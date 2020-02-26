@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import { run } from "../src";
+import {run} from "../../src/transpiler";
 
 describe("Single statements", () => {
   const tests = [
