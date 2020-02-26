@@ -1,0 +1,27 @@
+{
+  "name": "transpiler_poc",
+  "private": true,
+  "version": "1.0.0",
+  "description": "proof of concept",
+  "main": "index.js",
+  "scripts": {
+    "test": "tsc",
+    "posttest": "node build/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abaplint/transpiler_poc.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/abaplint/transpiler_poc/issues"
+  },
+  "homepage": "https://github.com/abaplint/transpiler_poc#readme",
+  "dependencies": {
+    "abaplint": "^2.26.3"
+  },
+  "devDependencies": {
+    "typescript": "^3.8.2"
+  }
+}
