@@ -14,7 +14,7 @@ function traverseStatement(node: abaplint.Nodes.StatementNode): string {
   return "todo";
 }
 
-function run(code: string): string {
+export function run(code: string): string {
   const file = new abaplint.MemoryFile("zfoobar.prog.abap", code);
   const reg = new abaplint.Registry().addFile(file).parse();
   const abap = reg.getABAPObjects()[0].getABAPFiles()[0];
@@ -25,6 +25,3 @@ function run(code: string): string {
   }
   return result;
 }
-
-console.log(run("DATA foo TYPE i."));
-console.log(run("foo = 2."));
