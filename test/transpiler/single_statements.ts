@@ -12,7 +12,7 @@ describe("Single statements", () => {
     {abap: "IF foo = bar.",                        js: "if (foo.equals(bar)) {",                    skip: true},
     {abap: "IF foo EQ bar.",                       js: "if (foo.equals(bar)) {",                    skip: true},
     {abap: "ELSEIF foo = bar.",                    js: "} else if (foo.equals(bar)) {",             skip: true},
-    {abap: "ELSE.",                                js: "} else {",                                  skip: true},
+    {abap: "ELSE.",                                js: "} else {",                                  skip: false},
     {abap: "ENDIF.",                               js: "}",                                         skip: true},
     {abap: "EXIT.",                                js: "break;",                                    skip: true}, // the linter must check the EXIT is inside loop
     {abap: "CONTINUE.",                            js: "continue;",                                 skip: true}, // the linter must check the CONTINUE is inside loop
