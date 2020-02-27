@@ -4,7 +4,7 @@ import {translateSource, translateTarget} from "./expressions";
 function traverseStatement(node: Nodes.StatementNode): string {
   if (node.get() instanceof Statements.Data) {
     const name = node.findFirstExpression(Expressions.NamespaceSimpleName)!.getFirstToken().getStr();
-    const type = node.findFirstExpression(Expressions.TypeName)!.getFirstToken().getStr()
+    const type = node.findFirstExpression(Expressions.TypeName)!.getFirstToken().getStr();
     return "let " + name + " = new abap.basictypes." + type + "();";
   } else if (node.get() instanceof Statements.Move) {
     const source = translateSource(node.findDirectExpression(Expressions.Source)!);
