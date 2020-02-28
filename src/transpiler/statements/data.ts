@@ -1,7 +1,7 @@
 import * as abaplint from "abaplint";
 import {IStatementTranspiler} from "./_statement_transpiler";
 
-export class DataTranspiler implements IStatementTranspiler {
+export class DataTranspiler extends abaplint.Statements.Data implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode): string {
     const name = node.findFirstExpression(abaplint.Expressions.NamespaceSimpleName)!.getFirstToken().getStr();

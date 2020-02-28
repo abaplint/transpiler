@@ -1,15 +1,16 @@
-import {Nodes, Statements, MemoryFile, Registry} from "abaplint";
+import {Nodes, MemoryFile, Registry} from "abaplint";
 import {Validation} from "./validation";
-import {MoveTranspiler, DataTranspiler, ElseTranspiler} from "./statements";
+import * as StatementTranspilers from "./statements";
 
 function traverseStatement(node: Nodes.StatementNode): string {
-  if (node.get() instanceof Statements.Data) {
-    return new DataTranspiler().transpile(node);
-  } else if (node.get() instanceof Statements.Move) {
-    return new MoveTranspiler().transpile(node);
-  } else if (node.get() instanceof Statements.Else) {
-    return new ElseTranspiler().transpile(node);
+  const list: any = StatementTranspilers;
+  for (const key in list) {
+    const transpiler = new list[key]();
+    if (node.get().constructor.name + "Transpiler" === transpiler.constructor.name) {
+      return transpiler.transpile(node);
+    }
   }
+
   return "todo";
 }
 

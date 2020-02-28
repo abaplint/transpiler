@@ -9,7 +9,7 @@ describe("Single statements", () => {
     {abap: "ADD 2 to foo.",                        js: "foo.set(foo.add(2));",                      skip: true},
     {abap: "foo = bar + moo.",                     js: "foo.set(bar.add(moo));",                    skip: true},
     {abap: "DATA foo TYPE i VALUE 2.",             js: "let foo = new abap.basictypes.i(2);",       skip: true},
-    {abap: "IF foo = bar.",                        js: "if (foo.equals(bar)) {",                    skip: true},
+    {abap: "IF foo = bar.",                        js: "if (foo.equals(bar)) {",                    skip: false},
     {abap: "IF foo EQ bar.",                       js: "if (foo.equals(bar)) {",                    skip: true},
     {abap: "ELSEIF foo = bar.",                    js: "} else if (foo.equals(bar)) {",             skip: true},
     {abap: "ELSE.",                                js: "} else {",                                  skip: false},
