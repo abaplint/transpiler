@@ -1,8 +1,8 @@
 import {expect} from "chai";
-import {run} from "../../src/transpiler";
+import {Transpiler} from "../../src/transpiler";
 import * as abap from "../../src/runtime";
 
-describe("Fibonacci", () => {
+describe("Full Examples", () => {
 
   it("Fibonacci", () => {
     const code = `
@@ -16,7 +16,7 @@ describe("Fibonacci", () => {
       lv_current = lv_next.
     ENDDO.`;
 
-    const js = run(code) + "\nreturn lv_current.get();";
+    const js = new Transpiler().run(code) + "\nreturn lv_current.get();";
 
     const f = new Function('abap', js);
 

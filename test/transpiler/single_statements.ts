@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {run} from "../../src/transpiler";
+import {Transpiler} from "../../src/transpiler";
 
 describe("Single statements", () => {
   const tests = [
@@ -55,11 +55,11 @@ describe("Single statements", () => {
   for (const test of tests) {
     if (test.skip) {
       it.skip(test.abap, () => {
-        expect(run(test.abap)).to.equal(test.js);
+        expect(new Transpiler().run(test.abap)).to.equal(test.js);
       });
     } else {
       it(test.abap, () => {
-        expect(run(test.abap)).to.equal(test.js);
+        expect(new Transpiler().run(test.abap)).to.equal(test.js);
       });
     }
   }
