@@ -189,7 +189,7 @@
     },
     "homepage": "https://github.com/abaplint/transpiler_poc#readme",
     "dependencies": {
-        "abaplint": "^2.26.4"
+        "abaplint": "^2.26.5"
     },
     "devDependencies": {
         "@types/chai": "^4.2.9",

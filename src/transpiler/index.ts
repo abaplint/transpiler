@@ -1,5 +1,6 @@
 import {Expressions, Nodes, Statements, MemoryFile, Registry} from "abaplint";
 import {translateSource, translateTarget} from "./expressions";
+import {Validation} from "./validation";
 
 function traverseStatement(node: Nodes.StatementNode): string {
   if (node.get() instanceof Statements.Data) {
@@ -18,7 +19,14 @@ function traverseStatement(node: Nodes.StatementNode): string {
 
 export function run(code: string): string {
   const file = new MemoryFile("zfoobar.prog.abap", code);
-  const reg = new Registry().addFile(file).parse();
+  const reg = new Registry().addFile(file);
+
+  const issues = Validation.run(reg);
+  if (issues.length > 0) {
+    console.dir(issues);
+    throw new Error("errors found");
+  }
+
   const abap = reg.getABAPObjects()[0].getABAPFiles()[0];
 
   let result = "";

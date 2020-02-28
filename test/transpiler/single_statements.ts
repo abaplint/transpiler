@@ -14,13 +14,12 @@ describe("Single statements", () => {
     {abap: "ELSEIF foo = bar.",                    js: "} else if (foo.equals(bar)) {",             skip: true},
     {abap: "ELSE.",                                js: "} else {",                                  skip: false},
     {abap: "ENDIF.",                               js: "}",                                         skip: true},
-    {abap: "EXIT.",                                js: "break;",                                    skip: true}, // the linter must check the EXIT is inside loop
-    {abap: "CONTINUE.",                            js: "continue;",                                 skip: true}, // the linter must check the CONTINUE is inside loop
-    {abap: "DATA(foo) = 2.",                       js: "let foo = new abap.basictypes.i(2);",       skip: true}, // implict type information required
+    {abap: "EXIT.",                                js: "break;",                                    skip: true},
+    {abap: "CONTINUE.",                            js: "continue;",                                 skip: true},
     {abap: "CASE bar.",                            js: "switch (bar.get()) {",                      skip: true},
     {abap: "WHEN 2.",                              js: "case 2:",                                   skip: true}, // todo, need to add "break" in JS
     {abap: "WHEN 1 OR 2.",                         js: "case 1:\ncase 2:",                          skip: true},
-    {abap: "WHEN OTHERS.",                         js: "default:",                                  skip: true}, // the linter must check OTHERS is last in the CASE
+    {abap: "WHEN OTHERS.",                         js: "default:",                                  skip: true},
     {abap: "ENDCASE.",                             js: "}",                                         skip: true},
     {abap: "DATA foo TYPE c.",                     js: "let foo = new abap.basictypes.c();",        skip: true},
     {abap: "DATA foo TYPE c LENGTH 2.",            js: "let foo = new abap.basictypes.c(2);",       skip: true},
@@ -35,14 +34,13 @@ describe("Single statements", () => {
     {abap: "DO 5 TIMES.",                          js: "for (let i = 0; i <= 5; i++) {",            skip: true}, // todo, the "i" variable must be unique
     {abap: "DO foo TIMES.",                        js: "for (let i = 0; i <= foo.get(); i++) {",    skip: true}, // todo, the "i" variable must be unique
     {abap: "LOOP AT table INTO line.",             js: "for (line of table.array()) {",             skip: true},
-    {abap: "LOOP AT table INTO DATA(line).",       js: "for (let line of table.array()) {",         skip: true},
     {abap: "ENDLOOP.",                             js: "}",                                         skip: true},
     {abap: "foo-bar = 2.",                         js: "foo.bar.set(2);",                           skip: true}, // hmm, will this kind of member access work?
     {abap: "foo(1) = 'a'.",                        js: "foo.set('a', {lenth: 1});",                 skip: true},
     {abap: "foo+1 = 'a'.",                         js: "foo.set('a', {offset: 1});",                skip: true},
     {abap: "foo+1(1) = 'a'.",                      js: "foo.set('a', {offset: 1, length: 1});",     skip: true},
     {abap: "foo(bar) = 'a'.",                      js: "foo.set('a', {lenth: bar.get()});",         skip: true},
-    {abap: "CLEAR foo.",                           js: "foo.clear();",                              skip: true}, // dont do REFRESH its obsolete
+    {abap: "CLEAR foo.",                           js: "foo.clear();",                              skip: true},
     {abap: "CLASS lcl_foo IMPLEMENTATION.",        js: "class lcl_foo {",                           skip: true}, // note: no code for the CLASS DEFINITION
     {abap: "ENDCLASS.",                            js: "}",                                         skip: true},
     {abap: "METHOD foo.",                          js: "foo() {",                                   skip: true}, // todo, take the abap definition and add to the js method def
@@ -50,7 +48,7 @@ describe("Single statements", () => {
     {abap: "RETURN.",                              js: "break;",                                    skip: true}, // todo, hmm?
     {abap: "foo->method().",                       js: "foo.method();",                             skip: true},
     {abap: "foo->method(1).",                      js: "foo.method(1);",                            skip: true},
-    {abap: "foo->method(bar = 2 moo = 1).",        js: "foo.method(1, 2);",                         skip: true}, // note: the sequence of method parameters matters in JS
+    {abap: "foo->method( bar = 2 moo = 1 ).",      js: "foo.method(1, 2);",                         skip: true}, // note: the sequence of method parameters matters in JS
     {abap: "moo = foo->method().",                 js: "moo.set(foo.method());",                    skip: true},
   ];
 
