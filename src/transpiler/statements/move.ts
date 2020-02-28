@@ -2,7 +2,7 @@ import * as abaplint from "abaplint";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {SourceTranspiler, TargetTranspiler} from "../expressions";
 
-export class MoveTranspiler extends abaplint.Statements.Move implements IStatementTranspiler {
+export class MoveTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode): string {
     const source = new SourceTranspiler().transpile(node.findDirectExpression(abaplint.Expressions.Source)!);

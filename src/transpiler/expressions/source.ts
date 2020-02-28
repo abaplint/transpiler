@@ -1,20 +1,31 @@
 import {Expressions, Nodes} from "abaplint";
 import {IExpressionTranspiler} from "./_expression_transpiler";
+import {FieldChainTranspiler, ArithOperatorTranspiler, ConstantTranspiler} from "./";
 
 export class SourceTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode): string {
-    const int = node.findFirstExpression(Expressions.Integer);
-    if (int) {
-      return int.getFirstToken().getStr();
+    let ret = "";
+    let post = "";
+
+    for (const c of node.getChildren()) {
+      if (c instanceof Nodes.ExpressionNode) {
+        if (c.get() instanceof Expressions.FieldChain) {
+          ret = ret + new FieldChainTranspiler().transpile(c);
+        } else if (c.get() instanceof Expressions.Constant) {
+          ret = ret + new ConstantTranspiler().transpile(c);
+        } else if (c.get() instanceof Expressions.ArithOperator) {
+          ret = ret + new ArithOperatorTranspiler().transpile(c);
+          post = ")";
+        } else if (c.get() instanceof Expressions.Source) {
+          ret = ret + this.transpile(c);
+        } else {
+          ret = ret + "Source, unknown";
+        }
+      }
     }
 
-    const name = node.findFirstExpression(Expressions.SourceField);
-    if (name) {
-      return name.getFirstToken().getStr();
-    }
-
-    return "todo, SourceTranspiler";
+    return ret + post;
   }
 
 }

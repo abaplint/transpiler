@@ -14,7 +14,6 @@ const config: IConfig = {
     globalMacros: [], // todo, remove this line
   },
   rules: {
-    exit_or_check: true,
     when_others_last: true,
     obsolete_statement: {
       refresh: true,

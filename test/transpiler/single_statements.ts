@@ -5,17 +5,17 @@ describe("Single statements", () => {
   const tests = [
     {abap: "DATA foo TYPE i.",                     js: "let foo = new abap.basictypes.i();",        skip: false},
     {abap: "foo = 2.",                             js: "foo.set(2);",                               skip: false},
-    {abap: "foo = bar + 2.",                       js: "foo.set(bar.add(2));",                      skip: true},
+    {abap: "foo = bar + 2.",                       js: "foo.set(bar.add(2));",                      skip: false},
     {abap: "ADD 2 to foo.",                        js: "foo.set(foo.add(2));",                      skip: true},
-    {abap: "foo = bar + moo.",                     js: "foo.set(bar.add(moo));",                    skip: true},
+    {abap: "foo = bar + moo.",                     js: "foo.set(bar.add(moo));",                    skip: false},
     {abap: "DATA foo TYPE i VALUE 2.",             js: "let foo = new abap.basictypes.i(2);",       skip: false},
     {abap: "IF foo = bar.",                        js: "if (foo.equals(bar)) {",                    skip: false},
-    {abap: "IF foo EQ bar.",                       js: "if (foo.equals(bar)) {",                    skip: true},
-    {abap: "ELSEIF foo = bar.",                    js: "} else if (foo.equals(bar)) {",             skip: true},
+    {abap: "IF foo EQ bar.",                       js: "if (foo.equals(bar)) {",                    skip: false},
+    {abap: "ELSEIF foo = bar.",                    js: "} else if (foo.equals(bar)) {",             skip: false},
     {abap: "ELSE.",                                js: "} else {",                                  skip: false},
-    {abap: "ENDIF.",                               js: "}",                                         skip: true},
-    {abap: "EXIT.",                                js: "break;",                                    skip: true},
-    {abap: "CONTINUE.",                            js: "continue;",                                 skip: true},
+    {abap: "ENDIF.",                               js: "}",                                         skip: false},
+    {abap: "EXIT.",                                js: "break;",                                    skip: false},
+    {abap: "CONTINUE.",                            js: "continue;",                                 skip: false},
     {abap: "CASE bar.",                            js: "switch (bar.get()) {",                      skip: true},
     {abap: "WHEN 2.",                              js: "case 2:",                                   skip: true}, // todo, need to add "break" in JS
     {abap: "WHEN 1 OR 2.",                         js: "case 1:\ncase 2:",                          skip: true},
@@ -30,7 +30,7 @@ describe("Single statements", () => {
     {abap: "IF foo IS NOT INITIAL.",               js: "if (!foo.initial()) {",                     skip: true},
     {abap: "IF NOT foo IS INITIAL.",               js: "if (!foo.initial()) {",                     skip: true},
     {abap: "DO.",                                  js: "for (;;) {",                                skip: true}, // todo, how to set sy-fields ?
-    {abap: "ENDDO.",                               js: "}",                                         skip: true},
+    {abap: "ENDDO.",                               js: "}",                                         skip: false},
     {abap: "DO 5 TIMES.",                          js: "for (let i = 0; i <= 5; i++) {",            skip: true}, // todo, the "i" variable must be unique
     {abap: "DO foo TIMES.",                        js: "for (let i = 0; i <= foo.get(); i++) {",    skip: true}, // todo, the "i" variable must be unique
     {abap: "LOOP AT table INTO line.",             js: "for (line of table.array()) {",             skip: true},

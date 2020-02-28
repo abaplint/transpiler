@@ -11,7 +11,7 @@ function traverseStatement(node: Nodes.StatementNode): string {
     }
   }
 
-  return "todo";
+  return "todo, statement: " + node.get().constructor.name;
 }
 
 export function run(code: string): string {
@@ -26,9 +26,7 @@ export function run(code: string): string {
 
   const abap = reg.getABAPObjects()[0].getABAPFiles()[0];
 
-  let result = "";
-  for(const s of abap.getStatements()) {
-    result = result + traverseStatement(s);
-  }
+  const result = abap.getStatements().map(s => traverseStatement(s)).join("\n");
+
   return result;
 }
