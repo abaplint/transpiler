@@ -8,7 +8,7 @@ describe("Single statements", () => {
     {abap: "foo = bar + 2.",                       js: "foo.set(bar.add(2));",                      skip: true},
     {abap: "ADD 2 to foo.",                        js: "foo.set(foo.add(2));",                      skip: true},
     {abap: "foo = bar + moo.",                     js: "foo.set(bar.add(moo));",                    skip: true},
-    {abap: "DATA foo TYPE i VALUE 2.",             js: "let foo = new abap.basictypes.i(2);",       skip: true},
+    {abap: "DATA foo TYPE i VALUE 2.",             js: "let foo = new abap.basictypes.i(2);",       skip: false},
     {abap: "IF foo = bar.",                        js: "if (foo.equals(bar)) {",                    skip: false},
     {abap: "IF foo EQ bar.",                       js: "if (foo.equals(bar)) {",                    skip: true},
     {abap: "ELSEIF foo = bar.",                    js: "} else if (foo.equals(bar)) {",             skip: true},
@@ -39,7 +39,7 @@ describe("Single statements", () => {
     {abap: "foo(1) = 'a'.",                        js: "foo.set('a', {lenth: 1});",                 skip: true},
     {abap: "foo+1 = 'a'.",                         js: "foo.set('a', {offset: 1});",                skip: true},
     {abap: "foo+1(1) = 'a'.",                      js: "foo.set('a', {offset: 1, length: 1});",     skip: true},
-    {abap: "foo(bar) = 'a'.",                      js: "foo.set('a', {lenth: bar.get()});",         skip: true},
+    {abap: "foo(bar) = 'a'.",                      js: "foo.set('a', {lenth: bar});",               skip: true},
     {abap: "CLEAR foo.",                           js: "foo.clear();",                              skip: true},
     {abap: "CLASS lcl_foo IMPLEMENTATION.",        js: "class lcl_foo {",                           skip: true}, // note: no code for the CLASS DEFINITION
     {abap: "ENDCLASS.",                            js: "}",                                         skip: true},
