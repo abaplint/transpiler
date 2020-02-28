@@ -3,12 +3,12 @@ import {run} from "../../src/transpiler";
 
 describe("Single statements", () => {
   const tests = [
-    {abap: "DATA foo TYPE i.",                     js: "let foo = new abap.basictypes.i();",        skip: false},
+    {abap: "DATA foo TYPE i.",                     js: "let foo = new abap.basictypes.I();",        skip: false},
     {abap: "foo = 2.",                             js: "foo.set(2);",                               skip: false},
     {abap: "foo = bar + 2.",                       js: "foo.set(bar.add(2));",                      skip: false},
     {abap: "ADD 2 to foo.",                        js: "foo.set(foo.add(2));",                      skip: true},
     {abap: "foo = bar + moo.",                     js: "foo.set(bar.add(moo));",                    skip: false},
-    {abap: "DATA foo TYPE i VALUE 2.",             js: "let foo = new abap.basictypes.i(2);",       skip: false},
+    {abap: "DATA foo TYPE i VALUE 2.",             js: "let foo = new abap.basictypes.I(2);",       skip: false},
     {abap: "IF foo = bar.",                        js: "if (foo.equals(bar)) {",                    skip: false},
     {abap: "IF foo EQ bar.",                       js: "if (foo.equals(bar)) {",                    skip: false},
     {abap: "ELSEIF foo = bar.",                    js: "} else if (foo.equals(bar)) {",             skip: false},

@@ -1,10 +1,11 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {run} from "../../src/transpiler";
+import * as abap from "../../src/runtime";
 
 describe("Fibonacci", () => {
 
   it("Fibonacci", () => {
-    const abap = `
+    const code = `
     DATA: lv_old     TYPE i VALUE 1,
           lv_current TYPE i VALUE 2,
           lv_next    TYPE i.
@@ -15,7 +16,10 @@ describe("Fibonacci", () => {
       lv_current = lv_next.
     ENDDO.`;
 
-    const js = run(abap);
-    console.dir(js);
+    const js = run(code) + "\nreturn lv_current.get();";
+
+    const f = new Function('abap', js);
+
+    expect(f(abap)).to.equal(89);
   });
 });
