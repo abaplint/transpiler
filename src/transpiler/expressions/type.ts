@@ -1,6 +1,6 @@
 import {Expressions, Nodes} from "abaplint";
 import {IExpressionTranspiler} from "./_expression_transpiler";
-import * as BasicTypes from "../../runtime/basictypes";
+import * as BasicTypes from "../../runtime/types";
 
 export class TypeTranspiler implements IExpressionTranspiler {
 

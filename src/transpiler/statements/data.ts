@@ -22,7 +22,7 @@ export class DataTranspiler implements IStatementTranspiler {
       }
     }
 
-    return "let " + name + " = new abap.basictypes." + type + "(" + value + ");";
+    return "let " + name + " = new abap.types." + type + "(" + value + ");";
   }
 
 }
