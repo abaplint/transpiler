@@ -17,9 +17,21 @@ describe("Full Examples", () => {
     ENDDO.`;
 
     const js = new Transpiler().run(code) + "\nreturn lv_current.get();";
-
     const f = new Function('abap', js);
-
     expect(f(abap)).to.equal(89);
+  });
+
+  it("Simple IF", () => {
+    const code = `
+    DATA: foo TYPE i VALUE 1,
+          bar TYPE i VALUE 1.
+
+    IF foo = bar.
+      foo = 2.
+    ENDIF.`;
+
+    const js = new Transpiler().run(code) + "\nreturn foo.get();";
+    const f = new Function('abap', js);
+    expect(f(abap)).to.equal(2);
   });
 });
