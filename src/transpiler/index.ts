@@ -1,18 +1,14 @@
-import {Expressions, Nodes, Statements, MemoryFile, Registry} from "abaplint";
-import {translateSource, translateTarget} from "./expressions";
+import {Nodes, Statements, MemoryFile, Registry} from "abaplint";
 import {Validation} from "./validation";
+import {MoveTranspiler, DataTranspiler, ElseTranspiler} from "./statements";
 
 function traverseStatement(node: Nodes.StatementNode): string {
   if (node.get() instanceof Statements.Data) {
-    const name = node.findFirstExpression(Expressions.NamespaceSimpleName)!.getFirstToken().getStr();
-    const type = node.findFirstExpression(Expressions.TypeName)!.getFirstToken().getStr();
-    return "let " + name + " = new abap.basictypes." + type + "();";
+    return new DataTranspiler().transpile(node);
   } else if (node.get() instanceof Statements.Move) {
-    const source = translateSource(node.findDirectExpression(Expressions.Source)!);
-    const target = translateTarget(node.findDirectExpression(Expressions.Target)!);
-    return target + ".set(" + source + ");";
+    return new MoveTranspiler().transpile(node);
   } else if (node.get() instanceof Statements.Else) {
-    return "} else {";
+    return new ElseTranspiler().transpile(node);
   }
   return "todo";
 }
