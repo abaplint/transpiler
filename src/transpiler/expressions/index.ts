@@ -1,6 +1,7 @@
 export * from "./source";
 export * from "./target";
 export * from "./cond";
+export * from "./type";
 export * from "./compare";
 export * from "./constant";
 export * from "./field_chain";

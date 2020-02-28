@@ -34,4 +34,30 @@ describe("Full Examples", () => {
     const f = new Function('abap', js);
     expect(f(abap)).to.equal(2);
   });
+
+  it.skip("Character field semantics", () => {
+    const code = `
+    DATA: foo TYPE c.
+    foo = 'abc'.
+    ASSERT foo = 'a'.
+    foo = 2 + 1.
+    ASSERT foo = '3'.
+    ASSERT foo = 3.
+    foo = 2 + '1'.
+    ASSERT foo = '3'.
+    ASSERT foo = 3.
+    foo = 0.
+    ASSERT foo = '0'.
+    ASSERT foo = 0.
+    foo = '0'.
+    ASSERT foo = '0'.
+    ASSERT foo = 0.
+    foo = |0|.
+    ASSERT foo = '0'.
+    ASSERT foo = 0.`;
+
+    const js = new Transpiler().run(code);
+    const f = new Function('abap', js);
+    f(abap);
+  });
 });

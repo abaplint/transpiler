@@ -3,12 +3,12 @@ import {Transpiler} from "../../src/transpiler";
 
 describe("Single statements", () => {
   const tests = [
-    {abap: "DATA foo TYPE i.",                     js: "let foo = new abap.basictypes.I();",        skip: false},
+    {abap: "DATA foo TYPE i.",                     js: "let foo = new abap.basictypes.Integer();",  skip: false},
     {abap: "foo = 2.",                             js: "foo.set(2);",                               skip: false},
     {abap: "foo = bar + 2.",                       js: "foo.set(bar.add(2));",                      skip: false},
     {abap: "ADD 2 to foo.",                        js: "foo.set(foo.add(2));",                      skip: true},
     {abap: "foo = bar + moo.",                     js: "foo.set(bar.add(moo));",                    skip: false},
-    {abap: "DATA foo TYPE i VALUE 2.",             js: "let foo = new abap.basictypes.I(2);",       skip: false},
+    {abap: "DATA foo TYPE i VALUE 2.",             js: "let foo = new abap.basictypes.Integer({value: 2});", skip: false},
     {abap: "IF foo = bar.",                        js: "if (foo.equals(bar)) {",                    skip: false},
     {abap: "IF foo EQ bar.",                       js: "if (foo.equals(bar)) {",                    skip: false},
     {abap: "ELSEIF foo = bar.",                    js: "} else if (foo.equals(bar)) {",             skip: false},
@@ -21,11 +21,11 @@ describe("Single statements", () => {
     {abap: "WHEN 1 OR 2.",                         js: "case 1:\ncase 2:",                          skip: true},
     {abap: "WHEN OTHERS.",                         js: "default:",                                  skip: true},
     {abap: "ENDCASE.",                             js: "}",                                         skip: false},
-    {abap: "DATA foo TYPE c.",                     js: "let foo = new abap.basictypes.C();",        skip: false},
-    {abap: "DATA foo TYPE c LENGTH 2.",            js: "let foo = new abap.basictypes.C(2);",       skip: true},
-    {abap: "DATA foo TYPE c LENGTH 2 VALUE 'fo'.", js: "let foo = new abap.basictypes.C(2, 'fo');", skip: true},
+    {abap: "DATA foo TYPE c.",                     js: "let foo = new abap.basictypes.Character();",        skip: false},
+    {abap: "DATA foo TYPE c LENGTH 2.",            js: "let foo = new abap.basictypes.Character({length: 2});",       skip: true},
+    {abap: "DATA foo TYPE c LENGTH 2 VALUE 'fo'.", js: "let foo = new abap.basictypes.Character({length: 2, value: 'fo'});", skip: true},
     {abap: "foo = 'fo'.",                          js: "foo.set('fo');",                            skip: true},
-    {abap: "foo = |fo|.",                          js: "foo.set('fo');",                            skip: true},
+    {abap: "foo = |fo|.",                          js: "foo.set(`fo`);",                            skip: true},
     {abap: "IF foo IS INITIAL.",                   js: "if (foo.initial()) {",                      skip: true},
     {abap: "IF foo IS NOT INITIAL.",               js: "if (!foo.initial()) {",                     skip: true},
     {abap: "IF NOT foo IS INITIAL.",               js: "if (!foo.initial()) {",                     skip: true},
@@ -40,7 +40,8 @@ describe("Single statements", () => {
     {abap: "foo+1 = 'a'.",                         js: "foo.set('a', {offset: 1});",                skip: true},
     {abap: "foo+1(1) = 'a'.",                      js: "foo.set('a', {offset: 1, length: 1});",     skip: true},
     {abap: "foo(bar) = 'a'.",                      js: "foo.set('a', {lenth: bar});",               skip: true},
-    {abap: "CLEAR foo.",                           js: "foo.clear();",                              skip: false},
+    {abap: "CLEAR foo.",                           js: "abap.statements.clear(foo);",               skip: true},
+    {abap: "ASSERT foo = bar.",                    js: "abap.statements.assert(foo.equals(bar));",  skip: true},
     {abap: "CLASS lcl_foo IMPLEMENTATION.",        js: "class lcl_foo {",                           skip: false}, // note: no code for the CLASS DEFINITION
     {abap: "ENDCLASS.",                            js: "}",                                         skip: false},
     {abap: "METHOD foo.",                          js: "foo() {",                                   skip: false}, // todo, take the abap definition and add to the js method def

@@ -15,6 +15,15 @@ const config: IConfig = {
   },
   rules: {
     when_others_last: true,
+    avoid_use: {
+      define: true,
+      execSQL: true,
+      kernelCall: true,
+      communication: true,
+      systemCall: true,
+      break: true,
+      statics: true,
+    },
     obsolete_statement: {
       refresh: true,
       compute: true,
