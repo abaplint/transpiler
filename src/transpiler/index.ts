@@ -10,8 +10,8 @@ export class Transpiler {
 
     const issues = Validation.run(reg);
     if (issues.length > 0) {
-      console.dir(issues);
-      throw new Error("errors found");
+      const messages = issues.map(i => i.getMessage());
+      throw new Error(messages.join("\n"));
     }
 
     const abap = reg.getABAPObjects()[0].getABAPFiles()[0];

@@ -23,6 +23,7 @@ describe("Single statements", () => {
     {abap: "WHEN OTHERS.",                         js: "default:",                                  skip: true},
     {abap: "ENDCASE.",                             js: "}",                                         skip: false},
     {abap: "DATA foo TYPE c.",                     js: "let foo = new abap.types.Character();",     skip: false},
+    {abap: "DATA foo TYPE string.",                js: "let foo = new abap.types.String();",        skip: false},
     {abap: "DATA foo TYPE c LENGTH 2.",            js: "let foo = new abap.types.Character({length: 2});",       skip: true},
     {abap: "DATA foo TYPE c LENGTH 2 VALUE 'fo'.", js: "let foo = new abap.types.Character({length: 2, value: 'fo'});", skip: true},
     {abap: "foo = 'fo'.",                          js: "foo.set('fo');",                            skip: true},

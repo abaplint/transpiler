@@ -1,0 +1,19 @@
+body, html, .inner, .outer {
+  height: 100%;
+  overflow: hidden;
+}
+
+.table {
+  display: table;
+  width: 100%;
+  height: 90%;
+}
+
+.table .container {
+  display: table-cell;
+  width: 30%;
+}
+
+select {
+  width: 100%;
+}
