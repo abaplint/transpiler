@@ -15,6 +15,10 @@ export class String implements ICharacter {
     }
   }
 
+  public clear(): void {
+    this.value = "";
+  }
+
   public get(): string {
     return this.value;
   }

@@ -1,6 +1,6 @@
 import {Expressions, Nodes} from "abaplint";
 import {IExpressionTranspiler} from "./_expression_transpiler";
-import {FieldChainTranspiler, ArithOperatorTranspiler, ConstantTranspiler} from "./";
+import {FieldChainTranspiler, ArithOperatorTranspiler, ConstantTranspiler, MethodCallChainTranspiler, StringTemplateTranspiler} from "./";
 
 export class SourceTranspiler implements IExpressionTranspiler {
 
@@ -14,9 +14,13 @@ export class SourceTranspiler implements IExpressionTranspiler {
           ret = ret + new FieldChainTranspiler().transpile(c);
         } else if (c.get() instanceof Expressions.Constant) {
           ret = ret + new ConstantTranspiler().transpile(c);
+        } else if (c.get() instanceof Expressions.StringTemplate) {
+          ret = ret + new StringTemplateTranspiler().transpile(c);
         } else if (c.get() instanceof Expressions.ArithOperator) {
           ret = ret + new ArithOperatorTranspiler().transpile(c);
           post = ")";
+        } else if (c.get() instanceof Expressions.MethodCallChain) {
+          ret = ret + new MethodCallChainTranspiler().transpile(c);
         } else if (c.get() instanceof Expressions.Source) {
           ret = ret + this.transpile(c);
         } else {

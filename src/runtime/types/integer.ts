@@ -19,8 +19,16 @@ export class Integer implements INumeric {
     return new Integer({value: value.value + this.value});
   }
 
-  public equals(value: Integer): boolean {
-    return value.value === this.value;
+  public equals(value: Integer | number): boolean {
+    if (typeof value === "number") {
+      return value === this.value;
+    } else {
+      return value.value === this.value;
+    }
+  }
+
+  public clear(): void {
+    this.value = 0;
   }
 
   public get(): number {

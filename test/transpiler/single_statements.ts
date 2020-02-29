@@ -36,7 +36,7 @@ describe("Single statements", () => {
     {abap: "ENDDO.",                               js: "}",                                         skip: false},
     {abap: "DO 5 TIMES.",                          js: "for (let unique1 = 0; unique1 < 5; unique1++) {",            skip: false},
     {abap: "DO foo TIMES.",                        js: "for (let unique1 = 0; unique1 < foo.get(); unique1++) {",    skip: true}, // todo, the "i" variable must be unique
-    {abap: "LOOP AT table INTO line.",             js: "for (line of table.array()) {",             skip: true},
+    {abap: "LOOP AT table INTO line.",             js: "for (line of table.array()) {",             skip: false},
     {abap: "ENDLOOP.",                             js: "}",                                         skip: false},
     {abap: "WHILE foo = bar.",                     js: "while (foo.equals(bar)) {",                 skip: false},
     {abap: "ENDWHILE.",                            js: "}",                                         skip: false},
@@ -60,6 +60,10 @@ describe("Single statements", () => {
     {abap: "moo = foo->method().",                 js: "moo.set(foo.method());",                    skip: true},
     {abap: "FORM foo.",                            js: "function foo() {",                          skip: false},
     {abap: "ENDFORM.",                             js: "}",                                         skip: false},
+    {abap: "DATA foo TYPE STANDARD TABLE OF string.", js: "let foo = new abap.types.Table();",      skip: false},
+    {abap: "lv_char = lines( lt_words ).",         js: "lv_char.set(abap.builtin.lines(lt_words));",             skip: false},
+    {abap: "SPLIT foo AT bar INTO TABLE moo.",     js: "abap.statements.split({source: foo, at: bar, target: moo});", skip: false},
+    {abap: "WRITE |moo|.",                         js: "abap.statements.write(`moo`);",             skip: false},
   ];
 
   for (const test of tests) {

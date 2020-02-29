@@ -1,17 +1,17 @@
 import {Expressions, Nodes} from "abaplint";
 import {IExpressionTranspiler} from "./_expression_transpiler";
-import {TypeNameTranspiler} from ".";
 
-export class TypeTranspiler implements IExpressionTranspiler {
+export class TypeTableTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode): string {
 
     const typeName = node.findDirectExpression(Expressions.TypeName);
     if (typeName) {
-      return new TypeNameTranspiler().transpile(typeName);
+      return "abap.types.Table";
     }
 
-    return "todo, TypeTranspiler";
+    return "todo, TypeTableTranspiler";
+
   }
 
 }

@@ -10,7 +10,7 @@ export class Character implements ICharacter {
   }
 
   public set(value: ICharacter | string) {
-    if (typeof value === "string") {
+    if (typeof value === "string" || typeof value === "number") {
       this.value = value;
     } else {
       this.value = value.get();
@@ -18,6 +18,10 @@ export class Character implements ICharacter {
     if (this.value.length > this.length) {
       this.value.substr(0, this.length);
     }
+  }
+
+  public clear(): void {
+    this.value = "";
   }
 
   public get(): string {

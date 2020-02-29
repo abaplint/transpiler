@@ -34,6 +34,8 @@ const config: IConfig = {
   },
 };
 
+// todo, make sure nothing is overloaded, eg "lines()"
+
 export class Validation {
 
   public static run(reg: Registry): Issue[] {

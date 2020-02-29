@@ -60,4 +60,19 @@ describe("Full Examples", () => {
     const f = new Function('abap', js);
     f(abap);
   });
+
+
+  it("Character field semantics", () => {
+    const code = `
+    DATA lv_str TYPE string.
+    DATA lt_table TYPE STANDARD TABLE OF string.
+    lv_str = 'foo bar'.
+    SPLIT lv_str AT | | INTO TABLE lt_table.
+    ASSERT lines( lt_table ) = 2.`;
+
+    const js = new Transpiler().run(code);
+    const f = new Function('abap', js);
+    f(abap);
+  });
+
 });
