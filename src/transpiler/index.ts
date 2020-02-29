@@ -1,6 +1,7 @@
 import {Nodes, MemoryFile, Registry} from "abaplint";
 import {Validation} from "./validation";
 import * as StatementTranspilers from "./statements";
+import {Indentation} from "./indentation";
 
 export class Transpiler {
 
@@ -18,7 +19,7 @@ export class Transpiler {
 
     const result = abap.getStatements().map(s => this.traverseStatement(s)).join("\n");
 
-    return result;
+    return new Indentation().run(result);
   }
 
   protected traverseStatement(node: Nodes.StatementNode): string {

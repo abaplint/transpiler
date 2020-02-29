@@ -9,6 +9,11 @@ export class ConstantTranspiler implements IExpressionTranspiler {
       return int.getFirstToken().getStr();
     }
 
+    const str = node.findFirstExpression(Expressions.ConstantString);
+    if (str) {
+      return str.getFirstToken().getStr();
+    }
+
     return "todo, Constant";
   }
 
