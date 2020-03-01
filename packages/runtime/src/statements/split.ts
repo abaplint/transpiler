@@ -1,5 +1,5 @@
 import {ICharacter} from "../types/_character";
-import {Table} from "../types";
+import {Table, String} from "../types";
 
 export function split(param: {source: ICharacter | string, at: ICharacter | string, target: Table}) {
   const source = typeof param.source === "string" ? param.source : param.source.get();
@@ -7,6 +7,6 @@ export function split(param: {source: ICharacter | string, at: ICharacter | stri
 
   param.target.clear();
   for(const s of source.split(at)) {
-    param.target.append(s);
+    param.target.append(new String({value: s}));
   }
 }

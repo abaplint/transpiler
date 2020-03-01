@@ -25,8 +25,16 @@ export class Packed implements INumeric {
     this.value = 0;
   }
 
-  public equals(value: INumeric): boolean {
-    return value.get() === this.value;
+  public eq(value: INumeric | number): boolean {
+    if (typeof value === "number") {
+      return value === this.value;
+    } else {
+      return value.get() === this.value;
+    }
+  }
+
+  public ne(value: INumeric | number): boolean {
+    return !this.eq(value);
   }
 
   public get(): number {

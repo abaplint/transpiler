@@ -3,9 +3,18 @@ import {IExpressionTranspiler} from "./_expression_transpiler";
 
 export class CompareOperatorTranspiler implements IExpressionTranspiler {
 
-  public transpile(_node: Nodes.ExpressionNode): string {
+  public transpile(node: Nodes.ExpressionNode): string {
 // todo, this is not correct
-    return "equals";
+    switch(node.getFirstToken().getStr().toUpperCase()) {
+      case '=':
+      case 'EQ':
+        return "eq";
+      case '<>':
+      case 'NE':
+        return "ne";
+      default:
+        return "compareoperatortodo";
+    }
   }
 
 }

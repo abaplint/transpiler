@@ -6,7 +6,15 @@ describe("Compare", () => {
     const foo = new abap.types.Integer({value: 2});
     const bar = new abap.types.Integer({value: 2});
 
-    const bool = foo.equals(bar);
+    const bool = foo.eq(bar);
+
+    expect(bool).to.equal(true);
+  });
+
+  it("empty string", () => {
+    const foo = new abap.types.String();
+
+    const bool = foo.eq('');
 
     expect(bool).to.equal(true);
   });

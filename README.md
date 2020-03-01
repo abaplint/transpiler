@@ -11,10 +11,10 @@ type information will be required, to be added later, also more work in abaplint
 
 this currently just focuses on transpiling, not the runtime
 
-run
+prerequsites: nodejs
+
+## Running
 
 `npm install`
 
 `npm test`
-
-prerequsites: nodejs

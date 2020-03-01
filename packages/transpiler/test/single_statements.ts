@@ -10,9 +10,9 @@ describe("Single statements", () => {
     {abap: "ADD 2 to foo.",                        js: "foo.set(foo.add(2));",                      skip: true},
     {abap: "foo = bar + moo.",                     js: "foo.set(bar.add(moo));",                    skip: false},
     {abap: "DATA foo TYPE i VALUE 2.",             js: "let foo = new abap.types.Integer({value: 2});", skip: false},
-    {abap: "IF foo = bar.",                        js: "if (foo.equals(bar)) {",                    skip: false},
-    {abap: "IF foo EQ bar.",                       js: "if (foo.equals(bar)) {",                    skip: false},
-    {abap: "ELSEIF foo = bar.",                    js: "} else if (foo.equals(bar)) {",             skip: false},
+    {abap: "IF foo = bar.",                        js: "if (foo.eq(bar)) {",                    skip: false},
+    {abap: "IF foo EQ bar.",                       js: "if (foo.eq(bar)) {",                    skip: false},
+    {abap: "ELSEIF foo = bar.",                    js: "} else if (foo.eq(bar)) {",             skip: false},
     {abap: "ELSE.",                                js: "} else {",                                  skip: false},
     {abap: "ENDIF.",                               js: "}",                                         skip: false},
     {abap: "EXIT.",                                js: "break;",                                    skip: false},
@@ -27,7 +27,8 @@ describe("Single statements", () => {
     {abap: "DATA foo TYPE c LENGTH 2.",            js: "let foo = new abap.types.Character({length: 2});",       skip: true},
     {abap: "DATA foo TYPE c LENGTH 2 VALUE 'fo'.", js: "let foo = new abap.types.Character({length: 2, value: 'fo'});", skip: true},
     {abap: "foo = 'fo'.",                          js: "foo.set('fo');",                            skip: false},
-    {abap: "foo = |fo|.",                          js: "foo.set(`fo`);",                            skip: true},
+    {abap: "foo = |fo|.",                          js: "foo.set(`fo`);",                            skip: false},
+    {abap: "foo = |fo{ 2 }|.",                     js: "foo.set(`fo${2}`);",                        skip: false},
     {abap: "foo = `fo`.",                          js: "foo.set(`fo`);",                            skip: false},
     {abap: "IF foo IS INITIAL.",                   js: "if (foo.initial()) {",                      skip: true},
     {abap: "IF foo IS NOT INITIAL.",               js: "if (!foo.initial()) {",                     skip: true},
@@ -38,7 +39,7 @@ describe("Single statements", () => {
     {abap: "DO foo TIMES.",                        js: "for (let unique1 = 0; unique1 < foo.get(); unique1++) {",    skip: true}, // todo, the "i" variable must be unique
     {abap: "LOOP AT table INTO line.",             js: "for (line of table.array()) {",             skip: false},
     {abap: "ENDLOOP.",                             js: "}",                                         skip: false},
-    {abap: "WHILE foo = bar.",                     js: "while (foo.equals(bar)) {",                 skip: false},
+    {abap: "WHILE foo = bar.",                     js: "while (foo.eq(bar)) {",                 skip: false},
     {abap: "ENDWHILE.",                            js: "}",                                         skip: false},
     {abap: "foo-bar = 2.",                         js: "foo.bar.set(2);",                           skip: true}, // hmm, will this kind of member access work?
     {abap: "foo(1) = 'a'.",                        js: "foo.set('a', {lenth: 1});",                 skip: true},
@@ -48,7 +49,7 @@ describe("Single statements", () => {
     {abap: "CLEAR foo.",                           js: "abap.statements.clear(foo);",               skip: false},
     {abap: "SORT foo.",                            js: "abap.statements.sort(foo);",                skip: false},
     {abap: "WRITE foo.",                           js: "abap.statements.write(foo);",               skip: false},
-    {abap: "ASSERT foo = bar.",                    js: "abap.statements.assert(foo.equals(bar));",  skip: false},
+    {abap: "ASSERT foo = bar.",                    js: "abap.statements.assert(foo.eq(bar));",  skip: false},
     {abap: "CLASS lcl_foo IMPLEMENTATION.",        js: "class lcl_foo {",                           skip: false}, // note: no code for the CLASS DEFINITION
     {abap: "ENDCLASS.",                            js: "}",                                         skip: false},
     {abap: "METHOD foo.",                          js: "foo() {",                                   skip: false}, // todo, take the abap definition and add to the js method def
@@ -61,9 +62,10 @@ describe("Single statements", () => {
     {abap: "FORM foo.",                            js: "function foo() {",                          skip: false},
     {abap: "ENDFORM.",                             js: "}",                                         skip: false},
     {abap: "DATA foo TYPE STANDARD TABLE OF string.", js: "let foo = new abap.types.Table();",      skip: false},
-    {abap: "lv_char = lines( lt_words ).",         js: "lv_char.set(abap.builtin.lines(lt_words));",             skip: false},
+    {abap: "lv_char = lines( lt_words ).",         js: "lv_char.set(abap.builtin.lines(lt_words));",                  skip: false},
     {abap: "SPLIT foo AT bar INTO TABLE moo.",     js: "abap.statements.split({source: foo, at: bar, target: moo});", skip: false},
     {abap: "WRITE |moo|.",                         js: "abap.statements.write(`moo`);",             skip: false},
+    {abap: "DELETE foo WHERE bar = 2.",            js: "abap.statements.deleteInternal(foo,() => {return bar.eq(2);});", skip: false},
   ];
 
   for (const test of tests) {
