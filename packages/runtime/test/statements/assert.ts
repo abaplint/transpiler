@@ -1,4 +1,4 @@
-import * as abap from "../../../src/runtime";
+import * as abap from "../../src";
 
 describe("Statement ASSERT", () => {
 

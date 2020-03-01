@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {Transpiler} from "../../src/transpiler";
+import {Transpiler} from "../src";
 
 describe("Multiple statements", () => {
 

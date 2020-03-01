@@ -1,6 +1,6 @@
 import {expect} from "chai";
-import {Transpiler} from "../../src/transpiler";
-import {UniqueIdentifier} from "../../src/transpiler/unique_identifier";
+import {Transpiler} from "../src";
+import {UniqueIdentifier} from "../src/unique_identifier";
 
 describe("Single statements", () => {
   const tests = [

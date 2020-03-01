@@ -1,14 +1,16 @@
 {
-    "name": "transpiler_poc",
+    "name": "top-level",
     "private": true,
     "version": "1.0.0",
     "description": "proof of concept",
-    "main": "index.js",
     "scripts": {
-        "pretest": "tsc",
+        "postinstall": "cd packages/runtime && npm install && cd ../transpiler && npm install && cd ../..",
+        "precompile": "cd packages/runtime && npm run compile",
+        "compile": "cd packages/transpiler && npm run compile",
+        "pretest": "npm run compile",
         "test": "mocha",
         "posttest": "npm run lint",
-        "lint": "eslint src/**/*.ts test/**/*.ts --format unix"
+        "lint": "eslint packages/**/*.ts --format unix"
     },
     "repository": {
         "type": "git",
@@ -17,7 +19,7 @@
     "mocha": {
         "recursive": true,
         "reporter": "progress",
-        "spec": "build/test/**/*.js",
+        "spec": "packages/*/build/test/**/*.js",
         "require": "source-map-support/register"
     },
     "eslintConfig": {
@@ -27,6 +29,10 @@
             "mocha": true,
             "node": true
         },
+        "ignorePatterns": [
+            "node_modules",
+            "build"
+        ],
         "parser": "@typescript-eslint/parser",
         "parserOptions": {
             "project": "tsconfig.eslint.json",
@@ -188,20 +194,16 @@
         "url": "https://github.com/abaplint/transpiler_poc/issues"
     },
     "homepage": "https://github.com/abaplint/transpiler_poc#readme",
-    "dependencies": {
-        "abaplint": "^2.26.7"
-    },
     "devDependencies": {
-        "@types/chai": "^4.2.9",
         "@typescript-eslint/eslint-plugin": "^2.21.0",
         "@typescript-eslint/parser": "^2.21.0",
         "eslint": "^6.8.0",
         "eslint-plugin-import": "^2.20.1",
+        "@types/chai": "^4.2.9",
         "@types/mocha": "^7.0.1",
         "chai": "^4.2.0",
         "mocha": "^7.1.0",
         "source-map-support": "^0.5.16",
-        "ts-node": "^8.6.2",
         "typescript": "^3.8.3"
     }
 }

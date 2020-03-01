@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import * as abap from "../../src/runtime";
+import * as abap from "../src";
 
 describe("Arithmetics", () => {
   it("Set initial value", () => {

@@ -1,6 +1,6 @@
 import {Expressions, Nodes} from "abaplint";
 import {IExpressionTranspiler} from "./_expression_transpiler";
-import {FieldChainTranspiler, ArithOperatorTranspiler, ConstantTranspiler, MethodCallChainTranspiler, StringTemplateTranspiler} from "./";
+import {FieldChainTranspiler, ArithOperatorTranspiler, ConstantTranspiler, MethodCallChainTranspiler, StringTemplateTranspiler} from ".";
 
 export class SourceTranspiler implements IExpressionTranspiler {
 
