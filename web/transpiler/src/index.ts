@@ -1,7 +1,7 @@
 import * as monaco from "monaco-editor";
 import "./index.css";
-import {Transpiler} from "../../../build/src/transpiler";
-import * as abap from "../../../build/src/runtime";
+import {Transpiler} from "@abaplint/transpiler";
+import * as abap from "@abaplint/runtime";
 
 // @ts-ignore
 self.MonacoEnvironment = {

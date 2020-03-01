@@ -13,6 +13,10 @@ module.exports = {
   },
   resolve: {
     extensions: [".ts", ".js"],
+    alias: {
+      "@abaplint/runtime": "../../../packages/runtime/build/src/",
+      "@abaplint/transpiler": "../../../packages/transpiler/build/src/",
+    },
   },
   output: {
     globalObject: "self",

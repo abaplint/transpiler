@@ -7,7 +7,11 @@
     "outDir": "./dist",
     "lib": ["dom", "es5", "es2015.collection", "es2015.promise"],
     "types": [],
-    "baseUrl": "./node_modules",
+    "baseUrl": ".",
+    "paths": {
+      "@abaplint/runtime": ["../../packages/runtime/build/src/"],
+      "@abaplint/transpiler": ["../../packages/transpiler/build/src/"]
+    },
     "typeRoots": ["node_modules/@types"]
   },
   "include": ["./src/**/*"],
