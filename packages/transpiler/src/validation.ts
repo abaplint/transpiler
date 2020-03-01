@@ -42,7 +42,7 @@ export class Validation {
   public static run(reg: Registry): Issue[] {
     const conf = new Config(JSON.stringify(config));
     reg.setConfig(conf);
-    const issues = reg.findIssues().filter(i => i.getKey() !== "structure");
+    const issues = reg.findIssues();
     return issues;
   }
 

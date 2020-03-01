@@ -6,7 +6,7 @@ export class Indentation {
     const output: string[] = [];
 
     for (const l of js.split("\n")) {
-      if (l === "}") {
+      if (l.startsWith("}")) {
         i = i - 1;
       }
       if (i > 0) {
