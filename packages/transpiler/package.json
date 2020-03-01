@@ -10,6 +10,7 @@
   },
   "scripts": {
     "compile": "tsc",
+    "prepublishOnly": "rm -rf build && npm run test",
     "pretest": "npm run compile",
     "test": "mocha"
   },
