@@ -2,6 +2,7 @@ import * as monaco from "monaco-editor";
 import "./index.css";
 import {Transpiler} from "@abaplint/transpiler";
 import * as abap from "@abaplint/runtime";
+import * as pako from "pako";
 
 // @ts-ignore
 self.MonacoEnvironment = {
@@ -52,6 +53,17 @@ function runJS() {
   }
 }
 
+function setUrl() {
+  const value = editor1.getValue();
+  const deflated = pako.deflate(value, {to: 'string'});
+  if (deflated.length < 800) {
+    const newUrl = window.location.pathname + "?source=" + btoa(deflated);
+    window.history.replaceState(null, document.title, newUrl);
+  } else {
+    window.history.replaceState(null, document.title, window.location.pathname);
+  }
+}
+
 function abapChanged() {
   try {
     const js = new Transpiler().run(editor1.getValue());
@@ -63,5 +75,15 @@ function abapChanged() {
   }
 }
 
+function readUrl() {
+  const source = new URL(document.location.href).searchParams.get("source");
+  if (source) {
+    const inflated = pako.inflate(atob(source), {to: 'string'});
+    editor1.setValue(inflated);
+  }
+}
+
 editor1.onDidChangeModelContent(abapChanged);
+readUrl();
 abapChanged();
+editor1.onDidChangeModelContent(setUrl);
