@@ -14,10 +14,11 @@
       "strictFunctionTypes": true,
       "alwaysStrict": true,
       "target": "es2017",
-      "sourceMap": true
+      "sourceMap": true,
+      "baseUrl": ".",
       },
   "filesGlob": [
-      "./**/*.ts"
+      "./test/**/*.ts"
       ],
   "exclude": [
       "node_modules",

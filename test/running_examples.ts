@@ -1,6 +1,6 @@
 import {expect} from "chai";
-import {Transpiler} from "../../src/transpiler";
-import * as abap from "../../src/runtime";
+import {Transpiler} from "../packages/transpiler/src/";
+import * as abap from "../packages/runtime/src/";
 
 describe("Full Examples", () => {
 
