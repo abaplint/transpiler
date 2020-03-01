@@ -24,6 +24,7 @@ const config: IConfig = {
       break: true,
       statics: true,
     },
+    parser_error: true,
     obsolete_statement: {
       refresh: true,
       compute: true,
