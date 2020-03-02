@@ -45,9 +45,10 @@ const editor3 = monaco.editor.create(document.getElementById("container3"), {
 function runJS() {
   const js = editor2.getValue();
   try {
-    const f = new Function('abap', js);
+    abap.Console.clear();
+    const f = new Function("abap", js);
     f(abap);
-    editor3.setValue("");
+    editor3.setValue(abap.Console.get());
   } catch (error) {
     editor3.setValue(error.message);
   }
@@ -55,7 +56,7 @@ function runJS() {
 
 function setUrl() {
   const value = editor1.getValue();
-  const deflated = pako.deflate(value, {to: 'string'});
+  const deflated = pako.deflate(value, {to: "string"});
   if (deflated.length < 800) {
     const newUrl = window.location.pathname + "?source=" + btoa(deflated);
     window.history.replaceState(null, document.title, newUrl);
@@ -78,7 +79,7 @@ function abapChanged() {
 function readUrl() {
   const source = new URL(document.location.href).searchParams.get("source");
   if (source) {
-    const inflated = pako.inflate(atob(source), {to: 'string'});
+    const inflated = pako.inflate(atob(source), {to: "string"});
     editor1.setValue(inflated);
   }
 }

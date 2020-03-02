@@ -14,7 +14,7 @@ describe("Compare", () => {
   it("empty string", () => {
     const foo = new abap.types.String();
 
-    const bool = foo.eq('');
+    const bool = foo.eq("");
 
     expect(bool).to.equal(true);
   });

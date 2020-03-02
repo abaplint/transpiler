@@ -6,11 +6,11 @@ export class CompareOperatorTranspiler implements IExpressionTranspiler {
   public transpile(node: Nodes.ExpressionNode): string {
 // todo, this is not correct
     switch(node.getFirstToken().getStr().toUpperCase()) {
-      case '=':
-      case 'EQ':
+      case "=":
+      case "EQ":
         return "eq";
-      case '<>':
-      case 'NE':
+      case "<>":
+      case "NE":
         return "ne";
       default:
         return "compareoperatortodo";

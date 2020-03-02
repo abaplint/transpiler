@@ -10,7 +10,7 @@ export class DeleteInternalTranspiler implements IStatementTranspiler {
     let extra = "";
     const where = node.findFirstExpression(abaplint.Expressions.ComponentCond);
     if (where) {
-      extra = ',' + new ComponentCondTranspiler().transpile(where);
+      extra = "," + new ComponentCondTranspiler().transpile(where);
     }
 
     return "abap.statements.deleteInternal(" + target + extra + ");";
