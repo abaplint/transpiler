@@ -1,4 +1,4 @@
-name: Node.js CI
+name: CI
 
 on: [push, pull_request]
 
@@ -9,7 +9,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Use Node.js 
+    - name: Use Node.js
       uses: actions/setup-node@v1
     - run: npm install
     - run: npm test
