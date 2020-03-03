@@ -4,6 +4,7 @@
     "version": "1.0.0",
     "description": "proof of concept",
     "scripts": {
+        "preinstall": "cd web/transpiler && npm install && cd ../../",
         "postinstall": "cd packages/runtime && npm install && cd ../transpiler && npm install && cd ../..",
         "precompile": "cd packages/runtime && npm run compile",
         "compile": "cd packages/transpiler && npm run compile",
@@ -204,7 +205,7 @@
         "@types/mocha": "^7.0.1",
         "@typescript-eslint/eslint-plugin": "^2.22.0",
         "@typescript-eslint/parser": "^2.22.0",
-        "abaplint": "^2.26.8",
+        "abaplint": "^2.26.9",
         "chai": "^4.2.0",
         "eslint": "^6.8.0",
         "eslint-plugin-import": "^2.20.1",

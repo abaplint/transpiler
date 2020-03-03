@@ -10,8 +10,6 @@ const config: IConfig = {
   syntax: {
     version: Version.v702,
     errorNamespace: "",
-    globalConstants: [], // todo, remove this line
-    globalMacros: [], // todo, remove this line
   },
   rules: {
     when_others_last: true,

@@ -17,7 +17,7 @@ describe("Full Examples", () => {
     ENDDO.`;
 
     const js = new Transpiler().run(code) + "\nreturn lv_current.get();";
-    const f = new Function('abap', js);
+    const f = new Function("abap", js);
     expect(f(abap)).to.equal(89);
   });
 
@@ -31,7 +31,7 @@ describe("Full Examples", () => {
     ENDIF.`;
 
     const js = new Transpiler().run(code) + "\nreturn foo.get();";
-    const f = new Function('abap', js);
+    const f = new Function("abap", js);
     expect(f(abap)).to.equal(2);
   });
 
@@ -57,10 +57,9 @@ describe("Full Examples", () => {
     ASSERT foo = 0.`;
 
     const js = new Transpiler().run(code);
-    const f = new Function('abap', js);
+    const f = new Function("abap", js);
     f(abap);
   });
-
 
   it("Character field semantics", () => {
     const code = `
@@ -71,7 +70,22 @@ describe("Full Examples", () => {
     ASSERT lines( lt_table ) = 2.`;
 
     const js = new Transpiler().run(code);
-    const f = new Function('abap', js);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it.skip("ASSERTs, left hand and right hand, none should fail", () => {
+    const code = `
+      ASSERT 1 = 1.
+      ASSERT 1 = '1'.
+      ASSERT 1 = |1|.
+      ASSERT 1 = \`1\`.
+      ASSERT '1' = 1.
+      ASSERT |1| = 1.
+      ASSERT \`1\` = 1.`;
+
+    const js = new Transpiler().run(code);
+    const f = new Function("abap", js);
     f(abap);
   });
 

@@ -3,27 +3,60 @@ import {Validation} from "./validation";
 import * as StatementTranspilers from "./statements";
 import {Indentation} from "./indentation";
 
+export interface IFile {
+  filename: string,
+  contents: string,
+}
+
 export class Transpiler {
 
-  public run(code: string): string {
-    const file = new MemoryFile("zfoobar.prog.abap", code);
-    const reg = new Registry().addFile(file);
+  public runMulti(files: IFile[]): IFile[] {
+    const memory = files.map(f => new MemoryFile(f.filename, f.contents));
+    const reg = new Registry().addFiles(memory);
+    this.validate(reg);
 
-    const issues = Validation.run(reg);
-    if (issues.length > 0) {
-      const messages = issues.map(i => i.getMessage());
-      throw new Error(messages.join("\n"));
+    const output: IFile[] = [];
+    for (const abap of reg.getABAPObjects()) {
+      for (const f of abap.getABAPFiles()) {
+        const contents = this.runObject(f.getStructure()!);
+        if (contents.length > 0) {
+          const filename = f.getFilename().replace(new RegExp("\.abap$"), ".js");
+          output.push({filename, contents});
+        }
+      }
     }
+    return output;
+  }
+
+// todo, deprecate/remove this method
+  public run(code: string): string {
+    const reg = new Registry().addFile(new MemoryFile("zfoobar.prog.abap", code));
+
+    this.validate(reg);
 
     const abap = reg.getABAPObjects()[0].getABAPFiles()[0];
 
-    let result = this.traverseStructure(abap.getStructure()!);
+    return this.runObject(abap.getStructure()!);
+  }
+
+// ///////////////////////////////
+
+  protected runObject(node: Nodes.StructureNode) {
+    let result = this.traverseStructure(node);
 
     if (result.endsWith("\n")) {
       result = result.substring(0, result.length - 1);
     }
 
     return new Indentation().run(result);
+  }
+
+  protected validate(reg: Registry) {
+    const issues = Validation.run(reg);
+    if (issues.length > 0) {
+      const messages = issues.map(i => i.getMessage());
+      throw new Error(messages.join("\n"));
+    }
   }
 
   protected traverseStructure(node: Nodes.StructureNode): string {

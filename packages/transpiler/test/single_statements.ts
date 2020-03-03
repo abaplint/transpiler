@@ -42,19 +42,19 @@ describe("Single statements", () => {
     {abap: "ASSERT foo = bar.",                    js: "abap.statements.assert(foo.eq(bar));",      skip: false},
     {abap: "CLASS lcl_foo IMPLEMENTATION. ENDCLASS.", js: "class lcl_foo {\n}",                     skip: false}, // note: no code for the CLASS DEFINITION
     {abap: "RETURN.",                                 js: "break;",                                 skip: true}, // todo, hmm?
-    {abap: "foo->method().",                          js: "foo.method();",                          skip: true},
-    {abap: "foo->method(1).",                         js: "foo.method(1);",                         skip: true},
+    {abap: "foo->method( ).",                         js: "foo.method();",                          skip: true},
+    {abap: "foo->method( 1 ).",                       js: "foo.method(1);",                         skip: true},
     {abap: "foo->method( bar = 2 moo = 1 ).",         js: "foo.method(1, 2);",                      skip: true}, // note: the sequence of method parameters matters in JS
     {abap: "moo = foo->method().",                    js: "moo.set(foo.method());",                 skip: true},
     {abap: "FORM foo. ENDFORM.",                      js: "function foo() {\n}",                    skip: false},
     {abap: "DATA foo TYPE STANDARD TABLE OF string.", js: "let foo = new abap.types.Table();",      skip: false},
     {abap: "lv_char = lines( lt_words ).",            js: "lv_char.set(abap.builtin.lines(lt_words));",                     skip: false},
-    {abap: "SPLIT foo AT bar INTO TABLE moo.",        js: "abap.statements.split({source: foo, at: bar, target: moo});",    skip: false},
-    {abap: "WRITE |moo|.",                            js: "abap.statements.write(`moo`);",                                  skip: false},
-    {abap: "DELETE foo WHERE bar = 2.",               js: "abap.statements.deleteInternal(foo,() => {return bar.eq(2);});", skip: false},
-    {abap: "ASSERT sy-subrc = 0.", js: "todo", skip: true},
-    {abap: "ASSERT 0 = 1.",        js: "todo", skip: true},
-    {abap: "* comment",            js: "// * comment", skip: true},
+    {abap: "SPLIT foo AT bar INTO TABLE moo.",     js: "abap.statements.split({source: foo, at: bar, target: moo});",    skip: false},
+    {abap: "WRITE |moo|.",                         js: "abap.statements.write(`moo`);",                                  skip: false},
+    {abap: "DELETE foo WHERE bar = 2.",            js: "abap.statements.deleteInternal(foo,() => {return bar.eq(2);});", skip: false},
+    {abap: "ASSERT sy-subrc = 0.",                 js: "abap.statements.assert(sy.subrc.eq(0));", skip: false},
+    {abap: "ASSERT 0 = 1.",                        js: "todo", skip: true},
+    {abap: "* comment",                            js: "// * comment", skip: true},
   ];
 
   for (const test of tests) {
