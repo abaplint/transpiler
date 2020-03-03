@@ -42,7 +42,7 @@ const editor3 = monaco.editor.create(document.getElementById("container3"), {
   language: "text",
 });
 
-function runJS() {
+function jsChanged() {
   const js = editor2.getValue();
   try {
     abap.Console.clear();
@@ -69,7 +69,6 @@ function abapChanged() {
   try {
     const js = new Transpiler().run(editor1.getValue());
     editor2.setValue(js);
-    runJS();
   } catch (error) {
     editor2.setValue("");
     editor3.setValue(error.message);
@@ -88,3 +87,4 @@ editor1.onDidChangeModelContent(abapChanged);
 readUrl();
 abapChanged();
 editor1.onDidChangeModelContent(setUrl);
+editor2.onDidChangeModelContent(jsChanged);

@@ -18,7 +18,6 @@ export class Transpiler {
     const abap = reg.getABAPObjects()[0].getABAPFiles()[0];
 
     let result = this.traverseStructure(abap.getStructure()!);
-//    const result = abap.getStatements().map(s => this.traverseStatement(s)).join("\n");
 
     if (result.endsWith("\n")) {
       result = result.substring(0, result.length - 1);
@@ -36,6 +35,9 @@ export class Transpiler {
           continue;
         }
         ret = ret + this.traverseStructure(c);
+        if (c.get() instanceof Structures.When) {
+          ret = ret + "break;\n";
+        }
       } else if (c instanceof Nodes.StatementNode) {
         ret = ret + this.traverseStatement(c) + "\n";
       } else {

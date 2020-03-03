@@ -47,6 +47,32 @@ describe("Multiple statements", () => {
   }
 }`;
 
+    expect(new Transpiler().run(abap)).to.equal(expected);
+  });
+
+  it("CASE", () => {
+    const abap = `
+CASE bar.
+WHEN 'foo'.
+WRITE 2.
+WHEN 1 OR 2.
+WHEN foo.
+WHEN OTHERS.
+ENDCASE.`;
+
+    const expected =
+`switch (bar.get()) {
+  case 'foo':
+  abap.statements.write(2);
+  break;
+  case 1:
+  case 2:
+  break;
+  case foo.get():
+  break;
+  default:
+  break;
+}`;
 
     expect(new Transpiler().run(abap)).to.equal(expected);
   });

@@ -1,5 +1,6 @@
 export * from "./append";
 export * from "./assert";
+export * from "./case";
 export * from "./class_implementation";
 export * from "./clear";
 export * from "./continue";
@@ -24,5 +25,6 @@ export * from "./method";
 export * from "./move";
 export * from "./sort";
 export * from "./split";
+export * from "./when";
 export * from "./while";
 export * from "./write";

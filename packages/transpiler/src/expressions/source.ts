@@ -3,6 +3,11 @@ import {IExpressionTranspiler} from "./_expression_transpiler";
 import {FieldChainTranspiler, ArithOperatorTranspiler, ConstantTranspiler, MethodCallChainTranspiler, StringTemplateTranspiler} from ".";
 
 export class SourceTranspiler implements IExpressionTranspiler {
+  private readonly addGet: boolean;
+
+  public constructor(addGet = false) {
+    this.addGet = addGet;
+  }
 
   public transpile(node: Nodes.ExpressionNode): string {
     let ret = "";
@@ -12,6 +17,9 @@ export class SourceTranspiler implements IExpressionTranspiler {
       if (c instanceof Nodes.ExpressionNode) {
         if (c.get() instanceof Expressions.FieldChain) {
           ret = ret + new FieldChainTranspiler().transpile(c);
+          if (this.addGet) {
+            ret = ret + ".get()";  // todo, this will break
+          }
         } else if (c.get() instanceof Expressions.Constant) {
           ret = ret + new ConstantTranspiler().transpile(c);
         } else if (c.get() instanceof Expressions.StringTemplate) {
