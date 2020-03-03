@@ -10,8 +10,8 @@ describe("Single statements", () => {
     {abap: "ADD 2 to foo.",                        js: "foo.set(foo.add(2));",                      skip: true},
     {abap: "foo = bar + moo.",                     js: "foo.set(bar.add(moo));",                    skip: false},
     {abap: "DATA foo TYPE i VALUE 2.",             js: "let foo = new abap.types.Integer({value: 2});", skip: false},
-    {abap: "IF foo = bar. ENDIF.",                 js: "if (foo.eq(bar)) {\n}",                     skip: false},
-    {abap: "IF foo EQ bar. ENDIF.",                js: "if (foo.eq(bar)) {\n}",                     skip: false},
+    {abap: "IF foo = bar. ENDIF.",                 js: "if (abap.compare.eq(foo, bar)) {\n}",                     skip: false},
+    {abap: "IF foo EQ bar. ENDIF.",                js: "if (abap.compare.eq(foo, bar)) {\n}",                     skip: false},
     {abap: "EXIT.",                                js: "break;",                                    skip: false},
     {abap: "CONTINUE.",                            js: "continue;",                                 skip: false},
     {abap: "CASE bar. ENDCASE.",                   js: "switch (bar.get()) {\n}",                   skip: false},
@@ -30,7 +30,7 @@ describe("Single statements", () => {
     {abap: "DO 5 TIMES. ENDDO.",                   js: "for (let unique1 = 0; unique1 < 5; unique1++) {\n}",         skip: false},
     {abap: "DO foo TIMES.  ENDDO.",                js: "for (let unique1 = 0; unique1 < foo.get(); unique1++) {\n}", skip: false}, // todo, the "i" variable must be unique
     {abap: "LOOP AT table INTO line. ENDLOOP.",    js: "for (line of table.array()) {\n}",          skip: false},
-    {abap: "WHILE foo = bar. ENDWHILE.",           js: "while (foo.eq(bar)) {\n}",                  skip: false},
+    {abap: "WHILE foo = bar. ENDWHILE.",           js: "while (abap.compare.eq(foo, bar)) {\n}",                  skip: false},
     {abap: "foo-bar = 2.",                         js: "foo.bar.set(2);",                           skip: true}, // hmm, will this kind of member access work?
     {abap: "foo(1) = 'a'.",                        js: "foo.set('a', {lenth: 1});",                 skip: true},
     {abap: "foo+1 = 'a'.",                         js: "foo.set('a', {offset: 1});",                skip: true},
@@ -39,7 +39,6 @@ describe("Single statements", () => {
     {abap: "CLEAR foo.",                           js: "abap.statements.clear(foo);",               skip: false},
     {abap: "SORT foo.",                            js: "abap.statements.sort(foo);",                skip: false},
     {abap: "WRITE foo.",                           js: "abap.statements.write(foo);",               skip: false},
-    {abap: "ASSERT foo = bar.",                    js: "abap.statements.assert(foo.eq(bar));",      skip: false},
     {abap: "CLASS lcl_foo IMPLEMENTATION. ENDCLASS.", js: "class lcl_foo {\n}",                     skip: false}, // note: no code for the CLASS DEFINITION
     {abap: "RETURN.",                                 js: "break;",                                 skip: true}, // todo, hmm?
     {abap: "foo->method( ).",                         js: "foo.method();",                          skip: true},
@@ -52,9 +51,10 @@ describe("Single statements", () => {
     {abap: "SPLIT foo AT bar INTO TABLE moo.",     js: "abap.statements.split({source: foo, at: bar, target: moo});",    skip: false},
     {abap: "WRITE |moo|.",                         js: "abap.statements.write(`moo`);",                                  skip: false},
     {abap: "DELETE foo WHERE bar = 2.",            js: "abap.statements.deleteInternal(foo,() => {return bar.eq(2);});", skip: false},
-    {abap: "ASSERT sy-subrc = 0.",                 js: "abap.statements.assert(sy.subrc.eq(0));", skip: false},
-    {abap: "ASSERT 0 = 1.",                        js: "todo", skip: true},
     {abap: "* comment",                            js: "// * comment", skip: true},
+    {abap: "ASSERT foo = bar.",                    js: "abap.statements.assert(abap.compare.eq(foo, bar));",      skip: false},
+    {abap: "ASSERT sy-subrc = 0.",                 js: "abap.statements.assert(abap.compare.eq(sy.subrc, 0));", skip: false},
+    {abap: "ASSERT 0 = 1.",                        js: "todo", skip: true},
   ];
 
   for (const test of tests) {

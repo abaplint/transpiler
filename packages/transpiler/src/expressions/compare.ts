@@ -11,7 +11,7 @@ export class CompareTranspiler implements IExpressionTranspiler {
       const operator = new CompareOperatorTranspiler().transpile(node.findFirstExpression(Expressions.CompareOperator)!);
       const s0 = new SourceTranspiler().transpile(sources[0]);
       const s1 = new SourceTranspiler().transpile(sources[1]);
-      return s0 + "." + operator + "(" + s1 + ")";
+      return "abap.compare." + operator + "(" + s0 + ", " + s1 + ")";
     }
 
     return "Compare, todo";

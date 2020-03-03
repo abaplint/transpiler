@@ -74,7 +74,7 @@ describe("Full Examples", () => {
     f(abap);
   });
 
-  it.skip("ASSERTs, left hand and right hand, none should fail", () => {
+  it("ASSERTs, left hand and right hand, none should fail", () => {
     const code = `
       ASSERT 1 = 1.
       ASSERT 1 = '1'.

@@ -19,18 +19,6 @@ export class String implements ICharacter {
     this.value = "";
   }
 
-  public eq(value: ICharacter | string): boolean {
-    if (typeof value === "string") {
-      return this.value === value;
-    } else {
-      return this.value === value.get();
-    }
-  }
-
-  public ne(value: ICharacter | string): boolean {
-    return !this.eq(value);
-  }
-
   public get(): string {
     return this.value;
   }

@@ -1,7 +1,7 @@
 import {expect} from "chai";
 import {Transpiler} from "../src";
 
-describe("Multiple statements", () => {
+describe("Multiple lines", () => {
 
   it("IF + ELSEIF + ELSE", () => {
     const abap = `
@@ -12,9 +12,9 @@ describe("Multiple statements", () => {
     ENDIF.`;
 
     const expected =
-`if (foo.eq(bar)) {
+`if (abap.compare.eq(foo, bar)) {
   abap.statements.write(moo);
-} else if (moo.eq(boo)) {
+} else if (abap.compare.eq(moo, boo)) {
 } else {
 }`;
 
