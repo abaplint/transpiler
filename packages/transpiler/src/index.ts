@@ -1,4 +1,4 @@
-import {Nodes, MemoryFile, Registry} from "abaplint";
+import {Nodes, MemoryFile, Registry, Structures} from "abaplint";
 import {Validation} from "./validation";
 import * as StatementTranspilers from "./statements";
 import {Indentation} from "./indentation";
@@ -17,9 +17,32 @@ export class Transpiler {
 
     const abap = reg.getABAPObjects()[0].getABAPFiles()[0];
 
-    const result = abap.getStatements().map(s => this.traverseStatement(s)).join("\n");
+    let result = this.traverseStructure(abap.getStructure()!);
+//    const result = abap.getStatements().map(s => this.traverseStatement(s)).join("\n");
+
+    if (result.endsWith("\n")) {
+      result = result.substring(0, result.length - 1);
+    }
 
     return new Indentation().run(result);
+  }
+
+  protected traverseStructure(node: Nodes.StructureNode): string {
+    let ret = "";
+    for (const c of node.getChildren()) {
+      if (c instanceof Nodes.StructureNode) {
+        if (c.get() instanceof Structures.Interface
+            || c.get() instanceof Structures.ClassDefinition) {
+          continue;
+        }
+        ret = ret + this.traverseStructure(c);
+      } else if (c instanceof Nodes.StatementNode) {
+        ret = ret + this.traverseStatement(c) + "\n";
+      } else {
+        throw new Error("traverseStructure, unexpected node type");
+      }
+    }
+    return ret;
   }
 
   protected traverseStatement(node: Nodes.StatementNode): string {

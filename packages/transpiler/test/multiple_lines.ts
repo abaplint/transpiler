@@ -21,7 +21,15 @@ describe("Multiple statements", () => {
     expect(new Transpiler().run(abap)).to.equal(expected);
   });
 
-  it.skip("Simple class", () => {
+  it("Interfaces should be skipped", () => {
+    const abap = `
+  INTERFACE lif_foobar.
+  ENDINTERFACE.`;
+
+    expect(new Transpiler().run(abap)).to.equal("");
+  });
+
+  it("Simple class", () => {
     const abap = `
     CLASS lcl_foobar DEFINITION.
       PUBLIC SECTION.
@@ -33,7 +41,12 @@ describe("Multiple statements", () => {
       ENDMETHOD.
     ENDCLASS.`;
 
-    const expected = "sdf";
+    const expected =
+`class lcl_foobar {
+  moo() {
+  }
+}`;
+
 
     expect(new Transpiler().run(abap)).to.equal(expected);
   });
