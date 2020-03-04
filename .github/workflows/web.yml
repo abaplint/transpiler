@@ -5,20 +5,18 @@ on: [push, pull_request]
 jobs:
   transpiler:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [12.x]
     steps:
     - uses: actions/checkout@v1
       with:
         fetch-depth: 1
     - uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
     - name: npm install
-      run: cd web/transpiler && npm install
-    - name: npm run build
-      run: npm run build
+      run: | 
+        npm install
+        npm test
+        cd web/transpiler
+        npm install
+        npm run build
     - name: deploy transpiler.abaplint.org
       if: github.ref == 'refs/heads/master' && github.repository == 'abaplint/transpiler'
       env:
