@@ -22,7 +22,7 @@ export class StringTemplateTranspiler implements IExpressionTranspiler {
           ret = ret + "}" + original + "`";
         }
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.Source) {
-        ret = ret + new SourceTranspiler().transpile(c);
+        ret = ret + new SourceTranspiler(true).transpile(c);
       }
     }
 

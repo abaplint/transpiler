@@ -29,6 +29,9 @@ export class SourceTranspiler implements IExpressionTranspiler {
           post = ")";
         } else if (c.get() instanceof Expressions.MethodCallChain) {
           ret = ret + new MethodCallChainTranspiler().transpile(c);
+          if (this.addGet) {
+            ret = ret + ".get()";  // todo, this will break
+          }
         } else if (c.get() instanceof Expressions.Source) {
           ret = ret + this.transpile(c);
         } else {

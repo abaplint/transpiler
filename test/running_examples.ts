@@ -89,4 +89,13 @@ describe("Full Examples", () => {
     f(abap);
   });
 
+  it("Console tracks output", () => {
+    const code = `WRITE 'foo'.`;
+    const js = new Transpiler().run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("foo");
+  });
+
 });

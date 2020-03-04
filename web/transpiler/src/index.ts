@@ -24,7 +24,7 @@ const editor1 = monaco.editor.create(document.getElementById("container1"), {
 });
 
 const editor2 = monaco.editor.create(document.getElementById("container2"), {
-  value: "console.log('hello world');",
+  value: "js",
   theme: "vs-dark",
   minimap: {
     enabled: false,
@@ -54,6 +54,7 @@ function jsChanged() {
   }
 }
 
+/*
 function setUrl() {
   const value = editor1.getValue();
   const deflated = pako.deflate(value, {to: "string"});
@@ -64,6 +65,7 @@ function setUrl() {
     window.history.replaceState(null, document.title, window.location.pathname);
   }
 }
+*/
 
 function abapChanged() {
   try {
@@ -75,6 +77,7 @@ function abapChanged() {
   }
 }
 
+/*
 function readUrl() {
   const source = new URL(document.location.href).searchParams.get("source");
   if (source) {
@@ -82,9 +85,10 @@ function readUrl() {
     editor1.setValue(inflated);
   }
 }
+*/
 
 editor1.onDidChangeModelContent(abapChanged);
-readUrl();
-abapChanged();
-editor1.onDidChangeModelContent(setUrl);
+// readUrl();
 editor2.onDidChangeModelContent(jsChanged);
+abapChanged();
+// editor1.onDidChangeModelContent(setUrl);
