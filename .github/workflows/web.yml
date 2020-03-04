@@ -18,7 +18,6 @@ jobs:
         npm install
         npm run build
     - name: deploy transpiler.abaplint.org
-      if: github.ref == 'refs/heads/master' && github.repository == 'abaplint/transpiler'
       env:
         MY_TOKEN: ${{ secrets.MY_TOKEN }}
       run: |
