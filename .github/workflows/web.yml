@@ -16,9 +16,10 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - name: npm install
-      run: cd web/transpiler && npm install
-    - name: npm run build
-      run: npm run build
+      run: | 
+        cd web/transpiler
+        npm install
+        npm run build
     - name: deploy transpiler.abaplint.org
       if: github.ref == 'refs/heads/master' && github.repository == 'abaplint/transpiler'
       env:
