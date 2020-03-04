@@ -12,6 +12,8 @@ jobs:
     - uses: actions/setup-node@v1
     - name: npm install
       run: | 
+        npm install
+        npm test
         cd web/transpiler
         npm install
         npm run build
