@@ -10,7 +10,7 @@ export interface IFile {
 
 export class Transpiler {
 
-  public runMulti(files: IFile[]): IFile[] {
+  public runMulti(files: IFile[]): {js: IFile[], maps: IFile[]} {
     const memory = files.map(f => new MemoryFile(f.filename, f.contents));
     const reg = new Registry().addFiles(memory);
     this.validate(reg);
@@ -25,7 +25,7 @@ export class Transpiler {
         }
       }
     }
-    return output;
+    return {js: output, maps: []};
   }
 
 // todo, deprecate/remove this method

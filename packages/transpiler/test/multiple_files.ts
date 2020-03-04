@@ -7,7 +7,7 @@ describe("Multiple files", () => {
     const file1 = {filename: "zfoo1.prog.abap", contents: "WRITE '1'."};
     const file2 = {filename: "zfoo2.prog.abap", contents: "WRITE '2'."};
 
-    const output = new Transpiler().runMulti([file1, file2]);
+    const output = new Transpiler().runMulti([file1, file2]).js;
 
     expect(output.length).to.equal(2);
     expect(output[0].filename).to.equal("zfoo1.prog.js");
