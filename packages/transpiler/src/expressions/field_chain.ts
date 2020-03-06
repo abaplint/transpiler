@@ -1,10 +1,17 @@
 import {Expressions, Nodes} from "abaplint";
 import {IExpressionTranspiler} from "./_expression_transpiler";
+import {FieldLengthTranspiler, FieldOffsetTranspiler} from ".";
 
 export class FieldChainTranspiler implements IExpressionTranspiler {
+  private addGet: boolean;
+
+  public constructor(addGet = false) {
+    this.addGet = addGet;
+  }
 
   public transpile(node: Nodes.ExpressionNode): string {
     let ret = "";
+    const extra: string[] = [];
     for (const c of node.getChildren()) {
       if (c.get() instanceof Expressions.SourceField
           || c.get() instanceof Expressions.ComponentName) {
@@ -14,7 +21,23 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
         if (str === "-") {
           ret = ret + ".";
         }
+      } else if (c instanceof Nodes.ExpressionNode
+          && c.get() instanceof Expressions.FieldOffset) {
+        extra.push("offset: " + new FieldOffsetTranspiler().transpile(c));
+        this.addGet = true;
+      } else if (c instanceof Nodes.ExpressionNode
+          && c.get() instanceof Expressions.FieldLength) {
+        extra.push("length: " + new FieldLengthTranspiler().transpile(c));
+        this.addGet = true;
       }
+    }
+
+    if (this.addGet) {
+      let foo = extra.join(", ");
+      if (foo !== "") {
+        foo = "{" + foo + "}";
+      }
+      ret = ret + ".get(" + foo + ")";  // todo, this will break
     }
 
     return ret;

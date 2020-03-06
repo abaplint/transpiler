@@ -98,4 +98,28 @@ describe("Full Examples", () => {
     expect(abap.Console.get()).to.equal("foo");
   });
 
+  it("Offset +1", () => {
+    const code = `
+      DATA: bar TYPE string.
+      bar = 'abc'.
+      WRITE bar+1.`;
+    const js = new Transpiler().run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("bc");
+  });
+
+  it("Length (1)", () => {
+    const code = `
+      DATA: bar TYPE string.
+      bar = 'abc'.
+      WRITE bar(1).`;
+    const js = new Transpiler().run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("a");
+  });
+
 });

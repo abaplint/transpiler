@@ -24,7 +24,14 @@ export class Character implements ICharacter {
     this.value = "";
   }
 
-  public get(): string {
-    return this.value;
+  public get(input?: {offset: number, length: number}): string {
+    let ret = this.value;
+    if (input?.offset) {
+      ret = ret.substr(input.offset);
+    }
+    if (input?.length) {
+      ret = ret.substr(0, input.length);
+    }
+    return ret;
   }
 }

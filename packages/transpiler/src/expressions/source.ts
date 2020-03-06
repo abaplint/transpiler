@@ -16,10 +16,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
     for (const c of node.getChildren()) {
       if (c instanceof Nodes.ExpressionNode) {
         if (c.get() instanceof Expressions.FieldChain) {
-          ret = ret + new FieldChainTranspiler().transpile(c);
-          if (this.addGet) {
-            ret = ret + ".get()";  // todo, this will break
-          }
+          ret = ret + new FieldChainTranspiler(this.addGet).transpile(c);
         } else if (c.get() instanceof Expressions.Constant) {
           ret = ret + new ConstantTranspiler().transpile(c);
         } else if (c.get() instanceof Expressions.StringTemplate) {
