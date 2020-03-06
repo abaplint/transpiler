@@ -8,7 +8,7 @@ export class ComponentCompareTranspiler implements IExpressionTranspiler {
     const component = new ComponentChainSimpleTranspiler().transpile(node.findDirectExpression(Expressions.ComponentChainSimple)!);
     const compare = new CompareOperatorTranspiler().transpile(node.findDirectExpression(Expressions.CompareOperator)!);
     const source = new SourceTranspiler().transpile(node.findDirectExpression(Expressions.Source)!);
-    return "() => {return " + component + "." + compare + "(" + source + ");}";
+    return "(i) => {return abap.compare." + compare + "(i." + component + ", " + source + ");}";
   }
 
 }

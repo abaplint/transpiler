@@ -122,4 +122,49 @@ describe("Full Examples", () => {
     expect(abap.Console.get()).to.equal("a");
   });
 
+  it("Basic delete internal", () => {
+    const code = `
+      DATA table TYPE STANDARD TABLE OF i.
+      APPEND 1 TO table.
+      APPEND 2 TO table.
+      DELETE table WHERE table_line = 1.
+      ASSERT lines( table ) = 1.`;
+    const js = new Transpiler().run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("String compare", () => {
+    const code = `
+    ASSERT 'a' < 'b'.
+    ASSERT 'A' < 'b'.
+    ASSERT 'A' < 'B'.
+    ASSERT 'b' >= 'B'.
+    ASSERT 'a' < 'ba'.
+    ASSERT 1 < '2'.
+    ASSERT 1 <= '1'.`;
+
+    const js = new Transpiler().run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("Basic sort table", () => {
+    const code = `
+    DATA: table TYPE STANDARD TABLE OF i,
+          int   TYPE i.
+    APPEND 2 TO table.
+    APPEND 1 TO table.
+    SORT table.
+    LOOP AT table INTO int.
+      WRITE / int.
+    ENDLOOP.`;
+
+    const js = new Transpiler().run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("1\n2");
+  });
+
 });

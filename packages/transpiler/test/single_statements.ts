@@ -54,13 +54,14 @@ describe("Single statements", () => {
     {abap: "lv_char = lines( lt_words ).",            js: "lv_char.set(abap.builtin.lines(lt_words));",                     skip: false},
     {abap: "SPLIT foo AT bar INTO TABLE moo.",        js: "abap.statements.split({source: foo, at: bar, target: moo});",    skip: false},
     {abap: "WRITE |moo|.",                            js: "abap.statements.write(`moo`);",                                  skip: false},
-    {abap: "DELETE foo WHERE bar = 2.",               js: "abap.statements.deleteInternal(foo,() => {return bar.eq(2);});", skip: false},
+    {abap: "DELETE foo WHERE bar = 2.",               js: "abap.statements.deleteInternal(foo,(i) => {return abap.compare.eq(i.bar, 2);});", skip: false},
     {abap: "* comment",                               js: "// * comment", skip: true},
-    {abap: "ASSERT foo = bar.",                       js: "abap.statements.assert(abap.compare.eq(foo, bar));",    skip: false},
-    {abap: "ASSERT sy-subrc = 0.",                    js: "abap.statements.assert(abap.compare.eq(sy.subrc, 0));", skip: false},
-    {abap: "ASSERT 0 = 1.",                           js: "abap.statements.assert(abap.compare.eq(0, 1));", skip: false},
-    {abap: "APPEND lv_word TO lt_letters.",           js: "abap.statements.append({source: lv_word, target: lt_letters});", skip: false},
-    {abap: "WRITE |foo{ lines( lt_words ) }bar|.",    js: "abap.statements.write(`foo${abap.builtin.lines(lt_words).get()}bar`);", skip: false},
+    {abap: "ASSERT foo = bar.",                       js: "abap.statements.assert(abap.compare.eq(foo, bar));",                     skip: false},
+    {abap: "ASSERT sy-subrc = 0.",                    js: "abap.statements.assert(abap.compare.eq(sy.subrc, 0));",                  skip: false},
+    {abap: "ASSERT 0 = 1.",                           js: "abap.statements.assert(abap.compare.eq(0, 1));",                         skip: false},
+    {abap: "APPEND lv_word TO lt_letters.",           js: "abap.statements.append({source: lv_word, target: lt_letters});",         skip: false},
+    {abap: "WRITE |foo{ lines( lt_words ) }bar|.",    js: "abap.statements.write(`foo${abap.builtin.lines(lt_words).get()}bar`);",  skip: false},
+    {abap: "ASSERT 'a' < 'b'.",                       js: "abap.statements.assert(abap.compare.lt('a', 'b'));",             skip: false},
   ];
 
   for (const test of tests) {

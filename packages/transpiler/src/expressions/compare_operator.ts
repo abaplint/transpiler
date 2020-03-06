@@ -9,6 +9,18 @@ export class CompareOperatorTranspiler implements IExpressionTranspiler {
       case "=":
       case "EQ":
         return "eq";
+      case "<":
+      case "LT":
+        return "lt";
+      case "<=":
+      case "LE":
+        return "le";
+      case ">":
+      case "GT":
+        return "gt";
+      case ">=":
+      case "GE":
+        return "ge";
       case "<>":
       case "NE":
         return "ne";
