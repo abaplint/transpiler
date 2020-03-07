@@ -172,7 +172,25 @@ describe("Full Examples", () => {
     try {
       new Transpiler().run(code);
       throw new Error("An exception should have been raised for invalid code");
-    } catch(e) {
+    } catch (e) {
+      // expected - do nothing
+    }
+  });
+
+  it("Should throw an error if language features are not supported yet", () => {
+    const code = `
+    DATA: table TYPE STANDARD TABLE OF i,
+          int   TYPE i.
+    APPEND 2 TO table.
+    APPEND 1 TO table.
+    APPEND 2 TO table.
+    SORT table.
+    DELETE ADJACENT DUPLICATES FROM table COMPARING FIELDS table_line`;
+
+    try {
+      new Transpiler({checks: Transpiler.CHECKS.strict}).run(code);
+      throw new Error("An exception should have been raised for not-supported language-features");
+    } catch (e) {
       // expected - do nothing
     }
   });
