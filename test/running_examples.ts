@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {Transpiler, CHECKS} from "../packages/transpiler/src/";
+import {Transpiler} from "../packages/transpiler/src/";
 import * as abap from "../packages/runtime/src/";
 
 describe("Full Examples", () => {
@@ -187,7 +187,7 @@ describe("Full Examples", () => {
     SORT table.
     DELETE ADJACENT DUPLICATES FROM table COMPARING FIELDS table_line`;
 
-    expect(() => new Transpiler({checks: CHECKS.strict}).run(code) )
+    expect(() => new Transpiler().run(code) )
       .to.throw(/Statement does not exist .*/);
   });
 });

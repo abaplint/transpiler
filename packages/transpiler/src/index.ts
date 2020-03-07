@@ -8,21 +8,7 @@ export interface IFile {
   contents: string,
 }
 
-export enum CHECKS {
-  comment,
-  strict
-}
-
-export interface ITranspilerOptions {
-  checks: CHECKS
-}
-
 export class Transpiler {
-  private readonly options: ITranspilerOptions ;
-
-  public constructor(options?: ITranspilerOptions){
-    this.options = options || {checks: CHECKS.comment};
-  }
 
   public runMulti(files: IFile[]): {js: IFile[], maps: IFile[]} {
     const memory = files.map(f => new MemoryFile(f.filename, f.contents));
@@ -102,11 +88,7 @@ export class Transpiler {
         return transpiler.transpile(node);
       }
     }
-    if (this.options.checks === CHECKS.comment) {
-      return "todo, statement: " + node.get().constructor.name;
-    } else {
-      throw new Error(`Statement ${node.get().constructor.name} not supported`);
-    }
+    throw new Error(`Statement ${node.get().constructor.name} not supported`);
   }
 
 }
