@@ -46,9 +46,14 @@ function jsChanged() {
   const js = editor2.getValue();
   try {
     abap.Console.clear();
-    const f = new Function("abap", js);
-    f(abap);
-    editor3.setValue(abap.Console.get());
+    try {
+      const f = new Function("abap", js);
+      f(abap);
+      editor3.setValue(abap.Console.get());
+    } catch(e) {
+      // write all errors to runtime result
+      editor3.setValue("An error was thrown: " + e.toString());
+    }
   } catch (error) {
     editor3.setValue(error.message);
   }
