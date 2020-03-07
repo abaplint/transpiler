@@ -187,11 +187,7 @@ describe("Full Examples", () => {
     SORT table.
     DELETE ADJACENT DUPLICATES FROM table COMPARING FIELDS table_line`;
 
-    try {
-      new Transpiler({checks: CHECKS.strict}).run(code);
-      throw new Error("An exception should have been raised for not-supported language-features");
-    } catch (e) {
-      // expected - do nothing
-    }
+    expect(() => new Transpiler({checks: CHECKS.strict}).run(code) )
+      .to.throw(/Statement does not exist .*/);
   });
 });
