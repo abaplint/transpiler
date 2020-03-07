@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {Transpiler} from "../packages/transpiler/src/";
+import {Transpiler, CHECKS} from "../packages/transpiler/src/";
 import * as abap from "../packages/runtime/src/";
 
 describe("Full Examples", () => {
@@ -188,7 +188,7 @@ describe("Full Examples", () => {
     DELETE ADJACENT DUPLICATES FROM table COMPARING FIELDS table_line`;
 
     try {
-      new Transpiler({checks: Transpiler.CHECKS.strict}).run(code);
+      new Transpiler({checks: CHECKS.strict}).run(code);
       throw new Error("An exception should have been raised for not-supported language-features");
     } catch (e) {
       // expected - do nothing
