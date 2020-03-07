@@ -88,8 +88,7 @@ export class Transpiler {
         return transpiler.transpile(node);
       }
     }
-
-    return "todo, statement: " + node.get().constructor.name;
+    throw new Error(`Statement ${node.get().constructor.name} not supported`);
   }
 
 }

@@ -167,4 +167,27 @@ describe("Full Examples", () => {
     expect(abap.Console.get()).to.equal("1\n2");
   });
 
+  it("Should throw an error if invalid code is requested to be transpiled", () => {
+    const code = `THIS IS NOT ABAP.`;
+    try {
+      new Transpiler().run(code);
+      throw new Error("An exception should have been raised for invalid code");
+    } catch (e) {
+      // expected - do nothing
+    }
+  });
+
+  it("Should throw an error if language features are not supported yet", () => {
+    const code = `
+    DATA: table TYPE STANDARD TABLE OF i,
+          int   TYPE i.
+    APPEND 2 TO table.
+    APPEND 1 TO table.
+    APPEND 2 TO table.
+    SORT table.
+    DELETE ADJACENT DUPLICATES FROM table COMPARING FIELDS table_line`;
+
+    expect(() => new Transpiler().run(code) )
+      .to.throw(/Statement does not exist .*/);
+  });
 });
