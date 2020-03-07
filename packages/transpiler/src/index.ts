@@ -1,4 +1,4 @@
-import {Nodes, MemoryFile, Registry, Structures} from "abaplint";
+import {Nodes, MemoryFile, Registry, Structures, ABAPObject} from "abaplint";
 import {Validation} from "./validation";
 import * as StatementTranspilers from "./statements";
 import {Indentation} from "./indentation";
@@ -8,24 +8,25 @@ export interface IFile {
   contents: string,
 }
 
+export interface IOutput {
+  js: IFile[];
+  maps: IFile[];
+}
+
 export class Transpiler {
 
-  public runMulti(files: IFile[]): {js: IFile[], maps: IFile[]} {
+  public runMulti(files: IFile[]): IOutput {
     const memory = files.map(f => new MemoryFile(f.filename, f.contents));
     const reg = new Registry().addFiles(memory);
     this.validate(reg);
 
-    const output: IFile[] = [];
+    const output: IOutput = {js: [], maps: []};
     for (const abap of reg.getABAPObjects()) {
-      for (const f of abap.getABAPFiles()) {
-        const contents = this.runObject(f.getStructure()!);
-        if (contents.length > 0) {
-          const filename = f.getFilename().replace(new RegExp("\.abap$"), ".js");
-          output.push({filename, contents});
-        }
-      }
+      const res = this.runObject(abap);
+      output.js = output.js.concat(res.js);
+      output.maps = output.maps.concat(res.maps);
     }
-    return {js: output, maps: []};
+    return output;
   }
 
 // todo, deprecate/remove this method
@@ -34,21 +35,34 @@ export class Transpiler {
 
     this.validate(reg);
 
-    const abap = reg.getABAPObjects()[0].getABAPFiles()[0];
+    const res = this.runObject(reg.getABAPObjects()[0]).js[0]?.contents;
 
-    return this.runObject(abap.getStructure()!);
+    return res ? res : "";
   }
 
 // ///////////////////////////////
 
-  protected runObject(node: Nodes.StructureNode) {
-    let result = this.traverseStructure(node);
+  protected runObject(obj: ABAPObject): IOutput {
 
-    if (result.endsWith("\n")) {
-      result = result.substring(0, result.length - 1);
+    const output: IOutput = {js: [], maps: []};
+
+    for (const f of obj.getABAPFiles()) {
+      let contents = this.traverseStructure(f.getStructure()!);
+
+      if (contents.endsWith("\n")) {
+        contents = contents.substring(0, contents.length - 1);
+      }
+
+      if (contents.length > 0) {
+        const filename = f.getFilename().replace(new RegExp("\.abap$"), ".js");
+        contents = new Indentation().run(contents);
+        output.js.push({filename, contents});
+      }
     }
 
-    return new Indentation().run(result);
+// new SyntaxLogic(reg, obj).run()
+
+    return output;
   }
 
   protected validate(reg: Registry) {

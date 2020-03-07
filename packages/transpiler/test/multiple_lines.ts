@@ -50,6 +50,29 @@ describe("Multiple lines", () => {
     expect(new Transpiler().run(abap)).to.equal(expected);
   });
 
+  it.skip("Simple class, with input parameter", () => {
+    const abap = `
+    CLASS lcl_foobar DEFINITION.
+      PUBLIC SECTION.
+        METHODS: moo
+          IMPORTING iv_foo TYPE string.
+    ENDCLASS.
+
+    CLASS lcl_foobar IMPLEMENTATION.
+      METHOD moo.
+      ENDMETHOD.
+    ENDCLASS.`;
+
+    const expected =
+`class lcl_foobar {
+  moo(unique1) {
+    let iv_foo = unique1.iv_foo;
+  }
+}`;
+
+    expect(new Transpiler().run(abap)).to.equal(expected);
+  });
+
   it("CASE", () => {
     const abap = `
 CASE bar.
