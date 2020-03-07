@@ -167,4 +167,13 @@ describe("Full Examples", () => {
     expect(abap.Console.get()).to.equal("1\n2");
   });
 
+  it("Should throw an error if invalid code is requested to be transpiled", () => {
+    const code = `THIS IS NOT ABAP.`;
+    try {
+      new Transpiler().run(code);
+      throw new Error("An exception should have been raised for invalid code");
+    } catch(e) {
+      // expected - do nothing
+    }
+  });
 });
