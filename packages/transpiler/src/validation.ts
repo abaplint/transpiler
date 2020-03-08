@@ -10,7 +10,7 @@ const config: IConfig = {
   },
   syntax: {
     version: Version.v702,
-    errorNamespace: "",
+    errorNamespace: ".",
   },
   rules: {
     when_others_last: true,
@@ -24,6 +24,7 @@ const config: IConfig = {
       statics: true,
     },
     parser_error: true,
+    unknown_types: true,
     check_syntax: true,
     functional_writing: true,
     obsolete_statement: {

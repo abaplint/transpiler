@@ -8,7 +8,7 @@ export class ParameterSTranspiler implements IExpressionTranspiler {
     const name = node.findDirectExpression(Expressions.ParameterName)?.getFirstToken().getStr();
     const source = new SourceTranspiler().transpile(node.findDirectExpression(Expressions.Source)!);
 
-    return name + " = " + source;
+    return name + ": " + source;
   }
 
 }

@@ -86,6 +86,7 @@ export class Transpiler {
     for (const c of node.getChildren()) {
       if (c instanceof Nodes.StructureNode) {
         if (c.get() instanceof Structures.Interface
+            || c.get() instanceof Structures.Types
             || c.get() instanceof Structures.ClassDefinition) {
           continue;
         }

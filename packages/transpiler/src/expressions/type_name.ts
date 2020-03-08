@@ -1,7 +1,5 @@
 import {Nodes} from "abaplint";
 import {IExpressionTranspiler} from "./_expression_transpiler";
-// todo, foobar
-// import * as BasicTypes from "../../../runtime/src/types";
 
 export class TypeNameTranspiler implements IExpressionTranspiler {
 
@@ -9,13 +7,13 @@ export class TypeNameTranspiler implements IExpressionTranspiler {
 
     switch (node?.getFirstToken().getStr().toUpperCase()) {
       case "I":
-        return "abap.types.Integer"; // + new BasicTypes.Integer().constructor.name;
+        return "abap.types.Integer";
       case "C":
-        return "abap.types.Character"; // + new BasicTypes.Character().constructor.name;
+        return "abap.types.Character";
       case "P":
-        return "abap.types.Packed"; // + new BasicTypes.Packed().constructor.name;
+        return "abap.types.Packed";
       case "STRING":
-        return "abap.types.String"; // + new BasicTypes.String().constructor.name;
+        return "abap.types.String";
       default:
         return "todo, TypeNameTranspiler";
     }

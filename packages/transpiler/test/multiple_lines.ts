@@ -29,6 +29,16 @@ describe("Multiple lines", () => {
     expect(await runSingle(abap)).to.equal("");
   });
 
+  it("TYPES should be skipped", async () => {
+    const abap = `
+    TYPES: BEGIN OF ty_header,
+    field TYPE string,
+    value TYPE string,
+  END OF ty_header.`;
+
+    expect(await runSingle(abap)).to.equal("");
+  });
+
   it("Simple class", async () => {
     const abap = `
     CLASS lcl_foobar DEFINITION.
@@ -119,6 +129,24 @@ ENDCASE.`;
   default:
   break;
 }`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.equal(expected);
+  });
+
+  it("REF TO object", async () => {
+    const abap = `
+CLASS zcl_words DEFINITION.
+ENDCLASS.
+CLASS zcl_words IMPLEMENTATION.
+ENDCLASS.
+DATA foo TYPE REF TO zcl_words.
+CREATE OBJECT foo.`;
+
+    const expected =
+`class zcl_words {
+}
+let foo = new abap.types.ABAPObject();
+foo.set(new zcl_words());`;
 
     expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.equal(expected);
   });

@@ -3,3 +3,4 @@ export * from "./integer";
 export * from "./packed";
 export * from "./string";
 export * from "./table";
+export * from "./abap_object";

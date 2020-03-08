@@ -24,6 +24,9 @@ export class MethodTranspiler implements IStatementTranspiler {
       }
     }
 
+// todo, if the method contains a returning parameter, start by setting it to the initial value
+// todo, actually set all, and only take from input if its supplied? ie. object property exists
+
     let unique = "";
     let after = "";
     if (parameterNames.length > 0) {

@@ -13,7 +13,7 @@ export class MethodCallChainTranspiler implements IExpressionTranspiler {
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.FieldChain) {
         ret = ret + new FieldChainTranspiler().transpile(c);
       } else if (c instanceof Nodes.TokenNode) {
-        ret = ret + ".";
+        ret = ret + ".get().";
       } else {
         ret = ret + "MethodCallChainTranspilerTodo";
       }
