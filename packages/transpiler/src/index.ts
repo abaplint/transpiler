@@ -1,4 +1,4 @@
-import {Nodes, MemoryFile, Registry, Structures, ABAPObject, SyntaxLogic} from "abaplint";
+import {Nodes, MemoryFile, Registry, Structures, ABAPObject, SyntaxLogic, SpaghettiScope} from "abaplint";
 import {Validation} from "./validation";
 import * as StatementTranspilers from "./statements";
 import {Indentation} from "./indentation";
@@ -54,13 +54,10 @@ export class Transpiler {
   protected runObject(obj: ABAPObject, reg: Registry): IOutput {
     const output: IOutput = {js: [], maps: []};
 
-    new SyntaxLogic(reg, obj).run();
-    /*
-    const syntax =
-    console.dir(syntax.issues.length);
-*/
+    const spaghetti = new SyntaxLogic(reg, obj).run().spaghetti;
+
     for (const f of obj.getABAPFiles()) {
-      let contents = this.traverseStructure(f.getStructure()!);
+      let contents = this.traverseStructure(f.getStructure()!, spaghetti, f.getFilename());
 
       if (contents.endsWith("\n")) {
         contents = contents.substring(0, contents.length - 1);
@@ -84,7 +81,7 @@ export class Transpiler {
     }
   }
 
-  protected traverseStructure(node: Nodes.StructureNode): string {
+  protected traverseStructure(node: Nodes.StructureNode, spaghetti: SpaghettiScope, filename: string): string {
     let ret = "";
     for (const c of node.getChildren()) {
       if (c instanceof Nodes.StructureNode) {
@@ -92,12 +89,12 @@ export class Transpiler {
             || c.get() instanceof Structures.ClassDefinition) {
           continue;
         }
-        ret = ret + this.traverseStructure(c);
+        ret = ret + this.traverseStructure(c, spaghetti, filename);
         if (c.get() instanceof Structures.When) {
           ret = ret + "break;\n";
         }
       } else if (c instanceof Nodes.StatementNode) {
-        ret = ret + this.traverseStatement(c) + "\n";
+        ret = ret + this.traverseStatement(c, spaghetti, filename) + "\n";
       } else {
         throw new Error("traverseStructure, unexpected node type");
       }
@@ -105,12 +102,12 @@ export class Transpiler {
     return ret;
   }
 
-  protected traverseStatement(node: Nodes.StatementNode): string {
+  protected traverseStatement(node: Nodes.StatementNode, spaghetti: SpaghettiScope, filename: string): string {
     const list: any = StatementTranspilers;
     for (const key in list) {
       const transpiler = new list[key]();
       if (node.get().constructor.name + "Transpiler" === transpiler.constructor.name) {
-        return transpiler.transpile(node);
+        return transpiler.transpile(node, spaghetti, filename);
       }
     }
     throw new Error(`Statement ${node.get().constructor.name} not supported`);

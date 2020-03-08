@@ -42,15 +42,16 @@ describe("Single statements", () => {
     {abap: "CLEAR foo.",                           js: "abap.statements.clear(foo);",               skip: false},
     {abap: "SORT foo.",                            js: "abap.statements.sort(foo);",                skip: false},
     {abap: "WRITE foo.",                           js: "abap.statements.write(foo);",               skip: false},
-    {abap: "WRITE / foo.",                         js: "abap.statements.write(foo, {newLine: true});",               skip: false},
-    {abap: "CLASS lcl_foo IMPLEMENTATION. ENDCLASS.", js: "class lcl_foo {\n}",                     skip: false}, // note: no code for the CLASS DEFINITION
-    {abap: "RETURN.",                                 js: "break;",                                 skip: true}, // todo, hmm?
-    {abap: "foo->method( ).",                         js: "foo.method();",                          skip: true},
-    {abap: "foo->method( 1 ).",                       js: "foo.method(1);",                         skip: true},
-    {abap: "foo->method( bar = 2 moo = 1 ).",         js: "foo.method(1, 2);",                      skip: true}, // note: the sequence of method parameters matters in JS
-    {abap: "moo = foo->method().",                    js: "moo.set(foo.method());",                 skip: true},
-    {abap: "FORM foo. ENDFORM.",                      js: "function foo() {\n}",                    skip: false},
-    {abap: "DATA foo TYPE STANDARD TABLE OF string.", js: "let foo = new abap.types.Table();",      skip: false},
+    {abap: "WRITE / foo.",                         js: "abap.statements.write(foo, {newLine: true});", skip: false},
+    {abap: "CLASS lcl_foo IMPLEMENTATION. ENDCLASS.", js: "class lcl_foo {\n}",                        skip: false}, // note: no code for the CLASS DEFINITION
+    {abap: "RETURN.",                                 js: "break;",                                    skip: true}, // todo, hmm?
+    {abap: "method( ).",                              js: "method();",                                 skip: false},
+    {abap: "foo->method( ).",                         js: "foo.method();",                             skip: false},
+    {abap: "foo->method( 1 ).",                       js: "foo.method(1);",                            skip: true}, // todo, hmm, need to know the default parameter name?
+    {abap: "foo->method( bar = 2 moo = 1 ).",         js: "foo.method({bar = 2, moo = 1});",           skip: false},
+    {abap: "moo = foo->method( ).",                   js: "moo.set(foo.method());",                    skip: false},
+    {abap: "FORM foo. ENDFORM.",                      js: "function foo() {\n}",                       skip: false},
+    {abap: "DATA foo TYPE STANDARD TABLE OF string.", js: "let foo = new abap.types.Table();",         skip: false},
     {abap: "lv_char = lines( lt_words ).",            js: "lv_char.set(abap.builtin.lines(lt_words));",                     skip: false},
     {abap: "SPLIT foo AT bar INTO TABLE moo.",        js: "abap.statements.split({source: foo, at: bar, target: moo});",    skip: false},
     {abap: "WRITE |moo|.",                            js: "abap.statements.write(`moo`);",                                  skip: false},

@@ -1,9 +1,9 @@
 import {expect} from "chai";
-import {Transpiler} from "../src";
+import {runSingle} from "./_utils";
 
 describe("Multiple lines", () => {
 
-  it("IF + ELSEIF + ELSE", () => {
+  it("IF + ELSEIF + ELSE", async () => {
     const abap = `
     IF foo = bar.
     write moo.
@@ -18,18 +18,18 @@ describe("Multiple lines", () => {
 } else {
 }`;
 
-    expect(new Transpiler({ignoreSyntaxCheck: true}).run(abap)).to.equal(expected);
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.equal(expected);
   });
 
-  it("Interfaces should be skipped", () => {
+  it("Interfaces should be skipped", async () => {
     const abap = `
   INTERFACE lif_foobar.
   ENDINTERFACE.`;
 
-    expect(new Transpiler().run(abap)).to.equal("");
+    expect(await runSingle(abap)).to.equal("");
   });
 
-  it("Simple class", () => {
+  it("Simple class", async () => {
     const abap = `
     CLASS lcl_foobar DEFINITION.
       PUBLIC SECTION.
@@ -47,10 +47,10 @@ describe("Multiple lines", () => {
   }
 }`;
 
-    expect(new Transpiler().run(abap)).to.equal(expected);
+    expect(await runSingle(abap)).to.equal(expected);
   });
 
-  it.skip("Simple class, with input parameter", () => {
+  it("Simple class, with input parameter", async () => {
     const abap = `
     CLASS lcl_foobar DEFINITION.
       PUBLIC SECTION.
@@ -70,10 +70,33 @@ describe("Multiple lines", () => {
   }
 }`;
 
-    expect(new Transpiler().run(abap)).to.equal(expected);
+    expect(await runSingle(abap)).to.equal(expected);
   });
 
-  it("CASE", () => {
+  it("Simple class, with return parameter", async () => {
+    const abap = `
+    CLASS lcl_foobar DEFINITION.
+      PUBLIC SECTION.
+        METHODS: moo
+          RETURNING VALUE(rv_foo) TYPE string.
+    ENDCLASS.
+
+    CLASS lcl_foobar IMPLEMENTATION.
+      METHOD moo.
+      ENDMETHOD.
+    ENDCLASS.`;
+
+    const expected =
+`class lcl_foobar {
+  moo() {
+    return rv_foo;
+  }
+}`;
+
+    expect(await runSingle(abap)).to.equal(expected);
+  });
+
+  it("CASE", async () => {
     const abap = `
 CASE bar.
 WHEN 'foo'.
@@ -97,7 +120,7 @@ ENDCASE.`;
   break;
 }`;
 
-    expect(new Transpiler({ignoreSyntaxCheck: true}).run(abap)).to.equal(expected);
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.equal(expected);
   });
 
 });

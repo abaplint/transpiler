@@ -1,17 +1,25 @@
 import {Nodes, Expressions} from "abaplint";
 import {IExpressionTranspiler} from "./_expression_transpiler";
-import {MethodCallTranspiler} from ".";
+import {MethodCallTranspiler, FieldChainTranspiler} from ".";
 
 export class MethodCallChainTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode): string {
+    let ret = "";
 
-    const call = node.findDirectExpression(Expressions.MethodCall);
-    if (call) {
-      return new MethodCallTranspiler().transpile(call);
+    for (const c of node.getChildren()) {
+      if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.MethodCall) {
+        ret = ret + new MethodCallTranspiler().transpile(c);
+      } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.FieldChain) {
+        ret = ret + new FieldChainTranspiler().transpile(c);
+      } else if (c instanceof Nodes.TokenNode) {
+        ret = ret + ".";
+      } else {
+        ret = ret + "MethodCallChainTranspilerTodo";
+      }
     }
 
-    return "todo, MethodCallChain";
+    return ret;
   }
 
 }

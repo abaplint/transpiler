@@ -25,6 +25,7 @@ const config: IConfig = {
     },
     parser_error: true,
     check_syntax: true,
+    functional_writing: true,
     obsolete_statement: {
       refresh: true,
       compute: true,

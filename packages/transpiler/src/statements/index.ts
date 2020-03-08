@@ -7,6 +7,7 @@ export * from "./continue";
 export * from "./data";
 export * from "./delete_internal";
 export * from "./do";
+export * from "./call";
 export * from "./else_if";
 export * from "./else";
 export * from "./end_case";
