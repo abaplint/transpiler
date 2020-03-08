@@ -1,4 +1,5 @@
 import {Issue, Registry, Config, IConfig, Version} from "abaplint";
+import {ITranspilerOptions} from ".";
 
 const config: IConfig = {
   global: {
@@ -23,6 +24,7 @@ const config: IConfig = {
       statics: true,
     },
     parser_error: true,
+    check_syntax: true,
     obsolete_statement: {
       refresh: true,
       compute: true,
@@ -37,7 +39,18 @@ const config: IConfig = {
 
 export class Validation {
 
-  public static run(reg: Registry): Issue[] {
+  private readonly options: ITranspilerOptions | undefined;
+
+  public constructor(options?: ITranspilerOptions) {
+    this.options = options;
+  }
+
+  public run(reg: Registry): Issue[] {
+    if (this.options?.ignoreSyntaxCheck === true) {
+      config.rules["check_syntax"] = false;
+    } else {
+      config.rules["check_syntax"] = true;
+    }
     const conf = new Config(JSON.stringify(config));
     reg.setConfig(conf);
     const issues = reg.findIssues();

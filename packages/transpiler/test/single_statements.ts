@@ -68,12 +68,12 @@ describe("Single statements", () => {
     if (test.skip) {
       it.skip(test.abap, () => {
         UniqueIdentifier.reset();
-        expect(new Transpiler().run(test.abap)).to.equal(test.js);
+        expect(new Transpiler({ignoreSyntaxCheck: true}).run(test.abap)).to.equal(test.js);
       });
     } else {
       it(test.abap, () => {
         UniqueIdentifier.reset();
-        expect(new Transpiler().run(test.abap)).to.equal(test.js);
+        expect(new Transpiler({ignoreSyntaxCheck: true}).run(test.abap)).to.equal(test.js);
       });
     }
   }

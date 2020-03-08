@@ -18,7 +18,7 @@ describe("Multiple lines", () => {
 } else {
 }`;
 
-    expect(new Transpiler().run(abap)).to.equal(expected);
+    expect(new Transpiler({ignoreSyntaxCheck: true}).run(abap)).to.equal(expected);
   });
 
   it("Interfaces should be skipped", () => {
@@ -97,7 +97,7 @@ ENDCASE.`;
   break;
 }`;
 
-    expect(new Transpiler().run(abap)).to.equal(expected);
+    expect(new Transpiler({ignoreSyntaxCheck: true}).run(abap)).to.equal(expected);
   });
 
 });
