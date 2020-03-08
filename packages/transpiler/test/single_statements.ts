@@ -63,6 +63,9 @@ describe("Single statements", () => {
     {abap: "APPEND lv_word TO lt_letters.",           js: "abap.statements.append({source: lv_word, target: lt_letters});",         skip: false},
     {abap: "WRITE |foo{ lines( lt_words ) }bar|.",    js: "abap.statements.write(`foo${abap.builtin.lines(lt_words).get()}bar`);",  skip: false},
     {abap: "ASSERT 'a' < 'b'.",                       js: "abap.statements.assert(abap.compare.lt('a', 'b'));",             skip: false},
+    {abap: "DATA foo TYPE REF TO zcl_words.",         js: "let foo = new abap.types.Object();",         skip: true},
+    {abap: "CREATE OBJECT foo TYPE zcl_words.",       js: "foo.set(new zcl_words());",                  skip: true},
+    {abap: "rs_response-body = 'hello'.",             js: "todo",                                       skip: true},
   ];
 
   for (const test of tests) {
