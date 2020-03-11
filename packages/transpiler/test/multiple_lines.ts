@@ -99,6 +99,7 @@ describe("Multiple lines", () => {
     const expected =
 `class lcl_foobar {
   moo() {
+    let rv_foo = new abap.types.String();
     return rv_foo;
   }
 }`;
@@ -148,7 +149,19 @@ CREATE OBJECT foo.`;
 let foo = new abap.types.ABAPObject();
 foo.set(new zcl_words());`;
 
-    expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.equal(expected);
+    expect(await runSingle(abap)).to.equal(expected);
+  });
+
+  it("Locally defined structure", async () => {
+    const abap = `
+  TYPES: BEGIN OF foo,
+  bar TYPE c,
+END OF foo.
+DATA moo TYPE foo.`;
+
+    const expected = `let moo = new abap.types.Structure();`;
+
+    expect(await runSingle(abap)).to.equal(expected);
   });
 
 });

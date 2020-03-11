@@ -1,33 +1,33 @@
 import * as abaplint from "abaplint";
 import {IStatementTranspiler} from "./_statement_transpiler";
-import {TypeTranspiler, TypeTableTranspiler} from "../expressions";
+import {TranspileTypes} from "../types";
 
 export class DataTranspiler implements IStatementTranspiler {
 
-  public transpile(node: abaplint.Nodes.StatementNode): string {
-    const name = node.findFirstExpression(abaplint.Expressions.NamespaceSimpleName)!.getFirstToken().getStr();
+  public transpile(node: abaplint.Nodes.StatementNode, spaghetti: abaplint.SpaghettiScope, filename: string): string {
+    const token = node.findFirstExpression(abaplint.Expressions.NamespaceSimpleName)!.getFirstToken();
 
-    let type = "todo, type";
-    const typeExpression = node.findFirstExpression(abaplint.Expressions.Type);
-    if (typeExpression) {
-      type = new TypeTranspiler().transpile(typeExpression);
-    } else {
-      const typeTable = node.findFirstExpression(abaplint.Expressions.TypeTable);
-      if (typeTable) {
-        type = new TypeTableTranspiler().transpile(typeTable);
-      }
+    const scope = spaghetti.lookupPosition(token.getStart(), filename);
+    if (scope === undefined) {
+      throw new Error("DataTranspiler, scope not found");
     }
 
+    const found = scope.findVariable(token.getStr());
+    if (found === undefined) {
+      throw new Error("DataTranspiler, var not found");
+    }
+
+// todo, refactor this part to use value from TypedIdentifier
     let value = "";
     const val = node.findFirstExpression(abaplint.Expressions.Value);
     if (val) {
       const int = val.findFirstExpression(abaplint.Expressions.Integer);
       if (int){
-        value = "{value: " + int.getFirstToken().getStr() + "}";
+        value = "\n" + found.getName() + ".set(" + int.getFirstToken().getStr() + ");";
       }
     }
 
-    return "let " + name + " = new " + type + "(" + value + ");";
+    return new TranspileTypes().declare(found) + value;
   }
 
 }

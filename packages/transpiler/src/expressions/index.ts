@@ -16,6 +16,3 @@ export * from "./parameter_s";
 export * from "./source";
 export * from "./string_template";
 export * from "./target";
-export * from "./type_name";
-export * from "./type_table";
-export * from "./type";

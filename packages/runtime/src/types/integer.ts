@@ -3,8 +3,8 @@ import {INumeric} from "./_numeric";
 export class Integer implements INumeric {
   private value: number;
 
-  public constructor(input?: {value?: number}) {
-    this.value = input?.value ? input?.value : 0;
+  public constructor() {
+    this.value = 0;
   }
 
   public set(value: INumeric | number) {
@@ -13,10 +13,11 @@ export class Integer implements INumeric {
     } else {
       this.value = value.get();
     }
+    return this;
   }
 
   public add(value: Integer) {
-    return new Integer({value: value.value + this.value});
+    return new Integer().set(value.value + this.value);
   }
 
   public clear(): void {

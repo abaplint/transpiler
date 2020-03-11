@@ -4,8 +4,8 @@ export class Character implements ICharacter {
   private value: string;
   private readonly length: number;
 
-  public constructor(input?: {value?: string, length?: number}) {
-    this.value = input?.value ? input?.value : "";
+  public constructor(input?: {length?: number}) {
+    this.value = "";
     this.length = input?.length ? input?.length : 1;
   }
 

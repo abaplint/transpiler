@@ -2,7 +2,7 @@ import {expect} from "chai";
 import {Transpiler} from "../packages/transpiler/src/";
 import * as abap from "../packages/runtime/src/";
 
-describe("Full Examples", () => {
+describe("Running Examples", () => {
 
   it("Fibonacci", () => {
     const code = `
@@ -179,4 +179,21 @@ describe("Full Examples", () => {
 
     expect(() => new Transpiler().run(code)).to.throw(/Statement does not exist .*/);
   });
+
+  it.skip("Locally defined structure", () => {
+    const code = `
+    TYPES: BEGIN OF ty_http,
+      headers TYPE ty_headers,
+      body    TYPE string,
+    END OF ty_http.
+    DATA ls_request TYPE ty_http.
+    ASSERT ls_request-body = ''.
+    ls_request-body = 'foo'.
+    ASSERT ls_request-body = 'foo'.`;
+
+    const js = new Transpiler().run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });

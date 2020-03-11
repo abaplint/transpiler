@@ -20,7 +20,7 @@ export class Table  {
 
   public append(item: number | string | INumeric | ICharacter | Table | ABAPObject) {
     if (typeof item === "number") {
-      this.value.push(new Integer({value: item}));
+      this.value.push(new Integer().set(item));
     } else {
       this.value.push(item);
     }

@@ -1,6 +1,7 @@
 import * as abaplint from "abaplint";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {UniqueIdentifier} from "../unique_identifier";
+import {TranspileTypes} from "../types";
 
 export class MethodTranspiler implements IStatementTranspiler {
 
@@ -15,20 +16,21 @@ export class MethodTranspiler implements IStatementTranspiler {
       throw new Error("MethodTranspiler, wrong scope found");
     }
 
+    let after = "";
     const parameterNames: string[] = [];
     for (const v of scope.getData().vars) {
-      if (v.identifier.getMeta() === abaplint.IdentifierMeta.MethodImporting
-          || v.identifier.getMeta() === abaplint.IdentifierMeta.MethodChanging
-          || v.identifier.getMeta() === abaplint.IdentifierMeta.MethodExporting) {
+      if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
+          || v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodChanging)
+          || v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodExporting)) {
         parameterNames.push(v.name);
+      } else if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodReturning)) {
+        after = after + "\n" + new TranspileTypes().declare(v.identifier);
       }
     }
 
-// todo, if the method contains a returning parameter, start by setting it to the initial value
 // todo, actually set all, and only take from input if its supplied? ie. object property exists
 
     let unique = "";
-    let after = "";
     if (parameterNames.length > 0) {
       unique = UniqueIdentifier.get();
       for (const p of parameterNames) {

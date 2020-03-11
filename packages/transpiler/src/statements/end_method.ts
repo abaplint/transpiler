@@ -13,7 +13,7 @@ export class EndMethodTranspiler implements IStatementTranspiler {
 
     let returning: string = "";
     for (const v of scope.getData().vars) {
-      if (v.identifier.getMeta() === abaplint.IdentifierMeta.MethodReturning) {
+      if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodReturning)) {
         returning = "return " + v.name + ";\n";
       }
     }
