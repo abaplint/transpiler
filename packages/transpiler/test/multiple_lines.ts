@@ -159,7 +159,7 @@ foo.set(new zcl_words());`;
 END OF foo.
 DATA moo TYPE foo.`;
 
-    const expected = `let moo = new abap.types.Structure();`;
+    const expected = `let moo = new abap.types.Structure({bar: new abap.types.Character()});`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });

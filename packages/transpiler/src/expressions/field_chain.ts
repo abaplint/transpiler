@@ -19,7 +19,7 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
       } else if (c instanceof Nodes.TokenNode) {
         const str = c.getFirstToken().getStr();
         if (str === "-") {
-          ret = ret + ".";
+          ret = ret + ".get().";
         }
       } else if (c instanceof Nodes.ExpressionNode
           && c.get() instanceof Expressions.FieldOffset) {

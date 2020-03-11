@@ -4,6 +4,12 @@ export class TranspileTypes {
 
   public declare(t: abaplint.TypedIdentifier): string {
     const type = t.getType();
+
+    return "let " + t.getName() + " = " + this.toType(type) + ";";
+
+  }
+
+  private toType(type: abaplint.AbstractType): string {
     let resolved = "typeTodo";
     let extra = "";
 
@@ -17,6 +23,11 @@ export class TranspileTypes {
       resolved = "String";
     } else if (type instanceof abaplint.BasicTypes.StructureType) {
       resolved = "Structure";
+      const list: string[] = [];
+      for (const c of type.getComponents()) {
+        list.push(c.name + ": " + this.toType(c.type));
+      }
+      extra = "{" + list.join(", ") + "}";
     } else if (type instanceof abaplint.BasicTypes.CharacterType) {
       resolved = "Character";
       if (type.getLength() !== 1) {
@@ -25,12 +36,13 @@ export class TranspileTypes {
     } else if (type instanceof abaplint.BasicTypes.PackedType) {
       resolved = "Packed";
     }
+
 /* todo
     case "P":
       return "abap.types.Packed";
 */
-    return "let " + t.getName() + " = new abap.types." + resolved + "(" + extra + ");";
 
+    return "new abap.types." + resolved + "(" + extra + ")";
   }
 
 }

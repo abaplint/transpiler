@@ -180,12 +180,11 @@ describe("Running Examples", () => {
     expect(() => new Transpiler().run(code)).to.throw(/Statement does not exist .*/);
   });
 
-  it.skip("Locally defined structure", () => {
+  it("Locally defined structure", () => {
     const code = `
     TYPES: BEGIN OF ty_http,
-      headers TYPE ty_headers,
-      body    TYPE string,
-    END OF ty_http.
+             body TYPE string,
+           END OF ty_http.
     DATA ls_request TYPE ty_http.
     ASSERT ls_request-body = ''.
     ls_request-body = 'foo'.

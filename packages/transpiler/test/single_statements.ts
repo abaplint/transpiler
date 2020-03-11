@@ -58,13 +58,14 @@ describe("Single statements", () => {
     {abap: "DELETE foo WHERE bar = 2.",               js: "abap.statements.deleteInternal(foo,(i) => {return abap.compare.eq(i.bar, 2);});", skip: false},
     {abap: "* comment",                               js: "// * comment",                              skip: true},
     {abap: "ASSERT foo = bar.",                       js: "abap.statements.assert(abap.compare.eq(foo, bar));",                     skip: false},
-    {abap: "ASSERT sy-subrc = 0.",                    js: "abap.statements.assert(abap.compare.eq(sy.subrc, 0));",                  skip: false},
+    {abap: "ASSERT sy-subrc = 0.",                    js: "abap.statements.assert(abap.compare.eq(sy.get().subrc, 0));",            skip: false},
     {abap: "ASSERT 0 = 1.",                           js: "abap.statements.assert(abap.compare.eq(0, 1));",                         skip: false},
     {abap: "APPEND lv_word TO lt_letters.",           js: "abap.statements.append({source: lv_word, target: lt_letters});",         skip: false},
     {abap: "WRITE |foo{ lines( lt_words ) }bar|.",    js: "abap.statements.write(`foo${abap.builtin.lines(lt_words).get()}bar`);",  skip: false},
-    {abap: "ASSERT 'a' < 'b'.",                       js: "abap.statements.assert(abap.compare.lt('a', 'b'));",             skip: false},
-    {abap: "rs_response-body = 'hello'.",             js: "todo",                                       skip: true},
-    {abap: "TYPES foo TYPE c.",                       js: "",                                           skip: false}, // yes, skip TYPES
+    {abap: "ASSERT 'a' < 'b'.",                       js: "abap.statements.assert(abap.compare.lt('a', 'b'));",   skip: false},
+    {abap: "rs_response-body = 'hello'.",             js: "rs_response.get().body.set('hello');",                 skip: false},
+    {abap: "TYPES foo TYPE c.",                       js: "",                                                     skip: false}, // yes, skip TYPES
+    {abap: "IF ls_request-body = ''.\nENDIF.",        js: "if (abap.compare.eq(ls_request.get().body, '')) {\n}", skip: false},
   ];
 
   for (const test of tests) {
