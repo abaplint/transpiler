@@ -76,7 +76,8 @@ describe("Multiple lines", () => {
     const expected =
 `class lcl_foobar {
   moo(unique1) {
-    let iv_foo = unique1.iv_foo;
+    let iv_foo = new abap.types.String();
+    if (unique1 && unique1.iv_foo) {iv_foo.set(unique1.iv_foo);}
   }
 }`;
 

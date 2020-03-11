@@ -195,4 +195,40 @@ describe("Running Examples", () => {
     f(abap);
   });
 
+  it("LOOP AT pass by value", () => {
+    const code = `
+  data tab type table of i.
+  data val type i.
+  append 2 to tab.
+  loop at tab into val.
+  write / val.
+  val = 1.
+  endloop.
+  loop at tab into val.
+  write / val.
+  endloop.`;
+
+    const js = new Transpiler().run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("2\n2");
+  });
+
+  it("APPEND string", () => {
+    const code = `
+  data tab type standard table of string.
+  data val type string.
+  append |foo| to tab.
+  loop at tab into val.
+  write val.
+  endloop.`;
+
+    const js = new Transpiler().run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("foo");
+  });
+
 });

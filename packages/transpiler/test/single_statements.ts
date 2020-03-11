@@ -32,7 +32,7 @@ describe("Single statements", () => {
     {abap: "DO. ENDDO.",                           js: "for (;;) {\n}",                             skip: true}, // todo, how to set sy-fields ?
     {abap: "DO 5 TIMES. ENDDO.",                   js: "for (let unique1 = 0; unique1 < 5; unique1++) {\n}",         skip: false},
     {abap: "DO foo TIMES.  ENDDO.",                js: "for (let unique1 = 0; unique1 < foo.get(); unique1++) {\n}", skip: false}, // todo, the "i" variable must be unique
-    {abap: "LOOP AT table INTO line. ENDLOOP.",    js: "for (line of table.array()) {\n}",          skip: false},
+    {abap: "LOOP AT table INTO line. ENDLOOP.",    js: "for (let unique1 of table.array()) {\n  line.set(unique1);\n}",          skip: false},
     {abap: "WHILE foo = bar. ENDWHILE.",           js: "while (abap.compare.eq(foo, bar)) {\n}",    skip: false},
     {abap: "foo-bar = 2.",                         js: "foo.bar.set(2);",                           skip: true}, // hmm, will this kind of member access work?
     {abap: "foo(1) = 'a'.",                        js: "foo.set('a', {lenth: 1});",                 skip: true},

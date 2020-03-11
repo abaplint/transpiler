@@ -1,6 +1,7 @@
 import * as abaplint from "abaplint";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {SourceTranspiler, TargetTranspiler} from "../expressions";
+import {UniqueIdentifier} from "../unique_identifier";
 
 export class LoopTranspiler implements IStatementTranspiler {
 
@@ -8,7 +9,9 @@ export class LoopTranspiler implements IStatementTranspiler {
     const source = new SourceTranspiler().transpile(node.findDirectExpression(abaplint.Expressions.Source)!);
     const target = new TargetTranspiler().transpile(node.findDirectExpression(abaplint.Expressions.Target)!);
 
-    return "for (" + target + " of " + source + ".array()) {";
+    const unique = UniqueIdentifier.get();
+    return "for (let " + unique + " of " + source + ".array()) {\n" +
+      target + ".set(" + unique + ");";
   }
 
 }

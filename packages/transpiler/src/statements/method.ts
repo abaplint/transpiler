@@ -17,24 +17,18 @@ export class MethodTranspiler implements IStatementTranspiler {
     }
 
     let after = "";
-    const parameterNames: string[] = [];
+    let unique = "";
     for (const v of scope.getData().vars) {
       if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
           || v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodChanging)
           || v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodExporting)) {
-        parameterNames.push(v.name);
+        if (unique === "") {
+          unique = UniqueIdentifier.get();
+        }
+        after = after + "\n" + new TranspileTypes().declare(v.identifier);
+        after = after + "\nif (" + unique + " && " + unique + "." + v.name + ") {" + v.name + ".set(" + unique + "." + v.name + ");}";
       } else if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodReturning)) {
         after = after + "\n" + new TranspileTypes().declare(v.identifier);
-      }
-    }
-
-// todo, actually set all, and only take from input if its supplied? ie. object property exists
-
-    let unique = "";
-    if (parameterNames.length > 0) {
-      unique = UniqueIdentifier.get();
-      for (const p of parameterNames) {
-        after = after + "\nlet " + p + " = " + unique + "." + p + ";";
       }
     }
 
