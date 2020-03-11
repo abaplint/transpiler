@@ -134,6 +134,18 @@ describe("Running Examples", () => {
     f(abap);
   });
 
+  it.skip("Basic delete ADJACENT DUPLICATES", () => {
+    const code = `
+      DATA table TYPE STANDARD TABLE OF i.
+      APPEND 1 TO table.
+      APPEND 2 TO table.
+      DELETE ADJACENT DUPLICATES FROM table.
+      ASSERT lines( table ) = 2.`;
+    const js = new Transpiler().run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
   it("String compare", () => {
     const code = `
     ASSERT 'a' < 'b'.
