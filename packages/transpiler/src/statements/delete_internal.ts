@@ -7,13 +7,23 @@ export class DeleteInternalTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode): string {
     const target = new TargetTranspiler().transpile(node.findFirstExpression(abaplint.Expressions.Target)!);
 
-    let extra = "";
+    const extra: string[] = [];
     const where = node.findFirstExpression(abaplint.Expressions.ComponentCond);
     if (where) {
-      extra = "," + new ComponentCondTranspiler().transpile(where);
+      extra.push("where: " + new ComponentCondTranspiler().transpile(where));
     }
 
-    return "abap.statements.deleteInternal(" + target + extra + ");";
+// todo, this is not completely correct, fields might have the name ADJACENT
+    if (node.findDirectTokenByText("ADJACENT")) {
+      extra.push("adjacent: true");
+    }
+
+    let concat = "";
+    if (extra.length > 0) {
+      concat = ",{" + extra.join(",") + "}";
+    }
+
+    return "abap.statements.deleteInternal(" + target + concat + ");";
   }
 
 }

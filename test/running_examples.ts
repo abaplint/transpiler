@@ -134,10 +134,23 @@ describe("Running Examples", () => {
     f(abap);
   });
 
-  it.skip("Basic delete ADJACENT DUPLICATES", () => {
+  it("Basic delete ADJACENT DUPLICATES, no deleted", () => {
     const code = `
       DATA table TYPE STANDARD TABLE OF i.
       APPEND 1 TO table.
+      APPEND 2 TO table.
+      DELETE ADJACENT DUPLICATES FROM table.
+      ASSERT lines( table ) = 2.`;
+    const js = new Transpiler().run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("Basic delete ADJACENT DUPLICATES, one deleted", () => {
+    const code = `
+      DATA table TYPE STANDARD TABLE OF i.
+      APPEND 1 TO table.
+      APPEND 2 TO table.
       APPEND 2 TO table.
       DELETE ADJACENT DUPLICATES FROM table.
       ASSERT lines( table ) = 2.`;
