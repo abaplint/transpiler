@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/runtime",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "abaplint, runtime",
   "main": "build/src/index.js",
   "typings": "build/src/index.d.ts",
