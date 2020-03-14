@@ -165,4 +165,26 @@ DATA moo TYPE foo.`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
+  it.skip("Class attribute", async () => {
+    const abap = `
+      CLASS zcl_words DEFINITION.
+        PUBLIC SECTION.
+          DATA bar TYPE i.
+          METHODS: run.
+      ENDCLASS.
+      CLASS zcl_words IMPLEMENTATION.
+        METHOD run.
+          WRITE bar.
+        ENDMETHOD.
+      ENDCLASS.`;
+
+    const expected = `class zcl_words {
+  run() {
+    abap.statements.write(this.bar);
+  }
+}`;
+
+    expect(await runSingle(abap)).to.equal(expected);
+  });
+
 });
