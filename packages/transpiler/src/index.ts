@@ -14,7 +14,8 @@ export interface IOutput {
 }
 
 export interface ITranspilerOptions {
-  ignoreSyntaxCheck: boolean;
+  ignoreSyntaxCheck?: boolean;
+  includeUnitTests?: boolean;
 }
 
 export class Transpiler {

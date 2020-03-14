@@ -256,41 +256,52 @@ describe("Running Examples", () => {
     expect(abap.Console.get()).to.equal("foo");
   });
 
-  it("Class, no compiler errors", () => {
+  it("Class, simple method call", () => {
     const code = `
     CLASS zcl_words DEFINITION.
-    PUBLIC SECTION.
-    TYPES: BEGIN OF ty_header,
-             field TYPE string,
-             value TYPE string,
-           END OF ty_header.
+      PUBLIC SECTION.
+        METHODS
+          run.
+    ENDCLASS.
 
-    TYPES ty_headers TYPE STANDARD TABLE OF ty_header WITH DEFAULT KEY.
+    CLASS zcl_words IMPLEMENTATION.
+      METHOD run.
+        WRITE 'foo'.
+      ENDMETHOD.
+    ENDCLASS.
 
-    TYPES: BEGIN OF ty_http,
-             headers TYPE ty_headers,
-             body    TYPE string,
-           END OF ty_http.
+    DATA foo TYPE REF TO zcl_words.
+    CREATE OBJECT foo.
+    foo->run( ).`;
 
-    METHODS
-      run
-        IMPORTING
-          request     TYPE ty_http OPTIONAL
-        RETURNING
-          VALUE(response) TYPE ty_http
-        RAISING
-          cx_static_check.
-  ENDCLASS.
+    const js = new Transpiler().run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("foo");
+  });
 
-  CLASS zcl_words IMPLEMENTATION.
-    METHOD run.
-      WRITE 'foo'.
-    ENDMETHOD.
-  ENDCLASS.
+  it("Class, call method in same class", () => {
+    const code = `
+    CLASS zcl_words DEFINITION.
+      PUBLIC SECTION.
+        METHODS:
+          run,
+          bar.
+    ENDCLASS.
 
-  DATA foo TYPE REF TO zcl_words.
-  CREATE OBJECT foo.
-  foo->run( ).`;
+    CLASS zcl_words IMPLEMENTATION.
+      METHOD run.
+        bar( ).
+      ENDMETHOD.
+      METHOD bar.
+        WRITE 'foo'.
+      ENDMETHOD.
+    ENDCLASS.
+
+    DATA foo TYPE REF TO zcl_words.
+    CREATE OBJECT foo.
+    foo->run( ).`;
 
     const js = new Transpiler().run(code);
     const f = new Function("abap", js);

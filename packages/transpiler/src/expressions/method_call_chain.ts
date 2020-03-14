@@ -19,6 +19,11 @@ export class MethodCallChainTranspiler implements IExpressionTranspiler {
       }
     }
 
+    if (node.getFirstChild()?.get() instanceof Expressions.MethodCall
+        && !ret.startsWith("abap.builtin.")) {
+      ret = "this." + ret;
+    }
+
     return ret;
   }
 

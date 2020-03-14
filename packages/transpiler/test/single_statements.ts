@@ -45,7 +45,7 @@ describe("Single statements", () => {
     {abap: "WRITE / foo.",                         js: "abap.statements.write(foo, {newLine: true});", skip: false},
     {abap: "CLASS lcl_foo IMPLEMENTATION. ENDCLASS.", js: "class lcl_foo {\n}",                        skip: false}, // note: no code for the CLASS DEFINITION
     {abap: "RETURN.",                                 js: "break;",                                    skip: true}, // todo, hmm?
-    {abap: "method( ).",                              js: "method();",                                 skip: false},
+    {abap: "method( ).",                              js: "this.method();",                            skip: false},
     {abap: "foo->method( ).",                         js: "foo.get().method();",                       skip: false},
     {abap: "foo->method( 1 ).",                       js: "foo.get().method(1);",                      skip: true}, // todo, hmm, need to know the default parameter name?
     {abap: "foo->method( bar = 2 moo = 1 ).",         js: "foo.get().method({bar: 2, moo: 1});",       skip: false},
