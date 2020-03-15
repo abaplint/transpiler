@@ -6,18 +6,23 @@
 
 Proof of concept, things might change
 
-Type information will be required, to be added later, also more work in abaplint needed for this
+Type information will be required, to be added later, also more work in [abaplint](https://github.com/abaplint/abaplint) needed for this
 
-Target is ES6, where JS classes was introduced
+Target is [ES6](http://es6-features.org)
+
+Planned database support: [SQLite](https://www.sqlite.org) & [HANA Express](https://www.sap.com/cmp/td/sap-hana-express-edition.html)
 
 ## Technical
 * Fixed point arithmetic is always enabled
-* Everything will run as unicode, targeting UCS-2
+* Everything will run as unicode, targeting [UCS-2](https://en.wikipedia.org/wiki/Universal_Coded_Character_Set)
 * Endianess ?
+* Time zone = [UTC](https://en.wikipedia.org/wiki/Coordinated_Universal_Time)
+* sysid = "ABC"
+* client = "123"
 
 ## Running
 
-Prerequsites: Node.js 10+
+Prerequsites: [Node.js](https://nodejs.org/) 10+
 
 `npm install`
 

@@ -1,10 +1,11 @@
 import {Nodes, Tokens, Expressions} from "abaplint";
+import * as abaplint from "abaplint";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {SourceTranspiler} from ".";
 
 export class StringTemplateTranspiler implements IExpressionTranspiler {
 
-  public transpile(node: Nodes.ExpressionNode): string {
+  public transpile(node: Nodes.ExpressionNode, spaghetti: abaplint.SpaghettiScope, filename: string): string {
 
     let ret = "";
 
@@ -22,7 +23,7 @@ export class StringTemplateTranspiler implements IExpressionTranspiler {
           ret = ret + "}" + original + "`";
         }
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.Source) {
-        ret = ret + new SourceTranspiler(true).transpile(c);
+        ret = ret + new SourceTranspiler(true).transpile(c, spaghetti, filename);
       }
     }
 

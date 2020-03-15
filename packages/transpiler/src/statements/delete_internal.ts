@@ -4,13 +4,13 @@ import {TargetTranspiler, ComponentCondTranspiler} from "../expressions";
 
 export class DeleteInternalTranspiler implements IStatementTranspiler {
 
-  public transpile(node: abaplint.Nodes.StatementNode): string {
+  public transpile(node: abaplint.Nodes.StatementNode, spaghetti: abaplint.SpaghettiScope, filename: string): string {
     const target = new TargetTranspiler().transpile(node.findFirstExpression(abaplint.Expressions.Target)!);
 
     const extra: string[] = [];
     const where = node.findFirstExpression(abaplint.Expressions.ComponentCond);
     if (where) {
-      extra.push("where: " + new ComponentCondTranspiler().transpile(where));
+      extra.push("where: " + new ComponentCondTranspiler().transpile(where, spaghetti, filename));
     }
 
 // todo, this is not completely correct, fields might have the name ADJACENT

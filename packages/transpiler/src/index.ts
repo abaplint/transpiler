@@ -1,7 +1,7 @@
-import {Nodes, MemoryFile, Registry, Structures, ABAPObject, SyntaxLogic, SpaghettiScope} from "abaplint";
+import {MemoryFile, Registry, ABAPObject, SyntaxLogic} from "abaplint";
 import {Validation} from "./validation";
-import * as StatementTranspilers from "./statements";
 import {Indentation} from "./indentation";
+import {Traversal} from "./traversal";
 
 export interface IFile {
   filename: string,
@@ -58,7 +58,7 @@ export class Transpiler {
     const spaghetti = new SyntaxLogic(reg, obj).run().spaghetti;
 
     for (const f of obj.getABAPFiles()) {
-      let contents = this.traverseStructure(f.getStructure()!, spaghetti, f.getFilename());
+      let contents = new Traversal(spaghetti, f.getFilename()).traverse(f.getStructure());
 
       if (contents.endsWith("\n")) {
         contents = contents.substring(0, contents.length - 1);
@@ -80,39 +80,6 @@ export class Transpiler {
       const messages = issues.map(i => i.getMessage());
       throw new Error(messages.join("\n"));
     }
-  }
-
-  protected traverseStructure(node: Nodes.StructureNode, spaghetti: SpaghettiScope, filename: string): string {
-    let ret = "";
-    for (const c of node.getChildren()) {
-      if (c instanceof Nodes.StructureNode) {
-        if (c.get() instanceof Structures.Interface
-            || c.get() instanceof Structures.Types
-            || c.get() instanceof Structures.ClassDefinition) {
-          continue;
-        }
-        ret = ret + this.traverseStructure(c, spaghetti, filename);
-        if (c.get() instanceof Structures.When) {
-          ret = ret + "break;\n";
-        }
-      } else if (c instanceof Nodes.StatementNode) {
-        ret = ret + this.traverseStatement(c, spaghetti, filename) + "\n";
-      } else {
-        throw new Error("traverseStructure, unexpected node type");
-      }
-    }
-    return ret;
-  }
-
-  protected traverseStatement(node: Nodes.StatementNode, spaghetti: SpaghettiScope, filename: string): string {
-    const list: any = StatementTranspilers;
-    for (const key in list) {
-      const transpiler = new list[key]();
-      if (node.get().constructor.name + "Transpiler" === transpiler.constructor.name) {
-        return transpiler.transpile(node, spaghetti, filename);
-      }
-    }
-    throw new Error(`Statement ${node.get().constructor.name} not supported`);
   }
 
 }

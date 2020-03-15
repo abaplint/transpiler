@@ -5,8 +5,8 @@ import {UniqueIdentifier} from "../unique_identifier";
 
 export class LoopTranspiler implements IStatementTranspiler {
 
-  public transpile(node: abaplint.Nodes.StatementNode): string {
-    const source = new SourceTranspiler().transpile(node.findDirectExpression(abaplint.Expressions.Source)!);
+  public transpile(node: abaplint.Nodes.StatementNode, spaghetti: abaplint.SpaghettiScope, filename: string): string {
+    const source = new SourceTranspiler().transpile(node.findDirectExpression(abaplint.Expressions.Source)!, spaghetti, filename);
     const target = new TargetTranspiler().transpile(node.findDirectExpression(abaplint.Expressions.Target)!);
 
     const unique = UniqueIdentifier.get();

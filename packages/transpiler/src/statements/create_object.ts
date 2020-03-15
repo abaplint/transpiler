@@ -20,9 +20,8 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
 
 // todo, handle constructor parameters
 
-    // todo, expose more types in abaplint?
-    // @ts-ignore
-    return target + ".set(new " + found.getType().name + "());";
+    const obj = found.getType() as abaplint.BasicTypes.ObjectReferenceType;
+    return target + ".set(new " + obj.getName() + "());";
   }
 
 }

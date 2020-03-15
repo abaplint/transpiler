@@ -179,6 +179,9 @@ DATA moo TYPE foo.`;
       ENDCLASS.`;
 
     const expected = `class zcl_words {
+  construtor() {
+    this.bar = new abap.types.Integer();
+  }
   run() {
     abap.statements.write(this.bar);
   }
