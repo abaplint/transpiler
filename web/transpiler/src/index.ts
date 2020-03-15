@@ -2,7 +2,6 @@ import * as monaco from "monaco-editor";
 import "./index.css";
 import {Transpiler} from "@abaplint/transpiler";
 import * as abap from "@abaplint/runtime";
-import * as pako from "pako";
 
 // @ts-ignore
 self.MonacoEnvironment = {
@@ -72,10 +71,10 @@ function setUrl() {
 }
 */
 
-function abapChanged() {
+async function abapChanged() {
   try {
-    const js = new Transpiler().run(editor1.getValue());
-    editor2.setValue(js);
+    const res = await new Transpiler().run([{filename: "zfoobar.prog.abap", contents: editor1.getValue()}]);
+    editor2.setValue(res.js[0]?.contents);
   } catch (error) {
     editor2.setValue("");
     editor3.setValue(error.message);
