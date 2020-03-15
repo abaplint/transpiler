@@ -190,7 +190,7 @@ DATA moo TYPE foo.`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
-  it.skip("Class constructor", async () => {
+  it("Class constructor", async () => {
     const abap = `
       CLASS zcl_words DEFINITION.
         PUBLIC SECTION.

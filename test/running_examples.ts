@@ -335,7 +335,7 @@ describe("Running Examples", () => {
     expect(abap.Console.get()).to.equal("0");
   });
 
-  it.skip("Class, constructor", () => {
+  it("Class, constructor", () => {
     const code = `
     CLASS zcl_words DEFINITION.
       PUBLIC SECTION.

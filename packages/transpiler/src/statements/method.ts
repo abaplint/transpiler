@@ -18,6 +18,11 @@ export class MethodTranspiler implements IStatementTranspiler {
     }
 
     let after = "";
+
+    if (name.toUpperCase() === "CONSTRUCTOR") {
+      after = traversal.buildConstructorContents(scope.getParent());
+    }
+
     let unique = "";
     for (const v of scope.getData().vars) {
       if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
@@ -26,11 +31,16 @@ export class MethodTranspiler implements IStatementTranspiler {
         if (unique === "") {
           unique = UniqueIdentifier.get();
         }
-        after = after + "\n" + new TranspileTypes().declare(v.identifier);
-        after = after + "\nif (" + unique + " && " + unique + "." + v.name + ") {" + v.name + ".set(" + unique + "." + v.name + ");}";
+        after = after + new TranspileTypes().declare(v.identifier) + "\n";
+        after = after + "if (" + unique + " && " + unique + "." + v.name + ") {" + v.name + ".set(" + unique + "." + v.name + ");}\n";
       } else if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodReturning)) {
-        after = after + "\n" + new TranspileTypes().declare(v.identifier);
+        after = after + new TranspileTypes().declare(v.identifier) + "\n";
       }
+    }
+
+    if (after.length > 0) { // argh
+      after = "\n" + after;
+      after = after.substring(0, after.length - 1);
     }
 
     return name + "(" + unique + ") {" + after;

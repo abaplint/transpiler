@@ -1,7 +1,6 @@
 import * as abaplint from "abaplint";
 import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
-import {TranspileTypes} from "../types";
 
 export class ClassImplementationTranspiler implements IStructureTranspiler {
 
@@ -32,6 +31,15 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
 
   private buildConstructor(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
     const scope = traversal.getSpaghetti().lookupPosition(node.getFirstToken().getStart(), traversal.getFilename());
+
+    const ret = traversal.buildConstructorContents(scope);
+    if (ret === "") {
+      return ret;
+    }
+
+    return "constructor() {\n" + ret + "}\n";
+
+    /*
     const vars = scope?.getData().vars;
     if (vars === undefined || vars.length === 0) {
       return "";
@@ -41,6 +49,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
       ret = ret + "this." + v.name + " = " + new TranspileTypes().toType(v.identifier.getType()) + ";\n";
     }
     return ret + "}\n";
+    */
   }
 
 }

@@ -5,6 +5,8 @@ import * as StructureTranspilers from "./structures";
 import {IStatementTranspiler} from "./statements/_statement_transpiler";
 import {IExpressionTranspiler} from "./expressions/_expression_transpiler";
 import {IStructureTranspiler} from "./structures/_structure_transpiler";
+import {SpaghettiScopeNode} from "abaplint/build/src/abap/syntax/spaghetti_scope";
+import {TranspileTypes} from "./types";
 // import {Token} from "abaplint/build/src/abap/tokens/_token"; // todo, bad import
 
 export class Traversal {
@@ -48,6 +50,18 @@ export class Traversal {
       return true;
     }
     return false;
+  }
+
+  public buildConstructorContents(scope: SpaghettiScopeNode | undefined): string {
+    const vars = scope?.getData().vars;
+    if (vars === undefined || vars.length === 0) {
+      return "";
+    }
+    let ret = "";
+    for (const v of vars) {
+      ret = ret + "this." + v.name + " = " + new TranspileTypes().toType(v.identifier.getType()) + ";\n";
+    }
+    return ret;
   }
 
   protected traverseStructure(node: Nodes.StructureNode): string {
