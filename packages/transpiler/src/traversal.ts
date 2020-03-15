@@ -1,6 +1,7 @@
 import {Nodes, Structures, SpaghettiScope, INode} from "abaplint";
 import * as StatementTranspilers from "./statements";
-// import {ClassImplementationTranspiler} from "./structures/";
+import {ClassImplementationTranspiler} from "./structures/";
+import {IStatementTranspiler} from "./statements/_statement_transpiler";
 
 export class Traversal {
   private readonly spaghetti: SpaghettiScope;
@@ -21,6 +22,14 @@ export class Traversal {
     }
   }
 
+  public getFilename(): string {
+    return this.filename;
+  }
+
+  public getSpaghetti(): SpaghettiScope {
+    return this.spaghetti;
+  }
+
   protected traverseStructure(node: Nodes.StructureNode): string {
     let ret = "";
 // todo, refactor
@@ -31,11 +40,9 @@ export class Traversal {
             || g instanceof Structures.Types
             || g instanceof Structures.ClassDefinition) {
           continue;
-          /*
         } else if (g instanceof Structures.ClassImplementation) {
-          ret = ret + new ClassImplementationTranspiler();
+          ret = ret + new ClassImplementationTranspiler().transpile(c, this);
           continue;
-          */
         }
 
         ret = ret + this.traverseStructure(c);
@@ -43,7 +50,7 @@ export class Traversal {
           ret = ret + "break;\n";
         }
       } else if (c instanceof Nodes.StatementNode) {
-        ret = ret + this.traverseStatement(c) + "\n";
+        ret = ret + this.traverseStatement(c);
       } else {
         throw new Error("traverseStructure, unexpected node type");
       }
@@ -54,9 +61,9 @@ export class Traversal {
   protected traverseStatement(node: Nodes.StatementNode): string {
     const list: any = StatementTranspilers;
     for (const key in list) {
-      const transpiler = new list[key]();
-      if (node.get().constructor.name + "Transpiler" === transpiler.constructor.name) {
-        return transpiler.transpile(node, this.spaghetti, this.filename);
+      if (node.get().constructor.name + "Transpiler" === key) {
+        const transpiler = new list[key]() as IStatementTranspiler;
+        return transpiler.transpile(node, this.spaghetti, this.filename) + "\n";
       }
     }
     throw new Error(`Statement ${node.get().constructor.name} not supported`);

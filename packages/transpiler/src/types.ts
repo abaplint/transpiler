@@ -4,12 +4,10 @@ export class TranspileTypes {
 
   public declare(t: abaplint.TypedIdentifier): string {
     const type = t.getType();
-
     return "let " + t.getName() + " = " + this.toType(type) + ";";
-
   }
 
-  private toType(type: abaplint.AbstractType): string {
+  public toType(type: abaplint.AbstractType): string {
     let resolved = "typeTodo";
     let extra = "";
 

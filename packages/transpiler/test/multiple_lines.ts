@@ -165,7 +165,7 @@ DATA moo TYPE foo.`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
-  it.skip("Class attribute", async () => {
+  it("Class attribute", async () => {
     const abap = `
       CLASS zcl_words DEFINITION.
         PUBLIC SECTION.
@@ -179,7 +179,7 @@ DATA moo TYPE foo.`;
       ENDCLASS.`;
 
     const expected = `class zcl_words {
-  construtor() {
+  constructor() {
     this.bar = new abap.types.Integer();
   }
   run() {

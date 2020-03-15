@@ -310,7 +310,7 @@ describe("Running Examples", () => {
     expect(abap.Console.get()).to.equal("foo");
   });
 
-  it.skip("Class, attribute", () => {
+  it("Class, attribute", () => {
     const code = `
     CLASS zcl_words DEFINITION.
       PUBLIC SECTION.
