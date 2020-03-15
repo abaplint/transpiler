@@ -1,16 +1,26 @@
 import {expect} from "chai";
-import {Transpiler} from "../src";
+import {runSingle} from "./_utils";
 
-describe("Validation", async () => {
-  it("Unknown variable, throws error", () => {
+describe("Validation", () => {
+  it("Unknown variable, throws error", async () => {
     const abap = `WRITE foowrite.`;
 
-    expect(() => new Transpiler().run(abap)).to.throw("not found");
+    try {
+      await runSingle(abap);
+      expect.fail();
+    } catch (e) {
+      expect(e.message).to.contain("not found");
+    }
   });
 
-  it("Unknown type, throws error", () => {
+  it("Unknown type, throws error", async () => {
     const abap = `DATA foo TYPE sdfsd.`;
 
-    expect(() => new Transpiler().run(abap)).to.throw("not found");
+    try {
+      await runSingle(abap);
+      expect.fail();
+    } catch (e) {
+      expect(e.message).to.contain("not found");
+    }
   });
 });

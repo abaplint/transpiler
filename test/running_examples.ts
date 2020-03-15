@@ -2,9 +2,14 @@ import {expect} from "chai";
 import {Transpiler} from "../packages/transpiler/src/";
 import * as abap from "../packages/runtime/src/";
 
+async function run(abap: string) {
+  const res = await new Transpiler().run([{filename: "zfoobar.prog.abap", contents: abap}]);
+  return res.js[0].contents;
+}
+
 describe("Running Examples", () => {
 
-  it("Fibonacci", () => {
+  it("Fibonacci", async () => {
     const code = `
     DATA: lv_old     TYPE i VALUE 1,
           lv_current TYPE i VALUE 2,
@@ -16,12 +21,12 @@ describe("Running Examples", () => {
       lv_current = lv_next.
     ENDDO.`;
 
-    const js = new Transpiler().run(code) + "\nreturn lv_current.get();";
+    const js = await run(code) + "\nreturn lv_current.get();";
     const f = new Function("abap", js);
     expect(f(abap)).to.equal(89);
   });
 
-  it("Simple IF", () => {
+  it("Simple IF", async () => {
     const code = `
     DATA: foo TYPE i VALUE 1,
           bar TYPE i VALUE 1.
@@ -30,12 +35,12 @@ describe("Running Examples", () => {
       foo = 2.
     ENDIF.`;
 
-    const js = new Transpiler().run(code) + "\nreturn foo.get();";
+    const js = await run(code) + "\nreturn foo.get();";
     const f = new Function("abap", js);
     expect(f(abap)).to.equal(2);
   });
 
-  it.skip("Character field semantics", () => {
+  it.skip("Character field semantics", async () => {
     const code = `
     DATA: foo TYPE c.
     foo = 'abc'.
@@ -56,12 +61,12 @@ describe("Running Examples", () => {
     ASSERT foo = '0'.
     ASSERT foo = 0.`;
 
-    const js = new Transpiler().run(code);
+    const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
   });
 
-  it("Character field semantics", () => {
+  it("Character field semantics", async () => {
     const code = `
     DATA lv_str TYPE string.
     DATA lt_table TYPE STANDARD TABLE OF string.
@@ -69,12 +74,12 @@ describe("Running Examples", () => {
     SPLIT lv_str AT | | INTO TABLE lt_table.
     ASSERT lines( lt_table ) = 2.`;
 
-    const js = new Transpiler().run(code);
+    const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
   });
 
-  it("ASSERTs, left hand and right hand, none should fail", () => {
+  it("ASSERTs, left hand and right hand, none should fail", async () => {
     const code = `
       ASSERT 1 = 1.
       ASSERT 1 = '1'.
@@ -84,69 +89,69 @@ describe("Running Examples", () => {
       ASSERT |1| = 1.
       ASSERT \`1\` = 1.`;
 
-    const js = new Transpiler().run(code);
+    const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
   });
 
-  it("Console tracks output", () => {
+  it("Console tracks output", async () => {
     const code = `WRITE 'foo'.`;
-    const js = new Transpiler().run(code);
+    const js = await run(code);
     const f = new Function("abap", js);
     abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("foo");
   });
 
-  it("Offset +1", () => {
+  it("Offset +1", async () => {
     const code = `
       DATA: bar TYPE string.
       bar = 'abc'.
       WRITE bar+1.`;
-    const js = new Transpiler().run(code);
+    const js = await run(code);
     const f = new Function("abap", js);
     abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("bc");
   });
 
-  it("Length (1)", () => {
+  it("Length (1)", async () => {
     const code = `
       DATA: bar TYPE string.
       bar = 'abc'.
       WRITE bar(1).`;
-    const js = new Transpiler().run(code);
+    const js = await run(code);
     const f = new Function("abap", js);
     abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("a");
   });
 
-  it("Basic delete internal", () => {
+  it("Basic delete internal", async () => {
     const code = `
       DATA table TYPE STANDARD TABLE OF i.
       APPEND 1 TO table.
       APPEND 2 TO table.
       DELETE table WHERE table_line = 1.
       ASSERT lines( table ) = 1.`;
-    const js = new Transpiler().run(code);
+    const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
   });
 
-  it("Basic delete ADJACENT DUPLICATES, no deleted", () => {
+  it("Basic delete ADJACENT DUPLICATES, no deleted", async () => {
     const code = `
       DATA table TYPE STANDARD TABLE OF i.
       APPEND 1 TO table.
       APPEND 2 TO table.
       DELETE ADJACENT DUPLICATES FROM table.
       ASSERT lines( table ) = 2.`;
-    const js = new Transpiler().run(code);
+    const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
   });
 
-  it("Basic delete ADJACENT DUPLICATES, one deleted", () => {
+  it("Basic delete ADJACENT DUPLICATES, one deleted", async () => {
     const code = `
       DATA table TYPE STANDARD TABLE OF i.
       APPEND 1 TO table.
@@ -154,12 +159,12 @@ describe("Running Examples", () => {
       APPEND 2 TO table.
       DELETE ADJACENT DUPLICATES FROM table.
       ASSERT lines( table ) = 2.`;
-    const js = new Transpiler().run(code);
+    const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
   });
 
-  it("String compare", () => {
+  it("String compare", async () => {
     const code = `
     ASSERT 'a' < 'b'.
     ASSERT 'A' < 'b'.
@@ -169,12 +174,12 @@ describe("Running Examples", () => {
     ASSERT 1 < '2'.
     ASSERT 1 <= '1'.`;
 
-    const js = new Transpiler().run(code);
+    const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
   });
 
-  it("Basic sort table", () => {
+  it("Basic sort table", async () => {
     const code = `
     DATA: table TYPE STANDARD TABLE OF i,
           int   TYPE i.
@@ -185,27 +190,38 @@ describe("Running Examples", () => {
       WRITE / int.
     ENDLOOP.`;
 
-    const js = new Transpiler().run(code);
+    const js = await run(code);
     const f = new Function("abap", js);
     abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("1\n2");
   });
 
-  it("Should throw an error if invalid code is requested to be transpiled", () => {
+  it("Should throw an error if invalid code is requested to be transpiled", async () => {
     const code = `THIS IS NOT ABAP.`;
-    expect(() => new Transpiler().run(code)).to.throw(/Statement does not exist .*/);
+
+    try {
+      await run(code);
+      expect.fail();
+    } catch (e) {
+      expect(e.message).to.contain("Statement does not exist");
+    }
   });
 
-  it("Should throw an error if language features are not supported yet", () => {
+  it("Should throw an error if language features are not supported yet", async () => {
     const code = `
     DATA: table TYPE STANDARD TABLE OF i.
     DELETE ADJACENT DUPLICATES FROM table COMPARING FIELDS table_line`;
 
-    expect(() => new Transpiler().run(code)).to.throw(/Statement does not exist .*/);
+    try {
+      await run(code);
+      expect.fail();
+    } catch (e) {
+      expect(e.message).to.contain("Statement does not exist");
+    }
   });
 
-  it("Locally defined structure", () => {
+  it("Locally defined structure", async () => {
     const code = `
     TYPES: BEGIN OF ty_http,
              body TYPE string,
@@ -215,12 +231,12 @@ describe("Running Examples", () => {
     ls_request-body = 'foo'.
     ASSERT ls_request-body = 'foo'.`;
 
-    const js = new Transpiler().run(code);
+    const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
   });
 
-  it("LOOP AT pass by value", () => {
+  it("LOOP AT pass by value", async () => {
     const code = `
   data tab type table of i.
   data val type i.
@@ -233,14 +249,14 @@ describe("Running Examples", () => {
   write / val.
   endloop.`;
 
-    const js = new Transpiler().run(code);
+    const js = await run(code);
     const f = new Function("abap", js);
     abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("2\n2");
   });
 
-  it("APPEND string", () => {
+  it("APPEND string", async () => {
     const code = `
   data tab type standard table of string.
   data val type string.
@@ -249,14 +265,14 @@ describe("Running Examples", () => {
   write val.
   endloop.`;
 
-    const js = new Transpiler().run(code);
+    const js = await run(code);
     const f = new Function("abap", js);
     abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("foo");
   });
 
-  it("Class, simple method call", () => {
+  it("Class, simple method call", async () => {
     const code = `
     CLASS zcl_words DEFINITION.
       PUBLIC SECTION.
@@ -274,14 +290,14 @@ describe("Running Examples", () => {
     CREATE OBJECT foo.
     foo->run( ).`;
 
-    const js = new Transpiler().run(code);
+    const js = await run(code);
     const f = new Function("abap", js);
     abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("foo");
   });
 
-  it("Class, call method in same class", () => {
+  it("Class, call method in same class", async () => {
     const code = `
     CLASS zcl_words DEFINITION.
       PUBLIC SECTION.
@@ -303,14 +319,14 @@ describe("Running Examples", () => {
     CREATE OBJECT foo.
     foo->run( ).`;
 
-    const js = new Transpiler().run(code);
+    const js = await run(code);
     const f = new Function("abap", js);
     abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("foo");
   });
 
-  it("Class, attribute", () => {
+  it("Class, attribute", async () => {
     const code = `
     CLASS zcl_words DEFINITION.
       PUBLIC SECTION.
@@ -328,14 +344,14 @@ describe("Running Examples", () => {
     CREATE OBJECT foo.
     foo->run( ).`;
 
-    const js = new Transpiler().run(code);
+    const js = await run(code);
     const f = new Function("abap", js);
     abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("0");
   });
 
-  it("Class, constructor", () => {
+  it("Class, constructor", async () => {
     const code = `
     CLASS zcl_words DEFINITION.
       PUBLIC SECTION.
@@ -353,7 +369,7 @@ describe("Running Examples", () => {
     DATA foo TYPE REF TO zcl_words.
     CREATE OBJECT foo.`;
 
-    const js = new Transpiler().run(code);
+    const js = await run(code);
     const f = new Function("abap", js);
     abap.Console.clear();
     f(abap);

@@ -25,7 +25,7 @@ export class Transpiler {
     this.options = options;
   }
 
-  public async runMulti(files: IFile[]): Promise<IOutput> {
+  public async run(files: IFile[]): Promise<IOutput> {
     const memory = files.map(f => new MemoryFile(f.filename, f.contents));
     const reg = new Registry().addFiles(memory);
     this.validate(reg);
@@ -37,17 +37,6 @@ export class Transpiler {
       output.maps = output.maps.concat(res.maps);
     }
     return output;
-  }
-
-// todo, deprecate/remove this method
-  public run(code: string): string {
-    const reg = new Registry().addFile(new MemoryFile("zfoobar.prog.abap", code));
-
-    this.validate(reg);
-
-    const res = this.runObject(reg.getABAPObjects()[0], reg).js[0]?.contents;
-
-    return res ? res : "";
   }
 
 // ///////////////////////////////

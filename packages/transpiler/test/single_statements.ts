@@ -1,6 +1,6 @@
 import {expect} from "chai";
-import {Transpiler} from "../src";
 import {UniqueIdentifier} from "../src/unique_identifier";
+import {runSingle} from "./_utils";
 
 describe("Single statements", () => {
   const tests = [
@@ -65,20 +65,19 @@ describe("Single statements", () => {
     {abap: "WRITE |foo{ lines( lt_words ) }bar|.",    js: "abap.statements.write(`foo${abap.builtin.lines(lt_words).get()}bar`);",  skip: false},
     {abap: "ASSERT 'a' < 'b'.",                       js: "abap.statements.assert(abap.compare.lt('a', 'b'));",   skip: false},
     {abap: "rs_response-body = 'hello'.",             js: "rs_response.get().body.set('hello');",                 skip: false},
-    {abap: "TYPES foo TYPE c.",                       js: "",                                                     skip: false}, // yes, skip TYPES
+    {abap: "TYPES foo TYPE c.",                       js: undefined,                                              skip: false}, // yes, skip TYPES
     {abap: "IF ls_request-body = ''.\nENDIF.",        js: "if (abap.compare.eq(ls_request.get().body, '')) {\n}", skip: false},
   ];
 
   for (const test of tests) {
     if (test.skip) {
-      it.skip(test.abap, () => {
-        UniqueIdentifier.reset();
-        expect(new Transpiler({ignoreSyntaxCheck: true}).run(test.abap)).to.equal(test.js);
+      it.skip(test.abap, async () => {
+        return;
       });
     } else {
-      it(test.abap, () => {
+      it(test.abap, async () => {
         UniqueIdentifier.reset();
-        expect(new Transpiler({ignoreSyntaxCheck: true}).run(test.abap)).to.equal(test.js);
+        expect(await runSingle(test.abap, {ignoreSyntaxCheck: true})).to.equal(test.js);
       });
     }
   }
