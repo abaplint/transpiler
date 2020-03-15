@@ -5,3 +5,4 @@ export * from "./delete_internal";
 export * from "./sort";
 export * from "./split";
 export * from "./write";
+export * from "./concatenate";

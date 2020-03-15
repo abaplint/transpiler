@@ -376,4 +376,14 @@ describe("Running Examples", () => {
     expect(abap.Console.get()).to.equal("2");
   });
 
+  it("Basic CONCATENATE", async () => {
+    const code = `
+      DATA target TYPE string.
+      CONCATENATE 'foo' 'bar' INTO target.
+      ASSERT target = 'foobar'.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });

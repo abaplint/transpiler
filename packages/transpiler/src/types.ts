@@ -8,7 +8,7 @@ export class TranspileTypes {
   }
 
   public toType(type: abaplint.AbstractType): string {
-    let resolved = "typeTodo";
+    let resolved = "";
     let extra = "";
 
     if (type instanceof abaplint.BasicTypes.ObjectReferenceType) {
@@ -33,12 +33,16 @@ export class TranspileTypes {
       }
     } else if (type instanceof abaplint.BasicTypes.PackedType) {
       resolved = "Packed";
+    } else if (type instanceof abaplint.BasicTypes.XStringType) {
+      resolved = "XString";
+    } else if (type instanceof abaplint.BasicTypes.HexType) {
+      resolved = "Hex";
+      if (type.getLength() !== 1) {
+        extra = "{length: " + type.getLength() + "}";
+      }
+    } else {
+      resolved = "typeTodo";
     }
-
-/* todo
-    case "P":
-      return "abap.types.Packed";
-*/
 
     return "new abap.types." + resolved + "(" + extra + ")";
   }

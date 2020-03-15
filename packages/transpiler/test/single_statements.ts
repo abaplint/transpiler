@@ -26,7 +26,7 @@ describe("Single statements", () => {
     {abap: "foo = bar+1.",                         js: "foo.set(bar.get({offset: 1}));",            skip: false},
     {abap: "foo = bar(1).",                        js: "foo.set(bar.get({length: 1}));",            skip: false},
     {abap: "foo = bar+1(1).",                      js: "foo.set(bar.get({offset: 1, length: 1}));", skip: false},
-    {abap: "IF foo IS INITIAL. ENDIF.",            js: "if (foo.initial()) {\n}",                   skip: true},
+    {abap: "IF foo IS INITIAL. ENDIF.",            js: "if (abap.compare.initial(foo)) {\n}",       skip: false},
     {abap: "IF foo IS NOT INITIAL. ENDIF.",        js: "if (!foo.initial()) {\n}",                  skip: true},
     {abap: "IF NOT foo IS INITIAL. ENDIF.",        js: "if (!foo.initial()) {\n}",                  skip: true},
     {abap: "DO. ENDDO.",                           js: "for (;;) {\n}",                             skip: true}, // todo, how to set sy-fields ?
@@ -67,6 +67,8 @@ describe("Single statements", () => {
     {abap: "rs_response-body = 'hello'.",             js: "rs_response.get().body.set('hello');",                 skip: false},
     {abap: "TYPES foo TYPE c.",                       js: undefined,                                              skip: false}, // yes, skip TYPES
     {abap: "IF ls_request-body = ''.\nENDIF.",        js: "if (abap.compare.eq(ls_request.get().body, '')) {\n}", skip: false},
+    {abap: "CONCATENATE 'foo' 'bar' INTO target.",    js: "abap.statements.concatenate({source: ['foo','bar'], target: target});", skip: false},
+    {abap: "zcl_bar=>static( ).",                     js: "zcl_bar.static();",        skip: false},
   ];
 
   for (const test of tests) {

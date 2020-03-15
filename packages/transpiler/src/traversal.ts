@@ -1,4 +1,4 @@
-import {Nodes, SpaghettiScope, INode, ScopeType} from "abaplint";
+import {Nodes, SpaghettiScope, INode, ScopeType, Token} from "abaplint";
 import * as StatementTranspilers from "./statements";
 import * as ExpressionTranspilers from "./expressions";
 import * as StructureTranspilers from "./structures";
@@ -7,7 +7,6 @@ import {IExpressionTranspiler} from "./expressions/_expression_transpiler";
 import {IStructureTranspiler} from "./structures/_structure_transpiler";
 import {SpaghettiScopeNode} from "abaplint/build/src/abap/syntax/spaghetti_scope";
 import {TranspileTypes} from "./types";
-// import {Token} from "abaplint/build/src/abap/tokens/_token"; // todo, bad import
 
 export class Traversal {
   private readonly spaghetti: SpaghettiScope;
@@ -38,7 +37,7 @@ export class Traversal {
     return this.spaghetti;
   }
 
-  public isClassAttribute(token: any): boolean {
+  public isClassAttribute(token: Token): boolean {
     const scope = this.spaghetti.lookupPosition(token.getStart(), this.filename);
     if (scope === undefined) {
       throw new Error("isClassAttribute, unable to lookup position");

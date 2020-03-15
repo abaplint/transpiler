@@ -7,7 +7,7 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): string {
 
     let ret = node.findDirectExpression(Expressions.MethodName)!.getFirstToken().getStr();
-    if (ret === "lines") { // todo, this is wrong
+    if (ret === "lines" || ret === "strlen" || ret === "xstrlen") { // todo, this is wrong
       ret = "abap.builtin." + ret + "(";
     } else {
       ret = ret + "(";

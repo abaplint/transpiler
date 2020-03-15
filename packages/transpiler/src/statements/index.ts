@@ -9,6 +9,7 @@ export * from "./delete_internal";
 export * from "./do";
 export * from "./type";
 export * from "./create_object";
+export * from "./concatenate";
 export * from "./call";
 export * from "./else_if";
 export * from "./else";
