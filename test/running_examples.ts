@@ -335,4 +335,29 @@ describe("Running Examples", () => {
     expect(abap.Console.get()).to.equal("0");
   });
 
+  it.skip("Class, constructor", () => {
+    const code = `
+    CLASS zcl_words DEFINITION.
+      PUBLIC SECTION.
+        DATA bar TYPE i.
+        METHODS: constructor.
+    ENDCLASS.
+
+    CLASS zcl_words IMPLEMENTATION.
+      METHOD constructor.
+        bar = 2.
+        WRITE bar.
+      ENDMETHOD.
+    ENDCLASS.
+
+    DATA foo TYPE REF TO zcl_words.
+    CREATE OBJECT foo.`;
+
+    const js = new Transpiler().run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("2");
+  });
+
 });

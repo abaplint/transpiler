@@ -1,7 +1,7 @@
 import {Expressions, Nodes} from "abaplint";
-import * as abaplint from "abaplint";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {FieldChainTranspiler, ArithOperatorTranspiler, ConstantTranspiler, MethodCallChainTranspiler, StringTemplateTranspiler} from ".";
+import {Traversal} from "../traversal";
 
 export class SourceTranspiler implements IExpressionTranspiler {
   private readonly addGet: boolean;
@@ -10,28 +10,28 @@ export class SourceTranspiler implements IExpressionTranspiler {
     this.addGet = addGet;
   }
 
-  public transpile(node: Nodes.ExpressionNode, spaghetti: abaplint.SpaghettiScope, filename: string): string {
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): string {
     let ret = "";
     let post = "";
 
     for (const c of node.getChildren()) {
       if (c instanceof Nodes.ExpressionNode) {
         if (c.get() instanceof Expressions.FieldChain) {
-          ret = ret + new FieldChainTranspiler(this.addGet).transpile(c, spaghetti, filename);
+          ret = ret + new FieldChainTranspiler(this.addGet).transpile(c, traversal);
         } else if (c.get() instanceof Expressions.Constant) {
           ret = ret + new ConstantTranspiler().transpile(c);
         } else if (c.get() instanceof Expressions.StringTemplate) {
-          ret = ret + new StringTemplateTranspiler().transpile(c, spaghetti, filename);
+          ret = ret + new StringTemplateTranspiler().transpile(c, traversal);
         } else if (c.get() instanceof Expressions.ArithOperator) {
           ret = ret + new ArithOperatorTranspiler().transpile(c);
           post = ")";
         } else if (c.get() instanceof Expressions.MethodCallChain) {
-          ret = ret + new MethodCallChainTranspiler().transpile(c, spaghetti, filename);
+          ret = ret + new MethodCallChainTranspiler().transpile(c, traversal);
           if (this.addGet) {
             ret = ret + ".get()";  // todo, this will break
           }
         } else if (c.get() instanceof Expressions.Source) {
-          ret = ret + this.transpile(c, spaghetti, filename);
+          ret = ret + this.transpile(c, traversal);
         } else {
           ret = ret + "Source, unknown";
         }

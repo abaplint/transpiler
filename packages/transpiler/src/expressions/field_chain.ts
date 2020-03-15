@@ -2,6 +2,7 @@ import * as abaplint from "abaplint";
 import {Expressions, Nodes} from "abaplint";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {FieldLengthTranspiler, FieldOffsetTranspiler} from ".";
+import {Traversal} from "../traversal";
 
 export class FieldChainTranspiler implements IExpressionTranspiler {
   private addGet: boolean;
@@ -10,13 +11,13 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
     this.addGet = addGet;
   }
 
-  public transpile(node: Nodes.ExpressionNode, spaghetti: abaplint.SpaghettiScope, filename: string): string {
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): string {
     let ret = "";
     const extra: string[] = [];
 
     for (const c of node.getChildren()) {
       if (c.get() instanceof Expressions.SourceField) {
-        const scope = spaghetti.lookupPosition(c.getFirstToken().getStart(), filename);
+        const scope = traversal.getSpaghetti().lookupPosition(c.getFirstToken().getStart(), traversal.getFilename());
         if (scope === undefined) {
           throw new Error("FieldChainTranspiler, unable to lookup position");
         }

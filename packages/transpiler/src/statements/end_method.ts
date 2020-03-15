@@ -1,12 +1,13 @@
 import * as abaplint from "abaplint";
 import {IStatementTranspiler} from "./_statement_transpiler";
+import {Traversal} from "../traversal";
 
 export class EndMethodTranspiler implements IStatementTranspiler {
 
-  public transpile(node: abaplint.Nodes.StatementNode, spaghetti: abaplint.SpaghettiScope, filename: string): string {
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
     const token = node.getFirstToken();
 
-    const scope = spaghetti.lookupPosition(token.getStart(), filename);
+    const scope = traversal.getSpaghetti().lookupPosition(token.getStart(), traversal.getFilename());
     if (scope === undefined) {
       throw new Error("EndMethodTranspiler, scope not found");
     }

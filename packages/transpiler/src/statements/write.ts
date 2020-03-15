@@ -1,16 +1,17 @@
 import * as abaplint from "abaplint";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {SourceTranspiler} from "../expressions";
+import {Traversal} from "../traversal";
 
 export class WriteTranspiler implements IStatementTranspiler {
 
-  public transpile(node: abaplint.Nodes.StatementNode, spaghetti: abaplint.SpaghettiScope, filename: string): string {
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
     let extra = "";
     const newLine = node.findDirectTokenByText("/") !== undefined;
     if (newLine === true) {
       extra = ", {newLine: true}";
     }
-    const source = new SourceTranspiler().transpile(node.findDirectExpression(abaplint.Expressions.Source)!, spaghetti, filename);
+    const source = new SourceTranspiler().transpile(node.findDirectExpression(abaplint.Expressions.Source)!, traversal);
     return "abap.statements.write(" + source + extra + ");";
   }
 

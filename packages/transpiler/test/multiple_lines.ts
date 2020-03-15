@@ -190,4 +190,30 @@ DATA moo TYPE foo.`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
+  it.skip("Class constructor", async () => {
+    const abap = `
+      CLASS zcl_words DEFINITION.
+        PUBLIC SECTION.
+          DATA bar TYPE i.
+          METHODS: constructor.
+      ENDCLASS.
+
+      CLASS zcl_words IMPLEMENTATION.
+        METHOD constructor.
+          bar = 2.
+          WRITE bar.
+        ENDMETHOD.
+      ENDCLASS.`;
+
+    const expected = `class zcl_words {
+  constructor() {
+    this.bar = new abap.types.Integer();
+    this.bar.set(2);
+    abap.statements.write(this.bar);
+  }
+}`;
+
+    expect(await runSingle(abap)).to.equal(expected);
+  });
+
 });

@@ -1,14 +1,15 @@
 import * as abaplint from "abaplint";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {SourceTranspiler, TargetTranspiler} from "../expressions";
+import {Traversal} from "../traversal";
 
 export class SplitTranspiler implements IStatementTranspiler {
 
-  public transpile(node: abaplint.Nodes.StatementNode, spaghetti: abaplint.SpaghettiScope, filename: string): string {
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
 
     const sources = node.findDirectExpressions(abaplint.Expressions.Source);
-    const source = new SourceTranspiler().transpile(sources[0], spaghetti, filename);
-    const at = new SourceTranspiler().transpile(sources[1], spaghetti, filename);
+    const source = new SourceTranspiler().transpile(sources[0], traversal);
+    const at = new SourceTranspiler().transpile(sources[1], traversal);
 
     const target = new TargetTranspiler().transpile(node.findDirectExpression(abaplint.Expressions.Target)!);
 

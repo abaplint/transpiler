@@ -63,7 +63,7 @@ export class Traversal {
     for (const key in list) {
       if (node.get().constructor.name + "Transpiler" === key) {
         const transpiler = new list[key]() as IStatementTranspiler;
-        return transpiler.transpile(node, this.spaghetti, this.filename) + "\n";
+        return transpiler.transpile(node, this) + "\n";
       }
     }
     throw new Error(`Statement ${node.get().constructor.name} not supported`);
