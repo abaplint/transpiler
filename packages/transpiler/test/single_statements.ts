@@ -68,7 +68,7 @@ describe("Single statements", () => {
     {abap: "TYPES foo TYPE c.",                       js: undefined,                                              skip: false}, // yes, skip TYPES
     {abap: "IF ls_request-body = ''.\nENDIF.",        js: "if (abap.compare.eq(ls_request.get().body, '')) {\n}", skip: false},
     {abap: "CONCATENATE 'foo' 'bar' INTO target.",    js: "abap.statements.concatenate({source: ['foo','bar'], target: target});", skip: false},
-    {abap: "zcl_bar=>static( ).",                     js: "zcl_bar.static();",        skip: false},
+    {abap: "zcl_bar=>do_something( ).",               js: "zcl_bar.do_something();",        skip: false},
   ];
 
   for (const test of tests) {

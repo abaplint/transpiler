@@ -181,13 +181,13 @@ describe("Running Examples", () => {
 
   it("Basic sort table", async () => {
     const code = `
-    DATA: table TYPE STANDARD TABLE OF i,
-          int   TYPE i.
+    DATA: table   TYPE STANDARD TABLE OF i,
+          integer TYPE i.
     APPEND 2 TO table.
     APPEND 1 TO table.
     SORT table.
-    LOOP AT table INTO int.
-      WRITE / int.
+    LOOP AT table INTO integer.
+      WRITE / integer.
     ENDLOOP.`;
 
     const js = await run(code);

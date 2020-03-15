@@ -23,4 +23,15 @@ describe("Validation", () => {
       expect(e.message).to.contain("not found");
     }
   });
+
+  it("Forbidden identifier", async () => {
+    const abap = `DATA let TYPE string.`;
+
+    try {
+      await runSingle(abap);
+      expect.fail();
+    } catch (e) {
+      expect(e.message).to.contain("allowed");
+    }
+  });
 });
