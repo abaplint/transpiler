@@ -1,6 +1,5 @@
 import * as abaplint from "abaplint";
 import {IStatementTranspiler} from "./_statement_transpiler";
-import {TargetTranspiler} from "../expressions";
 import {Traversal} from "../traversal";
 
 export class CreateObjectTranspiler implements IStatementTranspiler {
@@ -11,7 +10,7 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
       throw new Error("CreateObjectTranspiler, unable to lookup position");
     }
 
-    const target = new TargetTranspiler().transpile(node.findDirectExpression(abaplint.Expressions.Target)!);
+    const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
 
     const found = scope.findVariable(target);
     if (found === undefined) {

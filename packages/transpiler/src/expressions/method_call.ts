@@ -1,6 +1,5 @@
 import {Nodes, Expressions} from "abaplint";
 import {IExpressionTranspiler} from "./_expression_transpiler";
-import {SourceTranspiler, ParameterListSTranspiler} from ".";
 import {Traversal} from "../traversal";
 
 export class MethodCallTranspiler implements IExpressionTranspiler {
@@ -16,11 +15,11 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
 
     const source = node.findDirectExpression(Expressions.Source);
     if (source) {
-      ret = ret + new SourceTranspiler().transpile(source, traversal);
+      ret = ret + traversal.traverse(source);
     }
     const parameters = node.findDirectExpression(Expressions.ParameterListS);
     if (parameters) {
-      ret = ret + new ParameterListSTranspiler().transpile(parameters, traversal);
+      ret = ret + traversal.traverse(parameters);
     }
 
     return ret + ")";

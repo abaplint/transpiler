@@ -1,4 +1,3 @@
-import * as abaplint from "abaplint";
 import {Expressions, Nodes} from "abaplint";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {FieldLengthTranspiler, FieldOffsetTranspiler} from ".";
@@ -17,14 +16,8 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
 
     for (const c of node.getChildren()) {
       if (c.get() instanceof Expressions.SourceField) {
-        const scope = traversal.getSpaghetti().lookupPosition(c.getFirstToken().getStart(), traversal.getFilename());
-        if (scope === undefined) {
-          throw new Error("FieldChainTranspiler, unable to lookup position");
-        }
-
         let name = c.getFirstToken().getStr();
-        const found = scope.findScopeForVariable(name);
-        if (found && found.stype === abaplint.ScopeType.ClassImplementation) {
+        if (traversal.isClassAttribute(c.getFirstToken())) {
           name = "this." + name;
         }
 

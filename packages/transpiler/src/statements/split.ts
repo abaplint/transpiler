@@ -1,6 +1,5 @@
 import * as abaplint from "abaplint";
 import {IStatementTranspiler} from "./_statement_transpiler";
-import {SourceTranspiler, TargetTranspiler} from "../expressions";
 import {Traversal} from "../traversal";
 
 export class SplitTranspiler implements IStatementTranspiler {
@@ -8,10 +7,11 @@ export class SplitTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
 
     const sources = node.findDirectExpressions(abaplint.Expressions.Source);
-    const source = new SourceTranspiler().transpile(sources[0], traversal);
-    const at = new SourceTranspiler().transpile(sources[1], traversal);
 
-    const target = new TargetTranspiler().transpile(node.findDirectExpression(abaplint.Expressions.Target)!);
+    const source = traversal.traverse(sources[0]);
+    const at = traversal.traverse(sources[1]);
+
+    const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
 
     return "abap.statements.split({source: " + source + ", at: " + at + ", target: " + target + "});";
   }

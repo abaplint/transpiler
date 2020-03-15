@@ -1,6 +1,5 @@
 import {Expressions, Nodes} from "abaplint";
 import {IExpressionTranspiler} from "./_expression_transpiler";
-import {SourceTranspiler, CompareOperatorTranspiler} from ".";
 import {Traversal} from "../traversal";
 
 export class CompareTranspiler implements IExpressionTranspiler {
@@ -9,9 +8,9 @@ export class CompareTranspiler implements IExpressionTranspiler {
 // todo, this is not correct
     const sources = node.findDirectExpressions(Expressions.Source);
     if (sources.length >= 2) {
-      const operator = new CompareOperatorTranspiler().transpile(node.findFirstExpression(Expressions.CompareOperator)!);
-      const s0 = new SourceTranspiler().transpile(sources[0], traversal);
-      const s1 = new SourceTranspiler().transpile(sources[1], traversal);
+      const operator = traversal.traverse(node.findFirstExpression(Expressions.CompareOperator));
+      const s0 = traversal.traverse(sources[0]);
+      const s1 = traversal.traverse(sources[1]);
       return "abap.compare." + operator + "(" + s0 + ", " + s1 + ")";
     }
 
