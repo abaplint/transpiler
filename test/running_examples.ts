@@ -386,4 +386,33 @@ describe("Running Examples", () => {
     f(abap);
   });
 
+  it("Set structure", async () => {
+    const code = `
+TYPES: BEGIN OF ty_bar,
+    moo TYPE i,
+  END OF ty_bar.
+DATA: data1 TYPE ty_bar,
+      data2 TYPE ty_bar.
+data1-moo = 2.
+data2 = data1.
+ASSERT data2-moo = 2.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("Clear structure", async () => {
+    const code = `
+TYPES: BEGIN OF ty_bar,
+    moo TYPE i,
+  END OF ty_bar.
+DATA: data1 TYPE ty_bar.
+data1-moo = 2.
+CLEAR data1.
+ASSERT data1-moo = 0.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
