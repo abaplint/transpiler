@@ -43,6 +43,9 @@ export class MethodTranspiler implements IStatementTranspiler {
       after = after.substring(0, after.length - 1);
     }
 
+    // issue https://github.com/abaplint/transpiler/issues/22
+    // traversal.getClassDefinition(token):
+
     return name + "(" + unique + ") {" + after;
   }
 

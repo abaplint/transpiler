@@ -48,7 +48,7 @@ export class Transpiler {
     const spaghetti = new SyntaxLogic(reg, obj).run().spaghetti;
 
     for (const f of obj.getABAPFiles()) {
-      let contents = new Traversal(spaghetti, f.getFilename()).traverse(f.getStructure());
+      let contents = new Traversal(spaghetti, f.getFilename(), obj).traverse(f.getStructure());
 
       if (contents.endsWith("\n")) {
         contents = contents.substring(0, contents.length - 1);

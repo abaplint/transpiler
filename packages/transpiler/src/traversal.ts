@@ -1,4 +1,4 @@
-import {Nodes, SpaghettiScope, INode, ScopeType, Token} from "abaplint";
+import {Nodes, SpaghettiScope, INode, ScopeType, Token, ABAPObject} from "abaplint";
 import * as StatementTranspilers from "./statements";
 import * as ExpressionTranspilers from "./expressions";
 import * as StructureTranspilers from "./structures";
@@ -8,13 +8,16 @@ import {IStructureTranspiler} from "./structures/_structure_transpiler";
 import {SpaghettiScopeNode} from "abaplint/build/src/abap/syntax/spaghetti_scope";
 import {TranspileTypes} from "./types";
 
+
 export class Traversal {
   private readonly spaghetti: SpaghettiScope;
   private readonly filename: string;
+  private readonly obj: ABAPObject;
 
-  public constructor(spaghetti: SpaghettiScope, filename: string) {
+  public constructor(spaghetti: SpaghettiScope, filename: string, obj: ABAPObject) {
     this.spaghetti = spaghetti;
     this.filename = filename;
+    this.obj = obj;
   }
 
   public traverse(node: INode | undefined): string {
@@ -35,6 +38,20 @@ export class Traversal {
 
   public getSpaghetti(): SpaghettiScope {
     return this.spaghetti;
+  }
+
+  public getClassDefinition(token: Token) {
+    let scope = this.spaghetti.lookupPosition(token.getStart(), this.filename);
+
+    while (scope !== undefined) {
+      if (scope.getIdentifier().stype === ScopeType.ClassImplementation
+          || scope.getIdentifier().stype === ScopeType.ClassDefinition) {
+        return this.obj.getClassDefinition(scope?.getIdentifier().sname);
+      }
+      scope = scope.getParent();
+    }
+
+    return undefined;
   }
 
   public isClassAttribute(token: Token): boolean {
