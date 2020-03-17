@@ -6,7 +6,8 @@ export class UniqueIdentifier {
   }
 
   public static get(): string {
-// todo: right now this is a gamble
+// as part of the validation, it is ensured that no identifiers exists
+// in the input source with ^unique\d+$
     this.counter++;
     return "unique" + this.counter;
   }

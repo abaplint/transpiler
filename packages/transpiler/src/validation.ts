@@ -51,7 +51,8 @@ const config: IConfig = {
         "^super$",	"^switch$", "^synchronized$", "^this$",
         "^throw$",	"^throws$", "^transient$", "^true$",
         "^try$",	"^typeof$", "^var$", "^void$",
-        "^volatile$",	"^while$", "^with$", "^yield$"],
+        "^volatile$",	"^while$", "^with$", "^yield$",
+        "^unique\d+$"],
     },
   },
 };
