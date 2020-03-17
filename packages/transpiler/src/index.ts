@@ -26,8 +26,7 @@ export class Transpiler {
   }
 
   public async run(files: IFile[]): Promise<IOutput> {
-    // todo, replace of carriage returns, see https://github.com/abaplint/abaplint/issues/262
-    const memory = files.map(f => new MemoryFile(f.filename, f.contents.replace(/\r/g, "")));
+    const memory = files.map(f => new MemoryFile(f.filename, f.contents));
     const reg = new Registry().addFiles(memory);
     this.validate(reg);
 
