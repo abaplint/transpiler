@@ -43,10 +43,19 @@ export class MethodTranspiler implements IStatementTranspiler {
       after = after.substring(0, after.length - 1);
     }
 
-    // issue https://github.com/abaplint/transpiler/issues/22
-    // traversal.getClassDefinition(token):
+    // todo, this needs refactoring in abaplint
+    // todo, does this work with interfaces?
+    const defs = traversal.getClassDefinition(token)?.getMethodDefinitions(
+      abaplint.CurrentScope.buildDefault(new abaplint.Registry()))?.getAll();
+    let staticMethod = "";
+    for (const m of defs || []) {
+      if (m.getName().toUpperCase() === name.toUpperCase() && m.isStatic()) {
+        staticMethod = "static ";
+        break;
+      }
+    }
 
-    return name + "(" + unique + ") {" + after;
+    return staticMethod + name + "(" + unique + ") {" + after;
   }
 
 }

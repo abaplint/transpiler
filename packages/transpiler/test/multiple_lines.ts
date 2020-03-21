@@ -216,4 +216,33 @@ DATA moo TYPE foo.`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
+  it("Class constructor", async () => {
+    const abap = `
+CLASS zcl_ret DEFINITION.
+  PUBLIC SECTION.
+    DATA bar TYPE i.
+    CLASS-METHODS:
+      run RETURNING VALUE(rv_ret) TYPE string.
+ENDCLASS.
+
+CLASS zcl_ret IMPLEMENTATION.
+  METHOD run.
+    rv_ret = 'X'.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const expected = `class zcl_ret {
+  constructor() {
+    this.bar = new abap.types.Integer();
+  }
+  static run() {
+    let rv_ret = new abap.types.String();
+    rv_ret.set('X');
+    return rv_ret;
+  }
+}`;
+
+    expect(await runSingle(abap)).to.equal(expected);
+  });
+
 });
