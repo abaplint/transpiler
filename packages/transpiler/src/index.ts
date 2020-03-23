@@ -1,4 +1,4 @@
-import {MemoryFile, Registry, ABAPObject, SyntaxLogic} from "abaplint";
+import {MemoryFile, Registry, ABAPObject, SyntaxLogic, IRegistry} from "abaplint";
 import {Validation} from "./validation";
 import {Indentation} from "./indentation";
 import {Traversal} from "./traversal";
@@ -27,21 +27,25 @@ export class Transpiler {
 
   public async run(files: IFile[]): Promise<IOutput> {
     const memory = files.map(f => new MemoryFile(f.filename, f.contents));
-    const reg = new Registry().addFiles(memory);
+    const reg: IRegistry = new Registry().addFiles(memory).parse();
     this.validate(reg);
 
     const output: IOutput = {js: [], maps: []};
-    for (const abap of reg.getABAPObjects()) {
-      const res = this.runObject(abap, reg);
-      output.js = output.js.concat(res.js);
-      output.maps = output.maps.concat(res.maps);
+
+    for (const abap of reg.getObjects()) {
+      if (abap instanceof ABAPObject) {
+        const res = this.runObject(abap, reg);
+        output.js = output.js.concat(res.js);
+        output.maps = output.maps.concat(res.maps);
+      }
     }
+
     return output;
   }
 
 // ///////////////////////////////
 
-  protected runObject(obj: ABAPObject, reg: Registry): IOutput {
+  protected runObject(obj: ABAPObject, reg: IRegistry): IOutput {
     const output: IOutput = {js: [], maps: []};
 
     const spaghetti = new SyntaxLogic(reg, obj).run().spaghetti;
@@ -63,7 +67,7 @@ export class Transpiler {
     return output;
   }
 
-  protected validate(reg: Registry) {
+  protected validate(reg: IRegistry): void {
     const issues = new Validation(this.options).run(reg);
     if (issues.length > 0) {
       const messages = issues.map(i => i.getMessage());

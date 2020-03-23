@@ -1,4 +1,4 @@
-import {Issue, Registry, Config, IConfig, Version} from "abaplint";
+import {Issue, IRegistry, Config, IConfig, Version} from "abaplint";
 import {ITranspilerOptions} from ".";
 
 const config: IConfig = {
@@ -68,7 +68,7 @@ export class Validation {
     this.options = options;
   }
 
-  public run(reg: Registry): Issue[] {
+  public run(reg: IRegistry): readonly Issue[] {
     if (this.options?.ignoreSyntaxCheck === true) {
       config.rules["check_syntax"] = false;
     } else {
