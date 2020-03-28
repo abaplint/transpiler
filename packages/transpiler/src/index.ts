@@ -1,4 +1,4 @@
-import {MemoryFile, Registry, ABAPObject, SyntaxLogic, IRegistry} from "abaplint";
+import {MemoryFile, Registry, ABAPObject, SyntaxLogic, IRegistry} from "@abaplint/core";
 import {Validation} from "./validation";
 import {Indentation} from "./indentation";
 import {Traversal} from "./traversal";

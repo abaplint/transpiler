@@ -1,4 +1,4 @@
-import * as abaplint from "abaplint";
+import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 
 export class ContinueTranspiler implements IStatementTranspiler {

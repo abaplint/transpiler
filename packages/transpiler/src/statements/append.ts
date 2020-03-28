@@ -1,4 +1,4 @@
-import * as abaplint from "abaplint";
+import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {SourceTranspiler} from "../expressions";
 import {Traversal} from "../traversal";

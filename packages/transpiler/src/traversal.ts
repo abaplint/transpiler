@@ -1,11 +1,11 @@
-import {Nodes, SpaghettiScope, INode, ScopeType, Token, ABAPObject} from "abaplint";
+import {Nodes, SpaghettiScope, INode, ScopeType, Token, ABAPObject} from "@abaplint/core";
 import * as StatementTranspilers from "./statements";
 import * as ExpressionTranspilers from "./expressions";
 import * as StructureTranspilers from "./structures";
 import {IStatementTranspiler} from "./statements/_statement_transpiler";
 import {IExpressionTranspiler} from "./expressions/_expression_transpiler";
 import {IStructureTranspiler} from "./structures/_structure_transpiler";
-import {SpaghettiScopeNode} from "abaplint/build/src/abap/syntax/spaghetti_scope";
+import {SpaghettiScopeNode} from "@abaplint/core/build/src/abap/syntax/spaghetti_scope";
 import {TranspileTypes} from "./types";
 
 

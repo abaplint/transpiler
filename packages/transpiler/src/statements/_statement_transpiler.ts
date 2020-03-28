@@ -1,4 +1,4 @@
-import {Nodes} from "abaplint";
+import {Nodes} from "@abaplint/core";
 import {Traversal} from "../traversal";
 
 export interface IStatementTranspiler {

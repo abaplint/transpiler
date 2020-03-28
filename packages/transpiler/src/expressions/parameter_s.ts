@@ -1,4 +1,4 @@
-import {Nodes, Expressions} from "abaplint";
+import {Nodes, Expressions} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 

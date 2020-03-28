@@ -1,4 +1,4 @@
-import * as abaplint from "abaplint";
+import * as abaplint from "@abaplint/core";
 import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
 

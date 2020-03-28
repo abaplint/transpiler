@@ -1,4 +1,4 @@
-import {Nodes} from "abaplint";
+import {Nodes} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 
 export class ComponentChainSimpleTranspiler implements IExpressionTranspiler {

@@ -1,4 +1,4 @@
-import {Issue, IRegistry, Config, IConfig, Version} from "abaplint";
+import {Issue, IRegistry, Config, IConfig, Version} from "@abaplint/core";
 import {ITranspilerOptions} from ".";
 
 const config: IConfig = {

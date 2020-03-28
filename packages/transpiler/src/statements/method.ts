@@ -1,4 +1,4 @@
-import * as abaplint from "abaplint";
+import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {UniqueIdentifier} from "../unique_identifier";
 import {TranspileTypes} from "../types";
