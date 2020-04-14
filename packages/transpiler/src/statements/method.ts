@@ -43,10 +43,8 @@ export class MethodTranspiler implements IStatementTranspiler {
       after = after.substring(0, after.length - 1);
     }
 
-    // todo, this needs refactoring in abaplint
     // todo, does this work with interfaces?
-    const defs = traversal.getClassDefinition(token)?.getMethodDefinitions(
-      abaplint.CurrentScope.buildDefault(new abaplint.Registry()))?.getAll();
+    const defs = traversal.getClassDefinition(token)?.getMethodDefinitions()?.getAll();
     let staticMethod = "";
     for (const m of defs || []) {
       if (m.getName().toUpperCase() === name.toUpperCase() && m.isStatic()) {
