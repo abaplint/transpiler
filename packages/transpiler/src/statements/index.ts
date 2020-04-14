@@ -11,6 +11,8 @@ export * from "./type";
 export * from "./create_object";
 export * from "./concatenate";
 export * from "./call";
+export * from "./set_bit";
+export * from "./get_bit";
 export * from "./else_if";
 export * from "./else";
 export * from "./end_case";

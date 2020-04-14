@@ -56,8 +56,8 @@ describe("Single statements", () => {
     {abap: "SPLIT foo AT bar INTO TABLE moo.",        js: "abap.statements.split({source: foo, at: bar, target: moo});",    skip: false},
     {abap: "WRITE |moo|.",                            js: "abap.statements.write(`moo`);",                                  skip: false},
     {abap: "DELETE foo WHERE bar = 2.",               js: "abap.statements.deleteInternal(foo,{where: (i) => {return abap.compare.eq(i.bar, 2);}});", skip: false},
-    {abap: "DELETE ADJACENT DUPLICATES FROM foo.",    js: "abap.statements.deleteInternal(foo,{adjacent: true});", skip: false},
-    {abap: "* comment",                               js: "// * comment",                              skip: true},
+    {abap: "DELETE ADJACENT DUPLICATES FROM foo.",    js: "abap.statements.deleteInternal(foo,{adjacent: true});",                  skip: false},
+    {abap: "* comment",                               js: "// * comment",                                                           skip: true},
     {abap: "ASSERT foo = bar.",                       js: "abap.statements.assert(abap.compare.eq(foo, bar));",                     skip: false},
     {abap: "ASSERT sy-subrc = 0.",                    js: "abap.statements.assert(abap.compare.eq(sy.get().subrc, 0));",            skip: false},
     {abap: "ASSERT 0 = 1.",                           js: "abap.statements.assert(abap.compare.eq(0, 1));",                         skip: false},
@@ -68,7 +68,12 @@ describe("Single statements", () => {
     {abap: "TYPES foo TYPE c.",                       js: undefined,                                              skip: false}, // yes, skip TYPES
     {abap: "IF ls_request-body = ''.\nENDIF.",        js: "if (abap.compare.eq(ls_request.get().body, '')) {\n}", skip: false},
     {abap: "CONCATENATE 'foo' 'bar' INTO target.",    js: "abap.statements.concatenate({source: ['foo','bar'], target: target});", skip: false},
-    {abap: "zcl_bar=>do_something( ).",               js: "zcl_bar.do_something();",        skip: false},
+    {abap: "zcl_bar=>do_something( ).",               js: "zcl_bar.do_something();",                  skip: false},
+    {abap: "SET BIT foo OF bar.",                     js: "abap.statements.setBit(foo, bar);",        skip: false},
+    {abap: "SET BIT foo OF bar TO moo.",              js: "abap.statements.setBit(foo, bar, moo);",   skip: false},
+    {abap: "GET BIT foo OF bar INTO moo.",            js: "abap.statements.getBit(foo, bar, moo);",   skip: false},
+    {abap: "WRITE sy-index.",                         js: "abap.statements.write(sy.get().index);",   skip: false},
+
   ];
 
   for (const test of tests) {
