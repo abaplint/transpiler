@@ -1,5 +1,5 @@
 import {MemoryFile, Registry, ABAPObject, SyntaxLogic, IRegistry} from "@abaplint/core";
-import {Validation} from "./validation";
+import {Validation, config} from "./validation";
 import {Indentation} from "./indentation";
 import {Traversal} from "./traversal";
 
@@ -12,6 +12,8 @@ export interface IOutput {
   js: IFile[];
   maps: IFile[];
 }
+
+export {config};
 
 export interface ITranspilerOptions {
   ignoreSyntaxCheck?: boolean;

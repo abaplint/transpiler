@@ -1,7 +1,9 @@
-import * as monaco from "monaco-editor";
 import "./index.css";
-import {Transpiler} from "@abaplint/transpiler";
-import * as abap from "@abaplint/runtime";
+import * as monaco from "monaco-editor";
+import {Transpiler, config} from "@abaplint/transpiler";
+import * as runtime from "@abaplint/runtime";
+import * as abaplint from "@abaplint/core";
+import * as abapMonaco from "@abaplint/monaco";
 
 // @ts-ignore
 self.MonacoEnvironment = {
@@ -13,13 +15,23 @@ self.MonacoEnvironment = {
   },
 };
 
+const reg = new abaplint.Registry(new abaplint.Config(JSON.stringify(config)));
+abapMonaco.registerABAP(reg);
+
+const filename = "file:///zfoobar.prog.abap";
+const model1 = monaco.editor.createModel(
+  "WRITE 'hello'.",
+  "abap",
+  monaco.Uri.parse(filename),
+);
+reg.addFile(new abaplint.MemoryFile(filename, ""));
+
 const editor1 = monaco.editor.create(document.getElementById("container1"), {
-  value: "WRITE 'hello'.",
+  model: model1,
   theme: "vs-dark",
   minimap: {
     enabled: false,
   },
-  language: "abap",
 });
 
 const editor2 = monaco.editor.create(document.getElementById("container2"), {
@@ -44,11 +56,11 @@ const editor3 = monaco.editor.create(document.getElementById("container3"), {
 function jsChanged() {
   const js = editor2.getValue();
   try {
-    abap.Console.clear();
+    runtime.Console.clear();
     try {
       const f = new Function("abap", js);
-      f(abap);
-      editor3.setValue(abap.Console.get());
+      f(runtime);
+      editor3.setValue(runtime.Console.get());
     } catch(e) {
       // write all errors to runtime result
       editor3.setValue("An error was thrown: " + e.toString());
@@ -58,22 +70,15 @@ function jsChanged() {
   }
 }
 
-/*
-function setUrl() {
-  const value = editor1.getValue();
-  const deflated = pako.deflate(value, {to: "string"});
-  if (deflated.length < 800) {
-    const newUrl = window.location.pathname + "?source=" + btoa(deflated);
-    window.history.replaceState(null, document.title, newUrl);
-  } else {
-    window.history.replaceState(null, document.title, window.location.pathname);
-  }
-}
-*/
-
 async function abapChanged() {
   try {
-    const res = await new Transpiler().run([{filename: "zfoobar.prog.abap", contents: editor1.getValue()}]);
+    const contents = editor1.getValue();
+    const file = new abaplint.MemoryFile(filename, contents);
+    reg.updateFile(file);
+    reg.parse();
+    abapMonaco.updateMarkers(reg, model1);
+
+    const res = await new Transpiler().run([{filename, contents}]);
     editor2.setValue(res.js[0]?.contents);
   } catch (error) {
     editor2.setValue("");
@@ -81,18 +86,6 @@ async function abapChanged() {
   }
 }
 
-/*
-function readUrl() {
-  const source = new URL(document.location.href).searchParams.get("source");
-  if (source) {
-    const inflated = pako.inflate(atob(source), {to: "string"});
-    editor1.setValue(inflated);
-  }
-}
-*/
-
 editor1.onDidChangeModelContent(abapChanged);
-// readUrl();
 editor2.onDidChangeModelContent(jsChanged);
 abapChanged();
-// editor1.onDidChangeModelContent(setUrl);

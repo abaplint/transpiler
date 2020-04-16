@@ -1,7 +1,7 @@
 import {Issue, IRegistry, Config, IConfig, Version} from "@abaplint/core";
 import {ITranspilerOptions} from ".";
 
-const config: IConfig = {
+export const config: IConfig = {
   global: {
     files: "/**/*.*",
     skipGeneratedGatewayClasses: true,
