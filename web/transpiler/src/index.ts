@@ -89,3 +89,4 @@ async function abapChanged() {
 editor1.onDidChangeModelContent(abapChanged);
 editor2.onDidChangeModelContent(jsChanged);
 abapChanged();
+editor1.focus();
