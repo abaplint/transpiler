@@ -415,7 +415,7 @@ ASSERT data1-moo = 0.`;
     f(abap);
   });
 
-  it.skip("sy-index", async () => {
+  it("sy-index", async () => {
     const code = `ASSERT sy-index = 0.`;
     const js = await run(code);
     const f = new Function("abap", js);
