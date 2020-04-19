@@ -19,6 +19,8 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
         let name = c.getFirstToken().getStr();
         if (traversal.isClassAttribute(c.getFirstToken())) {
           name = "this." + name;
+        } else if (traversal.isBuiltin(c.getFirstToken())) {
+          name = "abap.builtin." + name;
         }
 
         ret = ret + name;

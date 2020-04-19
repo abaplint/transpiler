@@ -59,7 +59,7 @@ describe("Single statements", () => {
     {abap: "DELETE ADJACENT DUPLICATES FROM foo.",    js: "abap.statements.deleteInternal(foo,{adjacent: true});",                  skip: false},
     {abap: "* comment",                               js: "// * comment",                                                           skip: true},
     {abap: "ASSERT foo = bar.",                       js: "abap.statements.assert(abap.compare.eq(foo, bar));",                     skip: false},
-    {abap: "ASSERT sy-subrc = 0.",                    js: "abap.statements.assert(abap.compare.eq(sy.get().subrc, 0));",            skip: false},
+    {abap: "ASSERT sy-subrc = 0.",                    js: "abap.statements.assert(abap.compare.eq(abap.builtin.sy.get().subrc, 0));",            skip: false},
     {abap: "ASSERT 0 = 1.",                           js: "abap.statements.assert(abap.compare.eq(0, 1));",                         skip: false},
     {abap: "APPEND lv_word TO lt_letters.",           js: "abap.statements.append({source: lv_word, target: lt_letters});",         skip: false},
     {abap: "WRITE |foo{ lines( lt_words ) }bar|.",    js: "abap.statements.write(`foo${abap.builtin.lines(lt_words).get()}bar`);",  skip: false},
@@ -72,7 +72,7 @@ describe("Single statements", () => {
     {abap: "SET BIT foo OF bar.",                     js: "abap.statements.setBit(foo, bar);",        skip: false},
     {abap: "SET BIT foo OF bar TO moo.",              js: "abap.statements.setBit(foo, bar, moo);",   skip: false},
     {abap: "GET BIT foo OF bar INTO moo.",            js: "abap.statements.getBit(foo, bar, moo);",   skip: false},
-    {abap: "WRITE sy-index.",                         js: "abap.statements.write(sy.get().index);",   skip: false},
+    {abap: "WRITE sy-index.",                         js: "abap.statements.write(abap.builtin.sy.get().index);",   skip: false},
 
   ];
 

@@ -67,6 +67,20 @@ export class Traversal {
     return false;
   }
 
+  public isBuiltin(token: Token): boolean {
+    const scope = this.spaghetti.lookupPosition(token.getStart(), this.filename);
+    if (scope === undefined) {
+      throw new Error("isBuiltin, unable to lookup position");
+    }
+
+    const name = token.getStr();
+    const found = scope.findScopeForVariable(name);
+    if (found && found.stype === ScopeType.BuiltIn) {
+      return true;
+    }
+    return false;
+  }
+
   public buildConstructorContents(scope: SpaghettiScopeNode | undefined): string {
     const vars = scope?.getData().vars;
     if (vars === undefined || vars.length === 0) {
