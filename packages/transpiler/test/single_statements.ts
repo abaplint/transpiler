@@ -7,6 +7,9 @@ describe("Single statements", () => {
     {abap: "DATA foo TYPE i.",                     js: "let foo = new abap.types.Integer();",       skip: false},
     {abap: "foo = 2.",                             js: "foo.set(2);",                               skip: false},
     {abap: "foo = bar + 2.",                       js: "foo.set(bar.add(2));",                      skip: false},
+    {abap: "foo = bar - 2.",                       js: "foo.set(bar.minus(2));",                    skip: false},
+    {abap: "foo = bar * 2.",                       js: "foo.set(bar.multiply(2));",                 skip: false},
+    {abap: "foo = bar / 2.",                       js: "foo.set(bar.divide(2));",                   skip: false},
     {abap: "ADD 2 to foo.",                        js: "foo.set(foo.add(2));",                      skip: true},
     {abap: "foo = bar + moo.",                     js: "foo.set(bar.add(moo));",                    skip: false},
     {abap: "DATA foo TYPE i VALUE 2.",             js: "let foo = new abap.types.Integer();\nfoo.set(2);", skip: false},
@@ -27,9 +30,9 @@ describe("Single statements", () => {
     {abap: "foo = bar(1).",                        js: "foo.set(bar.get({length: 1}));",            skip: false},
     {abap: "foo = bar+1(1).",                      js: "foo.set(bar.get({offset: 1, length: 1}));", skip: false},
     {abap: "IF foo IS INITIAL. ENDIF.",            js: "if (abap.compare.initial(foo)) {\n}",       skip: false},
-    {abap: "IF foo IS NOT INITIAL. ENDIF.",        js: "if (!foo.initial()) {\n}",                  skip: true},
-    {abap: "IF NOT foo IS INITIAL. ENDIF.",        js: "if (!foo.initial()) {\n}",                  skip: true},
-    {abap: "DO. ENDDO.",                           js: "for (;;) {\n}",                             skip: true}, // todo, how to set sy-fields ?
+    {abap: "IF foo IS NOT INITIAL. ENDIF.",        js: "if (abap.compare.initial(foo) === false) {\n}", skip: false},
+    {abap: "IF NOT foo IS INITIAL. ENDIF.",        js: "if (abap.compare.initial(foo) === false) {\n}", skip: false},
+    {abap: "DO. ENDDO.",                           js: "for (;;) {\n}",                                 skip: true}, // todo, how to set sy-fields ?
     {abap: "DO 5 TIMES. ENDDO.",                   js: "for (let unique1 = 0; unique1 < 5; unique1++) {\n}",         skip: false},
     {abap: "DO foo TIMES.  ENDDO.",                js: "for (let unique1 = 0; unique1 < foo.get(); unique1++) {\n}", skip: false}, // todo, the "i" variable must be unique
     {abap: "LOOP AT table INTO line. ENDLOOP.",    js: "for (let unique1 of table.array()) {\n  line.set(unique1);\n}",          skip: false},

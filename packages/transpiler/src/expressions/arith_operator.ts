@@ -3,8 +3,19 @@ import {IExpressionTranspiler} from "./_expression_transpiler";
 
 export class ArithOperatorTranspiler implements IExpressionTranspiler {
 
-  public transpile(_node: Nodes.ExpressionNode): string {
-    return ".add(";
+  public transpile(node: Nodes.ExpressionNode): string {
+    switch(node.getFirstToken().getStr()) {
+      case "+":
+        return ".add(";
+      case "-":
+        return ".minus(";
+      case "*":
+        return ".multiply(";
+      case "/":
+        return ".divide(";
+      default:
+        return ".ArithOperatorUnknown";
+    }
   }
 
 }
