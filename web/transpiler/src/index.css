@@ -1,17 +1,35 @@
 body, html, .inner, .outer {
   height: 100%;
+  margin: 0;
   overflow: hidden;
 }
 
-.table {
-  display: table;
-  width: 100%;
-  height: 90%;
+#horizon {
+  display: grid;
+  grid-template-columns: 1fr 5px 1fr 5px 1fr;
+  grid-template-rows: 1fr;
+
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
 }
 
-.table .container {
-  display: table-cell;
-  width: 30%;
+.container {
+  overflow: hidden;
+}
+
+.gutter {
+  cursor: col-resize;
+}
+
+#gutter1 {
+  grid-area: 1 / 2 / 1 / 2;
+}
+
+#gutter2 {
+  grid-area: 1 / 4 / 1 / 4;
 }
 
 select {
