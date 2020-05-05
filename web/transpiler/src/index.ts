@@ -1,9 +1,10 @@
 import "./index.css";
 import * as monaco from "monaco-editor";
-import {Transpiler, config} from "@abaplint/transpiler";
+import {config, Transpiler} from "@abaplint/transpiler";
 import * as runtime from "@abaplint/runtime";
 import * as abaplint from "@abaplint/core";
 import * as abapMonaco from "@abaplint/monaco";
+import Split from "split-grid";
 
 // @ts-ignore
 self.MonacoEnvironment = {
@@ -25,6 +26,19 @@ const model1 = monaco.editor.createModel(
   monaco.Uri.parse(filename),
 );
 reg.addFile(new abaplint.MemoryFile(filename, ""));
+
+Split({
+  columnGutters: [
+    {
+      track: 1,
+      element: document.getElementById("gutter1"),
+    },
+    {
+      track: 3,
+      element: document.getElementById("gutter2"),
+    },
+  ],
+});
 
 const editor1 = monaco.editor.create(document.getElementById("container1"), {
   model: model1,
@@ -52,6 +66,29 @@ const editor3 = monaco.editor.create(document.getElementById("container3"), {
   readOnly: true,
   language: "text",
 });
+
+function updateEditorLayouts() {
+  editor1.layout();
+  editor2.layout();
+  editor3.layout();
+}
+
+const observer = new MutationObserver(mutations => {
+  for (const mutation of mutations) {
+    if (mutation.attributeName === "style") {
+      updateEditorLayouts();
+    }
+  }
+});
+
+observer.observe(document.getElementById("horizon"), {
+  attributes: true,
+  attributeFilter: [
+    "style",
+  ],
+});
+
+window.addEventListener("resize", updateEditorLayouts);
 
 function jsChanged() {
   const js = editor2.getValue();

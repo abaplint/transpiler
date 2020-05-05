@@ -213,5 +213,8 @@
         "mocha": "^7.1.2",
         "source-map-support": "^0.5.19",
         "typescript": "^3.8.3"
+    },
+    "dependencies": {
+        "split-grid": "^1.0.9"
     }
 }
