@@ -1,11 +1,13 @@
 import * as path from "path";
 import * as webpack from "webpack";
-import {createFsFromVolume, Volume} from "memfs";
+import * as memfs from "memfs";
 
-export default function run(fixture: any, _options = {}) {
+export default function run(fixture: any, options = {}) {
   const compiler = webpack({
     context: __dirname,
+    target: "node",
     entry: `./${fixture}`,
+    devtool: "nosources-source-map",
     output: {
       path: path.resolve(__dirname),
       filename: "bundle.js",
@@ -15,14 +17,20 @@ export default function run(fixture: any, _options = {}) {
         test: /\.abap$/,
         use: {
           loader: path.resolve(__dirname, "../src/loader.js"),
+          options,
         },
       }],
     },
   });
 
-  const volume = createFsFromVolume(new Volume());
+  const input = memfs.createFsFromVolume(memfs.Volume.fromJSON({
+    "./zprogram.prog.abap": "WRITE 'sdf'.",
+    "../src/loader.js": "",  // there is something strange here, it needs to be able to resolve from virtual file system, but the file is read from physical?
+  }, __dirname));
   // @ts-ignore
-  compiler.outputFileSystem = {...volume, join: path.join};
+  compiler.inputFileSystem = input;
+  // @ts-ignore
+  compiler.outputFileSystem = {...input, join: path.join};
 
   return new Promise((resolve, reject) => {
     compiler.run((err, stats) => {
