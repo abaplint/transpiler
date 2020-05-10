@@ -1,7 +1,7 @@
 import {expect} from "chai";
 import {Transpiler} from "../src";
 
-describe("Multiple files", () => {
+describe("Files", () => {
 
   it("Two reports", async () => {
     const file1 = {filename: "zfoo1.prog.abap", contents: "WRITE '1'."};
@@ -22,6 +22,22 @@ describe("Multiple files", () => {
 
     expect(output.length).to.equal(1);
     expect(output[0].filename).to.contain("zprogram.prog.js");
+  });
+
+  it("Global Class", async () => {
+    const filename = "zcl_index.clas.abap";
+    const contents = `
+CLASS zcl_index DEFINITION PUBLIC.
+ENDCLASS.
+CLASS zcl_index IMPLEMENTATION.
+ENDCLASS.
+`;
+    const file1 = {filename, contents};
+
+    const output = (await new Transpiler().run([file1])).js;
+
+    expect(output.length).to.equal(1);
+    expect(output[0].contents).to.match(/^export /i);
   });
 
 });

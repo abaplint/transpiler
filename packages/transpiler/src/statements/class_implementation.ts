@@ -4,9 +4,16 @@ import {Traversal} from "../traversal";
 
 export class ClassImplementationTranspiler implements IStatementTranspiler {
 
-  public transpile(node: abaplint.Nodes.StatementNode, _traversal: Traversal): string {
-    const name = node.findFirstExpression(abaplint.Expressions.ClassName)!.getFirstToken().getStr();
-    return "class " + name + " {";
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
+    const token = node.findFirstExpression(abaplint.Expressions.ClassName)!.getFirstToken();
+
+    let extra = "";
+    const definition = traversal.getClassDefinition(token);
+    if (definition && definition.isGlobal()) {
+      extra = "export ";
+    }
+
+    return extra + "class " + token.getStr() + " {";
   }
 
 }
