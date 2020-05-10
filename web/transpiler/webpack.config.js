@@ -36,13 +36,13 @@ module.exports = {
       },
       {
         test: /\.ttf$/,
-        use: ['file-loader'],
+        use: ["file-loader"],
       },
     ],
   },
   plugins: [
     new HtmlWebPackPlugin({
-      template: 'public/index.html',
+      template: "public/index.html",
     }),
   ],
 };

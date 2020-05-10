@@ -1,9 +1,9 @@
 {
   "name": "@abaplint/abap-loader",
-  "version": "0.4.8",
+  "version": "0.4.9",
   "description": "ABAP webpack loader",
-  "main": "build/src/index.js",
-  "typings": "build/src/index.d.ts",
+  "main": "build/src/loader.js",
+  "typings": "build/src/loader.d.ts",
   "scripts": {
     "compile": "tsc",
     "prepublishOnly": "rm -rf build && npm run test",
