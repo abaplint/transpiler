@@ -14,4 +14,14 @@ describe("Multiple files", () => {
     expect(output[1].filename).to.equal("zfoo2.prog.js");
   });
 
+  it("Full path file name", async () => {
+    const filename = "C:\\Users\\foobar\\git\\transpiler\\packages\\abap-loader\\build\\test\\zprogram.prog.abap";
+    const file1 = {filename, contents: "WRITE '1'."};
+
+    const output = (await new Transpiler().run([file1])).js;
+
+    expect(output.length).to.equal(1);
+    expect(output[0].filename).to.contain("zprogram.prog.js");
+  });
+
 });

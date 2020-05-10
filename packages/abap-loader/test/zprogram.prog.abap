@@ -1,0 +1,3 @@
+REPORT zprogram.
+
+WRITE 'sdf'.

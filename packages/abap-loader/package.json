@@ -1,40 +1,36 @@
 {
-  "name": "@abaplint/transpiler",
-  "version": "0.4.5",
-  "description": "Transpiler",
-  "main": "build/src/index.js",
-  "typings": "build/src/index.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/abaplint/transpiler.git"
-  },
+  "name": "@abaplint/abap-loader",
+  "version": "0.4.4",
+  "description": "ABAP webpack loader",
+  "main": "build/index.js",
   "scripts": {
     "compile": "tsc",
     "prepublishOnly": "rm -rf build && npm run test",
     "pretest": "npm run compile",
     "test": "mocha"
   },
+  "author": "abaplint",
+  "license": "MIT",
   "mocha": {
     "recursive": true,
     "reporter": "progress",
     "spec": "build/test/**/*.js",
     "require": "source-map-support/register"
   },
-  "keywords": [
-    "ABAP",
-    "abaplint"
-  ],
-  "author": "abaplint",
-  "license": "MIT",
   "dependencies": {
-    "@abaplint/core": "^2.32.14"
+    "@abaplint/transpiler": "^0.4.4",
+    "loader-utils": "^2.0.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.11",
     "@types/mocha": "^7.0.2",
+    "@types/node": "^13.13.5",
+    "@types/webpack": "^4.41.12",
     "chai": "^4.2.0",
+    "memfs": "^3.1.2",
     "mocha": "^7.1.2",
     "source-map-support": "^0.5.19",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "webpack": "^4.43.0"
   }
 }

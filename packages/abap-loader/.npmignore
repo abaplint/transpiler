@@ -1,0 +1,7 @@
+src/*
+test/*
+build/test/*
+tsconfig.json
+*.js.map
+npm-debug.log
+build/*.tsbuildinfo
