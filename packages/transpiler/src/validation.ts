@@ -2,40 +2,47 @@ import {Issue, IRegistry, Config, IConfig, Version} from "@abaplint/core";
 import {ITranspilerOptions} from ".";
 
 export const config: IConfig = {
-  global: {
-    files: "/**/*.*",
-    skipGeneratedGatewayClasses: true,
-    skipGeneratedPersistentClasses: true,
-    skipGeneratedFunctionGroups: true,
+  "global": {
+    "files": "/**/*.*",
+    "skipGeneratedGatewayClasses": true,
+    "skipGeneratedPersistentClasses": true,
+    "skipGeneratedFunctionGroups": true,
   },
-  syntax: {
-    version: Version.v702,
-    errorNamespace: ".",
+  "syntax": {
+    "version": Version.v702,
+    "errorNamespace": ".",
   },
-  rules: {
-    when_others_last: true,
-    avoid_use: {
-      define: true,
-      execSQL: true,
-      kernelCall: true,
-      communication: true,
-      systemCall: true,
-      break: true,
-      statics: true,
+  "rules": {
+    "when_others_last": true,
+    "avoid_use": {
+      "define": true,
+      "execSQL": true,
+      "kernelCall": true,
+      "communication": true,
+      "systemCall": true,
+      "break": true,
+      "statics": true,
+      "endselect": false,
+      "defaultKey": false,
     },
-    parser_error: true,
-    unknown_types: true,
-    check_syntax: true,
-    functional_writing: true,
-    obsolete_statement: {
-      refresh: true,
-      compute: true,
-      requested: true,
-      setExtended: true,
-      occurs: true,
+    "parser_error": true,
+    "unknown_types": true,
+    "check_syntax": true,
+    "functional_writing": true,
+    "obsolete_statement": {
+      "refresh": true,
+      "compute": true,
+      "requested": true,
+      "setExtended": true,
+      "occurs": true,
+      "add": false,
+      "divide": false,
+      "move": false,
+      "multiply": false,
+      "subtract": false,
     },
-    forbidden_identifier: {
-      check: [
+    "forbidden_identifier": {
+      "check": [
         "^abstract$",	"^arguments$", "^await$", "^boolean$",
         "^break$",	"^byte$", "^case$", "^catch$",
         "^char$",	"^class$", "^const$", "^continue$",
@@ -52,7 +59,7 @@ export const config: IConfig = {
         "^throw$",	"^throws$", "^transient$", "^true$",
         "^try$",	"^typeof$", "^var$", "^void$",
         "^volatile$",	"^while$", "^with$", "^yield$",
-        "^unique\d+$"],
+        "^unique\\d+$"],
     },
   },
 };
