@@ -16,11 +16,11 @@
     "monaco-editor": "^0.20.0",
     "split-grid": "^1.0.9",
     "style-loader": "^1.2.1",
-    "ts-loader": "^7.0.3",
-    "typescript": "^3.8.3",
+    "ts-loader": "^7.0.4",
+    "typescript": "^3.9.2",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.11",
-    "@abaplint/monaco": "^2.32.12",
+    "@abaplint/monaco": "^2.32.21",
     "webpack-dev-server": "^3.11.0"
   }
 }
