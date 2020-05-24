@@ -38,18 +38,6 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     }
 
     return "constructor() {\n" + ret + "}\n";
-
-    /*
-    const vars = scope?.getData().vars;
-    if (vars === undefined || vars.length === 0) {
-      return "";
-    }
-    let ret = "constructor() {\n";
-    for (const v of vars) {
-      ret = ret + "this." + v.name + " = " + new TranspileTypes().toType(v.identifier.getType()) + ";\n";
-    }
-    return ret + "}\n";
-    */
   }
 
 }

@@ -53,6 +53,9 @@ describe("Multiple lines", () => {
 
     const expected =
 `class lcl_foobar {
+  constructor() {
+    this.me = new abap.types.ABAPObject();
+  }
   moo() {
   }
 }`;
@@ -75,6 +78,9 @@ describe("Multiple lines", () => {
 
     const expected =
 `class lcl_foobar {
+  constructor() {
+    this.me = new abap.types.ABAPObject();
+  }
   moo(unique1) {
     let iv_foo = new abap.types.String();
     if (unique1 && unique1.iv_foo) {iv_foo.set(unique1.iv_foo);}
@@ -99,6 +105,9 @@ describe("Multiple lines", () => {
 
     const expected =
 `class lcl_foobar {
+  constructor() {
+    this.me = new abap.types.ABAPObject();
+  }
   moo() {
     let rv_foo = new abap.types.String();
     return rv_foo;
@@ -146,6 +155,9 @@ CREATE OBJECT foo.`;
 
     const expected =
 `class zcl_words {
+  constructor() {
+    this.me = new abap.types.ABAPObject();
+  }
 }
 let foo = new abap.types.ABAPObject();
 foo.set(new zcl_words());`;
@@ -180,6 +192,7 @@ DATA moo TYPE foo.`;
 
     const expected = `class zcl_words {
   constructor() {
+    this.me = new abap.types.ABAPObject();
     this.bar = new abap.types.Integer();
   }
   run() {
@@ -190,7 +203,7 @@ DATA moo TYPE foo.`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
-  it("Class constructor", async () => {
+  it("Class constructor1", async () => {
     const abap = `
       CLASS zcl_words DEFINITION.
         PUBLIC SECTION.
@@ -207,6 +220,7 @@ DATA moo TYPE foo.`;
 
     const expected = `class zcl_words {
   constructor() {
+    this.me = new abap.types.ABAPObject();
     this.bar = new abap.types.Integer();
     this.bar.set(2);
     abap.statements.write(this.bar);
@@ -216,7 +230,7 @@ DATA moo TYPE foo.`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
-  it("Class constructor", async () => {
+  it("Class constructor2", async () => {
     const abap = `
 CLASS zcl_ret DEFINITION.
   PUBLIC SECTION.
@@ -233,6 +247,7 @@ ENDCLASS.`;
 
     const expected = `class zcl_ret {
   constructor() {
+    this.me = new abap.types.ABAPObject();
     this.bar = new abap.types.Integer();
   }
   static run() {

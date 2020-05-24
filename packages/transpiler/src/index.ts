@@ -52,15 +52,15 @@ export class Transpiler {
 
     const spaghetti = new SyntaxLogic(reg, obj).run().spaghetti;
 
-    for (const f of obj.getABAPFiles()) {
-      let contents = new Traversal(spaghetti, f.getFilename(), obj).traverse(f.getStructure());
+    for (const file of obj.getABAPFiles()) {
+      let contents = new Traversal(spaghetti, file, obj).traverse(file.getStructure());
 
       if (contents.endsWith("\n")) {
         contents = contents.substring(0, contents.length - 1);
       }
 
       if (contents.length > 0) {
-        const filename = f.getFilename().replace(new RegExp("\.abap$"), ".js");
+        const filename = file.getFilename().replace(new RegExp("\.abap$"), ".js");
         contents = new Indentation().run(contents);
         output.js.push({filename, contents});
       }

@@ -202,7 +202,7 @@
     },
     "homepage": "https://github.com/abaplint/transpiler_poc#readme",
     "devDependencies": {
-        "@abaplint/core": "^2.32.21",
+        "@abaplint/core": "^2.33.1",
         "@types/chai": "^4.2.11",
         "@types/mocha": "^7.0.2",
         "@typescript-eslint/eslint-plugin": "^2.33.0",
@@ -210,8 +210,8 @@
         "chai": "^4.2.0",
         "eslint": "^7.0.0",
         "eslint-plugin-import": "^2.20.2",
-        "mocha": "^7.1.2",
+        "mocha": "^7.2.0",
         "source-map-support": "^0.5.19",
-        "typescript": "^3.9.2"
+        "typescript": "^3.9.3"
     }
 }

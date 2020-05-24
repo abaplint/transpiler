@@ -1,4 +1,4 @@
-import {Nodes, SpaghettiScopeNode, SpaghettiScope, INode, ScopeType, Token, ABAPObject} from "@abaplint/core";
+import {Nodes, INode, ScopeType, Token, ABAPObject, ISpaghettiScope, ABAPFile, ISpaghettiScopeNode} from "@abaplint/core";
 import * as StatementTranspilers from "./statements";
 import * as ExpressionTranspilers from "./expressions";
 import * as StructureTranspilers from "./structures";
@@ -9,14 +9,12 @@ import {TranspileTypes} from "./types";
 
 
 export class Traversal {
-  private readonly spaghetti: SpaghettiScope;
-  private readonly filename: string;
-  private readonly obj: ABAPObject;
+  private readonly spaghetti: ISpaghettiScope;
+  private readonly file: ABAPFile;
 
-  public constructor(spaghetti: SpaghettiScope, filename: string, obj: ABAPObject) {
+  public constructor(spaghetti: ISpaghettiScope, file: ABAPFile, _obj: ABAPObject) {
     this.spaghetti = spaghetti;
-    this.filename = filename;
-    this.obj = obj;
+    this.file = file;
   }
 
   public traverse(node: INode | undefined): string {
@@ -32,20 +30,23 @@ export class Traversal {
   }
 
   public getFilename(): string {
-    return this.filename;
+    return this.file.getFilename();
   }
 
-  public getSpaghetti(): SpaghettiScope {
+  public getSpaghetti(): ISpaghettiScope {
     return this.spaghetti;
   }
 
   public getClassDefinition(token: Token) {
-    let scope = this.spaghetti.lookupPosition(token.getStart(), this.filename);
+    let scope = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
 
     while (scope !== undefined) {
       if (scope.getIdentifier().stype === ScopeType.ClassImplementation
           || scope.getIdentifier().stype === ScopeType.ClassDefinition) {
-        return this.obj.getClassDefinition(scope?.getIdentifier().sname);
+
+        return scope.findClassDefinition(scope?.getIdentifier().sname);
+
+//        return this.obj.getClassDefinition(scope?.getIdentifier().sname);
       }
       scope = scope.getParent();
     }
@@ -54,7 +55,7 @@ export class Traversal {
   }
 
   public isClassAttribute(token: Token): boolean {
-    const scope = this.spaghetti.lookupPosition(token.getStart(), this.filename);
+    const scope = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
     if (scope === undefined) {
       throw new Error("isClassAttribute, unable to lookup position");
     }
@@ -68,7 +69,7 @@ export class Traversal {
   }
 
   public isBuiltin(token: Token): boolean {
-    const scope = this.spaghetti.lookupPosition(token.getStart(), this.filename);
+    const scope = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
     if (scope === undefined) {
       throw new Error("isBuiltin, unable to lookup position");
     }
@@ -81,7 +82,7 @@ export class Traversal {
     return false;
   }
 
-  public buildConstructorContents(scope: SpaghettiScopeNode | undefined): string {
+  public buildConstructorContents(scope: ISpaghettiScopeNode | undefined): string {
     const vars = scope?.getData().vars;
     if (vars === undefined || vars.length === 0) {
       return "";
