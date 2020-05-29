@@ -53,7 +53,7 @@ export class MethodTranspiler implements IStatementTranspiler {
       }
     }
 
-    return staticMethod + name + "(" + unique + ") {" + after;
+    return staticMethod + name.replace("~", "$") + "(" + unique + ") {" + after;
   }
 
 }

@@ -35,6 +35,9 @@ export class Transpiler {
     const output: IOutput = {js: [], maps: []};
 
     for (const abap of reg.getObjects()) {
+      if (abap.getType() === "INTF") {
+        continue;
+      }
       if (abap instanceof ABAPObject) {
         const res = this.runObject(abap, reg);
         output.js = output.js.concat(res.js);
