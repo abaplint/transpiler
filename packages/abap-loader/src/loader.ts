@@ -19,7 +19,10 @@ async function transpile(source: string) {
 }
 
 export default async function ABAPLoader(source: string, _map: any, _meta: any) {
-  const result = await transpile.bind(this)(source);
+  const result: transpiler.IOutput[] = await transpile.bind(this)(source);
 
-  return result.js[0].contents;
+  const req = result[0].requires.map(e => "const " + e.name.toLowerCase() + " = require('./" + e.name.toLowerCase() + "." + e.type.toLowerCase() + ".abap')." + e.name.toLowerCase() + ";\n").join("");
+
+  const content = req + result[0].js.contents;
+  return content;
 }

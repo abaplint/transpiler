@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/abap-loader",
-  "version": "0.4.11",
+  "version": "0.4.12",
   "description": "ABAP webpack loader",
   "main": "build/src/loader.js",
   "typings": "build/src/loader.d.ts",
@@ -19,7 +19,7 @@
     "require": "source-map-support/register"
   },
   "dependencies": {
-    "@abaplint/transpiler": "^0.4.10"
+    "@abaplint/transpiler": "^0.4.12"
   },
   "devDependencies": {
     "@types/chai": "^4.2.11",

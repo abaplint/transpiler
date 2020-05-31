@@ -4,7 +4,7 @@ import * as abap from "../packages/runtime/src/";
 
 async function run(abap: string) {
   const res = await new Transpiler().run([{filename: "zfoobar.prog.abap", contents: abap}]);
-  return res.js[0].contents;
+  return res[0].js.contents;
 }
 
 describe("Running Examples", () => {
