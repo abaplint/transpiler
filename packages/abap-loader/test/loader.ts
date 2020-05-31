@@ -71,5 +71,36 @@ ENDINTERFACE.`}],
     expect(output).to.contain(`export class`);
   });
 
+  it("Two classes", async () => {
+    const fix: IFixture = {
+      entryFilename: "zcl_foo.clas.abap",
+      files: [{
+        filename: "zcl_foo.clas.abap",
+        contents: `
+CLASS zcl_foo DEFINITION PUBLIC FINAL CREATE PUBLIC.
+  PUBLIC SECTION.
+    METHODS: run.
+ENDCLASS.
+CLASS zcl_foo IMPLEMENTATION.
+  METHOD run.
+    DATA bar TYPE REF TO zcl_bar.
+    CREATE OBJECT bar.
+  ENDMETHOD.
+ENDCLASS.`}, {
+        filename: "zcl_bar.clas.abap",
+        contents: `
+CLASS zcl_bar DEFINITION PUBLIC FINAL CREATE PUBLIC.
+  PUBLIC SECTION.
+ENDCLASS.
+CLASS zcl_bar IMPLEMENTATION.
+ENDCLASS.`}],
+    };
+    const stats = await run(fix);
+
+    const modules = stats.toJson().modules;
+    expect(modules?.length).to.equal(2);
+    expect(modules![0].source).to.contain(`export class zcl_foo `);
+    expect(modules![1].source).to.contain(`export class zcl_bar `);
+  });
 
 });
