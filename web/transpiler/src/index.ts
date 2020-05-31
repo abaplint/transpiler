@@ -116,7 +116,7 @@ async function abapChanged() {
     abapMonaco.updateMarkers(reg, model1);
 
     const res = await new Transpiler().run([{filename, contents}]);
-    editor2.setValue(res.js[0]?.contents);
+    editor2.setValue(res[0]?.js.contents);
   } catch (error) {
     editor2.setValue("");
     editor3.setValue(error.message);
