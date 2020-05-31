@@ -26,8 +26,14 @@ export const config: IConfig = {
       "defaultKey": false,
     },
     "parser_error": true,
+    "allowed_object_types": {
+      "allowed": ["INTF", "CLAS", "PROG"],
+    },
     "unknown_types": true,
+    "ambiguous_statement": true,
+    "begin_end_names": true,
     "check_syntax": true,
+    "form_no_dash": true,
     "functional_writing": true,
     "obsolete_statement": {
       "refresh": true,
