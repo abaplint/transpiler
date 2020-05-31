@@ -19,13 +19,13 @@ async function transpile(source: string) {
 }
 
 export default async function ABAPLoader(source: string, _map: any, _meta: any) {
-  const result = await transpile.bind(this)(source);
+  const result: transpiler.IOutput[] = await transpile.bind(this)(source);
 
   let content = "";
   if (this.resourcePath.endsWith("zcl_foo.clas.abap")) { // hack for test case
-    content = "require('./zcl_bar.clas.abap');\n" + result.js[0].contents;
+    content = "require('./zcl_bar.clas.abap');\n" + result[0].js.contents;
   } else {
-    content = result.js[0].contents;
+    content = result[0].js.contents;
   }
 
   return content;
