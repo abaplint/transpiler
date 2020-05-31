@@ -98,6 +98,7 @@ ENDCLASS.`}],
     const stats = await run(fix);
 
     const modules = stats.toJson().modules;
+
     expect(modules?.length).to.equal(2);
     expect(modules![0].source).to.contain(`export class zcl_foo `);
     expect(modules![1].source).to.contain(`export class zcl_bar `);
