@@ -28,7 +28,8 @@ export function run(fixture: IFixture, options = {}): Promise<webpack.Stats> {
     },
   });
 
-  // there is something strange here, it needs to be able to resolve from virtual file system, but the file is read from physical?
+  // there is something strange with "loader.js", it needs to be able to resolve from virtual file system,
+  // but the file is read from physical?
   const jsonFiles: any = {"../src/loader.js": ""};
   for (const f of fixture.files) {
     jsonFiles[f.filename] = f.contents;

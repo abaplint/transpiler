@@ -19,8 +19,7 @@
     "require": "source-map-support/register"
   },
   "dependencies": {
-    "@abaplint/transpiler": "^0.4.10",
-    "loader-utils": "^2.0.0"
+    "@abaplint/transpiler": "^0.4.10"
   },
   "devDependencies": {
     "@types/chai": "^4.2.11",

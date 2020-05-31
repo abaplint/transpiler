@@ -45,7 +45,7 @@ ENDCLASS.`}],
     expect(output).to.contain(`export class`);
   });
 
-  it.skip("CLAS + INTF", async () => {
+  it("CLAS + INTF", async () => {
     const fix: IFixture = {
       entryFilename: "zcl_foobar.clas.abap",
       files: [{
@@ -61,14 +61,13 @@ CLASS zcl_foobar IMPLEMENTATION.
 ENDCLASS.`}, {
         filename: "zif_foobar.intf.abap",
         contents: `
-INTERFACE zif_foobar DEFINITION PUBLIC.
+INTERFACE zif_foobar PUBLIC..
   METHODS: run.
 ENDINTERFACE.`}],
     };
     const stats = await run(fix);
 
     const output = stats.toJson().modules![0].source;
-    console.dir(output);
     expect(output).to.contain(`export class`);
   });
 
