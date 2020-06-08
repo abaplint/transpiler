@@ -6,7 +6,11 @@ import {Traversal} from "../traversal";
 export class LoopTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
-    const source = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Source));
+    if (!(node.get() instanceof abaplint.Statements.Loop)) {
+      throw new Error("LoopTranspiler, unexpected node");
+    }
+
+    const source = traversal.traverse(node.findDirectExpression(abaplint.Expressions.BasicSource));
     const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
 
     const unique = UniqueIdentifier.get();
