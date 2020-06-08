@@ -1,7 +1,7 @@
 export class Structure {
-  private readonly value: object;
+  private readonly value: any;
 
-  public constructor(fields: object) {
+  public constructor(fields: any) {
     this.value = fields;
   }
 

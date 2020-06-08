@@ -6,6 +6,7 @@ import {IStatementTranspiler} from "./statements/_statement_transpiler";
 import {IExpressionTranspiler} from "./expressions/_expression_transpiler";
 import {IStructureTranspiler} from "./structures/_structure_transpiler";
 import {TranspileTypes} from "./types";
+import {IClassDefinition} from "@abaplint/core/build/src/abap/types/_class_definition";
 
 
 export class Traversal {
@@ -24,6 +25,8 @@ export class Traversal {
       return this.traverseStatement(node);
     } else if (node instanceof Nodes.ExpressionNode) {
       return this.traverseExpression(node);
+    } else if (node === undefined) {
+      throw new Error("Traverse, node undefined");
     } else {
       throw new Error("Traverse, unexpected node type");
     }
@@ -37,7 +40,7 @@ export class Traversal {
     return this.spaghetti;
   }
 
-  public getClassDefinition(token: Token) {
+  public getClassDefinition(token: Token): IClassDefinition | undefined {
     let scope = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
 
     while (scope !== undefined) {
