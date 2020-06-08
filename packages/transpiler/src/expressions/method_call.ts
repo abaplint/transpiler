@@ -13,11 +13,16 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
       ret = ret + "(";
     }
 
-    const source = node.findDirectExpression(Expressions.Source);
+    const step = node.findDirectExpression(Expressions.MethodCallParam);
+    if (step === undefined) {
+      throw new Error("MethodCallTranspiler, unexpected node");
+    }
+
+    const source = step.findDirectExpression(Expressions.Source);
     if (source) {
       ret = ret + traversal.traverse(source);
     }
-    const parameters = node.findDirectExpression(Expressions.ParameterListS);
+    const parameters = step.findDirectExpression(Expressions.ParameterListS);
     if (parameters) {
       ret = ret + traversal.traverse(parameters);
     }

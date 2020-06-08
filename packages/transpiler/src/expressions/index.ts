@@ -5,6 +5,7 @@ export * from "./component_chain_simple";
 export * from "./component_compare";
 export * from "./component_cond";
 export * from "./cond";
+export * from "./basic_source";
 export * from "./constant";
 export * from "./field_chain";
 export * from "./field_length";
