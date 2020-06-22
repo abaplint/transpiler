@@ -33,5 +33,6 @@ export * from "./sort";
 export * from "./split";
 export * from "./type";
 export * from "./when";
+export * from "./when_others";
 export * from "./while";
 export * from "./write";
