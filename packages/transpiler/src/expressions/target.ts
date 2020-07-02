@@ -13,9 +13,9 @@ export class TargetTranspiler implements IExpressionTranspiler {
           ret = "this.";
         }
         ret = ret + c.getFirstToken().getStr();
-      } else if (c.get() instanceof Expressions.FieldAll) {
+      } else if (c.get() instanceof Expressions.ComponentName) {
         ret = ret + c.getFirstToken().getStr();
-      } else if (c.get() instanceof Expressions.ArrowOrDash) {
+      } else if (c.getFirstToken().getStr() === "-") {
         ret = ret + ".get().";
       }
     }
