@@ -28,7 +28,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/chai": "^4.2.11",
-    "@types/mocha": "^7.0.2",
+    "@types/mocha": "^8.0.0",
     "chai": "^4.2.0",
     "mocha": "^8.0.1",
     "source-map-support": "^0.5.19",
