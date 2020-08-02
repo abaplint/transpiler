@@ -18,9 +18,8 @@ describe("Validation", () => {
 
     try {
       await runSingle(abap);
-      expect.fail();
     } catch (e) {
-      expect(e.message).to.contain("not found");
+      expect(e.message).to.contain("foo");
     }
   });
 
