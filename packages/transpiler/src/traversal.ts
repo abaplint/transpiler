@@ -1,4 +1,4 @@
-import {Nodes, INode, ScopeType, Token, ABAPObject, ISpaghettiScope, ABAPFile, ISpaghettiScopeNode} from "@abaplint/core";
+import {Nodes, INode, ScopeType, Token, ABAPObject, ISpaghettiScope, ABAPFile, ISpaghettiScopeNode, IClassDefinition} from "@abaplint/core";
 import * as StatementTranspilers from "./statements";
 import * as ExpressionTranspilers from "./expressions";
 import * as StructureTranspilers from "./structures";
@@ -6,7 +6,6 @@ import {IStatementTranspiler} from "./statements/_statement_transpiler";
 import {IExpressionTranspiler} from "./expressions/_expression_transpiler";
 import {IStructureTranspiler} from "./structures/_structure_transpiler";
 import {TranspileTypes} from "./types";
-import {IClassDefinition} from "@abaplint/core/build/src/abap/types/_class_definition";
 
 
 export class Traversal {
