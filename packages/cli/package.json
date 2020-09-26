@@ -1,10 +1,14 @@
 {
   "name": "@abaplint/transpiler-cli",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Transpiler - Command Line Interface",
   "bin": {
     "abap_transpile": "./abap_transpile"
   },
+  "keywords": [
+    "ABAP",
+    "abaplint"
+  ],
   "scripts": {
     "test": "tsc && npm run webpack",
     "prepublishOnly": "rm -rf build && npm run test",
@@ -13,7 +17,7 @@
   "author": "abaplint",
   "license": "MIT",
   "devDependencies": {
-    "@abaplint/transpiler": "^0.5.0",
+    "@abaplint/transpiler": "^0.5.1",
     "@types/glob": "^7.1.3",
     "glob": "^7.1.6",
     "webpack": "^4.44.2",
