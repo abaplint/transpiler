@@ -23,7 +23,12 @@ async function run() {
   }
   for (const o of output) {
     console.log(o.js.filename);
-    fs.writeFileSync(dir + path.sep + o.js.filename, o.js.contents);
+    let contents = o.js.contents;
+    for (const r of o.requires) {
+      contents += "Requires: " + r.name + r.type + "\n";
+    }
+    // todo, add o.exports to contents
+    fs.writeFileSync(dir + path.sep + o.js.filename, contents);
   }
 }
 

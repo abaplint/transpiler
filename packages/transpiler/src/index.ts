@@ -18,6 +18,7 @@ export interface IObjectIdentifier {
 export interface IOutput {
   object: IObjectIdentifier;
   requires: readonly IObjectIdentifier[];
+  exports: readonly string[];
   js: IFile; // one javascript output file for each object
 }
 
@@ -56,6 +57,7 @@ export class Transpiler {
     const spaghetti = new abaplint.SyntaxLogic(reg, obj).run().spaghetti;
 
     let result = "";
+    let exports: string[] = [];
     for (const file of obj.getSequencedFiles()) {
 
       let contents = new Traversal(spaghetti, file, obj).traverse(file.getStructure());
@@ -67,6 +69,8 @@ export class Transpiler {
       if (contents.length > 0) {
         result += new Indentation().run(contents);
       }
+
+      exports = exports.concat(this.findExports(file.getStructure()));
     }
 
     const filename = obj.getName() + "." + obj.getType() + ".js";
@@ -74,9 +78,24 @@ export class Transpiler {
       object: {name: obj.getName(), type: obj.getType()},
       js: {filename: filename.toLowerCase(), contents: result},
       requires: this.findRequires(spaghetti.getTop(), reg),
+      exports,
     };
 
     return output;
+  }
+
+  protected findExports(node: abaplint.Nodes.StructureNode | undefined): string[] {
+    if (node === undefined) {
+      return [];
+    }
+    const res: string[] = [];
+    for (const c of node.findAllStatements(abaplint.Statements.ClassDefinition)) {
+      const e = c.findFirstExpression(abaplint.Expressions.ClassName)?.getFirstToken().getStr();
+      if (e) {
+        res.push(e);
+      }
+    }
+    return res;
   }
 
   protected findRequires(node: abaplint.ISpaghettiScopeNode, reg: abaplint.IRegistry): IObjectIdentifier[] {

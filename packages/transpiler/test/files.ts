@@ -37,7 +37,9 @@ ENDCLASS.
     const output = (await new Transpiler().run([file1]));
 
     expect(output.length).to.equal(1);
-    expect(output[0].js.contents).to.match(/^export /i);
+    expect(output[0].js.contents).to.include("zcl_index");
+    expect(output[0].exports.length).to.equal(1);
+    expect(output[0].exports[0]).to.equal("zcl_index");
   });
 
   it("Global Class and testclasses", async () => {

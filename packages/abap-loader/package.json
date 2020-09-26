@@ -8,7 +8,7 @@
     "compile": "tsc",
     "prepublishOnly": "rm -rf build && npm run test",
     "pretest": "npm run compile",
-    "test": "mocha"
+    "test": "mocha --timeout 10000"
   },
   "author": "abaplint",
   "license": "MIT",
@@ -19,7 +19,7 @@
     "require": "source-map-support/register"
   },
   "dependencies": {
-    "@abaplint/transpiler": "^0.5.0"
+    "@abaplint/transpiler": "^0.5.1"
   },
   "devDependencies": {
     "@types/chai": "^4.2.12",
