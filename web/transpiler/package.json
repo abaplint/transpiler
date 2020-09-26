@@ -12,15 +12,15 @@
   "devDependencies": {
     "css-loader": "^4.3.0",
     "file-loader": "^6.1.0",
-    "html-webpack-plugin": "^4.4.1",
-    "monaco-editor": "^0.20.0",
+    "html-webpack-plugin": "^4.5.0",
+    "monaco-editor": "^0.21.1",
     "split-grid": "^1.0.9",
     "style-loader": "^1.2.1",
-    "ts-loader": "^8.0.3",
-    "typescript": "^4.0.2",
-    "webpack": "^4.44.1",
+    "ts-loader": "^8.0.4",
+    "typescript": "^4.0.3",
+    "webpack": "^4.44.2",
     "webpack-cli": "^3.3.12",
-    "@abaplint/monaco": "^2.42.4",
+    "@abaplint/monaco": "^2.51.0",
     "webpack-dev-server": "^3.11.0"
   }
 }

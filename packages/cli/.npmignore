@@ -1,0 +1,5 @@
+build/index*.*
+build/*.tsbuildinfo
+src/*
+webpack.config.js
+tsconfig.json
