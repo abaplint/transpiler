@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/abap-loader",
-  "version": "0.4.12",
+  "version": "0.5.0",
   "description": "Transpiler - Webpack Loader",
   "main": "build/src/loader.js",
   "typings": "build/src/loader.d.ts",
