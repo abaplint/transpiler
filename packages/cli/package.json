@@ -5,6 +5,10 @@
   "bin": {
     "abap_transpile": "./abap_transpile"
   },
+  "keywords": [
+    "ABAP",
+    "abaplint"
+  ],
   "scripts": {
     "test": "tsc && npm run webpack",
     "prepublishOnly": "rm -rf build && npm run test",
