@@ -1,0 +1,11 @@
+{
+  "name": "@abaplint/transpiler_cli",
+  "version": "0.4.4",
+  "description": "Transpiler - Command Line Interface",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "abaplint",
+  "license": "MIT"
+}
