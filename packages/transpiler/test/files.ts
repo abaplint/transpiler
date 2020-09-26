@@ -40,4 +40,35 @@ ENDCLASS.
     expect(output[0].js.contents).to.match(/^export /i);
   });
 
+  it("Global Class and testclasses", async () => {
+    const filename1 = "zcl_index.clas.abap";
+    const contents1 = `
+CLASS zcl_index DEFINITION PUBLIC.
+ENDCLASS.
+CLASS zcl_index IMPLEMENTATION.
+ENDCLASS.
+`;
+    const file1 = {filename: filename1, contents: contents1};
+
+    const filename2 = "zcl_index.clas.testclasses.abap";
+    const contents2 = `
+    CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS FINAL.
+    PRIVATE SECTION.
+      METHODS test FOR TESTING.
+  ENDCLASS.
+
+  CLASS ltcl_test IMPLEMENTATION.
+    METHOD test.
+      WRITE 'hello world'.
+    ENDMETHOD.
+  ENDCLASS.
+`;
+    const file2 = {filename: filename2, contents: contents2};
+
+    const output = (await new Transpiler().run([file1, file2]));
+
+    expect(output.length).to.equal(1);
+    expect(output[0].js.contents).to.include("ltcl_test");
+  });
+
 });

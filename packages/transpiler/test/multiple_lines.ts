@@ -26,7 +26,7 @@ describe("Multiple lines", () => {
   INTERFACE lif_foobar.
   ENDINTERFACE.`;
 
-    expect(await runSingle(abap)).to.equal(undefined);
+    expect(await runSingle(abap)).to.equal("");
   });
 
   it("TYPES should be skipped", async () => {
@@ -36,7 +36,7 @@ describe("Multiple lines", () => {
     value TYPE string,
   END OF ty_header.`;
 
-    expect(await runSingle(abap)).to.equal(undefined);
+    expect(await runSingle(abap)).to.equal("");
   });
 
   it("Simple class", async () => {

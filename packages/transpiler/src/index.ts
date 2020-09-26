@@ -23,7 +23,6 @@ export interface IOutput {
 
 export interface ITranspilerOptions {
   ignoreSyntaxCheck?: boolean;
-  includeUnitTests?: boolean;
 }
 
 export class Transpiler {
@@ -43,12 +42,8 @@ export class Transpiler {
     for (const abap of reg.getObjects()) {
       if (abap.getType() === "INTF") {
         continue;
-      }
-      if (abap instanceof abaplint.ABAPObject) {
-        const res = this.runObject(abap, reg);
-        if (res) {
-          output.push(res);
-        }
+      } else if (abap instanceof abaplint.ABAPObject) {
+        output.push(this.runObject(abap, reg));
       }
     }
 
@@ -57,34 +52,31 @@ export class Transpiler {
 
 // ///////////////////////////////
 
-  protected runObject(obj: abaplint.ABAPObject, reg: abaplint.IRegistry): IOutput | undefined {
+  protected runObject(obj: abaplint.ABAPObject, reg: abaplint.IRegistry): IOutput {
     const spaghetti = new abaplint.SyntaxLogic(reg, obj).run().spaghetti;
 
-    const file = obj.getMainABAPFile(); // todo, start with the right ABAP file
-    if (file === undefined) {
-      return undefined;
+    let result = "";
+    for (const file of obj.getSequencedFiles()) {
+
+      let contents = new Traversal(spaghetti, file, obj).traverse(file.getStructure());
+
+      if (contents.endsWith("\n")) {
+        contents = contents.substring(0, contents.length - 1);
+      }
+
+      if (contents.length > 0) {
+        result += new Indentation().run(contents);
+      }
     }
 
-    let contents = new Traversal(spaghetti, file, obj).traverse(file.getStructure());
+    const filename = obj.getName() + "." + obj.getType() + ".js";
+    const output: IOutput = {
+      object: {name: obj.getName(), type: obj.getType()},
+      js: {filename: filename.toLowerCase(), contents: result},
+      requires: this.findRequires(spaghetti.getTop(), reg),
+    };
 
-    if (contents.endsWith("\n")) {
-      contents = contents.substring(0, contents.length - 1);
-    }
-
-    if (contents.length > 0) {
-      const filename = file.getFilename().replace(new RegExp("\.abap$"), ".js");
-      contents = new Indentation().run(contents);
-
-      const output: IOutput = {
-        object: {name: obj.getName(), type: obj.getType()},
-        js: {filename, contents},
-        requires: this.findRequires(spaghetti.getTop(), reg),
-      };
-
-      return output;
-    }
-
-    return undefined;
+    return output;
   }
 
   protected findRequires(node: abaplint.ISpaghettiScopeNode, reg: abaplint.IRegistry): IObjectIdentifier[] {

@@ -17,10 +17,13 @@ async function run() {
   const t = new Transpiler.Transpiler();
   const output = await t.run(files);
 
-  fs.mkdirSync("output");
+  const dir = "output";
+  if (!fs.existsSync(dir)){
+    fs.mkdirSync(dir);
+  }
   for (const o of output) {
     console.log(o.js.filename);
-    fs.writeFileSync("output" + path.sep + o.js.filename, o.js.contents);
+    fs.writeFileSync(dir + path.sep + o.js.filename, o.js.contents);
   }
 }
 
