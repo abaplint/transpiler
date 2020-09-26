@@ -1,6 +1,6 @@
 {
-  "name": "@abaplint/transpiler_cli",
-  "version": "0.4.4",
+  "name": "@abaplint/transpiler-cli",
+  "version": "0.5.0",
   "description": "Transpiler - Command Line Interface",
   "main": "index.js",
   "scripts": {
