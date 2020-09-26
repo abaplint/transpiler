@@ -50,6 +50,7 @@ describe("Single statements", () => {
     {abap: "RETURN.",                                 js: "break;",                                    skip: true}, // todo, hmm?
     {abap: "method( ).",                              js: "this.method();",                            skip: false},
     {abap: "foo->method( ).",                         js: "foo.get().method();",                       skip: false},
+    {abap: "super->method( ).",                       js: "super.get().method();",                     skip: false}, // todo, super is special???
     {abap: "foo->method( 1 ).",                       js: "foo.get().method(1);",                      skip: true}, // todo, hmm, need to know the default parameter name?
     {abap: "foo->method( bar = 2 moo = 1 ).",         js: "foo.get().method({bar: 2, moo: 1});",       skip: false},
     {abap: "moo = foo->method( ).",                   js: "moo.set(foo.get().method());",              skip: false},
