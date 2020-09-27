@@ -27,7 +27,9 @@ async function run() {
     for (const r of o.requires) {
       contents += "Requires: " + r.name + r.type + "\n";
     }
-    // todo, add o.exports to contents
+    for (const e of o.exports) {
+      contents += "Export: " + e + "\n";
+    }
     fs.writeFileSync(dir + path.sep + o.js.filename, contents);
   }
 }
