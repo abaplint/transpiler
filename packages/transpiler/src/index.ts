@@ -26,6 +26,7 @@ export interface IOutput {
 
 export interface ITranspilerOptions {
   ignoreSyntaxCheck?: boolean;
+  addCommonJS?: boolean;
 }
 
 export class Transpiler {
@@ -82,7 +83,26 @@ export class Transpiler {
       exports,
     };
 
+    if (this.options?.addCommonJS === true) {
+      output.js.contents = this.addCommonJS(output);
+    }
+
     return output;
+  }
+
+  /** adds common js modules syntax */
+  protected addCommonJS(output: IOutput): string {
+    let contents = "";
+    for (const r of output.requires) {
+      const name = r.name.toLowerCase();
+      const filename = name + "." + r.type.toLowerCase() + ".js";
+      contents += "const " + name + " = require(" + filename + ")." + name + ";";
+    }
+    contents += output.js.contents;
+    if (output.exports.length > 0) {
+      contents += "module.exports = {" + output.exports.join(", ") + "};";
+    }
+    return contents;
   }
 
   protected findExports(node: abaplint.Nodes.StructureNode | undefined): string[] {
