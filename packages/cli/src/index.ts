@@ -25,8 +25,9 @@ async function run() {
     console.log(o.js.filename);
     let contents = "";
     for (const r of o.requires) {
-      const filename = (r.name + "." + r.type + ".js").toLowerCase();
-      contents += "require(" + filename + ");";
+      const name = r.name.toLowerCase();
+      const filename = (name + "." + r.type + ".js").toLowerCase();
+      contents += "const " + name + " = require(" + filename + ")." + name + ";";
     }
     contents += o.js.contents;
     if (o.exports.length > 0) {
