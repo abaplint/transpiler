@@ -24,7 +24,7 @@ Planned database support: [SQLite](https://www.sqlite.org) & [HANA Express](http
 
 ## Running
 
-Prerequsites: [Node.js](https://nodejs.org/) 10+
+Prerequsites: [Node.js](https://nodejs.org/) 12+
 
 `npm install`
 
