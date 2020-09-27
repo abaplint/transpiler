@@ -17,10 +17,20 @@ async function run() {
   const t = new Transpiler.Transpiler();
   const output = await t.run(files);
 
-  fs.mkdirSync("output");
+  const dir = "output";
+  if (!fs.existsSync(dir)){
+    fs.mkdirSync(dir);
+  }
   for (const o of output) {
     console.log(o.js.filename);
-    fs.writeFileSync("output" + path.sep + o.js.filename, o.js.contents);
+    let contents = o.js.contents;
+    for (const r of o.requires) {
+      contents += "Requires: " + r.name + r.type + "\n";
+    }
+    for (const e of o.exports) {
+      contents += "Export: " + e + "\n";
+    }
+    fs.writeFileSync(dir + path.sep + o.js.filename, contents);
   }
 }
 

@@ -10,7 +10,7 @@
         "compile": "cd packages/transpiler && npm run compile",
         "postcompile": "tsc",
         "pretest": "npm run compile",
-        "test": "mocha",
+        "test": "mocha --timeout 10000",
         "posttest": "npm run lint",
         "lint": "eslint packages/**/*.ts --format unix"
     },
@@ -203,7 +203,7 @@
     },
     "homepage": "https://github.com/abaplint/transpiler_poc#readme",
     "devDependencies": {
-        "@abaplint/core": "^2.51.0",
+        "@abaplint/core": "^2.52.0",
         "@types/chai": "^4.2.12",
         "@types/mocha": "^8.0.3",
         "@typescript-eslint/eslint-plugin": "^4.2.0",

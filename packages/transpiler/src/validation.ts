@@ -62,7 +62,7 @@ export const config: IConfig = {
         "^let$",	"^long$", "^native$", "^new$",
         "^null$",	"^package$", "^private$", "^protected$",
         "^public$",	"^return$", "^short$", "^static$",
-        "^super$",	"^switch$", "^synchronized$", "^this$",
+        "^switch$", "^synchronized$", "^this$",
         "^throw$",	"^throws$", "^transient$", "^true$",
         "^try$",	"^typeof$", "^var$", "^void$",
         "^volatile$",	"^while$", "^with$", "^yield$",

@@ -29,8 +29,8 @@ ENDCLASS.`;
 
     const output = await new Transpiler().run(files);
     expect(output.length).to.equal(2);
-    expect(output[0].js.contents).to.contain("export class zcl_foo ");
-    expect(output[1].js.contents).to.contain("export class zcl_bar ");
+    expect(output[0].js.contents).to.contain("class zcl_foo ");
+    expect(output[1].js.contents).to.contain("class zcl_bar ");
 
     expect(output[0].requires.length).to.equal(1, "expected one require");
     expect(output[0].requires[0].type).to.equal("CLAS");

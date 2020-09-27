@@ -50,6 +50,7 @@ describe("Single statements", () => {
     {abap: "RETURN.",                                 js: "break;",                                    skip: true}, // todo, hmm?
     {abap: "method( ).",                              js: "this.method();",                            skip: false},
     {abap: "foo->method( ).",                         js: "foo.get().method();",                       skip: false},
+    {abap: "super->method( ).",                       js: "super.get().method();",                     skip: false}, // todo, super is special???
     {abap: "foo->method( 1 ).",                       js: "foo.get().method(1);",                      skip: true}, // todo, hmm, need to know the default parameter name?
     {abap: "foo->method( bar = 2 moo = 1 ).",         js: "foo.get().method({bar: 2, moo: 1});",       skip: false},
     {abap: "moo = foo->method( ).",                   js: "moo.set(foo.get().method());",              skip: false},
@@ -68,7 +69,7 @@ describe("Single statements", () => {
     {abap: "WRITE |foo{ lines( lt_words ) }bar|.",    js: "abap.statements.write(`foo${abap.builtin.lines(lt_words).get()}bar`);",  skip: false},
     {abap: "ASSERT 'a' < 'b'.",                       js: "abap.statements.assert(abap.compare.lt('a', 'b'));",   skip: false},
     {abap: "rs_response-body = 'hello'.",             js: "rs_response.get().body.set('hello');",                 skip: false},
-    {abap: "TYPES foo TYPE c.",                       js: undefined,                                              skip: false}, // yes, skip TYPES
+    {abap: "TYPES foo TYPE c.",                       js: "",                                              skip: false}, // yes, skip TYPES
     {abap: "IF ls_request-body = ''.\nENDIF.",        js: "if (abap.compare.eq(ls_request.get().body, '')) {\n}", skip: false},
     {abap: "CONCATENATE 'foo' 'bar' INTO target.",    js: "abap.statements.concatenate({source: ['foo','bar'], target: target});", skip: false},
     {abap: "zcl_bar=>do_something( ).",               js: "zcl_bar.do_something();",                  skip: false},
