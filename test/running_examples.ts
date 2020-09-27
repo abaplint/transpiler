@@ -460,4 +460,21 @@ ASSERT data1-moo = 0.`;
     f(abap);
   });
 
+  it("basic FIELD-SYMBOLS", async () => {
+    const code = `
+  DATA da TYPE i.
+  FIELD-SYMBOLS <fs> TYPE i.
+  ASSIGN da TO <fs>.
+  da = 1.
+  ASSERT da = 1.
+  ASSERT <fs> = 1.
+  <fs> = 2.
+  ASSERT da = 2.
+  ASSERT <fs> = 2.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });

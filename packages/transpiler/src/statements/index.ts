@@ -1,5 +1,6 @@
 export * from "./append";
 export * from "./assert";
+export * from "./assign";
 export * from "./call";
 export * from "./case";
 export * from "./catch";
@@ -23,6 +24,7 @@ export * from "./end_method";
 export * from "./end_try";
 export * from "./end_while";
 export * from "./exit";
+export * from "./field_symbol";
 export * from "./form";
 export * from "./get_bit";
 export * from "./if";
