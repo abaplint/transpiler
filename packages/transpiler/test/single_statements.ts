@@ -77,7 +77,10 @@ describe("Single statements", () => {
     {abap: "SET BIT foo OF bar TO moo.",              js: "abap.statements.setBit(foo, bar, moo);",   skip: false},
     {abap: "GET BIT foo OF bar INTO moo.",            js: "abap.statements.getBit(foo, bar, moo);",   skip: false},
     {abap: "WRITE sy-index.",                         js: "abap.statements.write(abap.builtin.sy.get().index);",   skip: false},
-
+    {abap: "FIELD-SYMBOLS <bar> TYPE i.",             js: "let fs_bar_ = undefined;",                              skip: false},
+    {abap: "ASSIGN da TO <name>.",                    js: "fs_name_ = da;",                                        skip: false},
+    {abap: "ASSERT <name> = 1.",                      js: "abap.statements.assert(abap.compare.eq(fs_name_, 1));", skip: false},
+    {abap: "<name> = 1.",                             js: "fs_name_.set(1);",                                      skip: false},
   ];
 
   for (const test of tests) {

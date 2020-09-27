@@ -422,4 +422,59 @@ ASSERT data1-moo = 0.`;
     f(abap);
   });
 
+  it("CLASS-DATA", async () => {
+    const code = `
+    CLASS zcl_words DEFINITION.
+      PUBLIC SECTION.
+        CLASS-DATA bar TYPE i.
+        METHODS: run.
+    ENDCLASS.
+
+    CLASS zcl_words IMPLEMENTATION.
+      METHOD run.
+        bar = 2.
+      ENDMETHOD.
+    ENDCLASS.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("CLASS-DATA, type ref", async () => {
+    const code = `
+    CLASS zcl_words DEFINITION.
+      PUBLIC SECTION.
+        CLASS-DATA bar TYPE REF TO zcl_words.
+        METHODS: run.
+    ENDCLASS.
+
+    CLASS zcl_words IMPLEMENTATION.
+      METHOD run.
+        CREATE OBJECT bar.
+      ENDMETHOD.
+    ENDCLASS.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("basic FIELD-SYMBOLS", async () => {
+    const code = `
+  DATA da TYPE i.
+  FIELD-SYMBOLS <fs> TYPE i.
+  ASSIGN da TO <fs>.
+  da = 1.
+  ASSERT da = 1.
+  ASSERT <fs> = 1.
+  <fs> = 2.
+  ASSERT da = 2.
+  ASSERT <fs> = 2.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });

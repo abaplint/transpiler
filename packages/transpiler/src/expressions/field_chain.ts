@@ -2,6 +2,7 @@ import {Expressions, Nodes} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {FieldLengthTranspiler, FieldOffsetTranspiler} from ".";
 import {Traversal} from "../traversal";
+import {FieldSymbolTranspiler} from "./field_symbol";
 
 export class FieldChainTranspiler implements IExpressionTranspiler {
   private addGet: boolean;
@@ -24,6 +25,9 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
         }
 
         ret = ret + name;
+      } else if (c instanceof Nodes.ExpressionNode
+          && c.get() instanceof Expressions.SourceFieldSymbol) {
+        ret = ret + new FieldSymbolTranspiler().transpile(c, traversal);
       } else if (c.get() instanceof Expressions.ComponentName) {
         ret = ret + c.getFirstToken().getStr();
       } else if (c instanceof Nodes.TokenNode) {
