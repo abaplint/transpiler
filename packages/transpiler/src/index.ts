@@ -2,6 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {Validation, config} from "./validation";
 import {Indentation} from "./indentation";
 import {Traversal} from "./traversal";
+import {Requires} from "./requires";
 
 export {config};
 
@@ -15,11 +16,12 @@ export interface IObjectIdentifier {
   type: string,
 }
 
+/** one javascript output file for each object */
 export interface IOutput {
   object: IObjectIdentifier;
+  js: IFile;
   requires: readonly IObjectIdentifier[];
   exports: readonly string[];
-  js: IFile; // one javascript output file for each object
 }
 
 export interface ITranspilerOptions {
@@ -60,12 +62,7 @@ export class Transpiler {
     let exports: string[] = [];
     for (const file of obj.getSequencedFiles()) {
 
-      let contents = new Traversal(spaghetti, file, obj).traverse(file.getStructure());
-
-      if (contents.endsWith("\n")) {
-        contents = contents.substring(0, contents.length - 1);
-      }
-
+      const contents = new Traversal(spaghetti, file, obj).traverse(file.getStructure());
       if (contents.length > 0) {
         result += new Indentation().run(contents);
       }
@@ -73,11 +70,15 @@ export class Transpiler {
       exports = exports.concat(this.findExports(file.getStructure()));
     }
 
+    if (result.endsWith("\n")) {
+      result = result.substring(0, result.length - 1);
+    }
+
     const filename = obj.getName() + "." + obj.getType() + ".js";
     const output: IOutput = {
       object: {name: obj.getName(), type: obj.getType()},
       js: {filename: filename.toLowerCase(), contents: result},
-      requires: this.findRequires(spaghetti.getTop(), reg),
+      requires: new Requires(reg).find(spaghetti.getTop()),
       exports,
     };
 
@@ -96,27 +97,6 @@ export class Transpiler {
       }
     }
     return res;
-  }
-
-  protected findRequires(node: abaplint.ISpaghettiScopeNode, reg: abaplint.IRegistry): IObjectIdentifier[] {
-    let ret: IObjectIdentifier[] = [];
-
-    for (const v of node.getData().vars) {
-      const type = v.identifier.getType();
-      if (v.identifier.getName() !== "me" // todo, this is a hack
-          && type instanceof abaplint.BasicTypes.ObjectReferenceType) {
-        const found = reg.getObject("CLAS", type.getName());
-        if (found) {
-          ret.push({type: found.getType(), name: found.getName()});
-        }
-      }
-    }
-
-    for (const c of node.getChildren()) {
-      ret = ret.concat(this.findRequires(c, reg));
-    }
-
-    return ret;
   }
 
   protected validate(reg: abaplint.IRegistry): void {
