@@ -47,8 +47,6 @@ export class Traversal {
           || scope.getIdentifier().stype === ScopeType.ClassDefinition) {
 
         return scope.findClassDefinition(scope?.getIdentifier().sname);
-
-//        return this.obj.getClassDefinition(scope?.getIdentifier().sname);
       }
       scope = scope.getParent();
     }

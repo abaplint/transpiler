@@ -7,9 +7,14 @@ import {Traversal} from "../traversal";
 export class DoTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
-    const source = new SourceTranspiler(true).transpile(node.findFirstExpression(abaplint.Expressions.Source)!, traversal);
-    const id = UniqueIdentifier.get();
-    return "for (let " + id + " = 0; " + id + " < " + source + "; " + id + "++) {";
+    const found = node.findFirstExpression(abaplint.Expressions.Source);
+    if (found) {
+      const source = new SourceTranspiler(true).transpile(found, traversal);
+      const id = UniqueIdentifier.get();
+      return "for (let " + id + " = 0; " + id + " < " + source + "; " + id + "++) {";
+    } else {
+      return "while (true) {";
+    }
   }
 
 }
