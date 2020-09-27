@@ -16,11 +16,12 @@ async function run() {
 
   const options: Transpiler.ITranspilerOptions = {
     ignoreSyntaxCheck: false,
-//    addCommonJS: true,
+    addCommonJS: true,
   };
   const t = new Transpiler.Transpiler(options);
   const output = await t.run(files);
 
+  console.log("\nOutput");
   const outputFolder = "output";
   if (!fs.existsSync(outputFolder)) {
     fs.mkdirSync(outputFolder);

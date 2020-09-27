@@ -96,11 +96,11 @@ export class Transpiler {
     for (const r of output.requires) {
       const name = r.name.toLowerCase();
       const filename = name + "." + r.type.toLowerCase() + ".js";
-      contents += "const " + name + " = require(" + filename + ")." + name + ";";
+      contents += "const " + name + " = require(\"./" + filename + "\")." + name + ";\n";
     }
     contents += output.js.contents;
     if (output.exports.length > 0) {
-      contents += "module.exports = {" + output.exports.join(", ") + "};";
+      contents += "\nmodule.exports = {" + output.exports.join(", ") + "};";
     }
     return contents;
   }
