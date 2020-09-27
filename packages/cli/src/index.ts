@@ -18,6 +18,7 @@ async function run() {
     ignoreSyntaxCheck: false,
     addCommonJS: true,
   };
+  console.log("\nBuilding");
   const t = new Transpiler.Transpiler(options);
   const output = await t.run(files);
 

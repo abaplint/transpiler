@@ -47,8 +47,6 @@ export class Traversal {
           || scope.getIdentifier().stype === ScopeType.ClassDefinition) {
 
         return scope.findClassDefinition(scope?.getIdentifier().sname);
-
-//        return this.obj.getClassDefinition(scope?.getIdentifier().sname);
       }
       scope = scope.getParent();
     }
@@ -125,7 +123,7 @@ export class Traversal {
       const transpiler = new list[search]() as IStatementTranspiler;
       return transpiler.transpile(node, this) + "\n";
     }
-    throw new Error(`Statement ${node.get().constructor.name} not supported`);
+    throw new Error(`Statement ${node.get().constructor.name} not supported, ${node.concatTokens()}`);
   }
 
   protected traverseExpression(node: Nodes.ExpressionNode): string {
@@ -135,7 +133,7 @@ export class Traversal {
       const transpiler = new list[search]() as IExpressionTranspiler;
       return transpiler.transpile(node, this);
     }
-    throw new Error(`Expression ${node.get().constructor.name} not supported`);
+    throw new Error(`Expression ${node.get().constructor.name} not supported, ${node.concatTokens()}`);
   }
 
 }

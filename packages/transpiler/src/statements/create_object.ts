@@ -15,7 +15,7 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
     const found = scope.findVariable(target);
     if (found === undefined) {
 // todo, chained stuff?
-      throw new Error("CreateObjectTranspiler, target variable not found in scope");
+      throw new Error("CreateObjectTranspiler, target variable not found in scope, \"" + target + "\"");
     }
 
 // todo, handle constructor parameters

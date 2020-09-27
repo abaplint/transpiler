@@ -15,7 +15,7 @@ export class DataTranspiler implements IStatementTranspiler {
 
     const found = scope.findVariable(token.getStr());
     if (found === undefined) {
-      throw new Error("DataTranspiler, var not found");
+      throw new Error("DataTranspiler, var not found, \"" + token.getStr() + "\"");
     }
 
 // todo, refactor this part to use value from TypedIdentifier

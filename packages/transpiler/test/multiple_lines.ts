@@ -260,4 +260,30 @@ ENDCLASS.`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
+  it("TRY, CATCH", async () => {
+    const abap = `
+TRY.
+CATCH cx_root.
+ENDTRY.`;
+
+    const expected =
+`try {
+} catch (e) {
+}`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.equal(expected);
+  });
+
+  it("DO. ENDDO.", async () => {
+    const abap = `
+DO.
+ENDDO.`;
+
+    const expected =
+`while (true) {
+}`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.equal(expected);
+  });
+
 });
