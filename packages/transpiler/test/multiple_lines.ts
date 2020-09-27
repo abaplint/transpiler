@@ -286,4 +286,26 @@ ENDDO.`;
     expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.equal(expected);
   });
 
+  it("Class constant, should set value", async () => {
+    const abap = `
+CLASS zcl_ret DEFINITION.
+  PRIVATE SECTION.
+    CONSTANTS: c_maxdcodes TYPE i VALUE 30.
+ENDCLASS.
+
+CLASS zcl_ret IMPLEMENTATION.
+ENDCLASS.`;
+
+    const expected = `class zcl_ret {
+  constructor() {
+    this.me = new abap.types.ABAPObject();
+  }
+}
+zcl_ret.c_maxdcodes = new abap.types.Integer();
+zcl_ret.c_maxdcodes.set(30);
+`;
+
+    expect(await runSingle(abap)).to.equal(expected);
+  });
+
 });

@@ -11,48 +11,48 @@ export class Requires {
   }
 
   public find(node: abaplint.ISpaghettiScopeNode): readonly IObjectIdentifier[] {
-    let ret: IObjectIdentifier[] = [];
+    const ret: IObjectIdentifier[] = [];
 
-// this finds all OO instance variables
-/*
-    for (const v of node.getData().vars) {
-      const type = v.identifier.getType();
-      if (v.identifier.getName() !== "me" // todo, this is a hack
-          && type instanceof abaplint.BasicTypes.ObjectReferenceType) {
-        const found = this.lookup(type.getName());
-        if (found) {
-          ret.push({type: found.getType(), name: found.getName()});
+    const add = function (obj: IObjectIdentifier | undefined) {
+      if (obj === undefined) {
+        return;
+      }
+      for (const r of ret) {
+        if (r.type === obj.type && r.name === obj.name) {
+          return;
         }
       }
-    }
-    */
+      ret.push(obj);
+    };
 
 // this finds all OO references
     for (const v of node.getData().references) {
-      // todo, use the enum
+      // todo, use the enum from abaplint, when its exported
       if (v.referenceType === "ObjectOrientedReference") {
-        const found = this.lookup(v.resolved.getName());
-        if (found) {
-          ret.push({type: found.getType(), name: found.getName()});
-        }
+        add(this.lookup(v.resolved.getName()));
       }
     }
 
     for (const c of node.getChildren()) {
-      ret = ret.concat(this.find(c));
+      for (const f of this.find(c)) {
+        add(f);
+      }
     }
-
-// todo, duplicates?
 
     return ret;
   }
 
-  private lookup(name: string) {
+//////////////////////////
+
+  private lookup(name: string): IObjectIdentifier | undefined {
     if (name.toUpperCase() === this.obj.getName().toUpperCase()) {
       return undefined;
     }
     const found = this.reg.getObject("CLAS", name);
-    return found;
+    if (found) {
+      return {type: found.getType(), name: found.getName()};
+    }
+    return undefined;
   }
 
 }

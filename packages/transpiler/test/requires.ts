@@ -46,6 +46,7 @@ ENDCLASS.
 CLASS zcl_foo IMPLEMENTATION.
   METHOD run.
     cl_abap_unit_assert=>assert_equals( act = 'Y' exp = 'X' ).
+    cl_abap_unit_assert=>assert_equals( act = 'Y' exp = 'X' ).
   ENDMETHOD.
 ENDCLASS.`;
 
