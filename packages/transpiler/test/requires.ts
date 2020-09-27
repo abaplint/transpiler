@@ -79,4 +79,26 @@ ENDCLASS.`;
     expect(output[0].requires[0].name).to.equal("CL_ABAP_UNIT_ASSERT");
   });
 
+  it("Dont require itself", async () => {
+    const clas1 = `
+CLASS zcl_foo DEFINITION PUBLIC FINAL CREATE PUBLIC.
+  PUBLIC SECTION.
+    METHODS: run.
+ENDCLASS.
+CLASS zcl_foo IMPLEMENTATION.
+  METHOD run.
+    DATA bar TYPE REF TO zcl_foo.
+    CREATE OBJECT bar.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const files = [{filename: "zcl_foo.clas.abap", contents: clas1}];
+
+    const output = await new Transpiler().run(files);
+    expect(output.length).to.equal(1);
+    expect(output[0].js.contents).to.contain("class zcl_foo ");
+
+    expect(output[0].requires.length).to.equal(0, "expected zero requires");
+  });
+
 });

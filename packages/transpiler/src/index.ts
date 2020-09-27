@@ -79,7 +79,7 @@ export class Transpiler {
     const output: IOutput = {
       object: {name: obj.getName(), type: obj.getType()},
       js: {filename: filename.toLowerCase(), contents: result},
-      requires: new Requires(reg).find(spaghetti.getTop()),
+      requires: new Requires(reg, obj).find(spaghetti.getTop()),
       exports,
     };
 

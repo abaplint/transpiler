@@ -3,9 +3,11 @@ import {IObjectIdentifier} from ".";
 
 export class Requires {
   private readonly reg: abaplint.IRegistry;
+  private readonly obj: abaplint.ABAPObject;
 
-  public constructor(reg: abaplint.IRegistry) {
+  public constructor(reg: abaplint.IRegistry, obj: abaplint.ABAPObject) {
     this.reg = reg;
+    this.obj = obj;
   }
 
   public find(node: abaplint.ISpaghettiScopeNode): readonly IObjectIdentifier[] {
@@ -46,6 +48,9 @@ export class Requires {
   }
 
   private lookup(name: string) {
+    if (name.toUpperCase() === this.obj.getName().toUpperCase()) {
+      return undefined;
+    }
     const found = this.reg.getObject("CLAS", name);
     return found;
   }
