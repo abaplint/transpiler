@@ -1,4 +1,4 @@
-import {Nodes, INode, ScopeType, Token, ABAPObject, ISpaghettiScope, ABAPFile, ISpaghettiScopeNode, IClassDefinition} from "@abaplint/core";
+import * as abaplint from "@abaplint/core";
 import * as StatementTranspilers from "./statements";
 import * as ExpressionTranspilers from "./expressions";
 import * as StructureTranspilers from "./structures";
@@ -9,20 +9,20 @@ import {TranspileTypes} from "./types";
 
 
 export class Traversal {
-  private readonly spaghetti: ISpaghettiScope;
-  private readonly file: ABAPFile;
+  private readonly spaghetti: abaplint.ISpaghettiScope;
+  private readonly file: abaplint.ABAPFile;
 
-  public constructor(spaghetti: ISpaghettiScope, file: ABAPFile, _obj: ABAPObject) {
+  public constructor(spaghetti: abaplint.ISpaghettiScope, file: abaplint.ABAPFile, _obj: abaplint.ABAPObject) {
     this.spaghetti = spaghetti;
     this.file = file;
   }
 
-  public traverse(node: INode | undefined): string {
-    if (node instanceof Nodes.StructureNode) {
+  public traverse(node: abaplint.INode | undefined): string {
+    if (node instanceof abaplint.Nodes.StructureNode) {
       return this.traverseStructure(node);
-    } else if (node instanceof Nodes.StatementNode) {
+    } else if (node instanceof abaplint.Nodes.StatementNode) {
       return this.traverseStatement(node);
-    } else if (node instanceof Nodes.ExpressionNode) {
+    } else if (node instanceof abaplint.Nodes.ExpressionNode) {
       return this.traverseExpression(node);
     } else if (node === undefined) {
       throw new Error("Traverse, node undefined");
@@ -35,16 +35,16 @@ export class Traversal {
     return this.file.getFilename();
   }
 
-  public getSpaghetti(): ISpaghettiScope {
+  public getSpaghetti(): abaplint.ISpaghettiScope {
     return this.spaghetti;
   }
 
-  public getClassDefinition(token: Token): IClassDefinition | undefined {
+  public getClassDefinition(token: abaplint.Token): abaplint.IClassDefinition | undefined {
     let scope = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
 
     while (scope !== undefined) {
-      if (scope.getIdentifier().stype === ScopeType.ClassImplementation
-          || scope.getIdentifier().stype === ScopeType.ClassDefinition) {
+      if (scope.getIdentifier().stype === abaplint.ScopeType.ClassImplementation
+          || scope.getIdentifier().stype === abaplint.ScopeType.ClassDefinition) {
 
         return scope.findClassDefinition(scope?.getIdentifier().sname);
       }
@@ -54,7 +54,7 @@ export class Traversal {
     return undefined;
   }
 
-  public isClassAttribute(token: Token): boolean {
+  public isClassAttribute(token: abaplint.Token): boolean {
     const scope = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
     if (scope === undefined) {
       throw new Error("isClassAttribute, unable to lookup position");
@@ -62,13 +62,13 @@ export class Traversal {
 
     const name = token.getStr();
     const found = scope.findScopeForVariable(name);
-    if (found && found.stype === ScopeType.ClassImplementation) {
+    if (found && found.stype === abaplint.ScopeType.ClassImplementation) {
       return true;
     }
     return false;
   }
 
-  public isBuiltin(token: Token): boolean {
+  public isBuiltin(token: abaplint.Token): boolean {
     const scope = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
     if (scope === undefined) {
       throw new Error("isBuiltin, unable to lookup position");
@@ -76,13 +76,13 @@ export class Traversal {
 
     const name = token.getStr();
     const found = scope.findScopeForVariable(name);
-    if (found && found.stype === ScopeType.BuiltIn) {
+    if (found && found.stype === abaplint.ScopeType.BuiltIn) {
       return true;
     }
     return false;
   }
 
-  public buildConstructorContents(scope: ISpaghettiScopeNode | undefined): string {
+  public buildConstructorContents(scope: abaplint.ISpaghettiScopeNode | undefined): string {
     const vars = scope?.getData().vars;
     if (vars === undefined || vars.length === 0) {
       return "";
@@ -94,12 +94,28 @@ export class Traversal {
     return ret;
   }
 
-  protected traverseStructure(node: Nodes.StructureNode): string {
+  public determineType(node: abaplint.Nodes.ExpressionNode | abaplint.Nodes.StatementNode,
+                       scope: abaplint.ISpaghettiScopeNode): abaplint.AbstractType | undefined {
+    const found = node.findDirectExpression(abaplint.Expressions.Target);
+    if (found === undefined) {
+      return undefined;
+    }
+
+    const v = scope.findVariable(found.concatTokens());
+    if (v) {
+      return v.getType();
+    }
+    return undefined;
+  }
+
+////////////////////////////
+
+  protected traverseStructure(node: abaplint.Nodes.StructureNode): string {
     const list: any = StructureTranspilers;
     let ret = "";
 
     for (const c of node.getChildren()) {
-      if (c instanceof Nodes.StructureNode) {
+      if (c instanceof abaplint.Nodes.StructureNode) {
         const search = c.get().constructor.name + "Transpiler";
         if (list[search]) {
           const transpiler = new list[search]() as IStructureTranspiler;
@@ -107,7 +123,7 @@ export class Traversal {
           continue;
         }
         ret = ret + this.traverseStructure(c);
-      } else if (c instanceof Nodes.StatementNode) {
+      } else if (c instanceof abaplint.Nodes.StatementNode) {
         ret = ret + this.traverseStatement(c);
       } else {
         throw new Error("traverseStructure, unexpected child node type");
@@ -116,7 +132,7 @@ export class Traversal {
     return ret;
   }
 
-  protected traverseStatement(node: Nodes.StatementNode): string {
+  protected traverseStatement(node: abaplint.Nodes.StatementNode): string {
     const list: any = StatementTranspilers;
     const search = node.get().constructor.name + "Transpiler";
     if (list[search]) {
@@ -126,7 +142,7 @@ export class Traversal {
     throw new Error(`Statement ${node.get().constructor.name} not supported, ${node.concatTokens()}`);
   }
 
-  protected traverseExpression(node: Nodes.ExpressionNode): string {
+  protected traverseExpression(node: abaplint.Nodes.ExpressionNode): string {
     const list: any = ExpressionTranspilers;
     const search = node.get().constructor.name + "Transpiler";
     if (list[search]) {

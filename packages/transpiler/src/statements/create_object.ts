@@ -12,15 +12,15 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
 
     const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
 
-    const found = scope.findVariable(target);
-    if (found === undefined) {
+    const type = traversal.determineType(node, scope);
+    if (type === undefined) {
 // todo, chained stuff?
       throw new Error("CreateObjectTranspiler, target variable not found in scope, \"" + target + "\"");
     }
 
 // todo, handle constructor parameters
 
-    const obj = found.getType() as abaplint.BasicTypes.ObjectReferenceType;
+    const obj = type as abaplint.BasicTypes.ObjectReferenceType;
     return target + ".set(new " + obj.getName() + "());";
   }
 
