@@ -27,7 +27,7 @@ ENDCLASS.`;
       {filename: "zcl_foo.clas.abap", contents: clas1},
       {filename: "zcl_bar.clas.abap", contents: clas2}];
 
-    const output = await new Transpiler().run(files);
+    const output = (await new Transpiler().run(files)).objects;
     expect(output.length).to.equal(2);
     expect(output[0].js.contents).to.contain("class zcl_foo ");
     expect(output[1].js.contents).to.contain("class zcl_bar ");
@@ -70,7 +70,7 @@ ENDCLASS.`;
       {filename: "zcl_foo.clas.abap", contents: clas1},
       {filename: "cl_abap_unit_assert.clas.abap", contents: clas2}];
 
-    const output = await new Transpiler().run(files);
+    const output = (await new Transpiler().run(files)).objects;
     expect(output.length).to.equal(2);
     expect(output[0].js.contents).to.contain("class zcl_foo ");
     expect(output[1].js.contents).to.contain("class cl_abap_unit_assert ");
@@ -95,7 +95,7 @@ ENDCLASS.`;
 
     const files = [{filename: "zcl_foo.clas.abap", contents: clas1}];
 
-    const output = await new Transpiler().run(files);
+    const output = (await new Transpiler().run(files)).objects;
     expect(output.length).to.equal(1);
     expect(output[0].js.contents).to.contain("class zcl_foo ");
 
