@@ -85,6 +85,7 @@ describe("Single statements", () => {
     {abap: "CONSTANTS c TYPE i VALUE 1.",             js: "let c = new abap.types.Integer();\nc.set(1);",          skip: false},
     {abap: "READ TABLE tab INDEX i INTO target.",     js: "target.set(tab.array()[i.get() - 1].get());",           skip: false},
     {abap: "READ TABLE tab INDEX i ASSIGNING <nam>.", js: "fs_nam_ = tab.array()[i.get() - 1];",                   skip: false},
+    {abap: "WRITE |foo| && |bar|.",                   js: "abap.statements.write(`foo` + `bar`);",                 skip: false},
   ];
 
   for (const test of tests) {
