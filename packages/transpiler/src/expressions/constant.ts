@@ -6,7 +6,7 @@ export class ConstantTranspiler implements IExpressionTranspiler {
   public transpile(node: Nodes.ExpressionNode): string {
     const int = node.findFirstExpression(Expressions.Integer);
     if (int) {
-      return int.getFirstToken().getStr();
+      return "constant_" + int.getFirstToken().getStr();
     }
 
     const str = node.findFirstExpression(Expressions.ConstantString);
