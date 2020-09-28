@@ -302,8 +302,7 @@ ENDCLASS.`;
   }
 }
 zcl_ret.c_maxdcodes = new abap.types.Integer();
-zcl_ret.c_maxdcodes.set(30);
-`;
+zcl_ret.c_maxdcodes.set(30);`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });
