@@ -33,7 +33,8 @@ export class TranspileTypes {
       }
     } else if (type instanceof abaplint.BasicTypes.PackedType) {
       resolved = "Packed";
-    } else if (type instanceof abaplint.BasicTypes.XStringType) {
+    } else if (type instanceof abaplint.BasicTypes.XStringType
+        || type instanceof abaplint.BasicTypes.XSequenceType) {
       resolved = "XString";
     } else if (type instanceof abaplint.BasicTypes.HexType) {
       resolved = "Hex";

@@ -28,6 +28,11 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
       } else if (c instanceof Nodes.ExpressionNode
           && c.get() instanceof Expressions.SourceFieldSymbol) {
         ret = ret + new FieldSymbolTranspiler().transpile(c, traversal);
+      } else if (c instanceof Nodes.ExpressionNode
+          && c.get() instanceof Expressions.ClassName) {
+        ret += c.getFirstToken().getStr().toLowerCase() + ".";
+      } else if (c.get() instanceof Expressions.AttributeName) {
+        ret = ret + c.getFirstToken().getStr();
       } else if (c.get() instanceof Expressions.ComponentName) {
         ret = ret + c.getFirstToken().getStr();
       } else if (c instanceof Nodes.TokenNode) {

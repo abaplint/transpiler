@@ -68,10 +68,10 @@ describe("Single statements", () => {
     {abap: "ASSERT 0 = 1.",                           js: "abap.statements.assert(abap.compare.eq(0, 1));",                         skip: false},
     {abap: "APPEND lv_word TO lt_letters.",           js: "abap.statements.append({source: lv_word, target: lt_letters});",         skip: false},
     {abap: "WRITE |foo{ lines( lt_words ) }bar|.",    js: "abap.statements.write(`foo${abap.builtin.lines(lt_words).get()}bar`);",  skip: false},
-    {abap: "ASSERT 'a' < 'b'.",                       js: "abap.statements.assert(abap.compare.lt('a', 'b'));",   skip: false},
-    {abap: "rs_response-body = 'hello'.",             js: "rs_response.get().body.set('hello');",                 skip: false},
-    {abap: "TYPES foo TYPE c.",                       js: "",                                              skip: false}, // yes, skip TYPES
-    {abap: "IF ls_request-body = ''.\nENDIF.",        js: "if (abap.compare.eq(ls_request.get().body, '')) {\n}", skip: false},
+    {abap: "ASSERT 'a' < 'b'.",                       js: "abap.statements.assert(abap.compare.lt('a', 'b'));",    skip: false},
+    {abap: "rs_response-body = 'hello'.",             js: "rs_response.get().body.set('hello');",                  skip: false},
+    {abap: "TYPES foo TYPE c.",                       js: "",                                                      skip: false}, // yes, skip TYPES
+    {abap: "IF ls_request-body = ''.\nENDIF.",        js: "if (abap.compare.eq(ls_request.get().body, '')) {\n}",  skip: false},
     {abap: "CONCATENATE 'foo' 'bar' INTO target.",    js: "abap.statements.concatenate({source: ['foo','bar'], target: target});", skip: false},
     {abap: "zcl_bar=>do_something( ).",               js: "zcl_bar.do_something();",                               skip: false},
     {abap: "SET BIT foo OF bar.",                     js: "abap.statements.setBit(foo, bar);",                     skip: false},
@@ -86,6 +86,9 @@ describe("Single statements", () => {
     {abap: "READ TABLE tab INDEX i INTO target.",     js: "target.set(tab.array()[i.get() - 1].get());",           skip: false},
     {abap: "READ TABLE tab INDEX i ASSIGNING <nam>.", js: "fs_nam_ = tab.array()[i.get() - 1];",                   skip: false},
     {abap: "WRITE |foo| && |bar|.",                   js: "abap.statements.write(`foo` + `bar`);",                 skip: false},
+    {abap: "lv_index = foo - 1 + lv_distance.",       js: "todo;",                                                 skip: true},
+    {abap: "WRITE zcl_name=>c_maxbits.",              js: "abap.statements.write(zcl_name.c_maxbits);",            skip: false},
+    {abap: "WRITE |`|.",                              js: "abap.statements.write(`\\``);",                         skip: false},
   ];
 
   for (const test of tests) {
