@@ -35,6 +35,8 @@ export class SourceTranspiler implements IExpressionTranspiler {
         } else {
           ret = ret + "Source, unknown";
         }
+      } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr() === "&&") {
+        ret = ret + " + ";
       }
     }
 

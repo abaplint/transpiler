@@ -47,9 +47,9 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
       if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.ReadOnly) === false) {
         continue;
       }
-      const name = node.getFirstToken().getStr() + "." + v.name;
+      const name = node.getFirstToken().getStr().toLowerCase() + "." + v.name;
       ret += name + " = " + new TranspileTypes().toType(v.identifier.getType()) + ";\n";
-      ret += name + ".set(" + v.identifier.getValue() + ");";
+      ret += name + ".set(" + v.identifier.getValue() + ");\n";
     }
     return ret;
   }
