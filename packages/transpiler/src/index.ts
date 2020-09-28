@@ -3,6 +3,7 @@ import {Validation, config} from "./validation";
 import {Indentation} from "./indentation";
 import {Traversal} from "./traversal";
 import {Requires} from "./requires";
+import {UnitTest} from "./unit_test";
 
 export {config};
 
@@ -19,6 +20,8 @@ export interface IObjectIdentifier {
 export interface IOutput {
   objects: IOutputFile[];
   reg: abaplint.IRegistry;
+  /** Experimental file to run unit tests */
+  unitTest: string;
 }
 
 /** one javascript output file for each object */
@@ -48,6 +51,7 @@ export class Transpiler {
 
     const output: IOutput = {
       objects: [],
+      unitTest: new UnitTest().run(reg),
       reg: reg,
     };
 
