@@ -48,7 +48,7 @@ ENDCLASS.`;
     const files = [{filename: "zif_abap_serverless_v1.intf.abap", contents: intf},
       {filename: "zcl_words.clas.abap", contents: clas}];
 
-    const output = await new Transpiler().run(files);
+    const output = (await new Transpiler().run(files)).objects;
 
     expect(output[0].js.contents).to.contain("moo");
   });

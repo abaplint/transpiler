@@ -89,7 +89,10 @@ export class Traversal {
     }
     let ret = "";
     for (const v of vars) {
-      ret = ret + "this." + v.name + " = " + new TranspileTypes().toType(v.identifier.getType()) + ";\n";
+      if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.ReadOnly) === true) {
+        continue;
+      }
+      ret += "this." + v.name + " = " + new TranspileTypes().toType(v.identifier.getType()) + ";\n";
     }
     return ret;
   }

@@ -34,7 +34,7 @@ describe("Single statements", () => {
     {abap: "IF NOT foo IS INITIAL. ENDIF.",        js: "if (abap.compare.initial(foo) === false) {\n}", skip: false},
     {abap: "DO. ENDDO.",                           js: "for (;;) {\n}",                                 skip: true}, // todo, how to set sy-fields ?
     {abap: "DO 5 TIMES. ENDDO.",                   js: "for (let unique1 = 0; unique1 < 5; unique1++) {\n}",         skip: false},
-    {abap: "DO foo TIMES.  ENDDO.",                js: "for (let unique1 = 0; unique1 < foo.get(); unique1++) {\n}", skip: false}, // todo, the "i" variable must be unique
+    {abap: "DO foo TIMES.  ENDDO.",                js: "for (let unique1 = 0; unique1 < foo.get(); unique1++) {\n}", skip: false},
     {abap: "LOOP AT table INTO line. ENDLOOP.",    js: "for (let unique1 of table.array()) {\n  line.set(unique1);\n}",          skip: false},
     {abap: "WHILE foo = bar. ENDWHILE.",           js: "while (abap.compare.eq(foo, bar)) {\n}",    skip: false},
     {abap: "foo-bar = 2.",                         js: "foo.bar.set(2);",                           skip: true}, // hmm, will this kind of member access work?
@@ -47,6 +47,7 @@ describe("Single statements", () => {
     {abap: "WRITE foo.",                           js: "abap.statements.write(foo);",               skip: false},
     {abap: "WRITE / foo.",                         js: "abap.statements.write(foo, {newLine: true});", skip: false},
     {abap: "CLASS lcl_foo IMPLEMENTATION. ENDCLASS.", js: "class lcl_foo {\n}",                        skip: false}, // note: no code for the CLASS DEFINITION
+    {abap: "CLASS LCL_FOO IMPLEMENTATION. ENDCLASS.", js: "class lcl_foo {\n}",                        skip: false},
     {abap: "RETURN.",                                 js: "return;",                                   skip: false}, // todo, hmm? some more to be added here
     {abap: "method( ).",                              js: "this.method();",                            skip: false},
     {abap: "foo->method( ).",                         js: "foo.get().method();",                       skip: false},
@@ -72,15 +73,18 @@ describe("Single statements", () => {
     {abap: "TYPES foo TYPE c.",                       js: "",                                              skip: false}, // yes, skip TYPES
     {abap: "IF ls_request-body = ''.\nENDIF.",        js: "if (abap.compare.eq(ls_request.get().body, '')) {\n}", skip: false},
     {abap: "CONCATENATE 'foo' 'bar' INTO target.",    js: "abap.statements.concatenate({source: ['foo','bar'], target: target});", skip: false},
-    {abap: "zcl_bar=>do_something( ).",               js: "zcl_bar.do_something();",                  skip: false},
-    {abap: "SET BIT foo OF bar.",                     js: "abap.statements.setBit(foo, bar);",        skip: false},
-    {abap: "SET BIT foo OF bar TO moo.",              js: "abap.statements.setBit(foo, bar, moo);",   skip: false},
-    {abap: "GET BIT foo OF bar INTO moo.",            js: "abap.statements.getBit(foo, bar, moo);",   skip: false},
+    {abap: "zcl_bar=>do_something( ).",               js: "zcl_bar.do_something();",                               skip: false},
+    {abap: "SET BIT foo OF bar.",                     js: "abap.statements.setBit(foo, bar);",                     skip: false},
+    {abap: "SET BIT foo OF bar TO moo.",              js: "abap.statements.setBit(foo, bar, moo);",                skip: false},
+    {abap: "GET BIT foo OF bar INTO moo.",            js: "abap.statements.getBit(foo, bar, moo);",                skip: false},
     {abap: "WRITE sy-index.",                         js: "abap.statements.write(abap.builtin.sy.get().index);",   skip: false},
     {abap: "FIELD-SYMBOLS <bar> TYPE i.",             js: "let fs_bar_ = undefined;",                              skip: false},
     {abap: "ASSIGN da TO <name>.",                    js: "fs_name_ = da;",                                        skip: false},
     {abap: "ASSERT <name> = 1.",                      js: "abap.statements.assert(abap.compare.eq(fs_name_, 1));", skip: false},
     {abap: "<name> = 1.",                             js: "fs_name_.set(1);",                                      skip: false},
+    {abap: "CONSTANTS c TYPE i VALUE 1.",             js: "let c = new abap.types.Integer();\nc.set(1);",          skip: false},
+    {abap: "READ TABLE tab INDEX i INTO target.",     js: "target.set(tab.array()[i.get() - 1].get());",           skip: false},
+    {abap: "READ TABLE tab INDEX i ASSIGNING <nam>.", js: "fs_nam_ = tab.array()[i.get() - 1];",                   skip: false},
   ];
 
   for (const test of tests) {

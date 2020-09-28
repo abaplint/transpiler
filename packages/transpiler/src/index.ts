@@ -3,6 +3,7 @@ import {Validation, config} from "./validation";
 import {Indentation} from "./indentation";
 import {Traversal} from "./traversal";
 import {Requires} from "./requires";
+import {UnitTest} from "./unit_test";
 
 export {config};
 
@@ -16,8 +17,15 @@ export interface IObjectIdentifier {
   type: string,
 }
 
-/** one javascript output file for each object */
 export interface IOutput {
+  objects: IOutputFile[];
+  reg: abaplint.IRegistry;
+  /** Experimental file to run unit tests */
+  unitTest: string;
+}
+
+/** one javascript output file for each object */
+export interface IOutputFile {
   object: IObjectIdentifier;
   js: IFile;
   requires: readonly IObjectIdentifier[];
@@ -36,18 +44,22 @@ export class Transpiler {
     this.options = options;
   }
 
-  public async run(files: IFile[]): Promise<IOutput[]> {
+  public async run(files: IFile[]): Promise<IOutput> {
     const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
     const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
     this.validate(reg);
 
-    const output: IOutput[] = [];
+    const output: IOutput = {
+      objects: [],
+      unitTest: new UnitTest().run(reg),
+      reg: reg,
+    };
 
     for (const abap of reg.getObjects()) {
       if (abap.getType() === "INTF") {
         continue;
       } else if (abap instanceof abaplint.ABAPObject) {
-        output.push(this.runObject(abap, reg));
+        output.objects.push(this.runObject(abap, reg));
       }
     }
 
@@ -56,7 +68,7 @@ export class Transpiler {
 
 // ///////////////////////////////
 
-  protected runObject(obj: abaplint.ABAPObject, reg: abaplint.IRegistry): IOutput {
+  protected runObject(obj: abaplint.ABAPObject, reg: abaplint.IRegistry): IOutputFile {
     const spaghetti = new abaplint.SyntaxLogic(reg, obj).run().spaghetti;
 
     let result = "";
@@ -76,7 +88,7 @@ export class Transpiler {
     }
 
     const filename = obj.getName() + "." + obj.getType() + ".js";
-    const output: IOutput = {
+    const output: IOutputFile = {
       object: {name: obj.getName(), type: obj.getType()},
       js: {filename: filename.toLowerCase(), contents: result},
       requires: new Requires(reg, obj).find(spaghetti.getTop()),
@@ -91,7 +103,7 @@ export class Transpiler {
   }
 
   /** adds common js modules syntax */
-  protected addCommonJS(output: IOutput): string {
+  protected addCommonJS(output: IOutputFile): string {
     let contents = "";
     for (const r of output.requires) {
       const name = r.name.toLowerCase();

@@ -28,10 +28,11 @@ async function run() {
     fs.mkdirSync(outputFolder);
   }
 
-  for (const o of output) {
+  for (const o of output.objects) {
     console.log(o.js.filename);
     fs.writeFileSync(outputFolder + path.sep + o.js.filename, o.js.contents);
   }
+  fs.writeFileSync(outputFolder + path.sep + "index.js", output.unitTest);
 }
 
 run().then(() => {

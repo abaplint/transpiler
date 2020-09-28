@@ -7,7 +7,7 @@ describe("Files", () => {
     const file1 = {filename: "zfoo1.prog.abap", contents: "WRITE '1'."};
     const file2 = {filename: "zfoo2.prog.abap", contents: "WRITE '2'."};
 
-    const output = (await new Transpiler().run([file1, file2]));
+    const output = (await new Transpiler().run([file1, file2])).objects;
 
     expect(output.length).to.equal(2);
     expect(output[0].js.filename).to.equal("zfoo1.prog.js");
@@ -18,7 +18,7 @@ describe("Files", () => {
     const filename = "C:\\Users\\foobar\\git\\transpiler\\packages\\abap-loader\\build\\test\\zprogram.prog.abap";
     const file1 = {filename, contents: "WRITE '1'."};
 
-    const output = (await new Transpiler().run([file1]));
+    const output = (await new Transpiler().run([file1])).objects;
 
     expect(output.length).to.equal(1);
     expect(output[0].js.filename).to.contain("zprogram.prog.js");
@@ -34,7 +34,7 @@ ENDCLASS.
 `;
     const file1 = {filename, contents};
 
-    const output = (await new Transpiler().run([file1]));
+    const output = (await new Transpiler().run([file1])).objects;
 
     expect(output.length).to.equal(1);
     expect(output[0].js.contents).to.include("zcl_index");
@@ -67,7 +67,7 @@ ENDCLASS.
 `;
     const file2 = {filename: filename2, contents: contents2};
 
-    const output = (await new Transpiler().run([file1, file2]));
+    const output = (await new Transpiler().run([file1, file2])).objects;
 
     expect(output.length).to.equal(1);
     expect(output[0].js.contents).to.include("ltcl_test");
