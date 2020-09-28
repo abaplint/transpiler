@@ -22,8 +22,11 @@ describe("Running Examples", () => {
     ENDDO.`;
 
     const js = await run(code) + "\nreturn lv_current.get();";
+
     const f = new Function("abap", js);
-    expect(f(abap)).to.equal(89);
+    const res = f(abap);
+
+    expect(res).to.equal(89);
   });
 
   it("Simple IF", async () => {

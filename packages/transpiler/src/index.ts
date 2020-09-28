@@ -35,6 +35,7 @@ export interface IOutputFile {
 export interface ITranspilerOptions {
   ignoreSyntaxCheck?: boolean;
   addCommonJS?: boolean;
+  skipConstants?: boolean;
 }
 
 export class Transpiler {
@@ -73,7 +74,15 @@ export class Transpiler {
 
     let result = "";
     let exports: string[] = [];
+    const constants: number[] = [];
+
     for (const file of obj.getSequencedFiles()) {
+      for (const i of file.getStructure()?.findAllExpressions(abaplint.Expressions.Integer) || []) {
+        const j = parseInt(i.getFirstToken().getStr(), 10);
+        if (constants.includes(j) === false) {
+          constants.push(j);
+        }
+      }
 
       const contents = new Traversal(spaghetti, file, obj).traverse(file.getStructure());
       if (contents.length > 0) {
@@ -81,6 +90,13 @@ export class Transpiler {
       }
 
       exports = exports.concat(this.findExports(file.getStructure()));
+    }
+
+    if (this.options?.skipConstants === false || this.options?.skipConstants === undefined) {
+      for (const c of constants) {
+        result = `let constant_${c} = new abap.types.Integer();\n` +
+          `constant_${c}.set(${c});\n` + result;
+      }
     }
 
     if (result.endsWith("\n")) {
