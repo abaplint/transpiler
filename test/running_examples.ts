@@ -480,4 +480,16 @@ ASSERT data1-moo = 0.`;
     f(abap);
   });
 
+  it("basic CLEAR", async () => {
+    const code = `
+  DATA da TYPE i.
+  da = 2.
+  CLEAR da.
+  ASSERT da = 0.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
