@@ -16,7 +16,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
         ret = ret + this.buildConstructor(c, traversal);
       }
     }
-    ret += this.buildConstants(node.findFirstExpression(abaplint.Expressions.ClassName), traversal);
+    ret += this.buildStatic(node.findFirstExpression(abaplint.Expressions.ClassName), traversal);
 
     return ret;
   }
@@ -33,7 +33,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     return false;
   }
 
-  private buildConstants(node: abaplint.Nodes.ExpressionNode | undefined, traversal: Traversal): string {
+  private buildStatic(node: abaplint.Nodes.ExpressionNode | undefined, traversal: Traversal): string {
     if (node === undefined) {
       return "";
     }
@@ -44,7 +44,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     }
     let ret = "";
     for (const v of vars) {
-      if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.ReadOnly) === false) {
+      if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.Static) === false) {
         continue;
       }
       const name = node.getFirstToken().getStr().toLowerCase() + "." + v.name;

@@ -492,4 +492,24 @@ ASSERT data1-moo = 0.`;
     f(abap);
   });
 
+  it("static variable in class", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CLASS-DATA foo TYPE i.
+    CLASS-METHODS name.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD name.
+    CLEAR foo.
+  ENDMETHOD.
+ENDCLASS.
+
+lcl_bar=>name( ).`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
