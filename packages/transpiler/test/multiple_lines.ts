@@ -315,4 +315,23 @@ zcl_ret.c_maxdcodes.set(30);`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
+  it("Class static data", async () => {
+    const abap = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CLASS-DATA foo TYPE i.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+ENDCLASS.`;
+
+    const expected = `class lcl_bar {
+  constructor() {
+    this.me = new abap.types.ABAPObject();
+  }
+}
+lcl_bar.foo = new abap.types.Integer();`;
+
+    expect(await runSingle(abap)).to.equal(expected);
+  });
+
 });

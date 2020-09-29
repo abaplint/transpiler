@@ -49,7 +49,9 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
       }
       const name = node.getFirstToken().getStr().toLowerCase() + "." + v.name;
       ret += name + " = " + new TranspileTypes().toType(v.identifier.getType()) + ";\n";
-      ret += name + ".set(" + v.identifier.getValue() + ");\n";
+      if (v.identifier.getValue()) {
+        ret += name + ".set(" + v.identifier.getValue() + ");\n";
+      }
     }
     return ret;
   }
