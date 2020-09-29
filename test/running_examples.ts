@@ -512,4 +512,17 @@ lcl_bar=>name( ).`;
     f(abap);
   });
 
+  it("basic xstring", async () => {
+    const code = `
+  DATA foo TYPE xstring.
+  foo = 'AA'.
+  WRITE foo.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("AA");
+  });
+
 });
