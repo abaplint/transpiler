@@ -3,7 +3,7 @@ import {Transpiler} from "../src";
 
 describe("Requires", () => {
 
-  it("CLAS using CLAS", async () => {
+  it("CLAS using CLAS, 1", async () => {
     const clas1 = `
 CLASS zcl_foo DEFINITION PUBLIC FINAL CREATE PUBLIC.
   PUBLIC SECTION.

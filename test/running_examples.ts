@@ -22,8 +22,11 @@ describe("Running Examples", () => {
     ENDDO.`;
 
     const js = await run(code) + "\nreturn lv_current.get();";
+
     const f = new Function("abap", js);
-    expect(f(abap)).to.equal(89);
+    const res = f(abap);
+
+    expect(res).to.equal(89);
   });
 
   it("Simple IF", async () => {
@@ -471,6 +474,38 @@ ASSERT data1-moo = 0.`;
   <fs> = 2.
   ASSERT da = 2.
   ASSERT <fs> = 2.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("basic CLEAR", async () => {
+    const code = `
+  DATA da TYPE i.
+  da = 2.
+  CLEAR da.
+  ASSERT da = 0.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("static variable in class", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CLASS-DATA foo TYPE i.
+    CLASS-METHODS name.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD name.
+    CLEAR foo.
+  ENDMETHOD.
+ENDCLASS.
+
+lcl_bar=>name( ).`;
 
     const js = await run(code);
     const f = new Function("abap", js);

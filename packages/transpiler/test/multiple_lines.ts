@@ -128,12 +128,16 @@ WHEN OTHERS.
 ENDCASE.`;
 
     const expected =
-`switch (bar.get()) {
+`let constant_1 = new abap.types.Integer();
+constant_1.set(1);
+let constant_2 = new abap.types.Integer();
+constant_2.set(2);
+switch (bar.get()) {
   case 'foo':
-  abap.statements.write(2);
+  abap.statements.write(constant_2);
   break;
-  case 1:
-  case 2:
+  case constant_1.get():
+  case constant_2.get():
   break;
   case foo.get():
   break;
@@ -218,11 +222,13 @@ DATA moo TYPE foo.`;
         ENDMETHOD.
       ENDCLASS.`;
 
-    const expected = `class zcl_words {
+    const expected = `let constant_2 = new abap.types.Integer();
+constant_2.set(2);
+class zcl_words {
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.bar = new abap.types.Integer();
-    this.bar.set(2);
+    this.bar.set(constant_2);
     abap.statements.write(this.bar);
   }
 }`;
@@ -296,13 +302,34 @@ ENDCLASS.
 CLASS zcl_ret IMPLEMENTATION.
 ENDCLASS.`;
 
-    const expected = `class zcl_ret {
+    const expected = `let constant_30 = new abap.types.Integer();
+constant_30.set(30);
+class zcl_ret {
   constructor() {
     this.me = new abap.types.ABAPObject();
   }
 }
 zcl_ret.c_maxdcodes = new abap.types.Integer();
 zcl_ret.c_maxdcodes.set(30);`;
+
+    expect(await runSingle(abap)).to.equal(expected);
+  });
+
+  it("Class static data", async () => {
+    const abap = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CLASS-DATA foo TYPE i.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+ENDCLASS.`;
+
+    const expected = `class lcl_bar {
+  constructor() {
+    this.me = new abap.types.ABAPObject();
+  }
+}
+lcl_bar.foo = new abap.types.Integer();`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });

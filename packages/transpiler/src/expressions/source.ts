@@ -2,6 +2,7 @@ import {Expressions, Nodes} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {FieldChainTranspiler} from ".";
 import {Traversal} from "../traversal";
+import {ConstantTranspiler} from "./constant";
 
 export class SourceTranspiler implements IExpressionTranspiler {
   private readonly addGet: boolean;
@@ -19,7 +20,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
         if (c.get() instanceof Expressions.FieldChain) {
           ret = ret + new FieldChainTranspiler(this.addGet).transpile(c, traversal);
         } else if (c.get() instanceof Expressions.Constant) {
-          ret = ret + traversal.traverse(c);
+          ret = ret + new ConstantTranspiler(this.addGet).transpile(c, traversal);
         } else if (c.get() instanceof Expressions.StringTemplate) {
           ret = ret + traversal.traverse(c);
         } else if (c.get() instanceof Expressions.ArithOperator) {

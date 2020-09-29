@@ -13,6 +13,7 @@ export class StringTemplateTranspiler implements IExpressionTranspiler {
       if (c instanceof Nodes.TokenNode) {
         let original = c.getFirstToken().getStr();
         original = original.substring(1, original.length - 1);
+        original = original.replace(/`/g, "\\`");
         if (c.get() instanceof Tokens.StringTemplate) {
           ret = "`" + original + "`";
         } else if (c.get() instanceof Tokens.StringTemplateBegin) {
