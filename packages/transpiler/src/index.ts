@@ -93,7 +93,7 @@ export class Transpiler {
     }
 
     if (this.options?.skipConstants === false || this.options?.skipConstants === undefined) {
-      for (const c of constants.sort((a, b) => a - b)) {
+      for (const c of constants.sort((a, b) => b - a)) {
         result = `let constant_${c} = new abap.types.Integer();\n` +
           `constant_${c}.set(${c});\n` + result;
       }
