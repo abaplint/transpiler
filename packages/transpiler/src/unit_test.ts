@@ -4,7 +4,8 @@ export class UnitTest {
 
   // with lots of assumptions regarding setup
   public run(reg: abaplint.IRegistry): string {
-    let ret = `global.abap = require("@abaplint/runtime");\n`;
+    let ret = `global.abap = require("@abaplint/runtime");
+try {\n`;
 
     for (const obj of reg.getObjects()) {
       if (obj instanceof abaplint.ABAPObject) {
@@ -48,6 +49,11 @@ const test = new ${def.name}();\n`;
         }
       }
     }
+
+    ret += `} catch (e) {
+  console.log(abap.Console.get());
+  throw e;
+}`;
 
     return ret;
   }
