@@ -536,4 +536,16 @@ lcl_bar=>name( ).`;
     expect(abap.Console.get()).to.equal("3");
   });
 
+  it("basic xstrlen", async () => {
+    const code = `
+    DATA foo TYPE xstring.
+    foo = 'AA'.
+    WRITE xstrlen( foo ).`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("1");
+  });
+
 });
