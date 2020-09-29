@@ -512,4 +512,40 @@ lcl_bar=>name( ).`;
     f(abap);
   });
 
+  it("basic xstring", async () => {
+    const code = `
+    DATA foo TYPE xstring.
+    foo = 'AA'.
+    WRITE foo.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("AA");
+  });
+
+  it("basic strlen", async () => {
+    const code = `
+    DATA foo TYPE string.
+    foo = '123'.
+    WRITE strlen( foo ).`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("3");
+  });
+
+  it("basic xstrlen", async () => {
+    const code = `
+    DATA foo TYPE xstring.
+    foo = 'AA'.
+    WRITE xstrlen( foo ).`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("1");
+  });
+
 });

@@ -7,15 +7,27 @@ export class XString implements ICharacter {
     this.value = "";
   }
 
-  public set(_value: ICharacter | string) {
-    console.dir("xstring set, todo" + this.value);
+  public set(value: ICharacter | string) {
+    // todo, this wont work?
+    if (typeof value === "string") {
+      this.value = value;
+    } else {
+      this.value = value.get();
+    }
   }
 
   public clear(): void {
     this.value = "";
   }
 
-  public get(_input?: {offset: number, length: number}): string {
-    return "xstringGetTodo";
+  public get(input?: {offset: number, length: number}): string {
+    let ret = this.value;
+    if (input?.offset) {
+      ret = ret.substr(input.offset);
+    }
+    if (input?.length) {
+      ret = ret.substr(0, input.length);
+    }
+    return ret;
   }
 }
