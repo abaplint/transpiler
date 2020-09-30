@@ -548,4 +548,16 @@ lcl_bar=>name( ).`;
     expect(abap.Console.get()).to.equal("1");
   });
 
+  it("xstring constant", async () => {
+    const code = `
+    CONSTANTS lc_raw TYPE xstring VALUE '48656C6C6F20576F726C64210D0A'.
+    WRITE lc_raw.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("48656C6C6F20576F726C64210D0A");
+  });
+
 });
