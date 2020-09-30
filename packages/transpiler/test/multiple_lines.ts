@@ -334,4 +334,21 @@ lcl_bar.foo = new abap.types.Integer();`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
+  it.only("method call", async () => {
+    const abap = `
+INTERFACE lif_bar.
+  METHODS moo IMPORTING foo TYPE string EXPORTING bar TYPE string.
+ENDINTERFACE.
+DATA bar TYPE REF TO lif_bar.
+DATA str TYPE string.
+bar->moo( EXPORTING foo = 'abc'
+          IMPORTING bar = str ).`;
+
+    const expected = `let bar = new abap.types.ABAPObject();
+let str = new abap.types.String();
+bar.get().moo(something);`;
+
+    expect(await runSingle(abap)).to.equal(expected);
+  });
+
 });
