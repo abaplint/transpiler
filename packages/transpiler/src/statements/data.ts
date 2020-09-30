@@ -22,7 +22,10 @@ export class DataTranspiler implements IStatementTranspiler {
     let value = "";
     const val = node.findFirstExpression(abaplint.Expressions.Value);
     if (val) {
-      const int = val.findFirstExpression(abaplint.Expressions.Integer);
+      let int = val.findFirstExpression(abaplint.Expressions.Integer);
+      if (int === undefined) {
+        int = val.findFirstExpression(abaplint.Expressions.ConstantString);
+      }
       if (int){
         value = "\n" + found.getName() + ".set(" + int.getFirstToken().getStr() + ");";
       }
