@@ -35,6 +35,7 @@ export interface IOutputFile {
 export interface ITranspilerOptions {
   ignoreSyntaxCheck?: boolean;
   addCommonJS?: boolean;
+  addFilenames?: boolean;
   skipConstants?: boolean;
 }
 
@@ -77,7 +78,9 @@ export class Transpiler {
     const constants: number[] = [];
 
     for (const file of obj.getSequencedFiles()) {
-      result += "// " + file.getFilename() + "\n";
+      if (this.options?.addFilenames === true) {
+        result += "// " + file.getFilename() + "\n";
+      }
       for (const i of file.getStructure()?.findAllExpressions(abaplint.Expressions.Integer) || []) {
         const j = parseInt(i.getFirstToken().getStr(), 10);
         if (constants.includes(j) === false) {

@@ -132,7 +132,7 @@ ENDCASE.`;
 constant_1.set(1);
 let constant_2 = new abap.types.Integer();
 constant_2.set(2);
-unique2 = bar;
+let unique2 = bar;
 if (abap.compare.eq(unique2, 'foo')) {
   abap.statements.write(constant_2);
 } else if (abap.compare.eq(unique2, constant_1) || abap.compare.eq(unique2, constant_2)) {

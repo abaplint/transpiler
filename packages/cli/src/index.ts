@@ -16,6 +16,7 @@ async function run() {
 
   const options: Transpiler.ITranspilerOptions = {
     ignoreSyntaxCheck: false,
+    addFilenames: true,
     addCommonJS: true,
   };
   console.log("\nBuilding");

@@ -18,7 +18,7 @@ describe("Single statements", () => {
     {abap: "IF foo EQ bar. ENDIF.",                js: "if (abap.compare.eq(foo, bar)) {\n}",       skip: false},
     {abap: "EXIT.",                                js: "break;",                                    skip: false},
     {abap: "CONTINUE.",                            js: "continue;",                                 skip: false},
-    {abap: "CASE bar. ENDCASE.",                   js: "unique1 = bar;",                            skip: false},
+    {abap: "CASE bar. ENDCASE.",                   js: "let unique1 = bar;",                        skip: false},
     {abap: "DATA foo TYPE c.",                     js: "let foo = new abap.types.Character();",     skip: false},
     {abap: "DATA foo TYPE string.",                js: "let foo = new abap.types.String();",        skip: false},
     {abap: "DATA foo TYPE c LENGTH 2.",            js: "let foo = new abap.types.Character({length: 2});",       skip: true},
@@ -90,6 +90,7 @@ describe("Single statements", () => {
     {abap: "lv_index = foo - 1 + lv_distance.",       js: "lv_index.set(foo.minus(constant_1.add(lv_distance)));", skip: false},
     {abap: "WRITE zcl_name=>c_maxbits.",              js: "abap.statements.write(zcl_name.c_maxbits);",            skip: false},
     {abap: "WRITE |`|.",                              js: "abap.statements.write(`\\``);",                         skip: false},
+    {abap: "ASSERT NOT act IS INITIAL.",              js: "abap.statements.assert(abap.compare.initial(act) === false);", skip: false},
   ];
 
   for (const test of tests) {

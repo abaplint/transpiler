@@ -15,7 +15,7 @@ export class CaseTranspiler implements IStructureTranspiler {
 
     let first = true;
     const u = UniqueIdentifier.get();
-    let ret = u + " = " + traversal.traverse(s) + ";\n";
+    let ret = "let " + u + " = " + traversal.traverse(s) + ";\n";
 
     for (const w of node.findDirectStructures(abaplint.Structures.When)) {
       for (const c of w.getChildren()) {
