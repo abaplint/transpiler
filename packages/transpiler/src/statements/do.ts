@@ -11,7 +11,8 @@ export class DoTranspiler implements IStatementTranspiler {
     if (found) {
       const source = new SourceTranspiler(true).transpile(found, traversal);
       const id = UniqueIdentifier.get();
-      return "for (let " + id + " = 0; " + id + " < " + source + "; " + id + "++) {";
+      return `for (let ${id} = 0; ${id} < ${source}; ${id}++) {
+abap.builtin.sy.get().index.set(${id} + 1);`;
     } else {
       return "while (true) {";
     }

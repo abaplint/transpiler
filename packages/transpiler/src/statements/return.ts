@@ -4,9 +4,16 @@ import {Traversal} from "../traversal";
 
 export class ReturnTranspiler implements IStatementTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): string {
-    // todo, return datafrom function/method
-    return "return;";
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
+    let extra = "";
+    const scope = traversal.findCurrentScope(node.getFirstToken());
+    for (const v of scope?.getData().vars || []) {
+      if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodReturning)) {
+        extra = " " + v.name;
+      }
+    }
+
+    return "return" + extra + ";";
   }
 
 }

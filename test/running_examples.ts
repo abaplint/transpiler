@@ -419,7 +419,9 @@ ASSERT data1-moo = 0.`;
   });
 
   it("sy-index", async () => {
-    const code = `ASSERT sy-index = 0.`;
+    const code = `DO 1 TIMES.
+    ASSERT sy-index = 1.
+    ENDDO.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
@@ -541,6 +543,92 @@ lcl_bar=>name( ).`;
     DATA foo TYPE xstring.
     foo = 'AA'.
     WRITE xstrlen( foo ).`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("1");
+  });
+
+  it("xstring constant", async () => {
+    const code = `
+    CONSTANTS lc_raw TYPE xstring VALUE '48656C6C6F20576F726C64210D0A'.
+    WRITE lc_raw.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("48656C6C6F20576F726C64210D0A");
+  });
+
+  it("IS INITIAL, yes", async () => {
+    const code = `
+    DATA raw TYPE xstring.
+    IF raw IS INITIAL.
+      WRITE 'yes'.
+    ELSE.
+      WRITE 'no'.
+    ENDIF.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("yes");
+  });
+
+  it("IS INITIAL, no", async () => {
+    const code = `
+    CONSTANTS lc_raw TYPE xstring VALUE 'AA'.
+    IF lc_raw IS INITIAL.
+      WRITE 'yes'.
+    ELSE.
+      WRITE 'no'.
+    ENDIF.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("no");
+  });
+
+  it("GET BIT", async () => {
+    const code = `
+    DATA lv_bit TYPE i.
+    DATA lv_c TYPE c LENGTH 1.
+    DATA result TYPE string.
+    DATA lv_x TYPE xstring.
+    lv_x = 'AB'.
+    DO 8 TIMES.
+      GET BIT sy-index OF lv_x INTO lv_c.
+      CONCATENATE result lv_c INTO result.
+    ENDDO.
+    WRITE result.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("10101011");
+  });
+
+  it("early RETURN in method", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS bar RETURNING VALUE(ret) TYPE i.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD bar.
+    ret = 1.
+    RETURN.
+  ENDMETHOD.
+ENDCLASS.
+
+  WRITE lcl_bar=>bar( ).`;
+
     const js = await run(code);
     const f = new Function("abap", js);
     abap.Console.clear();

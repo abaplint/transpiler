@@ -132,17 +132,12 @@ ENDCASE.`;
 constant_1.set(1);
 let constant_2 = new abap.types.Integer();
 constant_2.set(2);
-switch (bar.get()) {
-  case 'foo':
+let unique2 = bar;
+if (abap.compare.eq(unique2, 'foo')) {
   abap.statements.write(constant_2);
-  break;
-  case constant_1.get():
-  case constant_2.get():
-  break;
-  case foo.get():
-  break;
-  default:
-  break;
+} else if (abap.compare.eq(unique2, constant_1) || abap.compare.eq(unique2, constant_2)) {
+} else if (abap.compare.eq(unique2, foo)) {
+} else {
 }`;
 
     expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.equal(expected);
@@ -330,6 +325,23 @@ ENDCLASS.`;
   }
 }
 lcl_bar.foo = new abap.types.Integer();`;
+
+    expect(await runSingle(abap)).to.equal(expected);
+  });
+
+  it("method call", async () => {
+    const abap = `
+INTERFACE lif_bar.
+  METHODS moo IMPORTING foo TYPE string EXPORTING bar TYPE string.
+ENDINTERFACE.
+DATA bar TYPE REF TO lif_bar.
+DATA str TYPE string.
+bar->moo( EXPORTING foo = 'abc'
+          IMPORTING bar = str ).`;
+
+    const expected = `let bar = new abap.types.ABAPObject();
+let str = new abap.types.String();
+bar.get().moo({foo: 'abc', bar: str});`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });

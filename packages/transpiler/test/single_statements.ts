@@ -18,7 +18,7 @@ describe("Single statements", () => {
     {abap: "IF foo EQ bar. ENDIF.",                js: "if (abap.compare.eq(foo, bar)) {\n}",       skip: false},
     {abap: "EXIT.",                                js: "break;",                                    skip: false},
     {abap: "CONTINUE.",                            js: "continue;",                                 skip: false},
-    {abap: "CASE bar. ENDCASE.",                   js: "switch (bar.get()) {\n}",                   skip: false},
+    {abap: "CASE bar. ENDCASE.",                   js: "let unique1 = bar;",                        skip: false},
     {abap: "DATA foo TYPE c.",                     js: "let foo = new abap.types.Character();",     skip: false},
     {abap: "DATA foo TYPE string.",                js: "let foo = new abap.types.String();",        skip: false},
     {abap: "DATA foo TYPE c LENGTH 2.",            js: "let foo = new abap.types.Character({length: 2});",       skip: true},
@@ -33,9 +33,9 @@ describe("Single statements", () => {
     {abap: "IF foo IS INITIAL. ENDIF.",            js: "if (abap.compare.initial(foo)) {\n}",       skip: false},
     {abap: "IF foo IS NOT INITIAL. ENDIF.",        js: "if (abap.compare.initial(foo) === false) {\n}", skip: false},
     {abap: "IF NOT foo IS INITIAL. ENDIF.",        js: "if (abap.compare.initial(foo) === false) {\n}", skip: false},
-    {abap: "DO. ENDDO.",                           js: "for (;;) {\n}",                                 skip: true}, // todo, how to set sy-fields ?
-    {abap: "DO 5 TIMES. ENDDO.",                   js: "for (let unique1 = 0; unique1 < constant_5.get(); unique1++) {\n}",         skip: false},
-    {abap: "DO foo TIMES.  ENDDO.",                js: "for (let unique1 = 0; unique1 < foo.get(); unique1++) {\n}", skip: false},
+    {abap: "DO. ENDDO.",                           js: "for (;;) {\n}",                                 skip: true},
+    {abap: "DO 5 TIMES. ENDDO.",                   js: "for (let unique1 = 0; unique1 < constant_5.get(); unique1++) {\n  abap.builtin.sy.get().index.set(unique1 + 1);\n}",         skip: false},
+    {abap: "DO foo TIMES.  ENDDO.",                js: "for (let unique1 = 0; unique1 < foo.get(); unique1++) {\n  abap.builtin.sy.get().index.set(unique1 + 1);\n}", skip: false},
     {abap: "LOOP AT table INTO line. ENDLOOP.",    js: "for (let unique1 of table.array()) {\n  line.set(unique1);\n}",          skip: false},
     {abap: "WHILE foo = bar. ENDWHILE.",           js: "while (abap.compare.eq(foo, bar)) {\n}",    skip: false},
     {abap: "foo-bar = 2.",                         js: "foo.bar.set(2);",                           skip: true}, // hmm, will this kind of member access work?
@@ -90,6 +90,7 @@ describe("Single statements", () => {
     {abap: "lv_index = foo - 1 + lv_distance.",       js: "lv_index.set(foo.minus(constant_1.add(lv_distance)));", skip: false},
     {abap: "WRITE zcl_name=>c_maxbits.",              js: "abap.statements.write(zcl_name.c_maxbits);",            skip: false},
     {abap: "WRITE |`|.",                              js: "abap.statements.write(`\\``);",                         skip: false},
+    {abap: "ASSERT NOT act IS INITIAL.",              js: "abap.statements.assert(abap.compare.initial(act) === false);", skip: false},
   ];
 
   for (const test of tests) {
