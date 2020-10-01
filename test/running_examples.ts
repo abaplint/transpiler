@@ -614,4 +614,26 @@ lcl_bar=>name( ).`;
     expect(abap.Console.get()).to.equal("10101011");
   });
 
+  it("early RETURN in method", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS bar RETURNING VALUE(ret) TYPE i.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD bar.
+    ret = 1.
+    RETURN.
+  ENDMETHOD.
+ENDCLASS.
+
+  WRITE lcl_bar=>bar( ).`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("1");
+  });
+
 });

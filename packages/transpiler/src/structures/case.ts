@@ -35,7 +35,7 @@ export class CaseTranspiler implements IStructureTranspiler {
       }
     }
 
-    return ret + (first === true ? "" : "}");
+    return ret + (first === true ? "" : "}\n");
   }
 
 }
