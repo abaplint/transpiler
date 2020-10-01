@@ -50,7 +50,8 @@ const test = new ${def.name}();\n`;
       }
     }
 
-    ret += `} catch (e) {
+    ret += `console.log(abap.Console.get());
+} catch (e) {
   console.log(abap.Console.get());
   throw e;
 }`;
