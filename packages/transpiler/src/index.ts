@@ -77,6 +77,7 @@ export class Transpiler {
     const constants: number[] = [];
 
     for (const file of obj.getSequencedFiles()) {
+      result += "// " + file.getFilename() + "\n";
       for (const i of file.getStructure()?.findAllExpressions(abaplint.Expressions.Integer) || []) {
         const j = parseInt(i.getFirstToken().getStr(), 10);
         if (constants.includes(j) === false) {
