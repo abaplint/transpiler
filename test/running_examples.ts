@@ -560,4 +560,36 @@ lcl_bar=>name( ).`;
     expect(abap.Console.get()).to.equal("48656C6C6F20576F726C64210D0A");
   });
 
+  it("IS INITIAL, yes", async () => {
+    const code = `
+    DATA raw TYPE xstring.
+    IF raw IS INITIAL.
+      WRITE 'yes'.
+    ELSE.
+      WRITE 'no'.
+    ENDIF.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("yes");
+  });
+
+  it("IS INITIAL, no", async () => {
+    const code = `
+    CONSTANTS lc_raw TYPE xstring VALUE 'AA'.
+    IF lc_raw IS INITIAL.
+      WRITE 'yes'.
+    ELSE.
+      WRITE 'no'.
+    ENDIF.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("no");
+  });
+
 });
