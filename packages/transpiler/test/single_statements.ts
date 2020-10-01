@@ -33,9 +33,9 @@ describe("Single statements", () => {
     {abap: "IF foo IS INITIAL. ENDIF.",            js: "if (abap.compare.initial(foo)) {\n}",       skip: false},
     {abap: "IF foo IS NOT INITIAL. ENDIF.",        js: "if (abap.compare.initial(foo) === false) {\n}", skip: false},
     {abap: "IF NOT foo IS INITIAL. ENDIF.",        js: "if (abap.compare.initial(foo) === false) {\n}", skip: false},
-    {abap: "DO. ENDDO.",                           js: "for (;;) {\n}",                                 skip: true}, // todo, how to set sy-fields ?
-    {abap: "DO 5 TIMES. ENDDO.",                   js: "for (let unique1 = 0; unique1 < constant_5.get(); unique1++) {\n}",         skip: false},
-    {abap: "DO foo TIMES.  ENDDO.",                js: "for (let unique1 = 0; unique1 < foo.get(); unique1++) {\n}", skip: false},
+    {abap: "DO. ENDDO.",                           js: "for (;;) {\n}",                                 skip: true},
+    {abap: "DO 5 TIMES. ENDDO.",                   js: "for (let unique1 = 0; unique1 < constant_5.get(); unique1++) {\n  abap.builtin.sy.get().index.set(unique1 + 1);\n}",         skip: false},
+    {abap: "DO foo TIMES.  ENDDO.",                js: "for (let unique1 = 0; unique1 < foo.get(); unique1++) {\n  abap.builtin.sy.get().index.set(unique1 + 1);\n}", skip: false},
     {abap: "LOOP AT table INTO line. ENDLOOP.",    js: "for (let unique1 of table.array()) {\n  line.set(unique1);\n}",          skip: false},
     {abap: "WHILE foo = bar. ENDWHILE.",           js: "while (abap.compare.eq(foo, bar)) {\n}",    skip: false},
     {abap: "foo-bar = 2.",                         js: "foo.bar.set(2);",                           skip: true}, // hmm, will this kind of member access work?

@@ -419,7 +419,9 @@ ASSERT data1-moo = 0.`;
   });
 
   it("sy-index", async () => {
-    const code = `ASSERT sy-index = 0.`;
+    const code = `DO 1 TIMES.
+    ASSERT sy-index = 1.
+    ENDDO.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
@@ -590,6 +592,26 @@ lcl_bar=>name( ).`;
     abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("no");
+  });
+
+  it("GET BIT", async () => {
+    const code = `
+    DATA lv_bit TYPE i.
+    DATA lv_c TYPE c LENGTH 1.
+    DATA result TYPE string.
+    DATA lv_x TYPE xstring.
+    lv_x = 'AB'.
+    DO 8 TIMES.
+      GET BIT sy-index OF lv_x INTO lv_c.
+      CONCATENATE result lv_c INTO result.
+    ENDDO.
+    WRITE result.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("10101011");
   });
 
 });
