@@ -334,7 +334,7 @@ lcl_bar.foo = new abap.types.Integer();`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
-  it.only("method call", async () => {
+  it("method call", async () => {
     const abap = `
 INTERFACE lif_bar.
   METHODS moo IMPORTING foo TYPE string EXPORTING bar TYPE string.
@@ -346,7 +346,7 @@ bar->moo( EXPORTING foo = 'abc'
 
     const expected = `let bar = new abap.types.ABAPObject();
 let str = new abap.types.String();
-bar.get().moo(something);`;
+bar.get().moo({foo: 'abc', bar: str});`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });
