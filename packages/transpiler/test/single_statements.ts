@@ -18,7 +18,7 @@ describe("Single statements", () => {
     {abap: "IF foo EQ bar. ENDIF.",                js: "if (abap.compare.eq(foo, bar)) {\n}",       skip: false},
     {abap: "EXIT.",                                js: "break;",                                    skip: false},
     {abap: "CONTINUE.",                            js: "continue;",                                 skip: false},
-    {abap: "CASE bar. ENDCASE.",                   js: "switch (bar.get()) {\n}",                   skip: false},
+    {abap: "CASE bar. ENDCASE.",                   js: "unique1 = bar;",                            skip: false},
     {abap: "DATA foo TYPE c.",                     js: "let foo = new abap.types.Character();",     skip: false},
     {abap: "DATA foo TYPE string.",                js: "let foo = new abap.types.String();",        skip: false},
     {abap: "DATA foo TYPE c LENGTH 2.",            js: "let foo = new abap.types.Character({length: 2});",       skip: true},
