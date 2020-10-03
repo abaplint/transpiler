@@ -668,4 +668,33 @@ ENDCLASS.
     expect(abap.Console.get()).to.equal("01\n14\nAA\n12");
   });
 
+  it("convert type1", async () => {
+    const code = `
+  DATA i TYPE i.
+  i = '1'.
+  WRITE i.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("1");
+  });
+
+  it("convert type2", async () => {
+    const code = `
+  DATA i TYPE i.
+  DATA c TYPE c.
+  i = 2.
+  c = '3'.
+  i = i + c.
+  WRITE i.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("5");
+  });
+
 });

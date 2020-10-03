@@ -1,3 +1,4 @@
+import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 
 export class Integer implements INumeric {
@@ -7,25 +8,33 @@ export class Integer implements INumeric {
     this.value = 0;
   }
 
-  public set(value: INumeric | number) {
+  public set(value: INumeric | ICharacter | string | number) {
     if (typeof value === "number") {
       this.value = value;
+    } else if (typeof value === "string") {
+      this.value = parseInt(value, 10);
     } else {
-      this.value = value.get();
+      this.set(value.get());
     }
     return this;
   }
 
-  public add(value: Integer) {
-    return new Integer().set(this.value + value.value);
+  public add(value: INumeric | ICharacter | string | number) {
+    const t = new Integer();
+    t.set(value);
+    return new Integer().set(this.value + t.get());
   }
 
-  public minus(value: Integer) {
-    return new Integer().set(this.value - value.value);
+  public minus(value: INumeric | ICharacter | string | number) {
+    const t = new Integer();
+    t.set(value);
+    return new Integer().set(this.value - t.get());
   }
 
-  public multiply(value: Integer) {
-    return new Integer().set(this.value * value.value);
+  public multiply(value: INumeric | ICharacter | string | number) {
+    const t = new Integer();
+    t.set(value);
+    return new Integer().set(this.value * t.get());
   }
 
   public clear(): void {
