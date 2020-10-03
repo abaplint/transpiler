@@ -24,6 +24,10 @@ export class Integer implements INumeric {
     return new Integer().set(this.value - value.value);
   }
 
+  public multiply(value: Integer) {
+    return new Integer().set(this.value * value.value);
+  }
+
   public clear(): void {
     this.value = 0;
   }

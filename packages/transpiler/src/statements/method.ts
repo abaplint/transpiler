@@ -48,7 +48,11 @@ export class MethodTranspiler implements IStatementTranspiler {
     let staticMethod = "";
     for (const m of defs || []) {
       if (m.getName().toUpperCase() === name.toUpperCase() && m.isStatic()) {
-        staticMethod = "static ";
+        // in ABAP static methods can be called with instance arrows, "->"
+        const className = scope.getParent()?.getIdentifier().sname;
+        staticMethod = name + "(" + unique + ") {\n" +
+          "return " + className + "." + name + "(" + unique + ");\n" +
+          "}\n" + "static ";
         break;
       }
     }

@@ -33,6 +33,7 @@ const test = new ${def.name}();\n`;
                 ret += `test.setup();\n`;
               }
 
+              ret += `console.log('running ${def.name}->${m.name}');\n`;
               ret += `test.${m.name}();\n`;
 
               if (hasTeardown === true) {

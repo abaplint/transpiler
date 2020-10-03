@@ -18,10 +18,14 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
       throw new Error("CreateObjectTranspiler, target variable not found in scope, \"" + target + "\"");
     }
 
-// todo, handle constructor parameters
+    let para = "";
+    const parameters = node.findFirstExpression(abaplint.Expressions.ParameterListS);
+    if (parameters) {
+      para = traversal.traverse(parameters);
+    }
 
     const obj = type as abaplint.BasicTypes.ObjectReferenceType;
-    return target + ".set(new " + obj.getName() + "());";
+    return target + ".set(new " + obj.getName() + "(" + para + "));";
   }
 
 }
