@@ -724,4 +724,19 @@ ENDCLASS.
     expect(abap.Console.get()).to.equal("3456\n12");
   });
 
+  it("first bit of x", async () => {
+    const code = `
+  DATA x TYPE x.
+  DATA c TYPE c.
+  x = '01'.
+  GET BIT 1 OF x INTO c.
+  WRITE c.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("0");
+  });
+
 });

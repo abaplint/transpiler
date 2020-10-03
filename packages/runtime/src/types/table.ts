@@ -19,6 +19,13 @@ export class Table  {
     this.value = [];
   }
 
+  public set(tab: Table) {
+    this.clear();
+    for (const a of tab.array()) {
+      this.append(a);
+    }
+  }
+
   public append(item: number | string | INumeric | ICharacter | Table | ABAPObject) {
     if (typeof item === "number") {
       this.value.push(new Integer().set(item));
