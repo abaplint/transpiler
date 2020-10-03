@@ -605,13 +605,20 @@ lcl_bar=>name( ).`;
       GET BIT sy-index OF lv_x INTO lv_c.
       CONCATENATE result lv_c INTO result.
     ENDDO.
-    WRITE result.`;
+    WRITE / result.
+    result = ''.
+    lv_x = '01'.
+    DO 8 TIMES.
+      GET BIT sy-index OF lv_x INTO lv_c.
+      CONCATENATE result lv_c INTO result.
+    ENDDO.
+    WRITE / result.`;
 
     const js = await run(code);
     const f = new Function("abap", js);
     abap.Console.clear();
     f(abap);
-    expect(abap.Console.get()).to.equal("10101011");
+    expect(abap.Console.get()).to.equal("10101011\n00000001");
   });
 
   it("early RETURN in method", async () => {
