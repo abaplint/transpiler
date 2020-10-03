@@ -697,4 +697,31 @@ ENDCLASS.
     expect(abap.Console.get()).to.equal("5");
   });
 
+  it("convert type3", async () => {
+    const code = `
+  DATA foo TYPE c LENGTH 1.
+  foo = 'AB'.
+  WRITE foo.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("A");
+  });
+
+  it("hex offset and length", async () => {
+    const code = `
+  DATA x TYPE xstring.
+  x = '123456'.
+  WRITE / x+1.
+  WRITE / x(1).`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("3456\n12");
+  });
+
 });
