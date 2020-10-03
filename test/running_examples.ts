@@ -809,4 +809,30 @@ ENDCLASS.
     expect(abap.Console.get()).to.equal("345\n12\n345\n12");
   });
 
+  it("ASSERT sy-subrc = 0.", async () => {
+    const code = `ASSERT sy-subrc = 0.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("");
+  });
+
+  it("constant_0 should not change", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF i.
+  FIELD-SYMBOLS <lv_i> LIKE LINE OF tab.
+  APPEND 0 TO tab.
+  READ TABLE tab INDEX 1 ASSIGNING <lv_i>.
+  <lv_i> = 123.
+  WRITE 0.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("0");
+  });
+
 });

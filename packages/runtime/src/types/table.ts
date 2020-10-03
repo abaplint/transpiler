@@ -31,8 +31,12 @@ export class Table  {
       this.value.push(new Integer().set(item));
     } else if (typeof item === "string") {
       this.value.push(new String().set(item));
-    } else {
+    } else if (item instanceof Table) {
       this.value.push(item);
+    } else if (item instanceof ABAPObject) {
+      this.value.push(item);
+    } else {
+      this.append(item.get());
     }
   }
 }
