@@ -739,4 +739,50 @@ ENDCLASS.
     expect(abap.Console.get()).to.equal("0");
   });
 
+  it("class constant from static method", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CONSTANTS c TYPE i VALUE 10.
+    CLASS-METHODS foo.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD foo.
+    WRITE c.
+  ENDMETHOD.
+ENDCLASS.
+
+lcl_bar=>foo( ).`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("10");
+  });
+
+  it("class constant from instance method", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CONSTANTS c TYPE i VALUE 10.
+    METHODS foo.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD foo.
+    WRITE c.
+  ENDMETHOD.
+ENDCLASS.
+
+  DATA bar TYPE REF TO lcl_bar.
+  CREATE OBJECT bar.
+  bar->foo( ).`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("10");
+  });
+
 });

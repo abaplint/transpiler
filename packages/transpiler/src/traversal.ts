@@ -72,6 +72,23 @@ export class Traversal {
     return false;
   }
 
+  public isStaticClassAttribute(token: abaplint.Token): string | undefined {
+    const scope = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
+    if (scope === undefined) {
+      throw new Error("isStaticClassAttribute, unable to lookup position");
+    }
+
+    const name = token.getStr();
+    const found = scope.findScopeForVariable(name);
+    const id = scope.findVariable(name);
+    if (found && id
+        && id.getMeta().includes(abaplint.IdentifierMeta.Static)
+        && found.stype === abaplint.ScopeType.ClassImplementation) {
+      return scope.getParent()?.getIdentifier().sname;
+    }
+    return undefined;
+  }
+
   public isBuiltin(token: abaplint.Token): boolean {
     const scope = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
     if (scope === undefined) {

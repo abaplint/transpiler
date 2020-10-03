@@ -18,7 +18,10 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
     for (const c of node.getChildren()) {
       if (c.get() instanceof Expressions.SourceField) {
         let name = c.getFirstToken().getStr();
-        if (traversal.isClassAttribute(c.getFirstToken())) {
+        const cla = traversal.isStaticClassAttribute(c.getFirstToken());
+        if (cla) {
+          name = cla + "." + name;
+        } else if (traversal.isClassAttribute(c.getFirstToken())) {
           name = "this." + name;
         } else if (traversal.isBuiltin(c.getFirstToken())) {
           name = "abap.builtin." + name;
