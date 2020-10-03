@@ -17,7 +17,11 @@ export class Integer implements INumeric {
   }
 
   public add(value: Integer) {
-    return new Integer().set(value.value + this.value);
+    return new Integer().set(this.value + value.value);
+  }
+
+  public minus(value: Integer) {
+    return new Integer().set(this.value - value.value);
   }
 
   public clear(): void {

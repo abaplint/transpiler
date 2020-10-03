@@ -636,4 +636,36 @@ ENDCLASS.
     expect(abap.Console.get()).to.equal("1");
   });
 
+  it("basic minus", async () => {
+    const code = `
+  DATA foo TYPE i.
+  foo = 5 - 2.
+  WRITE foo.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("3");
+  });
+
+  it("hex type", async () => {
+    const code = `
+  DATA foo TYPE x.
+  foo = 1.
+  WRITE / foo.
+  foo = 20.
+  WRITE / foo.
+  foo = 'AA'.
+  WRITE / foo.
+  foo = '1234'.
+  WRITE / foo.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("01\n14\nAA\n12");
+  });
+
 });
