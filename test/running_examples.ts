@@ -792,4 +792,21 @@ ENDCLASS.
     expect(abap.Console.get()).to.equal("10");
   });
 
+  it("field lengths and offsets", async () => {
+    const code = `
+  DATA bar TYPE string VALUE '12345'.
+  DATA len TYPE i.
+  len = 2.
+  WRITE / bar+len.
+  WRITE / bar(len).
+  WRITE / bar+2.
+  WRITE / bar(2).`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("345\n12\n345\n12");
+  });
+
 });

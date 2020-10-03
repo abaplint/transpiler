@@ -3,9 +3,14 @@ import {IExpressionTranspiler} from "./_expression_transpiler";
 
 export class FieldOffsetTranspiler implements IExpressionTranspiler {
 
-  public transpile(_node: Nodes.ExpressionNode): string {
-// todo
-    return "1";
+  public transpile(node: Nodes.ExpressionNode): string {
+    const children = node.getChildren();
+    const str = children[1].getFirstToken().getStr();
+    if (/^\d+$/.test(str)) {
+      return str;
+    } else {
+      return str + ".get()";
+    }
   }
 
 }

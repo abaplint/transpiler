@@ -84,7 +84,7 @@ export class Traversal {
     if (found && id
         && id.getMeta().includes(abaplint.IdentifierMeta.Static)
         && found.stype === abaplint.ScopeType.ClassImplementation) {
-      return scope.getParent()?.getIdentifier().sname;
+      return scope.getParent()?.getIdentifier().sname.toLowerCase();
     }
     return undefined;
   }
