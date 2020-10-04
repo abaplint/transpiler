@@ -58,7 +58,7 @@ export class Traversal {
     return undefined;
   }
 
-  public isClassAttribute(token: abaplint.Token): boolean {
+  private isClassAttribute(token: abaplint.Token): boolean {
     const scope = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
     if (scope === undefined) {
       throw new Error("isClassAttribute, unable to lookup position");
@@ -72,7 +72,20 @@ export class Traversal {
     return false;
   }
 
-  public isStaticClassAttribute(token: abaplint.Token): string | undefined {
+  public findPrefix(t: abaplint.Token): string {
+    let name = t.getStr();
+    const cla = this.isStaticClassAttribute(t);
+    if (cla) {
+      name = cla + "." + name;
+    } else if (this.isClassAttribute(t)) {
+      name = "this." + name;
+    } else if (this.isBuiltin(t)) {
+      name = "abap.builtin." + name;
+    }
+    return name;
+  }
+
+  private isStaticClassAttribute(token: abaplint.Token): string | undefined {
     const scope = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
     if (scope === undefined) {
       throw new Error("isStaticClassAttribute, unable to lookup position");
@@ -89,7 +102,7 @@ export class Traversal {
     return undefined;
   }
 
-  public isBuiltin(token: abaplint.Token): boolean {
+  private isBuiltin(token: abaplint.Token): boolean {
     const scope = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
     if (scope === undefined) {
       throw new Error("isBuiltin, unable to lookup position");

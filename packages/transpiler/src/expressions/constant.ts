@@ -11,7 +11,7 @@ export class ConstantTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, _traversal: Traversal): string {
     const int = node.findFirstExpression(Expressions.Integer);
-    if (int && this.addGet) {
+    if (int && this.addGet === true) {
       return "constant_" + int.getFirstToken().getStr() + ".get()";
     } else if (int) {
       return "constant_" + int.getFirstToken().getStr();

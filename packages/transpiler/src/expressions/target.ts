@@ -10,10 +10,7 @@ export class TargetTranspiler implements IExpressionTranspiler {
 
     for (const c of node.getChildren()) {
       if (c.get() instanceof Expressions.TargetField) {
-        if (traversal.isClassAttribute(c.getFirstToken())) {
-          ret = "this.";
-        }
-        ret = ret + c.getFirstToken().getStr();
+        ret = ret + traversal.findPrefix(c.getFirstToken());
       } else if (c.get() instanceof Expressions.ComponentName) {
         ret = ret + c.getFirstToken().getStr();
       } else if (c instanceof Nodes.ExpressionNode

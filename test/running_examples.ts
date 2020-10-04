@@ -835,4 +835,32 @@ ENDCLASS.
     expect(abap.Console.get()).to.equal("0");
   });
 
+  it("ASSERT obj ref is initial", async () => {
+    const code = `
+    INTERFACE lif_bar.
+    ENDINTERFACE.
+    DATA ref TYPE REF TO lif_bar.
+    ASSERT ref IS INITIAL.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("");
+  });
+
+  it("DO with calculation", async () => {
+    const code = `
+  CONSTANTS lc_bar TYPE i VALUE 2.
+  DO lc_bar - 1 TIMES.
+    WRITE 'bar'.
+  ENDDO.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("bar");
+  });
+
 });
