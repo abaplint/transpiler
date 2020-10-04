@@ -904,7 +904,7 @@ ENDCLASS.
 START-OF-SELECTION.
   DATA bar TYPE REF TO lcl_bar.
   CREATE OBJECT bar.
-  bar->foo( 'hello' ).`;
+  bar->foo( moo = 'hello' ).`;
 
     const js = await run(code);
     const f = new Function("abap", js);

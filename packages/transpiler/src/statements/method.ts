@@ -32,7 +32,7 @@ export class MethodTranspiler implements IStatementTranspiler {
           unique = UniqueIdentifier.get();
         }
         after = after + new TranspileTypes().declare(v.identifier) + "\n";
-        if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)) {
+        if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting) && v.identifier.getType().isGeneric() === false) {
           after = after + "if (" + unique + " && " + unique + "." + v.name + ") {" + v.name + ".set(" + unique + "." + v.name + ");}\n";
         } else {
           after = after + "if (" + unique + " && " + unique + "." + v.name + ") {" + v.name + " = " + unique + "." + v.name + ";}\n";
