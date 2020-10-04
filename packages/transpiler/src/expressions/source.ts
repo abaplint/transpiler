@@ -18,9 +18,9 @@ export class SourceTranspiler implements IExpressionTranspiler {
     for (const c of node.getChildren()) {
       if (c instanceof Nodes.ExpressionNode) {
         if (c.get() instanceof Expressions.FieldChain) {
-          ret = ret + new FieldChainTranspiler(this.addGet).transpile(c, traversal);
+          ret = ret + new FieldChainTranspiler().transpile(c, traversal);
         } else if (c.get() instanceof Expressions.Constant) {
-          ret = ret + new ConstantTranspiler(this.addGet).transpile(c, traversal);
+          ret = ret + new ConstantTranspiler().transpile(c, traversal);
         } else if (c.get() instanceof Expressions.StringTemplate) {
           ret = ret + traversal.traverse(c);
         } else if (c.get() instanceof Expressions.ArithOperator) {
@@ -28,9 +28,6 @@ export class SourceTranspiler implements IExpressionTranspiler {
           post = ")";
         } else if (c.get() instanceof Expressions.MethodCallChain) {
           ret = ret + traversal.traverse(c);
-          if (this.addGet) {
-            ret = ret + ".get()";  // todo, this will break
-          }
         } else if (c.get() instanceof Expressions.Source) {
           ret = ret + this.transpile(c, traversal);
         } else {
@@ -41,7 +38,13 @@ export class SourceTranspiler implements IExpressionTranspiler {
       }
     }
 
-    return ret + post;
+    ret = ret + post;
+
+    if (this.addGet) {
+      ret = ret + ".get()";  // todo, this will break?
+    }
+
+    return ret;
   }
 
 }

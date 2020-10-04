@@ -23,10 +23,10 @@ export class XString implements ICharacter {
   public get(input?: {offset: number, length: number}): string {
     let ret = this.value;
     if (input?.offset) {
-      ret = ret.substr(input.offset);
+      ret = ret.substr(input.offset * 2);
     }
     if (input?.length) {
-      ret = ret.substr(0, input.length);
+      ret = ret.substr(0, input.length * 2);
     }
     return ret;
   }

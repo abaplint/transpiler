@@ -58,7 +58,7 @@ export class Traversal {
     return undefined;
   }
 
-  public isClassAttribute(token: abaplint.Token): boolean {
+  private isClassAttribute(token: abaplint.Token): boolean {
     const scope = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
     if (scope === undefined) {
       throw new Error("isClassAttribute, unable to lookup position");
@@ -72,7 +72,37 @@ export class Traversal {
     return false;
   }
 
-  public isBuiltin(token: abaplint.Token): boolean {
+  public findPrefix(t: abaplint.Token): string {
+    let name = t.getStr();
+    const cla = this.isStaticClassAttribute(t);
+    if (cla) {
+      name = cla + "." + name;
+    } else if (this.isClassAttribute(t)) {
+      name = "this." + name;
+    } else if (this.isBuiltin(t)) {
+      name = "abap.builtin." + name;
+    }
+    return name;
+  }
+
+  private isStaticClassAttribute(token: abaplint.Token): string | undefined {
+    const scope = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
+    if (scope === undefined) {
+      throw new Error("isStaticClassAttribute, unable to lookup position");
+    }
+
+    const name = token.getStr();
+    const found = scope.findScopeForVariable(name);
+    const id = scope.findVariable(name);
+    if (found && id
+        && id.getMeta().includes(abaplint.IdentifierMeta.Static)
+        && found.stype === abaplint.ScopeType.ClassImplementation) {
+      return scope.getParent()?.getIdentifier().sname.toLowerCase();
+    }
+    return undefined;
+  }
+
+  private isBuiltin(token: abaplint.Token): boolean {
     const scope = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
     if (scope === undefined) {
       throw new Error("isBuiltin, unable to lookup position");

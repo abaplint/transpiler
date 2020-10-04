@@ -32,7 +32,11 @@ export class MethodTranspiler implements IStatementTranspiler {
           unique = UniqueIdentifier.get();
         }
         after = after + new TranspileTypes().declare(v.identifier) + "\n";
-        after = after + "if (" + unique + " && " + unique + "." + v.name + ") {" + v.name + ".set(" + unique + "." + v.name + ");}\n";
+        if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)) {
+          after = after + "if (" + unique + " && " + unique + "." + v.name + ") {" + v.name + ".set(" + unique + "." + v.name + ");}\n";
+        } else {
+          after = after + "if (" + unique + " && " + unique + "." + v.name + ") {" + v.name + " = " + unique + "." + v.name + ";}\n";
+        }
       } else if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodReturning)) {
         after = after + new TranspileTypes().declare(v.identifier) + "\n";
       }
@@ -48,7 +52,11 @@ export class MethodTranspiler implements IStatementTranspiler {
     let staticMethod = "";
     for (const m of defs || []) {
       if (m.getName().toUpperCase() === name.toUpperCase() && m.isStatic()) {
-        staticMethod = "static ";
+        // in ABAP static methods can be called with instance arrows, "->"
+        const className = scope.getParent()?.getIdentifier().sname?.toLowerCase();
+        staticMethod = name + "(" + unique + ") {\n" +
+          "return " + className + "." + name + "(" + unique + ");\n" +
+          "}\n" + "static ";
         break;
       }
     }

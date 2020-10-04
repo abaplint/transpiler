@@ -17,7 +17,8 @@ export class TranspileTypes {
       resolved = "Table";
     } else if (type instanceof abaplint.BasicTypes.IntegerType) {
       resolved = "Integer";
-    } else if (type instanceof abaplint.BasicTypes.StringType) {
+    } else if (type instanceof abaplint.BasicTypes.StringType
+        || type instanceof abaplint.BasicTypes.CLikeType) {
       resolved = "String";
     } else if (type instanceof abaplint.BasicTypes.StructureType) {
       resolved = "Structure";

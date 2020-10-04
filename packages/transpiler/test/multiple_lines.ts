@@ -132,11 +132,11 @@ ENDCASE.`;
 constant_1.set(1);
 let constant_2 = new abap.types.Integer();
 constant_2.set(2);
-let unique2 = bar;
-if (abap.compare.eq(unique2, 'foo')) {
+let unique1 = bar;
+if (abap.compare.eq(unique1, 'foo')) {
   abap.statements.write(constant_2);
-} else if (abap.compare.eq(unique2, constant_1) || abap.compare.eq(unique2, constant_2)) {
-} else if (abap.compare.eq(unique2, foo)) {
+} else if (abap.compare.eq(unique1, constant_1) || abap.compare.eq(unique1, constant_2)) {
+} else if (abap.compare.eq(unique1, foo)) {
 } else {
 }`;
 
@@ -251,6 +251,9 @@ ENDCLASS.`;
     this.me = new abap.types.ABAPObject();
     this.bar = new abap.types.Integer();
   }
+  run() {
+    return zcl_ret.run();
+  }
   static run() {
     let rv_ret = new abap.types.String();
     rv_ret.set('X');
@@ -342,6 +345,77 @@ bar->moo( EXPORTING foo = 'abc'
     const expected = `let bar = new abap.types.ABAPObject();
 let str = new abap.types.String();
 bar.get().moo({foo: 'abc', bar: str});`;
+
+    expect(await runSingle(abap)).to.equal(expected);
+  });
+
+  it("method call, add default parameter name", async () => {
+    const abap = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS bar IMPORTING imp TYPE i.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD bar.
+  ENDMETHOD.
+ENDCLASS.
+
+FORM bar.
+  lcl_bar=>bar( 2 ).
+ENDFORM.`;
+
+    const expected = `let constant_2 = new abap.types.Integer();
+constant_2.set(2);
+class lcl_bar {
+  constructor() {
+    this.me = new abap.types.ABAPObject();
+  }
+  bar(unique1) {
+    return lcl_bar.bar(unique1);
+  }
+  static bar(unique1) {
+    let imp = new abap.types.Integer();
+    if (unique1 && unique1.imp) {imp.set(unique1.imp);}
+  }
+}
+function bar() {
+  lcl_bar.bar({imp: constant_2});
+}`;
+
+    expect(await runSingle(abap)).to.equal(expected);
+  });
+
+  it("constructor with parameter", async () => {
+    const abap = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor IMPORTING input TYPE i.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD constructor.
+    WRITE input.
+  ENDMETHOD.
+ENDCLASS.
+
+FORM bar.
+  DATA bar TYPE REF TO lcl_bar.
+  CREATE OBJECT bar EXPORTING input = 42.
+ENDFORM.`;
+
+    const expected = `let constant_42 = new abap.types.Integer();
+constant_42.set(42);
+class lcl_bar {
+  constructor(unique1) {
+    this.me = new abap.types.ABAPObject();
+    let input = new abap.types.Integer();
+    if (unique1 && unique1.input) {input.set(unique1.input);}
+    abap.statements.write(input);
+  }
+}
+function bar() {
+  let bar = new abap.types.ABAPObject();
+  bar.set(new lcl_bar({input: constant_42}));
+}`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });

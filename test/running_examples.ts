@@ -605,13 +605,20 @@ lcl_bar=>name( ).`;
       GET BIT sy-index OF lv_x INTO lv_c.
       CONCATENATE result lv_c INTO result.
     ENDDO.
-    WRITE result.`;
+    WRITE / result.
+    result = ''.
+    lv_x = '01'.
+    DO 8 TIMES.
+      GET BIT sy-index OF lv_x INTO lv_c.
+      CONCATENATE result lv_c INTO result.
+    ENDDO.
+    WRITE / result.`;
 
     const js = await run(code);
     const f = new Function("abap", js);
     abap.Console.clear();
     f(abap);
-    expect(abap.Console.get()).to.equal("10101011");
+    expect(abap.Console.get()).to.equal("10101011\n00000001");
   });
 
   it("early RETURN in method", async () => {
@@ -634,6 +641,252 @@ ENDCLASS.
     abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("1");
+  });
+
+  it("basic minus", async () => {
+    const code = `
+  DATA foo TYPE i.
+  foo = 5 - 2.
+  WRITE foo.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("3");
+  });
+
+  it("hex type", async () => {
+    const code = `
+  DATA foo TYPE x.
+  foo = 1.
+  WRITE / foo.
+  foo = 20.
+  WRITE / foo.
+  foo = 'AA'.
+  WRITE / foo.
+  foo = '1234'.
+  WRITE / foo.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("01\n14\nAA\n12");
+  });
+
+  it("convert type1", async () => {
+    const code = `
+  DATA i TYPE i.
+  i = '1'.
+  WRITE i.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("1");
+  });
+
+  it("convert type2", async () => {
+    const code = `
+  DATA i TYPE i.
+  DATA c TYPE c.
+  i = 2.
+  c = '3'.
+  i = i + c.
+  WRITE i.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("5");
+  });
+
+  it("convert type3", async () => {
+    const code = `
+  DATA foo TYPE c LENGTH 1.
+  foo = 'AB'.
+  WRITE foo.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("A");
+  });
+
+  it("hex offset and length", async () => {
+    const code = `
+  DATA x TYPE xstring.
+  x = '123456'.
+  WRITE / x+1.
+  WRITE / x(1).`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("3456\n12");
+  });
+
+  it("first bit of x", async () => {
+    const code = `
+  DATA x TYPE x.
+  DATA c TYPE c.
+  x = '01'.
+  GET BIT 1 OF x INTO c.
+  WRITE c.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("0");
+  });
+
+  it("class constant from static method", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CONSTANTS c TYPE i VALUE 10.
+    CLASS-METHODS foo.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD foo.
+    WRITE c.
+  ENDMETHOD.
+ENDCLASS.
+
+lcl_bar=>foo( ).`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("10");
+  });
+
+  it("class constant from instance method", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CONSTANTS c TYPE i VALUE 10.
+    METHODS foo.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD foo.
+    WRITE c.
+  ENDMETHOD.
+ENDCLASS.
+
+  DATA bar TYPE REF TO lcl_bar.
+  CREATE OBJECT bar.
+  bar->foo( ).`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("10");
+  });
+
+  it("field lengths and offsets", async () => {
+    const code = `
+  DATA bar TYPE string VALUE '12345'.
+  DATA len TYPE i.
+  len = 2.
+  WRITE / bar+len.
+  WRITE / bar(len).
+  WRITE / bar+2.
+  WRITE / bar(2).`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("345\n12\n345\n12");
+  });
+
+  it("ASSERT sy-subrc = 0.", async () => {
+    const code = `ASSERT sy-subrc = 0.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("");
+  });
+
+  it("constant_0 should not change", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF i.
+  FIELD-SYMBOLS <lv_i> LIKE LINE OF tab.
+  APPEND 0 TO tab.
+  READ TABLE tab INDEX 1 ASSIGNING <lv_i>.
+  <lv_i> = 123.
+  WRITE 0.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("0");
+  });
+
+  it("ASSERT obj ref is initial", async () => {
+    const code = `
+    INTERFACE lif_bar.
+    ENDINTERFACE.
+    DATA ref TYPE REF TO lif_bar.
+    ASSERT ref IS INITIAL.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("");
+  });
+
+  it("DO with calculation", async () => {
+    const code = `
+  CONSTANTS lc_bar TYPE i VALUE 2.
+  DO lc_bar - 1 TIMES.
+    WRITE 'bar'.
+  ENDDO.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("bar");
+  });
+
+  it("EXPORTING value", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    METHODS bar EXPORTING val TYPE i.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD bar.
+    val = 2.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA bar TYPE REF TO lcl_bar.
+  CREATE OBJECT bar.
+  DATA res TYPE i.
+  bar->bar( IMPORTING val = res ).
+  WRITE res.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("2");
   });
 
 });

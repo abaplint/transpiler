@@ -1,4 +1,5 @@
-import {Nodes, Expressions} from "@abaplint/core";
+import * as abaplint from "@abaplint/core";
+import {Nodes, Expressions, ISpaghettiScopeNode} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 
@@ -6,11 +7,15 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): string {
 
-    let ret = node.findDirectExpression(Expressions.MethodName)!.getFirstToken().getStr();
-    if (ret === "lines" || ret === "strlen" || ret === "xstrlen") { // todo, this is wrong, look at methodreferences instead
-      ret = "abap.builtin." + ret + "(";
+    const nameToken = node.findDirectExpression(Expressions.MethodName)?.getFirstToken();
+    if(nameToken === undefined) {
+      throw new Error("MethodCallTranspiler, name not found");
+    }
+    let name = nameToken.getStr();
+    if (name === "lines" || name === "strlen" || name === "xstrlen") { // todo, this is wrong, look at methodreferences instead
+      name = "abap.builtin." + name + "(";
     } else {
-      ret = ret + "(";
+      name = name + "(";
     }
 
     const step = node.findDirectExpression(Expressions.MethodCallParam);
@@ -20,19 +25,44 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
 
     const source = step.findDirectExpression(Expressions.Source);
     if (source) {
-      ret = ret + traversal.traverse(source);
+      const m = this.findMethodReference(nameToken, traversal.findCurrentScope(nameToken));
+      const def = m?.getParameters().getDefaultImporting()?.toLowerCase();
+      if (m === undefined || def === undefined) {
+        name = name + traversal.traverse(source);
+      } else {
+        name = name + "{" + def + ": " + traversal.traverse(source) + "}";
+      }
     }
 
     const parameters = step.findFirstExpression(Expressions.ParameterListS);
     if (parameters) {
-      ret = ret + traversal.traverse(parameters);
+      name = name + traversal.traverse(parameters);
     }
     for (const t of step.findAllExpressions(Expressions.ParameterListT)) {
-      ret = ret + traversal.traverse(t);
+      name = name + traversal.traverse(t);
     }
-    ret = ret.replace(/}{/g, ", ");
+    name = name.replace(/}{/g, ", ");
 
-    return ret + ")";
+    return name + ")";
+  }
+
+///////////////////
+
+  private findMethodReference(token: abaplint.Token, scope: ISpaghettiScopeNode | undefined): undefined | abaplint.Types.MethodDefinition {
+    if (scope === undefined) {
+      return undefined;
+    }
+
+    for (const r of scope.getData().references) {
+      if (r.referenceType !== abaplint.ReferenceType.MethodReference) {
+        continue;
+      } else if (r.position.getStart().equals(token.getStart())
+          && r.resolved instanceof abaplint.Types.MethodDefinition) {
+        return r.resolved;
+      }
+    }
+
+    return undefined;
   }
 
 }
