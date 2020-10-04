@@ -94,6 +94,7 @@ describe("Single statements", () => {
     {abap: "* comment",                               js: "",                    skip: false},
     {abap: "\" comment",                              js: "",                    skip: false},
     {abap: "WRITE '@KERNEL let arr = 2;'.",           js: "let arr = 2;",        skip: false},
+    {abap: "WRITE foo->bar.",           js: "abap.statements.write(foo.get().bar);",        skip: false},
   ];
 
   for (const test of tests) {
