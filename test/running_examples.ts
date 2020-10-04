@@ -889,4 +889,28 @@ START-OF-SELECTION.
     expect(abap.Console.get()).to.equal("2");
   });
 
+  it("clike", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    METHODS foo IMPORTING moo TYPE clike.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD foo.
+    WRITE moo.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA bar TYPE REF TO lcl_bar.
+  CREATE OBJECT bar.
+  bar->foo( 'hello' ).`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("hello");
+  });
+
 });
