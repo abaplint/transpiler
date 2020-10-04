@@ -9,7 +9,11 @@ export class ABAPObject  {
     return this.value;
   }
 
-  public set(value: any) {
-    this.value = value;
+  public set(value: ABAPObject | any) {
+    if (value instanceof ABAPObject) {
+      this.value = value.get();
+    } else {
+      this.value = value;
+    }
   }
 }

@@ -863,4 +863,30 @@ ENDCLASS.
     expect(abap.Console.get()).to.equal("bar");
   });
 
+  it("EXPORTING value", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    METHODS bar EXPORTING val TYPE i.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD bar.
+    val = 2.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA bar TYPE REF TO lcl_bar.
+  CREATE OBJECT bar.
+  DATA res TYPE i.
+  bar->bar( IMPORTING val = res ).
+  WRITE res.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("2");
+  });
+
 });

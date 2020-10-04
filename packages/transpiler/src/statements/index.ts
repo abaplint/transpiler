@@ -38,6 +38,7 @@ export * from "./return";
 export * from "./set_bit";
 export * from "./sort";
 export * from "./split";
+export * from "./start_of_selection";
 export * from "./try";
 export * from "./type";
 export * from "./when";
