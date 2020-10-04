@@ -12,7 +12,11 @@ export class WriteTranspiler implements IStatementTranspiler {
       extra = ", {newLine: true}";
     }
     const source = new SourceTranspiler().transpile(node.findDirectExpression(abaplint.Expressions.Source)!, traversal);
-    return "abap.statements.write(" + source + extra + ");";
+    if (source.startsWith("'@KERNEL ")) {
+      return source.substr(9, source.length - 10);
+    } else {
+      return "abap.statements.write(" + source + extra + ");";
+    }
   }
 
 }

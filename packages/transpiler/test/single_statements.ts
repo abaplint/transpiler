@@ -91,6 +91,9 @@ describe("Single statements", () => {
     {abap: "WRITE zcl_name=>c_maxbits.",              js: "abap.statements.write(zcl_name.c_maxbits);",            skip: false},
     {abap: "WRITE |`|.",                              js: "abap.statements.write(`\\``);",                         skip: false},
     {abap: "ASSERT NOT act IS INITIAL.",              js: "abap.statements.assert(abap.compare.initial(act) === false);", skip: false},
+    {abap: "* comment",                               js: "",                    skip: false},
+    {abap: "\" comment",                              js: "",                    skip: false},
+    {abap: "WRITE '@KERNEL let arr = 2;'.",           js: "let arr = 2;",        skip: false},
   ];
 
   for (const test of tests) {
