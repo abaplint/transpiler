@@ -30,7 +30,7 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
         ret = ret + c.getFirstToken().getStr();
       } else if (c instanceof Nodes.TokenNode) {
         const str = c.getFirstToken().getStr();
-        if (str === "-") {
+        if (str === "-" || str === "->") {
           ret = ret + ".get().";
         }
       } else if (c instanceof Nodes.ExpressionNode

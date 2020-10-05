@@ -4,10 +4,21 @@ import {Traversal} from "../traversal";
 
 export class ClassImplementationTranspiler implements IStatementTranspiler {
 
-  public transpile(node: abaplint.Nodes.StatementNode, _traversal: Traversal): string {
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
     const token = node.findFirstExpression(abaplint.Expressions.ClassName)!.getFirstToken();
 
-    return "class " + token.getStr().toLowerCase() + " {";
+    const def = traversal.getClassDefinition(token);
+
+    let ret = "class " + token.getStr().toLowerCase();
+
+    if (token.getStr().toLowerCase() === "cx_root") {
+      // special case for exceptions
+      ret += " extends Error";
+    } else if (def?.getSuperClass()) {
+      ret += " extends " + def?.getSuperClass()?.toLowerCase();
+    }
+
+    return ret + " {";
   }
 
 }

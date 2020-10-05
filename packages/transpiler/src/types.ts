@@ -17,8 +17,7 @@ export class TranspileTypes {
       resolved = "Table";
     } else if (type instanceof abaplint.BasicTypes.IntegerType) {
       resolved = "Integer";
-    } else if (type instanceof abaplint.BasicTypes.StringType
-        || type instanceof abaplint.BasicTypes.CLikeType) {
+    } else if (type instanceof abaplint.BasicTypes.StringType) {
       resolved = "String";
     } else if (type instanceof abaplint.BasicTypes.StructureType) {
       resolved = "Structure";
@@ -27,6 +26,13 @@ export class TranspileTypes {
         list.push(c.name + ": " + this.toType(c.type));
       }
       extra = "{" + list.join(", ") + "}";
+    } else if (type instanceof abaplint.BasicTypes.CLikeType) {
+      // if not supplied its a Character(1)
+      resolved = "Character";
+    } else if (type instanceof abaplint.BasicTypes.AnyType) {
+      // if not supplied its a Character(4)
+      resolved = "Character";
+      extra = "{length: 4}";
     } else if (type instanceof abaplint.BasicTypes.CharacterType) {
       resolved = "Character";
       if (type.getLength() !== 1) {
@@ -34,9 +40,11 @@ export class TranspileTypes {
       }
     } else if (type instanceof abaplint.BasicTypes.PackedType) {
       resolved = "Packed";
-    } else if (type instanceof abaplint.BasicTypes.XStringType
-        || type instanceof abaplint.BasicTypes.XSequenceType) {
+    } else if (type instanceof abaplint.BasicTypes.XStringType) {
       resolved = "XString";
+    } else if (type instanceof abaplint.BasicTypes.XSequenceType) {
+      // if not supplied itsa a Hex(1)
+      resolved = "Hex";
     } else if (type instanceof abaplint.BasicTypes.HexType) {
       resolved = "Hex";
       if (type.getLength() !== 1) {

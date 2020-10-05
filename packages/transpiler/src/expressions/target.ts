@@ -13,10 +13,12 @@ export class TargetTranspiler implements IExpressionTranspiler {
         ret = ret + traversal.findPrefix(c.getFirstToken());
       } else if (c.get() instanceof Expressions.ComponentName) {
         ret = ret + c.getFirstToken().getStr();
+      } else if (c.get() instanceof Expressions.AttributeName) {
+        ret = ret + c.getFirstToken().getStr();
       } else if (c instanceof Nodes.ExpressionNode
           && c.get() instanceof Expressions.TargetFieldSymbol) {
         ret = ret + new FieldSymbolTranspiler().transpile(c, traversal);
-      } else if (c.getFirstToken().getStr() === "-") {
+      } else if (c.getFirstToken().getStr() === "-" || c.getFirstToken().getStr() === "->") {
         ret = ret + ".get().";
       }
     }
