@@ -28,7 +28,7 @@ export class Requires {
 // this finds all OO references
     for (const v of node.getData().references) {
       // todo, use the enum from abaplint, when its exported
-      if (v.referenceType === "ObjectOrientedReference") {
+      if (v.referenceType === "ObjectOrientedReference" && v.resolved) {
         add(this.lookup(v.resolved.getName()));
       }
     }
