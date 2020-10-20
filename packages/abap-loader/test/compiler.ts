@@ -45,7 +45,7 @@ export function run(fixture: IFixture, options = {}): Promise<webpack.Stats> {
     compiler.run((err, stats) => {
       if (err) {
         reject(err);
-      } else if (stats.hasErrors()) {
+      } else if (stats?.hasErrors()) {
         reject(new Error(stats.toJson().errors.join("")));
       }
 

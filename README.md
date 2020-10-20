@@ -8,8 +8,6 @@
 
 Proof of concept, things might change
 
-Type information will be required, to be added later, also more work in [abaplint](https://github.com/abaplint/abaplint) needed for this
-
 Target is [ES6](http://es6-features.org)
 
 Planned database support: [SQLite](https://www.sqlite.org) & [HANA Express](https://www.sap.com/cmp/td/sap-hana-express-edition.html)
