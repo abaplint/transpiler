@@ -96,6 +96,8 @@ describe("Single statements", () => {
     {abap: "WRITE '@KERNEL let arr = 2;'.",           js: "let arr = 2;",        skip: false},
     {abap: "WRITE foo->bar.",                         js: "abap.statements.write(foo.get().bar);",        skip: false},
     {abap: "type->type_kind = 2.",                    js: "type.get().type_kind.set(constant_2);",         skip: false},
+    {abap: "REPLACE ALL OCCURRENCES OF |\\n| IN lv_norm WITH | |.",         js: "abap.statements.replace(lv_norm, `\\n`, ` `);",         skip: false},
+    {abap: "CONDENSE lv_norm.",  js: "abap.statements.condense(lv_norm);",         skip: false},
   ];
 
   for (const test of tests) {

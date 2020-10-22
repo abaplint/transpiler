@@ -913,4 +913,45 @@ START-OF-SELECTION.
     expect(abap.Console.get()).to.equal("hello");
   });
 
+  it("NOT INITIAL", async () => {
+    const code = `
+    DATA str TYPE string.
+    str = 'abc'.
+    ASSERT NOT str IS INITIAL.
+    str = ''.
+    ASSERT str IS INITIAL.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+  });
+
+  it("REPLACE ALL", async () => {
+    const code = `
+  DATA str TYPE string.
+  str = 'aabbccbb'.
+  REPLACE ALL OCCURRENCES OF |bb| IN str WITH |dd|.
+  ASSERT str = 'aaddccdd'.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+  });
+
+  it("CONDENSE", async () => {
+    const code = `
+  DATA str TYPE string.
+  str = | aa |.
+  ASSERT str = | aa |.
+  CONDENSE str.
+  ASSERT str = |aa|.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+  });
+
 });
