@@ -954,4 +954,21 @@ START-OF-SELECTION.
     f(abap);
   });
 
+  it("CP", async () => {
+    const code = `
+  DATA bar TYPE string.
+  bar = 'abc'.
+  ASSERT bar CP 'a*'.
+  ASSERT bar CP 'A*'.
+  ASSERT bar CP '*b*'.
+  ASSERT bar CP '*c'.
+  ASSERT bar CP 'abc'.
+  ASSERT bar CP '*abc*'.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+  });
+
 });
