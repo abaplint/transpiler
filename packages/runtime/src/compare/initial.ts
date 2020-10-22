@@ -10,6 +10,7 @@ export function initial(val: ICharacter | INumeric | ABAPObject) {
     return value === 0;
   } else if (val instanceof ABAPObject) {
     return value === undefined;
+  } else {
+    throw new Error("runtime, initial, missing implementation");
   }
-  return false;
 }

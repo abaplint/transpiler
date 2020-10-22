@@ -913,4 +913,18 @@ START-OF-SELECTION.
     expect(abap.Console.get()).to.equal("hello");
   });
 
+  it("NOT INITIAL", async () => {
+    const code = `
+    DATA str TYPE string.
+    str = 'abc'.
+    ASSERT NOT str IS INITIAL.
+    str = ''.
+    ASSERT str IS INITIAL.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+  });
+
 });
