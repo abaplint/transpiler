@@ -971,4 +971,25 @@ START-OF-SELECTION.
     f(abap);
   });
 
+  it.skip("structured constant", async () => {
+    const code = `
+CLASS lcl_foo DEFINITION.
+  PUBLIC SECTION.
+    CONSTANTS: BEGIN OF bar,
+                 field TYPE c VALUE 'A',
+               END OF bar.
+ENDCLASS.
+CLASS lcl_foo IMPLEMENTATION.
+ENDCLASS.
+
+WRITE lcl_foo=>bar-field.`;
+
+    const js = await run(code);
+    console.dir(js);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("A");
+  });
+
 });
