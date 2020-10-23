@@ -971,7 +971,7 @@ START-OF-SELECTION.
     f(abap);
   });
 
-  it.skip("structured constant", async () => {
+  it("structured constant", async () => {
     const code = `
 CLASS lcl_foo DEFINITION.
   PUBLIC SECTION.
@@ -985,7 +985,6 @@ ENDCLASS.
 WRITE lcl_foo=>bar-field.`;
 
     const js = await run(code);
-    console.dir(js);
     const f = new Function("abap", js);
     abap.Console.clear();
     f(abap);
