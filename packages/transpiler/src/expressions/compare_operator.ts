@@ -4,8 +4,8 @@ import {IExpressionTranspiler} from "./_expression_transpiler";
 export class CompareOperatorTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode): string {
-// todo, this is not correct
-    switch(node.getFirstToken().getStr().toUpperCase()) {
+    const op = node.getFirstToken().getStr().toUpperCase();
+    switch(op) {
       case "=":
       case "EQ":
         return "eq";
@@ -24,8 +24,10 @@ export class CompareOperatorTranspiler implements IExpressionTranspiler {
       case "<>":
       case "NE":
         return "ne";
+      case "CP":
+        return "cp";
       default:
-        return "compareoperatortodo";
+        return "compareoperatortodo" + op;
     }
   }
 

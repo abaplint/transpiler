@@ -104,6 +104,7 @@ function jsChanged() {
     }
   } catch (error) {
     editor3.setValue(error.message);
+    console.dir(error);
   }
 }
 
@@ -120,6 +121,7 @@ async function abapChanged() {
   } catch (error) {
     editor2.setValue("");
     editor3.setValue(error.message);
+    console.dir(error);
   }
 }
 
