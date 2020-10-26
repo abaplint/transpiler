@@ -991,4 +991,18 @@ WRITE lcl_foo=>bar-field.`;
     expect(abap.Console.get()).to.equal("A");
   });
 
+  it("DELETE from table INDEX", async () => {
+    const code = `
+  DATA foo TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  APPEND 2 TO foo.
+  APPEND 3 TO foo.
+  DELETE foo INDEX 2.
+  ASSERT lines( foo ) = 1.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+  });
+
 });
