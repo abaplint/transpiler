@@ -18,6 +18,11 @@ export class DeleteInternalTranspiler implements IStatementTranspiler {
       extra.push("adjacent: true");
     }
 
+    const index = node.findExpressionAfterToken("INDEX");
+    if (index) {
+      extra.push("index: " + traversal.traverse(index));
+    }
+
     let concat = "";
     if (extra.length > 0) {
       concat = ",{" + extra.join(",") + "}";
