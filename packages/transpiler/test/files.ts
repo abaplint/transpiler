@@ -61,7 +61,8 @@ ENDCLASS.
 
   CLASS ltcl_test IMPLEMENTATION.
     METHOD test.
-      WRITE 'hello world'.
+      DATA foo TYPE REF TO zcl_index.
+      CREATE OBJECT foo.
     ENDMETHOD.
   ENDCLASS.
 `;
@@ -69,8 +70,14 @@ ENDCLASS.
 
     const output = (await new Transpiler().run([file1, file2])).objects;
 
-    expect(output.length).to.equal(1);
-    expect(output[0].js.contents).to.include("ltcl_test");
+    expect(output.length).to.equal(2);
+    expect(output[0].js.contents).to.include("zcl_index");
+    expect(output[0].exports.length).to.equal(1, "one export expected, global class");
+    expect(output[0].requires.length).to.equal(0, "no requires from global class");
+
+    expect(output[1].js.contents).to.include("ltcl_test");
+    expect(output[1].exports.length).to.equal(1, "one export expected, testclass");
+    expect(output[1].requires.length).to.equal(1, "one require expected, testclass");
   });
 
 });
