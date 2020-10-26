@@ -25,7 +25,7 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
     }
 
     const obj = type as abaplint.BasicTypes.ObjectReferenceType;
-    return target + ".set(new " + obj.getName() + "(" + para + "));";
+    return target + ".set(new " + obj.getIdentifierName() + "(" + para + "));";
   }
 
 }

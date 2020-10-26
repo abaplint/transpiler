@@ -61,7 +61,7 @@ export class Transpiler {
       if (abap.getType() === "INTF") {
         continue;
       } else if (abap instanceof abaplint.ABAPObject) {
-        output.objects.push(this.runObject(abap, reg));
+        output.objects = output.objects.concat(this.runObject(abap, reg));
       }
     }
 
@@ -70,14 +70,16 @@ export class Transpiler {
 
 // ///////////////////////////////
 
-  protected runObject(obj: abaplint.ABAPObject, reg: abaplint.IRegistry): IOutputFile {
+  protected runObject(obj: abaplint.ABAPObject, reg: abaplint.IRegistry): IOutputFile[] {
     const spaghetti = new abaplint.SyntaxLogic(reg, obj).run().spaghetti;
 
-    let result = "";
-    let exports: string[] = [];
-    const constants: number[] = [];
+    const ret: IOutputFile[] = [];
 
     for (const file of obj.getSequencedFiles()) {
+      let exports: string[] = [];
+      const constants: number[] = [];
+      let result = "";
+
       if (this.options?.addFilenames === true) {
         result += "// " + file.getFilename() + "\n";
       }
@@ -94,32 +96,34 @@ export class Transpiler {
       }
 
       exports = exports.concat(this.findExports(file.getStructure()));
-    }
 
-    if (this.options?.skipConstants === false || this.options?.skipConstants === undefined) {
-      for (const c of constants.sort((a, b) => b - a)) {
-        result = `let constant_${c} = new abap.types.Integer();\n` +
-          `constant_${c}.set(${c});\n` + result;
+      if (this.options?.skipConstants === false || this.options?.skipConstants === undefined) {
+        for (const c of constants.sort((a, b) => b - a)) {
+          result = `let constant_${c} = new abap.types.Integer();\n` +
+            `constant_${c}.set(${c});\n` + result;
+        }
       }
+
+      if (result.endsWith("\n")) {
+        result = result.substring(0, result.length - 1);
+      }
+
+      const filename = file.getFilename().replace(".abap", ".js");
+
+      const output: IOutputFile = {
+        object: {name: obj.getName(), type: obj.getType()},
+        js: {filename: filename.toLowerCase(), contents: result},
+        requires: new Requires(reg, obj).find(spaghetti.getTop(), file.getFilename()),
+        exports,
+      };
+
+      if (this.options?.addCommonJS === true) {
+        output.js.contents = this.addCommonJS(output);
+      }
+      ret.push(output);
     }
 
-    if (result.endsWith("\n")) {
-      result = result.substring(0, result.length - 1);
-    }
-
-    const filename = obj.getName() + "." + obj.getType() + ".js";
-    const output: IOutputFile = {
-      object: {name: obj.getName(), type: obj.getType()},
-      js: {filename: filename.toLowerCase(), contents: result},
-      requires: new Requires(reg, obj).find(spaghetti.getTop()),
-      exports,
-    };
-
-    if (this.options?.addCommonJS === true) {
-      output.js.contents = this.addCommonJS(output);
-    }
-
-    return output;
+    return ret;
   }
 
   /** adds common js modules syntax */

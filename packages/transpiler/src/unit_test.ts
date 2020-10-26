@@ -15,7 +15,7 @@ try {\n`;
               continue;
             }
             ret += `{
-const ${def.name} = require("./${obj.getName().toLowerCase()}.${obj.getType().toLowerCase()}.js").${def.name};
+const ${def.name} = require("./${obj.getName().toLowerCase()}.${obj.getType().toLowerCase()}.testclasses.js").${def.name};
 const test = new ${def.name}();\n`;
 
             if (def.methods.some(m => m.name.toUpperCase() === "CLASS_SETUP")) {
