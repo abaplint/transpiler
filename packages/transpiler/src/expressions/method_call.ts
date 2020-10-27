@@ -11,8 +11,9 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
     if(nameToken === undefined) {
       throw new Error("MethodCallTranspiler, name not found");
     }
+
     let name = nameToken.getStr();
-    if (name === "lines" || name === "strlen" || name === "xstrlen") { // todo, this is wrong, look at methodreferences instead
+    if (name === "lines" || name === "strlen" || name === "xstrlen") { // todo, this is wrong, look at MethodReferences instead
       name = "abap.builtin." + name + "(";
     } else {
       name = name + "(";
@@ -23,10 +24,14 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
       throw new Error("MethodCallTranspiler, unexpected node");
     }
 
+    const m = this.findMethodReference(nameToken, traversal.findCurrentScope(nameToken));
+    if (m?.name) {
+      name = m.name + "(";
+    }
+
     const source = step.findDirectExpression(Expressions.Source);
     if (source) {
-      const m = this.findMethodReference(nameToken, traversal.findCurrentScope(nameToken));
-      const def = m?.getParameters().getDefaultImporting()?.toLowerCase();
+      const def = m?.def?.getParameters().getDefaultImporting()?.toLowerCase();
       if (m === undefined || def === undefined) {
         name = name + traversal.traverse(source);
       } else {
@@ -48,7 +53,9 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
 
 ///////////////////
 
-  private findMethodReference(token: abaplint.Token, scope: ISpaghettiScopeNode | undefined): undefined | abaplint.Types.MethodDefinition {
+  private findMethodReference(token: abaplint.Token, scope: ISpaghettiScopeNode | undefined):
+  undefined | {def: abaplint.Types.MethodDefinition, name: string} {
+
     if (scope === undefined) {
       return undefined;
     }
@@ -58,7 +65,13 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
         continue;
       } else if (r.position.getStart().equals(token.getStart())
           && r.resolved instanceof abaplint.Types.MethodDefinition) {
-        return r.resolved;
+
+        let name = r.resolved.getName();
+        if (r.extra?.ooName && r.extra?.ooType === "INTF") {
+          name = r.extra.ooName + "$" + name;
+        }
+
+        return {def: r.resolved, name};
       }
     }
 
