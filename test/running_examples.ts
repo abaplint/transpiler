@@ -1005,4 +1005,20 @@ WRITE lcl_foo=>bar-field.`;
     f(abap);
   });
 
+  it("simple PERFORM", async () => {
+    const code = `
+FORM bar.
+  WRITE 'hello'.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM bar.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("hello");
+  });
+
 });
