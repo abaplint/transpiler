@@ -13,7 +13,10 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
     }
 
     let name = nameToken.getStr();
-    if (name === "lines" || name === "strlen" || name === "xstrlen") { // todo, this is wrong, look at MethodReferences instead
+    if (name === "lines"
+        || name === "strlen"
+        || name === "concat_lines_of"
+        || name === "xstrlen") { // todo, this is wrong, look at MethodReferences instead
       name = "abap.builtin." + name + "(";
     } else {
       name = name + "(";

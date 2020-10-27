@@ -11,11 +11,21 @@ export class LoopTranspiler implements IStatementTranspiler {
     }
 
     const source = traversal.traverse(node.findDirectExpression(abaplint.Expressions.BasicSource));
-    const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
 
     const unique = UniqueIdentifier.get();
+    let target = "";
+    const into = node.findDirectExpression(abaplint.Expressions.Target);
+    if (into) {
+      target = traversal.traverse(into) + ".set(" + unique + ");";
+    } else {
+      const assigning = node.findFirstExpression(abaplint.Expressions.FieldSymbol);
+      if (assigning) {
+        target = traversal.traverse(assigning) + " = " + unique + ";";
+      }
+    }
+
     return "for (let " + unique + " of " + source + ".array()) {\n" +
-      target + ".set(" + unique + ");";
+      target;
   }
 
 }
