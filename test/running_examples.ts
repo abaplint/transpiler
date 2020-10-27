@@ -1100,4 +1100,21 @@ START-OF-SELECTION.
     expect(abap.Console.get()).to.equal("4");
   });
 
+  it("concat_lines_of", async () => {
+    const code = `
+  DATA rv_text TYPE string.
+  DATA lt_rows TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+  APPEND 'a' TO lt_rows.
+  APPEND 'c' TO lt_rows.
+  rv_text = concat_lines_of( table = lt_rows
+                             sep   = |b| ).
+  WRITE rv_text.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("abc");
+  });
+
 });
