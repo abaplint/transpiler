@@ -1054,4 +1054,23 @@ START-OF-SELECTION.
     expect(abap.Console.get()).to.equal("helloabc");
   });
 
+  it("LOOP at assigning", async () => {
+    const code = `
+    DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+    FIELD-SYMBOLS <row> TYPE i.
+    APPEND 1 TO tab.
+    LOOP AT tab ASSIGNING <row>.
+      <row> = 2.
+    ENDLOOP.
+    LOOP AT tab ASSIGNING <row>.
+      WRITE <row>.
+    ENDLOOP.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("2");
+  });
+
 });
