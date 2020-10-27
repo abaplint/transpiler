@@ -1073,4 +1073,31 @@ START-OF-SELECTION.
     expect(abap.Console.get()).to.equal("2");
   });
 
+  it("FIND FIRST OCCURRENCE, found", async () => {
+    const code = `
+  DATA lv_offset.
+  FIND FIRST OCCURRENCE OF |bar| IN |foobar| MATCH OFFSET lv_offset.
+  WRITE / sy-subrc.
+  WRITE / lv_offset.`;
+
+    const js = "global.abap = abap;\n" + await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("0\n3");
+  });
+
+  it("FIND FIRST OCCURRENCE, not found", async () => {
+    const code = `
+  DATA lv_offset.
+  FIND FIRST OCCURRENCE OF |bar| IN |foo| MATCH OFFSET lv_offset.
+  WRITE / sy-subrc.`;
+
+    const js = "global.abap = abap;\n" + await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("4");
+  });
+
 });
