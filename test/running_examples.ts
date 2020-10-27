@@ -1005,4 +1005,53 @@ WRITE lcl_foo=>bar-field.`;
     f(abap);
   });
 
+  it("simple PERFORM", async () => {
+    const code = `
+FORM bar.
+  WRITE 'hello'.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM bar.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("hello");
+  });
+
+  it("call interfaced method", async () => {
+    const code = `
+INTERFACE lif_foo.
+  METHODS bar.
+ENDINTERFACE.
+
+CLASS lcl_foo DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif_foo.
+ENDCLASS.
+
+CLASS lcl_foo IMPLEMENTATION.
+  METHOD lif_foo~bar.
+    WRITE 'helloabc'.
+  ENDMETHOD.
+ENDCLASS.
+
+FORM bar.
+  DATA ref TYPE REF TO lif_foo.
+  CREATE OBJECT ref TYPE lcl_foo.
+  ref->bar( ).
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM bar.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("helloabc");
+  });
+
 });

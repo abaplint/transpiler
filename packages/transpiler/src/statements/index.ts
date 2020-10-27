@@ -12,6 +12,7 @@ export * from "./constant";
 export * from "./continue";
 export * from "./create_object";
 export * from "./data";
+export * from "./perform";
 export * from "./delete_internal";
 export * from "./do";
 export * from "./else_if";
