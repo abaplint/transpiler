@@ -3,6 +3,7 @@ import {ICharacter} from "./_character";
 import {Integer} from "./integer";
 import {ABAPObject} from "./abap_object";
 import {String} from "./string";
+import {Structure} from "./structure";
 
 export class Table  {
   private value: any[];
@@ -32,6 +33,8 @@ export class Table  {
     } else if (typeof item === "string") {
       this.value.push(new String().set(item));
     } else if (item instanceof Table) {
+      this.value.push(item);
+    } else if (item instanceof Structure) {
       this.value.push(item);
     } else if (item instanceof ABAPObject) {
       this.value.push(item);
