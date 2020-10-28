@@ -1,3 +1,4 @@
+import {Hex} from "./hex";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 
@@ -8,11 +9,13 @@ export class Integer implements INumeric {
     this.value = 0;
   }
 
-  public set(value: INumeric | ICharacter | string | number) {
+  public set(value: INumeric | ICharacter | Hex | string | number) {
     if (typeof value === "number") {
       this.value = value;
     } else if (typeof value === "string") {
       this.value = parseInt(value, 10);
+    } else if (value instanceof Hex) {
+      this.set(parseInt(value.get(), 16));
     } else {
       this.set(value.get());
     }
