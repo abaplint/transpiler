@@ -1117,4 +1117,18 @@ START-OF-SELECTION.
     expect(abap.Console.get()).to.equal("abc");
   });
 
+  it("hex value conversion", async () => {
+    const code = `
+  DATA hex TYPE x.
+  DATA integer TYPE i.
+  hex = 'AA'.
+  integer = hex.
+  ASSERT integer = 170.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+  });
+
 });
