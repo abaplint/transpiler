@@ -11,7 +11,16 @@ module.exports = {
     "json.worker": "monaco-editor/esm/vs/language/json/json.worker",
     "ts.worker": "monaco-editor/esm/vs/language/typescript/ts.worker",
   },
+  devServer: {
+    open: true,
+    hot: true,
+  },
   resolve: {
+    fallback: {
+      "buffer": require.resolve("buffer/"),
+      "stream": require.resolve("stream-browserify"),
+      "string_decoder": require.resolve("string_decoder/"),
+    },
     extensions: [".ts", ".js"],
     alias: {
       "@abaplint/runtime": "../../../packages/runtime/build/src/",
