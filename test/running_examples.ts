@@ -1131,4 +1131,29 @@ START-OF-SELECTION.
     f(abap);
   });
 
+  it("append structure to table", async () => {
+    const code = `
+TYPES: BEGIN OF ty_bar,
+         field TYPE i,
+       END OF ty_bar.
+TYPES ty_tab TYPE STANDARD TABLE OF ty_bar WITH DEFAULT KEY.
+DATA bar TYPE ty_bar.
+DATA tab TYPE ty_tab.
+
+bar-field = 1.
+APPEND bar TO tab.
+bar-field = 2.
+APPEND bar TO tab.
+
+LOOP AT tab INTO bar.
+  WRITE / bar-field.
+ENDLOOP.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    abap.Console.clear();
+    f(abap);
+    expect(abap.Console.get()).to.equal("1\n2");
+  });
+
 });
