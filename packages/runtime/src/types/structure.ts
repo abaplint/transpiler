@@ -13,7 +13,11 @@ export class Structure {
     return this;
   }
 
-  public set(input: Structure) {
+  public set(input: Structure | undefined) {
+    if (input === undefined) {
+      return;
+    }
+
     const obj = input.get();
     for (const f in obj) {
       // @ts-ignore
