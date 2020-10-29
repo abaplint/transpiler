@@ -2,9 +2,10 @@ import {expect} from "chai";
 import {Transpiler} from "../packages/transpiler/src/";
 import * as abap from "../packages/runtime/src/";
 
-async function run(abap: string) {
-  const res = await new Transpiler().run([{filename: "zfoobar.prog.abap", contents: abap}]);
-  return res.objects[0].js.contents;
+async function run(contents: string) {
+  const res = await new Transpiler().run([{filename: "zfoobar.prog.abap", contents}]);
+  abap.Console.clear();
+  return "global.abap = abap;\n" + res.objects[0].js.contents;
 }
 
 describe("Running Examples", () => {
@@ -101,7 +102,6 @@ describe("Running Examples", () => {
     const code = `WRITE 'foo'.`;
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("foo");
   });
@@ -113,7 +113,6 @@ describe("Running Examples", () => {
       WRITE bar+1.`;
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("bc");
   });
@@ -125,7 +124,6 @@ describe("Running Examples", () => {
       WRITE bar(1).`;
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("a");
   });
@@ -195,7 +193,6 @@ describe("Running Examples", () => {
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("1\n2");
   });
@@ -254,7 +251,6 @@ describe("Running Examples", () => {
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("2\n2");
   });
@@ -270,7 +266,6 @@ describe("Running Examples", () => {
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("foo");
   });
@@ -295,7 +290,6 @@ describe("Running Examples", () => {
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("foo");
   });
@@ -324,7 +318,6 @@ describe("Running Examples", () => {
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("foo");
   });
@@ -349,7 +342,6 @@ describe("Running Examples", () => {
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("0");
   });
@@ -374,7 +366,6 @@ describe("Running Examples", () => {
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("2");
   });
@@ -521,7 +512,6 @@ lcl_bar=>name( ).`;
     WRITE foo.`;
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("AA");
   });
@@ -533,7 +523,6 @@ lcl_bar=>name( ).`;
     WRITE strlen( foo ).`;
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("3");
   });
@@ -545,7 +534,6 @@ lcl_bar=>name( ).`;
     WRITE xstrlen( foo ).`;
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("1");
   });
@@ -557,7 +545,6 @@ lcl_bar=>name( ).`;
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("48656C6C6F20576F726C64210D0A");
   });
@@ -573,7 +560,6 @@ lcl_bar=>name( ).`;
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("yes");
   });
@@ -589,7 +575,6 @@ lcl_bar=>name( ).`;
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("no");
   });
@@ -616,7 +601,6 @@ lcl_bar=>name( ).`;
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("10101011\n00000001");
   });
@@ -638,7 +622,6 @@ ENDCLASS.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("1");
   });
@@ -651,7 +634,6 @@ ENDCLASS.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("3");
   });
@@ -670,7 +652,6 @@ ENDCLASS.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("01\n14\nAA\n12");
   });
@@ -683,7 +664,6 @@ ENDCLASS.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("1");
   });
@@ -699,7 +679,6 @@ ENDCLASS.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("5");
   });
@@ -712,7 +691,6 @@ ENDCLASS.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("A");
   });
@@ -726,7 +704,6 @@ ENDCLASS.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("3456\n12");
   });
@@ -741,7 +718,6 @@ ENDCLASS.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("0");
   });
@@ -763,7 +739,6 @@ lcl_bar=>foo( ).`;
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("10");
   });
@@ -787,7 +762,6 @@ ENDCLASS.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("10");
   });
@@ -804,7 +778,6 @@ ENDCLASS.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("345\n12\n345\n12");
   });
@@ -814,7 +787,6 @@ ENDCLASS.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("");
   });
@@ -830,7 +802,6 @@ ENDCLASS.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("0");
   });
@@ -844,7 +815,6 @@ ENDCLASS.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("");
   });
@@ -858,7 +828,6 @@ ENDCLASS.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("bar");
   });
@@ -884,7 +853,6 @@ START-OF-SELECTION.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("2");
   });
@@ -908,7 +876,6 @@ START-OF-SELECTION.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("hello");
   });
@@ -923,7 +890,6 @@ START-OF-SELECTION.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
   });
 
@@ -936,7 +902,6 @@ START-OF-SELECTION.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
   });
 
@@ -950,7 +915,6 @@ START-OF-SELECTION.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
   });
 
@@ -967,7 +931,6 @@ START-OF-SELECTION.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
   });
 
@@ -986,7 +949,6 @@ WRITE lcl_foo=>bar-field.`;
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("A");
   });
@@ -1001,7 +963,6 @@ WRITE lcl_foo=>bar-field.`;
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
   });
 
@@ -1016,7 +977,6 @@ START-OF-SELECTION.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("hello");
   });
@@ -1049,7 +1009,6 @@ START-OF-SELECTION.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("helloabc");
   });
@@ -1068,7 +1027,6 @@ START-OF-SELECTION.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("2");
   });
@@ -1080,9 +1038,8 @@ START-OF-SELECTION.
   WRITE / sy-subrc.
   WRITE / lv_offset.`;
 
-    const js = "global.abap = abap;\n" + await run(code);
+    const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("0\n3");
   });
@@ -1093,9 +1050,8 @@ START-OF-SELECTION.
   FIND FIRST OCCURRENCE OF |bar| IN |foo| MATCH OFFSET lv_offset.
   WRITE / sy-subrc.`;
 
-    const js = "global.abap = abap;\n" + await run(code);
+    const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("4");
   });
@@ -1112,7 +1068,6 @@ START-OF-SELECTION.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("abc");
   });
@@ -1127,7 +1082,6 @@ START-OF-SELECTION.
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
   });
 
@@ -1151,9 +1105,26 @@ ENDLOOP.`;
 
     const js = await run(code);
     const f = new Function("abap", js);
-    abap.Console.clear();
     f(abap);
     expect(abap.Console.get()).to.equal("1\n2");
+  });
+
+  it("read index 1 of structured table", async () => {
+    const code = `
+TYPES: BEGIN OF ty_bar,
+         field TYPE i,
+       END OF ty_bar.
+TYPES ty_tab TYPE STANDARD TABLE OF ty_bar WITH DEFAULT KEY.
+DATA bar TYPE ty_bar.
+DATA tab TYPE ty_tab.
+
+READ TABLE tab INDEX 1 INTO bar.
+WRITE sy-subrc.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("4");
   });
 
 });
