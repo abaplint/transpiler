@@ -72,7 +72,7 @@ export const config: IConfig = {
 };
 
 
-// todo, make sure nothing is overloaded, eg "lines()"
+// todo, make sure nothing is overloaded, eg "lines()", there is a rule for this in abaplint now
 
 export class Validation {
 

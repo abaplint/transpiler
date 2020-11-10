@@ -1127,4 +1127,24 @@ WRITE sy-subrc.`;
     expect(abap.Console.get()).to.equal("4");
   });
 
+  it("javascript keyword uses as identifier", async () => {
+    const code = `
+data if type i.
+if = 1.
+write if.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("1");
+  });
+
+  it("javascript keyword in string template", async () => {
+    const code = `write |foo if bar|.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("foo if bar");
+  });
+
 });
