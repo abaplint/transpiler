@@ -31,6 +31,7 @@ export class Kewords {
   }
 
   private traverse(node: abaplint.INode, file: abaplint.ABAPFile): abaplint.Token[] {
+// https://www.w3schools.com/js/js_reserved.asp
     const keywords: string[] = [
       "abstract",	"arguments", "await", "boolean",
       "break",	"byte", "case", "catch",
