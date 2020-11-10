@@ -49,30 +49,13 @@ export const config: IConfig = {
       "subtract": false,
     },
     "forbidden_identifier": {
-      "check": [
-        "^abstract$",	"^arguments$", "^await$", "^boolean$",
-        "^break$",	"^byte$", "^case$", "^catch$",
-        "^char$",	"^class$", "^const$", "^continue$",
-        "^debugger$",	"^default$", "^delete$", "^do$",
-        "^double$",	"^else$", "^enum$", "^eval$",
-        "^export$",	"^extends$", "^false$", "^final$",
-        "^finally$",	"^float$", "^for$", "^function$",
-        "^goto$",	"^if$", "^implements$", "^import$",
-        "^in$",	"^instanceof$", "^int$", "^interface$",
-        "^let$",	"^long$", "^native$", "^new$",
-        "^null$",	"^package$", "^private$", "^protected$",
-        "^public$",	"^return$", "^short$", "^static$",
-        "^switch$", "^synchronized$", "^this$",
-        "^throw$",	"^throws$", "^transient$", "^true$",
-        "^try$",	"^typeof$", "^var$", "^void$",
-        "^volatile$",	"^while$", "^with$", "^yield$",
-        "^unique\\d+$", "^constant_\\d+$"],
+      "check": ["^unique\\d+$", "^constant_\\d+$"],
     },
   },
 };
 
 
-// todo, make sure nothing is overloaded, eg "lines()"
+// todo, make sure nothing is overloaded, eg "lines()", there is a rule for this in abaplint now
 
 export class Validation {
 

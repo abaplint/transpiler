@@ -24,7 +24,7 @@ describe("Validation", () => {
   });
 
   it("Forbidden identifier", async () => {
-    const abap = `DATA let TYPE string.`;
+    const abap = `DATA unique2 TYPE string.`;
 
     try {
       await runSingle(abap);
