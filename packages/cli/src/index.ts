@@ -1,30 +1,58 @@
-import * as Transpiler from "@abaplint/transpiler";
 import * as fs from "fs";
 import * as path from "path";
 import * as glob from "glob";
+import * as childProcess from "child_process";
+import * as os from "os";
+import * as Transpiler from "@abaplint/transpiler";
+import {ITranspilerConfig, TranspilerConfig} from "./config";
+import {FileOperations} from "./file_operations";
 
-async function run() {
-  console.log("Transpiler CLI");
-
+function loadFiles(config: ITranspilerConfig): Transpiler.IFile[] {
   const files: Transpiler.IFile[] = [];
-  for (let filename of glob.sync("src/**", {nosort: true, nodir: true})) {
+  const filter = (config.input_filter ?? []).map(pattern => new RegExp(pattern, "i"));
+  for (let filename of glob.sync(config.input_folder + "/**", {nosort: true, nodir: true})) {
+    if (filter.length > 0 && filter.some(a => a.test(filename)) === false) {
+      console.log("Skip:\t" + filename);
+      continue;
+    }
     const contents = fs.readFileSync(filename, "utf8");
     filename = path.basename(filename);
     files.push({filename, contents});
-    console.log(filename);
+    console.log("Add:\t" + filename);
   }
+  return files;
+}
 
-  const options: Transpiler.ITranspilerOptions = {
-    ignoreSyntaxCheck: false,
-    addFilenames: true,
-    addCommonJS: true,
-  };
+function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
+  const files: Transpiler.IFile[] = [];
+  if (config.lib && config.lib !== "") {
+    console.log("Clone: " + config.lib + "\n");
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "abap_transpile-"));
+    childProcess.execSync("git clone --quiet --depth 1 " + config.lib + " .", {cwd: dir, stdio: "inherit"});
+    for (let filename of glob.sync(dir + "/src/**", {nosort: true, nodir: true})) {
+      const contents = fs.readFileSync(filename, "utf8");
+      filename = path.basename(filename);
+      files.push({filename, contents});
+      console.log("Add lib: " + filename);
+    }
+    FileOperations.deleteFolderRecursive(dir);
+  }
+  return files;
+}
+
+async function run() {
+  const config = TranspilerConfig.find();
+
+  console.log("Transpiler CLI");
+
+  const files = loadFiles(config).concat(loadLib(config));
+
   console.log("\nBuilding");
-  const t = new Transpiler.Transpiler(options);
+  const t = new Transpiler.Transpiler(config.options);
   const output = await t.run(files);
 
   console.log("\nOutput");
-  const outputFolder = "output";
+  const outputFolder = config.output_folder;
   if (!fs.existsSync(outputFolder)) {
     fs.mkdirSync(outputFolder);
   }
@@ -33,7 +61,10 @@ async function run() {
     console.log(o.js.filename);
     fs.writeFileSync(outputFolder + path.sep + o.js.filename, o.js.contents);
   }
-  fs.writeFileSync(outputFolder + path.sep + "index.js", output.unitTest);
+
+  if (config.write_unit_tests === true) {
+    fs.writeFileSync(outputFolder + path.sep + "index.js", output.unitTest);
+  }
 }
 
 run().then(() => {
