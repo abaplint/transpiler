@@ -71,6 +71,7 @@ describe("Single statements", () => {
     {abap: "ASSERT sy-subrc = 0.",                    js: "abap.statements.assert(abap.compare.eq(abap.builtin.sy.get().subrc, constant_0));",            skip: false},
     {abap: "ASSERT 0 = 1.",                           js: "abap.statements.assert(abap.compare.eq(constant_0, constant_1));",                         skip: false},
     {abap: "APPEND lv_word TO lt_letters.",           js: "abap.statements.append({source: lv_word, target: lt_letters});",         skip: false},
+    {abap: "APPEND INITIAL LINE TO et_bintab ASSIGNING <lg_line>.", js: "abap.statements.append({initial: et_bintab, target: fs_lg_line_});", skip: false},
     {abap: "WRITE |foo{ lines( lt_words ) }bar|.",    js: "abap.statements.write(`foo${abap.builtin.lines(lt_words).get()}bar`);",  skip: false},
     {abap: "ASSERT 'a' < 'b'.",                       js: "abap.statements.assert(abap.compare.lt('a', 'b'));",    skip: false},
     {abap: "rs_response-body = 'hello'.",             js: "rs_response.get().body.set('hello');",                  skip: false},
@@ -102,7 +103,13 @@ describe("Single statements", () => {
     {abap: "REPLACE ALL OCCURRENCES OF |\\n| IN lv_norm WITH | |.",              js: "abap.statements.replace(lv_norm, `\\n`, ` `);",         skip: false},
     {abap: "CONDENSE lv_norm.",                                                  js: "abap.statements.condense(lv_norm);",         skip: false},
     {abap: "FIND FIRST OCCURRENCE OF |bar| IN |foobar| MATCH OFFSET lv_offset.", js: "abap.statements.find(`bar`, `foobar`, lv_offset);", skip: false},
+    {abap: "FIND FIRST OCCURRENCE OF cl_abap_char_utilities=>cr_lf IN iv_string.", js: `abap.statements.find(cl_abap_char_utilities.cr_lf, iv_string);`, skip: false},
     {abap: "SHIFT lv_bitbyte LEFT DELETING LEADING '0 '.", js: `abap.statements.shift(lv_bitbyte, {direction: 'LEFT',deletingLeading: '0 '});`, skip: false},
+    {abap: "TRANSLATE rv_spras TO UPPER CASE.", js: `abap.statements.translate(rv_spras, "UPPER");`, skip: false},
+    {abap: "TRANSLATE rv_spras TO LOWER CASE.", js: `abap.statements.translate(rv_spras, "LOWER");`, skip: false},
+    {abap: "DESCRIBE FIELD <lg_line> LENGTH lv_length IN CHARACTER MODE.", js: `abap.statements.describe();`, skip: false},
+    {abap: "DESCRIBE FIELD <lg_line> LENGTH lv_length IN BYTE MODE.", js: `abap.statements.describe();`, skip: false},
+    {abap: "foo = 2 ** 2.", js: `foo.set(constant_2.power(constant_2));`, skip: false},
   ];
 
   for (const test of tests) {

@@ -13,6 +13,8 @@ export class ArithOperatorTranspiler implements IExpressionTranspiler {
         return ".multiply(";
       case "/":
         return ".divide(";
+      case "**":
+        return ".power(";
       default:
         return ".ArithOperatorUnknown";
     }
