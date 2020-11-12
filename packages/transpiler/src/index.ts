@@ -21,7 +21,7 @@ export interface IObjectIdentifier {
 export interface IOutput {
   objects: IOutputFile[];
   reg: abaplint.IRegistry;
-  /** Experimental file to run unit tests */
+  /** Output experimental file to run unit tests */
   unitTest: string;
 }
 
