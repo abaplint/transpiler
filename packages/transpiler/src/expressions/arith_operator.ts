@@ -15,6 +15,10 @@ export class ArithOperatorTranspiler implements IExpressionTranspiler {
         return ".divide(";
       case "**":
         return ".power(";
+      case "DIV":
+        return ".integerDiv(";
+      case "MOD":
+        return ".integerMod(";
       default:
         return ".ArithOperatorUnknown";
     }
