@@ -21,7 +21,7 @@ export interface IObjectIdentifier {
 export interface IOutput {
   objects: IOutputFile[];
   reg: abaplint.IRegistry;
-  /** Experimental file to run unit tests */
+  /** Output experimental file to run unit tests */
   unitTest: string;
 }
 
@@ -34,10 +34,16 @@ export interface IOutputFile {
 }
 
 export interface ITranspilerOptions {
+  /** ignore syntax check, used for internal testing */
   ignoreSyntaxCheck?: boolean;
+  /** adds common js modules */
   addCommonJS?: boolean;
+  /** adds filenames as comments in the output js */
   addFilenames?: boolean;
+  /** skip outputing constants, used for internal testing */
   skipConstants?: boolean;
+  /** sets behavior for unknown types, either fail at compile- or run-time */
+  unknownTypes?: "compileError" | "runtimeError";
 }
 
 export class Transpiler {
@@ -45,6 +51,12 @@ export class Transpiler {
 
   public constructor(options?: ITranspilerOptions) {
     this.options = options;
+    if (this.options === undefined) {
+      this.options = {};
+    }
+    if (this.options.unknownTypes === undefined) {
+      this.options.unknownTypes = "compileError";
+    }
   }
 
   public async run(files: IFile[]): Promise<IOutput> {

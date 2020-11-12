@@ -88,6 +88,10 @@ export class Validation {
     } else {
       config.rules["check_syntax"] = true;
     }
+    if (this.options?.unknownTypes === "runtimeError") {
+      config.syntax.errorNamespace = "";
+      config.rules["unknown_types"] = false;
+    }
     const conf = new Config(JSON.stringify(config));
     reg.setConfig(conf);
     const issues = reg.findIssues();

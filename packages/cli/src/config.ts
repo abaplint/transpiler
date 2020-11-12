@@ -35,6 +35,8 @@ export class TranspilerConfig {
         ignoreSyntaxCheck: false,
         addFilenames: true,
         addCommonJS: true,
+        skipConstants: false,
+        unknownTypes: "compileError",
       },
     };
   }
