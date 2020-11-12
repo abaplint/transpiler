@@ -1158,4 +1158,26 @@ write if.`;
     expect(abap.Console.get()).to.equal("2");
   });
 
+  it("power", async () => {
+    const code = `
+      DATA foo TYPE i.
+      foo = 5 ** 2.
+      WRITE foo.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("25");
+  });
+
+  it("integer MOD", async () => {
+    const code = `
+      DATA foo TYPE i.
+      foo = 5 MOD 2.
+      WRITE foo.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("1");
+  });
+
 });
