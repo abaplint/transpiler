@@ -27,7 +27,7 @@ export const config: IConfig = {
     },
     "parser_error": true,
     "allowed_object_types": {
-      "allowed": ["INTF", "CLAS", "PROG", "DEVC", "TABL", "DTEL", "DOMA"],
+      "allowed": ["INTF", "CLAS", "PROG", "DEVC", "TABL", "DTEL", "DOMA", "TTYP"],
     },
     "unknown_types": true,
     "ambiguous_statement": true,
