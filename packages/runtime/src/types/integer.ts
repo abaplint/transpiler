@@ -40,6 +40,12 @@ export class Integer implements INumeric {
     return new Integer().set(this.value * t.get());
   }
 
+  public integerDiv(value: INumeric | ICharacter | string | number) {
+    const t = new Integer();
+    t.set(value);
+    return new Integer().set(Math.floor((this.value / t.get())));
+  }
+
   public clear(): void {
     this.value = 0;
   }

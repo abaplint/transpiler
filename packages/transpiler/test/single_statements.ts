@@ -110,6 +110,7 @@ describe("Single statements", () => {
     {abap: "DESCRIBE FIELD <lg_line> LENGTH lv_length IN CHARACTER MODE.", js: `abap.statements.describe();`, skip: false},
     {abap: "DESCRIBE FIELD <lg_line> LENGTH lv_length IN BYTE MODE.", js: `abap.statements.describe();`, skip: false},
     {abap: "foo = 2 ** 2.", js: `foo.set(constant_2.power(constant_2));`, skip: false},
+    {abap: "foo = 5 DIV 2.", js: `foo.set(constant_5.integerDiv(constant_2));`, skip: false},
   ];
 
   for (const test of tests) {

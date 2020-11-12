@@ -1147,4 +1147,15 @@ write if.`;
     expect(abap.Console.get()).to.equal("foo if bar");
   });
 
+  it("integer DIV", async () => {
+    const code = `
+      DATA foo TYPE i.
+      foo = 5 DIV 2.
+      WRITE foo.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("2");
+  });
+
 });
