@@ -8,9 +8,14 @@ export class FindTranspiler implements IStatementTranspiler {
     const sources = node.findDirectExpressions(abaplint.Expressions.Source);
     const source0 = traversal.traverse(sources[0]);
     const source1 = traversal.traverse(sources[1]);
-    const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
 
-    return "abap.statements.find(" + source0 + ", " + source1 + ", " + target + ");";
+    const target = node.findDirectExpression(abaplint.Expressions.Target);
+    let t = "";
+    if (target) {
+      t = ", " + traversal.traverse(target);
+    }
+
+    return "abap.statements.find(" + source0 + ", " + source1 + t + ");";
   }
 
 }

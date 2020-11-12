@@ -172,7 +172,10 @@ export class Transpiler {
   protected validate(reg: abaplint.IRegistry): void {
     const issues = new Validation(this.options).run(reg);
     if (issues.length > 0) {
-      const messages = issues.map(i => i.getMessage() + ", " + i.getFilename() + ", " + i.getStart().getRow());
+      const messages = issues.map(i => i.getKey() + ", " +
+        i.getMessage() + ", " +
+        i.getFilename() + ", " +
+        i.getStart().getRow());
       throw new Error(messages.join("\n"));
     }
   }
