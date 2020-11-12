@@ -40,6 +40,7 @@ export * from "./replace";
 export * from "./report";
 export * from "./return";
 export * from "./set_bit";
+export * from "./shift";
 export * from "./sort";
 export * from "./split";
 export * from "./start_of_selection";

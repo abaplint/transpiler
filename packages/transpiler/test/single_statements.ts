@@ -102,6 +102,7 @@ describe("Single statements", () => {
     {abap: "REPLACE ALL OCCURRENCES OF |\\n| IN lv_norm WITH | |.",              js: "abap.statements.replace(lv_norm, `\\n`, ` `);",         skip: false},
     {abap: "CONDENSE lv_norm.",                                                  js: "abap.statements.condense(lv_norm);",         skip: false},
     {abap: "FIND FIRST OCCURRENCE OF |bar| IN |foobar| MATCH OFFSET lv_offset.", js: "abap.statements.find(`bar`, `foobar`, lv_offset);", skip: false},
+    {abap: "SHIFT lv_bitbyte LEFT DELETING LEADING '0 '.", js: `abap.statements.shift(lv_bitbyte, {direction: 'LEFT',deletingLeading: '0 '});`, skip: false},
   ];
 
   for (const test of tests) {
