@@ -1180,4 +1180,15 @@ write if.`;
     expect(abap.Console.get()).to.equal("1");
   });
 
+  it("condense", async () => {
+    const code = `
+    DATA foo TYPE string.
+    foo = '123 '.
+    WRITE condense( foo ).`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("123");
+  });
+
 });
