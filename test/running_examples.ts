@@ -1184,11 +1184,26 @@ write if.`;
     const code = `
     DATA foo TYPE string.
     foo = '123 '.
-    WRITE condense( foo ).`;
+    foo = condense( foo ).
+    WRITE foo.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
     expect(abap.Console.get()).to.equal("123");
+  });
+
+  it("condense integer", async () => {
+    const code = `
+    DATA foo TYPE string.
+    data bar type i.
+    bar = 2.
+    foo = bar.
+    foo = condense( foo ).
+    WRITE foo.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("2");
   });
 
 });

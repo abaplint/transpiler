@@ -11,7 +11,7 @@ export class String implements ICharacter {
     if (typeof value === "string") {
       this.value = value;
     } else {
-      this.value = value.get();
+      this.value = value.get() + "";
     }
     return this;
   }
