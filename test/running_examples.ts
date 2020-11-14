@@ -1206,4 +1206,19 @@ write if.`;
     expect(abap.Console.get()).to.equal("2");
   });
 
+  it("MODIFY internal table INDEX FROM", async () => {
+    const code = `
+    DATA result TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+    DATA dat LIKE LINE OF result.
+    APPEND 2 TO result.
+    MODIFY result INDEX 1 FROM 4.
+    ASSERT sy-subrc = 0.
+    READ TABLE result INDEX 1 INTO dat.
+    WRITE dat.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("4");
+  });
+
 });

@@ -34,6 +34,7 @@ export * from "./get_bit";
 export * from "./if";
 export * from "./loop";
 export * from "./method";
+export * from "./modify_internal";
 export * from "./move";
 export * from "./perform";
 export * from "./read_table";
