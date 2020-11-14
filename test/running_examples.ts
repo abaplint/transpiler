@@ -1221,4 +1221,23 @@ write if.`;
     expect(abap.Console.get()).to.equal("4");
   });
 
+  it("MODIFY, testing references", async () => {
+    const code = `
+  DATA integers TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA int TYPE i.
+  APPEND 1 TO integers.
+  APPEND 2 TO integers.
+  int = 3.
+  MODIFY integers INDEX 1 FROM int.
+  int = 4.
+  MODIFY integers INDEX 2 FROM int.
+  LOOP AT integers INTO int.
+    WRITE / int.
+  ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("3\n4");
+  });
+
 });
