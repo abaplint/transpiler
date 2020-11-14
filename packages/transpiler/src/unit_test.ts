@@ -4,7 +4,9 @@ export class UnitTest {
 
   // with lots of assumptions regarding setup
   public run(reg: abaplint.IRegistry): string {
-    let ret = `global.abap = require("@abaplint/runtime");
+    let ret = `const fs = require("fs");
+const path = require("path");
+global.abap = require("@abaplint/runtime");
 const unit = new global.abap.UnitTestResult();
 let clas;
 let locl;
@@ -43,7 +45,7 @@ const test = new ${def.name}();\n`;
               ret += `  console.log('${obj.getName()}: running ${def.name}->${m.name}');\n`;
               ret += `  meth = locl.addMethod("${m.name}");\n`;
               ret += `  test.${m.name}();\n`;
-              ret += `  meth.fail();\n`;
+              ret += `  meth.pass();\n`;
 
               if (hasTeardown === true) {
                 ret += `  test.teardown();\n`;
@@ -62,9 +64,11 @@ const test = new ${def.name}();\n`;
     }
 
     ret += `console.log(abap.Console.get());
+fs.writeFileSync(__dirname + path.sep + "output.xml", unit.xUnitXML());
 } catch (e) {
   meth.fail();
   console.log(abap.Console.get());
+  fs.writeFileSync(__dirname + path.sep + "output.xml", unit.xUnitXML());
   throw e;
 }`;
 

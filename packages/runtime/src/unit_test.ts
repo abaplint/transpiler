@@ -63,7 +63,7 @@ export class UnitTestResult {
     for (const obj of this.objects) {
       ret += `  <assembly name="${obj.name}">\n`;
       for (const clas of obj.classes) {
-        ret += `    <collection>\n`;
+        ret += `    <collection name="${clas.name}">\n`;
         for (const meth of clas.methods) {
           ret += `      ` +
             `<test name="${meth.name}" type="${meth.name}" method="${meth.name}" time="0" result="${meth.result}"></test>\n`;
