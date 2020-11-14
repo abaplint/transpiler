@@ -1,9 +1,10 @@
 import * as abaplint from "@abaplint/core";
 
 /** Replaces javascript keywords in ABAP source code, in-memory only */
-export class Kewords {
+export class Keywords {
 
   public handle(reg: abaplint.IRegistry) {
+    reg.parse();
 
     for (const o of reg.getObjects()) {
       if (!(o instanceof abaplint.ABAPObject)) {

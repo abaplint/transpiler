@@ -1240,4 +1240,41 @@ write if.`;
     expect(abap.Console.get()).to.equal("3\n4");
   });
 
+  it("int to hex", async () => {
+    const code = `
+  DATA lv_x TYPE x LENGTH 4.
+  lv_x = 12345.
+  WRITE lv_x.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("00003039");
+  });
+
+  it("hex to int", async () => {
+    const code = `
+  DATA lv_x TYPE x LENGTH 4.
+  data int type i.
+  lv_x = '00003039'.
+  int = lv_x.
+  WRITE int.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("12345");
+  });
+
+  it("xstring to int", async () => {
+    const code = `
+  DATA lv_x TYPE xstring.
+  data int type i.
+  lv_x = '00003039'.
+  int = lv_x.
+  WRITE int.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("12345");
+  });
+
 });

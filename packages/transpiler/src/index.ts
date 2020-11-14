@@ -4,7 +4,7 @@ import {Indentation} from "./indentation";
 import {Traversal} from "./traversal";
 import {Requires} from "./requires";
 import {UnitTest} from "./unit_test";
-import {Kewords} from "./keywords";
+import {Keywords} from "./keywords";
 
 export {config};
 
@@ -62,7 +62,7 @@ export class Transpiler {
   public async run(files: IFile[]): Promise<IOutput> {
     const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
     const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
-    new Kewords().handle(reg);
+    new Keywords().handle(reg);
     this.validate(reg);
 
     const output: IOutput = {
