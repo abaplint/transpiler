@@ -1277,4 +1277,30 @@ write if.`;
     expect(abap.Console.get()).to.equal("12345");
   });
 
+  it("simple concat via &&", async () => {
+    const code = `WRITE 'foo' && 'bar'.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("foobar");
+  });
+
+  it("concat class constant", async () => {
+    const code = `
+    CLASS moo DEFINITION.
+      PUBLIC SECTION.
+        CONSTANTS bar TYPE c VALUE '_'.
+    ENDCLASS.
+    CLASS moo IMPLEMENTATION.
+    ENDCLASS.
+
+    DATA str TYPE string.
+    str = 'ABC' && moo=>bar && '123'.
+    WRITE str.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("ABC_123");
+  });
+
 });

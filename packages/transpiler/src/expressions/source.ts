@@ -5,7 +5,7 @@ import {Traversal} from "../traversal";
 import {ConstantTranspiler} from "./constant";
 
 export class SourceTranspiler implements IExpressionTranspiler {
-  private readonly addGet: boolean;
+  private addGet: boolean;
 
   public constructor(addGet = false) {
     this.addGet = addGet;
@@ -18,9 +18,9 @@ export class SourceTranspiler implements IExpressionTranspiler {
     for (const c of node.getChildren()) {
       if (c instanceof Nodes.ExpressionNode) {
         if (c.get() instanceof Expressions.FieldChain) {
-          ret = ret + new FieldChainTranspiler().transpile(c, traversal);
+          ret = ret + new FieldChainTranspiler(this.addGet).transpile(c, traversal);
         } else if (c.get() instanceof Expressions.Constant) {
-          ret = ret + new ConstantTranspiler().transpile(c, traversal);
+          ret = ret + new ConstantTranspiler(this.addGet).transpile(c, traversal);
         } else if (c.get() instanceof Expressions.StringTemplate) {
           ret = ret + traversal.traverse(c);
         } else if (c.get() instanceof Expressions.ArithOperator) {
@@ -28,21 +28,21 @@ export class SourceTranspiler implements IExpressionTranspiler {
           post = ")";
         } else if (c.get() instanceof Expressions.MethodCallChain) {
           ret = ret + traversal.traverse(c);
+          if (this.addGet) {
+            ret = ret + ".get()";
+          }
         } else if (c.get() instanceof Expressions.Source) {
-          ret = ret + this.transpile(c, traversal);
+          ret = ret + new SourceTranspiler(this.addGet).transpile(c, traversal);
         } else {
           ret = ret + "Source, unknown";
         }
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr() === "&&") {
+        this.addGet = true;
         ret = ret + " + ";
       }
     }
 
     ret = ret + post;
-
-    if (this.addGet) {
-      ret = ret + ".get()";  // todo, this will break?
-    }
 
     return ret;
   }

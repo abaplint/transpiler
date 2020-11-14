@@ -9,7 +9,7 @@ export class DoTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
     const found = node.findFirstExpression(abaplint.Expressions.Source);
     if (found) {
-      const source = new SourceTranspiler(true).transpile(found, traversal);
+      const source = new SourceTranspiler().transpile(found, traversal) + ".get()";
       const id = UniqueIdentifier.get();
       return `for (let ${id} = 0; ${id} < ${source}; ${id}++) {
 abap.builtin.sy.get().index.set(${id} + 1);`;
