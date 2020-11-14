@@ -61,12 +61,12 @@ export class UnitTestResult {
 
     let ret = `<?xml version="1.0" encoding="utf-8"?>\n<assemblies>\n`;
     for (const obj of this.objects) {
-      ret += `  <assembly name="${obj.name}">\n`;
+      ret += `  <assembly name="${obj.name}" test-framework="abap-framework" environment="abap-environment">\n`;
       for (const clas of obj.classes) {
         ret += `    <collection name="${clas.name}">\n`;
         for (const meth of clas.methods) {
           ret += `      ` +
-            `<test name="${meth.name}" type="${meth.name}" method="${meth.name}" time="0" result="${meth.result}"></test>\n`;
+            `<test name="${meth.name}" type="${obj.name}.${clas.name}" method="${meth.name}" time="0" result="${meth.result}"></test>\n`;
         }
         ret += `    </collection>\n`;
       }
