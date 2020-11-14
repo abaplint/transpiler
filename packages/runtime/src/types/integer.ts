@@ -1,4 +1,5 @@
 import {Hex} from "./hex";
+import {XString} from "./xstring";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 
@@ -14,7 +15,7 @@ export class Integer implements INumeric {
       this.value = value;
     } else if (typeof value === "string") {
       this.value = parseInt(value, 10);
-    } else if (value instanceof Hex) {
+    } else if (value instanceof Hex || value instanceof XString) {
       this.set(parseInt(value.get(), 16));
     } else {
       this.set(value.get());
