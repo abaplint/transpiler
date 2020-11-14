@@ -1,7 +1,7 @@
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
-export function find(search: ICharacter | string, input: ICharacter | string, output: INumeric) {
+export function find(search: ICharacter | string, input: ICharacter | string, output?: INumeric) {
   let s = search;
   if (typeof s !== "string") {
     s = s.get();
@@ -19,7 +19,7 @@ export function find(search: ICharacter | string, input: ICharacter | string, ou
   } else {
     // @ts-ignore
     abap.builtin.sy.get().subrc.set(0);
-    output.set(index);
+    output?.set(index);
   }
 
 }

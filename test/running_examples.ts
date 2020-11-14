@@ -1303,4 +1303,13 @@ write if.`;
     expect(abap.Console.get()).to.equal("ABC_123");
   });
 
+  it("FIND FIRST OCCURRENCE", async () => {
+    const code = `
+    FIND FIRST OCCURRENCE OF 'bar' IN 'foobar'.
+    ASSERT sy-subrc = 0.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
