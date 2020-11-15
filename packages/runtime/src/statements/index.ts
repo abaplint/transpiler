@@ -4,6 +4,7 @@ export * from "./clear";
 export * from "./concatenate";
 export * from "./condense";
 export * from "./delete_internal";
+export * from "./describe";
 export * from "./find";
 export * from "./get_bit";
 export * from "./modify_internal";

@@ -1,13 +1,38 @@
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
-// import {SourceTranspiler} from "../expressions";
 import {Traversal} from "../traversal";
 
 export class DescribeTranspiler implements IStatementTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): string {
-// todo
-    return "abap.statements.describe();";
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
+
+    const options: string[] = [];
+    const concat = node.concatTokens().toUpperCase();
+
+    const field = node.findExpressionAfterToken("FIELD");
+    if (field) {
+      options.push("field: " + traversal.traverse(field));
+    }
+
+    const type = node.findExpressionAfterToken("TYPE");
+    if (type) {
+      options.push("type: " + traversal.traverse(type));
+    }
+
+    const length = node.findExpressionAfterToken("LENGTH");
+    if (length) {
+      options.push("length: " + traversal.traverse(length));
+    }
+
+    if (concat.includes("IN CHARACTER MODE")) {
+      options.push("mode: 'CHARACTER'");
+    }
+
+    if (concat.includes("IN BYTE MODE")) {
+      options.push("mode: 'BYTE'");
+    }
+
+    return "abap.statements.describe({" + options.join(", ") + "});";
   }
 
 }

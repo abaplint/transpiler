@@ -108,8 +108,9 @@ describe("Single statements", () => {
     {abap: "SHIFT lv_bitbyte LEFT DELETING LEADING '0 '.", js: `abap.statements.shift(lv_bitbyte, {direction: 'LEFT',deletingLeading: '0 '});`, skip: false},
     {abap: "TRANSLATE rv_spras TO UPPER CASE.", js: `abap.statements.translate(rv_spras, "UPPER");`, skip: false},
     {abap: "TRANSLATE rv_spras TO LOWER CASE.", js: `abap.statements.translate(rv_spras, "LOWER");`, skip: false},
-    {abap: "DESCRIBE FIELD <lg_line> LENGTH lv_length IN CHARACTER MODE.", js: `abap.statements.describe();`, skip: false},
-    {abap: "DESCRIBE FIELD <lg_line> LENGTH lv_length IN BYTE MODE.", js: `abap.statements.describe();`, skip: false},
+    {abap: "DESCRIBE FIELD <lg_line> LENGTH lv_length IN CHARACTER MODE.", js: `abap.statements.describe({field: fs_lg_line_, length: lv_length, mode: 'CHARACTER'});`, skip: false},
+    {abap: "DESCRIBE FIELD <lg_line> LENGTH lv_length IN BYTE MODE.", js: `abap.statements.describe({field: fs_lg_line_, length: lv_length, mode: 'BYTE'});`, skip: false},
+    {abap: "DESCRIBE FIELD tab TYPE type.", js: `abap.statements.describe({field: tab, type: type});`, skip: false},
     {abap: "foo = 2 ** 2.", js: `foo.set(constant_2.power(constant_2));`, skip: false},
     {abap: "foo = 5 DIV 2.", js: `foo.set(constant_5.integerDiv(constant_2));`, skip: false},
   ];

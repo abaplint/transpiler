@@ -1312,4 +1312,16 @@ write if.`;
     f(abap);
   });
 
+  it("DESCRIBE FIELD table", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA type TYPE c LENGTH 1.
+  DESCRIBE FIELD tab TYPE type.
+  WRITE type.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("h");
+  });
+
 });
