@@ -10,6 +10,7 @@ export * from "./get_bit";
 export * from "./modify_internal";
 export * from "./read_table";
 export * from "./replace";
+export * from "./shift";
 export * from "./sort";
 export * from "./split";
 export * from "./write";

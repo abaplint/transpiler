@@ -1324,4 +1324,16 @@ write if.`;
     expect(abap.Console.get()).to.equal("h");
   });
 
+  it("SHIFT LEFT", async () => {
+    const code = `
+  DATA foo TYPE c LENGTH 10.
+  foo = '11223355'.
+  SHIFT foo LEFT DELETING LEADING '12'.
+  WRITE foo.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("3355");
+  });
+
 });
