@@ -4,11 +4,18 @@ export class UnitTest {
 
   // with lots of assumptions regarding setup
   public run(reg: abaplint.IRegistry): string {
-    let ret = `global.abap = require("@abaplint/runtime");
+    let ret = `const fs = require("fs");
+const path = require("path");
+global.abap = require("@abaplint/runtime");
+const unit = new global.abap.UnitTestResult();
+let clas;
+let locl;
+let meth;
 try {\n`;
 
     for (const obj of reg.getObjects()) {
       if (obj instanceof abaplint.ABAPObject) {
+        ret += `clas = unit.addObject("${obj.getName()}");\n`;
         for (const file of obj.getABAPFiles()) {
           for (const def of file.getInfo().listClassDefinitions()) {
             if (def.isForTesting === false) {
@@ -16,6 +23,7 @@ try {\n`;
             }
             ret += `{
 const ${def.name} = require("./${obj.getName().toLowerCase()}.${obj.getType().toLowerCase()}.testclasses.js").${def.name};
+locl = clas.addTestClass("${def.name}");
 const test = new ${def.name}();\n`;
 
             if (def.methods.some(m => m.name.toUpperCase() === "CLASS_SETUP")) {
@@ -29,16 +37,20 @@ const test = new ${def.name}();\n`;
               if (m.isForTesting === false) {
                 continue;
               }
+              ret += `{\n`;
               if (hasSetup === true) {
-                ret += `test.setup();\n`;
+                ret += `  test.setup();\n`;
               }
 
-              ret += `console.log('${obj.getName()}: running ${def.name}->${m.name}');\n`;
-              ret += `test.${m.name}();\n`;
+              ret += `  console.log('${obj.getName()}: running ${def.name}->${m.name}');\n`;
+              ret += `  meth = locl.addMethod("${m.name}");\n`;
+              ret += `  test.${m.name}();\n`;
+              ret += `  meth.pass();\n`;
 
               if (hasTeardown === true) {
-                ret += `test.teardown();\n`;
+                ret += `  test.teardown();\n`;
               }
+              ret += `}\n`;
             }
 
             if (def.methods.some(m => m.name.toUpperCase() === "CLASS_TEARDOWN")) {
@@ -52,8 +64,11 @@ const test = new ${def.name}();\n`;
     }
 
     ret += `console.log(abap.Console.get());
+fs.writeFileSync(__dirname + path.sep + "output.xml", unit.xUnitXML());
 } catch (e) {
+  meth.fail();
   console.log(abap.Console.get());
+  fs.writeFileSync(__dirname + path.sep + "output.xml", unit.xUnitXML());
   throw e;
 }`;
 
