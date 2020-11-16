@@ -1391,4 +1391,26 @@ write if.`;
     expect(abap.Console.get()).to.equal("01000000");
   });
 
+  it("integer into xstring", async () => {
+    const code = `
+    DATA bar TYPE xstring.
+    bar = 64.
+    WRITE bar.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("40");
+  });
+
+  it("integer into hex", async () => {
+    const code = `
+  DATA bar TYPE x LENGTH 1.
+  bar = 64.
+  WRITE bar.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("40");
+  });
+
 });

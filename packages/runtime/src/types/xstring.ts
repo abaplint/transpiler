@@ -1,4 +1,5 @@
 import {ICharacter} from "./_character";
+import {INumeric} from "./_numeric";
 
 export class XString implements ICharacter {
   private value: string;
@@ -7,12 +8,16 @@ export class XString implements ICharacter {
     this.value = "";
   }
 
-  public set(value: ICharacter | string) {
-    // todo, this wont work?
+  public set(value: ICharacter | INumeric | string) {
     if (typeof value === "string") {
       this.value = value;
     } else {
-      this.value = value.get();
+      const v = value.get();
+      if (typeof v === "number") {
+        this.value = v.toString(16);
+      } else {
+        this.value = v;
+      }
     }
   }
 
