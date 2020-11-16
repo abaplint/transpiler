@@ -1459,4 +1459,16 @@ write if.`;
     expect(abap.Console.get()).to.equal("0");
   });
 
+  it("DESCRIBE FIELD", async () => {
+    const code = `
+  DATA f TYPE c LENGTH 4.
+  DATA l TYPE i.
+  DESCRIBE FIELD f LENGTH l IN CHARACTER MODE.
+  WRITE l.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("4");
+  });
+
 });
