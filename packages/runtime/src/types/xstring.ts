@@ -15,6 +15,8 @@ export class XString implements ICharacter {
       const v = value.get();
       if (typeof v === "number") {
         this.value = v.toString(16);
+        const finalLength = Math.ceil(this.value.length / 2 ) * 2;
+        this.value = this.value.padStart(finalLength, "0");
       } else {
         this.value = v;
       }

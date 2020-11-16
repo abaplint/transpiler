@@ -1413,4 +1413,26 @@ write if.`;
     expect(abap.Console.get()).to.equal("40");
   });
 
+  it("xstring, zero", async () => {
+    const code = `
+  DATA bar TYPE xstring.
+  bar = 0.
+  WRITE bar.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("00");
+  });
+
+  it("xstring, one", async () => {
+    const code = `
+  DATA bar TYPE xstring.
+  bar = 1.
+  WRITE bar.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("01");
+  });
+
 });
