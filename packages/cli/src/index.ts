@@ -28,15 +28,17 @@ function loadFiles(config: ITranspilerConfig): Transpiler.IFile[] {
 function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
   const files: Transpiler.IFile[] = [];
   if (config.lib && config.lib !== "") {
-    console.log("Clone: " + config.lib + "\n");
+    console.log("Clone: " + config.lib);
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "abap_transpile-"));
     childProcess.execSync("git clone --quiet --depth 1 " + config.lib + " .", {cwd: dir, stdio: "inherit"});
+    let count = 0;
     for (let filename of glob.sync(dir + "/src/**", {nosort: true, nodir: true})) {
       const contents = fs.readFileSync(filename, "utf8");
       filename = path.basename(filename);
       files.push({filename, contents});
-      console.log("Add lib: " + filename);
+      count++;
     }
+    console.log(count + " files added from lib");
     FileOperations.deleteFolderRecursive(dir);
   }
   return files;
@@ -60,9 +62,9 @@ async function run() {
   }
 
   for (const o of output.objects) {
-    console.log(o.js.filename);
     fs.writeFileSync(outputFolder + path.sep + o.js.filename, o.js.contents);
   }
+  console.log(output.objects.length + " files written");
 
   if (config.write_unit_tests === true) {
     fs.writeFileSync(outputFolder + path.sep + "index.js", output.unitTest);
