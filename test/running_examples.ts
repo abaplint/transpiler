@@ -1372,9 +1372,9 @@ write if.`;
     expect(abap.Console.get()).to.equal("01000000");
   });
 
-  it.skip("GET all da BITs", async () => {
+  it("GET all da BITs", async () => {
     const code = `
-  DATA rv_bitbyte TYPE c LENGTH 8 .
+  DATA rv_bitbyte TYPE c LENGTH 8.
   DATA iv_x TYPE x VALUE '40'.
   GET BIT 1 OF iv_x INTO rv_bitbyte+0(1).
   GET BIT 2 OF iv_x INTO rv_bitbyte+1(1).
@@ -1386,7 +1386,6 @@ write if.`;
   GET BIT 8 OF iv_x INTO rv_bitbyte+7(1).
   WRITE rv_bitbyte.`;
     const js = await run(code);
-    console.dir(js);
     const f = new Function("abap", js);
     f(abap);
     expect(abap.Console.get()).to.equal("01000000");
