@@ -10,9 +10,10 @@ import {FileOperations} from "./file_operations";
 function loadFiles(config: ITranspilerConfig): Transpiler.IFile[] {
   const files: Transpiler.IFile[] = [];
   const filter = (config.input_filter ?? []).map(pattern => new RegExp(pattern, "i"));
+  let skipped = 0;
   for (let filename of glob.sync(config.input_folder + "/**", {nosort: true, nodir: true})) {
     if (filter.length > 0 && filter.some(a => a.test(filename)) === false) {
-      console.log("Skip:\t" + filename);
+      skipped++;
       continue;
     }
     const contents = fs.readFileSync(filename, "utf8");
@@ -20,6 +21,7 @@ function loadFiles(config: ITranspilerConfig): Transpiler.IFile[] {
     files.push({filename, contents});
     console.log("Add:\t" + filename);
   }
+  console.log(skipped + " files skipeed");
   return files;
 }
 

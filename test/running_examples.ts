@@ -1447,4 +1447,16 @@ write if.`;
     expect(abap.Console.get()).to.equal("ABC");
   });
 
+  it("APPEND INITIAL LINE", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF i.
+  FIELD-SYMBOLS <fs> LIKE LINE OF tab.
+  APPEND INITIAL LINE TO tab ASSIGNING <fs>.
+  WRITE <fs>.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("0");
+  });
+
 });
