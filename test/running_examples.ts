@@ -1435,4 +1435,16 @@ write if.`;
     expect(abap.Console.get()).to.equal("01");
   });
 
+  it("translate to upper case", async () => {
+    const code = `
+  DATA foo TYPE string.
+  foo = 'abc'.
+  TRANSLATE foo TO UPPER CASE.
+  WRITE foo.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("ABC");
+  });
+
 });
