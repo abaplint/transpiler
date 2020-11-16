@@ -766,7 +766,7 @@ ENDCLASS.
     expect(abap.Console.get()).to.equal("10");
   });
 
-  it("field lengths and offsets", async () => {
+  it("source field lengths and offsets", async () => {
     const code = `
   DATA bar TYPE string VALUE '12345'.
   DATA len TYPE i.
@@ -1334,6 +1334,42 @@ write if.`;
     const f = new Function("abap", js);
     f(abap);
     expect(abap.Console.get()).to.equal("3355");
+  });
+
+  it("target length and offsets", async () => {
+    const code = `
+  DATA foo TYPE c LENGTH 10.
+  foo = '11223355'.
+  foo+5(1) = 'A'.
+  WRITE / foo.
+  foo(1) = 'B'.
+  WRITE / foo.
+  foo+3 = 'C'.
+  WRITE / foo.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("11223A55\nB1223A55\nB12C");
+  });
+
+  it.skip("GET all da BITs", async () => {
+    const code = `
+  DATA rv_bitbyte TYPE c LENGTH 8 .
+  DATA iv_x TYPE x VALUE '40'.
+  GET BIT 1 OF iv_x INTO rv_bitbyte+0(1).
+  GET BIT 2 OF iv_x INTO rv_bitbyte+1(1).
+  GET BIT 3 OF iv_x INTO rv_bitbyte+2(1).
+  GET BIT 4 OF iv_x INTO rv_bitbyte+3(1).
+  GET BIT 5 OF iv_x INTO rv_bitbyte+4(1).
+  GET BIT 6 OF iv_x INTO rv_bitbyte+5(1).
+  GET BIT 7 OF iv_x INTO rv_bitbyte+6(1).
+  GET BIT 8 OF iv_x INTO rv_bitbyte+7(1).
+  WRITE rv_bitbyte.`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("01000000");
   });
 
   it.skip("GET all da BITs", async () => {
