@@ -13,9 +13,8 @@ export function describe(input: IDescribeOptions) {
   if (input.type) {
     if (input.field instanceof Table) {
       input.type.set("h");
-    } else {
-      throw "DESCRIBE, todo";
     }
+    // todo
   } else if (input.length) {
     if (input.field instanceof Character) {
       input.length.set(input.field.getLength());
