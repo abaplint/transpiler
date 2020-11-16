@@ -1471,4 +1471,19 @@ write if.`;
     expect(abap.Console.get()).to.equal("4");
   });
 
+  it("APPEND field symbol", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF i.
+  DATA row LIKE LINE OF tab.
+  FIELD-SYMBOLS <fs> LIKE LINE OF tab.
+  APPEND INITIAL LINE TO tab ASSIGNING <fs>.
+  <fs> = 2.
+  READ TABLE tab INDEX 1 INTO row.
+  WRITE row.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("2");
+  });
+
 });

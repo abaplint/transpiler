@@ -37,8 +37,8 @@ export class AppendTranspiler implements IStatementTranspiler {
       const unique = UniqueIdentifier.get();
 
       return "let " + unique + " = " + new TranspileTypes().toType(found.getRowType()) + "\n" +
-        target + " = " + unique + ";\n" +
-        token.getStr() + ".append(" + unique + ");";
+        token.getStr() + ".append(" + unique + ");\n" +
+        target + " = abap.statements.readTable(" + token.getStr() + ",{index: abap.builtin.lines(" + token.getStr() + ")});";
     } else {
       options.push("target: " + traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target)));
       return "abap.statements.append({" + options.join(", ") + "});";
