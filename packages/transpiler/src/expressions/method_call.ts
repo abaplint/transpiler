@@ -17,6 +17,7 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
     if (name === "lines"
         || name === "strlen"
         || name === "condense"
+        || name === "reverse"
         || name === "concat_lines_of"
         || name === "xstrlen") {
       name = "abap.builtin." + name + "(";

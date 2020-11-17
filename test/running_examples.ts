@@ -1507,4 +1507,15 @@ write if.`;
     expect(abap.Console.get()).to.equal("X");
   });
 
+  it("reverse", async () => {
+    const code = `
+  DATA str TYPE string.
+  str = reverse( 'abc' ).
+  WRITE str.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("cba");
+  });
+
 });
