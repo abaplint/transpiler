@@ -1585,4 +1585,19 @@ write if.`;
     expect(abap.Console.get()).to.equal("abcbar");
   });
 
+  it("concat vars", async () => {
+    const code = `
+  DATA lv_temp1 TYPE string.
+  lv_temp1 = 'foo'.
+  DATA lv_temp2 TYPE string.
+  lv_temp2 = 'bar'.
+  DATA rv_path TYPE string.
+  rv_path = lv_temp1 && lv_temp2.
+  WRITE rv_path.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("foobar");
+  });
+
 });

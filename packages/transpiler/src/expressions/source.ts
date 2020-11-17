@@ -5,7 +5,7 @@ import {Traversal} from "../traversal";
 import {ConstantTranspiler} from "./constant";
 
 export class SourceTranspiler implements IExpressionTranspiler {
-  private addGet: boolean;
+  private readonly addGet: boolean;
 
   public constructor(addGet = false) {
     this.addGet = addGet;
@@ -39,8 +39,11 @@ export class SourceTranspiler implements IExpressionTranspiler {
           ret += "SourceUnknown-" + c.get().constructor.name;
         }
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr() === "&&") {
-        this.addGet = true;
-        ret += " + ";
+        if (this.addGet === false) {
+          return new SourceTranspiler(true).transpile(node, traversal);
+        } else {
+          ret += " + ";
+        }
       } else if (c instanceof Nodes.TokenNodeRegex && c.getFirstToken().getStr().toUpperCase() === "BOOLC") {
         ret += "abap.builtin.boolc(";
         post += ")";
