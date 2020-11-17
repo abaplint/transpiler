@@ -5,17 +5,33 @@ import {Traversal} from "../traversal";
 export class FindTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
+    const options: string[] = [];
+
     const sources = node.findDirectExpressions(abaplint.Expressions.Source);
     const source0 = traversal.traverse(sources[0]);
+    if (node.findDirectTokenByText("REGEX")) {
+      options.push("regex: " + source0);
+    } else {
+      options.push("find: " + source0);
+    }
     const source1 = traversal.traverse(sources[1]);
 
-    const target = node.findDirectExpression(abaplint.Expressions.Target);
-    let t = "";
-    if (target) {
-      t = ", " + traversal.traverse(target);
+    const off = node.findExpressionAfterToken("OFFSET");
+    if (off) {
+      options.push("offset: " + traversal.traverse(off));
     }
 
-    return "abap.statements.find(" + source0 + ", " + source1 + t + ");";
+    const cnt = node.findExpressionAfterToken("COUNT");
+    if (cnt) {
+      options.push("count: " + traversal.traverse(cnt));
+    }
+
+    const len = node.findExpressionAfterToken("LENGTH");
+    if (len) {
+      options.push("length: " + traversal.traverse(len));
+    }
+
+    return "abap.statements.find(" + source1 + ", {" + options.join(", ") + "});";
   }
 
 }
