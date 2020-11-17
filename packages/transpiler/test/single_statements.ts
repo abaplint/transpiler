@@ -107,13 +107,13 @@ describe("Single statements", () => {
     {abap: "DESCRIBE FIELD <lg_line> LENGTH lv_length IN CHARACTER MODE.", js: `abap.statements.describe({field: fs_lg_line_, length: lv_length, mode: 'CHARACTER'});`, skip: false},
     {abap: "DESCRIBE FIELD <lg_line> LENGTH lv_length IN BYTE MODE.", js: `abap.statements.describe({field: fs_lg_line_, length: lv_length, mode: 'BYTE'});`, skip: false},
     {abap: "DESCRIBE FIELD tab TYPE type.", js: `abap.statements.describe({field: tab, type: type});`, skip: false},
-    {abap: "foo = 2 ** 2.", js: `foo.set(constant_2.power(constant_2));`, skip: false},
-    {abap: "foo = 5 DIV 2.", js: `foo.set(constant_5.integerDiv(constant_2));`, skip: false},
-    {abap: "foo+5(1) = 'A'.",  js: `new abap.OffsetLength(foo, {offset: 5, length: 1}).set('A');`, skip: false},
-    {abap: "foo(1) = 'a'.",    js: "new abap.OffsetLength(foo, {length: 1}).set('a');",            skip: false},
-    {abap: "foo+1 = 'a'.",     js: "new abap.OffsetLength(foo, {offset: 1}).set('a');",            skip: false},
-    {abap: "foo+1(1) = 'a'.",  js: "new abap.OffsetLength(foo, {offset: 1, length: 1}).set('a');", skip: false},
-    {abap: "foo(bar) = 'a'.",  js: "new abap.OffsetLength(foo, {length: bar.get()}).set('a');",    skip: false},
+    {abap: "foo = 2 ** 2.",   js: `foo.set(constant_2.power(constant_2));`,                       skip: false},
+    {abap: "foo = 5 DIV 2.",  js: `foo.set(constant_5.integerDiv(constant_2));`,                  skip: false},
+    {abap: "foo+5(1) = 'A'.", js: `new abap.OffsetLength(foo, {offset: 5, length: 1}).set('A');`, skip: false},
+    {abap: "foo(1) = 'a'.",   js: "new abap.OffsetLength(foo, {length: 1}).set('a');",            skip: false},
+    {abap: "foo+1 = 'a'.",    js: "new abap.OffsetLength(foo, {offset: 1}).set('a');",            skip: false},
+    {abap: "foo+1(1) = 'a'.", js: "new abap.OffsetLength(foo, {offset: 1, length: 1}).set('a');", skip: false},
+    {abap: "foo(bar) = 'a'.", js: "new abap.OffsetLength(foo, {length: bar.get()}).set('a');",    skip: false},
   ];
 
   for (const test of tests) {

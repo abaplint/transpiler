@@ -18,27 +18,32 @@ export class SourceTranspiler implements IExpressionTranspiler {
     for (const c of node.getChildren()) {
       if (c instanceof Nodes.ExpressionNode) {
         if (c.get() instanceof Expressions.FieldChain) {
-          ret = ret + new FieldChainTranspiler(this.addGet).transpile(c, traversal);
+          ret += new FieldChainTranspiler(this.addGet).transpile(c, traversal);
         } else if (c.get() instanceof Expressions.Constant) {
-          ret = ret + new ConstantTranspiler(this.addGet).transpile(c, traversal);
+          ret += new ConstantTranspiler(this.addGet).transpile(c, traversal);
         } else if (c.get() instanceof Expressions.StringTemplate) {
-          ret = ret + traversal.traverse(c);
+          ret += traversal.traverse(c);
+        } else if (c.get() instanceof Expressions.Cond) {
+          ret += traversal.traverse(c);
         } else if (c.get() instanceof Expressions.ArithOperator) {
-          ret = ret + traversal.traverse(c);
+          ret += traversal.traverse(c);
           post = ")";
         } else if (c.get() instanceof Expressions.MethodCallChain) {
-          ret = ret + traversal.traverse(c);
+          ret += traversal.traverse(c);
           if (this.addGet) {
-            ret = ret + ".get()";
+            ret += ".get()";
           }
         } else if (c.get() instanceof Expressions.Source) {
-          ret = ret + new SourceTranspiler(this.addGet).transpile(c, traversal);
+          ret += new SourceTranspiler(this.addGet).transpile(c, traversal);
         } else {
-          ret = ret + "Source, unknown";
+          ret += "SourceUnknown-" + c.get().constructor.name;
         }
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr() === "&&") {
         this.addGet = true;
-        ret = ret + " + ";
+        ret += " + ";
+      } else if (c instanceof Nodes.TokenNodeRegex && c.getFirstToken().getStr().toUpperCase() === "BOOLC") {
+        ret += "abap.builtin.boolc(";
+        post += ")";
       }
     }
 

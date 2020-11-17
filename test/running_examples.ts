@@ -1494,4 +1494,17 @@ write if.`;
     expect(abap.Console.get()).to.equal("\\");
   });
 
+  it("boolc test", async () => {
+    const code = `
+  DATA rv_yes TYPE abap_bool.
+  DATA iv_path TYPE string.
+  iv_path = '/'.
+  rv_yes = boolc( iv_path = '/' ).
+  WRITE rv_yes.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("X");
+  });
+
 });
