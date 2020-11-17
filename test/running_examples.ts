@@ -1486,4 +1486,134 @@ write if.`;
     expect(abap.Console.get()).to.equal("2");
   });
 
+  it("back slash", async () => {
+    const code = `WRITE '\\'.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("\\");
+  });
+
+  it("boolc test", async () => {
+    const code = `
+  DATA rv_yes TYPE abap_bool.
+  DATA iv_path TYPE string.
+  iv_path = '/'.
+  rv_yes = boolc( iv_path = '/' ).
+  WRITE rv_yes.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("X");
+  });
+
+  it("reverse", async () => {
+    const code = `
+  DATA str TYPE string.
+  str = reverse( 'abc' ).
+  WRITE str.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("cba");
+  });
+
+  it("FIND REGEX", async () => {
+    const code = `
+  DATA lv_cnt TYPE i.
+  DATA lv_len TYPE i.
+  FIND FIRST OCCURRENCE OF REGEX 'b+c' IN 'abcdbc' MATCH COUNT lv_cnt MATCH LENGTH lv_len.
+  WRITE / lv_cnt.
+  WRITE / lv_len.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("1\n2");
+  });
+
+  it("abap_true", async () => {
+    const code = `WRITE abap_true.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("X");
+  });
+
+  it("ASSERT strlen gt", async () => {
+    const code = `
+  DATA lv_len TYPE i.
+  lv_len = 4.
+  ASSERT strlen( '/dir/subdir' ) > lv_len.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("shift 1 places left", async () => {
+    const code = `
+  DATA lv_temp TYPE string.
+  lv_temp = 'abc'.
+  SHIFT lv_temp BY 1 PLACES LEFT.
+  WRITE lv_temp.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("bc");
+  });
+
+  it("shift up to left, found", async () => {
+    const code = `
+  DATA lv_temp TYPE string.
+  lv_temp = 'abc/bar'.
+  SHIFT lv_temp UP TO '/' LEFT.
+  WRITE lv_temp.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("/bar");
+  });
+
+  it("shift up to left, not found", async () => {
+    const code = `
+  DATA lv_temp TYPE string.
+  lv_temp = 'abcbar'.
+  SHIFT lv_temp UP TO '/' LEFT.
+  WRITE lv_temp.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("abcbar");
+  });
+
+  it("concat vars", async () => {
+    const code = `
+  DATA lv_temp1 TYPE string.
+  lv_temp1 = 'foo'.
+  DATA lv_temp2 TYPE string.
+  lv_temp2 = 'bar'.
+  DATA rv_path TYPE string.
+  rv_path = lv_temp1 && lv_temp2.
+  WRITE rv_path.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("foobar");
+  });
+
+  it("concat vars", async () => {
+    const code = `
+  DATA bar TYPE abap_bool.
+  bar = boolc( 'foo' CA 'a' ).
+  ASSERT bar = abap_false.
+  bar = boolc( 'foo' CA 'abc' ).
+  ASSERT bar = abap_false.
+  bar = boolc( 'foo' CA 'fo' ).
+  ASSERT bar = abap_true.
+  bar = boolc( 'foo' CA 'o' ).
+  ASSERT bar = abap_true.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });

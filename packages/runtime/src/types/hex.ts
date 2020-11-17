@@ -27,6 +27,10 @@ export class Hex implements ICharacter {
     }
   }
 
+  public getLength() {
+    return this.length;
+  }
+
   public clear(): void {
     this.value = "";
   }

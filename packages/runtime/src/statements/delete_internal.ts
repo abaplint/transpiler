@@ -1,6 +1,7 @@
 import {Table} from "../types";
 import {ne} from "../compare";
 import {INumeric} from "../types/_numeric";
+import {clone} from "../clone";
 
 export interface IDeleteInternalOptions {
   where?: (i: any) => boolean,
@@ -9,7 +10,8 @@ export interface IDeleteInternalOptions {
 }
 
 export function deleteInternal(target: Table, options?: IDeleteInternalOptions): void {
-  const result = new Table();
+  const result = clone(target);
+  result.clear();
 
   let prev: any = undefined;
   let index = 0;
