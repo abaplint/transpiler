@@ -1,4 +1,4 @@
-import {Character, Table} from "../types";
+import {Character, Hex, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -16,7 +16,8 @@ export function describe(input: IDescribeOptions) {
     }
     // todo
   } else if (input.length) {
-    if (input.field instanceof Character) {
+    if (input.field instanceof Character
+        || input.field instanceof Hex) {
       input.length.set(input.field.getLength());
     } else {
       throw "DESCRIBE, unsupported or todo";
