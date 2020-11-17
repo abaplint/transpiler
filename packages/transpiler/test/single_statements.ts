@@ -40,10 +40,6 @@ describe("Single statements", () => {
     {abap: "LOOP AT table INTO line. ENDLOOP.",    js: "for (let unique1 of table.array()) {\n  line.set(unique1);\n}",          skip: false},
     {abap: "WHILE foo = bar. ENDWHILE.",           js: "while (abap.compare.eq(foo, bar)) {\n}",    skip: false},
     {abap: "foo-bar = 2.",                         js: "foo.bar.set(2);",                           skip: true}, // hmm, will this kind of member access work?
-    {abap: "foo(1) = 'a'.",                        js: "foo.set('a', {lenth: 1});",                 skip: true},
-    {abap: "foo+1 = 'a'.",                         js: "foo.set('a', {offset: 1});",                skip: true},
-    {abap: "foo+1(1) = 'a'.",                      js: "foo.set('a', {offset: 1, length: 1});",     skip: true},
-    {abap: "foo(bar) = 'a'.",                      js: "foo.set('a', {lenth: bar});",               skip: true},
     {abap: "CLEAR foo.",                           js: "abap.statements.clear(foo);",               skip: false},
     {abap: "SORT foo.",                            js: "abap.statements.sort(foo);",                skip: false},
     {abap: "WRITE foo.",                           js: "abap.statements.write(foo);",               skip: false},
@@ -71,7 +67,6 @@ describe("Single statements", () => {
     {abap: "ASSERT sy-subrc = 0.",                    js: "abap.statements.assert(abap.compare.eq(abap.builtin.sy.get().subrc, constant_0));",            skip: false},
     {abap: "ASSERT 0 = 1.",                           js: "abap.statements.assert(abap.compare.eq(constant_0, constant_1));",                         skip: false},
     {abap: "APPEND lv_word TO lt_letters.",           js: "abap.statements.append({source: lv_word, target: lt_letters});",         skip: false},
-    {abap: "APPEND INITIAL LINE TO et_bintab ASSIGNING <lg_line>.", js: "abap.statements.append({initial: et_bintab, target: fs_lg_line_});", skip: false},
     {abap: "WRITE |foo{ lines( lt_words ) }bar|.",    js: "abap.statements.write(`foo${abap.builtin.lines(lt_words).get()}bar`);",  skip: false},
     {abap: "ASSERT 'a' < 'b'.",                       js: "abap.statements.assert(abap.compare.lt('a', 'b'));",    skip: false},
     {abap: "rs_response-body = 'hello'.",             js: "rs_response.get().body.set('hello');",                  skip: false},
@@ -113,6 +108,11 @@ describe("Single statements", () => {
     {abap: "DESCRIBE FIELD tab TYPE type.", js: `abap.statements.describe({field: tab, type: type});`, skip: false},
     {abap: "foo = 2 ** 2.", js: `foo.set(constant_2.power(constant_2));`, skip: false},
     {abap: "foo = 5 DIV 2.", js: `foo.set(constant_5.integerDiv(constant_2));`, skip: false},
+    {abap: "foo+5(1) = 'A'.",  js: `new abap.OffsetLength(foo, {offset: 5, length: 1}).set('A');`, skip: false},
+    {abap: "foo(1) = 'a'.",    js: "new abap.OffsetLength(foo, {length: 1}).set('a');",            skip: false},
+    {abap: "foo+1 = 'a'.",     js: "new abap.OffsetLength(foo, {offset: 1}).set('a');",            skip: false},
+    {abap: "foo+1(1) = 'a'.",  js: "new abap.OffsetLength(foo, {offset: 1, length: 1}).set('a');", skip: false},
+    {abap: "foo(bar) = 'a'.",  js: "new abap.OffsetLength(foo, {length: bar.get()}).set('a');",    skip: false},
   ];
 
   for (const test of tests) {

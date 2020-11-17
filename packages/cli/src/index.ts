@@ -10,9 +10,10 @@ import {FileOperations} from "./file_operations";
 function loadFiles(config: ITranspilerConfig): Transpiler.IFile[] {
   const files: Transpiler.IFile[] = [];
   const filter = (config.input_filter ?? []).map(pattern => new RegExp(pattern, "i"));
+  let skipped = 0;
   for (let filename of glob.sync(config.input_folder + "/**", {nosort: true, nodir: true})) {
     if (filter.length > 0 && filter.some(a => a.test(filename)) === false) {
-      console.log("Skip:\t" + filename);
+      skipped++;
       continue;
     }
     const contents = fs.readFileSync(filename, "utf8");
@@ -20,21 +21,24 @@ function loadFiles(config: ITranspilerConfig): Transpiler.IFile[] {
     files.push({filename, contents});
     console.log("Add:\t" + filename);
   }
+  console.log(skipped + " files skipeed");
   return files;
 }
 
 function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
   const files: Transpiler.IFile[] = [];
   if (config.lib && config.lib !== "") {
-    console.log("Clone: " + config.lib + "\n");
+    console.log("Clone: " + config.lib);
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "abap_transpile-"));
     childProcess.execSync("git clone --quiet --depth 1 " + config.lib + " .", {cwd: dir, stdio: "inherit"});
+    let count = 0;
     for (let filename of glob.sync(dir + "/src/**", {nosort: true, nodir: true})) {
       const contents = fs.readFileSync(filename, "utf8");
       filename = path.basename(filename);
       files.push({filename, contents});
-      console.log("Add lib: " + filename);
+      count++;
     }
+    console.log(count + " files added from lib");
     FileOperations.deleteFolderRecursive(dir);
   }
   return files;
@@ -58,9 +62,9 @@ async function run() {
   }
 
   for (const o of output.objects) {
-    console.log(o.js.filename);
     fs.writeFileSync(outputFolder + path.sep + o.js.filename, o.js.contents);
   }
+  console.log(output.objects.length + " files written");
 
   if (config.write_unit_tests === true) {
     fs.writeFileSync(outputFolder + path.sep + "index.js", output.unitTest);

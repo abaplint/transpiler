@@ -13,4 +13,5 @@ export * from "./replace";
 export * from "./shift";
 export * from "./sort";
 export * from "./split";
+export * from "./translate";
 export * from "./write";
