@@ -1522,7 +1522,7 @@ write if.`;
     const code = `
   DATA lv_cnt TYPE i.
   DATA lv_len TYPE i.
-  FIND FIRST OCCURRENCE OF REGEX 'b+c' IN 'abcd' MATCH COUNT lv_cnt MATCH LENGTH lv_len.
+  FIND FIRST OCCURRENCE OF REGEX 'b+c' IN 'abcdbc' MATCH COUNT lv_cnt MATCH LENGTH lv_len.
   WRITE / lv_cnt.
   WRITE / lv_len.`;
     const js = await run(code);
