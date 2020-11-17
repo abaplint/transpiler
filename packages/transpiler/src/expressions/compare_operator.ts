@@ -26,6 +26,8 @@ export class CompareOperatorTranspiler implements IExpressionTranspiler {
         return "ne";
       case "CP":
         return "cp";
+      case "CA":
+        return "ca";
       default:
         return "compareoperatortodo" + op;
     }

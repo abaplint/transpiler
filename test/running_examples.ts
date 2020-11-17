@@ -1600,4 +1600,20 @@ write if.`;
     expect(abap.Console.get()).to.equal("foobar");
   });
 
+  it("concat vars", async () => {
+    const code = `
+  DATA bar TYPE abap_bool.
+  bar = boolc( 'foo' CA 'a' ).
+  ASSERT bar = abap_false.
+  bar = boolc( 'foo' CA 'abc' ).
+  ASSERT bar = abap_false.
+  bar = boolc( 'foo' CA 'fo' ).
+  ASSERT bar = abap_true.
+  bar = boolc( 'foo' CA 'o' ).
+  ASSERT bar = abap_true.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });

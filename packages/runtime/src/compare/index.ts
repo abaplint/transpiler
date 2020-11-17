@@ -4,5 +4,6 @@ export * from "./gt";
 export * from "./le";
 export * from "./lt";
 export * from "./ne";
+export * from "./ca";
 export * from "./cp";
 export * from "./initial";
