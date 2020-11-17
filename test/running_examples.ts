@@ -1486,4 +1486,12 @@ write if.`;
     expect(abap.Console.get()).to.equal("2");
   });
 
+  it("back slash", async () => {
+    const code = `WRITE '\\'.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("\\");
+  });
+
 });

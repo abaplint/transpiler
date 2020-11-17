@@ -19,7 +19,9 @@ export class ConstantTranspiler implements IExpressionTranspiler {
 
     const str = node.findFirstExpression(Expressions.ConstantString);
     if (str) {
-      return str.getFirstToken().getStr();
+      let res = str.getFirstToken().getStr();
+      res = res.replace(/\\/g, "\\\\");
+      return res;
     }
 
     return "todo, Constant";
