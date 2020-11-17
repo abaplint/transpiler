@@ -18,6 +18,7 @@ export class Character implements ICharacter {
     if (this.value.length > this.length) {
       this.value = this.value.substr(0, this.length);
     }
+    return this;
   }
 
   public getLength() {

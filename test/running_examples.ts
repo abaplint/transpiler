@@ -1531,4 +1531,12 @@ write if.`;
     expect(abap.Console.get()).to.equal("1\n2");
   });
 
+  it("abap_true", async () => {
+    const code = `WRITE abap_true.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("X");
+  });
+
 });
