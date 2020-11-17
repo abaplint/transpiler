@@ -1549,4 +1549,40 @@ write if.`;
     f(abap);
   });
 
+  it("shift 1 places left", async () => {
+    const code = `
+  DATA lv_temp TYPE string.
+  lv_temp = 'abc'.
+  SHIFT lv_temp BY 1 PLACES LEFT.
+  WRITE lv_temp.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("bc");
+  });
+
+  it("shift up to left, found", async () => {
+    const code = `
+  DATA lv_temp TYPE string.
+  lv_temp = 'abc/bar'.
+  SHIFT lv_temp UP TO '/' LEFT.
+  WRITE lv_temp.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("/bar");
+  });
+
+  it("shift up to left, not found", async () => {
+    const code = `
+  DATA lv_temp TYPE string.
+  lv_temp = 'abcbar'.
+  SHIFT lv_temp UP TO '/' LEFT.
+  WRITE lv_temp.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("abcbar");
+  });
+
 });

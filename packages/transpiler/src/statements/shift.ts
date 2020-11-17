@@ -19,6 +19,16 @@ export class ShiftTranspiler implements IStatementTranspiler {
       options.push("deletingLeading: " + traversal.traverse(leading));
     }
 
+    const places = node.findExpressionAfterToken("BY");
+    if (places) {
+      options.push("places: " + traversal.traverse(places));
+    }
+
+    const to = node.findExpressionAfterToken("TO");
+    if (to) {
+      options.push("to: " + traversal.traverse(to));
+    }
+
     const extra = options.length > 0 ? ", {" + options.join(",") + "}" : "";
     return "abap.statements.shift(" + target + extra + ");";
   }
