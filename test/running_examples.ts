@@ -1539,4 +1539,14 @@ write if.`;
     expect(abap.Console.get()).to.equal("X");
   });
 
+  it("ASSERT strlen gt", async () => {
+    const code = `
+  DATA lv_len TYPE i.
+  lv_len = 4.
+  ASSERT strlen( '/dir/subdir' ) > lv_len.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
