@@ -114,6 +114,7 @@ describe("Single statements", () => {
     {abap: "foo+1 = 'a'.",    js: "new abap.OffsetLength(foo, {offset: 1}).set('a');",            skip: false},
     {abap: "foo+1(1) = 'a'.", js: "new abap.OffsetLength(foo, {offset: 1, length: 1}).set('a');", skip: false},
     {abap: "foo(bar) = 'a'.", js: "new abap.OffsetLength(foo, {length: bar.get()}).set('a');",    skip: false},
+    {abap: "IF iv_cd = '' OR iv_cd = '.'.\nENDIF.", js: "if (abap.compare.eq(iv_cd, '') || abap.compare.eq(iv_cd, '.')) {\n}", skip: false},
   ];
 
   for (const test of tests) {
