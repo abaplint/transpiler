@@ -15,6 +15,7 @@ export class TranspileTypes {
       resolved = "ABAPObject";
     } else if (type instanceof abaplint.BasicTypes.TableType) {
       resolved = "Table";
+      extra = this.toType(type.getRowType());
     } else if (type instanceof abaplint.BasicTypes.IntegerType) {
       resolved = "Integer";
     } else if (type instanceof abaplint.BasicTypes.StringType) {

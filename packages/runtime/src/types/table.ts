@@ -8,9 +8,11 @@ import {clone} from "../clone";
 
 export class Table  {
   private value: any[];
+  private readonly rowType: INumeric | ICharacter | Table | ABAPObject;
 
-  public constructor() {
+  public constructor(rowType: INumeric | ICharacter | Table | ABAPObject) {
     this.value = [];
+    this.rowType = rowType;
   }
 
   public array(): any[] {
@@ -43,4 +45,12 @@ export class Table  {
       this.append(item.get());
     }
   }
+
+  public appendInitial() {
+    // note that this will clone the object
+    this.append(this.rowType);
+    // return "field symbol" pointing to the inserted line
+    return this.value[this.value.length - 1];
+  }
+
 }
