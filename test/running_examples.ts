@@ -1633,7 +1633,7 @@ write if.`;
     f(abap);
   });
 
-  it.skip("structured constant", async () => {
+  it("structured constant", async () => {
     const code = `
 CONSTANTS: BEGIN OF lc_msg,
              field1 TYPE c VALUE '1',

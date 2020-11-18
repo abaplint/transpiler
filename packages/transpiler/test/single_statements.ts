@@ -63,6 +63,7 @@ describe("Single statements", () => {
     {abap: "DELETE foo WHERE bar = 2.",               js: "abap.statements.deleteInternal(foo,{where: (i) => {return abap.compare.eq(i.bar, constant_2);}});", skip: false},
     {abap: "DELETE ADJACENT DUPLICATES FROM foo.",    js: "abap.statements.deleteInternal(foo,{adjacent: true});",          skip: false},
     {abap: "DELETE foo INDEX 2.",                     js: "abap.statements.deleteInternal(foo,{index: constant_2});",       skip: false},
+    {abap: "DELETE TABLE tab FROM <bar>.", js: "", skip: true},
     {abap: "* comment",                               js: "// * comment",                                                   skip: true},
     {abap: "ASSERT foo = bar.",                       js: "abap.statements.assert(abap.compare.eq(foo, bar));",             skip: false},
     {abap: "ASSERT sy-subrc = 0.",                    js: "abap.statements.assert(abap.compare.eq(abap.builtin.sy.get().subrc, constant_0));",            skip: false},
