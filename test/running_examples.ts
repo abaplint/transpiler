@@ -1616,4 +1616,11 @@ write if.`;
     f(abap);
   });
 
+  it("NS comparator", async () => {
+    const code = `ASSERT 'foo' NS 'bar'.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });

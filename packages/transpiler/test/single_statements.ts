@@ -41,6 +41,7 @@ describe("Single statements", () => {
     {abap: "WHILE foo = bar. ENDWHILE.",           js: "while (abap.compare.eq(foo, bar)) {\n}",    skip: false},
     {abap: "foo-bar = 2.",                         js: "foo.bar.set(2);",                           skip: true}, // hmm, will this kind of member access work?
     {abap: "CLEAR foo.",                           js: "abap.statements.clear(foo);",               skip: false},
+    {abap: "FREE foo.",                            js: "abap.statements.clear(foo);",               skip: false},
     {abap: "SORT foo.",                            js: "abap.statements.sort(foo);",                skip: false},
     {abap: "WRITE foo.",                           js: "abap.statements.write(foo);",               skip: false},
     {abap: "WRITE / foo.",                         js: "abap.statements.write(foo, {newLine: true});", skip: false},
@@ -124,6 +125,8 @@ describe("Single statements", () => {
     {abap: "foo+1(1) = 'a'.", js: "new abap.OffsetLength(foo, {offset: 1, length: 1}).set('a');", skip: false},
     {abap: "foo(bar) = 'a'.", js: "new abap.OffsetLength(foo, {length: bar.get()}).set('a');",    skip: false},
     {abap: "IF iv_cd = '' OR iv_cd = '.'.\nENDIF.", js: "if (abap.compare.eq(iv_cd, '') || abap.compare.eq(iv_cd, '.')) {\n}", skip: false},
+
+    {abap: "CALL FUNCTION 'TODO'.", js: `throw "CallFunctionTranspilerTodo";`,    skip: false},
   ];
 
   for (const test of tests) {
