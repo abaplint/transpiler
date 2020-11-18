@@ -24,8 +24,9 @@ export class ConstantsTranspiler implements IStructureTranspiler {
         continue;
       }
       const value = c.findFirstExpression(abaplint.Expressions.Constant);
-
-      ret += `${name}.get().${field}.set(${traversal.traverse(value)});\n`;
+      if (value) {
+        ret += `${name}.get().${field}.set(${traversal.traverse(value)});\n`;
+      }
     }
 
     return ret;

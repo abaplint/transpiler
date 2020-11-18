@@ -1647,4 +1647,14 @@ WRITE / lc_msg-field2.`;
     expect(abap.Console.get()).to.equal("1\n2");
   });
 
+  it("structured constant, is initial", async () => {
+    const code = `
+CONSTANTS: BEGIN OF lc_msg,
+             field1 TYPE c VALUE IS INITIAL,
+           END OF lc_msg.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
