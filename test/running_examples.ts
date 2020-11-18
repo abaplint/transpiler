@@ -1623,4 +1623,14 @@ write if.`;
     f(abap);
   });
 
+  it("BETWEEN comparator", async () => {
+    const code = `
+  ASSERT 2 BETWEEN 1 AND 5.
+  ASSERT 1 BETWEEN 1 AND 5.
+  ASSERT 5 BETWEEN 1 AND 5.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
