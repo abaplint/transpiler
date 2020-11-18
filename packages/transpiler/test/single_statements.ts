@@ -100,18 +100,15 @@ describe("Single statements", () => {
     {abap: "type->type_kind = 2.",                    js: "type.get().type_kind.set(constant_2);",         skip: false},
     {abap: "REPLACE ALL OCCURRENCES OF |\\n| IN lv_norm WITH | |.",              js: "abap.statements.replace(lv_norm, `\\n`, ` `);",         skip: false},
     {abap: "CONDENSE lv_norm.",                                                  js: "abap.statements.condense(lv_norm);",         skip: false},
-
     {abap: "FIND FIRST OCCURRENCE OF |bar| IN |foobar| MATCH OFFSET lv_offset.",
       js: "abap.statements.find(`foobar`, {find: `bar`, offset: lv_offset});", skip: false},
     {abap: "FIND FIRST OCCURRENCE OF cl_abap_char_utilities=>cr_lf IN iv_string.",
       js: `abap.statements.find(iv_string, {find: cl_abap_char_utilities.cr_lf});`, skip: false},
     {abap: "FIND FIRST OCCURRENCE OF REGEX 'b+c' IN 'abcd' MATCH COUNT lv_cnt MATCH LENGTH lv_len.",
       js: "abap.statements.find('abcd', {regex: 'b+c', count: lv_cnt, length: lv_len});", skip: false},
-
     {abap: "SHIFT lv_bitbyte LEFT DELETING LEADING '0 '.", js: `abap.statements.shift(lv_bitbyte, {direction: 'LEFT',deletingLeading: '0 '});`, skip: false},
     {abap: "SHIFT lv_temp BY 1 PLACES LEFT.", js: `abap.statements.shift(lv_temp, {direction: 'LEFT',places: constant_1});`, skip: false},
     {abap: "SHIFT lv_temp UP TO '/' LEFT.", js: `abap.statements.shift(lv_temp, {direction: 'LEFT',to: '/'});`, skip: false},
-
     {abap: "TRANSLATE rv_spras TO UPPER CASE.", js: `abap.statements.translate(rv_spras, "UPPER");`, skip: false},
     {abap: "TRANSLATE rv_spras TO LOWER CASE.", js: `abap.statements.translate(rv_spras, "LOWER");`, skip: false},
     {abap: "DESCRIBE FIELD <lg_line> LENGTH lv_length IN CHARACTER MODE.", js: `abap.statements.describe({field: fs_lg_line_, length: lv_length, mode: 'CHARACTER'});`, skip: false},
@@ -125,8 +122,10 @@ describe("Single statements", () => {
     {abap: "foo+1(1) = 'a'.", js: "new abap.OffsetLength(foo, {offset: 1, length: 1}).set('a');", skip: false},
     {abap: "foo(bar) = 'a'.", js: "new abap.OffsetLength(foo, {length: bar.get()}).set('a');",    skip: false},
     {abap: "IF iv_cd = '' OR iv_cd = '.'.\nENDIF.", js: "if (abap.compare.eq(iv_cd, '') || abap.compare.eq(iv_cd, '.')) {\n}", skip: false},
-
     {abap: "CALL FUNCTION 'TODO'.", js: `throw "CallFunctionTranspilerTodo";`,    skip: false},
+    {abap: "TRY. ENDTRY.", js: `try {\n}`,    skip: false},
+    {abap: "MESSAGE e058(00) WITH 'Value_1' 'Value_2' 'Value_3' 'Value_4' INTO lv_dummy.", js: `abap.statements.message('MessageTranspilerTodo');`, skip: false},
+    {abap: "MESSAGE ID sy-msgid TYPE 'S' NUMBER sy-msgno WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4 INTO rv_text.", js: `abap.statements.message('MessageTranspilerTodo');`, skip: false},
   ];
 
   for (const test of tests) {
