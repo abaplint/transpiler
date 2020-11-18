@@ -128,6 +128,9 @@ export class Traversal {
       }
       const name = v.name.toLowerCase().replace("~", "$");
       ret += "this." + name + " = " + new TranspileTypes().toType(v.identifier.getType()) + ";\n";
+      if (name === "me") {
+        ret += "this." + name + ".set(this);\n";
+      }
     }
     return ret;
   }

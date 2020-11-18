@@ -1683,4 +1683,28 @@ START-OF-SELECTION.
     f(abap);
   });
 
+  it("class, testing me->", async () => {
+    const code = `
+CLASS lcl_foo DEFINITION.
+  PUBLIC SECTION.
+    DATA moo TYPE i.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS lcl_foo IMPLEMENTATION.
+  METHOD constructor.
+    me->moo = 2.
+    WRITE me->moo.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA bar TYPE REF TO lcl_foo.
+  CREATE OBJECT bar.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("2");
+  });
+
 });
