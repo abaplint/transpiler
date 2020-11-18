@@ -66,7 +66,9 @@ const test = new ${def.name}();\n`;
     ret += `console.log(abap.Console.get());
 fs.writeFileSync(__dirname + path.sep + "output.xml", unit.xUnitXML());
 } catch (e) {
-  meth.fail();
+  if (meth) {
+    meth.fail();
+  }
   console.log(abap.Console.get());
   fs.writeFileSync(__dirname + path.sep + "output.xml", unit.xUnitXML());
   throw e;

@@ -12,6 +12,7 @@ export class TargetTranspiler implements IExpressionTranspiler {
     for (const c of node.getChildren()) {
       if (c.get() instanceof Expressions.TargetField) {
         ret = ret + traversal.findPrefix(c.getFirstToken());
+        ret = ret.replace("~", "$");
       } else if (c.get() instanceof Expressions.ComponentName) {
         ret = ret + c.getFirstToken().getStr();
       } else if (c.get() instanceof Expressions.AttributeName) {
