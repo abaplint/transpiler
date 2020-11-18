@@ -33,6 +33,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     return false;
   }
 
+  /** this builds the part after the class, containing the static variables/constants */
   private buildStatic(node: abaplint.Nodes.ExpressionNode | undefined, traversal: Traversal): string {
     if (node === undefined) {
       return "";
@@ -47,7 +48,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
       if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.Static) === false) {
         continue;
       }
-      const name = node.getFirstToken().getStr().toLowerCase() + "." + v.name;
+      const name = node.getFirstToken().getStr().toLowerCase() + "." + v.name.toLocaleLowerCase().replace("~", "$");
       ret += name + " = " + new TranspileTypes().toType(v.identifier.getType()) + ";\n";
       const val = v.identifier.getValue();
       if (typeof val === "string") {

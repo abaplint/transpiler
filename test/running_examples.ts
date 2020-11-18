@@ -1707,4 +1707,31 @@ START-OF-SELECTION.
     expect(abap.Console.get()).to.equal("2");
   });
 
+  it("class, interface with constant", async () => {
+    const code = `
+INTERFACE lif_bar.
+  CONSTANTS moo TYPE i VALUE 2.
+ENDINTERFACE.
+
+CLASS lcl_foo DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif_bar.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS lcl_foo IMPLEMENTATION.
+  METHOD constructor.
+    WRITE lif_bar~moo.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA bar TYPE REF TO lcl_foo.
+  CREATE OBJECT bar.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("2");
+  });
+
 });
