@@ -23,6 +23,16 @@ export class DeleteInternalTranspiler implements IStatementTranspiler {
       extra.push("index: " + traversal.traverse(index));
     }
 
+    const from = node.findExpressionAfterToken("FROM");
+    if (from && node.findDirectTokenByText("ADJACENT") === undefined) {
+      extra.push("from: " + traversal.traverse(from));
+    }
+
+    const to = node.findExpressionAfterToken("TO");
+    if (to) {
+      extra.push("to: " + traversal.traverse(to));
+    }
+
     let concat = "";
     if (extra.length > 0) {
       concat = ",{" + extra.join(",") + "}";

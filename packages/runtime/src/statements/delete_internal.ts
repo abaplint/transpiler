@@ -5,8 +5,10 @@ import {clone} from "../clone";
 
 export interface IDeleteInternalOptions {
   where?: (i: any) => boolean,
-  index: INumeric,
-  adjacent: boolean,
+  index?: INumeric,
+  adjacent?: boolean,
+  from?: any,
+  to?: any,
 }
 
 export function deleteInternal(target: Table, options?: IDeleteInternalOptions): void {
