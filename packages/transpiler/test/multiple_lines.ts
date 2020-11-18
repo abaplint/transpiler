@@ -55,6 +55,7 @@ describe("Multiple lines", () => {
 `class lcl_foobar {
   constructor() {
     this.me = new abap.types.ABAPObject();
+    this.me.set(this);
   }
   moo() {
   }
@@ -80,6 +81,7 @@ describe("Multiple lines", () => {
 `class lcl_foobar {
   constructor() {
     this.me = new abap.types.ABAPObject();
+    this.me.set(this);
   }
   moo(unique1) {
     let iv_foo = new abap.types.String();
@@ -107,6 +109,7 @@ describe("Multiple lines", () => {
 `class lcl_foobar {
   constructor() {
     this.me = new abap.types.ABAPObject();
+    this.me.set(this);
   }
   moo() {
     let rv_foo = new abap.types.String();
@@ -156,6 +159,7 @@ CREATE OBJECT foo.`;
 `class zcl_words {
   constructor() {
     this.me = new abap.types.ABAPObject();
+    this.me.set(this);
   }
 }
 let foo = new abap.types.ABAPObject();
@@ -192,6 +196,7 @@ DATA moo TYPE foo.`;
     const expected = `class zcl_words {
   constructor() {
     this.me = new abap.types.ABAPObject();
+    this.me.set(this);
     this.bar = new abap.types.Integer();
   }
   run() {
@@ -222,6 +227,7 @@ constant_2.set(2);
 class zcl_words {
   constructor() {
     this.me = new abap.types.ABAPObject();
+    this.me.set(this);
     this.bar = new abap.types.Integer();
     this.bar.set(constant_2);
     abap.statements.write(this.bar);
@@ -249,6 +255,7 @@ ENDCLASS.`;
     const expected = `class zcl_ret {
   constructor() {
     this.me = new abap.types.ABAPObject();
+    this.me.set(this);
     this.bar = new abap.types.Integer();
   }
   run() {
@@ -305,6 +312,7 @@ constant_30.set(30);
 class zcl_ret {
   constructor() {
     this.me = new abap.types.ABAPObject();
+    this.me.set(this);
   }
 }
 zcl_ret.c_maxdcodes = new abap.types.Integer();
@@ -325,6 +333,7 @@ ENDCLASS.`;
     const expected = `class lcl_bar {
   constructor() {
     this.me = new abap.types.ABAPObject();
+    this.me.set(this);
   }
 }
 lcl_bar.foo = new abap.types.Integer();`;
@@ -369,6 +378,7 @@ constant_2.set(2);
 class lcl_bar {
   constructor() {
     this.me = new abap.types.ABAPObject();
+    this.me.set(this);
   }
   bar(unique1) {
     return lcl_bar.bar(unique1);
@@ -407,6 +417,7 @@ constant_42.set(42);
 class lcl_bar {
   constructor(unique1) {
     this.me = new abap.types.ABAPObject();
+    this.me.set(this);
     let input = new abap.types.Integer();
     if (unique1 && unique1.input) {input.set(unique1.input);}
     abap.statements.write(input);

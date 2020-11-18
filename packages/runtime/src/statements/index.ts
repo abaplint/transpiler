@@ -7,6 +7,7 @@ export * from "./delete_internal";
 export * from "./describe";
 export * from "./find";
 export * from "./get_bit";
+export * from "./message";
 export * from "./modify_internal";
 export * from "./read_table";
 export * from "./replace";

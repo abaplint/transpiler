@@ -1616,4 +1616,122 @@ write if.`;
     f(abap);
   });
 
+  it("NS comparator", async () => {
+    const code = `ASSERT 'foo' NS 'bar'.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("BETWEEN comparator", async () => {
+    const code = `
+  ASSERT 2 BETWEEN 1 AND 5.
+  ASSERT 1 BETWEEN 1 AND 5.
+  ASSERT 5 BETWEEN 1 AND 5.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("structured constant", async () => {
+    const code = `
+CONSTANTS: BEGIN OF lc_msg,
+             field1 TYPE c VALUE '1',
+             field2 TYPE c VALUE '2',
+           END OF lc_msg.
+WRITE / lc_msg-field1.
+WRITE / lc_msg-field2.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("1\n2");
+  });
+
+  it("structured constant, is initial", async () => {
+    const code = `
+CONSTANTS: BEGIN OF lc_msg,
+             field1 TYPE c VALUE IS INITIAL,
+           END OF lc_msg.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("class implementing interface with attribute", async () => {
+    const code = `
+INTERFACE lif_bar.
+  DATA moo TYPE i.
+ENDINTERFACE.
+
+CLASS lcl_foo DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif_bar.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS lcl_foo IMPLEMENTATION.
+  METHOD constructor.
+    lif_bar~moo = 2.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA bar TYPE REF TO lcl_foo.
+  CREATE OBJECT bar.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("class, testing me->", async () => {
+    const code = `
+CLASS lcl_foo DEFINITION.
+  PUBLIC SECTION.
+    DATA moo TYPE i.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS lcl_foo IMPLEMENTATION.
+  METHOD constructor.
+    me->moo = 2.
+    WRITE me->moo.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA bar TYPE REF TO lcl_foo.
+  CREATE OBJECT bar.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("2");
+  });
+
+  it("class, interface with constant", async () => {
+    const code = `
+INTERFACE lif_bar.
+  CONSTANTS moo TYPE i VALUE 2.
+ENDINTERFACE.
+
+CLASS lcl_foo DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif_bar.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS lcl_foo IMPLEMENTATION.
+  METHOD constructor.
+    WRITE lif_bar~moo.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA bar TYPE REF TO lcl_foo.
+  CREATE OBJECT bar.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("2");
+  });
+
 });
