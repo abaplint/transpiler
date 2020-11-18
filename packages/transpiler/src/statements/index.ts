@@ -40,6 +40,7 @@ export * from "./method";
 export * from "./modify_internal";
 export * from "./move";
 export * from "./perform";
+export * from "./raise";
 export * from "./read_table";
 export * from "./replace";
 export * from "./report";

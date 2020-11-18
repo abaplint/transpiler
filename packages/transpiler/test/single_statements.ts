@@ -126,6 +126,7 @@ describe("Single statements", () => {
     {abap: "TRY. ENDTRY.", js: `try {\n}`,    skip: false},
     {abap: "MESSAGE e058(00) WITH 'Value_1' 'Value_2' 'Value_3' 'Value_4' INTO lv_dummy.", js: `abap.statements.message('MessageTranspilerTodo');`, skip: false},
     {abap: "MESSAGE ID sy-msgid TYPE 'S' NUMBER sy-msgno WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4 INTO rv_text.", js: `abap.statements.message('MessageTranspilerTodo');`, skip: false},
+    {abap: "RAISE EXCEPTION TYPE zcx_foobar EXPORTING foo = bar.", js: `throw new zcx_foobar({foo: bar});`, skip: false},
   ];
 
   for (const test of tests) {
