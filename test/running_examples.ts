@@ -1633,4 +1633,18 @@ write if.`;
     f(abap);
   });
 
+  it.skip("structured constant", async () => {
+    const code = `
+CONSTANTS: BEGIN OF lc_msg,
+             field1 TYPE c VALUE '1',
+             field2 TYPE c VALUE '2',
+           END OF lc_msg.
+WRITE / lc_msg-field1.
+WRITE / lc_msg-field2.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("1\n2");
+  });
+
 });
