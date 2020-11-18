@@ -21,7 +21,7 @@ function loadFiles(config: ITranspilerConfig): Transpiler.IFile[] {
     files.push({filename, contents});
     console.log("Add:\t" + filename);
   }
-  console.log(skipped + " files skipeed");
+  console.log(skipped + " files skipped");
   return files;
 }
 
