@@ -130,7 +130,8 @@ describe("Single statements", () => {
     {abap: "RAISE EXCEPTION TYPE zcx_foobar EXPORTING foo = bar.", js: `throw new zcx_foobar({foo: bar});`, skip: false},
     {abap: "CLASS ltcl_test DEFINITION DEFERRED.", js: ``, skip: false},
     {abap: "CLASS sdfsdf DEFINITION LOCAL FRIENDS ltcl_test ltcl_split_text.", js: ``, skip: false},
-    {abap: "if_bar~field = 2.", js: `if_bar$field.set(constant_2);`, skip: false},
+    {abap: "if_bar~field = 2.",                                     js: `if_bar$field.set(constant_2);`, skip: false},
+    {abap: "IF if_bar~field IS NOT INITIAL. ENDIF.",                js: `if (abap.compare.initial(if_bar$field) === false) {\n}`, skip: false},
   ];
 
   for (const test of tests) {

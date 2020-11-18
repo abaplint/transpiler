@@ -1657,4 +1657,30 @@ CONSTANTS: BEGIN OF lc_msg,
     f(abap);
   });
 
+  it("class implementing interface with attribute", async () => {
+    const code = `
+INTERFACE lif_bar.
+  DATA moo TYPE i.
+ENDINTERFACE.
+
+CLASS lcl_foo DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif_bar.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS lcl_foo IMPLEMENTATION.
+  METHOD constructor.
+    lif_bar~moo = 2.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA bar TYPE REF TO lcl_foo.
+  CREATE OBJECT bar.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });

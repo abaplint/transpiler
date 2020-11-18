@@ -126,7 +126,8 @@ export class Traversal {
       if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
         continue;
       }
-      ret += "this." + v.name + " = " + new TranspileTypes().toType(v.identifier.getType()) + ";\n";
+      const name = v.name.toLowerCase().replace("~", "$");
+      ret += "this." + name + " = " + new TranspileTypes().toType(v.identifier.getType()) + ";\n";
     }
     return ret;
   }

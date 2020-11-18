@@ -17,12 +17,10 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
 
     for (const c of node.getChildren()) {
       if (c.get() instanceof Expressions.SourceField) {
-        ret = ret + traversal.findPrefix(c.getFirstToken());
-      } else if (c instanceof Nodes.ExpressionNode
-          && c.get() instanceof Expressions.SourceFieldSymbol) {
+        ret = ret + traversal.findPrefix(c.getFirstToken()).replace("~", "$");
+      } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.SourceFieldSymbol) {
         ret = ret + new FieldSymbolTranspiler().transpile(c, traversal);
-      } else if (c instanceof Nodes.ExpressionNode
-          && c.get() instanceof Expressions.ClassName) {
+      } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.ClassName) {
         ret += c.getFirstToken().getStr().toLowerCase() + ".";
       } else if (c.get() instanceof Expressions.AttributeName) {
         ret = ret + c.getFirstToken().getStr();
