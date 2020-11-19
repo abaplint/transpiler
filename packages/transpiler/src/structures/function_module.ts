@@ -7,8 +7,12 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
   public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): string {
     let r = "";
     for (const c of node.getChildren()) {
-      if (c.get() instanceof abaplint.Statements.FunctionModule) {
-        r += "function moo(input) {\n";
+      if (c.get() instanceof abaplint.Statements.FunctionModule && c instanceof abaplint.Nodes.StatementNode) {
+        let name = c.findDirectExpression(abaplint.Expressions.Field)?.concatTokens().toLowerCase();
+        if (name === undefined) {
+          name = "FunctionModuleTranspilerNameNotFound";
+        }
+        r += `function ${name}(input) {\n`;
       } else if (c.get() instanceof abaplint.Statements.EndFunction) {
         r += "}";
       } else {
