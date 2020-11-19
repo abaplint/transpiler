@@ -1733,4 +1733,33 @@ START-OF-SELECTION.
     expect(abap.Console.get()).to.equal("2");
   });
 
+  it("class, interfaced method", async () => {
+    const code = `
+INTERFACE zif_test.
+  METHODS moo.
+ENDINTERFACE.
+
+CLASS zcl_super DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES zif_test.
+ENDCLASS.
+CLASS zcl_super IMPLEMENTATION.
+  METHOD zif_test~moo.
+    WRITE 2.
+  ENDMETHOD.
+ENDCLASS.
+
+FORM foo.
+  DATA bar TYPE REF TO zif_test.
+  CREATE OBJECT bar TYPE zcl_super.
+  bar->moo( ).
+ENDFORM.
+
+PERFORM foo.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("2");
+  });
+
 });

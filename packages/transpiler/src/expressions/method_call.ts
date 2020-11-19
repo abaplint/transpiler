@@ -71,7 +71,6 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
         continue;
       } else if (r.position.getStart().equals(token.getStart())
           && r.resolved instanceof abaplint.Types.MethodDefinition) {
-
         let name = r.resolved.getName();
         if (r.extra?.ooName && r.extra?.ooType === "INTF") {
           name = r.extra.ooName + "$" + name;
