@@ -44,7 +44,7 @@ describe("Running Examples", () => {
     expect(f(abap)).to.equal(2);
   });
 
-  it.skip("Character field semantics", async () => {
+  it("Character field semantics", async () => {
     const code = `
     DATA: foo TYPE c.
     foo = 'abc'.
@@ -1352,7 +1352,7 @@ write if.`;
     expect(abap.Console.get()).to.equal("11223A55\nB1223A55\nB12C");
   });
 
-  it.skip("GET all da BITs", async () => {
+  it("GET all da BITs", async () => {
     const code = `
   DATA rv_bitbyte TYPE c LENGTH 8 .
   DATA iv_x TYPE x VALUE '40'.
@@ -1366,7 +1366,6 @@ write if.`;
   GET BIT 8 OF iv_x INTO rv_bitbyte+7(1).
   WRITE rv_bitbyte.`;
     const js = await run(code);
-    console.dir(js);
     const f = new Function("abap", js);
     f(abap);
     expect(abap.Console.get()).to.equal("01000000");
