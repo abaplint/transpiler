@@ -134,6 +134,8 @@ describe("Single statements", () => {
     {abap: "IF if_bar~field IS NOT INITIAL. ENDIF.", js: `if (abap.compare.initial(if_bar$field) === false) {\n}`, skip: false},
     {abap: "TRY. CATCH zcx_bar INTO lx_ex. ENDTRY.", js: `try {\n} catch (e) {\n  lx_ex.set(e);\n}`, skip: false},
     {abap: "FUNCTION bar. ENDFUNCTION.", js: `function moo(input) {\n}`, skip: false},
+    {abap: "FUNCTION-POOL zopenabap.", js: ``, skip: false},
+    {abap: "INCLUDE lzopenabaptop.", js: ``, skip: false},
   ];
 
   for (const test of tests) {
