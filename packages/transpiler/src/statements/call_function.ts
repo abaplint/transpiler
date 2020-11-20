@@ -12,11 +12,11 @@ export class CallFunctionTranspiler implements IStatementTranspiler {
 
     let param = "";
     const fmp = node.findDirectExpression(abaplint.Expressions.FunctionParameters);
-    if (fmp === undefined) {
+    if (fmp) {
       param = traversal.traverse(fmp);
     }
 
-    const ret = `abap.FunctionModules[${fmname}](${param});\n`;
+    const ret = `abap.FunctionModules[${fmname}](${param});`;
 
     return ret;
   }

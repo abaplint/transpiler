@@ -27,13 +27,13 @@ export class FunctionParametersTranspiler implements IExpressionTranspiler {
     let ret = "";
     for (const p of Object.keys(params)) {
       if (ret === "") {
-        ret += params[p];
+        ret += p + ": " + params[p];
       } else {
-        ret += ", " + params[p];
+        ret += ", " + p + ": " + params[p];
       }
     }
 
-    return ret;
+    return `{${ret}}`;
   }
 
 }

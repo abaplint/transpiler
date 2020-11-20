@@ -133,6 +133,8 @@ describe("Single statements", () => {
     {abap: "FUNCTION name123. ENDFUNCTION.", js: `function name123(input) {\n}\nabap.FunctionModules['NAME123'] = name123;`, skip: false},
     {abap: "FUNCTION-POOL zopenabap.", js: ``, skip: false},
     {abap: "INCLUDE lzopenabaptop.", js: ``, skip: false},
+    {abap: "CALL FUNCTION 'BAR'.", js: `abap.FunctionModules['BAR']();`, skip: false},
+    {abap: "CALL FUNCTION 'BAR' EXPORTING moo = boo.", js: `abap.FunctionModules['BAR']({exporting: {moo: boo}});`, skip: false},
   ];
 
   for (const test of tests) {
