@@ -124,7 +124,7 @@ export class Traversal {
     }
     let ret = "";
 
-    if (def.getSuperClass() !== undefined) {
+    if (def.getSuperClass() !== undefined || def.getName().toLowerCase() === "cx_root") {
       // todo, more here, there might be parameters to pass
       ret += "super();\n";
     }
