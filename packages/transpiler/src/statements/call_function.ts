@@ -13,7 +13,7 @@ export class CallFunctionTranspiler implements IStatementTranspiler {
     // todo, handle parameters
     let ret = "";
 
-    ret += `abap.FunctionModules[${fmname}]();`;
+    ret += `abap.FunctionModules[${fmname}]();\n`;
     ret += `throw "CallFunctionTranspilerTodo";`;
 
     return ret;

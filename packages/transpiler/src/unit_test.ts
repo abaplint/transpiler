@@ -2,11 +2,24 @@ import * as abaplint from "@abaplint/core";
 
 export class UnitTest {
 
+  private functionGroups(reg: abaplint.IRegistry): string {
+    let ret = "";
+    for (const obj of reg.getObjects()) {
+      if (obj instanceof abaplint.Objects.FunctionGroup) {
+        for (const m of obj.getModules()) {
+          ret += `require("./${obj.getName().toLowerCase()}.fugr.${m.getName().toLowerCase()}.js");\n`;
+        }
+      }
+    }
+    return ret;
+  }
+
   // with lots of assumptions regarding setup
   public run(reg: abaplint.IRegistry): string {
     let ret = `const fs = require("fs");
 const path = require("path");
 global.abap = require("@abaplint/runtime");
+${this.functionGroups(reg)}
 const unit = new global.abap.UnitTestResult();
 let clas;
 let locl;
@@ -14,7 +27,7 @@ let meth;
 try {\n`;
 
     for (const obj of reg.getObjects()) {
-      if (obj instanceof abaplint.ABAPObject) {
+      if (obj instanceof abaplint.Objects.Class) {
         ret += `clas = unit.addObject("${obj.getName()}");\n`;
         for (const file of obj.getABAPFiles()) {
           for (const def of file.getInfo().listClassDefinitions()) {
