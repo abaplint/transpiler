@@ -11,10 +11,16 @@ import {TranspileTypes} from "./types";
 export class Traversal {
   private readonly spaghetti: abaplint.ISpaghettiScope;
   private readonly file: abaplint.ABAPFile;
+  private readonly obj: abaplint.ABAPObject;
 
-  public constructor(spaghetti: abaplint.ISpaghettiScope, file: abaplint.ABAPFile, _obj: abaplint.ABAPObject) {
+  public constructor(spaghetti: abaplint.ISpaghettiScope, file: abaplint.ABAPFile, obj: abaplint.ABAPObject) {
     this.spaghetti = spaghetti;
     this.file = file;
+    this.obj = obj;
+  }
+
+  public getCurrentObject(): abaplint.ABAPObject {
+    return this.obj;
   }
 
   public traverse(node: abaplint.INode | undefined): string {

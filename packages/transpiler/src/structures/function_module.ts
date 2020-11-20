@@ -14,6 +14,7 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
           name = "FunctionModuleTranspilerNameNotFound";
         }
         r += `function ${name}(input) {\n`;
+        r += this.findSignature(traversal, name);
       } else if (c.get() instanceof abaplint.Statements.EndFunction) {
         r += "}\n";
         r += `abap.FunctionModules['${name.toUpperCase()}'] = ${name};\n`;
@@ -22,6 +23,26 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
       }
     }
     return r;
+  }
+
+//////////////////////
+
+  private findSignature(traversal: Traversal, name: string) {
+    const group = traversal.getCurrentObject() as abaplint.Objects.FunctionGroup | undefined;
+    if (group === undefined) {
+      throw "FunctionModuleTranspilerGroupNotFound";
+    }
+
+    const module = group.getModule(name);
+    if (module === undefined) {
+      throw "FunctionModuleTranspilerModuleNotFound";
+    }
+
+    let ret = "";
+    for (const p of module.getParameters()) {
+      ret += `// ${p.direction} ${p.name} ${p.type}\n`;
+    }
+    return ret;
   }
 
 }

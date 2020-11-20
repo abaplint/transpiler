@@ -130,7 +130,6 @@ describe("Single statements", () => {
     {abap: "if_bar~field = 2.",                      js: `if_bar$field.set(constant_2);`, skip: false},
     {abap: "IF if_bar~field IS NOT INITIAL. ENDIF.", js: `if (abap.compare.initial(if_bar$field) === false) {\n}`, skip: false},
     {abap: "TRY. CATCH zcx_bar INTO lx_ex. ENDTRY.", js: `try {\n} catch (e) {\n  lx_ex.set(e);\n}`, skip: false},
-    {abap: "FUNCTION name123. ENDFUNCTION.", js: `function name123(input) {\n}\nabap.FunctionModules['NAME123'] = name123;`, skip: false},
     {abap: "FUNCTION-POOL zopenabap.", js: ``, skip: false},
     {abap: "INCLUDE lzopenabaptop.", js: ``, skip: false},
     {abap: "CALL FUNCTION 'BAR'.", js: `abap.FunctionModules['BAR']();`, skip: false},
