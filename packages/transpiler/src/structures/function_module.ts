@@ -6,8 +6,8 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
 
   public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): string {
     let r = "";
+    let name: string | undefined = "";
     for (const c of node.getChildren()) {
-      let name: string | undefined = "";
       if (c.get() instanceof abaplint.Statements.FunctionModule && c instanceof abaplint.Nodes.StatementNode) {
         name = c.findDirectExpression(abaplint.Expressions.Field)?.concatTokens().toLowerCase();
         if (name === undefined) {
