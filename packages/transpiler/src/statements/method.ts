@@ -19,8 +19,10 @@ export class MethodTranspiler implements IStatementTranspiler {
 
     let after = "";
 
-    if (name.toUpperCase() === "CONSTRUCTOR") {
-      after = traversal.buildConstructorContents(scope.getParent());
+    const cdef = traversal.getClassDefinition(token);
+
+    if (name.toUpperCase() === "CONSTRUCTOR" && cdef) {
+      after = traversal.buildConstructorContents(scope.getParent(), cdef);
     }
 
     let unique = "";
@@ -48,7 +50,7 @@ export class MethodTranspiler implements IStatementTranspiler {
     }
 
     // todo, does this work with interfaces?
-    const defs = traversal.getClassDefinition(token)?.getMethodDefinitions()?.getAll();
+    const defs = cdef?.getMethodDefinitions()?.getAll();
     let staticMethod = "";
     for (const m of defs || []) {
       if (m.getName().toUpperCase() === name.toUpperCase() && m.isStatic()) {

@@ -45,8 +45,6 @@ describe("Single statements", () => {
     {abap: "SORT foo.",                            js: "abap.statements.sort(foo);",                skip: false},
     {abap: "WRITE foo.",                           js: "abap.statements.write(foo);",               skip: false},
     {abap: "WRITE / foo.",                         js: "abap.statements.write(foo, {newLine: true});", skip: false},
-    {abap: "CLASS lcl_foo IMPLEMENTATION. ENDCLASS.", js: "class lcl_foo {\n}",                        skip: false}, // note: no code for the CLASS DEFINITION
-    {abap: "CLASS LCL_FOO IMPLEMENTATION. ENDCLASS.", js: "class lcl_foo {\n}",                        skip: false},
     {abap: "RETURN.",                                 js: "return;",                                   skip: false}, // todo, hmm? some more to be added here
     {abap: "method( ).",                              js: "this.method();",                            skip: false},
     {abap: "foo->method( ).",                         js: "foo.get().method();",                       skip: false},

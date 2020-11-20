@@ -67,7 +67,16 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
   private buildConstructor(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
     const scope = traversal.getSpaghetti().lookupPosition(node.getFirstToken().getStart(), traversal.getFilename());
 
-    const ret = traversal.buildConstructorContents(scope);
+    const token = node.findFirstExpression(abaplint.Expressions.ClassName)?.getFirstToken();
+    if (token === undefined) {
+      throw "buildConstructorTokenNotFound";
+    }
+    const cdef = traversal.getClassDefinition(token);
+    if (cdef === undefined) {
+      throw "buildConstructorCDEFNotFound";
+    }
+
+    const ret = traversal.buildConstructorContents(scope, cdef);
     if (ret === "") {
       return ret;
     }

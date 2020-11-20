@@ -116,12 +116,19 @@ export class Traversal {
     return false;
   }
 
-  public buildConstructorContents(scope: abaplint.ISpaghettiScopeNode | undefined): string {
+  public buildConstructorContents(scope: abaplint.ISpaghettiScopeNode | undefined, def: abaplint.IClassDefinition): string {
+
     const vars = scope?.getData().vars;
     if (vars === undefined || vars.length === 0) {
       return "";
     }
     let ret = "";
+
+    if (def.getSuperClass() !== undefined) {
+      // todo, more here, there might be parameters to pass
+      ret += "super();\n";
+    }
+
     for (const v of vars) {
       if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
         continue;
