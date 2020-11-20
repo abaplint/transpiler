@@ -4,17 +4,19 @@ import {Traversal} from "../traversal";
 
 export class CallFunctionTranspiler implements IStatementTranspiler {
 
-  public transpile(node: abaplint.Nodes.StatementNode, _traversal: Traversal): string {
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
     const fmname = node.findDirectExpression(abaplint.Expressions.FunctionName)?.concatTokens();
     if (fmname === undefined) {
       throw "CallFunctionTranspilerNameNotFound";
     }
 
-    // todo, handle parameters
-    let ret = "";
+    let param = "";
+    const fmp = node.findDirectExpression(abaplint.Expressions.FunctionParameters);
+    if (fmp === undefined) {
+      param = traversal.traverse(fmp);
+    }
 
-    ret += `abap.FunctionModules[${fmname}]();\n`;
-    ret += `throw "CallFunctionTranspilerTodo";`;
+    const ret = `abap.FunctionModules[${fmname}](${param});\n`;
 
     return ret;
   }
