@@ -1795,4 +1795,11 @@ START-OF-SELECTION.
     expect(abap.Console.get()).to.equal("4");
   });
 
+  it("WRITE space", async () => {
+    const code = `WRITE space.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
