@@ -1910,4 +1910,16 @@ START-OF-SELECTION.
     f(abap);
     expect(abap.Console.get()).to.equal("1");
   });
+
+  it("clear object reference", async () => {
+    const code = `
+  interface lif_bar.
+  endinterface.
+  DATA bar TYPE REF TO lif_bar.
+  CLEAR bar.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
