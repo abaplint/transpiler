@@ -280,6 +280,9 @@ ENDTRY.`;
     const expected =
 `try {
 } catch (e) {
+  if (!(e instanceof cx_root)) {
+    throw e;
+  }
 }`;
 
     expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.equal(expected);

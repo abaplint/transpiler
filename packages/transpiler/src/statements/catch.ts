@@ -15,10 +15,10 @@ export class CatchTranspiler implements IStatementTranspiler {
     // todo, check type
 
     // it its not an instance of cx_root, its a javascript runtime error
-    return `} catch (e) {
-      if (!(e instanceof cx_root)) {
-        throw e;
-      }` + into;
+    return `} catch (e) {\n` +
+      `if (!(e instanceof cx_root)) {\n` +
+      `throw e;\n` +
+      `}` + into;
   }
 
 }
