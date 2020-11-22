@@ -1842,4 +1842,25 @@ START-OF-SELECTION.
     expect(abap.Console.get()).to.equal("a\nb");
   });
 
+  it("check structure is initial", async () => {
+    const code = `
+TYPES: BEGIN OF bar,
+         field TYPE i,
+       END OF bar.
+DATA bar TYPE bar.
+ASSERT bar IS INITIAL.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("check internal table is initial", async () => {
+    const code = `
+    DATA bar TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+    ASSERT bar IS INITIAL.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
