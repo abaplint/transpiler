@@ -45,7 +45,7 @@ export class Requires {
 
     // always add CX_ROOT, it is used for CATCH
     const cx = this.reg.getObject("CLAS", "CX_ROOT");
-    if (cx) {
+    if (cx && this.obj.getName().toUpperCase() !== "CX_ROOT") {
       add({type: cx.getType(), name: cx.getName()});
     }
 
