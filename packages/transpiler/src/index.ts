@@ -164,6 +164,12 @@ export class Transpiler {
         res.push(e);
       }
     }
+    for (const c of node.findAllStatements(abaplint.Statements.Interface)) {
+      const e = c.findFirstExpression(abaplint.Expressions.InterfaceName)?.getFirstToken().getStr();
+      if (e) {
+        res.push(e);
+      }
+    }
     return res;
   }
 
