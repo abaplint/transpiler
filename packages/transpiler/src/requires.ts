@@ -59,10 +59,14 @@ export class Requires {
         && filename === this.main) {
       return undefined;
     }
-    const found = this.reg.getObject("CLAS", name);
+    let found = this.reg.getObject("CLAS", name);
+    if (found === undefined) {
+      found = this.reg.getObject("INTF", name);
+    }
     if (found) {
       return {type: found.getType(), name: found.getName()};
     }
+
     return undefined;
   }
 
