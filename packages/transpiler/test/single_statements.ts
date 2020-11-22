@@ -48,7 +48,6 @@ describe("Single statements", () => {
     {abap: "RETURN.",                                 js: "return;",                                   skip: false}, // todo, hmm? some more to be added here
     {abap: "method( ).",                              js: "this.method();",                            skip: false},
     {abap: "foo->method( ).",                         js: "foo.get().method();",                       skip: false},
-    {abap: "super->method( ).",                       js: "super.get().method();",                     skip: false}, // todo, super is special???
     {abap: "foo->method( 1 ).",                       js: "foo.get().method(constant_1);",                      skip: true}, // todo, hmm, need to know the default parameter name?
     {abap: "foo->method( bar = 2 moo = 1 ).",         js: "foo.get().method({bar: constant_2, moo: constant_1});",       skip: false},
     {abap: "moo = foo->method( ).",                   js: "moo.set(foo.get().method());",              skip: false},
@@ -133,6 +132,7 @@ describe("Single statements", () => {
     {abap: "INCLUDE lzopenabaptop.", js: ``, skip: false},
     {abap: "CALL FUNCTION 'BAR'.", js: `abap.FunctionModules['BAR']();`, skip: false},
     {abap: "CALL FUNCTION 'BAR' EXPORTING moo = boo.", js: `abap.FunctionModules['BAR']({exporting: {moo: boo}});`, skip: false},
+    {abap: "super->method( ).",     js: `super.method();`, skip: false},
   ];
 
   for (const test of tests) {

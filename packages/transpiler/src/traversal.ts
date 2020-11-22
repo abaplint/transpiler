@@ -79,10 +79,12 @@ export class Traversal {
   }
 
   public findPrefix(t: abaplint.Token): string {
-    let name = t.getStr();
+    let name = t.getStr().toLowerCase();
     const cla = this.isStaticClassAttribute(t);
     if (cla) {
       name = cla + "." + name;
+    } else if (name === "super") {
+      return name;
     } else if (this.isClassAttribute(t)) {
       name = "this." + name;
     } else if (this.isBuiltin(t)) {
@@ -140,6 +142,9 @@ export class Traversal {
         continue;
       }
       const name = v.name.toLowerCase().replace("~", "$");
+      if (name === "super") {
+        continue; // todo, https://github.com/abaplint/transpiler/issues/133
+      }
       ret += "this." + name + " = " + new TranspileTypes().toType(v.identifier.getType()) + ";\n";
       if (name === "me") {
         ret += "this." + name + ".set(this);\n";

@@ -1802,4 +1802,44 @@ START-OF-SELECTION.
     f(abap);
   });
 
+  it("call super in redefined method", async () => {
+    const code = `
+CLASS zcl_super DEFINITION.
+  PUBLIC SECTION.
+    METHODS method.
+ENDCLASS.
+
+CLASS zcl_super IMPLEMENTATION.
+  METHOD method.
+    WRITE / 'b'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS zcl_sub DEFINITION INHERITING FROM zcl_super.
+  PUBLIC SECTION.
+    METHODS:
+      method REDEFINITION.
+ENDCLASS.
+
+CLASS zcl_sub IMPLEMENTATION.
+  METHOD method.
+    WRITE / 'a'.
+    super->method( ).
+  ENDMETHOD.
+ENDCLASS.
+
+FORM run.
+  DATA sub TYPE REF TO zcl_sub.
+  CREATE OBJECT sub.
+  sub->method( ).
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("a\nb");
+  });
+
 });
