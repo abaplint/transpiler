@@ -72,9 +72,7 @@ export class Transpiler {
     };
 
     for (const abap of reg.getObjects()) {
-      if (abap.getType() === "INTF") {
-        continue;
-      } else if (abap instanceof abaplint.ABAPObject) {
+      if (abap instanceof abaplint.ABAPObject) {
         output.objects = output.objects.concat(this.runObject(abap, reg));
       }
     }
@@ -162,6 +160,12 @@ export class Transpiler {
     const res: string[] = [];
     for (const c of node.findAllStatements(abaplint.Statements.ClassDefinition)) {
       const e = c.findFirstExpression(abaplint.Expressions.ClassName)?.getFirstToken().getStr();
+      if (e) {
+        res.push(e);
+      }
+    }
+    for (const c of node.findAllStatements(abaplint.Statements.Interface)) {
+      const e = c.findFirstExpression(abaplint.Expressions.InterfaceName)?.getFirstToken().getStr();
       if (e) {
         res.push(e);
       }

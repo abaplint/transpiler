@@ -43,6 +43,12 @@ export class Requires {
       }
     }
 
+    // always add CX_ROOT, it is used for CATCH
+    const cx = this.reg.getObject("CLAS", "CX_ROOT");
+    if (cx && this.obj.getName().toUpperCase() !== "CX_ROOT") {
+      add({type: cx.getType(), name: cx.getName()});
+    }
+
     return ret;
   }
 
@@ -53,10 +59,14 @@ export class Requires {
         && filename === this.main) {
       return undefined;
     }
-    const found = this.reg.getObject("CLAS", name);
+    let found = this.reg.getObject("CLAS", name);
+    if (found === undefined) {
+      found = this.reg.getObject("INTF", name);
+    }
     if (found) {
       return {type: found.getType(), name: found.getName()};
     }
+
     return undefined;
   }
 

@@ -79,10 +79,12 @@ export class Traversal {
   }
 
   public findPrefix(t: abaplint.Token): string {
-    let name = t.getStr();
+    let name = t.getStr().toLowerCase();
     const cla = this.isStaticClassAttribute(t);
     if (cla) {
       name = cla + "." + name;
+    } else if (name === "super") {
+      return name;
     } else if (this.isClassAttribute(t)) {
       name = "this." + name;
     } else if (this.isBuiltin(t)) {
@@ -122,7 +124,8 @@ export class Traversal {
     return false;
   }
 
-  public buildConstructorContents(scope: abaplint.ISpaghettiScopeNode | undefined, def: abaplint.IClassDefinition): string {
+  public buildConstructorContents(scope: abaplint.ISpaghettiScopeNode | undefined,
+                                  def: abaplint.IClassDefinition, inputName: string): string {
 
     const vars = scope?.getData().vars;
     if (vars === undefined || vars.length === 0) {
@@ -132,7 +135,8 @@ export class Traversal {
 
     if (def.getSuperClass() !== undefined || def.getName().toLowerCase() === "cx_root") {
       // todo, more here, there might be parameters to pass
-      ret += "super();\n";
+      // for now just pass the same input
+      ret += `super(${inputName});\n`;
     }
 
     for (const v of vars) {
@@ -140,9 +144,20 @@ export class Traversal {
         continue;
       }
       const name = v.name.toLowerCase().replace("~", "$");
+      if (name === "super") {
+        continue; // todo, https://github.com/abaplint/transpiler/issues/133
+      }
+
+      // todo, better handling of variables from interfaces, it should only initialize those that are directly implemented
+      if (def.getAttributes().findByName(name) === undefined
+          && name.includes("$") === false
+          && name !== "me") {
+        continue;
+      }
+
       ret += "this." + name + " = " + new TranspileTypes().toType(v.identifier.getType()) + ";\n";
       if (name === "me") {
-        ret += "this." + name + ".set(this);\n";
+        ret += "this.me.set(this);\n";
       }
     }
     return ret;

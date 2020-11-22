@@ -48,7 +48,6 @@ describe("Single statements", () => {
     {abap: "RETURN.",                                 js: "return;",                                   skip: false}, // todo, hmm? some more to be added here
     {abap: "method( ).",                              js: "this.method();",                            skip: false},
     {abap: "foo->method( ).",                         js: "foo.get().method();",                       skip: false},
-    {abap: "super->method( ).",                       js: "super.get().method();",                     skip: false}, // todo, super is special???
     {abap: "foo->method( 1 ).",                       js: "foo.get().method(constant_1);",                      skip: true}, // todo, hmm, need to know the default parameter name?
     {abap: "foo->method( bar = 2 moo = 1 ).",         js: "foo.get().method({bar: constant_2, moo: constant_1});",       skip: false},
     {abap: "moo = foo->method( ).",                   js: "moo.set(foo.get().method());",              skip: false},
@@ -129,11 +128,12 @@ describe("Single statements", () => {
     {abap: "CLASS sdfsdf DEFINITION LOCAL FRIENDS ltcl_test ltcl_split_text.", js: ``, skip: false},
     {abap: "if_bar~field = 2.",                      js: `if_bar$field.set(constant_2);`, skip: false},
     {abap: "IF if_bar~field IS NOT INITIAL. ENDIF.", js: `if (abap.compare.initial(if_bar$field) === false) {\n}`, skip: false},
-    {abap: "TRY. CATCH zcx_bar INTO lx_ex. ENDTRY.", js: `try {\n} catch (e) {\n  lx_ex.set(e);\n}`, skip: false},
     {abap: "FUNCTION-POOL zopenabap.", js: ``, skip: false},
     {abap: "INCLUDE lzopenabaptop.", js: ``, skip: false},
     {abap: "CALL FUNCTION 'BAR'.", js: `abap.FunctionModules['BAR']();`, skip: false},
     {abap: "CALL FUNCTION 'BAR' EXPORTING moo = boo.", js: `abap.FunctionModules['BAR']({exporting: {moo: boo}});`, skip: false},
+    {abap: "super->method( ).",     js: `super.method();`, skip: false},
+    {abap: "super->constructor( ).",     js: ``, skip: false}, // todo, https://github.com/abaplint/transpiler/issues/133
   ];
 
   for (const test of tests) {

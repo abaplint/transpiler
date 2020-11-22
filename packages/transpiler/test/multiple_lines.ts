@@ -21,12 +21,13 @@ describe("Multiple lines", () => {
     expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.equal(expected);
   });
 
-  it("Interfaces should be skipped", async () => {
+  it("Interfaces should not be skipped", async () => {
     const abap = `
   INTERFACE lif_foobar.
   ENDINTERFACE.`;
 
-    expect(await runSingle(abap)).to.equal("");
+    expect(await runSingle(abap)).to.equal(`class lif_foobar {
+}`);
   });
 
   it("TYPES should be skipped", async () => {
@@ -225,7 +226,7 @@ DATA moo TYPE foo.`;
     const expected = `let constant_2 = new abap.types.Integer();
 constant_2.set(2);
 class zcl_words {
-  constructor() {
+  constructor(unique1) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.bar = new abap.types.Integer();
@@ -280,6 +281,9 @@ ENDTRY.`;
     const expected =
 `try {
 } catch (e) {
+  if (!(e instanceof cx_root)) {
+    throw e;
+  }
 }`;
 
     expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.equal(expected);
@@ -351,7 +355,9 @@ DATA str TYPE string.
 bar->moo( EXPORTING foo = 'abc'
           IMPORTING bar = str ).`;
 
-    const expected = `let bar = new abap.types.ABAPObject();
+    const expected = `class lif_bar {
+}
+let bar = new abap.types.ABAPObject();
 let str = new abap.types.String();
 bar.get().moo({foo: 'abc', bar: str});`;
 

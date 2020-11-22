@@ -50,7 +50,7 @@ ENDCLASS.`;
 
     const output = (await new Transpiler().run(files)).objects;
 
-    expect(output[0].js.contents).to.contain("moo");
+    expect(output[1].js.contents).to.contain("moo");
   });
 
 });

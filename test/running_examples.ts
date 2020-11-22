@@ -1802,4 +1802,124 @@ START-OF-SELECTION.
     f(abap);
   });
 
+  it("call super in redefined method", async () => {
+    const code = `
+CLASS zcl_super DEFINITION.
+  PUBLIC SECTION.
+    METHODS method.
+ENDCLASS.
+
+CLASS zcl_super IMPLEMENTATION.
+  METHOD method.
+    WRITE / 'b'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS zcl_sub DEFINITION INHERITING FROM zcl_super.
+  PUBLIC SECTION.
+    METHODS:
+      method REDEFINITION.
+ENDCLASS.
+
+CLASS zcl_sub IMPLEMENTATION.
+  METHOD method.
+    WRITE / 'a'.
+    super->method( ).
+  ENDMETHOD.
+ENDCLASS.
+
+FORM run.
+  DATA sub TYPE REF TO zcl_sub.
+  CREATE OBJECT sub.
+  sub->method( ).
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("a\nb");
+  });
+
+  it("check structure is initial", async () => {
+    const code = `
+TYPES: BEGIN OF bar,
+         field TYPE i,
+       END OF bar.
+DATA bar TYPE bar.
+ASSERT bar IS INITIAL.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("check internal table is initial", async () => {
+    const code = `
+    DATA bar TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+    ASSERT bar IS INITIAL.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("write constant from interface", async () => {
+    const code = `
+    INTERFACE lif_foo.
+      CONSTANTS bar TYPE i VALUE 2.
+    ENDINTERFACE.
+
+    WRITE lif_foo=>bar.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("2");
+  });
+
+  it("testing initialization of variables in constructor", async () => {
+    const code = `
+CLASS zcl_super DEFINITION.
+  PUBLIC SECTION.
+    DATA foo TYPE i.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS zcl_super IMPLEMENTATION.
+  METHOD constructor.
+    foo = 1.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS zcl_sub DEFINITION INHERITING FROM zcl_super.
+  PUBLIC SECTION.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS zcl_sub IMPLEMENTATION.
+  METHOD constructor.
+    super->constructor( ).
+    WRITE foo.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA moo TYPE REF TO zcl_sub.
+  CREATE OBJECT moo.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("1");
+  });
+
+  it("clear object reference", async () => {
+    const code = `
+  interface lif_bar.
+  endinterface.
+  DATA bar TYPE REF TO lif_bar.
+  CLEAR bar.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
