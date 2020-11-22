@@ -43,6 +43,12 @@ export class Requires {
       }
     }
 
+    // always add CX_ROOT, it is used for CATCH
+    const cx = this.reg.getObject("CLAS", "CX_ROOT");
+    if (cx) {
+      add({type: cx.getType(), name: cx.getName()});
+    }
+
     return ret;
   }
 

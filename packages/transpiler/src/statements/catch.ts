@@ -12,8 +12,13 @@ export class CatchTranspiler implements IStatementTranspiler {
       into = "\n" + traversal.traverse(intoNode) + ".set(e);";
     }
 
-    // todo, add more here
-    return `} catch (e) {` + into;
+    // todo, check type
+
+    // it its not an instance of cx_root, its a javascript runtime error
+    return `} catch (e) {
+      if (!(e instanceof cx_root)) {
+        throw e;
+      }` + into;
   }
 
 }
