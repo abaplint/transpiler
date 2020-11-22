@@ -11,10 +11,16 @@ import {TranspileTypes} from "./types";
 export class Traversal {
   private readonly spaghetti: abaplint.ISpaghettiScope;
   private readonly file: abaplint.ABAPFile;
+  private readonly obj: abaplint.ABAPObject;
 
-  public constructor(spaghetti: abaplint.ISpaghettiScope, file: abaplint.ABAPFile, _obj: abaplint.ABAPObject) {
+  public constructor(spaghetti: abaplint.ISpaghettiScope, file: abaplint.ABAPFile, obj: abaplint.ABAPObject) {
     this.spaghetti = spaghetti;
     this.file = file;
+    this.obj = obj;
+  }
+
+  public getCurrentObject(): abaplint.ABAPObject {
+    return this.obj;
   }
 
   public traverse(node: abaplint.INode | undefined): string {
@@ -116,12 +122,19 @@ export class Traversal {
     return false;
   }
 
-  public buildConstructorContents(scope: abaplint.ISpaghettiScopeNode | undefined): string {
+  public buildConstructorContents(scope: abaplint.ISpaghettiScopeNode | undefined, def: abaplint.IClassDefinition): string {
+
     const vars = scope?.getData().vars;
     if (vars === undefined || vars.length === 0) {
       return "";
     }
     let ret = "";
+
+    if (def.getSuperClass() !== undefined || def.getName().toLowerCase() === "cx_root") {
+      // todo, more here, there might be parameters to pass
+      ret += "super();\n";
+    }
+
     for (const v of vars) {
       if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
         continue;

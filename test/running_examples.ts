@@ -1762,4 +1762,44 @@ PERFORM foo.`;
     expect(abap.Console.get()).to.equal("2");
   });
 
+  it("call method in super class, no constructor", async () => {
+    const code = `
+CLASS zcl_super DEFINITION.
+  PUBLIC SECTION.
+    METHODS method.
+ENDCLASS.
+
+CLASS zcl_super IMPLEMENTATION.
+  METHOD method.
+    WRITE 4.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS zcl_sub DEFINITION INHERITING FROM zcl_super.
+ENDCLASS.
+
+CLASS zcl_sub IMPLEMENTATION.
+ENDCLASS.
+
+FORM run.
+  DATA sub TYPE REF TO zcl_sub.
+  CREATE OBJECT sub.
+  sub->method( ).
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("4");
+  });
+
+  it("WRITE space", async () => {
+    const code = `WRITE space.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });

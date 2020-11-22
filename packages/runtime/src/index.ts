@@ -6,6 +6,9 @@ import {Console} from "./console";
 import {UnitTestResult} from "./unit_test";
 import {OffsetLength} from "./offset_length";
 
+const FunctionModules = {};
+
 export {
   types, statements, builtin, compare,
+  FunctionModules,
   Console, UnitTestResult, OffsetLength};

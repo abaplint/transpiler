@@ -11,3 +11,4 @@ export * from "./xstrlen";
 export const abap_true = new Character({length: 1}).set("X");
 export const abap_false = new Character({length: 1}).set("");
 export const abap_undefined = new Character({length: 1}).set("-");
+export const space = new Character({length: 1}).set(" ");

@@ -24,7 +24,7 @@ export class TranspileTypes {
       resolved = "Structure";
       const list: string[] = [];
       for (const c of type.getComponents()) {
-        list.push(c.name + ": " + this.toType(c.type));
+        list.push(c.name.toLowerCase() + ": " + this.toType(c.type));
       }
       extra = "{" + list.join(", ") + "}";
     } else if (type instanceof abaplint.BasicTypes.CLikeType) {

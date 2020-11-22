@@ -13,7 +13,7 @@ export class CatchTranspiler implements IStatementTranspiler {
     }
 
     // todo, add more here
-    return "} catch (e) {" + into;
+    return `} catch (e) {` + into;
   }
 
 }

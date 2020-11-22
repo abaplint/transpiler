@@ -45,8 +45,6 @@ describe("Single statements", () => {
     {abap: "SORT foo.",                            js: "abap.statements.sort(foo);",                skip: false},
     {abap: "WRITE foo.",                           js: "abap.statements.write(foo);",               skip: false},
     {abap: "WRITE / foo.",                         js: "abap.statements.write(foo, {newLine: true});", skip: false},
-    {abap: "CLASS lcl_foo IMPLEMENTATION. ENDCLASS.", js: "class lcl_foo {\n}",                        skip: false}, // note: no code for the CLASS DEFINITION
-    {abap: "CLASS LCL_FOO IMPLEMENTATION. ENDCLASS.", js: "class lcl_foo {\n}",                        skip: false},
     {abap: "RETURN.",                                 js: "return;",                                   skip: false}, // todo, hmm? some more to be added here
     {abap: "method( ).",                              js: "this.method();",                            skip: false},
     {abap: "foo->method( ).",                         js: "foo.get().method();",                       skip: false},
@@ -123,19 +121,19 @@ describe("Single statements", () => {
     {abap: "foo+1(1) = 'a'.", js: "new abap.OffsetLength(foo, {offset: 1, length: 1}).set('a');", skip: false},
     {abap: "foo(bar) = 'a'.", js: "new abap.OffsetLength(foo, {length: bar.get()}).set('a');",    skip: false},
     {abap: "IF iv_cd = '' OR iv_cd = '.'.\nENDIF.", js: "if (abap.compare.eq(iv_cd, '') || abap.compare.eq(iv_cd, '.')) {\n}", skip: false},
-    {abap: "CALL FUNCTION 'TODO'.", js: `throw "CallFunctionTranspilerTodo";`,    skip: false},
     {abap: "TRY. ENDTRY.", js: `try {\n}`,    skip: false},
-    {abap: "MESSAGE e058(00) WITH 'Value_1' 'Value_2' 'Value_3' 'Value_4' INTO lv_dummy.", js: `abap.statements.message('MessageTranspilerTodo');`, skip: false},
-    {abap: "MESSAGE ID sy-msgid TYPE 'S' NUMBER sy-msgno WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4 INTO rv_text.", js: `abap.statements.message('MessageTranspilerTodo');`, skip: false},
+    {abap: "MESSAGE e058(00) WITH 'Value_1' 'Value_2' 'Value_3' 'Value_4' INTO lv_dummy.", js: `abap.statements.message({into: lv_dummy});`, skip: false},
+    {abap: "MESSAGE ID sy-msgid TYPE 'S' NUMBER sy-msgno WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4 INTO rv_text.", js: `abap.statements.message({into: rv_text});`, skip: false},
     {abap: "RAISE EXCEPTION TYPE zcx_foobar EXPORTING foo = bar.", js: `throw new zcx_foobar({foo: bar});`, skip: false},
     {abap: "CLASS ltcl_test DEFINITION DEFERRED.", js: ``, skip: false},
     {abap: "CLASS sdfsdf DEFINITION LOCAL FRIENDS ltcl_test ltcl_split_text.", js: ``, skip: false},
     {abap: "if_bar~field = 2.",                      js: `if_bar$field.set(constant_2);`, skip: false},
     {abap: "IF if_bar~field IS NOT INITIAL. ENDIF.", js: `if (abap.compare.initial(if_bar$field) === false) {\n}`, skip: false},
     {abap: "TRY. CATCH zcx_bar INTO lx_ex. ENDTRY.", js: `try {\n} catch (e) {\n  lx_ex.set(e);\n}`, skip: false},
-    {abap: "FUNCTION name123. ENDFUNCTION.", js: `function name123(input) {\n}`, skip: false},
     {abap: "FUNCTION-POOL zopenabap.", js: ``, skip: false},
     {abap: "INCLUDE lzopenabaptop.", js: ``, skip: false},
+    {abap: "CALL FUNCTION 'BAR'.", js: `abap.FunctionModules['BAR']();`, skip: false},
+    {abap: "CALL FUNCTION 'BAR' EXPORTING moo = boo.", js: `abap.FunctionModules['BAR']({exporting: {moo: boo}});`, skip: false},
   ];
 
   for (const test of tests) {
