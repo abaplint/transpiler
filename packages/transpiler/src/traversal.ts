@@ -147,9 +147,17 @@ export class Traversal {
       if (name === "super") {
         continue; // todo, https://github.com/abaplint/transpiler/issues/133
       }
+
+      // todo, better handling of variables from interfaces, it should only initialize those that are directly implemented
+      if (def.getAttributes().findByName(name) === undefined
+          && name.includes("$") === false
+          && name !== "me") {
+        continue;
+      }
+
       ret += "this." + name + " = " + new TranspileTypes().toType(v.identifier.getType()) + ";\n";
       if (name === "me") {
-        ret += "this." + name + ".set(this);\n";
+        ret += "this.me.set(this);\n";
       }
     }
     return ret;

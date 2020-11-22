@@ -1876,4 +1876,38 @@ ASSERT bar IS INITIAL.`;
     expect(abap.Console.get()).to.equal("2");
   });
 
+  it("testing initialization of variables in constructor", async () => {
+    const code = `
+CLASS zcl_super DEFINITION.
+  PUBLIC SECTION.
+    DATA foo TYPE i.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS zcl_super IMPLEMENTATION.
+  METHOD constructor.
+    foo = 1.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS zcl_sub DEFINITION INHERITING FROM zcl_super.
+  PUBLIC SECTION.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS zcl_sub IMPLEMENTATION.
+  METHOD constructor.
+    super->constructor( ).
+    WRITE foo.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA moo TYPE REF TO zcl_sub.
+  CREATE OBJECT moo.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("1");
+  });
 });
