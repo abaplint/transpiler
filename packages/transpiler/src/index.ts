@@ -72,9 +72,7 @@ export class Transpiler {
     };
 
     for (const abap of reg.getObjects()) {
-      if (abap.getType() === "INTF") {
-        continue;
-      } else if (abap instanceof abaplint.ABAPObject) {
+      if (abap instanceof abaplint.ABAPObject) {
         output.objects = output.objects.concat(this.runObject(abap, reg));
       }
     }

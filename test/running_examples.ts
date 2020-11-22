@@ -1863,4 +1863,17 @@ ASSERT bar IS INITIAL.`;
     f(abap);
   });
 
+  it("write constant from interface", async () => {
+    const code = `
+    INTERFACE lif_foo.
+      CONSTANTS bar TYPE i VALUE 2.
+    ENDINTERFACE.
+
+    WRITE lif_foo=>bar.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.Console.get()).to.equal("2");
+  });
+
 });
