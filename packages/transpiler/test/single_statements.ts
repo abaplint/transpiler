@@ -133,6 +133,7 @@ describe("Single statements", () => {
     {abap: "CALL FUNCTION 'BAR'.", js: `abap.FunctionModules['BAR']();`, skip: false},
     {abap: "CALL FUNCTION 'BAR' EXPORTING moo = boo.", js: `abap.FunctionModules['BAR']({exporting: {moo: boo}});`, skip: false},
     {abap: "super->method( ).",     js: `super.method();`, skip: false},
+    {abap: "super->constructor( ).",     js: ``, skip: false}, // todo, https://github.com/abaplint/transpiler/issues/133
   ];
 
   for (const test of tests) {
