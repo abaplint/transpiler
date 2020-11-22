@@ -21,11 +21,12 @@ export class MethodTranspiler implements IStatementTranspiler {
 
     const cdef = traversal.getClassDefinition(token);
 
+    let unique = "";
     if (name.toUpperCase() === "CONSTRUCTOR" && cdef) {
-      after = traversal.buildConstructorContents(scope.getParent(), cdef);
+      unique = UniqueIdentifier.get();
+      after = traversal.buildConstructorContents(scope.getParent(), cdef, unique);
     }
 
-    let unique = "";
     for (const v of scope.getData().vars) {
       if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
           || v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodChanging)

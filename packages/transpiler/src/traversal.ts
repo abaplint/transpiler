@@ -124,7 +124,8 @@ export class Traversal {
     return false;
   }
 
-  public buildConstructorContents(scope: abaplint.ISpaghettiScopeNode | undefined, def: abaplint.IClassDefinition): string {
+  public buildConstructorContents(scope: abaplint.ISpaghettiScopeNode | undefined,
+                                  def: abaplint.IClassDefinition, inputName: string): string {
 
     const vars = scope?.getData().vars;
     if (vars === undefined || vars.length === 0) {
@@ -134,7 +135,8 @@ export class Traversal {
 
     if (def.getSuperClass() !== undefined || def.getName().toLowerCase() === "cx_root") {
       // todo, more here, there might be parameters to pass
-      ret += "super();\n";
+      // for now just pass the same input
+      ret += `super(${inputName});\n`;
     }
 
     for (const v of vars) {

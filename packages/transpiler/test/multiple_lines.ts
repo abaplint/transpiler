@@ -226,7 +226,7 @@ DATA moo TYPE foo.`;
     const expected = `let constant_2 = new abap.types.Integer();
 constant_2.set(2);
 class zcl_words {
-  constructor() {
+  constructor(unique1) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.bar = new abap.types.Integer();
