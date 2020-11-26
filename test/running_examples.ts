@@ -1,11 +1,9 @@
 import {expect} from "chai";
-import {Transpiler} from "../packages/transpiler/src/";
 import * as abap from "../packages/runtime/src/";
+import {runFiles} from "./_utils";
 
 async function run(contents: string) {
-  const res = await new Transpiler().run([{filename: "zfoobar.prog.abap", contents}]);
-  abap.Console.clear();
-  return "global.abap = abap;\n" + res.objects[0].js.contents;
+  return runFiles([{filename: "zfoobar.prog.abap", contents}]);
 }
 
 describe("Running Examples", () => {
