@@ -19,8 +19,8 @@ import {translate} from "./translate";
 import {write} from "./write";
 import {Console} from "../console";
 
-// this is a class, as statements like SELECT needs access to
-// the database object instance
+// this is a class, as statements like SELECT needs access to the database object instance
+// and WRITE will access the Console
 export class Statements {
   public append = append;
   public assert = assert;
@@ -47,7 +47,6 @@ export class Statements {
 
   public constructor(console: Console) {
     this.console = console;
-    this.select.bind(this);
   }
 
 }
