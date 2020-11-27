@@ -5,9 +5,10 @@ export class UnitTest {
   public run(reg: abaplint.IRegistry): string {
     let ret = `const fs = require("fs");
 const path = require("path");
-global.abap = require("@abaplint/runtime");
+const runtime = require("@abaplint/runtime");
+global.abap = new runtime.ABAP();
 ${this.functionGroups(reg)}
-const unit = new global.abap.UnitTestResult();
+const unit = new runtime.UnitTestResult();
 let clas;
 let locl;
 let meth;
@@ -63,13 +64,13 @@ const test = new ${def.name}();\n`;
       }
     }
 
-    ret += `console.log(abap.Console.get());
+    ret += `console.log(abap.console.get());
 fs.writeFileSync(__dirname + path.sep + "output.xml", unit.xUnitXML());
 } catch (e) {
   if (meth) {
     meth.fail();
   }
-  console.log(abap.Console.get());
+  console.log(abap.console.get());
   fs.writeFileSync(__dirname + path.sep + "output.xml", unit.xUnitXML());
   throw e;
 }`;
