@@ -1,9 +1,10 @@
 import {expect} from "chai";
-import * as abap from "../../src";
+import {ABAP} from "../../src";
 
 describe("Statement SPLIT", () => {
 
   it("split", () => {
+    const abap = new ABAP();
     const tab = new abap.types.Table(new abap.types.String());
     abap.statements.split({source: `foo bar`, at: ` `, target: tab});
     const arr = tab.array();
@@ -12,6 +13,7 @@ describe("Statement SPLIT", () => {
   });
 
   it("split, String", () => {
+    const abap = new ABAP();
     const tab = new abap.types.Table(new abap.types.String());
     const str = new abap.types.String();
     str.set(`foo bar`);

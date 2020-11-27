@@ -1,15 +1,15 @@
 export class Console {
-  private static data = "";
+  private data = "";
 
-  public static clear(): void {
+  public clear(): void {
     this.data = "";
   }
 
-  public static add(data: string): void {
+  public add(data: string): void {
     this.data = this.data + data;
   }
 
-  public static get(): string {
+  public get(): string {
     return this.data;
   }
 }

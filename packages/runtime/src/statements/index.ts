@@ -1,19 +1,53 @@
-export * from "./append";
-export * from "./assert";
-export * from "./clear";
-export * from "./concatenate";
-export * from "./condense";
-export * from "./delete_internal";
-export * from "./describe";
-export * from "./find";
-export * from "./get_bit";
-export * from "./message";
-export * from "./modify_internal";
-export * from "./read_table";
-export * from "./replace";
-export * from "./select";
-export * from "./shift";
-export * from "./sort";
-export * from "./split";
-export * from "./translate";
-export * from "./write";
+import {append} from "./append";
+import {assert} from "./assert";
+import {clear} from "./clear";
+import {concatenate} from "./concatenate";
+import {condense} from "./condense";
+import {deleteInternal} from "./delete_internal";
+import {describe} from "./describe";
+import {find} from "./find";
+import {getBit} from "./get_bit";
+import {message} from "./message";
+import {modifyInternal} from "./modify_internal";
+import {readTable} from "./read_table";
+import {replace} from "./replace";
+import {select} from "./select";
+import {shift} from "./shift";
+import {sort} from "./sort";
+import {split} from "./split";
+import {translate} from "./translate";
+import {write} from "./write";
+import {Console} from "../console";
+
+// this is a class, as statements like SELECT needs access to
+// the database object instance
+export class Statements {
+  public append = append;
+  public assert = assert;
+  public clear = clear;
+  public concatenate = concatenate;
+  public condense = condense;
+  public deleteInternal = deleteInternal;
+  public describe = describe;
+  public find = find;
+  public getBit = getBit;
+  public message = message;
+  public modifyInternal = modifyInternal;
+  public readTable = readTable;
+  public replace = replace;
+  public select = select;
+  public shift = shift;
+  public sort = sort;
+  public split = split;
+  public translate = translate;
+  public write = write;
+
+  // @ts-ignore
+  private readonly console: Console;
+
+  public constructor(console: Console) {
+    this.console = console;
+    this.select.bind(this);
+  }
+
+}

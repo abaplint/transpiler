@@ -1,14 +1,15 @@
 import {expect} from "chai";
-import * as abap from "../src";
+import {ABAP} from "../src";
 
 describe("Console", () => {
 
   it("test 1", () => {
+    const abap = new ABAP();
     const str = "bar";
     abap.statements.write(str);
-    expect(abap.Console.get()).to.equal(str);
-    abap.Console.clear();
-    expect(abap.Console.get()).to.equal("");
+    expect(abap.console.get()).to.equal(str);
+    abap.console.clear();
+    expect(abap.console.get()).to.equal("");
   });
 
 });

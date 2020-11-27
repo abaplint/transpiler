@@ -1,24 +1,33 @@
 import * as types from "./types";
 import * as builtin from "./builtin";
 import * as compare from "./compare";
-import * as statements from "./statements";
+import {Statements} from "./statements";
 import initSqlJs from "sql.js";
 import {Console} from "./console";
 import {UnitTestResult} from "./unit_test";
 import {OffsetLength} from "./offset_length";
 
-const FunctionModules = {};
+export {UnitTestResult, OffsetLength};
 
-async function initDB(sql?: string) {
-  const SQL = await initSqlJs();
-  const db = new SQL.Database();
-  if (sql) {
-    db.run(sql);
+export class ABAP {
+  public statements;
+  public types = types;
+  public builtin = builtin;
+  public compare = compare;
+  public FunctionModules = {};
+  public console: Console;
+  public db: undefined | any;
+
+  public constructor() {
+    this.console = new Console();
+    this.statements = new Statements(this.console);
   }
-  return db;
-}
 
-export {
-  types, statements, builtin, compare,
-  FunctionModules, initDB,
-  Console, UnitTestResult, OffsetLength};
+  public async initDB(sql?: string) {
+    const SQL = await initSqlJs();
+    this.db = new SQL.Database();
+    if (sql) {
+      this.db.run(sql);
+    }
+  }
+}
