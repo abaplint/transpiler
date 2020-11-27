@@ -11,6 +11,7 @@ export * from "./message";
 export * from "./modify_internal";
 export * from "./read_table";
 export * from "./replace";
+export * from "./select";
 export * from "./shift";
 export * from "./sort";
 export * from "./split";

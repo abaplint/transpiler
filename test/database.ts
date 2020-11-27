@@ -1,4 +1,5 @@
 import {runFiles} from "./_utils";
+import * as abap from "../packages/runtime/src/";
 
 const t100xml = `<?xml version="1.0" encoding="utf-8"?>
 <abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
@@ -84,11 +85,11 @@ const t100xml = `<?xml version="1.0" encoding="utf-8"?>
 describe("Top level, Database", () => {
 
   it("SELECT, no result", async () => {
-    const abap = `
+    const code = `
     DATA ls_result TYPE t100.
     SELECT SINGLE * FROM t100 INTO ls_result.`;
     const js = await runFiles([
-      {filename: "zfoobar.prog.abap", contents: abap},
+      {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: t100xml}]);
     const f = new Function("abap", js);
     f(abap);
