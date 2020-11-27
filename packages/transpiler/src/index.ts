@@ -5,6 +5,7 @@ import {Traversal} from "./traversal";
 import {Requires} from "./requires";
 import {UnitTest} from "./unit_test";
 import {Keywords} from "./keywords";
+import {DatabaseSetup} from "./database_setup";
 
 export {config};
 
@@ -23,6 +24,7 @@ export interface IOutput {
   reg: abaplint.IRegistry;
   /** Output experimental file to run unit tests */
   unitTest: string;
+  databaseSetup: string;
 }
 
 /** one javascript output file for each object */
@@ -68,6 +70,7 @@ export class Transpiler {
     const output: IOutput = {
       objects: [],
       unitTest: new UnitTest().run(reg),
+      databaseSetup: new DatabaseSetup(reg).run(),
       reg: reg,
     };
 

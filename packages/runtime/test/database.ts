@@ -1,7 +1,7 @@
 import {expect} from "chai";
 import initSqlJs from "sql.js";
 
-describe("Database", () => {
+describe("Basic standalone database", () => {
 
   it("create table, insert, and select", async() => {
     const SQL = await initSqlJs();

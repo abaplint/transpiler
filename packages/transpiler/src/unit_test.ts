@@ -2,19 +2,6 @@ import * as abaplint from "@abaplint/core";
 
 export class UnitTest {
 
-  private functionGroups(reg: abaplint.IRegistry): string {
-    let ret = "";
-    for (const obj of reg.getObjects()) {
-      if (obj instanceof abaplint.Objects.FunctionGroup) {
-        for (const m of obj.getModules()) {
-          ret += `require("./${obj.getName().toLowerCase()}.fugr.${m.getName().toLowerCase()}.js");\n`;
-        }
-      }
-    }
-    return ret;
-  }
-
-  // with lots of assumptions regarding setup
   public run(reg: abaplint.IRegistry): string {
     let ret = `const fs = require("fs");
 const path = require("path");
@@ -87,6 +74,18 @@ fs.writeFileSync(__dirname + path.sep + "output.xml", unit.xUnitXML());
   throw e;
 }`;
 
+    return ret;
+  }
+
+  private functionGroups(reg: abaplint.IRegistry): string {
+    let ret = "";
+    for (const obj of reg.getObjects()) {
+      if (obj instanceof abaplint.Objects.FunctionGroup) {
+        for (const m of obj.getModules()) {
+          ret += `require("./${obj.getName().toLowerCase()}.fugr.${m.getName().toLowerCase()}.js");\n`;
+        }
+      }
+    }
     return ret;
   }
 
