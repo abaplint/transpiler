@@ -44,9 +44,15 @@ export class Statements {
 
   // @ts-ignore
   private readonly console: Console;
+  // @ts-ignore
+  private db: any;
 
   public constructor(console: Console) {
     this.console = console;
+  }
+
+  public setDb(db: any) {
+    this.db = db;
   }
 
 }

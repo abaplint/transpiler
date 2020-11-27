@@ -7,7 +7,7 @@ import {Console} from "./console";
 import {UnitTestResult} from "./unit_test";
 import {OffsetLength} from "./offset_length";
 
-export {UnitTestResult, OffsetLength};
+export {UnitTestResult};
 
 export class ABAP {
   public statements;
@@ -17,10 +17,12 @@ export class ABAP {
   public FunctionModules = {};
   public console: Console;
   public db: undefined | any;
+  public OffsetLength = OffsetLength;
 
   public constructor() {
     this.console = new Console();
     this.statements = new Statements(this.console);
+    builtin.sy.get().subrc.set(0); // todo, this should not be a singleton, it should be part of this instance
   }
 
   public async initDB(sql?: string) {
@@ -29,5 +31,6 @@ export class ABAP {
     if (sql) {
       this.db.run(sql);
     }
+    this.statements.setDb(this.db);
   }
 }

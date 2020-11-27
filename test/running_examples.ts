@@ -1,12 +1,18 @@
 import {expect} from "chai";
-import * as abap from "../packages/runtime/src/";
+import {ABAP} from "../packages/runtime/src/";
 import {runFiles} from "./_utils";
 
+let abap: ABAP;
+
 async function run(contents: string) {
-  return runFiles([{filename: "zfoobar.prog.abap", contents}]);
+  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
 }
 
 describe("Running Examples", () => {
+
+  beforeEach(async () => {
+    abap = new ABAP();
+  });
 
   it("Fibonacci", async () => {
     const code = `
@@ -101,7 +107,7 @@ describe("Running Examples", () => {
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("foo");
+    expect(abap.console.get()).to.equal("foo");
   });
 
   it("Offset +1", async () => {
@@ -112,7 +118,7 @@ describe("Running Examples", () => {
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("bc");
+    expect(abap.console.get()).to.equal("bc");
   });
 
   it("Length (1)", async () => {
@@ -123,7 +129,7 @@ describe("Running Examples", () => {
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("a");
+    expect(abap.console.get()).to.equal("a");
   });
 
   it("Basic delete internal", async () => {
@@ -192,7 +198,7 @@ describe("Running Examples", () => {
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("1\n2");
+    expect(abap.console.get()).to.equal("1\n2");
   });
 
   it("Should throw an error if invalid code is requested to be transpiled", async () => {
@@ -250,7 +256,7 @@ describe("Running Examples", () => {
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("2\n2");
+    expect(abap.console.get()).to.equal("2\n2");
   });
 
   it("APPEND string", async () => {
@@ -265,7 +271,7 @@ describe("Running Examples", () => {
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("foo");
+    expect(abap.console.get()).to.equal("foo");
   });
 
   it("Class, simple method call", async () => {
@@ -289,7 +295,7 @@ describe("Running Examples", () => {
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("foo");
+    expect(abap.console.get()).to.equal("foo");
   });
 
   it("Class, call method in same class", async () => {
@@ -317,7 +323,7 @@ describe("Running Examples", () => {
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("foo");
+    expect(abap.console.get()).to.equal("foo");
   });
 
   it("Class, attribute", async () => {
@@ -341,7 +347,7 @@ describe("Running Examples", () => {
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("0");
+    expect(abap.console.get()).to.equal("0");
   });
 
   it("Class, constructor", async () => {
@@ -365,7 +371,7 @@ describe("Running Examples", () => {
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("2");
+    expect(abap.console.get()).to.equal("2");
   });
 
   it("Basic CONCATENATE", async () => {
@@ -511,7 +517,7 @@ lcl_bar=>name( ).`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("AA");
+    expect(abap.console.get()).to.equal("AA");
   });
 
   it("basic strlen", async () => {
@@ -522,7 +528,7 @@ lcl_bar=>name( ).`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("3");
+    expect(abap.console.get()).to.equal("3");
   });
 
   it("basic xstrlen", async () => {
@@ -533,7 +539,7 @@ lcl_bar=>name( ).`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("1");
+    expect(abap.console.get()).to.equal("1");
   });
 
   it("xstring constant", async () => {
@@ -544,7 +550,7 @@ lcl_bar=>name( ).`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("48656C6C6F20576F726C64210D0A");
+    expect(abap.console.get()).to.equal("48656C6C6F20576F726C64210D0A");
   });
 
   it("IS INITIAL, yes", async () => {
@@ -559,7 +565,7 @@ lcl_bar=>name( ).`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("yes");
+    expect(abap.console.get()).to.equal("yes");
   });
 
   it("IS INITIAL, no", async () => {
@@ -574,7 +580,7 @@ lcl_bar=>name( ).`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("no");
+    expect(abap.console.get()).to.equal("no");
   });
 
   it("GET BIT", async () => {
@@ -600,7 +606,7 @@ lcl_bar=>name( ).`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("10101011\n00000001");
+    expect(abap.console.get()).to.equal("10101011\n00000001");
   });
 
   it("early RETURN in method", async () => {
@@ -621,7 +627,7 @@ ENDCLASS.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("1");
+    expect(abap.console.get()).to.equal("1");
   });
 
   it("basic minus", async () => {
@@ -633,7 +639,7 @@ ENDCLASS.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("3");
+    expect(abap.console.get()).to.equal("3");
   });
 
   it("hex type", async () => {
@@ -651,7 +657,7 @@ ENDCLASS.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("01\n14\nAA\n12");
+    expect(abap.console.get()).to.equal("01\n14\nAA\n12");
   });
 
   it("convert type1", async () => {
@@ -663,7 +669,7 @@ ENDCLASS.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("1");
+    expect(abap.console.get()).to.equal("1");
   });
 
   it("convert type2", async () => {
@@ -678,7 +684,7 @@ ENDCLASS.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("5");
+    expect(abap.console.get()).to.equal("5");
   });
 
   it("convert type3", async () => {
@@ -690,7 +696,7 @@ ENDCLASS.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("A");
+    expect(abap.console.get()).to.equal("A");
   });
 
   it("hex offset and length", async () => {
@@ -703,7 +709,7 @@ ENDCLASS.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("3456\n12");
+    expect(abap.console.get()).to.equal("3456\n12");
   });
 
   it("first bit of x", async () => {
@@ -717,7 +723,7 @@ ENDCLASS.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("0");
+    expect(abap.console.get()).to.equal("0");
   });
 
   it("class constant from static method", async () => {
@@ -738,7 +744,7 @@ lcl_bar=>foo( ).`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("10");
+    expect(abap.console.get()).to.equal("10");
   });
 
   it("class constant from instance method", async () => {
@@ -761,7 +767,7 @@ ENDCLASS.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("10");
+    expect(abap.console.get()).to.equal("10");
   });
 
   it("source field lengths and offsets", async () => {
@@ -777,7 +783,7 @@ ENDCLASS.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("345\n12\n345\n12");
+    expect(abap.console.get()).to.equal("345\n12\n345\n12");
   });
 
   it("ASSERT sy-subrc = 0.", async () => {
@@ -786,7 +792,7 @@ ENDCLASS.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("");
+    expect(abap.console.get()).to.equal("");
   });
 
   it("constant_0 should not change", async () => {
@@ -801,7 +807,7 @@ ENDCLASS.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("0");
+    expect(abap.console.get()).to.equal("0");
   });
 
   it("ASSERT obj ref is initial", async () => {
@@ -814,7 +820,7 @@ ENDCLASS.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("");
+    expect(abap.console.get()).to.equal("");
   });
 
   it("DO with calculation", async () => {
@@ -827,7 +833,7 @@ ENDCLASS.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("bar");
+    expect(abap.console.get()).to.equal("bar");
   });
 
   it("EXPORTING value", async () => {
@@ -852,7 +858,7 @@ START-OF-SELECTION.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("2");
+    expect(abap.console.get()).to.equal("2");
   });
 
   it("clike", async () => {
@@ -875,7 +881,7 @@ START-OF-SELECTION.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("hello");
+    expect(abap.console.get()).to.equal("hello");
   });
 
   it("NOT INITIAL", async () => {
@@ -948,7 +954,7 @@ WRITE lcl_foo=>bar-field.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("A");
+    expect(abap.console.get()).to.equal("A");
   });
 
   it("DELETE from table INDEX", async () => {
@@ -976,7 +982,7 @@ START-OF-SELECTION.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("hello");
+    expect(abap.console.get()).to.equal("hello");
   });
 
   it("call interfaced method", async () => {
@@ -1008,7 +1014,7 @@ START-OF-SELECTION.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("helloabc");
+    expect(abap.console.get()).to.equal("helloabc");
   });
 
   it("LOOP at assigning", async () => {
@@ -1026,7 +1032,7 @@ START-OF-SELECTION.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("2");
+    expect(abap.console.get()).to.equal("2");
   });
 
   it("FIND FIRST OCCURRENCE, found", async () => {
@@ -1039,7 +1045,7 @@ START-OF-SELECTION.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("0\n3");
+    expect(abap.console.get()).to.equal("0\n3");
   });
 
   it("FIND FIRST OCCURRENCE, not found", async () => {
@@ -1051,7 +1057,7 @@ START-OF-SELECTION.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("4");
+    expect(abap.console.get()).to.equal("4");
   });
 
   it("concat_lines_of", async () => {
@@ -1067,7 +1073,7 @@ START-OF-SELECTION.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("abc");
+    expect(abap.console.get()).to.equal("abc");
   });
 
   it("hex value conversion", async () => {
@@ -1104,7 +1110,7 @@ ENDLOOP.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("1\n2");
+    expect(abap.console.get()).to.equal("1\n2");
   });
 
   it("read index 1 of structured table", async () => {
@@ -1122,7 +1128,7 @@ WRITE sy-subrc.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("4");
+    expect(abap.console.get()).to.equal("4");
   });
 
   it("javascript keyword uses as identifier", async () => {
@@ -1134,7 +1140,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("1");
+    expect(abap.console.get()).to.equal("1");
   });
 
   it("javascript keyword in string template", async () => {
@@ -1142,7 +1148,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("foo if bar");
+    expect(abap.console.get()).to.equal("foo if bar");
   });
 
   it("integer DIV", async () => {
@@ -1153,7 +1159,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("2");
+    expect(abap.console.get()).to.equal("2");
   });
 
   it("power", async () => {
@@ -1164,7 +1170,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("25");
+    expect(abap.console.get()).to.equal("25");
   });
 
   it("integer MOD", async () => {
@@ -1175,7 +1181,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("1");
+    expect(abap.console.get()).to.equal("1");
   });
 
   it("condense", async () => {
@@ -1187,7 +1193,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("123");
+    expect(abap.console.get()).to.equal("123");
   });
 
   it("condense integer", async () => {
@@ -1201,7 +1207,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("2");
+    expect(abap.console.get()).to.equal("2");
   });
 
   it("MODIFY internal table INDEX FROM", async () => {
@@ -1216,7 +1222,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("4");
+    expect(abap.console.get()).to.equal("4");
   });
 
   it("MODIFY, testing references", async () => {
@@ -1235,7 +1241,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("3\n4");
+    expect(abap.console.get()).to.equal("3\n4");
   });
 
   it("int to hex", async () => {
@@ -1246,7 +1252,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("00003039");
+    expect(abap.console.get()).to.equal("00003039");
   });
 
   it("hex to int", async () => {
@@ -1259,7 +1265,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("12345");
+    expect(abap.console.get()).to.equal("12345");
   });
 
   it("xstring to int", async () => {
@@ -1272,7 +1278,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("12345");
+    expect(abap.console.get()).to.equal("12345");
   });
 
   it("simple concat via &&", async () => {
@@ -1280,7 +1286,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("foobar");
+    expect(abap.console.get()).to.equal("foobar");
   });
 
   it("concat class constant", async () => {
@@ -1298,7 +1304,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("ABC_123");
+    expect(abap.console.get()).to.equal("ABC_123");
   });
 
   it("FIND FIRST OCCURRENCE", async () => {
@@ -1319,7 +1325,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("h");
+    expect(abap.console.get()).to.equal("h");
   });
 
   it("SHIFT LEFT", async () => {
@@ -1331,7 +1337,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("3355");
+    expect(abap.console.get()).to.equal("3355");
   });
 
   it("target length and offsets", async () => {
@@ -1347,7 +1353,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("11223A55\nB1223A55\nB12C");
+    expect(abap.console.get()).to.equal("11223A55\nB1223A55\nB12C");
   });
 
   it("GET all da BITs", async () => {
@@ -1366,7 +1372,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("01000000");
+    expect(abap.console.get()).to.equal("01000000");
   });
 
   it("GET all da BITs", async () => {
@@ -1385,7 +1391,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("01000000");
+    expect(abap.console.get()).to.equal("01000000");
   });
 
   it("integer into xstring", async () => {
@@ -1396,7 +1402,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("40");
+    expect(abap.console.get()).to.equal("40");
   });
 
   it("integer into hex", async () => {
@@ -1407,7 +1413,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("40");
+    expect(abap.console.get()).to.equal("40");
   });
 
   it("xstring, zero", async () => {
@@ -1418,7 +1424,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("00");
+    expect(abap.console.get()).to.equal("00");
   });
 
   it("xstring, one", async () => {
@@ -1429,7 +1435,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("01");
+    expect(abap.console.get()).to.equal("01");
   });
 
   it("translate to upper case", async () => {
@@ -1441,7 +1447,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("ABC");
+    expect(abap.console.get()).to.equal("ABC");
   });
 
   it("APPEND INITIAL LINE", async () => {
@@ -1453,7 +1459,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("0");
+    expect(abap.console.get()).to.equal("0");
   });
 
   it("DESCRIBE FIELD", async () => {
@@ -1465,7 +1471,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("4");
+    expect(abap.console.get()).to.equal("4");
   });
 
   it("APPEND field symbol", async () => {
@@ -1480,7 +1486,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("2");
+    expect(abap.console.get()).to.equal("2");
   });
 
   it("back slash", async () => {
@@ -1488,7 +1494,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("\\");
+    expect(abap.console.get()).to.equal("\\");
   });
 
   it("boolc test", async () => {
@@ -1501,7 +1507,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("X");
+    expect(abap.console.get()).to.equal("X");
   });
 
   it("reverse", async () => {
@@ -1512,7 +1518,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("cba");
+    expect(abap.console.get()).to.equal("cba");
   });
 
   it("FIND REGEX", async () => {
@@ -1525,7 +1531,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("1\n2");
+    expect(abap.console.get()).to.equal("1\n2");
   });
 
   it("abap_true", async () => {
@@ -1533,7 +1539,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("X");
+    expect(abap.console.get()).to.equal("X");
   });
 
   it("ASSERT strlen gt", async () => {
@@ -1555,7 +1561,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("bc");
+    expect(abap.console.get()).to.equal("bc");
   });
 
   it("shift up to left, found", async () => {
@@ -1567,7 +1573,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("/bar");
+    expect(abap.console.get()).to.equal("/bar");
   });
 
   it("shift up to left, not found", async () => {
@@ -1579,7 +1585,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("abcbar");
+    expect(abap.console.get()).to.equal("abcbar");
   });
 
   it("concat vars", async () => {
@@ -1594,7 +1600,7 @@ write if.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("foobar");
+    expect(abap.console.get()).to.equal("foobar");
   });
 
   it("concat vars", async () => {
@@ -1641,7 +1647,7 @@ WRITE / lc_msg-field2.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("1\n2");
+    expect(abap.console.get()).to.equal("1\n2");
   });
 
   it("structured constant, is initial", async () => {
@@ -1701,7 +1707,7 @@ START-OF-SELECTION.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("2");
+    expect(abap.console.get()).to.equal("2");
   });
 
   it("class, interface with constant", async () => {
@@ -1728,7 +1734,7 @@ START-OF-SELECTION.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("2");
+    expect(abap.console.get()).to.equal("2");
   });
 
   it("class, interfaced method", async () => {
@@ -1757,7 +1763,7 @@ PERFORM foo.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("2");
+    expect(abap.console.get()).to.equal("2");
   });
 
   it("call method in super class, no constructor", async () => {
@@ -1790,7 +1796,7 @@ START-OF-SELECTION.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("4");
+    expect(abap.console.get()).to.equal("4");
   });
 
   it("WRITE space", async () => {
@@ -1837,7 +1843,7 @@ START-OF-SELECTION.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("a\nb");
+    expect(abap.console.get()).to.equal("a\nb");
   });
 
   it("check structure is initial", async () => {
@@ -1871,7 +1877,7 @@ ASSERT bar IS INITIAL.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("2");
+    expect(abap.console.get()).to.equal("2");
   });
 
   it("testing initialization of variables in constructor", async () => {
@@ -1906,7 +1912,7 @@ START-OF-SELECTION.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.Console.get()).to.equal("1");
+    expect(abap.console.get()).to.equal("1");
   });
 
   it("clear object reference", async () => {

@@ -14,6 +14,7 @@ export class Structure {
   }
 
   public set(input: Structure | undefined) {
+    // todo, validate input stucture
     if (input === undefined) {
       return;
     }
