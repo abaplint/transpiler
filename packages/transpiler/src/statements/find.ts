@@ -31,6 +31,15 @@ export class FindTranspiler implements IStatementTranspiler {
       options.push("length: " + traversal.traverse(len));
     }
 
+    const firstSubmatch = node.findExpressionAfterToken("SUBMATCHES");
+    if (firstSubmatch) {
+      const submatches: string[] = [];
+      for (const t of node.findDirectExpressions(abaplint.Expressions.Target)) {
+        submatches.push(traversal.traverse(t));
+      }
+      options.push("submatches: [" + submatches.join(",") + "]");
+    }
+
     return "abap.statements.find(" + source1 + ", {" + options.join(", ") + "});";
   }
 

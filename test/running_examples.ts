@@ -1993,4 +1993,26 @@ WRITE lif=>bar-foo.`;
     expect(abap.console.get()).to.equal("17");
   });
 
+  it("FIND REGEX, not found", async () => {
+    const code = `
+  DATA lv_host TYPE string.
+  FIND REGEX 'a' IN '1122' SUBMATCHES lv_host.
+  WRITE sy-subrc.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("4");
+  });
+
+  it("FIND REGEX SUBMATCHES, found", async () => {
+    const code = `
+DATA lv_host TYPE string.
+FIND REGEX '11(\\w+)22' IN '11abc22' SUBMATCHES lv_host.
+ASSERT sy-subrc = 0.
+ASSERT lv_host = 'abc'.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });

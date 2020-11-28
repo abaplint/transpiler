@@ -7,6 +7,7 @@ export interface IFindOptions {
   offset?: INumeric,
   length?: INumeric,
   count?: INumeric,
+  submatches?: ICharacter[],
 }
 
 export function find(input: ICharacter | string, options: IFindOptions) {
@@ -27,6 +28,12 @@ export function find(input: ICharacter | string, options: IFindOptions) {
   }
 
   const match = i.match(s);
+
+  if (match && options.submatches) {
+    for (let index = 0; index < options.submatches.length; index++) {
+      options.submatches[index].set(match[index + 1]);
+    }
+  }
 
   if (match === undefined || match === null) {
     // @ts-ignore

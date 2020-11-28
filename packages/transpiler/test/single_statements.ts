@@ -105,6 +105,8 @@ describe("Single statements", () => {
       js: `abap.statements.find(iv_string, {find: cl_abap_char_utilities.cr_lf});`, skip: false},
     {abap: "FIND FIRST OCCURRENCE OF REGEX 'b+c' IN 'abcd' MATCH COUNT lv_cnt MATCH LENGTH lv_len.",
       js: "abap.statements.find('abcd', {regex: 'b+c', count: lv_cnt, length: lv_len});", skip: false},
+    {abap: "FIND REGEX '11(\\w+)22' IN '11abc22' SUBMATCHES lv_host.",
+      js: "abap.statements.find('11abc22', {regex: '11(\\\\w+)22', submatches: [lv_host]});", skip: false},
     {abap: "SHIFT lv_bitbyte LEFT DELETING LEADING '0 '.", js: `abap.statements.shift(lv_bitbyte, {direction: 'LEFT',deletingLeading: '0 '});`, skip: false},
     {abap: "SHIFT lv_temp BY 1 PLACES LEFT.", js: `abap.statements.shift(lv_temp, {direction: 'LEFT',places: constant_1});`, skip: false},
     {abap: "SHIFT lv_temp UP TO '/' LEFT.", js: `abap.statements.shift(lv_temp, {direction: 'LEFT',to: '/'});`, skip: false},
