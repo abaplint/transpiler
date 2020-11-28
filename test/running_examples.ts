@@ -2043,8 +2043,11 @@ CLASS cl IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 
-START-OF-SELECTION.
-  cl=>name( 'bar' ).`;
+FORM bar.
+  cl=>name( 'bar' ).
+ENDFORM.
+
+PERFORM bar.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
