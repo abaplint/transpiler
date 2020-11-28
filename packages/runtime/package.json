@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/runtime",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Transpiler - Runtime",
   "main": "build/src/index.js",
   "typings": "build/src/index.d.ts",
@@ -26,6 +26,9 @@
   ],
   "author": "abaplint",
   "license": "MIT",
+  "dependencies": {
+    "sql.js": "^1.4.0"
+  },
   "devDependencies": {
     "@types/chai": "^4.2.14",
     "@types/mocha": "^8.0.4",
@@ -33,7 +36,6 @@
     "mocha": "^8.2.1",
     "source-map-support": "^0.5.19",
     "typescript": "^4.1.2",
-    "@types/sql.js": "^1.0.3",
-    "sql.js": "^1.4.0"
+    "@types/sql.js": "^1.0.3"
   }
 }
