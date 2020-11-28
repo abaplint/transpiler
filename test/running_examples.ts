@@ -2028,7 +2028,7 @@ ASSERT lv_host = 'abc'.`;
     f(abap);
   });
 
-  it.only("determine default parameter name", async () => {
+  it("determine default parameter name", async () => {
     const code = `
 CLASS cl DEFINITION.
   PUBLIC SECTION.
