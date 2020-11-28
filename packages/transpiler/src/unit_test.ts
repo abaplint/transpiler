@@ -1,8 +1,10 @@
 import * as abaplint from "@abaplint/core";
 
+export type SkipSettings = {object: string, class: string, method: string}[];
+
 export class UnitTest {
 
-  public run(reg: abaplint.IRegistry, dbSetup: string): string {
+  public run(reg: abaplint.IRegistry, dbSetup: string, skip?: SkipSettings): string {
     let ret = `const fs = require("fs");
 const path = require("path");
 const runtime = require("@abaplint/runtime");
@@ -46,8 +48,12 @@ const test = new ${def.name}();\n`;
 
               ret += `  console.log('${obj.getName()}: running ${def.name}->${m.name}');\n`;
               ret += `  meth = locl.addMethod("${m.name}");\n`;
-              ret += `  test.${m.name}();\n`;
-              ret += `  meth.pass();\n`;
+              if ((skip || []).some(a => a.object === obj.getName() && a.class === def.name && a.method === m.name)) {
+                ret += `  meth.skip();\n`;
+              } else {
+                ret += `  test.${m.name}();\n`;
+                ret += `  meth.pass();\n`;
+              }
 
               if (hasTeardown === true) {
                 ret += `  test.teardown();\n`;

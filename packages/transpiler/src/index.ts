@@ -3,7 +3,7 @@ import {Validation, config} from "./validation";
 import {Indentation} from "./indentation";
 import {Traversal} from "./traversal";
 import {Requires} from "./requires";
-import {UnitTest} from "./unit_test";
+import {SkipSettings, UnitTest} from "./unit_test";
 import {Keywords} from "./keywords";
 import {DatabaseSetup} from "./database_setup";
 
@@ -46,6 +46,7 @@ export interface ITranspilerOptions {
   skipConstants?: boolean;
   /** sets behavior for unknown types, either fail at compile- or run-time */
   unknownTypes?: "compileError" | "runtimeError";
+  skip?: SkipSettings;
 }
 
 export class Transpiler {
@@ -71,7 +72,7 @@ export class Transpiler {
 
     const output: IOutput = {
       objects: [],
-      unitTest: new UnitTest().run(reg, dbSetup),
+      unitTest: new UnitTest().run(reg, dbSetup, this.options?.skip),
       databaseSetup: dbSetup,
       reg: reg,
     };
