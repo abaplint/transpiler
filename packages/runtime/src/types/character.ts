@@ -13,7 +13,7 @@ export class Character implements ICharacter {
     if (typeof value === "string" || typeof value === "number") {
       this.value = value;
     } else {
-      this.value = value.get();
+      this.value = value.get() + "";
     }
     if (this.value.length > this.length) {
       this.value = this.value.substr(0, this.length);
