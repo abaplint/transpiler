@@ -2015,4 +2015,17 @@ ASSERT lv_host = 'abc'.`;
     f(abap);
   });
 
+  it("FIND REGEX slashes", async () => {
+    const code = `
+  FIND REGEX '//' IN '11//22'.
+  ASSERT sy-subrc = 0.
+  FIND REGEX '/' IN '11/22'.
+  ASSERT sy-subrc = 0.
+  FIND REGEX '/' IN '1122'.
+  ASSERT sy-subrc = 4.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
