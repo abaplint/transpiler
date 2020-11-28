@@ -1,4 +1,5 @@
 import {ICharacter} from "./_character";
+import {String} from "./string";
 
 export class Character implements ICharacter {
   private value: string;
@@ -29,7 +30,11 @@ export class Character implements ICharacter {
     this.value = "";
   }
 
-  public get(input?: {offset: number, length: number}): string {
+  public get(): string {
+    return this.value;
+  }
+
+  public getOffset(input: {offset: number, length: number}) {
     let ret = this.value;
     if (input?.offset) {
       ret = ret.substr(input.offset);
@@ -37,6 +42,8 @@ export class Character implements ICharacter {
     if (input?.length) {
       ret = ret.substr(0, input.length);
     }
-    return ret;
+    const r = new String();
+    r.set(ret);
+    return r;
   }
 }

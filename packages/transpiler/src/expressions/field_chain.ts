@@ -5,7 +5,8 @@ import {Traversal} from "../traversal";
 import {FieldSymbolTranspiler} from "./field_symbol";
 
 export class FieldChainTranspiler implements IExpressionTranspiler {
-  private addGet: boolean;
+  private readonly addGet: boolean;
+  private addGetOffset: boolean;
 
   public constructor(addGet = false) {
     this.addGet = addGet;
@@ -34,20 +35,22 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
       } else if (c instanceof Nodes.ExpressionNode
           && c.get() instanceof Expressions.FieldOffset) {
         extra.push("offset: " + new FieldOffsetTranspiler().transpile(c));
-        this.addGet = true;
+        this.addGetOffset = true;
       } else if (c instanceof Nodes.ExpressionNode
           && c.get() instanceof Expressions.FieldLength) {
         extra.push("length: " + new FieldLengthTranspiler().transpile(c));
-        this.addGet = true;
+        this.addGetOffset = true;
       }
     }
 
-    if (this.addGet) {
+    if (this.addGetOffset) {
       let foo = extra.join(", ");
       if (foo !== "") {
         foo = "{" + foo + "}";
       }
-      ret = ret + ".get(" + foo + ")";  // todo, this will break
+      ret = ret + ".getOffset(" + foo + ")";  // todo, this will break
+    } else if (this.addGet) {
+      ret = ret + ".get()";  // todo, this will break?
     }
 
     return ret;

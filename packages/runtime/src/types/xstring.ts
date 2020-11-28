@@ -27,7 +27,11 @@ export class XString implements ICharacter {
     this.value = "";
   }
 
-  public get(input?: {offset: number, length: number}): string {
+  public get(): string {
+    return this.value;
+  }
+
+  public getOffset(input: {offset: number, length: number}) {
     let ret = this.value;
     if (input?.offset) {
       ret = ret.substr(input.offset * 2);
@@ -35,6 +39,8 @@ export class XString implements ICharacter {
     if (input?.length) {
       ret = ret.substr(0, input.length * 2);
     }
-    return ret;
+    const r = new XString();
+    r.set(ret);
+    return r;
   }
 }

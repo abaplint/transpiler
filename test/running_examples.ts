@@ -1981,4 +1981,16 @@ WRITE lif=>bar-foo.`;
     f(abap);
   });
 
+  it("xstring offset and length", async () => {
+    const code = `
+  DATA lv_a TYPE i VALUE 2.
+  DATA lv_x TYPE xstring VALUE '0F0F0F'.
+  lv_a = lv_a + lv_x+1(1).
+  WRITE lv_a.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("17");
+  });
+
 });
