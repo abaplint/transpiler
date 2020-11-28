@@ -2028,4 +2028,27 @@ ASSERT lv_host = 'abc'.`;
     f(abap);
   });
 
+  it.only("determine default parameter name", async () => {
+    const code = `
+CLASS cl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS name
+      IMPORTING
+        iv_url      TYPE string
+        iv_validate TYPE abap_bool DEFAULT abap_false.
+ENDCLASS.
+CLASS cl IMPLEMENTATION.
+  METHOD name.
+    WRITE iv_url.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  cl=>name( 'bar' ).`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("bar");
+  });
+
 });
