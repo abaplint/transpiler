@@ -67,10 +67,12 @@ export class Transpiler {
     new Keywords().handle(reg);
     this.validate(reg);
 
+    const dbSetup = new DatabaseSetup(reg).run();
+
     const output: IOutput = {
       objects: [],
-      unitTest: new UnitTest().run(reg),
-      databaseSetup: new DatabaseSetup(reg).run(),
+      unitTest: new UnitTest().run(reg, dbSetup),
+      databaseSetup: dbSetup,
       reg: reg,
     };
 

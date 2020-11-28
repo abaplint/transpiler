@@ -2,11 +2,12 @@ import * as abaplint from "@abaplint/core";
 
 export class UnitTest {
 
-  public run(reg: abaplint.IRegistry): string {
+  public run(reg: abaplint.IRegistry, dbSetup: string): string {
     let ret = `const fs = require("fs");
 const path = require("path");
 const runtime = require("@abaplint/runtime");
 global.abap = new runtime.ABAP();
+global.abap.initDB("${dbSetup}");
 ${this.functionGroups(reg)}
 const unit = new runtime.UnitTestResult();
 let clas;
