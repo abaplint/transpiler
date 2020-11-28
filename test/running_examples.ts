@@ -1952,4 +1952,19 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("5");
   });
 
+  it("Value from constant structure in interface", async () => {
+    const code = `
+INTERFACE lif.
+  CONSTANTS: BEGIN OF bar,
+               foo TYPE c VALUE 'A',
+             END OF bar.
+ENDINTERFACE.
+
+WRITE lif=>bar-foo.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("A");
+  });
+
 });
