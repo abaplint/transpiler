@@ -1,16 +1,31 @@
 import {INumeric} from "../types/_numeric";
 import {ICharacter} from "../types/_character";
 
-export function concatenate(input: {source: [number | string | INumeric | ICharacter], target: ICharacter}) {
-  let res = "";
+export interface IConcatenateInput {
+  source: [number | string | INumeric | ICharacter],
+  target: ICharacter,
+  separatedBy?: number | string | INumeric | ICharacter,
+}
+
+export function concatenate(input: IConcatenateInput) {
+  const list: string[] = [];
 
   for (const source of input.source) {
     if (typeof source === "string" || typeof source === "number") {
-      res = res + source.toString();
+      list.push(source.toString());
     } else {
-      res = res + source.get().toString();
+      list.push(source.get().toString());
     }
   }
 
-  input.target.set(res);
+  let sep = "";
+  if (input.separatedBy) {
+    if (typeof input.separatedBy === "string" || typeof input.separatedBy === "number") {
+      sep = input.separatedBy.toString();
+    } else {
+      sep = input.separatedBy.get().toString();
+    }
+  }
+
+  input.target.set(list.join(sep));
 }

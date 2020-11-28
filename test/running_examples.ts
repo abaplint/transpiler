@@ -1967,4 +1967,18 @@ WRITE lif=>bar-foo.`;
     expect(abap.console.get()).to.equal("A");
   });
 
+  it("CONCATENATE SEPARATED BY space", async () => {
+    const code = `
+  DATA lv_string TYPE string.
+  DATA lv_char10 TYPE c LENGTH 10.
+  DATA iv_type TYPE c LENGTH 6 VALUE 'commit'.
+  lv_char10 = 6.
+  CONDENSE lv_char10.
+  CONCATENATE iv_type lv_char10 INTO lv_string SEPARATED BY space.
+  ASSERT lv_string = 'commit 6'.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
