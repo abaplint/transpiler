@@ -1,7 +1,7 @@
 import "./index.css";
 import * as monaco from "monaco-editor";
 import {config, Transpiler} from "@abaplint/transpiler";
-import * as runtime from "@abaplint/runtime";
+import {ABAP} from "@abaplint/runtime";
 import * as abaplint from "@abaplint/core";
 import * as abapMonaco from "@abaplint/monaco";
 import Split from "split-grid";
@@ -93,11 +93,11 @@ window.addEventListener("resize", updateEditorLayouts);
 function jsChanged() {
   const js = editor2.getValue();
   try {
-    runtime.Console.clear();
+    abap.console.clear();
     try {
       const f = new Function("abap", js);
-      f(runtime);
-      editor3.setValue(runtime.Console.get());
+      f(abap);
+      editor3.setValue(abap.console.get());
     } catch(e) {
       // write all errors to runtime result
       editor3.setValue("An error was thrown: " + e.toString());
@@ -129,3 +129,4 @@ editor1.onDidChangeModelContent(abapChanged);
 editor2.onDidChangeModelContent(jsChanged);
 abapChanged();
 editor1.focus();
+const abap = new ABAP();

@@ -1,8 +1,10 @@
 import {expect} from "chai";
-import * as abap from "../src";
+import {ABAP} from "../src";
 
 describe("Arithmetics", () => {
+
   it("Set initial value", () => {
+    const abap = new ABAP();
     const foo = new abap.types.Integer();
     const bar = new abap.types.Integer();
     foo.set(bar);
@@ -12,6 +14,7 @@ describe("Arithmetics", () => {
   });
 
   it("2 + 2", () => {
+    const abap = new ABAP();
     const foo = new abap.types.Integer();
     foo.set(2);
     const bar = new abap.types.Integer();
@@ -23,4 +26,5 @@ describe("Arithmetics", () => {
 
     expect(boo.get()).to.equal(4);
   });
+
 });

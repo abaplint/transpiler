@@ -12,6 +12,10 @@ class UnitTestMethodResult {
   public fail() {
     this.result = "Fail";
   }
+
+  public skip() {
+    this.result = "Skip";
+  }
 }
 
 class UnitTestClassResult {

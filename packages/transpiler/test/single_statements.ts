@@ -28,9 +28,9 @@ describe("Single statements", () => {
     {abap: "foo = |fo|.",                          js: "foo.set(`fo`);",                            skip: false},
     {abap: "foo = |fo{ 2 }|.",                     js: "foo.set(`fo${constant_2.get()}`);",               skip: false},
     {abap: "foo = `fo`.",                          js: "foo.set(`fo`);",                            skip: false},
-    {abap: "foo = bar+1.",                         js: "foo.set(bar.get({offset: 1}));",            skip: false},
-    {abap: "foo = bar(1).",                        js: "foo.set(bar.get({length: 1}));",            skip: false},
-    {abap: "foo = bar+1(1).",                      js: "foo.set(bar.get({offset: 1, length: 1}));", skip: false},
+    {abap: "foo = bar+1.",                         js: "foo.set(bar.getOffset({offset: 1}));",            skip: false},
+    {abap: "foo = bar(1).",                        js: "foo.set(bar.getOffset({length: 1}));",            skip: false},
+    {abap: "foo = bar+1(1).",                      js: "foo.set(bar.getOffset({offset: 1, length: 1}));", skip: false},
     {abap: "IF foo IS INITIAL. ENDIF.",            js: "if (abap.compare.initial(foo)) {\n}",       skip: false},
     {abap: "IF foo IS NOT INITIAL. ENDIF.",        js: "if (abap.compare.initial(foo) === false) {\n}", skip: false},
     {abap: "IF NOT foo IS INITIAL. ENDIF.",        js: "if (abap.compare.initial(foo) === false) {\n}", skip: false},
@@ -73,6 +73,7 @@ describe("Single statements", () => {
     {abap: "TYPES foo TYPE c.",                       js: "",                                                      skip: false}, // yes, skip TYPES
     {abap: "IF ls_request-body = ''.\nENDIF.",        js: "if (abap.compare.eq(ls_request.get().body, '')) {\n}",  skip: false},
     {abap: "CONCATENATE 'foo' 'bar' INTO target.",    js: "abap.statements.concatenate({source: ['foo','bar'], target: target});", skip: false},
+    {abap: "CONCATENATE foo bar INTO tg SEPARATED BY space.",    js: "abap.statements.concatenate({source: [foo,bar], target: tg, separatedBy: abap.builtin.space});", skip: false},
     {abap: "zcl_bar=>do_something( ).",               js: "zcl_bar.do_something();",                               skip: false},
     {abap: "SET BIT foo OF bar.",                     js: "abap.statements.setBit(foo, bar);",                     skip: false},
     {abap: "SET BIT foo OF bar TO moo.",              js: "abap.statements.setBit(foo, bar, moo);",                skip: false},
@@ -104,6 +105,8 @@ describe("Single statements", () => {
       js: `abap.statements.find(iv_string, {find: cl_abap_char_utilities.cr_lf});`, skip: false},
     {abap: "FIND FIRST OCCURRENCE OF REGEX 'b+c' IN 'abcd' MATCH COUNT lv_cnt MATCH LENGTH lv_len.",
       js: "abap.statements.find('abcd', {regex: 'b+c', count: lv_cnt, length: lv_len});", skip: false},
+    {abap: "FIND REGEX '11(\\w+)22' IN '11abc22' SUBMATCHES lv_host.",
+      js: "abap.statements.find('11abc22', {regex: '11(\\\\w+)22', submatches: [lv_host]});", skip: false},
     {abap: "SHIFT lv_bitbyte LEFT DELETING LEADING '0 '.", js: `abap.statements.shift(lv_bitbyte, {direction: 'LEFT',deletingLeading: '0 '});`, skip: false},
     {abap: "SHIFT lv_temp BY 1 PLACES LEFT.", js: `abap.statements.shift(lv_temp, {direction: 'LEFT',places: constant_1});`, skip: false},
     {abap: "SHIFT lv_temp UP TO '/' LEFT.", js: `abap.statements.shift(lv_temp, {direction: 'LEFT',to: '/'});`, skip: false},
@@ -134,6 +137,7 @@ describe("Single statements", () => {
     {abap: "CALL FUNCTION 'BAR' EXPORTING moo = boo.", js: `abap.FunctionModules['BAR']({exporting: {moo: boo}});`, skip: false},
     {abap: "super->method( ).",     js: `super.method();`, skip: false},
     {abap: "super->constructor( ).",     js: ``, skip: false}, // todo, https://github.com/abaplint/transpiler/issues/133
+    {abap: "SELECT SINGLE * FROM t100 INTO ls_result.", js: `abap.statements.select(ls_result, "SELECT * FROM t100 LIMIT 1");`},
   ];
 
   for (const test of tests) {

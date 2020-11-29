@@ -9,6 +9,7 @@ export * from "./class_deferred";
 export * from "./class_implementation";
 export * from "./class_local_friends";
 export * from "./clear";
+export * from "./select";
 export * from "./concatenate";
 export * from "./condense";
 export * from "./constant";

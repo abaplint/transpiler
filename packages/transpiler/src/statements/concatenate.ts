@@ -10,9 +10,14 @@ export class ConcatenateTranspiler implements IStatementTranspiler {
       slist.push(traversal.traverse(s));
     }
 
+    let extra = "";
+    if (node.findExpressionAfterToken("BY")) {
+      extra = `, separatedBy: ${slist.pop()}`;
+    }
+
     const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
 
-    return "abap.statements.concatenate({source: [" + slist.join(",") + "], target: " + target + "});";
+    return "abap.statements.concatenate({source: [" + slist.join(",") + "], target: " + target + extra + "});";
   }
 
 }
