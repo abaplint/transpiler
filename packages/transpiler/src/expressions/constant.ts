@@ -11,10 +11,13 @@ export class ConstantTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, _traversal: Traversal): string {
     const int = node.findFirstExpression(Expressions.Integer);
-    if (int && this.addGet === true) {
-      return "constant_" + int.getFirstToken().getStr() + ".get()";
-    } else if (int) {
-      return "constant_" + int.getFirstToken().getStr();
+    if (int) {
+      const val = parseInt(int.concatTokens(), 10);
+      let ret = "constant_" + (val < 0 ? "minus_" : "") + Math.abs(val);
+      if (this.addGet === true) {
+        ret += ".get()";
+      }
+      return ret;
     }
 
     const str = node.findFirstExpression(Expressions.ConstantString);
