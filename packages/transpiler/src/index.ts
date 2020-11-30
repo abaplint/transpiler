@@ -102,7 +102,7 @@ export class Transpiler {
         result += "// " + file.getFilename() + "\n";
       }
       for (const i of file.getStructure()?.findAllExpressions(abaplint.Expressions.Integer) || []) {
-        const j = parseInt(i.getFirstToken().getStr(), 10);
+        const j = parseInt(i.concatTokens(), 10);
         if (constants.includes(j) === false) {
           constants.push(j);
         }
@@ -117,8 +117,9 @@ export class Transpiler {
 
       if (this.options?.skipConstants === false || this.options?.skipConstants === undefined) {
         for (const c of constants.sort((a, b) => b - a)) {
-          result = `let constant_${c} = new abap.types.Integer();\n` +
-            `constant_${c}.set(${c});\n` + result;
+          const post = c < 0 ? "minus_" : "";
+          result = `let constant_${post}${Math.abs(c)} = new abap.types.Integer();\n` +
+            `constant_${post}${Math.abs(c)}.set(${c});\n` + result;
         }
       }
 

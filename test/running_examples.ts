@@ -2054,4 +2054,12 @@ PERFORM bar.`;
     expect(abap.console.get()).to.equal("bar");
   });
 
+  it("negative number", async () => {
+    const code = `WRITE -1.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("-1");
+  });
+
 });
