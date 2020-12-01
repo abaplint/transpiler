@@ -2096,4 +2096,12 @@ PERFORM bar.`;
     expect(abap.console.get()).to.equal("0000");
   });
 
+  it("write sy-mandt", async () => {
+    const code = `WRITE sy-mandt.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("123");
+  });
+
 });
