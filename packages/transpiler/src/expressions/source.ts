@@ -26,7 +26,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
         } else if (c.get() instanceof Expressions.Cond) {
           ret += traversal.traverse(c);
         } else if (c.get() instanceof Expressions.ArithOperator) {
-          ret += traversal.traverse(c);
+          ret = traversal.traverse(c) + "(" + ret + ",";
           post = ")";
         } else if (c.get() instanceof Expressions.MethodCallChain) {
           ret += traversal.traverse(c);

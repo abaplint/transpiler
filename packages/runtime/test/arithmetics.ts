@@ -22,7 +22,7 @@ describe("Arithmetics", () => {
     const boo = new abap.types.Integer();
     boo.set(2);
 
-    boo.set(foo.add(bar));
+    boo.set(abap.operators.add(foo, bar));
 
     expect(boo.get()).to.equal(4);
   });

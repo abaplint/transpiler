@@ -23,42 +23,6 @@ export class Integer implements INumeric {
     return this;
   }
 
-  public add(value: INumeric | ICharacter | string | number) {
-    const t = new Integer();
-    t.set(value);
-    return new Integer().set(this.value + t.get());
-  }
-
-  public minus(value: INumeric | ICharacter | string | number) {
-    const t = new Integer();
-    t.set(value);
-    return new Integer().set(this.value - t.get());
-  }
-
-  public multiply(value: INumeric | ICharacter | string | number) {
-    const t = new Integer();
-    t.set(value);
-    return new Integer().set(this.value * t.get());
-  }
-
-  public integerDiv(value: INumeric | ICharacter | string | number) {
-    const t = new Integer();
-    t.set(value);
-    return new Integer().set(Math.floor(this.value / t.get()));
-  }
-
-  public integerMod(value: INumeric | ICharacter | string | number) {
-    const t = new Integer();
-    t.set(value);
-    return new Integer().set(this.value % t.get());
-  }
-
-  public power(value: INumeric | ICharacter | string | number) {
-    const t = new Integer();
-    t.set(value);
-    return new Integer().set(Math.pow(this.value, t.get()));
-  }
-
   public clear(): void {
     this.value = 0;
   }
