@@ -21,10 +21,20 @@ export class DatabaseSetup {
         ret += this.messageClass(obj);
       }
     }
+    ret += this.initT000();
     return ret.trim();
   }
 
 //////////////////
+
+  private initT000(): string {
+    const obj = this.reg.getObject("TABL", "T000") as abaplint.Objects.Table | undefined;
+    if (obj === undefined) {
+      return "";
+    }
+
+    return `INSERT INTO t000 VALUES ('123', '', '');\n`;
+  }
 
   private messageClass(msag: abaplint.Objects.MessageClass): string {
     // ignore if T100 is unknown
