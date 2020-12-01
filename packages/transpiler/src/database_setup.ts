@@ -21,13 +21,13 @@ export class DatabaseSetup {
         ret += this.messageClass(obj);
       }
     }
-    ret += this.initT000();
+    ret += this.t000Insert();
     return ret.trim();
   }
 
 //////////////////
 
-  private initT000(): string {
+  private t000Insert(): string {
     const obj = this.reg.getObject("TABL", "T000") as abaplint.Objects.Table | undefined;
     if (obj === undefined) {
       return "";
