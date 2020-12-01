@@ -14,6 +14,7 @@ export * from "./concatenate";
 export * from "./condense";
 export * from "./constant";
 export * from "./continue";
+export * from "./create_data";
 export * from "./create_object";
 export * from "./data";
 export * from "./delete_internal";
