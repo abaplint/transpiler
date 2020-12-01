@@ -24,7 +24,7 @@ export function split(param: ISplitOptions) {
     for (let i = 0; i < param.targets.length; i++) {
       param.targets[i].clear();
       if (split[i]) {
-        param.targets[1].set(split[i]);
+        param.targets[i].set(split[i]);
       }
     }
   }

@@ -2086,7 +2086,7 @@ PERFORM bar.`;
     f(abap);
   });
 
-  it("write numc field", async () => {
+  it("write numc field, initial", async () => {
     const code = `
   DATA foo TYPE n LENGTH 4.
   WRITE foo.`;
@@ -2106,9 +2106,9 @@ PERFORM bar.`;
 
   it("split 1", async () => {
     const code = `
-  DATA: lv_major   TYPE n LENGTH 4,
-  lv_minor   TYPE n LENGTH 4,
-  lv_release TYPE n LENGTH 4.
+DATA: lv_major   TYPE c LENGTH 4,
+      lv_minor   TYPE c LENGTH 4,
+      lv_release TYPE c LENGTH 4.
 SPLIT |blah| AT '.' INTO lv_major lv_minor lv_release.
 WRITE / lv_major.`;
     const js = await run(code);
@@ -2119,9 +2119,9 @@ WRITE / lv_major.`;
 
   it("split 2", async () => {
     const code = `
-DATA: lv_major   TYPE n LENGTH 4,
-lv_minor   TYPE n LENGTH 4,
-lv_release TYPE n LENGTH 4.
+DATA: lv_major   TYPE c LENGTH 4,
+lv_minor   TYPE c LENGTH 4,
+lv_release TYPE c LENGTH 4.
 SPLIT |blah.boo| AT '.' INTO lv_major lv_minor lv_release.
 WRITE / lv_major.
 WRITE / lv_minor.`;
@@ -2133,9 +2133,9 @@ WRITE / lv_minor.`;
 
   it("split 3", async () => {
     const code = `
-DATA: lv_major   TYPE n LENGTH 4,
-lv_minor   TYPE n LENGTH 4,
-lv_release TYPE n LENGTH 4.
+DATA: lv_major   TYPE c LENGTH 4,
+lv_minor   TYPE c LENGTH 4,
+lv_release TYPE c LENGTH 4.
 SPLIT |1.2.3| AT '.' INTO lv_major lv_minor lv_release.
 WRITE / lv_major.
 WRITE / lv_minor.
@@ -2144,6 +2144,17 @@ WRITE / lv_release.`;
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("1\n2\n3");
+  });
+
+  it("numc text value, int", async () => {
+    const code = `
+  DATA bar TYPE n LENGTH 10.
+  bar = '1'.
+  WRITE bar.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("0000000001");
   });
 
 });
