@@ -2062,4 +2062,28 @@ PERFORM bar.`;
     expect(abap.console.get()).to.equal("-1");
   });
 
+  it("add string values", async () => {
+    const code = `
+  DATA lv_string1 TYPE string.
+  DATA lv_string2 TYPE string.
+  lv_string1 = 1.
+  lv_string2 = 2.
+  ASSERT lv_string1 + lv_string2 = 3.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("charcter type plus integer type", async () => {
+    const code = `
+  DATA lv_val1 TYPE c LENGTH 1.
+  DATA lv_val2 TYPE i.
+  lv_val1 = 1.
+  lv_val2 = 2.
+  ASSERT lv_val1 + lv_val2 = 3.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });

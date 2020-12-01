@@ -6,19 +6,19 @@ export class ArithOperatorTranspiler implements IExpressionTranspiler {
   public transpile(node: Nodes.ExpressionNode): string {
     switch(node.getFirstToken().getStr()) {
       case "+":
-        return ".add(";
+        return "abap.operators.add";
       case "-":
-        return ".minus(";
+        return "abap.operators.minus";
       case "*":
-        return ".multiply(";
+        return "abap.operators.multiply";
       case "/":
-        return ".divide(";
+        return "abap.operators.divide";
       case "**":
-        return ".power(";
+        return "abap.operators.power";
       case "DIV":
-        return ".integerDiv(";
+        return "abap.operators.div";
       case "MOD":
-        return ".integerMod(";
+        return "abap.operators.mod";
       default:
         return ".ArithOperatorUnknown";
     }

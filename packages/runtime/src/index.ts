@@ -1,6 +1,7 @@
 import * as types from "./types";
 import * as builtin from "./builtin";
 import * as compare from "./compare";
+import * as operators from "./operators";
 import {Statements} from "./statements";
 import initSqlJs from "sql.js";
 import {Console} from "./console";
@@ -13,6 +14,7 @@ export class ABAP {
   public statements;
   public types = types;
   public builtin = builtin;
+  public operators = operators;
   public compare = compare;
   public FunctionModules = {};
   public console: Console;

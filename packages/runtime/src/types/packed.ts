@@ -27,11 +27,12 @@ export class Packed implements INumeric {
     }
   }
 
-  public add(_value: INumeric) {
-// todo
-//    return new Packed({value: value.value + this.value});
-    console.log(this.length);
-    console.log(this.decimals);
+  public getLength() {
+    return this.length;
+  }
+
+  public getDecimals() {
+    return this.decimals;
   }
 
   public clear(): void {
