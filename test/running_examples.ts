@@ -2104,4 +2104,46 @@ PERFORM bar.`;
     expect(abap.console.get()).to.equal("123");
   });
 
+  it("split 1", async () => {
+    const code = `
+  DATA: lv_major   TYPE n LENGTH 4,
+  lv_minor   TYPE n LENGTH 4,
+  lv_release TYPE n LENGTH 4.
+SPLIT |blah| AT '.' INTO lv_major lv_minor lv_release.
+WRITE / lv_major.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("blah");
+  });
+
+  it("split 2", async () => {
+    const code = `
+DATA: lv_major   TYPE n LENGTH 4,
+lv_minor   TYPE n LENGTH 4,
+lv_release TYPE n LENGTH 4.
+SPLIT |blah.boo| AT '.' INTO lv_major lv_minor lv_release.
+WRITE / lv_major.
+WRITE / lv_minor.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("blah\nboo");
+  });
+
+  it("split 3", async () => {
+    const code = `
+DATA: lv_major   TYPE n LENGTH 4,
+lv_minor   TYPE n LENGTH 4,
+lv_release TYPE n LENGTH 4.
+SPLIT |1.2.3| AT '.' INTO lv_major lv_minor lv_release.
+WRITE / lv_major.
+WRITE / lv_minor.
+WRITE / lv_release.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n3");
+  });
+
 });
