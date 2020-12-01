@@ -33,7 +33,12 @@ export class DatabaseSetup {
       return "";
     }
 
-    return `INSERT INTO t000 VALUES ('123', '', '');\n`;
+    const type = obj.parseType(this.reg);
+    if (type instanceof abaplint.BasicTypes.StructureType && type.getComponents().length === 3) {
+      return `INSERT INTO t000 VALUES ('123', '', '');\n`;
+    } else {
+      return "";
+    }
   }
 
   private messageClass(msag: abaplint.Objects.MessageClass): string {
