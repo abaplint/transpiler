@@ -2086,4 +2086,14 @@ PERFORM bar.`;
     f(abap);
   });
 
+  it("write numc field", async () => {
+    const code = `
+  DATA foo TYPE n LENGTH 4.
+  WRITE foo.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("0000");
+  });
+
 });

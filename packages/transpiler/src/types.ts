@@ -39,6 +39,11 @@ export class TranspileTypes {
       if (type.getLength() !== 1) {
         extra = "{length: " + type.getLength() + "}";
       }
+    } else if (type instanceof abaplint.BasicTypes.NumericType) {
+      resolved = "Numc";
+      if (type.getLength() !== 1) {
+        extra = "{length: " + type.getLength() + "}";
+      }
     } else if (type instanceof abaplint.BasicTypes.PackedType) {
       resolved = "Packed";
     } else if (type instanceof abaplint.BasicTypes.XStringType) {
@@ -56,7 +61,7 @@ export class TranspileTypes {
     } else if (type instanceof abaplint.BasicTypes.VoidType) {
       return `(() => { throw "Void type: ${type.getVoided()}" })()`;
     } else {
-      resolved = "typeTodo";
+      resolved = "typeTodo" + type.constructor.name;
     }
 
     return "new abap.types." + resolved + "(" + extra + ")";
