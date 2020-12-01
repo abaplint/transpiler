@@ -11,9 +11,16 @@ export class SplitTranspiler implements IStatementTranspiler {
     const source = traversal.traverse(sources[0]);
     const at = traversal.traverse(sources[1]);
 
-    const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
+    let to = "";
+    const table = node.findExpressionAfterToken("TABLE");
+    if (table) {
+      const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
+      to = ", table: " + target;
+    } else {
+      to = ", targets: [" + node.findDirectExpressions(abaplint.Expressions.Target).map(e => traversal.traverse((e))).join(",") + "]";
+    }
 
-    return "abap.statements.split({source: " + source + ", at: " + at + ", target: " + target + "});";
+    return "abap.statements.split({source: " + source + ", at: " + at + to + "});";
   }
 
 }

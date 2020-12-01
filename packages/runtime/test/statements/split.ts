@@ -6,7 +6,7 @@ describe("Statement SPLIT", () => {
   it("split", () => {
     const abap = new ABAP();
     const tab = new abap.types.Table(new abap.types.String());
-    abap.statements.split({source: `foo bar`, at: ` `, target: tab});
+    abap.statements.split({source: `foo bar`, at: ` `, table: tab});
     const arr = tab.array();
     expect(arr.length).to.equal(2);
     expect(arr[0].get()).to.equal("foo");
@@ -17,7 +17,7 @@ describe("Statement SPLIT", () => {
     const tab = new abap.types.Table(new abap.types.String());
     const str = new abap.types.String();
     str.set(`foo bar`);
-    abap.statements.split({source: str, at: ` `, target: tab});
+    abap.statements.split({source: str, at: ` `, table: tab});
 
     const arr = tab.array();
     expect(arr.length).to.equal(2);
