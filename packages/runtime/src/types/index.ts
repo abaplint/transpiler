@@ -2,6 +2,7 @@ export * from "./abap_object";
 export * from "./character";
 export * from "./hex";
 export * from "./integer";
+export * from "./numc";
 export * from "./packed";
 export * from "./string";
 export * from "./structure";

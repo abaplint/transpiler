@@ -9,7 +9,7 @@ export class UnitTest {
 const path = require("path");
 const runtime = require("@abaplint/runtime");
 global.abap = new runtime.ABAP();
-global.abap.initDB("${dbSetup}");
+global.abap.initDB(\`${dbSetup}\`);
 ${this.functionGroups(reg)}
 const unit = new runtime.UnitTestResult();
 let clas;

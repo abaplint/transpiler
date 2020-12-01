@@ -47,6 +47,7 @@ export class DatabaseSetup {
     for (const field of type.getComponents()) {
       fields.push(field.name.toLowerCase() + " " + this.toType(field.type));
     }
+    // todo, primary key, awaiting abaplint updates
     return `CREATE TABLE ${tabl.getName().toLowerCase()} (${fields.join(", ")});\n`;
   }
 
