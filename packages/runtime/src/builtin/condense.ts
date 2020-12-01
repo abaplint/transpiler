@@ -1,6 +1,7 @@
 import {String} from "../types";
 import {ICharacter} from "../types/_character";
+import {INumeric} from "../types/_numeric";
 
-export function condense(input: ICharacter) {
-  return new String().set(input.get().trim());
+export function condense(input: ICharacter | INumeric) {
+  return new String().set(input.get().toString().trim());
 }
