@@ -77,7 +77,7 @@ export function find(input: ICharacter | string, options: IFindOptions) {
     options.count?.clear();
   }
 
-  if (options?.length) {
+  if (options?.length && matches && matches[0]) {
     options.length?.set(matches[0][0].length);
   } else {
     options.length?.clear();

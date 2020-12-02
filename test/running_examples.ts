@@ -2275,4 +2275,15 @@ WRITE / lv_release.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("FIND FIRST occurrence, empty input with MATCH LENGTH", async () => {
+    const code = `
+  DATA iv_fullpath TYPE string.
+  DATA lv_cnt TYPE i.
+  DATA lv_len TYPE i.
+  FIND FIRST OCCURRENCE OF REGEX '^/(.*/)?' IN iv_fullpath MATCH COUNT lv_cnt MATCH LENGTH lv_len.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
