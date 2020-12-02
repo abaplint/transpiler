@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import {expect} from "chai";
 import * as abaplint from "@abaplint/core";
 import {msag_zag_unit_test, tabl_t100xml} from "./_data";
@@ -9,7 +10,7 @@ describe("transpiler, database setup", () => {
     const tabl = new abaplint.MemoryFile("t100.tabl.xml", tabl_t100xml);
     const reg = new abaplint.Registry().addFile(tabl).parse();
     const result = new DatabaseSetup(reg).run();
-    expect(result).to.equal(`CREATE TABLE t100 (sprsl NCHAR(1), arbgb NCHAR(20), msgnr NCHAR(3), text NCHAR(73));`);
+    expect(result).to.equal(`CREATE TABLE t100 (sprsl NCHAR(1), arbgb NCHAR(20), msgnr NCHAR(3), text NCHAR(73), PRIMARY KEY(sprsl,arbgb,msgnr));`);
   });
 
   it("t100 create table, insert MSAG entries", async () => {
