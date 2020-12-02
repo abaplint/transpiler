@@ -19,8 +19,12 @@ export function lt(left: number | string | ICharacter | INumeric, right: number 
   if (typeof l === "string" && typeof r === "number") {
     r = r.toString();
   }
-  if (typeof r === "string" && typeof l === "number") {
-    l = l.toString();
+  if (typeof l === "number" && typeof r === "string") {
+    if (r === "") {
+      r = 0;
+    } else {
+      r = parseInt(r, 10);
+    }
   }
 
   return l < r;

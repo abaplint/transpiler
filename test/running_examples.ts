@@ -2196,6 +2196,25 @@ WRITE / lv_release.`;
     expect(abap.console.get()).to.equal("0");
   });
 
+  it("EQ, initial string and integer", async () => {
+    const code = `DATA low TYPE string.
+    DATA int TYPE i.
+    ASSERT int EQ low.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("LT, string and integer", async () => {
+    const code = `DATA low TYPE string.
+    DATA int TYPE i.
+    low = |1|.
+    ASSERT int LT low.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
   it("BETWEEN 1", async () => {
     const code = `DATA low TYPE string.
     DATA high TYPE string.
