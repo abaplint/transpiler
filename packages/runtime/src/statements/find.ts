@@ -24,8 +24,14 @@ export function find(input: ICharacter | string, options: IFindOptions) {
     if (typeof s !== "string") {
       s = s.get();
     }
+    if (s === "") {
+      throw "FIND, runtime, no input, s empty";
+    }
     s = new RegExp(s, "g");
   } else if (options.regex) {
+    if (options.regex === "") {
+      throw "FIND, runtime, no input, regex empty";
+    }
     s = new RegExp(options.regex, "g");
   } else {
     throw "FIND, runtime, no input";
@@ -43,8 +49,8 @@ export function find(input: ICharacter | string, options: IFindOptions) {
 
   if (options.submatches) {
     for (let index = 0; index < options.submatches.length; index++) {
-      if (matches[index]?.length > 1) {
-        options.submatches[index].set(matches[index][1]);
+      if (matches[0] && matches[0][index + 1]) {
+        options.submatches[index].set(matches[0][index + 1]);
       } else {
         options.submatches[index].clear();
       }

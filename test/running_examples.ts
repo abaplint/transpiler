@@ -2167,4 +2167,21 @@ WRITE / lv_release.`;
     f(abap);
   });
 
+  it("FIND ALL, more submatches", async () => {
+    const code = `
+    DATA lv_val1 TYPE string.
+    DATA lv_val2 TYPE string.
+    DATA lv_val3 TYPE string.
+    DATA lv_val4 TYPE string.
+    FIND REGEX '(\\d+)-(\\d+) (\\w): (\\w+)' IN '5-9 g: ggccggmgn' SUBMATCHES lv_val1 lv_val2 lv_val3 lv_val4.
+    WRITE / lv_val1.
+    WRITE / lv_val2.
+    WRITE / lv_val3.
+    WRITE / lv_val4.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("5\n9\ng\nggccggmgn");
+  });
+
 });
