@@ -2196,4 +2196,53 @@ WRITE / lv_release.`;
     expect(abap.console.get()).to.equal("0");
   });
 
+  it("BETWEEN 1", async () => {
+    const code = `DATA low TYPE string.
+    DATA high TYPE string.
+    DATA int TYPE i.
+    ASSERT int BETWEEN low AND high.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("BETWEEN 2", async () => {
+    const code = `DATA low TYPE string.
+    DATA high TYPE string.
+    DATA int TYPE i.
+    low = |1|.
+    high = |1|.
+    int = 1.
+    ASSERT int BETWEEN low AND high.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("BETWEEN 3", async () => {
+    const code = `DATA low TYPE string.
+    DATA high TYPE string.
+    DATA int TYPE i.
+    low = |1|.
+    high = |1|.
+    int = 2.
+    ASSERT NOT int BETWEEN low AND high.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("BETWEEN 4", async () => {
+    const code = `DATA low TYPE string.
+    DATA high TYPE string.
+    DATA int TYPE i.
+    low = |10|.
+    high = |20|.
+    int = 2.
+    ASSERT NOT int BETWEEN low AND high.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
