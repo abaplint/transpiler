@@ -21,10 +21,25 @@ export class DatabaseSetup {
         ret += this.messageClass(obj);
       }
     }
+    ret += this.t000Insert();
     return ret.trim();
   }
 
 //////////////////
+
+  private t000Insert(): string {
+    const obj = this.reg.getObject("TABL", "T000") as abaplint.Objects.Table | undefined;
+    if (obj === undefined) {
+      return "";
+    }
+
+    const type = obj.parseType(this.reg);
+    if (type instanceof abaplint.BasicTypes.StructureType && type.getComponents().length === 3) {
+      return `INSERT INTO t000 VALUES ('123', '', '');\n`;
+    } else {
+      return "";
+    }
+  }
 
   private messageClass(msag: abaplint.Objects.MessageClass): string {
     // ignore if T100 is unknown

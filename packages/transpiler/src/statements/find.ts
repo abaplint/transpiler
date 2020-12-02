@@ -14,6 +14,11 @@ export class FindTranspiler implements IStatementTranspiler {
     } else {
       options.push("find: " + source0);
     }
+
+    if (node.concatTokens().toUpperCase().startsWith("FIND FIRST")) {
+      options.push("first: true");
+    }
+
     const source1 = traversal.traverse(sources[1]);
 
     const off = node.findExpressionAfterToken("OFFSET");

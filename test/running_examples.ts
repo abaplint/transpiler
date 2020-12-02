@@ -1521,7 +1521,7 @@ write if.`;
     expect(abap.console.get()).to.equal("cba");
   });
 
-  it("FIND REGEX", async () => {
+  it("FIND REGEX, count and length", async () => {
     const code = `
   DATA lv_cnt TYPE i.
   DATA lv_len TYPE i.
@@ -2086,7 +2086,7 @@ PERFORM bar.`;
     f(abap);
   });
 
-  it("write numc field", async () => {
+  it("write numc field, initial", async () => {
     const code = `
   DATA foo TYPE n LENGTH 4.
   WRITE foo.`;
@@ -2094,6 +2094,106 @@ PERFORM bar.`;
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("0000");
+  });
+
+  it("write sy-mandt", async () => {
+    const code = `WRITE sy-mandt.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("123");
+  });
+
+  it("split 1", async () => {
+    const code = `
+DATA: lv_major   TYPE c LENGTH 4,
+      lv_minor   TYPE c LENGTH 4,
+      lv_release TYPE c LENGTH 4.
+SPLIT |blah| AT '.' INTO lv_major lv_minor lv_release.
+WRITE / lv_major.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("blah");
+  });
+
+  it("split 2", async () => {
+    const code = `
+DATA: lv_major   TYPE c LENGTH 4,
+lv_minor   TYPE c LENGTH 4,
+lv_release TYPE c LENGTH 4.
+SPLIT |blah.boo| AT '.' INTO lv_major lv_minor lv_release.
+WRITE / lv_major.
+WRITE / lv_minor.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("blah\nboo");
+  });
+
+  it("split 3", async () => {
+    const code = `
+DATA: lv_major   TYPE c LENGTH 4,
+lv_minor   TYPE c LENGTH 4,
+lv_release TYPE c LENGTH 4.
+SPLIT |1.2.3| AT '.' INTO lv_major lv_minor lv_release.
+WRITE / lv_major.
+WRITE / lv_minor.
+WRITE / lv_release.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n3");
+  });
+
+  it("numc text value, int", async () => {
+    const code = `
+  DATA bar TYPE n LENGTH 10.
+  bar = '1'.
+  WRITE bar.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("0000000001");
+  });
+
+  it("FIND ALL, MATCH COUNT", async () => {
+    const code = `
+    DATA lv_count TYPE i.
+    FIND ALL OCCURRENCES OF 'a' IN 'aaa' MATCH COUNT lv_count.
+    ASSERT lv_count = 3.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("FIND ALL, more submatches", async () => {
+    const code = `
+    DATA lv_val1 TYPE string.
+    DATA lv_val2 TYPE string.
+    DATA lv_val3 TYPE string.
+    DATA lv_val4 TYPE string.
+    FIND REGEX '(\\d+)-(\\d+) (\\w): (\\w+)' IN '5-9 g: ggccggmgn' SUBMATCHES lv_val1 lv_val2 lv_val3 lv_val4.
+    WRITE / lv_val1.
+    WRITE / lv_val2.
+    WRITE / lv_val3.
+    WRITE / lv_val4.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("5\n9\ng\nggccggmgn");
+  });
+
+  it("FIND ALL, should clear", async () => {
+    const code = `
+  DATA lv_count TYPE i.
+  lv_count = 1.
+  FIND ALL OCCURRENCES OF 'a' IN '123' MATCH COUNT lv_count.
+  WRITE lv_count.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("0");
   });
 
 });
