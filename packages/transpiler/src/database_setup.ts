@@ -58,12 +58,16 @@ export class DatabaseSetup {
     if (!(type instanceof abaplint.BasicTypes.StructureType)) {
       return "";
     }
+
     const fields: string[] = [];
     for (const field of type.getComponents()) {
       fields.push(field.name.toLowerCase() + " " + this.toType(field.type));
     }
-    // todo, primary key, awaiting abaplint updates
-    return `CREATE TABLE ${tabl.getName().toLowerCase()} (${fields.join(", ")});\n`;
+
+    // assumption: all transparent tables have primary keys
+    const key = ", PRIMARY KEY(" + tabl.listKeys().map(e => e.toLowerCase()).join(",") + ")";
+
+    return `CREATE TABLE ${tabl.getName().toLowerCase()} (${fields.join(", ")}${key});\n`;
   }
 
   private toType(type: abaplint.AbstractType): string {

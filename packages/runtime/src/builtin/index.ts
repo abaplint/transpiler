@@ -1,6 +1,7 @@
 import {Character} from "../types";
 
 export * from "./concat_lines_of";
+export * from "./count";
 export * from "./condense";
 export * from "./lines";
 export * from "./strlen";

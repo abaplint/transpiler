@@ -87,7 +87,7 @@ export class Traversal {
       return name;
     } else if (this.isClassAttribute(t)) {
       name = "this." + name;
-    } else if (this.isBuiltin(t)) {
+    } else if (this.isBuiltinVariable(t)) {
       name = "abap.builtin." + name;
     }
     return name;
@@ -110,7 +110,22 @@ export class Traversal {
     return undefined;
   }
 
-  private isBuiltin(token: abaplint.Token): boolean {
+  public isBuiltinMethod(token: abaplint.Token): boolean {
+    const scope = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
+    if (scope === undefined) {
+      return false;
+    }
+
+    for (const r of scope.getData().references) {
+      if (r.referenceType === abaplint.ReferenceType.BuiltinMethodReference
+          && r.position.getStart().equals(token.getStart())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private isBuiltinVariable(token: abaplint.Token): boolean {
     const scope = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
     if (scope === undefined) {
       throw new Error("isBuiltin, unable to lookup position");
