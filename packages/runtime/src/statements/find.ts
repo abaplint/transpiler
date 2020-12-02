@@ -63,15 +63,24 @@ export function find(input: ICharacter | string, options: IFindOptions) {
   } else {
     // @ts-ignore
     abap.builtin.sy.get().subrc.set(0);
-    if (matches[0]?.index) {
-      options.offset?.set(matches[0].index);
-    }
-    if (options?.count) {
-      options.count?.set(matches.length);
-    }
-    if (options?.length) {
-      options.length?.set(matches[0][0].length);
-    }
+  }
+
+  if (matches[0]?.index) {
+    options.offset?.set(matches[0].index);
+  } else {
+    options.offset?.clear();
+  }
+
+  if (options?.count) {
+    options.count?.set(matches.length);
+  } else {
+    options.count?.clear();
+  }
+
+  if (options?.length) {
+    options.length?.set(matches[0][0].length);
+  } else {
+    options.length?.clear();
   }
 
 }

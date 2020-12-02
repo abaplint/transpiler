@@ -2184,4 +2184,16 @@ WRITE / lv_release.`;
     expect(abap.console.get()).to.equal("5\n9\ng\nggccggmgn");
   });
 
+  it("FIND ALL, should clear", async () => {
+    const code = `
+  DATA lv_count TYPE i.
+  lv_count = 1.
+  FIND ALL OCCURRENCES OF 'a' IN '123' MATCH COUNT lv_count.
+  WRITE lv_count.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
 });
