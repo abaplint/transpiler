@@ -53,7 +53,6 @@ describe("Single statements", () => {
     {abap: "FORM foo. ENDFORM.",                      js: "function foo() {\n}",                       skip: false},
     {abap: "PERFORM foo.",                            js: "foo();",                       skip: false},
     {abap: "DATA foo TYPE STANDARD TABLE OF string.", js: "let foo = new abap.types.Table(new abap.types.String());",         skip: false},
-    {abap: "lv_char = lines( lt_words ).",            js: "lv_char.set(abap.builtin.lines(lt_words));",                     skip: false},
     {abap: "SPLIT foo AT bar INTO TABLE moo.",            js: "abap.statements.split({source: foo, at: bar, table: moo});",    skip: false},
     {abap: "SPLIT |blah| AT '.' INTO lv_major lv_minor.", js: "abap.statements.split({source: `blah`, at: '.', targets: [lv_major,lv_minor]});",    skip: false},
     {abap: "WRITE |moo|.",                            js: "abap.statements.write(`moo`);",                                  skip: false},

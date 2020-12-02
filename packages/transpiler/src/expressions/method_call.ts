@@ -13,13 +13,7 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
     }
 
     let name = nameToken.getStr();
-    // todo, this is wrong, look at MethodReferences instead
-    if (name === "lines"
-        || name === "strlen"
-        || name === "condense"
-        || name === "reverse"
-        || name === "concat_lines_of"
-        || name === "xstrlen") {
+    if (traversal.isBuiltinMethod(nameToken)) {
       name = "abap.builtin." + name + "(";
     } else {
       name = name + "(";

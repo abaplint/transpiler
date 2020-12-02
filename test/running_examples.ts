@@ -2264,4 +2264,15 @@ WRITE / lv_release.`;
     f(abap);
   });
 
+  it("basic count()", async () => {
+    const code = `
+  DATA lv_count TYPE i.
+  lv_count = count( val = 'password' sub = 's' ).
+  WRITE lv_count.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
