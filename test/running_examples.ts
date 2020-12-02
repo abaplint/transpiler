@@ -1521,7 +1521,7 @@ write if.`;
     expect(abap.console.get()).to.equal("cba");
   });
 
-  it("FIND REGEX", async () => {
+  it("FIND REGEX, count and length", async () => {
     const code = `
   DATA lv_cnt TYPE i.
   DATA lv_len TYPE i.
@@ -2155,6 +2155,16 @@ WRITE / lv_release.`;
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("0000000001");
+  });
+
+  it("FIND ALL, MATCH COUNT", async () => {
+    const code = `
+    DATA lv_count TYPE i.
+    FIND ALL OCCURRENCES OF 'a' IN 'aaa' MATCH COUNT lv_count.
+    ASSERT lv_count = 3.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
   });
 
 });

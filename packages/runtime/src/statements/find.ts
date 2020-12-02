@@ -3,6 +3,7 @@ import {INumeric} from "../types/_numeric";
 
 export interface IFindOptions {
   find?: ICharacter | string,
+  first?: boolean,
   regex?: string,
   offset?: INumeric,
   length?: INumeric,
@@ -23,32 +24,47 @@ export function find(input: ICharacter | string, options: IFindOptions) {
     if (typeof s !== "string") {
       s = s.get();
     }
+    s = new RegExp(s, "g");
   } else if (options.regex) {
-    s = new RegExp(options.regex);
+    s = new RegExp(options.regex, "g");
+  } else {
+    throw "FIND, runtime, no input";
   }
 
-  const match = i.match(s);
-
-  if (match && options.submatches) {
-    for (let index = 0; index < options.submatches.length; index++) {
-      options.submatches[index].set(match[index + 1]);
+  let temp: RegExpExecArray | null;
+  const matches: RegExpExecArray[] = [];
+  // eslint-disable-next-line no-cond-assign
+  while(temp = s.exec(i)) {
+    matches.push(temp);
+    if (options.first === true) {
+      break;
     }
   }
 
-  if (match === undefined || match === null) {
+  if (options.submatches) {
+    for (let index = 0; index < options.submatches.length; index++) {
+      if (matches[index]?.length > 1) {
+        options.submatches[index].set(matches[index][1]);
+      } else {
+        options.submatches[index].clear();
+      }
+    }
+  }
+
+  if (matches.length === 0) {
     // @ts-ignore
     abap.builtin.sy.get().subrc.set(4);
   } else {
     // @ts-ignore
     abap.builtin.sy.get().subrc.set(0);
-    if (match?.index) {
-      options.offset?.set(match.index);
+    if (matches[0]?.index) {
+      options.offset?.set(matches[0].index);
     }
     if (options?.count) {
-      options.count?.set(1);
+      options.count?.set(matches.length);
     }
-    if (match[0]) {
-      options.length?.set(match[0].length);
+    if (options?.length) {
+      options.length?.set(matches[0][0].length);
     }
   }
 
