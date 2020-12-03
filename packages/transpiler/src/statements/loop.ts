@@ -12,19 +12,22 @@ export class LoopTranspiler implements IStatementTranspiler {
 
     const source = traversal.traverse(node.findDirectExpression(abaplint.Expressions.BasicSource));
 
-    const unique = UniqueIdentifier.get();
+    const unique1 = UniqueIdentifier.get();
     let target = "";
     const into = node.findDirectExpression(abaplint.Expressions.Target);
     if (into) {
-      target = traversal.traverse(into) + ".set(" + unique + ");";
+      target = traversal.traverse(into) + ".set(" + unique1 + ");";
     } else {
       const assigning = node.findFirstExpression(abaplint.Expressions.FieldSymbol);
       if (assigning) {
-        target = traversal.traverse(assigning) + " = " + unique + ";";
+        target = traversal.traverse(assigning) + " = " + unique1 + ";";
       }
     }
 
-    return "for (let " + unique + " of " + source + ".array()) {\n" +
+    const unique2 = UniqueIdentifier.get();
+    return "let " + unique2 + " = 1\n" +
+      "for (let " + unique1 + " of " + source + ".array()) {\n" +
+      "abap.builtin.sy.get().tabix.set(" + unique2 + "++);\n" +
       target;
   }
 

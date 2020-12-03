@@ -2275,4 +2275,50 @@ WRITE / lv_release.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("FIND FIRST occurrence, empty input with MATCH LENGTH", async () => {
+    const code = `
+  DATA iv_fullpath TYPE string.
+  DATA lv_cnt TYPE i.
+  DATA lv_len TYPE i.
+  FIND FIRST OCCURRENCE OF REGEX '^/(.*/)?' IN iv_fullpath MATCH COUNT lv_cnt MATCH LENGTH lv_len.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("concat via &", async () => {
+    const code = `
+  DATA mv_input TYPE string.
+  mv_input = |hello| & |world|.
+  WRITE mv_input.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("helloworld");
+  });
+
+  it("WRITE sy-tabix.", async () => {
+    const code = `WRITE sy-tabix.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
+  it("LOOP, should set sy-tabix", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DO 3 TIMES.
+    APPEND 'a' TO tab.
+  ENDDO.
+  DATA sdf TYPE i.
+  LOOP AT tab INTO sdf.
+    WRITE / sy-tabix.
+  ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n3");
+  });
+
 });
