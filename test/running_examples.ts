@@ -2321,4 +2321,15 @@ WRITE / lv_release.`;
     expect(abap.console.get()).to.equal("1\n2\n3");
   });
 
+  it("READ TABLE TRANSPORTING NO FIELDS", async () => {
+    const code = `
+    DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+    READ TABLE tab INDEX 1 TRANSPORTING NO FIELDS.
+    WRITE sy-subrc.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("4");
+  });
+
 });
