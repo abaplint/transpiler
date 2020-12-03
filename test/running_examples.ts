@@ -2286,4 +2286,15 @@ WRITE / lv_release.`;
     f(abap);
   });
 
+  it("concat via &", async () => {
+    const code = `
+  DATA mv_input TYPE string.
+  mv_input = |hello| & |world|.
+  WRITE mv_input.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("helloworld");
+  });
+
 });
