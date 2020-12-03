@@ -2297,4 +2297,12 @@ WRITE / lv_release.`;
     expect(abap.console.get()).to.equal("helloworld");
   });
 
+  it("WRITE sy-tabix.", async () => {
+    const code = `WRITE sy-tabix.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
 });
