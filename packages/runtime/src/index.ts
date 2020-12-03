@@ -24,7 +24,10 @@ export class ABAP {
   public constructor() {
     this.console = new Console();
     this.statements = new Statements(this.console);
-    builtin.sy.get().subrc.set(0); // todo, this should not be a singleton, it should be part of this instance
+
+    // todo, this should not be a singleton, it should be part of this instance
+    builtin.sy.get().subrc.set(0);
+    builtin.sy.get().tabix.set(0);
   }
 
   public async initDB(sql?: string) {

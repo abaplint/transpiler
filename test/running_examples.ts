@@ -2305,4 +2305,20 @@ WRITE / lv_release.`;
     expect(abap.console.get()).to.equal("0");
   });
 
+  it("LOOP, should set sy-tabix", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DO 3 TIMES.
+    APPEND 'a' TO tab.
+  ENDDO.
+  DATA sdf TYPE i.
+  LOOP AT tab INTO sdf.
+    WRITE / sy-tabix.
+  ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n3");
+  });
+
 });
