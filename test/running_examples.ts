@@ -2348,4 +2348,14 @@ WRITE / lv_release.`;
     f(abap);
   });
 
+  it("SPLIT empty string, should give empty table", async () => {
+    const code = `
+  DATA strs TYPE STANDARD TABLE OF string.
+  SPLIT || AT |a| INTO TABLE strs.
+  ASSERT lines( strs ) = 0.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
