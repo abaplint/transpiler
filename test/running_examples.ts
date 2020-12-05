@@ -2321,4 +2321,31 @@ WRITE / lv_release.`;
     expect(abap.console.get()).to.equal("1\n2\n3");
   });
 
+  it("READ TABLE TRANSPORTING NO FIELDS", async () => {
+    const code = `
+    DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+    READ TABLE tab INDEX 1 TRANSPORTING NO FIELDS.
+    WRITE sy-subrc.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("4");
+  });
+
+  it("integers div", async () => {
+    const code = `
+  DATA lv_int TYPE i.
+  lv_int = 5 / 2.
+  ASSERT lv_int = 3.
+  lv_int = 100 / 99.
+  ASSERT lv_int = 1.
+  lv_int = 5 / 3.
+  ASSERT lv_int = 2.
+  lv_int = 5 / 4.
+  ASSERT lv_int = 1.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });

@@ -20,12 +20,12 @@ export class ReadTableTranspiler implements IStatementTranspiler {
     let pre = "";
     let post = "";
     const rt = node.findDirectExpression(abaplint.Expressions.ReadTableTarget);
+    const target = rt?.findDirectExpression(abaplint.Expressions.Target);
     const fs = rt?.findDirectExpression(abaplint.Expressions.FSTarget);
     if (rt && fs) {
       const name = new FieldSymbolTranspiler().transpile(fs, traversal);
       pre = name + " = ";
-    } else {
-      const target = rt?.findDirectExpression(abaplint.Expressions.Target);
+    } else if (target) {
       const name = traversal.traverse(target);
       pre = name + ".set(";
       post = ")";

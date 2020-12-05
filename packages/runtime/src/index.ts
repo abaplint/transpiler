@@ -28,6 +28,7 @@ export class ABAP {
     // todo, this should not be a singleton, it should be part of this instance
     builtin.sy.get().subrc.set(0);
     builtin.sy.get().tabix.set(0);
+    builtin.sy.get().index.set(0);
   }
 
   public async initDB(sql?: string) {
