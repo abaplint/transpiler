@@ -12,15 +12,19 @@ export function split(param: ISplitOptions) {
   const source = typeof param.source === "string" ? param.source : param.source.get();
   const at = typeof param.at === "string" ? param.at : param.at.get();
 
+  const split = source.includes(at) ? source.split(at) : [];
+
   if (param.table) {
     param.table.clear();
-    for(const s of source.split(at)) {
+    for(const s of split) {
       param.table.append(new String().set(s));
     }
   }
 
   if (param.targets) {
-    const split = source.split(at);
+    if (split.length === 0) {
+      split.push(source);
+    }
     for (let i = 0; i < param.targets.length; i++) {
       param.targets[i].clear();
       if (split[i]) {
