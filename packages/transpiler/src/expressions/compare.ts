@@ -9,7 +9,7 @@ export class CompareTranspiler implements IExpressionTranspiler {
 
     const concat = node.concatTokens();
 
-    const pre = concat.startsWith("NOT") ? "!" : "";
+    let pre = concat.startsWith("NOT") ? "!" : "";
 
     const sources = node.findDirectExpressions(Expressions.Source);
     if (sources.length === 1) {
@@ -28,6 +28,9 @@ export class CompareTranspiler implements IExpressionTranspiler {
       const s1 = traversal.traverse(sources[1]);
       return pre + "abap.compare." + operator + "(" + s0 + ", " + s1 + ")";
     } else if (sources.length === 3 && node.findDirectTokenByText("BETWEEN")) {
+      if (concat.search("NOT BETWEEN") >= 0) {
+        pre = pre === "!" ? "" : "!";
+      }
       const s0 = traversal.traverse(sources[0]);
       const s1 = traversal.traverse(sources[1]);
       const s2 = traversal.traverse(sources[2]);
