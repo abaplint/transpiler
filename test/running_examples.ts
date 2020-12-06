@@ -1636,6 +1636,16 @@ write if.`;
     f(abap);
   });
 
+  it("NOT BETWEEN comparator", async () => {
+    const code = `
+  ASSERT 8 NOT BETWEEN 1 AND 5.
+  ASSERT NOT 3 NOT BETWEEN 2 AND 5.
+  ASSERT NOT 8 BETWEEN 1 AND 5.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
   it("structured constant", async () => {
     const code = `
 CONSTANTS: BEGIN OF lc_msg,
