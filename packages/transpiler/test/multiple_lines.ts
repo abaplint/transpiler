@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import {expect} from "chai";
 import {runSingle} from "./_utils";
 
@@ -434,6 +435,23 @@ function bar() {
   bar.set(new lcl_bar({input: constant_42}));
 }`;
 
+    expect(await runSingle(abap)).to.equal(expected);
+  });
+
+  it("FIND REGEX", async () => {
+    const abap = `
+    DATA lv_offset TYPE i.
+    DATA lv_length TYPE i.
+    DATA lv_line TYPE string.
+    DATA lv_count TYPE string.
+    DATA lv_color TYPE string.
+    FIND REGEX 'abc' IN lv_line MATCH OFFSET lv_offset MATCH LENGTH lv_length SUBMATCHES lv_count lv_color.`;
+    const expected = `let lv_offset = new abap.types.Integer();
+let lv_length = new abap.types.Integer();
+let lv_line = new abap.types.String();
+let lv_count = new abap.types.String();
+let lv_color = new abap.types.String();
+abap.statements.find(lv_line, {regex: 'abc', offset: lv_offset, length: lv_length, submatches: [lv_count,lv_color]});`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 

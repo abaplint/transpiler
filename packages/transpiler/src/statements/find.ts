@@ -40,6 +40,9 @@ export class FindTranspiler implements IStatementTranspiler {
     if (firstSubmatch) {
       const submatches: string[] = [];
       for (const t of node.findDirectExpressions(abaplint.Expressions.Target)) {
+        if (t === len || t === cnt || t === off) {
+          continue;
+        }
         submatches.push(traversal.traverse(t));
       }
       options.push("submatches: [" + submatches.join(",") + "]");
