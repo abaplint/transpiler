@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 class UnitTestMethodResult {
   public result: "Pass" | "Fail" | "Skip" | undefined = undefined;
 
@@ -70,7 +71,7 @@ export class UnitTestResult {
         ret += `    <collection name="${clas.name}">\n`;
         for (const meth of clas.methods) {
           ret += `      ` +
-            `<test name="${meth.name}" type="${obj.name}.${clas.name}" method="${meth.name}" time="0" result="${meth.result}"></test>\n`;
+            `<test name="${obj.name}.${clas.name}.${meth.name}" type="${obj.name}.${clas.name}" method="${obj.name}.${clas.name}.${meth.name}" time="0" result="${meth.result}"></test>\n`;
         }
         ret += `    </collection>\n`;
       }
