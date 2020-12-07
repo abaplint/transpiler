@@ -2368,4 +2368,14 @@ WRITE / lv_release.`;
     f(abap);
   });
 
+  it("SPLIT non-empty string, should give non-empty table", async () => {
+    const code = `
+    DATA lt_tab TYPE STANDARD TABLE OF string.
+    SPLIT |sdfds| AT |AA| INTO TABLE lt_tab.
+    ASSERT lines( lt_tab ) = 1.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });

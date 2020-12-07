@@ -19,6 +19,9 @@ export function split(param: ISplitOptions) {
     for(const s of split) {
       param.table.append(new String().set(s));
     }
+    if (source !== "" && split.length === 0) {
+      param.table.append(new String().set(source));
+    }
   }
 
   if (param.targets) {
