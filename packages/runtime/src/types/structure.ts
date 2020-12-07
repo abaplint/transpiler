@@ -1,3 +1,5 @@
+import {clone} from "../clone";
+
 export class Structure {
   private readonly value: any;
 
@@ -22,7 +24,7 @@ export class Structure {
     const obj = input.get();
     for (const f in obj) {
       // @ts-ignore
-      this.value[f].set(obj[f].get());
+      this.value[f].set(clone(obj[f]));
     }
     return this;
   }

@@ -2378,4 +2378,19 @@ WRITE / lv_release.`;
     f(abap);
   });
 
+  it("deep structure, move", async () => {
+    const code = `
+TYPES: BEGIN OF ty_deep,
+         field TYPE string,
+         tab   TYPE STANDARD TABLE OF i WITH DEFAULT KEY,
+       END OF ty_deep.
+
+DATA data1 TYPE ty_deep.
+DATA data2 TYPE ty_deep.
+data1 = data2.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
