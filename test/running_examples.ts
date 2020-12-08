@@ -2439,4 +2439,20 @@ ASSERT sy-subrc = 4.`;
     f(abap);
   });
 
+  it("LOOP AT WHERE", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA line LIKE LINE OF tab.
+  DO 5 TIMES.
+    APPEND sy-index TO tab.
+  ENDDO.
+  LOOP AT tab INTO line WHERE table_line <> 3.
+    WRITE / line.
+  ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n4\n5");
+  });
+
 });

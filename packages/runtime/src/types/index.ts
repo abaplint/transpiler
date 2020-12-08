@@ -1,5 +1,6 @@
 export * from "./abap_object";
 export * from "./character";
+export * from "./field_symbol";
 export * from "./hex";
 export * from "./integer";
 export * from "./numc";
