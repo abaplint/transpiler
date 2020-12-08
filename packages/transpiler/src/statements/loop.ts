@@ -1,6 +1,7 @@
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
+import {UniqueIdentifier} from "../unique_identifier";
 
 export class LoopTranspiler implements IStatementTranspiler {
 
@@ -11,21 +12,22 @@ export class LoopTranspiler implements IStatementTranspiler {
 
     const source = traversal.traverse(node.findDirectExpression(abaplint.Expressions.BasicSource));
 
+    const unique1 = UniqueIdentifier.get();
     let target = "";
     const into = node.findDirectExpression(abaplint.Expressions.Target);
     if (into) {
-      target = traversal.traverse(into);
+      target = traversal.traverse(into) + ".set(" + unique1 + ");";
     } else {
       const assigning = node.findFirstExpression(abaplint.Expressions.FieldSymbol);
       if (assigning) {
-        target = traversal.traverse(assigning);
+        target = traversal.traverse(assigning) + ".assign(" + unique1 + ");";
       }
     }
 
     const whereNode = node.findFirstExpression(abaplint.Expressions.ComponentCond);
-    const where = whereNode ? traversal.traverse(whereNode) : undefined;
+    const where = whereNode ? ", " + traversal.traverse(whereNode) : "";
 
-    return `abap.statements.loop(${source}, ${target}, ${where}, () => {`;
+    return `for (const ${unique1} of abap.statements.loop(${source}${where})) {\n  ${target}`;
   }
 
 }

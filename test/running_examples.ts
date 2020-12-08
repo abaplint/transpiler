@@ -2455,4 +2455,45 @@ ASSERT sy-subrc = 4.`;
     expect(abap.console.get()).to.equal("1\n2\n4\n5");
   });
 
+  it("LOOP AT nothing with CONTINUE and EXIT", async () => {
+    const code = `
+    DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+    DATA row LIKE LINE OF tab.
+    LOOP AT tab INTO row.
+      CONTINUE.
+    ENDLOOP.
+    LOOP AT tab INTO row.
+      EXIT.
+    ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("Field symbols mess", async () => {
+    const code = `
+  DATA act TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA exp TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA index TYPE i.
+  FIELD-SYMBOLS <tab1> TYPE INDEX TABLE.
+  FIELD-SYMBOLS <row1> TYPE any.
+  FIELD-SYMBOLS <tab2> TYPE INDEX TABLE.
+  FIELD-SYMBOLS <row2> TYPE any.
+  APPEND 1 TO act.
+  APPEND 1 TO exp.
+  ASSIGN act TO <tab1>.
+  ASSIGN exp TO <tab2>.
+  DO lines( act ) TIMES.
+    index = sy-index.
+    READ TABLE <tab1> INDEX index ASSIGNING <row1>.
+    ASSERT sy-subrc = 0.
+    READ TABLE <tab2> INDEX index ASSIGNING <row2>.
+    ASSERT sy-subrc = 0.
+    ASSERT <row1> = <row2>.
+  ENDDO.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });

@@ -1,8 +1,9 @@
 import {INumeric} from "./_numeric";
 import {ICharacter} from "./_character";
 import {ABAPObject} from "./abap_object";
+import {Table} from "./table";
 
-type PointerType = INumeric | ICharacter | ABAPObject | undefined;
+type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined;
 
 export class FieldSymbol  {
   private pointer: PointerType;
@@ -27,7 +28,13 @@ export class FieldSymbol  {
   }
 
   public get() {
+    // @ts-ignore
     return this.pointer?.get();
+  }
+
+  public array() {
+    // @ts-ignore
+    return this.pointer?.array();
   }
 
   public set(value: any) {
