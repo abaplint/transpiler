@@ -1,4 +1,4 @@
-import {Table} from "../types";
+import {FieldSymbol, Table} from "../types";
 import {INumeric} from "../types/_numeric";
 
 export interface IReadTableOptions {
@@ -6,11 +6,11 @@ export interface IReadTableOptions {
   withKey?: (i: any) => boolean,
 }
 
-export function readTable(table: Table, options?: IReadTableOptions) {
+export function readTable(table: Table | FieldSymbol, options?: IReadTableOptions) {
 
   let found: any = undefined;
 
-  const arr = table.array();
+  const arr = table instanceof Table ? table.array() : table.get().array();
 
   if (options?.index) {
     let index = options.index;
