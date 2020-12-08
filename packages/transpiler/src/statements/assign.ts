@@ -8,7 +8,7 @@ export class AssignTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
     const source = new SourceTranspiler(false).transpile(node.findDirectExpression(abaplint.Expressions.Source)!, traversal);
     const fs = new FieldSymbolTranspiler().transpile(node.findFirstExpression(abaplint.Expressions.FieldSymbol)!, traversal);
-    return fs + " = " + source + ";";
+    return fs + ".assign(" + source + ");";
   }
 
 }

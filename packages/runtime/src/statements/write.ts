@@ -1,7 +1,8 @@
+import {FieldSymbol} from "../types/field_symbol";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
-export function write(source: INumeric | ICharacter | string | number, options?: {newLine?: boolean}) {
+export function write(source: INumeric | ICharacter | FieldSymbol | string | number, options?: {newLine?: boolean}) {
   if (options?.newLine === true && this.console.get().length > 0) {
     this.console.add("\n");
   }

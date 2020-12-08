@@ -1,6 +1,7 @@
 import {append} from "./append";
 import {assert} from "./assert";
 import {clear} from "./clear";
+import {loop} from "./loop";
 import {concatenate} from "./concatenate";
 import {condense} from "./condense";
 import {deleteInternal} from "./delete_internal";
@@ -40,6 +41,7 @@ export class Statements {
   public sort = sort;
   public split = split;
   public translate = translate;
+  public loop = loop;
   public write = write;
 
   // @ts-ignore
