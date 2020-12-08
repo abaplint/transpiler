@@ -22,14 +22,10 @@ export class LoopTranspiler implements IStatementTranspiler {
       }
     }
 
-    return `abap.statements.loop(${source}, ${target}, () => {`;
-/*
-    const unique2 = UniqueIdentifier.get();
-    return "let " + unique2 + " = 1\n" +
-      "for (let " + unique1 + " of " + source + ".array()) {\n" +
-      "abap.builtin.sy.get().tabix.set(" + unique2 + "++);\n" +
-      target;
-*/
+    const whereNode = node.findFirstExpression(abaplint.Expressions.ComponentCond);
+    const where = whereNode ? traversal.traverse(whereNode) : undefined;
+
+    return `abap.statements.loop(${source}, ${target}, ${where}, () => {`;
   }
 
 }
