@@ -2428,4 +2428,15 @@ ASSERT sy-subrc = 4.`;
     f(abap);
   });
 
+  it("to_upper()", async () => {
+    const code = `
+  DATA bar TYPE string VALUE 'BAR'.
+  ASSERT to_upper( |bar| ) = |BAR|.
+  ASSERT to_upper( |bar| ) = bar.
+  ASSERT to_upper( bar ) = bar.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
