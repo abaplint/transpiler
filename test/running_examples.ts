@@ -2393,4 +2393,50 @@ data1 = data2.`;
     f(abap);
   });
 
+  it("basic substring", async () => {
+    const code = `ASSERT substring( val = |abc| off = 1 len = 1 ) = |b|.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("READ TABLE WITH KEY", async () => {
+    const code = `
+TYPES: BEGIN OF ty_structure,
+         field TYPE i,
+       END OF ty_structure.
+
+DATA tab TYPE STANDARD TABLE OF ty_structure WITH DEFAULT KEY.
+DATA line LIKE LINE OF tab.
+
+line-field = 2.
+APPEND line TO tab.
+line-field = 5.
+APPEND line TO tab.
+ASSERT lines( tab ) = 2.
+
+CLEAR line.
+
+READ TABLE tab INTO line WITH KEY field = 2.
+ASSERT sy-subrc = 0.
+ASSERT line-field = 2.
+
+READ TABLE tab INTO line WITH KEY field = 123.
+ASSERT sy-subrc = 4.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("to_upper()", async () => {
+    const code = `
+  DATA bar TYPE string VALUE 'BAR'.
+  ASSERT to_upper( |bar| ) = |BAR|.
+  ASSERT to_upper( |bar| ) = bar.
+  ASSERT to_upper( bar ) = bar.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });

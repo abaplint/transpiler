@@ -5,6 +5,8 @@ export * from "./count";
 export * from "./condense";
 export * from "./lines";
 export * from "./strlen";
+export * from "./to_upper";
+export * from "./substring";
 export * from "./sy";
 export * from "./boolc";
 export * from "./reverse";
