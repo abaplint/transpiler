@@ -2393,4 +2393,11 @@ data1 = data2.`;
     f(abap);
   });
 
+  it("basic substring", async () => {
+    const code = `ASSERT substring( val = |abc| off = 1 len = 1 ) = |b|.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
