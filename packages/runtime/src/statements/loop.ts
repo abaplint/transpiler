@@ -2,7 +2,7 @@ import {Structure, Table} from "../types";
 
 export function* loop(
   table: Table,
-  where: (i: any) => boolean | undefined) {
+  where?: (i: any) => boolean | undefined) {
 
   const array = table.array();
   for (let i = 0; i < array.length; i++) {

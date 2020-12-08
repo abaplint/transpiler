@@ -25,9 +25,9 @@ export class LoopTranspiler implements IStatementTranspiler {
     }
 
     const whereNode = node.findFirstExpression(abaplint.Expressions.ComponentCond);
-    const where = whereNode ? traversal.traverse(whereNode) : undefined;
+    const where = whereNode ? ", " + traversal.traverse(whereNode) : "";
 
-    return `for (const ${unique1} of abap.statements.loop(${source}, ${where})) {\n  ${target}`;
+    return `for (const ${unique1} of abap.statements.loop(${source}${where})) {\n  ${target}`;
   }
 
 }
