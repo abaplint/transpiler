@@ -10,7 +10,7 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
 
   let found: any = undefined;
 
-  const arr = table instanceof Table ? table.array() : table.get().array();
+  const arr = table.array();
 
   if (options?.index) {
     let index = options.index;

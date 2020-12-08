@@ -2470,4 +2470,30 @@ ASSERT sy-subrc = 4.`;
     f(abap);
   });
 
+  it("Field symbols mess", async () => {
+    const code = `
+  DATA act TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA exp TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA index TYPE i.
+  FIELD-SYMBOLS <tab1> TYPE INDEX TABLE.
+  FIELD-SYMBOLS <row1> TYPE any.
+  FIELD-SYMBOLS <tab2> TYPE INDEX TABLE.
+  FIELD-SYMBOLS <row2> TYPE any.
+  APPEND 1 TO act.
+  APPEND 1 TO exp.
+  ASSIGN act TO <tab1>.
+  ASSIGN exp TO <tab2>.
+  DO lines( act ) TIMES.
+    index = sy-index.
+    READ TABLE <tab1> INDEX index ASSIGNING <row1>.
+    ASSERT sy-subrc = 0.
+    READ TABLE <tab2> INDEX index ASSIGNING <row2>.
+    ASSERT sy-subrc = 0.
+    ASSERT <row1> = <row2>.
+  ENDDO.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
