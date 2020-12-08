@@ -1,12 +1,8 @@
-import {INumeric} from "../types/_numeric";
-import {ICharacter} from "../types/_character";
-import {FieldSymbol, Structure, Table} from "../types";
+import {Structure, Table} from "../types";
 
-export function loop(
+export function* loop(
   table: Table,
-  into: ICharacter | INumeric | Structure | FieldSymbol,
-  where: (i: any) => boolean | undefined,
-  callback: () => void) {
+  where: (i: any) => boolean | undefined) {
 
   const array = table.array();
   for (let i = 0; i < array.length; i++) {
@@ -20,13 +16,6 @@ export function loop(
       }
     }
 
-    if (into instanceof FieldSymbol) {
-      into.assign(array[i]);
-    } else if (into?.set) {
-      into.set(array[i]);
-    } else {
-      into = array[i]; // its a field symbol
-    }
-    callback();
+    yield array[i];
   }
 }
