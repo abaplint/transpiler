@@ -31,6 +31,20 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       post = ")";
     }
 
+    const compare = node.findDirectExpression(abaplint.Expressions.ComponentCompareSimple);
+    if (compare) {
+      const components = compare.findDirectExpressions(abaplint.Expressions.ComponentChain);
+      const sources = compare.findDirectExpressions(abaplint.Expressions.Source);
+      if (components.length !== sources.length) {
+        throw new Error("READ TABLE, transpiler unexpected lengths");
+      }
+      const conds: string[] = [];
+      for (let i = 0; i < components.length; i++) {
+        conds.push("abap.compare.eq(i.get()." + components[i].concatTokens() + ", " + traversal.traverse(sources[i]) + ")");
+      }
+      extra.push("withKey: (i) => {return " + conds.join(" && ") + ";}");
+    }
+
     let concat = "";
     if (extra.length > 0) {
       concat = ",{" + extra.join(",") + "}";

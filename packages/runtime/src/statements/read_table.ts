@@ -3,11 +3,14 @@ import {INumeric} from "../types/_numeric";
 
 export interface IReadTableOptions {
   index?: INumeric | number,
+  withKey?: (i: any) => boolean,
 }
 
-export function readTable(table: Table, options?: IReadTableOptions): void {
+export function readTable(table: Table, options?: IReadTableOptions) {
 
   let found: any = undefined;
+
+  const arr = table.array();
 
   if (options?.index) {
     let index = options.index;
@@ -15,7 +18,18 @@ export function readTable(table: Table, options?: IReadTableOptions): void {
       index = index.get();
     }
 
-    found = table.array()[index - 1];
+    found = arr[index - 1];
+  } else if (options?.withKey) {
+    // eslint-disable-next-line @typescript-eslint/prefer-for-of
+    for (let i = 0; i < arr.length; i++) {
+      if (options.withKey(arr[i]) === true) {
+        found = arr[i];
+        break;
+      }
+    }
+
+  } else {
+    throw new Error("runtime, readTable, unexpected input");
   }
 
   const subrc = found ? 0 : 4;
