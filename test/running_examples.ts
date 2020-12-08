@@ -2455,4 +2455,19 @@ ASSERT sy-subrc = 4.`;
     expect(abap.console.get()).to.equal("1\n2\n4\n5");
   });
 
+  it("LOOP AT nothing with CONTINUE and EXIT", async () => {
+    const code = `
+    DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+    DATA row LIKE LINE OF tab.
+    LOOP AT tab INTO row.
+      CONTINUE.
+    ENDLOOP.
+    LOOP AT tab INTO row.
+      EXIT.
+    ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
