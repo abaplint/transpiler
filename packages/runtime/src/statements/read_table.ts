@@ -1,4 +1,4 @@
-import {FieldSymbol, Table} from "../types";
+import {FieldSymbol, Structure, Table} from "../types";
 import {INumeric} from "../types/_numeric";
 
 export interface IReadTableOptions {
@@ -22,7 +22,8 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
   } else if (options?.withKey) {
     // eslint-disable-next-line @typescript-eslint/prefer-for-of
     for (let i = 0; i < arr.length; i++) {
-      if (options.withKey(arr[i]) === true) {
+      const row = arr[i] instanceof Structure ? arr[i].get() : {table_line: arr[i]};
+      if (options.withKey(row) === true) {
         found = arr[i];
         break;
       }

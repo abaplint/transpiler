@@ -83,7 +83,7 @@ describe("Single statements", () => {
     {abap: "<name> = 1.",                             js: "fs_name_.set(constant_1);",                                      skip: false},
     {abap: "CONSTANTS c TYPE i VALUE 1.",             js: "let c = new abap.types.Integer();\nc.set(1);",           skip: false},
     {abap: "READ TABLE tab INDEX i INTO target.",          js: "target.set(abap.statements.readTable(tab,{index: i}));", skip: false},
-    {abap: "READ TABLE tab INTO line WITH KEY field = 2.", js: "line.set(abap.statements.readTable(tab,{withKey: (i) => {return abap.compare.eq(i.get().field, constant_2);}}));", skip: false},
+    {abap: "READ TABLE tab INTO line WITH KEY field = 2.", js: "line.set(abap.statements.readTable(tab,{withKey: (i) => {return abap.compare.eq(i.field, constant_2);}}));", skip: false},
     {abap: "READ TABLE tab INDEX i ASSIGNING <nam>.",      js: "fs_nam_ = abap.statements.readTable(tab,{index: i});",   skip: false},
     {abap: "MODIFY result INDEX 1 FROM 4.",           js: "abap.statements.modifyInternal(result,{index: constant_1,from: constant_4});",   skip: false},
     {abap: "WRITE |foo| && |bar|.",                   js: "abap.statements.write(`foo` + `bar`);",                 skip: false},
