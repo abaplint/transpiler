@@ -40,7 +40,7 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       }
       const conds: string[] = [];
       for (let i = 0; i < components.length; i++) {
-        conds.push("abap.compare.eq(i.get()." + components[i].concatTokens() + ", " + traversal.traverse(sources[i]) + ")");
+        conds.push("abap.compare.eq(i." + components[i].concatTokens() + ", " + traversal.traverse(sources[i]) + ")");
       }
       extra.push("withKey: (i) => {return " + conds.join(" && ") + ";}");
     }

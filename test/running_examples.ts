@@ -2496,4 +2496,17 @@ ASSERT sy-subrc = 4.`;
     f(abap);
   });
 
+  it("READ TABLE table_line", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF i.
+  APPEND 2 TO tab.
+  READ TABLE tab WITH KEY table_line = 2 TRANSPORTING NO FIELDS.
+  ASSERT sy-subrc = 0.
+  READ TABLE tab WITH KEY table_line = 123 TRANSPORTING NO FIELDS.
+  ASSERT sy-subrc = 4.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
