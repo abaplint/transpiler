@@ -2509,4 +2509,25 @@ ASSERT sy-subrc = 4.`;
     f(abap);
   });
 
+  it("escape()", async () => {
+    const code = `
+  CONSTANTS e_html_text TYPE i VALUE 4.
+  CONSTANTS e_html_attr TYPE i VALUE 5.
+  CONSTANTS e_url TYPE i VALUE 12.
+  DATA lv_result TYPE string.
+  lv_result = escape( val = |abc123&<>"'| format = e_html_attr ).
+  WRITE / lv_result.
+  lv_result = escape( val = |abc123&<>"'| format = e_html_text ).
+  WRITE / lv_result.
+  lv_result = escape( val = |abc123&<>"'| format = e_url ).
+  WRITE / lv_result.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal(
+      `abc123&amp;&lt;&gt;&quot;&#39;\n` +
+      `abc123&amp;&lt;&gt;"'\n` +
+      `abc123&%3C%3E%22'`);
+  });
+
 });
