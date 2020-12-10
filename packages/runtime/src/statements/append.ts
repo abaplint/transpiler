@@ -1,7 +1,5 @@
-import {INumeric} from "../types/_numeric";
-import {ICharacter} from "../types/_character";
-import {Table} from "../types";
+import {Table, TableRowType} from "../types";
 
-export function append(input: {source: number | string | INumeric | ICharacter | Table, target: Table}) {
+export function append(input: {source: TableRowType, target: Table}) {
   input.target.append(input.source);
 }

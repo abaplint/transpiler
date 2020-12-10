@@ -2509,4 +2509,87 @@ ASSERT sy-subrc = 4.`;
     f(abap);
   });
 
+  it("escape()", async () => {
+    const code = `
+  CONSTANTS e_html_text TYPE i VALUE 4.
+  CONSTANTS e_html_attr TYPE i VALUE 5.
+  CONSTANTS e_url TYPE i VALUE 12.
+  DATA lv_result TYPE string.
+  lv_result = escape( val = |abc123&<>"'| format = e_html_attr ).
+  WRITE / lv_result.
+  lv_result = escape( val = |abc123&<>"'| format = e_html_text ).
+  WRITE / lv_result.
+  lv_result = escape( val = |abc123&<>"'| format = e_url ).
+  WRITE / lv_result.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal(
+      `abc123&amp;&lt;&gt;&quot;&#39;\n` +
+      `abc123&amp;&lt;&gt;"'\n` +
+      `abc123&%3C%3E%22'`);
+  });
+
+  it("FIND RESULTS, 1", async () => {
+    const code = `
+TYPES: BEGIN OF ty_submatch,
+         offset TYPE i,
+         length TYPE i,
+       END OF ty_submatch.
+
+TYPES: BEGIN OF ty_match,
+         line       TYPE i,
+         offset     TYPE i,
+         length     TYPE i,
+         submatches TYPE STANDARD TABLE OF ty_submatch WITH DEFAULT KEY,
+       END OF ty_match.
+
+DATA lt_matches TYPE STANDARD TABLE OF ty_match WITH DEFAULT KEY.
+DATA ls_match LIKE LINE OF lt_matches.
+
+FIND REGEX |bar| IN |hello bar world| RESULTS lt_matches.
+ASSERT lines( lt_matches ) = 1.
+READ TABLE lt_matches INDEX 1 INTO ls_match.
+ASSERT ls_match-line = 0.
+ASSERT ls_match-offset = 6.
+ASSERT ls_match-length = 3.
+ASSERT lines( ls_match-submatches ) = 0.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("FIND RESULTS, 2", async () => {
+    const code = `
+    TYPES: BEGIN OF ty_submatch,
+    offset TYPE i,
+    length TYPE i,
+  END OF ty_submatch.
+
+TYPES: BEGIN OF ty_match,
+    line       TYPE i,
+    offset     TYPE i,
+    length     TYPE i,
+    submatches TYPE STANDARD TABLE OF ty_submatch WITH DEFAULT KEY,
+  END OF ty_match.
+
+DATA lt_matches TYPE STANDARD TABLE OF ty_match WITH DEFAULT KEY.
+DATA ls_match LIKE LINE OF lt_matches.
+DATA ls_submatch LIKE LINE OF ls_match-submatches.
+
+FIND REGEX |(bar)| IN |hello bar bar world| RESULTS lt_matches.
+ASSERT lines( lt_matches ) = 1.
+
+FIND ALL OCCURRENCES OF REGEX |(bar)| IN |hello bar bar world| RESULTS lt_matches.
+ASSERT lines( lt_matches ) = 2.
+READ TABLE lt_matches INDEX 1 INTO ls_match.
+ASSERT lines( ls_match-submatches ) = 1.
+READ TABLE ls_match-submatches INDEX 1 INTO ls_submatch.
+ASSERT ls_submatch-offset = 6.
+ASSERT ls_submatch-length = 3.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });

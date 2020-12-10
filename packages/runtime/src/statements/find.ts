@@ -1,3 +1,4 @@
+import {Integer, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -8,6 +9,7 @@ export interface IFindOptions {
   offset?: INumeric,
   length?: INumeric,
   count?: INumeric,
+  results?: Table,
   submatches?: ICharacter[],
 }
 
@@ -53,6 +55,35 @@ export function find(input: ICharacter | string, options: IFindOptions) {
         options.submatches[index].set(matches[0][index + 1]);
       } else {
         options.submatches[index].clear();
+      }
+    }
+  }
+
+  if (options.results) {
+// assumption, results is a table with the correct type
+    options.results.clear();
+    for (const m of matches) {
+      const match = new Structure({
+        line: new Integer(),
+        offset: new Integer(),
+        length: new Integer(),
+        submatches: new Table(new Structure({offset: new Integer(), length: new Integer()})),
+      });
+
+      match.get().line.set(0); // todo
+      match.get().offset.set(m.index);
+      match.get().length.set(m[0].length);
+
+      if (m.length === 2) {
+        const submatch = new Structure({offset: new Integer(), length: new Integer()});
+        submatch.get().offset.set(m.index);
+        submatch.get().length.set(m[0].length);
+        match.get().submatches.append(submatch);
+      }
+
+      options.results.append(match);
+      if (options.first === undefined || options.first === true) {
+        break;
       }
     }
   }

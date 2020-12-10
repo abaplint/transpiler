@@ -4,6 +4,7 @@ export * from "./concat_lines_of";
 export * from "./count";
 export * from "./condense";
 export * from "./lines";
+export * from "./escape";
 export * from "./strlen";
 export * from "./to_upper";
 export * from "./substring";

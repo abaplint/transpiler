@@ -4,12 +4,15 @@ import {Integer} from "./integer";
 import {ABAPObject} from "./abap_object";
 import {String} from "./string";
 import {clone} from "../clone";
+import {Structure} from "./structure";
+
+export type TableRowType = INumeric | Structure | ICharacter | Table | ABAPObject | string | number;
 
 export class Table  {
   private value: any[];
-  private readonly rowType: INumeric | ICharacter | Table | ABAPObject;
+  private readonly rowType: TableRowType;
 
-  public constructor(rowType: INumeric | ICharacter | Table | ABAPObject) {
+  public constructor(rowType: TableRowType) {
     this.value = [];
     this.rowType = rowType;
   }
@@ -29,7 +32,7 @@ export class Table  {
     }
   }
 
-  public append(item: number | string | INumeric | ICharacter | Table | ABAPObject) {
+  public append(item: TableRowType) {
     if (typeof item === "number") {
       this.value.push(new Integer().set(item));
     } else if (typeof item === "string") {

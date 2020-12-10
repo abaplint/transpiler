@@ -15,8 +15,10 @@ export class FindTranspiler implements IStatementTranspiler {
       options.push("find: " + source0);
     }
 
-    if (node.concatTokens().toUpperCase().startsWith("FIND FIRST")) {
+    if (node.concatTokens().toUpperCase().startsWith("FIND FIRST OCCURRENCE OF ")) {
       options.push("first: true");
+    } else if (node.concatTokens().toUpperCase().startsWith("FIND ALL OCCURRENCES OF ")) {
+      options.push("first: false");
     }
 
     const source1 = traversal.traverse(sources[1]);
@@ -34,6 +36,11 @@ export class FindTranspiler implements IStatementTranspiler {
     const len = node.findExpressionAfterToken("LENGTH");
     if (len) {
       options.push("length: " + traversal.traverse(len));
+    }
+
+    const res = node.findExpressionAfterToken("RESULTS");
+    if (res) {
+      options.push("results: " + traversal.traverse(res));
     }
 
     const firstSubmatch = node.findExpressionAfterToken("SUBMATCHES");
