@@ -201,6 +201,25 @@ describe("Running Examples", () => {
     expect(abap.console.get()).to.equal("1\n2");
   });
 
+  it("Basic sort table, descending", async() => {
+    const code = `
+    DATA: table   TYPE STANDARD TABLE OF i,
+          integer TYPE i.
+    APPEND 2 TO table.
+    APPEND 3 TO table.
+    APPEND 1 TO table.
+    SORT table DESCENDING.
+    LOOP AT table INTO integer.
+      WRITE / integer.
+    ENDLOOP.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("3\n2\n1");
+
+  });
+
   it("Should throw an error if invalid code is requested to be transpiled", async () => {
     const code = `THIS IS NOT ABAP.`;
 
