@@ -12,6 +12,8 @@ Target is [ES6](http://es6-features.org)
 
 Planned database support: [SQLite](https://www.sqlite.org) & [HANA Express](https://www.sap.com/cmp/td/sap-hana-express-edition.html)
 
+Playground: https://transpiler.abaplint.org
+
 ## Technical
 * Fixed point arithmetic is always enabled
 * Everything will run as unicode, targeting [UCS-2](https://en.wikipedia.org/wiki/Universal_Coded_Character_Set)
