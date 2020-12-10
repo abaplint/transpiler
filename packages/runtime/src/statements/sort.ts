@@ -7,7 +7,7 @@ export function sort(input: Table, options?: {descending?: boolean}) {
   items.sort((a, b) => {
     if (eq(a,b)) {
       return 0;
-    } else if (descending && (gt(a,b)))  {
+    } else if (descending && gt(a,b))  {
       return -1;
     } else if (!descending && lt(a ,b)) {
       return -1;
