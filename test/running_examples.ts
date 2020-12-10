@@ -2592,4 +2592,30 @@ ASSERT ls_submatch-length = 3.`;
     f(abap);
   });
 
+  it("FIND RESULTS, 3", async () => {
+    const code = `
+    TYPES: BEGIN OF ty_submatch,
+    offset TYPE i,
+    length TYPE i,
+  END OF ty_submatch.
+
+TYPES: BEGIN OF ty_match,
+    line       TYPE i,
+    offset     TYPE i,
+    length     TYPE i,
+    submatches TYPE STANDARD TABLE OF ty_submatch WITH DEFAULT KEY,
+  END OF ty_match.
+
+DATA lt_matches TYPE STANDARD TABLE OF ty_match WITH DEFAULT KEY.
+DATA find TYPE string.
+find = 'aa'.
+DATA in TYPE string.
+in = 'fooaabar'.
+FIND ALL OCCURRENCES OF REGEX find IN in RESULTS lt_matches.
+ASSERT lines( lt_matches ) = 1.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
