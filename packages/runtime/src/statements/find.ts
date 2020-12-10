@@ -5,7 +5,7 @@ import {INumeric} from "../types/_numeric";
 export interface IFindOptions {
   find?: ICharacter | string,
   first?: boolean,
-  regex?: string,
+  regex?: string | ICharacter,
   offset?: INumeric,
   length?: INumeric,
   count?: INumeric,
@@ -34,7 +34,11 @@ export function find(input: ICharacter | string, options: IFindOptions) {
     if (options.regex === "") {
       throw "FIND, runtime, no input, regex empty";
     }
-    s = new RegExp(options.regex, "g");
+    let r = options.regex;
+    if (typeof r !== "string") {
+      r = r.get();
+    }
+    s = new RegExp(r, "g");
   } else {
     throw "FIND, runtime, no input";
   }
