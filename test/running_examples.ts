@@ -2681,7 +2681,7 @@ ASSERT lines( lt_matches ) = 1.`;
   
   DATA number TYPE i.
   DATA struct TYPE ty_struct.
-  DATA test_string TYPE string.
+  DATA test_string TYPE c LENGTH 100.
   
   test_string = '0123456789012'.
   number = 3.
