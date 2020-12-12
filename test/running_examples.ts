@@ -2823,4 +2823,16 @@ WRITE <lv_val>.`;
     expect(abap.console.get()).to.equal("4 * 8 = 32");
   });
 
+  it("IS ASSIGNED", async () => {
+    const code = `
+  FIELD-SYMBOLS <bar> TYPE i.
+  ASSERT <bar> IS NOT ASSIGNED.
+  ASSERT NOT <bar> IS ASSIGNED.
+  ASSIGN 2 TO <bar>.
+  ASSERT <bar> IS ASSIGNED.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });

@@ -29,6 +29,13 @@ export class CompareTranspiler implements IExpressionTranspiler {
         return "abap.compare.initial(" + s0 + ") === false";
       }
 
+      if ((concat.startsWith("NOT") && concat.endsWith("IS ASSIGNED"))
+          || concat.endsWith("IS NOT ASSIGNED")) {
+        return "abap.compare.assigned(" + s0 + ") === false";
+      } else if (concat.endsWith("IS ASSIGNED")) {
+        return "abap.compare.assigned(" + s0 + ")";
+      }
+
     } else if (sources.length === 2) {
       const operator = traversal.traverse(node.findFirstExpression(Expressions.CompareOperator));
       const s0 = traversal.traverse(sources[0]);
