@@ -2774,4 +2774,42 @@ WRITE <lv_val>.`;
     expect(abap.console.get()).to.equal("foo");
   });
 
+  it("test refs are identical", async () => {
+    const code = `
+  CLASS lcl_foo DEFINITION.
+  ENDCLASS.
+  CLASS lcl_foo IMPLEMENTATION.
+  ENDCLASS.
+  DATA ref1 TYPE REF TO lcl_foo.
+  DATA ref2 TYPE REF TO lcl_foo.
+  CREATE OBJECT ref1.
+  ref2 = ref1.
+  ASSERT ref1 = ref2.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("delete internal tab with object references", async () => {
+    const code = `
+  CLASS lcl_foo DEFINITION.
+  ENDCLASS.
+  CLASS lcl_foo IMPLEMENTATION.
+  ENDCLASS.
+
+  DATA tab TYPE STANDARD TABLE OF REF TO lcl_foo.
+  DATA ref1 TYPE REF TO lcl_foo.
+  DATA ref2 TYPE REF TO lcl_foo.
+  CREATE OBJECT ref1.
+  APPEND ref1 TO tab.
+  CREATE OBJECT ref2.
+  APPEND ref2 TO tab.
+
+  DELETE tab INDEX 2.
+  ASSERT sy-subrc = 0.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
