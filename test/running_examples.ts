@@ -2835,4 +2835,11 @@ WRITE <lv_val>.`;
     f(abap);
   });
 
+  it("to_lower()", async () => {
+    const code = `ASSERT to_lower( 'ABC' ) = 'abc'.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
