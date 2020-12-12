@@ -2715,4 +2715,21 @@ ASSERT lines( lt_matches ) = 1.`;
     f(abap);
     expect(abap.console.get()).to.equal("0##3###7####2\n012!!!!789012\n012$$$!789012\n012££$!789012\n0123PPPP89012\n0123AAAP89012\n0123ABAP89012\nABAP");
   });
+
+  it("getOffset for field-symbols", async () => {
+    const code = `
+    DATA lv_row TYPE string.
+    FIELD-SYMBOLS <lv_row> TYPE string.
+    lv_row = |foobar|.
+    ASSIGN lv_row TO <lv_row>.
+    <lv_row> = <lv_row>(3).
+    WRITE <lv_row>.
+    <lv_row> = |foobar|.
+    <lv_row> = <lv_row>+3(3).
+    WRITE / <lv_row>.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("foo\nbar");
+  });
 });
