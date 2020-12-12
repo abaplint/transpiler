@@ -2745,4 +2745,17 @@ ASSERT lines( lt_matches ) = 1.`;
     f(abap);
   });
 
+  it("IS BOUND", async () => {
+    const code = `
+  CLASS lcl_bar DEFINITION.
+  ENDCLASS.
+  CLASS lcl_bar IMPLEMENTATION.
+  ENDCLASS.
+  DATA foo TYPE REF TO lcl_bar.
+  ASSERT NOT foo IS BOUND.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
