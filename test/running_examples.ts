@@ -2842,4 +2842,14 @@ WRITE <lv_val>.`;
     f(abap);
   });
 
+  it("INSERT INTO TABLE", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  INSERT 5 INTO TABLE tab.
+  ASSERT lines( tab ) = 1.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
