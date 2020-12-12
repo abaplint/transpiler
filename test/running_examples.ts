@@ -2812,4 +2812,15 @@ WRITE <lv_val>.`;
     f(abap);
   });
 
+  it("calculation inside string template", async () => {
+    const code = `
+  DATA int_1 TYPE i VALUE 4.
+  DATA int_2 TYPE i VALUE 8.
+  WRITE |{ int_1 } * { int_2 } = { int_1 * int_2 }|.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("4 * 8 = 32");
+  });
+
 });
