@@ -1,5 +1,7 @@
+import {ABAPObject} from "./types";
+
 export function clone<T>(obj: T): T {
-  if (null == obj || "object" != typeof obj) {
+  if (null == obj || "object" != typeof obj || obj instanceof ABAPObject) {
     return obj;
   }
   // @ts-ignore
