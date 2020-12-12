@@ -22,6 +22,13 @@ export class CompareTranspiler implements IExpressionTranspiler {
         return "abap.compare.initial(" + s0 + ")";
       }
 
+      if ((concat.startsWith("NOT") && concat.endsWith("IS BOUND"))
+          || concat.endsWith("IS NOT BOUND")) {
+        return "abap.compare.initial(" + s0 + ")";
+      } else if (concat.endsWith("IS BOUND")) {
+        return "abap.compare.initial(" + s0 + ") === false";
+      }
+
     } else if (sources.length === 2) {
       const operator = traversal.traverse(node.findFirstExpression(Expressions.CompareOperator));
       const s0 = traversal.traverse(sources[0]);
