@@ -3,8 +3,9 @@ import {ICharacter} from "./_character";
 import {ABAPObject} from "./abap_object";
 import {Table} from "./table";
 import {String} from "./string";
+import {Structure} from "./structure";
 
-type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined;
+type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Structure;
 
 export class FieldSymbol  {
   private pointer: PointerType;

@@ -2758,7 +2758,7 @@ ASSERT lines( lt_matches ) = 1.`;
     f(abap);
   });
 
-  it.skip("basic ASSIGN COMPONENT", async () => {
+  it("basic ASSIGN COMPONENT", async () => {
     const code = `
 TYPES: BEGIN OF ty_stru,
          bar TYPE string,
@@ -2769,7 +2769,6 @@ ls_stru-bar = 'foo'.
 ASSIGN COMPONENT 'BAR' OF STRUCTURE ls_stru TO <lv_val>.
 WRITE <lv_val>.`;
     const js = await run(code);
-    console.dir(js);
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("foo");
