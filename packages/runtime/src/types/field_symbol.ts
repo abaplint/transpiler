@@ -2,7 +2,7 @@ import {INumeric} from "./_numeric";
 import {ICharacter} from "./_character";
 import {ABAPObject} from "./abap_object";
 import {Table} from "./table";
-import {String} from "../types";
+import {String} from "./string";
 
 type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined;
 
