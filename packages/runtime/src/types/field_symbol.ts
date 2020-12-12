@@ -2,6 +2,7 @@ import {INumeric} from "./_numeric";
 import {ICharacter} from "./_character";
 import {ABAPObject} from "./abap_object";
 import {Table} from "./table";
+import {String} from "./string";
 
 type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined;
 
@@ -41,4 +42,17 @@ export class FieldSymbol  {
     return this.pointer?.set(value);
   }
 
+  public getOffset(input: {offset: number, length: number}) {
+    // Assuming we're interested in Strings here, for now...
+    let ret = this.get();
+    if (input?.offset) {
+      ret = ret.substr(input.offset);
+    }
+    if (input?.length) {
+      ret = ret.substr(0, input.length);
+    }
+    const r = new String();
+    r.set(ret);
+    return r;
+  }
 }
