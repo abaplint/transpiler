@@ -1,13 +1,14 @@
 import {append} from "./append";
 import {assert} from "./assert";
+import {assign} from "./assign";
 import {clear} from "./clear";
-import {loop} from "./loop";
 import {concatenate} from "./concatenate";
 import {condense} from "./condense";
 import {deleteInternal} from "./delete_internal";
 import {describe} from "./describe";
 import {find} from "./find";
 import {getBit} from "./get_bit";
+import {loop} from "./loop";
 import {message} from "./message";
 import {modifyInternal} from "./modify_internal";
 import {readTable} from "./read_table";
@@ -25,6 +26,7 @@ import {Console} from "../console";
 export class Statements {
   public append = append;
   public assert = assert;
+  public assign = assign;
   public clear = clear;
   public concatenate = concatenate;
   public condense = condense;
@@ -32,6 +34,7 @@ export class Statements {
   public describe = describe;
   public find = find;
   public getBit = getBit;
+  public loop = loop;
   public message = message;
   public modifyInternal = modifyInternal;
   public readTable = readTable;
@@ -41,7 +44,6 @@ export class Statements {
   public sort = sort;
   public split = split;
   public translate = translate;
-  public loop = loop;
   public write = write;
 
   // @ts-ignore
