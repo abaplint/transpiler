@@ -2643,11 +2643,11 @@ ASSERT lines( lt_matches ) = 1.`;
     BEGIN OF ty_struct,
       num TYPE i,
     END OF ty_struct.
-  
+
   DATA number TYPE i.
   DATA struct TYPE ty_struct.
   DATA test_string TYPE string.
-  
+
   test_string = '0123456789'.
   number = 3.
   struct-num = 4.
@@ -2663,7 +2663,7 @@ ASSERT lines( lt_matches ) = 1.`;
   WRITE / test_string+struct-num(2).
   WRITE / test_string+struct-num(number).
   WRITE / test_string+struct-num(struct-num).
-  
+
   sy-index = 8. " This should probably not be allowed... :)
   WRITE / test_string+sy-index(1).`;
     const js = await run(code);
@@ -2678,11 +2678,11 @@ ASSERT lines( lt_matches ) = 1.`;
     BEGIN OF ty_struct,
       num TYPE i,
     END OF ty_struct.
-  
+
   DATA number TYPE i.
   DATA struct TYPE ty_struct.
   DATA test_string TYPE c LENGTH 100.
-  
+
   test_string = '0123456789012'.
   number = 3.
   struct-num = 4.
@@ -2707,7 +2707,7 @@ ASSERT lines( lt_matches ) = 1.`;
   WRITE / test_string.
   test_string+struct-num(2) = 'ABABABABAB'.
   WRITE / test_string.
-  
+
   sy-index = 4. " This should probably not be allowed... :)
   WRITE / test_string+sy-index(sy-index).`;
     const js = await run(code);
@@ -2732,4 +2732,17 @@ ASSERT lines( lt_matches ) = 1.`;
     f(abap);
     expect(abap.console.get()).to.equal("foo\nbar");
   });
+
+  it("compare using CO operator", async () => {
+    const code = `
+    DATA lv_val TYPE abap_bool.
+    lv_val = boolc( 'hello' CO 'ab' ).
+    ASSERT lv_val = abap_false.
+    lv_val = boolc( 'aabbaa' CO 'ab' ).
+    ASSERT lv_val = abap_true.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
