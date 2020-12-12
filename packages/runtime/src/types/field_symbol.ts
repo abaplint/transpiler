@@ -23,6 +23,10 @@ export class FieldSymbol  {
     this.pointer = undefined;
   }
 
+  public isAssigned(): boolean {
+    return this.pointer !== undefined;
+  }
+
 ///////////////
 
   public clear() {

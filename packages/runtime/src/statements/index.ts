@@ -9,6 +9,7 @@ import {describe} from "./describe";
 import {find} from "./find";
 import {getBit} from "./get_bit";
 import {loop} from "./loop";
+import {insertInternal} from "./insert_internal";
 import {message} from "./message";
 import {modifyInternal} from "./modify_internal";
 import {readTable} from "./read_table";
@@ -31,6 +32,7 @@ export class Statements {
   public concatenate = concatenate;
   public condense = condense;
   public deleteInternal = deleteInternal;
+  public insertInternal = insertInternal;
   public describe = describe;
   public find = find;
   public getBit = getBit;

@@ -2812,4 +2812,44 @@ WRITE <lv_val>.`;
     f(abap);
   });
 
+  it("calculation inside string template", async () => {
+    const code = `
+  DATA int_1 TYPE i VALUE 4.
+  DATA int_2 TYPE i VALUE 8.
+  WRITE |{ int_1 } * { int_2 } = { int_1 * int_2 }|.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("4 * 8 = 32");
+  });
+
+  it("IS ASSIGNED", async () => {
+    const code = `
+  FIELD-SYMBOLS <bar> TYPE i.
+  ASSERT <bar> IS NOT ASSIGNED.
+  ASSERT NOT <bar> IS ASSIGNED.
+  ASSIGN 2 TO <bar>.
+  ASSERT <bar> IS ASSIGNED.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("to_lower()", async () => {
+    const code = `ASSERT to_lower( 'ABC' ) = 'abc'.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("INSERT INTO TABLE", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  INSERT 5 INTO TABLE tab.
+  ASSERT lines( tab ) = 1.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
