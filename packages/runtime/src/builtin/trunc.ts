@@ -2,7 +2,7 @@
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
-export function abs(input: number | string | ICharacter | INumeric) {
+export function trunc(input: number | string | ICharacter | INumeric) {
   let num_in: number | undefined = undefined;
   if (typeof input === "number") {
     num_in = input;
@@ -11,5 +11,5 @@ export function abs(input: number | string | ICharacter | INumeric) {
   } else {
     num_in = parseFloat(input.get().toString());
   }
-  return Math.abs(num_in);
+  return Math.trunc(num_in);
 }

@@ -2852,22 +2852,4 @@ WRITE <lv_val>.`;
     f(abap);
   });
 
-  it.only("Test of abs runtime", async () => {
-    const code = `
-  DATA int TYPE i.
-  DATA packed TYPE p LENGTH 8 DECIMALS 3.
-  int = -3.
-  WRITE / int.
-  WRITE / abs( int ).
-  int = abs( int ).
-  WRITE / int.
-
-  WRITE / abs( '-12' ).
-  WRITE / abs( -18 ).
-  WRITE / abs( 7 ).`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("-3\n3\n3\n12\n18\n7");
-  });
 });
