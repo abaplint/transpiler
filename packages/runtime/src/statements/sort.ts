@@ -3,6 +3,7 @@ import {eq, lt, gt} from "../compare";
 
 export interface ISortOptions {
   descending?: boolean,
+  by?: {component: string, descending: boolean}[],
 }
 
 export function sort(input: Table, options?: ISortOptions) {
