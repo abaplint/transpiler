@@ -16,11 +16,12 @@ export function sort(input: Table, options?: ISortOptions) {
     items.sort((a, b) => {
       const vala = a.get()[componentName];
       const valb = b.get()[componentName];
+
       if (eq(vala,valb)) {
         return 0;
-      } else if (descending && gt(vala,valb))  {
+      } else if (descending && gt(vala, valb))  {
         return -1;
-      } else if (!descending && lt(vala ,valb)) {
+      } else if (!descending && lt(vala, valb)) {
         return -1;
       } else {
         return 1;
