@@ -2864,4 +2864,25 @@ WRITE <lv_val>.`;
     f(abap);
   });
 
+  it("SORT structure", async () => {
+    const code = `
+TYPES: BEGIN OF ty_structure,
+         field TYPE i,
+       END OF ty_structure.
+DATA tab TYPE STANDARD TABLE OF ty_structure WITH DEFAULT KEY.
+DATA row LIKE LINE OF tab.
+row-field = 2.
+APPEND row TO tab.
+row-field = 1.
+APPEND row TO tab.
+SORT tab BY field.
+LOOP AT tab INTO row.
+  WRITE / row-field.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("1\n2");
+  });
+
 });

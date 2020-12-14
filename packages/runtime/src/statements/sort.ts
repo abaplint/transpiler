@@ -8,18 +8,39 @@ export interface ISortOptions {
 
 export function sort(input: Table, options?: ISortOptions) {
   const items = input.array();
-  const descending = options?.descending === true ? true : false;
-  items.sort((a, b) => {
-    if (eq(a,b)) {
-      return 0;
-    } else if (descending && gt(a,b))  {
-      return -1;
-    } else if (!descending && lt(a ,b)) {
-      return -1;
-    } else {
-      return 1;
-    }
-  });
+
+  if (options?.by) {
+    const componentName = options.by[0].component;
+    const descending = options.by[0].descending;
+
+    items.sort((a, b) => {
+      const vala = a.get()[componentName];
+      const valb = b.get()[componentName];
+      if (eq(vala,valb)) {
+        return 0;
+      } else if (descending && gt(vala,valb))  {
+        return -1;
+      } else if (!descending && lt(vala ,valb)) {
+        return -1;
+      } else {
+        return 1;
+      }
+    });
+
+  } else {
+    const descending = options?.descending === true ? true : false;
+    items.sort((a, b) => {
+      if (eq(a,b)) {
+        return 0;
+      } else if (descending && gt(a,b))  {
+        return -1;
+      } else if (!descending && lt(a ,b)) {
+        return -1;
+      } else {
+        return 1;
+      }
+    });
+  }
 
   input.clear();
 

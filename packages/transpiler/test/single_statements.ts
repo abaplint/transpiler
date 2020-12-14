@@ -42,9 +42,9 @@ describe("Single statements", () => {
     {abap: "FREE foo.",                            js: "abap.statements.clear(foo);",               skip: false},
     {abap: "SORT foo.",                            js: "abap.statements.sort(foo,{});",                  skip: false},
     {abap: "SORT foo DESCENDING.",                 js: "abap.statements.sort(foo,{descending: true});",  skip: false},
-    {abap: "SORT foo BY field.",                   js: `abap.statements.sort(foo,{by: [{componet: "field"}]});`,  skip: false},
-    {abap: "SORT foo BY field1 field2.",           js: `abap.statements.sort(foo,{by: [{componet: "field1"},{componet: "field2"}]});`, skip: false},
-    {abap: "SORT ct_matches BY offset length DESCENDING.", js: `abap.statements.sort(ct_matches,{by: [{componet: "offset"},{componet: "length", descending: true}]});`, skip: false},
+    {abap: "SORT foo BY field.",                   js: `abap.statements.sort(foo,{by: [{component: "field"}]});`,  skip: false},
+    {abap: "SORT foo BY field1 field2.",           js: `abap.statements.sort(foo,{by: [{component: "field1"},{component: "field2"}]});`, skip: false},
+    {abap: "SORT ct_matches BY offset length DESCENDING.", js: `abap.statements.sort(ct_matches,{by: [{component: "offset"},{component: "length", descending: true}]});`, skip: false},
     {abap: "WRITE foo.",                           js: "abap.statements.write(foo);",                    skip: false},
     {abap: "WRITE / foo.",                         js: "abap.statements.write(foo, {newLine: true});", skip: false},
     {abap: "RETURN.",                                 js: "return;",                                   skip: false}, // todo, hmm? some more to be added here

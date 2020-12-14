@@ -19,9 +19,9 @@ export class SortTranspiler implements IStatementTranspiler {
       for (const c of components) {
         const next = this.findNextText(c, node);
         if (next === "DESCENDING") {
-          by.push(`{componet: "${c.concatTokens().toLowerCase()}", descending: true}`);
+          by.push(`{component: "${c.concatTokens().toLowerCase()}", descending: true}`);
         } else {
-          by.push(`{componet: "${c.concatTokens().toLowerCase()}"}`);
+          by.push(`{component: "${c.concatTokens().toLowerCase()}"}`);
         }
       }
       options.push(`by: [${by.join(",")}]`);
