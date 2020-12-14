@@ -33,7 +33,7 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
     const type = traversal.determineType(node, scope);
     if (type === undefined) {
 // todo, chained stuff?
-      throw new Error("CreateObjectTranspiler, target variable not found in scope");
+      throw new Error(`CreateObjectTranspiler, target variable "${node.concatTokens()}" not found in scope`);
     }
 
     const obj = type as abaplint.BasicTypes.ObjectReferenceType;
