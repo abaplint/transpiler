@@ -2852,4 +2852,37 @@ WRITE <lv_val>.`;
     f(abap);
   });
 
+  it("DELETE INITIAL where IS INITIAL", async () => {
+    const code = `
+    DATA lt_keywords TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+    APPEND '' TO lt_keywords.
+    ASSERT lines( lt_keywords ) = 1.
+    DELETE lt_keywords WHERE table_line IS INITIAL.
+    ASSERT lines( lt_keywords ) = 0.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("SORT structure", async () => {
+    const code = `
+TYPES: BEGIN OF ty_structure,
+         field TYPE i,
+       END OF ty_structure.
+DATA tab TYPE STANDARD TABLE OF ty_structure WITH DEFAULT KEY.
+DATA row LIKE LINE OF tab.
+row-field = 2.
+APPEND row TO tab.
+row-field = 1.
+APPEND row TO tab.
+SORT tab BY field.
+LOOP AT tab INTO row.
+  WRITE / row-field.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("1\n2");
+  });
+
 });
