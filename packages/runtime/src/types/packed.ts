@@ -19,9 +19,11 @@ export class Packed implements INumeric {
     }
   }
 
-  public set(value: INumeric | number) {
+  public set(value: INumeric | number | string) {
     if (typeof value === "number") {
       this.value = value;
+    } else if (typeof value === "string") {
+      this.value = parseFloat(value);
     } else {
       this.value = value.get();
     }
