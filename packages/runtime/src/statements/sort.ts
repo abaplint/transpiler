@@ -1,7 +1,11 @@
 import {Table} from "../types";
 import {eq, lt, gt} from "../compare";
 
-export function sort(input: Table, options?: {descending?: boolean}) {
+export interface ISortOptions {
+  descending?: boolean,
+}
+
+export function sort(input: Table, options?: ISortOptions) {
   const items = input.array();
   const descending = options?.descending === true ? true : false;
   items.sort((a, b) => {
