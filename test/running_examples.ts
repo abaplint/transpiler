@@ -2852,4 +2852,16 @@ WRITE <lv_val>.`;
     f(abap);
   });
 
+  it("DELETE INITIAL where IS INITIAL", async () => {
+    const code = `
+    DATA lt_keywords TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+    APPEND '' TO lt_keywords.
+    ASSERT lines( lt_keywords ) = 1.
+    DELETE lt_keywords WHERE table_line IS INITIAL.
+    ASSERT lines( lt_keywords ) = 0.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
