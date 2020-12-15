@@ -24,6 +24,9 @@ export class ConstantTranspiler implements IExpressionTranspiler {
     if (str) {
       let res = str.getFirstToken().getStr();
       res = res.replace(/\\/g, "\\\\");
+      // hmm, how to do this properly?
+      res = res.replace(/(.+)''(.+)/g, "$1\\'$2");
+      res = res.replace(/(.+)''(.+)/g, "$1\\'$2");
       return res;
     }
 
