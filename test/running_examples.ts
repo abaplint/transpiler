@@ -2885,4 +2885,22 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("1\n2");
   });
 
+  it("CREATE OBJECT with dashes/structure", async () => {
+    const code = `
+  CLASS lcl_bar DEFINITION.
+  ENDCLASS.
+  CLASS lcl_bar IMPLEMENTATION.
+  ENDCLASS.
+  TYPES: BEGIN OF ty_structure,
+           field TYPE REF TO lcl_bar,
+         END OF ty_structure.
+  FORM moo.
+    DATA ls_structure TYPE ty_structure.
+    CREATE OBJECT ls_structure-field.
+  ENDFORM.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
