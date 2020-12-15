@@ -30,15 +30,15 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
       throw new Error("CreateObjectTranspiler, unable to lookup position");
     }
 
+    const target = node.findDirectExpression(abaplint.Expressions.Target);
     const type = traversal.determineType(node, scope);
     if (type === undefined) {
-// todo, chained stuff?
-      throw new Error(`CreateObjectTranspiler, target variable "${node.concatTokens()}" not found in scope`);
+      throw new Error(`CreateObjectTranspiler, target variable "${target?.concatTokens()}" not found in scope`);
+    } else if (!(type instanceof abaplint.BasicTypes.ObjectReferenceType)) {
+      throw new Error(`CreateObjectTranspiler, target variable "${target?.concatTokens()}" not a object reference`);
     }
 
-    const obj = type as abaplint.BasicTypes.ObjectReferenceType;
-
-    return obj.getIdentifierName();
+    return type.getIdentifierName();
   }
 
 }
