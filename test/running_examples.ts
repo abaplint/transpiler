@@ -2885,4 +2885,61 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("1\n2");
   });
 
+  it("Bit operator BIT-AND", async () => {
+    const code = `
+    DATA x1 TYPE xstring.
+    DATA x2 TYPE xstring.
+    DATA x3 TYPE xstring.
+    x1 = '55555555'.
+    x2 = '92492492'.
+    x3 = x1 BIT-AND x2.
+    WRITE x3.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("10410410");
+  });
+
+  it.skip("Bit operator BIT-NOT", async () => {
+    const code = `
+    DATA x1 TYPE xstring.
+    DATA x2 TYPE xstring.
+    x1 = '0DBD'.
+    x2 = BIT-NOT x1.
+    WRITE x2.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("F242");
+  });
+
+  it("Bit operator BIT-OR", async () => {
+    const code = `
+    DATA x1 TYPE xstring.
+    DATA x2 TYPE xstring.
+    DATA x3 TYPE xstring.
+    x1 = '5555555'.
+    x2 = '2492492'.
+    x3 = x1 BIT-OR x2.
+    WRITE x3.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("75D75D7");
+  });
+
+  it("Bit operator BIT-XOR", async () => {
+    const code = `
+    DATA x1 TYPE xstring.
+    DATA x2 TYPE xstring.
+    DATA x3 TYPE xstring.
+    x1 = '5555555'.
+    x2 = '2492492'.
+    x3 = x1 BIT-XOR x2.
+    WRITE x3.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("71C71C7");
+  });
 });
