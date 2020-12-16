@@ -2,6 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
 import {TranspileTypes} from "../types";
+import {ConstantTranspiler} from "../expressions";
 
 export class ClassImplementationTranspiler implements IStructureTranspiler {
 
@@ -52,11 +53,13 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
       ret += name + " = " + new TranspileTypes().toType(v.identifier.getType()) + ";\n";
       const val = v.identifier.getValue();
       if (typeof val === "string") {
-        ret += name + ".set(" + v.identifier.getValue() + ");\n";
+        const e = new ConstantTranspiler().escape(val);
+        ret += name + ".set(" + e + ");\n";
       } else if (typeof val === "object") {
         const a: any = val;
         for (const v of Object.keys(val)) {
-          const s = a[v];
+          let s = a[v];
+          s = new ConstantTranspiler().escape(s);
           ret += name + ".get()." + v + ".set(" + s + ");\n";
         }
       }

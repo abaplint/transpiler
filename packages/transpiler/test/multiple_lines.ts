@@ -455,4 +455,23 @@ abap.statements.find(lv_line, {regex: 'abc', offset: lv_offset, length: lv_lengt
     expect(await runSingle(abap)).to.equal(expected);
   });
 
+  it("Escape class constants", async () => {
+    const abap = `
+  CLASS lcl_bar DEFINITION.
+    PUBLIC SECTION.
+      CONSTANTS foo TYPE string VALUE ''''.
+  ENDCLASS.
+  CLASS lcl_bar IMPLEMENTATION.
+  ENDCLASS.`;
+    const expected = `class lcl_bar {
+  constructor() {
+    this.me = new abap.types.ABAPObject();
+    this.me.set(this);
+  }
+}
+lcl_bar.foo = new abap.types.String();
+lcl_bar.foo.set('\\'');`;
+    expect(await runSingle(abap)).to.equal(expected);
+  });
+
 });
