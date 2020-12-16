@@ -185,11 +185,17 @@ export class Traversal {
       return undefined;
     }
 
-    const v = scope.findVariable(found.concatTokens());
-    if (v) {
-      return v.getType();
+    let context: abaplint.AbstractType | undefined = undefined;
+    for (const c of found.getChildren()) {
+      if (context === undefined) {
+        context = scope.findVariable(c.getFirstToken().getStr())?.getType();
+      } else if (c.get() instanceof abaplint.Expressions.ComponentName
+          && context instanceof abaplint.BasicTypes.StructureType) {
+        context = context.getComponentByName(c.getFirstToken().getStr());
+      }
     }
-    return undefined;
+
+    return context;
   }
 
 ////////////////////////////

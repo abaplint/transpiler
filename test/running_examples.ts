@@ -284,7 +284,7 @@ describe("Running Examples", () => {
   data val type string.
   append |foo| to tab.
   loop at tab into val.
-  write val.
+    write val.
   endloop.`;
 
     const js = await run(code);
@@ -2582,7 +2582,7 @@ ASSERT lines( ls_match-submatches ) = 0.`;
 
   it("FIND RESULTS, 2", async () => {
     const code = `
-    TYPES: BEGIN OF ty_submatch,
+TYPES: BEGIN OF ty_submatch,
     offset TYPE i,
     length TYPE i,
   END OF ty_submatch.
@@ -2634,6 +2634,29 @@ DATA in TYPE string.
 in = 'fooaabar'.
 FIND ALL OCCURRENCES OF REGEX find IN in RESULTS lt_matches.
 ASSERT lines( lt_matches ) = 1.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("FIND RESULTS, 4", async () => {
+    const code = `
+TYPES: BEGIN OF ty_submatch,
+         offset TYPE i,
+         length TYPE i,
+       END OF ty_submatch.
+
+TYPES: BEGIN OF ty_match,
+         line       TYPE i,
+         offset     TYPE i,
+         length     TYPE i,
+         submatches TYPE STANDARD TABLE OF ty_submatch WITH DEFAULT KEY,
+       END OF ty_match.
+
+DATA lt_matches TYPE STANDARD TABLE OF ty_match WITH DEFAULT KEY.
+
+FIND ALL OCCURRENCES OF REGEX '\\b[-_a-z0-9]+\\b' IN 'REPORT zfoo.' RESULTS lt_matches IGNORING CASE.
+ASSERT lines( lt_matches ) = 2.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
@@ -2968,4 +2991,114 @@ ENDLOOP.`;
     f(abap);
     expect(abap.console.get()).to.equal("010132FE0167\n010132FE0BCD7BABC0\n66CD");
   });
+
+  it("CREATE OBJECT with dashes/structure", async () => {
+    const code = `
+  CLASS lcl_bar DEFINITION.
+  ENDCLASS.
+  CLASS lcl_bar IMPLEMENTATION.
+  ENDCLASS.
+  TYPES: BEGIN OF ty_structure,
+           field TYPE REF TO lcl_bar,
+         END OF ty_structure.
+  FORM moo.
+    DATA ls_structure TYPE ty_structure.
+    CREATE OBJECT ls_structure-field.
+  ENDFORM.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("escaping constant strings, 1", async () => {
+    const code = `WRITE ''''.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("'");
+  });
+
+  it("escaping constant strings, 2", async () => {
+    const code = `WRITE 'bar''moo''boo'.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("bar'moo'boo");
+  });
+
+  it("split at newline", async () => {
+    const code = `
+  DATA moo TYPE string.
+  DATA foo TYPE string.
+  DATA bar TYPE string.
+  moo = |foo\\nbar|.
+  SPLIT moo AT |\\n| INTO foo bar.
+  WRITE / foo.
+  WRITE / bar.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("foo\nbar");
+  });
+
+  it("class constructor", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS class_constructor.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD class_constructor.
+    WRITE 'hello'.
+  ENDMETHOD.
+ENDCLASS.
+
+FORM bar.
+  DATA lo_bar TYPE REF TO lcl_bar.
+  CREATE OBJECT lo_bar.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM bar.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("hello");
+  });
+
+  it("SORT BY table_line", async () => {
+    const code = `
+  DATA lt_keywords TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+  APPEND |foo| TO lt_keywords.
+  APPEND |bar| TO lt_keywords.
+  SORT lt_keywords BY table_line ASCENDING.
+  DATA keyword TYPE string.
+  LOOP AT lt_keywords INTO keyword.
+    WRITE / keyword.
+  ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("bar\nfoo");
+  });
+
+  it("LOOPing and DELETE in same table", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA row LIKE LINE OF tab.
+  DO 4 TIMES.
+    APPEND sy-index TO tab.
+  ENDDO.
+  LOOP AT tab INTO row.
+    WRITE / sy-tabix.
+    WRITE / row.
+    DELETE tab INDEX 2.
+  ENDLOOP.
+  ASSERT lines( tab ) = 1.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("1\n1\n2\n3\n2\n4");
+  });
+
 });

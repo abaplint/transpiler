@@ -23,12 +23,12 @@ export function deleteInternal(target: Table, options?: IDeleteInternalOptions):
     if (options?.where) {
       const row = i instanceof Structure ? i.get() : {table_line: i};
       if (options.where(row) === false) {
-        result.append(i);
+        result.append(i, false);
       }
     } else if (options?.adjacent === true && (prev === undefined || ne(prev, i))) {
-      result.append(i);
+      result.append(i, false);
     } else if (options?.index && options.index.get() !== index) {
-      result.append(i);
+      result.append(i, false);
     }
 
     prev = i;
@@ -36,6 +36,6 @@ export function deleteInternal(target: Table, options?: IDeleteInternalOptions):
 
   target.clear();
   for (const r of result.array()) {
-    target.append(r);
+    target.append(r, false);
   }
 }

@@ -10,6 +10,7 @@ export interface IFindOptions {
   length?: INumeric,
   count?: INumeric,
   results?: Table,
+  ignoringCase?: boolean,
   submatches?: ICharacter[],
 }
 
@@ -38,7 +39,7 @@ export function find(input: ICharacter | string, options: IFindOptions) {
     if (typeof r !== "string") {
       r = r.get();
     }
-    s = new RegExp(r, "g");
+    s = new RegExp(r, "g" + (options.ignoringCase === true ? "i" : ""));
   } else {
     throw "FIND, runtime, no input";
   }
