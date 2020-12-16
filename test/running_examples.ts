@@ -2919,4 +2919,44 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("bar'moo'boo");
   });
 
+  it("split at newline", async () => {
+    const code = `
+  DATA moo TYPE string.
+  DATA foo TYPE string.
+  DATA bar TYPE string.
+  moo = |foo\\nbar|.
+  SPLIT moo AT |\\n| INTO foo bar.
+  WRITE / foo.
+  WRITE / bar.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("foo\nbar");
+  });
+
+  it("class constructor", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS class_constructor.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD class_constructor.
+    WRITE 'hello'.
+  ENDMETHOD.
+ENDCLASS.
+
+FORM bar.
+  DATA lo_bar TYPE REF TO lcl_bar.
+  CREATE OBJECT lo_bar.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM bar.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("hello");
+  });
+
 });
