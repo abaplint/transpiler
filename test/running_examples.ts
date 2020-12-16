@@ -2919,4 +2919,19 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("bar'moo'boo");
   });
 
+  it("split at newline", async () => {
+    const code = `
+  DATA moo TYPE string.
+  DATA foo TYPE string.
+  DATA bar TYPE string.
+  moo = |foo\\nbar|.
+  SPLIT moo AT |\\n| INTO foo bar.
+  WRITE / foo.
+  WRITE / bar.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("foo\nbar");
+  });
+
 });
