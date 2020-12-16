@@ -2903,4 +2903,20 @@ ENDLOOP.`;
     f(abap);
   });
 
+  it("escaping constant strings, 1", async () => {
+    const code = `WRITE ''''.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("'");
+  });
+
+  it("escaping constant strings, 2", async () => {
+    const code = `WRITE 'bar''moo''boo'.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("bar'moo'boo");
+  });
+
 });
