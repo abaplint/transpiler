@@ -15,10 +15,15 @@ export class FindTranspiler implements IStatementTranspiler {
       options.push("find: " + source0);
     }
 
-    if (node.concatTokens().toUpperCase().startsWith("FIND FIRST OCCURRENCE OF ")) {
+    const concat = node.concatTokens().toUpperCase();
+    if (concat.startsWith("FIND FIRST OCCURRENCE OF ")) {
       options.push("first: true");
-    } else if (node.concatTokens().toUpperCase().startsWith("FIND ALL OCCURRENCES OF ")) {
+    } else if (concat.startsWith("FIND ALL OCCURRENCES OF ")) {
       options.push("first: false");
+    }
+
+    if (concat.includes(" IGNORING CASE")) {
+      options.push("ignoringCase: true");
     }
 
     const source1 = traversal.traverse(sources[1]);

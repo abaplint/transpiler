@@ -2580,7 +2580,7 @@ ASSERT lines( ls_match-submatches ) = 0.`;
 
   it("FIND RESULTS, 2", async () => {
     const code = `
-    TYPES: BEGIN OF ty_submatch,
+TYPES: BEGIN OF ty_submatch,
     offset TYPE i,
     length TYPE i,
   END OF ty_submatch.
@@ -2632,6 +2632,29 @@ DATA in TYPE string.
 in = 'fooaabar'.
 FIND ALL OCCURRENCES OF REGEX find IN in RESULTS lt_matches.
 ASSERT lines( lt_matches ) = 1.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("FIND RESULTS, 4", async () => {
+    const code = `
+TYPES: BEGIN OF ty_submatch,
+         offset TYPE i,
+         length TYPE i,
+       END OF ty_submatch.
+
+TYPES: BEGIN OF ty_match,
+         line       TYPE i,
+         offset     TYPE i,
+         length     TYPE i,
+         submatches TYPE STANDARD TABLE OF ty_submatch WITH DEFAULT KEY,
+       END OF ty_match.
+
+DATA lt_matches TYPE STANDARD TABLE OF ty_match WITH DEFAULT KEY.
+
+FIND ALL OCCURRENCES OF REGEX '\\b[-_a-z0-9]+\\b' IN 'REPORT zfoo.' RESULTS lt_matches IGNORING CASE.
+ASSERT lines( lt_matches ) = 2.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
