@@ -11,12 +11,18 @@ export class WriteTranspiler implements IStatementTranspiler {
     if (newLine === true) {
       extra = ", {newLine: true}";
     }
-    const source = new SourceTranspiler().transpile(node.findDirectExpression(abaplint.Expressions.Source)!, traversal);
-    if (source.startsWith("'@KERNEL ")) {
-      return source.substr(9, source.length - 10);
-    } else {
-      return "abap.statements.write(" + source + extra + ");";
+    const expr = node.findDirectExpression(abaplint.Expressions.Source);
+    if (expr === undefined) {
+      throw new Error("WriteTranspiler, no source expression found");
     }
+    const concat = expr.concatTokens();
+    if (concat.startsWith("'@KERNEL ")) {
+      // @KERNEL commands must be taken verbatim
+      return concat.substr(9, concat.length - 10);
+    }
+
+    const source = new SourceTranspiler().transpile(expr, traversal);
+    return "abap.statements.write(" + source + extra + ");";
   }
 
 }
