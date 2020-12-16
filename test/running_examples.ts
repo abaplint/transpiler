@@ -1446,15 +1446,17 @@ write if.`;
     expect(abap.console.get()).to.equal("00");
   });
 
-  it("xstring, one", async () => {
+  it("xstring, one + C", async () => {
     const code = `
   DATA bar TYPE xstring.
   bar = 1.
-  WRITE bar.`;
+  WRITE bar.
+  bar = 'C'.
+  WRITE / bar.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.console.get()).to.equal("01");
+    expect(abap.console.get()).to.equal("01\nC0");
   });
 
   it("translate to upper case", async () => {
@@ -2890,14 +2892,22 @@ ENDLOOP.`;
     DATA x1 TYPE xstring.
     DATA x2 TYPE xstring.
     DATA x3 TYPE xstring.
-    x1 = '55555555'.
-    x2 = '92492492'.
+    x1 = 'DCBA98765432'.
+    x2 = 'DDBBAA885555'.
     x3 = x1 BIT-AND x2.
-    WRITE x3.`;
+    WRITE x3.
+    x1 = 'DCBA9876543299ABC'.
+    x2 = 'DDBBAA885FFFE2'.
+    x3 = x1 BIT-AND x2.
+    WRITE / x3.
+    x1 = 'ABCD'.
+    x2 = 'CD'.
+    x3 = x1 BIT-AND x2.
+    WRITE / x3.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.console.get()).to.equal("10410410");
+    expect(abap.console.get()).to.equal("DCBA88005410\nDCBA88005432800000\n8900");
   });
 
   it.skip("Bit operator BIT-NOT", async () => {
@@ -2918,14 +2928,22 @@ ENDLOOP.`;
     DATA x1 TYPE xstring.
     DATA x2 TYPE xstring.
     DATA x3 TYPE xstring.
-    x1 = '5555555'.
-    x2 = '2492492'.
+    x1 = 'DCBA98765432'.
+    x2 = 'DDBBAA885555'.
     x3 = x1 BIT-OR x2.
-    WRITE x3.`;
+    WRITE x3.
+    x1 = 'DCBA9876543299ABC'.
+    x2 = 'DDBBAA885FFFE2'.
+    x3 = x1 BIT-OR x2.
+    WRITE / x3.
+    x1 = 'ABCD'.
+    x2 = 'CD'.
+    x3 = x1 BIT-OR x2.
+    WRITE / x3.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.console.get()).to.equal("75D75D7");
+    expect(abap.console.get()).to.equal("DDBBBAFE5577\nDDBBBAFE5FFFFBABC0\nEFCD");
   });
 
   it("Bit operator BIT-XOR", async () => {
@@ -2933,13 +2951,21 @@ ENDLOOP.`;
     DATA x1 TYPE xstring.
     DATA x2 TYPE xstring.
     DATA x3 TYPE xstring.
-    x1 = '5555555'.
-    x2 = '2492492'.
+    x1 = 'DCBA98765432'.
+    x2 = 'DDBBAA885555'.
     x3 = x1 BIT-XOR x2.
-    WRITE x3.`;
+    WRITE x3.
+    x1 = 'DCBA9876543299ABC'.
+    x2 = 'DDBBAA885FFFE2'.
+    x3 = x1 BIT-XOR x2.
+    WRITE / x3.
+    x1 = 'ABCD'.
+    x2 = 'CD'.
+    x3 = x1 BIT-XOR x2.
+    WRITE / x3.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.console.get()).to.equal("71C71C7");
+    expect(abap.console.get()).to.equal("010132FE0167\n010132FE0BCD7BABC0\n66CD");
   });
 });

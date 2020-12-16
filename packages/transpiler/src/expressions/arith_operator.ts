@@ -21,8 +21,6 @@ export class ArithOperatorTranspiler implements IExpressionTranspiler {
         return "abap.operators.mod";
       case "BIT-AND":
         return "abap.operators.bitand";
-      case "BIT-NOT":
-        return "abap.operators.bitnot";
       case "BIT-OR":
         return "abap.operators.bitor";
       case "BIT-XOR":
