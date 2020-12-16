@@ -2959,7 +2959,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello");
   });
 
-  it.only("SORT BY table_line", async () => {
+  it("SORT BY table_line", async () => {
     const code = `
   DATA lt_keywords TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
   APPEND |foo| TO lt_keywords.

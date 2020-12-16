@@ -10,8 +10,12 @@ function compare(a: any, b: any, input: {component: string, descending?: boolean
   const componentName = input.component;
   const descending = input.descending;
 
-  const vala = a.get()[componentName];
-  const valb = b.get()[componentName];
+  let vala = a.get()[componentName];
+  let valb = b.get()[componentName];
+  if (componentName.toLowerCase() === "table_line") {
+    vala = a.get();
+    valb = b.get();
+  }
 
   if (eq(vala,valb)) {
     return 0;
