@@ -32,7 +32,7 @@ export class Table  {
     }
   }
 
-  public append(item: TableRowType) {
+  public append(item: TableRowType, cloneRow = true) {
     if (typeof item === "number") {
       this.value.push(new Integer().set(item));
     } else if (typeof item === "string") {
@@ -40,7 +40,7 @@ export class Table  {
     } else if (item instanceof ABAPObject) {
       this.value.push(item);
     } else {
-      this.value.push(clone(item));
+      this.value.push(cloneRow === true ? clone(item) : item);
     }
   }
 

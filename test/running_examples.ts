@@ -284,7 +284,7 @@ describe("Running Examples", () => {
   data val type string.
   append |foo| to tab.
   loop at tab into val.
-  write val.
+    write val.
   endloop.`;
 
     const js = await run(code);
@@ -2996,6 +2996,25 @@ START-OF-SELECTION.
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("bar\nfoo");
+  });
+
+  it("LOOPing and DELETE in same table", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA row LIKE LINE OF tab.
+  DO 4 TIMES.
+    APPEND sy-index TO tab.
+  ENDDO.
+  LOOP AT tab INTO row.
+    WRITE / sy-tabix.
+    WRITE / row.
+    DELETE tab INDEX 2.
+  ENDLOOP.
+  ASSERT lines( tab ) = 1.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("1\n1\n2\n3\n2\n4");
   });
 
 });
