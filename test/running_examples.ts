@@ -2653,7 +2653,7 @@ TYPES: BEGIN OF ty_match,
 
 DATA lt_matches TYPE STANDARD TABLE OF ty_match WITH DEFAULT KEY.
 
-FIND ALL OCCURRENCES OF REGEX '\b[-_a-z0-9]+\b' IN 'REPORT zfoo.' RESULTS lt_matches IGNORING CASE.
+FIND ALL OCCURRENCES OF REGEX '\\b[-_a-z0-9]+\\b' IN 'REPORT zfoo.' RESULTS lt_matches IGNORING CASE.
 ASSERT lines( lt_matches ) = 2.`;
     const js = await run(code);
     const f = new Function("abap", js);
