@@ -2959,4 +2959,20 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello");
   });
 
+  it.only("SORT BY table_line", async () => {
+    const code = `
+  DATA lt_keywords TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+  APPEND |foo| TO lt_keywords.
+  APPEND |bar| TO lt_keywords.
+  SORT lt_keywords BY table_line ASCENDING.
+  DATA keyword TYPE string.
+  LOOP AT lt_keywords INTO keyword.
+    WRITE / keyword.
+  ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("bar\nfoo");
+  });
+
 });
