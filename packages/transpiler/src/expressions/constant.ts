@@ -22,15 +22,21 @@ export class ConstantTranspiler implements IExpressionTranspiler {
 
     const str = node.findFirstExpression(Expressions.ConstantString);
     if (str) {
-      let res = str.getFirstToken().getStr();
-      res = res.replace(/\\/g, "\\\\");
-      // hmm, how to do this properly?
-      res = res.replace(/(.+)''(.+)/g, "$1\\'$2");
-      res = res.replace(/(.+)''(.+)/g, "$1\\'$2");
-      return res;
+      const res = str.getFirstToken().getStr();
+      return this.escape(res);
     }
 
     return "todo, Constant";
+  }
+
+  public escape(str: string): string {
+    str = str.replace(/\\/g, "\\\\");
+
+    const reg = new RegExp(/(.+)''(.+)/g);
+    while (reg.test(str)) {
+      str = str.replace(reg, "$1\\'$2");
+    }
+    return str;
   }
 
 }
