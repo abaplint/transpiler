@@ -4,7 +4,7 @@ import {IExpressionTranspiler} from "./_expression_transpiler";
 export class ArithOperatorTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode): string {
-    switch(node.getFirstToken().getStr()) {
+    switch(node.concatTokens()) {
       case "+":
         return "abap.operators.add";
       case "-":
@@ -19,6 +19,12 @@ export class ArithOperatorTranspiler implements IExpressionTranspiler {
         return "abap.operators.div";
       case "MOD":
         return "abap.operators.mod";
+      case "BIT-AND":
+        return "abap.operators.bitand";
+      case "BIT-OR":
+        return "abap.operators.bitor";
+      case "BIT-XOR":
+        return "abap.operators.bitxor";
       default:
         return ".ArithOperatorUnknown";
     }
