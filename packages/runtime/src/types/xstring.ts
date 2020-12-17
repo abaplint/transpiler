@@ -11,6 +11,8 @@ export class XString implements ICharacter {
   public set(value: ICharacter | INumeric | string) {
     if (typeof value === "string") {
       this.value = value;
+      const finalLength = Math.ceil(this.value.length / 2 ) * 2;
+      this.value = this.value.padEnd(finalLength, "0");
     } else {
       const v = value.get();
       if (typeof v === "number") {
