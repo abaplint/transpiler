@@ -847,12 +847,18 @@ ENDCLASS.
   CONSTANTS lc_bar TYPE i VALUE 2.
   DO lc_bar - 1 TIMES.
     WRITE 'bar'.
+  ENDDO.
+  
+  DATA lv_foo TYPE i VALUE 1.
+  DO lc_bar + lv_foo TIMES. " 2+1=3
+    WRITE / 'foo'.
+    lv_foo = 7.
   ENDDO.`;
 
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.console.get()).to.equal("bar");
+    expect(abap.console.get()).to.equal("bar\nfoo\nfoo\nfoo");
   });
 
   it("EXPORTING value", async () => {
