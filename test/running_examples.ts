@@ -628,6 +628,30 @@ lcl_bar=>name( ).`;
     expect(abap.console.get()).to.equal("10101011\n00000001");
   });
 
+  it("SET BIT", async () => {
+    const code = `
+    DATA hex TYPE x LENGTH 1.
+    DO 8 TIMES.
+      IF sy-index > 4.
+        CLEAR hex.
+      ENDIF.
+      SET BIT sy-index OF hex.
+      WRITE / hex.
+    ENDDO.
+    
+    DATA xstr TYPE xstring.
+    xstr = 'F2420FA000'.
+    SET BIT 30 OF xstr.
+    SET BIT 25 OF xstr TO 0.
+    SET BIT 35 OF xstr TO 1.
+    WRITE / xstr.
+    `;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("80\nC0\nE0\nF0\n08\n04\n02\n01\nF2420F2420");
+  });
+
   it("early RETURN in method", async () => {
     const code = `
 CLASS lcl_bar DEFINITION.
@@ -3105,6 +3129,63 @@ START-OF-SELECTION.
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("1\n1\n2\n3\n2\n4");
+  });
+
+  it("READ TABLE, table in table", async () => {
+    const code = `
+  TYPES:
+    BEGIN OF ty_inner,
+      i TYPE i,
+      txt TYPE string,
+    END OF ty_inner.
+  TYPES ty_inner_tt TYPE STANDARD TABLE OF ty_inner.
+  TYPES:
+    BEGIN OF ty_outer,
+      i TYPE i,
+      inner TYPE ty_inner_tt,
+    END OF ty_outer.
+  TYPES ty_outer_tt TYPE STANDARD TABLE OF ty_outer.
+  
+  DATA t_inner TYPE ty_inner_tt.
+  DATA t_outer TYPE ty_outer_tt.
+  DATA inner TYPE ty_inner.
+  DATA outer TYPE ty_outer.
+  
+  inner-i = 1.
+  inner-txt = |foo|.
+  APPEND inner TO t_inner.
+  inner-i = 3.
+  inner-txt = |bar|.
+  APPEND inner TO t_inner.
+  outer-i = 5.
+  outer-inner = t_inner.
+  APPEND outer to t_outer.
+  
+  CLEAR inner.
+  CLEAR outer.
+  inner-i = 7.
+  inner-txt = |meh|.
+  APPEND inner TO t_inner.
+  inner-i = 13.
+  inner-txt = |blah|.
+  APPEND inner TO t_inner.
+  outer-i = 17.
+  outer-inner = t_inner.
+
+  DATA read_outer TYPE ty_outer.
+  DATA read_inner TYPE ty_inner.
+  READ TABLE t_outer WITH KEY i = 5 INTO read_outer.
+  IF sy-subrc = 0.
+    READ TABLE read_outer-inner WITH KEY i = 3 INTO read_inner.
+    IF sy-subrc = 0.
+      WRITE read_inner-txt.
+    ENDIF.
+  ENDIF.
+  `;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("bar");
   });
 
 });
