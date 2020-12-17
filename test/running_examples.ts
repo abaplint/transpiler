@@ -3131,61 +3131,29 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1\n1\n2\n3\n2\n4");
   });
 
-  it("READ TABLE, table in table", async () => {
+  it("is initial, with clike input", async () => {
     const code = `
-  TYPES:
-    BEGIN OF ty_inner,
-      i TYPE i,
-      txt TYPE string,
-    END OF ty_inner.
-  TYPES ty_inner_tt TYPE STANDARD TABLE OF ty_inner.
-  TYPES:
-    BEGIN OF ty_outer,
-      i TYPE i,
-      inner TYPE ty_inner_tt,
-    END OF ty_outer.
-  TYPES ty_outer_tt TYPE STANDARD TABLE OF ty_outer.
-  
-  DATA t_inner TYPE ty_inner_tt.
-  DATA t_outer TYPE ty_outer_tt.
-  DATA inner TYPE ty_inner.
-  DATA outer TYPE ty_outer.
-  
-  inner-i = 1.
-  inner-txt = |foo|.
-  APPEND inner TO t_inner.
-  inner-i = 3.
-  inner-txt = |bar|.
-  APPEND inner TO t_inner.
-  outer-i = 5.
-  outer-inner = t_inner.
-  APPEND outer to t_outer.
-  
-  CLEAR inner.
-  CLEAR outer.
-  inner-i = 7.
-  inner-txt = |meh|.
-  APPEND inner TO t_inner.
-  inner-i = 13.
-  inner-txt = |blah|.
-  APPEND inner TO t_inner.
-  outer-i = 17.
-  outer-inner = t_inner.
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    METHODS: initial IMPORTING iv_text TYPE clike.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD initial.
+    ASSERT NOT iv_text IS INITIAL.
+  ENDMETHOD.
+ENDCLASS.
 
-  DATA read_outer TYPE ty_outer.
-  DATA read_inner TYPE ty_inner.
-  READ TABLE t_outer WITH KEY i = 5 INTO read_outer.
-  IF sy-subrc = 0.
-    READ TABLE read_outer-inner WITH KEY i = 3 INTO read_inner.
-    IF sy-subrc = 0.
-      WRITE read_inner-txt.
-    ENDIF.
-  ENDIF.
-  `;
+FORM moo.
+  DATA lo_bar TYPE REF TO lcl_bar.
+  CREATE OBJECT lo_bar.
+  lo_bar->initial( 'moo' ).
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM moo.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.console.get()).to.equal("bar");
   });
 
 });

@@ -2,9 +2,14 @@ import {ABAPObject, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
-export function initial(val: ICharacter | INumeric | Structure | Table | ABAPObject) {
+export function initial(val: ICharacter | INumeric | string | number | Structure | Table | ABAPObject) {
   if (val instanceof Table) {
     return val.array().length === 0;
+  }
+  if (typeof val === "string") {
+    return val === "";
+  } else if (typeof val === "number") {
+    return val === 0;
   }
   const value = val.get();
   if (typeof value === "string") {
