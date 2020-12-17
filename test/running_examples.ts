@@ -3101,4 +3101,29 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1\n1\n2\n3\n2\n4");
   });
 
+  it("is initial, with clike input", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    METHODS: initial IMPORTING iv_text TYPE clike.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD initial.
+    ASSERT NOT iv_text IS INITIAL.
+  ENDMETHOD.
+ENDCLASS.
+
+FORM moo.
+  DATA lo_bar TYPE REF TO lcl_bar.
+  CREATE OBJECT lo_bar.
+  lo_bar->initial( 'moo' ).
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM moo.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
