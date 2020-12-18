@@ -29,6 +29,8 @@ export function deleteInternal(target: Table, options?: IDeleteInternalOptions):
       result.append(i, false);
     } else if (options?.index && options.index.get() !== index) {
       result.append(i, false);
+    } else if (options?.from && options.from.get() > index) {
+      result.append(i, false);
     }
 
     prev = i;
