@@ -3211,4 +3211,22 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("1\n2\n3");
   });
 
+  it.skip("INSERT INDEX", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA row LIKE LINE OF tab.
+  DO 4 TIMES.
+    row = 5 - sy-index.
+    APPEND row TO tab.
+  ENDDO.
+  LOOP AT tab INTO row.
+    WRITE / row.
+    SORT tab.
+  ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("4\n2\n3\n4");
+  });
+
 });
