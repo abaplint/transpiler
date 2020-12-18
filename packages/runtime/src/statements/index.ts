@@ -8,6 +8,7 @@ import {deleteInternal} from "./delete_internal";
 import {describe} from "./describe";
 import {find} from "./find";
 import {getBit} from "./get_bit";
+import {setBit} from "./set_bit";
 import {loop} from "./loop";
 import {insertInternal} from "./insert_internal";
 import {message} from "./message";
@@ -36,6 +37,7 @@ export class Statements {
   public describe = describe;
   public find = find;
   public getBit = getBit;
+  public setBit = setBit;
   public loop = loop;
   public message = message;
   public modifyInternal = modifyInternal;
