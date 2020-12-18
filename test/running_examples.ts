@@ -638,7 +638,7 @@ lcl_bar=>name( ).`;
       SET BIT sy-index OF hex.
       WRITE / hex.
     ENDDO.
-    
+
     DATA xstr TYPE xstring.
     xstr = 'F2420FA000'.
     SET BIT 30 OF xstr.
@@ -872,7 +872,7 @@ ENDCLASS.
   DO lc_bar - 1 TIMES.
     WRITE 'bar'.
   ENDDO.
-  
+
   DATA lv_foo TYPE i VALUE 1.
   DO lc_bar + lv_foo TIMES. " 2+1=3
     WRITE / 'foo'.
@@ -3154,6 +3154,23 @@ START-OF-SELECTION.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
+  });
+
+  it("DELETE table FROM index", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA row LIKE LINE OF tab.
+DO 4 TIMES.
+  APPEND sy-index TO tab.
+ENDDO.
+DELETE tab FROM 2.
+LOOP AT tab INTO row.
+  WRITE / row.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("1");
   });
 
 });
