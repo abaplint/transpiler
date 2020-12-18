@@ -3173,4 +3173,20 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("ASSIGN fs TO fs", async () => {
+    const code = `
+    FIELD-SYMBOLS <fs1> TYPE i.
+    FIELD-SYMBOLS <fs2> TYPE i.
+    DATA data TYPE i.
+    data = 42.
+    ASSIGN data TO <fs1>.
+    ASSIGN <fs1> TO <fs2>.
+    ASSERT <fs2> IS ASSIGNED.
+    WRITE <fs2>.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("42");
+  });
+
 });
