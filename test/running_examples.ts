@@ -3189,4 +3189,26 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("42");
   });
 
+  it.skip("INSERT INDEX", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA row LIKE LINE OF tab.
+  DO 3 TIMES.
+    APPEND sy-index TO tab.
+  ENDDO.
+  LOOP AT tab INTO row.
+    WRITE / row.
+    IF row MOD 2 = 0.
+      ASSERT lines( tab ) < 10.
+      INSERT 5 INTO tab INDEX sy-tabix.
+    ENDIF.
+  ENDLOOP.
+  ASSERT lines( tab ) = 4.`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n3");
+  });
+
 });

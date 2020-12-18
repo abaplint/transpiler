@@ -5,16 +5,23 @@ import {Traversal} from "../traversal";
 export class InsertInternalTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
+    const options: string[] = [];
+
     const source = node.findDirectExpression(abaplint.Expressions.SimpleSource);
     const target = node.findDirectExpression(abaplint.Expressions.Target);
     if (source === undefined || target === undefined) {
       throw "InsertInternalTranspiler, source or target not found";
     }
 
+    const index = node.findExpressionAfterToken("INDEX");
+    if (index) {
+      options.push("index: " + traversal.traverse(index));
+    }
+
     const s = traversal.traverse(source);
     const t = traversal.traverse(target);
 
-    return `abap.statements.insertInternal(${s}, ${t});`;
+    return `abap.statements.insertInternal(${s}, ${t}, {${options.join(", ")}});`;
   }
 
 }

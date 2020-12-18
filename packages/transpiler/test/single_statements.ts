@@ -47,6 +47,7 @@ describe("Single statements", () => {
     {abap: "SORT ct_matches BY offset length DESCENDING.", js: `abap.statements.sort(ct_matches,{by: [{component: "offset"},{component: "length", descending: true}]});`, skip: false},
     {abap: "WRITE foo.",                           js: "abap.statements.write(foo);",                    skip: false},
     {abap: "WRITE / foo.",                         js: "abap.statements.write(foo, {newLine: true});", skip: false},
+    {abap: "INSERT 5 INTO tab INDEX sy-tabix.", js: "abap.statements.insertInternal(constant_5, tab, {index: abap.builtin.sy.get().tabix});", skip: false},
     {abap: "RETURN.",                                 js: "return;",                                   skip: false}, // todo, hmm? some more to be added here
     {abap: "method( ).",                              js: "this.method();",                            skip: false},
     {abap: "foo->method( ).",                         js: "foo.get().method();",                       skip: false},
