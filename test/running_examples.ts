@@ -645,11 +645,14 @@ lcl_bar=>name( ).`;
     SET BIT 25 OF xstr TO 0.
     SET BIT 35 OF xstr TO 1.
     WRITE / xstr.
-    `;
+
+    xstr = '03FF'.
+    SET BIT 9 OF xstr TO 0.
+    WRITE / xstr.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.console.get()).to.equal("80\nC0\nE0\nF0\n08\n04\n02\n01\nF2420F2420");
+    expect(abap.console.get()).to.equal("80\nC0\nE0\nF0\n08\n04\n02\n01\nF2420F2420\n037F");
   });
 
   it("early RETURN in method", async () => {
