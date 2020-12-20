@@ -21,7 +21,7 @@ export function setBit(number: INumeric, hex: XString | Hex, val?: INumeric) {
   let byte = "";
   let post = "";
   if (hexFull.length > 2) {
-    if (byteNum > 2) {
+    if (byteNum > 1) {
       pre = hexFull.substr(0,(byteNum - 1) * 2);
     }
     byte = hexFull.substr((byteNum - 1) * 2,2);

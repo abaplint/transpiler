@@ -34,11 +34,11 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
         }
       } else if (c instanceof Nodes.ExpressionNode
           && c.get() instanceof Expressions.FieldOffset) {
-        extra.push("offset: " + new FieldOffsetTranspiler().transpile(c));
+        extra.push("offset: " + new FieldOffsetTranspiler().transpile(c, traversal));
         this.addGetOffset = true;
       } else if (c instanceof Nodes.ExpressionNode
           && c.get() instanceof Expressions.FieldLength) {
-        extra.push("length: " + new FieldLengthTranspiler().transpile(c));
+        extra.push("length: " + new FieldLengthTranspiler().transpile(c, traversal));
         this.addGetOffset = true;
       }
     }
