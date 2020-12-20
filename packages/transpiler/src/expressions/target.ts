@@ -18,9 +18,9 @@ export class TargetTranspiler implements IExpressionTranspiler {
       } else if (c.get() instanceof Expressions.AttributeName) {
         ret = ret + c.getFirstToken().getStr();
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.FieldOffset) {
-        offset.push("offset: " + new FieldOffsetTranspiler().transpile(c));
+        offset.push("offset: " + new FieldOffsetTranspiler().transpile(c, traversal));
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.FieldLength) {
-        offset.push("length: " + new FieldLengthTranspiler().transpile(c));
+        offset.push("length: " + new FieldLengthTranspiler().transpile(c, traversal));
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.TargetFieldSymbol) {
         ret = ret + new FieldSymbolTranspiler().transpile(c, traversal);
       } else if (c.getFirstToken().getStr() === "-" || c.getFirstToken().getStr() === "->") {
