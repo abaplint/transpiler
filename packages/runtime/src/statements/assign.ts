@@ -32,7 +32,11 @@ export function assign(input: IAssignInput) {
     }
 
   } else {
-    input.target.assign(input.source);
+    if (input.source instanceof FieldSymbol) {
+      input.target.assign(input.source.getPointer());
+    } else {
+      input.target.assign(input.source);
+    }
     // @ts-ignore
     abap.builtin.sy.get().subrc.set(0);
   }
