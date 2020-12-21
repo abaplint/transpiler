@@ -3272,6 +3272,29 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("42");
   });
 
+  it("Structure equals", async () => {
+    const code = `
+TYPES: BEGIN OF ty_type,
+         field TYPE i,
+       END OF ty_type.
+DATA data1 TYPE ty_type.
+DATA data2 TYPE ty_type.
+ASSERT data1 = data2.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it.skip("internal table equals", async () => {
+    const code = `
+  DATA data1 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA data2 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  ASSERT data1 = data2.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
   it.skip("INSERT INDEX", async () => {
     const code = `
   DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.

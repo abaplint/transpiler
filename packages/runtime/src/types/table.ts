@@ -9,7 +9,7 @@ import {Structure} from "./structure";
 export type TableRowType = INumeric | Structure | ICharacter | Table | ABAPObject | string | number;
 
 export class Table  {
-  private value: any[];
+  private value: TableRowType[];
   private readonly rowType: TableRowType;
 
   public constructor(rowType: TableRowType) {
@@ -29,6 +29,7 @@ export class Table  {
   public set(tab: Table) {
     this.clear();
     for (const a of tab.array()) {
+      // this clones the values
       this.append(a);
     }
   }
@@ -51,6 +52,12 @@ export class Table  {
     // return "field symbol" pointing to the inserted line
     return this.value[this.value.length - 1];
   }
+
+  public sort(compareFn: (a: TableRowType, b: TableRowType) => number) {
+    this.value.sort(compareFn);
+  }
+
+///////////////////////////
 
   private getValue(item: TableRowType, cloneRow = true) {
     if (typeof item === "number") {

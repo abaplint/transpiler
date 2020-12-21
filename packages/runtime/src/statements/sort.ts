@@ -1,4 +1,4 @@
-import {Table} from "../types";
+import {Table, TableRowType} from "../types";
 import {eq, lt, gt} from "../compare";
 
 export interface ISortOptions {
@@ -48,7 +48,7 @@ export function sort(input: Table, options?: ISortOptions) {
 
   } else {
     const descending = options?.descending === true ? true : false;
-    items.sort((a, b) => {
+    input.sort((a: TableRowType, b: TableRowType) => {
       if (eq(a,b)) {
         return 0;
       } else if (descending && gt(a,b))  {
@@ -61,9 +61,4 @@ export function sort(input: Table, options?: ISortOptions) {
     });
   }
 
-  input.clear();
-
-  for (const i of items) {
-    input.append(i);
-  }
 }
