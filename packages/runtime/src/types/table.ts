@@ -6,15 +6,35 @@ import {String} from "./string";
 import {clone} from "../clone";
 import {Structure} from "./structure";
 
+export class LoopIndex {
+  public index: number;
+
+  public constructor(start: number) {
+    this.index = start;
+  }
+}
+
 export type TableRowType = INumeric | Structure | ICharacter | Table | ABAPObject | string | number;
 
 export class Table  {
   private value: TableRowType[];
   private readonly rowType: TableRowType;
+  private readonly loops: Set<LoopIndex>;
 
   public constructor(rowType: TableRowType) {
     this.value = [];
+    this.loops = new Set();
     this.rowType = rowType;
+  }
+
+  public startLoop(start: number = 0): LoopIndex {
+    const l = new LoopIndex(start);
+    this.loops.add(l);
+    return l;
+  }
+
+  public unregisterLoop(loop: LoopIndex) {
+    this.loops.delete(loop);
   }
 
   // Modifications to the array must be done inside this class, in order to keep track of LOOP indexes
