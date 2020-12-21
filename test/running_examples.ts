@@ -3202,6 +3202,7 @@ START-OF-SELECTION.
   DO 4 TIMES.
     APPEND sy-index TO tab.
   ENDDO.
+  ASSERT lines( tab ) = 4.
   LOOP AT tab INTO row.
     WRITE / sy-tabix.
     WRITE / row.
