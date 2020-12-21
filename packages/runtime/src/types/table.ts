@@ -17,6 +17,7 @@ export class Table  {
     this.rowType = rowType;
   }
 
+  // Modifications to the array must be done via this class, in order to keep track of LOOP indexes
   public array(): any[] {
     return this.value;
   }
@@ -30,6 +31,10 @@ export class Table  {
     for (const a of tab.array()) {
       this.append(a);
     }
+  }
+
+  public insertIndex(item: TableRowType, index: number) {
+    this.value.splice(index, 0, item);
   }
 
   public append(item: TableRowType, cloneRow = true) {

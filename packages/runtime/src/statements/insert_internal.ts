@@ -13,11 +13,10 @@ export function insertInternal(
 
   if (options?.index) {
     const index = options.index.get() - 1;
-    target.array().splice(index, 0, data);
-    console.dir(target.array());
+    target.insertIndex(data, index);
   } else {
 // todo, for now it just appends, this is not correct, but currently the table type is not known
-    target.append(data);
+    target.insertIndex(data, target.array().length - 1);
   }
 
 }
