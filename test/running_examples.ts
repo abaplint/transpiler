@@ -3296,7 +3296,7 @@ ASSERT data1 = data2.`;
     f(abap);
   });
 
-  it.skip("INSERT INDEX", async () => {
+  it("INSERT INDEX, one time before loop pointer", async () => {
     const code = `
   DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
   DATA row LIKE LINE OF tab.
@@ -3312,13 +3312,12 @@ ASSERT data1 = data2.`;
   ENDLOOP.
   ASSERT lines( tab ) = 4.`;
     const js = await run(code);
-    console.dir(js);
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("1\n2\n3");
   });
 
-  it.skip("INSERT INDEX", async () => {
+  it("INSERT INDEX, with SORT", async () => {
     const code = `
   DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
   DATA row LIKE LINE OF tab.

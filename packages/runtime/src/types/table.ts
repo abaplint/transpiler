@@ -56,20 +56,21 @@ export class Table  {
 
   public insertIndex(item: TableRowType, index: number) {
     this.value.splice(index, 0, this.getValue(item));
+    for (const l of this.loops.values()) {
+      if (l.index <= index) {
+        l.index++;
+      }
+    }
   }
 
   public deleteIndex(index: number) {
-//    console.dir("delete index " + index);
     if (index > this.value.length) {
-//      console.dir("skip");
       return;
     }
     this.value.splice(index, 1);
     for (const l of this.loops.values()) {
-//      console.dir("l.index " + l.index);
       if (l.index >= index) {
         l.index--;
-//        console.dir("decrement to " + l.index);
       }
     }
   }
