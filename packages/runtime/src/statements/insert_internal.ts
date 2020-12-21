@@ -16,7 +16,7 @@ export function insertInternal(
     target.insertIndex(data, index);
   } else {
 // todo, for now it just appends, this is not correct, but currently the table type is not known
-    target.insertIndex(data, target.array().length - 1);
+    target.insertIndex(data, target.array().length);
   }
 
 }

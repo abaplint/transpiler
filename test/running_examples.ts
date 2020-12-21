@@ -3384,4 +3384,19 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("1\n2\n2\n0");
   });
 
+  it("INSERT INTO TABLE", async () => {
+    const code = `
+  DATA bar TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA data LIKE LINE OF bar.
+  INSERT 1 INTO TABLE bar.
+  INSERT 2 INTO TABLE bar.
+  LOOP AT bar INTO data.
+    WRITE / data.
+  ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("1\n2");
+  });
+
 });
