@@ -3335,4 +3335,53 @@ ASSERT data1 = data2.`;
     expect(abap.console.get()).to.equal("4\n2\n3\n4");
   });
 
+  it("ASSIGN fs TO fs, 2", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  FIELD-SYMBOLS <fs1> TYPE i.
+  FIELD-SYMBOLS <fs2> TYPE i.
+  DO 3 TIMES.
+    APPEND sy-index TO tab.
+  ENDDO.
+  LOOP AT tab ASSIGNING <fs1>.
+    IF <fs2> IS NOT ASSIGNED.
+      ASSIGN <fs1> TO <fs2>.
+    ENDIF.
+  ENDLOOP.
+  ASSERT <fs1> = 3.
+  ASSERT <fs2> = 1.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("more ASSIGNing", async () => {
+    const code = `
+TYPES: BEGIN OF ty_structure,
+         field1 TYPE i,
+         field2 TYPE i,
+       END OF ty_structure.
+DATA tab TYPE STANDARD TABLE OF ty_structure WITH DEFAULT KEY.
+FIELD-SYMBOLS <fs1> TYPE ty_structure.
+FIELD-SYMBOLS <fs2> TYPE ty_structure.
+DO 2 TIMES.
+  APPEND INITIAL LINE TO tab ASSIGNING <fs1>.
+  <fs1>-field1 = sy-tabix.
+ENDDO.
+LOOP AT tab ASSIGNING <fs1>.
+  IF <fs2> IS ASSIGNED.
+    <fs2>-field2 = sy-tabix.
+  ENDIF.
+  ASSIGN <fs1> TO <fs2>.
+ENDLOOP.
+LOOP AT tab ASSIGNING <fs1>.
+  WRITE / <fs1>-field1.
+  WRITE / <fs1>-field2.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n2\n0");
+  });
+
 });

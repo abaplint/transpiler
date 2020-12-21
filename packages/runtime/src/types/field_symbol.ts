@@ -27,6 +27,10 @@ export class FieldSymbol  {
     return this.pointer !== undefined;
   }
 
+  public getPointer() {
+    return this.pointer;
+  }
+
 ///////////////
 
   public clear() {

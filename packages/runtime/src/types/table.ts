@@ -82,7 +82,8 @@ export class Table  {
   public appendInitial() {
     // note that this will clone the object
     this.append(this.rowType);
-    // return "field symbol" pointing to the inserted line
+    // @ts-ignore
+    abap.builtin.sy.get().tabix.set(this.value.length);
     return this.value[this.value.length - 1];
   }
 

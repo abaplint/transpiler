@@ -27,11 +27,10 @@ try {\n`;
             }
             ret += `{
 const ${def.name} = require("./${obj.getName().toLowerCase()}.${obj.getType().toLowerCase()}.testclasses.js").${def.name};
-locl = clas.addTestClass("${def.name}");
-const test = new ${def.name}();\n`;
+locl = clas.addTestClass("${def.name}");\n`;
 
             if (def.methods.some(m => m.name.toUpperCase() === "CLASS_SETUP")) {
-              ret += `test.class_setup();\n`;
+              ret += `${def.name}.class_setup();\n`;
             }
 
             const hasSetup = def.methods.some(m => m.name.toUpperCase() === "SETUP");
@@ -41,7 +40,7 @@ const test = new ${def.name}();\n`;
               if (m.isForTesting === false) {
                 continue;
               }
-              ret += `{\n`;
+              ret += `{\n  const test = new ${def.name}();\n`;
               if (hasSetup === true) {
                 ret += `  test.setup();\n`;
               }
@@ -62,7 +61,7 @@ const test = new ${def.name}();\n`;
             }
 
             if (def.methods.some(m => m.name.toUpperCase() === "CLASS_TEARDOWN")) {
-              ret += `test.class_teardown();\n`;
+              ret += `${def.name}.class_teardown();\n`;
             }
 
             ret += `}\n`;

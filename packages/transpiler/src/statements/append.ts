@@ -18,7 +18,7 @@ export class AppendTranspiler implements IStatementTranspiler {
     if (node.concatTokens().toUpperCase().includes("INITIAL LINE")) {
       const fs = traversal.traverse(node.findFirstExpression(abaplint.Expressions.FieldSymbol));
 
-      return fs + " = " + target + ".appendInitial();";
+      return fs + ".assign(" + target + ".appendInitial());";
     } else {
       options.push("target: " + target);
       return "abap.statements.append({" + options.join(", ") + "});";
