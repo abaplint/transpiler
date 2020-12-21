@@ -34,7 +34,7 @@ export class Table  {
   }
 
   public insertIndex(item: TableRowType, index: number) {
-    this.value.splice(index, 0, clone(item));
+    this.value.splice(index, 0, this.getValue(item));
   }
 
   public deleteIndex(index: number) {
@@ -42,15 +42,7 @@ export class Table  {
   }
 
   public append(item: TableRowType, cloneRow = true) {
-    if (typeof item === "number") {
-      this.value.push(new Integer().set(item));
-    } else if (typeof item === "string") {
-      this.value.push(new String().set(item));
-    } else if (item instanceof ABAPObject) {
-      this.value.push(item);
-    } else {
-      this.value.push(cloneRow === true ? clone(item) : item);
-    }
+    this.value.push(this.getValue(item, cloneRow));
   }
 
   public appendInitial() {
@@ -58,6 +50,18 @@ export class Table  {
     this.append(this.rowType);
     // return "field symbol" pointing to the inserted line
     return this.value[this.value.length - 1];
+  }
+
+  private getValue(item: TableRowType, cloneRow = true) {
+    if (typeof item === "number") {
+      return new Integer().set(item);
+    } else if (typeof item === "string") {
+      return new String().set(item);
+    } else if (item instanceof ABAPObject) {
+      return item;
+    } else {
+      return cloneRow === true ? clone(item) : item;
+    }
   }
 
 }
