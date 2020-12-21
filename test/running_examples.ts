@@ -3355,4 +3355,33 @@ ASSERT data1 = data2.`;
     f(abap);
   });
 
+  it("more ASSIGNing", async () => {
+    const code = `
+TYPES: BEGIN OF ty_structure,
+         field1 TYPE i,
+         field2 TYPE i,
+       END OF ty_structure.
+DATA tab TYPE STANDARD TABLE OF ty_structure WITH DEFAULT KEY.
+FIELD-SYMBOLS <fs1> TYPE ty_structure.
+FIELD-SYMBOLS <fs2> TYPE ty_structure.
+DO 2 TIMES.
+  APPEND INITIAL LINE TO tab ASSIGNING <fs1>.
+  <fs1>-field1 = sy-tabix.
+ENDDO.
+LOOP AT tab ASSIGNING <fs1>.
+  IF <fs2> IS ASSIGNED.
+    <fs2>-field2 = sy-tabix.
+  ENDIF.
+  ASSIGN <fs1> TO <fs2>.
+ENDLOOP.
+LOOP AT tab ASSIGNING <fs1>.
+  WRITE / <fs1>-field1.
+  WRITE / <fs1>-field2.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n2\n0");
+  });
+
 });
