@@ -29,14 +29,13 @@ function compare(a: any, b: any, input: {component: string, descending?: boolean
 }
 
 export function sort(input: Table, options?: ISortOptions) {
-  const items = input.array();
 
   if (options?.by) {
     if (options.by.length === 0) {
       throw "SortByLengthZero";
     }
 
-    items.sort((a, b) => {
+    input.sort((a, b) => {
       for (const c of options.by || []) {
         const res = compare(a, b, c);
         if (res !== 0) {

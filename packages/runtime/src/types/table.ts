@@ -18,7 +18,7 @@ export class Table  {
   }
 
   // Modifications to the array must be done inside this class, in order to keep track of LOOP indexes
-  public array(): any[] {
+  public array(): readonly any[] {
     return this.value;
   }
 
