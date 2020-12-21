@@ -1,7 +1,7 @@
 import {Structure, Table} from "../types";
-import {ne} from "../compare";
+import {eq} from "../compare";
 import {INumeric} from "../types/_numeric";
-import {clone} from "../clone";
+import {loop} from "./loop";
 
 export interface IDeleteInternalOptions {
   where?: (i: any) => boolean,
@@ -12,32 +12,35 @@ export interface IDeleteInternalOptions {
 }
 
 export function deleteInternal(target: Table, options?: IDeleteInternalOptions): void {
-  const result = clone(target);
-  result.clear();
-
   let prev: any = undefined;
   let index = 0;
-  for (const i of target.array()) {
-    index = index + 1;
+
+  if (options?.index
+      && options?.where === undefined
+      && options?.adjacent === undefined
+      && options?.from === undefined
+      && options?.to === undefined) {
+    target.deleteIndex(options.index.get() - 1);
+    return;
+  }
+
+  for (const i of loop(target)) {
+    // @ts-ignore
+    index = abap.builtin.sy.get().tabix.get() - 1;
 
     if (options?.where) {
       const row = i instanceof Structure ? i.get() : {table_line: i};
-      if (options.where(row) === false) {
-        result.append(i, false);
+      if (options.where(row) === true) {
+        target.deleteIndex(index);
       }
-    } else if (options?.adjacent === true && (prev === undefined || ne(prev, i))) {
-      result.append(i, false);
-    } else if (options?.index && options.index.get() !== index) {
-      result.append(i, false);
-    } else if (options?.from && options.from.get() > index) {
-      result.append(i, false);
+    } else if (options?.adjacent === true && prev !== undefined && eq(prev, i) === true) {
+      target.deleteIndex(index);
+    } else if (options?.index && options.index.get() === index) {
+      target.deleteIndex(options.index.get() - 1);
+    } else if (options?.from && options.from.get() <= index + 1) {
+      target.deleteIndex(index);
     }
 
     prev = i;
-  }
-
-  target.clear();
-  for (const r of result.array()) {
-    target.append(r, false);
   }
 }

@@ -3202,6 +3202,7 @@ START-OF-SELECTION.
   DO 4 TIMES.
     APPEND sy-index TO tab.
   ENDDO.
+  ASSERT lines( tab ) = 4.
   LOOP AT tab INTO row.
     WRITE / sy-tabix.
     WRITE / row.
@@ -3270,6 +3271,68 @@ ENDLOOP.`;
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("42");
+  });
+
+  it("Structure equals", async () => {
+    const code = `
+TYPES: BEGIN OF ty_type,
+         field TYPE i,
+       END OF ty_type.
+DATA data1 TYPE ty_type.
+DATA data2 TYPE ty_type.
+ASSERT data1 = data2.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it.skip("internal table equals", async () => {
+    const code = `
+  DATA data1 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA data2 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  ASSERT data1 = data2.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("INSERT INDEX, one time before loop pointer", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA row LIKE LINE OF tab.
+  DO 3 TIMES.
+    APPEND sy-index TO tab.
+  ENDDO.
+  LOOP AT tab INTO row.
+    WRITE / row.
+    IF row MOD 2 = 0.
+      ASSERT lines( tab ) < 10.
+      INSERT 5 INTO tab INDEX sy-tabix.
+    ENDIF.
+  ENDLOOP.
+  ASSERT lines( tab ) = 4.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n3");
+  });
+
+  it("INSERT INDEX, with SORT", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA row LIKE LINE OF tab.
+  DO 4 TIMES.
+    row = 5 - sy-index.
+    APPEND row TO tab.
+  ENDDO.
+  LOOP AT tab INTO row.
+    WRITE / row.
+    SORT tab.
+  ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("4\n2\n3\n4");
   });
 
 });

@@ -1,4 +1,3 @@
-import {clone} from "../clone";
 import {Table} from "../types";
 import {INumeric} from "../types/_numeric";
 
@@ -13,7 +12,8 @@ export function modifyInternal(table: Table, options: IModifyInternalOptions): v
 
   const found = table.array()[index] !== undefined;
   if (found) {
-    table.array()[index] = clone(options.from);
+    table.deleteIndex(index);
+    table.insertIndex(options.from, index);
   }
 
   const subrc = found ? 0 : 4;
