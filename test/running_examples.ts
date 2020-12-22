@@ -3503,4 +3503,18 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("11");
   });
 
+  it("DESCRIBE with field symbol", async () => {
+    const code = `
+    DATA lv_length TYPE i.
+    DATA bar TYPE c LENGTH 10.
+    FIELD-SYMBOLS <line> TYPE any.
+    ASSIGN bar TO <line>.
+    DESCRIBE FIELD <line> LENGTH lv_length IN CHARACTER MODE.
+    WRITE lv_length.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("10");
+  });
+
 });
