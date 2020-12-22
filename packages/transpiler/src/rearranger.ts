@@ -1,12 +1,12 @@
 import {Expressions, INode, Nodes} from "@abaplint/core";
 
 export class Rearranger {
-  public run(node: INode | undefined): INode | undefined {
+  public run(node: Nodes.StructureNode | undefined): Nodes.StructureNode | undefined {
     if (!node) {
       return;
     }
 
-    return this.apply(node);
+    return this.apply(node) as Nodes.StructureNode;
   }
 
   private apply(node: INode): INode {

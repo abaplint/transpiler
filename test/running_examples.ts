@@ -3399,6 +3399,16 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("1\n2");
   });
 
+  it("add character field", async () => {
+    const code = `
+    DATA int TYPE i.
+    int = '5' + 3.
+    ASSERT int = 8.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
   it.skip("Arithmetics, precedence 1", async () => {
     const code = `ASSERT 4 - 0 + 1 = 5.`;
     const js = await run(code);
