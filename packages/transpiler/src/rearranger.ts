@@ -38,20 +38,52 @@ export class Rearranger {
       return;
     }
 
-    // todo: multiplication/division
+    let splitAt: Nodes.ExpressionNode | undefined;
 
-    // left to right
-    const lastArith = arith[arith.length - 1];
-    const lastArithIndex = children.indexOf(lastArith);
+    // multiplication/division and left to right
+    for (let i = arith.length - 1; i >= 0; i--) {
+      const a = arith[i];
+      if (a.concatTokens() === "*" || a.concatTokens() === "/") {
+        continue;
+      }
+      splitAt = a;
+      break;
+    }
 
-    const lhs = children.slice(0, lastArithIndex);
-    const left = new Nodes.ExpressionNode(node.get());
-    left.setChildren(lhs);
-    this.precedence(left);
+    // fallback
+    if (splitAt === undefined) {
+      splitAt = arith[arith.length - 1];
+    }
 
-    const rhs = children.slice(lastArithIndex + 1);
+    const index = children.indexOf(splitAt);
 
-    node.setChildren([left as Nodes.TokenNode | Nodes.ExpressionNode, lastArith].concat(rhs));
+    let left: (Nodes.TokenNode | Nodes.ExpressionNode)[] = [];
+    {
+      const lhs = children.slice(0, index);
+      if (lhs.length > 1) {
+        const temp = new Nodes.ExpressionNode(node.get());
+        temp.setChildren(lhs);
+        this.precedence(temp);
+        left.push(temp);
+      } else {
+        left = lhs;
+      }
+    }
+
+    let right: (Nodes.TokenNode | Nodes.ExpressionNode)[] = [];
+    {
+      const rhs = children.slice(index + 1);
+      if (rhs.length > 1) {
+        const temp = new Nodes.ExpressionNode(node.get());
+        temp.setChildren(rhs);
+        this.precedence(temp);
+        right.push(temp);
+      } else {
+        right = rhs;
+      }
+    }
+
+    node.setChildren(left.concat([splitAt]).concat(right));
   }
 
   // this flattens the arithmethic expressions so all related is under the same node

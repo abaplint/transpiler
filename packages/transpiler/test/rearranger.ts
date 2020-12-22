@@ -26,6 +26,9 @@ function dump(node: abaplint.INode): string {
       case "+":
         operator = "plus";
         break;
+      case "*":
+        operator = "mult";
+        break;
       default:
         operator = "unknownOperator";
         break;
@@ -66,6 +69,15 @@ describe("The Rearranger of Nodes", () => {
     const source = run(abap);
     const text = dump(source);
     expect(text).to.equal("plus(plus(minus(5, 1), 1), 4)");
+  });
+
+  it("test 3, multiplication", async () => {
+    const abap = `
+      DATA int TYPE i.
+      int = 5 + 2 * 2.`;
+    const source = run(abap);
+    const text = dump(source);
+    expect(text).to.equal("plus(5, mult(2, 2))");
   });
 
 });

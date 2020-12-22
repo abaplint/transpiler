@@ -3416,7 +3416,7 @@ ENDLOOP.`;
     f(abap);
   });
 
-  it.skip("Arithmetics, precedence 2", async () => {
+  it("Arithmetics, precedence 2", async () => {
     const code = `
   DATA int TYPE i.
   int = 2 * 2 + 3 * 3.
@@ -3427,7 +3427,7 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("13");
   });
 
-  it.skip("Arithmetics, precedence 3", async () => {
+  it("Arithmetics, precedence 3", async () => {
     const code = `ASSERT 100 * 10 + 2 = ( 100 * 10 ) + 2.`;
     const js = await run(code);
     const f = new Function("abap", js);
@@ -3457,6 +3457,27 @@ ENDLOOP.`;
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("1");
+  });
+
+  it("Arithmetics, precedence 7", async () => {
+    const code = `ASSERT 2 * 2 * 2 = 8.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("Arithmetics, precedence 7", async () => {
+    const code = `ASSERT 2 * 2 * 2 = 8.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("Arithmetics, precedence 8", async () => {
+    const code = `ASSERT 16 / 2 / 2 = 4.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
   });
 
 });
