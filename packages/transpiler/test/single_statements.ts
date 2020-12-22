@@ -102,7 +102,7 @@ describe("Single statements", () => {
     {abap: "WRITE foo->bar.",                         js: "abap.statements.write(foo.get().bar);",        skip: false},
     {abap: "type->type_kind = 2.",                    js: "type.get().type_kind.set(constant_2);",         skip: false},
     {abap: "REPLACE ALL OCCURRENCES OF |\\n| IN lv_norm WITH | |.",              js: "abap.statements.replace(lv_norm, `\\n`, ` `);",         skip: false},
-    {abap: "CONDENSE lv_norm.",                                                  js: "abap.statements.condense(lv_norm);",         skip: false},
+    {abap: "CONDENSE lv_norm.",                                                  js: "abap.statements.condense(lv_norm, {nogaps: false});",         skip: false},
     {abap: "FIND FIRST OCCURRENCE OF |bar| IN |foobar| MATCH OFFSET lv_offset.",
       js: "abap.statements.find(`foobar`, {find: `bar`, first: true, offset: lv_offset});", skip: false},
     {abap: "FIND FIRST OCCURRENCE OF cl_abap_char_utilities=>cr_lf IN iv_string.",
