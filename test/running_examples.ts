@@ -3548,13 +3548,19 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("10");
   });
 
-  it.only("MESSAGE INTO", async () => {
+  it.skip("MESSAGE INTO", async () => {
     const code = `
     DATA lv_text TYPE string.
     MESSAGE e001(00) WITH 'foo' 'bar' INTO lv_text.
     WRITE / sy-msgid.
     WRITE / sy-msgno.
     WRITE / lv_text.`;
+
+    abap.initDB(`CREATE TABLE t000 (mandt NCHAR(3), cccategory NCHAR(1), ccnocliind NCHAR(1), PRIMARY KEY(mandt));
+    CREATE TABLE t100 (sprsl NCHAR(1), arbgb NCHAR(20), msgnr NCHAR(3), text NCHAR(73), PRIMARY KEY(sprsl,arbgb,msgnr));
+    INSERT INTO t100 VALUES ('E', '00', '001', 'open-abap-hello-world');
+    INSERT INTO t000 VALUES ('123', '', '');`);
+
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
