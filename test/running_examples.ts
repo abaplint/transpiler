@@ -2963,6 +2963,16 @@ WRITE <lv_val>.`;
     expect(abap.console.get()).to.equal("4 * 8 = 32");
   });
 
+  it("field offset and length inside string template", async () => {
+    const code = `
+    DATA text TYPE string VALUE 'HEYABAPPALOBA'.
+    WRITE |{ text+3(4) }|.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("ABAP");
+  });
+
   it("IS ASSIGNED", async () => {
     const code = `
   FIELD-SYMBOLS <bar> TYPE i.
