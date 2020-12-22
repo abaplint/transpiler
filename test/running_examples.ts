@@ -3480,4 +3480,15 @@ ENDLOOP.`;
     f(abap);
   });
 
+  it("Arithmetics, precedence 9", async () => {
+    const code = `
+  DATA int TYPE i.
+  int = 2 + 2 * 3 + 3.
+  WRITE int.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("11");
+  });
+
 });
