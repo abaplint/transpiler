@@ -2697,6 +2697,37 @@ ASSERT lines( lt_matches ) = 2.`;
     f(abap);
   });
 
+  it("FIND RESULTS, 5", async () => {
+    const code = `
+TYPES: BEGIN OF ty_submatch,
+         offset TYPE i,
+         length TYPE i,
+       END OF ty_submatch.
+TYPES: BEGIN OF ty_match,
+         line       TYPE i,
+         offset     TYPE i,
+         length     TYPE i,
+         submatches TYPE STANDARD TABLE OF ty_submatch WITH DEFAULT KEY,
+       END OF ty_match.
+DATA lt_matches TYPE STANDARD TABLE OF ty_match WITH DEFAULT KEY.
+DATA ls_match LIKE LINE OF lt_matches.
+DATA ls_submatch LIKE LINE OF ls_match-submatches.
+FIND ALL OCCURRENCES OF
+  REGEX '(?:"[^"]*")|(?:''[^'']*'')|([<>])'
+  IN '<tag attribute="value"/>'
+  RESULTS lt_matches IGNORING CASE.
+LOOP AT lt_matches INTO ls_match.
+  LOOP AT ls_match-submatches INTO ls_submatch.
+    WRITE / ls_submatch-offset.
+    WRITE / ls_submatch-length.
+  ENDLOOP.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("0\n1\n-1\n0\n23\n1");
+  });
+
   it("Field offsets and lengths with structures, source", async () => {
     const code = `
   TYPES:

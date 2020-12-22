@@ -81,8 +81,13 @@ export function find(input: ICharacter | string, options: IFindOptions) {
 
       if (m.length === 2) {
         const submatch = new Structure({offset: new Integer(), length: new Integer()});
-        submatch.get().offset.set(m.index);
-        submatch.get().length.set(m[0].length);
+        if (m[1] === undefined) {
+          submatch.get().offset.set(-1);
+          submatch.get().length.set(0);
+        } else {
+          submatch.get().offset.set(m.index);
+          submatch.get().length.set(m[0].length);
+        }
         match.get().submatches.append(submatch);
       }
 
