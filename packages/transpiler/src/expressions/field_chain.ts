@@ -49,7 +49,8 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
         foo = "{" + foo + "}";
       }
       ret = ret + ".getOffset(" + foo + ")";  // todo, this will break
-    } else if (this.addGet) {
+    }
+    if (this.addGet) {
       ret = ret + ".get()";  // todo, this will break?
     }
 
