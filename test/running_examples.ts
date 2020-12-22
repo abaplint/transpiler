@@ -964,10 +964,12 @@ START-OF-SELECTION.
   it("CONDENSE", async () => {
     const code = `
   DATA str TYPE string.
-  str = | aa |.
-  ASSERT str = | aa |.
+  str = |   fo  o b   ar |.
+  ASSERT str = |   fo  o b   ar |.
   CONDENSE str.
-  ASSERT str = |aa|.`;
+  ASSERT str = |fo o b ar|.
+  CONDENSE str NO-GAPS.
+  ASSERT str = |foobar|.`;
 
     const js = await run(code);
     const f = new Function("abap", js);
@@ -1239,13 +1241,13 @@ write if.`;
   it("condense", async () => {
     const code = `
     DATA foo TYPE string.
-    foo = '123 '.
+    foo = '12  3 '.
     foo = condense( foo ).
     WRITE foo.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-    expect(abap.console.get()).to.equal("123");
+    expect(abap.console.get()).to.equal("12 3");
   });
 
   it("condense integer", async () => {
@@ -2959,6 +2961,16 @@ WRITE <lv_val>.`;
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("4 * 8 = 32");
+  });
+
+  it("field offset and length inside string template", async () => {
+    const code = `
+    DATA text TYPE string VALUE 'HEYABAPPALOBA'.
+    WRITE |{ text+3(4) }|.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("ABAP");
   });
 
   it("IS ASSIGNED", async () => {
