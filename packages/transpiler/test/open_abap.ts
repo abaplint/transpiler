@@ -45,7 +45,8 @@ CLASS ZCL_WORDS IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.`;
 
-    const files = [{filename: "zif_abap_serverless_v1.intf.abap", contents: intf},
+    const files = [
+      {filename: "zif_abap_serverless_v1.intf.abap", contents: intf},
       {filename: "zcl_words.clas.abap", contents: clas}];
 
     const output = (await new Transpiler().run(files)).objects;

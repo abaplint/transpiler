@@ -6,6 +6,7 @@ import {Requires} from "./requires";
 import {SkipSettings, UnitTest} from "./unit_test";
 import {Keywords} from "./keywords";
 import {DatabaseSetup} from "./database_setup";
+import  {Rearranger} from "./rearranger";
 
 export {config};
 
@@ -108,7 +109,8 @@ export class Transpiler {
         }
       }
 
-      const contents = new Traversal(spaghetti, file, obj).traverse(file.getStructure());
+      const rearranged = new Rearranger().run(file.getStructure());
+      const contents = new Traversal(spaghetti, file, obj).traverse(rearranged);
       if (contents.length > 0) {
         result += new Indentation().run(contents);
       }
