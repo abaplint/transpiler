@@ -3409,7 +3409,7 @@ ENDLOOP.`;
     f(abap);
   });
 
-  it.skip("Arithmetics, precedence 1", async () => {
+  it("Arithmetics, precedence 1", async () => {
     const code = `ASSERT 4 - 0 + 1 = 5.`;
     const js = await run(code);
     const f = new Function("abap", js);
@@ -3434,21 +3434,21 @@ ENDLOOP.`;
     f(abap);
   });
 
-  it.skip("Arithmetics, precedence 4", async () => {
+  it("Arithmetics, precedence 4", async () => {
     const code = `ASSERT 4 + 1 - 2 = 3.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
   });
 
-  it.skip("Arithmetics, precedence 5", async () => {
+  it("Arithmetics, precedence 5", async () => {
     const code = `ASSERT 4 + ( 1 - 2 ) = 3.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
   });
 
-  it.skip("Arithmetics, precedence 6", async () => {
+  it("Arithmetics, precedence 6", async () => {
     const code = `
   DATA int TYPE i.
   int = 4 - 1 - 2.

@@ -15,14 +15,57 @@ function run(abap: string): abaplint.Nodes.ExpressionNode {
   return source!;
 }
 
-describe("Rearranger", () => {
+function dump(node: abaplint.INode): string {
+  const children = node.getChildren();
+  if (children.length === 3) {
+    let operator = "";
+    switch (children[1].getFirstToken().getStr()) {
+      case "-":
+        operator = "minus";
+        break;
+      case "+":
+        operator = "plus";
+        break;
+      default:
+        operator = "unknownOperator";
+        break;
+    }
 
-  it("test 1", async () => {
+    return operator + "(" + dump(children[0]) + ", " + dump(children[2]) + ")";
+  } else if (children.length === 1) {
+    return children[0].getFirstToken().getStr();
+  } else {
+    return "not-well-formed: " + children.map(c => c.getFirstToken().getStr()).join(" ");
+  }
+}
+
+describe("The Rearranger of Nodes", () => {
+
+  it("simple", async () => {
+    const abap = `
+      DATA int TYPE i.
+      int = 5 - 1.`;
+    const source = run(abap);
+    const text = dump(source);
+    expect(text).to.equal("minus(5, 1)");
+  });
+
+  it("test 1, evaluation must be left to right", async () => {
     const abap = `
       DATA int TYPE i.
       int = 5 - 1 + 1.`;
     const source = run(abap);
-    expect(source).to.not.equal(undefined);
+    const text = dump(source);
+    expect(text).to.equal("plus(minus(5, 1), 1)");
+  });
+
+  it("test 2, evaluation must be left to right", async () => {
+    const abap = `
+      DATA int TYPE i.
+      int = 5 - 1 + 1 + 4.`;
+    const source = run(abap);
+    const text = dump(source);
+    expect(text).to.equal("plus(plus(minus(5, 1), 1), 4)");
   });
 
 });

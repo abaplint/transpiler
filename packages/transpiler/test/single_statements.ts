@@ -92,7 +92,6 @@ describe("Single statements", () => {
     {abap: "READ TABLE tab INDEX i ASSIGNING <nam>.",      js: "fs_nam_ = abap.statements.readTable(tab,{index: i});",   skip: false},
     {abap: "MODIFY result INDEX 1 FROM 4.",           js: "abap.statements.modifyInternal(result,{index: constant_1,from: constant_4});",   skip: false},
     {abap: "WRITE |foo| && |bar|.",                   js: "abap.statements.write(`foo` + `bar`);",                 skip: false},
-    {abap: "lv_index = foo - 1 + lv_distance.",       js: "lv_index.set(abap.operators.minus(foo,abap.operators.add(constant_1,lv_distance)));", skip: false},
     {abap: "WRITE zcl_name=>c_maxbits.",              js: "abap.statements.write(zcl_name.c_maxbits);",            skip: false},
     {abap: "WRITE |`|.",                              js: "abap.statements.write(`\\``);",                         skip: false},
     {abap: "ASSERT NOT act IS INITIAL.",              js: "abap.statements.assert(abap.compare.initial(act) === false);", skip: false},

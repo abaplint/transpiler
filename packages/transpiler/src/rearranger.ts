@@ -1,57 +1,84 @@
 import {Expressions, INode, Nodes} from "@abaplint/core";
 
 export class Rearranger {
+
   public run(node: Nodes.StructureNode | undefined): Nodes.StructureNode | undefined {
     if (!node) {
-      return;
+      return undefined;
     }
 
-    return this.apply(node) as Nodes.StructureNode;
+    const flattened = this.flatten(node);
+    const rebuilt = this.rebuild(flattened);
+    return rebuilt as Nodes.StructureNode;
   }
 
-  private apply(node: INode): INode {
+/////////////////
+
+  private rebuild(node: INode): INode {
     if (node instanceof Nodes.TokenNode) {
       return node;
     }
 
-    node.setChildren(node.getChildren().map(c => {
-      if (c.get() instanceof Expressions.Source) {
-        return this.applySource(c as Nodes.ExpressionNode);
-      } else {
-        return this.apply(c);
-      }
-    }));
+    const children = node.getChildren();
+    children.forEach(this.rebuild.bind(this));
+
+    if (node instanceof Nodes.ExpressionNode) {
+      this.precedence(node);
+    }
 
     return node;
   }
 
-  private applySource(node: Nodes.ExpressionNode): INode {
-    const prec = ["*", "/", "+", "-"];
-
-    const lOp = node.findDirectExpression(Expressions.ArithOperator);
-    const src = node.findDirectExpression(Expressions.Source);
-    const rOp = src?.findDirectExpression(Expressions.ArithOperator);
-
-    if (!lOp || !src || !rOp) {
-      return this.apply(node);
+  // this takes a single flattened node, and splits into binary nodes according to precedence and left to right processing
+  private precedence(node: Nodes.ExpressionNode) {
+    const children = node.getChildren();
+    const arith = node.findDirectExpressions(Expressions.ArithOperator);
+    // after flattening it might have multiple operators under the samenode
+    if (arith.length <= 1) {
+      return;
     }
 
-    const lPrec = prec.indexOf(lOp.getFirstToken().getStr());
-    const rPrec = prec.indexOf(rOp.getFirstToken().getStr());
+    // todo: multiplication/division
 
-    if (lPrec >= rPrec) {
-      return this.apply(node);
-    }
+    // left to right
+    const lastArith = arith[arith.length - 1];
+    const lastArithIndex = children.indexOf(lastArith);
 
-    const l1 = node.getChildren();
-    const l2 = src.getChildren();
+    const lhs = children.slice(0, lastArithIndex);
+    const left = new Nodes.ExpressionNode(node.get());
+    left.setChildren(lhs);
+    this.precedence(left);
 
-    const n1 = l1.map(e => e === src ? l2[0] : e);
-    const n2 = [node as Nodes.ExpressionNode | Nodes.TokenNode].concat(l2.slice(1));
+    const rhs = children.slice(lastArithIndex + 1);
 
-    node.setChildren(n1);
-    src.setChildren(n2);
-
-    return src;
+    node.setChildren([left as Nodes.TokenNode | Nodes.ExpressionNode, lastArith].concat(rhs));
   }
+
+  // this flattens the arithmethic expressions so all related is under the same node
+  private flatten(node: INode): INode {
+    if (node instanceof Nodes.TokenNode) {
+      return node;
+    }
+
+    const children = node.getChildren();
+    children.forEach(this.flatten.bind(this));
+
+    const last = children[children.length - 1];
+    const secondLast = children[children.length - 2];
+    if (last === undefined
+        || secondLast === undefined
+        || !(last instanceof Nodes.ExpressionNode)
+        || !(last.get() instanceof Expressions.Source)
+        || !(secondLast instanceof Nodes.ExpressionNode)
+        || !(secondLast.get() instanceof Expressions.ArithOperator)) {
+      return node;
+    }
+
+    const withoutLast = node.getChildren().slice(0, children.length - 1);
+    const flat = withoutLast.concat(last.getChildren());
+    node.setChildren(flat);
+
+    return node;
+  }
+
 }
