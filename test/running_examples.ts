@@ -3580,7 +3580,7 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("ABC\n123\nABC:123 foo bar");
   });
 
-  it.only("Method with IMPORTING default value", async () => {
+  it("Method with IMPORTING default value", async () => {
     const code = `
 CLASS lcl_bar DEFINITION.
   PUBLIC SECTION.

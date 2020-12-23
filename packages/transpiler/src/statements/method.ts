@@ -27,7 +27,7 @@ export class MethodTranspiler implements IStatementTranspiler {
       after = traversal.buildConstructorContents(scope.getParent(), cdef, unique);
     }
 
-    this.findMethod(scope);
+    const methoddef = this.findMethodParameters(scope);
 
     for (const v of scope.getData().vars) {
       if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
@@ -38,9 +38,13 @@ export class MethodTranspiler implements IStatementTranspiler {
         }
         after = after + new TranspileTypes().declare(v.identifier) + "\n";
         if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting) && v.identifier.getType().isGeneric() === false) {
-          after = after + "if (" + unique + " && " + unique + "." + v.name + ") {" + v.name + ".set(" + unique + "." + v.name + ");}\n";
+          after += "if (" + unique + " && " + unique + "." + v.name + ") {" + v.name + ".set(" + unique + "." + v.name + ");}\n";
         } else {
-          after = after + "if (" + unique + " && " + unique + "." + v.name + ") {" + v.name + " = " + unique + "." + v.name + ";}\n";
+          after += "if (" + unique + " && " + unique + "." + v.name + ") {" + v.name + " = " + unique + "." + v.name + ";}\n";
+        }
+        const def = methoddef?.getParameterDefault(v.name);
+        if (def) {
+          after += "if (" + unique + " === undefined || " + unique + "." + v.name + " === undefined) {" + v.name + " = " + traversal.traverse(def) + ";}\n";
         }
       } else if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodReturning)) {
         after = after + new TranspileTypes().declare(v.identifier) + "\n";
@@ -69,12 +73,11 @@ export class MethodTranspiler implements IStatementTranspiler {
     return staticMethod + name.replace("~", "$") + "(" + unique + ") {" + after;
   }
 
-  private findMethod(scope: abaplint.ISpaghettiScopeNode): abaplint.Types.MethodDefinition | undefined {
+  private findMethodParameters(scope: abaplint.ISpaghettiScopeNode): abaplint.Types.MethodParameters | undefined {
     for (const r of scope.getData().references) {
       if (r.referenceType === abaplint.ReferenceType.MethodImplementationReference
           && r.resolved instanceof abaplint.Types.MethodDefinition) {
-        console.dir(r.resolved);
-        return r.resolved;
+        return r.resolved.getParameters();
       }
     }
     return undefined;
