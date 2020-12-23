@@ -34,7 +34,7 @@ export class ABAP {
   public async initDB(sql?: string) {
     const SQL = await initSqlJs();
     this.db = new SQL.Database();
-    if (sql) {
+    if (sql && sql !== "") {
       this.db.run(sql);
     }
     this.statements.setDb(this.db);

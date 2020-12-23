@@ -47,9 +47,7 @@ export class MessageTranspiler implements IStatementTranspiler {
     for (const c of node.getChildren()) {
       if (c.getFirstToken().getStr().toUpperCase() === "WITH") {
         withs = true;
-        continue;
-      }
-      if (withs === true && c.get() instanceof abaplint.Expressions.Source) {
+      } else if (withs === true && c.get() instanceof abaplint.Expressions.Source) {
         w.push(traversal.traverse(c));
       } else if (withs === true) {
         break;

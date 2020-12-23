@@ -11,4 +11,5 @@ export const sy = new Structure({
   msgv2: new Character({length: 50}),
   msgv3: new Character({length: 50}),
   msgv4: new Character({length: 50}),
+  langu: new Character({length: 1}).set("E"),
 });
