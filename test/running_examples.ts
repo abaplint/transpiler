@@ -3580,4 +3580,28 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("ABC\n123\nABC:123 foo bar");
   });
 
+  it.only("Method with IMPORTING default value", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS: moo IMPORTING bar LIKE sy-msgid DEFAULT sy-msgid.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD moo.
+    WRITE bar.
+  ENDMETHOD.
+ENDCLASS.
+FORM form.
+  sy-msgid = '123'.
+  lcl_bar=>moo( ).
+ENDFORM.
+START-OF-SELECTION.
+  PERFORM form.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("123");
+  });
+
 });

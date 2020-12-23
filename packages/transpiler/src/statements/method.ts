@@ -27,6 +27,8 @@ export class MethodTranspiler implements IStatementTranspiler {
       after = traversal.buildConstructorContents(scope.getParent(), cdef, unique);
     }
 
+    this.findMethod(scope);
+
     for (const v of scope.getData().vars) {
       if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
           || v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodChanging)
@@ -65,6 +67,17 @@ export class MethodTranspiler implements IStatementTranspiler {
     }
 
     return staticMethod + name.replace("~", "$") + "(" + unique + ") {" + after;
+  }
+
+  private findMethod(scope: abaplint.ISpaghettiScopeNode): abaplint.Types.MethodDefinition | undefined {
+    for (const r of scope.getData().references) {
+      if (r.referenceType === abaplint.ReferenceType.MethodImplementationReference
+          && r.resolved instanceof abaplint.Types.MethodDefinition) {
+        console.dir(r.resolved);
+        return r.resolved;
+      }
+    }
+    return undefined;
   }
 
 }
