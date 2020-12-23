@@ -1,6 +1,10 @@
 import {ICharacter} from "../types/_character";
 
 export interface IMessageOptions {
+  id?: ICharacter | string,
+  number?: ICharacter | string,
+  type?: ICharacter | string,
+  with?: (ICharacter | string)[],
   into?: ICharacter,
 }
 
