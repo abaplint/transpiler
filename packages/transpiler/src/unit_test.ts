@@ -9,8 +9,11 @@ export class UnitTest {
 const path = require("path");
 const runtime = require("@abaplint/runtime");
 global.abap = new runtime.ABAP();
-global.abap.initDB(\`${dbSetup}\`);
+async function initDB() {
+return global.abap.initDB(\`${dbSetup}\`);
+}
 ${this.functionGroups(reg)}
+initDB().then(() => {
 const unit = new runtime.UnitTestResult();
 let clas;
 let locl;
@@ -79,7 +82,11 @@ fs.writeFileSync(__dirname + path.sep + "output.xml", unit.xUnitXML());
   console.log(abap.console.get());
   fs.writeFileSync(__dirname + path.sep + "output.xml", unit.xUnitXML());
   throw e;
-}`;
+}
+}).catch((err) => {
+  console.log(err);
+  process.exit(1);
+});`;
 
     return ret;
   }
