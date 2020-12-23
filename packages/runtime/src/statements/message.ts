@@ -14,6 +14,7 @@ export function message(options: IMessageOptions): void {
   if (arbgb !== undefined && typeof arbgb !== "string") {
     arbgb = arbgb.get();
   }
+  arbgb = arbgb?.toUpperCase();
   // @ts-ignore
   abap.builtin.sy.get().msgid.set(arbgb);
   let msgnr = options.number;
@@ -53,7 +54,7 @@ function replace(text: string, w?: (ICharacter | string)[]): string {
 
     text = text.replace(search, replace);
   }
-  return text;
+  return text.trim();
 }
 
 function findText(arbgb: string | undefined, msgnr: string | undefined): string {

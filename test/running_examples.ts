@@ -3566,4 +3566,18 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("00\n001\nfoobar");
   });
 
+  it("MESSAGE fallback, no database initialized", async () => {
+    const code = `
+    DATA lv_text TYPE string.
+    MESSAGE e123(abc) WITH 'foo' 'bar' INTO lv_text.
+    WRITE / sy-msgid.
+    WRITE / sy-msgno.
+    WRITE / lv_text.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("ABC\n123\nABC:123 foo bar");
+  });
+
 });
