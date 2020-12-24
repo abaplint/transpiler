@@ -8,4 +8,6 @@ export * from "./packed";
 export * from "./string";
 export * from "./structure";
 export * from "./table";
+export * from "./date";
+export * from "./time";
 export * from "./xstring";
