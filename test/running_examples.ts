@@ -3632,4 +3632,11 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("00000000\n000000");
   });
 
+  it("basic repeat()", async () => {
+    const code = `ASSERT repeat( val = 'a' occ = 2 ) = 'aa'.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });

@@ -11,6 +11,7 @@ export * from "./strlen";
 export * from "./substring";
 export * from "./sy";
 export * from "./to_lower";
+export * from "./repeat";
 export * from "./to_upper";
 export * from "./xstrlen";
 export * from "./abs";
