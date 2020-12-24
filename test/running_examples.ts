@@ -3646,7 +3646,7 @@ START-OF-SELECTION.
     f(abap);
   });
 
-  it.only("nested calls to builtins", async () => {
+  it("nested calls to builtins", async () => {
     const code = `
     DATA lv_line TYPE string.
     lv_line = to_upper( shift_left( val = 'aabb' sub = 'a' ) ).
