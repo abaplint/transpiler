@@ -14,6 +14,7 @@ export * from "./to_lower";
 export * from "./repeat";
 export * from "./to_upper";
 export * from "./xstrlen";
+export * from "./shift_left";
 export * from "./abs";
 export * from "./ceil";
 export * from "./floor";

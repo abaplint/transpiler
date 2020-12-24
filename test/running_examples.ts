@@ -3639,4 +3639,11 @@ START-OF-SELECTION.
     f(abap);
   });
 
+  it("basic shift_left()", async () => {
+    const code = "ASSERT shift_left( val = 'aabbcc' sub = `a` ) = 'bbcc'.";
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
