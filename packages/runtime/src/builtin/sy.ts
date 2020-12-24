@@ -1,4 +1,4 @@
-import {Structure, Integer, Character, Numc} from "../types";
+import {Structure, Integer, Character, Numc, Date, Time} from "../types";
 
 export const sy = new Structure({
   mandt: new Character({length: 3}).set("123"),
@@ -12,10 +12,8 @@ export const sy = new Structure({
   msgv3: new Character({length: 50}),
   msgv4: new Character({length: 50}),
   langu: new Character({length: 1}).set("E"),
-  /*
-  datlo: new Dat
-  datum
-  timlo
-  uzeit
-  */
+  datlo: new Date(),
+  datum: new Date(),
+  timlo: new Time(),
+  uzeit: new Time(),
 });

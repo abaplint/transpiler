@@ -3616,11 +3616,10 @@ START-OF-SELECTION.
     const f = new Function("abap", js);
     f(abap);
     const result = abap.console.get();
-    console.dir(result);
     expect(result).to.not.equal("");
   });
 
-  it.only("Date and time initial values", async () => {
+  it("Date and time initial values", async () => {
     const code = `
   DATA date TYPE d.
   DATA time TYPE t.

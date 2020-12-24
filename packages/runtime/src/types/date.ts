@@ -13,7 +13,7 @@ export class Date implements ICharacter {
     if (typeof value === "number") {
       this.value = this.value.toString();
     } else if (typeof value === "string") {
-      this.value = parseInt(value, 10) + "";
+      this.value = value;
     } else {
       this.set(value.get());
     }
