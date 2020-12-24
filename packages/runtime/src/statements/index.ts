@@ -19,6 +19,7 @@ import {select} from "./select";
 import {shift} from "./shift";
 import {sort} from "./sort";
 import {split} from "./split";
+import {getTime} from "./get_time";
 import {translate} from "./translate";
 import {write} from "./write";
 import {Console} from "../console";
@@ -30,6 +31,7 @@ export class Statements {
   public assert = assert;
   public assign = assign;
   public clear = clear;
+  public getTime = getTime;
   public concatenate = concatenate;
   public condense = condense;
   public deleteInternal = deleteInternal;

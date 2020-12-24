@@ -3604,4 +3604,46 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("123");
   });
 
+  it("GET TIME", async () => {
+    const code = `
+    GET TIME.
+    WRITE / sy-datlo.
+    WRITE / sy-datum.
+    WRITE / sy-timlo.
+    WRITE / sy-uzeit.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    const result = abap.console.get();
+    expect(result).to.not.equal("");
+  });
+
+  it("Date and time initial values", async () => {
+    const code = `
+  DATA date TYPE d.
+  DATA time TYPE t.
+  WRITE / date.
+  WRITE / time.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("00000000\n000000");
+  });
+
+  it("basic repeat()", async () => {
+    const code = `ASSERT repeat( val = 'a' occ = 2 ) = 'aa'.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("basic shift_left()", async () => {
+    const code = "ASSERT shift_left( val = 'aabbcc' sub = `a` ) = 'bbcc'.";
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });

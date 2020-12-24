@@ -37,6 +37,7 @@ export * from "./form";
 export * from "./free";
 export * from "./function_pool";
 export * from "./get_bit";
+export * from "./get_time";
 export * from "./if";
 export * from "./include";
 export * from "./insert_internal";
