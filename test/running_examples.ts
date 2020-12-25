@@ -3791,4 +3791,35 @@ ASSERT <tab1> = <tab2>.`;
     f(abap);
   });
 
+  it("LOOP AT <fs1> ASSIGNING <fs2>", async () => {
+    const code = `
+  TYPES:
+    BEGIN OF ty_tabtab,
+      index TYPE i,
+      str_tab TYPE TABLE OF string,
+    END OF ty_tabtab.
+  DATA tabtab TYPE ty_tabtab.
+  DATA foo TYPE TABLE OF ty_tabtab.
+  tabtab-index = 1.
+  APPEND 'foo' TO tabtab-str_tab.
+  APPEND 'bar' TO tabtab-str_tab.
+  APPEND tabtab TO foo.
+  tabtab-index = 3.
+  CLEAR tabtab-str_tab[].
+  APPEND 'meh' TO tabtab-str_tab.
+  APPEND tabtab TO foo.
+  FIELD-SYMBOLS <foo> TYPE ty_tabtab.
+  FIELD-SYMBOLS <bar> TYPE string.
+  LOOP AT foo ASSIGNING <foo>.
+    LOOP AT <foo>-str_tab ASSIGNING <bar>.
+      WRITE <bar>.
+    ENDLOOP.
+  ENDLOOP.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("foobarmeh");
+  });
+
 });

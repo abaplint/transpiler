@@ -18,7 +18,7 @@ export class LoopTranspiler implements IStatementTranspiler {
     if (into) {
       target = traversal.traverse(into) + ".set(" + unique1 + ");";
     } else {
-      const assigning = node.findFirstExpression(abaplint.Expressions.FieldSymbol);
+      const assigning = node.findFirstExpression(abaplint.Expressions.FSTarget)?.findFirstExpression(abaplint.Expressions.FieldSymbol);
       if (assigning) {
         target = traversal.traverse(assigning) + ".assign(" + unique1 + ");";
       }
