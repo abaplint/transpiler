@@ -1,13 +1,22 @@
-import {ABAPObject, Structure, Table} from "../types";
+import {ABAPObject, FieldSymbol, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
 export function eq(
-  left: number | string | ICharacter | INumeric | ABAPObject | Structure | Table,
-  right: number | string | ICharacter | INumeric | ABAPObject | Structure | Table): boolean {
+  left: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | FieldSymbol,
+  right: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | FieldSymbol): boolean {
 
   if (left instanceof Table || right instanceof Table) {
     throw "todo, eq TABLE";
+  }
+
+  if (right instanceof FieldSymbol && right.getPointer() instanceof Structure
+      && left instanceof FieldSymbol && left.getPointer() instanceof Structure) {
+    return eq(left.getPointer()!, right.getPointer()!);
+  } else if (left instanceof FieldSymbol && left.getPointer() instanceof Structure) {
+    return eq(left.getPointer()!, right);
+  } else if (right instanceof FieldSymbol && right.getPointer() instanceof Structure) {
+    return eq(left, right.getPointer()!);
   }
 
   if (left instanceof Structure || right instanceof Structure) {

@@ -3677,4 +3677,45 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2\n3\n5\n7");
   });
 
+  it("field symbol eq", async () => {
+    const code = `
+    DATA tab1 TYPE STANDARD TABLE OF c.
+    DATA tab2 TYPE STANDARD TABLE OF c.
+    FIELD-SYMBOLS <tab1> LIKE LINE OF tab1.
+    FIELD-SYMBOLS <tab2> LIKE LINE OF tab2.
+    APPEND 'a' TO tab1.
+    APPEND 'a' TO tab2.
+    READ TABLE tab1 INDEX 1 ASSIGNING <tab1>.
+    READ TABLE tab2 INDEX 1 ASSIGNING <tab2>.
+    ASSERT <tab1> = <tab2>.
+    ASSERT <tab1> = 'a'.
+    ASSERT 'a' = <tab2>.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("field symbol eq, structure", async () => {
+    const code = `
+TYPES: BEGIN OF ty_stru,
+         foo TYPE string,
+       END OF ty_stru.
+DATA tab1 TYPE STANDARD TABLE OF ty_stru.
+DATA tab2 TYPE STANDARD TABLE OF ty_stru.
+DATA stru TYPE ty_stru.
+FIELD-SYMBOLS <tab1> LIKE LINE OF tab1.
+FIELD-SYMBOLS <tab2> LIKE LINE OF tab2.
+stru-foo = 'abc'.
+APPEND stru TO tab1.
+APPEND stru TO tab2.
+READ TABLE tab1 INDEX 1 ASSIGNING <tab1>.
+READ TABLE tab2 INDEX 1 ASSIGNING <tab2>.
+ASSERT <tab1> = <tab2>.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
