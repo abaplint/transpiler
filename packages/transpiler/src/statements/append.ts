@@ -21,6 +21,11 @@ export class AppendTranspiler implements IStatementTranspiler {
 
       return fs + ".assign(" + target + ".appendInitial());";
     } else {
+      const assigning = node.findExpressionAfterToken("ASSIGNING");
+      if (assigning) {
+        options.push("assigning: " + traversal.traverse((assigning.findFirstExpression(abaplint.Expressions.FieldSymbol))));
+      }
+
       if (concat.startsWith("APPEND LINES OF ")) {
         options.push("lines: true");
       }
