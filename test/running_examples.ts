@@ -3742,4 +3742,29 @@ ASSERT <tab1> = <tab2>.`;
     expect(abap.console.get()).to.equal("C\ng\nh\nr");
   });
 
+  it("DESCRIBE, direct character string", async () => {
+    const code = `
+  DATA lv_type TYPE c LENGTH 1.
+  DESCRIBE FIELD 'moo' TYPE lv_type.
+  ASSERT lv_type = 'C'.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("CONCATENATE LINES OF", async () => {
+    const code = `
+  DATA rv_html TYPE string.
+  DATA lt_temp TYPE STANDARD TABLE OF string.
+  APPEND |fo| TO lt_temp.
+  APPEND |bar| TO lt_temp.
+  CONCATENATE LINES OF lt_temp INTO rv_html SEPARATED BY 'o'.
+  ASSERT rv_html = 'foobar'.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
