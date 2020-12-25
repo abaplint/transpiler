@@ -3718,4 +3718,28 @@ ASSERT <tab1> = <tab2>.`;
     f(abap);
   });
 
+  it("more DESCRIBE", async () => {
+    const code = `
+    DATA lv_type TYPE c LENGTH 1.
+    DESCRIBE FIELD lv_type TYPE lv_type.
+    WRITE / lv_type.
+
+    DATA lv_string TYPE string.
+    DESCRIBE FIELD lv_string TYPE lv_type.
+    WRITE / lv_type.
+
+    DATA lt_tab TYPE STANDARD TABLE OF string.
+    DESCRIBE FIELD lt_tab TYPE lv_type.
+    WRITE / lv_type.
+
+    DATA ref TYPE REF TO object.
+    DESCRIBE FIELD ref TYPE lv_type.
+    WRITE / lv_type.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("C\ng\nh\nr");
+  });
+
 });

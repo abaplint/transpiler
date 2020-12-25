@@ -11,7 +11,8 @@ export class TranspileTypes {
     let resolved = "";
     let extra = "";
 
-    if (type instanceof abaplint.BasicTypes.ObjectReferenceType) {
+    if (type instanceof abaplint.BasicTypes.ObjectReferenceType
+        || type instanceof abaplint.BasicTypes.GenericObjectReferenceType) {
       resolved = "ABAPObject";
     } else if (type instanceof abaplint.BasicTypes.TableType) {
       resolved = "Table";

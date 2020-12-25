@@ -1,4 +1,4 @@
-import {Character, FieldSymbol, Hex, Table} from "../types";
+import {Character, String, FieldSymbol, Hex, Table, ABAPObject} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -13,6 +13,12 @@ export function describe(input: IDescribeOptions) {
   if (input.type) {
     if (input.field instanceof Table) {
       input.type.set("h");
+    } else if (input.field instanceof Character) {
+      input.type.set("C");
+    } else if (input.field instanceof String) {
+      input.type.set("g");
+    } else if (input.field instanceof ABAPObject) {
+      input.type.set("r");
     }
     // todo
   }
