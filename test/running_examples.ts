@@ -3753,4 +3753,18 @@ ASSERT <tab1> = <tab2>.`;
     f(abap);
   });
 
+  it("CONCATENATE LINES OF", async () => {
+    const code = `
+  DATA rv_html TYPE string.
+  DATA lt_temp TYPE STANDARD TABLE OF string.
+  APPEND |fo| TO lt_temp.
+  APPEND |bar| TO lt_temp.
+  CONCATENATE LINES OF lt_temp INTO rv_html SEPARATED BY 'o'.
+  ASSERT rv_html = 'foobar'.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
