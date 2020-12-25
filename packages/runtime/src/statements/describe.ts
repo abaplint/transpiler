@@ -13,7 +13,7 @@ export function describe(input: IDescribeOptions) {
   if (input.type) {
     if (input.field instanceof Table) {
       input.type.set("h");
-    } else if (input.field instanceof Character) {
+    } else if (input.field instanceof Character || typeof input.field === "string") {
       input.type.set("C");
     } else if (input.field instanceof String) {
       input.type.set("g");

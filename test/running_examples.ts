@@ -3742,4 +3742,15 @@ ASSERT <tab1> = <tab2>.`;
     expect(abap.console.get()).to.equal("C\ng\nh\nr");
   });
 
+  it("DESCRIBE, direct character string", async () => {
+    const code = `
+  DATA lv_type TYPE c LENGTH 1.
+  DESCRIBE FIELD 'moo' TYPE lv_type.
+  ASSERT lv_type = 'C'.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
