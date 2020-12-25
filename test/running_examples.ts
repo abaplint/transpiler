@@ -3646,4 +3646,14 @@ START-OF-SELECTION.
     f(abap);
   });
 
+  it("nested calls to builtins", async () => {
+    const code = `
+    DATA lv_line TYPE string.
+    lv_line = to_upper( shift_left( val = 'aabb' sub = 'a' ) ).
+    ASSERT lv_line = 'BB'.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });

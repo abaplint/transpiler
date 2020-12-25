@@ -25,7 +25,7 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
     }
 
     const m = this.findMethodReference(nameToken, traversal.findCurrentScope(nameToken));
-    if (m?.name) {
+    if (m?.name && traversal.isBuiltinMethod(nameToken) === false) {
       name = m.name + "(";
     }
 
@@ -39,13 +39,22 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
       }
     }
 
-    const parameters = step.findFirstExpression(Expressions.ParameterListS);
+    const parameters = step.findDirectExpression(Expressions.ParameterListS);
     if (parameters) {
       name = name + traversal.traverse(parameters);
+    } else {
+      const params = step.findDirectExpression(Expressions.MethodParameters);
+      if (params) {
+        const s = params.findDirectExpression(Expressions.ParameterListS);
+        if (s) {
+          name += traversal.traverse(s);
+        }
+        for (const t of params.findDirectExpressions(Expressions.ParameterListT)) {
+          name += traversal.traverse(t);
+        }
+      }
     }
-    for (const t of step.findAllExpressions(Expressions.ParameterListT)) {
-      name = name + traversal.traverse(t);
-    }
+
     name = name.replace(/}{/g, ", ");
 
     return name + ")";
@@ -61,9 +70,8 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
     }
 
     for (const r of scope.getData().references) {
-      if (r.referenceType !== abaplint.ReferenceType.MethodReference) {
-        continue;
-      } else if (r.position.getStart().equals(token.getStart())
+      if (r.referenceType === abaplint.ReferenceType.MethodReference
+          && r.position.getStart().equals(token.getStart())
           && r.resolved instanceof abaplint.Types.MethodDefinition) {
         let name = r.resolved.getName();
         if (r.extra?.ooName && r.extra?.ooType === "INTF") {
@@ -71,6 +79,12 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
         }
 
         return {def: r.resolved, name};
+      } else if (r.referenceType === abaplint.ReferenceType.BuiltinMethodReference
+          && r.position.getStart().equals(token.getStart())) {
+        const def = r.resolved as abaplint.Types.MethodDefinition;
+        const name = def.getName();
+
+        return {def, name};
       }
     }
 
