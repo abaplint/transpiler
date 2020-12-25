@@ -1,9 +1,10 @@
-import {ABAPObject, Structure, Table} from "../types";
+import {ABAPObject, FieldSymbol, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
 export interface IInsertInternalOptions {
   index?: INumeric,
+  assigning?: FieldSymbol,
 }
 
 export function insertInternal(
@@ -13,10 +14,16 @@ export function insertInternal(
 
   if (options?.index) {
     const index = options.index.get() - 1;
-    target.insertIndex(data, index);
+    const val = target.insertIndex(data, index);
+    if (options.assigning) {
+      options.assigning.assign(val);
+    }
   } else {
 // todo, for now it just appends, this is not correct, but currently the table type is not known
-    target.insertIndex(data, target.array().length);
+    const val = target.insertIndex(data, target.array().length);
+    if (options?.assigning) {
+      options.assigning.assign(val);
+    }
   }
 
 }

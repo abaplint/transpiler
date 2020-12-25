@@ -3779,4 +3779,16 @@ ASSERT <tab1> = <tab2>.`;
     f(abap);
   });
 
+  it("INSERT ASSIGNING", async () => {
+    const code = `
+  DATA tab TYPE TABLE OF i.
+  FIELD-SYMBOLS <i> TYPE i.
+  INSERT 7 INTO TABLE tab ASSIGNING <i>.
+  ASSERT <i> = 7.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });

@@ -18,6 +18,11 @@ export class InsertInternalTranspiler implements IStatementTranspiler {
       options.push("index: " + traversal.traverse(index));
     }
 
+    const assigning = node.findExpressionAfterToken("ASSIGNING");
+    if (assigning) {
+      options.push("assigning: " + traversal.traverse((assigning.findFirstExpression(abaplint.Expressions.FieldSymbol))));
+    }
+
     const s = traversal.traverse(source);
     const t = traversal.traverse(target);
 

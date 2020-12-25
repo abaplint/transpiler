@@ -55,12 +55,14 @@ export class Table  {
   }
 
   public insertIndex(item: TableRowType, index: number) {
-    this.value.splice(index, 0, this.getValue(item));
+    const val = this.getValue(item);
+    this.value.splice(index, 0, val);
     for (const l of this.loops.values()) {
       if (l.index <= index) {
         l.index++;
       }
     }
+    return val;
   }
 
   public deleteIndex(index: number) {
