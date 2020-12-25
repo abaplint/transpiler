@@ -76,7 +76,9 @@ export class Table  {
   }
 
   public append(item: TableRowType, cloneRow = true) {
-    this.value.push(this.getValue(item, cloneRow));
+    const val = this.getValue(item, cloneRow);
+    this.value.push(val);
+    return val;
   }
 
   public appendInitial() {

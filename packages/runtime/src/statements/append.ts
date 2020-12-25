@@ -1,9 +1,10 @@
-import {Table, TableRowType} from "../types";
+import {FieldSymbol, Table, TableRowType} from "../types";
 
 export interface IAppendOptions {
   source: TableRowType,
   target: Table,
   lines?: boolean,
+  assigning?: FieldSymbol,
 }
 
 export function append(input: IAppendOptions) {
@@ -12,6 +13,9 @@ export function append(input: IAppendOptions) {
       input.target.append(a);
     }
   } else {
-    input.target.append(input.source);
+    const val = input.target.append(input.source);
+    if (input.assigning) {
+      input.assigning.assign(val);
+    }
   }
 }
