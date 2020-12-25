@@ -1,4 +1,6 @@
 build/index*.*
+build/config*.*
+build/file_operations*.*
 build/*.tsbuildinfo
 src/*
 webpack.config.js
