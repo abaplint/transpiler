@@ -3656,4 +3656,25 @@ START-OF-SELECTION.
     f(abap);
   });
 
+  it("APPEND LINES", async () => {
+    const code = `
+  DATA tab1 TYPE STANDARD TABLE OF i.
+  DATA tab2 TYPE STANDARD TABLE OF i.
+  DATA line TYPE i.
+  APPEND 2 TO tab1.
+  APPEND 3 TO tab1.
+  APPEND 5 TO tab2.
+  APPEND 7 TO tab2.
+  APPEND LINES OF tab2 TO tab1.
+  LOOP AT tab1 INTO line.
+    WRITE / line.
+  ENDLOOP.
+  ASSERT lines( tab1 ) = 4.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("2\n3\n5\n7");
+  });
+
 });

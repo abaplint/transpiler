@@ -1,9 +1,12 @@
 import {FieldSymbol, Structure, Table} from "../types";
+import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
 export interface IReadTableOptions {
   index?: INumeric | number,
   withKey?: (i: any) => boolean,
+  into?: INumeric | ICharacter | Structure | Table,
+  assigning?: FieldSymbol,
 }
 
 export function readTable(table: Table | FieldSymbol, options?: IReadTableOptions) {
@@ -37,5 +40,10 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
   // @ts-ignore
   abap.builtin.sy.get().subrc.set(subrc);
 
-  return found;
+  if (options.into) {
+    options.into.set(found);
+  } else if (options.assigning) {
+    options.assigning.assign(found);
+  }
+
 }

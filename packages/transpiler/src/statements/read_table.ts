@@ -17,18 +17,15 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       extra.push("index: " + s);
     }
 
-    let pre = "";
-    let post = "";
     const rt = node.findDirectExpression(abaplint.Expressions.ReadTableTarget);
     const target = rt?.findDirectExpression(abaplint.Expressions.Target);
     const fs = rt?.findDirectExpression(abaplint.Expressions.FSTarget);
     if (rt && fs) {
       const name = new FieldSymbolTranspiler().transpile(fs, traversal);
-      pre = name + " = ";
+      extra.push("assigning: " + name);
     } else if (target) {
       const name = traversal.traverse(target);
-      pre = name + ".set(";
-      post = ")";
+      extra.push("into: " + name);
     }
 
     const compare = node.findDirectExpression(abaplint.Expressions.ComponentCompareSimple);
@@ -50,7 +47,7 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       concat = ",{" + extra.join(",") + "}";
     }
 
-    return pre + "abap.statements.readTable(" + ret + concat + ")" + post + ";";
+    return "abap.statements.readTable(" + ret + concat + ");";
   }
 
 }

@@ -7,6 +7,7 @@ export class AppendTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
     const options: string[] = [];
+    const concat = node.concatTokens();
 
     const s = node.findDirectExpression(abaplint.Expressions.SimpleSource);
     if (s) {
@@ -20,6 +21,9 @@ export class AppendTranspiler implements IStatementTranspiler {
 
       return fs + ".assign(" + target + ".appendInitial());";
     } else {
+      if (concat.startsWith("APPEND LINES OF ")) {
+        options.push("lines: true");
+      }
       options.push("target: " + target);
       return "abap.statements.append({" + options.join(", ") + "});";
     }
