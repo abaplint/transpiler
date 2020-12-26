@@ -3822,4 +3822,40 @@ ASSERT <tab1> = <tab2>.`;
     expect(abap.console.get()).to.equal("foobarmeh");
   });
 
+  it("LOOP with multiple conditions", async () => {
+    const code = `
+    TYPES:
+      BEGIN OF ty_struct,
+        foo TYPE i,
+        bar TYPE i,
+      END OF ty_struct.
+    DATA tab TYPE STANDARD TABLE OF ty_struct.
+    DATA line TYPE ty_struct.
+    DO 10 TIMES.
+      line-foo = sy-index.
+      line-bar = sy-index MOD 3.
+      APPEND line TO tab.
+      line-foo = sy-index * 3.
+      line-bar = line-foo MOD 7 + 1.
+      APPEND line TO tab.
+    ENDDO.
+    SORT tab BY foo bar.
+    LOOP AT tab INTO line WHERE foo < 10 AND bar >= 2.
+      WRITE |{ line-foo }-{ line-bar }.|.
+    ENDLOOP.
+    WRITE / ''.
+    LOOP AT tab INTO line WHERE foo > 25 OR bar = 7.
+      WRITE |{ line-foo }-{ line-bar }.|.
+    ENDLOOP.
+    WRITE / ''.
+    LOOP AT tab INTO line WHERE foo = 18 OR ( foo > 23 AND foo <= 30 ).
+      WRITE |{ line-foo }-{ line-bar }.|.
+    ENDLOOP.
+    `;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("2-2.3-4.5-2.6-7.8-2.9-3.\n6-7.27-7.30-3.\n18-5.24-4.27-7.30-3.");
+  });
+
 });
