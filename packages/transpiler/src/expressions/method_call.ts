@@ -29,7 +29,7 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
       throw new Error("MethodCallTranspiler, unexpected node");
     }
 
-    name += new MethodCallParam().transpile(step, traversal, m?.def);
+    name += new MethodCallParam(m?.def).transpile(step, traversal);
 
     return name + ")";
   }

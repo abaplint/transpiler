@@ -1,10 +1,16 @@
 import * as abaplint from "@abaplint/core";
 import {Nodes, Expressions} from "@abaplint/core";
 import {Traversal} from "../traversal";
+import {IExpressionTranspiler} from "./_expression_transpiler";
 
-export class MethodCallParam {
+export class MethodCallParam implements IExpressionTranspiler {
+  private readonly m: abaplint.Types.MethodDefinition | undefined;
 
-  public transpile(node: Nodes.ExpressionNode, traversal: Traversal, m?: abaplint.Types.MethodDefinition): string {
+  public constructor(m?: abaplint.Types.MethodDefinition) {
+    this.m = m;
+  }
+
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): string {
     let name = "";
 
     if (!(node.get() instanceof Expressions.MethodCallParam)) {
@@ -13,8 +19,8 @@ export class MethodCallParam {
 
     const source = node.findDirectExpression(Expressions.Source);
     if (source) {
-      const def = m?.getParameters().getDefaultImporting()?.toLowerCase();
-      if (m === undefined || def === undefined) {
+      const def = this.m?.getParameters().getDefaultImporting()?.toLowerCase();
+      if (this.m === undefined || def === undefined) {
         name = name + traversal.traverse(source);
       } else {
         name = name + "{" + def + ": " + traversal.traverse(source) + "}";
