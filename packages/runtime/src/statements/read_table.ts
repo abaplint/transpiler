@@ -40,9 +40,9 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
   // @ts-ignore
   abap.builtin.sy.get().subrc.set(subrc);
 
-  if (options.into) {
+  if (options.into && found) {
     options.into.set(found);
-  } else if (options.assigning) {
+  } else if (options.assigning && found) {
     options.assigning.assign(found);
   }
 

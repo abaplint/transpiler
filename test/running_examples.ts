@@ -3856,6 +3856,19 @@ ASSERT <tab1> = <tab2>.`;
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("2-2.3-4.5-2.6-7.8-2.9-3.\n6-7.27-7.30-3.\n18-5.24-4.27-7.30-3.");
+
+  it("READ TABLE INDEX not found", async () => {
+    const code = `
+  DATA lt_segments TYPE STANDARD TABLE OF string.
+  DATA lv_segment TYPE string.
+  lv_segment = 'abc'.
+  READ TABLE lt_segments INTO lv_segment INDEX 2.
+  ASSERT sy-subrc = 4.
+  ASSERT lv_segment = 'abc'.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
   });
 
 });
