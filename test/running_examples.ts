@@ -3836,4 +3836,30 @@ ASSERT <tab1> = <tab2>.`;
     f(abap);
   });
 
+  it("CALL METHOD", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    METHODS name.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD name.
+    WRITE / 'hello'.
+  ENDMETHOD.
+ENDCLASS.
+START-OF-SELECTION.
+  PERFORM bar.
+FORM bar.
+  DATA bar TYPE REF TO lcl_bar.
+  CREATE OBJECT bar.
+  CALL METHOD bar->name( ).
+  CALL METHOD bar->name.
+ENDFORM.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("hello\nhello");
+  });
+
 });

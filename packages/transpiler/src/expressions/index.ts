@@ -15,6 +15,7 @@ export * from "./field_symbol";
 export * from "./function_parameters";
 export * from "./method_call_chain";
 export * from "./method_call";
+export * from "./method_source";
 export * from "./parameter_list_s";
 export * from "./parameter_list_t";
 export * from "./parameter_s";
