@@ -6,6 +6,7 @@ import {IStatementTranspiler} from "./statements/_statement_transpiler";
 import {IExpressionTranspiler} from "./expressions/_expression_transpiler";
 import {IStructureTranspiler} from "./structures/_structure_transpiler";
 import {TranspileTypes} from "./types";
+import {ISpaghettiScopeNode} from "@abaplint/core";
 
 
 export class Traversal {
@@ -123,6 +124,35 @@ export class Traversal {
       }
     }
     return false;
+  }
+
+  public findMethodReference(token: abaplint.Token, scope: ISpaghettiScopeNode | undefined):
+  undefined | {def: abaplint.Types.MethodDefinition, name: string} {
+
+    if (scope === undefined) {
+      return undefined;
+    }
+
+    for (const r of scope.getData().references) {
+      if (r.referenceType === abaplint.ReferenceType.MethodReference
+          && r.position.getStart().equals(token.getStart())
+          && r.resolved instanceof abaplint.Types.MethodDefinition) {
+        let name = r.resolved.getName();
+        if (r.extra?.ooName && r.extra?.ooType === "INTF") {
+          name = r.extra.ooName + "$" + name;
+        }
+
+        return {def: r.resolved, name};
+      } else if (r.referenceType === abaplint.ReferenceType.BuiltinMethodReference
+          && r.position.getStart().equals(token.getStart())) {
+        const def = r.resolved as abaplint.Types.MethodDefinition;
+        const name = def.getName();
+
+        return {def, name};
+      }
+    }
+
+    return undefined;
   }
 
   private isBuiltinVariable(token: abaplint.Token): boolean {
