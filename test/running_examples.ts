@@ -3862,4 +3862,31 @@ ENDFORM.`;
     expect(abap.console.get()).to.equal("hello\nhello");
   });
 
+  it.skip("CALL METHOD with EXPORTING", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    METHODS name IMPORTING foo TYPE i.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD name.
+    WRITE / foo.
+  ENDMETHOD.
+ENDCLASS.
+START-OF-SELECTION.
+  PERFORM bar.
+FORM bar.
+  DATA bar TYPE REF TO lcl_bar.
+  CREATE OBJECT bar.
+  CALL METHOD bar->name( 1 ).
+  CALL METHOD bar->name( foo = 2 ).
+  CALL METHOD bar->name EXPORTING foo = 3.
+ENDFORM.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n3");
+  });
+
 });

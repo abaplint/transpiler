@@ -2,6 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {Nodes, Expressions, ISpaghettiScopeNode} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
+import {MethodCallParam} from "./method_call_param";
 
 export class MethodCallTranspiler implements IExpressionTranspiler {
 
@@ -19,43 +20,17 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
       name = name + "(";
     }
 
-    const step = node.findDirectExpression(Expressions.MethodCallParam);
-    if (step === undefined) {
-      throw new Error("MethodCallTranspiler, unexpected node");
-    }
-
     const m = this.findMethodReference(nameToken, traversal.findCurrentScope(nameToken));
     if (m?.name && traversal.isBuiltinMethod(nameToken) === false) {
       name = m.name + "(";
     }
 
-    const source = step.findDirectExpression(Expressions.Source);
-    if (source) {
-      const def = m?.def?.getParameters().getDefaultImporting()?.toLowerCase();
-      if (m === undefined || def === undefined) {
-        name = name + traversal.traverse(source);
-      } else {
-        name = name + "{" + def + ": " + traversal.traverse(source) + "}";
-      }
+    const step = node.findDirectExpression(Expressions.MethodCallParam);
+    if (step === undefined) {
+      throw new Error("MethodCallTranspiler, unexpected node");
     }
 
-    const parameters = step.findDirectExpression(Expressions.ParameterListS);
-    if (parameters) {
-      name = name + traversal.traverse(parameters);
-    } else {
-      const params = step.findDirectExpression(Expressions.MethodParameters);
-      if (params) {
-        const s = params.findDirectExpression(Expressions.ParameterListS);
-        if (s) {
-          name += traversal.traverse(s);
-        }
-        for (const t of params.findDirectExpressions(Expressions.ParameterListT)) {
-          name += traversal.traverse(t);
-        }
-      }
-    }
-
-    name = name.replace(/}{/g, ", ");
+    name += new MethodCallParam().transpile(step, traversal, m?.def);
 
     return name + ")";
   }

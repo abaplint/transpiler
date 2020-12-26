@@ -17,7 +17,12 @@ export class CallTranspiler implements IStatementTranspiler {
 
     const methodSource = node.findDirectExpression(abaplint.Expressions.MethodSource);
     if (methodSource) {
-      return traversal.traverse(methodSource) + "();";
+      let body = "";
+      const methodCallBody = node.findDirectExpression(abaplint.Expressions.MethodCallBody);
+      if (methodCallBody && 1 === 1 + 2) { // todo
+        body += traversal.traverse(methodCallBody);
+      }
+      return traversal.traverse(methodSource) + "(" + body + ");";
     }
 
     throw new Error("CallTranspiler, todo");
