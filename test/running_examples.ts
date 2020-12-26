@@ -3822,4 +3822,18 @@ ASSERT <tab1> = <tab2>.`;
     expect(abap.console.get()).to.equal("foobarmeh");
   });
 
+  it("READ TABLE INDEX not found", async () => {
+    const code = `
+  DATA lt_segments TYPE STANDARD TABLE OF string.
+  DATA lv_segment TYPE string.
+  lv_segment = 'abc'.
+  READ TABLE lt_segments INTO lv_segment INDEX 2.
+  ASSERT sy-subrc = 4.
+  ASSERT lv_segment = 'abc'.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });
