@@ -1,0 +1,184 @@
+import {expect} from "chai";
+import {ABAP} from "../../packages/runtime/src";
+import {runFiles} from "../_utils";
+
+let abap: ABAP;
+
+async function run(contents: string) {
+  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
+}
+
+describe("Running statements - LOOP", () => {
+
+  beforeEach(async () => {
+    abap = new ABAP();
+  });
+
+  it("LOOP AT pass by value", async () => {
+    const code = `
+      data tab type table of i.
+      data val type i.
+      append 2 to tab.
+      loop at tab into val.
+      write / val.
+      val = 1.
+      endloop.
+      loop at tab into val.
+      write / val.
+      endloop.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("2\n2");
+  });
+
+  it("LOOP at assigning", async () => {
+    const code = `
+    DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+    FIELD-SYMBOLS <row> TYPE i.
+    APPEND 1 TO tab.
+    LOOP AT tab ASSIGNING <row>.
+      <row> = 2.
+    ENDLOOP.
+    LOOP AT tab ASSIGNING <row>.
+      WRITE <row>.
+    ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+  it("LOOP, should set sy-tabix", async () => {
+    const code = `
+      DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+      DO 3 TIMES.
+        APPEND 'a' TO tab.
+      ENDDO.
+      DATA sdf TYPE i.
+      LOOP AT tab INTO sdf.
+        WRITE / sy-tabix.
+      ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n3");
+  });
+
+  it("LOOP AT WHERE", async () => {
+    const code = `
+      DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+      DATA line LIKE LINE OF tab.
+      DO 5 TIMES.
+        APPEND sy-index TO tab.
+      ENDDO.
+      LOOP AT tab INTO line WHERE table_line <> 3.
+        WRITE / line.
+      ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n4\n5");
+  });
+
+  it("LOOP AT nothing with CONTINUE and EXIT", async () => {
+    const code = `
+      DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+      DATA row LIKE LINE OF tab.
+      LOOP AT tab INTO row.
+        CONTINUE.
+      ENDLOOP.
+      LOOP AT tab INTO row.
+        EXIT.
+      ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
+  it("LOOPing and DELETE in same table", async () => {
+    const code = `
+      DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+      DATA row LIKE LINE OF tab.
+      DO 4 TIMES.
+        APPEND sy-index TO tab.
+      ENDDO.
+      ASSERT lines( tab ) = 4.
+      LOOP AT tab INTO row.
+        WRITE / sy-tabix.
+        WRITE / row.
+        DELETE tab INDEX 2.
+      ENDLOOP.
+      ASSERT lines( tab ) = 1.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("1\n1\n2\n3\n2\n4");
+  });
+
+  it("LOOP AT <fs1> ASSIGNING <fs2>", async () => {
+    const code = `
+      TYPES:
+        BEGIN OF ty_tabtab,
+          index TYPE i,
+          str_tab TYPE TABLE OF string,
+        END OF ty_tabtab.
+      DATA tabtab TYPE ty_tabtab.
+      DATA foo TYPE TABLE OF ty_tabtab.
+      tabtab-index = 1.
+      APPEND 'foo' TO tabtab-str_tab.
+      APPEND 'bar' TO tabtab-str_tab.
+      APPEND tabtab TO foo.
+      tabtab-index = 3.
+      CLEAR tabtab-str_tab[].
+      APPEND 'meh' TO tabtab-str_tab.
+      APPEND tabtab TO foo.
+      FIELD-SYMBOLS <foo> TYPE ty_tabtab.
+      FIELD-SYMBOLS <bar> TYPE string.
+      LOOP AT foo ASSIGNING <foo>.
+        LOOP AT <foo>-str_tab ASSIGNING <bar>.
+          WRITE <bar>.
+        ENDLOOP.
+      ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("foobarmeh");
+  });
+
+  it("LOOP with multiple conditions", async () => {
+    const code = `
+      TYPES:
+        BEGIN OF ty_struct,
+          foo TYPE i,
+          bar TYPE i,
+        END OF ty_struct.
+      DATA tab TYPE STANDARD TABLE OF ty_struct.
+      DATA line TYPE ty_struct.
+      DO 10 TIMES.
+        line-foo = sy-index.
+        line-bar = sy-index MOD 3.
+        APPEND line TO tab.
+        line-foo = sy-index * 3.
+        line-bar = line-foo MOD 7 + 1.
+        APPEND line TO tab.
+      ENDDO.
+      SORT tab BY foo bar.
+      LOOP AT tab INTO line WHERE foo < 10 AND bar >= 2.
+        WRITE |{ line-foo }-{ line-bar }.|.
+      ENDLOOP.
+      WRITE / ''.
+      LOOP AT tab INTO line WHERE foo > 25 OR bar = 7.
+        WRITE |{ line-foo }-{ line-bar }.|.
+      ENDLOOP.
+      WRITE / ''.
+      LOOP AT tab INTO line WHERE foo = 18 OR ( foo > 23 AND foo <= 30 ).
+        WRITE |{ line-foo }-{ line-bar }.|.
+      ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("2-2.3-4.5-2.6-7.8-2.9-3.\n6-7.27-7.30-3.\n18-5.24-4.27-7.30-3.");
+  });
+
+});
