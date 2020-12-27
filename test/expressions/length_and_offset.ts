@@ -1,0 +1,280 @@
+import {expect} from "chai";
+import {ABAP} from "../../packages/runtime/src";
+import {runFiles} from "../_utils";
+
+let abap: ABAP;
+
+async function run(contents: string) {
+  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
+}
+
+describe("Running expressions - Length and offset", () => {
+
+  beforeEach(async () => {
+    abap = new ABAP();
+  });
+
+  it("Offset +1", async () => {
+    const code = `
+      DATA: bar TYPE string.
+      bar = 'abc'.
+      WRITE bar+1.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("bc");
+  });
+
+  it("Length (1)", async () => {
+    const code = `
+      DATA: bar TYPE string.
+      bar = 'abc'.
+      WRITE bar(1).`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("a");
+  });
+
+  it("hex offset and length", async () => {
+    const code = `
+      DATA x TYPE xstring.
+      x = '123456'.
+      WRITE / x+1.
+      WRITE / x(1).`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("3456\n12");
+  });
+
+  it("source field lengths and offsets", async () => {
+    const code = `
+      DATA bar TYPE string VALUE '12345'.
+      DATA len TYPE i.
+      len = 2.
+      WRITE / bar+len.
+      WRITE / bar(len).
+      WRITE / bar+2.
+      WRITE / bar(2).`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("345\n12\n345\n12");
+  });
+
+  it("target length and offsets", async () => {
+    const code = `
+      DATA foo TYPE c LENGTH 10.
+      foo = '11223355'.
+      foo+5(1) = 'A'.
+      WRITE / foo.
+      foo(1) = 'B'.
+      WRITE / foo.
+      foo+3 = 'C'.
+      WRITE / foo.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("11223A55\nB1223A55\nB12C");
+  });
+
+  it("xstring offset and length", async () => {
+    const code = `
+      DATA lv_a TYPE i VALUE 2.
+      DATA lv_x TYPE xstring VALUE '0F0F0F'.
+      lv_a = lv_a + lv_x+1(1).
+      WRITE lv_a.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("17");
+  });
+
+  it("Field offsets and lengths with structures, source", async () => {
+    const code = `
+      TYPES:
+        BEGIN OF ty_struct,
+          num TYPE i,
+        END OF ty_struct.
+
+      DATA number TYPE i.
+      DATA struct TYPE ty_struct.
+      DATA test_string TYPE string.
+
+      test_string = '0123456789'.
+      number = 3.
+      struct-num = 4.
+
+      WRITE / test_string+1(2).
+      WRITE / test_string+2(number).
+      WRITE / test_string+3(struct-num).
+
+      WRITE / test_string+number(2).
+      WRITE / test_string+number(number).
+      WRITE / test_string+number(struct-num).
+
+      WRITE / test_string+struct-num(2).
+      WRITE / test_string+struct-num(number).
+      WRITE / test_string+struct-num(struct-num).
+
+      sy-index = 8. " This should probably not be allowed... :)
+      WRITE / test_string+sy-index(1).`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("12\n234\n3456\n34\n345\n3456\n45\n456\n4567\n8");
+  });
+
+  it("Field offsets and lengths with structures, target", async () => {
+    const code = `
+      TYPES:
+        BEGIN OF ty_struct,
+          num TYPE i,
+        END OF ty_struct.
+
+      DATA number TYPE i.
+      DATA struct TYPE ty_struct.
+      DATA test_string TYPE c LENGTH 100.
+
+      test_string = '0123456789012'.
+      number = 3.
+      struct-num = 4.
+
+      test_string+1(2) = '##########'.
+      test_string+4(number) = '##########'.
+      test_string+8(struct-num) = '##########'.
+      WRITE / test_string.
+
+      test_string = '0123456789012'.
+      test_string+number(struct-num) = '!!!!!!!!!!'.
+      WRITE / test_string.
+      test_string+number(number) = '$$$$$$$$$$'.
+      WRITE / test_string.
+      test_string+number(2) = '££££££££££'.
+      WRITE / test_string.
+
+      test_string = '0123456789012'.
+      test_string+struct-num(struct-num) = 'PPPPPPPPPP'.
+      WRITE / test_string.
+      test_string+struct-num(number) = 'AAAAAAAAAA'.
+      WRITE / test_string.
+      test_string+struct-num(2) = 'ABABABABAB'.
+      WRITE / test_string.
+
+      sy-index = 4. " This should probably not be allowed... :)
+      WRITE / test_string+sy-index(sy-index).`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("0##3###7####2\n012!!!!789012\n012$$$!789012\n012££$!789012\n0123PPPP89012\n0123AAAP89012\n0123ABAP89012\nABAP");
+  });
+
+  it("Field offsets and lengths with field-symbols, source", async () => {
+    const code = `
+      TYPES:
+        BEGIN OF ty_struct,
+          num TYPE i,
+        END OF ty_struct.
+
+      DATA number TYPE i.
+      DATA struct TYPE ty_struct.
+      DATA test_string TYPE string.
+      FIELD-SYMBOLS <number> TYPE i.
+      FIELD-SYMBOLS <struct> TYPE ty_struct.
+
+      test_string = '0123456789'.
+      number = 3.
+      struct-num = 4.
+      ASSIGN number TO <number>.
+      ASSIGN struct TO <struct>.
+
+      WRITE / test_string+2(<number>).
+      WRITE / test_string+3(<struct>-num).
+
+      WRITE / test_string+<number>(2).
+      WRITE / test_string+<number>(<number>).
+      WRITE / test_string+<number>(<struct>-num).
+
+      WRITE / test_string+<struct>-num(2).
+      WRITE / test_string+<struct>-num(<number>).
+      WRITE / test_string+<struct>-num(<struct>-num).`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("234\n3456\n34\n345\n3456\n45\n456\n4567");
+  });
+
+  it("Field offsets and lengths with field-symbols, target", async () => {
+    const code = `
+      TYPES:
+        BEGIN OF ty_struct,
+          num TYPE i,
+        END OF ty_struct.
+
+      DATA number TYPE i.
+      DATA struct TYPE ty_struct.
+      DATA test_string TYPE c LENGTH 100.
+      FIELD-SYMBOLS <number> TYPE i.
+      FIELD-SYMBOLS <struct> TYPE ty_struct.
+
+      test_string = '0123456789012'.
+      number = 3.
+      struct-num = 4.
+      ASSIGN number TO <number>.
+      ASSIGN struct TO <struct>.
+
+      test_string+1(2) = '##########'.
+      test_string+4(<number>) = '##########'.
+      test_string+8(<struct>-num) = '##########'.
+      WRITE / test_string.
+
+      test_string = '0123456789012'.
+      test_string+<number>(<struct>-num) = '!!!!!!!!!!'.
+      WRITE / test_string.
+      test_string+<number>(<number>) = '$$$$$$$$$$'.
+      WRITE / test_string.
+      test_string+<number>(2) = '££££££££££'.
+      WRITE / test_string.
+
+      test_string = '0123456789012'.
+      test_string+<struct>-num(<struct>-num) = 'PPPPPPPPPP'.
+      WRITE / test_string.
+      test_string+<struct>-num(<number>) = 'AAAAAAAAAA'.
+      WRITE / test_string.
+      test_string+<struct>-num(2) = 'ABABABABAB'.
+      WRITE / test_string.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("0##3###7####2\n012!!!!789012\n012$$$!789012\n012££$!789012\n0123PPPP89012\n0123AAAP89012\n0123ABAP89012");
+  });
+
+  it("getOffset for field-symbols", async () => {
+    const code = `
+    DATA lv_row TYPE string.
+    FIELD-SYMBOLS <lv_row> TYPE string.
+    lv_row = |foobar|.
+    ASSIGN lv_row TO <lv_row>.
+    <lv_row> = <lv_row>(3).
+    WRITE <lv_row>.
+    <lv_row> = |foobar|.
+    <lv_row> = <lv_row>+3(3).
+    WRITE / <lv_row>.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("foo\nbar");
+  });
+
+  it("field offset and length inside string template", async () => {
+    const code = `
+    DATA text TYPE string VALUE 'HEYABAPPALOBA'.
+    WRITE |{ text+3(4) }|.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("ABAP");
+  });
+
+});
