@@ -14,6 +14,8 @@ export class MethodCallChainTranspiler implements IExpressionTranspiler {
         ret = ret + traversal.traverse(c);
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.ClassName) {
         ret = c.getFirstToken().getStr();
+      } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.MethodName) {
+        ret += c.getFirstToken().getStr();
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr() === "->") {
         if (ret === "super") {
           ret = ret + ".";
@@ -23,7 +25,7 @@ export class MethodCallChainTranspiler implements IExpressionTranspiler {
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr() === "=>") {
         ret = ret + ".";
       } else {
-        ret = ret + "MethodCallChainTranspilerTodo";
+        ret = ret + "MethodCallChainTranspilerTodo-" + c.get().constructor.name;
       }
     }
 
