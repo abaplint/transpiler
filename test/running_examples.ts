@@ -34,20 +34,6 @@ describe("Running Examples", () => {
     expect(res).to.equal(89);
   });
 
-  it("Simple IF", async () => {
-    const code = `
-    DATA: foo TYPE i VALUE 1,
-          bar TYPE i VALUE 1.
-
-    IF foo = bar.
-      foo = 2.
-    ENDIF.`;
-
-    const js = await run(code) + "\nreturn foo.get();";
-    const f = new Function("abap", js);
-    expect(f(abap)).to.equal(2);
-  });
-
   it("Character field semantics", async () => {
     const code = `
     DATA: foo TYPE c.
@@ -74,99 +60,12 @@ describe("Running Examples", () => {
     f(abap);
   });
 
-  it("Character field semantics", async () => {
-    const code = `
-    DATA lv_str TYPE string.
-    DATA lt_table TYPE STANDARD TABLE OF string.
-    lv_str = 'foo bar'.
-    SPLIT lv_str AT | | INTO TABLE lt_table.
-    ASSERT lines( lt_table ) = 2.`;
-
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("ASSERTs, left hand and right hand, none should fail", async () => {
-    const code = `
-      ASSERT 1 = 1.
-      ASSERT 1 = '1'.
-      ASSERT 1 = |1|.
-      ASSERT 1 = \`1\`.
-      ASSERT '1' = 1.
-      ASSERT |1| = 1.
-      ASSERT \`1\` = 1.`;
-
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
   it("Console tracks output", async () => {
     const code = `WRITE 'foo'.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("foo");
-  });
-
-  it("Offset +1", async () => {
-    const code = `
-      DATA: bar TYPE string.
-      bar = 'abc'.
-      WRITE bar+1.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("bc");
-  });
-
-  it("Length (1)", async () => {
-    const code = `
-      DATA: bar TYPE string.
-      bar = 'abc'.
-      WRITE bar(1).`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("a");
-  });
-
-  it("Basic delete internal", async () => {
-    const code = `
-      DATA table TYPE STANDARD TABLE OF i.
-      APPEND 1 TO table.
-      APPEND 2 TO table.
-      DELETE table WHERE table_line = 1.
-      ASSERT lines( table ) = 1.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("Basic delete ADJACENT DUPLICATES, no deleted", async () => {
-    const code = `
-      DATA table TYPE STANDARD TABLE OF i.
-      APPEND 1 TO table.
-      APPEND 2 TO table.
-      DELETE ADJACENT DUPLICATES FROM table.
-      ASSERT lines( table ) = 2.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("Basic delete ADJACENT DUPLICATES, one deleted", async () => {
-    const code = `
-      DATA table TYPE STANDARD TABLE OF i.
-      APPEND 1 TO table.
-      APPEND 2 TO table.
-      APPEND 2 TO table.
-      DELETE ADJACENT DUPLICATES FROM table.
-      ASSERT lines( table ) = 2.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
   });
 
   it("String compare", async () => {
@@ -182,42 +81,6 @@ describe("Running Examples", () => {
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-  });
-
-  it("Basic sort table", async () => {
-    const code = `
-    DATA: table   TYPE STANDARD TABLE OF i,
-          integer TYPE i.
-    APPEND 2 TO table.
-    APPEND 1 TO table.
-    SORT table.
-    LOOP AT table INTO integer.
-      WRITE / integer.
-    ENDLOOP.`;
-
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("1\n2");
-  });
-
-  it("Basic sort table, descending", async() => {
-    const code = `
-    DATA: table   TYPE STANDARD TABLE OF i,
-          integer TYPE i.
-    APPEND 2 TO table.
-    APPEND 3 TO table.
-    APPEND 1 TO table.
-    SORT table DESCENDING.
-    LOOP AT table INTO integer.
-      WRITE / integer.
-    ENDLOOP.`;
-
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("3\n2\n1");
-
   });
 
   it("Should throw an error if invalid code is requested to be transpiled", async () => {
@@ -257,40 +120,6 @@ describe("Running Examples", () => {
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-  });
-
-  it("LOOP AT pass by value", async () => {
-    const code = `
-  data tab type table of i.
-  data val type i.
-  append 2 to tab.
-  loop at tab into val.
-  write / val.
-  val = 1.
-  endloop.
-  loop at tab into val.
-  write / val.
-  endloop.`;
-
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("2\n2");
-  });
-
-  it("APPEND string", async () => {
-    const code = `
-  data tab type standard table of string.
-  data val type string.
-  append |foo| to tab.
-  loop at tab into val.
-    write val.
-  endloop.`;
-
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("foo");
   });
 
   it("Class, simple method call", async () => {
@@ -393,16 +222,6 @@ describe("Running Examples", () => {
     expect(abap.console.get()).to.equal("2");
   });
 
-  it("Basic CONCATENATE", async () => {
-    const code = `
-      DATA target TYPE string.
-      CONCATENATE 'foo' 'bar' INTO target.
-      ASSERT target = 'foobar'.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
   it("Set structure", async () => {
     const code = `
 TYPES: BEGIN OF ty_bar,
@@ -413,20 +232,6 @@ DATA: data1 TYPE ty_bar,
 data1-moo = 2.
 data2 = data1.
 ASSERT data2-moo = 2.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("Clear structure", async () => {
-    const code = `
-TYPES: BEGIN OF ty_bar,
-    moo TYPE i,
-  END OF ty_bar.
-DATA: data1 TYPE ty_bar.
-data1-moo = 2.
-CLEAR data1.
-ASSERT data1-moo = 0.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
@@ -490,18 +295,6 @@ ASSERT data1-moo = 0.`;
   <fs> = 2.
   ASSERT da = 2.
   ASSERT <fs> = 2.`;
-
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("basic CLEAR", async () => {
-    const code = `
-  DATA da TYPE i.
-  da = 2.
-  CLEAR da.
-  ASSERT da = 0.`;
 
     const js = await run(code);
     const f = new Function("abap", js);
@@ -745,19 +538,6 @@ ENDCLASS.
     expect(abap.console.get()).to.equal("A");
   });
 
-  it("hex offset and length", async () => {
-    const code = `
-  DATA x TYPE xstring.
-  x = '123456'.
-  WRITE / x+1.
-  WRITE / x(1).`;
-
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("3456\n12");
-  });
-
   it("first bit of x", async () => {
     const code = `
   DATA x TYPE x.
@@ -814,22 +594,6 @@ ENDCLASS.
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("10");
-  });
-
-  it("source field lengths and offsets", async () => {
-    const code = `
-  DATA bar TYPE string VALUE '12345'.
-  DATA len TYPE i.
-  len = 2.
-  WRITE / bar+len.
-  WRITE / bar(len).
-  WRITE / bar+2.
-  WRITE / bar(2).`;
-
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("345\n12\n345\n12");
   });
 
   it("ASSERT sy-subrc = 0.", async () => {
@@ -1011,19 +775,6 @@ WRITE lcl_foo=>bar-field.`;
     expect(abap.console.get()).to.equal("A");
   });
 
-  it("DELETE from table INDEX", async () => {
-    const code = `
-  DATA foo TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
-  APPEND 2 TO foo.
-  APPEND 3 TO foo.
-  DELETE foo INDEX 2.
-  ASSERT lines( foo ) = 1.`;
-
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
   it("simple PERFORM", async () => {
     const code = `
 FORM bar.
@@ -1071,49 +822,6 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("helloabc");
   });
 
-  it("LOOP at assigning", async () => {
-    const code = `
-    DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
-    FIELD-SYMBOLS <row> TYPE i.
-    APPEND 1 TO tab.
-    LOOP AT tab ASSIGNING <row>.
-      <row> = 2.
-    ENDLOOP.
-    LOOP AT tab ASSIGNING <row>.
-      WRITE <row>.
-    ENDLOOP.`;
-
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("2");
-  });
-
-  it("FIND FIRST OCCURRENCE, found", async () => {
-    const code = `
-  DATA lv_offset.
-  FIND FIRST OCCURRENCE OF |bar| IN |foobar| MATCH OFFSET lv_offset.
-  WRITE / sy-subrc.
-  WRITE / lv_offset.`;
-
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("0\n3");
-  });
-
-  it("FIND FIRST OCCURRENCE, not found", async () => {
-    const code = `
-  DATA lv_offset.
-  FIND FIRST OCCURRENCE OF |bar| IN |foo| MATCH OFFSET lv_offset.
-  WRITE / sy-subrc.`;
-
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("4");
-  });
-
   it("concat_lines_of", async () => {
     const code = `
   DATA rv_text TYPE string.
@@ -1141,30 +849,6 @@ START-OF-SELECTION.
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-  });
-
-  it("append structure to table", async () => {
-    const code = `
-TYPES: BEGIN OF ty_bar,
-         field TYPE i,
-       END OF ty_bar.
-TYPES ty_tab TYPE STANDARD TABLE OF ty_bar WITH DEFAULT KEY.
-DATA bar TYPE ty_bar.
-DATA tab TYPE ty_tab.
-
-bar-field = 1.
-APPEND bar TO tab.
-bar-field = 2.
-APPEND bar TO tab.
-
-LOOP AT tab INTO bar.
-  WRITE / bar-field.
-ENDLOOP.`;
-
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("1\n2");
   });
 
   it("read index 1 of structured table", async () => {
@@ -1203,39 +887,6 @@ write if.`;
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("foo if bar");
-  });
-
-  it("integer DIV", async () => {
-    const code = `
-      DATA foo TYPE i.
-      foo = 5 DIV 2.
-      WRITE foo.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("2");
-  });
-
-  it("power", async () => {
-    const code = `
-      DATA foo TYPE i.
-      foo = 5 ** 2.
-      WRITE foo.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("25");
-  });
-
-  it("integer MOD", async () => {
-    const code = `
-      DATA foo TYPE i.
-      foo = 5 MOD 2.
-      WRITE foo.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("1");
   });
 
   it("condense", async () => {
@@ -1361,15 +1012,6 @@ write if.`;
     expect(abap.console.get()).to.equal("ABC_123");
   });
 
-  it("FIND FIRST OCCURRENCE", async () => {
-    const code = `
-    FIND FIRST OCCURRENCE OF 'bar' IN 'foobar'.
-    ASSERT sy-subrc = 0.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
   it("DESCRIBE FIELD table", async () => {
     const code = `
   DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
@@ -1392,22 +1034,6 @@ write if.`;
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("3355");
-  });
-
-  it("target length and offsets", async () => {
-    const code = `
-  DATA foo TYPE c LENGTH 10.
-  foo = '11223355'.
-  foo+5(1) = 'A'.
-  WRITE / foo.
-  foo(1) = 'B'.
-  WRITE / foo.
-  foo+3 = 'C'.
-  WRITE / foo.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("11223A55\nB1223A55\nB12C");
   });
 
   it("GET all da BITs", async () => {
@@ -1506,18 +1132,6 @@ write if.`;
     expect(abap.console.get()).to.equal("ABC");
   });
 
-  it("APPEND INITIAL LINE", async () => {
-    const code = `
-  DATA tab TYPE STANDARD TABLE OF i.
-  FIELD-SYMBOLS <fs> LIKE LINE OF tab.
-  APPEND INITIAL LINE TO tab ASSIGNING <fs>.
-  WRITE <fs>.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("0");
-  });
-
   it("DESCRIBE FIELD", async () => {
     const code = `
   DATA f TYPE c LENGTH 4.
@@ -1528,21 +1142,6 @@ write if.`;
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("4");
-  });
-
-  it("APPEND field symbol", async () => {
-    const code = `
-  DATA tab TYPE STANDARD TABLE OF i.
-  DATA row LIKE LINE OF tab.
-  FIELD-SYMBOLS <fs> LIKE LINE OF tab.
-  APPEND INITIAL LINE TO tab ASSIGNING <fs>.
-  <fs> = 2.
-  READ TABLE tab INDEX 1 INTO row.
-  WRITE row.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("2");
   });
 
   it("back slash", async () => {
@@ -1575,19 +1174,6 @@ write if.`;
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("cba");
-  });
-
-  it("FIND REGEX, count and length", async () => {
-    const code = `
-  DATA lv_cnt TYPE i.
-  DATA lv_len TYPE i.
-  FIND FIRST OCCURRENCE OF REGEX 'b+c' IN 'abcdbc' MATCH COUNT lv_cnt MATCH LENGTH lv_len.
-  WRITE / lv_cnt.
-  WRITE / lv_len.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("1\n2");
   });
 
   it("abap_true", async () => {
@@ -1981,17 +1567,6 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1");
   });
 
-  it("clear object reference", async () => {
-    const code = `
-  interface lif_bar.
-  endinterface.
-  DATA bar TYPE REF TO lif_bar.
-  CLEAR bar.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
   it("CONDENSE converted type", async () => {
     const code = `
   DATA lv_len TYPE i.
@@ -2031,67 +1606,6 @@ WRITE lif=>bar-foo.`;
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("A");
-  });
-
-  it("CONCATENATE SEPARATED BY space", async () => {
-    const code = `
-  DATA lv_string TYPE string.
-  DATA lv_char10 TYPE c LENGTH 10.
-  DATA iv_type TYPE c LENGTH 6 VALUE 'commit'.
-  lv_char10 = 6.
-  CONDENSE lv_char10.
-  CONCATENATE iv_type lv_char10 INTO lv_string SEPARATED BY space.
-  ASSERT lv_string = 'commit 6'.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("xstring offset and length", async () => {
-    const code = `
-  DATA lv_a TYPE i VALUE 2.
-  DATA lv_x TYPE xstring VALUE '0F0F0F'.
-  lv_a = lv_a + lv_x+1(1).
-  WRITE lv_a.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("17");
-  });
-
-  it("FIND REGEX, not found", async () => {
-    const code = `
-  DATA lv_host TYPE string.
-  FIND REGEX 'a' IN '1122' SUBMATCHES lv_host.
-  WRITE sy-subrc.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("4");
-  });
-
-  it("FIND REGEX SUBMATCHES, found", async () => {
-    const code = `
-DATA lv_host TYPE string.
-FIND REGEX '11(\\w+)22' IN '11abc22' SUBMATCHES lv_host.
-ASSERT sy-subrc = 0.
-ASSERT lv_host = 'abc'.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("FIND REGEX slashes", async () => {
-    const code = `
-  FIND REGEX '//' IN '11//22'.
-  ASSERT sy-subrc = 0.
-  FIND REGEX '/' IN '11/22'.
-  ASSERT sy-subrc = 0.
-  FIND REGEX '/' IN '1122'.
-  ASSERT sy-subrc = 4.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
   });
 
   it("determine default parameter name", async () => {
@@ -2170,48 +1684,6 @@ PERFORM bar.`;
     expect(abap.console.get()).to.equal("123");
   });
 
-  it("split 1", async () => {
-    const code = `
-DATA: lv_major   TYPE c LENGTH 4,
-      lv_minor   TYPE c LENGTH 4,
-      lv_release TYPE c LENGTH 4.
-SPLIT |blah| AT '.' INTO lv_major lv_minor lv_release.
-WRITE / lv_major.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("blah");
-  });
-
-  it("split 2", async () => {
-    const code = `
-DATA: lv_major   TYPE c LENGTH 4,
-lv_minor   TYPE c LENGTH 4,
-lv_release TYPE c LENGTH 4.
-SPLIT |blah.boo| AT '.' INTO lv_major lv_minor lv_release.
-WRITE / lv_major.
-WRITE / lv_minor.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("blah\nboo");
-  });
-
-  it("split 3", async () => {
-    const code = `
-DATA: lv_major   TYPE c LENGTH 4,
-lv_minor   TYPE c LENGTH 4,
-lv_release TYPE c LENGTH 4.
-SPLIT |1.2.3| AT '.' INTO lv_major lv_minor lv_release.
-WRITE / lv_major.
-WRITE / lv_minor.
-WRITE / lv_release.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("1\n2\n3");
-  });
-
   it("numc text value, int", async () => {
     const code = `
   DATA bar TYPE n LENGTH 10.
@@ -2221,45 +1693,6 @@ WRITE / lv_release.`;
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("0000000001");
-  });
-
-  it("FIND ALL, MATCH COUNT", async () => {
-    const code = `
-    DATA lv_count TYPE i.
-    FIND ALL OCCURRENCES OF 'a' IN 'aaa' MATCH COUNT lv_count.
-    ASSERT lv_count = 3.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("FIND ALL, more submatches", async () => {
-    const code = `
-    DATA lv_val1 TYPE string.
-    DATA lv_val2 TYPE string.
-    DATA lv_val3 TYPE string.
-    DATA lv_val4 TYPE string.
-    FIND REGEX '(\\d+)-(\\d+) (\\w): (\\w+)' IN '5-9 g: ggccggmgn' SUBMATCHES lv_val1 lv_val2 lv_val3 lv_val4.
-    WRITE / lv_val1.
-    WRITE / lv_val2.
-    WRITE / lv_val3.
-    WRITE / lv_val4.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("5\n9\ng\nggccggmgn");
-  });
-
-  it("FIND ALL, should clear", async () => {
-    const code = `
-  DATA lv_count TYPE i.
-  lv_count = 1.
-  FIND ALL OCCURRENCES OF 'a' IN '123' MATCH COUNT lv_count.
-  WRITE lv_count.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("0");
   });
 
   it("EQ, initial string and integer", async () => {
@@ -2341,17 +1774,6 @@ WRITE / lv_release.`;
     expect(abap.console.get()).to.equal("2");
   });
 
-  it("FIND FIRST occurrence, empty input with MATCH LENGTH", async () => {
-    const code = `
-  DATA iv_fullpath TYPE string.
-  DATA lv_cnt TYPE i.
-  DATA lv_len TYPE i.
-  FIND FIRST OCCURRENCE OF REGEX '^/(.*/)?' IN iv_fullpath MATCH COUNT lv_cnt MATCH LENGTH lv_len.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
   it("concat via &", async () => {
     const code = `
   DATA mv_input TYPE string.
@@ -2371,22 +1793,6 @@ WRITE / lv_release.`;
     expect(abap.console.get()).to.equal("0");
   });
 
-  it("LOOP, should set sy-tabix", async () => {
-    const code = `
-  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
-  DO 3 TIMES.
-    APPEND 'a' TO tab.
-  ENDDO.
-  DATA sdf TYPE i.
-  LOOP AT tab INTO sdf.
-    WRITE / sy-tabix.
-  ENDLOOP.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("1\n2\n3");
-  });
-
   it("READ TABLE TRANSPORTING NO FIELDS", async () => {
     const code = `
     DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
@@ -2396,42 +1802,6 @@ WRITE / lv_release.`;
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("4");
-  });
-
-  it("integers div", async () => {
-    const code = `
-  DATA lv_int TYPE i.
-  lv_int = 5 / 2.
-  ASSERT lv_int = 3.
-  lv_int = 100 / 99.
-  ASSERT lv_int = 1.
-  lv_int = 5 / 3.
-  ASSERT lv_int = 2.
-  lv_int = 5 / 4.
-  ASSERT lv_int = 1.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("SPLIT empty string, should give empty table", async () => {
-    const code = `
-  DATA strs TYPE STANDARD TABLE OF string.
-  SPLIT || AT |a| INTO TABLE strs.
-  ASSERT lines( strs ) = 0.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("SPLIT non-empty string, should give non-empty table", async () => {
-    const code = `
-    DATA lt_tab TYPE STANDARD TABLE OF string.
-    SPLIT |sdfds| AT |AA| INTO TABLE lt_tab.
-    ASSERT lines( lt_tab ) = 1.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
   });
 
   it("deep structure, move", async () => {
@@ -2490,37 +1860,6 @@ ASSERT sy-subrc = 4.`;
   ASSERT to_upper( |bar| ) = |BAR|.
   ASSERT to_upper( |bar| ) = bar.
   ASSERT to_upper( bar ) = bar.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("LOOP AT WHERE", async () => {
-    const code = `
-  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
-  DATA line LIKE LINE OF tab.
-  DO 5 TIMES.
-    APPEND sy-index TO tab.
-  ENDDO.
-  LOOP AT tab INTO line WHERE table_line <> 3.
-    WRITE / line.
-  ENDLOOP.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("1\n2\n4\n5");
-  });
-
-  it("LOOP AT nothing with CONTINUE and EXIT", async () => {
-    const code = `
-    DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
-    DATA row LIKE LINE OF tab.
-    LOOP AT tab INTO row.
-      CONTINUE.
-    ENDLOOP.
-    LOOP AT tab INTO row.
-      EXIT.
-    ENDLOOP.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
@@ -2586,324 +1925,6 @@ ASSERT sy-subrc = 4.`;
       `abc123&%3C%3E%22'`);
   });
 
-  it("FIND RESULTS, 1", async () => {
-    const code = `
-TYPES: BEGIN OF ty_submatch,
-         offset TYPE i,
-         length TYPE i,
-       END OF ty_submatch.
-
-TYPES: BEGIN OF ty_match,
-         line       TYPE i,
-         offset     TYPE i,
-         length     TYPE i,
-         submatches TYPE STANDARD TABLE OF ty_submatch WITH DEFAULT KEY,
-       END OF ty_match.
-
-DATA lt_matches TYPE STANDARD TABLE OF ty_match WITH DEFAULT KEY.
-DATA ls_match LIKE LINE OF lt_matches.
-
-FIND REGEX |bar| IN |hello bar world| RESULTS lt_matches.
-ASSERT lines( lt_matches ) = 1.
-READ TABLE lt_matches INDEX 1 INTO ls_match.
-ASSERT ls_match-line = 0.
-ASSERT ls_match-offset = 6.
-ASSERT ls_match-length = 3.
-ASSERT lines( ls_match-submatches ) = 0.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("FIND RESULTS, 2", async () => {
-    const code = `
-TYPES: BEGIN OF ty_submatch,
-    offset TYPE i,
-    length TYPE i,
-  END OF ty_submatch.
-
-TYPES: BEGIN OF ty_match,
-    line       TYPE i,
-    offset     TYPE i,
-    length     TYPE i,
-    submatches TYPE STANDARD TABLE OF ty_submatch WITH DEFAULT KEY,
-  END OF ty_match.
-
-DATA lt_matches TYPE STANDARD TABLE OF ty_match WITH DEFAULT KEY.
-DATA ls_match LIKE LINE OF lt_matches.
-DATA ls_submatch LIKE LINE OF ls_match-submatches.
-
-FIND REGEX |(bar)| IN |hello bar bar world| RESULTS lt_matches.
-ASSERT lines( lt_matches ) = 1.
-
-FIND ALL OCCURRENCES OF REGEX |(bar)| IN |hello bar bar world| RESULTS lt_matches.
-ASSERT lines( lt_matches ) = 2.
-READ TABLE lt_matches INDEX 1 INTO ls_match.
-ASSERT lines( ls_match-submatches ) = 1.
-READ TABLE ls_match-submatches INDEX 1 INTO ls_submatch.
-ASSERT ls_submatch-offset = 6.
-ASSERT ls_submatch-length = 3.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("FIND RESULTS, 3", async () => {
-    const code = `
-    TYPES: BEGIN OF ty_submatch,
-    offset TYPE i,
-    length TYPE i,
-  END OF ty_submatch.
-
-TYPES: BEGIN OF ty_match,
-    line       TYPE i,
-    offset     TYPE i,
-    length     TYPE i,
-    submatches TYPE STANDARD TABLE OF ty_submatch WITH DEFAULT KEY,
-  END OF ty_match.
-
-DATA lt_matches TYPE STANDARD TABLE OF ty_match WITH DEFAULT KEY.
-DATA find TYPE string.
-find = 'aa'.
-DATA in TYPE string.
-in = 'fooaabar'.
-FIND ALL OCCURRENCES OF REGEX find IN in RESULTS lt_matches.
-ASSERT lines( lt_matches ) = 1.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("FIND RESULTS, 4", async () => {
-    const code = `
-TYPES: BEGIN OF ty_submatch,
-         offset TYPE i,
-         length TYPE i,
-       END OF ty_submatch.
-
-TYPES: BEGIN OF ty_match,
-         line       TYPE i,
-         offset     TYPE i,
-         length     TYPE i,
-         submatches TYPE STANDARD TABLE OF ty_submatch WITH DEFAULT KEY,
-       END OF ty_match.
-
-DATA lt_matches TYPE STANDARD TABLE OF ty_match WITH DEFAULT KEY.
-
-FIND ALL OCCURRENCES OF REGEX '\\b[-_a-z0-9]+\\b' IN 'REPORT zfoo.' RESULTS lt_matches IGNORING CASE.
-ASSERT lines( lt_matches ) = 2.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("FIND RESULTS, 5", async () => {
-    const code = `
-TYPES: BEGIN OF ty_submatch,
-         offset TYPE i,
-         length TYPE i,
-       END OF ty_submatch.
-TYPES: BEGIN OF ty_match,
-         line       TYPE i,
-         offset     TYPE i,
-         length     TYPE i,
-         submatches TYPE STANDARD TABLE OF ty_submatch WITH DEFAULT KEY,
-       END OF ty_match.
-DATA lt_matches TYPE STANDARD TABLE OF ty_match WITH DEFAULT KEY.
-DATA ls_match LIKE LINE OF lt_matches.
-DATA ls_submatch LIKE LINE OF ls_match-submatches.
-FIND ALL OCCURRENCES OF
-  REGEX '(?:"[^"]*")|(?:''[^'']*'')|([<>])'
-  IN '<tag attribute="value"/>'
-  RESULTS lt_matches IGNORING CASE.
-LOOP AT lt_matches INTO ls_match.
-  LOOP AT ls_match-submatches INTO ls_submatch.
-    WRITE / ls_submatch-offset.
-    WRITE / ls_submatch-length.
-  ENDLOOP.
-ENDLOOP.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("0\n1\n-1\n0\n23\n1");
-  });
-
-  it("Field offsets and lengths with structures, source", async () => {
-    const code = `
-  TYPES:
-    BEGIN OF ty_struct,
-      num TYPE i,
-    END OF ty_struct.
-
-  DATA number TYPE i.
-  DATA struct TYPE ty_struct.
-  DATA test_string TYPE string.
-
-  test_string = '0123456789'.
-  number = 3.
-  struct-num = 4.
-
-  WRITE / test_string+1(2).
-  WRITE / test_string+2(number).
-  WRITE / test_string+3(struct-num).
-
-  WRITE / test_string+number(2).
-  WRITE / test_string+number(number).
-  WRITE / test_string+number(struct-num).
-
-  WRITE / test_string+struct-num(2).
-  WRITE / test_string+struct-num(number).
-  WRITE / test_string+struct-num(struct-num).
-
-  sy-index = 8. " This should probably not be allowed... :)
-  WRITE / test_string+sy-index(1).`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("12\n234\n3456\n34\n345\n3456\n45\n456\n4567\n8");
-  });
-
-  it("Field offsets and lengths with structures, target", async () => {
-    const code = `
-  TYPES:
-    BEGIN OF ty_struct,
-      num TYPE i,
-    END OF ty_struct.
-
-  DATA number TYPE i.
-  DATA struct TYPE ty_struct.
-  DATA test_string TYPE c LENGTH 100.
-
-  test_string = '0123456789012'.
-  number = 3.
-  struct-num = 4.
-
-  test_string+1(2) = '##########'.
-  test_string+4(number) = '##########'.
-  test_string+8(struct-num) = '##########'.
-  WRITE / test_string.
-
-  test_string = '0123456789012'.
-  test_string+number(struct-num) = '!!!!!!!!!!'.
-  WRITE / test_string.
-  test_string+number(number) = '$$$$$$$$$$'.
-  WRITE / test_string.
-  test_string+number(2) = '££££££££££'.
-  WRITE / test_string.
-
-  test_string = '0123456789012'.
-  test_string+struct-num(struct-num) = 'PPPPPPPPPP'.
-  WRITE / test_string.
-  test_string+struct-num(number) = 'AAAAAAAAAA'.
-  WRITE / test_string.
-  test_string+struct-num(2) = 'ABABABABAB'.
-  WRITE / test_string.
-
-  sy-index = 4. " This should probably not be allowed... :)
-  WRITE / test_string+sy-index(sy-index).`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("0##3###7####2\n012!!!!789012\n012$$$!789012\n012££$!789012\n0123PPPP89012\n0123AAAP89012\n0123ABAP89012\nABAP");
-  });
-
-  it("Field offsets and lengths with field-symbols, source", async () => {
-    const code = `
-  TYPES:
-    BEGIN OF ty_struct,
-      num TYPE i,
-    END OF ty_struct.
-
-  DATA number TYPE i.
-  DATA struct TYPE ty_struct.
-  DATA test_string TYPE string.
-  FIELD-SYMBOLS <number> TYPE i.
-  FIELD-SYMBOLS <struct> TYPE ty_struct.
-
-  test_string = '0123456789'.
-  number = 3.
-  struct-num = 4.
-  ASSIGN number TO <number>.
-  ASSIGN struct TO <struct>.
-
-  WRITE / test_string+2(<number>).
-  WRITE / test_string+3(<struct>-num).
-
-  WRITE / test_string+<number>(2).
-  WRITE / test_string+<number>(<number>).
-  WRITE / test_string+<number>(<struct>-num).
-
-  WRITE / test_string+<struct>-num(2).
-  WRITE / test_string+<struct>-num(<number>).
-  WRITE / test_string+<struct>-num(<struct>-num).`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("234\n3456\n34\n345\n3456\n45\n456\n4567");
-  });
-
-  it("Field offsets and lengths with field-symbols, target", async () => {
-    const code = `
-  TYPES:
-    BEGIN OF ty_struct,
-      num TYPE i,
-    END OF ty_struct.
-
-  DATA number TYPE i.
-  DATA struct TYPE ty_struct.
-  DATA test_string TYPE c LENGTH 100.
-  FIELD-SYMBOLS <number> TYPE i.
-  FIELD-SYMBOLS <struct> TYPE ty_struct.
-
-  test_string = '0123456789012'.
-  number = 3.
-  struct-num = 4.
-  ASSIGN number TO <number>.
-  ASSIGN struct TO <struct>.
-
-  test_string+1(2) = '##########'.
-  test_string+4(<number>) = '##########'.
-  test_string+8(<struct>-num) = '##########'.
-  WRITE / test_string.
-
-  test_string = '0123456789012'.
-  test_string+<number>(<struct>-num) = '!!!!!!!!!!'.
-  WRITE / test_string.
-  test_string+<number>(<number>) = '$$$$$$$$$$'.
-  WRITE / test_string.
-  test_string+<number>(2) = '££££££££££'.
-  WRITE / test_string.
-
-  test_string = '0123456789012'.
-  test_string+<struct>-num(<struct>-num) = 'PPPPPPPPPP'.
-  WRITE / test_string.
-  test_string+<struct>-num(<number>) = 'AAAAAAAAAA'.
-  WRITE / test_string.
-  test_string+<struct>-num(2) = 'ABABABABAB'.
-  WRITE / test_string.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("0##3###7####2\n012!!!!789012\n012$$$!789012\n012££$!789012\n0123PPPP89012\n0123AAAP89012\n0123ABAP89012");
-  });
-
-  it("getOffset for field-symbols", async () => {
-    const code = `
-    DATA lv_row TYPE string.
-    FIELD-SYMBOLS <lv_row> TYPE string.
-    lv_row = |foobar|.
-    ASSIGN lv_row TO <lv_row>.
-    <lv_row> = <lv_row>(3).
-    WRITE <lv_row>.
-    <lv_row> = |foobar|.
-    <lv_row> = <lv_row>+3(3).
-    WRITE / <lv_row>.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("foo\nbar");
-  });
-
   it("compare using CO operator", async () => {
     const code = `
     DATA lv_val TYPE abap_bool.
@@ -2929,22 +1950,6 @@ ENDLOOP.`;
     f(abap);
   });
 
-  it("basic ASSIGN COMPONENT", async () => {
-    const code = `
-TYPES: BEGIN OF ty_stru,
-         bar TYPE string,
-       END OF ty_stru.
-DATA: ls_stru TYPE ty_stru.
-FIELD-SYMBOLS <lv_val> TYPE any.
-ls_stru-bar = 'foo'.
-ASSIGN COMPONENT 'BAR' OF STRUCTURE ls_stru TO <lv_val>.
-WRITE <lv_val>.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("foo");
-  });
-
   it("test refs are identical", async () => {
     const code = `
   CLASS lcl_foo DEFINITION.
@@ -2961,28 +1966,6 @@ WRITE <lv_val>.`;
     f(abap);
   });
 
-  it("delete internal tab with object references", async () => {
-    const code = `
-  CLASS lcl_foo DEFINITION.
-  ENDCLASS.
-  CLASS lcl_foo IMPLEMENTATION.
-  ENDCLASS.
-
-  DATA tab TYPE STANDARD TABLE OF REF TO lcl_foo.
-  DATA ref1 TYPE REF TO lcl_foo.
-  DATA ref2 TYPE REF TO lcl_foo.
-  CREATE OBJECT ref1.
-  APPEND ref1 TO tab.
-  CREATE OBJECT ref2.
-  APPEND ref2 TO tab.
-
-  DELETE tab INDEX 2.
-  ASSERT sy-subrc = 0.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
   it("calculation inside string template", async () => {
     const code = `
   DATA int_1 TYPE i VALUE 4.
@@ -2992,16 +1975,6 @@ WRITE <lv_val>.`;
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("4 * 8 = 32");
-  });
-
-  it("field offset and length inside string template", async () => {
-    const code = `
-    DATA text TYPE string VALUE 'HEYABAPPALOBA'.
-    WRITE |{ text+3(4) }|.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("ABAP");
   });
 
   it("IS ASSIGNED", async () => {
@@ -3021,131 +1994,6 @@ WRITE <lv_val>.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-  });
-
-  it("INSERT INTO TABLE", async () => {
-    const code = `
-  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
-  INSERT 5 INTO TABLE tab.
-  ASSERT lines( tab ) = 1.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("DELETE INITIAL where IS INITIAL", async () => {
-    const code = `
-    DATA lt_keywords TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
-    APPEND '' TO lt_keywords.
-    ASSERT lines( lt_keywords ) = 1.
-    DELETE lt_keywords WHERE table_line IS INITIAL.
-    ASSERT lines( lt_keywords ) = 0.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("SORT structure", async () => {
-    const code = `
-TYPES: BEGIN OF ty_structure,
-         field TYPE i,
-       END OF ty_structure.
-DATA tab TYPE STANDARD TABLE OF ty_structure WITH DEFAULT KEY.
-DATA row LIKE LINE OF tab.
-row-field = 2.
-APPEND row TO tab.
-row-field = 1.
-APPEND row TO tab.
-SORT tab BY field.
-LOOP AT tab INTO row.
-  WRITE / row-field.
-ENDLOOP.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("1\n2");
-  });
-
-  it("Bit operator BIT-AND", async () => {
-    const code = `
-    DATA x1 TYPE xstring.
-    DATA x2 TYPE xstring.
-    DATA x3 TYPE xstring.
-    x1 = 'DCBA98765432'.
-    x2 = 'DDBBAA885555'.
-    x3 = x1 BIT-AND x2.
-    WRITE x3.
-    x1 = 'DCBA9876543299ABC'.
-    x2 = 'DDBBAA885FFFE2'.
-    x3 = x1 BIT-AND x2.
-    WRITE / x3.
-    x1 = 'ABCD'.
-    x2 = 'CD'.
-    x3 = x1 BIT-AND x2.
-    WRITE / x3.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("DCBA88005410\nDCBA88005432800000\n8900");
-  });
-
-  it.skip("Bit operator BIT-NOT", async () => {
-    const code = `
-    DATA x1 TYPE xstring.
-    DATA x2 TYPE xstring.
-    x1 = '0DBD'.
-    x2 = BIT-NOT x1.
-    WRITE x2.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("F242");
-  });
-
-  it("Bit operator BIT-OR", async () => {
-    const code = `
-    DATA x1 TYPE xstring.
-    DATA x2 TYPE xstring.
-    DATA x3 TYPE xstring.
-    x1 = 'DCBA98765432'.
-    x2 = 'DDBBAA885555'.
-    x3 = x1 BIT-OR x2.
-    WRITE x3.
-    x1 = 'DCBA9876543299ABC'.
-    x2 = 'DDBBAA885FFFE2'.
-    x3 = x1 BIT-OR x2.
-    WRITE / x3.
-    x1 = 'ABCD'.
-    x2 = 'CD'.
-    x3 = x1 BIT-OR x2.
-    WRITE / x3.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("DDBBBAFE5577\nDDBBBAFE5FFFFBABC0\nEFCD");
-  });
-
-  it("Bit operator BIT-XOR", async () => {
-    const code = `
-    DATA x1 TYPE xstring.
-    DATA x2 TYPE xstring.
-    DATA x3 TYPE xstring.
-    x1 = 'DCBA98765432'.
-    x2 = 'DDBBAA885555'.
-    x3 = x1 BIT-XOR x2.
-    WRITE x3.
-    x1 = 'DCBA9876543299ABC'.
-    x2 = 'DDBBAA885FFFE2'.
-    x3 = x1 BIT-XOR x2.
-    WRITE / x3.
-    x1 = 'ABCD'.
-    x2 = 'CD'.
-    x3 = x1 BIT-XOR x2.
-    WRITE / x3.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("010132FE0167\n010132FE0BCD7BABC0\n66CD");
   });
 
   it("CREATE OBJECT with dashes/structure", async () => {
@@ -3182,21 +2030,6 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("bar'moo'boo");
   });
 
-  it("split at newline", async () => {
-    const code = `
-  DATA moo TYPE string.
-  DATA foo TYPE string.
-  DATA bar TYPE string.
-  moo = |foo\\nbar|.
-  SPLIT moo AT |\\n| INTO foo bar.
-  WRITE / foo.
-  WRITE / bar.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("foo\nbar");
-  });
-
   it("class constructor", async () => {
     const code = `
 CLASS lcl_bar DEFINITION.
@@ -3220,42 +2053,6 @@ START-OF-SELECTION.
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("hello");
-  });
-
-  it("SORT BY table_line", async () => {
-    const code = `
-  DATA lt_keywords TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
-  APPEND |foo| TO lt_keywords.
-  APPEND |bar| TO lt_keywords.
-  SORT lt_keywords BY table_line ASCENDING.
-  DATA keyword TYPE string.
-  LOOP AT lt_keywords INTO keyword.
-    WRITE / keyword.
-  ENDLOOP.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("bar\nfoo");
-  });
-
-  it("LOOPing and DELETE in same table", async () => {
-    const code = `
-  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
-  DATA row LIKE LINE OF tab.
-  DO 4 TIMES.
-    APPEND sy-index TO tab.
-  ENDDO.
-  ASSERT lines( tab ) = 4.
-  LOOP AT tab INTO row.
-    WRITE / sy-tabix.
-    WRITE / row.
-    DELETE tab INDEX 2.
-  ENDLOOP.
-  ASSERT lines( tab ) = 1.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("1\n1\n2\n3\n2\n4");
   });
 
   it("is initial, with clike input", async () => {
@@ -3283,39 +2080,6 @@ START-OF-SELECTION.
     f(abap);
   });
 
-  it("DELETE table FROM index", async () => {
-    const code = `
-DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
-DATA row LIKE LINE OF tab.
-DO 4 TIMES.
-  APPEND sy-index TO tab.
-ENDDO.
-DELETE tab FROM 2.
-LOOP AT tab INTO row.
-  WRITE / row.
-ENDLOOP.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("1");
-  });
-
-  it("ASSIGN fs TO fs", async () => {
-    const code = `
-    FIELD-SYMBOLS <fs1> TYPE i.
-    FIELD-SYMBOLS <fs2> TYPE i.
-    DATA data TYPE i.
-    data = 42.
-    ASSIGN data TO <fs1>.
-    ASSIGN <fs1> TO <fs2>.
-    ASSERT <fs2> IS ASSIGNED.
-    WRITE <fs2>.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("42");
-  });
-
   it("Structure equals", async () => {
     const code = `
 TYPES: BEGIN OF ty_type,
@@ -3339,109 +2103,6 @@ ASSERT data1 = data2.`;
     f(abap);
   });
 
-  it("INSERT INDEX, one time before loop pointer", async () => {
-    const code = `
-  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
-  DATA row LIKE LINE OF tab.
-  DO 3 TIMES.
-    APPEND sy-index TO tab.
-  ENDDO.
-  LOOP AT tab INTO row.
-    WRITE / row.
-    IF row MOD 2 = 0.
-      ASSERT lines( tab ) < 10.
-      INSERT 5 INTO tab INDEX sy-tabix.
-    ENDIF.
-  ENDLOOP.
-  ASSERT lines( tab ) = 4.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("1\n2\n3");
-  });
-
-  it("INSERT INDEX, with SORT", async () => {
-    const code = `
-  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
-  DATA row LIKE LINE OF tab.
-  DO 4 TIMES.
-    row = 5 - sy-index.
-    APPEND row TO tab.
-  ENDDO.
-  LOOP AT tab INTO row.
-    WRITE / row.
-    SORT tab.
-  ENDLOOP.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("4\n2\n3\n4");
-  });
-
-  it("ASSIGN fs TO fs, 2", async () => {
-    const code = `
-  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
-  FIELD-SYMBOLS <fs1> TYPE i.
-  FIELD-SYMBOLS <fs2> TYPE i.
-  DO 3 TIMES.
-    APPEND sy-index TO tab.
-  ENDDO.
-  LOOP AT tab ASSIGNING <fs1>.
-    IF <fs2> IS NOT ASSIGNED.
-      ASSIGN <fs1> TO <fs2>.
-    ENDIF.
-  ENDLOOP.
-  ASSERT <fs1> = 3.
-  ASSERT <fs2> = 1.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("more ASSIGNing", async () => {
-    const code = `
-TYPES: BEGIN OF ty_structure,
-         field1 TYPE i,
-         field2 TYPE i,
-       END OF ty_structure.
-DATA tab TYPE STANDARD TABLE OF ty_structure WITH DEFAULT KEY.
-FIELD-SYMBOLS <fs1> TYPE ty_structure.
-FIELD-SYMBOLS <fs2> TYPE ty_structure.
-DO 2 TIMES.
-  APPEND INITIAL LINE TO tab ASSIGNING <fs1>.
-  <fs1>-field1 = sy-tabix.
-ENDDO.
-LOOP AT tab ASSIGNING <fs1>.
-  IF <fs2> IS ASSIGNED.
-    <fs2>-field2 = sy-tabix.
-  ENDIF.
-  ASSIGN <fs1> TO <fs2>.
-ENDLOOP.
-LOOP AT tab ASSIGNING <fs1>.
-  WRITE / <fs1>-field1.
-  WRITE / <fs1>-field2.
-ENDLOOP.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("1\n2\n2\n0");
-  });
-
-  it("INSERT INTO TABLE", async () => {
-    const code = `
-  DATA bar TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
-  DATA data LIKE LINE OF bar.
-  INSERT 1 INTO TABLE bar.
-  INSERT 2 INTO TABLE bar.
-  LOOP AT bar INTO data.
-    WRITE / data.
-  ENDLOOP.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("1\n2");
-  });
-
   it("add character field", async () => {
     const code = `
     DATA int TYPE i.
@@ -3450,88 +2111,6 @@ ENDLOOP.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-  });
-
-  it("Arithmetics, precedence 1", async () => {
-    const code = `ASSERT 4 - 0 + 1 = 5.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("Arithmetics, precedence 2", async () => {
-    const code = `
-  DATA int TYPE i.
-  int = 2 * 2 + 3 * 3.
-  WRITE int.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("13");
-  });
-
-  it("Arithmetics, precedence 3", async () => {
-    const code = `ASSERT 100 * 10 + 2 = ( 100 * 10 ) + 2.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("Arithmetics, precedence 4", async () => {
-    const code = `ASSERT 4 + 1 - 2 = 3.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("Arithmetics, precedence 5", async () => {
-    const code = `ASSERT 4 + ( 1 - 2 ) = 3.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("Arithmetics, precedence 6", async () => {
-    const code = `
-  DATA int TYPE i.
-  int = 4 - 1 - 2.
-  WRITE int.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("1");
-  });
-
-  it("Arithmetics, precedence 7", async () => {
-    const code = `ASSERT 2 * 2 * 2 = 8.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("Arithmetics, precedence 7", async () => {
-    const code = `ASSERT 2 * 2 * 2 = 8.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("Arithmetics, precedence 8", async () => {
-    const code = `ASSERT 16 / 2 / 2 = 4.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("Arithmetics, precedence 9", async () => {
-    const code = `
-  DATA int TYPE i.
-  int = 2 + 2 * 3 + 3.
-  WRITE int.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("11");
   });
 
   it("DESCRIBE with field symbol", async () => {
@@ -3656,27 +2235,6 @@ START-OF-SELECTION.
     f(abap);
   });
 
-  it("APPEND LINES", async () => {
-    const code = `
-  DATA tab1 TYPE STANDARD TABLE OF i.
-  DATA tab2 TYPE STANDARD TABLE OF i.
-  DATA line TYPE i.
-  APPEND 2 TO tab1.
-  APPEND 3 TO tab1.
-  APPEND 5 TO tab2.
-  APPEND 7 TO tab2.
-  APPEND LINES OF tab2 TO tab1.
-  LOOP AT tab1 INTO line.
-    WRITE / line.
-  ENDLOOP.
-  ASSERT lines( tab1 ) = 4.`;
-
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("2\n3\n5\n7");
-  });
-
   it("field symbol eq", async () => {
     const code = `
     DATA tab1 TYPE STANDARD TABLE OF c.
@@ -3751,111 +2309,6 @@ ASSERT <tab1> = <tab2>.`;
     const js = await run(code);
     const f = new Function("abap", js);
     f(abap);
-  });
-
-  it("CONCATENATE LINES OF", async () => {
-    const code = `
-  DATA rv_html TYPE string.
-  DATA lt_temp TYPE STANDARD TABLE OF string.
-  APPEND |fo| TO lt_temp.
-  APPEND |bar| TO lt_temp.
-  CONCATENATE LINES OF lt_temp INTO rv_html SEPARATED BY 'o'.
-  ASSERT rv_html = 'foobar'.`;
-
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("APPEND ASSIGNING", async () => {
-    const code = `
-  DATA tab TYPE TABLE OF i.
-  FIELD-SYMBOLS <i> TYPE i.
-  APPEND 3 TO tab ASSIGNING <i>.
-  ASSERT <i> = 3.`;
-
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("INSERT ASSIGNING", async () => {
-    const code = `
-  DATA tab TYPE TABLE OF i.
-  FIELD-SYMBOLS <i> TYPE i.
-  INSERT 7 INTO TABLE tab ASSIGNING <i>.
-  ASSERT <i> = 7.`;
-
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-  });
-
-  it("LOOP AT <fs1> ASSIGNING <fs2>", async () => {
-    const code = `
-  TYPES:
-    BEGIN OF ty_tabtab,
-      index TYPE i,
-      str_tab TYPE TABLE OF string,
-    END OF ty_tabtab.
-  DATA tabtab TYPE ty_tabtab.
-  DATA foo TYPE TABLE OF ty_tabtab.
-  tabtab-index = 1.
-  APPEND 'foo' TO tabtab-str_tab.
-  APPEND 'bar' TO tabtab-str_tab.
-  APPEND tabtab TO foo.
-  tabtab-index = 3.
-  CLEAR tabtab-str_tab[].
-  APPEND 'meh' TO tabtab-str_tab.
-  APPEND tabtab TO foo.
-  FIELD-SYMBOLS <foo> TYPE ty_tabtab.
-  FIELD-SYMBOLS <bar> TYPE string.
-  LOOP AT foo ASSIGNING <foo>.
-    LOOP AT <foo>-str_tab ASSIGNING <bar>.
-      WRITE <bar>.
-    ENDLOOP.
-  ENDLOOP.`;
-
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("foobarmeh");
-  });
-
-  it("LOOP with multiple conditions", async () => {
-    const code = `
-    TYPES:
-      BEGIN OF ty_struct,
-        foo TYPE i,
-        bar TYPE i,
-      END OF ty_struct.
-    DATA tab TYPE STANDARD TABLE OF ty_struct.
-    DATA line TYPE ty_struct.
-    DO 10 TIMES.
-      line-foo = sy-index.
-      line-bar = sy-index MOD 3.
-      APPEND line TO tab.
-      line-foo = sy-index * 3.
-      line-bar = line-foo MOD 7 + 1.
-      APPEND line TO tab.
-    ENDDO.
-    SORT tab BY foo bar.
-    LOOP AT tab INTO line WHERE foo < 10 AND bar >= 2.
-      WRITE |{ line-foo }-{ line-bar }.|.
-    ENDLOOP.
-    WRITE / ''.
-    LOOP AT tab INTO line WHERE foo > 25 OR bar = 7.
-      WRITE |{ line-foo }-{ line-bar }.|.
-    ENDLOOP.
-    WRITE / ''.
-    LOOP AT tab INTO line WHERE foo = 18 OR ( foo > 23 AND foo <= 30 ).
-      WRITE |{ line-foo }-{ line-bar }.|.
-    ENDLOOP.
-    `;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("2-2.3-4.5-2.6-7.8-2.9-3.\n6-7.27-7.30-3.\n18-5.24-4.27-7.30-3.");
   });
 
   it("READ TABLE INDEX not found", async () => {
