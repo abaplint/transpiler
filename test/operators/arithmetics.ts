@@ -8,7 +8,7 @@ async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
 }
 
-describe("Running operators - arithmetics", () => {
+describe("Running operators - Arithmetics", () => {
 
   beforeEach(async () => {
     abap = new ABAP();
