@@ -2378,4 +2378,16 @@ ENDFORM.`;
     expect(abap.console.get()).to.equal("1\n2\n3");
   });
 
+  it("escape constants", async () => {
+    const code = `
+  CONSTANTS const TYPE string VALUE '\\'.
+  DATA bar TYPE string.
+  bar = '\\'.
+  ASSERT const = bar.`;
+
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });

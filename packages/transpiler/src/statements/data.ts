@@ -2,6 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {TranspileTypes} from "../types";
 import {Traversal} from "../traversal";
+import {ConstantTranspiler} from "../expressions/constant";
 
 export class DataTranspiler implements IStatementTranspiler {
 
@@ -30,7 +31,8 @@ export class DataTranspiler implements IStatementTranspiler {
         int = val.findFirstExpression(abaplint.Expressions.ConstantString);
       }
       if (int){
-        value = "\n" + found.getName() + ".set(" + int.getFirstToken().getStr() + ");";
+        const escaped = new ConstantTranspiler().escape(int.getFirstToken().getStr());
+        value = "\n" + found.getName() + ".set(" + escaped + ");";
       }
     }
 
