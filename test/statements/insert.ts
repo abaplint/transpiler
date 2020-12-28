@@ -63,7 +63,7 @@ describe("Running statements - INSERT", () => {
     expect(abap.console.get()).to.equal("4\n2\n3\n4");
   });
 
-  it("INSERT INTO TABLE", async () => {
+  it("INSERT INTO TABLE 2", async () => {
     const code = `
       DATA bar TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
       DATA data LIKE LINE OF bar.
