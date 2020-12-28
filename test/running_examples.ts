@@ -548,30 +548,6 @@ write if.`;
     expect(abap.console.get()).to.equal("ABC_123");
   });
 
-  it("DESCRIBE FIELD table", async () => {
-    const code = `
-  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
-  DATA type TYPE c LENGTH 1.
-  DESCRIBE FIELD tab TYPE type.
-  WRITE type.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("h");
-  });
-
-  it("SHIFT LEFT", async () => {
-    const code = `
-  DATA foo TYPE c LENGTH 10.
-  foo = '11223355'.
-  SHIFT foo LEFT DELETING LEADING '12'.
-  WRITE foo.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("3355");
-  });
-
   it("GET all da BITs", async () => {
     const code = `
   DATA rv_bitbyte TYPE c LENGTH 8 .
@@ -668,18 +644,6 @@ write if.`;
     expect(abap.console.get()).to.equal("ABC");
   });
 
-  it("DESCRIBE FIELD", async () => {
-    const code = `
-  DATA f TYPE c LENGTH 4.
-  DATA l TYPE i.
-  DESCRIBE FIELD f LENGTH l IN CHARACTER MODE.
-  WRITE l.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("4");
-  });
-
   it("back slash", async () => {
     const code = `WRITE '\\'.`;
     const js = await run(code);
@@ -694,42 +658,6 @@ write if.`;
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("X");
-  });
-
-  it("shift 1 places left", async () => {
-    const code = `
-  DATA lv_temp TYPE string.
-  lv_temp = 'abc'.
-  SHIFT lv_temp BY 1 PLACES LEFT.
-  WRITE lv_temp.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("bc");
-  });
-
-  it("shift up to left, found", async () => {
-    const code = `
-  DATA lv_temp TYPE string.
-  lv_temp = 'abc/bar'.
-  SHIFT lv_temp UP TO '/' LEFT.
-  WRITE lv_temp.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("/bar");
-  });
-
-  it("shift up to left, not found", async () => {
-    const code = `
-  DATA lv_temp TYPE string.
-  lv_temp = 'abcbar'.
-  SHIFT lv_temp UP TO '/' LEFT.
-  WRITE lv_temp.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("abcbar");
   });
 
   it("concat vars", async () => {
@@ -936,52 +864,6 @@ data1 = data2.`;
     f(abap);
   });
 
-  it("DESCRIBE with field symbol", async () => {
-    const code = `
-    DATA lv_length TYPE i.
-    DATA bar TYPE c LENGTH 10.
-    FIELD-SYMBOLS <line> TYPE any.
-    ASSIGN bar TO <line>.
-    DESCRIBE FIELD <line> LENGTH lv_length IN CHARACTER MODE.
-    WRITE lv_length.`;
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("10");
-  });
-
-  it("MESSAGE INTO", async () => {
-    const code = `
-    DATA lv_text TYPE string.
-    MESSAGE e001(00) WITH 'foo' 'bar' INTO lv_text.
-    WRITE / sy-msgid.
-    WRITE / sy-msgno.
-    WRITE / lv_text.`;
-
-    await abap.initDB(`
-    CREATE TABLE t100 (sprsl NCHAR(1), arbgb NCHAR(20), msgnr NCHAR(3), text NCHAR(73), PRIMARY KEY(sprsl,arbgb,msgnr));
-    INSERT INTO t100 VALUES ('E', '00', '001', '&1&2&3&4');`);
-
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("00\n001\nfoobar");
-  });
-
-  it("MESSAGE fallback, no database initialized", async () => {
-    const code = `
-    DATA lv_text TYPE string.
-    MESSAGE e123(abc) WITH 'foo' 'bar' INTO lv_text.
-    WRITE / sy-msgid.
-    WRITE / sy-msgno.
-    WRITE / lv_text.`;
-
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("ABC\n123\nABC:123 foo bar");
-  });
-
   it("GET TIME", async () => {
     const code = `
     GET TIME.
@@ -1008,41 +890,6 @@ data1 = data2.`;
     const f = new Function("abap", js);
     f(abap);
     expect(abap.console.get()).to.equal("00000000\n000000");
-  });
-
-  it("more DESCRIBE", async () => {
-    const code = `
-    DATA lv_type TYPE c LENGTH 1.
-    DESCRIBE FIELD lv_type TYPE lv_type.
-    WRITE / lv_type.
-
-    DATA lv_string TYPE string.
-    DESCRIBE FIELD lv_string TYPE lv_type.
-    WRITE / lv_type.
-
-    DATA lt_tab TYPE STANDARD TABLE OF string.
-    DESCRIBE FIELD lt_tab TYPE lv_type.
-    WRITE / lv_type.
-
-    DATA ref TYPE REF TO object.
-    DESCRIBE FIELD ref TYPE lv_type.
-    WRITE / lv_type.`;
-
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
-    expect(abap.console.get()).to.equal("C\ng\nh\nr");
-  });
-
-  it("DESCRIBE, direct character string", async () => {
-    const code = `
-  DATA lv_type TYPE c LENGTH 1.
-  DESCRIBE FIELD 'moo' TYPE lv_type.
-  ASSERT lv_type = 'C'.`;
-
-    const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
   });
 
   it("escape constants", async () => {
