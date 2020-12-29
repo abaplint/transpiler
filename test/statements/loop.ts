@@ -116,6 +116,93 @@ describe("Running statements - LOOP", () => {
     expect(abap.console.get()).to.equal("1\n1\n2\n3\n2\n4");
   });
 
+  it("LOOPing FROM and TO", async () => {
+    const code = `
+      DATA tab TYPE STANDARD TABLE OF i.
+      DATA line TYPE i.
+      DO 10 TIMES.
+        APPEND sy-index TO tab.
+      ENDDO.
+      LOOP AT tab FROM 8 INTO line.
+        WRITE line.
+      ENDLOOP.
+      WRITE / ''.
+      LOOP AT tab TO 3 INTO line.
+        WRITE line.
+      ENDLOOP.
+      WRITE / ''.
+      LOOP AT tab FROM 5 TO 6 INTO line.
+        WRITE line.
+      ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("8910\n123\n56");
+  });
+
+  it("LOOPing FROM and TO with var and fs", async () => {
+    const code = `
+      DATA tab TYPE STANDARD TABLE OF i.
+      DATA line TYPE i.
+      DATA from TYPE i.
+      FIELD-SYMBOLS <to> TYPE i.
+      DO 10 TIMES.
+        APPEND sy-index TO tab.
+      ENDDO.
+      from = 4.
+      ASSIGN 7 TO <to>.
+      LOOP AT tab FROM from TO <to> INTO line.
+        WRITE line.
+      ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("4567");
+  });
+
+  it("LOOPing FROM and TO and WHERE", async () => {
+    const code = `
+      TYPES:
+        BEGIN OF ty_struct,
+          foo TYPE i,
+          bar TYPE i,
+        END OF ty_struct.
+      DATA tab TYPE STANDARD TABLE OF ty_struct.
+      DATA line TYPE ty_struct.
+      DO 10 TIMES.
+        line-foo = sy-index.
+        line-bar = sy-index MOD 3.
+        APPEND line TO tab.
+        line-foo = sy-index * 3.
+        line-bar = line-foo MOD 7 + 1.
+        APPEND line TO tab.
+      ENDDO.
+      SORT tab BY foo bar.
+      LOOP AT tab FROM 7 TO 13 INTO line WHERE foo < 8.
+        WRITE |{ line-foo }-{ line-bar }.|.
+      ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("6-0.6-7.7-1.");
+  });
+
+  it("LOOPing FROM and TO, out of bounds", async () => {
+    const code = `
+      DATA tab TYPE STANDARD TABLE OF i.
+      DATA line TYPE i.
+      DO 5 TIMES.
+        APPEND sy-index TO tab.
+      ENDDO.
+      LOOP AT tab FROM -3 TO 17 INTO line.
+        WRITE line.
+      ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+    expect(abap.console.get()).to.equal("12345");
+  });
+
   it("LOOP AT <fs1> ASSIGNING <fs2>", async () => {
     const code = `
       TYPES:

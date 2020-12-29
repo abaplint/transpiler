@@ -1,23 +1,30 @@
-import {Structure, Table} from "../types";
+import {Integer,Structure, Table} from "../types";
 
-export function* loop(
-  table: Table,
-  where?: (i: any) => boolean) {
+export interface ILoopOptions {
+  where?: (i: any) => boolean,
+  from?: Integer,
+  to?: Integer
+}
 
-  const loopIndex = table.startLoop();
+export function* loop(table: Table, options?: ILoopOptions) {
+  const loopFrom = options?.from && options.from.get() > 0 ? options.from.get() - 1 : 0;
+  let loopTo = options?.to && options.to.get() < table.array().length ? options.to.get() : table.array().length;
+  const loopIndex = table.startLoop(loopFrom);
 
   try {
-    while (loopIndex.index < table.array().length) {
+    while (loopIndex.index < loopTo) {
+      if (loopIndex.index > table.array().length) {
+        break;
+      }
       const array = table.array();
       const current = array[loopIndex.index];
-//      console.dir("index: " + loopIndex.index);
 
       // @ts-ignore
       abap.builtin.sy.get().tabix.set(loopIndex.index + 1);
 
-      if (where) {
+      if (options?.where) {
         const row = current instanceof Structure ? current.get() : {table_line: current};
-        if (where(row) === false) {
+        if (options.where(row) === false) {
           loopIndex.index++;
           continue;
         }
@@ -26,7 +33,7 @@ export function* loop(
       yield current;
 
       loopIndex.index++;
-//      console.dir("incremeted " + loopIndex.index);
+      loopTo = options?.to && options.to.get() < table.array().length ? options.to.get() : table.array().length;
     }
   } finally {
     table.unregisterLoop(loopIndex);
