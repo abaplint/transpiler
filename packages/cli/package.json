@@ -24,7 +24,7 @@
     "@abaplint/transpiler": "^1.0.40",
     "@types/glob": "^7.1.3",
     "glob": "^7.1.6",
-    "webpack": "^5.11.0",
+    "webpack": "^5.11.1",
     "webpack-cli": "^4.3.0",
     "typescript": "^4.1.3"
   }

@@ -7,6 +7,12 @@ import initSqlJs from "sql.js";
 import {Console} from "./console";
 import {UnitTestResult} from "./unit_test";
 import {OffsetLength} from "./offset_length";
+import * as fetch from "node-fetch";
+
+if (!globalThis.fetch) {
+  // @ts-ignore
+  globalThis.fetch = fetch;
+}
 
 export {UnitTestResult};
 
