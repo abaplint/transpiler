@@ -2,6 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {UniqueIdentifier} from "../unique_identifier";
+import {SourceTranspiler} from "../expressions";
 
 export class LoopTranspiler implements IStatementTranspiler {
 
@@ -24,10 +25,30 @@ export class LoopTranspiler implements IStatementTranspiler {
       }
     }
 
-    const whereNode = node.findFirstExpression(abaplint.Expressions.ComponentCond);
-    const where = whereNode ? ", " + traversal.traverse(whereNode) : "";
+    const extra: string[] = [];
+    const fromNode = node.findExpressionAfterToken("FROM");
+    if (fromNode) {
+      const from = new SourceTranspiler().transpile(fromNode, traversal);
+      extra.push("from: " + from);
+    }
 
-    return `for (const ${unique1} of abap.statements.loop(${source}${where})) {\n${target}`;
+    const toNode = node.findExpressionAfterToken("TO");
+    if (toNode) {
+      const to = new SourceTranspiler().transpile(toNode, traversal);
+      extra.push("to: " + to);
+    }
+
+    const whereNode = node.findFirstExpression(abaplint.Expressions.ComponentCond);
+    if (whereNode) {
+      const where = traversal.traverse(whereNode);
+      extra.push("where: " + where);
+    }
+
+    let concat = "";
+    if (extra.length > 0) {
+      concat = ",{" + extra.join(",") + "}";
+    }
+    return `for (const ${unique1} of abap.statements.loop(${source}${concat})) {\n${target}`;
   }
 
 }
