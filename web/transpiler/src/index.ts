@@ -91,11 +91,12 @@ observer.observe(document.getElementById("horizon"), {
 window.addEventListener("resize", updateEditorLayouts);
 
 function jsChanged() {
-  const js = editor2.getValue();
+  const makeGlobal = "abap = abapLocal;\n";
+  const js = makeGlobal + editor2.getValue();
   try {
     abap.console.clear();
     try {
-      const f = new Function("abap", js);
+      const f = new Function("abapLocal", js);
       f(abap);
       editor3.setValue(abap.console.get());
     } catch(e) {
