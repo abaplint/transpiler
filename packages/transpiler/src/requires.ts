@@ -3,11 +3,9 @@ import {IRequire} from ".";
 
 export class Requires {
   private readonly reg: abaplint.IRegistry;
-  private readonly obj: abaplint.ABAPObject;
 
-  public constructor(reg: abaplint.IRegistry, obj: abaplint.ABAPObject) {
+  public constructor(reg: abaplint.IRegistry) {
     this.reg = reg;
-    this.obj = obj;
   }
 
   public find(node: abaplint.ISpaghettiScopeNode, filename: string): readonly IRequire[] {
@@ -30,6 +28,7 @@ export class Requires {
     for (const v of node.getData().references) {
       // todo, use the enum from abaplint, when its exported
       if (v.referenceType === "ObjectOrientedReference"
+          && v.position.getFilename() === filename
           && v.resolved) {
         add({filename: v.resolved.getFilename(), name: v.resolved.getName()});
       }
@@ -43,8 +42,11 @@ export class Requires {
 
     // always add CX_ROOT, it is used for CATCH
     const cx = this.reg.getObject("CLAS", "CX_ROOT");
-    if (cx && this.obj.getName().toUpperCase() !== "CX_ROOT" && cx instanceof abaplint.ABAPObject) {
-      add({filename: cx.getMainABAPFile()!.getFilename(), name: cx.getName()});
+    if (cx && cx instanceof abaplint.ABAPObject) {
+      const main = cx.getMainABAPFile()?.getFilename();
+      if (main) {
+        add({filename: main, name: cx.getName()});
+      }
     }
 
     return ret;
