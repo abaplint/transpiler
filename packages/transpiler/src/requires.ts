@@ -30,7 +30,7 @@ export class Requires {
       if (v.referenceType === "ObjectOrientedReference"
           && v.position.getFilename() === filename
           && v.resolved) {
-        add({filename: v.resolved.getFilename(), name: v.resolved.getName()});
+        add({filename: v.resolved.getFilename(), name: v.resolved.getName().toLowerCase()});
       }
     }
 
@@ -45,7 +45,7 @@ export class Requires {
     if (cx && cx instanceof abaplint.ABAPObject) {
       const main = cx.getMainABAPFile()?.getFilename();
       if (main) {
-        add({filename: main, name: cx.getName()});
+        add({filename: main, name: cx.getName().toLowerCase()});
       }
     }
 
