@@ -182,7 +182,6 @@ ENDCLASS.`;
     const code = `
 INTERFACE lintf.
   DATA bar TYPE i.
-  METHODS barm.
 ENDINTERFACE.
 
 CLASS lclas DEFINITION.
@@ -191,15 +190,12 @@ CLASS lclas DEFINITION.
 ENDCLASS.
 
 CLASS lclas IMPLEMENTATION.
-  METHOD lintf~barm.
-    me->lintf~bar = 2.
-  ENDMETHOD.
 ENDCLASS.
 
 FORM bar.
   DATA li TYPE REF TO lintf.
   CREATE OBJECT li TYPE lclas.
-  li->barm( ).
+  li->bar = 2.
   WRITE li->bar.
 ENDFORM.
 
