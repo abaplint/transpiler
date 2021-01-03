@@ -90,14 +90,18 @@ observer.observe(document.getElementById("horizon"), {
 
 window.addEventListener("resize", updateEditorLayouts);
 
-function jsChanged() {
+// see https://github.com/SimulatedGREG/electron-vue/issues/777
+// see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AsyncFunction
+const AsyncFunction = new Function(`return Object.getPrototypeOf(async function(){}).constructor`)();
+
+async function jsChanged() {
   const makeGlobal = "abap = abapLocal;\n";
   const js = makeGlobal + editor2.getValue();
   try {
     abap.console.clear();
     try {
-      const f = new Function("abapLocal", js);
-      f(abap);
+      const f = new AsyncFunction("abapLocal", js);
+      await f(abap);
       editor3.setValue(abap.console.get());
     } catch(e) {
       // write all errors to runtime result
