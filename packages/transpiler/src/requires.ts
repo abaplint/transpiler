@@ -4,12 +4,10 @@ import {IRequire} from ".";
 export class Requires {
   private readonly reg: abaplint.IRegistry;
   private readonly obj: abaplint.ABAPObject;
-//  private readonly main: string | undefined;
 
   public constructor(reg: abaplint.IRegistry, obj: abaplint.ABAPObject) {
     this.reg = reg;
     this.obj = obj;
-//    this.main = obj.getMainABAPFile()?.getFilename();
   }
 
   public find(node: abaplint.ISpaghettiScopeNode, filename: string): readonly IRequire[] {
@@ -45,8 +43,8 @@ export class Requires {
 
     // always add CX_ROOT, it is used for CATCH
     const cx = this.reg.getObject("CLAS", "CX_ROOT");
-    if (cx && this.obj.getName().toUpperCase() !== "CX_ROOT") {
-      add({filename: "cx_root.abap.clas", name: cx.getName()});
+    if (cx && this.obj.getName().toUpperCase() !== "CX_ROOT" && cx instanceof abaplint.ABAPObject) {
+      add({filename: cx.getMainABAPFile()!.getFilename(), name: cx.getName()});
     }
 
     return ret;
