@@ -10,10 +10,11 @@ const path = require("path");
 const runtime = require("@abaplint/runtime");
 global.abap = new runtime.ABAP();
 async function initDB() {
-return global.abap.initDB(\`${dbSetup}\`);
+  return global.abap.initDB(\`${dbSetup}\`);
 }
 ${this.functionGroups(reg)}
-initDB().then(() => {
+async function run() {
+await initDB();
 const unit = new runtime.UnitTestResult();
 let clas;
 let locl;
@@ -33,7 +34,7 @@ const ${def.name} = require("./${obj.getName().toLowerCase()}.${obj.getType().to
 locl = clas.addTestClass("${def.name}");\n`;
 
             if (def.methods.some(m => m.name.toUpperCase() === "CLASS_SETUP")) {
-              ret += `${def.name}.class_setup();\n`;
+              ret += `await ${def.name}.class_setup();\n`;
             }
 
             const hasSetup = def.methods.some(m => m.name.toUpperCase() === "SETUP");
@@ -45,7 +46,7 @@ locl = clas.addTestClass("${def.name}");\n`;
               }
               ret += `{\n  const test = new ${def.name}();\n`;
               if (hasSetup === true) {
-                ret += `  test.setup();\n`;
+                ret += `  await test.setup();\n`;
               }
 
               ret += `  console.log('${obj.getName()}: running ${def.name}->${m.name}');\n`;
@@ -53,18 +54,18 @@ locl = clas.addTestClass("${def.name}");\n`;
               if ((skip || []).some(a => a.object === obj.getName() && a.class === def.name && a.method === m.name)) {
                 ret += `  meth.skip();\n`;
               } else {
-                ret += `  test.${m.name}();\n`;
+                ret += `  await test.${m.name}();\n`;
                 ret += `  meth.pass();\n`;
               }
 
               if (hasTeardown === true) {
-                ret += `  test.teardown();\n`;
+                ret += `  await test.teardown();\n`;
               }
               ret += `}\n`;
             }
 
             if (def.methods.some(m => m.name.toUpperCase() === "CLASS_TEARDOWN")) {
-              ret += `${def.name}.class_teardown();\n`;
+              ret += `await ${def.name}.class_teardown();\n`;
             }
 
             ret += `}\n`;
@@ -83,6 +84,10 @@ fs.writeFileSync(__dirname + path.sep + "output.xml", unit.xUnitXML());
   fs.writeFileSync(__dirname + path.sep + "output.xml", unit.xUnitXML());
   throw e;
 }
+}
+
+run().then(() => {
+  process.exit();
 }).catch((err) => {
   console.log(err);
   process.exit(1);

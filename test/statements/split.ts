@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -22,8 +22,8 @@ describe("Running statements - SPLIT", () => {
       SPLIT lv_str AT | | INTO TABLE lt_table.
       ASSERT lines( lt_table ) = 2.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("split 1", async () => {
@@ -34,8 +34,8 @@ describe("Running statements - SPLIT", () => {
       SPLIT |blah| AT '.' INTO lv_major lv_minor lv_release.
       WRITE / lv_major.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("blah");
   });
 
@@ -48,8 +48,8 @@ describe("Running statements - SPLIT", () => {
       WRITE / lv_major.
       WRITE / lv_minor.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("blah\nboo");
   });
 
@@ -63,8 +63,8 @@ describe("Running statements - SPLIT", () => {
       WRITE / lv_minor.
       WRITE / lv_release.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("1\n2\n3");
   });
 
@@ -74,8 +74,8 @@ describe("Running statements - SPLIT", () => {
       SPLIT || AT |a| INTO TABLE strs.
       ASSERT lines( strs ) = 0.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("SPLIT non-empty string, should give non-empty table", async () => {
@@ -84,8 +84,8 @@ describe("Running statements - SPLIT", () => {
       SPLIT |sdfds| AT |AA| INTO TABLE lt_tab.
       ASSERT lines( lt_tab ) = 1.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("split at newline", async () => {
@@ -98,8 +98,8 @@ describe("Running statements - SPLIT", () => {
       WRITE / foo.
       WRITE / bar.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("foo\nbar");
   });
 

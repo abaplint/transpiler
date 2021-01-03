@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -22,8 +22,8 @@ describe("Builtin functions", () => {
       rv_yes = boolc( iv_path = '/' ).
       WRITE rv_yes.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("X");
   });
 
@@ -37,8 +37,8 @@ describe("Builtin functions", () => {
                                 sep   = |b| ).
       WRITE rv_text.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("abc");
   });
 
@@ -49,8 +49,8 @@ describe("Builtin functions", () => {
       foo = condense( foo ).
       WRITE foo.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("12 3");
   });
 
@@ -63,8 +63,8 @@ describe("Builtin functions", () => {
       foo = condense( foo ).
       WRITE foo.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("2");
   });
 
@@ -74,8 +74,8 @@ describe("Builtin functions", () => {
       lv_count = count( val = 'password' sub = 's' ).
       WRITE lv_count.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("2");
   });
 
@@ -92,8 +92,8 @@ describe("Builtin functions", () => {
       lv_result = escape( val = |abc123&<>"'| format = e_url ).
       WRITE / lv_result.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal(
       `abc123&amp;&lt;&gt;&quot;&#39;\n` +
       `abc123&amp;&lt;&gt;"'\n` +
@@ -103,8 +103,8 @@ describe("Builtin functions", () => {
   it("basic repeat()", async () => {
     const code = `ASSERT repeat( val = 'a' occ = 2 ) = 'aa'.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("reverse", async () => {
@@ -113,16 +113,16 @@ describe("Builtin functions", () => {
       str = reverse( 'abc' ).
       WRITE str.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("cba");
   });
 
   it("basic shift_left()", async () => {
     const code = "ASSERT shift_left( val = 'aabbcc' sub = `a` ) = 'bbcc'.";
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("nested calls to builtins", async () => {
@@ -131,8 +131,8 @@ describe("Builtin functions", () => {
       lv_line = to_upper( shift_left( val = 'aabb' sub = 'a' ) ).
       ASSERT lv_line = 'BB'.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("basic strlen", async () => {
@@ -141,23 +141,23 @@ describe("Builtin functions", () => {
       foo = '123'.
       WRITE strlen( foo ).`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("3");
   });
 
   it("basic substring", async () => {
     const code = `ASSERT substring( val = |abc| off = 1 len = 1 ) = |b|.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("to_lower()", async () => {
     const code = `ASSERT to_lower( 'ABC' ) = 'abc'.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("to_upper()", async () => {
@@ -167,8 +167,8 @@ describe("Builtin functions", () => {
       ASSERT to_upper( |bar| ) = bar.
       ASSERT to_upper( bar ) = bar.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("basic xstrlen", async () => {
@@ -177,8 +177,8 @@ describe("Builtin functions", () => {
       foo = 'AA'.
       WRITE xstrlen( foo ).`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("1");
   });
 

@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -32,8 +32,8 @@ describe("Running code structure - Class", () => {
       CREATE OBJECT foo.
       foo->run( ).`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("foo");
   });
 
@@ -59,8 +59,8 @@ describe("Running code structure - Class", () => {
       CREATE OBJECT foo.
       foo->run( ).`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("foo");
   });
 
@@ -82,8 +82,8 @@ describe("Running code structure - Class", () => {
       CREATE OBJECT foo.
       foo->run( ).`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("0");
   });
 
@@ -105,8 +105,8 @@ describe("Running code structure - Class", () => {
       DATA foo TYPE REF TO zcl_words.
       CREATE OBJECT foo.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("2");
   });
 
@@ -124,8 +124,8 @@ describe("Running code structure - Class", () => {
         ENDMETHOD.
       ENDCLASS.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("CLASS-DATA, type ref", async () => {
@@ -142,8 +142,8 @@ describe("Running code structure - Class", () => {
         ENDMETHOD.
       ENDCLASS.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("static variable in class", async () => {
@@ -161,8 +161,8 @@ describe("Running code structure - Class", () => {
 
       lcl_bar=>name( ).`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("early RETURN in method", async () => {
@@ -180,8 +180,8 @@ describe("Running code structure - Class", () => {
 
         WRITE lcl_bar=>bar( ).`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("1");
   });
 
@@ -204,8 +204,8 @@ describe("Running code structure - Class", () => {
         bar->bar( IMPORTING val = res ).
         WRITE res.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("2");
   });
 
@@ -224,8 +224,8 @@ describe("Running code structure - Class", () => {
 
       lcl_bar=>foo( ).`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("10");
   });
 
@@ -246,8 +246,8 @@ describe("Running code structure - Class", () => {
         CREATE OBJECT bar.
         bar->foo( ).`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("10");
   });
 
@@ -270,8 +270,8 @@ describe("Running code structure - Class", () => {
         DATA bar TYPE REF TO lcl_foo.
         CREATE OBJECT bar.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("2");
   });
 
@@ -303,8 +303,8 @@ describe("Running code structure - Class", () => {
       START-OF-SELECTION.
         PERFORM run.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("4");
   });
 
@@ -343,8 +343,8 @@ describe("Running code structure - Class", () => {
       START-OF-SELECTION.
         PERFORM run.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("a\nb");
   });
 
@@ -378,8 +378,8 @@ describe("Running code structure - Class", () => {
         DATA moo TYPE REF TO zcl_sub.
         CREATE OBJECT moo.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("1");
   });
 
@@ -395,8 +395,8 @@ describe("Running code structure - Class", () => {
       ref2 = ref1.
       ASSERT ref1 = ref2.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("determine default parameter name", async () => {
@@ -420,8 +420,8 @@ describe("Running code structure - Class", () => {
 
       PERFORM bar.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("bar");
   });
 
@@ -439,8 +439,8 @@ describe("Running code structure - Class", () => {
         CREATE OBJECT ls_structure-field.
       ENDFORM.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("class constructor", async () => {
@@ -463,8 +463,8 @@ describe("Running code structure - Class", () => {
       START-OF-SELECTION.
         PERFORM bar.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("hello");
   });
 
@@ -486,8 +486,8 @@ describe("Running code structure - Class", () => {
       START-OF-SELECTION.
         PERFORM form.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("123");
   });
 
@@ -511,8 +511,8 @@ describe("Running code structure - Class", () => {
         CALL METHOD bar->name.
       ENDFORM.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("hello\nhello");
   });
 
@@ -537,8 +537,8 @@ describe("Running code structure - Class", () => {
         CALL METHOD bar->name EXPORTING foo = 3.
       ENDFORM.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("1\n2\n3");
   });
 

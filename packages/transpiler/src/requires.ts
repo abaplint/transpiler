@@ -1,39 +1,36 @@
 import * as abaplint from "@abaplint/core";
-import {IObjectIdentifier} from ".";
+import {IRequire} from ".";
 
 export class Requires {
   private readonly reg: abaplint.IRegistry;
-  private readonly obj: abaplint.ABAPObject;
-  private readonly main: string | undefined;
 
-  public constructor(reg: abaplint.IRegistry, obj: abaplint.ABAPObject) {
+  public constructor(reg: abaplint.IRegistry) {
     this.reg = reg;
-    this.obj = obj;
-    this.main = obj.getMainABAPFile()?.getFilename();
   }
 
-  public find(node: abaplint.ISpaghettiScopeNode, filename: string): readonly IObjectIdentifier[] {
-    const ret: IObjectIdentifier[] = [];
+  public find(node: abaplint.ISpaghettiScopeNode, filename: string): readonly IRequire[] {
+    const ret: IRequire[] = [];
 
-    const add = function (obj: IObjectIdentifier | undefined) {
-      if (obj === undefined) {
+    const add = function (req: IRequire | undefined) {
+      if (req === undefined || req.filename === filename) {
         return;
       }
       // skip if already in the list
       for (const r of ret) {
-        if (r.type === obj.type && r.name === obj.name) {
+        if (r.filename === req.filename && r.name === req.name) {
           return;
         }
       }
-      ret.push(obj);
+      ret.push(req);
     };
 
 // this finds all OO references
     for (const v of node.getData().references) {
       // todo, use the enum from abaplint, when its exported
       if (v.referenceType === "ObjectOrientedReference"
+          && v.position.getFilename() === filename
           && v.resolved) {
-        add(this.lookup(v.resolved.getName(), filename));
+        add({filename: v.resolved.getFilename(), name: v.resolved.getName().toLowerCase()});
       }
     }
 
@@ -45,29 +42,14 @@ export class Requires {
 
     // always add CX_ROOT, it is used for CATCH
     const cx = this.reg.getObject("CLAS", "CX_ROOT");
-    if (cx && this.obj.getName().toUpperCase() !== "CX_ROOT") {
-      add({type: cx.getType(), name: cx.getName()});
+    if (cx && cx instanceof abaplint.ABAPObject) {
+      const main = cx.getMainABAPFile()?.getFilename();
+      if (main) {
+        add({filename: main, name: cx.getName().toLowerCase()});
+      }
     }
 
     return ret;
-  }
-
-//////////////////////////
-
-  private lookup(name: string, filename: string): IObjectIdentifier | undefined {
-    if (name.toUpperCase() === this.obj.getName().toUpperCase()
-        && filename === this.main) {
-      return undefined;
-    }
-    let found = this.reg.getObject("CLAS", name);
-    if (found === undefined) {
-      found = this.reg.getObject("INTF", name);
-    }
-    if (found) {
-      return {type: found.getType(), name: found.getName()};
-    }
-
-    return undefined;
   }
 
 }

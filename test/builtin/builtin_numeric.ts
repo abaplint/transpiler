@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -18,7 +18,7 @@ describe("Builtin Numeric Functions", () => {
     const code = `
   DATA int TYPE i.
   DATA packed TYPE p LENGTH 12 DECIMALS 2.
-  
+
   int = -3.
   WRITE / int.
   WRITE / abs( int ).
@@ -32,14 +32,14 @@ describe("Builtin Numeric Functions", () => {
   WRITE / abs( -18 ).
   WRITE / abs( 7 ).`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("-3\n3\n3\n123.45\n12\n18\n7");
   });
 
   it("Builtin numerical: ceil", async () => {
     const code = `
-  DATA chars TYPE c LENGTH 10. 
+  DATA chars TYPE c LENGTH 10.
   DATA int TYPE i.
   DATA packed TYPE p.
 
@@ -54,14 +54,14 @@ describe("Builtin Numeric Functions", () => {
 
   WRITE / ceil( '43.21' ).`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("13\n13\n12\n44");
   });
 
   it("Builtin numerical: floor", async () => {
     const code = `
-  DATA chars TYPE c LENGTH 10. 
+  DATA chars TYPE c LENGTH 10.
   DATA int TYPE i.
   DATA packed TYPE p.
 
@@ -76,14 +76,14 @@ describe("Builtin Numeric Functions", () => {
 
   WRITE / floor( '43.21' ).`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("12\n12\n12\n43");
   });
 
   it("Builtin numerical: frac", async () => {
     const code = `
-  DATA chars TYPE c LENGTH 10. 
+  DATA chars TYPE c LENGTH 10.
   DATA int TYPE i.
   DATA packed TYPE p.
 
@@ -98,14 +98,14 @@ describe("Builtin Numeric Functions", () => {
 
   WRITE / frac( '-43.21' ).`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("0.34\n0.34\n0\n-0.21");
   });
 
   it("Builtin numerical: sign", async () => {
     const code = `
-  DATA chars TYPE c LENGTH 10. 
+  DATA chars TYPE c LENGTH 10.
   DATA int TYPE i.
   DATA packed TYPE p.
 
@@ -120,14 +120,14 @@ describe("Builtin Numeric Functions", () => {
 
   WRITE / frac( '0' ).`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("1\n1\n-1\n0");
   });
 
   it("Builtin numerical: trunc", async () => {
     const code = `
-  DATA chars TYPE c LENGTH 10. 
+  DATA chars TYPE c LENGTH 10.
   DATA int TYPE i.
   DATA packed TYPE p.
 
@@ -142,8 +142,8 @@ describe("Builtin Numeric Functions", () => {
 
   WRITE / trunc( '-43.21' ).`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("12\n12\n12\n-43");
   });
 });

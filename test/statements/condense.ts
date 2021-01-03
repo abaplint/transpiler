@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -24,8 +24,8 @@ describe("Running statements - CONDENSE", () => {
       CONDENSE str NO-GAPS.
       ASSERT str = |foobar|.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("CONDENSE converted type", async () => {
@@ -37,8 +37,8 @@ describe("Running statements - CONDENSE", () => {
       CONDENSE lv_char10.
       WRITE lv_char10.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("5");
   });
 
@@ -49,8 +49,8 @@ describe("Running statements - CONDENSE", () => {
       CONDENSE lv_char10.
       WRITE lv_char10.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("5");
   });
 

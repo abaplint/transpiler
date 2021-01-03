@@ -34,7 +34,7 @@ export class MethodCallChainTranspiler implements IExpressionTranspiler {
       ret = "this." + ret;
     }
 
-    return ret;
+    return "await " + ret;
   }
 
 }

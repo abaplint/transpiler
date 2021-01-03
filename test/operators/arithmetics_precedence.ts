@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -17,8 +17,8 @@ describe("Running operators - Arithmetic precedence", () => {
   it("Arithmetics, precedence 1", async () => {
     const code = `ASSERT 4 - 0 + 1 = 5.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("Arithmetics, precedence 2", async () => {
@@ -27,30 +27,30 @@ describe("Running operators - Arithmetic precedence", () => {
       int = 2 * 2 + 3 * 3.
       WRITE int.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("13");
   });
 
   it("Arithmetics, precedence 3", async () => {
     const code = `ASSERT 100 * 10 + 2 = ( 100 * 10 ) + 2.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("Arithmetics, precedence 4", async () => {
     const code = `ASSERT 4 + 1 - 2 = 3.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("Arithmetics, precedence 5", async () => {
     const code = `ASSERT 4 + ( 1 - 2 ) = 3.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("Arithmetics, precedence 6", async () => {
@@ -59,23 +59,23 @@ describe("Running operators - Arithmetic precedence", () => {
       int = 4 - 1 - 2.
       WRITE int.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("1");
   });
 
   it("Arithmetics, precedence 7", async () => {
     const code = `ASSERT 2 * 2 * 2 = 8.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("Arithmetics, precedence 8", async () => {
     const code = `ASSERT 16 / 2 / 2 = 4.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("Arithmetics, precedence 9", async () => {
@@ -84,8 +84,8 @@ describe("Running operators - Arithmetic precedence", () => {
       int = 2 + 2 * 3 + 3.
       WRITE int.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("11");
   });
 

@@ -41,7 +41,7 @@ describe("Multiple lines", () => {
     expect(await runSingle(abap)).to.equal("");
   });
 
-  it("Simple class", async () => {
+  it("Simple class, 1", async () => {
     const abap = `
     CLASS lcl_foobar DEFINITION.
       PUBLIC SECTION.
@@ -59,7 +59,7 @@ describe("Multiple lines", () => {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
   }
-  moo() {
+  async moo() {
   }
 }`;
 
@@ -85,7 +85,7 @@ describe("Multiple lines", () => {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
   }
-  moo(unique1) {
+  async moo(unique1) {
     let iv_foo = new abap.types.String();
     if (unique1 && unique1.iv_foo) {iv_foo.set(unique1.iv_foo);}
   }
@@ -113,7 +113,7 @@ describe("Multiple lines", () => {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
   }
-  moo() {
+  async moo() {
     let rv_foo = new abap.types.String();
     return rv_foo;
   }
@@ -201,7 +201,7 @@ DATA moo TYPE foo.`;
     this.me.set(this);
     this.bar = new abap.types.Integer();
   }
-  run() {
+  async run() {
     abap.statements.write(this.bar);
   }
 }`;
@@ -260,10 +260,10 @@ ENDCLASS.`;
     this.me.set(this);
     this.bar = new abap.types.Integer();
   }
-  run() {
+  async run() {
     return zcl_ret.run();
   }
-  static run() {
+  static async run() {
     let rv_ret = new abap.types.String();
     rv_ret.set('X');
     return rv_ret;
@@ -360,7 +360,7 @@ bar->moo( EXPORTING foo = 'abc'
 }
 let bar = new abap.types.ABAPObject();
 let str = new abap.types.String();
-bar.get().moo({foo: 'abc', bar: str});`;
+await bar.get().moo({foo: 'abc', bar: str});`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });
@@ -387,16 +387,16 @@ class lcl_bar {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
   }
-  bar(unique1) {
+  async bar(unique1) {
     return lcl_bar.bar(unique1);
   }
-  static bar(unique1) {
+  static async bar(unique1) {
     let imp = new abap.types.Integer();
     if (unique1 && unique1.imp) {imp.set(unique1.imp);}
   }
 }
-function bar() {
-  lcl_bar.bar({imp: constant_2});
+async function bar() {
+  await lcl_bar.bar({imp: constant_2});
 }`;
 
     expect(await runSingle(abap)).to.equal(expected);
@@ -430,7 +430,7 @@ class lcl_bar {
     abap.statements.write(input);
   }
 }
-function bar() {
+async function bar() {
   let bar = new abap.types.ABAPObject();
   bar.set(new lcl_bar({input: constant_42}));
 }`;

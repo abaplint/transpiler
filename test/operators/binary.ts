@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -32,8 +32,8 @@ describe("Running operators - Bit", () => {
     x3 = x1 BIT-AND x2.
     WRITE / x3.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("DCBA88005410\nDCBA88005432800000\n8900");
   });
 
@@ -45,8 +45,8 @@ describe("Running operators - Bit", () => {
     x2 = BIT-NOT x1.
     WRITE x2.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("F242");
   });
 
@@ -68,8 +68,8 @@ describe("Running operators - Bit", () => {
     x3 = x1 BIT-OR x2.
     WRITE / x3.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("DDBBBAFE5577\nDDBBBAFE5FFFFBABC0\nEFCD");
   });
 
@@ -91,8 +91,8 @@ describe("Running operators - Bit", () => {
     x3 = x1 BIT-XOR x2.
     WRITE / x3.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("010132FE0167\n010132FE0BCD7BABC0\n66CD");
   });
 

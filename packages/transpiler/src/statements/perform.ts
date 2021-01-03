@@ -12,7 +12,7 @@ export class PerformTranspiler implements IStatementTranspiler {
 
     // todo, parameters
 
-    return formName.concatTokens() + "();";
+    return "await " + formName.concatTokens() + "();";
   }
 
 }

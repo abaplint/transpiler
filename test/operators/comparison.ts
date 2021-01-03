@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -24,8 +24,8 @@ describe("Running operators - Comparison", () => {
       ASSERT 1 < '2'.
       ASSERT 1 <= '1'.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("IS INITIAL, yes", async () => {
@@ -37,8 +37,8 @@ describe("Running operators - Comparison", () => {
         WRITE 'no'.
       ENDIF.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("yes");
   });
 
@@ -51,8 +51,8 @@ describe("Running operators - Comparison", () => {
         WRITE 'no'.
       ENDIF.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("no");
   });
 
@@ -63,8 +63,8 @@ describe("Running operators - Comparison", () => {
       DATA ref TYPE REF TO lif_bar.
       ASSERT ref IS INITIAL.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("");
   });
 
@@ -76,8 +76,8 @@ describe("Running operators - Comparison", () => {
       str = ''.
       ASSERT str IS INITIAL.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("CP", async () => {
@@ -91,8 +91,8 @@ describe("Running operators - Comparison", () => {
       ASSERT bar CP 'abc'.
       ASSERT bar CP '*abc*'.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("ASSERT strlen gt", async () => {
@@ -101,16 +101,16 @@ describe("Running operators - Comparison", () => {
       lv_len = 4.
       ASSERT strlen( '/dir/subdir' ) > lv_len.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("NS comparator", async () => {
     const code = `
       ASSERT 'foo' NS 'bar'.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("BETWEEN comparator", async () => {
@@ -119,8 +119,8 @@ describe("Running operators - Comparison", () => {
       ASSERT 1 BETWEEN 1 AND 5.
       ASSERT 5 BETWEEN 1 AND 5.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("NOT BETWEEN comparator", async () => {
@@ -129,8 +129,8 @@ describe("Running operators - Comparison", () => {
       ASSERT NOT 3 NOT BETWEEN 2 AND 5.
       ASSERT NOT 8 BETWEEN 1 AND 5.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("check structure is initial", async () => {
@@ -141,8 +141,8 @@ describe("Running operators - Comparison", () => {
       DATA bar TYPE bar.
       ASSERT bar IS INITIAL.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("check internal table is initial", async () => {
@@ -150,8 +150,8 @@ describe("Running operators - Comparison", () => {
       DATA bar TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
       ASSERT bar IS INITIAL.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("EQ, initial string and integer", async () => {
@@ -160,8 +160,8 @@ describe("Running operators - Comparison", () => {
       DATA int TYPE i.
       ASSERT int EQ low.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("LT, string and integer", async () => {
@@ -171,8 +171,8 @@ describe("Running operators - Comparison", () => {
       low = |1|.
       ASSERT int LT low.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("BETWEEN 1", async () => {
@@ -182,8 +182,8 @@ describe("Running operators - Comparison", () => {
       DATA int TYPE i.
       ASSERT int BETWEEN low AND high.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("BETWEEN 2", async () => {
@@ -196,8 +196,8 @@ describe("Running operators - Comparison", () => {
       int = 1.
       ASSERT int BETWEEN low AND high.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("BETWEEN 3", async () => {
@@ -210,8 +210,8 @@ describe("Running operators - Comparison", () => {
       int = 2.
       ASSERT NOT int BETWEEN low AND high.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("BETWEEN 4", async () => {
@@ -224,8 +224,8 @@ describe("Running operators - Comparison", () => {
       int = 2.
       ASSERT NOT int BETWEEN low AND high.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("compare using CO operator", async () => {
@@ -236,8 +236,8 @@ describe("Running operators - Comparison", () => {
       lv_val = boolc( 'aabbaa' CO 'ab' ).
       ASSERT lv_val = abap_true.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("IS BOUND", async () => {
@@ -249,8 +249,8 @@ describe("Running operators - Comparison", () => {
       DATA foo TYPE REF TO lcl_bar.
       ASSERT NOT foo IS BOUND.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("IS ASSIGNED", async () => {
@@ -261,8 +261,8 @@ describe("Running operators - Comparison", () => {
       ASSIGN 2 TO <bar>.
       ASSERT <bar> IS ASSIGNED.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("is initial, with clike input", async () => {
@@ -286,8 +286,8 @@ describe("Running operators - Comparison", () => {
       START-OF-SELECTION.
         PERFORM moo.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("Structure equals", async () => {
@@ -299,8 +299,8 @@ describe("Running operators - Comparison", () => {
       DATA data2 TYPE ty_type.
       ASSERT data1 = data2.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it.skip("internal table equals", async () => {
@@ -309,8 +309,8 @@ describe("Running operators - Comparison", () => {
       DATA data2 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
       ASSERT data1 = data2.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("field symbol eq", async () => {
@@ -327,8 +327,8 @@ describe("Running operators - Comparison", () => {
       ASSERT <tab1> = 'a'.
       ASSERT 'a' = <tab2>.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("field symbol eq, structure", async () => {
@@ -348,8 +348,8 @@ describe("Running operators - Comparison", () => {
       READ TABLE tab2 INDEX 1 ASSIGNING <tab2>.
       ASSERT <tab1> = <tab2>.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("CA", async () => {
@@ -364,8 +364,8 @@ describe("Running operators - Comparison", () => {
       bar = boolc( 'foo' CA 'o' ).
       ASSERT bar = abap_true.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
 });

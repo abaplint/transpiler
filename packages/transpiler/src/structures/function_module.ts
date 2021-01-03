@@ -13,7 +13,7 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
         if (name === undefined) {
           name = "FunctionModuleTranspilerNameNotFound";
         }
-        r += `function ${name}(input) {\n`;
+        r += `async function ${name}(input) {\n`;
         r += this.findSignature(traversal, name);
       } else if (c.get() instanceof abaplint.Statements.EndFunction) {
         r += "}\n";
