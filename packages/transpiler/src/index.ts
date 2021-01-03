@@ -28,11 +28,16 @@ export interface IOutput {
   databaseSetup: string;
 }
 
+export interface IRequire {
+  name: string,
+  filename: string,
+}
+
 /** one javascript output file for each object */
 export interface IOutputFile {
   object: IObjectIdentifier;
   js: IFile;
-  requires: readonly IObjectIdentifier[];
+  requires: readonly IRequire[];
   exports: readonly string[];
 }
 
@@ -152,7 +157,7 @@ export class Transpiler {
     let contents = "";
     for (const r of output.requires) {
       const name = r.name.toLowerCase();
-      const filename = name + "." + r.type.toLowerCase() + ".js";
+      const filename = r.filename.replace(".abap", ".js");
       contents += "const " + name + " = require(\"./" + filename + "\")." + name + ";\n";
     }
     contents += output.js.contents;

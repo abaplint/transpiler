@@ -33,8 +33,7 @@ ENDCLASS.`;
     expect(output[1].js.contents).to.contain("class zcl_bar ");
 
     expect(output[0].requires.length).to.equal(1, "expected one require");
-    expect(output[0].requires[0].type).to.equal("CLAS");
-    expect(output[0].requires[0].name).to.equal("ZCL_BAR");
+    expect(output[0].requires[0].filename).to.equal("zcl_bar.clas.abap");
   });
 
   it("CLAS using CLAS, static reference", async () => {
@@ -76,8 +75,7 @@ ENDCLASS.`;
     expect(output[1].js.contents).to.contain("class cl_abap_unit_assert ");
 
     expect(output[0].requires.length).to.equal(1, "expected one require");
-    expect(output[0].requires[0].type).to.equal("CLAS");
-    expect(output[0].requires[0].name).to.equal("CL_ABAP_UNIT_ASSERT");
+    expect(output[0].requires[0].filename).to.equal("cl_abap_unit_assert.clas.abap");
   });
 
   it("Dont require itself", async () => {
@@ -98,8 +96,40 @@ ENDCLASS.`;
     const output = (await new Transpiler().run(files)).objects;
     expect(output.length).to.equal(1);
     expect(output[0].js.contents).to.contain("class zcl_foo ");
-
     expect(output[0].requires.length).to.equal(0, "expected zero requires");
+  });
+
+  it("clas, require locals", async () => {
+    const clas1 = `
+  CLASS zcl_locals DEFINITION PUBLIC FINAL CREATE PUBLIC.
+    PUBLIC SECTION.
+      CLASS-METHODS sdfsd .
+    PROTECTED SECTION.
+    PRIVATE SECTION.
+  ENDCLASS.
+  CLASS ZCL_LOCALS IMPLEMENTATION.
+    METHOD sdfsd.
+      DATA foo TYPE REF TO lcl_helper.
+      CREATE OBJECT foo.
+    ENDMETHOD.
+  ENDCLASS.`;
+
+    const locals = `
+    CLASS lcl_helper DEFINITION.
+    ENDCLASS.
+
+    CLASS lcl_helper IMPLEMENTATION.
+    ENDCLASS.`;
+
+    const files = [
+      {filename: "zcl_locals.clas.abap", contents: clas1},
+      {filename: "zcl_locals.clas.locals_imp.abap", contents: locals},
+    ];
+
+    const output = (await new Transpiler().run(files)).objects;
+    expect(output.length).to.equal(2);
+    expect(output[1].js.contents).to.contain("class zcl_locals ");
+    expect(output[1].requires.length).to.equal(1, "expected local require");
   });
 
 });
