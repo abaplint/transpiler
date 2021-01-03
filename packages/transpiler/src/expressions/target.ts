@@ -17,6 +17,7 @@ export class TargetTranspiler implements IExpressionTranspiler {
         ret = ret + c.getFirstToken().getStr();
       } else if (c.get() instanceof Expressions.AttributeName) {
         ret = ret + c.getFirstToken().getStr();
+        ret = ret.replace("~", "$");
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.FieldOffset) {
         offset.push("offset: " + new FieldOffsetTranspiler().transpile(c, traversal));
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.FieldLength) {
