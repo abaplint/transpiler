@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -22,8 +22,8 @@ describe("Running statements - DELETE internal", () => {
       DELETE table WHERE table_line = 1.
       ASSERT lines( table ) = 1.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("DELETE from table INDEX", async () => {
@@ -34,8 +34,8 @@ describe("Running statements - DELETE internal", () => {
       DELETE foo INDEX 2.
       ASSERT lines( foo ) = 1.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("Basic delete ADJACENT DUPLICATES, no deleted", async () => {
@@ -46,8 +46,8 @@ describe("Running statements - DELETE internal", () => {
       DELETE ADJACENT DUPLICATES FROM table.
       ASSERT lines( table ) = 2.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("Basic delete ADJACENT DUPLICATES, one deleted", async () => {
@@ -59,8 +59,8 @@ describe("Running statements - DELETE internal", () => {
       DELETE ADJACENT DUPLICATES FROM table.
       ASSERT lines( table ) = 2.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("DELETE table FROM index", async () => {
@@ -75,8 +75,8 @@ describe("Running statements - DELETE internal", () => {
         WRITE / row.
       ENDLOOP.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("1");
   });
 
@@ -88,8 +88,8 @@ describe("Running statements - DELETE internal", () => {
       DELETE lt_keywords WHERE table_line IS INITIAL.
       ASSERT lines( lt_keywords ) = 0.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("delete internal tab with object references", async () => {
@@ -110,8 +110,8 @@ describe("Running statements - DELETE internal", () => {
       DELETE tab INDEX 2.
       ASSERT sy-subrc = 0.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
 });

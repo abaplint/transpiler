@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../packages/runtime/src/";
-import {runFiles} from "./_utils";
+import {AsyncFunction, runFiles} from "./_utils";
 
 let abap: ABAP;
 
@@ -28,8 +28,8 @@ describe("Running Examples", () => {
 
     const js = await run(code) + "\nreturn lv_current.get();";
 
-    const f = new Function("abap", js);
-    const res = f(abap);
+    const f = new AsyncFunction("abap", js);
+    const res = await f(abap);
 
     expect(res).to.equal(89);
   });
@@ -56,15 +56,15 @@ describe("Running Examples", () => {
     ASSERT foo = 0.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("Console tracks output", async () => {
     const code = `WRITE 'foo'.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("foo");
   });
 
@@ -103,8 +103,8 @@ describe("Running Examples", () => {
     ASSERT ls_request-body = 'foo'.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("Set structure", async () => {
@@ -118,8 +118,8 @@ data1-moo = 2.
 data2 = data1.
 ASSERT data2-moo = 2.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("sy-index", async () => {
@@ -127,8 +127,8 @@ ASSERT data2-moo = 2.`;
     ASSERT sy-index = 1.
     ENDDO.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("basic FIELD-SYMBOLS", async () => {
@@ -144,8 +144,8 @@ ASSERT data2-moo = 2.`;
   ASSERT <fs> = 2.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("basic xstring", async () => {
@@ -154,8 +154,8 @@ ASSERT data2-moo = 2.`;
     foo = 'AA'.
     WRITE foo.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("AA");
   });
 
@@ -165,8 +165,8 @@ ASSERT data2-moo = 2.`;
     WRITE lc_raw.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("48656C6C6F20576F726C64210D0A");
   });
 
@@ -191,8 +191,8 @@ ASSERT data2-moo = 2.`;
     WRITE / result.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("10101011\n00000001");
   });
 
@@ -218,8 +218,8 @@ ASSERT data2-moo = 2.`;
     SET BIT 9 OF xstr TO 0.
     WRITE / xstr.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("80\nC0\nE0\nF0\n08\n04\n02\n01\nF2420F2420\n037F");
   });
 
@@ -230,8 +230,8 @@ ASSERT data2-moo = 2.`;
   WRITE foo.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("3");
   });
 
@@ -248,8 +248,8 @@ ASSERT data2-moo = 2.`;
   WRITE / foo.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("01\n14\nAA\n12");
   });
 
@@ -260,8 +260,8 @@ ASSERT data2-moo = 2.`;
   WRITE i.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("1");
   });
 
@@ -275,8 +275,8 @@ ASSERT data2-moo = 2.`;
   WRITE i.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("5");
   });
 
@@ -287,8 +287,8 @@ ASSERT data2-moo = 2.`;
   WRITE foo.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("A");
   });
 
@@ -301,8 +301,8 @@ ASSERT data2-moo = 2.`;
   WRITE c.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("0");
   });
 
@@ -310,8 +310,8 @@ ASSERT data2-moo = 2.`;
     const code = `ASSERT sy-subrc = 0.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("");
   });
 
@@ -325,8 +325,8 @@ ASSERT data2-moo = 2.`;
   WRITE 0.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("0");
   });
 
@@ -344,8 +344,8 @@ ASSERT data2-moo = 2.`;
   ENDDO.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("bar\nfoo\nfoo\nfoo");
   });
 
@@ -367,8 +367,8 @@ START-OF-SELECTION.
   bar->foo( moo = 'hello' ).`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("hello");
   });
 
@@ -380,8 +380,8 @@ START-OF-SELECTION.
   ASSERT str = 'aaddccdd'.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("structured constant", async () => {
@@ -398,8 +398,8 @@ ENDCLASS.
 WRITE lcl_foo=>bar-field.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("A");
   });
 
@@ -413,8 +413,8 @@ START-OF-SELECTION.
   PERFORM bar.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("hello");
   });
 
@@ -427,8 +427,8 @@ START-OF-SELECTION.
   ASSERT integer = 170.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("javascript keyword uses as identifier", async () => {
@@ -438,16 +438,16 @@ if = 1.
 write if.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("1");
   });
 
   it("javascript keyword in string template", async () => {
     const code = `write |foo if bar|.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("foo if bar");
   });
 
@@ -461,8 +461,8 @@ write if.`;
     READ TABLE result INDEX 1 INTO dat.
     WRITE dat.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("4");
   });
 
@@ -480,8 +480,8 @@ write if.`;
     WRITE / int.
   ENDLOOP.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("3\n4");
   });
 
@@ -491,8 +491,8 @@ write if.`;
   lv_x = 12345.
   WRITE lv_x.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("00003039");
   });
 
@@ -504,8 +504,8 @@ write if.`;
   int = lv_x.
   WRITE int.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("12345");
   });
 
@@ -517,16 +517,16 @@ write if.`;
   int = lv_x.
   WRITE int.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("12345");
   });
 
   it("simple concat via &&", async () => {
     const code = `WRITE 'foo' && 'bar'.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("foobar");
   });
 
@@ -543,8 +543,8 @@ write if.`;
     str = 'ABC' && moo=>bar && '123'.
     WRITE str.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("ABC_123");
   });
 
@@ -562,8 +562,8 @@ write if.`;
   GET BIT 8 OF iv_x INTO rv_bitbyte+7(1).
   WRITE rv_bitbyte.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("01000000");
   });
 
@@ -581,8 +581,8 @@ write if.`;
   GET BIT 8 OF iv_x INTO rv_bitbyte+7(1).
   WRITE rv_bitbyte.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("01000000");
   });
 
@@ -592,8 +592,8 @@ write if.`;
     bar = 64.
     WRITE bar.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("40");
   });
 
@@ -603,8 +603,8 @@ write if.`;
   bar = 64.
   WRITE bar.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("40");
   });
 
@@ -614,8 +614,8 @@ write if.`;
   bar = 0.
   WRITE bar.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("00");
   });
 
@@ -627,8 +627,8 @@ write if.`;
   bar = 'C'.
   WRITE / bar.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("01\nC0");
   });
 
@@ -639,24 +639,24 @@ write if.`;
   TRANSLATE foo TO UPPER CASE.
   WRITE foo.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("ABC");
   });
 
   it("back slash", async () => {
     const code = `WRITE '\\'.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("\\");
   });
 
   it("abap_true", async () => {
     const code = `WRITE abap_true.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("X");
   });
 
@@ -670,8 +670,8 @@ write if.`;
   rv_path = lv_temp1 && lv_temp2.
   WRITE rv_path.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("foobar");
   });
 
@@ -684,8 +684,8 @@ CONSTANTS: BEGIN OF lc_msg,
 WRITE / lc_msg-field1.
 WRITE / lc_msg-field2.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("1\n2");
   });
 
@@ -695,22 +695,22 @@ CONSTANTS: BEGIN OF lc_msg,
              field1 TYPE c VALUE IS INITIAL,
            END OF lc_msg.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("WRITE space", async () => {
     const code = `WRITE space.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("negative number", async () => {
     const code = `WRITE -1.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("-1");
   });
 
@@ -722,8 +722,8 @@ CONSTANTS: BEGIN OF lc_msg,
   lv_string2 = 2.
   ASSERT lv_string1 + lv_string2 = 3.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("charcter type plus integer type", async () => {
@@ -734,8 +734,8 @@ CONSTANTS: BEGIN OF lc_msg,
   lv_val2 = 2.
   ASSERT lv_val1 + lv_val2 = 3.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("write numc field, initial", async () => {
@@ -743,16 +743,16 @@ CONSTANTS: BEGIN OF lc_msg,
   DATA foo TYPE n LENGTH 4.
   WRITE foo.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("0000");
   });
 
   it("write sy-mandt", async () => {
     const code = `WRITE sy-mandt.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("123");
   });
 
@@ -762,8 +762,8 @@ CONSTANTS: BEGIN OF lc_msg,
   bar = '1'.
   WRITE bar.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("0000000001");
   });
 
@@ -773,16 +773,16 @@ CONSTANTS: BEGIN OF lc_msg,
   mv_input = |hello| & |world|.
   WRITE mv_input.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("helloworld");
   });
 
   it("WRITE sy-tabix.", async () => {
     const code = `WRITE sy-tabix.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("0");
   });
 
@@ -797,8 +797,8 @@ DATA data1 TYPE ty_deep.
 DATA data2 TYPE ty_deep.
 data1 = data2.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("Field symbols mess", async () => {
@@ -823,8 +823,8 @@ data1 = data2.`;
     ASSERT <row1> = <row2>.
   ENDDO.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("calculation inside string template", async () => {
@@ -833,24 +833,24 @@ data1 = data2.`;
   DATA int_2 TYPE i VALUE 8.
   WRITE |{ int_1 } * { int_2 } = { int_1 * int_2 }|.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("4 * 8 = 32");
   });
 
   it("escaping constant strings, 1", async () => {
     const code = `WRITE ''''.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("'");
   });
 
   it("escaping constant strings, 2", async () => {
     const code = `WRITE 'bar''moo''boo'.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("bar'moo'boo");
   });
 
@@ -860,8 +860,8 @@ data1 = data2.`;
     int = '5' + 3.
     ASSERT int = 8.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("GET TIME", async () => {
@@ -873,8 +873,8 @@ data1 = data2.`;
     WRITE / sy-uzeit.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     const result = abap.console.get();
     expect(result).to.not.equal("");
   });
@@ -887,8 +887,8 @@ data1 = data2.`;
   WRITE / time.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("00000000\n000000");
   });
 
@@ -900,8 +900,8 @@ data1 = data2.`;
   ASSERT const = bar.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
 });

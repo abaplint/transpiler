@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -23,8 +23,8 @@ describe("Running statements - DESCRIBE", () => {
     DESCRIBE FIELD <line> LENGTH lv_length IN CHARACTER MODE.
     WRITE lv_length.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("10");
   });
 
@@ -47,8 +47,8 @@ describe("Running statements - DESCRIBE", () => {
     WRITE / lv_type.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("C\ng\nh\nr");
   });
 
@@ -59,8 +59,8 @@ describe("Running statements - DESCRIBE", () => {
   ASSERT lv_type = 'C'.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("DESCRIBE FIELD table", async () => {
@@ -70,8 +70,8 @@ describe("Running statements - DESCRIBE", () => {
   DESCRIBE FIELD tab TYPE type.
   WRITE type.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("h");
   });
 
@@ -82,8 +82,8 @@ describe("Running statements - DESCRIBE", () => {
   DESCRIBE FIELD f LENGTH l IN CHARACTER MODE.
   WRITE l.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("4");
   });
 

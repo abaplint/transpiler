@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -27,8 +27,8 @@ describe("Running statements - LOOP", () => {
       write / val.
       endloop.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("2\n2");
   });
 
@@ -44,8 +44,8 @@ describe("Running statements - LOOP", () => {
       WRITE <row>.
     ENDLOOP.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("2");
   });
 
@@ -60,8 +60,8 @@ describe("Running statements - LOOP", () => {
         WRITE / sy-tabix.
       ENDLOOP.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("1\n2\n3");
   });
 
@@ -76,8 +76,8 @@ describe("Running statements - LOOP", () => {
         WRITE / line.
       ENDLOOP.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("1\n2\n4\n5");
   });
 
@@ -92,8 +92,8 @@ describe("Running statements - LOOP", () => {
         EXIT.
       ENDLOOP.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("LOOPing and DELETE in same table", async () => {
@@ -111,8 +111,8 @@ describe("Running statements - LOOP", () => {
       ENDLOOP.
       ASSERT lines( tab ) = 1.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("1\n1\n2\n3\n2\n4");
   });
 
@@ -135,8 +135,8 @@ describe("Running statements - LOOP", () => {
         WRITE line.
       ENDLOOP.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("8910\n123\n56");
   });
 
@@ -155,8 +155,8 @@ describe("Running statements - LOOP", () => {
         WRITE line.
       ENDLOOP.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("4567");
   });
 
@@ -182,8 +182,8 @@ describe("Running statements - LOOP", () => {
         WRITE |{ line-foo }-{ line-bar }.|.
       ENDLOOP.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("6-0.6-7.7-1.");
   });
 
@@ -198,8 +198,8 @@ describe("Running statements - LOOP", () => {
         WRITE line.
       ENDLOOP.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("12345");
   });
 
@@ -228,8 +228,8 @@ describe("Running statements - LOOP", () => {
         ENDLOOP.
       ENDLOOP.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("foobarmeh");
   });
 
@@ -263,8 +263,8 @@ describe("Running statements - LOOP", () => {
         WRITE |{ line-foo }-{ line-bar }.|.
       ENDLOOP.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("2-2.3-4.5-2.6-7.8-2.9-3.\n6-7.27-7.30-3.\n18-5.24-4.27-7.30-3.");
   });
 

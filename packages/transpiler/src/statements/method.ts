@@ -63,14 +63,15 @@ export class MethodTranspiler implements IStatementTranspiler {
       if (m.getName().toUpperCase() === name.toUpperCase() && m.isStatic()) {
         // in ABAP static methods can be called with instance arrows, "->"
         const className = scope.getParent()?.getIdentifier().sname?.toLowerCase();
-        staticMethod = name + "(" + unique + ") {\n" +
+        staticMethod = "async " + name + "(" + unique + ") {\n" +
           "return " + className + "." + name + "(" + unique + ");\n" +
           "}\n" + "static ";
         break;
       }
     }
 
-    return staticMethod + name.replace("~", "$") + "(" + unique + ") {" + after;
+    const asyn = name.toUpperCase() === "CONSTRUCTOR" ? "" : "async ";
+    return staticMethod + asyn + name.replace("~", "$") + "(" + unique + ") {" + after;
   }
 
   private findMethodParameters(scope: abaplint.ISpaghettiScopeNode): abaplint.Types.MethodParameters | undefined {

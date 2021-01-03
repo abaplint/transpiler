@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -41,8 +41,8 @@ START-OF-SELECTION.
   PERFORM bar.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("helloabc");
   });
 
@@ -68,8 +68,8 @@ START-OF-SELECTION.
   DATA bar TYPE REF TO lcl_foo.
   CREATE OBJECT bar.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("class, interface with constant", async () => {
@@ -94,8 +94,8 @@ START-OF-SELECTION.
   DATA bar TYPE REF TO lcl_foo.
   CREATE OBJECT bar.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("2");
   });
 
@@ -123,8 +123,8 @@ ENDFORM.
 
 PERFORM foo.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("2");
   });
 
@@ -136,8 +136,8 @@ PERFORM foo.`;
 
     WRITE lif_foo=>bar.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("2");
   });
 
@@ -151,8 +151,8 @@ ENDINTERFACE.
 
 WRITE lif=>bar-foo.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("A");
   });
 

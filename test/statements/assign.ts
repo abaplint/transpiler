@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -25,8 +25,8 @@ describe("Running statements - ASSIGN", () => {
       ASSIGN COMPONENT 'BAR' OF STRUCTURE ls_stru TO <lv_val>.
       WRITE <lv_val>.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("foo");
   });
 
@@ -41,8 +41,8 @@ describe("Running statements - ASSIGN", () => {
       ASSERT <fs2> IS ASSIGNED.
       WRITE <fs2>.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("42");
   });
 
@@ -62,8 +62,8 @@ describe("Running statements - ASSIGN", () => {
       ASSERT <fs1> = 3.
       ASSERT <fs2> = 1.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("more ASSIGNing", async () => {
@@ -90,8 +90,8 @@ describe("Running statements - ASSIGN", () => {
         WRITE / <fs1>-field2.
       ENDLOOP.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("1\n2\n2\n0");
   });
 

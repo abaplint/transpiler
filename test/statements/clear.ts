@@ -1,5 +1,5 @@
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -23,8 +23,8 @@ describe("Running statements - CLEAR", () => {
       CLEAR data1.
       ASSERT data1-moo = 0.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("basic CLEAR", async () => {
@@ -34,8 +34,8 @@ describe("Running statements - CLEAR", () => {
       CLEAR da.
       ASSERT da = 0.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("clear object reference", async () => {
@@ -45,8 +45,8 @@ describe("Running statements - CLEAR", () => {
       DATA bar TYPE REF TO lif_bar.
       CLEAR bar.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
 });

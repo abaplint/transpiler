@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -20,8 +20,8 @@ describe("Running expressions - Length and offset", () => {
       bar = 'abc'.
       WRITE bar+1.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("bc");
   });
 
@@ -31,8 +31,8 @@ describe("Running expressions - Length and offset", () => {
       bar = 'abc'.
       WRITE bar(1).`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("a");
   });
 
@@ -43,8 +43,8 @@ describe("Running expressions - Length and offset", () => {
       WRITE / x+1.
       WRITE / x(1).`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("3456\n12");
   });
 
@@ -58,8 +58,8 @@ describe("Running expressions - Length and offset", () => {
       WRITE / bar+2.
       WRITE / bar(2).`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("345\n12\n345\n12");
   });
 
@@ -74,8 +74,8 @@ describe("Running expressions - Length and offset", () => {
       foo+3 = 'C'.
       WRITE / foo.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("11223A55\nB1223A55\nB12C");
   });
 
@@ -86,8 +86,8 @@ describe("Running expressions - Length and offset", () => {
       lv_a = lv_a + lv_x+1(1).
       WRITE lv_a.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("17");
   });
 
@@ -121,8 +121,8 @@ describe("Running expressions - Length and offset", () => {
       sy-index = 8. " This should probably not be allowed... :)
       WRITE / test_string+sy-index(1).`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("12\n234\n3456\n34\n345\n3456\n45\n456\n4567\n8");
   });
 
@@ -165,8 +165,8 @@ describe("Running expressions - Length and offset", () => {
       sy-index = 4. " This should probably not be allowed... :)
       WRITE / test_string+sy-index(sy-index).`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("0##3###7####2\n012!!!!789012\n012$$$!789012\n012££$!789012\n0123PPPP89012\n0123AAAP89012\n0123ABAP89012\nABAP");
   });
 
@@ -200,8 +200,8 @@ describe("Running expressions - Length and offset", () => {
       WRITE / test_string+<struct>-num(<number>).
       WRITE / test_string+<struct>-num(<struct>-num).`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("234\n3456\n34\n345\n3456\n45\n456\n4567");
   });
 
@@ -245,8 +245,8 @@ describe("Running expressions - Length and offset", () => {
       test_string+<struct>-num(2) = 'ABABABABAB'.
       WRITE / test_string.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("0##3###7####2\n012!!!!789012\n012$$$!789012\n012££$!789012\n0123PPPP89012\n0123AAAP89012\n0123ABAP89012");
   });
 
@@ -262,8 +262,8 @@ describe("Running expressions - Length and offset", () => {
     <lv_row> = <lv_row>+3(3).
     WRITE / <lv_row>.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("foo\nbar");
   });
 
@@ -272,8 +272,8 @@ describe("Running expressions - Length and offset", () => {
     DATA text TYPE string VALUE 'HEYABAPPALOBA'.
     WRITE |{ text+3(4) }|.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("ABAP");
   });
 

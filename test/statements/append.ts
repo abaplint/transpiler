@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -23,8 +23,8 @@ describe("Running statements - APPEND", () => {
         write val.
       endloop.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("foo");
   });
 
@@ -46,8 +46,8 @@ describe("Running statements - APPEND", () => {
         WRITE / bar-field.
       ENDLOOP.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("1\n2");
   });
 
@@ -58,8 +58,8 @@ describe("Running statements - APPEND", () => {
       APPEND INITIAL LINE TO tab ASSIGNING <fs>.
       WRITE <fs>.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("0");
   });
 
@@ -73,8 +73,8 @@ describe("Running statements - APPEND", () => {
       READ TABLE tab INDEX 1 INTO row.
       WRITE row.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("2");
   });
 
@@ -93,8 +93,8 @@ describe("Running statements - APPEND", () => {
       ENDLOOP.
       ASSERT lines( tab1 ) = 4.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("2\n3\n5\n7");
   });
 
@@ -105,8 +105,8 @@ describe("Running statements - APPEND", () => {
       APPEND 3 TO tab ASSIGNING <i>.
       ASSERT <i> = 3.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
 });

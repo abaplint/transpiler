@@ -1,5 +1,5 @@
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -19,8 +19,8 @@ describe("Running statements - CONCATENATE", () => {
       CONCATENATE 'foo' 'bar' INTO target.
       ASSERT target = 'foobar'.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("CONCATENATE SEPARATED BY space", async () => {
@@ -33,8 +33,8 @@ describe("Running statements - CONCATENATE", () => {
       CONCATENATE iv_type lv_char10 INTO lv_string SEPARATED BY space.
       ASSERT lv_string = 'commit 6'.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("CONCATENATE LINES OF", async () => {
@@ -46,8 +46,8 @@ describe("Running statements - CONCATENATE", () => {
       CONCATENATE LINES OF lt_temp INTO rv_html SEPARATED BY 'o'.
       ASSERT rv_html = 'foobar'.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
 });

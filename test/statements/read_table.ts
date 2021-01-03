@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -26,8 +26,8 @@ describe("Running statements - READ TABLE", () => {
       READ TABLE tab INDEX 1 INTO bar.
       WRITE sy-subrc.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("4");
   });
 
@@ -37,8 +37,8 @@ describe("Running statements - READ TABLE", () => {
       READ TABLE tab INDEX 1 TRANSPORTING NO FIELDS.
       WRITE sy-subrc.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("4");
   });
 
@@ -66,8 +66,8 @@ describe("Running statements - READ TABLE", () => {
       READ TABLE tab INTO line WITH KEY field = 123.
       ASSERT sy-subrc = 4.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("READ TABLE table_line", async () => {
@@ -79,8 +79,8 @@ describe("Running statements - READ TABLE", () => {
       READ TABLE tab WITH KEY table_line = 123 TRANSPORTING NO FIELDS.
       ASSERT sy-subrc = 4.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("READ TABLE INDEX not found", async () => {
@@ -92,8 +92,8 @@ describe("Running statements - READ TABLE", () => {
       ASSERT sy-subrc = 4.
       ASSERT lv_segment = 'abc'.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
 });

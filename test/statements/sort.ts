@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -25,8 +25,8 @@ describe("Running statements - SORT", () => {
         WRITE / integer.
       ENDLOOP.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("1\n2");
   });
 
@@ -42,8 +42,8 @@ describe("Running statements - SORT", () => {
         WRITE / integer.
       ENDLOOP.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("3\n2\n1");
   });
 
@@ -63,8 +63,8 @@ describe("Running statements - SORT", () => {
         WRITE / row-field.
       ENDLOOP.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("1\n2");
   });
 
@@ -79,8 +79,8 @@ describe("Running statements - SORT", () => {
         WRITE / keyword.
       ENDLOOP.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("bar\nfoo");
   });
 

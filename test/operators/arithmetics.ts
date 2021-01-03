@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -26,8 +26,8 @@ describe("Running operators - Arithmetics", () => {
       lv_int = 5 / 4.
       ASSERT lv_int = 1.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("integer DIV", async () => {
@@ -36,8 +36,8 @@ describe("Running operators - Arithmetics", () => {
       foo = 5 DIV 2.
       WRITE foo.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("2");
   });
 
@@ -47,8 +47,8 @@ describe("Running operators - Arithmetics", () => {
       foo = 5 ** 2.
       WRITE foo.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("25");
   });
 
@@ -58,8 +58,8 @@ describe("Running operators - Arithmetics", () => {
       foo = 5 MOD 2.
       WRITE foo.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("1");
   });
 

@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {runFiles} from "./_utils";
+import {AsyncFunction, runFiles} from "./_utils";
 import {ABAP} from "../packages/runtime/src/";
 import {msag_zag_unit_test, tabl_t100xml} from "./_data";
 
@@ -19,8 +19,8 @@ describe("Top level tests, Database", () => {
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("hello world");
   });
 
@@ -32,8 +32,8 @@ describe("Top level tests, Database", () => {
     const js = await runFiles(abap, [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("4");
   });
 

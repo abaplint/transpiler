@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -21,8 +21,8 @@ describe("Running statements - SHIFT", () => {
   SHIFT lv_temp BY 1 PLACES LEFT.
   WRITE lv_temp.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("bc");
   });
 
@@ -33,8 +33,8 @@ describe("Running statements - SHIFT", () => {
   SHIFT lv_temp UP TO '/' LEFT.
   WRITE lv_temp.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("/bar");
   });
 
@@ -45,8 +45,8 @@ describe("Running statements - SHIFT", () => {
   SHIFT lv_temp UP TO '/' LEFT.
   WRITE lv_temp.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("abcbar");
   });
 
@@ -57,8 +57,8 @@ describe("Running statements - SHIFT", () => {
   SHIFT foo LEFT DELETING LEADING '12'.
   WRITE foo.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("3355");
   });
 

@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -20,8 +20,8 @@ describe("Running statements - INSERT", () => {
       INSERT 5 INTO TABLE tab.
       ASSERT lines( tab ) = 1.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("INSERT INDEX, one time before loop pointer", async () => {
@@ -40,8 +40,8 @@ describe("Running statements - INSERT", () => {
       ENDLOOP.
       ASSERT lines( tab ) = 4.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("1\n2\n3");
   });
 
@@ -58,8 +58,8 @@ describe("Running statements - INSERT", () => {
         SORT tab.
       ENDLOOP.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("4\n2\n3\n4");
   });
 
@@ -73,8 +73,8 @@ describe("Running statements - INSERT", () => {
         WRITE / data.
       ENDLOOP.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("1\n2");
   });
 
@@ -85,8 +85,8 @@ describe("Running statements - INSERT", () => {
       INSERT 7 INTO TABLE tab ASSIGNING <i>.
       ASSERT <i> = 7.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
 });

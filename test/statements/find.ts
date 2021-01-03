@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -21,8 +21,8 @@ describe("Running statements - FIND", () => {
       WRITE / sy-subrc.
       WRITE / lv_offset.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("0\n3");
   });
 
@@ -32,8 +32,8 @@ describe("Running statements - FIND", () => {
       FIND FIRST OCCURRENCE OF |bar| IN |foo| MATCH OFFSET lv_offset.
       WRITE / sy-subrc.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("4");
   });
 
@@ -42,8 +42,8 @@ describe("Running statements - FIND", () => {
       FIND FIRST OCCURRENCE OF 'bar' IN 'foobar'.
       ASSERT sy-subrc = 0.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("FIND REGEX, count and length", async () => {
@@ -54,8 +54,8 @@ describe("Running statements - FIND", () => {
       WRITE / lv_cnt.
       WRITE / lv_len.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("1\n2");
   });
 
@@ -65,8 +65,8 @@ describe("Running statements - FIND", () => {
       FIND REGEX 'a' IN '1122' SUBMATCHES lv_host.
       WRITE sy-subrc.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("4");
   });
 
@@ -77,8 +77,8 @@ describe("Running statements - FIND", () => {
       ASSERT sy-subrc = 0.
       ASSERT lv_host = 'abc'.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("FIND REGEX slashes", async () => {
@@ -90,8 +90,8 @@ describe("Running statements - FIND", () => {
       FIND REGEX '/' IN '1122'.
       ASSERT sy-subrc = 4.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("FIND ALL, MATCH COUNT", async () => {
@@ -100,8 +100,8 @@ describe("Running statements - FIND", () => {
       FIND ALL OCCURRENCES OF 'a' IN 'aaa' MATCH COUNT lv_count.
       ASSERT lv_count = 3.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("FIND ALL, more submatches", async () => {
@@ -116,8 +116,8 @@ describe("Running statements - FIND", () => {
       WRITE / lv_val3.
       WRITE / lv_val4.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("5\n9\ng\nggccggmgn");
   });
 
@@ -128,8 +128,8 @@ describe("Running statements - FIND", () => {
       FIND ALL OCCURRENCES OF 'a' IN '123' MATCH COUNT lv_count.
       WRITE lv_count.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("0");
   });
 
@@ -140,8 +140,8 @@ describe("Running statements - FIND", () => {
       DATA lv_len TYPE i.
       FIND FIRST OCCURRENCE OF REGEX '^/(.*/)?' IN iv_fullpath MATCH COUNT lv_cnt MATCH LENGTH lv_len.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("FIND RESULTS, 1", async () => {
@@ -169,8 +169,8 @@ describe("Running statements - FIND", () => {
       ASSERT ls_match-length = 3.
       ASSERT lines( ls_match-submatches ) = 0.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("FIND RESULTS, 2", async () => {
@@ -202,8 +202,8 @@ describe("Running statements - FIND", () => {
       ASSERT ls_submatch-offset = 6.
       ASSERT ls_submatch-length = 3.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("FIND RESULTS, 3", async () => {
@@ -228,8 +228,8 @@ describe("Running statements - FIND", () => {
       FIND ALL OCCURRENCES OF REGEX find IN in RESULTS lt_matches.
       ASSERT lines( lt_matches ) = 1.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("FIND RESULTS, 4", async () => {
@@ -251,8 +251,8 @@ describe("Running statements - FIND", () => {
       FIND ALL OCCURRENCES OF REGEX '\\b[-_a-z0-9]+\\b' IN 'REPORT zfoo.' RESULTS lt_matches IGNORING CASE.
       ASSERT lines( lt_matches ) = 2.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("FIND RESULTS, 5", async () => {
@@ -281,8 +281,8 @@ describe("Running statements - FIND", () => {
         ENDLOOP.
       ENDLOOP.`;
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("0\n1\n-1\n0\n23\n1");
   });
 

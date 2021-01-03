@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
-import {runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -27,8 +27,8 @@ describe("Running statements - MESSAGE", () => {
     INSERT INTO t100 VALUES ('E', '00', '001', '&1&2&3&4');`);
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("00\n001\nfoobar");
   });
 
@@ -41,8 +41,8 @@ describe("Running statements - MESSAGE", () => {
     WRITE / lv_text.`;
 
     const js = await run(code);
-    const f = new Function("abap", js);
-    f(abap);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
     expect(abap.console.get()).to.equal("ABC\n123\nABC:123 foo bar");
   });
 
