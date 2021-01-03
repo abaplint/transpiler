@@ -14,7 +14,7 @@ async function initDB() {
 }
 ${this.functionGroups(reg)}
 async function run() {
-await initDb();
+await initDB();
 const unit = new runtime.UnitTestResult();
 let clas;
 let locl;
