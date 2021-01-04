@@ -35,7 +35,8 @@ export class InterfaceTranspiler implements IStructureTranspiler {
           || v.identifier.getMeta().includes(abaplint.IdentifierMeta.ReadOnly) === false) {
         continue;
       }
-      const name = node.getFirstToken().getStr().toLowerCase() + "." + v.name.toLocaleLowerCase().replace("~", "$");
+      const interfaceName = node.getFirstToken().getStr().toLowerCase();
+      const name = interfaceName + "." + interfaceName + "$" + v.name;
       ret += name + " = " + new TranspileTypes().toType(v.identifier.getType()) + ";\n";
       const val = v.identifier.getValue();
       if (typeof val === "string") {

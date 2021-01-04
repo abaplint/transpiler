@@ -39,7 +39,7 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       for (let i = 0; i < components.length; i++) {
         conds.push("abap.compare.eq(i." + components[i].concatTokens() + ", " + traversal.traverse(sources[i]) + ")");
       }
-      extra.push("withKey: (i) => {return " + conds.join(" && ") + ";}");
+      extra.push("withKey: async (i) => {return " + conds.join(" && ") + ";}");
     }
 
     let concat = "";
@@ -47,7 +47,7 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       concat = ",{" + extra.join(",") + "}";
     }
 
-    return "abap.statements.readTable(" + ret + concat + ");";
+    return "await abap.statements.readTable(" + ret + concat + ");";
   }
 
 }
