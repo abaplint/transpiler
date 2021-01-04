@@ -573,4 +573,32 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello");
   });
 
+  it("method call chain", async () => {
+    const code = `
+CLASS clas DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS bar1 RETURNING VALUE(ref) TYPE REF TO clas.
+    CLASS-METHODS bar2 RETURNING VALUE(val) TYPE string.
+ENDCLASS.
+CLASS clas IMPLEMENTATION.
+  METHOD bar1.
+    CREATE OBJECT ref.
+  ENDMETHOD.
+  METHOD bar2.
+    val = 'hello'.
+  ENDMETHOD.
+ENDCLASS.
+
+FORM moo.
+  WRITE clas=>bar1( )->bar2( ).
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM moo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello");
+  });
+
 });
