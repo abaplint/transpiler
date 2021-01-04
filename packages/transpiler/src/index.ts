@@ -115,7 +115,7 @@ export class Transpiler {
       }
 
       const rearranged = new Rearranger().run(file.getStructure());
-      const contents = new Traversal(spaghetti, file, obj).traverse(rearranged);
+      const contents = new Traversal(spaghetti, file, obj, reg).traverse(rearranged);
       if (contents.length > 0) {
         result += new Indentation().run(contents);
       }

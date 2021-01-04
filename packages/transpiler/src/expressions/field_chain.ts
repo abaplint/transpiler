@@ -24,10 +24,10 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.ClassName) {
         ret += c.getFirstToken().getStr().toLowerCase() + ".";
       } else if (c.get() instanceof Expressions.AttributeName) {
-        const intf = traversal.isInterfaceAttribute(c.getFirstToken());
+        const interfaceName = traversal.isInterfaceAttribute(c.getFirstToken());
         let name = c.getFirstToken().getStr().replace("~", "$");
-        if (intf && name.startsWith(intf) === false) {
-          name = intf + "$" + name;
+        if (interfaceName && name.startsWith(interfaceName) === false) {
+          name = interfaceName + "$" + name;
         }
         ret += name;
       } else if (c.get() instanceof Expressions.ComponentName) {
