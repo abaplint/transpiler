@@ -16,7 +16,12 @@ export class TargetTranspiler implements IExpressionTranspiler {
       } else if (c.get() instanceof Expressions.ComponentName) {
         ret = ret + c.getFirstToken().getStr();
       } else if (c.get() instanceof Expressions.AttributeName) {
-        ret = ret + c.getFirstToken().getStr();
+        const intf = traversal.isInterfaceAttribute(c.getFirstToken());
+        let name = c.getFirstToken().getStr().replace("~", "$");
+        if (intf && name.startsWith(intf) === false) {
+          name = intf + "$" + name;
+        }
+        ret += name;
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.FieldOffset) {
         offset.push("offset: " + new FieldOffsetTranspiler().transpile(c, traversal));
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.FieldLength) {

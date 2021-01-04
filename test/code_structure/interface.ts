@@ -156,4 +156,55 @@ WRITE lif=>bar-foo.`;
     expect(abap.console.get()).to.equal("A");
   });
 
+  it("interfaced target variable", async () => {
+    const code = `
+INTERFACE lintf.
+  DATA bar TYPE i.
+ENDINTERFACE.
+
+CLASS lclas DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lintf.
+    METHODS bar.
+ENDCLASS.
+
+CLASS lclas IMPLEMENTATION.
+  METHOD bar.
+    me->lintf~bar = 2.
+  ENDMETHOD.
+ENDCLASS.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("Value from interface output", async () => {
+    const code = `
+INTERFACE lintf.
+  DATA bar TYPE i.
+ENDINTERFACE.
+
+CLASS lclas DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lintf.
+ENDCLASS.
+
+CLASS lclas IMPLEMENTATION.
+ENDCLASS.
+
+FORM bar.
+  DATA li TYPE REF TO lintf.
+  CREATE OBJECT li TYPE lclas.
+  li->bar = 2.
+  WRITE li->bar.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
