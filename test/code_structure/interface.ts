@@ -135,7 +135,12 @@ PERFORM foo.`;
       CONSTANTS bar TYPE i VALUE 2.
     ENDINTERFACE.
 
-    WRITE lif_foo=>bar.`;
+    FORM moo.
+      WRITE lif_foo=>bar.
+    ENDFORM.
+
+    START-OF-SELECTION.
+      PERFORM moo.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
@@ -150,7 +155,12 @@ INTERFACE lif.
              END OF bar.
 ENDINTERFACE.
 
-WRITE lif=>bar-foo.`;
+FORM moo.
+  WRITE lif=>bar-foo.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM moo.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
@@ -248,6 +258,24 @@ START-OF-SELECTION.
 
     const js = result.objects[1].js.contents;
     expect(js).to.contain(".if_client$request");
+  });
+
+  it("WRITE constant from interface", async () => {
+    const code = `
+INTERFACE lif.
+  CONSTANTS bar TYPE c VALUE 'a'.
+ENDINTERFACE.
+
+FORM moo.
+  WRITE lif=>bar.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM moo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("a");
   });
 
 });
