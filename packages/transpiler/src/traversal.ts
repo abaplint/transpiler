@@ -221,7 +221,7 @@ export class Traversal {
     }
     let ret = "";
 
-    if (def.getSuperClass() !== undefined || def.getName().toLowerCase() === "cx_root") {
+    if (def.getSuperClass() !== undefined) {
       // todo, more here, there might be parameters to pass
       // for now just pass the same input
       ret += `await super.constructor_(${inputName});\n`;
