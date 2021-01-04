@@ -169,6 +169,37 @@ export class Traversal {
     return false;
   }
 
+  // returns the interface name if interfaced
+  public isInterfaceAttribute(token: abaplint.Token): string | undefined {
+    const ref = this.findReadOrWriteReference(token, this.getFilename());
+    if (ref === undefined) {
+      return undefined;
+    }
+
+    const scope = this.spaghetti.lookupPosition(ref.getToken().getStart(), ref.getFilename());
+    if (scope?.getIdentifier().stype === abaplint.ScopeType.Interface) {
+      return scope?.getIdentifier().sname;
+    }
+
+    return undefined;
+  }
+
+  private findReadOrWriteReference(token: abaplint.Token, filename: string) {
+    const scope = this.spaghetti.lookupPosition(token.getStart(), filename);
+    if (scope === undefined) {
+      return undefined;
+    }
+
+    for (const r of scope.getData().references) {
+      if ((r.referenceType === abaplint.ReferenceType.DataReadReference
+          || r.referenceType === abaplint.ReferenceType.DataWriteReference)
+          && r.position.getStart().equals(token.getStart())) {
+        return r.resolved;
+      }
+    }
+    return undefined;
+  }
+
   public buildConstructorContents(scope: abaplint.ISpaghettiScopeNode | undefined,
                                   def: abaplint.IClassDefinition, inputName: string): string {
 

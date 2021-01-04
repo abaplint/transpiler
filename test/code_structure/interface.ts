@@ -178,7 +178,7 @@ ENDCLASS.`;
     await f(abap);
   });
 
-  it.only("Value from interface output", async () => {
+  it("Value from interface output", async () => {
     const code = `
 INTERFACE lintf.
   DATA bar TYPE i.
@@ -202,7 +202,6 @@ ENDFORM.
 START-OF-SELECTION.
   PERFORM bar.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
