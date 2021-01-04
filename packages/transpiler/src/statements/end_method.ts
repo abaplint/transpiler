@@ -20,7 +20,6 @@ export class EndMethodTranspiler implements IStatementTranspiler {
     }
 
     const data = scope.getIdentifier();
-    console.dir(data);
     if (data.stype === abaplint.ScopeType.Method && data.sname.toLowerCase() === "constructor") {
       returning = "return this;\n";
     }

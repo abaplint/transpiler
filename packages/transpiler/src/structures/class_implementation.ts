@@ -92,7 +92,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
       return ret;
     }
 
-    return "async constructor_() {\n" + ret + "\nreturn this;}\n";
+    return "async constructor_() {\n" + ret + "return this;\n}\n";
   }
 
 }
