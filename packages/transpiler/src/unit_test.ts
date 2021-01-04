@@ -44,7 +44,7 @@ locl = clas.addTestClass("${def.name}");\n`;
               if (m.isForTesting === false) {
                 continue;
               }
-              ret += `{\n  const test = new ${def.name}();\n`;
+              ret += `{\n  const test = await (new ${def.name}()).constructor_();\n`;
               if (hasSetup === true) {
                 ret += `  await test.setup();\n`;
               }
