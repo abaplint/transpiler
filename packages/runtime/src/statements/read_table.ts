@@ -4,12 +4,12 @@ import {INumeric} from "../types/_numeric";
 
 export interface IReadTableOptions {
   index?: INumeric | number,
-  withKey?: (i: any) => boolean,
+  withKey?: (i: any) => Promise<boolean>,
   into?: INumeric | ICharacter | Structure | Table,
   assigning?: FieldSymbol,
 }
 
-export function readTable(table: Table | FieldSymbol, options?: IReadTableOptions) {
+export async function readTable(table: Table | FieldSymbol, options?: IReadTableOptions) {
 
   let found: any = undefined;
 
@@ -26,7 +26,7 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
     // eslint-disable-next-line @typescript-eslint/prefer-for-of
     for (let i = 0; i < arr.length; i++) {
       const row = arr[i] instanceof Structure ? arr[i].get() : {table_line: arr[i]};
-      if (options.withKey(row) === true) {
+      if (await options.withKey(row) === true) {
         found = arr[i];
         break;
       }

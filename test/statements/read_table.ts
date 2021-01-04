@@ -96,4 +96,27 @@ describe("Running statements - READ TABLE", () => {
     await f(abap);
   });
 
+  it("READ TABLE calling method", async () => {
+    const code = `
+CLASS clas DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS bar1.
+    CLASS-METHODS bar2 RETURNING VALUE(val) TYPE string..
+ENDCLASS.
+CLASS clas IMPLEMENTATION.
+  METHOD bar1.
+    DATA gt_auth TYPE STANDARD TABLE OF string.
+    READ TABLE gt_auth WITH KEY table_line = bar2( ) TRANSPORTING NO FIELDS.
+  ENDMETHOD.
+  METHOD bar2.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  clas=>bar1( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
