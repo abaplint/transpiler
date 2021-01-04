@@ -5,8 +5,6 @@ import {Traversal} from "../traversal";
 export class CreateObjectTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
-
-
     const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
 
     let para = "";
@@ -16,7 +14,7 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
     }
 
     const name = this.findClassName(node, traversal);
-    return target + ".set(new " + name + "(" + para + "));";
+    return target + ".set(await (new " + name + "()).constructor_(" + para + "));";
   }
 
   private findClassName(node: abaplint.Nodes.StatementNode, traversal: Traversal) {

@@ -224,7 +224,7 @@ export class Traversal {
     if (def.getSuperClass() !== undefined || def.getName().toLowerCase() === "cx_root") {
       // todo, more here, there might be parameters to pass
       // for now just pass the same input
-      ret += `super(${inputName});\n`;
+      ret += `await super.constructor_(${inputName});\n`;
     }
 
     for (const v of vars) {
