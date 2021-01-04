@@ -55,9 +55,10 @@ describe("Multiple lines", () => {
 
     const expected =
 `class lcl_foobar {
-  constructor() {
+  async constructor_() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    return this;
   }
   async moo() {
   }
@@ -81,9 +82,10 @@ describe("Multiple lines", () => {
 
     const expected =
 `class lcl_foobar {
-  constructor() {
+  async constructor_() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    return this;
   }
   async moo(unique1) {
     let iv_foo = new abap.types.String();
@@ -109,9 +111,10 @@ describe("Multiple lines", () => {
 
     const expected =
 `class lcl_foobar {
-  constructor() {
+  async constructor_() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    return this;
   }
   async moo() {
     let rv_foo = new abap.types.String();
@@ -159,13 +162,14 @@ CREATE OBJECT foo.`;
 
     const expected =
 `class zcl_words {
-  constructor() {
+  async constructor_() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    return this;
   }
 }
 let foo = new abap.types.ABAPObject();
-foo.set(new zcl_words());`;
+foo.set(await (new zcl_words()).constructor_());`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });
@@ -196,10 +200,11 @@ DATA moo TYPE foo.`;
       ENDCLASS.`;
 
     const expected = `class zcl_words {
-  constructor() {
+  async constructor_() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.bar = new abap.types.Integer();
+    return this;
   }
   async run() {
     abap.statements.write(this.bar);
@@ -227,12 +232,13 @@ DATA moo TYPE foo.`;
     const expected = `let constant_2 = new abap.types.Integer();
 constant_2.set(2);
 class zcl_words {
-  constructor(unique1) {
+  async constructor_(unique1) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.bar = new abap.types.Integer();
     this.bar.set(constant_2);
     abap.statements.write(this.bar);
+    return this;
   }
 }`;
 
@@ -255,10 +261,11 @@ CLASS zcl_ret IMPLEMENTATION.
 ENDCLASS.`;
 
     const expected = `class zcl_ret {
-  constructor() {
+  async constructor_() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.bar = new abap.types.Integer();
+    return this;
   }
   async run() {
     return zcl_ret.run();
@@ -315,9 +322,10 @@ ENDCLASS.`;
     const expected = `let constant_30 = new abap.types.Integer();
 constant_30.set(30);
 class zcl_ret {
-  constructor() {
+  async constructor_() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    return this;
   }
 }
 zcl_ret.c_maxdcodes = new abap.types.Integer();
@@ -336,9 +344,10 @@ CLASS lcl_bar IMPLEMENTATION.
 ENDCLASS.`;
 
     const expected = `class lcl_bar {
-  constructor() {
+  async constructor_() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    return this;
   }
 }
 lcl_bar.foo = new abap.types.Integer();`;
@@ -383,9 +392,10 @@ ENDFORM.`;
     const expected = `let constant_2 = new abap.types.Integer();
 constant_2.set(2);
 class lcl_bar {
-  constructor() {
+  async constructor_() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    return this;
   }
   async bar(unique1) {
     return lcl_bar.bar(unique1);
@@ -422,17 +432,18 @@ ENDFORM.`;
     const expected = `let constant_42 = new abap.types.Integer();
 constant_42.set(42);
 class lcl_bar {
-  constructor(unique1) {
+  async constructor_(unique1) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     let input = new abap.types.Integer();
     if (unique1 && unique1.input) {input.set(unique1.input);}
     abap.statements.write(input);
+    return this;
   }
 }
 async function bar() {
   let bar = new abap.types.ABAPObject();
-  bar.set(new lcl_bar({input: constant_42}));
+  bar.set(await (new lcl_bar()).constructor_({input: constant_42}));
 }`;
 
     expect(await runSingle(abap)).to.equal(expected);
@@ -464,9 +475,10 @@ abap.statements.find(lv_line, {regex: 'abc', offset: lv_offset, length: lv_lengt
   CLASS lcl_bar IMPLEMENTATION.
   ENDCLASS.`;
     const expected = `class lcl_bar {
-  constructor() {
+  async constructor_() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    return this;
   }
 }
 lcl_bar.foo = new abap.types.String();

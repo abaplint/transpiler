@@ -8,7 +8,7 @@ export class MethodTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
     const token = node.findFirstExpression(abaplint.Expressions.MethodName)!.getFirstToken();
-    const name = token.getStr();
+    let name = token.getStr();
 
     const scope = traversal.getSpaghetti().lookupPosition(token.getStart(), traversal.getFilename());
     if (scope === undefined) {
@@ -25,6 +25,7 @@ export class MethodTranspiler implements IStatementTranspiler {
     if (name.toUpperCase() === "CONSTRUCTOR" && cdef) {
       unique = UniqueIdentifier.get();
       after = traversal.buildConstructorContents(scope.getParent(), cdef, unique);
+      name = "constructor_";
     }
 
     const methoddef = this.findMethodParameters(scope);
@@ -70,8 +71,7 @@ export class MethodTranspiler implements IStatementTranspiler {
       }
     }
 
-    const asyn = name.toUpperCase() === "CONSTRUCTOR" ? "" : "async ";
-    return staticMethod + asyn + name.replace("~", "$") + "(" + unique + ") {" + after;
+    return staticMethod + "async " + name.replace("~", "$") + "(" + unique + ") {" + after;
   }
 
   private findMethodParameters(scope: abaplint.ISpaghettiScopeNode): abaplint.Types.MethodParameters | undefined {
