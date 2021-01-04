@@ -542,4 +542,34 @@ describe("Running code structure - Class", () => {
     expect(abap.console.get()).to.equal("1\n2\n3");
   });
 
+  it("call method in constructor", async () => {
+    const code = `
+CLASS lclas DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor.
+    METHODS foobar.
+ENDCLASS.
+
+CLASS lclas IMPLEMENTATION.
+  METHOD constructor.
+    foobar( ).
+  ENDMETHOD.
+  METHOD foobar.
+    WRITE 'hello'.
+  ENDMETHOD.
+ENDCLASS.
+
+FORM bar.
+  DATA cl TYPE REF TO lclas.
+  CREATE OBJECT cl.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello");
+  });
+
 });
