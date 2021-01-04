@@ -13,11 +13,13 @@ export class Traversal {
   private readonly spaghetti: abaplint.ISpaghettiScope;
   private readonly file: abaplint.ABAPFile;
   private readonly obj: abaplint.ABAPObject;
+  private readonly reg: abaplint.IRegistry;
 
-  public constructor(spaghetti: abaplint.ISpaghettiScope, file: abaplint.ABAPFile, obj: abaplint.ABAPObject) {
+  public constructor(spaghetti: abaplint.ISpaghettiScope, file: abaplint.ABAPFile, obj: abaplint.ABAPObject, reg: abaplint.IRegistry) {
     this.spaghetti = spaghetti;
     this.file = file;
     this.obj = obj;
+    this.reg = reg;
   }
 
   public getCurrentObject(): abaplint.ABAPObject {
@@ -176,9 +178,19 @@ export class Traversal {
       return undefined;
     }
 
+    // local classes
     const scope = this.spaghetti.lookupPosition(ref.getToken().getStart(), ref.getFilename());
     if (scope?.getIdentifier().stype === abaplint.ScopeType.Interface) {
       return scope?.getIdentifier().sname;
+    }
+
+    // global classes
+    const file = this.reg.getFileByName(ref.getFilename());
+    if (file) {
+      const obj = this.reg.findObjectForFile(file);
+      if (obj?.getType() === "INTF") {
+        return obj.getName().toLowerCase();
+      }
     }
 
     return undefined;

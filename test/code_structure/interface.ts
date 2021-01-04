@@ -1,4 +1,5 @@
 import {expect} from "chai";
+import {Transpiler} from "../../packages/transpiler/src";
 import {ABAP} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -205,6 +206,48 @@ START-OF-SELECTION.
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
+  });
+
+  it("global interface and classes", async () => {
+    const zcl_client = `
+    CLASS zcl_client DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        INTERFACES if_client.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+    ENDCLASS.`;
+
+    const tests = `
+    CLASS lcl_test DEFINITION.
+      PUBLIC SECTION.
+        METHODS bar.
+    ENDCLASS.
+    CLASS lcl_test IMPLEMENTATION.
+      METHOD bar.
+        DATA li_client TYPE REF TO if_client.
+        CREATE OBJECT li_client TYPE zcl_client.
+        WRITE li_client->request.
+      ENDMETHOD.
+    ENDCLASS.`;
+
+    const if_client = `
+    INTERFACE if_client PUBLIC.
+      DATA request TYPE REF TO if_request.
+    ENDINTERFACE.`;
+
+    const if_request = `
+    INTERFACE if_request PUBLIC.
+    ENDINTERFACE.`;
+
+    const result = await new Transpiler().run([
+      {filename: "zcl_client.clas.abap", contents: zcl_client},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+      {filename: "if_client.intf.abap", contents: if_client},
+      {filename: "if_request.intf.abap", contents: if_request},
+    ]);
+
+    const js = result.objects[1].js.contents;
+    expect(js).to.contain(".if_client$request");
   });
 
 });
