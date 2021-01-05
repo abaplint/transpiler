@@ -14,7 +14,7 @@ export class TargetTranspiler implements IExpressionTranspiler {
         ret = ret + traversal.findPrefix(c.getFirstToken());
         ret = ret.replace("~", "$");
       } else if (c.get() instanceof Expressions.ComponentName) {
-        ret = ret + c.getFirstToken().getStr();
+        ret = ret + c.getFirstToken().getStr().toLowerCase();
       } else if (c.get() instanceof Expressions.AttributeName) {
         const intf = traversal.isInterfaceAttribute(c.getFirstToken());
         let name = c.getFirstToken().getStr().replace("~", "$");

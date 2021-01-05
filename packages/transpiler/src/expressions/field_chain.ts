@@ -31,7 +31,7 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
         }
         ret += name;
       } else if (c.get() instanceof Expressions.ComponentName) {
-        ret = ret + c.getFirstToken().getStr();
+        ret = ret + c.getFirstToken().getStr().toLowerCase();
       } else if (c instanceof Nodes.TokenNode) {
         const str = c.getFirstToken().getStr();
         if (str === "-" || str === "->") {
