@@ -125,8 +125,8 @@ export class Transpiler {
       if (this.options?.skipConstants === false || this.options?.skipConstants === undefined) {
         for (const c of constants.sort((a, b) => b - a)) {
           const post = c < 0 ? "minus_" : "";
-          result = `let constant_${post}${Math.abs(c)} = new abap.types.Integer();\n` +
-            `constant_${post}${Math.abs(c)}.set(${c});\n` + result;
+          result = `const constant_${post}${Math.abs(c)} = new abap.types.Integer().set(${c});\n` + result;
+//            `constant_${post}${Math.abs(c)}.set(${c});\n` + result;
         }
       }
 
