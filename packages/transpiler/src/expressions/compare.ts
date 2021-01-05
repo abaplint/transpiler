@@ -7,7 +7,7 @@ export class CompareTranspiler implements IExpressionTranspiler {
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): string {
 // todo, this is not correct
 
-    const concat = node.concatTokens();
+    const concat = node.concatTokens().toUpperCase();
 
     let pre = concat.startsWith("NOT") ? "!" : "";
 
