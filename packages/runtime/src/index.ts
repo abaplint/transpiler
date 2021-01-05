@@ -18,12 +18,14 @@ if (!globalThis.fetch) {
 export {UnitTestResult};
 
 export class ABAP {
+  public FunctionModules = {};
+  public Classes = {};
+
   public statements;
   public types = types;
   public builtin = builtin;
   public operators = operators;
   public compare = compare;
-  public FunctionModules = {};
   public console: Console;
   public db: undefined | any;
   public OffsetLength = OffsetLength;

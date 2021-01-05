@@ -94,6 +94,26 @@ export class Transpiler {
 
 // ///////////////////////////////
 
+  protected handleConstants(file: abaplint.ABAPFile): string {
+    let result = "";
+    const constants: number[] = [];
+
+    for (const i of file.getStructure()?.findAllExpressions(abaplint.Expressions.Integer) || []) {
+      const j = parseInt(i.concatTokens(), 10);
+      if (constants.includes(j) === false) {
+        constants.push(j);
+      }
+    }
+    if (this.options?.skipConstants === false || this.options?.skipConstants === undefined) {
+      for (const c of constants.sort()) {
+        const post = c < 0 ? "minus_" : "";
+        result += `const constant_${post}${Math.abs(c)} = new abap.types.Integer().set(${c});\n`;
+      }
+    }
+
+    return result;
+  }
+
   protected runObject(obj: abaplint.ABAPObject, reg: abaplint.IRegistry): IOutputFile[] {
     const spaghetti = new abaplint.SyntaxLogic(reg, obj).run().spaghetti;
 
@@ -101,34 +121,19 @@ export class Transpiler {
 
     for (const file of obj.getSequencedFiles()) {
       let exports: string[] = [];
-      const constants: number[] = [];
       let result = "";
 
       if (this.options?.addFilenames === true) {
         result += "// " + file.getFilename() + "\n";
       }
-      for (const i of file.getStructure()?.findAllExpressions(abaplint.Expressions.Integer) || []) {
-        const j = parseInt(i.concatTokens(), 10);
-        if (constants.includes(j) === false) {
-          constants.push(j);
-        }
-      }
+
+      result += this.handleConstants(file);
 
       const rearranged = new Rearranger().run(file.getStructure());
       const contents = new Traversal(spaghetti, file, obj, reg).traverse(rearranged);
-      if (contents.length > 0) {
-        result += new Indentation().run(contents);
-      }
+      result += new Indentation().run(contents);
 
       exports = exports.concat(this.findExports(file.getStructure()));
-
-      if (this.options?.skipConstants === false || this.options?.skipConstants === undefined) {
-        for (const c of constants.sort((a, b) => b - a)) {
-          const post = c < 0 ? "minus_" : "";
-          result = `let constant_${post}${Math.abs(c)} = new abap.types.Integer();\n` +
-            `constant_${post}${Math.abs(c)}.set(${c});\n` + result;
-        }
-      }
 
       if (result.endsWith("\n")) {
         result = result.substring(0, result.length - 1);

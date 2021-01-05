@@ -368,4 +368,11 @@ describe("Running operators - Comparison", () => {
     await f(abap);
   });
 
+  it("CP, whitespace", async () => {
+    const code = `ASSERT |hello\\nfoobar\\nmoo| CP '*oo*'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

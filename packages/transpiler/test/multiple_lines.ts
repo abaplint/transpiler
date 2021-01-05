@@ -136,10 +136,8 @@ WHEN OTHERS.
 ENDCASE.`;
 
     const expected =
-`let constant_1 = new abap.types.Integer();
-constant_1.set(1);
-let constant_2 = new abap.types.Integer();
-constant_2.set(2);
+`const constant_1 = new abap.types.Integer().set(1);
+const constant_2 = new abap.types.Integer().set(2);
 let unique1 = bar;
 if (abap.compare.eq(unique1, 'foo')) {
   abap.statements.write(constant_2);
@@ -229,8 +227,7 @@ DATA moo TYPE foo.`;
         ENDMETHOD.
       ENDCLASS.`;
 
-    const expected = `let constant_2 = new abap.types.Integer();
-constant_2.set(2);
+    const expected = `const constant_2 = new abap.types.Integer().set(2);
 class zcl_words {
   async constructor_(unique1) {
     this.me = new abap.types.ABAPObject();
@@ -319,8 +316,7 @@ ENDCLASS.
 CLASS zcl_ret IMPLEMENTATION.
 ENDCLASS.`;
 
-    const expected = `let constant_30 = new abap.types.Integer();
-constant_30.set(30);
+    const expected = `const constant_30 = new abap.types.Integer().set(30);
 class zcl_ret {
   async constructor_() {
     this.me = new abap.types.ABAPObject();
@@ -389,8 +385,7 @@ FORM bar.
   lcl_bar=>bar( 2 ).
 ENDFORM.`;
 
-    const expected = `let constant_2 = new abap.types.Integer();
-constant_2.set(2);
+    const expected = `const constant_2 = new abap.types.Integer().set(2);
 class lcl_bar {
   async constructor_() {
     this.me = new abap.types.ABAPObject();
@@ -429,8 +424,7 @@ FORM bar.
   CREATE OBJECT bar EXPORTING input = 42.
 ENDFORM.`;
 
-    const expected = `let constant_42 = new abap.types.Integer();
-constant_42.set(42);
+    const expected = `const constant_42 = new abap.types.Integer().set(42);
 class lcl_bar {
   async constructor_(unique1) {
     this.me = new abap.types.ABAPObject();
