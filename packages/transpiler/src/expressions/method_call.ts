@@ -12,7 +12,7 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
       throw new Error("MethodCallTranspiler, name not found");
     }
 
-    let name = nameToken.getStr();
+    let name = nameToken.getStr().toLowerCase();
     if (traversal.isBuiltinMethod(nameToken)) {
       name = "abap.builtin." + name + "(";
     } else {
@@ -21,7 +21,7 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
 
     const m = traversal.findMethodReference(nameToken, traversal.findCurrentScope(nameToken));
     if (m?.name && traversal.isBuiltinMethod(nameToken) === false) {
-      name = m.name + "(";
+      name = m.name.toLowerCase() + "(";
     }
 
     const step = node.findDirectExpression(Expressions.MethodCallParam);

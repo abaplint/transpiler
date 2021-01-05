@@ -21,7 +21,7 @@ export class MethodCallChainTranspiler implements IExpressionTranspiler {
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.ClassName) {
         ret = c.getFirstToken().getStr();
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.MethodName) {
-        ret += c.getFirstToken().getStr();
+        ret += c.getFirstToken().getStr().toLowerCase();
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr() === "->") {
         if (ret === "super") {
           ret = ret + ".";
