@@ -49,7 +49,8 @@ export class Keywords {
       "switch", "synchronized", "this",
       "throw",	"throws", "transient", "true",
       "try",	"typeof", "var", "void",
-      "volatile",	"while", "with", "yield"];
+      "volatile",	"while", "yield"];
+// "with"
 
     let ret: abaplint.Token[] = [];
     for (const c of node.getChildren()) {

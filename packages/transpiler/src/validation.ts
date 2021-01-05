@@ -64,7 +64,7 @@ export const config: IConfig = {
         "^switch$", "^synchronized$", "^this$",
         "^throw$",	"^throws$", "^transient$", "^true$",
         "^try$",	"^typeof$", "^var$", "^void$",
-        "^volatile$",	"^while$", "^with$", "^yield$",
+        "^volatile$",	"^while$", "^yield$",
         "^unique\\d+$", "^constant_\\d+$"],
     },
   },
