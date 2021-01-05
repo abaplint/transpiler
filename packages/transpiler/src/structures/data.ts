@@ -11,7 +11,7 @@ export class DataTranspiler implements IStructureTranspiler {
       return "";
     }
 
-    return new DataStatementTranspiler().transpile(begin, traversal);
+    return new DataStatementTranspiler().transpile(begin, traversal) + "\n";
   }
 
 }

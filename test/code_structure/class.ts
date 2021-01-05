@@ -601,4 +601,31 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello");
   });
 
+  it("method parameter uppercase", async () => {
+    const code = `
+      CLASS cl DEFINITION.
+        PUBLIC SECTION.
+          CLASS-METHODS name
+            IMPORTING
+              IV_URL TYPE string.
+      ENDCLASS.
+      CLASS cl IMPLEMENTATION.
+        METHOD name.
+          WRITE / iv_url.
+          WRITE / IV_URL.
+          WRITE / iV_URl.
+        ENDMETHOD.
+      ENDCLASS.
+
+      FORM bar.
+        cl=>name( 'bar' ).
+      ENDFORM.
+
+      PERFORM bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("bar\nbar\nbar");
+  });
+
 });

@@ -4,7 +4,7 @@ export class TranspileTypes {
 
   public declare(t: abaplint.TypedIdentifier): string {
     const type = t.getType();
-    return "let " + t.getName() + " = " + this.toType(type) + ";";
+    return "let " + t.getName().toLowerCase() + " = " + this.toType(type) + ";";
   }
 
   public toType(type: abaplint.AbstractType): string {
