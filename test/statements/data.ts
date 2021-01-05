@@ -28,4 +28,16 @@ ls_msg-a3 = 'A'.`;
     await f(abap);
   });
 
+  it("DATA, upper case component name", async () => {
+    const code = `
+DATA: BEGIN OF ls_msg,
+        a3 TYPE c LENGTH 1,
+      END OF ls_msg.
+ls_msg-a3 = 'A'.
+ls_msg-A3 = 'A'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
