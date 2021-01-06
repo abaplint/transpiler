@@ -286,4 +286,14 @@ describe("Running statements - FIND", () => {
     expect(abap.console.get()).to.equal("0\n1\n-1\n0\n23\n1");
   });
 
+  it("FIND, bad types", async () => {
+    const code = `
+      DATA lv_offset TYPE string.
+      FIND REGEX 'aa' IN 'bbaabb' MATCH OFFSET lv_offset.
+      ASSERT lv_offset = '2'.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    f(abap);
+  });
+
 });

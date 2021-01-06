@@ -7,9 +7,11 @@ export class String implements ICharacter {
     this.value = "";
   }
 
-  public set(value: ICharacter | string) {
+  public set(value: ICharacter | string | number) {
     if (typeof value === "string") {
       this.value = value;
+    } else if (typeof value === "number" ) {
+      this.value = value.toString();
     } else {
       this.value = value.get() + "";
     }
