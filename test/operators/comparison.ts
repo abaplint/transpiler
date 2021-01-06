@@ -375,4 +375,13 @@ describe("Running operators - Comparison", () => {
     await f(abap);
   });
 
+  it("CA, empty left -> space", async () => {
+    const code = `
+      ASSERT NOT '' CA 'AB'.
+      ASSERT '' CA 'A B'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

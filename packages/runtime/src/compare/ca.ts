@@ -8,6 +8,9 @@ export function ca(left: number | string | ICharacter | INumeric, right: string 
   } else {
     l = left.get().toString();
   }
+  if (l === "") {
+    l = " ";
+  }
 
   let r = "";
   if (typeof right === "string") {
