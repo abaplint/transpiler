@@ -36,4 +36,16 @@ describe("Running Examples - Date type", () => {
     expect(abap.console.get()).to.equal("00020402");
   });
 
+  it("Date, adding 397", async () => {
+    const code = `
+      DATA date TYPE d.
+      date = '20090807'.
+      date = date + 397.
+      WRITE date.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("20100908");
+  });
+
 });
