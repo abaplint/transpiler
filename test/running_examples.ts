@@ -892,6 +892,22 @@ data1 = data2.`;
     expect(abap.console.get()).to.equal("00000000\n000000");
   });
 
+  it("Adding to date and time ", async () => {
+    const code = `
+      DATA date TYPE d.
+      DATA time TYPE t.
+      date = '20020401'.
+      time = '000241'.
+      date = date + 1.
+      time = time + 1.
+      WRITE / date.
+      WRITE / time.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("20020402\n000242");
+  });
+
   it("escape constants", async () => {
     const code = `
   CONSTANTS const TYPE string VALUE '\\'.
