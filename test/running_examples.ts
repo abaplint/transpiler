@@ -879,19 +879,6 @@ data1 = data2.`;
     expect(result).to.not.equal("");
   });
 
-  it("Date and time initial values", async () => {
-    const code = `
-  DATA date TYPE d.
-  DATA time TYPE t.
-  WRITE / date.
-  WRITE / time.`;
-
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("00000000\n000000");
-  });
-
   it("escape constants", async () => {
     const code = `
   CONSTANTS const TYPE string VALUE '\\'.

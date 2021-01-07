@@ -11,7 +11,7 @@ export class Date implements ICharacter {
 
   public set(value: INumeric | ICharacter | Hex | string | number) {
     if (typeof value === "number") {
-      this.value = this.value.toString();
+      this.value = value.toString().padStart(8,"0");
     } else if (typeof value === "string") {
       this.value = value;
     } else {
