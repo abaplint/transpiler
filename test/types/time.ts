@@ -24,6 +24,28 @@ describe("Running Examples - Time type", () => {
     expect(abap.console.get()).to.equal("000000");
   });
 
+  it("Time, assignment from character type", async () => {
+    const code = `
+      DATA time TYPE t.
+      time = '123456'.
+      WRITE time.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("123456");
+  });
+
+  it("Time, assignment from numeric type", async () => {
+    const code = `
+      DATA time TYPE t.
+      time = 123456.
+      WRITE time.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("101736");
+  });
+
   it("Time, adding 1", async () => {
     const code = `
       DATA time TYPE t.
