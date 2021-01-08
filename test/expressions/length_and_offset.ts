@@ -277,4 +277,26 @@ describe("Running expressions - Length and offset", () => {
     expect(abap.console.get()).to.equal("ABAP");
   });
 
+  it("field offset and length for date", async () => {
+    const code = `
+    DATA date type d.
+    date = '19991231'.
+    WRITE |{ date+0(4) }-{ date+4(2) }-{ date+6(2) }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1999-12-31");
+  });
+
+  it("field offset and length for time", async () => {
+    const code = `
+    DATA time type t.
+    time = '123456'.
+    WRITE |{ time+0(2) }:{ time+2(2) }:{ time+4(2) }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("12:34:56");
+  });
+
 });

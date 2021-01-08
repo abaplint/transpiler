@@ -1,6 +1,7 @@
 import {Hex} from "./hex";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
+import {String} from "./string";
 import {getDateFromNumber, getNumberFromDate} from "./_javascript_date";
 
 export class Date implements ICharacter {
@@ -35,5 +36,18 @@ export class Date implements ICharacter {
 
   public getNumeric(): number {
     return getNumberFromDate(this.value);
+  }
+
+  public getOffset(input: {offset: number, length: number}) {
+    let ret = this.value;
+    if (input?.offset) {
+      ret = ret.substr(input.offset);
+    }
+    if (input?.length) {
+      ret = ret.substr(0, input.length);
+    }
+    const r = new String();
+    r.set(ret);
+    return r;
   }
 }
