@@ -698,4 +698,26 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("attribute case, upper case FOO", async () => {
+    const code = `
+CLASS zcl_super DEFINITION.
+  PUBLIC SECTION.
+    DATA foo TYPE i.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS zcl_super IMPLEMENTATION.
+  METHOD constructor.
+    me->FOO = 1.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA moo TYPE REF TO zcl_super.
+  CREATE OBJECT moo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
