@@ -891,4 +891,21 @@ data1 = data2.`;
     await f(abap);
   });
 
+  it("set structure with basic varialbe", async () => {
+    const code = `
+DATA: BEGIN OF ls_msg,
+        a1 TYPE c LENGTH 1,
+        a2 TYPE c LENGTH 2,
+      END OF ls_msg.
+ls_msg = 'abc'.
+WRITE ls_msg.
+ls_msg = ''.
+ls_msg = 'a'.
+ls_msg = 'abcfdsfdsfds'.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
