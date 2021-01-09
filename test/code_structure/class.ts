@@ -628,4 +628,39 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("bar\nbar\nbar");
   });
 
+  it("testing initialization of variables in constructor, with CALL METHOD", async () => {
+    const code = `
+      CLASS zcl_super DEFINITION.
+        PUBLIC SECTION.
+          DATA foo TYPE i.
+          METHODS constructor.
+      ENDCLASS.
+
+      CLASS zcl_super IMPLEMENTATION.
+        METHOD constructor.
+          foo = 1.
+        ENDMETHOD.
+      ENDCLASS.
+
+      CLASS zcl_sub DEFINITION INHERITING FROM zcl_super.
+        PUBLIC SECTION.
+          METHODS constructor.
+      ENDCLASS.
+
+      CLASS zcl_sub IMPLEMENTATION.
+        METHOD constructor.
+          CALL METHOD super->constructor( ).
+          WRITE foo.
+        ENDMETHOD.
+      ENDCLASS.
+
+      START-OF-SELECTION.
+        DATA moo TYPE REF TO zcl_sub.
+        CREATE OBJECT moo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });
