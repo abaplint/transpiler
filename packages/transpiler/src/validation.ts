@@ -52,7 +52,7 @@ export const config: IConfig = {
         "^abstract$",	"^arguments$", "^await$", "^boolean$",
         "^break$",	"^byte$", "^case$", "^catch$",
         "^char$",	"^class$", "^const$", "^continue$",
-        "^debugger$",	"^default$", "^delete$", "^do$",
+        "^debugger$",	"^default$", "^do$",
         "^double$",	"^else$", "^enum$", "^eval$",
         "^export$",	"^extends$", "^false$", "^final$",
         "^finally$",	"^float$", "^for$", "^function$",
