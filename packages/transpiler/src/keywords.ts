@@ -37,7 +37,7 @@ export class Keywords {
       "abstract",	"arguments", "await", "boolean",
       "break",	"byte", "case", "catch",
       "char",	"class", "const", "continue",
-      "debugger",	"default", "delete", "do",
+      "debugger",	"default", "do",
       "double",	"else", "enum", "eval",
       "export",	"extends", "false", "final",
       "finally",	"float", "for", "function",
@@ -51,6 +51,7 @@ export class Keywords {
       "try",	"typeof", "var", "void",
       "volatile",	"while", "yield"];
 // "with"
+// "delete"
 
     let ret: abaplint.Token[] = [];
     for (const c of node.getChildren()) {

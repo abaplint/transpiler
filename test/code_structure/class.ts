@@ -720,4 +720,37 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("implement interface, method name is js keyword", async () => {
+    const code = `
+INTERFACE foo.
+  METHODS delete.
+ENDINTERFACE.
+CLASS bar DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES foo.
+ENDCLASS.
+CLASS bar IMPLEMENTATION.
+  METHOD foo~delete.
+  ENDMETHOD.
+ENDCLASS.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("method name is js keyword", async () => {
+    const code = `
+CLASS bar DEFINITION.
+  PUBLIC SECTION.
+    METHODS delete.
+ENDCLASS.
+CLASS bar IMPLEMENTATION.
+  METHOD delete.
+  ENDMETHOD.
+ENDCLASS.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
