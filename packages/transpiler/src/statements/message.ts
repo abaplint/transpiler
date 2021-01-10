@@ -49,6 +49,8 @@ export class MessageTranspiler implements IStatementTranspiler {
         withs = true;
       } else if (withs === true && c.get() instanceof abaplint.Expressions.Source) {
         w.push(traversal.traverse(c));
+      } else if (withs === true && c.get() instanceof abaplint.Expressions.ConstantOrFieldSource) {
+        w.push(traversal.traverse(c));
       } else if (withs === true) {
         break;
       }

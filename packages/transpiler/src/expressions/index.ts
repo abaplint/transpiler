@@ -8,6 +8,7 @@ export * from "./component_cond";
 export * from "./cond_sub";
 export * from "./cond";
 export * from "./constant";
+export * from "./constant_or_field_source";
 export * from "./field_chain";
 export * from "./field_length";
 export * from "./field_offset";
