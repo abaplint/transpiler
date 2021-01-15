@@ -9,7 +9,7 @@ export class AppendTranspiler implements IStatementTranspiler {
     const options: string[] = [];
     const concat = node.concatTokens();
 
-    const s = node.findDirectExpression(abaplint.Expressions.SimpleSource);
+    const s = node.findDirectExpression(abaplint.Expressions.SimpleSource4);
     if (s) {
       options.push("source: " + new SourceTranspiler().transpile(s, traversal));
     }

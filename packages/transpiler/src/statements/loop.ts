@@ -11,7 +11,7 @@ export class LoopTranspiler implements IStatementTranspiler {
       throw new Error("LoopTranspiler, unexpected node");
     }
 
-    const source = traversal.traverse(node.findDirectExpression(abaplint.Expressions.BasicSource));
+    const source = traversal.traverse(node.findDirectExpression(abaplint.Expressions.SimpleSource2));
 
     const unique1 = UniqueIdentifier.get();
     let target = "";

@@ -7,7 +7,7 @@ export class ReadTableTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
 
-    const s = node.findDirectExpression(abaplint.Expressions.BasicSource);
+    const s = node.findDirectExpression(abaplint.Expressions.SimpleSource2);
     const ret = traversal.traverse(s);
 
     const extra: string[] = [];
