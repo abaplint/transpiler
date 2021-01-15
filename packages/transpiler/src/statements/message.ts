@@ -49,7 +49,7 @@ export class MessageTranspiler implements IStatementTranspiler {
         withs = true;
       } else if (withs === true && c.get() instanceof abaplint.Expressions.Source) {
         w.push(traversal.traverse(c));
-      } else if (withs === true && c.get() instanceof abaplint.Expressions.ConstantOrFieldSource) {
+      } else if (withs === true && c.get() instanceof abaplint.Expressions.SimpleSource3) {
         w.push(traversal.traverse(c));
       } else if (withs === true) {
         break;

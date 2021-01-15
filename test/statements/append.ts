@@ -18,7 +18,7 @@ describe("Running statements - APPEND", () => {
     const code = `
       data tab type standard table of string.
       data val type string.
-      append |foo| to tab.
+      append 'foo' to tab.
       loop at tab into val.
         write val.
       endloop.`;
