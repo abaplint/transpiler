@@ -16,6 +16,13 @@ export class DeleteInternalTranspiler implements IStatementTranspiler {
 // todo, this is not completely correct, fields might have the name ADJACENT
     if (node.findDirectTokenByText("ADJACENT")) {
       extra.push("adjacent: true");
+      if (node.findDirectTokenByText("COMPARING")) {
+        const comparing = node.findAllExpressions(abaplint.Expressions.FieldSub);
+        if (comparing) {
+          const compareFields = comparing.map(i => i.getFirstToken().getStr()).join(",");
+          extra.push("comparing: '" + compareFields + "'");
+        }
+      }
     }
 
     const index = node.findExpressionAfterToken("INDEX");
