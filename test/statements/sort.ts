@@ -71,8 +71,8 @@ describe("Running statements - SORT", () => {
   it("SORT BY table_line", async () => {
     const code = `
       DATA lt_keywords TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
-      APPEND |foo| TO lt_keywords.
-      APPEND |bar| TO lt_keywords.
+      APPEND 'foo' TO lt_keywords.
+      APPEND 'bar' TO lt_keywords.
       SORT lt_keywords BY table_line ASCENDING.
       DATA keyword TYPE string.
       LOOP AT lt_keywords INTO keyword.

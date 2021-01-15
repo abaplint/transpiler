@@ -3,7 +3,7 @@ import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {SourceTranspiler} from "./source";
 
-export class SimpleSourceTranspiler implements IExpressionTranspiler {
+export class SimpleSource1Transpiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): string {
     return new SourceTranspiler().transpile(node, traversal);
