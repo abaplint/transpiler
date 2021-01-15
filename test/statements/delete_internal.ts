@@ -114,4 +114,78 @@ describe("Running statements - DELETE internal", () => {
     await f(abap);
   });
 
+  it("DELETE ADJACENT DUPLICATES COMPARING, 1", async () => {
+    const code = `
+      TYPES:
+        BEGIN OF ty_foo,
+          bar TYPE i,
+          baz TYPE i,
+        END OF ty_foo.
+      DATA foo TYPE ty_foo.
+      DATA footab TYPE TABLE OF ty_foo.
+      DO 8 TIMES.
+        foo-bar = sy-index DIV 2.
+        foo-baz = sy-index MOD 4.
+        APPEND foo TO footab.
+      ENDDO.
+      SORT footab BY baz.
+      DELETE ADJACENT DUPLICATES FROM footab COMPARING baz.
+      LOOP AT footab INTO foo.
+        WRITE / |{ foo-bar }{ foo-baz }|.
+      ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("20\n01\n12\n13");
+  });
+
+  it("DELETE ADJACENT DUPLICATES COMPARING, 2", async () => {
+    const code = `
+      TYPES:
+        BEGIN OF ty_foo,
+          bar TYPE i,
+          baz TYPE i,
+        END OF ty_foo.
+      DATA foo TYPE ty_foo.
+      DATA footab TYPE TABLE OF ty_foo.
+      DO 8 TIMES.
+        foo-bar = sy-index MOD 2.
+        foo-baz = sy-index DIV 4.
+        APPEND foo TO footab.
+      ENDDO.
+      SORT footab BY bar.
+      DELETE ADJACENT DUPLICATES FROM footab COMPARING bar baz.
+      LOOP AT footab INTO foo.
+        WRITE / |{ foo-bar }{ foo-baz }|.
+      ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("00\n01\n02\n10\n11");
+  });
+
+  it("DELETE ADJACENT DUPLICATES COMPARING ALL FIELDS", async () => {
+    const code = `
+      TYPES:
+        BEGIN OF ty_foo,
+          bar TYPE i,
+          baz TYPE i,
+        END OF ty_foo.
+      DATA foo TYPE ty_foo.
+      DATA footab TYPE TABLE OF ty_foo.
+      DO 8 TIMES.
+        foo-bar = sy-index MOD 2.
+        foo-baz = sy-index DIV 4.
+        APPEND foo TO footab.
+      ENDDO.
+      SORT footab BY bar.
+      DELETE ADJACENT DUPLICATES FROM footab COMPARING ALL FIELDS.
+      LOOP AT footab INTO foo.
+        WRITE / |{ foo-bar }{ foo-baz }|.
+      ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("00\n01\n02\n10\n11");
+  });
 });

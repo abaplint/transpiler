@@ -7,6 +7,7 @@ export interface IDeleteInternalOptions {
   where?: (i: any) => boolean,
   index?: INumeric,
   adjacent?: boolean,
+  comparing?: string[],
   from?: any,
   to?: any,
 }
@@ -33,8 +34,21 @@ export function deleteInternal(target: Table, options?: IDeleteInternalOptions):
       if (options.where(row) === true) {
         target.deleteIndex(index);
       }
-    } else if (options?.adjacent === true && prev !== undefined && eq(prev, i) === true) {
-      target.deleteIndex(index);
+    } else if (options?.adjacent === true && prev !== undefined) {
+      if (options?.comparing) {
+        let match = false;
+        for (const compareField of options.comparing) {
+          match = eq(prev.get()[compareField], i.get()[compareField]);
+          if (!match) {
+            break;
+          }
+        }
+        if (match) {
+          target.deleteIndex(index);
+        }
+      } else if (eq(prev, i) === true) {
+        target.deleteIndex(index);
+      }
     } else if (options?.index && options.index.get() === index) {
       target.deleteIndex(options.index.get() - 1);
     } else if (options?.from && options.from.get() <= index + 1) {
