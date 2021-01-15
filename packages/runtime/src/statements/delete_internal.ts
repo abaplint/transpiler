@@ -7,7 +7,7 @@ export interface IDeleteInternalOptions {
   where?: (i: any) => boolean,
   index?: INumeric,
   adjacent?: boolean,
-  comparing?: any,
+  comparing?: string[],
   from?: any,
   to?: any,
 }
@@ -25,8 +25,6 @@ export function deleteInternal(target: Table, options?: IDeleteInternalOptions):
     return;
   }
 
-  const compareFields = options?.comparing?.split(",");
-
   for (const i of loop(target)) {
     // @ts-ignore
     index = abap.builtin.sy.get().tabix.get() - 1;
@@ -37,9 +35,9 @@ export function deleteInternal(target: Table, options?: IDeleteInternalOptions):
         target.deleteIndex(index);
       }
     } else if (options?.adjacent === true && prev !== undefined) {
-      if (compareFields) {
+      if (options?.comparing) {
         let match = false;
-        for (const compareField of compareFields) {
+        for (const compareField of options.comparing) {
           match = eq(prev.get()[compareField], i.get()[compareField]);
           if (!match) {
             break;

@@ -20,8 +20,8 @@ export class DeleteInternalTranspiler implements IStatementTranspiler {
       if (node.findDirectTokenByText("COMPARING") && !node.concatTokens().toUpperCase().includes("COMPARING ALL FIELDS")) {
         const comparing = node.findAllExpressions(abaplint.Expressions.FieldSub);
         if (comparing) {
-          const compareFields = comparing.map(i => i.getFirstToken().getStr()).join(",");
-          extra.push("comparing: '" + compareFields + "'");
+          const compareFields = comparing.map(i => "'" + i.getFirstToken().getStr() + "'").join(",");
+          extra.push("comparing: [" + compareFields + "]");
         }
       }
     }
