@@ -8,7 +8,7 @@ export class Requires {
     this.reg = reg;
   }
 
-  public find(node: abaplint.ISpaghettiScopeNode, filename: string): readonly IRequire[] {
+  public find(obj: abaplint.ABAPObject, node: abaplint.ISpaghettiScopeNode, filename: string): readonly IRequire[] {
     const ret: IRequire[] = [];
 
     const add = function (req: IRequire | undefined) {
@@ -35,17 +35,19 @@ export class Requires {
     }
 
     for (const c of node.getChildren()) {
-      for (const f of this.find(c, filename)) {
+      for (const f of this.find(obj, c, filename)) {
         add(f);
       }
     }
 
-    // always add CX_ROOT, it is used for CATCH
-    const cx = this.reg.getObject("CLAS", "CX_ROOT");
-    if (cx && cx instanceof abaplint.ABAPObject) {
-      const main = cx.getMainABAPFile()?.getFilename();
-      if (main) {
-        add({filename: main, name: cx.getName().toLowerCase()});
+    // always add CX_ROOT, it is used for CATCH, no catches in global interfaces
+    if (obj.getType() !== "INTF") {
+      const cx = this.reg.getObject("CLAS", "CX_ROOT");
+      if (cx && cx instanceof abaplint.ABAPObject) {
+        const main = cx.getMainABAPFile()?.getFilename();
+        if (main) {
+          add({filename: main, name: cx.getName().toLowerCase()});
+        }
       }
     }
 
