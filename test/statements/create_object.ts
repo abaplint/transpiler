@@ -73,4 +73,55 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("CREATE OBJECT, equals", async () => {
+    const code = `
+  CLASS lcl_bar DEFINITION.
+  ENDCLASS.
+
+  CLASS lcl_bar IMPLEMENTATION.
+  ENDCLASS.
+
+  FORM foo.
+    DATA ref1 TYPE REF TO lcl_bar.
+    DATA ref2 TYPE REF TO lcl_bar.
+    CREATE OBJECT ref1.
+    ref2 = ref1.
+    ASSERT ref1 = ref2.
+  ENDFORM.
+
+  START-OF-SELECTION.
+    PERFORM foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("CREATE OBJECT, equals after append in table", async () => {
+    const code = `
+    CLASS lcl_bar DEFINITION.
+    ENDCLASS.
+
+    CLASS lcl_bar IMPLEMENTATION.
+    ENDCLASS.
+
+    FORM foo.
+      DATA tab TYPE STANDARD TABLE OF REF TO lcl_bar.
+      DATA ref1 TYPE REF TO lcl_bar.
+      DATA ref2 TYPE REF TO lcl_bar.
+      CREATE OBJECT ref1.
+      APPEND ref1 TO tab.
+      APPEND ref1 TO tab.
+
+      READ TABLE tab INDEX 1 INTO ref1.
+      READ TABLE tab INDEX 2 INTO ref2.
+      ASSERT ref1 = ref2.
+    ENDFORM.
+
+    START-OF-SELECTION.
+      PERFORM foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
