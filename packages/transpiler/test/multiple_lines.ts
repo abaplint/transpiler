@@ -167,6 +167,7 @@ CREATE OBJECT foo.`;
   }
 }
 let foo = new abap.types.ABAPObject();
+foo = new abap.types.ABAPObject();
 foo.set(await (new zcl_words()).constructor_());`;
 
     expect(await runSingle(abap)).to.equal(expected);
@@ -437,6 +438,7 @@ class lcl_bar {
 }
 async function bar() {
   let bar = new abap.types.ABAPObject();
+  bar = new abap.types.ABAPObject();
   bar.set(await (new lcl_bar()).constructor_({input: constant_42}));
 }`;
 
