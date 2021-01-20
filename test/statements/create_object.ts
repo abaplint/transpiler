@@ -47,4 +47,30 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1\n2");
   });
 
+  it("CREATE OBJECT, exporting ref", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS instantiate EXPORTING ref TYPE REF TO lcl_bar.
+ENDCLASS.
+
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD instantiate.
+    CREATE OBJECT ref.
+  ENDMETHOD.
+ENDCLASS.
+
+FORM foo.
+  DATA ref TYPE REF TO lcl_bar.
+  lcl_bar=>instantiate( IMPORTING ref = ref ).
+  ASSERT NOT ref IS INITIAL.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
