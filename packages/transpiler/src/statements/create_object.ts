@@ -14,8 +14,7 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
     }
 
     const name = this.findClassName(node, traversal);
-    const n = target + " = new abap.types.ABAPObject();\n";
-    return n + target + ".set(await (new " + name + "()).constructor_(" + para + "));";
+    return target + ".set(await (new " + name + "()).constructor_(" + para + "));";
   }
 
   private findClassName(node: abaplint.Nodes.StatementNode, traversal: Traversal) {

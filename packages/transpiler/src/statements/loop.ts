@@ -18,17 +18,7 @@ export class LoopTranspiler implements IStatementTranspiler {
     const into = node.findDirectExpression(abaplint.Expressions.Target);
     if (into) {
       const t = traversal.traverse(into);
-
-      let extra = "";
-      const scope = traversal.getSpaghetti().lookupPosition(node.getFirstToken().getStart(), traversal.getFilename());
-      if (scope !== undefined) {
-        const type = traversal.determineType(node, scope);
-        if (type instanceof abaplint.BasicTypes.ObjectReferenceType) {
-          extra = t + " = new abap.types.ABAPObject();\n";
-        }
-      }
-
-      target = extra + t + ".set(" + unique1 + ");";
+      target = t + ".set(" + unique1 + ");";
     } else {
       const assigning = node.findFirstExpression(abaplint.Expressions.FSTarget)?.findFirstExpression(abaplint.Expressions.FieldSymbol);
       if (assigning) {
