@@ -144,7 +144,7 @@ export class Transpiler {
       const output: IOutputFile = {
         object: {name: obj.getName(), type: obj.getType()},
         js: {filename: filename.toLowerCase(), contents: result},
-        requires: new Requires(reg).find(spaghetti.getTop(), file.getFilename()),
+        requires: new Requires(reg).find(obj, spaghetti.getTop(), file.getFilename()),
         exports,
       };
 
