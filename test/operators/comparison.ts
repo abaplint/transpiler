@@ -384,4 +384,21 @@ describe("Running operators - Comparison", () => {
     await f(abap);
   });
 
+  it("object reference IS INITIAL", async () => {
+    const code = `
+  CLASS lcl_bar DEFINITION.
+  ENDCLASS.
+  CLASS lcl_bar IMPLEMENTATION.
+  ENDCLASS.
+  FORM foo.
+    DATA foo TYPE REF TO lcl_bar.
+    ASSERT foo IS INITIAL.
+  ENDFORM.
+  START-OF-SELECTION.
+    PERFORM foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
