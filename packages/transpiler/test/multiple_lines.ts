@@ -300,7 +300,9 @@ DO.
 ENDDO.`;
 
     const expected =
-`while (true) {
+`let unique1 = 1;
+while (true) {
+  abap.builtin.sy.get().index.set(unique1++);
 }`;
 
     expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.equal(expected);

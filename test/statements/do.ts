@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -36,6 +36,31 @@ START-OF-SELECTION.
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("DO should set sy-index", async () => {
+    const code = `
+DO 3 TIMES.
+  WRITE / sy-index.
+ENDDO.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n3");
+  });
+
+  it("DO forever should set sy-index", async () => {
+    const code = `
+DO.
+  WRITE / sy-index.
+  IF sy-index >= 3.
+    EXIT.
+  ENDIF.
+ENDDO.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n3");
   });
 
 });

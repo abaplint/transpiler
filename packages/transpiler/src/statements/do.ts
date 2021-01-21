@@ -16,7 +16,10 @@ export class DoTranspiler implements IStatementTranspiler {
 for (let ${id} = 0; ${id} < ${idSource}; ${id}++) {
 abap.builtin.sy.get().index.set(${id} + 1);`;
     } else {
-      return "while (true) {";
+      const unique = UniqueIdentifier.get();
+      return `let ${unique} = 1;
+while (true) {
+abap.builtin.sy.get().index.set(${unique}++);`;
     }
   }
 
