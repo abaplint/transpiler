@@ -45,9 +45,9 @@ function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
 }
 
 async function run() {
-  const config = TranspilerConfig.find();
-
   console.log("Transpiler CLI");
+
+  const config = TranspilerConfig.find(process.argv[2]);
 
   const files = loadFiles(config).concat(loadLib(config));
 
