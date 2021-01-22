@@ -372,18 +372,6 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello");
   });
 
-  it("REPLACE ALL", async () => {
-    const code = `
-  DATA str TYPE string.
-  str = 'aabbccbb'.
-  REPLACE ALL OCCURRENCES OF |bb| IN str WITH |dd|.
-  ASSERT str = 'aaddccdd'.`;
-
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-  });
-
   it("structured constant", async () => {
     const code = `
 CLASS lcl_foo DEFINITION.
@@ -630,18 +618,6 @@ write if.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("01\nC0");
-  });
-
-  it("translate to upper case", async () => {
-    const code = `
-  DATA foo TYPE string.
-  foo = 'abc'.
-  TRANSLATE foo TO UPPER CASE.
-  WRITE foo.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("ABC");
   });
 
   it("back slash", async () => {

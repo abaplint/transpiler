@@ -14,14 +14,25 @@ export interface ITranspilerConfig {
 
 export class TranspilerConfig {
 
-  public static find(): ITranspilerConfig {
-    const filename = process.cwd() + path.sep + "abap_transpile.json";
-    if (fs.existsSync(filename)) {
-      const json = fs.readFileSync(filename, "utf8");
-      return JSON.parse(json);
-    } else {
-      return this.getDefaultConfig();
+  public static find(filename: string | undefined): ITranspilerConfig {
+    if (filename !== undefined) {
+      const f = filename;
+      if (fs.existsSync(f)) {
+        console.log("Using config: " + filename);
+        const json = fs.readFileSync(f, "utf8");
+        return JSON.parse(json);
+      }
     }
+
+    const f = process.cwd() + path.sep + "abap_transpile.json";
+    if (fs.existsSync(f)) {
+      console.log("Using config: abap_transpile.json");
+      const json = fs.readFileSync(f, "utf8");
+      return JSON.parse(json);
+    }
+
+    console.log("Using default config");
+    return this.getDefaultConfig();
   }
 
   public static getDefaultConfig(): ITranspilerConfig {

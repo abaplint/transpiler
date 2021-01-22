@@ -41,4 +41,17 @@ describe("Builtin functions - concat_lines_of", () => {
     expect(abap.console.get()).to.equal("foobar");
   });
 
+  it("concat_lines_of, return object", async () => {
+    const code = `
+  DATA str TYPE string.
+  DATA tab TYPE STANDARD TABLE OF string.
+  APPEND 'world' TO tab.
+  str = 'hello' && concat_lines_of( tab ).
+  WRITE str.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("helloworld");
+  });
+
 });
