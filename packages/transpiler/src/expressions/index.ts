@@ -11,6 +11,8 @@ export * from "./field_chain";
 export * from "./field_length";
 export * from "./field_offset";
 export * from "./field_symbol";
+export * from "./attribute_chain";
+export * from "./attribute_name";
 export * from "./function_parameters";
 export * from "./method_call_chain";
 export * from "./method_call";

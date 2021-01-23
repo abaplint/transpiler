@@ -884,4 +884,39 @@ ls_msg = 'abcfdsfdsfds'.`;
     await f(abap);
   });
 
+  it("method and attribute chaining", async () => {
+    const code = `
+CLASS lcl_foo DEFINITION.
+  PUBLIC SECTION.
+    DATA absolute_name TYPE string.
+ENDCLASS.
+CLASS lcl_foo IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    METHODS get_referenced_type RETURNING VALUE(ret) TYPE REF TO lcl_foo.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD get_referenced_type.
+    CREATE OBJECT ret.
+    ret->absolute_name = 'foobar'.
+  ENDMETHOD.
+ENDCLASS.
+
+FORM run.
+  DATA lo_bar TYPE REF TO lcl_bar.
+  CREATE OBJECT lo_bar.
+  WRITE lo_bar->get_referenced_type( )->absolute_name.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("foobar");
+  });
+
 });
