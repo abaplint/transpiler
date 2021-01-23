@@ -1,6 +1,5 @@
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
-import {UniqueIdentifier} from "../unique_identifier";
 import {TranspileTypes} from "../types";
 import {Traversal} from "../traversal";
 
@@ -23,7 +22,8 @@ export class MethodTranspiler implements IStatementTranspiler {
 
     let unique = "";
     if (methodName.toUpperCase() === "CONSTRUCTOR" && cdef) {
-      unique = UniqueIdentifier.get();
+// note that all ABAP identifiers are lower cased, sometimes the kernel does magic, so it needs to know the method input name
+      unique = "INPUT";
       after = traversal.buildConstructorContents(scope.getParent(), cdef, unique);
       methodName = "constructor_";
     }
@@ -36,7 +36,7 @@ export class MethodTranspiler implements IStatementTranspiler {
           || v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodChanging)
           || v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodExporting)) {
         if (unique === "") {
-          unique = UniqueIdentifier.get();
+          unique = "INPUT";
         }
         after = after + new TranspileTypes().declare(v.identifier) + "\n";
         if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting) && v.identifier.getType().isGeneric() === false) {

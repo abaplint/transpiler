@@ -87,9 +87,9 @@ describe("Multiple lines", () => {
     this.me.set(this);
     return this;
   }
-  async moo(unique1) {
+  async moo(INPUT) {
     let iv_foo = new abap.types.String();
-    if (unique1 && unique1.iv_foo) {iv_foo.set(unique1.iv_foo);}
+    if (INPUT && INPUT.iv_foo) {iv_foo.set(INPUT.iv_foo);}
   }
 }`;
 
@@ -229,7 +229,7 @@ DATA moo TYPE foo.`;
 
     const expected = `const constant_2 = new abap.types.Integer().set(2);
 class zcl_words {
-  async constructor_(unique1) {
+  async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.bar = new abap.types.Integer();
@@ -394,12 +394,12 @@ class lcl_bar {
     this.me.set(this);
     return this;
   }
-  async bar(unique1) {
-    return lcl_bar.bar(unique1);
+  async bar(INPUT) {
+    return lcl_bar.bar(INPUT);
   }
-  static async bar(unique1) {
+  static async bar(INPUT) {
     let imp = new abap.types.Integer();
-    if (unique1 && unique1.imp) {imp.set(unique1.imp);}
+    if (INPUT && INPUT.imp) {imp.set(INPUT.imp);}
   }
 }
 async function bar() {
@@ -428,11 +428,11 @@ ENDFORM.`;
 
     const expected = `const constant_42 = new abap.types.Integer().set(42);
 class lcl_bar {
-  async constructor_(unique1) {
+  async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     let input = new abap.types.Integer();
-    if (unique1 && unique1.input) {input.set(unique1.input);}
+    if (INPUT && INPUT.input) {input.set(INPUT.input);}
     abap.statements.write(input);
     return this;
   }
