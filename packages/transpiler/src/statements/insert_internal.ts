@@ -7,8 +7,15 @@ export class InsertInternalTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
     const options: string[] = [];
 
-    const source = node.findDirectExpression(abaplint.Expressions.SimpleSource1);
+    let source = node.findDirectExpression(abaplint.Expressions.SimpleSource1);
     const target = node.findDirectExpression(abaplint.Expressions.Target);
+
+    const concat = node.concatTokens().toUpperCase();
+    if (concat.startsWith("INSERT LINES OF ")) {
+      source = node.findDirectExpression(abaplint.Expressions.Source);
+      options.push("lines: true");
+    }
+
     if (source === undefined || target === undefined) {
       throw "InsertInternalTranspiler, source or target not found";
     }
