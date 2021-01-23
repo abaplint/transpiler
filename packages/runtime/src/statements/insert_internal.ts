@@ -5,10 +5,11 @@ import {INumeric} from "../types/_numeric";
 export interface IInsertInternalOptions {
   index?: INumeric,
   assigning?: FieldSymbol,
+  lines?: boolean,
 }
 
 export function insertInternal(
-  data: INumeric | ICharacter | Structure | ABAPObject,
+  data: INumeric | ICharacter | Structure | ABAPObject | Table,
   target: Table,
   options?: IInsertInternalOptions): void {
 
@@ -17,6 +18,10 @@ export function insertInternal(
     const val = target.insertIndex(data, index);
     if (options.assigning) {
       options.assigning.assign(val);
+    }
+  } else if (options?.lines && data instanceof Table) {
+    for (const i of data.array()) {
+      target.append(i);
     }
   } else {
 // todo, for now it just appends, this is not correct, but currently the table type is not known

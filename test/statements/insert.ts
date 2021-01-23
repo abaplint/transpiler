@@ -89,4 +89,22 @@ describe("Running statements - INSERT", () => {
     await f(abap);
   });
 
+  it("INSERT LINES OF", async () => {
+    const code = `
+  DATA tab1 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA tab2 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA val LIKE LINE OF tab1.
+  APPEND 1 TO tab1.
+  APPEND 2 TO tab2.
+  INSERT LINES OF tab2 INTO TABLE tab1.
+  LOOP AT tab1 INTO val.
+    WRITE / val.
+  ENDLOOP.
+  ASSERT lines( tab1 ) = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2");
+  });
+
 });
