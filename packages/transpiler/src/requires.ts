@@ -11,6 +11,10 @@ export class Requires {
   public find(obj: abaplint.ABAPObject, node: abaplint.ISpaghettiScopeNode, filename: string): readonly IRequire[] {
     const ret: IRequire[] = [];
 
+    if (obj.getType() === "INTF") {
+      return [];
+    }
+
     const add = function (req: IRequire | undefined) {
       if (req === undefined || req.filename === filename) {
         return;
