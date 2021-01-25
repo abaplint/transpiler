@@ -919,4 +919,14 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("foobar");
   });
 
+  it("basic data reference", async () => {
+    const code = `
+    DATA ref TYPE REF TO i.
+    ASSERT ref IS INITIAL.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
