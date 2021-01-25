@@ -26,7 +26,19 @@ describe("Running statements - DELETE internal", () => {
     await f(abap);
   });
 
-  it("DELETE from table INDEX", async () => {
+  it("DELETE from table INDEX 1", async () => {
+    const code = `
+      DATA foo TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+      APPEND 2 TO foo.
+      APPEND 3 TO foo.
+      DELETE foo INDEX 1.
+      ASSERT lines( foo ) = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("DELETE from table INDEX 2", async () => {
     const code = `
       DATA foo TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
       APPEND 2 TO foo.
