@@ -37,6 +37,10 @@ export class Table  {
     this.loops.delete(loop);
   }
 
+  public getRowType() {
+    return this.rowType;
+  }
+
   // Modifications to the array must be done inside this class, in order to keep track of LOOP indexes
   public array(): readonly any[] {
     return this.value;
@@ -69,7 +73,7 @@ export class Table  {
     if (index > this.value.length) {
       return;
     }
-    if (index === this.value.length) {
+    if (index === this.value.length - 1) {
       this.value.pop(); // pop'ing is faster than splice
     } else if (index === 0) {
       this.value.shift();
