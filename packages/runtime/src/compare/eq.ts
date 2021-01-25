@@ -40,23 +40,22 @@ export function eq(
   }
 
   let l: number | string | undefined = undefined;
-  if (typeof left === "number" || typeof left === "string") {
-    l = left;
-  } else {
+  if (typeof left === "object") {
     l = left.get();
+  } else {
+    l = left;
   }
 
   let r: number | string | undefined = undefined;
-  if (typeof right === "number" || typeof right === "string") {
-    r = right;
-  } else {
+  if (typeof right === "object") {
     r = right.get();
+  } else {
+    r = right;
   }
 
   if (typeof l === "string" && typeof r === "number") {
     r = r.toString();
-  }
-  if (typeof l === "number" && typeof r === "string") {
+  } else if (typeof l === "number" && typeof r === "string") {
     if (r === "") {
       r = 0;
     } else {
