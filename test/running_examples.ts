@@ -929,4 +929,17 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("data reference, dereference", async () => {
+    const code = `
+  DATA int TYPE i VALUE 2.
+  DATA ref TYPE REF TO i.
+  GET REFERENCE OF int INTO ref.
+  WRITE ref->*.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
