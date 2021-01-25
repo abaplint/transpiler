@@ -10,13 +10,10 @@ export function eq(
     throw "todo, eq TABLE";
   }
 
-  if (right instanceof FieldSymbol && right.getPointer() instanceof Structure
-      && left instanceof FieldSymbol && left.getPointer() instanceof Structure) {
-    return eq(left.getPointer()!, right.getPointer()!);
-  } else if (left instanceof FieldSymbol && left.getPointer() instanceof Structure) {
-    return eq(left.getPointer()!, right);
-  } else if (right instanceof FieldSymbol && right.getPointer() instanceof Structure) {
+  if (right instanceof FieldSymbol) {
     return eq(left, right.getPointer()!);
+  } else if (left instanceof FieldSymbol) {
+    return eq(left.getPointer()!, right);
   }
 
   if (left instanceof Structure || right instanceof Structure) {
