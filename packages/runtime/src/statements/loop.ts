@@ -7,8 +7,13 @@ export interface ILoopOptions {
 }
 
 export function* loop(table: Table, options?: ILoopOptions) {
-  const loopFrom = options?.from && options.from.get() > 0 ? options.from.get() - 1 : 0;
-  let loopTo = options?.to && options.to.get() < table.array().length ? options.to.get() : table.array().length;
+  const length = table.array().length;
+  if (length === 0) {
+    return;
+  }
+
+  const loopFrom = options?.from && options?.from.get() > 0 ? options.from.get() - 1 : 0;
+  let loopTo = options?.to && options.to.get() < length ? options.to.get() : length;
   const loopIndex = table.startLoop(loopFrom);
 
   try {

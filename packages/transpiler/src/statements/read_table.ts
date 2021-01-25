@@ -7,6 +7,7 @@ export class ReadTableTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
 
+    let prefix = "";
     const s = node.findDirectExpression(abaplint.Expressions.SimpleSource2);
     const ret = traversal.traverse(s);
 
@@ -39,7 +40,10 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       for (let i = 0; i < components.length; i++) {
         conds.push("abap.compare.eq(i." + components[i].concatTokens() + ", " + traversal.traverse(sources[i]) + ")");
       }
+// todo, this should only be async if there is a method call somewhere in the conditions
+// hmm, does this even work?
       extra.push("withKey: async (i) => {return " + conds.join(" && ") + ";}");
+      prefix = "await ";
     }
 
     let concat = "";
@@ -47,7 +51,7 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       concat = ",{" + extra.join(",") + "}";
     }
 
-    return "await abap.statements.readTable(" + ret + concat + ");";
+    return prefix + "abap.statements.readTable(" + ret + concat + ");";
   }
 
 }

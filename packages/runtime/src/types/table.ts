@@ -69,7 +69,13 @@ export class Table  {
     if (index > this.value.length) {
       return;
     }
-    this.value.splice(index, 1);
+    if (index === this.value.length) {
+      this.value.pop(); // pop'ing is faster than splice
+    } else if (index === 0) {
+      this.value.shift();
+    } else {
+      this.value.splice(index, 1);
+    }
     for (const l of this.loops.values()) {
       if (l.index >= index) {
         l.index--;
