@@ -22,11 +22,11 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
 
     found = arr[index - 1];
   } else if (options?.withKey) {
-    // eslint-disable-next-line @typescript-eslint/prefer-for-of
-    for (let i = 0; i < arr.length; i++) {
-      const row = arr[i] instanceof Structure ? arr[i].get() : {table_line: arr[i]};
+    const isStructured = arr[0] instanceof Structure;
+    for (const a of arr) {
+      const row = isStructured ? a.get() : {table_line: a};
       if (options.withKey(row) === true) {
-        found = arr[i];
+        found = a;
         break;
       }
     }
