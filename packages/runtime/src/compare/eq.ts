@@ -53,13 +53,16 @@ export function eq(
     r = right;
   }
 
-  if (typeof l === "string" && typeof r === "number") {
-    r = r.toString();
-  } else if (typeof l === "number" && typeof r === "string") {
-    if (r === "") {
-      r = 0;
-    } else {
-      r = parseInt(r, 10);
+  // assumption: typically no casts are required, so start checking if the types doesnt match
+  if (typeof l !== typeof r) {
+    if (typeof l === "string" && typeof r === "number") {
+      r = r.toString();
+    } else if (typeof l === "number" && typeof r === "string") {
+      if (r === "") {
+        r = 0;
+      } else {
+        r = parseInt(r, 10);
+      }
     }
   }
 
