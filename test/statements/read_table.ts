@@ -119,4 +119,41 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("READ TABLE calling method, should be executed once", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    DATA counter TYPE i.
+    METHODS bar RETURNING VALUE(str) TYPE string.
+    METHODS run.
+ENDCLASS.
+
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD bar.
+    counter = counter + 1.
+  ENDMETHOD.
+  METHOD run.
+    DATA tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+    APPEND 'foo' TO tab.
+    APPEND 'bar' TO tab.
+    APPEND 'moo' TO tab.
+    READ TABLE tab WITH KEY table_line = bar( ) TRANSPORTING NO FIELDS.
+    WRITE / counter.
+  ENDMETHOD.
+ENDCLASS.
+
+FORM run.
+  DATA bar TYPE REF TO lcl_bar.
+  CREATE OBJECT bar.
+  bar->run( ).
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });

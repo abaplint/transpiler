@@ -2,6 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {FieldSymbolTranspiler, SourceTranspiler} from "../expressions";
+import {UniqueIdentifier} from "../unique_identifier";
 
 export class ReadTableTranspiler implements IStatementTranspiler {
 
@@ -38,12 +39,16 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       }
       const conds: string[] = [];
       for (let i = 0; i < components.length; i++) {
-        conds.push("abap.compare.eq(i." + components[i].concatTokens() + ", " + traversal.traverse(sources[i]) + ")");
+        const s = traversal.traverse(sources[i]);
+        if (s.includes("await")) {
+          const id = UniqueIdentifier.get();
+          prefix += "const " + id + " = " + s + ";\n";
+          conds.push("abap.compare.eq(i." + components[i].concatTokens() + ", " + id + ")");
+        } else {
+          conds.push("abap.compare.eq(i." + components[i].concatTokens() + ", " + s + ")");
+        }
       }
-// todo, this should only be async if there is a method call somewhere in the conditions
-// hmm, does this even work?
-      extra.push("withKey: async (i) => {return " + conds.join(" && ") + ";}");
-      prefix = "await ";
+      extra.push("withKey: (i) => {return " + conds.join(" && ") + ";}");
     }
 
     let concat = "";
