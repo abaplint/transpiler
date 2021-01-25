@@ -942,4 +942,40 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("data reference, append initial", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA row LIKE LINE OF tab.
+  DATA ref TYPE REF TO i.
+  APPEND INITIAL LINE TO tab REFERENCE INTO ref.
+  ref->* = 2.
+  LOOP AT tab INTO row.
+    WRITE row.
+  ENDLOOP.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+  it("data reference, READ TABLE REFERENCE INTO", async () => {
+    const code = `
+TYPES: BEGIN OF ty_struc,
+         name TYPE string,
+       END OF ty_struc.
+DATA tab TYPE STANDARD TABLE OF ty_struc WITH DEFAULT KEY.
+DATA row LIKE LINE OF tab.
+DATA ref LIKE REF TO row.
+row-name = 'bar'.
+APPEND row TO tab.
+READ TABLE tab REFERENCE INTO ref WITH KEY name = 'bar'.
+WRITE ref->name.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("bar");
+  });
+
 });

@@ -1,11 +1,11 @@
-import {FieldSymbol, Structure, Table} from "../types";
+import {DataReference, FieldSymbol, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
 export interface IReadTableOptions {
   index?: INumeric | number,
   withKey?: (i: any) => Promise<boolean>,
-  into?: INumeric | ICharacter | Structure | Table,
+  into?: INumeric | ICharacter | Structure | Table | DataReference,
   assigning?: FieldSymbol,
 }
 
@@ -41,7 +41,11 @@ export async function readTable(table: Table | FieldSymbol, options?: IReadTable
   abap.builtin.sy.get().subrc.set(subrc);
 
   if (options.into && found) {
-    options.into.set(found);
+    if (options.into instanceof DataReference) {
+      options.into.assign(found);
+    } else {
+      options.into.set(found);
+    }
   } else if (options.assigning && found) {
     options.assigning.assign(found);
   }

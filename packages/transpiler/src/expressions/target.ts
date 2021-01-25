@@ -28,8 +28,15 @@ export class TargetTranspiler implements IExpressionTranspiler {
         offset.push("length: " + new FieldLengthTranspiler().transpile(c, traversal));
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.TargetFieldSymbol) {
         ret = ret + new FieldSymbolTranspiler().transpile(c, traversal);
-      } else if (c.getFirstToken().getStr() === "-" || c.getFirstToken().getStr() === "->") {
+      } else if (c.getFirstToken().getStr() === "-") {
         ret = ret + ".get().";
+      } else if (c.getFirstToken().getStr() === "->") {
+        if (node.concatTokens().endsWith("->*")) {
+          ret = ret + ".getPointer()";
+          break;
+        } else {
+          ret = ret + ".get().";
+        }
       }
     }
 
