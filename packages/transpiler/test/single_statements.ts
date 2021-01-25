@@ -7,6 +7,7 @@ import {runSingle} from "./_utils";
 describe("Single statements", () => {
   const tests = [
     {abap: "DATA foo TYPE i.",                     js: "let foo = new abap.types.Integer();",       skip: false},
+    {abap: "DATA ref TYPE REF TO i.",              js: "let ref = new abap.types.DataReference(new abap.types.Integer());",       skip: false},
     {abap: "foo = 2.",                             js: "foo.set(constant_2);",                      skip: false},
     {abap: "foo = bar + 2.",                       js: "foo.set(abap.operators.add(bar,constant_2));",             skip: false},
     {abap: "foo = bar - 2.",                       js: "foo.set(abap.operators.minus(bar,constant_2));",           skip: false},
@@ -145,6 +146,7 @@ describe("Single statements", () => {
     {abap: "super->constructor( ).",     js: ``, skip: false}, // todo, https://github.com/abaplint/transpiler/issues/133
     {abap: "SELECT SINGLE * FROM t100 INTO ls_result.", js: `abap.statements.select(ls_result, "SELECT * FROM t100 LIMIT 1");`},
     {abap: "ASSERT NOT foo EQ bar.",     js: `abap.statements.assert(!abap.compare.eq(foo, bar));`, skip: false},
+    {abap: "GET REFERENCE OF blah INTO ref.", js: `ref.assign(blah);`, skip: false},
   ];
 
   for (const test of tests) {

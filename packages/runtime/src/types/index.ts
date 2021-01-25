@@ -1,5 +1,7 @@
 export * from "./abap_object";
 export * from "./character";
+export * from "./data_reference";
+export * from "./date";
 export * from "./field_symbol";
 export * from "./hex";
 export * from "./integer";
@@ -8,6 +10,5 @@ export * from "./packed";
 export * from "./string";
 export * from "./structure";
 export * from "./table";
-export * from "./date";
 export * from "./time";
 export * from "./xstring";

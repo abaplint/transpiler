@@ -1,10 +1,12 @@
-import {ABAPObject, Structure, Table} from "../types";
+import {ABAPObject, DataReference, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
-export function initial(val: ICharacter | INumeric | string | number | Structure | Table | ABAPObject) {
+export function initial(val: ICharacter | INumeric | string | number | Structure | DataReference | Table | ABAPObject) {
   if (val instanceof Table) {
     return val.array().length === 0;
+  } else if (val instanceof DataReference) {
+    return val.getPointer() === undefined;
   }
   if (typeof val === "string") {
     return val === "";

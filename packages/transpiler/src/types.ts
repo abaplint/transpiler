@@ -25,6 +25,9 @@ export class TranspileTypes {
       resolved = "Date";
     } else if (type instanceof abaplint.BasicTypes.TimeType) {
       resolved = "Time";
+    } else if (type instanceof abaplint.BasicTypes.DataReference) {
+      resolved = "DataReference";
+      extra = this.toType(type.getType());
     } else if (type instanceof abaplint.BasicTypes.StructureType) {
       resolved = "Structure";
       const list: string[] = [];
