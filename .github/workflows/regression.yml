@@ -31,3 +31,7 @@ jobs:
       run: |
         cat ../../results_after.json
         cat ../../results_before.json
+
+    - name: Build comment
+      run: |
+        node ./.github/regression/run.js
