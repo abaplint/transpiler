@@ -20,7 +20,7 @@ for (const b of before) {
   result[b.name].before = b.runtime;
 }
 
-console.dir(results);
+console.dir(result);
 
 let comment = "Regression test results: hello world\n";
 
