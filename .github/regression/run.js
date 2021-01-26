@@ -24,10 +24,16 @@ console.dir(result);
 
 let comment = "Regression test results:\n";
 
-comment += "| Performance | Before | After |\n";
-comment += "| :--- | :---   | :---  |\n";
+comment += "| Performance | Before | After | Delta |\n";
+comment += "| :--- | :---   | :---  | :---  |\n";
 for (const key of Object.keys(result)) {
-  comment += "| " + key + " | " + result[key].before + "ms | " + result[key].after + "ms |\n";
+  let delta = result[key].after - result[key].before;
+  if (Math.abs(delta) > 200) {
+    delta += ":red_circle:";
+  } else {
+    delta += ":green_circle:";
+  }
+  comment += "| " + key + " | " + result[key].before + "ms | " + result[key].after + "ms | " + delta + " |\n";
 }
 
 comment += "\nUpdated: " + new Date().toISOString() + "\n";
