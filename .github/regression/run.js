@@ -27,10 +27,9 @@ let comment = "Regression test results:\n";
 comment += "| Performance | Before | After |\n";
 comment += "| :--- | :---   | :---  |\n";
 for (const key of Object.keys(result)) {
-  comment += "| " + key + " | " + result[key].before + "ms | " + result[key].after + "ms |";
+  comment += "| " + key + " | " + result[key].before + "ms | " + result[key].after + "ms |\n";
 }
 
-comment += "\n";
 comment += "\nUpdated: " + new Date().toISOString() + "\n";
 comment += "\nSHA: " + process.env.GITHUB_SHA + "\n";
 
