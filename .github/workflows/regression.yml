@@ -38,3 +38,36 @@ jobs:
         cd .. && cd ..
         ls -salh
         node ./run.js
+
+    - uses: jwalton/gh-find-current-pr@v1
+      id: findPr
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+    - run: echo ${{ steps.findPr.outputs.pr }}
+
+    - name: Find Comment
+      uses: peter-evans/find-comment@v1
+      id: fc
+      with:
+        issue-number: '${{steps.findPr.outputs.pr}}'
+        body-includes: Regression test results
+    - run: echo ${{ steps.fc.outputs.comment-id }}
+
+    - name: Build body from file
+      id: get-comment-body
+      run: |
+        cd .. && cd ..
+        cat comment-body.txt
+        body=$(cat comment-body.txt)
+        body="${body//'%'/'%25'}"
+        body="${body//$'\n'/'%0A'}"
+        body="${body//$'\r'/'%0D'}"
+        echo ::set-output name=body::$body
+    - name: Create comment
+      uses: peter-evans/create-or-update-comment@v1
+      id: create-comment
+      with:
+        issue-number: '${{steps.findPr.outputs.pr}}'
+        edit-mode: replace
+        comment-id: '${{steps.fc.outputs.comment-id}}'
+        body: ${{steps.get-comment-body.outputs.body}}
