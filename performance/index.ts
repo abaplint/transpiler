@@ -74,7 +74,7 @@ async function execute() {
 }
 
 async function start() {
-  const time = new Date().toLocaleTimeString([], {hour: "2-digit", minute: "2-digit", hour12: false});
+  const time = new Date().toLocaleTimeString([], {hour: "2-digit", minute: "2-digit", hour12: false}) + " (" + Intl.DateTimeFormat().resolvedOptions().timeZone + ")";
   console.log("START PERFORMANCE TEST, " + time);
   const results = await execute();
   let index = 1;

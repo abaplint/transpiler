@@ -7,7 +7,6 @@ on:
 
 jobs:
   regression:
-    # Check if the event is not triggered by a fork, this is stupid but its github
     if: github.ref != 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
@@ -20,6 +19,7 @@ jobs:
 
     - name: Performance
       run: |
+        cp .github/regression/run.js ../../run.js
         npm install && npm run performance
         cp build/performance/results.json ../../results_after.json
         git checkout -f master
@@ -32,3 +32,45 @@ jobs:
       run: |
         cat ../../results_after.json
         cat ../../results_before.json
+
+    - name: Build comment
+      run: |
+        cd .. && cd ..
+        ls -salh
+        node ./run.js
+
+    - uses: jwalton/gh-find-current-pr@v1
+      id: findPr
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+    - run: echo ${{ steps.findPr.outputs.pr }}
+
+    - name: Find Comment
+      uses: peter-evans/find-comment@v1
+      id: fc
+      with:
+        issue-number: '${{steps.findPr.outputs.pr}}'
+        body-includes: Regression test results
+    - run: echo ${{ steps.fc.outputs.comment-id }}
+
+    - name: Build body from file
+      id: get-comment-body
+      run: |
+        ls -salh
+        cd .. && cd ..
+        ls -salh
+        cat comment-body.txt
+        body=$(cat comment-body.txt)
+        body="${body//'%'/'%25'}"
+        body="${body//$'\n'/'%0A'}"
+        body="${body//$'\r'/'%0D'}"
+        echo ::set-output name=body::$body
+
+    - name: Create comment
+      uses: peter-evans/create-or-update-comment@v1
+      id: create-comment
+      with:
+        issue-number: '${{steps.findPr.outputs.pr}}'
+        edit-mode: replace
+        comment-id: '${{steps.fc.outputs.comment-id}}'
+        body: ${{steps.get-comment-body.outputs.body}}
