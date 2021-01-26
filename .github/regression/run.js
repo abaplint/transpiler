@@ -27,7 +27,7 @@ let comment = "Regression test results:\n";
 comment += "| Performance | Before | After |\n";
 comment += "| :--- | :---   | :---  |\n";
 for (const key of Object.keys(result)) {
-  comment += "| " + result[key] + " | " + result[key].before + "ms | " + result[key].after + "ms |";
+  comment += "| " + key + " | " + result[key].before + "ms | " + result[key].after + "ms |";
 }
 
 comment += "\n";
