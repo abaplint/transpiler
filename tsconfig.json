@@ -18,7 +18,8 @@
       "baseUrl": ".",
       },
   "filesGlob": [
-      "./test/**/*.ts"
+      "./test/**/*.ts",
+      "./performance/**/*.ts"
       ],
   "exclude": [
       "node_modules",

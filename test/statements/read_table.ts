@@ -190,4 +190,31 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("READ TABLE must set sy-tabix", async () => {
+    const code = `
+FORM run.
+  DATA table TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA row LIKE LINE OF table.
+  APPEND 1 TO table.
+  APPEND 2 TO table.
+  READ TABLE table WITH KEY table_line = 1 TRANSPORTING NO FIELDS.
+  ASSERT sy-tabix = 1.
+  READ TABLE table WITH KEY table_line = 2 TRANSPORTING NO FIELDS.
+  ASSERT sy-tabix = 2.
+  READ TABLE table INDEX 1 INTO row.
+  ASSERT sy-tabix = 1.
+  READ TABLE table INDEX 2 INTO row.
+  ASSERT sy-tabix = 2.
+
+  READ TABLE table INDEX 123 INTO row.
+  ASSERT sy-tabix = 0.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
