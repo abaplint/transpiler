@@ -1,6 +1,8 @@
 import {AsyncFunction, runFiles} from "../test/_utils";
 import {ABAP} from "../packages/runtime/src";
 import {performance} from "perf_hooks";
+import * as fs from "fs";
+import * as path from "path";
 
 // NOTES
 // * does not run via Mocha
@@ -12,11 +14,11 @@ async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
 }
 
-type TypeTests = {name: string, only?: boolean, abap: string}[];
-type TypeResult = {name: string, runtime: number}[];
+type Tests = {name: string, abap: string}[];
+type Results = {name: string, runtime: number}[];
 
-const tests: TypeTests = [
-  {name: "Internal table, APPEND and DELETE", only: false, abap: `
+const tests: Tests = [
+  {name: "Internal table, APPEND and DELETE", abap: `
 FORM run.
   CONSTANTS c_max TYPE i VALUE 5000000.
   DATA lv_index TYPE i.
@@ -35,7 +37,7 @@ ENDFORM.
 START-OF-SELECTION.
   PERFORM run.`},
 
-  {name: "Internal table, READ TABLE, table_line", only: false, abap: `
+  {name: "Internal table, READ TABLE, table_line", abap: `
 FORM run.
   CONSTANTS c_max TYPE i VALUE 20000.
   DATA str TYPE string.
@@ -57,8 +59,7 @@ START-OF-SELECTION.
 ];
 
 async function execute() {
-  const result: TypeResult = [];
-  // todo, take "only" parameter into account
+  const result: Results = [];
   for (const t of tests) {
     const js = await run(t.abap);
     const f = new AsyncFunction("abap", js);
@@ -80,6 +81,7 @@ async function start() {
   for (const r of results) {
     console.log(`${ (index++ + "").padStart(3, "0") }: ${ r.name.padEnd(50, " ") } ${ r.runtime }ms`);
   }
+  fs.writeFileSync(__dirname + path.sep + "results.json", JSON.stringify(results, null, 2));
 }
 
 start().then(() => {
