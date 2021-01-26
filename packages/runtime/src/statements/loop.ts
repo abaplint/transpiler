@@ -17,28 +17,30 @@ export function* loop(table: Table, options?: ILoopOptions) {
   const loopIndex = table.startLoop(loopFrom);
 
   try {
+    const array = table.array();
+    const isStructured = array[0] instanceof Structure;
+
     while (loopIndex.index < loopTo) {
-      if (loopIndex.index > table.array().length) {
+      if (loopIndex.index > array.length) {
         break;
       }
-      const array = table.array();
       const current = array[loopIndex.index];
 
-      // @ts-ignore
-      abap.builtin.sy.get().tabix.set(loopIndex.index + 1);
-
       if (options?.where) {
-        const row = current instanceof Structure ? current.get() : {table_line: current};
+        const row = isStructured ? current.get() : {table_line: current};
         if (options.where(row) === false) {
           loopIndex.index++;
           continue;
         }
       }
 
+      // @ts-ignore
+      abap.builtin.sy.get().tabix.set(loopIndex.index + 1);
+
       yield current;
 
       loopIndex.index++;
-      loopTo = options?.to && options.to.get() < table.array().length ? options.to.get() : table.array().length;
+      loopTo = options?.to && options.to.get() < array.length ? options.to.get() : array.length;
     }
   } finally {
     table.unregisterLoop(loopIndex);
