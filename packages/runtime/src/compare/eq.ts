@@ -10,13 +10,10 @@ export function eq(
     throw "todo, eq TABLE";
   }
 
-  if (right instanceof FieldSymbol && right.getPointer() instanceof Structure
-      && left instanceof FieldSymbol && left.getPointer() instanceof Structure) {
-    return eq(left.getPointer()!, right.getPointer()!);
-  } else if (left instanceof FieldSymbol && left.getPointer() instanceof Structure) {
-    return eq(left.getPointer()!, right);
-  } else if (right instanceof FieldSymbol && right.getPointer() instanceof Structure) {
+  if (right instanceof FieldSymbol) {
     return eq(left, right.getPointer()!);
+  } else if (left instanceof FieldSymbol) {
+    return eq(left.getPointer()!, right);
   }
 
   if (left instanceof Structure || right instanceof Structure) {
@@ -43,27 +40,29 @@ export function eq(
   }
 
   let l: number | string | undefined = undefined;
-  if (typeof left === "number" || typeof left === "string") {
-    l = left;
-  } else {
+  if (typeof left === "object") {
     l = left.get();
+  } else {
+    l = left;
   }
 
   let r: number | string | undefined = undefined;
-  if (typeof right === "number" || typeof right === "string") {
-    r = right;
-  } else {
+  if (typeof right === "object") {
     r = right.get();
+  } else {
+    r = right;
   }
 
-  if (typeof l === "string" && typeof r === "number") {
-    r = r.toString();
-  }
-  if (typeof l === "number" && typeof r === "string") {
-    if (r === "") {
-      r = 0;
-    } else {
-      r = parseInt(r, 10);
+  // assumption: typically no casts are required, so start checking if the types doesnt match
+  if (typeof l !== typeof r) {
+    if (typeof l === "string" && typeof r === "number") {
+      r = r.toString();
+    } else if (typeof l === "number" && typeof r === "string") {
+      if (r === "") {
+        r = 0;
+      } else {
+        r = parseInt(r, 10);
+      }
     }
   }
 
