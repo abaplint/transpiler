@@ -11,6 +11,7 @@ export interface IReadTableOptions {
 
 export function readTable(table: Table | FieldSymbol, options?: IReadTableOptions) {
   let found: any = undefined;
+  let foundIndex = 0;
 
   const arr = table.array();
 
@@ -21,14 +22,21 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
     }
 
     found = arr[index - 1];
+    if (found) {
+      foundIndex = index;
+    }
   } else if (options?.withKey) {
     const isStructured = arr[0] instanceof Structure;
     for (const a of arr) {
+      foundIndex++;
       const row = isStructured ? a.get() : {table_line: a};
       if (options.withKey(row) === true) {
         found = a;
         break;
       }
+    }
+    if (found === undefined) {
+      foundIndex = 0;
     }
 
   } else {
@@ -38,6 +46,8 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
   const subrc = found ? 0 : 4;
   // @ts-ignore
   abap.builtin.sy.get().subrc.set(subrc);
+  // @ts-ignore
+  abap.builtin.sy.get().tabix.set(foundIndex);
 
   if (options.into && found) {
     if (options.into instanceof DataReference) {

@@ -9,6 +9,7 @@
         "precompile": "cd packages/runtime && npm run compile",
         "compile": "cd packages/transpiler && npm run compile",
         "postcompile": "tsc",
+        "performance": "npm run compile && node build/performance/index.js",
         "pretest": "npm run compile",
         "test": "mocha --timeout 10000",
         "posttest": "npm run lint",

@@ -1,0 +1,34 @@
+name: Regression
+
+on:
+  push:
+    branches-ignore:
+    - master
+
+jobs:
+  regression:
+    # Check if the event is not triggered by a fork, this is stupid but its github
+    if: github.ref != 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '12.x'
+
+    - name: Performance
+      run: |
+        npm install && npm run performance
+        cp build/performance/results.json ../../results_after.json
+        git checkout -f master
+        git reset --hard
+        git status
+        npm install && npm run performance
+        cp build/performance/results.json ../../results_before.json
+
+    - name: cat
+      run: |
+        cat ../../results_after.json
+        cat ../../results_before.json
