@@ -22,7 +22,17 @@ for (const b of before) {
 
 console.dir(result);
 
-let comment = "Regression test results: hello world\n";
+let comment = "Regression test results:\n";
+
+comment += "| Performance | Before | After |\n";
+comment += "| :--- | :---   | :---  |\n";
+for (const key of Object.keys(result)) {
+  comment += "| " + result[key] + " | " + result[key].before + "ms | " + result[key].after + "ms |";
+}
+
+comment += "\n" + issues;
+comment += "\nUpdated: " + new Date().toISOString() + "\n";
+comment += "\nSHA: " + process.env.GITHUB_SHA + "\n";
 
 console.dir(comment);
 
