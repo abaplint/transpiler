@@ -30,7 +30,7 @@ for (const key of Object.keys(result)) {
   comment += "| " + result[key] + " | " + result[key].before + "ms | " + result[key].after + "ms |";
 }
 
-comment += "\n" + issues;
+comment += "\n";
 comment += "\nUpdated: " + new Date().toISOString() + "\n";
 comment += "\nSHA: " + process.env.GITHUB_SHA + "\n";
 
