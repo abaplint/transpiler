@@ -19,6 +19,7 @@ jobs:
 
     - name: Performance
       run: |
+        cp .github/regression/run.js ../../run.js
         npm install && npm run performance
         cp build/performance/results.json ../../results_after.json
         git checkout -f master
@@ -34,4 +35,6 @@ jobs:
 
     - name: Build comment
       run: |
-        node ./.github/regression/run.js
+        cd .. && cd ..
+        ls -salh
+        node ./run.js
