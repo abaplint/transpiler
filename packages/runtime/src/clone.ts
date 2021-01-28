@@ -1,9 +1,17 @@
 import {ABAPObject} from "./types";
 
 export function clone<T>(obj: T): T {
-  if (null == obj || "object" != typeof obj || obj instanceof ABAPObject) {
+  if (null == obj || "object" != typeof obj) {
     return obj;
   }
+
+  if (obj instanceof ABAPObject) {
+    const n = new ABAPObject();
+    n.set(obj.get());
+    // @ts-ignore
+    return n;
+  }
+
   // @ts-ignore
   const copy = new obj.constructor();
   for (const attr in obj) {

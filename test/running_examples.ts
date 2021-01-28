@@ -1004,7 +1004,7 @@ WRITE ref->name.`;
     expect(abap.console.get()).to.equal("23");
   });
 
-  it("numc, exeeed length with string", async () => {
+  it("numc, exceed length with string", async () => {
     const code = `
   DATA foo TYPE n LENGTH 2.
   foo = '123'.
@@ -1014,6 +1014,73 @@ WRITE ref->name.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("23");
+  });
+
+  it("something with references, 1", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    DATA num TYPE i.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+ENDCLASS.
+
+FORM bar.
+  DATA tab TYPE STANDARD TABLE OF ref to lcl_bar WITH DEFAULT KEY.
+  DATA row LIKE LINE OF tab.
+  DO 2 TIMES.
+    CLEAR row.
+    CREATE OBJECT row.
+    row->num = sy-index.
+    APPEND row TO tab.
+  ENDDO.
+  LOOP AT tab INTO row.
+    WRITE / row->num.
+  ENDLOOP.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM bar.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2");
+  });
+
+  it("something with references, 2", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    DATA num TYPE i.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+ENDCLASS.
+
+FORM bar.
+  TYPES: BEGIN OF ty_structure,
+           field TYPE REF TO lcl_bar,
+         END OF ty_structure.
+  DATA tab TYPE STANDARD TABLE OF ty_structure WITH DEFAULT KEY.
+  DATA row LIKE LINE OF tab.
+  DO 2 TIMES.
+    CLEAR row.
+    CREATE OBJECT row-field.
+    row-field->num = sy-index.
+    APPEND row TO tab.
+  ENDDO.
+  LOOP AT tab INTO row.
+    WRITE / row-field->num.
+  ENDLOOP.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM bar.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2");
   });
 
 });
