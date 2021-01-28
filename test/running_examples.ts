@@ -1048,7 +1048,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1\n2");
   });
 
-  it.only("something with references, 2", async () => {
+  it("something with references, 2", async () => {
     const code = `
 CLASS lcl_bar DEFINITION.
   PUBLIC SECTION.

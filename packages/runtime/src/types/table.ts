@@ -112,14 +112,6 @@ export class Table  {
       return new Integer().set(item);
     } else if (typeof item === "string") {
       return new String().set(item);
-    } else if (item instanceof ABAPObject) {
-      if (cloneRow === true) {
-        const obj = new ABAPObject();
-        obj.set(item.get());
-        return obj;
-      } else {
-        return item;
-      }
     } else {
       return cloneRow === true ? clone(item) : item;
     }
