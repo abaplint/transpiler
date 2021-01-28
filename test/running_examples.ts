@@ -1004,7 +1004,7 @@ WRITE ref->name.`;
     expect(abap.console.get()).to.equal("23");
   });
 
-  it("something with references", async () => {
+  it("numc, exceed length with string", async () => {
     const code = `
   DATA foo TYPE n LENGTH 2.
   foo = '123'.
