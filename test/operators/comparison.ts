@@ -401,4 +401,36 @@ describe("Running operators - Comparison", () => {
     await f(abap);
   });
 
+  it("IS SUPPLIED", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS moo
+      IMPORTING opt TYPE i OPTIONAL.
+ENDCLASS.
+
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD moo.
+    IF opt IS SUPPLIED.
+      WRITE / 'yes'.
+    ELSE.
+      WRITE / 'no'.
+    ENDIF.
+  ENDMETHOD.
+ENDCLASS.
+
+FORM run.
+  lcl_bar=>moo( ).
+  lcl_bar=>moo( 1 ).
+  lcl_bar=>moo( opt = 1 ).
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("no\nyes\nyes");
+  });
+
 });
