@@ -13,19 +13,23 @@ export class Numc implements ICharacter {
 
   public set(value: INumeric | ICharacter | Hex | string | number) {
     if (typeof value === "number") {
-      this.value = this.value.toString();
+      this.value = value.toString();
     } else if (typeof value === "string") {
       this.value = parseInt(value, 10) + "";
-      if (this.value.length > this.length) {
-        this.value = this.value.substr(0, this.length);
-      }
     } else {
       this.set(value.get());
+      return;
     }
-    const pad = this.length - this.value.length;
-    if (pad > 0) {
-      this.value = "0".repeat(pad) + this.value;
+
+    if (this.value.length > this.length) {
+      this.value = this.value.substr(this.value.length - this.length, this.length);
+    } else {
+      const pad = this.length - this.value.length;
+      if (pad > 0) {
+        this.value = "0".repeat(pad) + this.value;
+      }
     }
+
     return this;
   }
 

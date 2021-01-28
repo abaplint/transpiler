@@ -978,4 +978,42 @@ WRITE ref->name.`;
     expect(abap.console.get()).to.equal("bar");
   });
 
+  it("set and write numc", async () => {
+    const code = `
+  DATA foo TYPE n LENGTH 2.
+  DO 2 TIMES.
+    foo = sy-index.
+    WRITE / foo.
+  ENDDO.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("01\n02");
+  });
+
+  it("numc, exeeed length with number", async () => {
+    const code = `
+  DATA foo TYPE n LENGTH 2.
+  foo = 123.
+  WRITE foo.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("23");
+  });
+
+  it("numc, exeeed length with string", async () => {
+    const code = `
+  DATA foo TYPE n LENGTH 2.
+  foo = '123'.
+  WRITE foo.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("23");
+  });
+
 });
