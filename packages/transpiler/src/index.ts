@@ -33,6 +33,11 @@ export interface IRequire {
   filename: string,
 }
 
+export interface IProgress {
+  set(total: number, text: string): void;
+  tick(text: string): Promise<void>;
+}
+
 /** one javascript output file for each object */
 export interface IOutputFile {
   object: IObjectIdentifier;
@@ -68,7 +73,7 @@ export class Transpiler {
     }
   }
 
-  public async run(files: IFile[]): Promise<IOutput> {
+  public async run(files: IFile[], progress?: IProgress): Promise<IOutput> {
     const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
     const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
     new Keywords().handle(reg);
@@ -83,9 +88,11 @@ export class Transpiler {
       reg: reg,
     };
 
-    for (const abap of reg.getObjects()) {
-      if (abap instanceof abaplint.ABAPObject) {
-        output.objects = output.objects.concat(this.runObject(abap, reg));
+    progress?.set(reg.getObjectCount(false), "Building");
+    for (const obj of reg.getObjects()) {
+      progress?.tick("Building, " + obj.getName());
+      if (obj instanceof abaplint.ABAPObject) {
+        output.objects = output.objects.concat(this.runObject(obj, reg));
       }
     }
 
