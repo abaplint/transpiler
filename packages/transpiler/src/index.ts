@@ -144,7 +144,7 @@ export class Transpiler {
 
       result += this.handleConstants(file);
 
-      const rearranged = new Rearranger().run(file.getStructure());
+      const rearranged = obj.getType() === "INTF" ? file.getStructure() : new Rearranger().run(file.getStructure());
       const contents = new Traversal(spaghetti, file, obj, reg).traverse(rearranged);
       result += new Indentation().run(contents);
 
