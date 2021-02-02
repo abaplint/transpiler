@@ -3,9 +3,23 @@ import * as path from "path";
 import * as glob from "glob";
 import * as childProcess from "child_process";
 import * as os from "os";
+import * as ProgressBar from "progress";
 import * as Transpiler from "@abaplint/transpiler";
 import {ITranspilerConfig, TranspilerConfig} from "./config";
 import {FileOperations} from "./file_operations";
+
+class Progress implements Transpiler.IProgress {
+  private bar: ProgressBar;
+
+  public set(total: number, _text: string) {
+    this.bar = new ProgressBar(":percent - :elapseds - :text", {total, renderThrottle: 100});
+  }
+
+  public async tick(text: string) {
+    this.bar.tick({text});
+    this.bar.render();
+  }
+}
 
 function loadFiles(config: ITranspilerConfig): Transpiler.IFile[] {
   const files: Transpiler.IFile[] = [];
@@ -53,7 +67,7 @@ async function run() {
 
   console.log("\nBuilding");
   const t = new Transpiler.Transpiler(config.options);
-  const output = await t.run(files);
+  const output = await t.run(files, new Progress());
 
   console.log("\nOutput");
   const outputFolder = config.output_folder;
