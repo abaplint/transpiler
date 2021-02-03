@@ -21,24 +21,6 @@ class Progress implements Transpiler.IProgress {
   }
 }
 
-function loadFiles(config: ITranspilerConfig): Transpiler.IFile[] {
-  const files: Transpiler.IFile[] = [];
-  const filter = (config.input_filter ?? []).map(pattern => new RegExp(pattern, "i"));
-  let skipped = 0;
-  for (let filename of glob.sync(config.input_folder + "/**", {nosort: true, nodir: true})) {
-    if (filter.length > 0 && filter.some(a => a.test(filename)) === false) {
-      skipped++;
-      continue;
-    }
-    const contents = fs.readFileSync(filename, "utf8");
-    filename = path.basename(filename);
-    files.push({filename, contents});
-    console.log("Add:\t" + filename);
-  }
-  console.log(skipped + " files skipped");
-  return files;
-}
-
 function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
   const files: Transpiler.IFile[] = [];
   if (config.lib && config.lib !== "") {
@@ -63,7 +45,7 @@ async function run() {
 
   const config = TranspilerConfig.find(process.argv[2]);
 
-  const files = loadFiles(config).concat(loadLib(config));
+  const files = FileOperations.loadFiles(config).concat(loadLib(config));
 
   console.log("\nBuilding");
   const t = new Transpiler.Transpiler(config.options);

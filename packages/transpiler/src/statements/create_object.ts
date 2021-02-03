@@ -23,7 +23,7 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
       return c.concatTokens();
     }
 
-    const scope = traversal.getSpaghetti().lookupPosition(node.getFirstToken().getStart(), traversal.getFilename());
+    const scope = traversal.findCurrentScope(node.getFirstToken());
     if (scope === undefined) {
       throw new Error("CreateObjectTranspiler, unable to lookup position");
     }

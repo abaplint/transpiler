@@ -3,6 +3,8 @@ import {ABAP} from "../packages/runtime/src";
 import {performance} from "perf_hooks";
 import * as fs from "fs";
 import * as path from "path";
+import {test1} from "./test1";
+import {test2} from "./test2";
 
 // NOTES
 // * does not run via Mocha
@@ -18,44 +20,8 @@ type Tests = {name: string, abap: string}[];
 type Results = {name: string, runtime: number}[];
 
 const tests: Tests = [
-  {name: "Internal table, APPEND and DELETE", abap: `
-FORM run.
-  CONSTANTS c_max TYPE i VALUE 5000000.
-  DATA lv_index TYPE i.
-  DATA table TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
-  DO c_max TIMES.
-    APPEND sy-index TO table.
-  ENDDO.
-  ASSERT lines( table ) = c_max.
-  WHILE lines( table ) > 0.
-    lv_index = lines( table ).
-    DELETE table INDEX lv_index.
-  ENDWHILE.
-  ASSERT lines( table ) = 0.
-ENDFORM.
-
-START-OF-SELECTION.
-  PERFORM run.`},
-
-  {name: "Internal table, READ TABLE, table_line", abap: `
-FORM run.
-  CONSTANTS c_max TYPE i VALUE 20000.
-  DATA str TYPE string.
-  DATA table TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
-  DO c_max TIMES.
-    str = |foobar{ sy-index }|.
-    APPEND str TO table.
-  ENDDO.
-  ASSERT lines( table ) = c_max.
-
-  DO 1000 TIMES. " make sure READ TABLE takes the most time
-    READ TABLE table WITH KEY table_line = str TRANSPORTING NO FIELDS.
-    ASSERT sy-tabix = c_max.
-  ENDDO.
-ENDFORM.
-
-START-OF-SELECTION.
-  PERFORM run.`},
+  {name: "Internal table, APPEND and DELETE", abap: test1},
+  {name: "Internal table, READ TABLE, table_line", abap: test2},
 ];
 
 async function execute() {
@@ -75,7 +41,7 @@ async function execute() {
 
 async function start() {
   const time = new Date().toLocaleTimeString([], {hour: "2-digit", minute: "2-digit", hour12: false}) + " (" + Intl.DateTimeFormat().resolvedOptions().timeZone + ")";
-  console.log("START PERFORMANCE TEST, " + time);
+  console.log("START RUNTIME PERFORMANCE TEST, " + time);
   const results = await execute();
   let index = 1;
   for (const r of results) {

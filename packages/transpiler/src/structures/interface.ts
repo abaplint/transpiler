@@ -24,7 +24,7 @@ export class InterfaceTranspiler implements IStructureTranspiler {
     if (node === undefined) {
       return "";
     }
-    const scope = traversal.getSpaghetti().lookupPosition(node.getFirstToken().getStart(), traversal.getFilename());
+    const scope = traversal.findCurrentScope(node.getFirstToken());
     const vars = scope?.getData().vars;
     if (vars === undefined || vars.length === 0) {
       return "";

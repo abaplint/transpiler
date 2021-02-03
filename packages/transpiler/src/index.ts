@@ -90,7 +90,7 @@ export class Transpiler {
 
     progress?.set(reg.getObjectCount(false), "Building, Syntax Logic");
     for (const obj of reg.getObjects()) {
-      progress?.tick("Building, Syntax Logic, " + obj.getName());
+      await progress?.tick("Building, Syntax Logic, " + obj.getName());
       if (obj instanceof abaplint.ABAPObject) {
         new abaplint.SyntaxLogic(reg, obj).run();
       }
@@ -98,7 +98,7 @@ export class Transpiler {
 
     progress?.set(reg.getObjectCount(false), "Building");
     for (const obj of reg.getObjects()) {
-      progress?.tick("Building, " + obj.getName());
+      await progress?.tick("Building, " + obj.getName());
       if (obj instanceof abaplint.ABAPObject) {
         output.objects = output.objects.concat(this.runObject(obj, reg));
       }
