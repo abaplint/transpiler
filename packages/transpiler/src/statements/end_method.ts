@@ -7,7 +7,7 @@ export class EndMethodTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
     const token = node.getFirstToken();
 
-    const scope = traversal.getSpaghetti().lookupPosition(token.getStart(), traversal.getFilename());
+    const scope = traversal.findCurrentScope(token);
     if (scope === undefined) {
       throw new Error("EndMethodTranspiler, scope not found");
     }

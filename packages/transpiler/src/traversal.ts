@@ -53,7 +53,7 @@ export class Traversal {
   }
 
   public getClassDefinition(token: abaplint.Token): abaplint.IClassDefinition | undefined {
-    let scope = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
+    let scope = this.findCurrentScope(token);
 
     while (scope !== undefined) {
       if (scope.getIdentifier().stype === abaplint.ScopeType.ClassImplementation
@@ -68,7 +68,7 @@ export class Traversal {
   }
 
   private isClassAttribute(token: abaplint.Token): boolean {
-    const scope = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
+    const scope = this.findCurrentScope(token);
     if (scope === undefined) {
       throw new Error("isClassAttribute, unable to lookup position");
     }
@@ -97,7 +97,7 @@ export class Traversal {
   }
 
   private isStaticClassAttribute(token: abaplint.Token): string | undefined {
-    const scope = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
+    const scope = this.findCurrentScope(token);
     if (scope === undefined) {
       throw new Error("isStaticClassAttribute, unable to lookup position");
     }
@@ -114,7 +114,7 @@ export class Traversal {
   }
 
   public isBuiltinMethod(token: abaplint.Token): boolean {
-    const scope = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
+    const scope = this.findCurrentScope(token);
     if (scope === undefined) {
       return false;
     }
@@ -158,7 +158,7 @@ export class Traversal {
   }
 
   private isBuiltinVariable(token: abaplint.Token): boolean {
-    const scope = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
+    const scope = this.findCurrentScope(token);
     if (scope === undefined) {
       throw new Error("isBuiltin, unable to lookup position");
     }
@@ -173,13 +173,13 @@ export class Traversal {
 
   // returns the interface name if interfaced
   public isInterfaceAttribute(token: abaplint.Token): string | undefined {
-    const ref = this.findReadOrWriteReference(token, this.getFilename());
+    const ref = this.findReadOrWriteReference(token);
     if (ref === undefined) {
       return undefined;
     }
 
     // local classes
-    const scope = this.spaghetti.lookupPosition(ref.getToken().getStart(), ref.getFilename());
+    const scope = this.findCurrentScope(ref.getToken());
     if (scope?.getIdentifier().stype === abaplint.ScopeType.Interface) {
       return scope?.getIdentifier().sname;
     }
@@ -196,8 +196,8 @@ export class Traversal {
     return undefined;
   }
 
-  private findReadOrWriteReference(token: abaplint.Token, filename: string) {
-    const scope = this.spaghetti.lookupPosition(token.getStart(), filename);
+  private findReadOrWriteReference(token: abaplint.Token) {
+    const scope = this.findCurrentScope(token);
     if (scope === undefined) {
       return undefined;
     }

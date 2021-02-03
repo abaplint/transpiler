@@ -9,7 +9,7 @@ export class MethodTranspiler implements IStatementTranspiler {
     const token = node.findFirstExpression(abaplint.Expressions.MethodName)!.getFirstToken();
     let methodName = token.getStr();
 
-    const scope = traversal.getSpaghetti().lookupPosition(token.getStart(), traversal.getFilename());
+    const scope = traversal.findCurrentScope(token);
     if (scope === undefined) {
       throw new Error("MethodTranspiler, scope not found");
     } else if (scope.getIdentifier().sname !== methodName) {
