@@ -49,7 +49,8 @@ export class Traversal {
   }
 
   public findCurrentScope(token: abaplint.Token) {
-    return this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
+    const node = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
+    return node;
   }
 
   public getClassDefinition(token: abaplint.Token): abaplint.IClassDefinition | undefined {
