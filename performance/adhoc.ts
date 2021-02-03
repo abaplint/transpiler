@@ -2,6 +2,8 @@ import * as Transpiler from "../packages/transpiler/src";
 import {ITranspilerConfig} from "../packages/cli/src/config";
 import {FileOperations} from "../packages/cli/src/file_operations";
 
+// only does building, does not execute runtime
+
 // while in cwd = /, run with:
 //   npm run compile && time node build/performance/adhoc.js
 // assuming `npm install clinic -g`,

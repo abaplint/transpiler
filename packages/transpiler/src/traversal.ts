@@ -48,8 +48,34 @@ export class Traversal {
     return this.spaghetti;
   }
 
+  private scopeCache: {
+    cov: {start: abaplint.Position, end: abaplint.Position},
+    filename: string,
+    node: abaplint.ISpaghettiScopeNode
+  } | undefined = undefined;
+
   public findCurrentScope(token: abaplint.Token) {
-    const node = this.spaghetti.lookupPosition(token.getStart(), this.file.getFilename());
+    const filename = this.file.getFilename();
+
+    if (this.scopeCache
+      && this.scopeCache.filename === filename
+      && token.getEnd().isBetween(this.scopeCache.cov.start, this.scopeCache.cov.end)) {
+      return this.scopeCache.node;
+    }
+
+    const node = this.spaghetti.lookupPosition(token.getStart(), filename);
+
+// note: cache only works for leafs, as parent nodes cover multiple leaves
+    if (node && node.getChildren().length === 0) {
+      this.scopeCache = {
+        cov: node.calcCoverage(),
+        filename: filename,
+        node: node,
+      };
+    } else {
+      this.scopeCache = undefined;
+    }
+
     return node;
   }
 
