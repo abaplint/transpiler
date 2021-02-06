@@ -268,4 +268,20 @@ describe("Running statements - LOOP", () => {
     expect(abap.console.get()).to.equal("2-2.3-4.5-2.6-7.8-2.9-3.\n6-7.27-7.30-3.\n18-5.24-4.27-7.30-3.");
   });
 
+  it.skip("LOOP should set sy-subrc", async () => {
+    const code = `
+    DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+    APPEND 2 TO tab.
+    LOOP AT tab TRANSPORTING NO FIELDS WHERE table_line = 1.
+    ENDLOOP.
+    WRITE / sy-subrc.
+    LOOP AT tab TRANSPORTING NO FIELDS WHERE table_line = 2.
+    ENDLOOP.
+    WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n0");
+  });
+
 });
