@@ -367,7 +367,7 @@ bar->moo( EXPORTING foo = 'abc'
 }
 let bar = new abap.types.ABAPObject();
 let str = new abap.types.String();
-await bar.get().moo({foo: 'abc', bar: str});`;
+await bar.get().lif_bar$moo({foo: 'abc', bar: str});`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });
