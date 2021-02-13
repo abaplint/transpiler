@@ -23,6 +23,7 @@ export * from "./frac";
 export * from "./sign";
 export * from "./trunc";
 export * from "./nmin";
+export * from "./nmax";
 export const abap_true = new Character({length: 1}).set("X");
 export const abap_false = new Character({length: 1}).set("");
 export const abap_undefined = new Character({length: 1}).set("-");

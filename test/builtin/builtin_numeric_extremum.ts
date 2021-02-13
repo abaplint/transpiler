@@ -46,4 +46,38 @@ describe("Builtin Numeric Extremum Functions", () => {
     await f(abap);
     expect(abap.console.get()).to.equal("37");
   });
+
+  it("Builtin numerical: nmax 1", async () => {
+    const code = `
+      DATA int1 TYPE i VALUE 1.
+      DATA int2 TYPE i VALUE 2.
+      DATA max TYPE i.
+      max = nmax( val1 = int1
+                  val2 = int2 ).
+      WRITE / max.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+  it("Builtin numerical: nmax 2", async () => {
+    const code = `
+      DATA int1 TYPE i VALUE 42.
+      DATA int2 TYPE i VALUE 37.
+      DATA max TYPE i.
+      max = nmax( val1 = int1
+                  val2 = 234
+                  val3 = 156
+                  val4 = 200000
+                  val5 = 777
+                  val6 = int2
+                  val7 = 3233 ).
+      WRITE / max.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("200000");
+  });
+
 });
