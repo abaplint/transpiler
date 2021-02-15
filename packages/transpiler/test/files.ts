@@ -80,4 +80,32 @@ ENDCLASS.
     expect(output[1].requires.length).to.equal(1, "one require expected, testclass");
   });
 
+  it("Global Class implementing global intf", async () => {
+    const filename1 = "zcl_index.clas.abap";
+    const contents1 = `
+CLASS zcl_index DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    INTERFACES zif_index.
+ENDCLASS.
+CLASS zcl_index IMPLEMENTATION.
+  METHOD zif_index~bar.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const filename2 = "zif_index.intf.abap";
+    const contents2 = `
+INTERFACE zif_index PUBLIC.
+  METHODS bar IMPORTING foo TYPE i DEFAULT 25.
+ENDINTERFACE.`;
+
+    const file1 = {filename: filename1, contents: contents1};
+    const file2 = {filename: filename2, contents: contents2};
+
+    const output = (await new Transpiler().run([file1, file2])).objects;
+
+    expect(output.length).to.equal(2);
+    expect(output[0].js.contents).to.include("zcl_index");
+    expect(output[0].js.contents).to.include("const constant_25 = ");
+  });
+
 });
