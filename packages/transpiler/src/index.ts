@@ -109,24 +109,41 @@ export class Transpiler {
 
 // ///////////////////////////////
 
-  protected handleConstants(file: abaplint.ABAPFile): string {
+  protected handleConstants(obj: abaplint.ABAPObject, file: abaplint.ABAPFile, reg: abaplint.IRegistry): string {
     let result = "";
-    const constants: number[] = [];
+    const constants = this.findConstants(obj, file, reg);
 
-    for (const i of file.getStructure()?.findAllExpressions(abaplint.Expressions.Integer) || []) {
-      const j = parseInt(i.concatTokens(), 10);
-      if (constants.includes(j) === false) {
-        constants.push(j);
-      }
-    }
     if (this.options?.skipConstants === false || this.options?.skipConstants === undefined) {
-      for (const c of constants.sort()) {
+      for (const c of Array.from(constants).sort()) {
         const post = c < 0 ? "minus_" : "";
         result += `const constant_${post}${Math.abs(c)} = new abap.types.Integer().set(${c});\n`;
       }
     }
 
     return result;
+  }
+
+  protected findConstants(obj: abaplint.ABAPObject, file: abaplint.ABAPFile, reg: abaplint.IRegistry): Set<number> {
+    let constants = new Set<number>();
+
+    for (const i of file.getStructure()?.findAllExpressions(abaplint.Expressions.Integer) || []) {
+      const j = parseInt(i.concatTokens(), 10);
+      constants.add(j);
+    }
+
+    // extra constants from interfaces, used for default values
+    if (obj.getType() === "CLAS") {
+      const clas = obj as abaplint.Objects.Class;
+      for (const i of clas.getClassDefinition()?.interfaces || []) {
+        const intf = reg.getObject("INTF", i.name) as abaplint.ABAPObject | undefined;
+        const main = intf?.getMainABAPFile();
+        if (intf && main) {
+          constants = new Set([...constants, ...this.findConstants(intf, main, reg).values()]);
+        }
+      }
+    }
+
+    return constants;
   }
 
   protected runObject(obj: abaplint.ABAPObject, reg: abaplint.IRegistry): IOutputFile[] {
@@ -142,7 +159,7 @@ export class Transpiler {
         result += "// " + file.getFilename() + "\n";
       }
 
-      result += this.handleConstants(file);
+      result += this.handleConstants(obj, file, reg);
 
       const rearranged = obj.getType() === "INTF" ? file.getStructure() : new Rearranger().run(file.getStructure());
       const contents = new Traversal(spaghetti, file, obj, reg).traverse(rearranged);
