@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "@types/chai": "^4.2.15",
-    "@types/mocha": "^8.2.0",
+    "@types/mocha": "^8.2.1",
     "@types/sql.js": "^1.0.3",
     "chai": "^4.3.0",
     "mocha": "^8.3.0",

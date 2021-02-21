@@ -30,16 +30,18 @@ export class MethodTranspiler implements IStatementTranspiler {
 
     const methoddef = this.findMethodParameters(scope);
 
-    for (const v of scope.getData().vars) {
-      const varName = v.name.toLowerCase();
-      if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
-          || v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodChanging)
-          || v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodExporting)) {
+    const vars = scope.getData().vars;
+    for (const n in vars) {
+      const identifier = vars[n];
+      const varName = n.toLowerCase();
+      if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
+          || identifier.getMeta().includes(abaplint.IdentifierMeta.MethodChanging)
+          || identifier.getMeta().includes(abaplint.IdentifierMeta.MethodExporting)) {
         if (unique === "") {
           unique = "INPUT";
         }
-        after = after + new TranspileTypes().declare(v.identifier) + "\n";
-        if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting) && v.identifier.getType().isGeneric() === false) {
+        after = after + new TranspileTypes().declare(identifier) + "\n";
+        if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting) && identifier.getType().isGeneric() === false) {
           after += "if (" + unique + " && " + unique + "." + varName + ") {" + varName + ".set(" + unique + "." + varName + ");}\n";
         } else {
           after += "if (" + unique + " && " + unique + "." + varName + ") {" + varName + " = " + unique + "." + varName + ";}\n";
@@ -48,8 +50,8 @@ export class MethodTranspiler implements IStatementTranspiler {
         if (def) {
           after += "if (" + unique + " === undefined || " + unique + "." + varName + " === undefined) {" + varName + " = " + traversal.traverse(def) + ";}\n";
         }
-      } else if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodReturning)) {
-        after = after + new TranspileTypes().declare(v.identifier) + "\n";
+      } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodReturning)) {
+        after = after + new TranspileTypes().declare(identifier) + "\n";
       }
     }
 

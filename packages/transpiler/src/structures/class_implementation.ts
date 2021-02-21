@@ -41,17 +41,18 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     }
     const scope = traversal.findCurrentScope(node.getFirstToken());
     const vars = scope?.getData().vars;
-    if (vars === undefined || vars.length === 0) {
+    if (vars === undefined || Object.keys(vars).length === 0) {
       return "";
     }
     let ret = "";
-    for (const v of vars) {
-      if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.Static) === false) {
+    for (const n in vars) {
+      const identifier = vars[n];
+      if (identifier.getMeta().includes(abaplint.IdentifierMeta.Static) === false) {
         continue;
       }
-      const name = node.getFirstToken().getStr().toLowerCase() + "." + v.name.toLocaleLowerCase().replace("~", "$");
-      ret += name + " = " + new TranspileTypes().toType(v.identifier.getType()) + ";\n";
-      const val = v.identifier.getValue();
+      const name = node.getFirstToken().getStr().toLowerCase() + "." + n.toLocaleLowerCase().replace("~", "$");
+      ret += name + " = " + new TranspileTypes().toType(identifier.getType()) + ";\n";
+      const val = identifier.getValue();
       if (typeof val === "string") {
         const e = new ConstantTranspiler().escape(val);
         ret += name + ".set(" + e + ");\n";

@@ -13,9 +13,11 @@ export class EndMethodTranspiler implements IStatementTranspiler {
     }
 
     let returning: string = "";
-    for (const v of scope.getData().vars) {
-      if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodReturning)) {
-        returning = "return " + v.name + ";\n";
+    const vars = scope.getData().vars;
+    for (const n in vars) {
+      const identifier = vars[n];
+      if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodReturning)) {
+        returning = "return " + n.toLowerCase() + ";\n";
       }
     }
 
