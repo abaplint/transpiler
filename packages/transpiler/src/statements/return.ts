@@ -7,9 +7,11 @@ export class ReturnTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
     let extra = "";
     const scope = traversal.findCurrentScope(node.getFirstToken());
-    for (const v of scope?.getData().vars || []) {
-      if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.MethodReturning)) {
-        extra = " " + v.name;
+    const vars = scope?.getData().vars;
+    for (const n in vars) {
+      const identifier = vars[n];
+      if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodReturning)) {
+        extra = " " + n.toLowerCase();
       }
     }
 

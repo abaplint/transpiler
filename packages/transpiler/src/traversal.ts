@@ -243,7 +243,7 @@ export class Traversal {
                                   def: abaplint.IClassDefinition, inputName: string): string {
 
     const vars = scope?.getData().vars;
-    if (vars === undefined || vars.length === 0) {
+    if (vars === undefined || Object.keys(vars).length === 0) {
       return "";
     }
     let ret = "";
@@ -254,11 +254,12 @@ export class Traversal {
       ret += `await super.constructor_(${inputName});\n`;
     }
 
-    for (const v of vars) {
-      if (v.identifier.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
+    for (const n in vars) {
+      const identifier = vars[n];
+      if (identifier.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
         continue;
       }
-      const name = v.name.toLowerCase().replace("~", "$");
+      const name = n.toLowerCase().replace("~", "$");
       if (name === "super") {
         continue; // todo, https://github.com/abaplint/transpiler/issues/133
       }
@@ -270,7 +271,7 @@ export class Traversal {
         continue;
       }
 
-      ret += "this." + name + " = " + new TranspileTypes().toType(v.identifier.getType()) + ";\n";
+      ret += "this." + name + " = " + new TranspileTypes().toType(identifier.getType()) + ";\n";
       if (name === "me") {
         ret += "this.me.set(this);\n";
       }
