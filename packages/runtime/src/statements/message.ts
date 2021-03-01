@@ -1,5 +1,5 @@
 import {ICharacter} from "../types/_character";
-import {SqlJs} from "sql.js/module";
+// import {SqlJs} from "sql.js/module"; todo
 
 export interface IMessageOptions {
   id?: ICharacter | string,
@@ -59,7 +59,7 @@ function replace(text: string, w?: (ICharacter | string)[]): string {
 
 function findText(arbgb: string | undefined, msgnr: string | undefined): string {
   let text: string | undefined = undefined;
-  const db = this.db as SqlJs.Database | undefined;
+  const db = this.db as any | undefined;
   if (db && arbgb && msgnr) {
     try {
       const stmt = db.prepare("SELECT * FROM t100 WHERE sprsl=:sprsl AND arbgb=:arbgb AND msgnr=:msgnr LIMIT 1");
