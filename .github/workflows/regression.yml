@@ -3,11 +3,11 @@ name: Regression
 on:
   push:
     branches-ignore:
-      - 'master'
+      - 'main'
 
 jobs:
   regression:
-    if: github.ref != 'refs/heads/master'
+    if: github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -22,7 +22,7 @@ jobs:
         cp .github/regression/run.js ../../run.js
         npm install && npm run performance
         cp build/performance/results.json ../../results_after.json
-        git checkout -f master
+        git checkout -f main
         git reset --hard
         git status
         npm install && npm run performance
