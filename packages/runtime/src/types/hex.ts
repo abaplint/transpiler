@@ -45,7 +45,7 @@ export class Hex implements ICharacter {
     if (input?.offset) {
       ret = ret.substr(input.offset * 2);
     }
-    if (input?.length) {
+    if (input?.length !== undefined) {
       ret = ret.substr(0, input.length * 2);
     }
     const r = new XString();

@@ -31,7 +31,7 @@ export class String implements ICharacter {
     if (input?.offset) {
       ret = ret.substr(input.offset);
     }
-    if (input?.length) {
+    if (input?.length !== undefined) {
       ret = ret.substr(0, input.length);
     }
     const r = new String();

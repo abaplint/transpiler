@@ -299,4 +299,26 @@ describe("Running expressions - Length and offset", () => {
     expect(abap.console.get()).to.equal("12:34:56");
   });
 
+  it("length zero", async () => {
+    const code = `
+  DATA foo TYPE string.
+  foo = 'abc'.
+  foo = foo(0).
+  ASSERT foo = ''.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("ofset zero", async () => {
+    const code = `
+  DATA foo TYPE string.
+  foo = 'abc'.
+  foo = foo+0.
+  ASSERT foo = 'abc'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
