@@ -18,6 +18,7 @@ export * from "./reverse";
 export * from "./shift_left";
 export * from "./sign";
 export * from "./strlen";
+export * from "./substring_after";
 export * from "./substring_before";
 export * from "./substring";
 export * from "./sy";
