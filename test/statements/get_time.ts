@@ -27,7 +27,7 @@ describe("Running statements - GET TIME", () => {
     await f(abap);
     expect(abap.console.get()).to.not.equal("");
   });
-/*
+
   it("GET TIME FIELD", async () => {
     const code = `
     DATA bar TYPE t.
@@ -38,5 +38,18 @@ describe("Running statements - GET TIME", () => {
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
-*/
+
+  it("GET TIME STAMP FIELD", async () => {
+    const code = `
+    DATA bar TYPE p.
+    GET TIME STAMP FIELD bar.
+    WRITE |{ bar TIMESTAMP = ISO }|.
+    ASSERT NOT bar IS INITIAL.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+//    console.dir(abap.console.get());
+  });
+
 });
