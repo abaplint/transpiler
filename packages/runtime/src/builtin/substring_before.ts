@@ -1,9 +1,18 @@
 import {ICharacter} from "../types/_character";
 import {String} from "../types/string";
 
-export function substring_before(input: {val: ICharacter | string, regex: ICharacter | string}): ICharacter {
+export function substring_before(input: {val: ICharacter | string, sub?: ICharacter | string, regex?: ICharacter | string}): ICharacter {
   const val = typeof input.val === "string" ? input.val : input.val.get();
-  const reg = typeof input.regex === "string" ? input.regex : input.regex.get();
+  let reg = "";
+  if (typeof input.regex === "string") {
+    reg = input.regex;
+  } else if (input?.regex) {
+    reg = input.regex.get();
+  } else if (typeof input.sub === "string") {
+    reg = input.sub;
+  } else if (input?.sub) {
+    reg = input.sub.get();
+  }
 
   const r = new RegExp("(.*?)" + reg);
   const res = val.match(r);

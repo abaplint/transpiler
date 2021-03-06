@@ -28,4 +28,16 @@ describe("Builtin functions - substring_before", () => {
     await f(abap);
   });
 
+  it("substring_before 02", async () => {
+    const code = `
+    DATA res TYPE string.
+    DATA input TYPE string.
+    input = 'foo=bar'.
+    res = substring_before( val = input sub = '=' ).
+    ASSERT res = 'foo'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
