@@ -1,3 +1,4 @@
+import {Character} from "./character";
 import {ICharacter} from "./_character";
 
 export class String implements ICharacter {
@@ -12,6 +13,9 @@ export class String implements ICharacter {
       this.value = value;
     } else if (typeof value === "number" ) {
       this.value = value.toString();
+    } else if (value instanceof Character) {
+      // replace trailing blanks if the source is a Character string
+      this.value = value.get().replace(/[ ]*$/g, "");
     } else {
       this.value = value.get() + "";
     }
