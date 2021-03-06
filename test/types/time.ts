@@ -24,6 +24,15 @@ describe("Running Examples - Time type", () => {
     expect(abap.console.get()).to.equal("000000");
   });
 
+  it("Time initial value", async () => {
+    const code = `
+      DATA time TYPE t.
+      ASSERT time IS INITIAL.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("Time, assignment from character type", async () => {
     const code = `
       DATA time TYPE t.

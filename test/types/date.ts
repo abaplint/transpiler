@@ -24,6 +24,15 @@ describe("Running Examples - Date type", () => {
     expect(abap.console.get()).to.equal("00000000");
   });
 
+  it("date initial value", async () => {
+    const code = `
+      DATA date TYPE d.
+      ASSERT date IS INITIAL.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("Date, assignment from character type", async () => {
     const code = `
       DATA date TYPE d.
