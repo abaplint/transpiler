@@ -7,7 +7,7 @@ import initSqlJs from "sql.js";
 import {Console} from "./console";
 import {UnitTestResult} from "./unit_test";
 import {OffsetLength} from "./offset_length";
-// import * as fetch from "node-fetch";
+import {templateFormatting} from "./template_formatting";
 
 if (!globalThis.fetch) {
   // @ts-ignore
@@ -29,6 +29,7 @@ export class ABAP {
   public console: Console;
   public db: undefined | any;
   public OffsetLength = OffsetLength;
+  public templateFormatting = templateFormatting;
 
   public constructor() {
     this.console = new Console();
