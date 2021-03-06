@@ -406,19 +406,6 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello");
   });
 
-  it("hex value conversion", async () => {
-    const code = `
-  DATA hex TYPE x.
-  DATA integer TYPE i.
-  hex = 'AA'.
-  integer = hex.
-  ASSERT integer = 170.`;
-
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-  });
-
   it("javascript keyword uses as identifier", async () => {
     const code = `
 data if type i.
