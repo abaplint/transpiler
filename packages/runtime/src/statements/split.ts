@@ -16,6 +16,9 @@ export function split(param: ISplitOptions) {
 
   if (param.table) {
     param.table.clear();
+    if (source.endsWith(at)) {
+      split.pop();
+    }
     for(const s of split) {
       param.table.append(new String().set(s));
     }

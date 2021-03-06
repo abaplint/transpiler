@@ -840,21 +840,6 @@ data1 = data2.`;
     await f(abap);
   });
 
-  it("GET TIME", async () => {
-    const code = `
-    GET TIME.
-    WRITE / sy-datlo.
-    WRITE / sy-datum.
-    WRITE / sy-timlo.
-    WRITE / sy-uzeit.`;
-
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    const result = abap.console.get();
-    expect(result).to.not.equal("");
-  });
-
   it("escape constants", async () => {
     const code = `
   CONSTANTS const TYPE string VALUE '\\'.

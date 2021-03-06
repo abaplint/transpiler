@@ -1,4 +1,11 @@
-export function getTime(): void {
+import {ICharacter} from "../types/_character";
+
+type options = {
+  field?: ICharacter,
+  stamp?: ICharacter
+};
+
+export function getTime(options?: options): void {
 
   const d = new Date();
   const date = d.getUTCFullYear() +
@@ -16,4 +23,11 @@ export function getTime(): void {
   abap.builtin.sy.get().timlo.set(time);
   // @ts-ignore
   abap.builtin.sy.get().uzeit.set(time);
+
+  if (options?.field) {
+    options.field.set(time);
+  }
+  if (options?.stamp) {
+    options.stamp.set(date + time);
+  }
 }

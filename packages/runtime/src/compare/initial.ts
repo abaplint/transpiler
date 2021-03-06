@@ -1,4 +1,4 @@
-import {ABAPObject, DataReference, Structure, Table} from "../types";
+import {ABAPObject, DataReference, Date, Structure, Table, Time} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -7,7 +7,12 @@ export function initial(val: ICharacter | INumeric | string | number | Structure
     return val.array().length === 0;
   } else if (val instanceof DataReference) {
     return val.getPointer() === undefined;
+  } else if (val instanceof Date) {
+    return val.get() === "00000000";
+  } else if (val instanceof Time) {
+    return val.get() === "000000";
   }
+
   if (typeof val === "string") {
     return val === "";
   } else if (typeof val === "number") {

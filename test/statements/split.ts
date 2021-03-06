@@ -103,4 +103,38 @@ describe("Running statements - SPLIT", () => {
     expect(abap.console.get()).to.equal("foo\nbar");
   });
 
+  it("split at A", async () => {
+    const code = `
+DATA lv_str TYPE string.
+DATA lt_str TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+SPLIT |AbarAA| AT |A| INTO TABLE lt_str.
+ASSERT lines( lt_str ) = 3.
+READ TABLE lt_str INDEX 1 INTO lv_str.
+ASSERT lv_str = ''.
+READ TABLE lt_str INDEX 2 INTO lv_str.
+ASSERT lv_str = 'bar'.
+READ TABLE lt_str INDEX 3 INTO lv_str.
+ASSERT lv_str = ''.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("another split", async () => {
+    const code = `
+  DATA lv_str TYPE string.
+  DATA lt_str TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+  SPLIT |fooAAbar| AT |A| INTO TABLE lt_str.
+  ASSERT lines( lt_str ) = 3.
+  READ TABLE lt_str INDEX 1 INTO lv_str.
+  ASSERT lv_str = 'foo'.
+  READ TABLE lt_str INDEX 2 INTO lv_str.
+  ASSERT lv_str = ''.
+  READ TABLE lt_str INDEX 3 INTO lv_str.
+  ASSERT lv_str = 'bar'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
