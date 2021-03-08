@@ -753,4 +753,27 @@ ENDCLASS.`;
     await f(abap);
   });
 
+  it("class constructor, set structured var", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS class_constructor.
+    CLASS-DATA: BEGIN OF bar,
+                  field TYPE string,
+                END OF bar.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD class_constructor.
+    bar-field = 'abc'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  WRITE lcl_bar=>bar-field.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("abc");
+  });
+
 });
