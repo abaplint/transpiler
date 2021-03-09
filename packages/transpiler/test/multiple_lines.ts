@@ -139,7 +139,7 @@ ENDCASE.`;
 `const constant_1 = new abap.types.Integer().set(1);
 const constant_2 = new abap.types.Integer().set(2);
 let unique1 = bar;
-if (abap.compare.eq(unique1, 'foo')) {
+if (abap.compare.eq(unique1, new abap.types.Character({length: 3}).set('foo'))) {
   abap.statements.write(constant_2);
 } else if (abap.compare.eq(unique1, constant_1) || abap.compare.eq(unique1, constant_2)) {
 } else if (abap.compare.eq(unique1, foo)) {
@@ -269,7 +269,7 @@ ENDCLASS.`;
   }
   static async run() {
     let rv_ret = new abap.types.String();
-    rv_ret.set('X');
+    rv_ret.set(new abap.types.Character({length: 1}).set('X'));
     return rv_ret;
   }
 }`;
@@ -353,25 +353,6 @@ lcl_bar.foo = new abap.types.Integer();`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
-  it("method call", async () => {
-    const abap = `
-INTERFACE lif_bar.
-  METHODS moo IMPORTING foo TYPE string EXPORTING bar TYPE string.
-ENDINTERFACE.
-DATA bar TYPE REF TO lif_bar.
-DATA str TYPE string.
-bar->moo( EXPORTING foo = 'abc'
-          IMPORTING bar = str ).`;
-
-    const expected = `class lif_bar {
-}
-let bar = new abap.types.ABAPObject();
-let str = new abap.types.String();
-await bar.get().lif_bar$moo({foo: 'abc', bar: str});`;
-
-    expect(await runSingle(abap)).to.equal(expected);
-  });
-
   it("method call, add default parameter name", async () => {
     const abap = `
 CLASS lcl_bar DEFINITION.
@@ -442,23 +423,6 @@ async function bar() {
   bar.set(await (new lcl_bar()).constructor_({input: constant_42}));
 }`;
 
-    expect(await runSingle(abap)).to.equal(expected);
-  });
-
-  it("FIND REGEX", async () => {
-    const abap = `
-    DATA lv_offset TYPE i.
-    DATA lv_length TYPE i.
-    DATA lv_line TYPE string.
-    DATA lv_count TYPE string.
-    DATA lv_color TYPE string.
-    FIND REGEX 'abc' IN lv_line MATCH OFFSET lv_offset MATCH LENGTH lv_length SUBMATCHES lv_count lv_color.`;
-    const expected = `let lv_offset = new abap.types.Integer();
-let lv_length = new abap.types.Integer();
-let lv_line = new abap.types.String();
-let lv_count = new abap.types.String();
-let lv_color = new abap.types.String();
-abap.statements.find(lv_line, {regex: 'abc', offset: lv_offset, length: lv_length, submatches: [lv_count,lv_color]});`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 

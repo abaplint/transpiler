@@ -1,6 +1,10 @@
 import {ICharacter} from "../types/_character";
 
-export function translate(input: ICharacter, c: string): void {
+export function translate(input: ICharacter, i: ICharacter | string): void {
+  let c = i;
+  if (typeof c !== "string") {
+    c = c.get();
+  }
   if (c === "LOWER") {
     input.set(input.get().toLowerCase());
   } else if (c === "UPPER") {
