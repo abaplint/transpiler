@@ -23,7 +23,11 @@ export class ConstantTranspiler implements IExpressionTranspiler {
     const str = node.findFirstExpression(Expressions.ConstantString);
     if (str) {
       const res = str.getFirstToken().getStr();
-      return this.escape(res);
+      if (res.startsWith("'") && this.addGet === false) {
+        return "new abap.types.Character({length: " + (res.length - 2) + "}).set(" + this.escape(res) + ")";
+      } else {
+        return this.escape(res);
+      }
     }
 
     return "todo, Constant";

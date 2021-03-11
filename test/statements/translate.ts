@@ -50,4 +50,18 @@ WRITE str.`;
     expect(abap.console.get()).to.equal("apps_create_from_manifest");
   });
 
+  it("TRANSLATE USING, str", async () => {
+    const code = `
+    DATA str TYPE string.
+    DATA using TYPE string.
+    using = '/_-_'.
+    str = 'apps/create-from-manifest'.
+    TRANSLATE str USING using.
+    WRITE str.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("apps_create_from_manifest");
+  });
+
 });

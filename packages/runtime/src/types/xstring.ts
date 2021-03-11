@@ -20,7 +20,7 @@ export class XString implements ICharacter {
         const finalLength = Math.ceil(this.value.length / 2 ) * 2;
         this.value = this.value.padStart(finalLength, "0");
       } else {
-        this.value = v;
+        this.set(v);
       }
     }
   }
