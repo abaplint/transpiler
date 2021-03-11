@@ -11,6 +11,10 @@ export interface IDescribeOptions {
 
 export function describe(input: IDescribeOptions) {
   if (input.type) {
+    if (input.field instanceof FieldSymbol) {
+      describe({field: input.field.getPointer(), type: input.type, length: input.length, mode: input.mode});
+      return;
+    }
     if (input.field instanceof Table) {
       input.type.set("h");
     } else if (input.field instanceof Character || typeof input.field === "string") {

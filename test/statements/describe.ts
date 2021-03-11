@@ -101,7 +101,7 @@ describe("Running statements - DESCRIBE", () => {
     await f(abap);
   });
 
-  it("DESCRIBE FIELD 3", async () => {
+  it("appending character to string table should give string", async () => {
     const code = `
   DATA tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
   FIELD-SYMBOLS <bar> TYPE any.
