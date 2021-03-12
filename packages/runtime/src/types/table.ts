@@ -14,7 +14,7 @@ export class LoopIndex {
   }
 }
 
-export type TableRowType = INumeric | Structure | ICharacter | Table | ABAPObject | string | number;
+export type TableRowType = INumeric | Structure | ICharacter | Table | ABAPObject;
 
 export class Table  {
   private value: TableRowType[];
@@ -89,7 +89,9 @@ export class Table  {
 
   public append(item: TableRowType, cloneRow = true) {
     const val = this.getValue(item, cloneRow);
-    this.value.push(val);
+    const p = clone(this.rowType);
+    p.set(val);
+    this.value.push(p);
     return val;
   }
 

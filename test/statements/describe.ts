@@ -75,7 +75,7 @@ describe("Running statements - DESCRIBE", () => {
     expect(abap.console.get()).to.equal("h");
   });
 
-  it("DESCRIBE FIELD", async () => {
+  it("DESCRIBE FIELD 1", async () => {
     const code = `
   DATA f TYPE c LENGTH 4.
   DATA l TYPE i.
@@ -85,6 +85,34 @@ describe("Running statements - DESCRIBE", () => {
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("4");
+  });
+
+  it("DESCRIBE FIELD 2", async () => {
+    const code = `
+    DATA tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+    DATA bar TYPE string.
+    DATA type TYPE c LENGTH 1.
+    APPEND 'foo' TO tab.
+    READ TABLE tab INDEX 1 INTO bar.
+    DESCRIBE FIELD bar TYPE type.
+    ASSERT type = 'g'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("appending character to string table should give string", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+  FIELD-SYMBOLS <bar> TYPE any.
+  DATA type TYPE c LENGTH 1.
+  APPEND 'foo' TO tab.
+  READ TABLE tab INDEX 1 ASSIGNING <bar>.
+  DESCRIBE FIELD <bar> TYPE type.
+  ASSERT type = 'g'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
 });
