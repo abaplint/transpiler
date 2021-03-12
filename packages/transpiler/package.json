@@ -27,7 +27,7 @@
   "author": "abaplint",
   "license": "MIT",
   "dependencies": {
-    "@abaplint/core": "^2.70.2"
+    "@abaplint/core": "^2.71.2"
   },
   "devDependencies": {
     "@types/chai": "^4.2.15",
