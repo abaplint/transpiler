@@ -109,4 +109,24 @@ describe("Running statements - APPEND", () => {
     await f(abap);
   });
 
+  it("APPEND ASSIGNING", async () => {
+    const code = `
+    DATA tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+    DATA tab2 TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+    FIELD-SYMBOLS <lv_line> LIKE LINE OF tab.
+    FIELD-SYMBOLS <lv_line_c>  LIKE LINE OF tab.
+    APPEND 'bar' TO tab.
+    LOOP AT tab ASSIGNING <lv_line>.
+      APPEND <lv_line> TO tab2 ASSIGNING <lv_line_c>.
+      <lv_line_c> = |foo|.
+    ENDLOOP.
+    LOOP AT tab2 ASSIGNING <lv_line>.
+      WRITE <lv_line>.
+    ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("foo");
+  });
+
 });
