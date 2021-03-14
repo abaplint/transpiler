@@ -15,7 +15,11 @@ export function append(input: IAppendOptions) {
   } else {
     const val = input.target.append(input.source);
     if (input.assigning) {
-      input.assigning.assign(val);
+      if (val instanceof FieldSymbol) {
+        input.assigning.assign(val.getPointer());
+      } else {
+        input.assigning.assign(val);
+      }
     }
   }
 }

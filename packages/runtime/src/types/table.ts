@@ -5,6 +5,7 @@ import {ABAPObject} from "./abap_object";
 import {String} from "./string";
 import {clone} from "../clone";
 import {Structure} from "./structure";
+import {FieldSymbol} from "./field_symbol";
 
 export class LoopIndex {
   public index: number;
@@ -88,11 +89,20 @@ export class Table  {
   }
 
   public append(item: TableRowType, cloneRow = true) {
-    const val = this.getValue(item, cloneRow);
-    const p = clone(this.rowType);
-    p.set(val);
-    this.value.push(p);
-    return val;
+    if (item instanceof FieldSymbol) {
+      const p = item.getPointer();
+      if (p === undefined) {
+        throw new Error("APPEND, fs not assigned");
+      }
+      this.value.push(p);
+      return item;
+    } else {
+      const val = this.getValue(item, cloneRow);
+      const p = clone(this.rowType);
+      p.set(val);
+      this.value.push(p);
+      return val;
+    }
   }
 
   public appendInitial() {
