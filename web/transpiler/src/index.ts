@@ -1,3 +1,17 @@
+// @ts-ignore
+global.MonacoEnvironment = {
+  globalAPI: true,
+  getWorkerUrl: function (_moduleId: any, label: any) {
+    if (label === "json") {
+      return "./json.worker.bundle.js";
+    }
+    if (label === "typescript" || label === "javascript") {
+      return "./ts.worker.bundle.js";
+    }
+    return "./editor.worker.bundle.js";
+  },
+};
+
 import "./index.css";
 import * as monaco from "monaco-editor";
 import {config, Transpiler} from "@abaplint/transpiler";
@@ -5,16 +19,6 @@ import {ABAP} from "@abaplint/runtime";
 import * as abaplint from "@abaplint/core";
 import * as abapMonaco from "@abaplint/monaco";
 import Split from "split-grid";
-
-// @ts-ignore
-self.MonacoEnvironment = {
-  getWorkerUrl: function(_moduleId, label) {
-    if (label === "typescript" || label === "javascript") {
-      return "./ts.worker.bundle.js";
-    }
-    return "./editor.worker.bundle.js";
-  },
-};
 
 const reg = new abaplint.Registry(new abaplint.Config(JSON.stringify(config)));
 abapMonaco.registerABAP(reg);
