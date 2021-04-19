@@ -47,7 +47,7 @@ export * from "./insert_database";
 export * from "./insert_internal";
 export * from "./loop";
 export * from "./message";
-export * from "./method";
+export * from "./method_implementation";
 export * from "./modify_database";
 export * from "./modify_internal";
 export * from "./move";

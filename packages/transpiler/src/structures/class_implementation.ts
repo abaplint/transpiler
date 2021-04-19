@@ -25,7 +25,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
 ///////////////////////////////
 
   private hasConstructor(node: abaplint.Nodes.StructureNode): boolean {
-    for (const m of node.findAllStatements(abaplint.Statements.Method)) {
+    for (const m of node.findAllStatements(abaplint.Statements.MethodImplementation)) {
       const name = m.findFirstExpression(abaplint.Expressions.MethodName)?.getFirstToken().getStr();
       if (name?.toUpperCase() === "CONSTRUCTOR") {
         return true;

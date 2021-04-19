@@ -3,7 +3,7 @@ import {IStatementTranspiler} from "./_statement_transpiler";
 import {TranspileTypes} from "../types";
 import {Traversal} from "../traversal";
 
-export class MethodTranspiler implements IStatementTranspiler {
+export class MethodImplementationTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
     const token = node.findFirstExpression(abaplint.Expressions.MethodName)!.getFirstToken();
