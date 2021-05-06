@@ -171,7 +171,7 @@ export class Transpiler {
         result = result.substring(0, result.length - 1);
       }
 
-      const filename = file.getFilename().replace(".abap", ".js");
+      const filename = file.getFilename().replace(".abap", ".mjs");
 
       const output: IOutputFile = {
         object: {name: obj.getName(), type: obj.getType()},
@@ -194,12 +194,13 @@ export class Transpiler {
     let contents = "";
     for (const r of output.requires) {
       const name = r.name.toLowerCase();
-      const filename = r.filename.replace(".abap", ".js");
-      contents += "const " + name + " = require(\"./" + filename + "\")." + name + ";\n";
+      const filename = r.filename.replace(".abap", ".mjs");
+      contents += "const {" + name + "} = await import(\"./" + filename + "\");\n";
     }
     contents += output.js.contents;
     if (output.exports.length > 0) {
-      contents += "\nmodule.exports = {" + output.exports.join(", ") + "};";
+//      contents += "\nmodule.exports = {" + output.exports.join(", ") + "};";
+      contents += "\nexport {" + output.exports.join(", ") + "};";
     }
     return contents;
   }

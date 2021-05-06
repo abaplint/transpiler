@@ -18,9 +18,12 @@ if (!globalThis.fetch) {
 export {UnitTestResult};
 
 export class ABAP {
+// global objects
   public FunctionModules = {};
   public Classes = {};
+  public Interfaces = {};
 
+// stuff for runtime
   public statements;
   public types = types;
   public builtin = builtin;

@@ -63,7 +63,7 @@ async function run() {
   console.log(output.objects.length + " files written");
 
   if (config.write_unit_tests === true) {
-    fs.writeFileSync(outputFolder + path.sep + "index.js", output.unitTest);
+    fs.writeFileSync(outputFolder + path.sep + "index.mjs", output.unitTest);
   }
 }
 

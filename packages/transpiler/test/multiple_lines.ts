@@ -62,7 +62,8 @@ describe("Multiple lines", () => {
   }
   async moo() {
   }
-}`;
+}
+abap.Classes['LCL_FOOBAR'] = lcl_foobar;`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });
@@ -91,7 +92,8 @@ describe("Multiple lines", () => {
     let iv_foo = new abap.types.String();
     if (INPUT && INPUT.iv_foo) {iv_foo.set(INPUT.iv_foo);}
   }
-}`;
+}
+abap.Classes['LCL_FOOBAR'] = lcl_foobar;`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });
@@ -120,7 +122,8 @@ describe("Multiple lines", () => {
     let rv_foo = new abap.types.String();
     return rv_foo;
   }
-}`;
+}
+abap.Classes['LCL_FOOBAR'] = lcl_foobar;`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });
@@ -166,6 +169,7 @@ CREATE OBJECT foo.`;
     return this;
   }
 }
+abap.Classes['ZCL_WORDS'] = zcl_words;
 let foo = new abap.types.ABAPObject();
 foo.set(await (new zcl_words()).constructor_());`;
 
@@ -207,7 +211,8 @@ DATA moo TYPE foo.`;
   async run() {
     abap.statements.write(this.bar);
   }
-}`;
+}
+abap.Classes['ZCL_WORDS'] = zcl_words;`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });
@@ -237,7 +242,8 @@ class zcl_words {
     abap.statements.write(this.bar);
     return this;
   }
-}`;
+}
+abap.Classes['ZCL_WORDS'] = zcl_words;`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });
@@ -272,7 +278,8 @@ ENDCLASS.`;
     rv_ret.set(new abap.types.Character({length: 1}).set('X'));
     return rv_ret;
   }
-}`;
+}
+abap.Classes['ZCL_RET'] = zcl_ret;`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });
@@ -326,6 +333,7 @@ class zcl_ret {
     return this;
   }
 }
+abap.Classes['ZCL_RET'] = zcl_ret;
 zcl_ret.c_maxdcodes = new abap.types.Integer();
 zcl_ret.c_maxdcodes.set(30);`;
 
@@ -348,6 +356,7 @@ ENDCLASS.`;
     return this;
   }
 }
+abap.Classes['LCL_BAR'] = lcl_bar;
 lcl_bar.foo = new abap.types.Integer();`;
 
     expect(await runSingle(abap)).to.equal(expected);
@@ -383,6 +392,7 @@ class lcl_bar {
     if (INPUT && INPUT.imp) {imp.set(INPUT.imp);}
   }
 }
+abap.Classes['LCL_BAR'] = lcl_bar;
 async function bar() {
   await lcl_bar.bar({imp: constant_2});
 }`;
@@ -418,6 +428,7 @@ class lcl_bar {
     return this;
   }
 }
+abap.Classes['LCL_BAR'] = lcl_bar;
 async function bar() {
   let bar = new abap.types.ABAPObject();
   bar.set(await (new lcl_bar()).constructor_({input: constant_42}));
@@ -441,6 +452,7 @@ async function bar() {
     return this;
   }
 }
+abap.Classes['LCL_BAR'] = lcl_bar;
 lcl_bar.foo = new abap.types.String();
 lcl_bar.foo.set('\\'');`;
     expect(await runSingle(abap)).to.equal(expected);
