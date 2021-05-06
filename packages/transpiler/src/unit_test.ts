@@ -5,9 +5,12 @@ export type SkipSettings = {object: string, class: string, method: string}[];
 export class UnitTest {
 
   public run(reg: abaplint.IRegistry, dbSetup: string, skip?: SkipSettings): string {
-    let ret = `const fs = require("fs");
-const path = require("path");
-const runtime = require("@abaplint/runtime");
+    let ret = `import fs from "fs";
+import path from "path";
+import runtime from "@abaplint/runtime";
+import {dirname} from 'path';
+import {fileURLToPath} from 'url';
+const __dirname = dirname(fileURLToPath(import.meta.url));
 global.abap = new runtime.ABAP();
 async function initDB() {
   return global.abap.initDB(\`${dbSetup}\`);
@@ -30,7 +33,7 @@ try {\n`;
               continue;
             }
             ret += `{
-const ${def.name} = require("./${obj.getName().toLowerCase()}.${obj.getType().toLowerCase()}.testclasses.js").${def.name};
+const {${def.name}} = await import("./${obj.getName().toLowerCase()}.${obj.getType().toLowerCase()}.testclasses.mjs");
 locl = clas.addTestClass("${def.name}");\n`;
 
             if (def.methods.some(m => m.name.toUpperCase() === "CLASS_SETUP")) {
@@ -101,7 +104,7 @@ run().then(() => {
     for (const obj of reg.getObjects()) {
       if (obj instanceof abaplint.Objects.FunctionGroup) {
         for (const m of obj.getModules()) {
-          ret += `require("./${obj.getName().toLowerCase()}.fugr.${m.getName().toLowerCase()}.js");\n`;
+          ret += `require("./${obj.getName().toLowerCase()}.fugr.${m.getName().toLowerCase()}.mjs");\n`;
         }
       }
     }

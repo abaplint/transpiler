@@ -34,11 +34,11 @@ describe("Testing Unit Testing", () => {
       fs.writeFileSync(outputFolder + path.sep + o.js.filename, o.js.contents);
     }
     // hack
-    output.unitTest = output.unitTest.replace(`require("@abaplint/runtime");`,
-                                              `require("../../packages/runtime/build/src/index.js");`);
-    const indexName = outputFolder + path.sep + "index.js";
+    output.unitTest = output.unitTest.replace(`import runtime from "@abaplint/runtime";`,
+                                              `import runtime from "../../packages/runtime/build/src/index.js";`);
+    const indexName = outputFolder + path.sep + "index.mjs";
     fs.writeFileSync(indexName, output.unitTest);
-    const buf = childProcess.execSync("node unit-test/" + name + "/index.js");
+    const buf = childProcess.execSync("node unit-test/" + name + "/index.mjs");
     return buf.toString();
   }
 

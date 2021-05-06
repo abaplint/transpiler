@@ -10,8 +10,8 @@ describe("Files", () => {
     const output = (await new Transpiler().run([file1, file2])).objects;
 
     expect(output.length).to.equal(2);
-    expect(output[0].js.filename).to.equal("zfoo1.prog.js");
-    expect(output[1].js.filename).to.equal("zfoo2.prog.js");
+    expect(output[0].js.filename).to.equal("zfoo1.prog.mjs");
+    expect(output[1].js.filename).to.equal("zfoo2.prog.mjs");
   });
 
   it("Full path file name", async () => {
@@ -21,7 +21,7 @@ describe("Files", () => {
     const output = (await new Transpiler().run([file1])).objects;
 
     expect(output.length).to.equal(1);
-    expect(output[0].js.filename).to.contain("zprogram.prog.js");
+    expect(output[0].js.filename).to.contain("zprogram.prog.mjs");
   });
 
   it("Global Class", async () => {
