@@ -17,6 +17,10 @@ export function replace(input: ICharacter, s: ICharacter | string, r: ICharacter
     replace = r.get();
   }
 
+  if (search.length === 0) {
+    throw "REPLACE, zero length input";
+  }
+
   while(temp.replace(search, replace) !== temp) {
     temp = temp.replace(search, replace);
   }
