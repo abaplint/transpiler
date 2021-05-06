@@ -14,7 +14,9 @@ export class ReplaceTranspiler implements IStatementTranspiler {
 
     const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
 
-    return "abap.statements.replace(" + target + ", " + sources.join(", ") + ");";
+    const all = node.concatTokens().toUpperCase().startsWith("REPLACE ALL");
+
+    return "abap.statements.replace(" + target + ", " + all + ", " + sources.join(", ") + ");";
   }
 
 }

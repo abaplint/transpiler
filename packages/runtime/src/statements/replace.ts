@@ -1,6 +1,6 @@
 import {ICharacter} from "../types/_character";
 
-export function replace(input: ICharacter, s: ICharacter | string, r: ICharacter | string): void {
+export function replace(input: ICharacter, all: boolean, s: ICharacter | string, r: ICharacter | string): void {
   let temp = input.get();
 
   let search: string = "";
@@ -17,11 +17,14 @@ export function replace(input: ICharacter, s: ICharacter | string, r: ICharacter
     replace = r.get();
   }
 
-  if (search.length === 0) {
-    throw "REPLACE, zero length input";
-  }
-
-  while(temp.replace(search, replace) !== temp) {
+  if (all === true) {
+    if (search.length === 0) {
+      throw "REPLACE, zero length input";
+    }
+    while(temp.replace(search, replace) !== temp) {
+      temp = temp.replace(search, replace);
+    }
+  } else {
     temp = temp.replace(search, replace);
   }
 

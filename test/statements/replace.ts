@@ -55,4 +55,16 @@ describe("Running statements - REPLACE", () => {
     await f(abap);
   });
 
+  it("REPLACE FIRST", async () => {
+    const code = `
+  DATA lv_host TYPE string.
+  lv_host = 'abc'.
+  REPLACE FIRST OCCURRENCE OF '' IN lv_host WITH ''.
+  ASSERT lv_host = 'abc'.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
