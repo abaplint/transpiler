@@ -195,7 +195,7 @@ export class Transpiler {
     for (const r of output.requires) {
       const name = r.name.toLowerCase();
       const filename = r.filename.replace(".abap", ".mjs");
-      contents += "const " + name + " = require(\"./" + filename + "\")." + name + ";\n";
+      contents += "const {" + name + "} = await import(\"./" + filename + "\");\n";
     }
     contents += output.js.contents;
     if (output.exports.length > 0) {
