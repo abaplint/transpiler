@@ -63,7 +63,41 @@ describe("Testing Unit Testing", () => {
       {filename: "zcl_client.clas.testclasses.abap", contents: tests},
     ];
     const cons = await dumpNrun(files);
-    expect(cons).to.include("hello world");
+    expect(cons.split("\n")[1]).to.equal("hello world");
+  });
+
+  it("test-2", async () => {
+// instantiating class + using abap.types.Integer
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        METHODS method.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+      METHOD method.
+        DATA int TYPE i.
+        int = 2.
+        WRITE: / 'hello from method', int.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA ref TYPE REF TO zcl_client.
+        CREATE OBJECT ref.
+        ref->method( ).
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("hello from method2");
   });
 
 });
