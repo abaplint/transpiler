@@ -104,7 +104,7 @@ run().then(() => {
     for (const obj of reg.getObjects()) {
       if (obj instanceof abaplint.Objects.FunctionGroup) {
         for (const m of obj.getModules()) {
-          ret += `import "./${obj.getName().toLowerCase()}.fugr.${m.getName().toLowerCase()}.mjs";\n`;
+          ret += `await import("./${obj.getName().toLowerCase()}.fugr.${m.getName().toLowerCase()}.mjs");\n`;
         }
       }
     }
