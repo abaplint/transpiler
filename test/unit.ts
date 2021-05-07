@@ -100,4 +100,73 @@ describe("Testing Unit Testing", () => {
     expect(cons.split("\n")[1]).to.equal("hello from method2");
   });
 
+  it("test-3", async () => {
+// class constructor
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        CLASS-DATA gv_int TYPE i.
+        CLASS-METHODS class_constructor.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+      METHOD class_constructor.
+        gv_int = 42.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        WRITE / zcl_client=>gv_int.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("42");
+  });
+
+  it("test-4", async () => {
+// create object, reference to itself
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        METHODS method.
+        METHODS write.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+      METHOD write.
+        WRITE / 'moo'.
+      ENDMETHOD.
+      METHOD method.
+        DATA ref TYPE REF TO zcl_client.
+        CREATE OBJECT ref.
+        ref->write( ).
+      ENDMETHOD.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA ref TYPE REF TO zcl_client.
+        CREATE OBJECT ref.
+        ref->method( ).
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("moo");
+  });
+
 });
