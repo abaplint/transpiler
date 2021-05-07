@@ -77,7 +77,7 @@ ENDCLASS.
 
     expect(output[1].js.contents).to.include("ltcl_test");
     expect(output[1].exports.length).to.equal(1, "one export expected, testclass");
-    expect(output[1].requires.length).to.equal(1, "one require expected, testclass");
+    expect(output[1].requires.length).to.equal(0);
   });
 
   it("Global Class implementing global intf", async () => {

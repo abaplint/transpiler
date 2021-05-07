@@ -10,12 +10,12 @@ import path from "path";
 import runtime from "@abaplint/runtime";
 import {dirname} from 'path';
 import {fileURLToPath} from 'url';
-const __dirname = dirname(fileURLToPath(import.meta.url));
 global.abap = new runtime.ABAP();
+${this.buildImports(reg)}
+const __dirname = dirname(fileURLToPath(import.meta.url));
 async function initDB() {
   return global.abap.initDB(\`${dbSetup}\`);
 }
-${this.functionGroups(reg)}
 async function run() {
 await initDB();
 const unit = new runtime.UnitTestResult();
@@ -99,13 +99,16 @@ run().then(() => {
     return ret;
   }
 
-  private functionGroups(reg: abaplint.IRegistry): string {
+  private buildImports(reg: abaplint.IRegistry): string {
+// note: es modules are hoised, so use the dynamic import()
     let ret = "";
     for (const obj of reg.getObjects()) {
       if (obj instanceof abaplint.Objects.FunctionGroup) {
         for (const m of obj.getModules()) {
           ret += `await import("./${obj.getName().toLowerCase()}.fugr.${m.getName().toLowerCase()}.mjs");\n`;
         }
+      } else if (obj instanceof abaplint.Objects.Class) {
+        ret += `await import("./${obj.getName().toLowerCase()}.clas.mjs");\n`;
       }
     }
     return ret;

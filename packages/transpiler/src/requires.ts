@@ -8,7 +8,8 @@ export class Requires {
     this.reg = reg;
   }
 
-  public find(obj: abaplint.ABAPObject, node: abaplint.ISpaghettiScopeNode, filename: string): readonly IRequire[] {
+  // todo, refactor this method
+  public find(obj: abaplint.ABAPObject, _node: abaplint.ISpaghettiScopeNode, filename: string): readonly IRequire[] {
     const ret: IRequire[] = [];
 
     if (obj.getType() === "INTF") {
@@ -28,7 +29,25 @@ export class Requires {
       ret.push(req);
     };
 
+// add the superclass
+    if (obj.getType() === "CLAS") {
+      const clas = obj as abaplint.Objects.Class;
+      const sup = clas.getDefinition()?.getSuperClass()?.toLowerCase();
+      if (sup) {
+        add({filename: sup + ".clas.abap", name: sup});
+      }
+      for (const f of clas.getSequencedFiles()) {
+        if (f.getFilename() === filename
+            || f.getFilename().endsWith(".clas.testclasses.abap")
+            || f.getFilename() === clas.getMainABAPFile()?.getFilename()) {
+          continue;
+        }
+        add({filename: f.getFilename(), name: undefined});
+      }
+    }
+
 // this finds all OO references
+/*
     for (const v of node.getData().references) {
       // todo, use the enum from abaplint, when its exported
       if (v.referenceType === "ObjectOrientedReference"
@@ -43,6 +62,7 @@ export class Requires {
         add(f);
       }
     }
+*/
 
     // always add CX_ROOT, it is used for CATCH, no catches in global interfaces
     if (obj.getType() !== "INTF") {

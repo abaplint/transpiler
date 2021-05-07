@@ -28,7 +28,8 @@ describe("Multiple lines", () => {
   ENDINTERFACE.`;
 
     expect(await runSingle(abap)).to.equal(`class lif_foobar {
-}`);
+}
+abap.Classes['LIF_FOOBAR'] = lif_foobar;`);
   });
 
   it("TYPES should be skipped", async () => {

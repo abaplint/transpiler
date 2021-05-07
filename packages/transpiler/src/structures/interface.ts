@@ -7,12 +7,14 @@ export class InterfaceTranspiler implements IStructureTranspiler {
 
   public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): string {
     let ret = "";
+    let name: string | undefined;
     for (const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.Interface) {
-        const name = c.findDirectExpression(abaplint.Expressions.InterfaceName)?.getFirstToken().getStr().toLowerCase();
+        name = c.findDirectExpression(abaplint.Expressions.InterfaceName)?.getFirstToken().getStr().toLowerCase();
         ret += `class ${name} {\n`;
       } else if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.EndInterface) {
         ret += "}\n";
+        ret += `abap.Classes['${name?.toUpperCase()}'] = ${name};\n`;
       }
     }
     ret += this.buildConstants(node.findFirstExpression(abaplint.Expressions.InterfaceName), traversal);
