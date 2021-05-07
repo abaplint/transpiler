@@ -70,7 +70,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     // but this will probably work
     const cdef = traversal.getClassDefinition(node.getFirstToken());
     if (cdef?.getMethodDefinitions().getByName("class_constructor")) {
-      ret += node.getFirstToken().getStr().toLowerCase() + ".class_constructor();\n";
+      ret += "await " + node.getFirstToken().getStr().toLowerCase() + ".class_constructor();\n";
     }
 
     return ret;
