@@ -169,4 +169,109 @@ describe("Testing Unit Testing", () => {
     expect(cons.split("\n")[1]).to.equal("moo");
   });
 
+  it("test-5", async () => {
+// cycles, typedescr instantiates structdescr, structdescr implements typedescr
+    const clas = `
+    CLASS cl_abap_typedescr DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        METHODS method.
+    ENDCLASS.
+    CLASS cl_abap_typedescr IMPLEMENTATION.
+      METHOD method.
+        DATA ref TYPE REF TO cl_abap_structdescr.
+        CREATE OBJECT ref.
+        ref->moo( ).
+      ENDMETHOD.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA ref TYPE REF TO cl_abap_typedescr.
+        CREATE OBJECT ref.
+        ref->method( ).
+      ENDMETHOD.
+    ENDCLASS.`;
+    const stru = `
+    CLASS cl_abap_structdescr DEFINITION PUBLIC INHERITING FROM cl_abap_typedescr.
+      PUBLIC SECTION.
+        METHODS moo.
+    ENDCLASS.
+    CLASS cl_abap_structdescr IMPLEMENTATION.
+      METHOD moo.
+        WRITE / 'done'.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "cl_abap_typedescr.clas.abap", contents: clas},
+      {filename: "cl_abap_typedescr.clas.testclasses.abap", contents: tests},
+      {filename: "cl_abap_structdescr.clas.abap", contents: stru},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("done");
+  });
+
+  it("test-6", async () => {
+// static method call
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        CLASS-METHODS method.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+      METHOD method.
+        WRITE / 'moo'.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        zcl_client=>method( ).
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("moo");
+  });
+
+  it("test-7", async () => {
+// write constant from interface
+    const intf = `
+    INTERFACE if_bar PUBLIC.
+      CONSTANTS value TYPE i VALUE 2.
+    ENDINTERFACE.`;
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        WRITE if_bar=>value.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "if_bar.intf.abap", contents: intf},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("2");
+  });
+
 });

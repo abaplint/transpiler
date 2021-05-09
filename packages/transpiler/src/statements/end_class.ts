@@ -8,7 +8,8 @@ export class EndClassTranspiler implements IStatementTranspiler {
     const def = traversal.getClassDefinition(node.getFirstToken());
     let ret = "}\n";
     // todo, this might cause local classes to spill to global scope
-    ret += `abap.Classes['${def?.getName().toUpperCase()}'] = ${def?.getName().toLowerCase()};`;
+    ret += traversal.registerClass(def?.getName());
+//    ret += `abap.Classes['${def?.getName().toUpperCase()}'] = ${def?.getName().toLowerCase()};`;
     return ret;
   }
 

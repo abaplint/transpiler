@@ -16,7 +16,9 @@ export class RaiseTranspiler implements IStatementTranspiler {
       p = traversal.traverse(parameters);
     }
 
-    return `throw await (new ${className}()).constructor_(${p});`;
+    const look = traversal.lookupClass(className);
+
+    return `throw await (new ${look}()).constructor_(${p});`;
   }
 
 }

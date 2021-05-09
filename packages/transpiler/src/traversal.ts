@@ -299,6 +299,15 @@ export class Traversal {
     return context;
   }
 
+  public registerClass(name: string | undefined): string {
+    const ret = `abap.Classes['${name?.toUpperCase()}'] = ${name};`;
+    return ret;
+  }
+
+  public lookupClass(name: string | undefined): string {
+    return "abap.Classes['" + name?.toUpperCase() + "']";
+  }
+
 ////////////////////////////
 
   protected traverseStructure(node: abaplint.Nodes.StructureNode): string {

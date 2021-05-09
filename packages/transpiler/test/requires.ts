@@ -32,8 +32,7 @@ ENDCLASS.`;
     expect(output[0].js.contents).to.contain("class zcl_foo ");
     expect(output[1].js.contents).to.contain("class zcl_bar ");
 
-    expect(output[0].requires.length).to.equal(1, "expected one require");
-    expect(output[0].requires[0].filename).to.equal("zcl_bar.clas.abap");
+    expect(output[0].requires.length).to.equal(0);
   });
 
   it("CLAS using CLAS, static reference", async () => {
@@ -74,8 +73,7 @@ ENDCLASS.`;
     expect(output[0].js.contents).to.contain("class zcl_foo ");
     expect(output[1].js.contents).to.contain("class cl_abap_unit_assert ");
 
-    expect(output[0].requires.length).to.equal(1, "expected one require");
-    expect(output[0].requires[0].filename).to.equal("cl_abap_unit_assert.clas.abap");
+    expect(output[0].requires.length).to.equal(0, "expected one require");
   });
 
   it("Dont require itself", async () => {

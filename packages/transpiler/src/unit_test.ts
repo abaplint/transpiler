@@ -10,12 +10,12 @@ import path from "path";
 import runtime from "@abaplint/runtime";
 import {dirname} from 'path';
 import {fileURLToPath} from 'url';
-const __dirname = dirname(fileURLToPath(import.meta.url));
 global.abap = new runtime.ABAP();
+${this.buildImports(reg)}
+const __dirname = dirname(fileURLToPath(import.meta.url));
 async function initDB() {
   return global.abap.initDB(\`${dbSetup}\`);
 }
-${this.functionGroups(reg)}
 async function run() {
 await initDB();
 const unit = new runtime.UnitTestResult();
@@ -99,16 +99,37 @@ run().then(() => {
     return ret;
   }
 
-  private functionGroups(reg: abaplint.IRegistry): string {
-    let ret = "";
+  private buildImports(reg: abaplint.IRegistry): string {
+// note: es modules are hoised, so use the dynamic import()
+
+// todo, some sorting might be required? eg. a class constructor using constant from interface?
+
+// temporary sorting:
+// 1: dependency interfaces
+// 2: dependency classes
+// 3: interfaces
+// 4: classes
+// 5: function groups
+
+    const list: {sort: number, code: string}[] = [];
+
     for (const obj of reg.getObjects()) {
       if (obj instanceof abaplint.Objects.FunctionGroup) {
         for (const m of obj.getModules()) {
-          ret += `await import("./${obj.getName().toLowerCase()}.fugr.${m.getName().toLowerCase()}.mjs");\n`;
+          list.push({sort: 5, code: `await import("./${obj.getName().toLowerCase()}.fugr.${m.getName().toLowerCase()}.mjs");`});
         }
+      } else if (obj instanceof abaplint.Objects.Class) {
+        const sort = reg.isDependency(obj) ? 2 : 4;
+        list.push({sort, code: `await import("./${obj.getName().toLowerCase()}.clas.mjs");`});
+      } else if (obj instanceof abaplint.Objects.Interface) {
+        const sort = reg.isDependency(obj) ? 1 : 3;
+        list.push({sort, code: `await import("./${obj.getName().toLowerCase()}.intf.mjs");`});
       }
     }
-    return ret;
+
+    list.sort((a, b) => { return a.sort - b.sort; });
+
+    return list.map(a => a.code).join("\n") + "\n";
   }
 
 }

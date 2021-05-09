@@ -6,7 +6,7 @@ import {Requires} from "./requires";
 import {SkipSettings, UnitTest} from "./unit_test";
 import {Keywords} from "./keywords";
 import {DatabaseSetup} from "./database_setup";
-import  {Rearranger} from "./rearranger";
+import {Rearranger} from "./rearranger";
 
 export {config};
 
@@ -29,7 +29,7 @@ export interface IOutput {
 }
 
 export interface IRequire {
-  name: string,
+  name: string | undefined,
   filename: string,
 }
 
@@ -193,9 +193,13 @@ export class Transpiler {
   protected addCommonJS(output: IOutputFile): string {
     let contents = "";
     for (const r of output.requires) {
-      const name = r.name.toLowerCase();
+      const name = r.name?.toLowerCase();
       const filename = r.filename.replace(".abap", ".mjs");
-      contents += "const {" + name + "} = await import(\"./" + filename + "\");\n";
+      if (name) {
+        contents += "const {" + name + "} = await import(\"./" + filename + "\");\n";
+      } else {
+        contents += "await import(\"./" + filename + "\");\n";
+      }
     }
     contents += output.js.contents;
     if (output.exports.length > 0) {
