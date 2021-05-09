@@ -23,7 +23,8 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
         ret = ret + new FieldSymbolTranspiler().transpile(c, traversal);
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.ClassName) {
 //        ret += c.getFirstToken().getStr().toLowerCase() + ".";
-        ret += "abap.Classes['" + c.getFirstToken().getStr().toUpperCase() + "'].";
+//        ret += "abap.Classes['" + c.getFirstToken().getStr().toUpperCase() + "'].";
+        ret += traversal.lookupClass(c.getFirstToken().getStr()) + ".";
       } else if (c.get() instanceof Expressions.AttributeName) {
         const interfaceName = traversal.isInterfaceAttribute(c.getFirstToken());
         let name = c.getFirstToken().getStr().replace("~", "$");
