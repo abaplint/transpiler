@@ -101,6 +101,7 @@ run().then(() => {
 
   private buildImports(reg: abaplint.IRegistry): string {
 // note: es modules are hoised, so use the dynamic import()
+
 // todo, some sorting might be required? eg. a class constructor using constant from interface?
 
 // temporary sorting:
@@ -118,9 +119,11 @@ run().then(() => {
           list.push({sort: 5, code: `await import("./${obj.getName().toLowerCase()}.fugr.${m.getName().toLowerCase()}.mjs");`});
         }
       } else if (obj instanceof abaplint.Objects.Class) {
-        list.push({sort: 5, code: `await import("./${obj.getName().toLowerCase()}.clas.mjs");`});
+        const sort = reg.isDependency(obj) ? 2 : 4;
+        list.push({sort, code: `await import("./${obj.getName().toLowerCase()}.clas.mjs");`});
       } else if (obj instanceof abaplint.Objects.Interface) {
-        list.push({sort: 5, code: `await import("./${obj.getName().toLowerCase()}.intf.mjs");`});
+        const sort = reg.isDependency(obj) ? 1 : 3;
+        list.push({sort, code: `await import("./${obj.getName().toLowerCase()}.intf.mjs");`});
       }
     }
 
