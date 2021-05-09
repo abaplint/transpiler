@@ -101,6 +101,7 @@ run().then(() => {
 
   private buildImports(reg: abaplint.IRegistry): string {
 // note: es modules are hoised, so use the dynamic import()
+// todo, some sorting might be required? eg. a class constructor using constant from interface?
     let ret = "";
     for (const obj of reg.getObjects()) {
       if (obj instanceof abaplint.Objects.FunctionGroup) {
@@ -109,6 +110,8 @@ run().then(() => {
         }
       } else if (obj instanceof abaplint.Objects.Class) {
         ret += `await import("./${obj.getName().toLowerCase()}.clas.mjs");\n`;
+      } else if (obj instanceof abaplint.Objects.Interface) {
+        ret += `await import("./${obj.getName().toLowerCase()}.intf.mjs");\n`;
       }
     }
     return ret;

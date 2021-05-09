@@ -244,4 +244,34 @@ describe("Testing Unit Testing", () => {
     expect(cons.split("\n")[1]).to.equal("moo");
   });
 
+  it("test-7", async () => {
+// write constant from interface
+    const intf = `
+    INTERFACE if_bar PUBLIC.
+      CONSTANTS value TYPE i VALUE 2.
+    ENDINTERFACE.`;
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        WRITE if_bar=>value.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "if_bar.intf.abap", contents: intf},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("2");
+  });
+
 });
