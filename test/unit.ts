@@ -214,4 +214,34 @@ describe("Testing Unit Testing", () => {
     expect(cons.split("\n")[1]).to.equal("done");
   });
 
+  it("test-6", async () => {
+// static method call
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        CLASS-METHODS method.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+      METHOD method.
+        WRITE / 'moo'.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        zcl_client=>method( ).
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("moo");
+  });
+
 });

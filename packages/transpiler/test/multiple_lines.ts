@@ -395,7 +395,7 @@ class lcl_bar {
 }
 abap.Classes['LCL_BAR'] = lcl_bar;
 async function bar() {
-  await lcl_bar.bar({imp: constant_2});
+  await abap.Classes['LCL_BAR'].bar({imp: constant_2});
 }`;
 
     expect(await runSingle(abap)).to.equal(expected);

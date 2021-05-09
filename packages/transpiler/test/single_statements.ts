@@ -78,7 +78,7 @@ describe("Single statements", () => {
     {abap: "IF ls_request-body = ''.\nENDIF.",        js: "if (abap.compare.eq(ls_request.get().body, new abap.types.Character({length: 0}).set(''))) {\n}",  skip: false},
     {abap: "CONCATENATE 'foo' 'bar' INTO target.",    js: "abap.statements.concatenate({source: [new abap.types.Character({length: 3}).set('foo'),new abap.types.Character({length: 3}).set('bar')], target: target});", skip: false},
     {abap: "CONCATENATE foo bar INTO tg SEPARATED BY space.",    js: "abap.statements.concatenate({source: [foo,bar], target: tg, separatedBy: abap.builtin.space});", skip: false},
-    {abap: "zcl_bar=>do_something( ).",               js: "await zcl_bar.do_something();",                               skip: false},
+    {abap: "zcl_bar=>do_something( ).",               js: "await abap.Classes['ZCL_BAR'].do_something();",                               skip: false},
     {abap: "SET BIT foo OF bar.",                     js: "abap.statements.setBit(foo, bar);",                     skip: false},
     {abap: "SET BIT foo OF bar TO moo.",              js: "abap.statements.setBit(foo, bar, moo);",                skip: false},
     {abap: "GET BIT foo OF bar INTO moo.",            js: "abap.statements.getBit(foo, bar, moo);",                skip: false},
