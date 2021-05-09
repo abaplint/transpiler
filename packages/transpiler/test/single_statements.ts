@@ -133,7 +133,7 @@ describe("Single statements", () => {
       js: `abap.statements.message({into: lv_dummy, id: "00", number: "058", type: "E", with: [new abap.types.Character({length: 7}).set('Value_1'),new abap.types.Character({length: 7}).set('Value_2'),new abap.types.Character({length: 7}).set('Value_3'),new abap.types.Character({length: 7}).set('Value_4')]});`, skip: false},
     {abap: "MESSAGE ID sy-msgid TYPE 'S' NUMBER sy-msgno WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4 INTO rv_text.",
       js: `abap.statements.message({into: rv_text, id: abap.builtin.sy.get().msgid, type: new abap.types.Character({length: 1}).set('S'), number: abap.builtin.sy.get().msgno, with: [abap.builtin.sy.get().msgv1,abap.builtin.sy.get().msgv2,abap.builtin.sy.get().msgv3,abap.builtin.sy.get().msgv4]});`, skip: false},
-    {abap: "RAISE EXCEPTION TYPE zcx_foobar EXPORTING foo = bar.", js: `throw await (new zcx_foobar()).constructor_({foo: bar});`, skip: false},
+    {abap: "RAISE EXCEPTION TYPE zcx_foobar EXPORTING foo = bar.", js: `throw await (new abap.Classes['ZCX_FOOBAR']()).constructor_({foo: bar});`, skip: false},
     {abap: "CLASS ltcl_test DEFINITION DEFERRED.", js: ``, skip: false},
     {abap: "CLASS sdfsdf DEFINITION LOCAL FRIENDS ltcl_test ltcl_split_text.", js: ``, skip: false},
     {abap: "if_bar~field = 2.",                      js: `if_bar$field.set(constant_2);`, skip: false},
