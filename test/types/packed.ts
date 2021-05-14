@@ -55,4 +55,14 @@ ASSERT foo = '12345'.`;
     await f(abap);
   });
 
+  it("testing length", async () => {
+    const code = `
+  DATA lv_timestamp TYPE p LENGTH 8.
+  lv_timestamp = '19500505185024'.
+  ASSERT lv_timestamp = '19500505185024'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

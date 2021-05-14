@@ -23,6 +23,7 @@ import {getTime} from "./get_time";
 import {translate} from "./translate";
 import {write} from "./write";
 import {Console} from "../console";
+import {convert} from "./convert";
 
 // this is a class, as statements like SELECT needs access to the database object instance
 // and WRITE will access the Console
@@ -34,6 +35,7 @@ export class Statements {
   public getTime = getTime;
   public concatenate = concatenate;
   public condense = condense;
+  public convert = convert;
   public deleteInternal = deleteInternal;
   public insertInternal = insertInternal;
   public describe = describe;
