@@ -34,4 +34,14 @@ ASSERT foo = '12345'.`;
     await f(abap);
   });
 
+  it("compare value, different lengths", async () => {
+    const code = `
+  DATA foo TYPE p LENGTH 2.
+  DATA bar TYPE p LENGTH 4.
+  ASSERT foo = bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

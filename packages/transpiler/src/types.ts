@@ -55,6 +55,7 @@ export class TranspileTypes {
       }
     } else if (type instanceof abaplint.BasicTypes.PackedType) {
       resolved = "Packed";
+      extra = "{length: " + type.getLength() + ", decimals: " + type.getDecimals() + "}";
     } else if (type instanceof abaplint.BasicTypes.XStringType) {
       resolved = "XString";
     } else if (type instanceof abaplint.BasicTypes.XSequenceType) {
