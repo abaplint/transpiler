@@ -148,6 +148,8 @@ describe("Single statements", () => {
     {abap: "SELECT SINGLE * FROM t100 INTO ls_result.", js: `abap.statements.select(ls_result, "SELECT * FROM t100 LIMIT 1");`},
     {abap: "ASSERT NOT foo EQ bar.",     js: `abap.statements.assert(!abap.compare.eq(foo, bar));`, skip: false},
     {abap: "GET REFERENCE OF blah INTO ref.", js: `ref.assign(blah);`, skip: false},
+    {abap: "CONVERT DATE lv_date TIME lv_time INTO TIME STAMP lv_timestamp TIME ZONE lv_utc.",
+      js: `abap.statements.convert({date: lv_date,time: lv_time,zone: lv_utc}, {stamp: lv_timestamp});`, skip: false},
   ];
 
   for (const test of tests) {
