@@ -13,7 +13,7 @@ describe("Running statements - CONVERT", () => {
     abap = new ABAP();
   });
 
-  it.only("test 01", async () => {
+  it("test 01", async () => {
     const code = `
     DATA lv_date TYPE d.
     DATA lv_time TYPE t.
