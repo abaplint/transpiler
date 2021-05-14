@@ -4,7 +4,6 @@ import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
-
 async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
 }
