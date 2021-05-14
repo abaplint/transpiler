@@ -13,7 +13,7 @@ export class Packed implements INumeric {
       this.length = input.length;
     }
 
-    this.decimals = 666;
+    this.decimals = 0;
     if (input?.decimals) {
       this.decimals = input.decimals;
     }
