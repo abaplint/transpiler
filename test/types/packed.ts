@@ -44,4 +44,14 @@ ASSERT foo = '12345'.`;
     await f(abap);
   });
 
+  it("long value", async () => {
+    const code = `
+  DATA pack TYPE p LENGTH 15.
+  pack = '19710201012320'.
+  ASSERT pack = '19710201012320'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
