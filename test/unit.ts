@@ -274,4 +274,42 @@ describe("Testing Unit Testing", () => {
     expect(cons.split("\n")[1]).to.equal("2");
   });
 
+  it("test-8", async () => {
+// CLAS locals includes
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        lcl_mapping_camel=>run( ).
+      ENDMETHOD.
+    ENDCLASS.`;
+    const def = `
+    CLASS lcl_mapping_camel DEFINITION.
+      PUBLIC SECTION.
+        CLASS-METHODS run.
+    ENDCLASS.`;
+    const imp = `
+    CLASS lcl_mapping_camel IMPLEMENTATION.
+      METHOD run.
+        WRITE 'from impl'.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "zcl_client.clas.locals_def.abap", contents: def},
+      {filename: "zcl_client.clas.locals_imp.abap", contents: imp},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("from impl");
+  });
+
 });

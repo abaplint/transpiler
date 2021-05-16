@@ -149,7 +149,7 @@ export class Transpiler {
   protected runObject(obj: abaplint.ABAPObject, reg: abaplint.IRegistry): IOutputFile[] {
     const spaghetti = new abaplint.SyntaxLogic(reg, obj).run().spaghetti;
 
-    const ret: IOutputFile[] = [];
+    let ret: IOutputFile[] = [];
 
     for (const file of obj.getSequencedFiles()) {
       let exports: string[] = [];
@@ -180,21 +180,71 @@ export class Transpiler {
         exports,
       };
 
-      if (this.options?.addCommonJS === true) {
-        output.js.contents = this.addCommonJS(output);
-      }
       ret.push(output);
+    }
+
+    ret = this.rearrangeClassLocals(obj, ret);
+
+    if (this.options?.addCommonJS === true) {
+      ret.map(output => output.js.contents = this.addImportsAndExports(output));
     }
 
     return ret;
   }
 
-  /** adds common js modules syntax */
-  protected addCommonJS(output: IOutputFile): string {
+  /** merges the locals def and imp into one mjs file */
+  private rearrangeClassLocals(obj: abaplint.ABAPObject, output: IOutputFile[]): IOutputFile[] {
+    const ret: IOutputFile[] = [];
+    if (obj.getType() !== "CLAS") {
+      return output;
+    }
+
+    let imp: IOutputFile | undefined = undefined;
+    let def: IOutputFile | undefined = undefined;
+    for (const o of output) {
+      if (o.js.filename.endsWith(".clas.locals_imp.mjs")) {
+        imp = o;
+      } else if (o.js.filename.endsWith(".clas.locals_def.mjs")) {
+        def = o;
+      } else {
+        ret.push(o);
+      }
+    }
+
+    if (def) {
+      def.js.filename = def.js.filename.replace(".locals_def.mjs", ".locals.mjs");
+    }
+    if (imp) {
+      imp.js.filename = imp.js.filename.replace(".locals_imp.mjs", ".locals.mjs");
+    }
+
+    if (imp && def) {
+      ret.push({
+        object: imp.object,
+        js: {
+          filename: imp.js.filename,
+          contents: def.js.contents + imp.js.contents,
+        },
+        requires: def.requires.concat(imp.requires),
+        exports: def.exports.concat(imp.exports),
+      });
+    } else if (imp) {
+      ret.push(imp);
+    } else if (def) {
+      ret.push(def);
+    }
+
+    return ret;
+  }
+
+  protected addImportsAndExports(output: IOutputFile): string {
     let contents = "";
     for (const r of output.requires) {
       const name = r.name?.toLowerCase();
       const filename = r.filename.replace(".abap", ".mjs");
+      if (filename === output.js.filename) {
+        continue;
+      }
       if (name) {
         contents += "const {" + name + "} = await import(\"./" + filename + "\");\n";
       } else {
@@ -203,7 +253,6 @@ export class Transpiler {
     }
     contents += output.js.contents;
     if (output.exports.length > 0) {
-//      contents += "\nmodule.exports = {" + output.exports.join(", ") + "};";
       contents += "\nexport {" + output.exports.join(", ") + "};";
     }
     return contents;
