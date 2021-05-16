@@ -1,6 +1,5 @@
 # Design Notes
 
-
 * `await` all method/form/fm calls
 * as all method calls are `await` the default JS constructor cannot be used => `constructor_`
 * Interfaces required foraccess to eg. constants
