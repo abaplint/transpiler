@@ -42,7 +42,13 @@ export class Requires {
             || f.getFilename() === clas.getMainABAPFile()?.getFilename()) {
           continue;
         }
-        add({filename: f.getFilename(), name: undefined});
+        let foo = f.getFilename();
+        foo = foo.replace(".clas.locals_imp.abap", ".clas.locals.abap");
+        foo = foo.replace(".clas.locals_def.abap", ".clas.locals.abap");
+        add({
+          filename: foo,
+          name: undefined,
+        });
       }
     }
 
@@ -70,7 +76,10 @@ export class Requires {
       if (cx && cx instanceof abaplint.ABAPObject) {
         const main = cx.getMainABAPFile()?.getFilename();
         if (main) {
-          add({filename: main, name: cx.getName().toLowerCase()});
+          add({
+            filename: main,
+            name: cx.getName().toLowerCase(),
+          });
         }
       }
     }

@@ -126,8 +126,8 @@ ENDCLASS.`;
 
     const output = (await new Transpiler().run(files)).objects;
     expect(output.length).to.equal(2);
-    expect(output[1].js.contents).to.contain("class zcl_locals ");
-    expect(output[1].requires.length).to.equal(1, "expected local require");
+    expect(output[0].js.contents).to.contain("class zcl_locals ");
+    expect(output[0].requires.length).to.equal(1, "expected local require");
   });
 
 });

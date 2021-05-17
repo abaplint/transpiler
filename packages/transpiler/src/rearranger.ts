@@ -1,5 +1,7 @@
 import {Expressions, INode, Nodes} from "@abaplint/core";
 
+// this rearranges the AST to take precedence into account
+
 export class Rearranger {
 
   public run(node: Nodes.StructureNode | undefined): Nodes.StructureNode | undefined {
