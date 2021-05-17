@@ -219,13 +219,21 @@ export class Transpiler {
     }
 
     if (imp && def) {
+// remove duplicates
+      const requires = [...def.requires];
+      for (const r of imp.requires) {
+        if (requires.find(a => a.filename === r.filename && a.name === r.name) === undefined) {
+          requires.push(r);
+        }
+      }
+
       ret.push({
         object: imp.object,
         js: {
           filename: imp.js.filename,
           contents: def.js.contents + imp.js.contents,
         },
-        requires: def.requires.concat(imp.requires),
+        requires,
         exports: def.exports.concat(imp.exports),
       });
     } else if (imp) {

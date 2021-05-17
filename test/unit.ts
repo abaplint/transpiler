@@ -302,7 +302,13 @@ describe("Testing Unit Testing", () => {
         WRITE 'from impl'.
       ENDMETHOD.
     ENDCLASS.`;
+    const cxroot = `
+    CLASS cx_root DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS cx_root IMPLEMENTATION.
+    ENDCLASS.`;
     const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
       {filename: "zcl_client.clas.abap", contents: clas},
       {filename: "zcl_client.clas.locals_def.abap", contents: def},
       {filename: "zcl_client.clas.locals_imp.abap", contents: imp},
