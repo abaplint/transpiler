@@ -13,6 +13,8 @@ export class Integer implements INumeric {
   public set(value: INumeric | ICharacter | Hex | string | number) {
     if (typeof value === "number") {
       this.value = value;
+    } else if (typeof value === "string" && value.trim().length === 0) {
+      this.value = 0;
     } else if (typeof value === "string") {
       this.value = parseInt(value, 10);
     } else if (value instanceof Hex || value instanceof XString) {

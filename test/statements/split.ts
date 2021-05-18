@@ -137,4 +137,26 @@ ASSERT lv_str = ''.`;
     await f(abap);
   });
 
+  it("SPLIT, too short", async () => {
+    const code = `
+DATA lv_children TYPE string.
+DATA lv_order TYPE string.
+DATA lv_last TYPE string.
+DATA lv_int TYPE i.
+
+SPLIT '2|3' AT '|' INTO
+  lv_children
+  lv_order
+  lv_last.
+
+lv_int = lv_children.
+WRITE / lv_int.
+lv_int = lv_last.
+WRITE / lv_int.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2\n0");
+  });
+
 });
