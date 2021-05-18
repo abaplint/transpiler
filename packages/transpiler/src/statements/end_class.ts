@@ -7,9 +7,7 @@ export class EndClassTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
     const def = traversal.getClassDefinition(node.getFirstToken());
     let ret = "}\n";
-    // todo, this might cause local classes to spill to global scope
-    ret += traversal.registerClass(def?.getName());
-//    ret += `abap.Classes['${def?.getName().toUpperCase()}'] = ${def?.getName().toLowerCase()};`;
+    ret += traversal.registerClass(def);
     return ret;
   }
 

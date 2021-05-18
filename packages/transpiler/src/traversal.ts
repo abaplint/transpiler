@@ -79,6 +79,20 @@ export class Traversal {
     return node;
   }
 
+  // todo, add explicit return type,
+  public getInterfaceDefinition(token: abaplint.Token): any | undefined {
+    let scope = this.findCurrentScope(token);
+
+    while (scope !== undefined) {
+      if (scope.getIdentifier().stype === abaplint.ScopeType.Interface) {
+        return scope.findInterfaceDefinition(scope?.getIdentifier().sname);
+      }
+      scope = scope.getParent();
+    }
+
+    return undefined;
+  }
+
   public getClassDefinition(token: abaplint.Token): abaplint.IClassDefinition | undefined {
     let scope = this.findCurrentScope(token);
 
@@ -299,8 +313,14 @@ export class Traversal {
     return context;
   }
 
-  public registerClass(name: string | undefined): string {
-    const ret = `abap.Classes['${name?.toUpperCase()}'] = ${name};`;
+////////////////////////////
+
+  public registerClass(def: abaplint.IClassDefinition | undefined): string {
+    if (def === undefined) {
+      return "";
+    }
+    const name = def.getName();
+    const ret = `abap.Classes['${name.toUpperCase()}'] = ${name};`;
     return ret;
   }
 

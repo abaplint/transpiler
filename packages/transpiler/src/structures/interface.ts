@@ -14,7 +14,8 @@ export class InterfaceTranspiler implements IStructureTranspiler {
         ret += `class ${name} {\n`;
       } else if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.EndInterface) {
         ret += "}\n";
-        ret += traversal.registerClass(name);
+        const def = traversal.getInterfaceDefinition(node.getFirstToken());
+        ret += traversal.registerClass(def);
       }
     }
     ret += this.buildConstants(node.findFirstExpression(abaplint.Expressions.InterfaceName), traversal);
