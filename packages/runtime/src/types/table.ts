@@ -6,6 +6,7 @@ import {String} from "./string";
 import {clone} from "../clone";
 import {Structure} from "./structure";
 import {FieldSymbol} from "./field_symbol";
+import {DataReference} from "./data_reference";
 
 export class LoopIndex {
   public index: number;
@@ -95,6 +96,9 @@ export class Table  {
         throw new Error("APPEND, fs not assigned");
       }
       this.value.push(p);
+      return item;
+    } else if (item instanceof DataReference) {
+      this.value.push(item);
       return item;
     } else {
       const val = this.getValue(item, cloneRow);
