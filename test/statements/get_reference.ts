@@ -150,4 +150,54 @@ WRITE <item>-children.`;
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("data references, GET REFERENCE", async () => {
+    const code = `
+TYPES: BEGIN OF ty_data,
+         field TYPE i,
+       END OF ty_data.
+DATA item1 TYPE ty_data.
+DATA item2 TYPE ty_data.
+DATA top TYPE REF TO ty_data.
+DATA stack TYPE STANDARD TABLE OF REF TO ty_data.
+
+GET REFERENCE OF item1 INTO top.
+top->field = 2.
+INSERT top INTO stack INDEX 1.
+
+GET REFERENCE OF item2 INTO top.
+top->field = 3.
+INSERT top INTO stack INDEX 1.
+
+LOOP AT stack INTO top.
+  WRITE / top->field.
+ENDLOOP.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3\n2");
+  });
+
+  it("data references, GET REFERENCE, simpler", async () => {
+    const code = `
+TYPES: BEGIN OF ty_data,
+         field TYPE i,
+       END OF ty_data.
+DATA item1 TYPE ty_data.
+DATA item2 TYPE ty_data.
+DATA top TYPE REF TO ty_data.
+
+GET REFERENCE OF item1 INTO top.
+top->field = 1.
+GET REFERENCE OF item2 INTO top.
+top->field = 2.
+WRITE / item1-field.
+WRITE / item2-field.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2");
+  });
+
 });

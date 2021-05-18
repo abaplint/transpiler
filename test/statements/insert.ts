@@ -107,4 +107,19 @@ describe("Running statements - INSERT", () => {
     expect(abap.console.get()).to.equal("1\n2");
   });
 
+  it("INSERT INDEX", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA int TYPE i.
+  INSERT 1 INTO tab INDEX 1.
+  INSERT 2 INTO tab INDEX 1.
+  LOOP AT tab INTO int.
+    WRITE / int.
+  ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2\n1");
+  });
+
 });
