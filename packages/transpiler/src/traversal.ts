@@ -320,24 +320,47 @@ export class Traversal {
       return "";
     }
     const name = def.getName();
-    const ret = `abap.Classes['${name.toUpperCase()}'] = ${name};`;
-    return ret;
+    if (def.isGlobal() === false) {
+      const prefix = this.buildPrefix(def);
+      return `abap.Classes['${prefix}-${name.toUpperCase()}'] = ${name};`;
+    } else {
+      return `abap.Classes['${name.toUpperCase()}'] = ${name};`;
+    }
   }
 
-  public lookupClass(name: string | undefined, token: abaplint.Token | undefined): string {
+  public lookupClassOrInterface(name: string | undefined, token: abaplint.Token | undefined): string {
     if (name === undefined || token === undefined) {
       return "abap.Classes['undefined']";
     }
 
     const scope = this.findCurrentScopeByToken(token);
-    const def = scope?.findClassDefinition(name);
+
+    // todo, add explicit type,
+    let def: any | undefined = scope?.findClassDefinition(name);
+    if (def === undefined) {
+      def = scope?.findInterfaceDefinition(name);
+    }
 
     if (def) {
-      return "abap.Classes['" + def?.getName()?.toUpperCase() + "']";
+      if (def.isGlobal() === false) {
+        const prefix = this.buildPrefix(def);
+        return `abap.Classes['${prefix}-${def?.getName()?.toUpperCase()}']`;
+      } else {
+        return `abap.Classes['${def?.getName()?.toUpperCase()}']`;
+      }
     } else {
 // assume global
       return "abap.Classes['" + name.toUpperCase() + "']";
     }
+  }
+
+  private buildPrefix(def: abaplint.IClassDefinition): string {
+    const file = this.reg.getFileByName(def.getFilename());
+    if (file === undefined) {
+      return "NOT_FOUND";
+    }
+    const obj = this.reg.findObjectForFile(file);
+    return obj?.getType() + "-" + obj?.getName();
   }
 
 ////////////////////////////
