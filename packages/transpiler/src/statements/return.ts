@@ -6,7 +6,7 @@ export class ReturnTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
     let extra = "";
-    const scope = traversal.findCurrentScope(node.getFirstToken());
+    const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
     const vars = scope?.getData().vars;
     for (const n in vars) {
       const identifier = vars[n];

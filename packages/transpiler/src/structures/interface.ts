@@ -15,7 +15,7 @@ export class InterfaceTranspiler implements IStructureTranspiler {
       } else if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.EndInterface) {
         ret += "}\n";
         const def = traversal.getInterfaceDefinition(node.getFirstToken());
-        ret += traversal.registerClass(def);
+        ret += traversal.registerClassOrInterface(def);
       }
     }
     ret += this.buildConstants(node.findFirstExpression(abaplint.Expressions.InterfaceName), traversal);
@@ -27,7 +27,7 @@ export class InterfaceTranspiler implements IStructureTranspiler {
     if (node === undefined) {
       return "";
     }
-    const scope = traversal.findCurrentScope(node.getFirstToken());
+    const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
     const vars = scope?.getData().vars;
     if (vars === undefined || Object.keys(vars).length === 0) {
       return "";

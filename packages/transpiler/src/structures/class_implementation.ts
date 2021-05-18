@@ -39,7 +39,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     if (node === undefined) {
       return "";
     }
-    const scope = traversal.findCurrentScope(node.getFirstToken());
+    const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
     const vars = scope?.getData().vars;
     if (vars === undefined || Object.keys(vars).length === 0) {
       return "";
@@ -77,7 +77,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
   }
 
   private buildConstructor(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
-    const scope = traversal.findCurrentScope(node.getFirstToken());
+    const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
 
     const token = node.findFirstExpression(abaplint.Expressions.ClassName)?.getFirstToken();
     if (token === undefined) {

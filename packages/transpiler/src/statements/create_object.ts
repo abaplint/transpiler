@@ -15,7 +15,7 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
 
     const name = this.findClassName(node, traversal);
 //    return target + ".set(await (new " + name + "()).constructor_(" + para + "));";
-    return target + ".set(await (new " + traversal.lookupClass(name) + "()).constructor_(" + para + "));";
+    return target + ".set(await (new " + traversal.lookupClass(name, node.getFirstToken()) + "()).constructor_(" + para + "));";
   }
 
   private findClassName(node: abaplint.Nodes.StatementNode, traversal: Traversal) {
@@ -24,7 +24,7 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
       return c.concatTokens();
     }
 
-    const scope = traversal.findCurrentScope(node.getFirstToken());
+    const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
     if (scope === undefined) {
       throw new Error("CreateObjectTranspiler, unable to lookup position");
     }
