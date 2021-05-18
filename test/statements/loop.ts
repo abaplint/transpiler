@@ -307,4 +307,69 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("4");
   });
 
+  it("LOOP and APPEND INITIl ASSIGNING", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  FIELD-SYMBOLS <row> LIKE LINE OF tab.
+  APPEND INITIAL LINE TO tab ASSIGNING <row>.
+  <row> = 1.
+  APPEND INITIAL LINE TO tab ASSIGNING <row>.
+  <row> = 2.
+  LOOP AT tab ASSIGNING <row>.
+    WRITE / <row>.
+  ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2");
+  });
+
+  it("LOOP refs", async () => {
+    const code = `
+TYPES: BEGIN OF ty_data,
+         field TYPE i,
+       END OF ty_data.
+DATA data TYPE ty_data.
+DATA ref TYPE REF TO ty_data.
+DATA tab TYPE STANDARD TABLE OF REF TO ty_data.
+
+GET REFERENCE OF data INTO ref.
+INSERT ref INTO tab INDEX 1.
+ref->field = 2.
+
+LOOP AT tab INTO ref.
+  WRITE ref->field.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+  it("LOOP refs", async () => {
+    const code = `
+TYPES: BEGIN OF ty_data,
+         field TYPE i,
+       END OF ty_data.
+DATA data TYPE ty_data.
+DATA ref TYPE REF TO ty_data.
+DATA tab TYPE STANDARD TABLE OF REF TO ty_data.
+
+GET REFERENCE OF data INTO ref.
+INSERT ref INTO tab INDEX 1.
+ref->field = 2.
+
+LOOP AT tab INTO ref.
+  ref->field = 3.
+ENDLOOP.
+
+LOOP AT tab INTO ref.
+  WRITE ref->field.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3");
+  });
+
 });
