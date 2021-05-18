@@ -50,7 +50,9 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
   abap.builtin.sy.get().tabix.set(foundIndex);
 
   if (options.into && found) {
-    if (options.into instanceof DataReference) {
+    if (options.into instanceof DataReference && found instanceof DataReference) {
+      options.into.assign(found.getPointer());
+    } else if (options.into instanceof DataReference) {
       options.into.assign(found);
     } else {
       options.into.set(found);

@@ -120,4 +120,34 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("data references, field symbols", async () => {
+    const code = `
+TYPES: BEGIN OF ty_node,
+         children TYPE i,
+       END OF ty_node.
+TYPES ty_stack_tt TYPE STANDARD TABLE OF REF TO ty_node.
+DATA rt_tree TYPE STANDARD TABLE OF ty_node WITH DEFAULT KEY.
+DATA mt_stack TYPE ty_stack_tt.
+DATA lr_stack_top LIKE LINE OF mt_stack.
+FIELD-SYMBOLS <item> LIKE LINE OF rt_tree.
+
+APPEND INITIAL LINE TO rt_tree ASSIGNING <item>.
+<item>-children = 33.
+GET REFERENCE OF <item> INTO lr_stack_top.
+lr_stack_top->children = 22.
+INSERT lr_stack_top INTO mt_stack INDEX 1.
+lr_stack_top->children = 44.
+
+READ TABLE mt_stack INDEX 1 INTO lr_stack_top.
+ASSERT sy-subrc = 0.
+lr_stack_top->children = 1.
+
+WRITE <item>-children.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });

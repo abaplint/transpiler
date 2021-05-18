@@ -1,4 +1,4 @@
-import {ABAPObject} from "./types";
+import {ABAPObject, DataReference} from "./types";
 
 export function clone<T>(obj: T): T {
   if (null == obj || "object" != typeof obj) {
@@ -10,6 +10,8 @@ export function clone<T>(obj: T): T {
     n.set(obj.get());
     // @ts-ignore
     return n;
+  } else if (obj instanceof DataReference) {
+    return obj;
   }
 
   // @ts-ignore

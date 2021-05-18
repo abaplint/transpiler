@@ -284,5 +284,27 @@ describe("Running statements - LOOP", () => {
     expect(abap.console.get()).to.equal("4\n0");
   });
 
+  it("LOOP, REFERENCE INTO", async () => {
+    const code = `
+TYPES: BEGIN OF ty_node,
+         value TYPE i,
+       END OF ty_node.
+DATA tab TYPE STANDARD TABLE OF ty_node WITH DEFAULT KEY.
+DATA row LIKE LINE OF tab.
+DATA ref TYPE REF TO ty_node.
+
+APPEND row TO tab.
+
+LOOP AT tab REFERENCE INTO ref.
+  ref->value = 4.
+ENDLOOP.
+LOOP AT tab REFERENCE INTO ref.
+  WRITE ref->value.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4");
+  });
 
 });
