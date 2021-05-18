@@ -18,7 +18,14 @@ export class LoopTranspiler implements IStatementTranspiler {
     const into = node.findDirectExpression(abaplint.Expressions.Target);
     if (into) {
       const t = traversal.traverse(into);
-      target = t + ".set(" + unique1 + ");";
+
+      const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
+      const typ = traversal.determineType(node, scope);
+      if (typ instanceof abaplint.BasicTypes.DataReference) {
+        target = t + ".assign(" + unique1 + ");";
+      } else {
+        target = t + ".set(" + unique1 + ");";
+      }
     } else {
       const assigning = node.findFirstExpression(abaplint.Expressions.FSTarget)?.findFirstExpression(abaplint.Expressions.FieldSymbol);
       if (assigning) {

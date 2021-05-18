@@ -294,7 +294,11 @@ export class Traversal {
   }
 
   public determineType(node: abaplint.Nodes.ExpressionNode | abaplint.Nodes.StatementNode,
-                       scope: abaplint.ISpaghettiScopeNode): abaplint.AbstractType | undefined {
+                       scope: abaplint.ISpaghettiScopeNode | undefined): abaplint.AbstractType | undefined {
+    if (scope === undefined) {
+      return undefined;
+    }
+
     const found = node.findDirectExpression(abaplint.Expressions.Target);
     if (found === undefined) {
       return undefined;
