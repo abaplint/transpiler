@@ -27,9 +27,11 @@ describe("Multiple lines", () => {
   INTERFACE lif_foobar.
   ENDINTERFACE.`;
 
-    expect(await runSingle(abap)).to.equal(`class lif_foobar {
+    const expected = `class lif_foobar {
 }
-abap.Classes['LIF_FOOBAR'] = lif_foobar;`);
+abap.Classes['PROG-ZFOOBAR-LIF_FOOBAR'] = lif_foobar;`;
+
+    expect(await runSingle(abap)).to.equal(expected);
   });
 
   it("TYPES should be skipped", async () => {
@@ -64,7 +66,7 @@ abap.Classes['LIF_FOOBAR'] = lif_foobar;`);
   async moo() {
   }
 }
-abap.Classes['LCL_FOOBAR'] = lcl_foobar;`;
+abap.Classes['PROG-ZFOOBAR-LCL_FOOBAR'] = lcl_foobar;`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });
@@ -94,7 +96,7 @@ abap.Classes['LCL_FOOBAR'] = lcl_foobar;`;
     if (INPUT && INPUT.iv_foo) {iv_foo.set(INPUT.iv_foo);}
   }
 }
-abap.Classes['LCL_FOOBAR'] = lcl_foobar;`;
+abap.Classes['PROG-ZFOOBAR-LCL_FOOBAR'] = lcl_foobar;`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });
@@ -124,7 +126,7 @@ abap.Classes['LCL_FOOBAR'] = lcl_foobar;`;
     return rv_foo;
   }
 }
-abap.Classes['LCL_FOOBAR'] = lcl_foobar;`;
+abap.Classes['PROG-ZFOOBAR-LCL_FOOBAR'] = lcl_foobar;`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });
@@ -170,9 +172,9 @@ CREATE OBJECT foo.`;
     return this;
   }
 }
-abap.Classes['ZCL_WORDS'] = zcl_words;
+abap.Classes['PROG-ZFOOBAR-ZCL_WORDS'] = zcl_words;
 let foo = new abap.types.ABAPObject();
-foo.set(await (new abap.Classes['ZCL_WORDS']()).constructor_());`;
+foo.set(await (new abap.Classes['PROG-ZFOOBAR-ZCL_WORDS']()).constructor_());`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });
@@ -213,7 +215,7 @@ DATA moo TYPE foo.`;
     abap.statements.write(this.bar);
   }
 }
-abap.Classes['ZCL_WORDS'] = zcl_words;`;
+abap.Classes['PROG-ZFOOBAR-ZCL_WORDS'] = zcl_words;`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });
@@ -244,7 +246,7 @@ class zcl_words {
     return this;
   }
 }
-abap.Classes['ZCL_WORDS'] = zcl_words;`;
+abap.Classes['PROG-ZFOOBAR-ZCL_WORDS'] = zcl_words;`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });
@@ -280,7 +282,7 @@ ENDCLASS.`;
     return rv_ret;
   }
 }
-abap.Classes['ZCL_RET'] = zcl_ret;`;
+abap.Classes['PROG-ZFOOBAR-ZCL_RET'] = zcl_ret;`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });
@@ -334,7 +336,7 @@ class zcl_ret {
     return this;
   }
 }
-abap.Classes['ZCL_RET'] = zcl_ret;
+abap.Classes['PROG-ZFOOBAR-ZCL_RET'] = zcl_ret;
 zcl_ret.c_maxdcodes = new abap.types.Integer();
 zcl_ret.c_maxdcodes.set(30);`;
 
@@ -357,7 +359,7 @@ ENDCLASS.`;
     return this;
   }
 }
-abap.Classes['LCL_BAR'] = lcl_bar;
+abap.Classes['PROG-ZFOOBAR-LCL_BAR'] = lcl_bar;
 lcl_bar.foo = new abap.types.Integer();`;
 
     expect(await runSingle(abap)).to.equal(expected);
@@ -393,9 +395,9 @@ class lcl_bar {
     if (INPUT && INPUT.imp) {imp.set(INPUT.imp);}
   }
 }
-abap.Classes['LCL_BAR'] = lcl_bar;
+abap.Classes['PROG-ZFOOBAR-LCL_BAR'] = lcl_bar;
 async function bar() {
-  await abap.Classes['LCL_BAR'].bar({imp: constant_2});
+  await abap.Classes['PROG-ZFOOBAR-LCL_BAR'].bar({imp: constant_2});
 }`;
 
     expect(await runSingle(abap)).to.equal(expected);
@@ -429,10 +431,10 @@ class lcl_bar {
     return this;
   }
 }
-abap.Classes['LCL_BAR'] = lcl_bar;
+abap.Classes['PROG-ZFOOBAR-LCL_BAR'] = lcl_bar;
 async function bar() {
   let bar = new abap.types.ABAPObject();
-  bar.set(await (new abap.Classes['LCL_BAR']()).constructor_({input: constant_42}));
+  bar.set(await (new abap.Classes['PROG-ZFOOBAR-LCL_BAR']()).constructor_({input: constant_42}));
 }`;
 
     expect(await runSingle(abap)).to.equal(expected);
@@ -453,7 +455,7 @@ async function bar() {
     return this;
   }
 }
-abap.Classes['LCL_BAR'] = lcl_bar;
+abap.Classes['PROG-ZFOOBAR-LCL_BAR'] = lcl_bar;
 lcl_bar.foo = new abap.types.String();
 lcl_bar.foo.set('\\'');`;
     expect(await runSingle(abap)).to.equal(expected);

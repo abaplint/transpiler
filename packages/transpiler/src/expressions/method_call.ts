@@ -19,7 +19,7 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
       name = name + "(";
     }
 
-    const m = traversal.findMethodReference(nameToken, traversal.findCurrentScope(nameToken));
+    const m = traversal.findMethodReference(nameToken, traversal.findCurrentScopeByToken(nameToken));
     if (m?.name && traversal.isBuiltinMethod(nameToken) === false) {
       name = m.name.toLowerCase() + "(";
     }

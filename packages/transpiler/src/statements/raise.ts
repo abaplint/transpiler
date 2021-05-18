@@ -5,7 +5,8 @@ import {Traversal} from "../traversal";
 export class RaiseTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
-    const className = node.findFirstExpression(abaplint.Expressions.ClassName)?.getFirstToken().getStr();
+    const classNameToken = node.findFirstExpression(abaplint.Expressions.ClassName)?.getFirstToken();
+    const className = classNameToken?.getStr();
     if (className === undefined) {
       throw "RaiseTranspilerNameNotFound";
     }
@@ -16,7 +17,7 @@ export class RaiseTranspiler implements IStatementTranspiler {
       p = traversal.traverse(parameters);
     }
 
-    const look = traversal.lookupClass(className);
+    const look = traversal.lookupClassOrInterface(classNameToken?.getStr(), classNameToken);
 
     return `throw await (new ${look}()).constructor_(${p});`;
   }

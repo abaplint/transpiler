@@ -12,7 +12,7 @@ export class DataTranspiler implements IStatementTranspiler {
       throw new Error("DataTranspiler, token not found");
     }
 
-    const scope = traversal.findCurrentScope(token);
+    const scope = traversal.findCurrentScopeByToken(token);
     if (scope === undefined) {
       throw new Error("DataTranspiler, scope not found");
     }

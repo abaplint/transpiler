@@ -54,7 +54,7 @@ export class Traversal {
     node: abaplint.ISpaghettiScopeNode
   } | undefined = undefined;
 
-  public findCurrentScope(token: abaplint.Token) {
+  public findCurrentScopeByToken(token: abaplint.Token) {
     const filename = this.file.getFilename();
 
     if (this.scopeCache
@@ -79,8 +79,22 @@ export class Traversal {
     return node;
   }
 
+  // todo, add explicit return type,
+  public getInterfaceDefinition(token: abaplint.Token): any | undefined {
+    let scope = this.findCurrentScopeByToken(token);
+
+    while (scope !== undefined) {
+      if (scope.getIdentifier().stype === abaplint.ScopeType.Interface) {
+        return scope.findInterfaceDefinition(scope?.getIdentifier().sname);
+      }
+      scope = scope.getParent();
+    }
+
+    return undefined;
+  }
+
   public getClassDefinition(token: abaplint.Token): abaplint.IClassDefinition | undefined {
-    let scope = this.findCurrentScope(token);
+    let scope = this.findCurrentScopeByToken(token);
 
     while (scope !== undefined) {
       if (scope.getIdentifier().stype === abaplint.ScopeType.ClassImplementation
@@ -95,7 +109,7 @@ export class Traversal {
   }
 
   private isClassAttribute(token: abaplint.Token): boolean {
-    const scope = this.findCurrentScope(token);
+    const scope = this.findCurrentScopeByToken(token);
     if (scope === undefined) {
       throw new Error("isClassAttribute, unable to lookup position");
     }
@@ -124,7 +138,7 @@ export class Traversal {
   }
 
   private isStaticClassAttribute(token: abaplint.Token): string | undefined {
-    const scope = this.findCurrentScope(token);
+    const scope = this.findCurrentScopeByToken(token);
     if (scope === undefined) {
       throw new Error("isStaticClassAttribute, unable to lookup position");
     }
@@ -141,7 +155,7 @@ export class Traversal {
   }
 
   public isBuiltinMethod(token: abaplint.Token): boolean {
-    const scope = this.findCurrentScope(token);
+    const scope = this.findCurrentScopeByToken(token);
     if (scope === undefined) {
       return false;
     }
@@ -185,7 +199,7 @@ export class Traversal {
   }
 
   private isBuiltinVariable(token: abaplint.Token): boolean {
-    const scope = this.findCurrentScope(token);
+    const scope = this.findCurrentScopeByToken(token);
     if (scope === undefined) {
       throw new Error("isBuiltin, unable to lookup position");
     }
@@ -206,7 +220,7 @@ export class Traversal {
     }
 
     // local classes
-    const scope = this.findCurrentScope(ref.getToken());
+    const scope = this.findCurrentScopeByToken(ref.getToken());
     if (scope?.getIdentifier().stype === abaplint.ScopeType.Interface) {
       return scope?.getIdentifier().sname;
     }
@@ -224,7 +238,7 @@ export class Traversal {
   }
 
   private findReadOrWriteReference(token: abaplint.Token) {
-    const scope = this.findCurrentScope(token);
+    const scope = this.findCurrentScopeByToken(token);
     if (scope === undefined) {
       return undefined;
     }
@@ -299,13 +313,54 @@ export class Traversal {
     return context;
   }
 
-  public registerClass(name: string | undefined): string {
-    const ret = `abap.Classes['${name?.toUpperCase()}'] = ${name};`;
-    return ret;
+////////////////////////////
+
+  public registerClassOrInterface(def: abaplint.IClassDefinition | undefined): string {
+    if (def === undefined) {
+      return "";
+    }
+    const name = def.getName();
+    if (def.isGlobal() === false) {
+      const prefix = this.buildPrefix(def);
+      return `abap.Classes['${prefix}-${name.toUpperCase()}'] = ${name};`;
+    } else {
+      return `abap.Classes['${name.toUpperCase()}'] = ${name};`;
+    }
   }
 
-  public lookupClass(name: string | undefined): string {
-    return "abap.Classes['" + name?.toUpperCase() + "']";
+  public lookupClassOrInterface(name: string | undefined, token: abaplint.Token | undefined): string {
+    if (name === undefined || token === undefined) {
+      return "abap.Classes['undefined']";
+    }
+
+    const scope = this.findCurrentScopeByToken(token);
+
+    // todo, add explicit type,
+    let def: any | undefined = scope?.findClassDefinition(name);
+    if (def === undefined) {
+      def = scope?.findInterfaceDefinition(name);
+    }
+
+    if (def) {
+      if (def.isGlobal() === false) {
+        const prefix = this.buildPrefix(def);
+        return `abap.Classes['${prefix}-${def?.getName()?.toUpperCase()}']`;
+      } else {
+        return `abap.Classes['${def?.getName()?.toUpperCase()}']`;
+      }
+    } else {
+// assume global
+      return "abap.Classes['" + name.toUpperCase() + "']";
+    }
+  }
+
+  private buildPrefix(def: abaplint.IClassDefinition): string {
+    const file = this.reg.getFileByName(def.getFilename());
+    if (file === undefined) {
+      return "NOT_FOUND";
+    }
+    const obj = this.reg.findObjectForFile(file);
+    return obj?.getType() + "-" + obj?.getName();
   }
 
 ////////////////////////////
