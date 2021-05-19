@@ -47,12 +47,14 @@ locl = clas.addTestClass("${def.name}");\n`;
               if (m.isForTesting === false) {
                 continue;
               }
-              ret += `{\n  const test = await (new ${def.name}()).constructor_();\n`;
-              if (hasSetup === true) {
-                ret += `  await test.setup();\n`;
+              const skipThis = (skip || []).some(a => a.object === obj.getName() && a.class === def.name && a.method === m.name);
+              if (skipThis === false) {
+                ret += `{\n  const test = await (new ${def.name}()).constructor_();\n`;
+                if (hasSetup === true) {
+                  ret += `  await test.setup();\n`;
+                }
               }
 
-              const skipThis = (skip || []).some(a => a.object === obj.getName() && a.class === def.name && a.method === m.name);
               const extraLog = skipThis ? ", skipped" : "";
               ret += `  console.log('${obj.getName()}: running ${def.name}->${m.name}${extraLog}');\n`;
               ret += `  meth = locl.addMethod("${m.name}");\n`;
@@ -63,7 +65,7 @@ locl = clas.addTestClass("${def.name}");\n`;
                 ret += `  meth.pass();\n`;
               }
 
-              if (hasTeardown === true) {
+              if (hasTeardown === true && skipThis === false) {
                 ret += `  await test.teardown();\n`;
               }
               ret += `}\n`;
