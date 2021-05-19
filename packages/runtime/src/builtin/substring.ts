@@ -4,16 +4,18 @@ import {INumeric} from "../types/_numeric";
 
 export interface ISubstringInput {
   val: ICharacter | string;
-  off: INumeric;
+  off?: INumeric;
   len?: INumeric;
 }
 
 export function substring(input: ISubstringInput): ICharacter {
   const val = typeof input.val === "string" ? input.val : input.val.get();
-  const off = input.off.get();
+  let off = input?.off?.get();
+  if (off === undefined) {
+    off = 0;
+  }
   const len = input?.len?.get();
 
   const sub = val.substr(off, len);
-
   return new String().set(sub);
 }
