@@ -341,4 +341,19 @@ describe("Running statements - FIND", () => {
     expect(abap.console.get()).to.equal("02\n02\n02\n42\n42");
   });
 
+  it("FIND, with REGEX :space:", async () => {
+    const code = `
+    DATA lv_string TYPE string.
+    DATA lv_offset TYPE i.
+    DATA lv_length TYPE i.
+    lv_string = 'foo MOO  BAR'.
+    FIND REGEX |MOO[[:space:]]+| IN lv_string MATCH OFFSET lv_offset MATCH LENGTH lv_length.
+    WRITE / lv_offset.
+    WRITE / lv_length.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n5");
+  });
+
 });
