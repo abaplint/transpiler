@@ -24,7 +24,7 @@ describe("Running Examples - Hex type", () => {
     expect(abap.console.get()).to.equal("00");
   });
 
-  it.skip("Hex Calculation, MOD has precedence", async () => {
+  it("Hex Calculation, MOD has precedence", async () => {
     const code = `
     DATA lv_hex    TYPE x LENGTH 1.
     DATA lv_type   TYPE i.
@@ -34,7 +34,6 @@ describe("Running Examples - Hex type", () => {
     lv_hex = lv_hex + lv_type + lv_length MOD 16.
     WRITE lv_hex.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0D"); // 13 in decimal
