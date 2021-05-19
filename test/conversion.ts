@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP} from "../packages/runtime/src/";
 import {AsyncFunction, runFiles} from "./_utils";
 
@@ -92,6 +92,60 @@ describe("Value conversions", () => {
   DATA int TYPE i.
   int = str.
   ASSERT int = 0.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("field symbol to structure", async () => {
+    const code = `
+TYPES: BEGIN OF bar,
+         foo TYPE i,
+       END OF bar.
+DATA data1 TYPE bar.
+DATA data2 TYPE bar.
+FIELD-SYMBOLS <fs> TYPE bar.
+
+ASSIGN data1 TO <fs>.
+data1-foo = 2.
+
+data2 = <fs>.
+WRITE data2-foo.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+  it("field symbol to i", async () => {
+    const code = `
+  DATA data1 TYPE i.
+  DATA data2 TYPE i.
+  FIELD-SYMBOLS <fs> TYPE i.
+
+  ASSIGN data1 TO <fs>.
+  data1 = 2.
+
+  data2 = <fs>.
+  WRITE data2.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+  it("field symbol to table", async () => {
+    const code = `
+  TYPES tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA data1 TYPE tab.
+  DATA data2 TYPE tab.
+  FIELD-SYMBOLS <fs> TYPE tab.
+
+  ASSIGN data1 TO <fs>.
+  data2 = <fs>.`;
 
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
