@@ -1,5 +1,8 @@
 import {clone} from "../clone";
+import {FieldSymbol} from "./field_symbol";
+import {Table} from "./table";
 import {ICharacter} from "./_character";
+import {INumeric} from "./_numeric";
 
 export class Structure {
   private readonly value: any;
@@ -16,12 +19,16 @@ export class Structure {
     return this;
   }
 
-  public set(input: Structure | string | ICharacter | undefined) {
+  public set(input: Structure | string | INumeric | Table | ICharacter | FieldSymbol | undefined) {
     if (input === undefined) {
       return;
     }
 
-    if (input instanceof Structure) {
+    if (input instanceof FieldSymbol) {
+      this.set(input.getPointer());
+    } else if (input instanceof Table) {
+      throw "Structure, input is a table";
+    } else if (input instanceof Structure) {
       const obj = input.get();
       for (const f in obj) {
         // @ts-ignore
@@ -34,12 +41,12 @@ export class Structure {
     return this;
   }
 
-  private setCharacter(input: string | ICharacter) {
+  private setCharacter(input: string | ICharacter | INumeric) {
     this.clear();
 
     let val = input;
     if (typeof val !== "string") {
-      val = val.get();
+      val = val.get() + "";
     }
 
     for (const key of Object.keys(this.value)) {

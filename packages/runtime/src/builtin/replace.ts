@@ -34,6 +34,8 @@ export function replace(input: IReplaceInput) {
   if (input.occ === undefined && sub && wi) {
     val = val.replace(sub, wi);
   } else if (input.occ && input.occ.get() === 0 && sub && wi) {
+    sub = sub.replace(/\\/g, "\\\\");
+    sub = sub.replace(/\[/g, "\\[");
     const reg = new RegExp(sub, "g");
     val = val.replace(reg, wi);
   }
