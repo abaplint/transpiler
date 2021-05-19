@@ -6,6 +6,7 @@ export class FindTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
     const options: string[] = [];
+    let index = 1;
 
     const sources = node.findDirectExpressions(abaplint.Expressions.Source);
     const source0 = traversal.traverse(sources[0]);
@@ -26,11 +27,27 @@ export class FindTranspiler implements IStatementTranspiler {
       options.push("ignoringCase: true");
     }
 
-    const source1 = traversal.traverse(sources[1]);
+    if (concat.includes(" IN BYTE MODE")) {
+      options.push("byteMode: true");
+    }
 
-    const off = node.findExpressionAfterToken("OFFSET");
-    if (off) {
-      options.push("offset: " + traversal.traverse(off));
+    if (concat.includes(" IN SECTION OFFSET")) {
+      options.push("sectionOffset: " + traversal.traverse(sources[1]));
+      index++;
+    }
+
+    const source1 = traversal.traverse(sources[index]);
+
+    let prev = undefined;
+    let off: abaplint.Nodes.ExpressionNode | abaplint.Nodes.TokenNode | undefined;
+    for (const c of node.getChildren()) {
+      if (prev?.getFirstToken().getStr().toUpperCase() === "OFFSET"
+          && c.get() instanceof abaplint.Expressions.Target) {
+        options.push("offset: " + traversal.traverse(c));
+        off = c;
+        break;
+      }
+      prev = c;
     }
 
     const cnt = node.findExpressionAfterToken("COUNT");

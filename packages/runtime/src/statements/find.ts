@@ -7,6 +7,8 @@ export interface IFindOptions {
   first?: boolean,
   regex?: string | ICharacter,
   offset?: INumeric,
+  sectionOffset?: INumeric,
+  byteMode?: boolean,
   length?: INumeric,
   count?: INumeric,
   results?: Table,
@@ -15,7 +17,6 @@ export interface IFindOptions {
 }
 
 export function find(input: ICharacter | string, options: IFindOptions) {
-
   let i = input;
   if (typeof i !== "string") {
     i = i.get();
@@ -107,7 +108,11 @@ export function find(input: ICharacter | string, options: IFindOptions) {
   }
 
   if (matches[0]?.index) {
-    options.offset?.set(matches[0].index);
+    let val = matches[0].index;
+    if (options.byteMode) {
+      val = val / 2;
+    }
+    options.offset?.set(val);
   } else {
     options.offset?.clear();
   }

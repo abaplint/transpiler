@@ -293,7 +293,22 @@ describe("Running statements - FIND", () => {
       ASSERT lv_offset = '2'.`;
     const js = await run(code);
     const f = new Function("abap", js);
-    f(abap);
+    await f(abap);
+  });
+
+  it("FIND, SECTION + BYTE MODE + MATCH OFFSET", async () => {
+    const code = `
+  DATA lv_cursor TYPE i.
+  DATA lv_match TYPE i.
+  CONSTANTS lc_null TYPE x VALUE '00'.
+  DATA iv_data TYPE xstring.
+  iv_data = '1122003344'.
+  FIND FIRST OCCURRENCE OF lc_null IN SECTION OFFSET lv_cursor OF iv_data IN BYTE MODE MATCH OFFSET lv_match.
+  WRITE lv_match.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
   });
 
 });
