@@ -22,6 +22,11 @@ export function find(input: ICharacter | string, options: IFindOptions) {
     i = i.get();
   }
 
+  let sectionOffset = options.sectionOffset?.get();
+  if (sectionOffset && options.byteMode) {
+    sectionOffset = sectionOffset * 2;
+  }
+
   let s: ICharacter | string | RegExp = "";
   if (options.find) {
     s = options.find;
@@ -43,6 +48,10 @@ export function find(input: ICharacter | string, options: IFindOptions) {
     s = new RegExp(r, "g" + (options.ignoringCase === true ? "i" : ""));
   } else {
     throw "FIND, runtime, no input";
+  }
+
+  if (sectionOffset) {
+    i = i.substr(sectionOffset);
   }
 
   let temp: RegExpExecArray | null;
@@ -107,14 +116,15 @@ export function find(input: ICharacter | string, options: IFindOptions) {
     abap.builtin.sy.get().subrc.set(0);
   }
 
-  if (matches[0]?.index) {
+  if (matches[0]?.index !== undefined) {
     let val = matches[0].index;
+    if (sectionOffset) {
+      val += sectionOffset;
+    }
     if (options.byteMode) {
       val = val / 2;
     }
     options.offset?.set(val);
-  } else {
-    options.offset?.clear();
   }
 
   if (options?.count) {
