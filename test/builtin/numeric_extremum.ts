@@ -8,7 +8,7 @@ async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
 }
 
-describe("Builtin Numeric Extremum Functions", () => {
+describe("Builtin Numeric Extremum Functions, nmin & nmax", () => {
 
   beforeEach(async () => {
     abap = new ABAP();

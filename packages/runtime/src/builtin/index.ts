@@ -7,6 +7,7 @@ export * from "./concat_lines_of";
 export * from "./condense";
 export * from "./count";
 export * from "./escape";
+export * from "./find";
 export * from "./floor";
 export * from "./frac";
 export * from "./lines";
