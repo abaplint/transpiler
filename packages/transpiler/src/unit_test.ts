@@ -52,9 +52,11 @@ locl = clas.addTestClass("${def.name}");\n`;
                 ret += `  await test.setup();\n`;
               }
 
-              ret += `  console.log('${obj.getName()}: running ${def.name}->${m.name}');\n`;
+              const skipThis = (skip || []).some(a => a.object === obj.getName() && a.class === def.name && a.method === m.name);
+              const extraLog = skipThis ? ", skipped" : "";
+              ret += `  console.log('${obj.getName()}: running ${def.name}->${m.name}${extraLog}');\n`;
               ret += `  meth = locl.addMethod("${m.name}");\n`;
-              if ((skip || []).some(a => a.object === obj.getName() && a.class === def.name && a.method === m.name)) {
+              if (skipThis) {
                 ret += `  meth.skip();\n`;
               } else {
                 ret += `  await test.${m.name}();\n`;
