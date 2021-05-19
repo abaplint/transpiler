@@ -1042,4 +1042,58 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1\n2");
   });
 
+  it("method call, chained structure field", async () => {
+    const code = `
+CLASS lcl_chaining DEFINITION.
+  PUBLIC SECTION.
+    TYPES: BEGIN OF ty_structure,
+             val TYPE i,
+           END OF ty_structure.
+    CLASS-METHODS run
+      RETURNING VALUE(struc) TYPE ty_structure.
+ENDCLASS.
+
+CLASS lcl_chaining IMPLEMENTATION.
+  METHOD run.
+    struc-val = 12.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  WRITE lcl_chaining=>run( )-val.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("12");
+  });
+
+  it("method call, chained structure field, double", async () => {
+    const code = `
+CLASS lcl_chaining DEFINITION.
+  PUBLIC SECTION.
+    TYPES: BEGIN OF ty_structure,
+             BEGIN OF bar,
+               val TYPE i,
+             END OF bar,
+           END OF ty_structure.
+    CLASS-METHODS run
+      RETURNING VALUE(struc) TYPE ty_structure.
+ENDCLASS.
+
+CLASS lcl_chaining IMPLEMENTATION.
+  METHOD run.
+    struc-bar-val = 12.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  WRITE lcl_chaining=>run( )-bar-val.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("12");
+  });
+
 });
