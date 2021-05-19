@@ -45,7 +45,10 @@ export function find(input: ICharacter | string, options: IFindOptions) {
     if (typeof r !== "string") {
       r = r.get();
     }
-    r = r.replace("[[:space:]]", "[ ]");
+    // check type, it can also be a CL_ABAP_REGEX
+    if (typeof r === "string") {
+      r = r.replace("[[:space:]]", "\\s");
+    }
     s = new RegExp(r, "g" + (options.ignoringCase === true ? "i" : ""));
   } else {
     throw "FIND, runtime, no input";
