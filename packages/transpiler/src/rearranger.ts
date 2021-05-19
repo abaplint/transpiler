@@ -45,7 +45,7 @@ export class Rearranger {
     // multiplication/division and left to right
     for (let i = arith.length - 1; i >= 0; i--) {
       const a = arith[i];
-      if (a.concatTokens() === "*" || a.concatTokens() === "/") {
+      if (a.concatTokens() === "*" || a.concatTokens() === "/" || a.concatTokens() === "MOD" || a.concatTokens() === "DIV") {
         continue;
       }
       splitAt = a;

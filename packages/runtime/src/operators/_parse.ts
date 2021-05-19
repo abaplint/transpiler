@@ -9,6 +9,9 @@ export function parse(val: INumeric | ICharacter | string | number): number {
   } else if (typeof val === "string") {
     return parseInt(val, 10);
   } else if (val instanceof XString || val instanceof Hex) {
+    if (val.get() === "") {
+      return 0;
+    }
     return parseInt(val.get(), 16);
   } else if (val instanceof Time || val instanceof Date) {
     return val.getNumeric();

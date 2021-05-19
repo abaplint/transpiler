@@ -7,8 +7,8 @@ export class Hex implements ICharacter {
   private readonly length: number;
 
   public constructor(input?: {length?: number}) {
-    this.value = "";
     this.length = input?.length ? input?.length : 1;
+    this.value = "0".repeat(this.length * 2);
   }
 
   public set(value: ICharacter | INumeric | string) {
