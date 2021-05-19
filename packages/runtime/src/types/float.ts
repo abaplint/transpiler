@@ -3,7 +3,23 @@ import {XString} from "./xstring";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 
-export class Float implements INumeric {
+/*
+function getNumberParts(x: number) {
+  if(isNaN(x)) {
+    throw "Float NaN";
+  }
+  const sig = x > 0 ? 1 : -1;
+  if (!isFinite(x)) {
+    throw "Float not finite";
+  }
+  x = Math.abs(x);
+  const exp = Math.floor(Math.log(x) * Math.LOG2E) - 52;
+  const man = x / Math.pow(2, exp);
+  return {mantissa: sig * man, exponent: exp};
+}
+*/
+
+export class Float {
   private value: number;
 
   public constructor() {
@@ -30,7 +46,13 @@ export class Float implements INumeric {
     this.value = 0;
   }
 
-  public get(): number {
-    return this.value;
+  public get(): string {
+    let text = new Number(this.value).toExponential(16);
+    text = text.replace(".", ",");
+    const split = text.split("e+");
+    const mantissa = split[0];
+    const exponent = split[1].padStart(2, "0");
+
+    return mantissa + "E+" + exponent;
   }
 }
