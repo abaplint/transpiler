@@ -66,6 +66,8 @@ export class TranspileTypes {
       if (type.getLength() !== 1) {
         extra = "{length: " + type.getLength() + "}";
       }
+    } else if (type instanceof abaplint.BasicTypes.FloatType) {
+      resolved = "Float";
     } else if (type instanceof abaplint.BasicTypes.UnknownType) {
       return `(() => { throw "Unknown type: ${type.getError()}" })()`;
     } else if (type instanceof abaplint.BasicTypes.VoidType) {

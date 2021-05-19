@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -8,28 +8,36 @@ async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
 }
 
-describe("Builtin functions - substring", () => {
+describe("Builtin functions - condense", () => {
 
   beforeEach(async () => {
     abap = new ABAP();
   });
 
-  it("substring 01", async () => {
+  it("condense", async () => {
     const code = `
-    DATA path TYPE string VALUE '/'.
-    DATA result TYPE string.
-    result = substring( val = path off = strlen( path ) - 1 ).
-    ASSERT result = '/'.`;
+      DATA foo TYPE string.
+      foo = '12  3 '.
+      foo = condense( foo ).
+      WRITE foo.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+    expect(abap.console.get()).to.equal("12 3");
   });
 
-  it("basic substring", async () => {
-    const code = `ASSERT substring( val = |abc| off = 1 len = 1 ) = |b|.`;
+  it("condense integer", async () => {
+    const code = `
+      DATA foo TYPE string.
+      data bar type i.
+      bar = 2.
+      foo = bar.
+      foo = condense( foo ).
+      WRITE foo.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+    expect(abap.console.get()).to.equal("2");
   });
 
 });

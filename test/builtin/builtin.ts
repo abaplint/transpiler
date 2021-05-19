@@ -8,6 +8,8 @@ async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
 }
 
+// todo, split these tests into separate files
+
 describe("Builtin functions", () => {
 
   beforeEach(async () => {
@@ -25,89 +27,6 @@ describe("Builtin functions", () => {
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("X");
-  });
-
-  it("condense", async () => {
-    const code = `
-      DATA foo TYPE string.
-      foo = '12  3 '.
-      foo = condense( foo ).
-      WRITE foo.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("12 3");
-  });
-
-  it("condense integer", async () => {
-    const code = `
-      DATA foo TYPE string.
-      data bar type i.
-      bar = 2.
-      foo = bar.
-      foo = condense( foo ).
-      WRITE foo.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("2");
-  });
-
-  it("basic count()", async () => {
-    const code = `
-      DATA lv_count TYPE i.
-      lv_count = count( val = 'password' sub = 's' ).
-      WRITE lv_count.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("2");
-  });
-
-  it("escape()", async () => {
-    const code = `
-      CONSTANTS e_html_text TYPE i VALUE 4.
-      CONSTANTS e_html_attr TYPE i VALUE 5.
-      CONSTANTS e_url TYPE i VALUE 12.
-      DATA lv_result TYPE string.
-      lv_result = escape( val = |abc123&<>"'| format = e_html_attr ).
-      WRITE / lv_result.
-      lv_result = escape( val = |abc123&<>"'| format = e_html_text ).
-      WRITE / lv_result.
-      lv_result = escape( val = |abc123&<>"'| format = e_url ).
-      WRITE / lv_result.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal(
-      `abc123&amp;&lt;&gt;&quot;&#39;\n` +
-      `abc123&amp;&lt;&gt;"'\n` +
-      `abc123&%3C%3E%22'`);
-  });
-
-  it("basic repeat()", async () => {
-    const code = `ASSERT repeat( val = 'a' occ = 2 ) = 'aa'.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-  });
-
-  it("reverse", async () => {
-    const code = `
-      DATA str TYPE string.
-      str = reverse( 'abc' ).
-      WRITE str.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("cba");
-  });
-
-  it("basic shift_left()", async () => {
-    const code = "ASSERT shift_left( val = 'aabbcc' sub = `a` ) = 'bbcc'.";
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
   });
 
   it("nested calls to builtins", async () => {
@@ -129,31 +48,6 @@ describe("Builtin functions", () => {
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("3");
-  });
-
-  it("basic substring", async () => {
-    const code = `ASSERT substring( val = |abc| off = 1 len = 1 ) = |b|.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-  });
-
-  it("to_lower()", async () => {
-    const code = `ASSERT to_lower( 'ABC' ) = 'abc'.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-  });
-
-  it("to_upper()", async () => {
-    const code = `
-      DATA bar TYPE string VALUE 'BAR'.
-      ASSERT to_upper( |bar| ) = |BAR|.
-      ASSERT to_upper( |bar| ) = bar.
-      ASSERT to_upper( bar ) = bar.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
   });
 
   it("basic xstrlen", async () => {
