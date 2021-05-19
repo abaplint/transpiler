@@ -48,24 +48,23 @@ locl = clas.addTestClass("${def.name}");\n`;
                 continue;
               }
               const skipThis = (skip || []).some(a => a.object === obj.getName() && a.class === def.name && a.method === m.name);
-              if (skipThis === false) {
-                ret += `{\n  const test = await (new ${def.name}()).constructor_();\n`;
-                if (hasSetup === true) {
-                  ret += `  await test.setup();\n`;
-                }
-              }
-
-              const extraLog = skipThis ? ", skipped" : "";
-              ret += `  console.log('${obj.getName()}: running ${def.name}->${m.name}${extraLog}');\n`;
-              ret += `  meth = locl.addMethod("${m.name}");\n`;
               if (skipThis) {
+                ret += `  console.log('${obj.getName()}: running ${def.name}->${m.name}, skipped');\n`;
                 ret += `  meth.skip();\n`;
-              } else {
-                ret += `  await test.${m.name}();\n`;
-                ret += `  meth.pass();\n`;
+                continue;
               }
 
-              if (hasTeardown === true && skipThis === false) {
+              ret += `{\n  const test = await (new ${def.name}()).constructor_();\n`;
+              if (hasSetup === true) {
+                ret += `  await test.setup();\n`;
+              }
+
+              ret += `  console.log('${obj.getName()}: running ${def.name}->${m.name}');\n`;
+              ret += `  meth = locl.addMethod("${m.name}");\n`;
+              ret += `  await test.${m.name}();\n`;
+              ret += `  meth.pass();\n`;
+
+              if (hasTeardown === true) {
                 ret += `  await test.teardown();\n`;
               }
               ret += `}\n`;
