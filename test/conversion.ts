@@ -74,4 +74,28 @@ describe("Value conversions", () => {
     await f(abap);
   });
 
+  it("empty string to int", async () => {
+    const code = `
+  DATA str TYPE string.
+  DATA int TYPE i.
+  int = str.
+  ASSERT int = 0.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("empty char to int", async () => {
+    const code = `
+  DATA str TYPE c.
+  DATA int TYPE i.
+  int = str.
+  ASSERT int = 0.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

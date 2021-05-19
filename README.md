@@ -6,7 +6,6 @@
 [![npm (scoped)](https://img.shields.io/npm/v/@abaplint/abap-loader?label=%40abaplint%2Fabap-loader)](https://www.npmjs.com/package/@abaplint/abap-loader)
 [![CI](https://github.com/abaplint/transpiler/workflows/CI/badge.svg)](https://github.com/abaplint/transpiler/actions)
 
-Proof of concept, things might change
 
 Target is [ES6](http://es6-features.org)
 

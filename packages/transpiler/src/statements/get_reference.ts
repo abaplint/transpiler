@@ -13,8 +13,13 @@ export class GetReferenceTranspiler implements IStatementTranspiler {
       throw new Error("GetReference, Target not found");
     }
 
-    const source = traversal.traverse(s);
+    let source = traversal.traverse(s);
     const target = traversal.traverse(t);
+
+    if (s.getFirstToken().getStr().startsWith("<")) {
+      // its a field symbol
+      source += ".getPointer()";
+    }
 
     return target + ".assign(" + source + ");";
   }
