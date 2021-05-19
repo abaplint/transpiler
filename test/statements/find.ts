@@ -26,6 +26,18 @@ describe("Running statements - FIND", () => {
     expect(abap.console.get()).to.equal("0\n3");
   });
 
+  it("FIND FIRST OCCURRENCE, found 2", async () => {
+    const code = `
+      DATA lv_offset.
+      FIND FIRST OCCURRENCE OF |bar| IN |foobarr| MATCH OFFSET lv_offset.
+      WRITE / sy-subrc.
+      WRITE / lv_offset.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n3");
+  });
+
   it("FIND FIRST OCCURRENCE, not found", async () => {
     const code = `
       DATA lv_offset.
@@ -293,7 +305,40 @@ describe("Running statements - FIND", () => {
       ASSERT lv_offset = '2'.`;
     const js = await run(code);
     const f = new Function("abap", js);
-    f(abap);
+    await f(abap);
+  });
+
+  it("FIND, SECTION + BYTE MODE + MATCH OFFSET", async () => {
+    const code = `
+  DATA lv_cursor TYPE i.
+  DATA lv_match TYPE i.
+  CONSTANTS lc_null TYPE x VALUE '00'.
+  DATA iv_data TYPE xstring.
+  iv_data = '1122003344'.
+  FIND FIRST OCCURRENCE OF lc_null IN SECTION OFFSET lv_cursor OF iv_data IN BYTE MODE MATCH OFFSET lv_match.
+  WRITE lv_match.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+  it("FIND, more BYTE MODE", async () => {
+    const code = `
+    DATA lv_cursor TYPE i.
+    DATA lv_match TYPE i.
+    CONSTANTS lc_null TYPE x VALUE '00'.
+    DATA iv_data TYPE xstring.
+    iv_data = '1122003344'.
+    DO 5 TIMES.
+      FIND FIRST OCCURRENCE OF lc_null IN SECTION OFFSET lv_cursor OF iv_data IN BYTE MODE MATCH OFFSET lv_match.
+      WRITE: / sy-subrc, lv_match.
+      lv_cursor = lv_cursor + 1.
+    ENDDO.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("02\n02\n02\n42\n42");
   });
 
 });

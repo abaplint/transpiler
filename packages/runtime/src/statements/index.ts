@@ -2,6 +2,8 @@ import {append} from "./append";
 import {assert} from "./assert";
 import {assign} from "./assign";
 import {clear} from "./clear";
+import {commit} from "./commit";
+import {rollback} from "./rollback";
 import {concatenate} from "./concatenate";
 import {condense} from "./condense";
 import {deleteInternal} from "./delete_internal";
@@ -43,6 +45,8 @@ export class Statements {
   public getBit = getBit;
   public setBit = setBit;
   public loop = loop;
+  public commit = commit;
+  public rollback = rollback;
   public message = message;
   public modifyInternal = modifyInternal;
   public readTable = readTable;

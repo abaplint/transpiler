@@ -32,4 +32,11 @@ describe("Builtin functions - substring", () => {
     await f(abap);
   });
 
+  it("substring, only val and len supplied", async () => {
+    const code = `ASSERT substring( val = |abc| len = 1 ) = |a|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
