@@ -1,6 +1,6 @@
 import {Expressions, Nodes} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
-import {AttributeChainTranspiler, FieldChainTranspiler} from ".";
+import {AttributeChainTranspiler, ComponentChainTranspiler, FieldChainTranspiler} from ".";
 import {Traversal} from "../traversal";
 import {ConstantTranspiler} from "./constant";
 
@@ -46,6 +46,8 @@ export class SourceTranspiler implements IExpressionTranspiler {
           ret = "(" + ret + ").get().";
         } else if (c.get() instanceof Expressions.AttributeChain) {
           ret += new AttributeChainTranspiler().transpile(c, traversal);
+        } else if (c.get() instanceof Expressions.ComponentChain) {
+          ret = "(" + ret + ").get()." + new ComponentChainTranspiler().transpile(c, traversal);
         } else {
           ret += "SourceUnknown-" + c.get().constructor.name;
         }
