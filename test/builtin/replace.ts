@@ -46,4 +46,14 @@ describe("Builtin functions - replace", () => {
     expect(abap.console.get()).to.equal("bar [[foo");
   });
 
+  it("replace 04", async () => {
+    const code = `DATA rv_escaped TYPE string VALUE 'foo\\bar'.
+    rv_escaped = replace( val = rv_escaped sub = '\\' with = '\\\\' occ = 0 ).
+    WRITE rv_escaped.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("foo\\\\bar");
+  });
+
 });
