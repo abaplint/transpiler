@@ -10,6 +10,8 @@ export * from "./class_deferred";
 export * from "./class_implementation";
 export * from "./class_local_friends";
 export * from "./clear";
+export * from "./commit";
+export * from "./rollback";
 export * from "./concatenate";
 export * from "./condense";
 export * from "./constant";

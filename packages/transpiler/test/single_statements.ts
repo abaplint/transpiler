@@ -151,6 +151,8 @@ describe("Single statements", () => {
     {abap: `GET REFERENCE OF <item> INTO lr_stack_top.`, js: `lr_stack_top.assign(fs_item_.getPointer());`, skip: false},
     {abap: "CONVERT DATE lv_date TIME lv_time INTO TIME STAMP lv_timestamp TIME ZONE lv_utc.",
       js: `abap.statements.convert({date: lv_date,time: lv_time,zone: lv_utc}, {stamp: lv_timestamp});`, skip: false},
+    {abap: "COMMIT WORK.",     js: `abap.statements.commit();`, skip: false},
+    {abap: "ROLLBACK WORK.",   js: `abap.statements.rollback();`, skip: false},
   ];
 
   for (const test of tests) {
