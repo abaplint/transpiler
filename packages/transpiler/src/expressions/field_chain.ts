@@ -12,7 +12,7 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
     this.addGet = addGet;
   }
 
-  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): string {
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal, prefix = true): string {
     let ret = "";
     const extra: string[] = [];
 
@@ -27,7 +27,7 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
       } else if (c.get() instanceof Expressions.AttributeName) {
         const interfaceName = traversal.isInterfaceAttribute(c.getFirstToken());
         let name = c.getFirstToken().getStr().replace("~", "$");
-        if (interfaceName && name.startsWith(interfaceName) === false) {
+        if (prefix && interfaceName && name.startsWith(interfaceName) === false) {
           name = interfaceName + "$" + name;
         }
         ret += name;
