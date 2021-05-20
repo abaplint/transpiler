@@ -11,9 +11,12 @@ export class Hex implements ICharacter {
     this.value = "0".repeat(this.length * 2);
   }
 
-  public set(value: ICharacter | INumeric | string) {
+  public set(value: ICharacter | INumeric | string | number) {
     if (typeof value === "string") {
       this.value = value;
+    } else if (typeof value === "number") {
+      this.value = value.toString(16);
+      this.value = this.value.padStart(this.length * 2, "0");
     } else {
       const v = value.get();
       if (typeof v === "number") {
