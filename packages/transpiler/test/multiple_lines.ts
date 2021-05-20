@@ -480,7 +480,7 @@ bool.set(abap.builtin.abap_true);`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
-  it.skip("constants next should reference first, class and interface", async () => {
+  it.only("constants next should reference first, class and interface", async () => {
     const abap = `
 CLASS lcl_bar DEFINITION.
   PUBLIC SECTION.
@@ -492,7 +492,21 @@ ENDCLASS.
 INTERFACE bar.
   CONSTANTS next TYPE c LENGTH 1 VALUE lcl_bar=>first.
 ENDINTERFACE.`;
-    const expected = `sdf`;
+    const expected = `const constant_1 = new abap.types.Integer().set(1);
+class lcl_bar {
+  async constructor_() {
+    this.me = new abap.types.ABAPObject();
+    this.me.set(this);
+    return this;
+  }
+}
+abap.Classes['PROG-ZFOOBAR-LCL_BAR'] = lcl_bar;
+lcl_bar.first = new abap.types.Character();
+lcl_bar.first.set('b');
+class bar {
+}
+abap.Classes['PROG-ZFOOBAR-BAR'] = bar;bar.bar$next = new abap.types.Character();
+bar.bar$next.set(something_first);`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 

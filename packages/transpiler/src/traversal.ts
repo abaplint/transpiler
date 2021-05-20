@@ -48,6 +48,16 @@ export class Traversal {
     return this.spaghetti;
   }
 
+  /** finds a statement in the _current_ file given a position */
+  public findStatementInFile(pos: abaplint.Position): abaplint.Nodes.StatementNode | undefined {
+    for (const s of this.file.getStatements()) {
+      if (pos.isBetween(s.getStart(), s.getEnd())) {
+        return s;
+      }
+    }
+    return undefined;
+  }
+
   private scopeCache: {
     cov: {start: abaplint.Position, end: abaplint.Position},
     filename: string,

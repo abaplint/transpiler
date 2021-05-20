@@ -42,6 +42,10 @@ export class InterfaceTranspiler implements IStructureTranspiler {
       const interfaceName = node.getFirstToken().getStr().toLowerCase();
       const name = interfaceName + "." + interfaceName + "$" + n.toLowerCase();
       ret += name + " = " + new TranspileTypes().toType(identifier.getType()) + ";\n";
+
+      // TODO TODO TODO
+      console.dir(traversal.findStatementInFile(identifier.getStart()));
+
       const val = identifier.getValue();
       if (typeof val === "string") {
         ret += name + ".set(" + identifier.getValue() + ");\n";
