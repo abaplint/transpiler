@@ -31,11 +31,16 @@ export function split(param: ISplitOptions) {
     if (split.length === 0) {
       split.push(source);
     }
-    for (let i = 0; i < param.targets.length; i++) {
-      param.targets[i].clear();
-      if (split[i]) {
-        param.targets[i].set(split[i]);
+    for (const t of param.targets) {
+      t.clear();
+      if (split[0]) {
+        t.set(split.shift()!);
       }
+    }
+    if (split.length > 0) {
+      const concat = split.join(at);
+      const last = param.targets[param.targets.length - 1];
+      last.set(last.get() + at + concat);
     }
   }
 
