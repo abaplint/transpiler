@@ -318,4 +318,47 @@ describe("Testing Unit Testing", () => {
     expect(cons.split("\n")[1]).to.equal("from impl");
   });
 
+  it("test-9", async () => {
+// newline constant referenced
+    const charutils = `CLASS cl_abap_char_utilities DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    CONSTANTS:
+      newline TYPE c LENGTH 1 VALUE '_'.
+    CLASS-METHODS:
+      class_constructor.
+ENDCLASS.
+CLASS cl_abap_char_utilities IMPLEMENTATION.
+  METHOD class_constructor.
+    WRITE '@KERNEL cl_abap_char_utilities.newline.set("\\n");'.
+  ENDMETHOD.
+ENDCLASS.`;
+    const intf = `
+    INTERFACE zif_abapgit_definitions PUBLIC.
+      CONSTANTS c_newline TYPE c LENGTH 1 VALUE cl_abap_char_utilities=>newline ##NO_TEXT.
+    ENDINTERFACE.`;
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        WRITE zif_abapgit_definitions=>c_newline.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "cl_abap_char_utilities.clas.abap", contents: charutils},
+      {filename: "zif_abapgit_definitions.intf.abap", contents: intf},
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n").length).to.equal(4);
+  });
+
 });
