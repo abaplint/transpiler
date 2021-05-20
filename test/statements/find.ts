@@ -371,4 +371,19 @@ describe("Running statements - FIND", () => {
     expect(abap.console.get()).to.equal("4\n4");
   });
 
+  it.skip("FIND, with REGEX", async () => {
+    const code = `
+    DATA str TYPE string.
+    DATA lv_name TYPE string.
+    DATA lv_email TYPE string.
+    str = |Foo Bar <foo@bar.com> 1526718052 +0000|.
+    FIND FIRST OCCURRENCE OF REGEX \`(.*)<(.*)>\` IN str SUBMATCHES lv_name lv_email.
+    WRITE / lv_name.
+    WRITE / lv_email.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("Foo Bar\nfoo@bar.com");
+  });
+
 });
