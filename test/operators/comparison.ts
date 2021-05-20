@@ -95,6 +95,13 @@ describe("Running operators - Comparison", () => {
     await f(abap);
   });
 
+  it("CP 2", async () => {
+    const code = `ASSERT |comment\\n| CP 'comment+'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("ASSERT strlen gt", async () => {
     const code = `
       DATA lv_len TYPE i.

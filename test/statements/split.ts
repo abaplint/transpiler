@@ -159,4 +159,17 @@ WRITE / lv_int.`;
     expect(abap.console.get()).to.equal("2\n0");
   });
 
+  it("split 3", async () => {
+    const code = `
+    DATA lv_first TYPE string.
+    DATA lv_rest TYPE string.
+    SPLIT |hello world moo| AT space INTO lv_first lv_rest.
+    WRITE / lv_first.
+    WRITE / lv_rest.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello\nworld moo");
+  });
+
 });
