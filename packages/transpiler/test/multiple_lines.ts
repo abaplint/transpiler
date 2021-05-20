@@ -480,7 +480,7 @@ bool.set(abap.builtin.abap_true);`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
-  it.only("constants next should reference first, class and interface", async () => {
+  it("constants next should reference first, class and interface", async () => {
     const abap = `
 CLASS lcl_bar DEFINITION.
   PUBLIC SECTION.
@@ -505,8 +505,9 @@ lcl_bar.first = new abap.types.Character();
 lcl_bar.first.set('b');
 class bar {
 }
-abap.Classes['PROG-ZFOOBAR-BAR'] = bar;bar.bar$next = new abap.types.Character();
-bar.bar$next.set(something_first);`;
+abap.Classes['PROG-ZFOOBAR-BAR'] = bar;
+bar.bar$next = new abap.types.Character();
+bar.bar$next.set(abap.Classes['PROG-ZFOOBAR-LCL_BAR'].first);`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
