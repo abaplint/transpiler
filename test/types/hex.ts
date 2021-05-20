@@ -39,4 +39,14 @@ describe("Running Examples - Hex type", () => {
     expect(abap.console.get()).to.equal("0D"); // 13 in decimal
   });
 
+  it("Hex, constant", async () => {
+    const code = `
+    CONSTANTS lc_mask TYPE x VALUE 112.
+    WRITE lc_mask.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("70");
+  });
+
 });

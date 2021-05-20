@@ -461,4 +461,54 @@ lcl_bar.foo.set('\\'');`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
+  it("constants next should reference first", async () => {
+    const abap = `
+  CONSTANTS first TYPE c LENGTH 1 VALUE 'b'.
+  CONSTANTS next TYPE c LENGTH 1 VALUE first.`;
+    const expected = `const constant_1 = new abap.types.Integer().set(1);
+let first = new abap.types.Character();
+first.set('b');
+let next = new abap.types.Character();
+next.set(first);`;
+    expect(await runSingle(abap)).to.equal(expected);
+  });
+
+  it("bool VALUE abap_true", async () => {
+    const abap = `DATA bool TYPE abap_bool VALUE abap_true.`;
+    const expected = `let bool = new abap.types.Character();
+bool.set(abap.builtin.abap_true);`;
+    expect(await runSingle(abap)).to.equal(expected);
+  });
+
+  it("constants next should reference first, class and interface", async () => {
+    const abap = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CONSTANTS first TYPE c LENGTH 1 VALUE 'b'.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+ENDCLASS.
+
+INTERFACE bar.
+  CONSTANTS next TYPE c LENGTH 1 VALUE lcl_bar=>first.
+ENDINTERFACE.`;
+    const expected = `const constant_1 = new abap.types.Integer().set(1);
+class lcl_bar {
+  async constructor_() {
+    this.me = new abap.types.ABAPObject();
+    this.me.set(this);
+    return this;
+  }
+}
+abap.Classes['PROG-ZFOOBAR-LCL_BAR'] = lcl_bar;
+lcl_bar.first = new abap.types.Character();
+lcl_bar.first.set('b');
+class bar {
+}
+abap.Classes['PROG-ZFOOBAR-BAR'] = bar;
+bar.bar$next = new abap.types.Character();
+bar.bar$next.set(abap.Classes['PROG-ZFOOBAR-LCL_BAR'].first);`;
+    expect(await runSingle(abap)).to.equal(expected);
+  });
+
 });

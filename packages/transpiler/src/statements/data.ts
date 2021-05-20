@@ -3,6 +3,7 @@ import {IStatementTranspiler} from "./_statement_transpiler";
 import {TranspileTypes} from "../types";
 import {Traversal} from "../traversal";
 import {ConstantTranspiler} from "../expressions/constant";
+import {FieldChainTranspiler} from "../expressions";
 
 export class DataTranspiler implements IStatementTranspiler {
 
@@ -22,7 +23,6 @@ export class DataTranspiler implements IStatementTranspiler {
       throw new Error("DataTranspiler, var not found, \"" + token.getStr() + "\"");
     }
 
-// todo, refactor this part to use value from TypedIdentifier
     let value = "";
     const val = node.findFirstExpression(abaplint.Expressions.Value);
     if (val) {
@@ -30,9 +30,12 @@ export class DataTranspiler implements IStatementTranspiler {
       if (int === undefined) {
         int = val.findFirstExpression(abaplint.Expressions.ConstantString);
       }
-      if (int){
+      if (int) {
         const escaped = new ConstantTranspiler().escape(int.getFirstToken().getStr());
         value = "\n" + found.getName() + ".set(" + escaped + ");";
+      } else if (val.getChildren()[1].get() instanceof abaplint.Expressions.SimpleFieldChain) {
+        const s = new FieldChainTranspiler().transpile(val.getChildren()[1] as abaplint.Nodes.ExpressionNode, traversal);
+        value = "\n" + found.getName() + ".set(" + s + ");";
       }
     }
 

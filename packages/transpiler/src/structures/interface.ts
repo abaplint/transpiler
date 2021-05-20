@@ -2,6 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
 import {TranspileTypes} from "../types";
+import {FieldChainTranspiler} from "../expressions";
 
 export class InterfaceTranspiler implements IStructureTranspiler {
 
@@ -32,7 +33,7 @@ export class InterfaceTranspiler implements IStructureTranspiler {
     if (vars === undefined || Object.keys(vars).length === 0) {
       return "";
     }
-    let ret = "";
+    let ret = "\n";
     for (const n in vars) {
       const identifier = vars[n];
       if (identifier.getMeta().includes(abaplint.IdentifierMeta.Static) === false
@@ -42,6 +43,15 @@ export class InterfaceTranspiler implements IStructureTranspiler {
       const interfaceName = node.getFirstToken().getStr().toLowerCase();
       const name = interfaceName + "." + interfaceName + "$" + n.toLowerCase();
       ret += name + " = " + new TranspileTypes().toType(identifier.getType()) + ";\n";
+
+      const constantStatement = traversal.findStatementInFile(identifier.getStart());
+      const valExpression = constantStatement?.findFirstExpression(abaplint.Expressions.Value);
+      if (valExpression?.getChildren()[1].get() instanceof abaplint.Expressions.SimpleFieldChain) {
+        const s = new FieldChainTranspiler().transpile(valExpression.getChildren()[1] as abaplint.Nodes.ExpressionNode, traversal);
+        ret += name + ".set(" + s + ");\n";
+        continue;
+      }
+
       const val = identifier.getValue();
       if (typeof val === "string") {
         ret += name + ".set(" + identifier.getValue() + ");\n";
