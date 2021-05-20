@@ -49,4 +49,30 @@ describe("Running Examples - Hex type", () => {
     expect(abap.console.get()).to.equal("70");
   });
 
+  it("Hex, compare with integers", async () => {
+    const code = `
+  DATA hex TYPE x VALUE '30'.
+  ASSERT hex = 48.
+
+  CASE hex.
+    WHEN 48.
+      WRITE 'ok'.
+    WHEN OTHERS.
+      WRITE 'fail'.
+  ENDCASE.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ok");
+  });
+
+  it("Hex, compare with string", async () => {
+    const code = `
+  DATA hex TYPE x VALUE '30'.
+  ASSERT hex = |30|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

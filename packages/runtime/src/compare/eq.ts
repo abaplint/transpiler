@@ -1,10 +1,10 @@
-import {ABAPObject, FieldSymbol, Structure, Table} from "../types";
+import {ABAPObject, FieldSymbol, Hex, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
 export function eq(
-  left: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | FieldSymbol,
-  right: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | FieldSymbol): boolean {
+  left: number | string | ICharacter | INumeric | ABAPObject | Structure | Hex | Table | FieldSymbol,
+  right: number | string | ICharacter | INumeric | ABAPObject | Structure | Hex | Table | FieldSymbol): boolean {
 
   if (left instanceof Table || right instanceof Table) {
     throw "todo, eq TABLE";
@@ -51,6 +51,12 @@ export function eq(
     r = right.get();
   } else {
     r = right;
+  }
+
+  if (right instanceof Hex && typeof l === "number") {
+    r = parseInt(right.get(), 16);
+  } else if (left instanceof Hex && typeof r === "number") {
+    l = parseInt(left.get(), 16);
   }
 
   // assumption: typically no casts are required, so start checking if the types doesnt match
