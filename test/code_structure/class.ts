@@ -776,7 +776,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("abc");
   });
 
-  it("class, alias field from interface", async () => {
+  it.only("class, alias field from interface", async () => {
     const code = `
 INTERFACE intf.
   CLASS-DATA bar TYPE i.
@@ -794,6 +794,41 @@ CLASS clas IMPLEMENTATION.
     bar = 2.
     WRITE / bar.
     WRITE / intf~bar.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  clas=>run( ).`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2\n");
+  });
+
+  it.only("class, alias field from interface, instance", async () => {
+    const code = `
+INTERFACE intf.
+  DATA bar TYPE i.
+ENDINTERFACE.
+
+CLASS clas DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES intf.
+    ALIASES bar FOR intf~bar.
+    METHODS inst.
+    CLASS-METHODS run.
+ENDCLASS.
+
+CLASS clas IMPLEMENTATION.
+  METHOD inst.
+    bar = 2.
+    WRITE bar.
+  ENDMETHOD.
+  METHOD run.
+    DATA clas TYPE REF TO clas.
+    CREATE OBJECT clas.
+    clas->inst( ).
   ENDMETHOD.
 ENDCLASS.
 
