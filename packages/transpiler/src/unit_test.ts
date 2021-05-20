@@ -50,6 +50,7 @@ locl = clas.addTestClass("${def.name}");\n`;
               const skipThis = (skip || []).some(a => a.object === obj.getName() && a.class === def.name && a.method === m.name);
               if (skipThis) {
                 ret += `  console.log('${obj.getName()}: running ${def.name}->${m.name}, skipped');\n`;
+                ret += `  meth = locl.addMethod("${m.name}");\n`;
                 ret += `  meth.skip();\n`;
                 continue;
               }
