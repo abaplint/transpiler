@@ -371,7 +371,7 @@ describe("Running statements - FIND", () => {
     expect(abap.console.get()).to.equal("4\n4");
   });
 
-  it.skip("FIND, with REGEX", async () => {
+  it("FIND, with REGEX", async () => {
     const code = `
     DATA str TYPE string.
     DATA lv_name TYPE string.
@@ -383,7 +383,7 @@ describe("Running statements - FIND", () => {
     const js = await run(code);
     const f = new Function("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("Foo Bar\nfoo@bar.com");
+    expect(abap.console.get()).to.equal("Foo Bar \nfoo@bar.com");
   });
 
 });
