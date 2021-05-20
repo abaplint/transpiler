@@ -776,4 +776,34 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("abc");
   });
 
+  it("class, alias field from interface", async () => {
+    const code = `
+INTERFACE intf.
+  CLASS-DATA bar TYPE i.
+ENDINTERFACE.
+
+CLASS clas DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES intf.
+    ALIASES bar FOR intf~bar.
+    CLASS-METHODS run.
+ENDCLASS.
+
+CLASS clas IMPLEMENTATION.
+  METHOD run.
+    bar = 2.
+    WRITE / bar.
+    WRITE / intf~bar.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  clas=>run( ).`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2\n");
+  });
+
 });
