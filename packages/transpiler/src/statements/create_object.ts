@@ -13,9 +13,23 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
       para = traversal.traverse(parameters);
     }
 
-    const name = this.findClassName(node, traversal);
-//    return target + ".set(await (new " + name + "()).constructor_(" + para + "));";
-    return target + ".set(await (new " + traversal.lookupClassOrInterface(name, node.getFirstToken()) + "()).constructor_(" + para + "));";
+    let name = "";
+    const dynamic = node.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.ConstantString);
+    if (dynamic) {
+      name = dynamic.getFirstToken().getStr();
+      name = name.substring(1, name.length - 1);
+    } else {
+      name = this.findClassName(node, traversal);
+    }
+
+    let ret = "";
+    const clas = traversal.lookupClassOrInterface(name, node.getFirstToken());
+    if (dynamic) {
+      ret += "if (" + clas + " === undefined) { throw 'cx_sy_create_object_error'; }\n";
+    }
+    ret += target + ".set(await (new " + clas + "()).constructor_(" + para + "));";
+
+    return ret;
   }
 
   private findClassName(node: abaplint.Nodes.StatementNode, traversal: Traversal) {
@@ -33,6 +47,8 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
     const type = traversal.determineType(node, scope);
     if (type === undefined) {
       throw new Error(`CreateObjectTranspiler, target variable "${target?.concatTokens()}" not found in scope`);
+    } else if (type instanceof abaplint.BasicTypes.GenericObjectReferenceType) {
+      return "object";
     } else if (!(type instanceof abaplint.BasicTypes.ObjectReferenceType)) {
       throw new Error(`CreateObjectTranspiler, target variable "${target?.concatTokens()}" not a object reference`);
     }
