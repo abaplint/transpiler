@@ -839,4 +839,21 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("constant defined in UPPER case", async () => {
+    const code = `
+CLASS clas DEFINITION.
+  PUBLIC SECTION.
+    CONSTANTS UPPER TYPE c LENGTH 1 VALUE 'U'.
+ENDCLASS.
+CLASS clas IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  WRITE clas=>upper.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("U");
+  });
+
 });

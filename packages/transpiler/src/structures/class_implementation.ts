@@ -57,8 +57,8 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
 
       implementing.push(...intf.getImplementing());
 
-      ret.push(...intf.getAttributes().getStatic().map(a => {return {identifier: a, prefix: intf.getName() + "$"};}));
-      ret.push(...intf.getAttributes().getConstants().map(a => {return {identifier: a, prefix: intf.getName() + "$"};}));
+      ret.push(...intf.getAttributes().getStatic().map(a => {return {identifier: a, prefix: intf.getName().toLowerCase() + "$"};}));
+      ret.push(...intf.getAttributes().getConstants().map(a => {return {identifier: a, prefix: intf.getName().toLowerCase() + "$"};}));
     }
 
     return ret;
@@ -82,7 +82,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     const clasName = node.getFirstToken().getStr().toLowerCase();
     const staticAttributes = this.findStaticAttributes(cdef, scope);
     for (const attr of staticAttributes) {
-      const name = clasName + "." + attr.prefix + attr.identifier.getName();
+      const name = clasName + "." + attr.prefix + attr.identifier.getName().toLowerCase();
       ret += name + " = " + new TranspileTypes().toType(attr.identifier.getType()) + ";\n";
       const val = attr.identifier.getValue();
       if (typeof val === "string") {
@@ -103,7 +103,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
       if (isStatic === false) {
         continue;
       }
-      ret += clasName + "." + alias.getName() + " = " + clasName + "." + alias.getComponent().replace("~", "$") + ";\n";
+      ret += clasName + "." + alias.getName().toLowerCase() + " = " + clasName + "." + alias.getComponent().replace("~", "$") + ";\n";
     }
 
     // this is not correct, ABAP does not invocate the class constructor at require time,
