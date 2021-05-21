@@ -13,6 +13,7 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
   let found: any = undefined;
   let foundIndex = 0;
 
+
   const arr = table.array();
 
   if (options?.index) {

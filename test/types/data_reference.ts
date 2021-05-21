@@ -35,4 +35,26 @@ WRITE / item1->bar.`;
     expect(abap.console.get()).to.equal("2\n3");
   });
 
+  it("clear", async () => {
+    const code = `
+TYPES: BEGIN OF node,
+  bar TYPE i,
+END OF node.
+DATA node TYPE node.
+DATA ref TYPE REF TO node.
+DATA tab TYPE STANDARD TABLE OF REF TO node.
+node-bar = 2.
+GET REFERENCE OF node INTO ref.
+APPEND ref TO tab.
+
+CLEAR ref.
+READ TABLE tab INDEX 1 INTO ref.
+WRITE ref->bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+
 });

@@ -30,7 +30,8 @@ export class DataReference  {
 ///////////////
 
   public clear() {
-    return this.pointer?.clear();
+    this.unassign();
+//    return this.pointer?.clear();
   }
 
   public get() {
