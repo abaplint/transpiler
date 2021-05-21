@@ -300,6 +300,12 @@ export class Traversal {
         ret += "this.me.set(this);\n";
       }
     }
+
+    // handle aliases after initialization of carrier variables
+    for (const a of def.getAliases().getAll()) {
+      ret += "this." + a.getName() + " = this." + a.getComponent().replace("~", "$") + ";\n";
+    }
+
     return ret;
   }
 
