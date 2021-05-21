@@ -776,7 +776,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("abc");
   });
 
-  it.only("class, alias field from interface", async () => {
+  it("class, alias field from interface, static", async () => {
     const code = `
 INTERFACE intf.
   CLASS-DATA bar TYPE i.
@@ -800,13 +800,12 @@ ENDCLASS.
 START-OF-SELECTION.
   clas=>run( ).`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("2\n");
+    expect(abap.console.get()).to.equal("2\n2");
   });
 
-  it.only("class, alias field from interface, instance", async () => {
+  it.skip("class, alias field from interface, instance", async () => {
     const code = `
 INTERFACE intf.
   DATA bar TYPE i.

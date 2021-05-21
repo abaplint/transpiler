@@ -34,25 +34,57 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     return false;
   }
 
+  /** Finds static attributes + constants including those from interfaces (from superclass is ingored) */
+  private findStaticAttributes(cdef: abaplint.IClassDefinition, scope: abaplint.ISpaghettiScopeNode){
+
+    const ret: {identifier: abaplint.Types.ClassAttribute | abaplint.Types.ClassConstant, prefix: string}[] = [];
+
+    ret.push(...cdef.getAttributes().getStatic().map(a => {return {identifier: a, prefix: ""};}));
+    ret.push(...cdef.getAttributes().getConstants().map(a => {return {identifier: a, prefix: ""};}));
+
+    const implementing = [...cdef.getImplementing()];
+    while (implementing.length > 0) {
+      const i = implementing.shift();
+      if (i === undefined) {
+        break;
+      }
+
+      const intf = scope.findInterfaceDefinition(i.name);
+      if (intf === undefined) {
+        continue;
+      }
+// todo, constants from interface?
+
+      implementing.push(...intf.getImplementing());
+
+      ret.push(...intf.getAttributes().getStatic().map(a => {return {identifier: a, prefix: intf.getName() + "$"};}));
+      ret.push(...intf.getAttributes().getConstants().map(a => {return {identifier: a, prefix: intf.getName() + "$"};}));
+    }
+
+    return ret;
+  }
+
   /** this builds the part after the class, containing the static variables/constants */
   private buildStatic(node: abaplint.Nodes.ExpressionNode | undefined, traversal: Traversal): string {
     if (node === undefined) {
       return "";
     }
-    const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
-    const vars = scope?.getData().vars;
-    if (vars === undefined || Object.keys(vars).length === 0) {
-      return "";
+    const cdef = traversal.getClassDefinition(node.getFirstToken());
+    if (cdef === undefined) {
+      return "ERROR_CDEF_NOT_FOUND";
     }
+    const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
+    if (scope === undefined) {
+      return "ERROR_SCOPE_NOT_FOUND";
+    }
+
     let ret = "";
-    for (const n in vars) {
-      const identifier = vars[n];
-      if (identifier.getMeta().includes(abaplint.IdentifierMeta.Static) === false) {
-        continue;
-      }
-      const name = node.getFirstToken().getStr().toLowerCase() + "." + n.toLocaleLowerCase().replace("~", "$");
-      ret += name + " = " + new TranspileTypes().toType(identifier.getType()) + ";\n";
-      const val = identifier.getValue();
+    const clasName = node.getFirstToken().getStr().toLowerCase();
+    const staticAttributes = this.findStaticAttributes(cdef, scope);
+    for (const attr of staticAttributes) {
+      const name = clasName + "." + attr.prefix + attr.identifier.getName();
+      ret += name + " = " + new TranspileTypes().toType(attr.identifier.getType()) + ";\n";
+      const val = attr.identifier.getValue();
       if (typeof val === "string") {
         const e = new ConstantTranspiler().escape(val);
         ret += name + ".set(" + e + ");\n";
@@ -66,10 +98,17 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
       }
     }
 
+    for (const alias of cdef.getAliases().getAll()) {
+      const isStatic = staticAttributes.some(s => s.prefix.replace("$", "~") + s.identifier.getName() === alias.getComponent());
+      if (isStatic === false) {
+        continue;
+      }
+      ret += clasName + "." + alias.getName() + " = " + clasName + "." + alias.getComponent().replace("~", "$") + ";\n";
+    }
+
     // this is not correct, ABAP does not invocate the class constructor at require time,
     // but this will probably work
-    const cdef = traversal.getClassDefinition(node.getFirstToken());
-    if (cdef?.getMethodDefinitions().getByName("class_constructor")) {
+    if (cdef.getMethodDefinitions().getByName("class_constructor")) {
       ret += "await " + node.getFirstToken().getStr().toLowerCase() + ".class_constructor();\n";
     }
 
