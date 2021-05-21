@@ -47,7 +47,11 @@ export class DataReference  {
   }
 
   public set(value: any) {
-    return this.pointer?.set(value);
+    if (value instanceof DataReference) {
+      return this.pointer = value.getPointer();
+    } else {
+      return this.pointer?.set(value);
+    }
   }
 
   public getOffset(input: {offset: number, length: number}) {
