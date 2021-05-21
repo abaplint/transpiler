@@ -98,8 +98,10 @@ export class Table  {
       this.value.push(p);
       return item;
     } else if (item instanceof DataReference) {
-      this.value.push(item);
-      return item;
+      const ref = new DataReference();
+      ref.assign(item.getPointer());
+      this.value.push(ref);
+      return ref;
     } else {
       const val = this.getValue(item, cloneRow);
       const p = clone(this.rowType);

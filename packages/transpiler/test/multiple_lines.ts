@@ -511,4 +511,13 @@ bar.bar$next.set(abap.Classes['PROG-ZFOOBAR-LCL_BAR'].first);`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
+  it("CREATE OBJECT, dynamic", async () => {
+    const abap = `
+    DATA blah TYPE REF TO OBJECT.
+    CREATE OBJECT blah TYPE ('ZCL_BLAH').`;
+    const expected = `let blah = new abap.types.ABAPObject();
+if (abap.Classes['ZCL_BLAH'] === undefined) { throw 'cx_sy_create_object_error'; }
+blah.set(await (new abap.Classes['ZCL_BLAH']()).constructor_());`;
+    expect(await runSingle(abap)).to.equal(expected);
+  });
 });
