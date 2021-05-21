@@ -16,16 +16,18 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 async function initDB() {
   return global.abap.initDB(\`${dbSetup}\`);
 }
+
 async function run() {
-await initDB();
-const unit = new runtime.UnitTestResult();
-let clas;
-let locl;
-let meth;
+  await initDB();
+  const unit = new runtime.UnitTestResult();
+  let clas;
+  let locl;
+  let meth;
 try {\n`;
 
     for (const obj of reg.getObjects()) {
       if (obj instanceof abaplint.Objects.Class) {
+        ret += `// --------------------------------------------\n`;
         ret += `clas = unit.addObject("${obj.getName()}");\n`;
         for (const file of obj.getABAPFiles()) {
           for (const def of file.getInfo().listClassDefinitions()) {
@@ -81,7 +83,8 @@ locl = clas.addTestClass("${def.name}");\n`;
       }
     }
 
-    ret += `console.log(abap.console.get());
+    ret += `// -------------------END-------------------
+console.log(abap.console.get());
 fs.writeFileSync(__dirname + path.sep + "output.xml", unit.xUnitXML());
 } catch (e) {
   if (meth) {
