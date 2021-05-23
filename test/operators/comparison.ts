@@ -440,4 +440,73 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("no\nyes\nyes");
   });
 
+  it("two x strings", async () => {
+    const code = `
+      DATA lv_x_len_2  TYPE x LENGTH 2 value '0106'.
+      DATA lv_x_len_1 TYPE x LENGTH 1 value '07'.
+      IF lv_x_len_1 > lv_x_len_2.
+        WRITE: '07 > 0106'.
+      ELSE.
+        WRITE: '0106 > 07'.
+      ENDIF.
+      `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`07 > 0106`);
+  });
+
+  it("xstring and int - part 1", async () => {
+    const code = `
+      DATA lv_int TYPE i VALUE 8.
+      DATA lv_x_len_1 TYPE x LENGTH 1 VALUE '07'.
+    
+      IF lv_int > lv_x_len_1.
+        WRITE: '8i > 07'.
+      ELSE.
+        WRITE: '07 > 8i '.
+      ENDIF.
+      `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`8i > 07`);
+  });
+
+  it("xstring and int - part 2", async () => {
+    const code = `
+      DATA lv_int TYPE i VALUE 8.
+      DATA lv_x_len_2  TYPE x LENGTH 2 value '1D06'.
+
+      IF lv_int > lv_x_len_2.
+        WRITE: '8i > 1D06'.
+      ELSE.
+        WRITE: '1D06 > 8i'.
+      ENDIF.
+      `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`1D06 > 8i`);
+  });
+
+  it("xstring and int - part 3", async () => {
+    const code = `
+      DATA lv_hex TYPE x.
+      lv_hex = '1B'.
+      DATA lv_int TYPE i VALUE 4.
+    
+      IF lv_hex > lv_int.
+        WRITE: '1B > 4i'.
+      ELSE.
+        WRITE: '4i > 1B'.
+      ENDIF.
+      `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`1B > 4i`);
+  });
+
+
 });
