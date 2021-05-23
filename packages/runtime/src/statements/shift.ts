@@ -63,7 +63,7 @@ function shift_byte_mode(target: ICharacter, options?: IShiftOptions) {
     }
     const split = leading.split("");
     while (split.some(s => value.substr(0, 2) === s)) {
-      value = value.substr(1);
+      value = value.substr(2);
     }
   } else if (options?.places) {
     const p = (options.places.get()) * 2;
