@@ -60,21 +60,37 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
       after = after.substring(0, after.length - 1);
     }
 
-    // todo, does this work with interfaces?
-    const defs = cdef?.getMethodDefinitions()?.getAll();
+    const method = this.findMethod(methodName, cdef, traversal);
     let staticMethod = "";
-    for (const m of defs || []) {
-      if (m.getName().toUpperCase() === methodName.toUpperCase() && m.isStatic()) {
-        // in ABAP static methods can be called with instance arrows, "->"
-        const className = scope.getParent()?.getIdentifier().sname?.toLowerCase();
-        staticMethod = "async " + methodName + "(" + unique + ") {\n" +
-          "return " + className + "." + methodName + "(" + unique + ");\n" +
-          "}\n" + "static ";
-        break;
-      }
+
+    methodName = methodName.replace("~", "$");
+
+    if (method && method.isStatic()) {
+      // in ABAP static methods can be called with instance arrows, "->"
+      const className = scope.getParent()?.getIdentifier().sname?.toLowerCase();
+      staticMethod = "async " + methodName + "(" + unique + ") {\n" +
+        "return " + className + "." + methodName + "(" + unique + ");\n" +
+        "}\n" + "static ";
     }
 
-    return staticMethod + "async " + methodName.replace("~", "$") + "(" + unique + ") {" + after;
+    return staticMethod + "async " + methodName + "(" + unique + ") {" + after;
+  }
+
+  private findMethod(name: string, cdef: abaplint.IClassDefinition | undefined, traversal: Traversal) {
+    if (cdef === undefined) {
+      return undefined;
+    }
+
+    if (name.includes("~")) {
+      const split = name.split("~");
+      const intfName = split[0];
+      name = split[1];
+      const scope = traversal.findCurrentScopeByToken(cdef.getToken());
+      const intf = scope?.findInterfaceDefinition(intfName);
+      return intf?.getMethodDefinitions()?.getByName(name);
+    } else {
+      return cdef.getMethodDefinitions()?.getByName(name);
+    }
   }
 
   private findMethodParameters(scope: abaplint.ISpaghettiScopeNode): abaplint.Types.MethodParameters | undefined {
