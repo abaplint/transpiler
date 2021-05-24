@@ -95,4 +95,26 @@ describe("Running statements - ASSIGN", () => {
     expect(abap.console.get()).to.equal("1\n2\n2\n0");
   });
 
+  it("assign with field symbol source", async () => {
+    const code = `
+TYPES: BEGIN OF ts_test,
+         a TYPE c LENGTH 4,
+       END OF ts_test.
+DATA lt_test TYPE STANDARD TABLE OF ts_test WITH DEFAULT KEY.
+DATA ls_test LIKE LINE OF lt_test.
+FIELD-SYMBOLS <ls> LIKE LINE OF lt_test.
+FIELD-SYMBOLS <lv> TYPE any.
+
+ls_test-a = 'asd'.
+APPEND ls_test TO lt_test.
+LOOP AT lt_test ASSIGNING <ls> .
+  ASSIGN COMPONENT 'A' OF STRUCTURE <ls> TO <lv>.
+  WRITE <lv>.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("asd");
+  });
+
 });
