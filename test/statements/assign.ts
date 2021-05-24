@@ -1,11 +1,11 @@
-import {expect} from "chai";
-import {ABAP} from "../../packages/runtime/src";
-import {AsyncFunction, runFiles} from "../_utils";
+import { expect } from "chai";
+import { ABAP } from "../../packages/runtime/src";
+import { AsyncFunction, runFiles } from "../_utils";
 
 let abap: ABAP;
 
 async function run(contents: string) {
-  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
+  return runFiles(abap, [{ filename: "zfoobar.prog.abap", contents }]);
 }
 
 describe("Running statements - ASSIGN", () => {
@@ -116,5 +116,25 @@ ENDLOOP.`;
     await f(abap);
     expect(abap.console.get()).to.equal("asd");
   });
+
+  it("ASSIGN by number", async () => {
+    const code = `
+      TYPES:
+        BEGIN OF ts_test,
+          a TYPE c LENGTH 4,
+        END OF ts_test.
+      DATA ls_test type ts_test. 
+      ls_test-a = 'ABCD'.
+      FIELD-SYMBOLS <lv> TYPE any.
+      ASSIGN COMPONENT 1 OF STRUCTURE ls_test TO <lv>.
+      WRITE <lv>.  
+    `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ABCD");
+  });
+
+
 
 });
