@@ -26,6 +26,19 @@ describe("Running statements - SHIFT", () => {
     expect(abap.console.get()).to.equal("bc");
   });
 
+  it("shift in byte mode", async () => {
+    const code = `
+    DATA lv_xstring TYPE xstring.
+    lv_xstring = '0061736D' .
+    SHIFT lv_xstring IN BYTE MODE BY 1 PLACES CIRCULAR.
+    write lv_xstring+0(1).
+  `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("61");
+  });
+
   it("shift up to left, found", async () => {
     const code = `
   DATA lv_temp TYPE string.
