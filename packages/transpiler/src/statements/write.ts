@@ -7,21 +7,30 @@ export class WriteTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
     let extra = "";
+    let source = "";
     const newLine = node.findDirectTokenByText("/") !== undefined;
-    if (newLine === true) {
-      extra = ", {newLine: true}";
-    }
+
+
+
     const expr = node.findDirectExpression(abaplint.Expressions.Source);
     if (expr === undefined) {
-      throw new Error("WriteTranspiler, no source expression found");
+      if (newLine === true) {
+        source = "''";
+        extra = ", {newLine: true,skipLine: true}";
+      } else {
+        throw new Error("WriteTranspiler, no source expression found");
+      }
+    } else {
+      if (newLine === true) {
+        extra = ", {newLine: true}";
+      }
+      const concat = expr.concatTokens();
+      if (concat.startsWith("'@KERNEL ")) {
+        // @KERNEL commands must be taken verbatim
+        return concat.substr(9, concat.length - 10);
+      }
+      source = new SourceTranspiler().transpile(expr, traversal);
     }
-    const concat = expr.concatTokens();
-    if (concat.startsWith("'@KERNEL ")) {
-      // @KERNEL commands must be taken verbatim
-      return concat.substr(9, concat.length - 10);
-    }
-
-    const source = new SourceTranspiler().transpile(expr, traversal);
     return "abap.statements.write(" + source + extra + ");";
   }
 
