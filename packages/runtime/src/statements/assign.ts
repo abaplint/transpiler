@@ -11,7 +11,11 @@ export interface IAssignInput {
 export function assign(input: IAssignInput) {
 
   if (input.component) {
-    if (!(input.source instanceof Structure)) {
+    if (input.source instanceof FieldSymbol) {
+      input.source = input.source.getPointer() as any;
+      assign(input);
+      return;
+    } else if (!(input.source instanceof Structure)) {
       throw "ASSIGN, not a structure"; // todo, this should be a runtime error?
     }
 

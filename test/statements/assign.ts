@@ -1,11 +1,11 @@
-import { expect } from "chai";
-import { ABAP } from "../../packages/runtime/src";
-import { AsyncFunction, runFiles } from "../_utils";
+import {expect} from "chai";
+import {ABAP} from "../../packages/runtime/src";
+import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
 async function run(contents: string) {
-  return runFiles(abap, [{ filename: "zfoobar.prog.abap", contents }]);
+  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
 }
 
 describe("Running statements - ASSIGN", () => {
