@@ -856,4 +856,36 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("U");
   });
 
+  it("static method in interface", async () => {
+    const code = `
+INTERFACE lif_test.
+  CLASS-METHODS main.
+ENDINTERFACE.
+
+CLASS lcl_test DEFINITION CREATE PUBLIC.
+  PUBLIC SECTION.
+    INTERFACES lif_test.
+    CLASS-METHODS main.
+ENDCLASS.
+
+CLASS lcl_test IMPLEMENTATION.
+
+  METHOD lif_test~main.
+    WRITE 'I am from interface'.
+  ENDMETHOD.
+
+  METHOD main.
+    WRITE 'I am from class'.
+  ENDMETHOD.
+
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl_test=>lif_test~main( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("I am from interface");
+  });
+
 });
