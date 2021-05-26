@@ -66,7 +66,7 @@ describe("Running statements - WRITE", () => {
     expect(abap.console.get()).to.equal("A");
   });
 
-  it("WRITE - structure with 2 components", async () => {
+/*   it("WRITE - structure with 2 components", async () => {
     const code = `
       TYPES BEGIN OF ts_str_2.
       TYPES aaa TYPE c LENGTH 5.
@@ -74,14 +74,14 @@ describe("Running statements - WRITE", () => {
       TYPES END OF ts_str_2.
       DATA ls_str_2 TYPE ts_str_2.
       ls_str_2-aaa = 1.
-      ls_str_2-bbb = 2.   
+      ls_str_2-bbb = 2.
       WRITE: ls_str_2.
     `;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("   1    2 ");
-  });
+  }); */
 
 
 
