@@ -23,8 +23,17 @@ export function assign(input: IAssignInput) {
     if (typeof component !== "string") {
       component = component.get();
     }
+    let result: any = undefined;
+    if (typeof component === "number") {
+      const structure_as_object = input.source.get();
+      const keys = Object.keys(structure_as_object);
+      const component_name = keys[(component - 1)];
+      result = structure_as_object[component_name];
+    } else {
+      result = input.source.get()[component.toLowerCase()];
 
-    const result = input.source.get()[component.toLowerCase()];
+    }
+
     if (result === undefined) {
       // not a field in the structure
       // @ts-ignore
