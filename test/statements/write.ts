@@ -23,4 +23,22 @@ describe("Running statements - WRITE", () => {
     await f(abap);
     expect(abap.console.get()).to.equal("\n");
   });
+
+  it("WRITE - structure", async () => {
+    const code = `
+      TYPES:
+        BEGIN OF ts_str,
+          comp_one TYPE c LENGTH 10,
+        END OF ts_str.
+        DATA ls_str TYPE ts_str.
+        ls_str-comp_one = 'A'.
+        write: ls_str.
+    `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("A");
+  });
+
+
 });
