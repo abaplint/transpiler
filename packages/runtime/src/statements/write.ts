@@ -1,4 +1,4 @@
-import {Structure} from "../types";
+import {Integer, Structure} from "../types";
 import {FieldSymbol} from "../types/field_symbol";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
@@ -19,6 +19,19 @@ export function write(source: INumeric | ICharacter | FieldSymbol | string | num
           // @ts-ignore
           abap.statements.write(obj[f]);
         }
+      } else if (source instanceof Integer) {
+        //get the padded integer
+        const lv_integer_value = source.get();
+        let lv_integer_as_string = lv_integer_value.toString();
+        lv_integer_as_string = lv_integer_as_string.padStart(10, " ");
+        //add sign suffix
+        const lv_sign_suffix = (lv_integer_value > 0) ? " " : "-";
+        lv_integer_as_string = lv_integer_as_string + lv_sign_suffix;
+
+        this.console.add(lv_integer_as_string);
+
+
+
       } else {
         this.console.add(source.get().toString());
       }
