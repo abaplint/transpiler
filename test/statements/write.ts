@@ -66,7 +66,7 @@ describe("Running statements - WRITE", () => {
     expect(abap.console.get()).to.equal("A");
   });
 
-/*   it("WRITE - structure with 2 components", async () => {
+  it.skip("WRITE - structure with 2 components", async () => {
     const code = `
       TYPES BEGIN OF ts_str_2.
       TYPES aaa TYPE c LENGTH 5.
@@ -81,7 +81,7 @@ describe("Running statements - WRITE", () => {
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("   1    2 ");
-  }); */
+  });
 
 
 
