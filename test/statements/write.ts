@@ -45,7 +45,7 @@ describe("Running statements - WRITE", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("         1 ");
+    expect(abap.console.get()).to.equal("1");
   });
 
 
