@@ -1,4 +1,5 @@
 import {Character} from "./character";
+import {Integer} from "./integer";
 import {ICharacter} from "./_character";
 
 export class String implements ICharacter {
@@ -11,12 +12,17 @@ export class String implements ICharacter {
   public set(value: ICharacter | string | number) {
     if (typeof value === "string") {
       this.value = value;
-    } else if (typeof value === "number" ) {
+    } else if (typeof value === "number") {
       this.value = value.toString();
     } else if (value instanceof Character) {
       // replace trailing blanks if the source is a Character string
       this.value = value.get().replace(/[ ]*$/g, "");
-    } else {
+    } else if (value instanceof Integer) {
+      const lv_sign = (parseInt(value.get(), 10) >= 0) ? " " : "-";
+      this.value = value.get() + lv_sign;
+    }
+
+    else {
       this.value = value.get() + "";
     }
     return this;
@@ -30,7 +36,7 @@ export class String implements ICharacter {
     return this.value;
   }
 
-  public getOffset(input: {offset: number, length: number}) {
+  public getOffset(input: { offset: number, length: number }) {
     let ret = this.value;
     if (input?.offset) {
       ret = ret.substr(input.offset);
