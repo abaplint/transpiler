@@ -6,3 +6,10 @@
 * Interfaces required foraccess to eg. constants
 * CLAS locals_imp and locals_def are merged to one file, as abaplint points to the definitions which are skipped
 * top level await possible via `.mjs` file extension
+
+# Statements
+
+* WRITE statement
+  * no spaces between consequential WRITEs
+  * WRITE for integer is not producing preceding spaces
+ 
