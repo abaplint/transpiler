@@ -16,7 +16,7 @@ describe("Running statements - WRITE", () => {
 
   it("WRITE - single line", async () => {
     const code = `
-        WRITE /. 
+        WRITE /.
     `;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
@@ -28,7 +28,7 @@ describe("Running statements - WRITE", () => {
     const code = `
       data lv_test type c length 10.
       lv_test = 'A'.
-      WRITE lv_test. 
+      WRITE lv_test.
     `;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
@@ -40,15 +40,13 @@ describe("Running statements - WRITE", () => {
     const code = `
       data lv_test type i.
       lv_test = 1.
-      WRITE lv_test. 
+      WRITE lv_test.
     `;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
   });
-
-
 
   it("WRITE - structure with one component", async () => {
     const code = `
