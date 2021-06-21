@@ -274,13 +274,13 @@ export class Transpiler {
     for (const c of node.findAllStatements(abaplint.Statements.ClassDefinition)) {
       const e = c.findFirstExpression(abaplint.Expressions.ClassName)?.getFirstToken().getStr();
       if (e) {
-        res.push(e);
+        res.push(e.toLowerCase());
       }
     }
     for (const c of node.findAllStatements(abaplint.Statements.Interface)) {
       const e = c.findFirstExpression(abaplint.Expressions.InterfaceName)?.getFirstToken().getStr();
       if (e) {
-        res.push(e);
+        res.push(e.toLowerCase());
       }
     }
     return res;

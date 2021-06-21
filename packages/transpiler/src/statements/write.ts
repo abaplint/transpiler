@@ -8,18 +8,12 @@ export class WriteTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
     let extra = "";
     let source = "";
-    const newLine = node.findDirectTokenByText("/") !== undefined;
-
-
+    const newLine = node.findFirstExpression(abaplint.Expressions.WriteOffsetLength)?.findDirectTokenByText("/") !== undefined;
 
     const expr = node.findDirectExpression(abaplint.Expressions.Source);
     if (expr === undefined) {
-      if (newLine === true) {
-        source = "''";
-        extra = ", {newLine: true,skipLine: true}";
-      } else {
-        throw new Error("WriteTranspiler, no source expression found");
-      }
+      source = "''";
+      extra = ", {newLine: true,skipLine: true}";
     } else {
       if (newLine === true) {
         extra = ", {newLine: true}";

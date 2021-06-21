@@ -342,9 +342,9 @@ export class Traversal {
     const name = def.getName();
     if (def.isGlobal() === false) {
       const prefix = this.buildPrefix(def);
-      return `abap.Classes['${prefix}-${name.toUpperCase()}'] = ${name};`;
+      return `abap.Classes['${prefix}-${name.toUpperCase()}'] = ${name.toLowerCase()};`;
     } else {
-      return `abap.Classes['${name.toUpperCase()}'] = ${name};`;
+      return `abap.Classes['${name.toUpperCase()}'] = ${name.toLowerCase()};`;
     }
   }
 
