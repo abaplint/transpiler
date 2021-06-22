@@ -334,4 +334,28 @@ describe("Running expressions - Length and offset", () => {
     expect(abap.console.get()).to.equal("00000800000000000000");
   });
 
+  it("offset int set into hex, 16, 1", async () => {
+    const code = `
+  DATA rv_s TYPE x LENGTH 10.
+  DATA lv_int TYPE i.
+  lv_int = 16.
+  rv_s+2(1) = lv_int.
+  WRITE / rv_s.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("00001000000000000000");
+  });
+
+  it("offset int set into hex, 16, 2", async () => {
+    const code = `
+  DATA rv_s TYPE x LENGTH 10.
+  rv_s+2(1) = 16.
+  WRITE / rv_s.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("00001000000000000000");
+  });
+
 });

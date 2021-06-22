@@ -1,4 +1,4 @@
-import {Hex, XString} from "./types";
+import {Hex, Integer, XString} from "./types";
 import {ICharacter} from "./types/_character";
 import {INumeric} from "./types/_numeric";
 
@@ -44,8 +44,15 @@ export class OffsetLength {
   public set(value: ICharacter | string) {
 
     let val = "";
-    if (typeof value === "string" || typeof value === "number") {
+    if (typeof value === "string") {
+      val = value;
+    } else if (typeof value === "number") {
       val = value + "";
+    } else if (value instanceof Integer) {
+      val = value.get() + "";
+      if (this.isHex) {
+        val = Number(val).toString(16);
+      }
     } else {
       val = value.get() + "";
     }
