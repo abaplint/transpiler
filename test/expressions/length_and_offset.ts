@@ -36,7 +36,7 @@ describe("Running expressions - Length and offset", () => {
     expect(abap.console.get()).to.equal("a");
   });
 
-  it("hex offset and length", async () => {
+  it("hex offset and length, reading", async () => {
     const code = `
       DATA x TYPE xstring.
       x = '123456'.
@@ -319,6 +319,19 @@ describe("Running expressions - Length and offset", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("offset int set into hex", async () => {
+    const code = `
+  DATA rv_s TYPE x LENGTH 10.
+  DATA lv_int TYPE i.
+  lv_int = 8.
+  rv_s+2(1) = lv_int.
+  WRITE / rv_s.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("00000800000000000000");
   });
 
 });

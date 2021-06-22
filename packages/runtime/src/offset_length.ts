@@ -1,3 +1,4 @@
+import {Hex, XString} from "./types";
 import {ICharacter} from "./types/_character";
 import {INumeric} from "./types/_numeric";
 
@@ -10,15 +11,21 @@ export class OffsetLength {
   private readonly obj: ICharacter;
   private readonly offset?: number;
   private readonly length?: number;
+  private readonly isHex: boolean;
 
   public constructor(obj: ICharacter, options: IOffsetLengthOptions) {
     this.obj = obj;
+
+    this.isHex = obj instanceof Hex || obj instanceof XString;
 
     if (options.offset) {
       if (typeof options.offset === "number") {
         this.offset = options.offset;
       } else {
         this.offset = options.offset.get();
+      }
+      if (this.isHex) {
+        this.offset *= 2;
       }
     }
 
@@ -28,6 +35,9 @@ export class OffsetLength {
       } else {
         this.length = options.length.get();
       }
+      if (this.isHex) {
+        this.length *= 2;
+      }
     }
   }
 
@@ -35,16 +45,24 @@ export class OffsetLength {
 
     let val = "";
     if (typeof value === "string" || typeof value === "number") {
-      val = value;
+      val = value + "";
     } else {
-      val = value.get();
+      val = value.get() + "";
     }
 
     let old = this.obj.get();
+
+    if (this.length) {
+      val = val.substr(0, this.length);
+      if (this.isHex) {
+        val = val.padStart(this.length, "0");
+      }
+    }
+
     if (this.length && this.offset) {
-      old = old.substr(0, this.offset) + val.substr(0, this.length) + old.substr(this.offset + this.length);
+      old = old.substr(0, this.offset) + val + old.substr(this.offset + this.length);
     } else if (this.length) {
-      old = val.substr(0, this.length) + old.substr(this.length);
+      old = val + old.substr(this.length);
     } else if (this.offset) {
       old = old.substr(0, this.offset) + val;
     }
