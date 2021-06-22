@@ -1,8 +1,9 @@
 /* eslint-disable no-bitwise */
 import {Hex, XString} from "../types";
+import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
-export function setBit(number: INumeric, hex: XString | Hex, val?: INumeric) {
+export function setBit(number: INumeric, hex: XString | Hex, val?: INumeric | ICharacter) {
   let hexFull = hex.get();
   if (hexFull === "") {
     hexFull = "00";
@@ -34,7 +35,7 @@ export function setBit(number: INumeric, hex: XString | Hex, val?: INumeric) {
 
   let bits = parseInt(byte,16);
   const bitMask = 1 << 8 - ( number.get() - ( byteNum - 1 ) * 8 );
-  if (val?.get() === 0) {
+  if (val?.get() === 0 || val?.get() === "0") {
     bits = bits &= ~bitMask;
   } else {
     bits = bits |= bitMask;

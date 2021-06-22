@@ -196,33 +196,6 @@ ASSERT data2-moo = 2.`;
     expect(abap.console.get()).to.equal("10101011\n00000001");
   });
 
-  it("SET BIT", async () => {
-    const code = `
-    DATA hex TYPE x LENGTH 1.
-    DO 8 TIMES.
-      IF sy-index > 4.
-        CLEAR hex.
-      ENDIF.
-      SET BIT sy-index OF hex.
-      WRITE / hex.
-    ENDDO.
-
-    DATA xstr TYPE xstring.
-    xstr = 'F2420FA000'.
-    SET BIT 30 OF xstr.
-    SET BIT 25 OF xstr TO 0.
-    SET BIT 35 OF xstr TO 1.
-    WRITE / xstr.
-
-    xstr = '03FF'.
-    SET BIT 9 OF xstr TO 0.
-    WRITE / xstr.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("80\nC0\nE0\nF0\n08\n04\n02\n01\nF2420F2420\n037F");
-  });
-
   it("basic minus", async () => {
     const code = `
   DATA foo TYPE i.
