@@ -361,4 +361,53 @@ ENDCLASS.`;
     expect(cons.split("\n").length).to.equal(4);
   });
 
+  it("test-10", async () => {
+// CLAS locals includes, testclass class inheriting from locals class
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS lcl_buffer DEFINITION INHERITING FROM lcl_mapping_camel.
+    ENDCLASS.
+    CLASS lcl_buffer IMPLEMENTATION.
+    ENDCLASS.
+
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        lcl_mapping_camel=>run( ).
+      ENDMETHOD.
+    ENDCLASS.`;
+    const def = `
+    CLASS lcl_mapping_camel DEFINITION.
+      PUBLIC SECTION.
+        CLASS-METHODS run.
+    ENDCLASS.`;
+    const imp = `
+    CLASS lcl_mapping_camel IMPLEMENTATION.
+      METHOD run.
+        WRITE 'from impl'.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const cxroot = `
+    CLASS cx_root DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS cx_root IMPLEMENTATION.
+    ENDCLASS.`;
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "zcl_client.clas.locals_def.abap", contents: def},
+      {filename: "zcl_client.clas.locals_imp.abap", contents: imp},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("from impl");
+  });
+
 });

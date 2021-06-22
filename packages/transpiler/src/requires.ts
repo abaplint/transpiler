@@ -29,13 +29,15 @@ export class Requires {
       ret.push(req);
     };
 
-// add the superclass
     if (obj.getType() === "CLAS") {
+
+      // add the superclass
       const clas = obj as abaplint.Objects.Class;
       const sup = clas.getDefinition()?.getSuperClass()?.toLowerCase();
       if (sup) {
         add({filename: sup + ".clas.abap", name: sup});
       }
+
       for (const f of clas.getSequencedFiles()) {
         if (f.getFilename() === filename
             || f.getFilename().endsWith(".clas.testclasses.abap")
@@ -43,11 +45,17 @@ export class Requires {
           continue;
         }
         let foo = f.getFilename();
+
         foo = foo.replace(".clas.locals_imp.abap", ".clas.locals.abap");
         foo = foo.replace(".clas.locals_def.abap", ".clas.locals.abap");
+
+        let name: string | undefined = undefined;
+        if (filename.endsWith(".testclasses.abap")) {
+          name = f.getInfo().listClassDefinitions().map(c => c.name).join(",");
+        }
         add({
           filename: foo,
-          name: undefined,
+          name: name,
         });
       }
     }
