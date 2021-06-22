@@ -170,32 +170,6 @@ ASSERT data2-moo = 2.`;
     expect(abap.console.get()).to.equal("48656C6C6F20576F726C64210D0A");
   });
 
-  it("GET BIT", async () => {
-    const code = `
-    DATA lv_bit TYPE i.
-    DATA lv_c TYPE c LENGTH 1.
-    DATA result TYPE string.
-    DATA lv_x TYPE xstring.
-    lv_x = 'AB'.
-    DO 8 TIMES.
-      GET BIT sy-index OF lv_x INTO lv_c.
-      CONCATENATE result lv_c INTO result.
-    ENDDO.
-    WRITE / result.
-    result = ''.
-    lv_x = '01'.
-    DO 8 TIMES.
-      GET BIT sy-index OF lv_x INTO lv_c.
-      CONCATENATE result lv_c INTO result.
-    ENDDO.
-    WRITE / result.`;
-
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("10101011\n00000001");
-  });
-
   it("basic minus", async () => {
     const code = `
   DATA foo TYPE i.
@@ -263,20 +237,6 @@ ASSERT data2-moo = 2.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("A");
-  });
-
-  it("first bit of x", async () => {
-    const code = `
-  DATA x TYPE x.
-  DATA c TYPE c.
-  x = '01'.
-  GET BIT 1 OF x INTO c.
-  WRITE c.`;
-
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("0");
   });
 
   it("ASSERT sy-subrc = 0.", async () => {
@@ -494,44 +454,6 @@ write if.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("ABC_123");
-  });
-
-  it("GET all da BITs", async () => {
-    const code = `
-  DATA rv_bitbyte TYPE c LENGTH 8 .
-  DATA iv_x TYPE x VALUE '40'.
-  GET BIT 1 OF iv_x INTO rv_bitbyte+0(1).
-  GET BIT 2 OF iv_x INTO rv_bitbyte+1(1).
-  GET BIT 3 OF iv_x INTO rv_bitbyte+2(1).
-  GET BIT 4 OF iv_x INTO rv_bitbyte+3(1).
-  GET BIT 5 OF iv_x INTO rv_bitbyte+4(1).
-  GET BIT 6 OF iv_x INTO rv_bitbyte+5(1).
-  GET BIT 7 OF iv_x INTO rv_bitbyte+6(1).
-  GET BIT 8 OF iv_x INTO rv_bitbyte+7(1).
-  WRITE rv_bitbyte.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("01000000");
-  });
-
-  it("GET all da BITs", async () => {
-    const code = `
-  DATA rv_bitbyte TYPE c LENGTH 8.
-  DATA iv_x TYPE x VALUE '40'.
-  GET BIT 1 OF iv_x INTO rv_bitbyte+0(1).
-  GET BIT 2 OF iv_x INTO rv_bitbyte+1(1).
-  GET BIT 3 OF iv_x INTO rv_bitbyte+2(1).
-  GET BIT 4 OF iv_x INTO rv_bitbyte+3(1).
-  GET BIT 5 OF iv_x INTO rv_bitbyte+4(1).
-  GET BIT 6 OF iv_x INTO rv_bitbyte+5(1).
-  GET BIT 7 OF iv_x INTO rv_bitbyte+6(1).
-  GET BIT 8 OF iv_x INTO rv_bitbyte+7(1).
-  WRITE rv_bitbyte.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("01000000");
   });
 
   it("integer into xstring", async () => {
