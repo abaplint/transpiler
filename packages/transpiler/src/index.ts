@@ -99,7 +99,7 @@ export class Transpiler {
     progress?.set(reg.getObjectCount(false), "Building");
     for (const obj of reg.getObjects()) {
       await progress?.tick("Building, " + obj.getName());
-      if (obj instanceof abaplint.ABAPObject) {
+      if (obj instanceof abaplint.ABAPObject && !(obj instanceof abaplint.Objects.TypePool)) {
         output.objects = output.objects.concat(this.runObject(obj, reg));
       }
     }
