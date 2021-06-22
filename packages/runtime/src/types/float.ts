@@ -46,6 +46,10 @@ export class Float {
     this.value = 0;
   }
 
+  public getRaw(): number {
+    return this.value;
+  }
+
   public get(): string {
     let text = new Number(this.value).toExponential(16);
     text = text.replace(".", ",");
