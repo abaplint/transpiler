@@ -410,4 +410,35 @@ ENDCLASS.`;
     expect(cons.split("\n")[1]).to.equal("from impl");
   });
 
+  it("test-11", async () => {
+// TYPE GROUP
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA e TYPE abap_encoding.
+        e = 'UTF'.
+        WRITE e.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const type = `TYPE-POOL abap.
+
+TYPES abap_encoding TYPE c LENGTH 20.`;
+    const files = [
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "abap.type.abap", contents: type},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("UTF");
+  });
+
 });
