@@ -59,4 +59,18 @@ describe("Running Examples - Float type", () => {
     expect(abap.console.get()).to.equal("1,2345000000000000E+04");
   });
 
+  it("float to float", async () => {
+    const code = `
+  DATA lv_f TYPE f.
+  DATA lv_f2 TYPE f.
+  lv_f = 123.
+  WRITE / lv_f.
+  lv_f2 = lv_f.
+  WRITE / lv_f2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1,2300000000000000E+02\n1,2300000000000000E+02");
+  });
+
 });
