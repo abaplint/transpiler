@@ -96,4 +96,33 @@ describe("Running Examples - Hex type", () => {
 00000003`);
   });
 
+  it("Hex, compare integer", async () => {
+    const code = `
+    DATA lv_int TYPE i.
+    lv_int = 2147483647.
+    DATA lv_f TYPE f.
+    lv_f = 4.
+    IF lv_f > lv_int.
+      WRITE 'true'.
+    ELSE.
+      WRITE 'false'.
+    ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("false");
+  });
+
+  it("Hex, compare 100 and 1000", async () => {
+    const code = `
+  DATA lv_f1 TYPE f.
+  DATA lv_f2 TYPE f.
+  lv_f1 = 100.
+  lv_f2 = 1000.
+  ASSERT lv_f1 < lv_f2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
