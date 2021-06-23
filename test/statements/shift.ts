@@ -75,4 +75,18 @@ describe("Running statements - SHIFT", () => {
     expect(abap.console.get()).to.equal("3355");
   });
 
+  it("SHIFT LEFT CIRCULAR", async () => {
+    const code = `
+  DATA lv_c TYPE c LENGTH 4.
+  lv_c = 'ABCD'.
+  SHIFT lv_c LEFT BY 2 PLACES CIRCULAR.
+  WRITE / lv_c.
+  SHIFT lv_c LEFT BY 1 PLACES CIRCULAR.
+  WRITE / lv_c.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("CDAB\nDABC");
+  });
+
 });
