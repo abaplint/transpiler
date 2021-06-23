@@ -75,4 +75,25 @@ describe("Running Examples - Hex type", () => {
     await f(abap);
   });
 
+  it("float into hex", async () => {
+    const code = `
+    DATA float TYPE f.
+    DATA hex TYPE x LENGTH 4.
+    float = '2.1'.
+    hex = float.
+    WRITE / hex.
+    float = '2.5'.
+    hex = float.
+    WRITE / hex.
+    float = '2.9'.
+    hex = float.
+    WRITE / hex.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`00000002
+00000003
+00000003`);
+  });
+
 });

@@ -1,3 +1,4 @@
+import {Float} from "./float";
 import {XString} from "./xstring";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
@@ -15,12 +16,15 @@ export class Hex implements ICharacter {
     if (typeof value === "string") {
       this.value = value;
     } else if (typeof value === "number") {
-      this.value = value.toString(16);
+      this.value = Math.round(value).toString(16);
       this.value = this.value.padStart(this.length * 2, "0");
     } else {
-      const v = value.get();
+      let v = value.get();
+      if (value instanceof Float) {
+        v = value.getRaw();
+      }
       if (typeof v === "number") {
-        this.value = v.toString(16);
+        this.value = Math.round(v).toString(16);
         this.value = this.value.padStart(this.length * 2, "0");
       } else {
         this.value = v;
