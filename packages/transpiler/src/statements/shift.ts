@@ -14,6 +14,10 @@ export class ShiftTranspiler implements IStatementTranspiler {
       options.push("direction: 'LEFT'");
     }
 
+    if (node.findDirectTokenByText("CIRCULAR")) {
+      options.push("circular: true");
+    }
+
     const leading = node.findExpressionAfterToken("LEADING");
     if (leading) {
       options.push("deletingLeading: " + traversal.traverse(leading));

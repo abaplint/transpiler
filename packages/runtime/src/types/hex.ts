@@ -1,3 +1,4 @@
+import {minus} from "../operators";
 import {Float} from "./float";
 import {XString} from "./xstring";
 import {ICharacter} from "./_character";
@@ -22,6 +23,11 @@ export class Hex implements ICharacter {
       let v = value.get();
       if (value instanceof Float) {
         v = value.getRaw();
+        if (v < 0) {
+          this.value = "F".repeat(this.length * 2);
+          this.set(minus(this, Math.abs(v) - 1));
+          return;
+        }
       }
       if (typeof v === "number") {
         this.value = Math.round(v).toString(16);

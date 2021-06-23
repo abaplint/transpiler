@@ -73,4 +73,17 @@ describe("Running Examples - Float type", () => {
     expect(abap.console.get()).to.equal("1,2300000000000000E+02\n1,2300000000000000E+02");
   });
 
+  it("negative float to hex", async () => {
+    const code = `
+    DATA lv_f TYPE f.
+    DATA lv_hex TYPE x LENGTH 4.
+    lv_f = -1000.
+    lv_hex = lv_f.
+    WRITE lv_hex.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("FFFFFC18");
+  });
+
 });

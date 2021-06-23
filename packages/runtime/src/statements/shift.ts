@@ -6,6 +6,7 @@ export interface IShiftOptions {
   places?: INumeric,
   to?: ICharacter | string,
   direction?: "LEFT" | "RIGHT",
+  circular?: boolean,
   mode?: "BYTE" | "CHARACTER",
 }
 
@@ -34,7 +35,11 @@ function shift_character_mode(target: ICharacter, options?: IShiftOptions) {
     }
   } else if (options?.places) {
     const p = options.places.get();
-    value = value.substr(p);
+    if (options.circular) {
+      value = value.substr(p) + value.substr(0, p);
+    } else {
+      value = value.substr(p);
+    }
   } else if (options?.to) {
     let to = "";
     if (typeof options.to === "string") {
@@ -66,8 +71,12 @@ function shift_byte_mode(target: ICharacter, options?: IShiftOptions) {
       value = value.substr(2);
     }
   } else if (options?.places) {
-    const p = (options.places.get()) * 2;
-    value = value.substr(p);
+    const p = options.places.get() * 2;
+    if (options.circular) {
+      value = value.substr(p) + value.substr(0, p);
+    } else {
+      value = value.substr(p);
+    }
   } else if (options?.to) {
     let to = "";
     if (typeof options.to === "string") {
