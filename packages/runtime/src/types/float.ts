@@ -33,6 +33,8 @@ export class Float {
       this.value = 0;
     } else if (typeof value === "string") {
       this.value = parseFloat(value);
+    } else if (value instanceof Float) {
+      this.value = value.getRaw();
     } else if (value instanceof Hex || value instanceof XString) {
 // todo, how/if should this work?
       this.set(parseInt(value.get(), 16));
