@@ -37,7 +37,7 @@ describe("Running operators - Bit", () => {
     expect(abap.console.get()).to.equal("DCBA88005410\nDCBA88005432800000\n8900");
   });
 
-  it.skip("Bit operator BIT-NOT", async () => {
+  it("Bit operator BIT-NOT", async () => {
     const code = `
     DATA x1 TYPE xstring.
     DATA x2 TYPE xstring.
@@ -94,6 +94,70 @@ describe("Running operators - Bit", () => {
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("010132FE0167\n010132FE0BCD7BABC0\n66CD");
+  });
+
+  it("Bit operator BIT-XOR, 2", async () => {
+    const code = `
+    DATA iv_x TYPE x LENGTH 4.
+    iv_x = '6F952B2E'.
+    DATA iv_y TYPE x LENGTH 4.
+    iv_y = 'B49A4DAE'.
+    DATA iv_z TYPE x LENGTH 4.
+    iv_z = '0A15C329'.
+    DATA rv_result TYPE x LENGTH 4.
+    rv_result = ( iv_x BIT-XOR iv_y ) BIT-XOR iv_z.
+    WRITE rv_result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("D11AA5A9");
+  });
+
+  it("Bit operators, 1", async () => {
+    const code = `
+  DATA iv_x TYPE x LENGTH 4.
+  iv_x = 'EFCDAB89'.
+  DATA iv_y TYPE x LENGTH 4.
+  iv_y = '98BADCFE'.
+  DATA iv_z TYPE x LENGTH 4.
+  iv_z = '10325476'.
+  DATA rv_result TYPE x LENGTH 4.
+  rv_result = ( iv_x BIT-AND iv_y ) BIT-OR ( ( BIT-NOT iv_x ) BIT-AND iv_z ).
+  WRITE rv_result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("98BADCFE");
+  });
+
+  it("Bit operators, 2", async () => {
+    const code = `
+  DATA iv_x TYPE x LENGTH 4.
+  iv_x = 'EFCDAB89'.
+  DATA iv_y TYPE x LENGTH 4.
+  iv_y = '98BADCFE'.
+  DATA iv_z TYPE x LENGTH 4.
+  iv_z = '10325476'.
+  DATA rv_result TYPE x LENGTH 4.
+  rv_result = ( iv_x BIT-AND iv_y ) BIT-OR ( iv_x BIT-AND iv_z ).
+  WRITE rv_result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("88888888");
+  });
+
+  it("Bit operators, 3", async () => {
+    const code = `
+  DATA iv_x TYPE x LENGTH 4.
+  iv_x = 'EFCDAB89'.
+  DATA rv_result TYPE x LENGTH 4.
+  rv_result = BIT-NOT iv_x.
+  WRITE rv_result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("10325476");
   });
 
 });
