@@ -113,4 +113,21 @@ describe("Running operators - Bit", () => {
     expect(abap.console.get()).to.equal("D11AA5A9");
   });
 
+  it("Bit operators", async () => {
+    const code = `
+  DATA iv_x TYPE x LENGTH 4.
+  iv_x = 'EFCDAB89'.
+  DATA iv_y TYPE x LENGTH 4.
+  iv_y = '98BADCFE'.
+  DATA iv_z TYPE x LENGTH 4.
+  iv_z = '10325476'.
+  DATA rv_result TYPE x LENGTH 4.
+  rv_result = ( iv_x BIT-AND iv_y ) BIT-OR ( ( BIT-NOT iv_x ) BIT-AND iv_z ).
+  WRITE rv_result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("98BADCFE");
+  });
+
 });
