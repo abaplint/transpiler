@@ -96,4 +96,17 @@ describe("Running Examples - Hex type", () => {
 00000003`);
   });
 
+  it("Hex, offset", async () => {
+    const code = `
+    DATA lv_pass TYPE xstring.
+    DATA lv_rd2  TYPE x LENGTH 7.
+    lv_pass = '5345435245543031'.
+    lv_rd2 = lv_pass+7.
+    WRITE lv_rd2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`31000000000000`);
+  });
+
 });
