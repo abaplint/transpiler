@@ -16,6 +16,7 @@ export * from "./nmin";
 export * from "./repeat";
 export * from "./replace";
 export * from "./reverse";
+export * from "./round";
 export * from "./shift_left";
 export * from "./sign";
 export * from "./strlen";
