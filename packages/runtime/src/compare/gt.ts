@@ -1,4 +1,4 @@
-import {ABAPObject, Hex, Structure, Table} from "../types";
+import {ABAPObject, Float, Hex, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {Integer} from "../types/integer";
@@ -19,6 +19,8 @@ export function gt(
   let l: number | string | undefined = undefined;
   if (typeof left === "number" || typeof left === "string") {
     l = left;
+  } else if (left instanceof Float) {
+    l = left.getRaw();
   } else {
     l = left.get();
   }
@@ -26,6 +28,8 @@ export function gt(
   let r: number | string | undefined = undefined;
   if (typeof right === "number" || typeof right === "string") {
     r = right;
+  } else if (right instanceof Float) {
+    r = right.getRaw();
   } else {
     r = right.get();
   }
@@ -57,7 +61,6 @@ function gt_with_hex(
 
   const left_hex = get_hex_from_parameter(left);
   const right_hex = get_hex_from_parameter(right);
-
   return left_hex > right_hex;
 }
 
