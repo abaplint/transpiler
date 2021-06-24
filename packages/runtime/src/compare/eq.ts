@@ -1,4 +1,4 @@
-import {ABAPObject, FieldSymbol, Hex, Structure, Table} from "../types";
+import {ABAPObject, FieldSymbol, Float, Hex, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -57,6 +57,12 @@ export function eq(
     r = parseInt(right.get(), 16);
   } else if (left instanceof Hex && typeof r === "number") {
     l = parseInt(left.get(), 16);
+  }
+
+  if (right instanceof Float && typeof l === "number") {
+    r = right.getRaw();
+  } else if (left instanceof Float && typeof r === "number") {
+    l = left.getRaw();
   }
 
   // assumption: typically no casts are required, so start checking if the types doesnt match

@@ -115,4 +115,18 @@ describe("Running Examples - Float type", () => {
     await f(abap);
   });
 
+  it("Float, add integer to float", async () => {
+    const code = `
+    DATA lv_f TYPE f.
+    DATA lv_int TYPE i.
+    DATA lv_a TYPE f.
+    lv_f = -2147483648.
+    lv_int = 2147483647.
+    lv_a = lv_f + lv_int + 1.
+    ASSERT lv_a = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
