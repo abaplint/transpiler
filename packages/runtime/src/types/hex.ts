@@ -17,6 +17,11 @@ export class Hex implements ICharacter {
     if (typeof value === "string") {
       this.value = value;
     } else if (typeof value === "number") {
+      if (value < 0) {
+        this.value = "F".repeat(this.length * 2);
+        this.set(minus(this, Math.abs(value) - 1));
+        return;
+      }
       this.value = Math.round(value).toString(16);
       this.value = this.value.padStart(this.length * 2, "0");
     } else {

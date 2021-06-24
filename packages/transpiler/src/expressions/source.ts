@@ -62,6 +62,9 @@ export class SourceTranspiler implements IExpressionTranspiler {
       } else if (c instanceof Nodes.TokenNodeRegex && c.getFirstToken().getStr().toUpperCase() === "BOOLC") {
         ret += "abap.builtin.boolc(";
         post += ")";
+      } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "BIT") { // todo, this will not work in the general case
+        ret += "abap.operators.bitnot(";
+        post += ")";
       }
     }
 
