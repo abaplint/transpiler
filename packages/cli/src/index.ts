@@ -43,9 +43,32 @@ function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
 async function run() {
   console.log("Transpiler CLI");
 
+    //in case we are requested to provide verbose output, save it to the attribute and remove the verbose components from parameters
+  let verbose: boolean = false;
+  if (process.argv.find(element => element === "-verbose") !== undefined) {
+    verbose = true;
+    const verbose_index = process.argv.indexOf("-verbose", 0);
+    process.argv.splice(verbose_index, 1);
+  }
+
+  if (verbose) {
+    console.log("\Running in verbose mode");
+  }
+
   const config = TranspilerConfig.find(process.argv[2]);
 
+  if (verbose) {
+    console.log(config);
+  }
+
   const files = FileOperations.loadFiles(config).concat(loadLib(config));
+
+  if (verbose) {
+    console.log("\nSource files");
+    for (const file of files){
+      console.log("\n" + file.filename);
+    }
+  }
 
   console.log("\nBuilding");
   const t = new Transpiler.Transpiler(config.options);
