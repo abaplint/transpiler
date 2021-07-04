@@ -135,4 +135,19 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("ABCD");
   });
 
+  it("ASSIGN by with field symbol", async () => {
+    const code = `
+      DATA lv_test TYPE string VALUE 'ABCD'.
+      DATA lv_test_ref TYPE REF TO data.
+      GET REFERENCE OF lv_test INTO lv_test_ref.
+      FIELD-SYMBOLS <lv_test> TYPE string.
+      ASSIGN lv_test_ref->* TO <lv_test>.
+      WRITE: / <lv_test>.
+    `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ABCD");
+  });
+
 });

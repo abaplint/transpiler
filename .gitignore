@@ -3,3 +3,5 @@ build
 isolate-*
 .clinic
 unit-test/
+.idea
+output
