@@ -55,6 +55,16 @@ async function run() {
     console.log("\Running in verbose mode");
   }
 
+
+  if (process.argv.find(element => element === "-default_config") !== undefined) {
+    const defaultConfigPath = process.cwd() + path.sep + "abap_transpile.json";
+    console.log("Creating default config using path: " + defaultConfigPath);
+    fs.writeFileSync(defaultConfigPath, JSON.stringify(TranspilerConfig.getDefaultConfig()));
+    console.log("default config created");
+    return;
+  }
+
+
   const config = TranspilerConfig.find(process.argv[2]);
 
   if (verbose) {
@@ -65,7 +75,7 @@ async function run() {
 
   if (verbose) {
     console.log("\nSource files");
-    for (const file of files){
+    for (const file of files) {
       console.log("\n" + file.filename);
     }
   }
