@@ -49,7 +49,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
         } else if (c.get() instanceof Expressions.ComponentChain) {
           ret = "(" + ret + ").get()." + new ComponentChainTranspiler().transpile(c, traversal);
         } else if (c.get() instanceof Expressions.Dereference) {
-          ret = "(" + ret + ").get()";
+          ret = "(" + ret + ").getPointer()";
         } else {
           ret += "SourceUnknown-" + c.get().constructor.name;
         }

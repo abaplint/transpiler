@@ -1,9 +1,9 @@
-import {FieldSymbol, Structure} from "../types";
+import {DataReference, FieldSymbol, Structure} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
 export interface IAssignInput {
-  source: INumeric | ICharacter | Structure,
+  source: INumeric | ICharacter | Structure|DataReference,
   target: FieldSymbol,
   component?: string | ICharacter,
 }
@@ -11,7 +11,7 @@ export interface IAssignInput {
 export function assign(input: IAssignInput) {
 
   if (input.component) {
-    if (input.source instanceof FieldSymbol) {
+    if (input.source instanceof FieldSymbol || input.source instanceof DataReference) {
       input.source = input.source.getPointer() as any;
       assign(input);
       return;
