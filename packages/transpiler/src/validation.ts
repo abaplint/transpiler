@@ -50,7 +50,7 @@ export const config: IConfig = {
     "forbidden_identifier": {
       "check": [
         "^abstract$",	"^arguments$", "^await$", "^boolean$",
-        "^break$",	"^byte$", "^case$", "^catch$",
+        "^break$",	"^byte$", "^catch$",
         "^char$",	"^class$", "^const$", "^continue$",
         "^debugger$",	"^default$", "^do$",
         "^double$",	"^else$", "^enum$", "^eval$",

@@ -35,7 +35,7 @@ export class Keywords {
 // https://www.w3schools.com/js/js_reserved.asp
     const keywords: string[] = [
       "abstract",	"arguments", "await", "boolean",
-      "break",	"byte", "case", "catch",
+      "break",	"byte", "catch",
       "char",	"class", "const", "continue",
       "debugger",	"default", "do",
       "double",	"else", "enum", "eval",
