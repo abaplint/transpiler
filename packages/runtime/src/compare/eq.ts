@@ -3,8 +3,8 @@ import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
 export function eq(
-  left: number | string | ICharacter | INumeric | ABAPObject | Structure | Hex | Table | FieldSymbol,
-  right: number | string | ICharacter | INumeric | ABAPObject | Structure | Hex | Table | FieldSymbol): boolean {
+  left: number | string | ICharacter | INumeric | Float | ABAPObject | Structure | Hex | Table | FieldSymbol,
+  right: number | string | ICharacter | INumeric | Float | ABAPObject | Structure | Hex | Table | FieldSymbol): boolean {
 
   if (left instanceof Table || right instanceof Table) {
     throw "todo, eq TABLE";
@@ -61,8 +61,13 @@ export function eq(
 
   if (right instanceof Float && typeof l === "number") {
     r = right.getRaw();
-  } else if (left instanceof Float && typeof r === "number") {
-    l = left.getRaw();
+  } else if (left instanceof Float) {
+    if (typeof r === "number") {
+      l = left.getRaw();
+    } else if (typeof r === "string") {
+      l = left.getRaw();
+      r = Number(r);
+    }
   }
 
   // assumption: typically no casts are required, so start checking if the types doesnt match

@@ -129,4 +129,13 @@ describe("Running Examples - Float type", () => {
     await f(abap);
   });
 
+  it("Float, compare with string", async () => {
+    const code = `
+  DATA float TYPE f VALUE 5.
+  ASSERT float = '5.0'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
