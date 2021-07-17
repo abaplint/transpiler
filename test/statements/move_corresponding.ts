@@ -17,13 +17,13 @@ describe("Running statements - MOVE-CORRESPONDING", () => {
   it("Basic", async () => {
     const code = `
 TYPES: BEGIN OF ty,
-         int TYPE i,
+         field TYPE i,
        END OF ty.
 DATA bar TYPE ty.
 DATA foo TYPE ty.
-bar-int = 2.
+bar-field = 2.
 MOVE-CORRESPONDING bar TO foo.
-WRITE foo-int.`;
+WRITE foo-field.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
