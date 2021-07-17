@@ -153,6 +153,7 @@ describe("Single statements", () => {
       js: `abap.statements.convert({date: lv_date,time: lv_time,zone: lv_utc}, {stamp: lv_timestamp});`, skip: false},
     {abap: "COMMIT WORK.",     js: `abap.statements.commit();`, skip: false},
     {abap: "ROLLBACK WORK.",   js: `abap.statements.rollback();`, skip: false},
+    {abap: "MOVE-CORRESPONDING foo TO bar.", js: `abap.statements.moveCorresponding(foo, bar);`, skip: false},
   ];
 
   for (const test of tests) {
