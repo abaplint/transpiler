@@ -9,12 +9,6 @@ import {UnitTestResult} from "./unit_test";
 import {OffsetLength} from "./offset_length";
 import {templateFormatting} from "./template_formatting";
 
-if (!globalThis.fetch) {
-  // @ts-ignore
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  globalThis.fetch = require("node-fetch");
-}
-
 export {UnitTestResult};
 
 export class ABAP {
