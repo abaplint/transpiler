@@ -88,8 +88,8 @@ export class Validation {
       config.rules["check_syntax"] = true;
     }
     if (this.options?.unknownTypes === "runtimeError") {
-      config.syntax.errorNamespace = "";
-      config.rules["unknown_types"] = false;
+      config.syntax.errorNamespace = "VOID_EVERYTHING"; // this is not a constant, just a regex that happens to not match anything
+//      config.rules["unknown_types"] = false;
     }
     const conf = new Config(JSON.stringify(config));
     reg.setConfig(conf);
