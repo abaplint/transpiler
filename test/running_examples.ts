@@ -991,11 +991,11 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("12");
   });
 
-  it.only("access constant via instance arrow", async () => {
+  it("access constant via instance arrow", async () => {
     const code = `
 CLASS lcl_bar DEFINITION.
   PUBLIC SECTION.
-    CONSTANTS const TYPE string VALUE 'foo'.
+    CONSTANTS field TYPE string VALUE 'foo'.
 ENDCLASS.
 
 CLASS lcl_bar IMPLEMENTATION.
@@ -1004,8 +1004,8 @@ ENDCLASS.
 START-OF-SELECTION.
   DATA ref TYPE REF TO lcl_bar.
   CREATE OBJECT ref.
-  WRITE / ref->const.
-  WRITE / lcl_bar=>const.`;
+  WRITE / ref->field.
+  WRITE / lcl_bar=>field.`;
 
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
