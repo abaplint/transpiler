@@ -32,4 +32,14 @@ foo.set(await (new abap.Classes['ZCL_ABAPGIT_GUI']()).constructor_());`;
     expect(await runSingle(abap, options)).to.equal(expected);
   });
 
+  it("test 4, CREATE OBJECT something", async () => {
+    const abap = `DATA foo TYPE REF TO something.
+    CREATE OBJECT foo.`;
+
+    const expected = `let foo = (() => { throw "Void type: something" })();
+foo.set(await (new abap.Classes['RUNTIME_ERROR']()).constructor_());`;
+
+    expect(await runSingle(abap, options)).to.equal(expected);
+  });
+
 });

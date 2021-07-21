@@ -12,6 +12,10 @@ export class PerformTranspiler implements IStatementTranspiler {
 
     // todo, parameters
 
+    if (node.concatTokens().includes(" IN PROGRAM ")) {
+      return `throw new Error("PerformTranspiler IN PROGRAM, transpiler todo");`;
+    }
+
     return "await " + formName.concatTokens() + "();";
   }
 
