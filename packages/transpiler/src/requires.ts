@@ -30,7 +30,6 @@ export class Requires {
     };
 
     if (obj.getType() === "CLAS") {
-
       // add the superclass
       const clas = obj as abaplint.Objects.Class;
       const sup = clas.getDefinition()?.getSuperClass()?.toLowerCase();
@@ -39,6 +38,11 @@ export class Requires {
       }
 
       for (const f of clas.getSequencedFiles()) {
+        if (filename.endsWith(".testclasses.abap")) {
+          // add the global class, in case its inherited by a local testclass
+          add({filename: clas.getMainABAPFile()?.getFilename() || "", name: obj.getName().toLowerCase()});
+        }
+
         if (f.getFilename() === filename
             || f.getFilename().endsWith(".clas.testclasses.abap")
             || f.getFilename() === clas.getMainABAPFile()?.getFilename()) {

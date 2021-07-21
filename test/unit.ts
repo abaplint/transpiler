@@ -441,4 +441,26 @@ TYPES abap_encoding TYPE c LENGTH 20.`;
     expect(cons.split("\n")[1]).to.equal("UTF");
   });
 
+  it("test-12", async () => {
+// local testclass inheriting from global class
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+CLASS ltcl_xml_concrete DEFINITION FOR TESTING
+    FINAL
+    INHERITING FROM zcl_client.
+ENDCLASS.
+
+CLASS ltcl_xml_concrete IMPLEMENTATION.
+ENDCLASS.`;
+    const files = [
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    await dumpNrun(files);
+  });
+
 });
