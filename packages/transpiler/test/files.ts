@@ -108,4 +108,37 @@ ENDINTERFACE.`;
     expect(output[0].js.contents).to.include("const constant_25 = ");
   });
 
+  it("Global Class implementing global intf, whitespace lookup default parameter value", async () => {
+    const filename1 = "zcl_index.clas.abap";
+    const contents1 = `
+CLASS zcl_index DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    INTERFACES zif_index.
+ENDCLASS.
+
+
+
+CLASS zcl_index IMPLEMENTATION.
+  METHOD zif_index~bar.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const filename2 = "zif_index.intf.abap";
+// note how the method is defined at the postion between ENDCLASS and CLASS IMPLEMENTAION above,
+    const contents2 = `
+INTERFACE zif_index PUBLIC.
+
+
+
+  METHODS bar IMPORTING foo TYPE abap_bool DEFAULT abap_true.
+ENDINTERFACE.`;
+
+    const file1 = {filename: filename1, contents: contents1};
+    const file2 = {filename: filename2, contents: contents2};
+
+    const output = (await new Transpiler().run([file1, file2])).objects;
+
+    expect(output.length).to.equal(2);
+  });
+
 });
