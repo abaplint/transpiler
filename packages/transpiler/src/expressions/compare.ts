@@ -15,21 +15,21 @@ export class CompareTranspiler implements IExpressionTranspiler {
     if (sources.length === 1) {
       const s0 = traversal.traverse(sources[0]);
 
-      if ((concat.startsWith("NOT") && concat.endsWith("IS INITIAL"))
+      if ((concat.startsWith("NOT") && concat.endsWith(" IS INITIAL"))
           || concat.endsWith("IS NOT INITIAL")) {
         return "abap.compare.initial(" + s0 + ") === false";
       } else if (concat.endsWith("IS INITIAL")) {
         return "abap.compare.initial(" + s0 + ")";
       }
 
-      if ((concat.startsWith("NOT") && concat.endsWith("IS BOUND"))
+      if ((concat.startsWith("NOT") && concat.endsWith(" IS BOUND"))
           || concat.endsWith("IS NOT BOUND")) {
         return "abap.compare.initial(" + s0 + ")";
       } else if (concat.endsWith("IS BOUND")) {
         return "abap.compare.initial(" + s0 + ") === false";
       }
 
-      if ((concat.startsWith("NOT") && concat.endsWith("IS ASSIGNED"))
+      if ((concat.startsWith("NOT") && concat.endsWith(" IS ASSIGNED"))
           || concat.endsWith("IS NOT ASSIGNED")) {
         return "abap.compare.assigned(" + s0 + ") === false";
       } else if (concat.endsWith("IS ASSIGNED")) {
@@ -39,7 +39,10 @@ export class CompareTranspiler implements IExpressionTranspiler {
       if (concat.endsWith(" IS SUPPLIED")) {
         return pre + "INPUT && INPUT." + concat.replace(" IS SUPPLIED", "").toLowerCase();
       }
-
+    } else if (sources.length === 2 && node.findDirectTokenByText("IN")) {
+      const s0 = traversal.traverse(sources[0]);
+      const s1 = traversal.traverse(sources[1]);
+      return pre + "abap.compare.in(" + s0 + ", " + s1 + ")";
     } else if (sources.length === 2) {
       const operator = traversal.traverse(node.findFirstExpression(Expressions.CompareOperator));
       const s0 = traversal.traverse(sources[0]);

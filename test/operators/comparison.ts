@@ -460,7 +460,7 @@ START-OF-SELECTION.
     const code = `
       DATA lv_int TYPE i VALUE 8.
       DATA lv_x_len_1 TYPE x LENGTH 1 VALUE '07'.
-    
+
       IF lv_int > lv_x_len_1.
         WRITE: '8i > 07'.
       ELSE.
@@ -495,18 +495,25 @@ START-OF-SELECTION.
       DATA lv_hex TYPE x.
       lv_hex = '1B'.
       DATA lv_int TYPE i VALUE 4.
-    
+
       IF lv_hex > lv_int.
         WRITE: '1B > 4i'.
       ELSE.
         WRITE: '4i > 1B'.
-      ENDIF.
-      `;
+      ENDIF.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal(`1B > 4i`);
   });
 
+  it("IN empty", async () => {
+    const code = `
+  DATA bar TYPE RANGE OF i.
+  ASSERT 5 IN bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
 
 });
