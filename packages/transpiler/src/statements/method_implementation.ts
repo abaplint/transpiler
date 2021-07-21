@@ -2,6 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {TranspileTypes} from "../types";
 import {Traversal} from "../traversal";
+import {ConstantTranspiler, FieldChainTranspiler} from "../expressions";
 
 export class MethodImplementationTranspiler implements IStatementTranspiler {
 
@@ -48,7 +49,22 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
         }
         const def = methoddef?.getParameterDefault(varName);
         if (def) {
-          after += "if (" + unique + " === undefined || " + unique + "." + varName + " === undefined) {" + varName + " = " + traversal.traverse(def) + ";}\n";
+          let val = "";
+          if (def.get() instanceof abaplint.Expressions.Constant) {
+            val = new ConstantTranspiler().transpile(def, traversal);
+          } else if (def.get() instanceof abaplint.Expressions.FieldChain) {
+            if (def.getFirstToken().getStr().toLowerCase() === "abap_true") {
+              val = "abap.builtin.abap_true";
+            } else if (def.getFirstToken().getStr().toLowerCase() === "abap_false") {
+              val = "abap.builtin.abap_false";
+            } else {
+              // note: this can be difficult, the "def" might be from an interface, ie. a different scope than the method
+              val = new FieldChainTranspiler().transpile(def, traversal);
+            }
+          } else {
+            throw "MethodImplementationTranspiler, unknown default param type";
+          }
+          after += "if (" + unique + " === undefined || " + unique + "." + varName + " === undefined) {" + varName + " = " + val + ";}\n";
         }
       } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodReturning)) {
         after = after + new TranspileTypes().declare(identifier) + "\n";
