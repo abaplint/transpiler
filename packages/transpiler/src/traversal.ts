@@ -150,7 +150,7 @@ export class Traversal {
   private isStaticClassAttribute(token: abaplint.Token): string | undefined {
     const scope = this.findCurrentScopeByToken(token);
     if (scope === undefined) {
-      throw new Error(`isStaticClassAttribute, unable to lookup position, ${token.getStr()},${token.getRow()},${token.getCol()}` +
+      throw new Error(`isStaticClassAttribute, unable to lookup position, ${token.getStr()},${token.getRow()},${token.getCol()},` +
         this.file.getFilename());
     }
 
