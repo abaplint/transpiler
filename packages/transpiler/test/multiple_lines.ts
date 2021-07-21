@@ -333,6 +333,7 @@ class zcl_ret {
   async constructor_() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    this.c_maxdcodes = zcl_ret.c_maxdcodes;
     return this;
   }
 }
@@ -452,6 +453,7 @@ async function bar() {
   async constructor_() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    this.foo = lcl_bar.foo;
     return this;
   }
 }
@@ -497,6 +499,7 @@ class lcl_bar {
   async constructor_() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    this.first = lcl_bar.first;
     return this;
   }
 }

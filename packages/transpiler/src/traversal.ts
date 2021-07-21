@@ -305,6 +305,10 @@ export class Traversal {
     for (const a of def.getAliases().getAll()) {
       ret += "this." + a.getName() + " = this." + a.getComponent().replace("~", "$") + ";\n";
     }
+    // constants can be accessed both statically and via reference
+    for (const c of def.getAttributes().getConstants()) {
+      ret += "this." + c.getName() + " = " + def.getName() + "." + c.getName() + ";\n";
+    }
 
     return ret;
   }
