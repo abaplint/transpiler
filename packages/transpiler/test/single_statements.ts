@@ -154,6 +154,7 @@ describe("Single statements", () => {
     {abap: "COMMIT WORK.",     js: `abap.statements.commit();`, skip: false},
     {abap: "ROLLBACK WORK.",   js: `abap.statements.rollback();`, skip: false},
     {abap: "MOVE-CORRESPONDING foo TO bar.", js: `abap.statements.moveCorresponding(foo, bar);`, skip: false},
+    {abap: "ASSERT 5 IN bar.", js: `abap.statements.assert(abap.compare.in(constant_5, bar));`, skip: false},
   ];
 
   for (const test of tests) {
