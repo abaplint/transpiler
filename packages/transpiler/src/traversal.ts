@@ -8,18 +8,20 @@ import {IStructureTranspiler} from "./structures/_structure_transpiler";
 import {TranspileTypes} from "./types";
 import {ISpaghettiScopeNode} from "@abaplint/core";
 
-
 export class Traversal {
   private readonly spaghetti: abaplint.ISpaghettiScope;
   private readonly file: abaplint.ABAPFile;
   private readonly obj: abaplint.ABAPObject;
   private readonly reg: abaplint.IRegistry;
+  public readonly runtimeTypeError: boolean;
 
-  public constructor(spaghetti: abaplint.ISpaghettiScope, file: abaplint.ABAPFile, obj: abaplint.ABAPObject, reg: abaplint.IRegistry) {
+  public constructor(spaghetti: abaplint.ISpaghettiScope, file: abaplint.ABAPFile,
+                     obj: abaplint.ABAPObject, reg: abaplint.IRegistry, runtimeTypeError = false) {
     this.spaghetti = spaghetti;
     this.file = file;
     this.obj = obj;
     this.reg = reg;
+    this.runtimeTypeError = runtimeTypeError;
   }
 
   public getCurrentObject(): abaplint.ABAPObject {

@@ -162,7 +162,7 @@ export class Transpiler {
       result += this.handleConstants(obj, file, reg);
 
       const rearranged = obj.getType() === "INTF" ? file.getStructure() : new Rearranger().run(file.getStructure());
-      const contents = new Traversal(spaghetti, file, obj, reg).traverse(rearranged);
+      const contents = new Traversal(spaghetti, file, obj, reg, this.options?.unknownTypes === "runtimeError").traverse(rearranged);
       result += new Indentation().run(contents);
 
       exports = exports.concat(this.findExports(file.getStructure()));
@@ -291,7 +291,7 @@ export class Transpiler {
     if (issues.length > 0) {
       const messages = issues.map(i => i.getKey() + ", " +
         i.getMessage() + ", " +
-        i.getFilename() + ", " +
+        i.getFilename() + ":" +
         i.getStart().getRow());
       throw new Error(messages.join("\n"));
     }

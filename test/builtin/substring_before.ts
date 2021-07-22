@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -38,6 +38,18 @@ describe("Builtin functions - substring_before", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("substring_before 03", async () => {
+    const code = `
+  DATA res TYPE string.
+  res = substring_before( val   = 'ZSOME_PROG_ENDING_WITH_CP'
+                          regex = '(=+CP)?$' ).
+  WRITE res.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal( `ZSOME_PROG_ENDING_WITH_CP` );
   });
 
 });

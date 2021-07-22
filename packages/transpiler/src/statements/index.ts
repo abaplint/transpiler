@@ -63,6 +63,7 @@ export * from "./return";
 export * from "./rollback";
 export * from "./select";
 export * from "./set_bit";
+export * from "./set_handler";
 export * from "./shift";
 export * from "./sort";
 export * from "./split";

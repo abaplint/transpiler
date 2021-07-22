@@ -17,7 +17,7 @@ export class InsertInternalTranspiler implements IStatementTranspiler {
     }
 
     if (source === undefined || target === undefined) {
-      throw "InsertInternalTranspiler, source or target not found";
+      throw "InsertInternalTranspiler, source or target not found: " + node.concatTokens();
     }
 
     const index = node.findExpressionAfterToken("INDEX");
