@@ -6,7 +6,7 @@ import {runSingle} from "./_utils";
 
 describe("Single statements", () => {
   const tests = [
-    {abap: "DATA foo TYPE i.",                     js: "let foo = new abap.types.Integer();",       skip: false},
+    {abap: "DATA foo TYPE i.",                     js: "let foo = new abap.types.Integer();",       skip: false, only: false},
     {abap: "DATA ref TYPE REF TO i.",              js: "let ref = new abap.types.DataReference(new abap.types.Integer());",       skip: false},
     {abap: "foo = 2.",                             js: "foo.set(constant_2);",                      skip: false},
     {abap: "foo = bar + 2.",                       js: "foo.set(abap.operators.add(bar,constant_2));",             skip: false},
@@ -156,12 +156,19 @@ describe("Single statements", () => {
     {abap: "MOVE-CORRESPONDING foo TO bar.", js: `abap.statements.moveCorresponding(foo, bar);`, skip: false},
     {abap: "ASSERT 5 IN bar.", js: `abap.statements.assert(abap.compare.in(constant_5, bar));`, skip: false},
     {abap: "INSERT INITIAL LINE INTO tab ASSIGNING <row> INDEX 1.", js: `abap.statements.insertInternal({initial: true, index: constant_1, assigning: fs_row_, table: tab});`, skip: false},
+    {abap: "DELETE lt_log_temp WHERE msg-level < iv_min_level.", js: `abap.statements.deleteInternal(lt_log_temp,{where: (i) => {return abap.compare.lt(i.msg.get().level, iv_min_level);}});`, skip: false},
   ];
 
   for (const test of tests) {
     if (test.skip) {
       it.skip(test.abap, async () => {
         return;
+      });
+    } else if (test.only) {
+      it.only(test.abap, async () => {
+        UniqueIdentifier.reset();
+        const options: ITranspilerOptions = {ignoreSyntaxCheck: true, skipConstants: true};
+        expect(await runSingle(test.abap, options)).to.equal(test.js);
       });
     } else {
       it(test.abap, async () => {
