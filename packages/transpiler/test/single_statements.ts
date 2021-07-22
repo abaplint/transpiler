@@ -50,7 +50,7 @@ describe("Single statements", () => {
     {abap: "SORT ct_matches BY offset length DESCENDING.", js: `abap.statements.sort(ct_matches,{by: [{component: "offset"},{component: "length", descending: true}]});`, skip: false},
     {abap: "WRITE foo.",                           js: "abap.statements.write(foo);",                    skip: false},
     {abap: "WRITE / foo.",                         js: "abap.statements.write(foo, {newLine: true});", skip: false},
-    {abap: "INSERT 5 INTO tab INDEX sy-tabix.", js: "abap.statements.insertInternal(constant_5, tab, {index: abap.builtin.sy.get().tabix});", skip: false},
+    {abap: "INSERT 5 INTO tab INDEX sy-tabix.", js: "abap.statements.insertInternal({data: constant_5, index: abap.builtin.sy.get().tabix, table: tab});", skip: false},
     {abap: "RETURN.",                                 js: "return;",                                   skip: false}, // todo, hmm? some more to be added here
     {abap: "method( ).",                              js: "await this.method();",                            skip: false},
     {abap: "foo->method( ).",                         js: "await foo.get().method();",                       skip: false},
@@ -155,6 +155,7 @@ describe("Single statements", () => {
     {abap: "ROLLBACK WORK.",   js: `abap.statements.rollback();`, skip: false},
     {abap: "MOVE-CORRESPONDING foo TO bar.", js: `abap.statements.moveCorresponding(foo, bar);`, skip: false},
     {abap: "ASSERT 5 IN bar.", js: `abap.statements.assert(abap.compare.in(constant_5, bar));`, skip: false},
+    {abap: "INSERT INITIAL LINE INTO tab ASSIGNING <row> INDEX 1.", js: `abap.statements.insertInternal({initial: true, index: constant_1, assigning: fs_row_, table: tab});`, skip: false},
   ];
 
   for (const test of tests) {
