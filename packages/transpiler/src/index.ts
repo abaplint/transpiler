@@ -291,7 +291,7 @@ export class Transpiler {
     if (issues.length > 0) {
       const messages = issues.map(i => i.getKey() + ", " +
         i.getMessage() + ", " +
-        i.getFilename() + ", " +
+        i.getFilename() + ":" +
         i.getStart().getRow());
       throw new Error(messages.join("\n"));
     }
