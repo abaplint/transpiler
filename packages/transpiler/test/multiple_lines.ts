@@ -290,13 +290,16 @@ abap.Classes['PROG-ZFOOBAR-ZCL_RET'] = zcl_ret;`;
   it("TRY, CATCH", async () => {
     const abap = `
 TRY.
-CATCH cx_root.
+CATCH cx_bar cx_foo INTO bar.
+CATCH cx_moo.
 ENDTRY.`;
 
-    const expected =
-`try {
+    const expected = `try {
 } catch (e) {
-  if (!(e instanceof cx_root)) {
+  if (e instanceof abap.Classes['CX_BAR'] || e instanceof abap.Classes['CX_FOO']) {
+    bar.set(e);
+  } else if (e instanceof abap.Classes['CX_MOO']) {
+  } else {
     throw e;
   }
 }`;

@@ -83,6 +83,7 @@ export class Requires {
 */
 
     // always add CX_ROOT, it is used for CATCH, no catches in global interfaces
+    // todo, it might be possible to remove this, as CATCH uses instanceof with dynamic registered classes
     if (obj.getType() !== "INTF") {
       const cx = this.reg.getObject("CLAS", "CX_ROOT");
       if (cx && cx instanceof abaplint.ABAPObject) {
