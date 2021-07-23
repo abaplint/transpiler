@@ -16,8 +16,10 @@ export class InsertInternalTranspiler implements IStatementTranspiler {
       options.push("lines: true");
     }
 
-    if (source === undefined || target === undefined) {
-      throw "InsertInternalTranspiler, source or target not found: " + node.concatTokens();
+    if (source === undefined) {
+      options.push("initial: true");
+    } else {
+      options.push("data: " + traversal.traverse(source));
     }
 
     const index = node.findExpressionAfterToken("INDEX");
@@ -30,10 +32,9 @@ export class InsertInternalTranspiler implements IStatementTranspiler {
       options.push("assigning: " + traversal.traverse((assigning.findFirstExpression(abaplint.Expressions.FieldSymbol))));
     }
 
-    const s = traversal.traverse(source);
-    const t = traversal.traverse(target);
+    options.push("table: " + traversal.traverse(target));
 
-    return `abap.statements.insertInternal(${s}, ${t}, {${options.join(", ")}});`;
+    return `abap.statements.insertInternal({${options.join(", ")}});`;
   }
 
 }
