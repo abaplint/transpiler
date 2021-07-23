@@ -5,5 +5,6 @@ export * from "./constants";
 export * from "./data";
 export * from "./function_module";
 export * from "./interface";
+export * from "./try";
 export * from "./types";
 export * from "./when";

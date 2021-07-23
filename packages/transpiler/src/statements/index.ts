@@ -5,7 +5,7 @@ export * from "./call_function";
 export * from "./call_transformation";
 export * from "./call";
 export * from "./case";
-export * from "./catch";
+export * from "./check";
 export * from "./class_deferred";
 export * from "./class_implementation";
 export * from "./class_local_friends";

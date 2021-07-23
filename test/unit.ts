@@ -463,4 +463,47 @@ ENDCLASS.`;
     await dumpNrun(files);
   });
 
+  it("test-13", async () => {
+// Catch
+    const clas = `
+    CLASS zcx_error DEFINITION PUBLIC INHERITING FROM cx_root.
+    ENDCLASS.
+    CLASS zcx_error IMPLEMENTATION.
+    ENDCLASS.`;
+    const clas2 = `
+    CLASS zcx_something DEFINITION PUBLIC INHERITING FROM cx_root.
+    ENDCLASS.
+    CLASS zcx_something IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        TRY.
+          RAISE EXCEPTION TYPE zcx_error.
+        CATCH zcx_something.
+          WRITE 'blah'.
+        CATCH zcx_error.
+          WRITE 'hello'.
+        ENDTRY.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const cxroot = `
+    CLASS cx_root DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS cx_root IMPLEMENTATION.
+    ENDCLASS.`;
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "zcx_something.clas.abap", contents: clas2},
+      {filename: "zcx_error.clas.abap", contents: clas},
+      {filename: "zcx_error.clas.testclasses.abap", contents: tests},
+    ];
+    const console = await dumpNrun(files);
+    expect(console.split("\n")[1]).to.equal("hello");
+  });
+
 });
