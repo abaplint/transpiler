@@ -506,4 +506,17 @@ ENDCLASS.`;
     expect(console.split("\n")[1]).to.equal("hello");
   });
 
+  it("test-14", async () => {
+// global test class without test methods
+    const clas = `
+  CLASS zcl_abapgit_persist_injector DEFINITION PUBLIC CREATE PRIVATE FOR TESTING.
+  ENDCLASS.
+  CLASS ZCL_ABAPGIT_PERSIST_INJECTOR IMPLEMENTATION.
+  ENDCLASS.`;
+    const files = [
+      {filename: "zcl_abapgit_persist_injector.clas.abap", contents: clas},
+    ];
+    await dumpNrun(files);
+  });
+
 });

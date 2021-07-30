@@ -31,7 +31,7 @@ try {\n`;
         ret += `clas = unit.addObject("${obj.getName()}");\n`;
         for (const file of obj.getABAPFiles()) {
           for (const def of file.getInfo().listClassDefinitions()) {
-            if (def.isForTesting === false) {
+            if (def.isForTesting === false || def.methods.length === 0) {
               continue;
             }
             ret += `{
