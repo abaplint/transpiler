@@ -1013,4 +1013,35 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("foo\nfoo");
   });
 
+  it("set static attribute in other class", async () => {
+    const code = `
+CLASS lcl_container DEFINITION.
+  PUBLIC SECTION.
+    CLASS-DATA bar TYPE i.
+ENDCLASS.
+
+CLASS lcl_container IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lcl_logic DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS m1.
+ENDCLASS.
+
+CLASS lcl_logic IMPLEMENTATION.
+  METHOD m1.
+    lcl_container=>bar = 2.
+    WRITE lcl_container=>bar.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl_logic=>m1( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
