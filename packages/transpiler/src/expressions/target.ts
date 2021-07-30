@@ -13,6 +13,8 @@ export class TargetTranspiler implements IExpressionTranspiler {
       if (c.get() instanceof Expressions.TargetField) {
         ret = ret + traversal.findPrefix(c.getFirstToken());
         ret = ret.replace("~", "$");
+      } else if (c.get() instanceof Expressions.ClassName) {
+        ret += traversal.lookupClassOrInterface(c.getFirstToken().getStr(), c.getFirstToken());
       } else if (c.get() instanceof Expressions.ComponentName) {
         ret = ret + c.getFirstToken().getStr().toLowerCase();
       } else if (c.get() instanceof Expressions.AttributeName) {
@@ -33,6 +35,8 @@ export class TargetTranspiler implements IExpressionTranspiler {
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.Dereference) {
         ret = ret + ".getPointer()";
         break;
+      } else if (c.getFirstToken().getStr() === "=>") {
+        ret = ret + ".";
       } else if (c.getFirstToken().getStr() === "->") {
         if (node.concatTokens().endsWith("->*")) {
           ret = ret + ".getPointer()";
