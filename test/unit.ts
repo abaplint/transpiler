@@ -525,4 +525,46 @@ ENDCLASS.`;
     await dumpNrun(files);
   });
 
+  it("test-15", async () => {
+// dyanmic instantiation of class by name
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA li_bar TYPE REF TO object.
+        TRY.
+            CREATE OBJECT li_bar TYPE ('ZCL_SDFSD').
+          CATCH cx_sy_create_object_error.
+            WRITE 'not found'.
+        ENDTRY.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const cxroot = `
+    CLASS cx_root DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS cx_root IMPLEMENTATION.
+    ENDCLASS.`;
+    const cxcreate = `
+    CLASS cx_sy_create_object_error DEFINITION PUBLIC INHERITING FROM cx_root.
+    ENDCLASS.
+    CLASS cx_sy_create_object_error IMPLEMENTATION.
+    ENDCLASS.`;
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "cx_sy_create_object_error.clas.abap", contents: cxcreate},
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("not found");
+  });
+
 });

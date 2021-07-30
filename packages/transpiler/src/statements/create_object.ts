@@ -24,8 +24,9 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
 
     let ret = "";
     const clas = traversal.lookupClassOrInterface(name, node.getFirstToken());
+    const cx = traversal.lookupClassOrInterface("CX_SY_CREATE_OBJECT_ERROR", node.getFirstToken());
     if (dynamic) {
-      ret += "if (" + clas + " === undefined) { throw 'cx_sy_create_object_error'; }\n";
+      ret += `if (${clas} === undefined) { throw new ${cx}; }\n`;
     }
     ret += target + ".set(await (new " + clas + "()).constructor_(" + para + "));";
 
