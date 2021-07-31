@@ -11,7 +11,7 @@ export interface IFindOptions {
   byteMode?: boolean,
   length?: INumeric,
   count?: INumeric,
-  results?: Table,
+  results?: Table | Structure,
   ignoringCase?: boolean,
   submatches?: ICharacter[],
 }
@@ -99,13 +99,17 @@ export function find(input: ICharacter | string, options: IFindOptions) {
           submatch.get().offset.set(-1);
           submatch.get().length.set(0);
         } else {
-          submatch.get().offset.set(m.index);
-          submatch.get().length.set(m[0].length);
+          submatch.get().offset.set(m.index + m[0].indexOf(m[1]));
+          submatch.get().length.set(m[1].length);
         }
         match.get().submatches.append(submatch);
       }
 
-      options.results.append(match);
+      if (options.results instanceof Table) {
+        options.results.append(match);
+      } else {
+        options.results.set(match);
+      }
       if (options.first === undefined || options.first === true) {
         break;
       }

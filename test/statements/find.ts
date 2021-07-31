@@ -386,4 +386,34 @@ describe("Running statements - FIND", () => {
     expect(abap.console.get()).to.equal("Foo Bar \nfoo@bar.com");
   });
 
+  it("FIND FIRST with REGEX + RESULTS", async () => {
+    const code = `
+TYPES: BEGIN OF ty_submatch,
+         offset TYPE i,
+         length TYPE i,
+       END OF ty_submatch.
+
+TYPES: BEGIN OF ty_match,
+         line       TYPE i,
+         offset     TYPE i,
+         length     TYPE i,
+         submatches TYPE STANDARD TABLE OF ty_submatch WITH DEFAULT KEY,
+       END OF ty_match.
+
+DATA ls_match TYPE ty_match.
+DATA ls_submatch LIKE LINE OF ls_match-submatches.
+DATA iv_data TYPE string.
+
+iv_data = 'done symref=HEAD:refs/heads/main filter object'.
+FIND FIRST OCCURRENCE OF REGEX '\\ssymref=HEAD:([^\\s]+)' IN iv_data RESULTS ls_match.
+READ TABLE ls_match-submatches INTO ls_submatch INDEX 1.
+WRITE / ls_match-offset.
+WRITE / ls_submatch-offset.
+WRITE / ls_submatch-length.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n17\n15");
+  });
+
 });

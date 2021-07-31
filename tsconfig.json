@@ -1,30 +1,30 @@
 {
   "compilerOptions": {
-      "module": "commonjs",
-      "outDir": "build",
-      "incremental": true,
-      "pretty": true,
-      "noFallthroughCasesInSwitch": true,
-      "noImplicitReturns": true,
-      "noUnusedParameters": true,
-      "noUnusedLocals": true,
-      "noImplicitAny": true,
-      "declaration": true,
-      "strictNullChecks": true,
-      "strictFunctionTypes": true,
-      "alwaysStrict": true,
-      "target": "es2017",
-      "sourceMap": true,
-      "baseUrl": ".",
-      },
+    "module": "commonjs",
+    "outDir": "build",
+    "incremental": true,
+    "pretty": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUnusedParameters": true,
+    "noUnusedLocals": true,
+    "noImplicitAny": true,
+    "declaration": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "alwaysStrict": true,
+    "target": "es2017",
+    "sourceMap": true,
+    "baseUrl": ".",
+  },
   "filesGlob": [
-      "./test/**/*.ts",
-      "./performance/**/*.ts"
-      ],
+    "./test/**/*.ts",
+    "./performance/**/*.ts"
+  ],
   "exclude": [
-      "node_modules",
-      "web",
-      "docs",
-      "build"
+    "node_modules",
+    "web",
+    "docs",
+    "build"
   ]
 }
