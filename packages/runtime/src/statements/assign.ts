@@ -49,6 +49,9 @@ export function assign(input: IAssignInput) {
     if (input.source instanceof FieldSymbol) {
       input.target.assign(input.source.getPointer());
     } else {
+      if (input.casting) {
+        input.target.setCasting();
+      }
       input.target.assign(input.source);
     }
     // @ts-ignore

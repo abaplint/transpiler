@@ -150,7 +150,7 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("ABCD");
   });
 
-  it.skip("ASSIGN CASTING", async () => {
+  it("ASSIGN CASTING", async () => {
     const code = `
   DATA lv_x TYPE x LENGTH 2 VALUE '0000'.
   FIELD-SYMBOLS <lv_y> TYPE c.
@@ -159,7 +159,7 @@ ENDLOOP.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("ABCD");
+    expect(abap.console.get()).to.equal("\u0000\u0000");
   });
 
 });
