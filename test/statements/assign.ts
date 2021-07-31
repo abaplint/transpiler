@@ -123,11 +123,11 @@ ENDLOOP.`;
         BEGIN OF ts_test,
           a TYPE c LENGTH 4,
         END OF ts_test.
-      DATA ls_test type ts_test. 
+      DATA ls_test type ts_test.
       ls_test-a = 'ABCD'.
       FIELD-SYMBOLS <lv> TYPE any.
       ASSIGN COMPONENT 1 OF STRUCTURE ls_test TO <lv>.
-      WRITE <lv>.  
+      WRITE <lv>.
     `;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
@@ -144,6 +144,18 @@ ENDLOOP.`;
       ASSIGN lv_test_ref->* TO <lv_test>.
       WRITE: / <lv_test>.
     `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ABCD");
+  });
+
+  it.skip("ASSIGN CASTING", async () => {
+    const code = `
+  DATA lv_x TYPE x LENGTH 2 VALUE '0000'.
+  FIELD-SYMBOLS <lv_y> TYPE c.
+  ASSIGN lv_x TO <lv_y> CASTING.
+  WRITE: / <lv_y>.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);

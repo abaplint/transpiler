@@ -5,6 +5,7 @@ import {INumeric} from "../types/_numeric";
 export interface IAssignInput {
   source: INumeric | ICharacter | Structure|DataReference,
   target: FieldSymbol,
+  casting?: boolean,
   component?: string | ICharacter,
 }
 

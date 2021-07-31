@@ -11,12 +11,17 @@ export class AssignTranspiler implements IStatementTranspiler {
 
     const options: string[] = [];
 
-    if (node.concatTokens().startsWith("ASSIGN COMPONENT ")) {
+    const concat = node.concatTokens();
+    if (concat.startsWith("ASSIGN COMPONENT ")) {
       options.push("component: " + sources.shift());
     }
 
     options.push("target: " + fs);
     options.push("source: " + sources.pop());
+
+    if (concat.endsWith(" CASTING.")) {
+      options.push("casting: true");
+    }
 
     return "abap.statements.assign({" + options.join(", ") + "});";
   }
