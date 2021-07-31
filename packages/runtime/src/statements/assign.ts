@@ -5,6 +5,7 @@ import {INumeric} from "../types/_numeric";
 export interface IAssignInput {
   source: INumeric | ICharacter | Structure|DataReference,
   target: FieldSymbol,
+  casting?: boolean,
   component?: string | ICharacter,
 }
 
@@ -48,6 +49,9 @@ export function assign(input: IAssignInput) {
     if (input.source instanceof FieldSymbol) {
       input.target.assign(input.source.getPointer());
     } else {
+      if (input.casting) {
+        input.target.setCasting();
+      }
       input.target.assign(input.source);
     }
     // @ts-ignore

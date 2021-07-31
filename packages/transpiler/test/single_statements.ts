@@ -157,6 +157,7 @@ describe("Single statements", () => {
     {abap: "ASSERT 5 IN bar.", js: `abap.statements.assert(abap.compare.in(constant_5, bar));`, skip: false},
     {abap: "INSERT INITIAL LINE INTO tab ASSIGNING <row> INDEX 1.", js: `abap.statements.insertInternal({initial: true, index: constant_1, assigning: fs_row_, table: tab});`, skip: false},
     {abap: "DELETE lt_log_temp WHERE msg-level < iv_min_level.", js: `abap.statements.deleteInternal(lt_log_temp,{where: (i) => {return abap.compare.lt(i.msg.get().level, iv_min_level);}});`, skip: false},
+    {abap: "ASSIGN lv_x TO <lv_y> CASTING.", js: `abap.statements.assign({target: fs_lv_y_, source: lv_x, casting: true});`, skip: false},
   ];
 
   for (const test of tests) {

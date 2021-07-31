@@ -9,14 +9,20 @@ type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Stru
 
 export class FieldSymbol  {
   private pointer: PointerType;
+  private casting: boolean;
   // todo, add typing, so its possible to get runtime errors?
 
   public constructor() {
     this.pointer = undefined;
+    this.casting = false;
   }
 
   public assign(pointer: PointerType) {
     this.pointer = pointer;
+  }
+
+  public setCasting() {
+    this.casting =  true;
   }
 
   public unassign(): void {
@@ -38,8 +44,13 @@ export class FieldSymbol  {
   }
 
   public get() {
-    // @ts-ignore
-    return this.pointer?.get();
+    if (this.casting) {
+      // @ts-ignore
+      return new String().set(Buffer.from(this.pointer?.get(), "hex").toString()).get();
+    } else {
+      // @ts-ignore
+      return this.pointer?.get();
+    }
   }
 
   public array() {
