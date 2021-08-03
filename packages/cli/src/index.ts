@@ -40,11 +40,21 @@ function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
   return files;
 }
 
+function writeObjects(objects: Transpiler.IOutputFile[], writeSourceMaps: boolean, outputFolder: string) {
+  for (const o of objects) {
+    let contents = o.js.contents;
+    if (writeSourceMaps === true) {
+      contents = contents + `\n//# sourceMappingURL=` + o.sourceMap.filename;
+      fs.writeFileSync(outputFolder + path.sep + o.sourceMap.filename, o.sourceMap.contents);
+    }
+    fs.writeFileSync(outputFolder + path.sep + o.js.filename, o.js.contents);
+  }
+}
+
 async function run() {
   console.log("Transpiler CLI");
 
   const config = TranspilerConfig.find(process.argv[2]);
-
   const files = FileOperations.loadFiles(config).concat(loadLib(config));
 
   console.log("\nBuilding");
@@ -57,10 +67,8 @@ async function run() {
     fs.mkdirSync(outputFolder);
   }
 
-  for (const o of output.objects) {
-    fs.writeFileSync(outputFolder + path.sep + o.js.filename, o.js.contents);
-  }
-  console.log(output.objects.length + " files written");
+  writeObjects(output.objects, config.write_source_map, outputFolder);
+  console.log(output.objects.length + " objects written to disk");
 
   if (config.write_unit_tests === true) {
     fs.writeFileSync(outputFolder + path.sep + "index.mjs", output.unitTest);

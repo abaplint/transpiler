@@ -31,7 +31,10 @@ describe("Testing Unit Testing", () => {
     const output = await new Transpiler(config).run(files);
 
     for (const o of output.objects) {
-      fs.writeFileSync(outputFolder + path.sep + o.js.filename, o.js.contents);
+      let contents = o.js.contents;
+      contents = contents + `\n//# sourceMappingURL=` + o.sourceMap.filename;
+      fs.writeFileSync(outputFolder + path.sep + o.sourceMap.filename, o.sourceMap.contents);
+      fs.writeFileSync(outputFolder + path.sep + o.js.filename, contents);
     }
     // hack
     output.unitTest = output.unitTest.replace(`import runtime from "@abaplint/runtime";`,

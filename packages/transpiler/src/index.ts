@@ -44,6 +44,7 @@ export interface IOutputFile {
   js: IFile;
   requires: readonly IRequire[];
   exports: readonly string[];
+  sourceMap: IFile;
 }
 
 export interface ITranspilerOptions {
@@ -178,6 +179,7 @@ export class Transpiler {
         js: {filename: filename.toLowerCase(), contents: result},
         requires: new Requires(reg).find(obj, spaghetti.getTop(), file.getFilename()),
         exports,
+        sourceMap: {filename: filename.toLowerCase() + ".map", contents: "todo"},
       };
 
       ret.push(output);
@@ -234,6 +236,7 @@ export class Transpiler {
           contents: def.js.contents + imp.js.contents,
         },
         requires,
+        sourceMap: imp.sourceMap, // todo, also merge this
         exports: def.exports.concat(imp.exports),
       });
     } else if (imp) {

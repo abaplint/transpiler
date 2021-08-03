@@ -13,6 +13,9 @@
         "pretest": "npm run compile",
         "test": "mocha --timeout 10000",
         "posttest": "npm run lint",
+        "link-local": "npm run link:transpiler && npm run link:transpiler-into-cli",
+        "link:transpiler": "cd packages/transpiler && npm link",
+        "link:transpiler-into-cli": "cd packages/cli && npm link @abaplint/transpiler",
         "lint": "eslint packages/**/*.ts --format unix"
     },
     "repository": {

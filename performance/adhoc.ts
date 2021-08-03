@@ -16,6 +16,7 @@ async function run() {
     output_folder: "",
     lib: "",
     write_unit_tests: true,
+    write_source_map: true,
     options: {
       "ignoreSyntaxCheck": false,
       "addFilenames": true,
