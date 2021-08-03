@@ -7,6 +7,7 @@ import {SkipSettings, UnitTest} from "./unit_test";
 import {Keywords} from "./keywords";
 import {DatabaseSetup} from "./database_setup";
 import {Rearranger} from "./rearranger";
+import {FileResult} from "./file_result";
 
 export {config};
 
@@ -154,32 +155,40 @@ export class Transpiler {
 
     for (const file of obj.getSequencedFiles()) {
       let exports: string[] = [];
-      let result = "";
+
+      const result = new FileResult();
 
       if (this.options?.addFilenames === true) {
-        result += "// " + file.getFilename() + "\n";
+        result.append("// " + file.getFilename() + "\n");
       }
 
-      result += this.handleConstants(obj, file, reg);
+      result.append(this.handleConstants(obj, file, reg));
 
       const rearranged = new Rearranger().run(obj.getType(), file.getStructure());
       const contents = new Traversal(spaghetti, file, obj, reg, this.options?.unknownTypes === "runtimeError").traverse(rearranged);
-      result += new Indentation().run(contents);
+      result.append(new Indentation().run(contents));
 
       exports = exports.concat(this.findExports(file.getStructure()));
 
-      if (result.endsWith("\n")) {
-        result = result.substring(0, result.length - 1);
-      }
+      result.stripLastNewline();
 
       const filename = file.getFilename().replace(".abap", ".mjs").toLowerCase();
 
       const output: IOutputFile = {
-        object: {name: obj.getName(), type: obj.getType()},
-        js: {filename: filename, contents: result},
+        object: {
+          name: obj.getName(),
+          type: obj.getType(),
+        },
+        js: {
+          filename: filename,
+          contents: result.get(),
+        },
         requires: new Requires(reg).find(obj, spaghetti.getTop(), file.getFilename()),
         exports,
-        sourceMap: {filename: filename + ".map", contents: "todo"},
+        sourceMap: {
+          filename: filename + ".map",
+          contents: "todo",
+        },
       };
 
       ret.push(output);
