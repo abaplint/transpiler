@@ -4,9 +4,14 @@ import {Expressions, INode, Nodes} from "@abaplint/core";
 
 export class Rearranger {
 
-  public run(node: Nodes.StructureNode | undefined): Nodes.StructureNode | undefined {
+  public run(type: string, node: Nodes.StructureNode | undefined): Nodes.StructureNode | undefined {
     if (!node) {
       return undefined;
+    }
+
+    if (type === "INTF") {
+// no arithmethic expressions in global interfaces
+      return node;
     }
 
     const flattened = this.flatten(node);

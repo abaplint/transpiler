@@ -162,7 +162,7 @@ export class Transpiler {
 
       result += this.handleConstants(obj, file, reg);
 
-      const rearranged = obj.getType() === "INTF" ? file.getStructure() : new Rearranger().run(file.getStructure());
+      const rearranged = new Rearranger().run(obj.getType(), file.getStructure());
       const contents = new Traversal(spaghetti, file, obj, reg, this.options?.unknownTypes === "runtimeError").traverse(rearranged);
       result += new Indentation().run(contents);
 
@@ -172,14 +172,14 @@ export class Transpiler {
         result = result.substring(0, result.length - 1);
       }
 
-      const filename = file.getFilename().replace(".abap", ".mjs");
+      const filename = file.getFilename().replace(".abap", ".mjs").toLowerCase();
 
       const output: IOutputFile = {
         object: {name: obj.getName(), type: obj.getType()},
-        js: {filename: filename.toLowerCase(), contents: result},
+        js: {filename: filename, contents: result},
         requires: new Requires(reg).find(obj, spaghetti.getTop(), file.getFilename()),
         exports,
-        sourceMap: {filename: filename.toLowerCase() + ".map", contents: "todo"},
+        sourceMap: {filename: filename + ".map", contents: "todo"},
       };
 
       ret.push(output);

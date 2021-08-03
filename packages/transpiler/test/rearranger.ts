@@ -9,7 +9,7 @@ function run(abap: string): abaplint.Nodes.ExpressionNode {
   const obj = reg.getFirstObject() as abaplint.ABAPObject;
   const stru = obj.getMainABAPFile()?.getStructure();
   expect(stru).to.not.equal(undefined);
-  const rearranged = new Rearranger().run(stru!);
+  const rearranged = new Rearranger().run(obj.getType(), stru!);
   const source = rearranged?.findFirstStatement(abaplint.Statements.Move)?.findFirstExpression(abaplint.Expressions.Source);
   expect(source).to.not.equal(undefined);
   return source!;
