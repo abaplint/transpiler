@@ -1,6 +1,5 @@
 import * as abaplint from "@abaplint/core";
 import {Validation, config} from "./validation";
-import {Indentation} from "./indentation";
 import {Traversal} from "./traversal";
 import {Requires} from "./requires";
 import {SkipSettings, UnitTest} from "./unit_test";
@@ -166,7 +165,7 @@ export class Transpiler {
 
       const rearranged = new Rearranger().run(obj.getType(), file.getStructure());
       const contents = new Traversal(spaghetti, file, obj, reg, this.options?.unknownTypes === "runtimeError").traverse(rearranged);
-      result.append(new Indentation().run(contents));
+      result.append(contents);
 
       exports = exports.concat(this.findExports(file.getStructure()));
 
