@@ -15,5 +15,5 @@ jobs:
     - run: npm install
       env:
         CI: true
-    - run: npm link-local
+    - run: npm run link-local
     - run: npm test
