@@ -7,20 +7,23 @@ import {IExpressionTranspiler} from "./expressions/_expression_transpiler";
 import {IStructureTranspiler} from "./structures/_structure_transpiler";
 import {TranspileTypes} from "./types";
 import {ISpaghettiScopeNode} from "@abaplint/core";
+import {FileResult} from "./file_result";
 
 export class Traversal {
   private readonly spaghetti: abaplint.ISpaghettiScope;
   private readonly file: abaplint.ABAPFile;
   private readonly obj: abaplint.ABAPObject;
   private readonly reg: abaplint.IRegistry;
+//  private readonly fileResult: FileResult;
   public readonly runtimeTypeError: boolean;
 
   public constructor(spaghetti: abaplint.ISpaghettiScope, file: abaplint.ABAPFile,
-                     obj: abaplint.ABAPObject, reg: abaplint.IRegistry, runtimeTypeError = false) {
+                     obj: abaplint.ABAPObject, _fileResult: FileResult, reg: abaplint.IRegistry, runtimeTypeError = false) {
     this.spaghetti = spaghetti;
     this.file = file;
     this.obj = obj;
     this.reg = reg;
+//    this.fileResult = fileResult;
     this.runtimeTypeError = runtimeTypeError;
   }
 
@@ -30,11 +33,14 @@ export class Traversal {
 
   public traverse(node: abaplint.INode | undefined): string {
     if (node instanceof abaplint.Nodes.StructureNode) {
-      return this.traverseStructure(node);
+      const str = this.traverseStructure(node);
+      return str;
     } else if (node instanceof abaplint.Nodes.StatementNode) {
-      return this.traverseStatement(node);
+      const str = this.traverseStatement(node);
+      return str;
     } else if (node instanceof abaplint.Nodes.ExpressionNode) {
-      return this.traverseExpression(node);
+      const str = this.traverseExpression(node);
+      return str;
     } else if (node === undefined) {
       throw new Error("Traverse, node undefined");
     } else {

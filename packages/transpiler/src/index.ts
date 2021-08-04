@@ -164,7 +164,7 @@ export class Transpiler {
       result.append(this.handleConstants(obj, file, reg));
 
       const rearranged = new Rearranger().run(obj.getType(), file.getStructure());
-      const contents = new Traversal(spaghetti, file, obj, reg, this.options?.unknownTypes === "runtimeError").traverse(rearranged);
+      const contents = new Traversal(spaghetti, file, obj, result, reg, this.options?.unknownTypes === "runtimeError").traverse(rearranged);
       result.append(contents);
 
       exports = exports.concat(this.findExports(file.getStructure()));
@@ -180,13 +180,13 @@ export class Transpiler {
         },
         js: {
           filename: filename,
-          contents: result.get(),
+          contents: result.getCode(),
         },
         requires: new Requires(reg).find(obj, spaghetti.getTop(), file.getFilename()),
         exports,
         sourceMap: {
           filename: filename + ".map",
-          contents: "todo",
+          contents: result.getMap(filename),
         },
       };
 
