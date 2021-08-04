@@ -6,7 +6,7 @@ import {Chunk} from "../chunk";
 export class TryTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    return new Chunk().appendString("try {", node, traversal);
+    return new Chunk().append("try {", node, traversal);
   }
 
 }

@@ -6,7 +6,7 @@ import {IStatementTranspiler} from "./_statement_transpiler";
 export class EndTryTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    return new Chunk().appendString("}", node, traversal);
+    return new Chunk().append("}", node, traversal);
   }
 
 }

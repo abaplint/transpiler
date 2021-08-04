@@ -1,6 +1,5 @@
 import * as sourceMap from "source-map";
 import * as abaplint from "@abaplint/core";
-import {Traversal} from "./traversal";
 
 /*
 source-map:
@@ -43,14 +42,14 @@ export class Chunk {
     this.raw += append.getCode();
   }
 
-  public appendString(input: string, pos?: abaplint.Position | abaplint.INode, traversal?: Traversal) {
+  public append(input: string, pos: abaplint.Position | abaplint.INode, traversal: {getFilename(): string}) {
     if (pos) {
       const lines = this.raw.split("\n");
       const lastLine = lines[lines.length - 1];
       const originalLine = pos instanceof abaplint.Position ? pos.getRow() : pos.getFirstToken().getRow();
       const originalColumn = pos instanceof abaplint.Position ? pos.getCol() - 1 : pos.getFirstToken().getCol() - 1;
       this.map.push({
-        source: traversal?.getFilename() || "",
+        source: traversal.getFilename(),
         generated: {
           line: lines.length,
           column: lastLine.length,
@@ -62,6 +61,11 @@ export class Chunk {
       });
     }
 
+    this.raw += input;
+    return this;
+  }
+
+  public appendString(input: string) {
     this.raw += input;
     return this;
   }
