@@ -1,5 +1,6 @@
 import * as sourceMap from "source-map";
 import * as abaplint from "@abaplint/core";
+import {Traversal} from "./traversal";
 
 /*
 source-map:
@@ -16,12 +17,11 @@ export class Chunk {
   private raw: string;
   public readonly map: sourceMap.Mapping[] = [];
 
-  public constructor(str?: string, pos?: abaplint.Position) {
+  public constructor(str?: string) {
     this.raw = "";
     this.map = [];
-
     if (str) {
-      this.appendString(str, pos);
+      this.appendString(str);
     }
   }
 
@@ -30,7 +30,7 @@ export class Chunk {
     const lineCount = lines.length;
     const lastLine = lines[lines.length - 1];
     append.map.forEach(m => {
-      // original stays the same
+      // original stays the same, but adjust the generated positions
       const add = m;
       if (add.generated.line === 1 && this.raw.endsWith("\n") === false) {
         add.generated.column += lastLine.length;
@@ -43,24 +43,27 @@ export class Chunk {
     this.raw += append.getCode();
   }
 
-  public appendString(input: string, pos?: abaplint.Position) {
+  public appendString(input: string, pos?: abaplint.Position | abaplint.INode, traversal?: Traversal) {
     if (pos) {
       const lines = this.raw.split("\n");
       const lastLine = lines[lines.length - 1];
+      const originalLine = pos instanceof abaplint.Position ? pos.getRow() : pos.getFirstToken().getRow();
+      const originalColumn = pos instanceof abaplint.Position ? pos.getCol() - 1 : pos.getFirstToken().getCol() - 1;
       this.map.push({
-        source: "zfoobar.prog.js",
+        source: traversal?.getFilename() || "",
         generated: {
           line: lines.length,
           column: lastLine.length,
         },
         original: {
-          line: pos.getRow(),
-          column: pos.getCol() - 1,
+          line: originalLine,
+          column: originalColumn,
         },
       });
     }
 
     this.raw += input;
+    return this;
   }
 
   public stripLastNewline(): void {
@@ -76,10 +79,7 @@ export class Chunk {
 
   public getMap(generatedFilename: string): string {
     const generator = new sourceMap.SourceMapGenerator();
-
-    this.map.forEach(m => {
-      generator.addMapping(m);
-    });
+    this.map.forEach(m => generator.addMapping(m));
 
     const json = generator.toJSON();
     json.file = generatedFilename;

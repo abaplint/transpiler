@@ -15,7 +15,7 @@ ENDTRY.`;
 `{
   "version": 3,
   "sources": [
-    "zfoobar.prog.js"
+    "zfoobar.prog.abap"
   ],
   "names": [],
   "mappings": "AAAA;AACA",
