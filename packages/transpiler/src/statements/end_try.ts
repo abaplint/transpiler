@@ -4,8 +4,8 @@ import {IStatementTranspiler} from "./_statement_transpiler";
 
 export class EndTryTranspiler implements IStatementTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StatementNode): Chunk {
-    return new Chunk("}");
+  public transpile(node: abaplint.Nodes.StatementNode): Chunk {
+    return new Chunk("}", node.getFirstToken().getStart());
   }
 
 }

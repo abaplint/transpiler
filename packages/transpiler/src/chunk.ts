@@ -2,42 +2,55 @@ import * as sourceMap from "source-map";
 import * as abaplint from "@abaplint/core";
 
 /*
-Source map:
-line: The line number is 1-based.
-column: The column number is 0-based.
+source-map:
+  line: The line number is 1-based.
+  column: The column number is 0-based.
 
 abaplint:
-line: The line number is 1-based.
-column: The column number is 1-based.
+  line: The line number is 1-based.
+  column: The column number is 1-based.
 */
 
-// Performs automatic indentation
 // Keeps track of source maps as generated code is added
 export class Chunk {
   private raw: string;
-  private readonly map: sourceMap.SourceMapGenerator;
+  public readonly map: sourceMap.Mapping[] = [];
 
   public constructor(str?: string, pos?: abaplint.Position) {
     this.raw = "";
-    this.map = new sourceMap.SourceMapGenerator();
+    this.map = [];
 
     if (str) {
       this.appendString(str, pos);
     }
   }
 
-  public appendChunk(input: Chunk) {
-    this.raw += input.getCode();
+  public appendChunk(append: Chunk) {
+    const lines = this.raw.split("\n");
+    const lineCount = lines.length;
+    const lastLine = lines[lines.length - 1];
+    append.map.forEach(m => {
+      // original stays the same
+      const add = m;
+      if (add.generated.line === 1 && this.raw.endsWith("\n") === false) {
+        add.generated.column += lastLine.length;
+      } else {
+        add.generated.line += lineCount - 1;
+      }
+      this.map.push(add);
+    });
+
+    this.raw += append.getCode();
   }
 
   public appendString(input: string, pos?: abaplint.Position) {
     if (pos) {
       const lines = this.raw.split("\n");
       const lastLine = lines[lines.length - 1];
-      this.map.addMapping({
-        source: "foo.js",
+      this.map.push({
+        source: "zfoobar.prog.js",
         generated: {
-          line: lines.length + 1,
+          line: lines.length,
           column: lastLine.length,
         },
         original: {
@@ -47,37 +60,6 @@ export class Chunk {
       });
     }
 
-/*
-    const output: string[] = [];
-
-    if (input === "\n") {
-      const lines = this.raw.split("\n");
-      const lastLine = lines[lines.length - 1];
-      if (lastLine.startsWith("}")) {
-        this.indentation = this.indentation - 1;
-      } else if (lastLine.endsWith(" {")) {
-        this.indentation = this.indentation + 1;
-      }
-      this.raw += "\n";
-      return;
-    }
-
-    for (const l of input.split("\n")) {
-      if (l.startsWith("}")) {
-        this.indentation = this.indentation - 1;
-      }
-      if (this.indentation > 0) {
-        output.push(" ".repeat(this.indentation * 2) + l);
-      } else {
-        output.push(l);
-      }
-      if (l.endsWith(" {")) {
-        this.indentation = this.indentation + 1;
-      }
-    }
-
-    this.raw += output.join("\n");
-    */
     this.raw += input;
   }
 
@@ -93,7 +75,13 @@ export class Chunk {
   }
 
   public getMap(generatedFilename: string): string {
-    const json = this.map.toJSON();
+    const generator = new sourceMap.SourceMapGenerator();
+
+    this.map.forEach(m => {
+      generator.addMapping(m);
+    });
+
+    const json = generator.toJSON();
     json.file = generatedFilename;
     json.sourceRoot = "";
     return JSON.stringify(json, null, 2);
