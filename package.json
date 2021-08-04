@@ -211,7 +211,7 @@
         "@abaplint/core": "^2.76.7",
         "@types/chai": "^4.2.21",
         "@types/mocha": "^9.0.0",
-        "@types/node": "^16.4.10",
+        "@types/node": "^16.4.12",
         "@typescript-eslint/eslint-plugin": "^4.29.0",
         "@typescript-eslint/parser": "^4.29.0",
         "chai": "^4.3.4",
