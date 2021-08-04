@@ -1,4 +1,15 @@
 import * as sourceMap from "source-map";
+import * as abaplint from "@abaplint/core";
+
+/*
+Source map:
+line: The line number is 1-based.
+column: The column number is 0-based.
+
+abaplint:
+line: The line number is 1-based.
+column: The column number is 1-based.
+*/
 
 // Performs automatic indentation
 // Keeps track of source maps as generated code is added
@@ -6,12 +17,12 @@ export class Chunk {
   private raw: string;
   private readonly map: sourceMap.SourceMapGenerator;
 
-  public constructor(str?: string) {
+  public constructor(str?: string, pos?: abaplint.Position) {
     this.raw = "";
     this.map = new sourceMap.SourceMapGenerator();
 
     if (str) {
-      this.appendString(str);
+      this.appendString(str, pos);
     }
   }
 
@@ -19,21 +30,23 @@ export class Chunk {
     this.raw += input.getCode();
   }
 
-  public appendString(input: string) {
-/*
-    this.map.addMapping({
-      generated: {
-        line: 10,
-        column: 35,
-      },
-      source: "foo.js",
-      original: {
-        line: 33,
-        column: 2,
-      },
-      name: "christopher",
-    });
-*/
+  public appendString(input: string, pos?: abaplint.Position) {
+    if (pos) {
+      const lines = this.raw.split("\n");
+      const lastLine = lines[lines.length - 1];
+      this.map.addMapping({
+        source: "foo.js",
+        generated: {
+          line: lines.length + 1,
+          column: lastLine.length,
+        },
+        original: {
+          line: pos.getRow(),
+          column: pos.getCol() - 1,
+        },
+      });
+    }
+
 /*
     const output: string[] = [];
 

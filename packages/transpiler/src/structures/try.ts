@@ -6,28 +6,30 @@ import {Chunk} from "../chunk";
 export class TryTranspiler implements IStructureTranspiler {
 
   public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): Chunk {
-    let ret = "";
+    const ret = new Chunk();
 
     const catches = node.findDirectStructures(abaplint.Structures.Catch);
-    let catchCode = this.buildCatchCode(catches, traversal);
+    let catchCode: Chunk | undefined = this.buildCatchCode(catches, traversal);
 
     for (const c of node.getChildren()) {
       if (c.get() instanceof abaplint.Structures.Catch) {
-        ret += catchCode;
-        catchCode = "";
+        if (catchCode) {
+          ret.appendChunk(catchCode);
+        }
+        catchCode = undefined;
       } else {
-        ret += traversal.traverse(c).getCode();
+        ret.appendChunk(traversal.traverse(c));
       }
     }
-    return new Chunk(ret);
+    return ret;
   }
 
-  private buildCatchCode(nodes: abaplint.Nodes.StructureNode[], traversal: Traversal): string {
+  private buildCatchCode(nodes: abaplint.Nodes.StructureNode[], traversal: Traversal): Chunk {
     let ret = "";
     let first = true;
 
     if (nodes.length === 0) {
-      return ret;
+      return new Chunk(ret);
     }
 
     ret += `} catch (e) {\n`;
@@ -61,7 +63,7 @@ export class TryTranspiler implements IStructureTranspiler {
     `throw e;\n` +
     `}\n`;
 
-    return ret;
+    return new Chunk(ret);
   }
 
 }

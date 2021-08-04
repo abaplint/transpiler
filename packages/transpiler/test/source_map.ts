@@ -3,7 +3,7 @@ import {runSingleMapped} from "./_utils";
 
 describe("Source Map", () => {
 
-  it("TRY", async () => {
+  it.skip("TRY", async () => {
     const abap = `
 TRY.
 ENDTRY.`;
@@ -17,7 +17,7 @@ ENDTRY.`;
   "version": 3,
   "sources": [],
   "names": [],
-  "mappings": "",
+  "mappings": "sdf",
   "file": "zfoobar.prog.mjs",
   "sourceRoot": ""
 }`;
