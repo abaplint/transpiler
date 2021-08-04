@@ -2,7 +2,7 @@ import * as sourceMap from "source-map";
 
 // Performs automatic indentation
 // Keeps track of source maps as generated code is added
-export class FileResult {
+export class Chunk {
   private raw: string;
   private indentation: number;
   private readonly map: sourceMap.SourceMapGenerator;
@@ -13,7 +13,11 @@ export class FileResult {
     this.map = new sourceMap.SourceMapGenerator();
   }
 
-  public append(input: string) {
+  public appendChunk(input: Chunk) {
+    this.raw += input.getCode();
+  }
+
+  public appendString(input: string) {
 /*
     this.map.addMapping({
       generated: {

@@ -6,7 +6,7 @@ import {SkipSettings, UnitTest} from "./unit_test";
 import {Keywords} from "./keywords";
 import {DatabaseSetup} from "./database_setup";
 import {Rearranger} from "./rearranger";
-import {FileResult} from "./file_result";
+import {Chunk} from "./chunk";
 
 export {config};
 
@@ -155,21 +155,21 @@ export class Transpiler {
     for (const file of obj.getSequencedFiles()) {
       let exports: string[] = [];
 
-      const result = new FileResult();
+      const chunk = new Chunk();
 
       if (this.options?.addFilenames === true) {
-        result.append("// " + file.getFilename() + "\n");
+        chunk.appendString("// " + file.getFilename() + "\n");
       }
 
-      result.append(this.handleConstants(obj, file, reg));
+      chunk.appendString(this.handleConstants(obj, file, reg));
 
       const rearranged = new Rearranger().run(obj.getType(), file.getStructure());
-      const contents = new Traversal(spaghetti, file, obj, result, reg, this.options?.unknownTypes === "runtimeError").traverse(rearranged);
-      result.append(contents);
+      const contents = new Traversal(spaghetti, file, obj, reg, this.options?.unknownTypes === "runtimeError").traverse(rearranged);
+      chunk.appendString(contents);
 
       exports = exports.concat(this.findExports(file.getStructure()));
 
-      result.stripLastNewline();
+      chunk.stripLastNewline();
 
       const filename = file.getFilename().replace(".abap", ".mjs").toLowerCase();
 
@@ -180,13 +180,13 @@ export class Transpiler {
         },
         js: {
           filename: filename,
-          contents: result.getCode(),
+          contents: chunk.getCode(),
         },
         requires: new Requires(reg).find(obj, spaghetti.getTop(), file.getFilename()),
         exports,
         sourceMap: {
           filename: filename + ".map",
-          contents: result.getMap(filename),
+          contents: chunk.getMap(filename),
         },
       };
 

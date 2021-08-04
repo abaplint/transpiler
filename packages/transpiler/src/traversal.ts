@@ -7,23 +7,21 @@ import {IExpressionTranspiler} from "./expressions/_expression_transpiler";
 import {IStructureTranspiler} from "./structures/_structure_transpiler";
 import {TranspileTypes} from "./types";
 import {ISpaghettiScopeNode} from "@abaplint/core";
-import {FileResult} from "./file_result";
+// import {Chunk} from "./chunk";
 
 export class Traversal {
   private readonly spaghetti: abaplint.ISpaghettiScope;
   private readonly file: abaplint.ABAPFile;
   private readonly obj: abaplint.ABAPObject;
   private readonly reg: abaplint.IRegistry;
-//  private readonly fileResult: FileResult;
   public readonly runtimeTypeError: boolean;
 
   public constructor(spaghetti: abaplint.ISpaghettiScope, file: abaplint.ABAPFile,
-                     obj: abaplint.ABAPObject, _fileResult: FileResult, reg: abaplint.IRegistry, runtimeTypeError = false) {
+                     obj: abaplint.ABAPObject, reg: abaplint.IRegistry, runtimeTypeError = false) {
     this.spaghetti = spaghetti;
     this.file = file;
     this.obj = obj;
     this.reg = reg;
-//    this.fileResult = fileResult;
     this.runtimeTypeError = runtimeTypeError;
   }
 
