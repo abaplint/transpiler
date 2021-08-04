@@ -1,10 +1,11 @@
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
+import {Chunk} from "../chunk";
 
 export class ClassImplementationTranspiler implements IStatementTranspiler {
 
-  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const token = node.findFirstExpression(abaplint.Expressions.ClassName)!.getFirstToken();
 
     const def = traversal.getClassDefinition(token);
@@ -18,7 +19,7 @@ export class ClassImplementationTranspiler implements IStatementTranspiler {
       ret += " extends " + def?.getSuperClass()?.toLowerCase();
     }
 
-    return ret + " {";
+    return new Chunk(ret + " {");
   }
 
 }

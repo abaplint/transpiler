@@ -2,10 +2,11 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {SourceTranspiler} from "../expressions";
 import {Traversal} from "../traversal";
+import {Chunk} from "../chunk";
 
 export class WriteTranspiler implements IStatementTranspiler {
 
-  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     let extra = "";
     let source = "";
     const newLine = node.findFirstExpression(abaplint.Expressions.WriteOffsetLength)?.findDirectTokenByText("/") !== undefined;
@@ -21,11 +22,11 @@ export class WriteTranspiler implements IStatementTranspiler {
       const concat = expr.concatTokens();
       if (concat.startsWith("'@KERNEL ")) {
         // @KERNEL commands must be taken verbatim
-        return concat.substr(9, concat.length - 10);
+        return new Chunk(concat.substr(9, concat.length - 10));
       }
-      source = new SourceTranspiler().transpile(expr, traversal);
+      source = new SourceTranspiler().transpile(expr, traversal).getCode();
     }
-    return "abap.statements.write(" + source + extra + ");";
+    return new Chunk("abap.statements.write(" + source + extra + ");");
   }
 
 }

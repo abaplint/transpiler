@@ -1,10 +1,11 @@
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
+import {Chunk} from "../chunk";
 
 export class InsertInternalTranspiler implements IStatementTranspiler {
 
-  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const options: string[] = [];
 
     let source = node.findDirectExpression(abaplint.Expressions.SimpleSource1);
@@ -19,22 +20,22 @@ export class InsertInternalTranspiler implements IStatementTranspiler {
     if (source === undefined) {
       options.push("initial: true");
     } else {
-      options.push("data: " + traversal.traverse(source));
+      options.push("data: " + traversal.traverse(source).getCode());
     }
 
     const index = node.findExpressionAfterToken("INDEX");
     if (index) {
-      options.push("index: " + traversal.traverse(index));
+      options.push("index: " + traversal.traverse(index).getCode());
     }
 
     const assigning = node.findExpressionAfterToken("ASSIGNING");
     if (assigning) {
-      options.push("assigning: " + traversal.traverse((assigning.findFirstExpression(abaplint.Expressions.FieldSymbol))));
+      options.push("assigning: " + traversal.traverse((assigning.findFirstExpression(abaplint.Expressions.FieldSymbol))).getCode());
     }
 
-    options.push("table: " + traversal.traverse(target));
+    options.push("table: " + traversal.traverse(target).getCode());
 
-    return `abap.statements.insertInternal({${options.join(", ")}});`;
+    return new Chunk(`abap.statements.insertInternal({${options.join(", ")}});`);
   }
 
 }

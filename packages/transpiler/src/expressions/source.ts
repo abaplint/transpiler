@@ -3,6 +3,7 @@ import {IExpressionTranspiler} from "./_expression_transpiler";
 import {AttributeChainTranspiler, ComponentChainTranspiler, FieldChainTranspiler} from ".";
 import {Traversal} from "../traversal";
 import {ConstantTranspiler} from "./constant";
+import {Chunk} from "../chunk";
 
 export class SourceTranspiler implements IExpressionTranspiler {
   private readonly addGet: boolean;
@@ -11,28 +12,28 @@ export class SourceTranspiler implements IExpressionTranspiler {
     this.addGet = addGet;
   }
 
-  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): string {
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     let ret = "";
     let post = "";
 
     for (const c of node.getChildren()) {
       if (c instanceof Nodes.ExpressionNode) {
         if (c.get() instanceof Expressions.FieldChain) {
-          ret += new FieldChainTranspiler(this.addGet).transpile(c, traversal);
+          ret += new FieldChainTranspiler(this.addGet).transpile(c, traversal).getCode();
         } else if (c.get() instanceof Expressions.Constant) {
-          ret += new ConstantTranspiler(this.addGet).transpile(c, traversal);
+          ret += new ConstantTranspiler(this.addGet).transpile(c, traversal).getCode();
         } else if (c.get() instanceof Expressions.StringTemplate) {
-          ret += traversal.traverse(c);
+          ret += traversal.traverse(c).getCode();
         } else if (c.get() instanceof Expressions.Cond) {
-          ret += traversal.traverse(c);
+          ret += traversal.traverse(c).getCode();
         } else if (c.get() instanceof Expressions.ArithOperator) {
-          ret = traversal.traverse(c) + "(" + ret + ",";
+          ret = traversal.traverse(c).getCode() + "(" + ret + ",";
           post = ")";
           if (this.addGet) {
             post += ".get()";
           }
         } else if (c.get() instanceof Expressions.MethodCallChain) {
-          ret += traversal.traverse(c);
+          ret += traversal.traverse(c).getCode();
           if (this.addGet) {
             if (ret.includes("await")) {
               ret = "(" + ret + ").get()";
@@ -41,13 +42,13 @@ export class SourceTranspiler implements IExpressionTranspiler {
             }
           }
         } else if (c.get() instanceof Expressions.Source) {
-          ret += new SourceTranspiler(this.addGet).transpile(c, traversal);
+          ret += new SourceTranspiler(this.addGet).transpile(c, traversal).getCode();
         } else if (c.get() instanceof Expressions.Arrow) {
           ret = "(" + ret + ").get().";
         } else if (c.get() instanceof Expressions.AttributeChain) {
-          ret += new AttributeChainTranspiler().transpile(c, traversal);
+          ret += new AttributeChainTranspiler().transpile(c, traversal).getCode();
         } else if (c.get() instanceof Expressions.ComponentChain) {
-          ret = "(" + ret + ").get()." + new ComponentChainTranspiler().transpile(c, traversal);
+          ret = "(" + ret + ").get()." + new ComponentChainTranspiler().transpile(c, traversal).getCode();
         } else if (c.get() instanceof Expressions.Dereference) {
           ret = "(" + ret + ").getPointer()";
         } else {
@@ -70,7 +71,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
 
     ret = ret + post;
 
-    return ret;
+    return new Chunk(ret);
   }
 
 }

@@ -1,19 +1,20 @@
 import {Nodes} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
+import {Chunk} from "../chunk";
 
 export class ParameterListSTranspiler implements IExpressionTranspiler {
 
-  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): string {
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     const parameters: string[] = [];
 
     for (const c of node.getChildren()) {
       if (c instanceof Nodes.ExpressionNode) {
-        parameters.push(traversal.traverse(c));
+        parameters.push(traversal.traverse(c).getCode());
       }
     }
 
-    return "{" + parameters.join(", ") + "}";
+    return new Chunk("{" + parameters.join(", ") + "}");
   }
 
 }

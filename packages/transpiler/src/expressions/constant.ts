@@ -1,4 +1,5 @@
 import {Expressions, Nodes} from "@abaplint/core";
+import {Chunk} from "../chunk";
 import {Traversal} from "../traversal";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 
@@ -9,7 +10,7 @@ export class ConstantTranspiler implements IExpressionTranspiler {
     this.addGet = addGet;
   }
 
-  public transpile(node: Nodes.ExpressionNode, _traversal: Traversal): string {
+  public transpile(node: Nodes.ExpressionNode, _traversal: Traversal): Chunk {
     const int = node.findFirstExpression(Expressions.Integer);
     if (int) {
       const val = parseInt(int.concatTokens(), 10);
@@ -17,20 +18,20 @@ export class ConstantTranspiler implements IExpressionTranspiler {
       if (this.addGet === true) {
         ret += ".get()";
       }
-      return ret;
+      return new Chunk(ret);
     }
 
     const str = node.findFirstExpression(Expressions.ConstantString);
     if (str) {
       const res = str.getFirstToken().getStr();
       if (res.startsWith("'") && this.addGet === false) {
-        return "new abap.types.Character({length: " + (res.length - 2) + "}).set(" + this.escape(res) + ")";
+        return new Chunk("new abap.types.Character({length: " + (res.length - 2) + "}).set(" + this.escape(res) + ")");
       } else {
-        return this.escape(res);
+        return new Chunk(this.escape(res));
       }
     }
 
-    return "todo, Constant";
+    return new Chunk("todo, Constant");
   }
 
   public escape(str: string): string {

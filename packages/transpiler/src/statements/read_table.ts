@@ -3,19 +3,20 @@ import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {FieldSymbolTranspiler, SourceTranspiler} from "../expressions";
 import {UniqueIdentifier} from "../unique_identifier";
+import {Chunk} from "../chunk";
 
 export class ReadTableTranspiler implements IStatementTranspiler {
 
-  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
 
     let prefix = "";
     const s = node.findDirectExpression(abaplint.Expressions.SimpleSource2);
-    const ret = traversal.traverse(s);
+    const ret = traversal.traverse(s).getCode();
 
     const extra: string[] = [];
     const index = node.findExpressionAfterToken("INDEX");
     if (index) {
-      const s = new SourceTranspiler().transpile(index, traversal);
+      const s = new SourceTranspiler().transpile(index, traversal).getCode();
       extra.push("index: " + s);
     }
 
@@ -23,10 +24,10 @@ export class ReadTableTranspiler implements IStatementTranspiler {
     const target = rt?.findDirectExpression(abaplint.Expressions.Target);
     const fs = rt?.findDirectExpression(abaplint.Expressions.FSTarget);
     if (rt && fs) {
-      const name = new FieldSymbolTranspiler().transpile(fs, traversal);
+      const name = new FieldSymbolTranspiler().transpile(fs, traversal).getCode();
       extra.push("assigning: " + name);
     } else if (target) {
-      const name = traversal.traverse(target);
+      const name = traversal.traverse(target).getCode();
       extra.push("into: " + name);
     }
 
@@ -39,7 +40,7 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       }
       const conds: string[] = [];
       for (let i = 0; i < components.length; i++) {
-        const s = traversal.traverse(sources[i]);
+        const s = traversal.traverse(sources[i]).getCode();
         if (s.includes("await")) {
           const id = UniqueIdentifier.get();
           prefix += "const " + id + " = " + s + ";\n";
@@ -56,7 +57,7 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       concat = ",{" + extra.join(",") + "}";
     }
 
-    return prefix + "abap.statements.readTable(" + ret + concat + ");";
+    return new Chunk(prefix + "abap.statements.readTable(" + ret + concat + ");");
   }
 
 }

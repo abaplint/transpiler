@@ -2,10 +2,11 @@ import {Expressions, Nodes, Tokens} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {FieldSymbolTranspiler} from "./field_symbol";
+import {Chunk} from "../chunk";
 
 export class FieldOffsetTranspiler implements IExpressionTranspiler {
 
-  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): string {
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     let ret = "";
     for (const c of node.getChildren()) {
       if (c instanceof Nodes.ExpressionNode) {
@@ -16,7 +17,7 @@ export class FieldOffsetTranspiler implements IExpressionTranspiler {
           }
           ret += sourceStr;
         } else if (c.get() instanceof Expressions.SourceFieldSymbol) {
-          ret += new FieldSymbolTranspiler().transpile(c, traversal);
+          ret += new FieldSymbolTranspiler().transpile(c, traversal).getCode();
         } else if (c.get() instanceof Expressions.ArrowOrDash) {
           ret += ".get().";
         } else if (c.get() instanceof Expressions.ComponentName) {
@@ -29,9 +30,9 @@ export class FieldOffsetTranspiler implements IExpressionTranspiler {
       }
     }
     if (/^\d+$/.test(ret)) {
-      return ret;
+      return new Chunk(ret);
     } else {
-      return ret + ".get()";
+      return new Chunk(ret + ".get()");
     }
   }
 

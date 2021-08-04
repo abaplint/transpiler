@@ -1,15 +1,16 @@
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
+import {Chunk} from "../chunk";
 
 export class FindTranspiler implements IStatementTranspiler {
 
-  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const options: string[] = [];
     let index = 1;
 
     const sources = node.findDirectExpressions(abaplint.Expressions.Source);
-    const source0 = traversal.traverse(sources[0]);
+    const source0 = traversal.traverse(sources[0]).getCode();
     if (node.findDirectTokenByText("REGEX")) {
       options.push("regex: " + source0);
     } else {
@@ -32,18 +33,18 @@ export class FindTranspiler implements IStatementTranspiler {
     }
 
     if (concat.includes(" IN SECTION OFFSET")) {
-      options.push("sectionOffset: " + traversal.traverse(sources[1]));
+      options.push("sectionOffset: " + traversal.traverse(sources[1]).getCode());
       index++;
     }
 
-    const source1 = traversal.traverse(sources[index]);
+    const source1 = traversal.traverse(sources[index]).getCode();
 
     let prev = undefined;
     let off: abaplint.Nodes.ExpressionNode | abaplint.Nodes.TokenNode | undefined;
     for (const c of node.getChildren()) {
       if (prev?.getFirstToken().getStr().toUpperCase() === "OFFSET"
           && c.get() instanceof abaplint.Expressions.Target) {
-        options.push("offset: " + traversal.traverse(c));
+        options.push("offset: " + traversal.traverse(c).getCode());
         off = c;
         break;
       }
@@ -52,17 +53,17 @@ export class FindTranspiler implements IStatementTranspiler {
 
     const cnt = node.findExpressionAfterToken("COUNT");
     if (cnt) {
-      options.push("count: " + traversal.traverse(cnt));
+      options.push("count: " + traversal.traverse(cnt).getCode());
     }
 
     const len = node.findExpressionAfterToken("LENGTH");
     if (len) {
-      options.push("length: " + traversal.traverse(len));
+      options.push("length: " + traversal.traverse(len).getCode());
     }
 
     const res = node.findExpressionAfterToken("RESULTS");
     if (res) {
-      options.push("results: " + traversal.traverse(res));
+      options.push("results: " + traversal.traverse(res).getCode());
     }
 
     const firstSubmatch = node.findExpressionAfterToken("SUBMATCHES");
@@ -72,12 +73,12 @@ export class FindTranspiler implements IStatementTranspiler {
         if (t === len || t === cnt || t === off) {
           continue;
         }
-        submatches.push(traversal.traverse(t));
+        submatches.push(traversal.traverse(t).getCode());
       }
       options.push("submatches: [" + submatches.join(",") + "]");
     }
 
-    return "abap.statements.find(" + source1 + ", {" + options.join(", ") + "});";
+    return new Chunk("abap.statements.find(" + source1 + ", {" + options.join(", ") + "});");
   }
 
 }

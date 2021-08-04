@@ -1,32 +1,33 @@
 import {Nodes} from "@abaplint/core";
+import {Chunk} from "../chunk";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 
 export class ArithOperatorTranspiler implements IExpressionTranspiler {
 
-  public transpile(node: Nodes.ExpressionNode): string {
+  public transpile(node: Nodes.ExpressionNode): Chunk {
     switch(node.concatTokens()) {
       case "+":
-        return "abap.operators.add";
+        return new Chunk("abap.operators.add");
       case "-":
-        return "abap.operators.minus";
+        return new Chunk("abap.operators.minus");
       case "*":
-        return "abap.operators.multiply";
+        return new Chunk("abap.operators.multiply");
       case "/":
-        return "abap.operators.divide";
+        return new Chunk("abap.operators.divide");
       case "**":
-        return "abap.operators.power";
+        return new Chunk("abap.operators.power");
       case "DIV":
-        return "abap.operators.div";
+        return new Chunk("abap.operators.div");
       case "MOD":
-        return "abap.operators.mod";
+        return new Chunk("abap.operators.mod");
       case "BIT-AND":
-        return "abap.operators.bitand";
+        return new Chunk("abap.operators.bitand");
       case "BIT-OR":
-        return "abap.operators.bitor";
+        return new Chunk("abap.operators.bitor");
       case "BIT-XOR":
-        return "abap.operators.bitxor";
+        return new Chunk("abap.operators.bitxor");
       default:
-        return ".ArithOperatorUnknown";
+        return new Chunk(".ArithOperatorUnknown");
     }
   }
 

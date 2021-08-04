@@ -1,10 +1,11 @@
 import * as abaplint from "@abaplint/core";
 import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
+import {Chunk} from "../chunk";
 
 export class TryTranspiler implements IStructureTranspiler {
 
-  public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): string {
+  public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): Chunk {
     let ret = "";
 
     const catches = node.findDirectStructures(abaplint.Structures.Catch);
@@ -15,10 +16,10 @@ export class TryTranspiler implements IStructureTranspiler {
         ret += catchCode;
         catchCode = "";
       } else {
-        ret += traversal.traverse(c);
+        ret += traversal.traverse(c).getCode();
       }
     }
-    return ret;
+    return new Chunk(ret);
   }
 
   private buildCatchCode(nodes: abaplint.Nodes.StructureNode[], traversal: Traversal): string {
@@ -44,12 +45,12 @@ export class TryTranspiler implements IStructureTranspiler {
 
       const intoNode = catchStatement.findExpressionAfterToken("INTO");
       if (intoNode) {
-        ret += traversal.traverse(intoNode) + ".set(e);\n";
+        ret += traversal.traverse(intoNode).getCode() + ".set(e);\n";
       }
 
       const body = n.findDirectStructure(abaplint.Structures.Body);
       if (body) {
-        ret += traversal.traverse(body);
+        ret += traversal.traverse(body).getCode();
       }
 
       ret += "}";

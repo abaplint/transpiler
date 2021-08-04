@@ -7,6 +7,7 @@ import {Keywords} from "./keywords";
 import {DatabaseSetup} from "./database_setup";
 import {Rearranger} from "./rearranger";
 import {Chunk} from "./chunk";
+import {Indentation} from "./indentation";
 
 export {config};
 
@@ -165,7 +166,7 @@ export class Transpiler {
 
       const rearranged = new Rearranger().run(obj.getType(), file.getStructure());
       const contents = new Traversal(spaghetti, file, obj, reg, this.options?.unknownTypes === "runtimeError").traverse(rearranged);
-      chunk.appendString(contents);
+      chunk.appendChunk(contents);
 
       exports = exports.concat(this.findExports(file.getStructure()));
 
@@ -180,7 +181,7 @@ export class Transpiler {
         },
         js: {
           filename: filename,
-          contents: chunk.getCode(),
+          contents: new Indentation().run(chunk.getCode()),
         },
         requires: new Requires(reg).find(obj, spaghetti.getTop(), file.getFilename()),
         exports,

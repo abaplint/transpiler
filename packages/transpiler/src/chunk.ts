@@ -4,13 +4,15 @@ import * as sourceMap from "source-map";
 // Keeps track of source maps as generated code is added
 export class Chunk {
   private raw: string;
-  private indentation: number;
   private readonly map: sourceMap.SourceMapGenerator;
 
-  public constructor() {
+  public constructor(str?: string) {
     this.raw = "";
-    this.indentation = 0;
     this.map = new sourceMap.SourceMapGenerator();
+
+    if (str) {
+      this.appendString(str);
+    }
   }
 
   public appendChunk(input: Chunk) {
@@ -32,8 +34,20 @@ export class Chunk {
       name: "christopher",
     });
 */
-
+/*
     const output: string[] = [];
+
+    if (input === "\n") {
+      const lines = this.raw.split("\n");
+      const lastLine = lines[lines.length - 1];
+      if (lastLine.startsWith("}")) {
+        this.indentation = this.indentation - 1;
+      } else if (lastLine.endsWith(" {")) {
+        this.indentation = this.indentation + 1;
+      }
+      this.raw += "\n";
+      return;
+    }
 
     for (const l of input.split("\n")) {
       if (l.startsWith("}")) {
@@ -50,6 +64,8 @@ export class Chunk {
     }
 
     this.raw += output.join("\n");
+    */
+    this.raw += input;
   }
 
   public stripLastNewline(): void {

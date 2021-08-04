@@ -3,14 +3,15 @@ import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
 import {TranspileTypes} from "../types";
 import {ConstantTranspiler} from "../expressions";
+import {Chunk} from "../chunk";
 
 export class ClassImplementationTranspiler implements IStructureTranspiler {
 
-  public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): string {
+  public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): Chunk {
 
     let ret = "";
     for (const c of node.getChildren()) {
-      ret = ret + traversal.traverse(c);
+      ret = ret + traversal.traverse(c).getCode();
       if (c instanceof abaplint.Nodes.StatementNode
           && c.get() instanceof abaplint.Statements.ClassImplementation
           && this.hasConstructor(node) === false) {
@@ -19,7 +20,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     }
     ret += this.buildStatic(node.findFirstExpression(abaplint.Expressions.ClassName), traversal);
 
-    return ret;
+    return new Chunk(ret);
   }
 
 ///////////////////////////////

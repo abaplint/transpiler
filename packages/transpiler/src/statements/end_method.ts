@@ -1,10 +1,11 @@
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
+import {Chunk} from "../chunk";
 
 export class EndMethodTranspiler implements IStatementTranspiler {
 
-  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const token = node.getFirstToken();
 
     const scope = traversal.findCurrentScopeByToken(token);
@@ -26,7 +27,7 @@ export class EndMethodTranspiler implements IStatementTranspiler {
       returning = "return this;\n";
     }
 
-    return returning + "}";
+    return new Chunk(returning + "}");
   }
 
 }

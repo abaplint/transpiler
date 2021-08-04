@@ -1,41 +1,42 @@
 import {Nodes} from "@abaplint/core";
+import {Chunk} from "../chunk";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 
 export class CompareOperatorTranspiler implements IExpressionTranspiler {
 
-  public transpile(node: Nodes.ExpressionNode): string {
+  public transpile(node: Nodes.ExpressionNode): Chunk {
     const op = node.getFirstToken().getStr().toUpperCase();
     switch(op) {
       case "=":
       case "EQ":
-        return "eq";
+        return new Chunk("eq");
       case "<":
       case "LT":
-        return "lt";
+        return new Chunk("lt");
       case "<=":
       case "LE":
-        return "le";
+        return new Chunk("le");
       case ">":
       case "GT":
-        return "gt";
+        return new Chunk("gt");
       case ">=":
       case "GE":
-        return "ge";
+        return new Chunk("ge");
       case "<>":
       case "NE":
-        return "ne";
+        return new Chunk("ne");
       case "CO":
-        return "co";
+        return new Chunk("co");
       case "CP":
-        return "cp";
+        return new Chunk("cp");
       case "CA":
-        return "ca";
+        return new Chunk("ca");
       case "CS":
-        return "cs";
+        return new Chunk("cs");
       case "NS":
-        return "ns";
+        return new Chunk("ns");
       default:
-        return "compareoperatortodo" + op;
+        return new Chunk("compareoperatortodo" + op);
     }
   }
 
