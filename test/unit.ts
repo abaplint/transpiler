@@ -28,6 +28,11 @@ describe("Testing Unit Testing", () => {
     const config: ITranspilerOptions = {
       addCommonJS: true,
     };
+
+    for (const f of files) {
+      fs.writeFileSync(outputFolder + path.sep + f.filename, f.contents);
+    }
+
     const output = await new Transpiler(config).run(files);
 
     for (const o of output.objects) {
@@ -511,17 +516,15 @@ ENDCLASS.`;
 
   it("test-14", async () => {
 // global test class without test methods
-    const clas = `
-  CLASS zcl_abapgit_persist_injector DEFINITION PUBLIC CREATE PRIVATE FOR TESTING.
-    PUBLIC SECTION.
-      CLASS-METHODS set_repo.
-  ENDCLASS.
-  CLASS ZCL_ABAPGIT_PERSIST_INJECTOR IMPLEMENTATION.
-    METHOD set_repo.
-      WRITE 'hello'.
-    ENDMETHOD.
-  ENDCLASS.
-  `;
+    const clas = `CLASS zcl_abapgit_persist_injector DEFINITION PUBLIC CREATE PRIVATE FOR TESTING.
+  PUBLIC SECTION.
+    CLASS-METHODS set_repo.
+ENDCLASS.
+CLASS ZCL_ABAPGIT_PERSIST_INJECTOR IMPLEMENTATION.
+  METHOD set_repo.
+    WRITE 'hello'.
+  ENDMETHOD.
+ENDCLASS.`;
     const files = [
       {filename: "zcl_abapgit_persist_injector.clas.abap", contents: clas},
     ];
