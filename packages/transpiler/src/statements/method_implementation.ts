@@ -90,7 +90,8 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
         "}\n" + "static ";
     }
 
-    return new Chunk(staticMethod + "async " + methodName + "(" + unique + ") {" + after);
+    const str = staticMethod + "async " + methodName + "(" + unique + ") {" + after;
+    return new Chunk().append(str, node, traversal);
   }
 
   private findMethod(name: string, cdef: abaplint.IClassDefinition | undefined, traversal: Traversal) {

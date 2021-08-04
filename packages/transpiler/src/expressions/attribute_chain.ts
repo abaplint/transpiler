@@ -6,17 +6,17 @@ import {Chunk} from "../chunk";
 export class AttributeChainTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
-    let ret = "";
+    const ret = new Chunk();
 
     for (const c of node.getChildren()) {
       if (c.get() instanceof Expressions.AttributeName) {
-        ret += traversal.traverse(c).getCode();
+        ret.appendChunk(traversal.traverse(c));
       } else {
-        ret += "AttributeChainTodo";
+        ret.append("AttributeChainTodo", node, traversal);
       }
     }
 
-    return new Chunk(ret);
+    return ret;
   }
 
 }

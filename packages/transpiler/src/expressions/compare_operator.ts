@@ -1,42 +1,43 @@
 import {Nodes} from "@abaplint/core";
 import {Chunk} from "../chunk";
+import {Traversal} from "../traversal";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 
 export class CompareOperatorTranspiler implements IExpressionTranspiler {
 
-  public transpile(node: Nodes.ExpressionNode): Chunk {
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     const op = node.getFirstToken().getStr().toUpperCase();
     switch(op) {
       case "=":
       case "EQ":
-        return new Chunk("eq");
+        return new Chunk().append("eq", node, traversal);
       case "<":
       case "LT":
-        return new Chunk("lt");
+        return new Chunk().append("lt", node, traversal);
       case "<=":
       case "LE":
-        return new Chunk("le");
+        return new Chunk().append("le", node, traversal);
       case ">":
       case "GT":
-        return new Chunk("gt");
+        return new Chunk().append("gt", node, traversal);
       case ">=":
       case "GE":
-        return new Chunk("ge");
+        return new Chunk().append("ge", node, traversal);
       case "<>":
       case "NE":
-        return new Chunk("ne");
+        return new Chunk().append("ne", node, traversal);
       case "CO":
-        return new Chunk("co");
+        return new Chunk().append("co", node, traversal);
       case "CP":
-        return new Chunk("cp");
+        return new Chunk().append("cp", node, traversal);
       case "CA":
-        return new Chunk("ca");
+        return new Chunk().append("ca", node, traversal);
       case "CS":
-        return new Chunk("cs");
+        return new Chunk().append("cs", node, traversal);
       case "NS":
-        return new Chunk("ns");
+        return new Chunk().append("ns", node, traversal);
       default:
-        return new Chunk("compareoperatortodo" + op);
+        return new Chunk().append("compareoperatortodo" + op, node, traversal);
     }
   }
 

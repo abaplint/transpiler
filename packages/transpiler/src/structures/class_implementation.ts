@@ -9,18 +9,18 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
 
   public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): Chunk {
 
-    let ret = "";
+    const ret = new Chunk();
     for (const c of node.getChildren()) {
-      ret = ret + traversal.traverse(c).getCode();
+      ret.appendChunk(traversal.traverse(c));
       if (c instanceof abaplint.Nodes.StatementNode
           && c.get() instanceof abaplint.Statements.ClassImplementation
           && this.hasConstructor(node) === false) {
-        ret = ret + this.buildConstructor(c, traversal);
+        ret.appendString(this.buildConstructor(c, traversal));
       }
     }
-    ret += this.buildStatic(node.findFirstExpression(abaplint.Expressions.ClassName), traversal);
+    ret.appendString(this.buildStatic(node.findFirstExpression(abaplint.Expressions.ClassName), traversal));
 
-    return new Chunk(ret);
+    return ret;
   }
 
 ///////////////////////////////

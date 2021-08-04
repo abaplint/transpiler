@@ -1,33 +1,34 @@
 import {Nodes} from "@abaplint/core";
 import {Chunk} from "../chunk";
+import {Traversal} from "../traversal";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 
 export class ArithOperatorTranspiler implements IExpressionTranspiler {
 
-  public transpile(node: Nodes.ExpressionNode): Chunk {
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     switch(node.concatTokens()) {
       case "+":
-        return new Chunk("abap.operators.add");
+        return new Chunk().append("abap.operators.add", node, traversal);
       case "-":
-        return new Chunk("abap.operators.minus");
+        return new Chunk().append("abap.operators.minus", node, traversal);
       case "*":
-        return new Chunk("abap.operators.multiply");
+        return new Chunk().append("abap.operators.multiply", node, traversal);
       case "/":
-        return new Chunk("abap.operators.divide");
+        return new Chunk().append("abap.operators.divide", node, traversal);
       case "**":
-        return new Chunk("abap.operators.power");
+        return new Chunk().append("abap.operators.power", node, traversal);
       case "DIV":
-        return new Chunk("abap.operators.div");
+        return new Chunk().append("abap.operators.div", node, traversal);
       case "MOD":
-        return new Chunk("abap.operators.mod");
+        return new Chunk().append("abap.operators.mod", node, traversal);
       case "BIT-AND":
-        return new Chunk("abap.operators.bitand");
+        return new Chunk().append("abap.operators.bitand", node, traversal);
       case "BIT-OR":
-        return new Chunk("abap.operators.bitor");
+        return new Chunk().append("abap.operators.bitor", node, traversal);
       case "BIT-XOR":
-        return new Chunk("abap.operators.bitxor");
+        return new Chunk().append("abap.operators.bitxor", node, traversal);
       default:
-        return new Chunk(".ArithOperatorUnknown");
+        return new Chunk().append(".ArithOperatorUnknown", node, traversal);
     }
   }
 

@@ -5,12 +5,8 @@ import {Chunk} from "../chunk";
 
 export class AttributeNameTranspiler implements IExpressionTranspiler {
 
-  public transpile(node: Nodes.ExpressionNode, _traversal: Traversal): Chunk {
-    let ret = "";
-
-    ret = node.concatTokens();
-
-    return new Chunk(ret);
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
+    return new Chunk().append(node.concatTokens(), node, traversal);
   }
 
 }
