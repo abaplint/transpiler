@@ -5,3 +5,4 @@ isolate-*
 unit-test/
 .idea
 output
+comment-*
