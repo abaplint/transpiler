@@ -54,7 +54,7 @@ jobs:
       id: fc
       with:
         issue-number: '${{steps.findPr.outputs.pr}}'
-        body-includes: Regression test results
+        body-includes: Performance test results
     - run: echo ${{ steps.fc.outputs.comment-id }}
 
     - name: Build body from file
