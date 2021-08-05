@@ -6,8 +6,11 @@ import {Chunk} from "../chunk";
 export class AssertTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    const cond = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Cond)).getCode();
-    return new Chunk("abap.statements.assert(" + cond + ");");
+    const ret = new Chunk();
+    ret.appendString("abap.statements.assert(");
+    ret.appendChunk(traversal.traverse(node.findDirectExpression(abaplint.Expressions.Cond)));
+    ret.appendString(");");
+    return ret;
   }
 
 }
