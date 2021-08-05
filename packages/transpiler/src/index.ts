@@ -7,7 +7,6 @@ import {Keywords} from "./keywords";
 import {DatabaseSetup} from "./database_setup";
 import {Rearranger} from "./rearranger";
 import {Chunk} from "./chunk";
-import {Indentation} from "./indentation";
 
 export {config};
 
@@ -181,7 +180,7 @@ export class Transpiler {
         },
         js: {
           filename: filename,
-          contents: new Indentation().run(chunk.getCode()),
+          contents: chunk.runIndentationLogic().getCode(),
         },
         requires: new Requires(reg).find(obj, spaghetti.getTop(), file.getFilename()),
         exports,
