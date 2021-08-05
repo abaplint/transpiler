@@ -7,17 +7,11 @@ import {Chunk} from "../chunk";
 export class AppendTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    const options: string[] = [];
     const concat = node.concatTokens();
-
-    const s = node.findDirectExpression(abaplint.Expressions.SimpleSource4);
-    if (s) {
-      options.push("source: " + new SourceTranspiler().transpile(s, traversal).getCode());
-    }
 
     const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target)).getCode();
 
-    if (node.concatTokens().toUpperCase().includes("INITIAL LINE")) {
+    if (concat.toUpperCase().includes("INITIAL LINE")) {
       const found = node.findFirstExpression(abaplint.Expressions.FieldSymbol);
       if (found) {
         const fs = traversal.traverse(found).getCode();
@@ -28,6 +22,13 @@ export class AppendTranspiler implements IStatementTranspiler {
         return new Chunk(ref + ".assign(" + target + ".appendInitial());");
       }
     } else {
+      const options: string[] = [];
+
+      const s = node.findDirectExpression(abaplint.Expressions.SimpleSource4);
+      if (s) {
+        options.push("source: " + new SourceTranspiler().transpile(s, traversal).getCode());
+      }
+
       const assigning = node.findExpressionAfterToken("ASSIGNING");
       if (assigning) {
         options.push("assigning: " + traversal.traverse((assigning.findFirstExpression(abaplint.Expressions.FieldSymbol))).getCode());
@@ -36,7 +37,9 @@ export class AppendTranspiler implements IStatementTranspiler {
       if (concat.startsWith("APPEND LINES OF ")) {
         options.push("lines: true");
       }
+
       options.push("target: " + target);
+
       return new Chunk("abap.statements.append({" + options.join(", ") + "});");
     }
 
