@@ -545,4 +545,32 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("Compare string with integer, gt", async () => {
+    const code = `
+  DATA lv_data TYPE string.
+  lv_data = 190.
+  IF lv_data > 76.
+    WRITE / 'expected1'.
+  ENDIF.
+  `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`expected1`);
+  });
+
+  it("Compare string with integer, lt", async () => {
+    const code = `
+  DATA lv_data TYPE string.
+  lv_data = 190.
+  IF lv_data < 200.
+    WRITE / 'expected2'.
+  ENDIF.
+  `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`expected2`);
+  });
+
 });
