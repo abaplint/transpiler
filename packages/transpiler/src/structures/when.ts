@@ -6,12 +6,12 @@ import {Chunk} from "../chunk";
 export class WhenTranspiler implements IStructureTranspiler {
 
   public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): Chunk {
-    let ret = "";
+    const ret = new Chunk();
     for (const c of node.getChildren()) {
-      ret = ret + traversal.traverse(c).getCode();
+      ret.appendChunk(traversal.traverse(c));
     }
-    ret = ret + "break;\n";
-    return new Chunk(ret);
+    ret.append("break;\n", node, traversal);
+    return ret;
   }
 
 }
