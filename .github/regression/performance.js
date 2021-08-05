@@ -22,7 +22,7 @@ for (const b of before) {
 
 console.dir(result);
 
-let comment = "Regression test results:\n";
+let comment = "Performance test results:\n";
 
 comment += "| Performance | Before | After | Delta |\n";
 comment += "| :--- | ---: | ---: | ---: |\n";
@@ -41,4 +41,4 @@ comment += "\nSHA: " + process.env.GITHUB_SHA + "\n";
 
 console.dir(comment);
 
-fs.writeFileSync("comment-body.txt", comment);
+fs.writeFileSync("comment-performance.txt", comment);

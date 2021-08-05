@@ -33,11 +33,11 @@ jobs:
         cat ../../results_after.json
         cat ../../results_before.json
 
-    - name: Build comment
+    - name: Build performance comment
       run: |
         cd .. && cd ..
         ls -salh
-        node ./run.js
+        node ./performance.js
 
     - uses: jwalton/gh-find-current-pr@v1
       id: findPr
@@ -59,8 +59,8 @@ jobs:
         ls -salh
         cd .. && cd ..
         ls -salh
-        cat comment-body.txt
-        body=$(cat comment-body.txt)
+        cat comment-performance.txt
+        body=$(cat comment-performance.txt)
         body="${body//'%'/'%25'}"
         body="${body//$'\n'/'%0A'}"
         body="${body//$'\r'/'%0D'}"
