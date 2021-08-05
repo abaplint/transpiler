@@ -13,6 +13,7 @@
         "pretest": "npm run compile",
         "test": "mocha --timeout 10000",
         "posttest": "npm run lint",
+        "regression": "node .github/regression/regression.js",
         "link-local": "npm run link:transpiler && npm run link:cli && npm run link:runtime",
         "link:transpiler": "cd packages/transpiler && npm link",
         "link:runtime": "cd packages/runtime && npm link",
