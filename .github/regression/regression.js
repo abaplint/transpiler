@@ -38,10 +38,11 @@ for (const repo of repos) {
 
 let comment = "Regression test results:\n";
 
-comment += "| Repo | Status |\n";
-comment += "| :--- | :--- |\n";
+comment += "| Repository | Before | After |\n";
+comment += "| :--- | :--- | :--- |\n";
 for (const repo of repos) {
-  comment += "| " + repo.name + " | :green_circle: |\n";
+  const link = "[" + repo.name + "](https://github.com/" + repo.name + ")"
+  comment += "| " + link + " | :green_circle: | :green_circle: |\n";
 }
 comment += "\n";
 
