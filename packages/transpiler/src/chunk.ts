@@ -81,6 +81,10 @@ export class Chunk {
     return this.raw;
   }
 
+  public toString(): string {
+    throw "error, dont toString a Chunk";
+  }
+
   public runIndentationLogic() {
     let i = 0;
     let line = 1;
