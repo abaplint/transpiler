@@ -43,6 +43,7 @@ comment += "| :--- | :--- |\n";
 for (const repo of repos) {
   comment += "| " + repo.name + " | :green_circle: |\n";
 }
+comment += "\n";
 
 console.dir(comment);
 
