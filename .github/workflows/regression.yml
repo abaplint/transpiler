@@ -64,8 +64,8 @@ jobs:
         cp comment-regression.txt ../../
         cd .. && cd ..
         ls -salh
-        cat comment-performance.txt comment-regression.txt
-        body=$(cat comment-performance.txt comment-regression.txt)
+        cat comment-regression.txt comment-performance.txt
+        body=$(cat comment-regression.txt comment-performance.txt)
         body="${body//'%'/'%25'}"
         body="${body//$'\n'/'%0A'}"
         body="${body//$'\r'/'%0D'}"
