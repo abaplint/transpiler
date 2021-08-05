@@ -61,6 +61,7 @@ jobs:
       id: get-comment-body
       run: |
         ls -salh
+        cp comment-regression.txt ../../
         cd .. && cd ..
         ls -salh
         cat comment-performance.txt comment-regression.txt
