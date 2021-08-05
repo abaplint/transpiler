@@ -20,12 +20,12 @@ jobs:
     - name: Performance
       run: |
         cp .github/regression/performance.js ../../performance.js
-        npm install && npm run performance
+        npm install && npm run link-local && npm run performance
         cp build/performance/results.json ../../results_after.json
         git checkout -f main
         git reset --hard
         git status
-        npm install && npm run performance
+        npm install && npm run link-local && npm run performance
         cp build/performance/results.json ../../results_before.json
 
     - name: cat
