@@ -545,35 +545,32 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.only("Compare string with integer", async () => {
+  it("Compare string with integer, gt", async () => {
     const code = `
   DATA lv_data TYPE string.
   lv_data = 190.
   IF lv_data > 76.
-    WRITE / 'invalid'.
-  ENDIF.`;
+    WRITE / 'expected1'.
+  ENDIF.
+  `;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal(`invalid`);
+    expect(abap.console.get()).to.equal(`expected1`);
   });
 
-  it("Compare result from regex", async () => {
+  it("Compare string with integer, lt", async () => {
     const code = `
   DATA lv_data TYPE string.
-  DATA lv_unit TYPE string.
-  DATA lv_line TYPE string.
-  lv_line = |hgt:190in |.
-  FIND FIRST OCCURRENCE OF REGEX 'hgt:(\\d+)(in|cm)\\s' IN lv_line SUBMATCHES lv_data lv_unit.
-  WRITE / lv_data.
-  WRITE / lv_unit.
-  IF lv_data > 76.
-    WRITE / 'invalid'.
-  ENDIF.`;
+  lv_data = 190.
+  IF lv_data < 200.
+    WRITE / 'expected2'.
+  ENDIF.
+  `;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal(`190\nin\ninvalid`);
+    expect(abap.console.get()).to.equal(`expected2`);
   });
 
 });

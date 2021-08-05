@@ -35,9 +35,12 @@ export function gt(
   }
 
   if (typeof l === "string" && typeof r === "number") {
-    r = r.toString();
-  }
-  if (typeof l === "number" && typeof r === "string") {
+    if (l === "") {
+      l = 0;
+    } else {
+      l = parseInt(l, 10);
+    }
+  } else if (typeof l === "number" && typeof r === "string") {
     if (r === "") {
       r = 0;
     } else {
