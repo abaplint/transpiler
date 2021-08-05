@@ -17,15 +17,19 @@ jobs:
       with:
         node-version: '14'
 
+    - name: Regression
+      run: |
+        node .github/regression/regression.js
+
     - name: Performance
       run: |
-        cp .github/regression/run.js ../../run.js
-        npm install && npm run performance
+        cp .github/regression/performance.js ../../performance.js
+        npm install && npm run link-local && npm run performance
         cp build/performance/results.json ../../results_after.json
         git checkout -f main
         git reset --hard
         git status
-        npm install && npm run performance
+        npm install && npm run link-local && npm run performance
         cp build/performance/results.json ../../results_before.json
 
     - name: cat
@@ -33,11 +37,11 @@ jobs:
         cat ../../results_after.json
         cat ../../results_before.json
 
-    - name: Build comment
+    - name: Build performance comment
       run: |
         cd .. && cd ..
         ls -salh
-        node ./run.js
+        node ./performance.js
 
     - uses: jwalton/gh-find-current-pr@v1
       id: findPr
@@ -50,17 +54,18 @@ jobs:
       id: fc
       with:
         issue-number: '${{steps.findPr.outputs.pr}}'
-        body-includes: Regression test results
+        body-includes: Performance test results
     - run: echo ${{ steps.fc.outputs.comment-id }}
 
     - name: Build body from file
       id: get-comment-body
       run: |
         ls -salh
+        cp comment-regression.txt ../../
         cd .. && cd ..
         ls -salh
-        cat comment-body.txt
-        body=$(cat comment-body.txt)
+        cat comment-regression.txt comment-performance.txt
+        body=$(cat comment-regression.txt comment-performance.txt)
         body="${body//'%'/'%25'}"
         body="${body//$'\n'/'%0A'}"
         body="${body//$'\r'/'%0D'}"

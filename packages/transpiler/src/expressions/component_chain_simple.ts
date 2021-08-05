@@ -1,10 +1,11 @@
 import {Nodes, Expressions} from "@abaplint/core";
+import {Chunk} from "../chunk";
 import {Traversal} from "../traversal";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 
 export class ComponentChainSimpleTranspiler implements IExpressionTranspiler {
 
-  public transpile(node: Nodes.ExpressionNode, _traversal: Traversal): string {
+  public transpile(node: Nodes.ExpressionNode, _traversal: Traversal): Chunk {
     let ret = "";
     for (const c of node.getChildren()) {
       if (c.get() instanceof Expressions.ComponentName) {
@@ -13,7 +14,7 @@ export class ComponentChainSimpleTranspiler implements IExpressionTranspiler {
         ret += ".get().";
       }
     }
-    return ret;
+    return new Chunk(ret);
   }
 
 }

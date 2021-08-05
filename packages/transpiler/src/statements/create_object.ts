@@ -1,16 +1,17 @@
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
+import {Chunk} from "../chunk";
 
 export class CreateObjectTranspiler implements IStatementTranspiler {
 
-  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
-    const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
+    const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target)).getCode();
 
     let para = "";
     const parameters = node.findFirstExpression(abaplint.Expressions.ParameterListS);
     if (parameters) {
-      para = traversal.traverse(parameters);
+      para = traversal.traverse(parameters).getCode();
     }
 
     let name = "";
@@ -30,7 +31,7 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
     }
     ret += target + ".set(await (new " + clas + "()).constructor_(" + para + "));";
 
-    return ret;
+    return new Chunk(ret);
   }
 
   private findClassName(node: abaplint.Nodes.StatementNode, traversal: Traversal) {

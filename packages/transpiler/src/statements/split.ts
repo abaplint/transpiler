@@ -1,26 +1,27 @@
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
+import {Chunk} from "../chunk";
 
 export class SplitTranspiler implements IStatementTranspiler {
 
-  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
 
     const sources = node.findDirectExpressions(abaplint.Expressions.Source);
 
-    const source = traversal.traverse(sources[0]);
-    const at = traversal.traverse(sources[1]);
+    const source = traversal.traverse(sources[0]).getCode();
+    const at = traversal.traverse(sources[1]).getCode();
 
     let to = "";
     const table = node.findExpressionAfterToken("TABLE");
     if (table) {
-      const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
+      const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target)).getCode();
       to = ", table: " + target;
     } else {
-      to = ", targets: [" + node.findDirectExpressions(abaplint.Expressions.Target).map(e => traversal.traverse((e))).join(",") + "]";
+      to = ", targets: [" + node.findDirectExpressions(abaplint.Expressions.Target).map(e => traversal.traverse(e).getCode()).join(",") + "]";
     }
 
-    return "abap.statements.split({source: " + source + ", at: " + at + to + "});";
+    return new Chunk("abap.statements.split({source: " + source + ", at: " + at + to + "});");
   }
 
 }

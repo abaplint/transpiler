@@ -1,32 +1,35 @@
 import * as abaplint from "@abaplint/core";
 import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
+import {Chunk} from "../chunk";
 
 export class TryTranspiler implements IStructureTranspiler {
 
-  public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): string {
-    let ret = "";
+  public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): Chunk {
+    const ret = new Chunk();
 
     const catches = node.findDirectStructures(abaplint.Structures.Catch);
-    let catchCode = this.buildCatchCode(catches, traversal);
+    let catchCode: Chunk | undefined = this.buildCatchCode(catches, traversal);
 
     for (const c of node.getChildren()) {
       if (c.get() instanceof abaplint.Structures.Catch) {
-        ret += catchCode;
-        catchCode = "";
+        if (catchCode) {
+          ret.appendChunk(catchCode);
+        }
+        catchCode = undefined;
       } else {
-        ret += traversal.traverse(c);
+        ret.appendChunk(traversal.traverse(c));
       }
     }
     return ret;
   }
 
-  private buildCatchCode(nodes: abaplint.Nodes.StructureNode[], traversal: Traversal): string {
+  private buildCatchCode(nodes: abaplint.Nodes.StructureNode[], traversal: Traversal): Chunk {
     let ret = "";
     let first = true;
 
     if (nodes.length === 0) {
-      return ret;
+      return new Chunk(ret);
     }
 
     ret += `} catch (e) {\n`;
@@ -44,12 +47,12 @@ export class TryTranspiler implements IStructureTranspiler {
 
       const intoNode = catchStatement.findExpressionAfterToken("INTO");
       if (intoNode) {
-        ret += traversal.traverse(intoNode) + ".set(e);\n";
+        ret += traversal.traverse(intoNode).getCode() + ".set(e);\n";
       }
 
       const body = n.findDirectStructure(abaplint.Structures.Body);
       if (body) {
-        ret += traversal.traverse(body);
+        ret += traversal.traverse(body).getCode();
       }
 
       ret += "}";
@@ -60,7 +63,7 @@ export class TryTranspiler implements IStructureTranspiler {
     `throw e;\n` +
     `}\n`;
 
-    return ret;
+    return new Chunk(ret);
   }
 
 }

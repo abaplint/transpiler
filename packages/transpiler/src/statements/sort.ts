@@ -1,10 +1,11 @@
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
+import {Chunk} from "../chunk";
 
 export class SortTranspiler implements IStatementTranspiler {
 
-  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const concat = node.concatTokens().toUpperCase();
     const components = node.findDirectExpressions(abaplint.Expressions.ComponentChain);
     const options: string[] = [];
@@ -27,8 +28,8 @@ export class SortTranspiler implements IStatementTranspiler {
       options.push(`by: [${by.join(",")}]`);
     }
 
-    const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
-    return "abap.statements.sort(" + target + ",{" + options.join(",") + "});";
+    const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target)).getCode();
+    return new Chunk("abap.statements.sort(" + target + ",{" + options.join(",") + "});");
   }
 
   private findNextText(c: abaplint.Nodes.ExpressionNode, parent: abaplint.Nodes.StatementNode): string {

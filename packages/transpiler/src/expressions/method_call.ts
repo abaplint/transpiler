@@ -2,10 +2,11 @@ import {Nodes, Expressions} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {MethodCallParam} from "./method_call_param";
+import {Chunk} from "../chunk";
 
 export class MethodCallTranspiler implements IExpressionTranspiler {
 
-  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): string {
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
 
     const nameToken = node.findDirectExpression(Expressions.MethodName)?.getFirstToken();
     if(nameToken === undefined) {
@@ -29,9 +30,9 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
       throw new Error("MethodCallTranspiler, unexpected node");
     }
 
-    name += new MethodCallParam(m?.def).transpile(step, traversal);
+    name += new MethodCallParam(m?.def).transpile(step, traversal).getCode();
 
-    return name + ")";
+    return new Chunk(name + ")");
   }
 
 }

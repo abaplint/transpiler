@@ -7,6 +7,7 @@ import {IExpressionTranspiler} from "./expressions/_expression_transpiler";
 import {IStructureTranspiler} from "./structures/_structure_transpiler";
 import {TranspileTypes} from "./types";
 import {ISpaghettiScopeNode} from "@abaplint/core";
+import {Chunk} from "./chunk";
 
 export class Traversal {
   private readonly spaghetti: abaplint.ISpaghettiScope;
@@ -28,7 +29,7 @@ export class Traversal {
     return this.obj;
   }
 
-  public traverse(node: abaplint.INode | undefined): string {
+  public traverse(node: abaplint.INode | undefined): Chunk {
     if (node instanceof abaplint.Nodes.StructureNode) {
       return this.traverseStructure(node);
     } else if (node instanceof abaplint.Nodes.StatementNode) {
@@ -392,21 +393,21 @@ export class Traversal {
 
 ////////////////////////////
 
-  protected traverseStructure(node: abaplint.Nodes.StructureNode): string {
+  protected traverseStructure(node: abaplint.Nodes.StructureNode): Chunk {
     const list: any = StructureTranspilers;
-    let ret = "";
+    const ret = new Chunk();
 
     for (const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.StructureNode) {
         const search = c.get().constructor.name + "Transpiler";
         if (list[search]) {
           const transpiler = new list[search]() as IStructureTranspiler;
-          ret = ret + transpiler.transpile(c, this);
+          ret.appendChunk(transpiler.transpile(c, this));
           continue;
         }
-        ret = ret + this.traverseStructure(c);
+        ret.appendChunk(this.traverseStructure(c));
       } else if (c instanceof abaplint.Nodes.StatementNode) {
-        ret = ret + this.traverseStatement(c);
+        ret.appendChunk(this.traverseStatement(c));
       } else {
         throw new Error("traverseStructure, unexpected child node type");
       }
@@ -414,17 +415,19 @@ export class Traversal {
     return ret;
   }
 
-  protected traverseStatement(node: abaplint.Nodes.StatementNode): string {
+  protected traverseStatement(node: abaplint.Nodes.StatementNode): Chunk {
     const list: any = StatementTranspilers;
     const search = node.get().constructor.name + "Transpiler";
     if (list[search]) {
       const transpiler = new list[search]() as IStatementTranspiler;
-      return transpiler.transpile(node, this) + "\n";
+      const chunk = transpiler.transpile(node, this);
+      chunk.appendString("\n");
+      return chunk;
     }
     throw new Error(`Statement ${node.get().constructor.name} not supported, ${node.concatTokens()}`);
   }
 
-  protected traverseExpression(node: abaplint.Nodes.ExpressionNode): string {
+  protected traverseExpression(node: abaplint.Nodes.ExpressionNode): Chunk {
     const list: any = ExpressionTranspilers;
     const search = node.get().constructor.name + "Transpiler";
     if (list[search]) {

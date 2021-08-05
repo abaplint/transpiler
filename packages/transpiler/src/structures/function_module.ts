@@ -1,10 +1,11 @@
 import * as abaplint from "@abaplint/core";
 import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
+import {Chunk} from "../chunk";
 
 export class FunctionModuleTranspiler implements IStructureTranspiler {
 
-  public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): string {
+  public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): Chunk {
     let r = "";
     let name: string | undefined = "";
     for (const c of node.getChildren()) {
@@ -19,10 +20,10 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
         r += "}\n";
         r += `abap.FunctionModules['${name.toUpperCase()}'] = ${name};\n`;
       } else {
-        r += traversal.traverse(c);
+        r += traversal.traverse(c).getCode();
       }
     }
-    return r;
+    return new Chunk(r);
   }
 
 //////////////////////

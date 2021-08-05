@@ -3,10 +3,11 @@ import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
 import {TranspileTypes} from "../types";
 import {FieldChainTranspiler} from "../expressions";
+import {Chunk} from "../chunk";
 
 export class InterfaceTranspiler implements IStructureTranspiler {
 
-  public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): string {
+  public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): Chunk {
     let ret = "";
     let name: string | undefined;
     for (const c of node.getChildren()) {
@@ -21,7 +22,7 @@ export class InterfaceTranspiler implements IStructureTranspiler {
     }
     ret += this.buildConstants(node.findFirstExpression(abaplint.Expressions.InterfaceName), traversal);
 
-    return ret;
+    return new Chunk(ret);
   }
 
   private buildConstants(node: abaplint.Nodes.ExpressionNode | undefined, traversal: Traversal): string {
@@ -47,7 +48,8 @@ export class InterfaceTranspiler implements IStructureTranspiler {
       const constantStatement = traversal.findStatementInFile(identifier.getStart());
       const valExpression = constantStatement?.findFirstExpression(abaplint.Expressions.Value);
       if (valExpression?.getChildren()[1].get() instanceof abaplint.Expressions.SimpleFieldChain) {
-        const s = new FieldChainTranspiler().transpile(valExpression.getChildren()[1] as abaplint.Nodes.ExpressionNode, traversal, false);
+        const s = new FieldChainTranspiler().transpile(
+          valExpression.getChildren()[1] as abaplint.Nodes.ExpressionNode, traversal, false).getCode();
         ret += name + ".set(" + s + ");\n";
         continue;
       }

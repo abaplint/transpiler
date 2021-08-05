@@ -13,6 +13,7 @@ jobs:
       with:
         node-version: '14'
     - run: npm install
-    - run: npm test
       env:
         CI: true
+    - run: npm run link-local
+    - run: npm test

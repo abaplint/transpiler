@@ -1,15 +1,16 @@
 import {Nodes, Expressions} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
+import {Chunk} from "../chunk";
 
 export class MethodCallChainTranspiler implements IExpressionTranspiler {
 
-  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): string {
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     let ret = "";
 
     for (const c of node.getChildren()) {
       if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.MethodCall) {
-        const sub = traversal.traverse(c);
+        const sub = traversal.traverse(c).getCode();
         if (sub.startsWith("abap.builtin.")) {
           ret = ret + sub;
         } else {
@@ -17,7 +18,7 @@ export class MethodCallChainTranspiler implements IExpressionTranspiler {
           ret = "(await " + t + ret + sub + ")";
         }
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.FieldChain) {
-        ret = ret + traversal.traverse(c);
+        ret = ret + traversal.traverse(c).getCode();
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.ClassName) {
         ret = traversal.lookupClassOrInterface(c.getFirstToken().getStr(), c.getFirstToken());
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.MethodName) {
@@ -36,9 +37,9 @@ export class MethodCallChainTranspiler implements IExpressionTranspiler {
     }
 
     if (ret.startsWith("(") && ret.endsWith(")")) {
-      return ret.substr(1, ret.length - 2);
+      return new Chunk(ret.substr(1, ret.length - 2));
     } else {
-      return ret;
+      return new Chunk(ret);
     }
   }
 

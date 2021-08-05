@@ -3,10 +3,11 @@ import {IStatementTranspiler} from "./_statement_transpiler";
 import {TranspileTypes} from "../types";
 import {Traversal} from "../traversal";
 import {ConstantTranspiler, FieldChainTranspiler} from "../expressions";
+import {Chunk} from "../chunk";
 
 export class MethodImplementationTranspiler implements IStatementTranspiler {
 
-  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const token = node.findFirstExpression(abaplint.Expressions.MethodName)!.getFirstToken();
     let methodName = token.getStr();
 
@@ -51,7 +52,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
         if (def) {
           let val = "";
           if (def.get() instanceof abaplint.Expressions.Constant) {
-            val = new ConstantTranspiler().transpile(def, traversal);
+            val = new ConstantTranspiler().transpile(def, traversal).getCode();
           } else if (def.get() instanceof abaplint.Expressions.FieldChain) {
             if (def.getFirstToken().getStr().toLowerCase() === "abap_true") {
               val = "abap.builtin.abap_true";
@@ -59,7 +60,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
               val = "abap.builtin.abap_false";
             } else {
               // note: this can be difficult, the "def" might be from an interface, ie. a different scope than the method
-              val = new FieldChainTranspiler().transpile(def, traversal);
+              val = new FieldChainTranspiler().transpile(def, traversal).getCode();
             }
           } else {
             throw "MethodImplementationTranspiler, unknown default param type";
@@ -89,7 +90,8 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
         "}\n" + "static ";
     }
 
-    return staticMethod + "async " + methodName + "(" + unique + ") {" + after;
+    const str = staticMethod + "async " + methodName + "(" + unique + ") {" + after;
+    return new Chunk().append(str, node, traversal);
   }
 
   private findMethod(name: string, cdef: abaplint.IClassDefinition | undefined, traversal: Traversal) {

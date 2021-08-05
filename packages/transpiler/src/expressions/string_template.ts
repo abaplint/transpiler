@@ -2,10 +2,11 @@ import {Nodes, Tokens, Expressions} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {SourceTranspiler} from ".";
 import {Traversal} from "../traversal";
+import {Chunk} from "../chunk";
 
 export class StringTemplateTranspiler implements IExpressionTranspiler {
 
-  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): string {
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     let ret = "";
     const children = node.getChildren();
     for (let i = 0; i < children.length; i++) {
@@ -38,12 +39,12 @@ export class StringTemplateTranspiler implements IExpressionTranspiler {
           }
         }
         if (g instanceof Expressions.Source) {
-          ret = ret + pre + new SourceTranspiler(get).transpile(c, traversal) + post;
+          ret = ret + pre + new SourceTranspiler(get).transpile(c, traversal).getCode() + post;
         }
       }
     }
 
-    return ret;
+    return new Chunk(ret);
   }
 
   private build(node: Nodes.ExpressionNode): undefined | string {

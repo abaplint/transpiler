@@ -1,12 +1,12 @@
 import * as abaplint from "@abaplint/core";
 import {Validation, config} from "./validation";
-import {Indentation} from "./indentation";
 import {Traversal} from "./traversal";
 import {Requires} from "./requires";
 import {SkipSettings, UnitTest} from "./unit_test";
 import {Keywords} from "./keywords";
 import {DatabaseSetup} from "./database_setup";
 import {Rearranger} from "./rearranger";
+import {Chunk} from "./chunk";
 
 export {config};
 
@@ -44,6 +44,7 @@ export interface IOutputFile {
   js: IFile;
   requires: readonly IRequire[];
   exports: readonly string[];
+  sourceMap: IFile;
 }
 
 export interface ITranspilerOptions {
@@ -153,31 +154,40 @@ export class Transpiler {
 
     for (const file of obj.getSequencedFiles()) {
       let exports: string[] = [];
-      let result = "";
+
+      const chunk = new Chunk();
 
       if (this.options?.addFilenames === true) {
-        result += "// " + file.getFilename() + "\n";
+        chunk.appendString("// " + file.getFilename() + "\n");
       }
 
-      result += this.handleConstants(obj, file, reg);
+      chunk.appendString(this.handleConstants(obj, file, reg));
 
-      const rearranged = obj.getType() === "INTF" ? file.getStructure() : new Rearranger().run(file.getStructure());
+      const rearranged = new Rearranger().run(obj.getType(), file.getStructure());
       const contents = new Traversal(spaghetti, file, obj, reg, this.options?.unknownTypes === "runtimeError").traverse(rearranged);
-      result += new Indentation().run(contents);
+      chunk.appendChunk(contents);
 
       exports = exports.concat(this.findExports(file.getStructure()));
 
-      if (result.endsWith("\n")) {
-        result = result.substring(0, result.length - 1);
-      }
+      chunk.stripLastNewline();
 
-      const filename = file.getFilename().replace(".abap", ".mjs");
+      const filename = file.getFilename().replace(".abap", ".mjs").toLowerCase();
 
       const output: IOutputFile = {
-        object: {name: obj.getName(), type: obj.getType()},
-        js: {filename: filename.toLowerCase(), contents: result},
+        object: {
+          name: obj.getName(),
+          type: obj.getType(),
+        },
+        js: {
+          filename: filename,
+          contents: chunk.runIndentationLogic().getCode(),
+        },
         requires: new Requires(reg).find(obj, spaghetti.getTop(), file.getFilename()),
         exports,
+        sourceMap: {
+          filename: filename + ".map",
+          contents: chunk.getMap(filename),
+        },
       };
 
       ret.push(output);
@@ -234,6 +244,7 @@ export class Transpiler {
           contents: def.js.contents + imp.js.contents,
         },
         requires,
+        sourceMap: imp.sourceMap, // todo, also merge this
         exports: def.exports.concat(imp.exports),
       });
     } else if (imp) {

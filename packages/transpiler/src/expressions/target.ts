@@ -2,10 +2,11 @@ import {Expressions, Nodes} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {FieldLengthTranspiler, FieldOffsetTranspiler, FieldSymbolTranspiler} from ".";
+import {Chunk} from "../chunk";
 
 export class TargetTranspiler implements IExpressionTranspiler {
 
-  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): string {
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     const offset: string[] = [];
     let ret = "";
 
@@ -25,11 +26,11 @@ export class TargetTranspiler implements IExpressionTranspiler {
         }
         ret += name;
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.FieldOffset) {
-        offset.push("offset: " + new FieldOffsetTranspiler().transpile(c, traversal));
+        offset.push("offset: " + new FieldOffsetTranspiler().transpile(c, traversal).getCode());
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.FieldLength) {
-        offset.push("length: " + new FieldLengthTranspiler().transpile(c, traversal));
+        offset.push("length: " + new FieldLengthTranspiler().transpile(c, traversal).getCode());
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.TargetFieldSymbol) {
-        ret = ret + new FieldSymbolTranspiler().transpile(c, traversal);
+        ret = ret + new FieldSymbolTranspiler().transpile(c, traversal).getCode();
       } else if (c.getFirstToken().getStr() === "-") {
         ret = ret + ".get().";
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.Dereference) {
@@ -54,7 +55,7 @@ export class TargetTranspiler implements IExpressionTranspiler {
       post = ", {" + offset.join(", ") + "})";
     }
 
-    return pre + ret + post;
+    return new Chunk(pre + ret + post);
   }
 
 }

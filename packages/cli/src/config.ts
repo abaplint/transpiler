@@ -9,6 +9,7 @@ export interface ITranspilerConfig {
   output_folder: string;
   lib: string;
   write_unit_tests: boolean;
+  write_source_map: boolean;
   options: ITranspilerOptions;
 }
 
@@ -42,6 +43,7 @@ export class TranspilerConfig {
       output_folder: "output",
       lib: "https://github.com/open-abap/open-abap",
       write_unit_tests: true,
+      write_source_map: true,
       options: {
         ignoreSyntaxCheck: false,
         addFilenames: true,
