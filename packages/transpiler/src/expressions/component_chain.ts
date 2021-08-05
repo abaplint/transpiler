@@ -5,16 +5,16 @@ import {IExpressionTranspiler} from "./_expression_transpiler";
 
 export class ComponentChainTranspiler implements IExpressionTranspiler {
 
-  public transpile(node: Nodes.ExpressionNode, _traversal: Traversal): Chunk {
-    let ret = "";
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
+    const ret = new Chunk();
     for (const n of node.getChildren()) {
       if (n.get() instanceof Expressions.ComponentName) {
-        ret += n.concatTokens().toLowerCase();
+        ret.append(n.concatTokens().toLowerCase(), n, traversal);
       } else if (n.concatTokens() === "-") {
-        ret += ".get().";
+        ret.append(".get().", n, traversal);
       }
     }
-    return new Chunk(ret);
+    return ret;
   }
 
 }

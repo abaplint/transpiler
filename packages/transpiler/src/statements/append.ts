@@ -1,6 +1,5 @@
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
-import {SourceTranspiler} from "../expressions";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 
@@ -27,7 +26,7 @@ export class AppendTranspiler implements IStatementTranspiler {
       const s = node.findDirectExpression(abaplint.Expressions.SimpleSource4);
       if (s) {
         const option = new Chunk().appendString("source: ");
-        option.appendChunk(new SourceTranspiler().transpile(s, traversal));
+        option.appendChunk(traversal.traverse(s));
         options.push(option);
       }
 

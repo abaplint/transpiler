@@ -6,8 +6,13 @@ import {Chunk} from "../chunk";
 export class ClearTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target)).getCode();
-    return new Chunk("abap.statements.clear(" + target + ");");
+    const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
+
+    const ret = new Chunk();
+    ret.append("abap.statements.clear(", node, traversal);
+    ret.appendChunk(target);
+    ret.append(");", node, traversal);
+    return ret;
   }
 
 }
