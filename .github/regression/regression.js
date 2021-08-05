@@ -6,10 +6,10 @@ const childProcess = require("child_process");
 const repos = [
   {name: "abap-openapi/abap-openapi-client", command: "npm test"},
   {name: "abapGit/abapGit",                  command: "npm run unit"},
+  {name: "larshp/abap-advent-2020",          command: "npm test"},
+//  {name: "larshp/abap-wasm",                 command: "npm test"}, hmm, guess https://github.com/larshp/abap-wasm/issues/44
   {name: "larshp/abapNTLM",                  command: "npm test"},
   {name: "open-abap/open-abap",              command: "npm test"},
-//  {name: "larshp/abap-advent-2020",          command: "npm test"},
-//  {name: "larshp/abap-wasm",                 command: "npm test"},
 ];
 
 const CWD = "./.github/regression/";
@@ -39,7 +39,7 @@ for (const repo of repos) {
 let comment = "Regression test results:\n";
 
 comment += "| Repository | Result |\n";
-comment += "| :--- | :--- |\n";
+comment += "| :--- | :---: |\n";
 for (const repo of repos) {
   const link = "[" + repo.name + "](https://github.com/" + repo.name + ")"
   comment += "| " + link + " | :green_circle: |\n";
