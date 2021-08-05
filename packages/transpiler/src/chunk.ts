@@ -24,7 +24,17 @@ export class Chunk {
     }
   }
 
-  public appendChunk(append: Chunk) {
+  public join(chunks: Chunk[], str = ", "): Chunk {
+    for (let i = 0; i < chunks.length; i++) {
+      this.appendChunk(chunks[i]);
+      if (i !== chunks.length - 1) {
+        this.appendString(str);
+      }
+    }
+    return this;
+  }
+
+  public appendChunk(append: Chunk): Chunk {
     const lines = this.raw.split("\n");
     const lineCount = lines.length;
     const lastLine = lines[lines.length - 1];
@@ -40,6 +50,7 @@ export class Chunk {
     });
 
     this.raw += append.getCode();
+    return this;
   }
 
   public append(input: string, pos: abaplint.Position | abaplint.INode, traversal: {getFilename(): string}): Chunk {
