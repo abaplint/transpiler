@@ -16,6 +16,7 @@
   "scripts": {
     "test": "tsc && npm run webpack",
     "prepublishOnly": "rm -rf build && npm run test",
+    "compile": "npm test",
     "webpack": "webpack --progress"
   },
   "author": "abaplint",

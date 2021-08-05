@@ -7,7 +7,7 @@
         "preinstall": "cd web/transpiler && npm install && cd ../../",
         "postinstall": "cd packages/runtime && npm install && cd ../cli && npm install && cd ../transpiler && npm install && cd ../..",
         "precompile": "cd packages/runtime && npm run compile",
-        "compile": "cd packages/transpiler && npm run compile",
+        "compile": "cd packages/transpiler && npm run compile && cd ../../ && cd packages/cli && npm run compile",
         "postcompile": "tsc",
         "performance": "npm run compile && node build/performance/index.js",
         "pretest": "npm run compile",

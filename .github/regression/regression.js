@@ -7,7 +7,7 @@ const repos = [
   {name: "abapGit/abapGit",                  command: "npm run unit"},
 //  {name: "larshp/abap-advent-2020",          command: "npm test"},
 //  {name: "larshp/abap-wasm",                 command: "npm test"},
-  {name: "open-abap/open-abap",              command: "npm test"},
+////  {name: "open-abap/open-abap",              command: "npm test"},
 //  {name: "abap-openapi/abap-openapi-client", command: "npm test"},
 //  {name: "larshp/abapNTLM",                  command: "npm test"},
 ];
@@ -22,10 +22,10 @@ for (const repo of repos) {
   childProcess.execSync(repo.command, {stdio: "inherit", cwd: CWD + repo.folderName});
 }
 
-// compile local/new version of the transpiler and runtime
+// compile local/new version
 childProcess.execSync("npm install", {stdio: "inherit"});
 childProcess.execSync("npm run link-local", {stdio: "inherit"});
-childProcess.execSync("npm test", {stdio: "inherit"});
+childProcess.execSync("npm run compile", {stdio: "inherit"});
 
 for (const repo of repos) {
   console.dir("New Version: " + repo.name + ", " + repo.folderName);
