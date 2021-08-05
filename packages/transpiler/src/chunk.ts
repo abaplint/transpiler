@@ -42,8 +42,12 @@ export class Chunk {
     this.raw += append.getCode();
   }
 
-  public append(input: string, pos: abaplint.Position | abaplint.INode, traversal: {getFilename(): string}) {
-    if (pos) {
+  public append(input: string, pos: abaplint.Position | abaplint.INode, traversal: {getFilename(): string}): Chunk {
+    if (input === "") {
+      return this;
+    }
+
+    if (pos && input !== "\n") {
       const lines = this.raw.split("\n");
       const lastLine = lines[lines.length - 1];
       const originalLine = pos instanceof abaplint.Position ? pos.getRow() : pos.getFirstToken().getRow();
