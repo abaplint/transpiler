@@ -1,6 +1,5 @@
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
-import {SourceTranspiler} from "../expressions";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 
@@ -13,7 +12,7 @@ export class WriteTranspiler implements IStatementTranspiler {
 
     const expr = node.findDirectExpression(abaplint.Expressions.Source);
     if (expr === undefined) {
-      source = new Chunk().appendString("''");
+      source = new Chunk().append("''", node, traversal);
       extra = ", {newLine: true,skipLine: true}";
     } else {
       if (newLine === true) {
@@ -22,15 +21,15 @@ export class WriteTranspiler implements IStatementTranspiler {
       const concat = expr.concatTokens();
       if (concat.startsWith("'@KERNEL ")) {
         // @KERNEL commands must be taken verbatim
-        return new Chunk(concat.substr(9, concat.length - 10));
+        return new Chunk().append(concat.substr(9, concat.length - 10), node, traversal);
       }
-      source = new SourceTranspiler().transpile(expr, traversal);
+      source = traversal.traverse(expr);
     }
 
     const chunk = new Chunk();
     chunk.append("abap.statements.write(", node, traversal);
     chunk.appendChunk(source);
-    chunk.appendString(extra + ");");
+    chunk.append(extra + ");", node, traversal);
     return chunk;
   }
 
