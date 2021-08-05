@@ -17,10 +17,11 @@ export class CaseTranspiler implements IStructureTranspiler {
     let first = true;
     const u = UniqueIdentifier.get();
     const ret = new Chunk();
+
+    // this determines and copies the value
     ret.append("let " + u + " = ", node, traversal);
     ret.appendChunk(traversal.traverse(s));
-    ret.append(";\n", s.getLastToken().getStart(), traversal);
-    //let ret = "let " + u + " = " + traversal.traverse(s).getCode() + ";\n";
+    ret.append(";\n", node, traversal);
 
     for (const w of node.findDirectStructures(abaplint.Structures.When)) {
       for (const c of w.getChildren()) {
