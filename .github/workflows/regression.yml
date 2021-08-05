@@ -19,7 +19,7 @@ jobs:
 
     - name: Performance
       run: |
-        cp .github/regression/run.js ../../run.js
+        cp .github/regression/performance.js ../../performance.js
         npm install && npm run performance
         cp build/performance/results.json ../../results_after.json
         git checkout -f main
