@@ -27,12 +27,10 @@ export class SourceTranspiler implements IExpressionTranspiler {
         } else if (c.get() instanceof Expressions.Cond) {
           ret.appendChunk(traversal.traverse(c));
         } else if (c.get() instanceof Expressions.ArithOperator) {
-          const code = ret.copy();
-          ret = new Chunk().appendChunk(traversal.traverse(c));
-          ret.appendString("(").appendChunk(code).appendString(",");
+          ret = new Chunk().appendChunk(traversal.traverse(c)).appendString("(").appendChunk(ret).appendString(",");
           post.appendString(")");
           if (this.addGet) {
-            post.appendString(".get()");
+            post.append(".get()", c, traversal);
           }
         } else if (c.get() instanceof Expressions.MethodCallChain) {
           ret.appendChunk(traversal.traverse(c));
@@ -41,26 +39,20 @@ export class SourceTranspiler implements IExpressionTranspiler {
             if (code.includes("await")) {
               ret = new Chunk().appendString("(").appendChunk(ret).appendString(").get()");
             } else {
-              ret.appendString(".get()");
+              ret.append(".get()", c, traversal);
             }
           }
         } else if (c.get() instanceof Expressions.Source) {
           ret.appendChunk(new SourceTranspiler(this.addGet).transpile(c, traversal));
         } else if (c.get() instanceof Expressions.Arrow) {
-          const code = ret.copy();
-          ret = new Chunk();
-          ret.appendString("(").appendChunk(code).appendString(").get().");
+          ret = new Chunk().appendString("(").appendChunk(ret).appendString(").get().");
         } else if (c.get() instanceof Expressions.AttributeChain) {
           ret.appendChunk(new AttributeChainTranspiler().transpile(c, traversal));
         } else if (c.get() instanceof Expressions.ComponentChain) {
-          const code = ret.copy();
-          ret = new Chunk();
-          ret.appendString("(").appendChunk(code).appendString(").get().");
+          ret = new Chunk().appendString("(").appendChunk(ret).appendString(").get().");
           ret.appendChunk(new ComponentChainTranspiler().transpile(c, traversal));
         } else if (c.get() instanceof Expressions.Dereference) {
-          const code = ret.copy();
-          ret = new Chunk();
-          ret.appendString("(").appendChunk(code).appendString(").getPointer()");
+          ret = new Chunk().appendString("(").appendChunk(ret).appendString(").getPointer()");
         } else {
           ret.appendString("SourceUnknown-" + c.get().constructor.name);
         }
