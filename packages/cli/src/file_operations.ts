@@ -28,14 +28,16 @@ export class FileOperations {
     const filter = (config.input_filter ?? []).map(pattern => new RegExp(pattern, "i"));
     let skipped = 0;
 
-    for (let filename of glob.sync(config.input_folder + "/**", {nosort: true, nodir: true})) {
+    for (const filename of glob.sync(config.input_folder + "/**", {nosort: true, nodir: true})) {
       if (filter.length > 0 && filter.some(a => a.test(filename)) === false) {
         skipped++;
         continue;
       }
-      const contents = fs.readFileSync(filename, "utf8");
-      filename = path.basename(filename);
-      files.push({filename, contents});
+      files.push({
+        filename: path.basename(filename),
+        relative: path.relative(config.output_folder, path.dirname(filename)),
+        contents: fs.readFileSync(filename, "utf8"),
+      });
       console.log("Add:\t" + filename);
     }
     console.log(skipped + " files skipped");
