@@ -42,6 +42,10 @@ export class Chunk {
   }
 
   public appendChunk(append: Chunk): Chunk {
+    if (append.getCode() === "") {
+      return this;
+    }
+
     const lines = this.raw.split("\n");
     const lineCount = lines.length;
     const lastLine = lines[lines.length - 1];
@@ -60,7 +64,7 @@ export class Chunk {
     return this;
   }
 
-  public append(input: string, pos: abaplint.Position | abaplint.INode, traversal: {getFilename(): string}): Chunk {
+  public append(input: string, pos: abaplint.Position | abaplint.INode | abaplint.Token, traversal: {getFilename(): string}): Chunk {
     if (input === "") {
       return this;
     }
@@ -68,8 +72,17 @@ export class Chunk {
     if (pos && input !== "\n") {
       const lines = this.raw.split("\n");
       const lastLine = lines[lines.length - 1];
-      const originalLine = pos instanceof abaplint.Position ? pos.getRow() : pos.getFirstToken().getRow();
-      const originalColumn = pos instanceof abaplint.Position ? pos.getCol() - 1 : pos.getFirstToken().getCol() - 1;
+
+      let originalLine = 0;
+      let originalColumn = 0;
+      if (pos instanceof abaplint.Position || pos instanceof abaplint.Token) {
+        originalLine = pos.getRow();
+        originalColumn = pos.getCol() - 1;
+      } else {
+        originalLine = pos.getFirstToken().getRow();
+        originalColumn = pos.getFirstToken().getCol() - 1;
+      }
+
       this.mappings.push({
         source: traversal.getFilename(),
         generated: {

@@ -135,7 +135,7 @@ export class Traversal {
     return false;
   }
 
-  public findPrefix(t: abaplint.Token): string {
+  public prefixAndName(t: abaplint.Token): string {
     let name = t.getStr().toLowerCase();
     const cla = this.isStaticClassAttribute(t);
     if (cla) {

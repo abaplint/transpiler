@@ -20,7 +20,7 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
     for (const c of node.getChildren()) {
       if (c.get() instanceof Expressions.SourceField
           || c.get() instanceof Expressions.Field) {
-        ret = ret + traversal.findPrefix(c.getFirstToken()).replace("~", "$");
+        ret = ret + traversal.prefixAndName(c.getFirstToken()).replace("~", "$");
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.SourceFieldSymbol) {
         ret = ret + new FieldSymbolTranspiler().transpile(c, traversal).getCode();
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.ClassName) {
