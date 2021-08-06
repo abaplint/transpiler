@@ -52,7 +52,9 @@ function writeObjects(objects: Transpiler.IOutputFile[], writeSourceMaps: boolea
           continue;
         }
         if (map.includes(`"${f.filename}"`)) {
-          map = map.replace(`"${f.filename}"`, `"${f.relative}${f.filename}"`);
+          let withPath = `"${f.relative}${path.sep}${f.filename}"`;
+          withPath = withPath.replace(/\\/g, "\\\\");
+          map = map.replace(`"${f.filename}"`, withPath);
         }
       }
       fs.writeFileSync(outputFolder + path.sep + name, map);
