@@ -33,7 +33,10 @@ export class DescribeTranspiler implements IStatementTranspiler {
       options.push("mode: 'BYTE'");
     }
 
-    return new Chunk("abap.statements.describe({" + options.join(", ") + "});");
+    return new Chunk()
+      .append("abap.statements.describe({", node, traversal)
+      .appendString(options.join(", "))
+      .append("});", node.getLastToken(), traversal);
   }
 
 }

@@ -11,7 +11,7 @@ export class CheckTranspiler implements IStatementTranspiler {
     const ret = new Chunk();
     ret.append("if (!(", node, traversal);
     ret.appendChunk(cond);
-    ret.append(")) {\ncontinue;\n}", node, traversal);
+    ret.append(")) {\ncontinue;\n}", node.getLastToken(), traversal);
     return ret;
   }
 

@@ -14,15 +14,19 @@ export class GetReferenceTranspiler implements IStatementTranspiler {
       throw new Error("GetReference, Target not found");
     }
 
-    let source = traversal.traverse(s).getCode();
-    const target = traversal.traverse(t).getCode();
+    const source = traversal.traverse(s);
+    const target = traversal.traverse(t);
 
     if (s.getFirstToken().getStr().startsWith("<")) {
       // its a field symbol
-      source += ".getPointer()";
+      source.appendString(".getPointer()");
     }
 
-    return new Chunk(target + ".assign(" + source + ");");
+    return new Chunk()
+      .appendChunk(target)
+      .appendString(".assign(")
+      .appendChunk(source)
+      .append(");", node.getLastToken(), traversal);
   }
 
 }

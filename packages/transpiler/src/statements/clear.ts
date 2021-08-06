@@ -11,7 +11,7 @@ export class ClearTranspiler implements IStatementTranspiler {
     const ret = new Chunk();
     ret.append("abap.statements.clear(", node, traversal);
     ret.appendChunk(target);
-    ret.append(");", node, traversal);
+    ret.append(");", node.getLastToken(), traversal);
     return ret;
   }
 

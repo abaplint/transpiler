@@ -12,7 +12,7 @@ export class CondenseTranspiler implements IStatementTranspiler {
     const ret = new Chunk();
     ret.append("abap.statements.condense(", node, traversal);
     ret.appendChunk(target);
-    ret.append(", {nogaps: " + noGaps + "});", node, traversal);
+    ret.append(", {nogaps: " + noGaps + "});", node.getLastToken(), traversal);
     return ret;
   }
 
