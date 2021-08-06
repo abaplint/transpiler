@@ -10,8 +10,8 @@ describe("Files", () => {
     const output = (await new Transpiler().run([file1, file2])).objects;
 
     expect(output.length).to.equal(2);
-    expect(output[0].js.filename).to.equal("zfoo1.prog.mjs");
-    expect(output[1].js.filename).to.equal("zfoo2.prog.mjs");
+    expect(output[0].filename).to.equal("zfoo1.prog.mjs");
+    expect(output[1].filename).to.equal("zfoo2.prog.mjs");
   });
 
   it("Full path file name", async () => {
@@ -21,7 +21,7 @@ describe("Files", () => {
     const output = (await new Transpiler().run([file1])).objects;
 
     expect(output.length).to.equal(1);
-    expect(output[0].js.filename).to.contain("zprogram.prog.mjs");
+    expect(output[0].filename).to.contain("zprogram.prog.mjs");
   });
 
   it("Global Class", async () => {
@@ -37,7 +37,7 @@ ENDCLASS.
     const output = (await new Transpiler().run([file1])).objects;
 
     expect(output.length).to.equal(1);
-    expect(output[0].js.contents).to.include("zcl_index");
+    expect(output[0].chunk.getCode()).to.include("zcl_index");
     expect(output[0].exports.length).to.equal(1);
     expect(output[0].exports[0]).to.equal("zcl_index");
   });
@@ -71,11 +71,11 @@ ENDCLASS.
     const output = (await new Transpiler().run([file1, file2])).objects;
 
     expect(output.length).to.equal(2);
-    expect(output[0].js.contents).to.include("zcl_index");
+    expect(output[0].chunk.getCode()).to.include("zcl_index");
     expect(output[0].exports.length).to.equal(1, "one export expected, global class");
     expect(output[0].requires.length).to.equal(0, "no requires from global class");
 
-    expect(output[1].js.contents).to.include("ltcl_test");
+    expect(output[1].chunk.getCode()).to.include("ltcl_test");
     expect(output[1].exports.length).to.equal(1, "one export expected, testclass");
     expect(output[1].requires.length).to.equal(1); // the global class
   });
@@ -104,8 +104,8 @@ ENDINTERFACE.`;
     const output = (await new Transpiler().run([file1, file2])).objects;
 
     expect(output.length).to.equal(2);
-    expect(output[0].js.contents).to.include("zcl_index");
-    expect(output[0].js.contents).to.include("const constant_25 = ");
+    expect(output[0].chunk.getCode()).to.include("zcl_index");
+    expect(output[0].chunk.getCode()).to.include("const constant_25 = ");
   });
 
   it("Global Class implementing global intf, whitespace lookup default parameter value", async () => {

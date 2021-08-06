@@ -256,7 +256,7 @@ START-OF-SELECTION.
       {filename: "if_request.intf.abap", contents: if_request},
     ]);
 
-    const js = result.objects[1].js.contents;
+    const js = result.objects[1].chunk.getCode();
     expect(js).to.contain(".if_client$request");
   });
 

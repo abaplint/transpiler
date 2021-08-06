@@ -41,10 +41,10 @@ export interface IProgress {
 /** one javascript output file for each object */
 export interface IOutputFile {
   object: IObjectIdentifier;
-  js: IFile;
+  filename: string,
+  chunk: Chunk,
   requires: readonly IRequire[];
   exports: readonly string[];
-  sourceMap: IFile;
 }
 
 export interface ITranspilerOptions {
@@ -176,16 +176,10 @@ export class Transpiler {
           name: obj.getName(),
           type: obj.getType(),
         },
-        js: {
-          filename: filename,
-          contents: chunk.getCode(),
-        },
+        filename: filename,
+        chunk: chunk,
         requires: new Requires(reg).find(obj, spaghetti.getTop(), file.getFilename()),
-        exports,
-        sourceMap: {
-          filename: filename + ".map",
-          contents: chunk.getMap(filename),
-        },
+        exports: exports,
       };
 
       ret.push(output);
@@ -194,7 +188,7 @@ export class Transpiler {
     ret = this.rearrangeClassLocals(obj, ret);
 
     if (this.options?.addCommonJS === true) {
-      ret.map(output => output.js.contents = this.addImportsAndExports(output));
+      ret.map(output => output.chunk = this.addImportsAndExports(output));
     }
 
     return ret;
@@ -210,9 +204,9 @@ export class Transpiler {
     let imp: IOutputFile | undefined = undefined;
     let def: IOutputFile | undefined = undefined;
     for (const o of output) {
-      if (o.js.filename.endsWith(".clas.locals_imp.mjs")) {
+      if (o.filename.endsWith(".clas.locals_imp.mjs")) {
         imp = o;
-      } else if (o.js.filename.endsWith(".clas.locals_def.mjs")) {
+      } else if (o.filename.endsWith(".clas.locals_def.mjs")) {
         def = o;
       } else {
         ret.push(o);
@@ -220,10 +214,10 @@ export class Transpiler {
     }
 
     if (def) {
-      def.js.filename = def.js.filename.replace(".locals_def.mjs", ".locals.mjs");
+      def.filename = def.filename.replace(".locals_def.mjs", ".locals.mjs");
     }
     if (imp) {
-      imp.js.filename = imp.js.filename.replace(".locals_imp.mjs", ".locals.mjs");
+      imp.filename = imp.filename.replace(".locals_imp.mjs", ".locals.mjs");
     }
 
     if (imp && def) {
@@ -235,14 +229,13 @@ export class Transpiler {
         }
       }
 
+      const chunk = new Chunk().appendChunk(def.chunk).appendChunk(imp.chunk);
+
       ret.push({
         object: imp.object,
-        js: {
-          filename: imp.js.filename,
-          contents: def.js.contents + imp.js.contents,
-        },
-        requires,
-        sourceMap: imp.sourceMap, // todo, also merge this
+        filename: imp.filename,
+        chunk: chunk,
+        requires: requires,
         exports: def.exports.concat(imp.exports),
       });
     } else if (imp) {
@@ -254,23 +247,23 @@ export class Transpiler {
     return ret;
   }
 
-  protected addImportsAndExports(output: IOutputFile): string {
-    let contents = "";
+  protected addImportsAndExports(output: IOutputFile): Chunk {
+    const contents = new Chunk();
     for (const r of output.requires) {
       const name = r.name?.toLowerCase();
       const filename = r.filename.replace(".abap", ".mjs");
-      if (filename === output.js.filename) {
+      if (filename === output.filename) {
         continue;
       }
       if (name) {
-        contents += "const {" + name + "} = await import(\"./" + filename + "\");\n";
+        contents.appendString("const {" + name + "} = await import(\"./" + filename + "\");\n");
       } else {
-        contents += "await import(\"./" + filename + "\");\n";
+        contents.appendString("await import(\"./" + filename + "\");\n");
       }
     }
-    contents += output.js.contents;
+    contents.appendChunk(output.chunk);
     if (output.exports.length > 0) {
-      contents += "\nexport {" + output.exports.join(", ") + "};";
+      contents.appendString("\nexport {" + output.exports.join(", ") + "};");
     }
     return contents;
   }
