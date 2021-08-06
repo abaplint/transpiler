@@ -14,30 +14,32 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
   }
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal, prefix = true): Chunk {
-    let ret = "";
+    const ret = new Chunk();
     const extra: string[] = [];
 
     for (const c of node.getChildren()) {
       if (c.get() instanceof Expressions.SourceField
           || c.get() instanceof Expressions.Field) {
-        ret = ret + traversal.prefixAndName(c.getFirstToken()).replace("~", "$");
+        const name = traversal.prefixAndName(c.getFirstToken()).replace("~", "$");
+        ret.append(name, c, traversal);
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.SourceFieldSymbol) {
-        ret = ret + new FieldSymbolTranspiler().transpile(c, traversal).getCode();
+        ret.appendChunk(new FieldSymbolTranspiler().transpile(c, traversal));
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.ClassName) {
-        ret += traversal.lookupClassOrInterface(c.getFirstToken().getStr(), c.getFirstToken()) + ".";
+        const name = traversal.lookupClassOrInterface(c.getFirstToken().getStr(), c.getFirstToken());
+        ret.append(name + ".", c, traversal);
       } else if (c.get() instanceof Expressions.AttributeName) {
         const interfaceName = traversal.isInterfaceAttribute(c.getFirstToken());
         let name = c.getFirstToken().getStr().replace("~", "$");
         if (prefix && interfaceName && name.startsWith(interfaceName) === false) {
           name = interfaceName + "$" + name;
         }
-        ret += name;
+        ret.append(name, c, traversal);
       } else if (c.get() instanceof Expressions.ComponentName) {
-        ret = ret + c.getFirstToken().getStr().toLowerCase();
+        ret.append(c.getFirstToken().getStr().toLowerCase(), c, traversal);
       } else if (c instanceof Nodes.TokenNode) {
         const str = c.getFirstToken().getStr();
         if (str === "-" || str === "->") {
-          ret += ".get().";
+          ret.append(".get().", c, traversal);
         }
       } else if (c instanceof Nodes.ExpressionNode
           && c.get() instanceof Expressions.FieldOffset) {
@@ -55,13 +57,13 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
       if (foo !== "") {
         foo = "{" + foo + "}";
       }
-      ret = ret + ".getOffset(" + foo + ")";  // todo, this will break
+      ret.appendString(".getOffset(" + foo + ")");  // todo, this will break
     }
     if (this.addGet) {
-      ret = ret + ".get()";  // todo, this will break?
+      ret.appendString(".get()");  // todo, this will break?
     }
 
-    return new Chunk(ret);
+    return ret;
   }
 
 }

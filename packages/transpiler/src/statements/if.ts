@@ -10,7 +10,7 @@ export class IfTranspiler implements IStatementTranspiler {
     const ret = new Chunk();
     ret.append("if (", node, traversal);
     ret.appendChunk(cond);
-    ret.append(") {", node, traversal);
+    ret.append(") {", node.getLastToken(), traversal);
     return ret;
   }
 

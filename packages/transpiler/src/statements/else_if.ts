@@ -6,8 +6,8 @@ import {Chunk} from "../chunk";
 export class ElseIfTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    const cond = traversal.traverse(node.findFirstExpression(abaplint.Expressions.Cond)).getCode();
-    return new Chunk("} else if (" + cond + ") {");
+    const cond = traversal.traverse(node.findFirstExpression(abaplint.Expressions.Cond));
+    return new Chunk().appendString("} else if (").appendChunk(cond).appendString(") {");
   }
 
 }

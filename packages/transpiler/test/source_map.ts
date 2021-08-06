@@ -63,8 +63,18 @@ ENDIF.`;
     expect(result?.js).to.equal(js);
 
     const perLine = await countMappingsPerGeneratedLine(result?.map);
-    expect(perLine[1]).to.equal(3);
+    expect(perLine[1]).to.equal(5);
     expect(perLine[2]).to.equal(1);
+  });
+
+  it("APPEND", async () => {
+    const abap = "APPEND <ls_branch> TO rt_branches.";
+    const js = `abap.statements.append({source: fs_ls_branch_, target: rt_branches});`;
+    const result = await runSingleMapped(abap, OPTIONS);
+    expect(result?.js).to.equal(js);
+
+    const perLine = await countMappingsPerGeneratedLine(result?.map);
+    expect(perLine[1]).to.equal(4);
   });
 
   it("global CLAS", async () => {
@@ -96,7 +106,7 @@ export {zcl_maptest};`;
     expect(result?.js).to.equal(js);
 
     const perLine = await countMappingsPerGeneratedLine(result?.map);
-    expect(perLine[8]).to.equal(2); // the WRITE statement
+    expect(perLine[8]).to.equal(3); // the WRITE statement
   });
 
 });

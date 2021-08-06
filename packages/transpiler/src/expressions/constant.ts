@@ -10,7 +10,7 @@ export class ConstantTranspiler implements IExpressionTranspiler {
     this.addGet = addGet;
   }
 
-  public transpile(node: Nodes.ExpressionNode, _traversal: Traversal): Chunk {
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     const int = node.findFirstExpression(Expressions.Integer);
     if (int) {
       const val = parseInt(int.concatTokens(), 10);
@@ -18,16 +18,18 @@ export class ConstantTranspiler implements IExpressionTranspiler {
       if (this.addGet === true) {
         ret += ".get()";
       }
-      return new Chunk(ret);
+      return new Chunk().append(ret, node, traversal);
     }
 
     const str = node.findFirstExpression(Expressions.ConstantString);
     if (str) {
       const res = str.getFirstToken().getStr();
       if (res.startsWith("'") && this.addGet === false) {
-        return new Chunk("new abap.types.Character({length: " + (res.length - 2) + "}).set(" + this.escape(res) + ")");
+        const code = "new abap.types.Character({length: " + (res.length - 2) + "}).set(" + this.escape(res) + ")";
+        return new Chunk().append(code, node, traversal);
       } else {
-        return new Chunk(this.escape(res));
+        const code = this.escape(res);
+        return new Chunk().append(code, node, traversal);
       }
     }
 
