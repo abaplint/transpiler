@@ -14,7 +14,7 @@ abaplint:
 // Keeps track of source maps as generated code is added
 export class Chunk {
   private raw: string;
-  public readonly mappings: sourceMap.Mapping[] = [];
+  public mappings: sourceMap.Mapping[] = [];
 
   public constructor(str?: string) {
     this.raw = "";
@@ -22,6 +22,13 @@ export class Chunk {
     if (str) {
       this.appendString(str);
     }
+  }
+
+  public copy(): Chunk {
+    const ret = new Chunk();
+    ret.raw = this.raw;
+    ret.mappings = [...this.mappings];
+    return ret;
   }
 
   public join(chunks: Chunk[], str = ", "): Chunk {
