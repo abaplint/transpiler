@@ -153,8 +153,6 @@ export class Transpiler {
     let ret: IOutputFile[] = [];
 
     for (const file of obj.getSequencedFiles()) {
-      let exports: string[] = [];
-
       const chunk = new Chunk();
 
       if (this.options?.addFilenames === true) {
@@ -164,13 +162,13 @@ export class Transpiler {
       chunk.appendString(this.handleConstants(obj, file, reg));
 
       const rearranged = new Rearranger().run(obj.getType(), file.getStructure());
+
       const contents = new Traversal(spaghetti, file, obj, reg, this.options?.unknownTypes === "runtimeError").traverse(rearranged);
       chunk.appendChunk(contents);
-
-      exports = exports.concat(this.findExports(file.getStructure()));
-
       chunk.stripLastNewline();
+      chunk.runIndentationLogic();
 
+      const exports = this.findExports(file.getStructure());
       const filename = file.getFilename().replace(".abap", ".mjs").toLowerCase();
 
       const output: IOutputFile = {
@@ -180,7 +178,7 @@ export class Transpiler {
         },
         js: {
           filename: filename,
-          contents: chunk.runIndentationLogic().getCode(),
+          contents: chunk.getCode(),
         },
         requires: new Requires(reg).find(obj, spaghetti.getTop(), file.getFilename()),
         exports,

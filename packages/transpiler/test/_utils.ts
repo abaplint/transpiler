@@ -7,9 +7,9 @@ export async function runSingle(abap: string, options?: ITranspilerOptions): Pro
   return res.objects[0]?.js.contents;
 }
 
-export async function runSingleMapped(abap: string, options?: ITranspilerOptions) {
+export async function runSingleMapped(abap: string, options?: ITranspilerOptions, filename = "zfoobar.prog.abap") {
   UniqueIdentifier.reset();
-  const res = await new Transpiler(options).run([{filename: "zfoobar.prog.abap", contents: abap}]);
+  const res = await new Transpiler(options).run([{filename, contents: abap}]);
   const obj = res.objects[0];
   if (obj === undefined) {
     return undefined;
