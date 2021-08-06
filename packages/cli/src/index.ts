@@ -40,13 +40,22 @@ function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
   return files;
 }
 
-function writeObjects(objects: Transpiler.IOutputFile[], writeSourceMaps: boolean, outputFolder: string) {
+function writeObjects(objects: Transpiler.IOutputFile[], writeSourceMaps: boolean, outputFolder: string, files: Transpiler.IFile[]) {
   for (const o of objects) {
     let contents = o.chunk.getCode();
     if (writeSourceMaps === true) {
       const name = o.filename + ".map";
       contents = contents + `\n//# sourceMappingURL=` + name;
-      fs.writeFileSync(outputFolder + path.sep + name, o.chunk.getMap(o.filename));
+      let map = o.chunk.getMap(o.filename);
+      for (const f of files) { // hack the paths to the original files
+        if (f.relative === undefined) {
+          continue;
+        }
+        if (map.includes(`"${f.filename}"`)) {
+          map = map.replace(`"${f.filename}"`, `"${f.relative}${f.filename}"`);
+        }
+      }
+      fs.writeFileSync(outputFolder + path.sep + name, map);
     }
     fs.writeFileSync(outputFolder + path.sep + o.filename, contents);
   }
@@ -68,7 +77,7 @@ async function run() {
     fs.mkdirSync(outputFolder);
   }
 
-  writeObjects(output.objects, config.write_source_map, outputFolder);
+  writeObjects(output.objects, config.write_source_map, outputFolder, files);
   console.log(output.objects.length + " objects written to disk");
 
   if (config.write_unit_tests === true) {

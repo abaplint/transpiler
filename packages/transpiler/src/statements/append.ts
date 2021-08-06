@@ -44,9 +44,9 @@ export class AppendTranspiler implements IStatementTranspiler {
       options.push(new Chunk().appendString("target: ").appendChunk(target));
 
       const ret = new Chunk();
-      ret.appendString("abap.statements.append({");
+      ret.append("abap.statements.append({", node, traversal);
       ret.join(options);
-      ret.appendString("});");
+      ret.append("});", node.getLastToken(), traversal);
       return ret;
     }
 

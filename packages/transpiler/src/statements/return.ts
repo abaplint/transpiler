@@ -16,7 +16,7 @@ export class ReturnTranspiler implements IStatementTranspiler {
       }
     }
 
-    return new Chunk("return" + extra + ";");
+    return new Chunk().append("return" + extra + ";", node, traversal);
   }
 
 }

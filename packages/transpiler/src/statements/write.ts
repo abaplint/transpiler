@@ -29,7 +29,7 @@ export class WriteTranspiler implements IStatementTranspiler {
     const chunk = new Chunk();
     chunk.append("abap.statements.write(", node, traversal);
     chunk.appendChunk(source);
-    chunk.append(extra + ");", node, traversal);
+    chunk.append(extra + ");", node.getLastToken(), traversal);
     return chunk;
   }
 

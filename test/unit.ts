@@ -574,4 +574,28 @@ ENDCLASS.`;
     expect(cons.split("\n")[1]).to.equal("not found");
   });
 
+  it("test-16", async () => {
+// used for manual testing of source maps
+    const clas = `CLASS zcl_sourcemaptest DEFINITION PUBLIC CREATE PRIVATE FOR TESTING.
+  PUBLIC SECTION.
+    CLASS-METHODS set_repo.
+ENDCLASS.
+CLASS zcl_sourcemaptest IMPLEMENTATION.
+  METHOD set_repo.
+    DATA foo TYPE i.
+    DATA bar TYPE i.
+    DATA list TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+    APPEND foo TO list.
+    WRITE 'hello'.
+    IF foo = bar.
+      WRITE 'moo'.
+    ENDIF.
+  ENDMETHOD.
+ENDCLASS.`;
+    const files = [
+      {filename: "zcl_sourcemaptest.clas.abap", contents: clas},
+    ];
+    await dumpNrun(files);
+  });
+
 });

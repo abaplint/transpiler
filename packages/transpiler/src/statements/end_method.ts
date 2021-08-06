@@ -27,7 +27,7 @@ export class EndMethodTranspiler implements IStatementTranspiler {
       returning = "return this;\n";
     }
 
-    return new Chunk(returning + "}");
+    return new Chunk().append(returning + "}", node, traversal);
   }
 
 }

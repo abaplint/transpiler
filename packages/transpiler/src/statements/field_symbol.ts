@@ -9,7 +9,10 @@ export class FieldSymbolTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const name = node.findDirectExpression(abaplint.Expressions.FieldSymbol);
     if (name) {
-      return new Chunk("let " + new Expr().transpile(name, traversal).getCode() + " = new abap.types.FieldSymbol();");
+      return new Chunk()
+        .append("let ", node, traversal)
+        .appendChunk(new Expr().transpile(name, traversal))
+        .append(" = new abap.types.FieldSymbol();", node.getLastToken(), traversal);
     }
     throw new Error("FieldSymbolTranspiler, name not found");
   }
