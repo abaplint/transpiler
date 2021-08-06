@@ -29,8 +29,8 @@ ENDCLASS.`;
 
     const output = (await new Transpiler().run(files)).objects;
     expect(output.length).to.equal(2);
-    expect(output[0].js.contents).to.contain("class zcl_foo ");
-    expect(output[1].js.contents).to.contain("class zcl_bar ");
+    expect(output[0].chunk.getCode()).to.contain("class zcl_foo ");
+    expect(output[1].chunk.getCode()).to.contain("class zcl_bar ");
 
     expect(output[0].requires.length).to.equal(0);
   });
@@ -70,8 +70,8 @@ ENDCLASS.`;
 
     const output = (await new Transpiler().run(files)).objects;
     expect(output.length).to.equal(2);
-    expect(output[0].js.contents).to.contain("class zcl_foo ");
-    expect(output[1].js.contents).to.contain("class cl_abap_unit_assert ");
+    expect(output[0].chunk.getCode()).to.contain("class zcl_foo ");
+    expect(output[1].chunk.getCode()).to.contain("class cl_abap_unit_assert ");
 
     expect(output[0].requires.length).to.equal(0, "expected one require");
   });
@@ -93,7 +93,7 @@ ENDCLASS.`;
 
     const output = (await new Transpiler().run(files)).objects;
     expect(output.length).to.equal(1);
-    expect(output[0].js.contents).to.contain("class zcl_foo ");
+    expect(output[0].chunk.getCode()).to.contain("class zcl_foo ");
     expect(output[0].requires.length).to.equal(0, "expected zero requires");
   });
 
@@ -126,7 +126,7 @@ ENDCLASS.`;
 
     const output = (await new Transpiler().run(files)).objects;
     expect(output.length).to.equal(2);
-    expect(output[0].js.contents).to.contain("class zcl_locals ");
+    expect(output[0].chunk.getCode()).to.contain("class zcl_locals ");
     expect(output[0].requires.length).to.equal(1, "expected local require");
   });
 

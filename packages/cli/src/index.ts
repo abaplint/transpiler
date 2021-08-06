@@ -42,12 +42,13 @@ function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
 
 function writeObjects(objects: Transpiler.IOutputFile[], writeSourceMaps: boolean, outputFolder: string) {
   for (const o of objects) {
-    let contents = o.js.contents;
+    let contents = o.chunk.getCode();
     if (writeSourceMaps === true) {
-      contents = contents + `\n//# sourceMappingURL=` + o.sourceMap.filename;
-      fs.writeFileSync(outputFolder + path.sep + o.sourceMap.filename, o.sourceMap.contents);
+      const name = o.filename + ".map";
+      contents = contents + `\n//# sourceMappingURL=` + name;
+      fs.writeFileSync(outputFolder + path.sep + name, o.chunk.getMap(o.filename));
     }
-    fs.writeFileSync(outputFolder + path.sep + o.js.filename, o.js.contents);
+    fs.writeFileSync(outputFolder + path.sep + o.filename, contents);
   }
 }
 

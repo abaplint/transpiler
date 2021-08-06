@@ -11,5 +11,5 @@ export async function runFiles(abap: ABAP, files: IFile[]) {
   if (res.databaseSetup !== "") {
     await abap.initDB(res.databaseSetup);
   }
-  return "global.abap = abap;\n" + res.objects[0].js.contents;
+  return "global.abap = abap;\n" + res.objects[0].chunk.getCode();
 }
