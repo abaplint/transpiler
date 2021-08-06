@@ -12,12 +12,12 @@ export class TargetTranspiler implements IExpressionTranspiler {
 
     for (const c of node.getChildren()) {
       if (c.get() instanceof Expressions.TargetField) {
-        ret = ret + traversal.findPrefix(c.getFirstToken());
-        ret = ret.replace("~", "$");
+        const prefix = traversal.findPrefix(c.getFirstToken()).replace("~", "$");
+        ret += prefix;
       } else if (c.get() instanceof Expressions.ClassName) {
         ret += traversal.lookupClassOrInterface(c.getFirstToken().getStr(), c.getFirstToken());
       } else if (c.get() instanceof Expressions.ComponentName) {
-        ret = ret + c.getFirstToken().getStr().toLowerCase();
+        ret += c.getFirstToken().getStr().toLowerCase();
       } else if (c.get() instanceof Expressions.AttributeName) {
         const intf = traversal.isInterfaceAttribute(c.getFirstToken());
         let name = c.getFirstToken().getStr().replace("~", "$").toLowerCase();
