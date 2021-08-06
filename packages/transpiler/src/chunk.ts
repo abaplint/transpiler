@@ -14,7 +14,7 @@ abaplint:
 // Keeps track of source maps as generated code is added
 export class Chunk {
   private raw: string;
-  public readonly mappings: sourceMap.Mapping[] = [];
+  public mappings: sourceMap.Mapping[] = [];
 
   public constructor(str?: string) {
     this.raw = "";
@@ -24,7 +24,28 @@ export class Chunk {
     }
   }
 
-  public appendChunk(append: Chunk) {
+  public copy(): Chunk {
+    const ret = new Chunk();
+    ret.raw = this.raw;
+    ret.mappings = [...this.mappings];
+    return ret;
+  }
+
+  public join(chunks: Chunk[], str = ", "): Chunk {
+    for (let i = 0; i < chunks.length; i++) {
+      this.appendChunk(chunks[i]);
+      if (i !== chunks.length - 1) {
+        this.appendString(str);
+      }
+    }
+    return this;
+  }
+
+  public appendChunk(append: Chunk): Chunk {
+    if (append.getCode() === "") {
+      return this;
+    }
+
     const lines = this.raw.split("\n");
     const lineCount = lines.length;
     const lastLine = lines[lines.length - 1];
@@ -40,14 +61,28 @@ export class Chunk {
     });
 
     this.raw += append.getCode();
+    return this;
   }
 
-  public append(input: string, pos: abaplint.Position | abaplint.INode, traversal: {getFilename(): string}) {
-    if (pos) {
+  public append(input: string, pos: abaplint.Position | abaplint.INode | abaplint.Token, traversal: {getFilename(): string}): Chunk {
+    if (input === "") {
+      return this;
+    }
+
+    if (pos && input !== "\n") {
       const lines = this.raw.split("\n");
       const lastLine = lines[lines.length - 1];
-      const originalLine = pos instanceof abaplint.Position ? pos.getRow() : pos.getFirstToken().getRow();
-      const originalColumn = pos instanceof abaplint.Position ? pos.getCol() - 1 : pos.getFirstToken().getCol() - 1;
+
+      let originalLine = 0;
+      let originalColumn = 0;
+      if (pos instanceof abaplint.Position || pos instanceof abaplint.Token) {
+        originalLine = pos.getRow();
+        originalColumn = pos.getCol() - 1;
+      } else {
+        originalLine = pos.getFirstToken().getRow();
+        originalColumn = pos.getFirstToken().getCol() - 1;
+      }
+
       this.mappings.push({
         source: traversal.getFilename(),
         generated: {

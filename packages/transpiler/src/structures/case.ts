@@ -16,27 +16,37 @@ export class CaseTranspiler implements IStructureTranspiler {
 
     let first = true;
     const u = UniqueIdentifier.get();
-    let ret = "let " + u + " = " + traversal.traverse(s).getCode() + ";\n";
+    const ret = new Chunk();
+
+    // this determines and copies the value
+    ret.append("let " + u + " = ", node, traversal);
+    ret.appendChunk(traversal.traverse(s));
+    ret.append(";\n", node, traversal);
 
     for (const w of node.findDirectStructures(abaplint.Structures.When)) {
       for (const c of w.getChildren()) {
         if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.When) {
           if (first === true) {
             first = false;
-            ret += "if (";
+            ret.appendString("if (");
           } else {
-            ret += "} else if (";
+            ret.appendString("} else if (");
           }
-          ret += new WhenTranspiler(u).transpile(c, traversal).getCode() + ") {\n";
+          ret.appendChunk(new WhenTranspiler(u).transpile(c, traversal));
+          ret.appendString(") {\n");
         } else if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.WhenOthers) {
-          ret += "} else {\n";
+          ret.appendString("} else {\n");
         } else {
-          ret += traversal.traverse(c).getCode(); // Normal
+          ret.appendChunk(traversal.traverse(c)); // Normal
         }
       }
     }
 
-    return new Chunk(ret + (first === true ? "" : "}\n"));
+    if (first === false) {
+      ret.appendString("}\n");
+    }
+
+    return ret;
   }
 
 }

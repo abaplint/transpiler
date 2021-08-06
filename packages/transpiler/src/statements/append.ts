@@ -1,43 +1,53 @@
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
-import {SourceTranspiler} from "../expressions";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 
 export class AppendTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    const options: string[] = [];
     const concat = node.concatTokens();
 
-    const s = node.findDirectExpression(abaplint.Expressions.SimpleSource4);
-    if (s) {
-      options.push("source: " + new SourceTranspiler().transpile(s, traversal).getCode());
-    }
+    const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
 
-    const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target)).getCode();
-
-    if (node.concatTokens().toUpperCase().includes("INITIAL LINE")) {
+    if (concat.toUpperCase().includes("INITIAL LINE")) {
       const found = node.findFirstExpression(abaplint.Expressions.FieldSymbol);
       if (found) {
         const fs = traversal.traverse(found).getCode();
-        return new Chunk(fs + ".assign(" + target + ".appendInitial());");
+        return new Chunk(fs + ".assign(" + target.getCode() + ".appendInitial());");
       } else {
         const into = node.findExpressionAfterToken("INTO");
         const ref = traversal.traverse(into).getCode();
-        return new Chunk(ref + ".assign(" + target + ".appendInitial());");
+        return new Chunk(ref + ".assign(" + target.getCode() + ".appendInitial());");
       }
     } else {
+      const options: Chunk[] = [];
+
+      const s = node.findDirectExpression(abaplint.Expressions.SimpleSource4);
+      if (s) {
+        const option = new Chunk().appendString("source: ");
+        option.appendChunk(traversal.traverse(s));
+        options.push(option);
+      }
+
       const assigning = node.findExpressionAfterToken("ASSIGNING");
       if (assigning) {
-        options.push("assigning: " + traversal.traverse((assigning.findFirstExpression(abaplint.Expressions.FieldSymbol))).getCode());
+        const option = new Chunk().appendString("assigning: ");
+        option.appendChunk(traversal.traverse(assigning.findFirstExpression(abaplint.Expressions.FieldSymbol)));
+        options.push(option);
       }
 
       if (concat.startsWith("APPEND LINES OF ")) {
-        options.push("lines: true");
+        options.push(new Chunk().appendString("lines: true"));
       }
-      options.push("target: " + target);
-      return new Chunk("abap.statements.append({" + options.join(", ") + "});");
+
+      options.push(new Chunk().appendString("target: ").appendChunk(target));
+
+      const ret = new Chunk();
+      ret.appendString("abap.statements.append({");
+      ret.join(options);
+      ret.appendString("});");
+      return ret;
     }
 
   }

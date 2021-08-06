@@ -14,7 +14,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     let ret = new Chunk();
-    let post = "";
+    const post = new Chunk();
 
     for (const c of node.getChildren()) {
       if (c instanceof Nodes.ExpressionNode) {
@@ -27,42 +27,32 @@ export class SourceTranspiler implements IExpressionTranspiler {
         } else if (c.get() instanceof Expressions.Cond) {
           ret.appendChunk(traversal.traverse(c));
         } else if (c.get() instanceof Expressions.ArithOperator) {
-          const code = ret.getCode();
-          ret = new Chunk();
-          ret.appendChunk(traversal.traverse(c));
-          ret.appendString("(" + code + ",");
-          post = ")";
+          ret = new Chunk().appendChunk(traversal.traverse(c)).appendString("(").appendChunk(ret).appendString(",");
+          post.appendString(")");
           if (this.addGet) {
-            post += ".get()";
+            post.append(".get()", c, traversal);
           }
         } else if (c.get() instanceof Expressions.MethodCallChain) {
           ret.appendChunk(traversal.traverse(c));
-          const code = ret.getCode();
           if (this.addGet) {
-            if (ret.getCode().includes("await")) {
-              ret = new Chunk();
-              ret.appendString("(" + code + ").get()");
+            const code = ret.getCode();
+            if (code.includes("await")) {
+              ret = new Chunk().appendString("(").appendChunk(ret).appendString(").get()");
             } else {
-              ret.appendString(".get()");
+              ret.append(".get()", c, traversal);
             }
           }
         } else if (c.get() instanceof Expressions.Source) {
           ret.appendChunk(new SourceTranspiler(this.addGet).transpile(c, traversal));
         } else if (c.get() instanceof Expressions.Arrow) {
-          const code = ret.getCode();
-          ret = new Chunk();
-          ret.appendString("(" + code + ").get().");
+          ret = new Chunk().appendString("(").appendChunk(ret).appendString(").get().");
         } else if (c.get() instanceof Expressions.AttributeChain) {
           ret.appendChunk(new AttributeChainTranspiler().transpile(c, traversal));
         } else if (c.get() instanceof Expressions.ComponentChain) {
-          const code = ret.getCode();
-          ret = new Chunk();
-          ret.appendString("(" + code + ").get().");
+          ret = new Chunk().appendString("(").appendChunk(ret).appendString(").get().");
           ret.appendChunk(new ComponentChainTranspiler().transpile(c, traversal));
         } else if (c.get() instanceof Expressions.Dereference) {
-          const code = ret.getCode();
-          ret = new Chunk();
-          ret.appendString("(" + code + ").getPointer()");
+          ret = new Chunk().appendString("(").appendChunk(ret).appendString(").getPointer()");
         } else {
           ret.appendString("SourceUnknown-" + c.get().constructor.name);
         }
@@ -70,18 +60,18 @@ export class SourceTranspiler implements IExpressionTranspiler {
         if (this.addGet === false) {
           return new SourceTranspiler(true).transpile(node, traversal);
         } else {
-          ret.appendString(" + ");
+          ret.append(" + ", c, traversal);
         }
       } else if (c instanceof Nodes.TokenNodeRegex && c.getFirstToken().getStr().toUpperCase() === "BOOLC") {
-        ret.appendString("abap.builtin.boolc(");
-        post += ")";
+        ret.append("abap.builtin.boolc(", c, traversal);
+        post.append(")", c, traversal);
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "BIT") { // todo, this will not work in the general case
-        ret.appendString("abap.operators.bitnot(");
-        post += ")";
+        ret.append("abap.operators.bitnot(", c, traversal);
+        post.append(")", c, traversal);
       }
     }
 
-    ret.appendString(post);
+    ret.appendChunk(post);
 
     return ret;
   }

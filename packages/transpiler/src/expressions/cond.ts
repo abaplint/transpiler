@@ -6,20 +6,20 @@ import {Chunk} from "../chunk";
 export class CondTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
-    let ret = "";
+    const ret = new Chunk();
 
     for (const c of node.getChildren()) {
       if (c.get() instanceof Expressions.Compare
           || c.get() instanceof Expressions.CondSub) {
-        ret += traversal.traverse(c).getCode();
+        ret.appendChunk(traversal.traverse(c));
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr() === "OR") {
-        ret += " || ";
+        ret.append(" || ", c, traversal);
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr() === "AND") {
-        ret += " && ";
+        ret.append(" && ", c, traversal);
       }
     }
 
-    return new Chunk(ret);
+    return ret;
   }
 
 }

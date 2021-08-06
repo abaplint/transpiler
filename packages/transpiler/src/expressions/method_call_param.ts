@@ -22,15 +22,18 @@ export class MethodCallParam implements IExpressionTranspiler {
     if (source) {
       const def = this.m?.getParameters().getDefaultImporting()?.toLowerCase();
       if (this.m === undefined || def === undefined) {
-        name = name + traversal.traverse(source).getCode();
+        return traversal.traverse(source);
       } else {
-        name = name + "{" + def + ": " + traversal.traverse(source).getCode() + "}";
+        return new Chunk()
+          .appendString("{" + def + ": ")
+          .appendChunk(traversal.traverse(source))
+          .appendString("}");
       }
     }
 
     const parameters = node.findDirectExpression(Expressions.ParameterListS);
     if (parameters) {
-      name = name + traversal.traverse(parameters).getCode();
+      return traversal.traverse(parameters);
     } else {
       const params = node.findDirectExpression(Expressions.MethodParameters);
       if (params) {

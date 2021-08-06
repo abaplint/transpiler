@@ -30,9 +30,12 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
       throw new Error("MethodCallTranspiler, unexpected node");
     }
 
-    name += new MethodCallParam(m?.def).transpile(step, traversal).getCode();
+    const ret = new Chunk();
+    ret.append(name, nameToken, traversal);
+    ret.appendChunk(new MethodCallParam(m?.def).transpile(step, traversal));
+    ret.appendString(")");
 
-    return new Chunk(name + ")");
+    return ret;
   }
 
 }

@@ -8,42 +8,43 @@ export class TargetTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     const offset: string[] = [];
-    let ret = "";
+    const ret = new Chunk();
 
     for (const c of node.getChildren()) {
       if (c.get() instanceof Expressions.TargetField) {
-        ret = ret + traversal.findPrefix(c.getFirstToken());
-        ret = ret.replace("~", "$");
+        const prefix = traversal.prefixAndName(c.getFirstToken()).replace("~", "$");
+        ret.append(prefix, c, traversal);
       } else if (c.get() instanceof Expressions.ClassName) {
-        ret += traversal.lookupClassOrInterface(c.getFirstToken().getStr(), c.getFirstToken());
+        const name = traversal.lookupClassOrInterface(c.getFirstToken().getStr(), c.getFirstToken());
+        ret.append(name, c, traversal);
       } else if (c.get() instanceof Expressions.ComponentName) {
-        ret = ret + c.getFirstToken().getStr().toLowerCase();
+        ret.append(c.getFirstToken().getStr().toLowerCase(), c, traversal);
       } else if (c.get() instanceof Expressions.AttributeName) {
         const intf = traversal.isInterfaceAttribute(c.getFirstToken());
         let name = c.getFirstToken().getStr().replace("~", "$").toLowerCase();
         if (intf && name.startsWith(intf) === false) {
           name = intf + "$" + name;
         }
-        ret += name;
+        ret.append(name, c, traversal);
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.FieldOffset) {
         offset.push("offset: " + new FieldOffsetTranspiler().transpile(c, traversal).getCode());
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.FieldLength) {
         offset.push("length: " + new FieldLengthTranspiler().transpile(c, traversal).getCode());
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.TargetFieldSymbol) {
-        ret = ret + new FieldSymbolTranspiler().transpile(c, traversal).getCode();
+        ret.appendChunk(new FieldSymbolTranspiler().transpile(c, traversal));
       } else if (c.getFirstToken().getStr() === "-") {
-        ret = ret + ".get().";
+        ret.append(".get().", c, traversal);
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.Dereference) {
-        ret = ret + ".getPointer()";
+        ret.append(".getPointer()", c, traversal);
         break;
       } else if (c.getFirstToken().getStr() === "=>") {
-        ret = ret + ".";
+        ret.append(".", c, traversal);
       } else if (c.getFirstToken().getStr() === "->") {
         if (node.concatTokens().endsWith("->*")) {
-          ret = ret + ".getPointer()";
+          ret.append(".getPointer()", c, traversal);
           break;
         } else {
-          ret = ret + ".get().";
+          ret.append(".get().", c, traversal);
         }
       }
     }
@@ -55,7 +56,7 @@ export class TargetTranspiler implements IExpressionTranspiler {
       post = ", {" + offset.join(", ") + "})";
     }
 
-    return new Chunk(pre + ret + post);
+    return new Chunk().appendString(pre).appendChunk(ret).appendString(post);
   }
 
 }

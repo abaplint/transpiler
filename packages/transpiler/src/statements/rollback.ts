@@ -5,8 +5,8 @@ import {Chunk} from "../chunk";
 
 export class RollbackTranspiler implements IStatementTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    return new Chunk("abap.statements.rollback();");
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
+    return new Chunk().append("abap.statements.rollback();", node, traversal);
   }
 
 }

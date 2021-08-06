@@ -6,9 +6,14 @@ import {Chunk} from "../chunk";
 export class CondenseTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target)).getCode();
-    const noGaps = node.concatTokens().search(/NO-GAPS.$/) > -1;
-    return new Chunk("abap.statements.condense(" + target + ", {nogaps: " + noGaps + "});");
+    const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
+    const noGaps = node.concatTokens().includes(" NO-GAPS");
+
+    const ret = new Chunk();
+    ret.append("abap.statements.condense(", node, traversal);
+    ret.appendChunk(target);
+    ret.append(", {nogaps: " + noGaps + "});", node, traversal);
+    return ret;
   }
 
 }

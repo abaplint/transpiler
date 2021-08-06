@@ -6,15 +6,15 @@ import {Chunk} from "../chunk";
 export class ParameterListTTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
-    const parameters: string[] = [];
+    const parameters: Chunk[] = [];
 
     for (const c of node.getChildren()) {
       if (c instanceof Nodes.ExpressionNode) {
-        parameters.push(traversal.traverse(c).getCode());
+        parameters.push(traversal.traverse(c));
       }
     }
 
-    return new Chunk("{" + parameters.join(", ") + "}");
+    return new Chunk().appendString("{").join(parameters).appendString("}");
   }
 
 }
