@@ -11,10 +11,11 @@ export class CallTranspiler implements IStatementTranspiler {
       return new Chunk("");
     }
 
-
     const chain = node.findDirectExpression(abaplint.Expressions.MethodCallChain);
     if (chain) {
-      return new Chunk(traversal.traverse(chain).getCode() + ";");
+      return new Chunk()
+        .appendChunk(traversal.traverse(chain))
+        .append(";", node.getLastToken(), traversal);
     }
 
     const methodSource = node.findDirectExpression(abaplint.Expressions.MethodSource);
@@ -24,7 +25,7 @@ export class CallTranspiler implements IStatementTranspiler {
       if (methodCallBody && 1 === 1 + 2) { // todo
         body += traversal.traverse(methodCallBody).getCode();
       }
-      return new Chunk(traversal.traverse(methodSource).getCode() + "(" + body + ");");
+      return new Chunk().appendChunk(traversal.traverse(methodSource)).appendString("(" + body + ");");
     }
 
     throw new Error("CallTranspiler, todo");
