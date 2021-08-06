@@ -5,8 +5,8 @@ import {IStatementTranspiler} from "./_statement_transpiler";
 
 export class ExitTranspiler implements IStatementTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    return new Chunk("break;");
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
+    return new Chunk().append("break;", node, traversal);
   }
 
 }
