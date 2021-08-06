@@ -11,6 +11,7 @@ export class CallTranspiler implements IStatementTranspiler {
       return new Chunk("");
     }
 
+
     const chain = node.findDirectExpression(abaplint.Expressions.MethodCallChain);
     if (chain) {
       return new Chunk(traversal.traverse(chain).getCode() + ";");
