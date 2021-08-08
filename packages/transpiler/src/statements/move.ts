@@ -11,7 +11,7 @@ export class MoveTranspiler implements IStatementTranspiler {
 
     const ret = new Chunk()
       .appendChunk(target)
-      .append(".set(", node, traversal)
+      .appendString(".set(")
       .appendChunk(source)
       .append(");", node.getLastToken(), traversal);
 

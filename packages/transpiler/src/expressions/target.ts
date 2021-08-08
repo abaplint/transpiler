@@ -56,7 +56,10 @@ export class TargetTranspiler implements IExpressionTranspiler {
       post = ", {" + offset.join(", ") + "})";
     }
 
-    return new Chunk().appendString(pre).appendChunk(ret).appendString(post);
+    return new Chunk()
+      .appendString(pre)
+      .appendChunk(ret)
+      .appendString(post);
   }
 
 }
