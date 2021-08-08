@@ -20,7 +20,7 @@ export class RaiseTranspiler implements IStatementTranspiler {
 
     const look = traversal.lookupClassOrInterface(classNameToken?.getStr(), classNameToken);
 
-    return new Chunk(`throw await (new ${look}()).constructor_(${p});`);
+    return new Chunk().append(`throw await (new ${look}()).constructor_(${p});`, node, traversal);
   }
 
 }

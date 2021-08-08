@@ -9,11 +9,12 @@ export class MoveTranspiler implements IStatementTranspiler {
     const source = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Source));
     const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
 
-    const ret = new Chunk();
-    ret.appendChunk(target);
-    ret.append(".set(", node, traversal);
-    ret.appendChunk(source);
-    ret.append(");", node, traversal);
+    const ret = new Chunk()
+      .appendChunk(target)
+      .append(".set(", node, traversal)
+      .appendChunk(source)
+      .append(");", node.getLastToken(), traversal);
+
     return ret;
   }
 

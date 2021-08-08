@@ -29,7 +29,10 @@ export class ModifyInternalTranspiler implements IStatementTranspiler {
       concat = ",{" + extra.join(",") + "}";
     }
 
-    return new Chunk("abap.statements.modifyInternal(" + target + concat + ");");
+    return new Chunk()
+      .append("abap.statements.modifyInternal(", node, traversal)
+      .appendString(target + concat)
+      .append(");", node.getLastToken(), traversal);
   }
 
 }

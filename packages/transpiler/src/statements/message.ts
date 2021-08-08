@@ -60,7 +60,10 @@ export class MessageTranspiler implements IStatementTranspiler {
       options.push("with: [" + w.join(",") + "]");
     }
 
-    return new Chunk("abap.statements.message({" + options.join(", ") + "});");
+    return new Chunk()
+      .append("abap.statements.message({", node, traversal)
+      .appendString(options.join(", "))
+      .append("});", node.getLastToken(), traversal);
   }
 
 }

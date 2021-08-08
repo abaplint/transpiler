@@ -21,7 +21,7 @@ export class SplitTranspiler implements IStatementTranspiler {
       to = ", targets: [" + node.findDirectExpressions(abaplint.Expressions.Target).map(e => traversal.traverse(e).getCode()).join(",") + "]";
     }
 
-    return new Chunk("abap.statements.split({source: " + source + ", at: " + at + to + "});");
+    return new Chunk().append("abap.statements.split({source: " + source + ", at: " + at + to + "});", node, traversal);
   }
 
 }

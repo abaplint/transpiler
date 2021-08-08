@@ -57,7 +57,10 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       concat = ",{" + extra.join(",") + "}";
     }
 
-    return new Chunk(prefix + "abap.statements.readTable(" + ret + concat + ");");
+    return new Chunk()
+      .append(prefix + "abap.statements.readTable(", node, traversal)
+      .appendString(ret + concat)
+      .append(");", node.getLastToken(), traversal);
   }
 
 }

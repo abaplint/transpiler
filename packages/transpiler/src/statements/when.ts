@@ -22,7 +22,7 @@ export class WhenTranspiler implements IStatementTranspiler {
       ret += "abap.compare.eq(" + this.u + ", " + source + ")";
     }
 
-    return new Chunk(ret);
+    return new Chunk().append(ret, node, traversal);
   }
 
 }

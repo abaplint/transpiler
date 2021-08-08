@@ -24,7 +24,7 @@ export class TranslateTranspiler implements IStatementTranspiler {
       }
     }
 
-    return new Chunk("abap.statements.translate(" + target + ", " + type + ");");
+    return new Chunk().append("abap.statements.translate(" + target + ", " + type + ");", node, traversal);
   }
 
 }

@@ -38,7 +38,7 @@ export class ShiftTranspiler implements IStatementTranspiler {
       options.push("mode: 'BYTE'");
     }
     const extra = options.length > 0 ? ", {" + options.join(",") + "}" : "";
-    return new Chunk("abap.statements.shift(" + target + extra + ");");
+    return new Chunk().append("abap.statements.shift(" + target + extra + ");", node, traversal);
   }
 
 }
