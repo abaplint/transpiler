@@ -6,40 +6,46 @@ import {Chunk} from "../chunk";
 export class MethodCallChainTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
-    let ret = "";
+    let ret = new Chunk();
 
     for (const c of node.getChildren()) {
       if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.MethodCall) {
-        const sub = traversal.traverse(c).getCode();
-        if (sub.startsWith("abap.builtin.")) {
-          ret = ret + sub;
+        const sub = traversal.traverse(c);
+        if (sub.getCode().startsWith("abap.builtin.")) {
+          ret.appendChunk(sub);
         } else {
           const t = c === node.getFirstChild() ? "this." : "";
-          ret = "(await " + t + ret + sub + ")";
+          ret = new Chunk()
+            .appendString("(await ")
+            .append(t, node, traversal)
+            .appendChunk(ret)
+            .appendChunk(sub)
+            .appendString(")");
         }
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.FieldChain) {
-        ret = ret + traversal.traverse(c).getCode();
+        ret.appendChunk(traversal.traverse(c));
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.ClassName) {
-        ret = traversal.lookupClassOrInterface(c.getFirstToken().getStr(), c.getFirstToken());
+        ret = new Chunk().append(traversal.lookupClassOrInterface(c.getFirstToken().getStr(), c.getFirstToken()), c, traversal);
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.MethodName) {
-        ret += c.getFirstToken().getStr().toLowerCase();
+        ret.append(c.getFirstToken().getStr().toLowerCase(), c, traversal);
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr() === "->") {
-        if (ret === "super") {
-          ret = ret + ".";
+        if (ret.getCode() === "super") {
+          ret.append(".", c, traversal);
         } else {
-          ret = ret + ".get().";
+          ret.append(".get().", c, traversal);
         }
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr() === "=>") {
-        ret = ret + ".";
+        ret.append(".", c, traversal);
       } else {
-        ret = ret + "MethodCallChainTranspilerTodo-" + c.get().constructor.name;
+        ret.append("MethodCallChainTranspilerTodo-" + c.get().constructor.name, c, traversal);
       }
     }
 
-    if (ret.startsWith("(") && ret.endsWith(")")) {
-      return new Chunk(ret.substr(1, ret.length - 2));
+    const code = ret.getCode();
+    if (code.startsWith("(") && code.endsWith(")")) {
+      return new Chunk().append(code.substr(1, code.length - 2), node, traversal);
     } else {
-      return new Chunk(ret);
+      return ret;
     }
   }
 
