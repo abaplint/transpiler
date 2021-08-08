@@ -40,7 +40,9 @@ export class DataTranspiler implements IStatementTranspiler {
       }
     }
 
-    return new Chunk(new TranspileTypes().declare(found) + value);
+    return new Chunk()
+      .append(new TranspileTypes().declare(found), node, traversal)
+      .append(value, node.getLastToken(), traversal);
   }
 
 }

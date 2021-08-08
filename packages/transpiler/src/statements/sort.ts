@@ -29,7 +29,7 @@ export class SortTranspiler implements IStatementTranspiler {
     }
 
     const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target)).getCode();
-    return new Chunk("abap.statements.sort(" + target + ",{" + options.join(",") + "});");
+    return new Chunk().append("abap.statements.sort(" + target + ",{" + options.join(",") + "});", node, traversal);
   }
 
   private findNextText(c: abaplint.Nodes.ExpressionNode, parent: abaplint.Nodes.StatementNode): string {

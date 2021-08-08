@@ -17,7 +17,10 @@ export class ReplaceTranspiler implements IStatementTranspiler {
 
     const all = node.concatTokens().toUpperCase().startsWith("REPLACE ALL");
 
-    return new Chunk("abap.statements.replace(" + target + ", " + all + ", " + sources.join(", ") + ");");
+    return new Chunk()
+      .append("abap.statements.replace(", node, traversal)
+      .appendString(target + ", " + all + ", " + sources.join(", "))
+      .append(");", node.getLastToken(), traversal);
   }
 
 }

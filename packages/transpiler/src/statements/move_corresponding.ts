@@ -6,12 +6,12 @@ import {Chunk} from "../chunk";
 export class MoveCorrespondingTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target)).getCode();
-    const source = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Source)).getCode();
+    const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
+    const source = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Source));
 
-    const ret = `abap.statements.moveCorresponding(${source}, ${target});`;
-
-    return new Chunk(ret);
+    return new Chunk().append("abap.statements.moveCorresponding(", node, traversal)
+      .join([source, target])
+      .append(");", node.getLastToken(), traversal);
   }
 
 }
