@@ -35,7 +35,10 @@ export class InsertInternalTranspiler implements IStatementTranspiler {
 
     options.push("table: " + traversal.traverse(target).getCode());
 
-    return new Chunk(`abap.statements.insertInternal({${options.join(", ")}});`);
+    return new Chunk()
+      .append(`abap.statements.insertInternal({`, node, traversal)
+      .appendString(options.join(", "))
+      .append(`});`, node.getLastToken(), traversal);
   }
 
 }

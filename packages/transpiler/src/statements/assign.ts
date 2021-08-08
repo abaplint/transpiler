@@ -25,7 +25,9 @@ export class AssignTranspiler implements IStatementTranspiler {
       options.push("casting: true");
     }
 
-    return new Chunk("abap.statements.assign({" + options.join(", ") + "});");
+    return new Chunk().append("abap.statements.assign({", node, traversal)
+      .appendString(options.join(", "))
+      .append("});", node.getLastToken(), traversal);
   }
 
 }

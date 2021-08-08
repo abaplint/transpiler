@@ -7,9 +7,9 @@ export class AssertTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const ret = new Chunk();
-    ret.appendString("abap.statements.assert(");
+    ret.append("abap.statements.assert(", node, traversal);
     ret.appendChunk(traversal.traverse(node.findDirectExpression(abaplint.Expressions.Cond)));
-    ret.appendString(");");
+    ret.append(");", node.getLastToken(), traversal);
     return ret;
   }
 

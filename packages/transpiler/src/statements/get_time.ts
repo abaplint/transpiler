@@ -13,7 +13,10 @@ export class GetTimeTranspiler implements IStatementTranspiler {
     } else if (concat.startsWith("GET TIME STAMP FIELD")) {
       options = "{stamp: " + traversal.traverse(node.findFirstExpression(abaplint.Expressions.Target)).getCode() + "}";
     }
-    return new Chunk("abap.statements.getTime(" + options + ");");
+    return new Chunk()
+      .append("abap.statements.getTime(", node, traversal)
+      .appendString(options)
+      .append(");", node.getLastToken(), traversal);
   }
 
 }
