@@ -26,6 +26,9 @@ async function run() {
 try {\n`;
 
     for (const obj of reg.getObjects()) {
+      if (reg.isDependency(obj)) {
+        continue;
+      }
       if (obj instanceof abaplint.Objects.Class) {
         ret += `// --------------------------------------------\n`;
         ret += `clas = unit.addObject("${obj.getName()}");\n`;

@@ -69,13 +69,19 @@ async function run() {
 
   const config = TranspilerConfig.find(process.argv[2]);
   const libFiles = loadLib(config);
-  const files = FileOperations.loadFiles(config).concat(libFiles);
+  const files = FileOperations.loadFiles(config);
 
   console.log("\nBuilding");
   const t = new Transpiler.Transpiler(config.options);
 
-  const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
-  const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
+  const reg: abaplint.IRegistry = new abaplint.Registry();
+  for (const f of files) {
+    reg.addFile(new abaplint.MemoryFile(f.filename, f.contents));
+  }
+  for (const l of libFiles) {
+    reg.addDependency(new abaplint.MemoryFile(l.filename, l.contents));
+  }
+  reg.parse();
 
   const output = await t.run(reg, new Progress());
 
