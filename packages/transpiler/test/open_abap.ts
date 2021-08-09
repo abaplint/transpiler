@@ -1,5 +1,13 @@
 import {expect} from "chai";
-import {Transpiler} from "../src";
+import {IFile, Transpiler} from "../src";
+import * as abaplint from "@abaplint/core";
+
+async function runFiles(files: IFile[]) {
+  const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
+  const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
+  const res = await new Transpiler().run(reg);
+  return res.objects;
+}
 
 describe("open abap examples", () => {
 
@@ -49,7 +57,7 @@ ENDCLASS.`;
       {filename: "zif_abap_serverless_v1.intf.abap", contents: intf},
       {filename: "zcl_words.clas.abap", contents: clas}];
 
-    const output = (await new Transpiler().run(files)).objects;
+    const output = await runFiles(files);
 
     expect(output[1].chunk.getCode()).to.contain("moo");
   });

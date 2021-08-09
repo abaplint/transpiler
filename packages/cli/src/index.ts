@@ -5,6 +5,7 @@ import * as childProcess from "child_process";
 import * as os from "os";
 import * as ProgressBar from "progress";
 import * as Transpiler from "@abaplint/transpiler";
+import * as abaplint from "@abaplint/core";
 import {ITranspilerConfig, TranspilerConfig} from "./config";
 import {FileOperations} from "./file_operations";
 
@@ -67,11 +68,16 @@ async function run() {
   console.log("Transpiler CLI");
 
   const config = TranspilerConfig.find(process.argv[2]);
-  const files = FileOperations.loadFiles(config).concat(loadLib(config));
+  const libFiles = loadLib(config);
+  const files = FileOperations.loadFiles(config).concat(libFiles);
 
   console.log("\nBuilding");
   const t = new Transpiler.Transpiler(config.options);
-  const output = await t.run(files, new Progress());
+
+  const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
+  const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
+
+  const output = await t.run(reg, new Progress());
 
   console.log("\nOutput");
   const outputFolder = config.output_folder;

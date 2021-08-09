@@ -76,9 +76,9 @@ export class Transpiler {
     }
   }
 
-  public async run(files: IFile[], progress?: IProgress): Promise<IOutput> {
-    const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
-    const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
+  public async run(reg: abaplint.IRegistry, progress?: IProgress): Promise<IOutput> {
+
+    reg.parse();
     new Keywords().handle(reg);
     this.validate(reg);
 

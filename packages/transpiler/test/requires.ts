@@ -1,5 +1,14 @@
 import {expect} from "chai";
-import {Transpiler} from "../src";
+import {IFile, Transpiler} from "../src";
+import * as abaplint from "@abaplint/core";
+
+async function runFiles(files: IFile[]) {
+  const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
+  const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
+  const res = await new Transpiler().run(reg);
+  return res.objects;
+}
+
 
 describe("Requires", () => {
 
@@ -27,7 +36,7 @@ ENDCLASS.`;
       {filename: "zcl_foo.clas.abap", contents: clas1},
       {filename: "zcl_bar.clas.abap", contents: clas2}];
 
-    const output = (await new Transpiler().run(files)).objects;
+    const output = await runFiles(files);
     expect(output.length).to.equal(2);
     expect(output[0].chunk.getCode()).to.contain("class zcl_foo ");
     expect(output[1].chunk.getCode()).to.contain("class zcl_bar ");
@@ -68,7 +77,7 @@ ENDCLASS.`;
       {filename: "zcl_foo.clas.abap", contents: clas1},
       {filename: "cl_abap_unit_assert.clas.abap", contents: clas2}];
 
-    const output = (await new Transpiler().run(files)).objects;
+    const output = await runFiles(files);
     expect(output.length).to.equal(2);
     expect(output[0].chunk.getCode()).to.contain("class zcl_foo ");
     expect(output[1].chunk.getCode()).to.contain("class cl_abap_unit_assert ");
@@ -91,7 +100,7 @@ ENDCLASS.`;
 
     const files = [{filename: "zcl_foo.clas.abap", contents: clas1}];
 
-    const output = (await new Transpiler().run(files)).objects;
+    const output = await runFiles(files);
     expect(output.length).to.equal(1);
     expect(output[0].chunk.getCode()).to.contain("class zcl_foo ");
     expect(output[0].requires.length).to.equal(0, "expected zero requires");
@@ -124,7 +133,7 @@ ENDCLASS.`;
       {filename: "zcl_locals.clas.locals_imp.abap", contents: locals},
     ];
 
-    const output = (await new Transpiler().run(files)).objects;
+    const output = await runFiles(files);
     expect(output.length).to.equal(2);
     expect(output[0].chunk.getCode()).to.contain("class zcl_locals ");
     expect(output[0].requires.length).to.equal(1, "expected local require");

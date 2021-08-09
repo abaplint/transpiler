@@ -1,6 +1,6 @@
-import * as Transpiler from "../packages/transpiler/src";
 import {ITranspilerConfig} from "../packages/cli/src/config";
 import {FileOperations} from "../packages/cli/src/file_operations";
+import {compileFiles} from "test/_utils";
 
 // only does building, does not execute runtime
 
@@ -27,8 +27,8 @@ async function run() {
   const files = FileOperations.loadFiles(config);
 
   console.log("\nBuilding");
-  const t = new Transpiler.Transpiler(config.options);
-  const output = await t.run(files);
+//  const t = new Transpiler.Transpiler(config.options);
+  const output = await compileFiles(files, config.options);
   console.log(output.reg.getObjectCount() + " objects processed");
 }
 
