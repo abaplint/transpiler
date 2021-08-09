@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as childProcess from "child_process";
 import {expect} from "chai";
 import {IFile, ITranspilerOptions, Transpiler} from "../packages/transpiler/src/";
+import * as abaplint from "@abaplint/core";
 
 describe("Testing Unit Testing", () => {
   const base: string = path.join(__dirname, "..", "..", "unit-test/");
@@ -33,7 +34,9 @@ describe("Testing Unit Testing", () => {
       fs.writeFileSync(outputFolder + path.sep + f.filename, f.contents);
     }
 
-    const output = await new Transpiler(config).run(files);
+    const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
+    const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
+    const output = await new Transpiler(config).run(reg);
 
     for (const o of output.objects) {
       let contents = o.chunk.getCode();

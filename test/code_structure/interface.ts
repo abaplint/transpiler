@@ -1,7 +1,6 @@
 import {expect} from "chai";
-import {Transpiler} from "../../packages/transpiler/src";
 import {ABAP} from "../../packages/runtime/src";
-import {AsyncFunction, runFiles} from "../_utils";
+import {AsyncFunction, compileFiles, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -249,7 +248,7 @@ START-OF-SELECTION.
     INTERFACE if_request PUBLIC.
     ENDINTERFACE.`;
 
-    const result = await new Transpiler().run([
+    const result = await compileFiles([
       {filename: "zcl_client.clas.abap", contents: zcl_client},
       {filename: "zcl_client.clas.testclasses.abap", contents: tests},
       {filename: "if_client.intf.abap", contents: if_client},

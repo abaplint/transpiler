@@ -1,5 +1,13 @@
 import {expect} from "chai";
-import {Transpiler} from "../src";
+import {IFile, Transpiler} from "../src";
+import * as abaplint from "@abaplint/core";
+
+async function runFiles(files: IFile[]) {
+  const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
+  const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
+  const res = await new Transpiler().run(reg);
+  return res.objects;
+}
 
 describe("Files", () => {
 
@@ -7,7 +15,7 @@ describe("Files", () => {
     const file1 = {filename: "zfoo1.prog.abap", contents: "WRITE '1'."};
     const file2 = {filename: "zfoo2.prog.abap", contents: "WRITE '2'."};
 
-    const output = (await new Transpiler().run([file1, file2])).objects;
+    const output = await runFiles([file1, file2]);
 
     expect(output.length).to.equal(2);
     expect(output[0].filename).to.equal("zfoo1.prog.mjs");
@@ -18,7 +26,7 @@ describe("Files", () => {
     const filename = "C:\\Users\\foobar\\git\\transpiler\\packages\\abap-loader\\build\\test\\zprogram.prog.abap";
     const file1 = {filename, contents: "WRITE '1'."};
 
-    const output = (await new Transpiler().run([file1])).objects;
+    const output = await runFiles([file1]);
 
     expect(output.length).to.equal(1);
     expect(output[0].filename).to.contain("zprogram.prog.mjs");
@@ -34,7 +42,7 @@ ENDCLASS.
 `;
     const file1 = {filename, contents};
 
-    const output = (await new Transpiler().run([file1])).objects;
+    const output = await runFiles([file1]);
 
     expect(output.length).to.equal(1);
     expect(output[0].chunk.getCode()).to.include("zcl_index");
@@ -68,7 +76,7 @@ ENDCLASS.
 `;
     const file2 = {filename: filename2, contents: contents2};
 
-    const output = (await new Transpiler().run([file1, file2])).objects;
+    const output = await runFiles([file1, file2]);
 
     expect(output.length).to.equal(2);
     expect(output[0].chunk.getCode()).to.include("zcl_index");
@@ -101,7 +109,7 @@ ENDINTERFACE.`;
     const file1 = {filename: filename1, contents: contents1};
     const file2 = {filename: filename2, contents: contents2};
 
-    const output = (await new Transpiler().run([file1, file2])).objects;
+    const output = await runFiles([file1, file2]);
 
     expect(output.length).to.equal(2);
     expect(output[0].chunk.getCode()).to.include("zcl_index");
@@ -136,7 +144,7 @@ ENDINTERFACE.`;
     const file1 = {filename: filename1, contents: contents1};
     const file2 = {filename: filename2, contents: contents2};
 
-    const output = (await new Transpiler().run([file1, file2])).objects;
+    const output = await runFiles([file1, file2]);
 
     expect(output.length).to.equal(2);
   });
