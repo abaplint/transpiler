@@ -27,6 +27,7 @@ export class FileOperations {
     const files: Transpiler.IFile[] = [];
     const filter = (config.input_filter ?? []).map(pattern => new RegExp(pattern, "i"));
     let skipped = 0;
+    let added = 0;
 
     for (const filename of glob.sync(config.input_folder + "/**", {nosort: true, nodir: true})) {
       if (filter.length > 0 && filter.some(a => a.test(filename)) === false) {
@@ -38,8 +39,9 @@ export class FileOperations {
         relative: path.relative(config.output_folder, path.dirname(filename)),
         contents: fs.readFileSync(filename, "utf8"),
       });
-      console.log("Add:\t" + filename);
+      added++;
     }
+    console.log(added + " files added");
     console.log(skipped + " files skipped");
     return files;
   }
