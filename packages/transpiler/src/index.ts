@@ -76,6 +76,13 @@ export class Transpiler {
     }
   }
 
+  // workaround for web/webpack
+  public async runRaw(files: IFile[]): Promise<IOutput> {
+    const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
+    const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
+    return new Transpiler().run(reg);
+  }
+
   public async run(reg: abaplint.IRegistry, progress?: IProgress): Promise<IOutput> {
 
     reg.parse();

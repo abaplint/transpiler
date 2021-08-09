@@ -125,11 +125,7 @@ async function abapChanged() {
     reg.parse();
     abapMonaco.updateMarkers(reg, model1);
 
-    /*
-    console.dir("count:" + reg.getObjectCount());
-    console.dir(reg.getObject("PROG", "zfoobar"));
-    */
-    const res = await new Transpiler().run(reg);
+    const res = await new Transpiler().runRaw([{filename, contents}]);
     editor2.setValue(res.objects[0].chunk.getCode() || "");
   } catch (error) {
     editor2.setValue("");
