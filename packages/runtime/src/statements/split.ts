@@ -14,11 +14,12 @@ export function split(param: ISplitOptions) {
 
   const split = source.includes(at) ? source.split(at) : [];
 
+  if (source.endsWith(at)) {
+    split.pop();
+  }
+
   if (param.table) {
     param.table.clear();
-    if (source.endsWith(at)) {
-      split.pop();
-    }
     for(const s of split) {
       param.table.append(new String().set(s));
     }

@@ -172,4 +172,17 @@ WRITE / lv_int.`;
     expect(abap.console.get()).to.equal("hello\nworld moo");
   });
 
+  it("split 4", async () => {
+    const code = `
+  DATA lv_str TYPE string.
+  DATA lv_order TYPE string.
+  SPLIT 'hello|' AT '|' INTO lv_str lv_order.
+  WRITE / lv_str.
+  WRITE / lv_order.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello\n");
+  });
+
 });
