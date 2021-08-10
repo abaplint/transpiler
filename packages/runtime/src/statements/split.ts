@@ -34,8 +34,8 @@ export function split(param: ISplitOptions) {
     }
     for (const t of param.targets) {
       t.clear();
-      if (split[0]) {
-        t.set(split.shift()!);
+      if (split.length > 0) {
+        t.set(split.shift()!.trimEnd());
       }
     }
     if (split.length > 0) {
