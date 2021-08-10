@@ -185,4 +185,51 @@ WRITE / lv_int.`;
     expect(abap.console.get()).to.equal("hello\n");
   });
 
+  it("split 5", async () => {
+    const code = `
+    DATA lv_str1 TYPE string.
+    DATA lv_str2 TYPE string.
+    DATA lv_str3 TYPE string.
+    DATA lv_str4 TYPE string.
+    DATA lv_str5 TYPE string.
+    DATA lv_str6 TYPE string.
+    DATA lv_str7 TYPE string.
+
+    SPLIT '/a/b/c/ |d     |object |     ||0' AT '|' INTO
+    lv_str1
+    lv_str2
+    lv_str3
+    lv_str4
+    lv_str5
+    lv_str6
+    lv_str7.
+
+    WRITE: / '1', lv_str1.
+    WRITE: / '2', lv_str2.
+    WRITE: / '3', lv_str3.
+    WRITE: / '4', lv_str4.
+    WRITE: / '5', lv_str5.
+    WRITE: / '6', lv_str6.
+    WRITE: / '7', lv_str7.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`1/a/b/c/\n2d\n3object\n4\n5\n60\n7`);
+  });
+
+  it("split 6", async () => {
+    const code = `
+    DATA lv_str1 TYPE string.
+    DATA lv_str2 TYPE string.
+    SPLIT ' a|d' AT '|' INTO
+    lv_str1
+    lv_str2.
+    WRITE: / '1', lv_str1.
+    WRITE: / '2', lv_str2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`1 a\n2d`);
+  });
+
 });
