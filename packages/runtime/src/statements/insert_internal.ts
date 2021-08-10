@@ -1,4 +1,4 @@
-import {ABAPObject, FieldSymbol, Structure, Table} from "../types";
+import {ABAPObject, DataReference, FieldSymbol, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -7,6 +7,7 @@ export interface IInsertInternalOptions {
   initial?: boolean,
   data?: INumeric | ICharacter | Structure | ABAPObject | Table,
   table: Table,
+  referenceInto?: DataReference,
   assigning?: FieldSymbol,
   lines?: boolean,
 }
@@ -38,6 +39,9 @@ export function insertInternal(
     const val = options.table.insertIndex(options.data, options.table.array().length);
     if (options.assigning) {
       options.assigning.assign(val);
+    }
+    if (options.referenceInto) {
+      options.referenceInto.assign(val);
     }
   }
 
