@@ -122,4 +122,24 @@ describe("Running statements - INSERT", () => {
     expect(abap.console.get()).to.equal("2\n1");
   });
 
+  it.skip("INSERT REFERENCE INTO", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i.
+DATA ref TYPE REF TO i.
+DATA ref2 TYPE REF TO i.
+DATA int TYPE i.
+
+int = 2.
+
+INSERT int INTO TABLE tab REFERENCE INTO ref.
+WRITE / ref->*.
+
+READ TABLE tab INDEX 1 REFERENCE INTO ref2.
+WRITE / ref2->*.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2\n2");
+  });
+
 });
