@@ -28,6 +28,11 @@ export class InsertInternalTranspiler implements IStatementTranspiler {
       options.push("index: " + traversal.traverse(index).getCode());
     }
 
+    if (concat.includes(" REFERENCE INTO ")) {
+      const targets = node.findDirectExpressions(abaplint.Expressions.Target);
+      options.push("referenceInto: " + traversal.traverse(targets[1]).getCode());
+    }
+
     const assigning = node.findExpressionAfterToken("ASSIGNING");
     if (assigning) {
       options.push("assigning: " + traversal.traverse((assigning.findFirstExpression(abaplint.Expressions.FieldSymbol))).getCode());

@@ -6,6 +6,7 @@ export interface IReadTableOptions {
   index?: INumeric | number,
   withKey?: (i: any) => boolean,
   into?: INumeric | ICharacter | Structure | Table | DataReference,
+  referenceInto?: DataReference,
   assigning?: FieldSymbol,
 }
 
@@ -58,6 +59,8 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
     } else {
       options.into.set(found);
     }
+  } else if (options.referenceInto && found) {
+    options.referenceInto.assign(found);
   } else if (options.assigning && found) {
     options.assigning.assign(found);
   }

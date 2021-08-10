@@ -28,7 +28,11 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       extra.push("assigning: " + name);
     } else if (target) {
       const name = traversal.traverse(target).getCode();
-      extra.push("into: " + name);
+      if (rt?.findDirectTokenByText("REFERENCE")) {
+        extra.push("referenceInto: " + name);
+      } else {
+        extra.push("into: " + name);
+      }
     }
 
     const compare = node.findDirectExpression(abaplint.Expressions.ComponentCompareSimple);

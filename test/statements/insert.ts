@@ -122,7 +122,7 @@ describe("Running statements - INSERT", () => {
     expect(abap.console.get()).to.equal("2\n1");
   });
 
-  it.skip("INSERT REFERENCE INTO", async () => {
+  it("INSERT REFERENCE INTO", async () => {
     const code = `
 DATA tab TYPE STANDARD TABLE OF i.
 DATA ref TYPE REF TO i.
