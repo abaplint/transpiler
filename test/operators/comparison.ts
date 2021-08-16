@@ -573,4 +573,17 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal(`expected2`);
   });
 
+  it("more CP", async () => {
+    const code = `
+    ASSERT '<?xml' CP '<?xml'.
+    ASSERT '<?xml sdf' CP '<?xml *'.
+    ASSERT '()' CP '()'.
+    ASSERT '[]' CP '[]'.
+    ASSERT '.' CP '.'.
+    ASSERT '|' CP '|'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
