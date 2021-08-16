@@ -8,6 +8,7 @@ async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
 }
 
+
 describe("Running statements - FIND", () => {
 
   beforeEach(async () => {
