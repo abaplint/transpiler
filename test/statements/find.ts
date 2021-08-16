@@ -8,6 +8,7 @@ async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
 }
 
+
 describe("Running statements - FIND", () => {
 
   beforeEach(async () => {
@@ -415,5 +416,65 @@ WRITE / ls_submatch-length.`;
     await f(abap);
     expect(abap.console.get()).to.equal("4\n17\n15");
   });
+
+  it("FIND FIRST, not a regex!", async () => {
+    const code = `
+    DATA lv_offset TYPE i.
+    FIND FIRST OCCURRENCE OF '?>' IN '?>' MATCH OFFSET lv_offset.
+    ASSERT lv_offset = 0.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    await f(abap);
+  });
+
+  it("FIND FIRST REGEX RESULTS", async () => {
+    const code = `
+TYPES: BEGIN OF ty_submatch,
+         offset TYPE i,
+         length TYPE i,
+       END OF ty_submatch.
+
+DATA: BEGIN OF ls_match,
+        line       TYPE i,
+        offset     TYPE i,
+        length     TYPE i,
+        submatches TYPE STANDARD TABLE OF ty_submatch WITH DEFAULT KEY,
+      END OF ls_match.
+
+FIND FIRST OCCURRENCE OF REGEX 'b(ar)' IN 'fobar' RESULTS ls_match.
+ASSERT ls_match-offset = 2.
+ASSERT ls_match-length = 3.
+ASSERT lines( ls_match-submatches ) = 1.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    await f(abap);
+  });
+
+  it("FIND FIRST REGEX RESULTS, 2", async () => {
+    const code = `
+TYPES: BEGIN OF ty_submatch,
+         offset TYPE i,
+         length TYPE i,
+       END OF ty_submatch.
+
+DATA: BEGIN OF ls_match,
+        line       TYPE i,
+        offset     TYPE i,
+        length     TYPE i,
+        submatches TYPE STANDARD TABLE OF ty_submatch WITH DEFAULT KEY,
+      END OF ls_match.
+
+FIND FIRST OCCURRENCE OF
+  REGEX '<\\/?(\\w+)( \\w+="[\\w\\.]+")*>'
+  IN '<abapGit version="v1.0.0">'
+  RESULTS ls_match.
+ASSERT ls_match-offset = 0.
+ASSERT ls_match-length = 26.
+ASSERT lines( ls_match-submatches ) = 2.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    await f(abap);
+  });
+
 
 });
