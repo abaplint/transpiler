@@ -36,6 +36,17 @@ export function find(input: ICharacter | string, options: IFindOptions) {
     if (s === "") {
       throw "FIND, runtime, no input, s empty";
     }
+
+    s = s.replace(/\[/g, "\\[");
+    s = s.replace(/\]/g, "\\]");
+    s = s.replace(/\?/g, "\\?");
+    s = s.replace(/\(/g, "\\(");
+    s = s.replace(/\)/g, "\\)");
+    s = s.replace(/\./g, "\\.");
+    s = s.replace(/\|/g, "\\|");
+    s = s.replace(/\*/g, "\\*");
+    s = s.replace(/\+/g, "\\+");
+
     s = new RegExp(s, "g");
   } else if (options.regex) {
     if (options.regex === "") {

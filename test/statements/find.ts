@@ -416,4 +416,14 @@ WRITE / ls_submatch-length.`;
     expect(abap.console.get()).to.equal("4\n17\n15");
   });
 
+  it("FIND FIRST, not a regex!", async () => {
+    const code = `
+    DATA lv_offset TYPE i.
+    FIND FIRST OCCURRENCE OF '?>' IN '?>' MATCH OFFSET lv_offset.
+    ASSERT lv_offset = 0.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    await f(abap);
+  });
+
 });
