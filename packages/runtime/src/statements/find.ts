@@ -104,14 +104,14 @@ export function find(input: ICharacter | string, options: IFindOptions) {
       match.get().offset.set(m.index);
       match.get().length.set(m[0].length);
 
-      if (m.length === 2) {
-        const submatch = new Structure({offset: new Integer(), length: new Integer()});
-        if (m[1] === undefined) {
+      const submatch = new Structure({offset: new Integer(), length: new Integer()});
+      for (let i = 1; i < m.length; i++) {
+        if (m[i] === undefined) {
           submatch.get().offset.set(-1);
           submatch.get().length.set(0);
         } else {
-          submatch.get().offset.set(m.index + m[0].indexOf(m[1]));
-          submatch.get().length.set(m[1].length);
+          submatch.get().offset.set(m.index + m[0].indexOf(m[i]));
+          submatch.get().length.set(m[i].length);
         }
         match.get().submatches.append(submatch);
       }
