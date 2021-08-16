@@ -426,4 +426,27 @@ WRITE / ls_submatch-length.`;
     await f(abap);
   });
 
+  it("FIND FIRST REGEX RESULTS", async () => {
+    const code = `
+TYPES: BEGIN OF ty_submatch,
+         offset TYPE i,
+         length TYPE i,
+       END OF ty_submatch.
+
+DATA: BEGIN OF ls_match,
+        line       TYPE i,
+        offset     TYPE i,
+        length     TYPE i,
+        submatches TYPE STANDARD TABLE OF ty_submatch WITH DEFAULT KEY,
+      END OF ls_match.
+
+FIND FIRST OCCURRENCE OF REGEX 'b(ar)' IN 'fobar' RESULTS ls_match.
+ASSERT ls_match-offset = 2.
+ASSERT ls_match-length = 3.
+ASSERT lines( ls_match-submatches ) = 1.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    await f(abap);
+  });
+
 });
