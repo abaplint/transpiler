@@ -6,7 +6,7 @@ import {Chunk} from "../chunk";
 export class CallTransformationTranspiler implements IStatementTranspiler {
 
   public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    return new Chunk(`throw new Error("CallTransformation, transpiler todo");`);
+    return new Chunk(`throw new Error("CallTransformation sdf, transpiler todo");`);
   }
 
 }
