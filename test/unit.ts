@@ -601,4 +601,43 @@ ENDCLASS.`;
     await dumpNrun(files);
   });
 
+  it("test-17", async () => {
+// CALL TRANSFORMATION, check dummy implementation runs
+    const clas = `CLASS kernel_call_transformation DEFINITION PUBLIC.
+* handling of ABAP statement CALL TRANSFORMATION
+  PUBLIC SECTION.
+    CLASS-METHODS call IMPORTING input TYPE any.
+ENDCLASS.
+
+CLASS kernel_call_transformation IMPLEMENTATION.
+  METHOD call.
+    WRITE / 'itWorks'.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA lv_xml TYPE string.
+        DATA: BEGIN OF ls_structure,
+                field TYPE i,
+              END OF ls_structure.
+        CALL TRANSFORMATION id
+          SOURCE XML lv_xml
+          RESULT data = ls_structure.
+      ENDMETHOD.
+    ENDCLASS.`;
+
+    const files = [
+      {filename: "kernel_call_transformation.clas.abap", contents: clas},
+      {filename: "kernel_call_transformation.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("itWorks");
+  });
+
 });
