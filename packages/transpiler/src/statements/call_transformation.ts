@@ -38,7 +38,7 @@ export class CallTransformationTranspiler implements IStatementTranspiler {
       options.push("source: " + traversal.traverse(source).getCode());
     }
 
-    const call = lookup + `.call({${options.join(",")}});`;
+    const call = `await ${lookup}.call({${options.join(",")}});`;
 
     return new Chunk().append(
       `if (${lookup} === undefined) throw new Error("CallTransformation, kernel class missing");\n${call}`, node, traversal);

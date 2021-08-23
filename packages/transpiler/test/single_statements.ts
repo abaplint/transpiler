@@ -162,22 +162,22 @@ describe("Single statements", () => {
     OPTIONS value_handling = 'accept_data_loss'
     SOURCE XML iv_string
     RESULT data = rs_xml.`, js: `if (abap.Classes['KERNEL_CALL_TRANSFORMATION'] === undefined) throw new Error("CallTransformation, kernel class missing");
-abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",sourceXML: iv_string,options: {value_handling:new abap.types.Character({length: 16}).set('accept_data_loss')},result: {data:rs_xml}});`},
+await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",sourceXML: iv_string,options: {value_handling:new abap.types.Character({length: 16}).set('accept_data_loss')},result: {data:rs_xml}});`},
     {abap: `CALL TRANSFORMATION id
       OPTIONS initial_components = 'suppress'
       SOURCE data = is_data
       RESULT XML rv_xml.`, js: `if (abap.Classes['KERNEL_CALL_TRANSFORMATION'] === undefined) throw new Error("CallTransformation, kernel class missing");
-abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",resultXML: rv_xml,options: {initial_components:new abap.types.Character({length: 8}).set('suppress')},source: {data:is_data}});`},
+await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",resultXML: rv_xml,options: {initial_components:new abap.types.Character({length: 8}).set('suppress')},source: {data:is_data}});`},
     {abap: `CALL TRANSFORMATION id
       OPTIONS value_handling = 'accept_data_loss'
       SOURCE XML mi_xml_doc
       RESULT (lt_rtab).`, js: `if (abap.Classes['KERNEL_CALL_TRANSFORMATION'] === undefined) throw new Error("CallTransformation, kernel class missing");
-abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",sourceXML: mi_xml_doc,options: {value_handling:new abap.types.Character({length: 16}).set('accept_data_loss')},result: (lt_rtab)});`},
+await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",sourceXML: mi_xml_doc,options: {value_handling:new abap.types.Character({length: 16}).set('accept_data_loss')},result: (lt_rtab)});`},
     {abap: `CALL TRANSFORMATION id
       OPTIONS initial_components = 'suppress'
       SOURCE (lt_stab)
       RESULT XML li_doc.`, js: `if (abap.Classes['KERNEL_CALL_TRANSFORMATION'] === undefined) throw new Error("CallTransformation, kernel class missing");
-abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",resultXML: li_doc,options: {initial_components:new abap.types.Character({length: 8}).set('suppress')},source: (lt_stab)});`},
+await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",resultXML: li_doc,options: {initial_components:new abap.types.Character({length: 8}).set('suppress')},source: (lt_stab)});`},
   ];
 
   for (const test of tests) {
