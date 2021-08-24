@@ -30,7 +30,7 @@ describe("Running Examples - Table type", () => {
     expect(abap.console.get()).to.equal("1\n3\n2");
   });
 
-  it("Basic, sorted", async () => {
+  it.skip("Basic, sorted", async () => {
     const code = `
   DATA tab TYPE SORTED TABLE OF i WITH UNIQUE KEY table_line.
   DATA row LIKE LINE OF tab.
@@ -46,7 +46,7 @@ describe("Running Examples - Table type", () => {
     expect(abap.console.get()).to.equal("1\n2\n3");
   });
 
-  it("sorted, already exists", async () => {
+  it.skip("sorted, already exists", async () => {
     const code = `
   DATA tab TYPE SORTED TABLE OF i WITH UNIQUE KEY table_line.
   DATA row LIKE LINE OF tab.
@@ -60,7 +60,7 @@ describe("Running Examples - Table type", () => {
     expect(abap.console.get()).to.equal("0\n4");
   });
 
-  it("sorted, duplicate key, expect dump", async () => {
+  it.skip("sorted, duplicate key, expect dump", async () => {
     const code = `
   DATA tab TYPE SORTED TABLE OF i WITH UNIQUE KEY table_line.
   DATA row LIKE LINE OF tab.
@@ -71,13 +71,13 @@ describe("Running Examples - Table type", () => {
     expect(async () => f(abap)).to.throw();
   });
 
-  it("sorted, structured", async () => {
+  it.skip("sorted, structured", async () => {
     const code = `
 TYPES: BEGIN OF type,
          int  TYPE i,
          char TYPE c LENGTH 4,
        END OF type.
-DATA tab TYPE SORTED TABLE OF type WITH UNIQUE KEY table_line.
+DATA tab TYPE SORTED TABLE OF type WITH UNIQUE KEY int char.
 DATA row LIKE LINE OF tab.
 CLEAR row.
 row-int = 1.

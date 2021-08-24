@@ -16,6 +16,13 @@ export class LoopIndex {
   }
 }
 
+export type ITableOptions = {
+  type?: string,
+  keyFields?: string[],
+  isUnique?: boolean,
+  withHeader: boolean,
+};
+
 export type TableRowType = INumeric | Structure | ICharacter | Table | ABAPObject;
 
 export class Table  {
@@ -23,7 +30,7 @@ export class Table  {
   private readonly rowType: TableRowType;
   private readonly loops: Set<LoopIndex>;
 
-  public constructor(rowType: TableRowType) {
+  public constructor(rowType: TableRowType, _options?: ITableOptions) {
     this.value = [];
     this.loops = new Set();
     this.rowType = rowType;
