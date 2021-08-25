@@ -8,7 +8,7 @@ async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
 }
 
-describe("Running Examples - Table type", () => {
+describe("Running Examples - Internal table type", () => {
 
   beforeEach(async () => {
     abap = new ABAP();
