@@ -96,4 +96,48 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("AAAA\nBBBB");
   });
 
+  it("copying table to sorted table should sort", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA sorted TYPE SORTED TABLE OF i WITH UNIQUE KEY table_line.
+  DATA row LIKE LINE OF tab.
+  INSERT 1 INTO TABLE tab.
+  INSERT 3 INTO TABLE tab.
+  INSERT 2 INTO TABLE tab.
+  sorted = tab.
+  LOOP AT sorted INTO row.
+    WRITE / row.
+  ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n3");
+  });
+
+  it.skip("complex key", async () => {
+    const code = `
+  TYPES:
+    BEGIN OF ty_node,
+      path TYPE string,
+      name TYPE string,
+      type TYPE string,
+      value TYPE string,
+      index TYPE i,
+      order TYPE i,
+      children TYPE i,
+    END OF ty_node .
+  TYPES:
+    ty_nodes_tt TYPE STANDARD TABLE OF ty_node WITH KEY path name .
+  TYPES:
+    ty_nodes_ts TYPE SORTED TABLE OF ty_node
+      WITH UNIQUE KEY path name
+      WITH NON-UNIQUE SORTED KEY array_index COMPONENTS path index
+      WITH NON-UNIQUE SORTED KEY item_order COMPONENTS path order .`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n3");
+  });
+
 });
