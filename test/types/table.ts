@@ -30,7 +30,7 @@ describe("Running Examples - Table type", () => {
     expect(abap.console.get()).to.equal("1\n3\n2");
   });
 
-  it.skip("Basic, sorted", async () => {
+  it("Basic, sorted", async () => {
     const code = `
   DATA tab TYPE SORTED TABLE OF i WITH UNIQUE KEY table_line.
   DATA row LIKE LINE OF tab.

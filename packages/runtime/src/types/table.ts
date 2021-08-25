@@ -8,6 +8,14 @@ import {Structure} from "./structure";
 import {FieldSymbol} from "./field_symbol";
 import {DataReference} from "./data_reference";
 
+export enum TableAccessType {
+  standard = "STANDARD",
+  sorted = "SORTED",
+  hashed = "HASHED",
+  index = "INDEX",
+  any = "ANY",
+}
+
 export class LoopIndex {
   public index: number;
 
@@ -17,7 +25,7 @@ export class LoopIndex {
 }
 
 export type ITableOptions = {
-  type?: string,
+  type?: TableAccessType,
   keyFields?: string[],
   isUnique?: boolean,
   withHeader: boolean,
@@ -29,11 +37,17 @@ export class Table  {
   private value: TableRowType[];
   private readonly rowType: TableRowType;
   private readonly loops: Set<LoopIndex>;
+  private readonly options: ITableOptions | undefined;
 
-  public constructor(rowType: TableRowType, _options?: ITableOptions) {
+  public constructor(rowType: TableRowType, options?: ITableOptions) {
     this.value = [];
     this.loops = new Set();
     this.rowType = rowType;
+    this.options = options;
+  }
+
+  public getOptions() {
+    return this.options;
   }
 
   public startLoop(start: number = 0): LoopIndex {

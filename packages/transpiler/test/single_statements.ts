@@ -152,6 +152,7 @@ describe("Single statements", () => {
     {abap: "CONVERT DATE lv_date TIME lv_time INTO TIME STAMP lv_timestamp TIME ZONE lv_utc.",
       js: `abap.statements.convert({date: lv_date,time: lv_time,zone: lv_utc}, {stamp: lv_timestamp});`, skip: false},
     {abap: "COMMIT WORK.",     js: `abap.statements.commit();`, skip: false},
+    {abap: `INSERT 1 INTO TABLE tab.`, js: `abap.statements.insertInternal({data: constant_1, table: tab});`, skip: false},
     {abap: "ROLLBACK WORK.",   js: `abap.statements.rollback();`, skip: false},
     {abap: "MOVE-CORRESPONDING foo TO bar.", js: `abap.statements.moveCorresponding(foo, bar);`, skip: false},
     {abap: "ASSERT 5 IN bar.", js: `abap.statements.assert(abap.compare.in(constant_5, bar));`, skip: false},

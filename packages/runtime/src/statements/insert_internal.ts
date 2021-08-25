@@ -1,6 +1,7 @@
-import {ABAPObject, DataReference, FieldSymbol, Structure, Table} from "../types";
+import {ABAPObject, DataReference, FieldSymbol, Structure, Table, TableAccessType} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {sort} from "./sort";
 
 export interface IInsertInternalOptions {
   index?: INumeric,
@@ -14,6 +15,8 @@ export interface IInsertInternalOptions {
 
 export function insertInternal(
   options: IInsertInternalOptions): void {
+
+  const tableOptions = options.table.getOptions();
 
   if (options.data && options.index) {
     const index = options.index.get() - 1;
@@ -43,6 +46,12 @@ export function insertInternal(
     if (options.referenceInto) {
       options.referenceInto.assign(val);
     }
+  }
+
+  if (tableOptions?.type === TableAccessType.sorted || tableOptions?.type === TableAccessType.hashed) {
+// slow, but works for now
+    const by = tableOptions?.keyFields?.map(f => {return {component: f}; });
+    sort(options.table, {by: by});
   }
 
 }
