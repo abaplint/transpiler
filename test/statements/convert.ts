@@ -38,12 +38,12 @@ DATA lv_time TYPE t.
 iv_val = '20210505120000'.
 CONVERT TIME STAMP iv_val TIME ZONE lv_utc
   INTO DATE lv_date TIME lv_time.
-WRITE / lv_date.
+ASSERT lv_date = '20210505'.
 WRITE / lv_time.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("sdfsd");
+    expect(abap.console.get()).to.equal("120000");
   });
 
 });
