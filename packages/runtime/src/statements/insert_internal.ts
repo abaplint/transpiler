@@ -1,6 +1,9 @@
-import {ABAPObject, DataReference, FieldSymbol, Structure, Table} from "../types";
+import {ne} from "../compare";
+import {ABAPObject, DataReference, FieldSymbol, Structure, Table, TableAccessType} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {readTable} from "./read_table";
+import {sort} from "./sort";
 
 export interface IInsertInternalOptions {
   index?: INumeric,
@@ -14,6 +17,28 @@ export interface IInsertInternalOptions {
 
 export function insertInternal(
   options: IInsertInternalOptions): void {
+
+  const tableOptions = options.table.getOptions();
+  const isSorted = tableOptions?.type === TableAccessType.sorted || tableOptions?.type === TableAccessType.hashed;
+
+  if (isSorted) {
+    const insert = options.data instanceof Structure ? options.data.get() : {table_line: options.data};
+    const compare = (row: any): boolean => {
+      for (const key of tableOptions?.keyFields || []) {
+        if (ne(row[key.toLowerCase()], insert[key.toLowerCase()])) {
+          return false;
+        }
+      }
+      return true;
+    };
+    readTable(options.table, {withKey: compare});
+    // @ts-ignore
+    if (abap.builtin.sy.get().subrc.get() === 0) {
+      // @ts-ignore
+      abap.builtin.sy.get().subrc.set(4);
+      return;
+    }
+  }
 
   if (options.data && options.index) {
     const index = options.index.get() - 1;
@@ -43,6 +68,15 @@ export function insertInternal(
     if (options.referenceInto) {
       options.referenceInto.assign(val);
     }
+  }
+
+  // @ts-ignore
+  abap.builtin.sy.get().subrc.set(0);
+
+  if (isSorted) {
+// slow, but works for now
+    const by = tableOptions?.keyFields?.map(f => {return {component: f.toLowerCase()}; });
+    sort(options.table, {by: by});
   }
 
 }

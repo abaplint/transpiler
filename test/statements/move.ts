@@ -59,6 +59,7 @@ describe("Running statements - MOVE", () => {
 
     expect(await f(abap)).to.throw();
   });
+
   it.skip("MOVE - string to integer structure", async () => {
     const code = `
         TYPES:
@@ -77,8 +78,6 @@ describe("Running statements - MOVE", () => {
     const f = new AsyncFunction("abap", js);
 
     expect(await f(abap)).to.throw();
-
-
   });
 
   it.skip("MOVE - string to structure", async () => {
@@ -93,9 +92,5 @@ describe("Running statements - MOVE", () => {
     await f(abap);
     expect(abap.console.get()).to.equal("1 ");
   });
+
 });
-
-
-
-
-

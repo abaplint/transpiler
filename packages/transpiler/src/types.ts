@@ -17,6 +17,7 @@ export class TranspileTypes {
     } else if (type instanceof abaplint.BasicTypes.TableType) {
       resolved = "Table";
       extra = this.toType(type.getRowType());
+      extra += ", " + JSON.stringify(type.getOptions());
     } else if (type instanceof abaplint.BasicTypes.IntegerType) {
       resolved = "Integer";
     } else if (type instanceof abaplint.BasicTypes.StringType) {

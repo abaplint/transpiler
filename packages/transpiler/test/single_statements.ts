@@ -59,7 +59,7 @@ describe("Single statements", () => {
     {abap: "moo = foo->method( ).",                   js: "moo.set(await foo.get().method());",              skip: false},
     {abap: "FORM foo. ENDFORM.",                      js: "async function foo() {\n}",                       skip: false},
     {abap: "PERFORM foo.",                            js: "await foo();",                       skip: false},
-    {abap: "DATA foo TYPE STANDARD TABLE OF string.", js: "let foo = new abap.types.Table(new abap.types.String());",         skip: false},
+    {abap: "DATA foo TYPE STANDARD TABLE OF string.", js: `let foo = new abap.types.Table(new abap.types.String(), {"withHeader":false,"type":"STANDARD","isUnique":false,"keyFields":[]});`,         skip: false},
     {abap: "SPLIT foo AT bar INTO TABLE moo.",            js: "abap.statements.split({source: foo, at: bar, table: moo});",    skip: false},
     {abap: "SPLIT |blah| AT '.' INTO lv_major lv_minor.", js: "abap.statements.split({source: `blah`, at: new abap.types.Character({length: 1}).set('.'), targets: [lv_major,lv_minor]});",    skip: false},
     {abap: "WRITE |moo|.",                            js: "abap.statements.write(`moo`);",                                  skip: false},
@@ -152,6 +152,7 @@ describe("Single statements", () => {
     {abap: "CONVERT DATE lv_date TIME lv_time INTO TIME STAMP lv_timestamp TIME ZONE lv_utc.",
       js: `abap.statements.convert({date: lv_date,time: lv_time,zone: lv_utc}, {stamp: lv_timestamp});`, skip: false},
     {abap: "COMMIT WORK.",     js: `abap.statements.commit();`, skip: false},
+    {abap: `INSERT 1 INTO TABLE tab.`, js: `abap.statements.insertInternal({data: constant_1, table: tab});`, skip: false},
     {abap: "ROLLBACK WORK.",   js: `abap.statements.rollback();`, skip: false},
     {abap: "MOVE-CORRESPONDING foo TO bar.", js: `abap.statements.moveCorresponding(foo, bar);`, skip: false},
     {abap: "ASSERT 5 IN bar.", js: `abap.statements.assert(abap.compare.in(constant_5, bar));`, skip: false},
@@ -178,6 +179,8 @@ await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",sourceXML: mi_
       SOURCE (lt_stab)
       RESULT XML li_doc.`, js: `if (abap.Classes['KERNEL_CALL_TRANSFORMATION'] === undefined) throw new Error("CallTransformation, kernel class missing");
 await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",resultXML: li_doc,options: {initial_components:new abap.types.Character({length: 8}).set('suppress')},source: (lt_stab)});`},
+    {abap: `DATA tab TYPE SORTED TABLE OF i WITH UNIQUE KEY table_line.`,
+      js: `let tab = new abap.types.Table(new abap.types.Integer(), {"withHeader":false,"type":"SORTED","isUnique":true,"keyFields":["TABLE_LINE"]});`},
   ];
 
   for (const test of tests) {
