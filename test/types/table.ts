@@ -114,30 +114,4 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("1\n2\n3");
   });
 
-  it.skip("complex key", async () => {
-    const code = `
-  TYPES:
-    BEGIN OF ty_node,
-      path TYPE string,
-      name TYPE string,
-      type TYPE string,
-      value TYPE string,
-      index TYPE i,
-      order TYPE i,
-      children TYPE i,
-    END OF ty_node .
-  TYPES:
-    ty_nodes_tt TYPE STANDARD TABLE OF ty_node WITH KEY path name .
-  TYPES:
-    ty_nodes_ts TYPE SORTED TABLE OF ty_node
-      WITH UNIQUE KEY path name
-      WITH NON-UNIQUE SORTED KEY array_index COMPONENTS path index
-      WITH NON-UNIQUE SORTED KEY item_order COMPONENTS path order .`;
-    const js = await run(code);
-    console.dir(js);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("1\n2\n3");
-  });
-
 });

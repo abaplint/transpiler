@@ -525,4 +525,26 @@ if (abap.Classes['ZCL_BLAH'] === undefined) { throw new abap.Classes['CX_SY_CREA
 blah.set(await (new abap.Classes['ZCL_BLAH']()).constructor_());`;
     expect(await runSingle(abap)).to.equal(expected);
   });
+
+  it("Complex table key", async () => {
+    const abap = `
+  TYPES:
+    BEGIN OF ty_node,
+      path     TYPE string,
+      name     TYPE string,
+      type     TYPE string,
+      value    TYPE string,
+      index    TYPE i,
+      order    TYPE i,
+      children TYPE i,
+    END OF ty_node.
+   TYPES:
+    ty_nodes_ts TYPE SORTED TABLE OF ty_node
+      WITH UNIQUE KEY path name
+      WITH NON-UNIQUE SORTED KEY array_index COMPONENTS path index
+      WITH NON-UNIQUE SORTED KEY item_order COMPONENTS path order.
+   DATA bar TYPE ty_nodes_ts.`;
+    expect(await runSingle(abap)).to.include(`"keyFields":["PATH","NAME"]`);
+  });
+
 });
