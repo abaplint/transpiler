@@ -1,4 +1,5 @@
 import {ABAP} from "../../packages/runtime/src";
+import {expect} from "chai";
 import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
@@ -26,6 +27,23 @@ describe("Running statements - CONVERT", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("test 02", async () => {
+    const code = `
+DATA iv_val TYPE p LENGTH 8.
+DATA lv_utc TYPE string VALUE 'UTC'.
+DATA lv_date TYPE d.
+DATA lv_time TYPE t.
+iv_val = '20210505120000'.
+CONVERT TIME STAMP iv_val TIME ZONE lv_utc
+  INTO DATE lv_date TIME lv_time.
+WRITE / lv_date.
+WRITE / lv_time.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("sdfsd");
   });
 
 });
