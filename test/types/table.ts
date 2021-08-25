@@ -71,28 +71,29 @@ describe("Running Examples - Table type", () => {
     expect(async () => f(abap)).to.throw();
   });
 
-  it.skip("sorted, structured", async () => {
+  it("sorted, structured", async () => {
     const code = `
 TYPES: BEGIN OF type,
-         int  TYPE i,
-         char TYPE c LENGTH 4,
+         foo TYPE i,
+         bar TYPE c LENGTH 4,
        END OF type.
-DATA tab TYPE SORTED TABLE OF type WITH UNIQUE KEY int char.
+DATA tab TYPE SORTED TABLE OF type WITH UNIQUE KEY foo bar.
 DATA row LIKE LINE OF tab.
 CLEAR row.
-row-int = 1.
-row-char = 'BBBB'.
+row-foo = 1.
+row-bar = 'BBBB'.
 INSERT row INTO TABLE tab.
 CLEAR row.
-row-int = 1.
-row-char = 'AAAA'.
+row-foo = 1.
+row-bar = 'AAAA'.
 INSERT row INTO TABLE tab.
 LOOP AT tab INTO row.
-  WRITE / row-char.
+  WRITE / row-bar.
 ENDLOOP.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
-    expect(async () => f(abap)).to.throw();
+    await f(abap);
+    expect(abap.console.get()).to.equal("AAAA\nBBBB");
   });
 
 });

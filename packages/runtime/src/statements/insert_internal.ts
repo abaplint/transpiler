@@ -75,7 +75,7 @@ export function insertInternal(
 
   if (isSorted) {
 // slow, but works for now
-    const by = tableOptions?.keyFields?.map(f => {return {component: f}; });
+    const by = tableOptions?.keyFields?.map(f => {return {component: f.toLowerCase()}; });
     sort(options.table, {by: by});
   }
 
