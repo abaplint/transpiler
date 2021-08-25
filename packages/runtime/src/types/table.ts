@@ -7,6 +7,7 @@ import {clone} from "../clone";
 import {Structure} from "./structure";
 import {FieldSymbol} from "./field_symbol";
 import {DataReference} from "./data_reference";
+import {insertInternal} from "../statements/insert_internal";
 
 export enum TableAccessType {
   standard = "STANDARD",
@@ -76,8 +77,8 @@ export class Table  {
   public set(tab: Table) {
     this.clear();
     for (const a of tab.array()) {
-      // this clones the values
-      this.append(a);
+      // this clones the values, and add sorting if required
+      insertInternal({table: this, data: a});
     }
   }
 

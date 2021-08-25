@@ -96,4 +96,22 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("AAAA\nBBBB");
   });
 
+  it("copying table to sorted table should sort", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA sorted TYPE SORTED TABLE OF i WITH UNIQUE KEY table_line.
+  DATA row LIKE LINE OF tab.
+  INSERT 1 INTO TABLE tab.
+  INSERT 3 INTO TABLE tab.
+  INSERT 2 INTO TABLE tab.
+  sorted = tab.
+  LOOP AT sorted INTO row.
+    WRITE / row.
+  ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n3");
+  });
+
 });
