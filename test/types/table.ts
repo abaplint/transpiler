@@ -46,7 +46,7 @@ describe("Running Examples - Table type", () => {
     expect(abap.console.get()).to.equal("1\n2\n3");
   });
 
-  it.skip("sorted, already exists", async () => {
+  it("sorted, already exists", async () => {
     const code = `
   DATA tab TYPE SORTED TABLE OF i WITH UNIQUE KEY table_line.
   DATA row LIKE LINE OF tab.
