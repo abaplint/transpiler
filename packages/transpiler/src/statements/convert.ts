@@ -7,7 +7,6 @@ import {Chunk} from "../chunk";
 export class ConvertTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-//    const source = new SourceTranspiler(true).transpile(node.findDirectExpression(abaplint.Expressions.Source)!, traversal);
 
     const source: string[] = [];
     const target: string[] = [];

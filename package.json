@@ -213,7 +213,7 @@
         "@abaplint/core": "^2.76.15",
         "@types/chai": "^4.2.21",
         "@types/mocha": "^9.0.0",
-        "@types/node": "^16.7.1",
+        "@types/node": "^16.7.2",
         "@typescript-eslint/eslint-plugin": "^4.29.3",
         "@typescript-eslint/parser": "^4.29.3",
         "chai": "^4.3.4",
@@ -223,6 +223,6 @@
         "source-map-support": "^0.5.19",
         "@types/sql.js": "^1.4.2",
         "sql.js": "^1.6.1",
-        "typescript": "^4.3.5"
+        "typescript": "^4.4.2"
     }
 }
