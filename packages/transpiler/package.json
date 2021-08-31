@@ -27,14 +27,14 @@
   "author": "abaplint",
   "license": "MIT",
   "dependencies": {
-    "@abaplint/core": "^2.76.15",
+    "@abaplint/core": "^2.77.4",
     "source-map": "^0.7.3"
   },
   "devDependencies": {
     "@types/chai": "^4.2.21",
     "@types/mocha": "^9.0.0",
     "chai": "^4.3.4",
-    "mocha": "^9.1.0",
+    "mocha": "^9.1.1",
     "source-map-support": "^0.5.19",
     "typescript": "^4.4.2"
   }
