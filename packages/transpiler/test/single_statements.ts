@@ -183,6 +183,8 @@ await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",sourceXML: mi_
 await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",resultXML: li_doc,options: {initial_components:new abap.types.Character({length: 8}).set('suppress')},source: (lt_stab)});`},
     {abap: `DATA tab TYPE SORTED TABLE OF i WITH UNIQUE KEY table_line.`,
       js: `let tab = new abap.types.Table(new abap.types.Integer(), {"withHeader":false,"type":"SORTED","isUnique":true,"keyFields":["TABLE_LINE"]});`},
+    {abap: `DATA foobar TYPE abap_bool.`,
+      js: `let foobar = new abap.types.Character({qualifiedName: "ABAP_BOOL"});`},
   ];
 
   for (const test of tests) {
