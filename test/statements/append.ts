@@ -135,7 +135,8 @@ describe("Running statements - APPEND", () => {
   FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
   ASSIGN tab TO <table>.
   APPEND INITIAL LINE TO <table>.
-  ASSERT lines( tab ) = 1.`;
+  ASSERT lines( tab ) = 1.
+  ASSERT lines( <table> ) = 1.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
