@@ -1,4 +1,4 @@
-import {Character, String, FieldSymbol, Hex, Table, ABAPObject, Structure, DataReference, Integer, Float, Numc} from "../types";
+import {Character, String, FieldSymbol, Hex, Table, ABAPObject, Structure, DataReference, Integer, Float, Numc, XString} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -25,8 +25,12 @@ export function describe(input: IDescribeOptions) {
       input.type.set("F");
     } else if (input.field instanceof Numc) {
       input.type.set("N");
+    } else if (input.field instanceof Hex) {
+      input.type.set("X");
     } else if (input.field instanceof String) {
       input.type.set("g");
+    } else if (input.field instanceof XString) {
+      input.type.set("y");
     } else if (input.field instanceof Structure) {
       input.type.set("u");
     } else if (input.field instanceof ABAPObject) {
@@ -34,7 +38,7 @@ export function describe(input: IDescribeOptions) {
     } else if (input.field instanceof DataReference) {
       input.type.set("l");
     } else {
-      throw "DESCRIBE, todo, transpiler";
+      throw new Error("DESCRIBE, todo, transpiler, " + input.field.constructor.name);
     }
   }
 

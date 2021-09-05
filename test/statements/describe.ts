@@ -180,4 +180,28 @@ WRITE / lv_type.`;
     expect(abap.console.get()).to.equal("N");
   });
 
+  it("DESCRIBE FIELD, hex", async () => {
+    const code = `
+  DATA lv_type TYPE c.
+  DATA bar TYPE x.
+  DESCRIBE FIELD bar TYPE lv_type.
+  WRITE lv_type.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("X");
+  });
+
+  it("DESCRIBE FIELD, xstring", async () => {
+    const code = `
+  DATA lv_type TYPE c.
+  DATA bar TYPE xstring.
+  DESCRIBE FIELD bar TYPE lv_type.
+  WRITE lv_type.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("y");
+  });
+
 });
