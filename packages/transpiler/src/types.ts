@@ -47,7 +47,9 @@ export class TranspileTypes {
     } else if (type instanceof abaplint.BasicTypes.CharacterType) {
       resolved = "Character";
       if (type.getLength() !== 1) {
-        extra = "{length: " + type.getLength() + "}";
+        extra = "{length: " + type.getLength() + ", qualifiedName: \"" + type.getQualifiedName() + "\"}";
+      } else if (type.getQualifiedName() !== undefined) {
+        extra = "{qualifiedName: \"" + type.getQualifiedName() + "\"}";
       }
     } else if (type instanceof abaplint.BasicTypes.NumericType) {
       resolved = "Numc";

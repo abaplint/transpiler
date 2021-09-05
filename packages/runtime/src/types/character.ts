@@ -4,10 +4,12 @@ import {String} from "./string";
 export class Character implements ICharacter {
   private value: string;
   private readonly length: number;
+  private readonly qualifiedName: string | undefined;
 
-  public constructor(input?: {length?: number}) {
+  public constructor(input?: {length?: number, qualifiedName?: string}) {
     this.value = "";
     this.length = input?.length ? input?.length : 1;
+    this.qualifiedName = input?.qualifiedName;
   }
 
   public set(value: ICharacter | string) {
@@ -20,6 +22,10 @@ export class Character implements ICharacter {
       this.value = this.value.substr(0, this.length);
     }
     return this;
+  }
+
+  public getQualifiedName() {
+    return this.qualifiedName;
   }
 
   public getLength() {

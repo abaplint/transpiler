@@ -37,7 +37,7 @@ export class ReadTableTranspiler implements IStatementTranspiler {
 
     const compare = node.findDirectExpression(abaplint.Expressions.ComponentCompareSimple);
     if (compare) {
-      const components = compare.findDirectExpressions(abaplint.Expressions.ComponentChain);
+      const components = compare.findDirectExpressions(abaplint.Expressions.ComponentChainSimple);
       const sources = compare.findDirectExpressions(abaplint.Expressions.Source);
       if (components.length !== sources.length) {
         throw new Error("READ TABLE, transpiler unexpected lengths");

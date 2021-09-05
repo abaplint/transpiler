@@ -479,7 +479,7 @@ next.set(first);`;
 
   it("bool VALUE abap_true", async () => {
     const abap = `DATA bool TYPE abap_bool VALUE abap_true.`;
-    const expected = `let bool = new abap.types.Character();
+    const expected = `let bool = new abap.types.Character({qualifiedName: "ABAP_BOOL"});
 bool.set(abap.builtin.abap_true);`;
     expect(await runSingle(abap)).to.equal(expected);
   });
