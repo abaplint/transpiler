@@ -64,4 +64,22 @@ WRITE str.`;
     expect(abap.console.get()).to.equal("apps_create_from_manifest");
   });
 
+  it("TRANSLATE first character", async () => {
+    const code = `
+  TYPES ty_token TYPE c LENGTH 255.
+  DATA lt_tokens TYPE STANDARD TABLE OF ty_token.
+  DATA rv_result TYPE string.
+  FIELD-SYMBOLS <token> LIKE LINE OF lt_tokens.
+  SPLIT 'hello_world' AT '_' INTO TABLE lt_tokens.
+  LOOP AT lt_tokens ASSIGNING <token>.
+    TRANSLATE <token>(1) TO UPPER CASE.
+  ENDLOOP.
+  CONCATENATE LINES OF lt_tokens INTO rv_result.
+  WRITE rv_result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("HelloWorld");
+  });
+
 });

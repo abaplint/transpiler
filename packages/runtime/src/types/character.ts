@@ -40,7 +40,7 @@ export class Character implements ICharacter {
     return this.value;
   }
 
-  public getOffset(input: {offset: number, length: number}) {
+  public getOffset(input: {offset?: number, length?: number}) {
     let ret = this.value;
     if (input?.offset) {
       ret = ret.substr(input.offset);
