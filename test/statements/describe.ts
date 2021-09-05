@@ -115,4 +115,93 @@ describe("Running statements - DESCRIBE", () => {
     await f(abap);
   });
 
+  it("DESCRIBE FIELD, fs and structure", async () => {
+    const code = `
+TYPES: BEGIN OF ty_bar,
+         foo TYPE i,
+       END OF ty_bar.
+DATA bar TYPE ty_bar.
+DATA lv_type TYPE c.
+FIELD-SYMBOLS <struc> TYPE any.
+ASSIGN bar TO <struc>.
+DESCRIBE FIELD <struc> TYPE lv_type.
+WRITE / lv_type.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("u");
+  });
+
+  it("DESCRIBE FIELD, ref to data", async () => {
+    const code = `
+  DATA lv_type TYPE c.
+  DATA bar TYPE REF TO data.
+  DESCRIBE FIELD bar TYPE lv_type.
+  WRITE lv_type.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("l");
+  });
+
+  it("DESCRIBE FIELD, integer", async () => {
+    const code = `
+  DATA lv_type TYPE c.
+  DATA bar TYPE i.
+  DESCRIBE FIELD bar TYPE lv_type.
+  WRITE lv_type.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("I");
+  });
+
+  it("DESCRIBE FIELD, float", async () => {
+    const code = `
+  DATA lv_type TYPE c.
+  DATA bar TYPE f.
+  DESCRIBE FIELD bar TYPE lv_type.
+  WRITE lv_type.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("F");
+  });
+
+  it("DESCRIBE FIELD, numeric", async () => {
+    const code = `
+  DATA lv_type TYPE c.
+  DATA bar TYPE n.
+  DESCRIBE FIELD bar TYPE lv_type.
+  WRITE lv_type.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("N");
+  });
+
+  it("DESCRIBE FIELD, hex", async () => {
+    const code = `
+  DATA lv_type TYPE c.
+  DATA bar TYPE x.
+  DESCRIBE FIELD bar TYPE lv_type.
+  WRITE lv_type.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("X");
+  });
+
+  it("DESCRIBE FIELD, xstring", async () => {
+    const code = `
+  DATA lv_type TYPE c.
+  DATA bar TYPE xstring.
+  DESCRIBE FIELD bar TYPE lv_type.
+  WRITE lv_type.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("y");
+  });
+
 });
