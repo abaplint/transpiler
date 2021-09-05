@@ -216,4 +216,28 @@ WRITE / lv_type.`;
     expect(abap.console.get()).to.equal("P");
   });
 
+  it("DESCRIBE FIELD, date", async () => {
+    const code = `
+  DATA lv_type TYPE c.
+  DATA bar TYPE d.
+  DESCRIBE FIELD bar TYPE lv_type.
+  WRITE lv_type.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("D");
+  });
+
+  it("DESCRIBE FIELD, time", async () => {
+    const code = `
+  DATA lv_type TYPE c.
+  DATA bar TYPE T.
+  DESCRIBE FIELD bar TYPE lv_type.
+  WRITE lv_type.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("T");
+  });
+
 });
