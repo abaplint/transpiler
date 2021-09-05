@@ -1,4 +1,4 @@
-import {Character, String, FieldSymbol, Hex, Table, ABAPObject, Structure, DataReference, Integer, Float, Numc, XString} from "../types";
+import {Character, String, FieldSymbol, Hex, Table, ABAPObject, Structure, DataReference, Integer, Float, Numc, XString, Packed} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -27,6 +27,8 @@ export function describe(input: IDescribeOptions) {
       input.type.set("N");
     } else if (input.field instanceof Hex) {
       input.type.set("X");
+    } else if (input.field instanceof Packed) {
+      input.type.set("P");
     } else if (input.field instanceof String) {
       input.type.set("g");
     } else if (input.field instanceof XString) {

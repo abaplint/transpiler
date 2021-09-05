@@ -204,4 +204,16 @@ WRITE / lv_type.`;
     expect(abap.console.get()).to.equal("y");
   });
 
+  it("DESCRIBE FIELD, packed", async () => {
+    const code = `
+  DATA lv_type TYPE c.
+  DATA bar TYPE p.
+  DESCRIBE FIELD bar TYPE lv_type.
+  WRITE lv_type.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("P");
+  });
+
 });
