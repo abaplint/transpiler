@@ -1,4 +1,4 @@
-import {Character, String, FieldSymbol, Hex, Table, ABAPObject} from "../types";
+import {Character, String, FieldSymbol, Hex, Table, ABAPObject, Structure, DataReference, Integer, Float, Numc} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -19,12 +19,23 @@ export function describe(input: IDescribeOptions) {
       input.type.set("h");
     } else if (input.field instanceof Character || typeof input.field === "string") {
       input.type.set("C");
+    } else if (input.field instanceof Integer) {
+      input.type.set("I");
+    } else if (input.field instanceof Float) {
+      input.type.set("F");
+    } else if (input.field instanceof Numc) {
+      input.type.set("N");
     } else if (input.field instanceof String) {
       input.type.set("g");
+    } else if (input.field instanceof Structure) {
+      input.type.set("u");
     } else if (input.field instanceof ABAPObject) {
       input.type.set("r");
+    } else if (input.field instanceof DataReference) {
+      input.type.set("l");
+    } else {
+      throw "DESCRIBE, todo, transpiler";
     }
-    // todo
   }
 
   if (input.length) {
