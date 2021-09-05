@@ -53,6 +53,13 @@ export class FieldSymbol  {
     }
   }
 
+  public appendInitial() {
+    if (this.pointer instanceof Table) {
+      return this.pointer.appendInitial();
+    }
+    return undefined;
+  }
+
   public array() {
     // @ts-ignore
     return this.pointer?.array();
