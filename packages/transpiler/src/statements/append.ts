@@ -11,14 +11,17 @@ export class AppendTranspiler implements IStatementTranspiler {
     const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
 
     if (concat.toUpperCase().includes("INITIAL LINE")) {
-      const found = node.findFirstExpression(abaplint.Expressions.FieldSymbol);
-      if (found) {
+      const assigning = node.findExpressionAfterToken("ASSIGNING");
+      const into = node.findExpressionAfterToken("INTO");
+      if (assigning) {
+        const found = assigning.findFirstExpression(abaplint.Expressions.FieldSymbol);
         const fs = traversal.traverse(found).getCode();
         return new Chunk(fs + ".assign(" + target.getCode() + ".appendInitial());");
-      } else {
-        const into = node.findExpressionAfterToken("INTO");
+      } else if (into){
         const ref = traversal.traverse(into).getCode();
         return new Chunk(ref + ".assign(" + target.getCode() + ".appendInitial());");
+      } else {
+        return new Chunk(target.getCode() + ".appendInitial();");
       }
     } else {
       const options: Chunk[] = [];

@@ -1,4 +1,4 @@
-import {Integer,Structure, Table} from "../types";
+import {FieldSymbol, Integer, Structure, Table} from "../types";
 
 export interface ILoopOptions {
   where?: (i: any) => boolean,
@@ -6,7 +6,15 @@ export interface ILoopOptions {
   to?: Integer
 }
 
-export function* loop(table: Table, options?: ILoopOptions) {
+export function* loop(table: Table | FieldSymbol | undefined, options?: ILoopOptions): Generator<any, void, unknown> {
+  if (table === undefined) {
+    throw new Error("LOOP at undefined");
+  } else if (table instanceof FieldSymbol) {
+    // @ts-ignore
+    yield* loop(table.getPointer(), options);
+    return;
+  }
+
   const length = table.array().length;
   if (length === 0) {
     return;

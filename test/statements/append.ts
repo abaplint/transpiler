@@ -129,4 +129,17 @@ describe("Running statements - APPEND", () => {
     expect(abap.console.get()).to.equal("foo");
   });
 
+  it("APPEND INITIAL to fs", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+  FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
+  ASSIGN tab TO <table>.
+  APPEND INITIAL LINE TO <table>.
+  ASSERT lines( tab ) = 1.
+  ASSERT lines( <table> ) = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

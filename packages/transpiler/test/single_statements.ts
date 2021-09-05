@@ -185,6 +185,8 @@ await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",resultXML: li_
       js: `let tab = new abap.types.Table(new abap.types.Integer(), {"withHeader":false,"type":"SORTED","isUnique":true,"keyFields":["TABLE_LINE"]});`},
     {abap: `DATA foobar TYPE abap_bool.`,
       js: `let foobar = new abap.types.Character({qualifiedName: "ABAP_BOOL"});`},
+    {abap: `APPEND INITIAL LINE TO <table>.`,
+      js: `fs_table_.appendInitial();`},
   ];
 
   for (const test of tests) {

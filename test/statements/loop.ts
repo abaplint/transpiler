@@ -372,4 +372,20 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("3");
   });
 
+  it("LOOP fs", async () => {
+    const code = `
+    DATA tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+    DATA row LIKE LINE OF tab.
+    FIELD-SYMBOLS <tab> LIKE tab.
+    APPEND 'hello' TO tab.
+    ASSIGN tab TO <tab>.
+    LOOP AT <tab> INTO row.
+      WRITE / row.
+    ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello");
+  });
+
 });
