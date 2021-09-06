@@ -440,6 +440,38 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("no\nyes\nyes");
   });
 
+  it("IS SUPPLIED with boolc()", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS moo
+      IMPORTING opt TYPE i OPTIONAL.
+ENDCLASS.
+
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD moo.
+    IF boolc( opt IS SUPPLIED ) = abap_true.
+      WRITE / 'yes'.
+    ELSE.
+      WRITE / 'no'.
+    ENDIF.
+  ENDMETHOD.
+ENDCLASS.
+
+FORM run.
+  lcl_bar=>moo( ).
+  lcl_bar=>moo( 1 ).
+  lcl_bar=>moo( opt = 1 ).
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("no\nyes\nyes");
+  });
+
   it("two x strings", async () => {
     const code = `
       DATA lv_x_len_2  TYPE x LENGTH 2 value '0106'.
