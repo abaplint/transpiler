@@ -23,6 +23,7 @@ export function* loop(table: Table | FieldSymbol | undefined, options?: ILoopOpt
   const loopFrom = options?.from && options?.from.get() > 0 ? options.from.get() - 1 : 0;
   let loopTo = options?.to && options.to.get() < length ? options.to.get() : length;
   const loopIndex = table.startLoop(loopFrom);
+  let entered = false;
 
   try {
     const array = table.array();
@@ -47,11 +48,14 @@ export function* loop(table: Table | FieldSymbol | undefined, options?: ILoopOpt
 
       yield current;
 
+      entered = true;
       loopIndex.index++;
       loopTo = options?.to && options.to.get() < array.length ? options.to.get() : array.length;
     }
   } finally {
     table.unregisterLoop(loopIndex);
+    // @ts-ignore
+    abap.builtin.sy.get().subrc.set(entered ? 0 : 4);
   }
 
 }
