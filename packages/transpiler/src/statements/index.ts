@@ -55,6 +55,7 @@ export * from "./modify_database";
 export * from "./modify_internal";
 export * from "./move_corresponding";
 export * from "./move";
+export * from "./parameter";
 export * from "./perform";
 export * from "./raise";
 export * from "./read_table";
