@@ -9,7 +9,7 @@ export const config: IConfig = {
     "skipGeneratedFunctionGroups": true,
   },
   "syntax": {
-    "version": Version.v702,
+    "version": Version.OpenABAP,
     "errorNamespace": ".",
   },
   "rules": {
