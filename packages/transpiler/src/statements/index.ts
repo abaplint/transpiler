@@ -75,6 +75,7 @@ export * from "./translate";
 export * from "./try";
 export * from "./type";
 export * from "./update_database";
+export * from "./wait";
 export * from "./when";
 export * from "./while";
 export * from "./write";
