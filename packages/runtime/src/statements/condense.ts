@@ -1,11 +1,12 @@
 import {ICharacter} from "../types/_character";
 
 export function condense(input: ICharacter, options: {nogaps: boolean}): void {
-  let trimmed = input.get().trim();
+  let trimmed = input.get().replace(/ +$/, "");
+  trimmed = trimmed.replace(/^ +/, "");
   if (options.nogaps) {
-    trimmed = trimmed.replace(/\s*/g,"");
+    trimmed = trimmed.replace(/ */g,"");
   } else {
-    trimmed = trimmed.replace(/\s{2,}/g," ");
+    trimmed = trimmed.replace(/ {2,}/g," ");
   }
   input.set(trimmed);
 }

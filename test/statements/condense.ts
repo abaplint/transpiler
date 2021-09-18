@@ -54,4 +54,15 @@ describe("Running statements - CONDENSE", () => {
     expect(abap.console.get()).to.equal("5");
   });
 
+  it("CONDENSE, another test", async () => {
+    const code = `
+    DATA lv_bar TYPE string.
+    lv_bar = | foo\\n bar\\n|.
+    CONDENSE lv_bar.
+    ASSERT lv_bar = |foo\\n bar\\n|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
