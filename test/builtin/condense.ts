@@ -40,4 +40,14 @@ describe("Builtin functions - condense", () => {
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("condense() test", async () => {
+    const code = `
+    DATA lv_bar TYPE string.
+    lv_bar = condense( | foo\\n bar\\n| ).
+    ASSERT lv_bar = |foo\\n bar\\n|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
