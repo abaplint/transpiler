@@ -1,3 +1,4 @@
+export * from "./add";
 export * from "./append";
 export * from "./assert";
 export * from "./assign";

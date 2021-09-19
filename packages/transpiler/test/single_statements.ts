@@ -191,7 +191,7 @@ await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",resultXML: li_
       js: `if (abap.Classes['KERNEL_PUSH_CHANNELS'] === undefined) throw new Error("Wait, kernel class missing");
 await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({cond: abap.compare.initial(lo_handler.get().message) === false,seconds: constant_10});`},
     {abap: `ADD 2 to foo.`,
-      js: `sdfds`},
+      js: `foo.set(abap.operators.add(foo,constant_2));`},
   ];
 
   for (const test of tests) {
