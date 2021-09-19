@@ -60,6 +60,7 @@ export * from "./parameter";
 export * from "./perform";
 export * from "./raise";
 export * from "./read_table";
+export * from "./refresh";
 export * from "./replace";
 export * from "./report";
 export * from "./return";
