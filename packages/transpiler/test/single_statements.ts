@@ -190,6 +190,8 @@ await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",resultXML: li_
     {abap: `WAIT FOR PUSH CHANNELS UNTIL lo_handler->message IS NOT INITIAL UP TO 10 SECONDS.`,
       js: `if (abap.Classes['KERNEL_PUSH_CHANNELS'] === undefined) throw new Error("Wait, kernel class missing");
 await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({cond: abap.compare.initial(lo_handler.get().message) === false,seconds: constant_10});`},
+    {abap: `ADD 2 to foo.`,
+      js: `foo.set(abap.operators.add(foo,constant_2));`},
   ];
 
   for (const test of tests) {
