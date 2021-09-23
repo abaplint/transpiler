@@ -30,7 +30,7 @@
     "sql.js": "^1.6.1"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.21",
+    "@types/chai": "^4.2.22",
     "@types/mocha": "^9.0.0",
     "@types/sql.js": "^1.4.3",
     "chai": "^4.3.4",
