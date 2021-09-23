@@ -36,16 +36,10 @@ export const config: IConfig = {
     "check_syntax": true,
     "form_no_dash": true,
     "obsolete_statement": {
-      "refresh": true,
       "compute": true,
       "requested": true,
       "setExtended": true,
       "occurs": true,
-      "add": false,
-      "divide": false,
-      "move": false,
-      "multiply": false,
-      "subtract": false,
     },
     "forbidden_identifier": {
       "check": [
