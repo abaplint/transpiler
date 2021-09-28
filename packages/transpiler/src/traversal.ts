@@ -47,6 +47,10 @@ export class Traversal {
     return this.file.getFilename();
   }
 
+  public getFile(): abaplint.ABAPFile {
+    return this.file;
+  }
+
   public getSpaghetti(): abaplint.ISpaghettiScope {
     return this.spaghetti;
   }
