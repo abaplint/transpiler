@@ -29,6 +29,10 @@ export const config: IConfig = {
     "allowed_object_types": {
       "allowed": ["INTF", "CLAS", "PROG", "DEVC", "TABL", "XSLT", "TYPE", "DTEL", "DOMA", "TTYP", "MSAG", "FUGR"],
     },
+    "exit_or_check": {
+      "allowCheck": true,
+      "allowExit": false,
+    },
     "unknown_types": true,
     "ambiguous_statement": true,
     "implement_methods": true,

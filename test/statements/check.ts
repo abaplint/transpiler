@@ -26,4 +26,11 @@ ENDDO.`;
     expect(abap.console.get()).to.equal("2\n4");
   });
 
+  it("Top level CHECK", async () => {
+    const code = `CHECK 1 = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
