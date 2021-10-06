@@ -277,4 +277,37 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("a");
   });
 
+  it("call interfaced method in super, check it compiles to valid JS", async () => {
+    const code = `
+INTERFACE lcl_if.
+  METHODS get_text RETURNING VALUE(result) TYPE string.
+ENDINTERFACE.
+
+CLASS sup DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lcl_if.
+ENDCLASS.
+
+CLASS sup IMPLEMENTATION.
+  METHOD lcl_if~get_text.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS sub DEFINITION INHERITING FROM sup.
+  PUBLIC SECTION.
+    METHODS lcl_if~get_text REDEFINITION.
+ENDCLASS.
+
+CLASS sub IMPLEMENTATION.
+  METHOD lcl_if~get_text.
+    CALL METHOD super->lcl_if~get_text
+      RECEIVING
+        result = result.
+  ENDMETHOD.
+ENDCLASS.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
