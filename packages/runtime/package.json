@@ -28,7 +28,7 @@
   "license": "MIT",
   "dependencies": {
     "hdb": "^0.18.3",
-    "sql.js": "^1.6.1"
+    "sql.js": "^1.6.2"
   },
   "devDependencies": {
     "@types/chai": "^4.2.22",
