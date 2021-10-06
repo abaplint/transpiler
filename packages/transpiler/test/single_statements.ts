@@ -26,6 +26,7 @@ describe("Single statements", () => {
     {abap: "DATA foo TYPE c LENGTH 2 VALUE 'fo'.", js: "let foo = new abap.types.Character({length: 2});\nfoo.set('fo');", skip: true},
     {abap: "DATA bar TYPE p LENGTH 4.",            js: "let bar = new abap.types.Packed({length: 4, decimals: 0});", skip: false},
     {abap: "foo = 'fo'.",                          js: "foo.set(new abap.types.Character({length: 2}).set('fo'));",                            skip: false},
+    {abap: "foo = 'moo'(005).",                    js: "foo.set(new abap.types.Character({length: 3}).set('moo'));",                           skip: false},
     {abap: "foo = |fo|.",                          js: "foo.set(`fo`);",                            skip: false},
     {abap: "foo = |fo{ 2 }|.",                     js: "foo.set(`fo${constant_2.get()}`);",               skip: false},
     {abap: "foo = `fo`.",                          js: "foo.set(`fo`);",                            skip: false},

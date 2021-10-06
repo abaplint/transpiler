@@ -21,7 +21,10 @@ export class ConstantTranspiler implements IExpressionTranspiler {
       return new Chunk().append(ret, node, traversal);
     }
 
-    const str = node.findFirstExpression(Expressions.ConstantString);
+    let str = node.findFirstExpression(Expressions.ConstantString);
+    if (str === undefined) {
+      str = node.findFirstExpression(Expressions.TextElementString);
+    }
     if (str) {
       const res = str.getFirstToken().getStr();
       if (res.startsWith("'") && this.addGet === false) {
@@ -33,7 +36,7 @@ export class ConstantTranspiler implements IExpressionTranspiler {
       }
     }
 
-    return new Chunk("todo, Constant");
+    return new Chunk(`todo, Constant`);
   }
 
   public escape(str: string): string {
