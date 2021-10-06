@@ -44,6 +44,9 @@ export class TranspileTypes {
       // if not supplied its a Character(4)
       resolved = "Character";
       extra = "{length: 4}";
+    } else if (type instanceof abaplint.BasicTypes.SimpleType) {
+      // if not supplied its a Character(1)
+      resolved = "Character";
     } else if (type instanceof abaplint.BasicTypes.CharacterType) {
       resolved = "Character";
       if (type.getLength() !== 1) {
@@ -59,6 +62,9 @@ export class TranspileTypes {
     } else if (type instanceof abaplint.BasicTypes.PackedType) {
       resolved = "Packed";
       extra = "{length: " + type.getLength() + ", decimals: " + type.getDecimals() + "}";
+    } else if (type instanceof abaplint.BasicTypes.NumericGenericType) {
+      resolved = "Packed";
+      extra = "{length: 8, decimals: 0}";
     } else if (type instanceof abaplint.BasicTypes.XStringType) {
       resolved = "XString";
     } else if (type instanceof abaplint.BasicTypes.XSequenceType) {

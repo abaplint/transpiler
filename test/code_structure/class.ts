@@ -888,4 +888,42 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("I am from interface");
   });
 
+  it("\"simple\" importing parameter", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS bar IMPORTING foo TYPE simple.
+ENDCLASS.
+
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD bar.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl_bar=>bar( 2 ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("\"numeric\" importing parameter", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS bar IMPORTING foo TYPE numeric.
+ENDCLASS.
+
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD bar.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl_bar=>bar( 2 ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
