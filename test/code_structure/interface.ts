@@ -277,7 +277,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("a");
   });
 
-  it.only("call interfaced method in super, check it compiles to valid JS", async () => {
+  it("call interfaced method in super, check it compiles to valid JS", async () => {
     const code = `
 INTERFACE lcl_if.
   METHODS get_text RETURNING VALUE(result) TYPE string.
