@@ -676,9 +676,7 @@ ENDCLASS.`;
       {filename: "zcl_test.clas.abap", contents: clas},
       {filename: "zcl_test.clas.testclasses.abap", contents: tests},
     ];
-//    const cons =
     await dumpNrun(files);
-//    expect(cons.split("\n")[1]).to.equal("itWorks");
   });
 
 });
