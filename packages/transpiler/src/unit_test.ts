@@ -42,12 +42,7 @@ try {\n`;
 const {${def.name}} = await import("./${obj.getName().toLowerCase()}.${obj.getType().toLowerCase()}.testclasses.mjs");
 locl = clas.addTestClass("${def.name}");\n`;
 
-          if (def.methods.some(m => m.name.toUpperCase() === "CLASS_SETUP")) {
-            ret += `await ${def.name}.class_setup();\n`;
-          }
-
-          const hasSetup = def.methods.some(m => m.name.toUpperCase() === "SETUP");
-          const hasTeardown = def.methods.some(m => m.name.toUpperCase() === "TEARDOWN");
+          ret += `if (${def.name}.class_setup) await ${def.name}.class_setup();\n`;
 
           for (const m of def.methods) {
             if (m.isForTesting === false) {
@@ -62,25 +57,16 @@ locl = clas.addTestClass("${def.name}");\n`;
             }
 
             ret += `{\n  const test = await (new ${def.name}()).constructor_();\n`;
-            if (hasSetup === true) {
-              ret += `  await test.setup();\n`;
-            }
-
+            ret += `  if (test.setup) await test.setup();\n`;
             ret += `  console.log('${obj.getName()}: running ${def.name}->${m.name}');\n`;
             ret += `  meth = locl.addMethod("${m.name}");\n`;
             ret += `  await test.${m.name}();\n`;
             ret += `  meth.pass();\n`;
-
-            if (hasTeardown === true) {
-              ret += `  await test.teardown();\n`;
-            }
+            ret += `  if (test.teardown) await test.teardown();\n`;
             ret += `}\n`;
           }
 
-          if (def.methods.some(m => m.name.toUpperCase() === "CLASS_TEARDOWN")) {
-            ret += `await ${def.name}.class_teardown();\n`;
-          }
-
+          ret += `if (${def.name}.class_teardown) await ${def.name}.class_teardown();\n`;
           ret += `}\n`;
         }
       }

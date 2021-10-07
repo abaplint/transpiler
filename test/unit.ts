@@ -640,4 +640,43 @@ ENDCLASS.`;
     expect(cons.split("\n")[1]).to.equal("itWorks");
   });
 
+  it("test-18", async () => {
+// check private SETUP method in test superclass is called
+    const clas = `CLASS zcl_test DEFINITION PUBLIC FINAL CREATE PUBLIC.
+ENDCLASS.
+CLASS ZCL_TEST IMPLEMENTATION.
+ENDCLASS.`;
+
+    const tests = `
+CLASS ltcl_base DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT ABSTRACT.
+  PROTECTED SECTION.
+    DATA val TYPE i.
+  PRIVATE SECTION.
+    METHODS setup.
+ENDCLASS.
+
+CLASS ltcl_base IMPLEMENTATION.
+  METHOD setup.
+    val = 2.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS INHERITING FROM ltcl_base.
+  PRIVATE SECTION.
+    METHODS sdfsd FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD sdfsd.
+    ASSERT val = 2.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "zcl_test.clas.abap", contents: clas},
+      {filename: "zcl_test.clas.testclasses.abap", contents: tests},
+    ];
+    await dumpNrun(files);
+  });
+
 });
