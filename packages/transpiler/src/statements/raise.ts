@@ -9,7 +9,12 @@ export class RaiseTranspiler implements IStatementTranspiler {
     const classNameToken = node.findFirstExpression(abaplint.Expressions.ClassName)?.getFirstToken();
     const className = classNameToken?.getStr();
     if (className === undefined) {
-      throw "RaiseTranspilerNameNotFound";
+      const s = node.findFirstExpression(abaplint.Expressions.SimpleSource2);
+      if (s === undefined) {
+        throw "RaiseTranspilerNameNotFound";
+      }
+      const sCode = traversal.traverse(s).getCode();
+      return new Chunk().append(`throw ${sCode};`, node, traversal);
     }
 
     let p = "";
