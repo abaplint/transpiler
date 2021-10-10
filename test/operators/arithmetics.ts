@@ -63,4 +63,15 @@ describe("Running operators - Arithmetics", () => {
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("integer MOD, lower case", async () => {
+    const code = `
+      DATA foo TYPE i.
+      foo = 5 mod 2.
+      WRITE foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });

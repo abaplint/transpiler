@@ -6,7 +6,7 @@ import {IExpressionTranspiler} from "./_expression_transpiler";
 export class ArithOperatorTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
-    switch(node.concatTokens()) {
+    switch(node.concatTokens().toUpperCase()) {
       case "+":
         return new Chunk().append("abap.operators.add", node, traversal);
       case "-":
