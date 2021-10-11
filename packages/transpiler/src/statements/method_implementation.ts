@@ -61,7 +61,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
             } else {
               // note: this can be difficult, the "def" might be from an interface, ie. a different scope than the method
               val = new FieldChainTranspiler().transpile(def, traversal).getCode();
-              if (val.includes(".") === false) {
+              if (val.startsWith(def.getFirstToken().getStr()) === true) {
                 val = "this." + val;
               }
             }
