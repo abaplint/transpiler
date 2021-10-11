@@ -2,6 +2,7 @@ import {Hex} from "./hex";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {String} from "./string";
+import {Float} from ".";
 
 export class Time implements ICharacter {
   private value: string;
@@ -19,6 +20,8 @@ export class Time implements ICharacter {
                    date.getUTCSeconds().toString().padStart(2,"0");
     } else if (typeof value === "string") {
       this.value = value;
+    } else if (value instanceof Float) {
+      this.set(Math.round(value.getRaw()));
     } else {
       this.set(value.get());
     }

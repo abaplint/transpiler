@@ -3,6 +3,7 @@ import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {String} from "./string";
 import {getDateFromNumber, getNumberFromDate} from "./_javascript_date";
+import {Float} from "./float";
 
 export class Date implements ICharacter {
   private value: string;
@@ -18,6 +19,8 @@ export class Date implements ICharacter {
       } else {
         this.value = getDateFromNumber(value);
       }
+    } else if (value instanceof Float) {
+      this.set(Math.round(value.getRaw()));
     } else if (typeof value === "string") {
       this.value = value;
     } else {

@@ -99,9 +99,7 @@ describe("Running operators - Arithmetics", () => {
   });
 
   it("rationals", async () => {
-    const code = `
-  ASSERT 1 / 5 = + '0.2'.
-  ASSERT '0.2' * 2 = + '0.4'.`;
+    const code = `ASSERT 1 / 5 = + '0.2'.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
