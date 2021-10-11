@@ -14,15 +14,39 @@ describe("Running operators - Arithmetics", () => {
     abap = new ABAP();
   });
 
-  it("integers DIV", async () => {
+  it("integers DIV 1", async () => {
     const code = `
       DATA lv_int TYPE i.
       lv_int = 5 / 2.
-      ASSERT lv_int = 3.
+      ASSERT lv_int = 3.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("integers DIV 2", async () => {
+    const code = `
+      DATA lv_int TYPE i.
       lv_int = 100 / 99.
-      ASSERT lv_int = 1.
+      ASSERT lv_int = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("integers DIV 3", async () => {
+    const code = `
+      DATA lv_int TYPE i.
       lv_int = 5 / 3.
-      ASSERT lv_int = 2.
+      ASSERT lv_int = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("integers DIV 4", async () => {
+    const code = `
+      DATA lv_int TYPE i.
       lv_int = 5 / 4.
       ASSERT lv_int = 1.`;
     const js = await run(code);
@@ -72,6 +96,60 @@ describe("Running operators - Arithmetics", () => {
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
+  });
+
+  it("rationals", async () => {
+    const code = `ASSERT 1 / 5 = + '0.2'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("rationals 2", async () => {
+    const code = `
+  DATA f TYPE f.
+  f = 1 / 5.
+  ASSERT f = + '0.2'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("rationals 3", async () => {
+    const code = `
+  DATA f TYPE f.
+  f = 1 / 5.
+  f = f * 5.
+  ASSERT f = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("power, fractions", async () => {
+    const code = `
+  DATA f TYPE f.
+  f = 1 / 5.
+  f = f ** 2.
+  WRITE f.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4,0000000000000008E-02");
+  });
+
+  it("degrees to radians", async () => {
+    const code = `
+  CONSTANTS pi TYPE f VALUE '3.14159265359'.
+  DATA degrees TYPE f.
+  DATA radians TYPE f.
+  degrees = 90.
+  radians = ( degrees * pi ) / 180.
+  WRITE radians.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1,5707963267950003E+00");
   });
 
 });
