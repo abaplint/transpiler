@@ -55,10 +55,16 @@ export class Float {
   public get(): string {
     let text = new Number(this.value).toExponential(16);
     text = text.replace(".", ",");
-    const split = text.split("e+");
-    const mantissa = split[0];
-    const exponent = split[1].padStart(2, "0");
-
-    return mantissa + "E+" + exponent;
+    if (text.includes("e+")) {
+      const split = text.split("e+");
+      const mantissa = split[0];
+      const exponent = split[1].padStart(2, "0");
+      return mantissa + "E+" + exponent;
+    } else {
+      const split = text.split("e-");
+      const mantissa = split[0];
+      const exponent = split[1].padStart(2, "0");
+      return mantissa + "E-" + exponent;
+    }
   }
 }

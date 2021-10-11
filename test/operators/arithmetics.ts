@@ -74,4 +74,34 @@ describe("Running operators - Arithmetics", () => {
     expect(abap.console.get()).to.equal("1");
   });
 
+  it.skip("rationals", async () => {
+    const code = `
+  ASSERT 1 / 5 = + '0.2'.
+  ASSERT '0.2' * 2 = + '0.4'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it.skip("rationals 2", async () => {
+    const code = `
+  DATA f TYPE f.
+  f = 1 / 5.
+  ASSERT f = + '0.2'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it.skip("rationals 3", async () => {
+    const code = `
+  DATA f TYPE f.
+  f = 1 / 5.
+  f = f * 5.
+  ASSERT f = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

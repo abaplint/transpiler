@@ -35,6 +35,17 @@ describe("Running Examples - Float type", () => {
     expect(abap.console.get()).to.equal("2,0000000000000000E+00");
   });
 
+  it("float, value = 0.2", async () => {
+    const code = `
+  DATA f TYPE f.
+  f = '0.2'.
+  WRITE f.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2,0000000000000001E-01");
+  });
+
   it("convert float to string", async () => {
     const code = `
   DATA float TYPE f.
