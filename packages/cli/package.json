@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/transpiler-cli",
-  "version": "1.6.44",
+  "version": "1.6.45",
   "description": "Transpiler - Command Line Interface",
   "bin": {
     "abap_transpile": "./abap_transpile"
