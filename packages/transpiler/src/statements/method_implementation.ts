@@ -61,6 +61,9 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
             } else {
               // note: this can be difficult, the "def" might be from an interface, ie. a different scope than the method
               val = new FieldChainTranspiler().transpile(def, traversal).getCode();
+              if (val.includes(".") === false) {
+                val = "this." + val;
+              }
             }
           } else {
             throw "MethodImplementationTranspiler, unknown default param type";

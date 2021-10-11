@@ -926,7 +926,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.skip("static method with constant default", async () => {
+  it("static method with constant default", async () => {
     const code = `
 CLASS lcl_bar DEFINITION.
   PUBLIC SECTION.
