@@ -128,4 +128,16 @@ describe("Running operators - Arithmetics", () => {
     await f(abap);
   });
 
+  it("power, fractions", async () => {
+    const code = `
+  DATA f TYPE f.
+  f = 1 / 5.
+  f = f ** 2.
+  WRITE f.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4,0000000000000008E-02");
+  });
+
 });
