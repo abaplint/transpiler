@@ -926,4 +926,52 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("static method with constant default", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CONSTANTS default_height TYPE i VALUE 3.
+    CLASS-METHODS create
+      IMPORTING height TYPE i DEFAULT default_height.
+ENDCLASS.
+
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD create.
+    WRITE height.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl_bar=>create( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3");
+  });
+
+  it("static method with structured constant default", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CONSTANTS: BEGIN OF defaults,
+                 height TYPE i VALUE 3,
+               END OF defaults.
+    CLASS-METHODS create
+      IMPORTING height TYPE i DEFAULT defaults-height.
+ENDCLASS.
+
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD create.
+    WRITE height.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl_bar=>create( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3");
+  });
+
 });
