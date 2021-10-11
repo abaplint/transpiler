@@ -926,4 +926,27 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it.skip("static method with constant default", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CONSTANTS default_height TYPE i VALUE 3.
+    CLASS-METHODS create
+      IMPORTING height TYPE i DEFAULT default_height.
+ENDCLASS.
+
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD create.
+    WRITE default_height.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl_bar=>create( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3");
+  });
+
 });
