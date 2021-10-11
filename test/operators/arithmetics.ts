@@ -138,4 +138,18 @@ describe("Running operators - Arithmetics", () => {
     expect(abap.console.get()).to.equal("4,0000000000000008E-02");
   });
 
+  it("degrees to radians", async () => {
+    const code = `
+  CONSTANTS pi TYPE f VALUE '3.14159265359'.
+  DATA degrees TYPE f.
+  DATA radians TYPE f.
+  degrees = 90.
+  radians = ( degrees * pi ) / 180.
+  WRITE radians.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1,5707963267950003E+00");
+  });
+
 });
