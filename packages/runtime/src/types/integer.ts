@@ -1,3 +1,4 @@
+import {Float} from "./float";
 import {Hex} from "./hex";
 import {XString} from "./xstring";
 import {ICharacter} from "./_character";
@@ -17,6 +18,8 @@ export class Integer implements INumeric {
       this.value = 0;
     } else if (typeof value === "string") {
       this.value = parseInt(value, 10);
+    } else if (value instanceof Float) {
+      this.set(Math.round(value.getRaw()));
     } else if (value instanceof Hex || value instanceof XString) {
       this.set(parseInt(value.get(), 16));
     } else {

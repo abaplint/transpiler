@@ -14,15 +14,39 @@ describe("Running operators - Arithmetics", () => {
     abap = new ABAP();
   });
 
-  it("integers DIV", async () => {
+  it("integers DIV 1", async () => {
     const code = `
       DATA lv_int TYPE i.
       lv_int = 5 / 2.
-      ASSERT lv_int = 3.
+      ASSERT lv_int = 3.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("integers DIV 2", async () => {
+    const code = `
+      DATA lv_int TYPE i.
       lv_int = 100 / 99.
-      ASSERT lv_int = 1.
+      ASSERT lv_int = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("integers DIV 3", async () => {
+    const code = `
+      DATA lv_int TYPE i.
       lv_int = 5 / 3.
-      ASSERT lv_int = 2.
+      ASSERT lv_int = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("integers DIV 4", async () => {
+    const code = `
+      DATA lv_int TYPE i.
       lv_int = 5 / 4.
       ASSERT lv_int = 1.`;
     const js = await run(code);
@@ -74,7 +98,7 @@ describe("Running operators - Arithmetics", () => {
     expect(abap.console.get()).to.equal("1");
   });
 
-  it.skip("rationals", async () => {
+  it("rationals", async () => {
     const code = `
   ASSERT 1 / 5 = + '0.2'.
   ASSERT '0.2' * 2 = + '0.4'.`;
@@ -83,7 +107,7 @@ describe("Running operators - Arithmetics", () => {
     await f(abap);
   });
 
-  it.skip("rationals 2", async () => {
+  it("rationals 2", async () => {
     const code = `
   DATA f TYPE f.
   f = 1 / 5.
@@ -93,7 +117,7 @@ describe("Running operators - Arithmetics", () => {
     await f(abap);
   });
 
-  it.skip("rationals 3", async () => {
+  it("rationals 3", async () => {
     const code = `
   DATA f TYPE f.
   f = 1 / 5.
