@@ -152,4 +152,28 @@ describe("Running operators - Arithmetics", () => {
     expect(abap.console.get()).to.equal("1,5707963267950003E+00");
   });
 
+  it("more cos, 1", async () => {
+    const code = `
+  CONSTANTS pi TYPE f VALUE '3.14159265359'.
+  DATA new_x TYPE f.
+  new_x = cos( pi ).
+  WRITE new_x.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("-1,0000000000000000E+00");
+  });
+
+  it("more cos, 2", async () => {
+    const code = `
+  CONSTANTS pi TYPE f VALUE '3.14159265'.
+  DATA new_x TYPE f.
+  new_x = cos( pi ).
+  WRITE new_x.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("-1,0000000000000000E+00");
+  });
+
 });
