@@ -12,9 +12,11 @@ export class CondTranspiler implements IExpressionTranspiler {
       if (c.get() instanceof Expressions.Compare
           || c.get() instanceof Expressions.CondSub) {
         ret.appendChunk(traversal.traverse(c));
-      } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr() === "OR") {
+      } else if (c instanceof Nodes.TokenNode
+          && c.getFirstToken().getStr().toUpperCase() === "OR") {
         ret.append(" || ", c, traversal);
-      } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr() === "AND") {
+      } else if (c instanceof Nodes.TokenNode
+          && c.getFirstToken().getStr().toUpperCase() === "AND") {
         ret.append(" && ", c, traversal);
       }
     }
