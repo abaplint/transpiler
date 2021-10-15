@@ -974,4 +974,22 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("3");
   });
 
+  it("CONSTANTS VALUE IS INITIAL", async () => {
+    const code = `
+  CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    TYPES:
+      BEGIN OF ty_dummy,
+        tdate TYPE d,
+      END OF ty_dummy.
+    CONSTANTS c_dummy TYPE ty_dummy VALUE IS INITIAL.
+ENDCLASS.
+
+CLASS lcl_bar IMPLEMENTATION.
+ENDCLASS.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
