@@ -11,7 +11,7 @@ export class RaiseTranspiler implements IStatementTranspiler {
     if (className === undefined) {
       const s = node.findFirstExpression(abaplint.Expressions.SimpleSource2);
       if (s === undefined) {
-        throw "RaiseTranspilerNameNotFound";
+        throw "Raise: Non-class based exceptions not supported";
       }
       const sCode = traversal.traverse(s).getCode();
       return new Chunk().append(`throw ${sCode};`, node, traversal);

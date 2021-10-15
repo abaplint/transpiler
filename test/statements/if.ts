@@ -25,4 +25,15 @@ describe("Running statements - IF", () => {
     await f(abap);
   });
 
+  it("OR, lower case", async () => {
+    const code = `
+    data i_amount_format type c length 2.
+    if not ( i_amount_format is initial or i_amount_format+1(1) is initial ).
+    endif.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
