@@ -49,7 +49,7 @@ describe("Single statements", () => {
     {abap: "SORT foo BY field1 field2.",           js: `abap.statements.sort(foo,{by: [{component: "field1"},{component: "field2"}]});`, skip: false},
     {abap: "SORT ct_matches BY offset length DESCENDING.", js: `abap.statements.sort(ct_matches,{by: [{component: "offset"},{component: "length", descending: true}]});`, skip: false},
     {abap: "WRITE foo.",                           js: "abap.statements.write(foo);",                    skip: false},
-    {abap: "WRITE / foo.",                         js: "abap.statements.write(foo, {newLine: true});", skip: false},
+    {abap: "WRITE / foo.",                         js: "abap.statements.write(foo,{newLine: true});", skip: false},
     {abap: "INSERT 5 INTO tab INDEX sy-tabix.", js: "abap.statements.insertInternal({data: constant_5, index: abap.builtin.sy.get().tabix, table: tab});", skip: false},
     {abap: "RETURN.",                                 js: "return;",                                   skip: false}, // todo, hmm? some more to be added here
     {abap: "method( ).",                              js: "await this.method();",                            skip: false},
