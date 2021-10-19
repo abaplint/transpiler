@@ -3,7 +3,13 @@ import {FieldSymbol} from "../types/field_symbol";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
-export function write(source: INumeric | ICharacter | FieldSymbol | string | number, options?: { newLine?: boolean, skipLine?: boolean }) {
+interface IWriteOptions {
+  newLine?: boolean,
+  skipLine?: boolean,
+  target?: ICharacter,
+}
+
+export function write(source: INumeric | ICharacter | FieldSymbol | string | number, options?: IWriteOptions) {
   if (options?.skipLine === true) {
     this.console.add("\n");
   } else {
@@ -11,7 +17,11 @@ export function write(source: INumeric | ICharacter | FieldSymbol | string | num
       this.console.add("\n");
     }
     if (typeof source === "string" || typeof source === "number") {
-      this.console.add(source.toString());
+      if (options?.target) {
+        options.target.set(source.toString());
+      } else {
+        this.console.add(source.toString());
+      }
     } else {
       if (source instanceof Structure) {
         const obj = source.get();
@@ -20,7 +30,11 @@ export function write(source: INumeric | ICharacter | FieldSymbol | string | num
           abap.statements.write(obj[f]);
         }
       } else {
-        this.console.add(source.get().toString());
+        if (options?.target) {
+          options.target.set(source.get().toString());
+        } else {
+          this.console.add(source.get().toString());
+        }
       }
     }
   }

@@ -10,6 +10,11 @@ export class WriteTranspiler implements IStatementTranspiler {
     let source: Chunk | undefined;
     const newLine = node.findFirstExpression(abaplint.Expressions.WriteOffsetLength)?.findDirectTokenByText("/") !== undefined;
 
+    const target = node.findDirectExpression(abaplint.Expressions.Target);
+    if (target) {
+      extra.push("target: " + traversal.traverse(target).getCode());
+    }
+
     const expr = node.findDirectExpression(abaplint.Expressions.Source);
     if (expr === undefined) {
       source = new Chunk().append("''", node, traversal);
