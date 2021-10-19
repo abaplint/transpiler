@@ -10,6 +10,7 @@ import {convert} from "./convert";
 import {deleteInternal} from "./delete_internal";
 import {describe} from "./describe";
 import {find} from "./find";
+import {getRunTime} from "./get_run_time";
 import {getBit} from "./get_bit";
 import {getTime} from "./get_time";
 import {insertInternal} from "./insert_internal";
@@ -42,6 +43,7 @@ export class Statements {
   public deleteInternal = deleteInternal;
   public describe = describe;
   public find = find;
+  public getRunTime = getRunTime;
   public getBit = getBit;
   public getTime = getTime;
   public insertInternal = insertInternal;
