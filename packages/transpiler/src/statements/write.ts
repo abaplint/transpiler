@@ -6,17 +6,23 @@ import {Chunk} from "../chunk";
 export class WriteTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    let extra = "";
+    const extra: string[] = [];
     let source: Chunk | undefined;
     const newLine = node.findFirstExpression(abaplint.Expressions.WriteOffsetLength)?.findDirectTokenByText("/") !== undefined;
+
+    const target = node.findDirectExpression(abaplint.Expressions.Target);
+    if (target) {
+      extra.push("target: " + traversal.traverse(target).getCode());
+    }
 
     const expr = node.findDirectExpression(abaplint.Expressions.Source);
     if (expr === undefined) {
       source = new Chunk().append("''", node, traversal);
-      extra = ", {newLine: true,skipLine: true}";
+      extra.push("newLine: true");
+      extra.push("skipLine: true");
     } else {
       if (newLine === true) {
-        extra = ", {newLine: true}";
+        extra.push("newLine: true");
       }
       const concat = expr.concatTokens();
       if (concat.startsWith("'@KERNEL ")) {
@@ -29,7 +35,11 @@ export class WriteTranspiler implements IStatementTranspiler {
     const chunk = new Chunk();
     chunk.append("abap.statements.write(", node, traversal);
     chunk.appendChunk(source);
-    chunk.append(extra + ");", node.getLastToken(), traversal);
+    if (extra.length === 0) {
+      chunk.append(");", node.getLastToken(), traversal);
+    } else {
+      chunk.append(",{" + extra.join(",") + "});", node.getLastToken(), traversal);
+    }
     return chunk;
   }
 
