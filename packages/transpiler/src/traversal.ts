@@ -139,8 +139,20 @@ export class Traversal {
     return false;
   }
 
-  public prefixAndName(t: abaplint.Token): string {
+  public prefixAndName(t: abaplint.Token, filename?: string): string {
     let name = t.getStr().toLowerCase();
+
+    if (filename && this.getCurrentObject().getABAPFileByName(filename) === undefined) {
+      // the prefix is from a different object
+      const file = this.reg.getFileByName(filename);
+      if (file) {
+        const found = this.reg.findObjectForFile(file);
+        if (found) {
+          return found.getName().toLowerCase() + "." + name;
+        }
+      }
+    }
+
     const cla = this.isStaticClassAttribute(t);
     if (cla) {
       name = cla + "." + name;

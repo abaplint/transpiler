@@ -20,17 +20,17 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
 
     let after = "";
 
-    const cdef = traversal.getClassDefinition(token);
+    const classDef = traversal.getClassDefinition(token);
 
     let unique = "";
-    if (methodName.toUpperCase() === "CONSTRUCTOR" && cdef) {
+    if (methodName.toUpperCase() === "CONSTRUCTOR" && classDef) {
 // note that all ABAP identifiers are lower cased, sometimes the kernel does magic, so it needs to know the method input name
       unique = "INPUT";
-      after = traversal.buildConstructorContents(scope.getParent(), cdef, unique);
+      after = traversal.buildConstructorContents(scope.getParent(), classDef, unique);
       methodName = "constructor_";
     }
 
-    const methoddef = this.findMethodParameters(scope);
+    const methodDef = this.findMethodParameters(scope);
 
     const vars = scope.getData().vars;
     for (const n in vars) {
@@ -48,20 +48,20 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
         } else {
           after += "if (" + unique + " && " + unique + "." + varName + ") {" + varName + " = " + unique + "." + varName + ";}\n";
         }
-        const def = methoddef?.getParameterDefault(varName);
-        if (def) {
+        const parameterDefault = methodDef?.getParameterDefault(varName);
+        if (parameterDefault) {
           let val = "";
-          if (def.get() instanceof abaplint.Expressions.Constant) {
-            val = new ConstantTranspiler().transpile(def, traversal).getCode();
-          } else if (def.get() instanceof abaplint.Expressions.FieldChain) {
-            if (def.getFirstToken().getStr().toLowerCase() === "abap_true") {
+          if (parameterDefault.get() instanceof abaplint.Expressions.Constant) {
+            val = new ConstantTranspiler().transpile(parameterDefault, traversal).getCode();
+          } else if (parameterDefault.get() instanceof abaplint.Expressions.FieldChain) {
+            if (parameterDefault.getFirstToken().getStr().toLowerCase() === "abap_true") {
               val = "abap.builtin.abap_true";
-            } else if (def.getFirstToken().getStr().toLowerCase() === "abap_false") {
+            } else if (parameterDefault.getFirstToken().getStr().toLowerCase() === "abap_false") {
               val = "abap.builtin.abap_false";
             } else {
               // note: this can be difficult, the "def" might be from an interface, ie. a different scope than the method
-              val = new FieldChainTranspiler().transpile(def, traversal).getCode();
-              if (val.startsWith(def.getFirstToken().getStr()) === true) {
+              val = new FieldChainTranspiler().transpile(parameterDefault, traversal, true, methodDef?.getFilename()).getCode();
+              if (val.startsWith(parameterDefault.getFirstToken().getStr()) === true) {
                 val = "this." + val;
               }
             }
@@ -80,7 +80,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
       after = after.substring(0, after.length - 1);
     }
 
-    const method = this.findMethod(methodName, cdef, traversal);
+    const method = this.findMethod(methodName, classDef, traversal);
     let staticMethod = "";
 
     methodName = methodName.replace("~", "$");
