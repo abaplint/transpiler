@@ -343,7 +343,6 @@ ENDCLASS.`;
     ]);
 
     const js = result.objects[0].chunk.getCode();
-    console.dir(js);
     expect(js).to.contain("|| INPUT.iv_visit === undefined) {iv_visit = if_client.visit_type.get().value;}");
   });
 
