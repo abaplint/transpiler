@@ -34,6 +34,8 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
           name = interfaceName + "$" + name;
         }
         ret.append(name, c, traversal);
+      } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.Dereference) {
+        ret.append(".getPointer()", c, traversal);
       } else if (c.get() instanceof Expressions.ComponentName) {
         ret.append(c.getFirstToken().getStr().toLowerCase(), c, traversal);
       } else if (c instanceof Nodes.TokenNode) {
