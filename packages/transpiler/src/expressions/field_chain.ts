@@ -13,14 +13,14 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
     this.addGet = addGet;
   }
 
-  public transpile(node: Nodes.ExpressionNode, traversal: Traversal, prefix = true): Chunk {
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal, prefix = true, filename?: string): Chunk {
     const ret = new Chunk();
     const extra: string[] = [];
 
     for (const c of node.getChildren()) {
       if (c.get() instanceof Expressions.SourceField
           || c.get() instanceof Expressions.Field) {
-        const name = traversal.prefixAndName(c.getFirstToken()).replace("~", "$");
+        const name = traversal.prefixAndName(c.getFirstToken(), filename).replace("~", "$");
         ret.append(name, c, traversal);
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.SourceFieldSymbol) {
         ret.appendChunk(new FieldSymbolTranspiler().transpile(c, traversal));
