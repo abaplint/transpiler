@@ -60,18 +60,10 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
               val = "abap.builtin.abap_false";
             } else {
               // note: this can be difficult, the "def" might be from an interface, ie. a different scope than the method
-//              try {
               val = new FieldChainTranspiler().transpile(parameterDefault, traversal, true, methodDef.getFilename()).getCode();
               if (val.startsWith(parameterDefault.getFirstToken().getStr()) === true) {
                 val = "this." + val;
               }
-                /*
-              } catch (e) {
-                val =
-                console.dir(methodDef);
-                console.dir(parameterDefault);
-              }
-              */
             }
           } else {
             throw "MethodImplementationTranspiler, unknown default param type";
