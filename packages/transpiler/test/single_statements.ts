@@ -196,7 +196,9 @@ await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({cond: abap.compare.initial(lo_h
     {abap: `ASSIGN lv_test_ref->* TO <lv_test>.`,
       js: `abap.statements.assign({target: fs_lv_test_, source: (lv_test_ref).getPointer()});`},
     {abap: `LOOP AT mr_source_tree->* INTO ls_node. ENDLOOP.`,
-      js: `sdfds`},
+      js: `for (const unique1 of abap.statements.loop(mr_source_tree.getPointer())) {
+  ls_node.set(unique1);
+}`},
   ];
 
   for (const test of tests) {
