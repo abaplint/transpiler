@@ -343,7 +343,7 @@ ENDCLASS.`;
     ]);
 
     const js = result.objects[0].chunk.getCode();
-    expect(js).to.contain("|| INPUT.iv_visit === undefined) {iv_visit = if_client.visit_type.get().value;}");
+    expect(js).to.contain("|| INPUT.iv_visit === undefined) {iv_visit = abap.Classes['IF_CLIENT'].visit_type.get().value;}");
   });
 
 });
