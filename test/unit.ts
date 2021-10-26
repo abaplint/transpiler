@@ -679,4 +679,53 @@ ENDCLASS.`;
     await dumpNrun(files);
   });
 
+  it("test-19", async () => {
+// structured default method importing constant from interface
+    const intf = `INTERFACE zif_client PUBLIC.
+  TYPES ty_visit_type TYPE i.
+
+  CONSTANTS:
+    BEGIN OF visit_type,
+      value TYPE ty_visit_type VALUE 0,
+      open  TYPE ty_visit_type VALUE 123,
+    END OF visit_type.
+
+  METHODS keep_node
+    IMPORTING
+      iv_visit TYPE ty_visit_type DEFAULT visit_type-open.
+ENDINTERFACE.`;
+
+    const clas = `CLASS zcl_client DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    INTERFACES zif_client.
+ENDCLASS.
+CLASS zcl_client IMPLEMENTATION.
+  METHOD zif_client~keep_node.
+    WRITE iv_visit.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const tests = `
+CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS sdfsd FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD sdfsd.
+    DATA foo TYPE REF TO zcl_client.
+    CREATE OBJECT foo.
+    foo->zif_client~keep_node( ).
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "zif_client.intf.abap", contents: intf},
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("123");
+  });
+
 });
