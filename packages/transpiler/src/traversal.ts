@@ -148,7 +148,11 @@ export class Traversal {
       if (file) {
         const found = this.reg.findObjectForFile(file);
         if (found) {
-          return this.lookupClassOrInterface(found.getName(), t) + "." + name;
+          if (found instanceof abaplint.Objects.Interface) {
+            return this.lookupClassOrInterface(found.getName(), t) + "." + found.getName().toLowerCase() + "$" + name;
+          } else {
+            return this.lookupClassOrInterface(found.getName(), t) + "." + name;
+          }
         }
       }
     }

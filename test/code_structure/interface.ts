@@ -310,40 +310,4 @@ ENDCLASS.`;
     await f(abap);
   });
 
-  it("global interface and classes, method DEFAULT from INTF", async () => {
-    const zcl_client = `
-    CLASS zcl_client DEFINITION PUBLIC.
-      PUBLIC SECTION.
-        INTERFACES if_client.
-    ENDCLASS.
-    CLASS zcl_client IMPLEMENTATION.
-      METHOD if_client~keep_node.
-        WRITE 'hello'.
-      ENDMETHOD.
-    ENDCLASS.`;
-
-    const if_client = `
-    INTERFACE if_client PUBLIC.
-      TYPES ty_visit_type TYPE i.
-
-      CONSTANTS:
-        BEGIN OF visit_type,
-          value TYPE ty_visit_type VALUE 0,
-          open  TYPE ty_visit_type VALUE 1,
-        END OF visit_type.
-
-      METHODS keep_node
-        IMPORTING
-          iv_visit TYPE ty_visit_type DEFAULT visit_type-value.
-    ENDINTERFACE.`;
-
-    const result = await compileFiles([
-      {filename: "zcl_client.clas.abap", contents: zcl_client},
-      {filename: "if_client.intf.abap", contents: if_client},
-    ]);
-
-    const js = result.objects[0].chunk.getCode();
-    expect(js).to.contain("|| INPUT.iv_visit === undefined) {iv_visit = abap.Classes['IF_CLIENT'].visit_type.get().value;}");
-  });
-
 });
