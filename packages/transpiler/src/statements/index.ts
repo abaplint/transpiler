@@ -27,6 +27,7 @@ export * from "./describe";
 export * from "./do";
 export * from "./else_if";
 export * from "./else";
+export * from "./end_at";
 export * from "./end_case";
 export * from "./end_class";
 export * from "./end_do";
