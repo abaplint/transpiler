@@ -201,6 +201,8 @@ await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({cond: abap.compare.initial(lo_h
 }`},
     {abap: `lo_result->if_ci_test~navigate( ).`,
       js: `await lo_result.get().if_ci_test$navigate();`},
+    {abap: `WRITE bar+30(*).`,
+      js: `abap.statements.write(bar.getOffset({offset: 30}));`},
   ];
 
   for (const test of tests) {
