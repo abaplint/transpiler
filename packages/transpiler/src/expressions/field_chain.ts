@@ -48,7 +48,8 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
         extra.push("offset: " + new FieldOffsetTranspiler().transpile(c, traversal).getCode());
         this.addGetOffset = true;
       } else if (c instanceof Nodes.ExpressionNode
-          && c.get() instanceof Expressions.FieldLength) {
+          && c.get() instanceof Expressions.FieldLength
+          && c.concatTokens() !== "(*)") {
         extra.push("length: " + new FieldLengthTranspiler().transpile(c, traversal).getCode());
         this.addGetOffset = true;
       }

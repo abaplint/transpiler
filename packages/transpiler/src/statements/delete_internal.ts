@@ -11,7 +11,8 @@ export class DeleteInternalTranspiler implements IStatementTranspiler {
     const extra: string[] = [];
     const where = node.findFirstExpression(abaplint.Expressions.ComponentCond);
     if (where) {
-      extra.push("where: " + traversal.traverse(where).getCode());
+      // todo, replacing "await" is a hack
+      extra.push("where: " + traversal.traverse(where).getCode().replace("await ", ""));
     }
 
 // todo, this is not completely correct, fields might have the name ADJACENT
