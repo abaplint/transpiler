@@ -203,6 +203,8 @@ await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({cond: abap.compare.initial(lo_h
       js: `await lo_result.get().if_ci_test$navigate();`},
     {abap: `WRITE bar+30(*).`,
       js: `abap.statements.write(bar.getOffset({offset: 30}));`},
+    {abap: `mi_merge->get_result( )-stage->count( ).`,
+      js: `await (await mi_merge.get().get_result()).get().stage.get().count();`},
   ];
 
   for (const test of tests) {
