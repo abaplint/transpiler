@@ -12,6 +12,7 @@ export * from "./class_deferred";
 export * from "./class_implementation";
 export * from "./class_local_friends";
 export * from "./clear";
+export * from "./raise_event";
 export * from "./collect";
 export * from "./commit";
 export * from "./concatenate";
