@@ -200,4 +200,33 @@ describe("Running statements - DELETE internal", () => {
     await f(abap);
     expect(abap.console.get()).to.equal("00\n01\n02\n10\n11");
   });
+
+  it("DELETE WHERE method_call( ), check it compiles to valid JS", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    METHODS run.
+    METHODS get_selected_commit RETURNING VALUE(val) TYPE string.
+ENDCLASS.
+
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD run.
+    TYPES: BEGIN OF ty_commit,
+             sha1 TYPE string,
+           END OF ty_commit.
+    DATA lt_commits TYPE STANDARD TABLE OF ty_commit WITH DEFAULT KEY.
+    DELETE lt_commits WHERE sha1 = get_selected_commit( ).
+  ENDMETHOD.
+  METHOD get_selected_commit.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA bar TYPE REF TO lcl_bar.
+  CREATE OBJECT bar.
+  bar->run( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
 });
