@@ -35,9 +35,7 @@ describe("open abap examples", () => {
           query       TYPE string OPTIONAL
           request     TYPE ty_http OPTIONAL
         RETURNING
-          VALUE(response) TYPE ty_http
-        RAISING
-          cx_static_check.
+          VALUE(response) TYPE ty_http.
 
   ENDINTERFACE.`;
 
