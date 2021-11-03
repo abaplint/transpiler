@@ -67,4 +67,17 @@ describe("Running statements - REPLACE", () => {
     await f(abap);
   });
 
+  it("REPLACE IN SECTION LENGTH", async () => {
+    const code = `
+  DATA lv_value TYPE string.
+  lv_value = 'abfooab'.
+  REPLACE REGEX 'ab' IN SECTION LENGTH 2 OF lv_value WITH ''.
+  WRITE lv_value.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("fooab");
+  });
+
 });

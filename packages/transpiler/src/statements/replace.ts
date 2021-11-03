@@ -15,7 +15,15 @@ export class ReplaceTranspiler implements IStatementTranspiler {
 
     const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target)).getCode();
 
-    const all = node.concatTokens().toUpperCase().startsWith("REPLACE ALL");
+    const concat = node.concatTokens().toUpperCase();
+    const all = concat.startsWith("REPLACE ALL");
+
+    if (concat.includes("SECTION LENGTH")) {
+// TODO,
+      const last = sources.pop()!;
+      sources.pop();
+      sources.push(last);
+    }
 
     return new Chunk()
       .append("abap.statements.replace(", node, traversal)
