@@ -10,15 +10,17 @@ export class FunctionExportingTranspiler implements IExpressionTranspiler {
     const parameters: Chunk[] = [];
 
     let chunk = new Chunk();
-    for (const child of node.getChildren()) {
-      if (child.getFirstToken().getStr() === "=") {
-        chunk.appendString(": ");
-      } else if (child.get() instanceof abaplint.Expressions.ParameterName) {
-        chunk = new Chunk();
-        chunk.appendChunk(traversal.traverse(child));
-      } else {
-        chunk.appendChunk(traversal.traverse(child));
-        parameters.push(chunk);
+    for (const parameter of node.getChildren()) {
+      for (const child of parameter.getChildren()) {
+        if (child.getFirstToken().getStr() === "=") {
+          chunk.appendString(": ");
+        } else if (child.get() instanceof abaplint.Expressions.ParameterName) {
+          chunk = new Chunk();
+          chunk.appendChunk(traversal.traverse(child));
+        } else {
+          chunk.appendChunk(traversal.traverse(child));
+          parameters.push(chunk);
+        }
       }
     }
 
