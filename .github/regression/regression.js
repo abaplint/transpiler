@@ -23,7 +23,7 @@ for (const repo of repos) {
 }
 
 // compile local/new version
-childProcess.execSync("npm install", {stdio: "inherit"});
+childProcess.execSync("npm run install", {stdio: "inherit"});
 childProcess.execSync("npm run link-local", {stdio: "inherit"});
 childProcess.execSync("npm run compile", {stdio: "inherit"});
 
