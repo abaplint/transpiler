@@ -23,8 +23,8 @@ Playground: https://transpiler.abaplint.org
 
 ## Running
 
-Prerequsites: [Node.js](https://nodejs.org/) 14.8.0+
+Prerequsites: [Node.js](https://nodejs.org/) 16+
 
-`npm install`
+`npm run install`
 
 `npm test`

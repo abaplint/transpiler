@@ -15,7 +15,7 @@ jobs:
         fetch-depth: 0
     - uses: actions/setup-node@v2
       with:
-        node-version: '14'
+        node-version: '16'
 
     - name: Regression
       run: |
@@ -24,12 +24,12 @@ jobs:
     - name: Performance
       run: |
         cp .github/regression/performance.js ../../performance.js
-        npm install && npm run link-local && npm run performance
+        npm run install && npm run link-local && npm run performance
         cp build/performance/results.json ../../results_after.json
         git checkout -f main
         git reset --hard
         git status
-        npm install && npm run link-local && npm run performance
+        npm run install && npm run link-local && npm run performance
         cp build/performance/results.json ../../results_before.json
 
     - name: cat
