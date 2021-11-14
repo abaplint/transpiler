@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/transpiler",
-  "version": "1.6.63",
+  "version": "1.6.64",
   "description": "Transpiler",
   "main": "build/src/index.js",
   "typings": "build/src/index.d.ts",
@@ -10,9 +10,8 @@
   },
   "scripts": {
     "compile": "tsc",
-    "prepublishOnly": "rm -rf build && npm run test",
-    "pretest": "npm run compile",
-    "test": "mocha"
+    "publish:patch": "npm --no-git-tag-version version patch && rm -rf build && npm install && npm run test && npm publish --access public",
+    "test": "npm run compile && mocha"
   },
   "mocha": {
     "recursive": true,

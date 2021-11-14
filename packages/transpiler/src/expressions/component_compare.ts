@@ -7,7 +7,7 @@ export class ComponentCompareTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
 
-    const concat = node.concatTokens();
+    const concat = node.concatTokens().toUpperCase();
     const pre = concat.startsWith("NOT") ? "!" : "";
     const component = traversal.traverse(node.findDirectExpression(Expressions.ComponentChainSimple)).getCode();
 

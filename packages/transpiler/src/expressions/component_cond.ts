@@ -7,31 +7,33 @@ import {Chunk} from "../chunk";
 export class ComponentCondTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
-// todo, this is still not correct
     let ret = "";
     for(const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.ExpressionNode) {
-        const cond = traversal.traverse(c).getCode();
-        ret += ret === "" ? cond : cond.replace(/^\(i\) => \{return /,"");
+        let cond = traversal.traverse(c).getCode();
+        cond = cond.replace(/^\(i\) => \{return /,"");
+        cond = cond.replace(/;\}$/, "");
+        ret += cond;
       } else if (c instanceof abaplint.Nodes.TokenNode) {
-        switch (c.get().getStr()) {
+        switch (c.get().getStr().toUpperCase()) {
           case "AND":
-            ret = ret.replace(/;\}$/," && ");
+            ret += " && ";
             break;
           case "OR":
-            ret = ret.replace(/;\}$/," || ");
+            ret += " || ";
             break;
           case "(":
             ret += "(";
             break;
           case ")":
-            ret = ret.replace(/;\}$/,");}");
+            ret += ")";
             break;
           default:
             // todo, runtime error
         }
       }
     }
+    ret = `(i) => {return ${ret};}`;
     return new Chunk(ret);
   }
 }
