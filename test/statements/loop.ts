@@ -388,4 +388,19 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("hello");
   });
 
+  it.only("LOOP condition with paren", async () => {
+    const code = `
+TYPES: BEGIN OF ty_cell,
+         row_from TYPE i,
+         col_from TYPE i,
+       END OF ty_cell.
+DATA cells TYPE STANDARD TABLE OF ty_cell WITH DEFAULT KEY.
+LOOP AT cells TRANSPORTING NO FIELDS
+  WHERE ( row_from <= 2 ) AND ( col_from <= 2 ).
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
