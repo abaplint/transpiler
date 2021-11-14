@@ -15,7 +15,7 @@ export class ComponentCondTranspiler implements IExpressionTranspiler {
         cond = cond.replace(/;\}$/, "");
         ret += cond;
       } else if (c instanceof abaplint.Nodes.TokenNode) {
-        switch (c.get().getStr()) {
+        switch (c.get().getStr().toUpperCase()) {
           case "AND":
             ret += " && ";
             break;
