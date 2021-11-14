@@ -388,7 +388,7 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("hello");
   });
 
-  it.only("LOOP condition with paren", async () => {
+  it("LOOP condition with paren", async () => {
     const code = `
 TYPES: BEGIN OF ty_cell,
          row_from TYPE i,
@@ -396,7 +396,7 @@ TYPES: BEGIN OF ty_cell,
        END OF ty_cell.
 DATA cells TYPE STANDARD TABLE OF ty_cell WITH DEFAULT KEY.
 LOOP AT cells TRANSPORTING NO FIELDS
-  WHERE ( row_from <= 2 ) AND ( col_from <= 2 ).
+  WHERE ( row_from <= 1 ) AND ( col_from <= 2 ).
 ENDLOOP.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
