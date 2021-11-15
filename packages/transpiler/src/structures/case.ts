@@ -35,6 +35,9 @@ export class CaseTranspiler implements IStructureTranspiler {
           ret.appendChunk(new WhenTranspiler(u).transpile(c, traversal));
           ret.appendString(") {\n");
         } else if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.WhenOthers) {
+          if (first === true) {
+            continue;
+          }
           ret.appendString("} else {\n");
         } else {
           ret.appendChunk(traversal.traverse(c)); // Normal
