@@ -25,8 +25,8 @@ export interface IObjectIdentifier {
 export interface IOutput {
   objects: IOutputFile[];
   reg: abaplint.IRegistry;
-  /** Output experimental file to run unit tests */
-  unitTest: string;
+  unitTestScript: string;
+  initializationScript: string;
   databaseSetup: string;
 }
 
@@ -93,7 +93,8 @@ export class Transpiler {
 
     const output: IOutput = {
       objects: [],
-      unitTest: new UnitTest().run(reg, dbSetup, this.options?.skip),
+      unitTestScript: new UnitTest().unitTestScript(reg, this.options?.skip),
+      initializationScript: new UnitTest().initializationScript(reg, dbSetup),
       databaseSetup: dbSetup,
       reg: reg,
     };

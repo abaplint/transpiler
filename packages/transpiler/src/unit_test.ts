@@ -4,18 +4,23 @@ export type SkipSettings = {object: string, class: string, method: string}[];
 
 export class UnitTest {
 
-  public run(reg: abaplint.IRegistry, dbSetup: string, skip?: SkipSettings): string {
-    let ret = `import fs from "fs";
-import path from "path";
-import runtime from "@abaplint/runtime";
-import {dirname} from 'path';
-import {fileURLToPath} from 'url';
+  public initializationScript(reg: abaplint.IRegistry, dbSetup: string) {
+    return `import runtime from "@abaplint/runtime";
 global.abap = new runtime.ABAP();
 ${this.buildImports(reg)}
-const __dirname = dirname(fileURLToPath(import.meta.url));
-async function initDB() {
+export async function initDB() {
   return global.abap.initDB(\`${dbSetup}\`);
-}
+}`;
+  }
+
+  public unitTestScript(reg: abaplint.IRegistry, skip?: SkipSettings): string {
+    let ret = `import fs from "fs";
+import path from "path";
+import {dirname} from 'path';
+import {fileURLToPath} from 'url';
+const __dirname = dirname(fileURLToPath(import.meta.url));
+import {initDB} from "./init.mjs";
+import runtime from "@abaplint/runtime";
 
 async function run() {
   await initDB();

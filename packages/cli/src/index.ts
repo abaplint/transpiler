@@ -95,8 +95,9 @@ async function run() {
   console.log(output.objects.length + " objects written to disk");
 
   if (config.write_unit_tests === true) {
-    fs.writeFileSync(outputFolder + path.sep + "index.mjs", output.unitTest);
+    fs.writeFileSync(outputFolder + path.sep + "index.mjs", output.unitTestScript);
   }
+  fs.writeFileSync(outputFolder + path.sep + "init.mjs", output.initializationScript);
 }
 
 run().then(() => {
