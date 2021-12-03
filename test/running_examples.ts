@@ -1044,4 +1044,29 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("constructor parameter name UPPER case", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor IMPORTING moo TYPE i.
+    DATA foo TYPE i.
+ENDCLASS.
+
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD constructor.
+    foo = moo.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA bar TYPE REF TO lcl_bar.
+  CREATE OBJECT bar EXPORTING MOO = 2.
+  WRITE bar->foo.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
