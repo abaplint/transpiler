@@ -56,4 +56,17 @@ describe("Builtin functions - replace", () => {
     expect(abap.console.get()).to.equal("foo\\\\bar");
   });
 
+  it("replace with regex", async () => {
+    const code = `data text type string.
+text = replace( val   = to_lower( 'O M G' )
+                regex = \`[ .,]\`
+                with  = \`\`
+                occ   = 0 ).
+write text.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("omg");
+  });
+
 });

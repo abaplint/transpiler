@@ -6,6 +6,7 @@ export interface IReplaceInput {
   val: string | ICharacter,
   sub?: string | ICharacter,
   with?: string | ICharacter,
+  regex?: string | ICharacter,
   occ?: INumeric,
 }
 
@@ -30,12 +31,20 @@ export function replace(input: IReplaceInput) {
   } else if (input.sub) {
     sub = input.sub.get();
   }
+  if (sub !== undefined) {
+    sub = sub.replace(/\\/g, "\\\\");
+    sub = sub.replace(/\[/g, "\\[");
+  }
+
+  if (typeof input.regex === "string") {
+    sub = input.regex;
+  } else if (input.regex) {
+    sub = input.regex.get();
+  }
 
   if (input.occ === undefined && sub && wi) {
     val = val.replace(sub, wi);
-  } else if (input.occ && input.occ.get() === 0 && sub && wi) {
-    sub = sub.replace(/\\/g, "\\\\");
-    sub = sub.replace(/\[/g, "\\[");
+  } else if (input.occ && input.occ.get() === 0 && sub && wi !== undefined) {
     const reg = new RegExp(sub, "g");
     val = val.replace(reg, wi);
   }
