@@ -438,6 +438,16 @@ write if.`;
     expect(abap.console.get()).to.equal("foobar");
   });
 
+  it("simple concat via &&, whitespace end", async () => {
+    const code = `DATA lv_html TYPE string.
+    lv_html = 'foo  ' && 'bar'.
+    WRITE lv_html.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("foobar");
+  });
+
   it("concat class constant", async () => {
     const code = `
     CLASS moo DEFINITION.
