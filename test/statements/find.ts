@@ -523,4 +523,15 @@ ASSERT lines( ls_match-submatches ) = 2.`;
     await f(abap);
   });
 
+  it("FIND more REGEX, hosts", async () => {
+    const code = `
+  DATA rv_prefix TYPE string.
+  rv_prefix = 'sdf'.
+  FIND REGEX '\\w(\\/[\\w\\d\\.\\-\\/]+)' IN 'https://api.foobar.com' SUBMATCHES rv_prefix.
+  ASSERT rv_prefix = 'sdf'.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    await f(abap);
+  });
+
 });
