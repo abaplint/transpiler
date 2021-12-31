@@ -83,8 +83,6 @@ export function find(input: ICharacter | string, options: IFindOptions) {
     for (let index = 0; index < options.submatches.length; index++) {
       if (matches[0] && matches[0][index + 1]) {
         options.submatches[index].set(matches[0][index + 1]);
-      } else {
-        options.submatches[index].clear();
       }
     }
   }

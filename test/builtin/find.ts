@@ -73,4 +73,25 @@ WRITE lv_end.`;
     expect(abap.console.get()).to.equal("-1");
   });
 
+  it("find 06", async () => {
+    const code = `
+DATA lv_offset TYPE i.
+DATA lv_html TYPE string.
+
+lv_html = '<!DOCTYPE html><html><head><title>abapGit</title><link rel="stylesheet" type="text/css"' &&
+          'href="css/common.css"><link rel="stylesheet" type="text/css" href="css/ag-icons.css">' &&
+          '<link rel="stylesheet" type="text/css" href="css/theme-default.css"><script type="text/javascript"' &&
+          ' src="js/common.js"></script></head>'.
+
+lv_offset = find( val = lv_html
+                  regex = |\\s*</head>|
+                  case = abap_false ).
+
+WRITE lv_offset.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("299");
+  });
+
 });

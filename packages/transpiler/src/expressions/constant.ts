@@ -26,11 +26,14 @@ export class ConstantTranspiler implements IExpressionTranspiler {
       str = node.findFirstExpression(Expressions.TextElementString);
     }
     if (str) {
-      const res = str.getFirstToken().getStr();
+      let res = str.getFirstToken().getStr();
       if (res.startsWith("'") && this.addGet === false) {
         const code = "new abap.types.Character({length: " + (res.length - 2) + "}).set(" + this.escape(res) + ")";
         return new Chunk().append(code, node, traversal);
       } else {
+        if (res.startsWith("'")) {
+          res = "'" + res.substring(1, res.length - 1).trimEnd() + "'";
+        }
         const code = this.escape(res);
         return new Chunk().append(code, node, traversal);
       }
