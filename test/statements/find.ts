@@ -476,5 +476,51 @@ ASSERT lines( ls_match-submatches ) = 2.`;
     await f(abap);
   });
 
+  it("FIND more REGEX", async () => {
+    const code = `
+  DATA text TYPE string.
+  DATA ev_author TYPE string.
+  DATA ev_email TYPE string.
+  DATA ev_time TYPE string.
+  CONSTANTS c_author_regex TYPE string VALUE '^(.+) <(.*)> (\\d{10})\\s?.\\d{4}$' ##NO_TEXT.
+  text = 'Lastname, Firstname <mail@mail.com> 1532611350 +0000'.
+  FIND REGEX c_author_regex IN text
+    SUBMATCHES
+    ev_author
+    ev_email
+    ev_time.
+  ASSERT sy-subrc = 0.
+  ASSERT ev_author = 'Lastname, Firstname'.
+  ASSERT ev_email = 'mail@mail.com'.
+  ASSERT ev_time = '1532611350'.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    await f(abap);
+  });
+
+  it("FIND more REGEX, submatches should not clear", async () => {
+    const code = `
+  DATA text TYPE string.
+  DATA ev_author TYPE string.
+  DATA ev_email TYPE string.
+  DATA ev_time TYPE string.
+  ev_author = '1'.
+  ev_email = '1'.
+  ev_time = '1'.
+  CONSTANTS c_author_regex TYPE string VALUE '^(.+) <(.*)> (\\d{10})\\s?.\\d{4}$' ##NO_TEXT.
+  text = 'no match'.
+  FIND REGEX c_author_regex IN text
+    SUBMATCHES
+    ev_author
+    ev_email
+    ev_time.
+  ASSERT sy-subrc <> 0.
+  ASSERT ev_author = '1'.
+  ASSERT ev_email = '1'.
+  ASSERT ev_time = '1'.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    await f(abap);
+  });
 
 });
