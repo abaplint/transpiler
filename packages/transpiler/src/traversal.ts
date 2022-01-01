@@ -96,8 +96,7 @@ export class Traversal {
     return node;
   }
 
-  // todo, add explicit return type,
-  public getInterfaceDefinition(token: abaplint.Token): any | undefined {
+  public getInterfaceDefinition(token: abaplint.Token): abaplint.IInterfaceDefinition | undefined {
     let scope = this.findCurrentScopeByToken(token);
 
     while (scope !== undefined) {
@@ -132,8 +131,12 @@ export class Traversal {
     }
 
     const name = token.getStr();
+    if (name.toLowerCase() === "me") {
+      return true;
+    }
     const found = scope.findScopeForVariable(name);
-    if (found && found.stype === abaplint.ScopeType.ClassImplementation) {
+    if (found && (found.stype === abaplint.ScopeType.MethodInstance
+        || found.stype === abaplint.ScopeType.ClassImplementation)) {
       return true;
     }
     return false;
@@ -157,9 +160,9 @@ export class Traversal {
       }
     }
 
-    const cla = this.isStaticClassAttribute(t);
-    if (cla) {
-      name = cla + "." + name;
+    const className = this.isStaticClassAttribute(t);
+    if (className) {
+      name = className + "." + name;
     } else if (name === "super") {
       return name;
     } else if (this.isClassAttribute(t)) {
@@ -183,7 +186,8 @@ export class Traversal {
     if (found && id
         && id.getMeta().includes(abaplint.IdentifierMeta.Static)
         && found.stype === abaplint.ScopeType.ClassImplementation) {
-      return scope.getParent()?.getIdentifier().sname.toLowerCase();
+//      console.dir(found.sname);
+      return found.sname.toLowerCase();
     }
     return undefined;
   }
@@ -290,10 +294,12 @@ export class Traversal {
   public buildConstructorContents(scope: abaplint.ISpaghettiScopeNode | undefined,
                                   def: abaplint.IClassDefinition, inputName: string): string {
 
+    /*
     const vars = scope?.getData().vars;
     if (vars === undefined || Object.keys(vars).length === 0) {
       return "";
     }
+    */
     let ret = "";
 
     if (def.getSuperClass() !== undefined) {
@@ -302,6 +308,7 @@ export class Traversal {
       ret += `await super.constructor_(${inputName});\n`;
     }
 
+    /*
     for (const n in vars) {
       const identifier = vars[n];
       if (identifier.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
@@ -322,6 +329,28 @@ export class Traversal {
       ret += "this." + name + " = " + new TranspileTypes().toType(identifier.getType()) + ";\n";
       if (name === "me") {
         ret += "this.me.set(this);\n";
+      }
+    }
+    */
+
+    ret += "this.me = new abap.types.ABAPObject();\n";
+    ret += "this.me.set(this);\n";
+    for (const a of def.getAttributes().getAll()) {
+      if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
+        continue;
+      }
+      const name = a.getName().toLowerCase();
+      ret += "this." + name + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
+    }
+
+    // attributes from directly implemented interfaces(not interfaces implemented in super classes)
+    for (const i of def.getImplementing()) {
+      for (const a of scope?.findInterfaceDefinition(i.name)?.getAttributes().getAll() || []) {
+        if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
+          continue;
+        }
+        const name = i.name.toLowerCase() + "$" + a.getName().toLowerCase();
+        ret += "this." + name + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
       }
     }
 
@@ -363,7 +392,7 @@ export class Traversal {
 
 ////////////////////////////
 
-  public registerClassOrInterface(def: abaplint.IClassDefinition | undefined): string {
+  public registerClassOrInterface(def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined): string {
     if (def === undefined) {
       return "";
     }
@@ -402,7 +431,7 @@ export class Traversal {
     }
   }
 
-  private buildPrefix(def: abaplint.IClassDefinition): string {
+  private buildPrefix(def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition ): string {
     const file = this.reg.getFileByName(def.getFilename());
     if (file === undefined) {
       return "NOT_FOUND";
