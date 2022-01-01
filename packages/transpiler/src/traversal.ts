@@ -335,14 +335,28 @@ export class Traversal {
     return ret;
   }
 
-  private dataFromInterfaces(name: string, scope: abaplint.ISpaghettiScopeNode | undefined): string {
-    let ret = "";
-
+  public findInterfaceDefinition(name: string, scope: abaplint.ISpaghettiScopeNode | undefined) {
     let intf = scope?.findInterfaceDefinition(name);
     if (intf === undefined) {
       const iglobal = this.reg.getObject("INTF", name) as abaplint.Objects.Interface | undefined;
       intf = iglobal?.getDefinition();
     }
+    return intf;
+  }
+
+  public findClassDefinition(name: string, scope: abaplint.ISpaghettiScopeNode | undefined) {
+    let clas = scope?.findClassDefinition(name);
+    if (clas === undefined) {
+      const iglobal = this.reg.getObject("CLAS", name) as abaplint.Objects.Class | undefined;
+      clas = iglobal?.getDefinition();
+    }
+    return clas;
+  }
+
+  private dataFromInterfaces(name: string, scope: abaplint.ISpaghettiScopeNode | undefined): string {
+    let ret = "";
+
+    const intf = this.findInterfaceDefinition(name, scope);
 
     for (const a of intf?.getAttributes().getAll() || []) {
       if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
