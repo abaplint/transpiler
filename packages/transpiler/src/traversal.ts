@@ -345,7 +345,13 @@ export class Traversal {
 
     // attributes from directly implemented interfaces(not interfaces implemented in super classes)
     for (const i of def.getImplementing()) {
-      for (const a of scope?.findInterfaceDefinition(i.name)?.getAttributes().getAll() || []) {
+      let intf = scope?.findInterfaceDefinition(i.name);
+      if (intf === undefined) {
+        const iglobal = this.reg.getObject("INTF", i.name) as abaplint.Objects.Interface | undefined;
+        intf = iglobal?.getDefinition();
+      }
+
+      for (const a of intf?.getAttributes().getAll() || []) {
         if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
           continue;
         }
