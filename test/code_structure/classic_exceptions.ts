@@ -14,7 +14,7 @@ describe("Running code structure - Classic Exceptions", () => {
     abap = new ABAP();
   });
 
-  it.skip("Classic exceptions", async () => {
+  it("Classic exceptions", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
