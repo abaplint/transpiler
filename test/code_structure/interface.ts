@@ -310,4 +310,35 @@ ENDCLASS.`;
     await f(abap);
   });
 
+  it("data from interface implementing interface", async () => {
+    const code = `
+INTERFACE zif_top.
+  DATA bar TYPE i.
+ENDINTERFACE.
+
+INTERFACE zif_client.
+  INTERFACES zif_top.
+ENDINTERFACE.
+
+CLASS zcl_client DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES zif_client.
+    METHODS constructor.
+ENDCLASS.
+
+
+CLASS zcl_client IMPLEMENTATION.
+  METHOD constructor.
+    zif_top~bar = 2.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA obj TYPE REF TO zcl_client.
+  CREATE OBJECT obj.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

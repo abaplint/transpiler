@@ -308,31 +308,6 @@ export class Traversal {
       ret += `await super.constructor_(${inputName});\n`;
     }
 
-    /*
-    for (const n in vars) {
-      const identifier = vars[n];
-      if (identifier.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
-        continue;
-      }
-      const name = n.toLowerCase().replace("~", "$");
-      if (name === "super") {
-        continue; // todo, https://github.com/abaplint/transpiler/issues/133
-      }
-
-      // todo, better handling of variables from interfaces, it should only initialize those that are directly implemented
-      if (def.getAttributes().findByName(name) === undefined
-          && name.includes("$") === false
-          && name !== "me") {
-        continue;
-      }
-
-      ret += "this." + name + " = " + new TranspileTypes().toType(identifier.getType()) + ";\n";
-      if (name === "me") {
-        ret += "this.me.set(this);\n";
-      }
-    }
-    */
-
     ret += "this.me = new abap.types.ABAPObject();\n";
     ret += "this.me.set(this);\n";
     for (const a of def.getAttributes().getAll()) {
@@ -345,19 +320,7 @@ export class Traversal {
 
     // attributes from directly implemented interfaces(not interfaces implemented in super classes)
     for (const i of def.getImplementing()) {
-      let intf = scope?.findInterfaceDefinition(i.name);
-      if (intf === undefined) {
-        const iglobal = this.reg.getObject("INTF", i.name) as abaplint.Objects.Interface | undefined;
-        intf = iglobal?.getDefinition();
-      }
-
-      for (const a of intf?.getAttributes().getAll() || []) {
-        if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
-          continue;
-        }
-        const name = i.name.toLowerCase() + "$" + a.getName().toLowerCase();
-        ret += "this." + name + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
-      }
+      ret += this.dataFromInterfaces(i.name, scope);
     }
 
     // handle aliases after initialization of carrier variables
@@ -367,6 +330,30 @@ export class Traversal {
     // constants can be accessed both statically and via reference
     for (const c of def.getAttributes().getConstants()) {
       ret += "this." + c.getName() + " = " + def.getName() + "." + c.getName() + ";\n";
+    }
+
+    return ret;
+  }
+
+  private dataFromInterfaces(name: string, scope: abaplint.ISpaghettiScopeNode | undefined): string {
+    let ret = "";
+
+    let intf = scope?.findInterfaceDefinition(name);
+    if (intf === undefined) {
+      const iglobal = this.reg.getObject("INTF", name) as abaplint.Objects.Interface | undefined;
+      intf = iglobal?.getDefinition();
+    }
+
+    for (const a of intf?.getAttributes().getAll() || []) {
+      if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
+        continue;
+      }
+      const n = name.toLowerCase() + "$" + a.getName().toLowerCase();
+      ret += "this." + n + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
+    }
+
+    for (const i of intf?.getImplementing() || []) {
+      ret += this.dataFromInterfaces(i.name, scope);
     }
 
     return ret;
