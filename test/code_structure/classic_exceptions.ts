@@ -14,7 +14,7 @@ describe("Running code structure - Classic Exceptions", () => {
     abap = new ABAP();
   });
 
-  it("Classic exceptions", async () => {
+  it("Classic exceptions, class", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
@@ -32,6 +32,37 @@ ENDCLASS.
 
 START-OF-SELECTION.
   lcl=>send(
+    EXCEPTIONS
+      http_communication_failure = 1
+      OTHERS                     = 5 ).
+  ASSERT sy-subrc = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("Classic exceptions, interface", async () => {
+    const code = `
+INTERFACE lif.
+CLASS-METHODS send
+  EXCEPTIONS
+    http_communication_failure.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD lif~send.
+    FIND 'foo' IN 'bar'.
+    ASSERT sy-subrc = 4.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>lif~send(
     EXCEPTIONS
       http_communication_failure = 1
       OTHERS                     = 5 ).

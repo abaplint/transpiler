@@ -14,22 +14,7 @@ export class EndMethodTranspiler implements IStatementTranspiler {
     }
 
     let returning: string = "";
-
-    let methodName: string | undefined = undefined;
-    if (scope?.getIdentifier().stype === abaplint.ScopeType.Method) {
-      methodName = scope?.getIdentifier().sname;
-    }
-    let className: string | undefined = undefined;
-    if (scope?.getParent()?.getIdentifier().stype === abaplint.ScopeType.ClassImplementation) {
-      className = scope?.getParent()?.getIdentifier().sname;
-    }
-    if (methodName && className) {
-      const classDef = scope.findClassDefinition(className);
-      const methodDef = classDef?.getMethodDefinitions().getByName(methodName);
-      if (methodDef && methodDef.getExceptions().length > 0) {
-        returning += "abap.builtin.sy.get().subrc.set(0);\n";
-      }
-    }
+    returning += this.setSubrc(scope, traversal);
 
     const vars = scope.getData().vars;
     for (const n in vars) {
@@ -45,6 +30,37 @@ export class EndMethodTranspiler implements IStatementTranspiler {
     }
 
     return new Chunk().append(returning + "}", node, traversal);
+  }
+
+  private setSubrc(scope: abaplint.ISpaghettiScopeNode, traversal: Traversal): string {
+    let methodName: string | undefined = undefined;
+    if (scope?.getIdentifier().stype === abaplint.ScopeType.Method) {
+      methodName = scope?.getIdentifier().sname;
+    }
+    let className: string | undefined = undefined;
+    if (scope?.getParent()?.getIdentifier().stype === abaplint.ScopeType.ClassImplementation) {
+      className = scope?.getParent()?.getIdentifier().sname;
+    }
+
+    if (methodName === undefined || className === undefined) {
+      return "";
+    }
+
+    let methodDef: abaplint.IMethodDefinition | undefined = undefined;
+    if (methodName.includes("~")) {
+      const split = methodName.split("~");
+      const classDef = traversal.findInterfaceDefinition(split[0], scope);
+      methodDef = classDef?.getMethodDefinitions().getByName(split[1]);
+    } else {
+      const classDef = traversal.findClassDefinition(className, scope);
+      methodDef = classDef?.getMethodDefinitions().getByName(methodName);
+    }
+
+    if (methodDef && methodDef.getExceptions().length > 0) {
+      return "abap.builtin.sy.get().subrc.set(0);\n";
+    }
+
+    return "";
   }
 
 }
