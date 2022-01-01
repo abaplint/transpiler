@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/runtime",
-  "version": "1.6.69",
+  "version": "1.7.0",
   "description": "Transpiler - Runtime",
   "main": "build/src/index.js",
   "typings": "build/src/index.d.ts",
@@ -10,6 +10,7 @@
   },
   "scripts": {
     "compile": "tsc",
+    "publish:minor": "npm --no-git-tag-version version minor && rm -rf build && npm install && npm run test && npm publish --access public",
     "publish:patch": "npm --no-git-tag-version version patch && rm -rf build && npm install && npm run test && npm publish --access public",
     "test": "npm run compile && mocha"
   },
