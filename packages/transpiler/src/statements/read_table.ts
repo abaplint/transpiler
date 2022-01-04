@@ -20,6 +20,12 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       extra.push("index: " + s);
     }
 
+    const from = node.findExpressionAfterToken("FROM");
+    if (from) {
+      const s = new SourceTranspiler().transpile(from, traversal).getCode();
+      extra.push("from: " + s);
+    }
+
     const rt = node.findDirectExpression(abaplint.Expressions.ReadTableTarget);
     const target = rt?.findDirectExpression(abaplint.Expressions.Target);
     const fs = rt?.findDirectExpression(abaplint.Expressions.FSTarget);

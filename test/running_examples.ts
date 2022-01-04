@@ -359,40 +359,6 @@ write if.`;
     expect(abap.console.get()).to.equal("foo if bar");
   });
 
-  it("MODIFY internal table INDEX FROM", async () => {
-    const code = `
-    DATA result TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
-    DATA dat LIKE LINE OF result.
-    APPEND 2 TO result.
-    MODIFY result INDEX 1 FROM 4.
-    ASSERT sy-subrc = 0.
-    READ TABLE result INDEX 1 INTO dat.
-    WRITE dat.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("4");
-  });
-
-  it("MODIFY, testing references", async () => {
-    const code = `
-  DATA integers TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
-  DATA int TYPE i.
-  APPEND 1 TO integers.
-  APPEND 2 TO integers.
-  int = 3.
-  MODIFY integers INDEX 1 FROM int.
-  int = 4.
-  MODIFY integers INDEX 2 FROM int.
-  LOOP AT integers INTO int.
-    WRITE / int.
-  ENDLOOP.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("3\n4");
-  });
-
   it("int to hex", async () => {
     const code = `
   DATA lv_x TYPE x LENGTH 4.
