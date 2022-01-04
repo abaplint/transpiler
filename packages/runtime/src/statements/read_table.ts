@@ -6,6 +6,7 @@ export interface IReadTableOptions {
   index?: INumeric | number,
   withKey?: (i: any) => boolean,
   into?: INumeric | ICharacter | Structure | Table | DataReference,
+  from?: INumeric | ICharacter | Structure | Table | DataReference,
   referenceInto?: DataReference,
   assigning?: FieldSymbol,
 }
