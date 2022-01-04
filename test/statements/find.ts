@@ -498,6 +498,20 @@ ASSERT lines( ls_match-submatches ) = 2.`;
     await f(abap);
   });
 
+  it("FIND more REGEX, constant defined in INTF", async () => {
+    const code = `
+INTERFACE bar.
+  CONSTANTS regex TYPE string VALUE '\\d+'.
+ENDINTERFACE.
+
+START-OF-SELECTION.
+  FIND REGEX bar=>regex IN '123'.
+  ASSERT sy-subrc = 0.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    await f(abap);
+  });
+
   it("FIND more REGEX, submatches should not clear", async () => {
     const code = `
   DATA text TYPE string.

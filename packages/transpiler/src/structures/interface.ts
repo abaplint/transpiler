@@ -2,7 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
 import {TranspileTypes} from "../types";
-import {FieldChainTranspiler} from "../expressions";
+import {ConstantTranspiler, FieldChainTranspiler} from "../expressions";
 import {Chunk} from "../chunk";
 
 export class InterfaceTranspiler implements IStructureTranspiler {
@@ -50,13 +50,15 @@ export class InterfaceTranspiler implements IStructureTranspiler {
       if (valExpression?.getChildren()[1].get() instanceof abaplint.Expressions.SimpleFieldChain) {
         const s = new FieldChainTranspiler().transpile(
           valExpression.getChildren()[1] as abaplint.Nodes.ExpressionNode, traversal, false).getCode();
-        ret += name + ".set(" + s + ");\n";
+        const e = new ConstantTranspiler().escape(s);
+        ret += name + ".set(" + e + ");\n";
         continue;
       }
 
       const val = identifier.getValue();
       if (typeof val === "string") {
-        ret += name + ".set(" + identifier.getValue() + ");\n";
+        const e = new ConstantTranspiler().escape(val);
+        ret += name + ".set(" + e + ");\n";
       } else if (typeof val === "object") {
         const a: any = val;
         for (const v of Object.keys(val)) {
