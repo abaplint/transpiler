@@ -237,4 +237,24 @@ ASSERT sy-subrc = 0.`;
     await f(abap);
   });
 
+  it("READ TABLE, with table key, not found", async () => {
+    const code = `
+TYPES: BEGIN OF ty_css_var,
+         name  TYPE string,
+         value TYPE string,
+       END OF ty_css_var.
+TYPES ty_css_vars TYPE SORTED TABLE OF ty_css_var WITH UNIQUE KEY name.
+DATA lt_tab TYPE ty_css_vars.
+DATA row LIKE LINE OF lt_tab.
+row-name = 'foo'.
+row-value = 'bar'.
+INSERT row INTO TABLE lt_tab.
+row-name = 'sdfsd'.
+READ TABLE lt_tab FROM row TRANSPORTING NO FIELDS.
+ASSERT sy-subrc = 8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

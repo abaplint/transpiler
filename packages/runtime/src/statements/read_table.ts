@@ -1,4 +1,4 @@
-import { eq } from "../compare";
+import {eq} from "../compare";
 import {DataReference, FieldSymbol, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
@@ -71,7 +71,11 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
     throw new Error("runtime, readTable, unexpected input");
   }
 
-  const subrc = found ? 0 : 4;
+  let subrc = found ? 0 : 4;
+  if (options?.from && subrc === 4) {
+    subrc = 8;
+  }
+
   // @ts-ignore
   abap.builtin.sy.get().subrc.set(subrc);
   // @ts-ignore
