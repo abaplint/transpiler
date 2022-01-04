@@ -217,7 +217,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.skip("READ TABLE, with table key", async () => {
+  it("READ TABLE, with table key, found", async () => {
     const code = `
 TYPES: BEGIN OF ty_css_var,
          name  TYPE string,
