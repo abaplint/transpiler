@@ -8,12 +8,18 @@ export interface IModifyInternalOptions {
 
 export function modifyInternal(table: Table, options: IModifyInternalOptions): void {
 
-  const index = options.index.get() - 1;
+  let found = false;
 
-  const found = table.array()[index] !== undefined;
-  if (found) {
-    table.deleteIndex(index);
-    table.insertIndex(options.from, index);
+  if (options.index) {
+    const index = options.index.get() - 1;
+    found = table.array()[index] !== undefined;
+    if (found) {
+      table.deleteIndex(index);
+      table.insertIndex(options.from, index);
+    }
+  } else {
+// with table key
+// todo
   }
 
   const subrc = found ? 0 : 4;
