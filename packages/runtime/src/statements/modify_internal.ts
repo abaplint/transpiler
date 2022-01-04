@@ -1,5 +1,8 @@
-import {Table} from "../types";
+import {Integer, Table} from "../types";
 import {INumeric} from "../types/_numeric";
+import {deleteInternal} from "./delete_internal";
+import {insertInternal} from "./insert_internal";
+import {readTable} from "./read_table";
 
 export interface IModifyInternalOptions {
   index: INumeric,
@@ -17,9 +20,12 @@ export function modifyInternal(table: Table, options: IModifyInternalOptions): v
       table.deleteIndex(index);
       table.insertIndex(options.from, index);
     }
-  } else {
-// with table key
-// todo
+  } else if (options.from) {
+    const readResult = readTable(table, {from: options.from});
+    if (readResult.subrc === 0) {
+      deleteInternal(table, {index: new Integer().set(readResult.foundIndex)});
+    }
+    insertInternal({table, data: options.from});
   }
 
   const subrc = found ? 0 : 4;

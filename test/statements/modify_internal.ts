@@ -48,7 +48,7 @@ describe("Running statements - MODIFY internal", () => {
     expect(abap.console.get()).to.equal("3\n4");
   });
 
-  it.skip("MODIFY, table key", async () => {
+  it("MODIFY, table key", async () => {
     const code = `
 TYPES: BEGIN OF ty_css_var,
          name  TYPE string,

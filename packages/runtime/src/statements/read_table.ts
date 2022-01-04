@@ -95,4 +95,5 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
     options.assigning.assign(found);
   }
 
+  return {subrc, foundIndex};
 }
