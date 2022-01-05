@@ -627,4 +627,12 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("NA", async () => {
+    const code = `
+    ASSERT 'foboar' NA 'c'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
