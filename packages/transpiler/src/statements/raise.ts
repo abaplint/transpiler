@@ -2,6 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
+import {SourceTranspiler} from "../expressions";
 
 export class RaiseTranspiler implements IStatementTranspiler {
 
@@ -13,7 +14,7 @@ export class RaiseTranspiler implements IStatementTranspiler {
       if (s === undefined) {
         throw "Raise: Non-class based exceptions not supported";
       }
-      const sCode = traversal.traverse(s).getCode();
+      const sCode = new SourceTranspiler(true).transpile(s, traversal).getCode();
       return new Chunk().append(`throw ${sCode};`, node, traversal);
     }
 

@@ -495,17 +495,32 @@ ENDCLASS.`;
     CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
       PRIVATE SECTION.
         METHODS test01 FOR TESTING.
+        METHODS test02 FOR TESTING.
     ENDCLASS.
     CLASS ltcl_test IMPLEMENTATION.
+
       METHOD test01.
         TRY.
           RAISE EXCEPTION TYPE zcx_error.
         CATCH zcx_something.
-          WRITE 'blah'.
+          WRITE 'blah1'.
         CATCH zcx_error.
           WRITE 'hello'.
         ENDTRY.
       ENDMETHOD.
+
+      METHOD test02.
+        DATA temp2 TYPE REF TO zcx_error.
+        TRY.
+          CREATE OBJECT temp2.
+          RAISE EXCEPTION temp2.
+        CATCH zcx_something.
+          WRITE 'blah2'.
+        CATCH zcx_error.
+          WRITE 'world'.
+        ENDTRY.
+      ENDMETHOD.
+
     ENDCLASS.`;
     const cxroot = `
     CLASS cx_root DEFINITION PUBLIC.
@@ -519,7 +534,7 @@ ENDCLASS.`;
       {filename: "zcx_error.clas.testclasses.abap", contents: tests},
     ];
     const console = await dumpNrun(files);
-    expect(console.split("\n")[1]).to.equal("hello");
+    expect(console.split("\n")[2]).to.equal("helloworld");
   });
 
   it("test-14", async () => {
