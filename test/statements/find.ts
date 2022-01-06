@@ -548,4 +548,18 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("FIND more REGEX, clearing of submatches", async () => {
+    const code = `
+    DATA foo TYPE string.
+    DATA duplicates TYPE string.
+    DATA str TYPE string.
+    str = 'Z'.
+    FIND REGEX '([\\w|\\s])(.*)(.*)' IN str SUBMATCHES foo duplicates str.
+    ASSERT foo = 'Z'.
+    ASSERT str = ''.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    await f(abap);
+  });
+
 });
