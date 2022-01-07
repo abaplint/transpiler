@@ -37,4 +37,19 @@ ASSERT foo IS NOT INITIAL.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("CREATE DATA, structure", async () => {
+    const code = `
+TYPES: BEGIN OF ty_structure,
+         field TYPE string,
+       END OF ty_structure.
+DATA ls_data TYPE REF TO ty_structure.
+CREATE DATA ls_data.
+ls_data->field = 'hello'.
+WRITE ls_data->field.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello");
+  });
+
 });
