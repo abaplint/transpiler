@@ -7,6 +7,7 @@ export const sy = new Structure({
   index: new Integer(),
   langu: new Character({length: 1}).set("E"),
   mandt: new Character({length: 3}).set("123"),
+  sysid: new Character({length: 3}).set("ABC"),
   msgid: new Character({length: 20}),
   msgno: new Numc({length: 3}),
   msgv1: new Character({length: 50}),
