@@ -1,6 +1,6 @@
 import * as abaplint from "@abaplint/core";
 
-export type SkipSettings = {object: string, class: string, method: string}[];
+export type TestMethodList = {object: string, class: string, method: string}[];
 
 export class UnitTest {
 
@@ -13,7 +13,7 @@ export async function initDB() {
 }`;
   }
 
-  public unitTestScript(reg: abaplint.IRegistry, skip?: SkipSettings): string {
+  public unitTestScript(reg: abaplint.IRegistry, skip?: TestMethodList, _only?: TestMethodList): string {
     let ret = `import fs from "fs";
 import path from "path";
 import {dirname} from 'path';
