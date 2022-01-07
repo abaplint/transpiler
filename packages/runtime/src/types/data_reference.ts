@@ -9,10 +9,15 @@ type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Stru
 
 export class DataReference  {
   private pointer: PointerType;
-  // todo, add typing, so its possible to get runtime errors?
+  private readonly type: PointerType;
 
-  public constructor() {
+  public constructor(type: PointerType) {
     this.pointer = undefined;
+    this.type = type;
+  }
+
+  public getType(): PointerType {
+    return this.type;
   }
 
   public assign(pointer: PointerType) {

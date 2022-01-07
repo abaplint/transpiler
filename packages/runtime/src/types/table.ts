@@ -120,7 +120,7 @@ export class Table  {
       this.value.push(p);
       return item;
     } else if (item instanceof DataReference) {
-      const ref = new DataReference();
+      const ref = new DataReference(item.getType());
       ref.assign(item.getPointer());
       this.value.push(ref);
       return ref;
