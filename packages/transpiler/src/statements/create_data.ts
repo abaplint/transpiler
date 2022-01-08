@@ -5,8 +5,11 @@ import {Chunk} from "../chunk";
 
 export class CreateDataTranspiler implements IStatementTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    return new Chunk(`throw "CreateDataTranspiler-todo";`);
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
+    const targetNode = node.findDirectExpression(abaplint.Expressions.Target);
+    const target = traversal.traverse(targetNode);
+
+    return new Chunk("abap.statements.createData(" + target.getCode() + ");");
   }
 
 }

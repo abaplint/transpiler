@@ -2,7 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {Validation, config} from "./validation";
 import {Traversal} from "./traversal";
 import {Requires} from "./requires";
-import {SkipSettings, UnitTest} from "./unit_test";
+import {TestMethodList, UnitTest} from "./unit_test";
 import {Keywords} from "./keywords";
 import {DatabaseSetup} from "./database_setup";
 import {Rearranger} from "./rearranger";
@@ -60,7 +60,8 @@ export interface ITranspilerOptions {
   skipConstants?: boolean;
   /** sets behavior for unknown types, either fail at compile- or run-time */
   unknownTypes?: "compileError" | "runtimeError";
-  skip?: SkipSettings;
+  skip?: TestMethodList;
+  only?: TestMethodList;
 }
 
 export class Transpiler {
@@ -93,7 +94,7 @@ export class Transpiler {
 
     const output: IOutput = {
       objects: [],
-      unitTestScript: new UnitTest().unitTestScript(reg, this.options?.skip),
+      unitTestScript: new UnitTest().unitTestScript(reg, this.options?.skip, this.options?.only),
       initializationScript: new UnitTest().initializationScript(reg, dbSetup),
       databaseSetup: dbSetup,
       reg: reg,

@@ -1,29 +1,30 @@
 import * as abaplint from "@abaplint/core";
 
-export type SkipSettings = {object: string, class: string, method: string}[];
+export type TestMethodList = {object: string, class: string, method: string}[];
 
 export class UnitTest {
 
+  // todo, move this somewhere else, its much more than just unit test relevant
   public initializationScript(reg: abaplint.IRegistry, dbSetup: string) {
     return `import runtime from "@abaplint/runtime";
 global.abap = new runtime.ABAP();
 ${this.buildImports(reg)}
-export async function initDB() {
-  return global.abap.initDB(\`${dbSetup}\`);
+export async function initializeABAP(settings) {
+  await global.abap.initDB(\`${dbSetup}\`);
 }`;
   }
 
-  public unitTestScript(reg: abaplint.IRegistry, skip?: SkipSettings): string {
+  public unitTestScript(reg: abaplint.IRegistry, skip?: TestMethodList, _only?: TestMethodList): string {
     let ret = `import fs from "fs";
 import path from "path";
 import {dirname} from 'path';
 import {fileURLToPath} from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
-import {initDB} from "./init.mjs";
+import {initializeABAP} from "./init.mjs";
 import runtime from "@abaplint/runtime";
 
 async function run() {
-  await initDB();
+  await initializeABAP();
   const unit = new runtime.UnitTestResult();
   let clas;
   let locl;

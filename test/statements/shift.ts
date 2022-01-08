@@ -89,4 +89,26 @@ describe("Running statements - SHIFT", () => {
     expect(abap.console.get()).to.equal("CDAB\nDABC");
   });
 
+  it("shift left", async () => {
+    const code = `
+  DATA lv_temp TYPE string.
+  lv_temp = 'abc'.
+  SHIFT lv_temp LEFT.
+  WRITE lv_temp.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("bc");
+  });
+
+  it("shift left, empty str", async () => {
+    const code = `
+  DATA lv_temp TYPE string.
+  SHIFT lv_temp LEFT.
+  WRITE lv_temp.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

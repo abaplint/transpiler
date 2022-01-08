@@ -11,7 +11,7 @@ export function clone<T>(obj: T): T {
     // @ts-ignore
     return n;
   } else if (obj instanceof DataReference) {
-    const n = new DataReference();
+    const n = new DataReference(obj.getType());
     n.assign(obj.getPointer());
     // @ts-ignore
     return n;

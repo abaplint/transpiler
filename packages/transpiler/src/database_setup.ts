@@ -35,6 +35,7 @@ export class DatabaseSetup {
 
     const type = obj.parseType(this.reg);
     if (type instanceof abaplint.BasicTypes.StructureType && type.getComponents().length === 3) {
+      // todo, this should take the client number from the settings
       return `INSERT INTO t000 VALUES ('123', '', '');\n`;
     } else {
       return "";
