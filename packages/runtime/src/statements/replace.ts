@@ -17,7 +17,7 @@ export function replace(input: ICharacter, all: boolean, s: ICharacter | string,
     replace = r.get();
   }
 
-  const found = temp.search(search) >= 0;
+  const found = temp.indexOf(search) >= 0;
 
   if (all === true) {
     if (search.length === 0) {

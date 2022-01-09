@@ -104,4 +104,16 @@ describe("Running statements - REPLACE", () => {
     await f(abap);
   });
 
+  it("REPLACE, plus", async () => {
+    const code = `
+    DATA foo TYPE string.
+    foo = 'a+c'.
+    REPLACE ALL OCCURRENCES OF '+' IN foo WITH '_'.
+    ASSERT foo = 'a_c'.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
