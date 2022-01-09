@@ -6,12 +6,17 @@ export class UnitTest {
 
   // todo, move this somewhere else, its much more than just unit test relevant
   public initializationScript(reg: abaplint.IRegistry, dbSetup: string) {
-    return `import runtime from "@abaplint/runtime";
+    let ret = `import runtime from "@abaplint/runtime";
 global.abap = new runtime.ABAP();
 ${this.buildImports(reg)}
-export async function initializeABAP(settings) {
-  await global.abap.initDB(\`${dbSetup}\`);
-}`;
+export async function initializeABAP(settings) {\n`;
+    if (dbSetup === "") {
+      ret += `// no database artifacts, skip DB initialization\n`;
+    } else {
+      ret += `  await global.abap.initDB(\`${dbSetup}\`);\n`;
+    }
+    ret += `}`;
+    return ret;
   }
 
   public unitTestScript(reg: abaplint.IRegistry, skip?: TestMethodList, _only?: TestMethodList): string {
@@ -92,7 +97,7 @@ fs.writeFileSync(__dirname + path.sep + "output.xml", unit.xUnitXML());
 }
 
 run().then(() => {
-  process.exit();
+  process.exit(0);
 }).catch((err) => {
   console.log(err);
   process.exit(1);
