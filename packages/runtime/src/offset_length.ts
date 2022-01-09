@@ -46,6 +46,7 @@ export class OffsetLength {
   }
 
   public set(value: ICharacter | string) {
+
     let val = "";
     if (typeof value === "string") {
       val = value;
@@ -61,6 +62,9 @@ export class OffsetLength {
     }
 
     let old = this.obj.get();
+    if (this.obj instanceof Character) {
+      old = old.padEnd(this.obj.getLength(), " ");
+    }
 
     if (this.length) {
       val = val.substr(0, this.length);
@@ -76,6 +80,7 @@ export class OffsetLength {
     } else if (this.offset) {
       old = old.substr(0, this.offset) + val;
     }
+    old = old.trimEnd();
 
     this.obj.set(old);
   }
