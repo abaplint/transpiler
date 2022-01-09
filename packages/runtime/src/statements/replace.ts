@@ -17,6 +17,8 @@ export function replace(input: ICharacter, all: boolean, s: ICharacter | string,
     replace = r.get();
   }
 
+  const found = temp.indexOf(search) >= 0;
+
   if (all === true) {
     if (search.length === 0) {
       throw "REPLACE, zero length input";
@@ -27,6 +29,10 @@ export function replace(input: ICharacter, all: boolean, s: ICharacter | string,
   } else {
     temp = temp.replace(search, replace);
   }
+
+  const subrc = found ? 0 : 4;
+  // @ts-ignore
+  abap.builtin.sy.get().subrc.set(subrc);
 
   input.set(temp);
 }

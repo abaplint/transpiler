@@ -80,4 +80,40 @@ describe("Running statements - REPLACE", () => {
     expect(abap.console.get()).to.equal("fooab");
   });
 
+  it("REPLACE, not found, should set subrc", async () => {
+    const code = `
+    DATA foo TYPE string.
+    foo = 'abc'.
+    REPLACE FIRST OCCURRENCE OF '1' IN foo WITH \` \`.
+    ASSERT sy-subrc = 4.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("REPLACE, found, should set subrc", async () => {
+    const code = `
+    DATA foo TYPE string.
+    foo = 'abc'.
+    REPLACE FIRST OCCURRENCE OF 'a' IN foo WITH \` \`.
+    ASSERT sy-subrc = 0.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("REPLACE, plus", async () => {
+    const code = `
+    DATA foo TYPE string.
+    foo = 'a+c'.
+    REPLACE ALL OCCURRENCES OF '+' IN foo WITH '_'.
+    ASSERT foo = 'a_c'.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

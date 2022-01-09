@@ -358,4 +358,18 @@ describe("Running expressions - Length and offset", () => {
     expect(abap.console.get()).to.equal("00001000000000000000");
   });
 
+  it("Set in uninitialized area", async () => {
+    const code = `
+    DATA res TYPE c LENGTH 26.
+    DATA pos TYPE i.
+    res+pos(1) = abap_true.
+    pos = 5.
+    res+pos(1) = abap_true.
+    WRITE / res.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("X    X");
+  });
+
 });
