@@ -5,9 +5,13 @@ import * as fs from "fs";
 export interface ITranspilerConfig {
   input_folder: string;
   /** list of regex, case insensitive, empty gives all files, positive list */
-  input_filter: string[];
+  input_filter?: string[];
   output_folder: string;
-  lib: string;
+  /** to be deprecated */
+  lib?: string;
+  libs?: {
+    url: string,
+  }[],
   write_unit_tests: boolean;
   write_source_map: boolean;
   options: ITranspilerOptions;
@@ -41,7 +45,9 @@ export class TranspilerConfig {
       input_folder: "src",
       input_filter: [],
       output_folder: "output",
-      lib: "https://github.com/open-abap/open-abap",
+      libs: [
+        {"url": "https://github.com/open-abap/open-abap"},
+      ],
       write_unit_tests: true,
       write_source_map: true,
       options: {
