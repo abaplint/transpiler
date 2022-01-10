@@ -24,10 +24,14 @@ class Progress implements Transpiler.IProgress {
 
 function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
   const files: Transpiler.IFile[] = [];
-  if (config.lib && config.lib !== "") {
-    console.log("Clone: " + config.lib);
+  if (config.lib && config.lib !== "" && config.libs === undefined) {
+    config.libs = [{url: config.lib}];
+  }
+
+  for (const l of config.libs || []) {
+    console.log("Clone: " + l.url);
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "abap_transpile-"));
-    childProcess.execSync("git clone --quiet --depth 1 " + config.lib + " .", {cwd: dir, stdio: "inherit"});
+    childProcess.execSync("git clone --quiet --depth 1 " + l.url + " .", {cwd: dir, stdio: "inherit"});
     let count = 0;
     for (let filename of glob.sync(dir + "/src/**", {nosort: true, nodir: true})) {
       const contents = fs.readFileSync(filename, "utf8");

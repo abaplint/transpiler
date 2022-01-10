@@ -45,7 +45,9 @@ export class TranspilerConfig {
       input_folder: "src",
       input_filter: [],
       output_folder: "output",
-      lib: "https://github.com/open-abap/open-abap",
+      libs: [
+        {"url": "https://github.com/open-abap/open-abap"},
+      ],
       write_unit_tests: true,
       write_source_map: true,
       options: {
