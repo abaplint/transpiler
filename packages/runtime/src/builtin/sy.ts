@@ -7,7 +7,6 @@ export const sy = new Structure({
   index: new Integer(),
   langu: new Character({length: 1}).set("E"),
   mandt: new Character({length: 3}).set("123"),
-  sysid: new Character({length: 3}).set("ABC"),
   msgid: new Character({length: 20}),
   msgno: new Numc({length: 3}),
   msgv1: new Character({length: 50}),
@@ -15,7 +14,9 @@ export const sy = new Structure({
   msgv3: new Character({length: 50}),
   msgv4: new Character({length: 50}),
   subrc: new Integer(),
+  sysid: new Character({length: 3}).set("ABC"),
   tabix: new Integer(),
   timlo: new Time(),
+  uname: new Character({length: 12}).set("USERNAME"),
   uzeit: new Time(),
 });

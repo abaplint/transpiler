@@ -69,4 +69,12 @@ describe("Builtin functions", () => {
     expect(abap.console.get()).to.equal("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
   });
 
+  it("sy-uname", async () => {
+    const code = `WRITE sy-uname.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.not.equal("");
+  });
+
 });
