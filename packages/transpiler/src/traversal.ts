@@ -412,9 +412,13 @@ export class Traversal {
     }
   }
 
-  public lookupClassOrInterface(name: string | undefined, token: abaplint.Token | undefined): string {
+  public lookupClassOrInterface(name: string | undefined, token: abaplint.Token | undefined, directGlobal = false): string {
     if (name === undefined || token === undefined) {
       return "abap.Classes['undefined']";
+    }
+
+    if (directGlobal === true) {
+      return "abap.Classes[" + name + "]";
     }
 
     const scope = this.findCurrentScopeByToken(token);
