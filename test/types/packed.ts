@@ -68,12 +68,13 @@ ASSERT foo = '12345'.`;
   it.skip("31 digits", async () => {
     const code = `
     DATA foo TYPE p LENGTH 16.
-    foo = 5465645645645645645645646545644.
+    foo = 5465645645698765645645646545644.
     WRITE foo.`;
     const js = await run(code);
     console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+    expect(abap.console.get()).to.equal("5465645645698765645645646545644");
   });
 
 });
