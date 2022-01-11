@@ -240,4 +240,16 @@ WRITE / lv_type.`;
     expect(abap.console.get()).to.equal("T");
   });
 
+  it("DESCRIBE FIELD, decfloat34", async () => {
+    const code = `
+    DATA foo TYPE decfloat34.
+    DATA lv_bar TYPE c LENGTH 1.
+    DESCRIBE FIELD foo TYPE lv_bar.
+    WRITE lv_bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("e");
+  });
+
 });
