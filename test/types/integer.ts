@@ -36,4 +36,14 @@ describe("Running Examples - Integer type", () => {
     expect(abap.console.get()).to.equal("-2");
   });
 
+  it("int, positive", async () => {
+    const code = `
+  DATA int TYPE i.
+  int = +4.
+  WRITE int.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4");
+  });
 });
