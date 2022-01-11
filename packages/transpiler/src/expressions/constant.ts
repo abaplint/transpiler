@@ -14,7 +14,8 @@ export class ConstantTranspiler implements IExpressionTranspiler {
     const int = node.findFirstExpression(Expressions.Integer);
     if (int) {
       const concat = int.concatTokens().trim();
-      let ret = "constant_" + (concat.startsWith("-") ? "minus_" : "") + int.getLastToken().getStr();
+      const post = concat.startsWith("-") ? "minus_" : "";
+      let ret = "constant_" + post + int.getLastToken().getStr();
       if (this.addGet === true) {
         ret += ".get()";
       }
