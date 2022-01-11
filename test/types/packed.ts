@@ -65,4 +65,15 @@ ASSERT foo = '12345'.`;
     await f(abap);
   });
 
+  it.skip("31 digits", async () => {
+    const code = `
+    DATA foo TYPE p LENGTH 16.
+    foo = 5465645645645645645645646545644.
+    WRITE foo.`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

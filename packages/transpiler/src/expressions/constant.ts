@@ -13,8 +13,8 @@ export class ConstantTranspiler implements IExpressionTranspiler {
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     const int = node.findFirstExpression(Expressions.Integer);
     if (int) {
-      const val = parseInt(int.concatTokens(), 10);
-      let ret = "constant_" + (val < 0 ? "minus_" : "") + Math.abs(val);
+      const concat = int.concatTokens().trim();
+      let ret = "constant_" + (concat.startsWith("-") ? "minus_" : "") + int.getLastToken().getStr();
       if (this.addGet === true) {
         ret += ".get()";
       }
