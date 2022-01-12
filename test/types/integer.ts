@@ -46,4 +46,15 @@ describe("Running Examples - Integer type", () => {
     await f(abap);
     expect(abap.console.get()).to.equal("4");
   });
+
+  it("no thousand separator, design choice?", async () => {
+    const code = `
+  DATA int TYPE i.
+  int = 2000.
+  WRITE int.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2000");
+  });
 });
