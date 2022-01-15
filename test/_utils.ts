@@ -1,6 +1,7 @@
-import {IFile, ITranspilerOptions, Transpiler} from "../packages/transpiler/src/";
+import {Transpiler} from "../packages/transpiler/src/";
 import {ABAP} from "../packages/runtime/src/";
 import * as abaplint from "@abaplint/core";
+import {IFile, ITranspilerOptions} from "../packages/transpiler/src/types";
 
 // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AsyncFunction
 // eslint-disable-next-line @typescript-eslint/no-empty-function

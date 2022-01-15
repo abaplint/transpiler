@@ -1,5 +1,5 @@
 import * as abaplint from "@abaplint/core";
-import {IOutputFile, ITranspilerOptions} from ".";
+import {IOutputFile, ITranspilerOptions} from "./types";
 import {Traversal} from "./traversal";
 import {Requires} from "./requires";
 import {Rearranger} from "./rearranger";

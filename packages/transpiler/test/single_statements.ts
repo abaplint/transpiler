@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import {expect} from "chai";
-import {ITranspilerOptions} from "../src";
+import {ITranspilerOptions} from "../src/types";
 import {UniqueIdentifier} from "../src/unique_identifier";
 import {runSingle} from "./_utils";
 
