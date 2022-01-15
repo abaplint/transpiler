@@ -11,8 +11,8 @@ export class HandleTable {
       return [];
     }
 
-    const chunk = new Chunk().appendString(`abap.DDIC['${obj.getName().toUpperCase()}'] = {
-  "type": undefined
+    const chunk = new Chunk().appendString(`abap.DDIC["${obj.getName().toUpperCase()}"] = {
+  "type": undefined,
 };`);
 
     const output: IOutputFile = {

@@ -104,9 +104,11 @@ describe("Testing Unit Testing", () => {
 
     for (const o of output.objects) {
       let contents = o.chunk.getCode();
-      const name = o.filename + ".map";
-      contents = contents + `\n//# sourceMappingURL=` + name;
-      fs.writeFileSync(outputFolder + path.sep + name, o.chunk.getMap(o.filename));
+      if (o.object.type.toUpperCase() !== "TABL") {
+        const name = o.filename + ".map";
+        contents = contents + `\n//# sourceMappingURL=` + name;
+        fs.writeFileSync(outputFolder + path.sep + name, o.chunk.getMap(o.filename));
+      }
       fs.writeFileSync(outputFolder + path.sep + o.filename, contents);
     }
     // hack

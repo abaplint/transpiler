@@ -16,6 +16,7 @@ export class ABAP {
   public FunctionModules = {};
   public Classes = {};
   public Interfaces = {};
+  public DDIC = {};
 
 // stuff for runtime
   public statements;

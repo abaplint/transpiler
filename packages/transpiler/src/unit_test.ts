@@ -116,6 +116,12 @@ run().then(() => {
     const list: string[] = [];
 
     for (const obj of reg.getObjects()) {
+      if (obj instanceof abaplint.Objects.Table) {
+        list.push(`await import("./${obj.getName().toLowerCase()}.tabl.mjs");`);
+      }
+    }
+
+    for (const obj of reg.getObjects()) {
       if (obj instanceof abaplint.Objects.FunctionGroup) {
         for (const m of obj.getModules()) {
           list.push(`await import("./${obj.getName().toLowerCase()}.fugr.${m.getName().toLowerCase()}.mjs");`);
