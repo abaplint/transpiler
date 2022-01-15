@@ -147,6 +147,7 @@ describe("Single statements", () => {
     {abap: "super->method( ).",     js: `await super.method();`, skip: false},
     {abap: "super->constructor( ).",     js: ``, skip: false}, // todo, https://github.com/abaplint/transpiler/issues/133
     {abap: "SELECT SINGLE * FROM t100 INTO ls_result.", js: `abap.statements.select(ls_result, "SELECT * FROM t100 LIMIT 1");`},
+    {abap: "SELECT * FROM (mv_table) INTO TABLE lt_tab.", js: `abap.statements.select(lt_tab, "SELECT * FROM " + mv_table.get() + "");`},
     {abap: "ASSERT NOT foo EQ bar.",     js: `abap.statements.assert(!abap.compare.eq(foo, bar));`, skip: false},
     {abap: "GET REFERENCE OF blah INTO ref.", js: `ref.assign(blah);`, skip: false},
     {abap: `GET REFERENCE OF <item> INTO lr_stack_top.`, js: `lr_stack_top.assign(fs_item_.getPointer());`, skip: false},

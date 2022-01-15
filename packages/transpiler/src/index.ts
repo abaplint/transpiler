@@ -126,21 +126,20 @@ export class Transpiler {
     const constants = this.findConstants(obj, file, reg);
 
     if (this.options?.skipConstants === false || this.options?.skipConstants === undefined) {
-      for (const c of Array.from(constants).sort()) {
-        const post = c < 0 ? "minus_" : "";
-        result += `const constant_${post}${Math.abs(c)} = new abap.types.Integer().set(${c});\n`;
+      for (const concat of Array.from(constants).sort()) {
+        const post = concat.startsWith("-") ? "minus_" : "";
+        result += `const constant_${post}${concat.replace("-", "")} = new abap.types.Integer().set(${concat});\n`;
       }
     }
 
     return result;
   }
 
-  protected findConstants(obj: abaplint.ABAPObject, file: abaplint.ABAPFile, reg: abaplint.IRegistry): Set<number> {
-    let constants = new Set<number>();
+  protected findConstants(obj: abaplint.ABAPObject, file: abaplint.ABAPFile, reg: abaplint.IRegistry): Set<string> {
+    let constants = new Set<string>();
 
     for (const i of file.getStructure()?.findAllExpressions(abaplint.Expressions.Integer) || []) {
-      const j = parseInt(i.concatTokens(), 10);
-      constants.add(j);
+      constants.add(i.concatTokens().replace(" ", ""));
     }
 
     // extra constants from interfaces, used for default values

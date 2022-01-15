@@ -65,4 +65,40 @@ ASSERT foo = '12345'.`;
     await f(abap);
   });
 
+  it.skip("31 digits", async () => {
+    const code = `
+    DATA foo TYPE p LENGTH 16.
+    foo = 5465645645698765645645646545644.
+    WRITE foo.`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("5465645645698765645645646545644");
+  });
+
+  it.skip("length 5, decimals 2", async () => {
+    const code = `
+    DATA foo TYPE p LENGTH 4 DECIMALS 2.
+    foo = '1212.123'.
+    WRITE foo.`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1212,12");
+  });
+
+  it.skip("length 5, decimals 2, rounding", async () => {
+    const code = `
+    DATA foo TYPE p LENGTH 4 DECIMALS 2.
+    foo = '1212.127'.
+    WRITE foo.`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1212,13");
+  });
+
 });

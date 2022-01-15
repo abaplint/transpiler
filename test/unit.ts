@@ -5,6 +5,69 @@ import {expect} from "chai";
 import {IFile, ITranspilerOptions, Transpiler} from "../packages/transpiler/src/";
 import * as abaplint from "@abaplint/core";
 
+const t000 = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V>
+    <TABNAME>T000</TABNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <TABCLASS>TRANSP</TABCLASS>
+    <DDTEXT>T000</DDTEXT>
+    <CONTFLAG>A</CONTFLAG>
+    <EXCLASS>1</EXCLASS>
+   </DD02V>
+   <DD09L>
+    <TABNAME>T000</TABNAME>
+    <AS4LOCAL>A</AS4LOCAL>
+    <TABKAT>0</TABKAT>
+    <TABART>APPL0</TABART>
+    <BUFALLOW>N</BUFALLOW>
+   </DD09L>
+   <DD03P_TABLE>
+    <DD03P>
+     <TABNAME>T000</TABNAME>
+     <FIELDNAME>MANDT</FIELDNAME>
+     <DDLANGUAGE>E</DDLANGUAGE>
+     <POSITION>0001</POSITION>
+     <KEYFLAG>X</KEYFLAG>
+     <ADMINFIELD>0</ADMINFIELD>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000006</INTLEN>
+     <NOTNULL>X</NOTNULL>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000003</LENG>
+     <MASK>  CHAR</MASK>
+    </DD03P>
+    <DD03P>
+     <TABNAME>T000</TABNAME>
+     <FIELDNAME>CCCATEGORY</FIELDNAME>
+     <DDLANGUAGE>E</DDLANGUAGE>
+     <POSITION>0002</POSITION>
+     <ADMINFIELD>0</ADMINFIELD>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000002</INTLEN>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000001</LENG>
+     <MASK>  CHAR</MASK>
+    </DD03P>
+    <DD03P>
+     <TABNAME>T000</TABNAME>
+     <FIELDNAME>CCNOCLIIND</FIELDNAME>
+     <DDLANGUAGE>E</DDLANGUAGE>
+     <POSITION>0003</POSITION>
+     <ADMINFIELD>0</ADMINFIELD>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000002</INTLEN>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000001</LENG>
+     <MASK>  CHAR</MASK>
+    </DD03P>
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
 describe("Testing Unit Testing", () => {
   const base: string = path.join(__dirname, "..", "..", "unit-test/");
   let name: string | undefined = "";
@@ -786,6 +849,94 @@ ENDCLASS.`;
     ];
     const cons = await dumpNrun(files);
     expect(cons.split("\n")[1]).to.equal("2221");
+  });
+
+  it("test-21", async () => {
+// select from non-existing database table, should throw exception
+
+    const cxroot = `
+CLASS cx_root DEFINITION PUBLIC.
+ENDCLASS.
+CLASS cx_root IMPLEMENTATION.
+ENDCLASS.`;
+
+// "FROM cx_root" is not correct, but ok for the testcase
+    const cx = `CLASS cx_sy_dynamic_osql_semantics DEFINITION PUBLIC INHERITING FROM cx_root.
+ENDCLASS.
+CLASS cx_sy_dynamic_osql_semantics IMPLEMENTATION.
+ENDCLASS.`;
+
+    const clas = `CLASS zcl_select_nono DEFINITION PUBLIC.
+  PUBLIC SECTION.
+ENDCLASS.
+
+CLASS zcl_select_nono IMPLEMENTATION.
+ENDCLASS.`;
+
+    const tests = `
+CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS select FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD select.
+    FIELD-SYMBOLS <fs> TYPE STANDARD TABLE.
+    TRY.
+      SELECT * FROM ('NONO') INTO TABLE <fs>.
+      WRITE / 'fail'.
+    CATCH cx_sy_dynamic_osql_semantics.
+      WRITE / 'ok'.
+    ENDTRY.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "t000.tabl.xml", contents: t000}, // one database table is required or database does not startup
+      {filename: "cx_sy_dynamic_osql_semantics.clas.abap", contents: cx},
+      {filename: "zcl_select_nono.clas.abap", contents: clas},
+      {filename: "zcl_select_nono.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("ok");
+  });
+
+  it("test-22", async () => {
+// dynamic select from existing table
+
+    const clas = `CLASS zcl_select_t000 DEFINITION PUBLIC.
+  PUBLIC SECTION.
+ENDCLASS.
+
+CLASS zcl_select_t000 IMPLEMENTATION.
+ENDCLASS.`;
+
+    const tests = `
+CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS select FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD select.
+    DATA mv_table TYPE string VALUE 'T000'.
+    DATA lt_tab TYPE STANDARD TABLE OF t000 WITH DEFAULT KEY.
+    DATA ls_row LIKE LINE OF lt_tab.
+    SELECT * FROM (mv_table) INTO TABLE lt_tab.
+    ASSERT sy-subrc = 0.
+    ASSERT lines( lt_tab ) = 1.
+    READ TABLE lt_tab INDEX 1 INTO ls_row.
+    ASSERT ls_row-mandt = sy-mandt.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "t000.tabl.xml", contents: t000}, // one database table is required or database does not startup
+      {filename: "zcl_select_t000.clas.abap", contents: clas},
+      {filename: "zcl_select_t000.clas.testclasses.abap", contents: tests},
+    ];
+    await dumpNrun(files);
   });
 
 });
