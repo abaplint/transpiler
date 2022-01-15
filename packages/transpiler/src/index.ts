@@ -7,6 +7,7 @@ import {Keywords} from "./keywords";
 import {DatabaseSetup} from "./database_setup";
 import {Rearranger} from "./rearranger";
 import {Chunk} from "./chunk";
+import {HandleTable} from "./handle_table";
 
 export {config};
 
@@ -104,6 +105,7 @@ export class Transpiler {
     for (const obj of reg.getObjects()) {
       await progress?.tick("Building, Syntax Logic, " + obj.getName());
       if (obj instanceof abaplint.ABAPObject) {
+// todo, this is already done inside reg.parse()?
         new abaplint.SyntaxLogic(reg, obj).run();
       }
     }
@@ -112,7 +114,9 @@ export class Transpiler {
     for (const obj of reg.getObjects()) {
       await progress?.tick("Building, " + obj.getName());
       if (obj instanceof abaplint.ABAPObject && !(obj instanceof abaplint.Objects.TypePool)) {
-        output.objects = output.objects.concat(this.runObject(obj, reg));
+        output.objects.push(...this.runObject(obj, reg));
+      } else if (obj instanceof abaplint.Objects.Table) {
+        output.objects.push(...new HandleTable().runObject(obj, reg));
       }
     }
 
