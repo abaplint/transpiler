@@ -213,11 +213,11 @@ ENDINTERFACE.`;
     expect(output.length).to.equal(2);
   });
 
-  it.skip("Global TABL", async () => {
+  it("Global TABL", async () => {
     const file1 = {filename: "t000.tabl.xml", contents: t000};
     const output = await runFiles([file1]);
     expect(output.length).to.equal(1);
-    expect(output[0].chunk.getCode()).to.include("t000");
+    expect(output[0].chunk.getCode()).to.include("T000");
   });
 
 });

@@ -5,9 +5,9 @@ import {Keywords} from "./keywords";
 import {DatabaseSetup} from "./database_setup";
 import {HandleTable} from "./handle_table";
 import {HandleABAP} from "./handle_abap";
-import {IFile, IOutput, IProgress, ITranspilerOptions} from "./types";
+import {IFile, IOutput, IProgress, ITranspilerOptions, IOutputFile} from "./types";
 
-export {config};
+export {config, ITranspilerOptions, IFile, IProgress, IOutputFile};
 
 export class Transpiler {
   private readonly options: ITranspilerOptions | undefined;
