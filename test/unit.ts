@@ -902,7 +902,7 @@ ENDCLASS.`;
     expect(cons.split("\n")[1]).to.equal("ok");
   });
 
-  it.skip("test-22", async () => {
+  it("test-22", async () => {
 // dynamic select from existing table
 
     const clas = `CLASS zcl_select_t000 DEFINITION PUBLIC.
@@ -922,9 +922,12 @@ CLASS ltcl_test IMPLEMENTATION.
   METHOD select.
     DATA mv_table TYPE string VALUE 'T000'.
     DATA lt_tab TYPE STANDARD TABLE OF t000 WITH DEFAULT KEY.
+    DATA ls_row LIKE LINE OF lt_tab.
     SELECT * FROM (mv_table) INTO TABLE lt_tab.
     ASSERT sy-subrc = 0.
-    WRITE / lines( lt_tab ).
+    ASSERT lines( lt_tab ) = 1.
+    READ TABLE lt_tab INDEX 1 INTO ls_row.
+    ASSERT ls_row-mandt = sy-mandt.
   ENDMETHOD.
 ENDCLASS.`;
 
@@ -933,8 +936,7 @@ ENDCLASS.`;
       {filename: "zcl_select_t000.clas.abap", contents: clas},
       {filename: "zcl_select_t000.clas.testclasses.abap", contents: tests},
     ];
-    const cons = await dumpNrun(files);
-    expect(cons.split("\n")[1]).to.equal("ok");
+    await dumpNrun(files);
   });
 
 });
