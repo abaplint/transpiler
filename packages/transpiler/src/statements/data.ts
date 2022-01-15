@@ -1,6 +1,6 @@
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
-import {TranspileTypes} from "../types";
+import {TranspileTypes} from "../transpile_types";
 import {Traversal} from "../traversal";
 import {ConstantTranspiler} from "../expressions/constant";
 import {FieldChainTranspiler} from "../expressions";
