@@ -1,7 +1,7 @@
 import {clone} from "../clone";
-import {Structure, Table} from "../types";
+import {FieldSymbol, Structure, Table} from "../types";
 
-export function select(target: Structure | Table, select: string) {
+export function select(target: Structure | Table | FieldSymbol, select: string) {
   if (this.db === undefined) {
     throw new Error("Runtime, database not initialized");
   }
@@ -16,6 +16,11 @@ export function select(target: Structure | Table, select: string) {
       throw new abap.Classes["CX_SY_DYNAMIC_OSQL_SEMANTICS"]();
     }
     throw error;
+  }
+
+  if (target instanceof FieldSymbol) {
+    // @ts-ignore
+    target = target.getPointer();
   }
 
   target.clear();

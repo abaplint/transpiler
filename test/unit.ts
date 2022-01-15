@@ -939,4 +939,38 @@ ENDCLASS.`;
     await dumpNrun(files);
   });
 
+  it("test-23", async () => {
+// static select into field symbol
+
+    const clas = `CLASS zcl_select_t000 DEFINITION PUBLIC.
+  PUBLIC SECTION.
+ENDCLASS.
+
+CLASS zcl_select_t000 IMPLEMENTATION.
+ENDCLASS.`;
+
+    const tests = `
+CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS select FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD select.
+    DATA tab TYPE STANDARD TABLE OF t000 WITH DEFAULT KEY.
+    FIELD-SYMBOLS <fs> TYPE ANY TABLE.
+    ASSIGN tab TO <fs>.
+    SELECT * FROM t000 INTO TABLE <fs>.
+    ASSERT lines( <fs> ) = 1.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "t000.tabl.xml", contents: t000}, // one database table is required or database does not startup
+      {filename: "zcl_select_t000.clas.abap", contents: clas},
+      {filename: "zcl_select_t000.clas.testclasses.abap", contents: tests},
+    ];
+    await dumpNrun(files);
+  });
+
 });
