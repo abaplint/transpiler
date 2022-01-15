@@ -976,7 +976,7 @@ ENDCLASS.`;
     await dumpNrun(files);
   });
 
-  it.skip("test-24", async () => {
+  it("test-24", async () => {
 // dynamic CREATE DATA
 
     const clas = `CLASS zcl_select_t000 DEFINITION PUBLIC.
