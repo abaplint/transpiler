@@ -902,4 +902,39 @@ ENDCLASS.`;
     expect(cons.split("\n")[1]).to.equal("ok");
   });
 
+  it.skip("test-22", async () => {
+// dynamic select from existing table
+
+    const clas = `CLASS zcl_select_t000 DEFINITION PUBLIC.
+  PUBLIC SECTION.
+ENDCLASS.
+
+CLASS zcl_select_t000 IMPLEMENTATION.
+ENDCLASS.`;
+
+    const tests = `
+CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS select FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD select.
+    DATA mv_table TYPE string VALUE 'T000'.
+    DATA lt_tab TYPE STANDARD TABLE OF t000 WITH DEFAULT KEY.
+    SELECT * FROM (mv_table) INTO TABLE lt_tab.
+    ASSERT sy-subrc = 0.
+    WRITE / lines( lt_tab ).
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "t000.tabl.xml", contents: t000}, // one database table is required or database does not startup
+      {filename: "zcl_select_t000.clas.abap", contents: clas},
+      {filename: "zcl_select_t000.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("ok");
+  });
+
 });
