@@ -1,5 +1,5 @@
 import {Issue, IRegistry, Config, IConfig, Version} from "@abaplint/core";
-import {ITranspilerOptions} from ".";
+import {ITranspilerOptions} from "./types";
 
 export const config: IConfig = {
   "global": {

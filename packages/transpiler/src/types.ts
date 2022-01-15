@@ -1,93 +1,57 @@
+import {Chunk} from "./chunk";
 import * as abaplint from "@abaplint/core";
+import {TestMethodList} from "./unit_test";
 
-export class TranspileTypes {
+export interface IFile {
+  filename: string,
+  // from output folder to original source folder
+  relative?: string,
+  contents: string,
+}
 
-  public declare(t: abaplint.TypedIdentifier): string {
-    const type = t.getType();
-    return "let " + t.getName().toLowerCase() + " = " + this.toType(type) + ";";
-  }
+export interface IObjectIdentifier {
+  name: string,
+  type: string,
+}
 
-  public toType(type: abaplint.AbstractType): string {
-    let resolved = "";
-    let extra = "";
+export interface IOutput {
+  objects: IOutputFile[];
+  reg: abaplint.IRegistry;
+  unitTestScript: string;
+  initializationScript: string;
+  databaseSetup: string;
+}
 
-    if (type instanceof abaplint.BasicTypes.ObjectReferenceType
-        || type instanceof abaplint.BasicTypes.GenericObjectReferenceType) {
-      resolved = "ABAPObject";
-    } else if (type instanceof abaplint.BasicTypes.TableType) {
-      resolved = "Table";
-      extra = this.toType(type.getRowType());
-      extra += ", " + JSON.stringify(type.getOptions());
-    } else if (type instanceof abaplint.BasicTypes.IntegerType) {
-      resolved = "Integer";
-    } else if (type instanceof abaplint.BasicTypes.StringType) {
-      resolved = "String";
-    } else if (type instanceof abaplint.BasicTypes.DateType) {
-      resolved = "Date";
-    } else if (type instanceof abaplint.BasicTypes.TimeType) {
-      resolved = "Time";
-    } else if (type instanceof abaplint.BasicTypes.DataReference) {
-      resolved = "DataReference";
-      extra = this.toType(type.getType());
-    } else if (type instanceof abaplint.BasicTypes.StructureType) {
-      resolved = "Structure";
-      const list: string[] = [];
-      for (const c of type.getComponents()) {
-        list.push(c.name.toLowerCase() + ": " + this.toType(c.type));
-      }
-      extra = "{" + list.join(", ") + "}";
-    } else if (type instanceof abaplint.BasicTypes.CLikeType
-        || type instanceof abaplint.BasicTypes.CSequenceType) {
-      // if not supplied its a Character(1)
-      resolved = "Character";
-    } else if (type instanceof abaplint.BasicTypes.AnyType) {
-      // if not supplied its a Character(4)
-      resolved = "Character";
-      extra = "{length: 4}";
-    } else if (type instanceof abaplint.BasicTypes.SimpleType) {
-      // if not supplied its a Character(1)
-      resolved = "Character";
-    } else if (type instanceof abaplint.BasicTypes.CharacterType) {
-      resolved = "Character";
-      if (type.getLength() !== 1) {
-        extra = "{length: " + type.getLength() + ", qualifiedName: \"" + type.getQualifiedName() + "\"}";
-      } else if (type.getQualifiedName() !== undefined) {
-        extra = "{qualifiedName: \"" + type.getQualifiedName() + "\"}";
-      }
-    } else if (type instanceof abaplint.BasicTypes.NumericType) {
-      resolved = "Numc";
-      if (type.getLength() !== 1) {
-        extra = "{length: " + type.getLength() + "}";
-      }
-    } else if (type instanceof abaplint.BasicTypes.PackedType) {
-      resolved = "Packed";
-      extra = "{length: " + type.getLength() + ", decimals: " + type.getDecimals() + "}";
-    } else if (type instanceof abaplint.BasicTypes.NumericGenericType) {
-      resolved = "Packed";
-      extra = "{length: 8, decimals: 0}";
-    } else if (type instanceof abaplint.BasicTypes.XStringType) {
-      resolved = "XString";
-    } else if (type instanceof abaplint.BasicTypes.XSequenceType) {
-      // if not supplied itsa a Hex(1)
-      resolved = "Hex";
-    } else if (type instanceof abaplint.BasicTypes.HexType) {
-      resolved = "Hex";
-      if (type.getLength() !== 1) {
-        extra = "{length: " + type.getLength() + "}";
-      }
-    } else if (type instanceof abaplint.BasicTypes.FloatType) {
-      resolved = "Float";
-    } else if (type instanceof abaplint.BasicTypes.DecFloat34Type) {
-      resolved = "DecFloat34";
-    } else if (type instanceof abaplint.BasicTypes.UnknownType) {
-      return `(() => { throw "Unknown type: ${type.getError()}" })()`;
-    } else if (type instanceof abaplint.BasicTypes.VoidType) {
-      return `(() => { throw "Void type: ${type.getVoided()}" })()`;
-    } else {
-      resolved = "typeTodo" + type.constructor.name;
-    }
+export interface IRequire {
+  name: string | undefined,
+  filename: string,
+}
 
-    return "new abap.types." + resolved + "(" + extra + ")";
-  }
+export interface IProgress {
+  set(total: number, text: string): void;
+  tick(text: string): Promise<void>;
+}
 
+/** one javascript output file for each object */
+export interface IOutputFile {
+  object: IObjectIdentifier;
+  filename: string,
+  chunk: Chunk,
+  requires: readonly IRequire[];
+  exports: readonly string[];
+}
+
+export interface ITranspilerOptions {
+  /** ignore syntax check, used for internal testing */
+  ignoreSyntaxCheck?: boolean;
+  /** adds common js modules */
+  addCommonJS?: boolean;
+  /** adds filenames as comments in the output js */
+  addFilenames?: boolean;
+  /** skip outputing constants, used for internal testing */
+  skipConstants?: boolean;
+  /** sets behavior for unknown types, either fail at compile- or run-time */
+  unknownTypes?: "compileError" | "runtimeError";
+  skip?: TestMethodList;
+  only?: TestMethodList;
 }

@@ -1,4 +1,5 @@
-import {IFile, ITranspilerOptions, Transpiler} from "../src";
+import {Transpiler} from "../src";
+import {IFile, ITranspilerOptions} from "../src/types";
 import {UniqueIdentifier} from "../src/unique_identifier";
 import * as abaplint from "@abaplint/core";
 

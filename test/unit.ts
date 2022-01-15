@@ -2,7 +2,8 @@ import * as path from "path";
 import * as fs from "fs";
 import * as childProcess from "child_process";
 import {expect} from "chai";
-import {IFile, ITranspilerOptions, Transpiler} from "../packages/transpiler/src/";
+import {Transpiler} from "../packages/transpiler/src/";
+import {IFile, ITranspilerOptions} from "../packages/transpiler/src/types";
 import * as abaplint from "@abaplint/core";
 
 const t000 = `<?xml version="1.0" encoding="utf-8"?>
@@ -103,9 +104,11 @@ describe("Testing Unit Testing", () => {
 
     for (const o of output.objects) {
       let contents = o.chunk.getCode();
-      const name = o.filename + ".map";
-      contents = contents + `\n//# sourceMappingURL=` + name;
-      fs.writeFileSync(outputFolder + path.sep + name, o.chunk.getMap(o.filename));
+      if (o.object.type.toUpperCase() !== "TABL") {
+        const name = o.filename + ".map";
+        contents = contents + `\n//# sourceMappingURL=` + name;
+        fs.writeFileSync(outputFolder + path.sep + name, o.chunk.getMap(o.filename));
+      }
       fs.writeFileSync(outputFolder + path.sep + o.filename, contents);
     }
     // hack
@@ -928,6 +931,40 @@ CLASS ltcl_test IMPLEMENTATION.
     ASSERT lines( lt_tab ) = 1.
     READ TABLE lt_tab INDEX 1 INTO ls_row.
     ASSERT ls_row-mandt = sy-mandt.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "t000.tabl.xml", contents: t000}, // one database table is required or database does not startup
+      {filename: "zcl_select_t000.clas.abap", contents: clas},
+      {filename: "zcl_select_t000.clas.testclasses.abap", contents: tests},
+    ];
+    await dumpNrun(files);
+  });
+
+  it("test-23", async () => {
+// static select into field symbol
+
+    const clas = `CLASS zcl_select_t000 DEFINITION PUBLIC.
+  PUBLIC SECTION.
+ENDCLASS.
+
+CLASS zcl_select_t000 IMPLEMENTATION.
+ENDCLASS.`;
+
+    const tests = `
+CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS select FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD select.
+    DATA tab TYPE STANDARD TABLE OF t000 WITH DEFAULT KEY.
+    FIELD-SYMBOLS <fs> TYPE ANY TABLE.
+    ASSIGN tab TO <fs>.
+    SELECT * FROM t000 INTO TABLE <fs>.
+    ASSERT lines( <fs> ) = 1.
   ENDMETHOD.
 ENDCLASS.`;
 

@@ -1,7 +1,7 @@
 import * as abaplint from "@abaplint/core";
 import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
-import {TranspileTypes} from "../types";
+import {TranspileTypes} from "../transpile_types";
 import {ConstantTranspiler, FieldChainTranspiler} from "../expressions";
 import {Chunk} from "../chunk";
 

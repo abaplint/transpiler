@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import * as sourceMap from "source-map";
-import {ITranspilerOptions} from "../src";
+import {ITranspilerOptions} from "../src/types";
 import {runSingleMapped} from "./_utils";
 
 const OPTIONS: ITranspilerOptions = {

@@ -5,7 +5,7 @@ import * as StructureTranspilers from "./structures";
 import {IStatementTranspiler} from "./statements/_statement_transpiler";
 import {IExpressionTranspiler} from "./expressions/_expression_transpiler";
 import {IStructureTranspiler} from "./structures/_structure_transpiler";
-import {TranspileTypes} from "./types";
+import {TranspileTypes} from "./transpile_types";
 import {ISpaghettiScopeNode} from "@abaplint/core";
 import {Chunk} from "./chunk";
 
