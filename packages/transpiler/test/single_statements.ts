@@ -206,6 +206,10 @@ await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({cond: abap.compare.initial(lo_h
       js: `abap.statements.write(bar.getOffset({offset: 30}));`},
     {abap: `mi_merge->get_result( )-stage->count( ).`,
       js: `await (await mi_merge.get().get_result()).get().stage.get().count();`},
+    {abap: `CREATE DATA dref TYPE STANDARD TABLE OF ('T000') WITH DEFAULT KEY.`,
+      js: `abap.statements.createData(dref,{"name": 'T000',"table": true});`},
+    {abap: `CREATE DATA dref TYPE STANDARD TABLE OF (mv_tab) WITH DEFAULT KEY.`,
+      js: `abap.statements.createData(dref,{"name": mv_tab.get(),"table": true});`},
   ];
 
   for (const test of tests) {
