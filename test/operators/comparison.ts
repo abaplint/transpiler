@@ -635,4 +635,14 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("NP", async () => {
+    const code = `
+    ASSERT 'sdf' NP '*a'.
+    ASSERT 'sdf' NP '*b*'.
+    ASSERT 'sdf' NP 'c*'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

@@ -14,4 +14,5 @@ export * from "./lt";
 export * from "./ne";
 export * from "./na";
 export * from "./ns";
+export * from "./np";
 export {compareIn as in} from "./in";
