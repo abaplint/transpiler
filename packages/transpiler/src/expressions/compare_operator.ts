@@ -40,6 +40,8 @@ export class CompareOperatorTranspiler implements IExpressionTranspiler {
         return new Chunk().append("cn", node, traversal);
       case "NA":
         return new Chunk().append("na", node, traversal);
+      case "NP":
+        return new Chunk().append("np", node, traversal);
       default:
         return new Chunk().append("compareoperatortodo" + op, node, traversal);
     }
