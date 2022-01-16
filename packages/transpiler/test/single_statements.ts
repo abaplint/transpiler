@@ -215,6 +215,9 @@ await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({cond: abap.compare.initial(lo_h
       js: `abap.statements.createData(dref,{"name": mv_tab.get(),"table": true});`},
     {abap: `ASSERT <fs> IS ASSIGNED.`,
       js: `abap.statements.assert(abap.compare.assigned(fs_fs_));`},
+    {abap: `AUTHORITY-CHECK OBJECT 'ZFOOBAR' ID 'ACTVT' FIELD '03'.`,
+      js: `if (abap.Classes['KERNEL_AUTHORITY_CHECK'] === undefined) throw new Error("AuthorityCheck, kernel class missing");
+await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({});`}, // todo
   ];
 
   for (const test of tests) {
