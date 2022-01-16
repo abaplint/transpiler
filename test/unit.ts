@@ -976,4 +976,40 @@ ENDCLASS.`;
     await dumpNrun(files);
   });
 
+  it("test-24", async () => {
+// dynamic CREATE DATA
+
+    const clas = `CLASS zcl_select_t000 DEFINITION PUBLIC.
+  PUBLIC SECTION.
+ENDCLASS.
+
+CLASS zcl_select_t000 IMPLEMENTATION.
+ENDCLASS.`;
+
+    const tests = `
+CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS select FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD select.
+    DATA dref TYPE REF TO data.
+    FIELD-SYMBOLS <fs> TYPE STANDARD TABLE.
+    CREATE DATA dref TYPE STANDARD TABLE OF ('T000') WITH DEFAULT KEY.
+    ASSIGN dref->* TO <fs>.
+    APPEND INITIAL LINE TO <fs>.
+    WRITE lines( <fs> ).
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "t000.tabl.xml", contents: t000}, // one database table is required or database does not startup
+      {filename: "zcl_select_t000.clas.abap", contents: clas},
+      {filename: "zcl_select_t000.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("1");
+  });
+
 });
