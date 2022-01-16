@@ -15,8 +15,7 @@ export interface IInsertInternalOptions {
   lines?: boolean,
 }
 
-export function insertInternal(
-  options: IInsertInternalOptions): void {
+export function insertInternal(options: IInsertInternalOptions): void {
 
   const tableOptions = options.table.getOptions();
   const isSorted = tableOptions?.type === TableAccessType.sorted || tableOptions?.type === TableAccessType.hashed;
