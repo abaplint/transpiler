@@ -31,6 +31,7 @@ export * from "./simple_source1";
 export * from "./simple_source2";
 export * from "./simple_source3";
 export * from "./simple_source4";
+export * from "./source_field_symbol";
 export * from "./source";
 export * from "./sql_source";
 export * from "./string_template_source";

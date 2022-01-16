@@ -12,7 +12,7 @@ export class CompareTranspiler implements IExpressionTranspiler {
 
     let pre = concat.startsWith("NOT ") ? "!" : "";
 
-    const sources = node.findDirectExpressions(Expressions.Source);
+    const sources = node.findDirectExpressions(Expressions.Source).concat(node.findDirectExpressions(Expressions.SourceFieldSymbol));
     if (sources.length === 1) {
       const s0 = traversal.traverse(sources[0]);
 

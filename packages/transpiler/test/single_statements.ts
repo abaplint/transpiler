@@ -213,6 +213,8 @@ await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({cond: abap.compare.initial(lo_h
       js: `abap.statements.createData(dref,{"name": 'T000',"table": true});`},
     {abap: `CREATE DATA dref TYPE STANDARD TABLE OF (mv_tab) WITH DEFAULT KEY.`,
       js: `abap.statements.createData(dref,{"name": mv_tab.get(),"table": true});`},
+    {abap: `ASSERT <fs> IS ASSIGNED.`,
+      js: `abap.statements.assert(abap.compare.assigned(fs_fs_));`},
   ];
 
   for (const test of tests) {
