@@ -1086,6 +1086,12 @@ CLASS ltcl_test IMPLEMENTATION.
     INSERT INTO zopentest VALUES ls_row.
     ASSERT sy-subrc = 0.
 
+    INSERT INTO zopentest VALUES ls_row.
+    ASSERT sy-subrc <> 0.
+
+    SELECT SINGLE * FROM zopentest INTO ls_row.
+    ASSERT sy-subrc = 0.
+
   ENDMETHOD.
 ENDCLASS.`;
 
