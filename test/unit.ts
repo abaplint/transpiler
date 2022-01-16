@@ -69,6 +69,52 @@ const t000 = `<?xml version="1.0" encoding="utf-8"?>
  </asx:abap>
 </abapGit>`;
 
+const zopentest = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V>
+    <TABNAME>ZOPENTEST</TABNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <TABCLASS>TRANSP</TABCLASS>
+    <DDTEXT>ZOPENTEST</DDTEXT>
+    <MAINFLAG>X</MAINFLAG>
+    <CONTFLAG>A</CONTFLAG>
+    <EXCLASS>1</EXCLASS>
+   </DD02V>
+   <DD09L>
+    <TABNAME>ZOPENTEST</TABNAME>
+    <AS4LOCAL>A</AS4LOCAL>
+    <TABKAT>0</TABKAT>
+    <TABART>APPL1</TABART>
+    <BUFALLOW>N</BUFALLOW>
+   </DD09L>
+   <DD03P_TABLE>
+    <DD03P>
+     <FIELDNAME>KEYFIELD</FIELDNAME>
+     <KEYFLAG>X</KEYFLAG>
+     <ADMINFIELD>0</ADMINFIELD>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000008</INTLEN>
+     <NOTNULL>X</NOTNULL>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000004</LENG>
+     <MASK>  CHAR</MASK>
+    </DD03P>
+    <DD03P>
+     <FIELDNAME>VALUEFIELD</FIELDNAME>
+     <ADMINFIELD>0</ADMINFIELD>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000020</INTLEN>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000010</LENG>
+     <MASK>  CHAR</MASK>
+    </DD03P>
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
 describe("Testing Unit Testing", () => {
   const base: string = path.join(__dirname, "..", "..", "unit-test/");
   let name: string | undefined = "";
@@ -1010,6 +1056,51 @@ ENDCLASS.`;
     ];
     const cons = await dumpNrun(files);
     expect(cons.split("\n")[1]).to.equal("1");
+  });
+
+  it("test-25", async () => {
+// INSERT into database
+
+    const clas = `CLASS zcl_insertdb DEFINITION PUBLIC.
+  PUBLIC SECTION.
+ENDCLASS.
+
+CLASS zcl_insertdb IMPLEMENTATION.
+ENDCLASS.`;
+
+    const tests = `
+CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS insert FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD insert.
+
+    DATA ls_row TYPE zopentest.
+    SELECT SINGLE * FROM zopentest INTO ls_row.
+    ASSERT sy-subrc <> 0.
+
+    ls_row-keyfield = 'hihi'.
+    ls_row-valuefield = 'world'.
+    INSERT INTO zopentest VALUES ls_row.
+    ASSERT sy-subrc = 0.
+
+    INSERT INTO zopentest VALUES ls_row.
+    ASSERT sy-subrc <> 0.
+
+    SELECT SINGLE * FROM zopentest INTO ls_row.
+    ASSERT sy-subrc = 0.
+
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "zopentest.tabl.xml", contents: zopentest},
+      {filename: "zcl_insertdb.clas.abap", contents: clas},
+      {filename: "zcl_insertdb.clas.testclasses.abap", contents: tests},
+    ];
+    await dumpNrun(files);
   });
 
 });
