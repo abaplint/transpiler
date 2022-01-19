@@ -39,6 +39,7 @@ export const config: IConfig = {
     "begin_end_names": true,
     "check_syntax": true,
     "form_no_dash": true,
+    "omit_preceding_zeros": true,
     "obsolete_statement": {
       "compute": true,
       "requested": true,
