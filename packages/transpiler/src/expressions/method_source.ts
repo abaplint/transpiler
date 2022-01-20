@@ -40,7 +40,6 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
         } else {
           ret.append(".get().", child, traversal);
         }
-        ret.append(".get().", child.getFirstToken().getStart(), traversal);
       } else if (child.get() instanceof Expressions.FieldChain) {
         ret.appendChunk(traversal.traverse(child));
       } else {
