@@ -15,7 +15,7 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
 
       if (child.get() instanceof Expressions.ClassName) {
         ret.appendString(traversal.lookupClassOrInterface(child.concatTokens(), child.getFirstToken()));
-      } else if (child.get() instanceof Expressions.Dynamic && nextChild.concatTokens() === "=>") {
+      } else if (child.get() instanceof Expressions.Dynamic && nextChild?.concatTokens() === "=>") {
         const second = child.getChildren()[1];
         if (second.get() instanceof Expressions.FieldChain) {
           ret.appendChunk(traversal.traverse(second));
@@ -26,6 +26,15 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
           ret.appendString(`if (${lookup} === undefined && ${lookupException} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }\n`);
           ret.appendString(`if (${lookup} === undefined) { throw new ${lookupException}(); }\n`);
           ret.appendString(lookup);
+        } else {
+          ret.appendString("MethodSourceTranspiler-Unexpected");
+        }
+      } else if (child.get() instanceof Expressions.Dynamic) {
+        const second = child.getChildren()[1];
+        if (second.get() instanceof Expressions.FieldChain) {
+          ret.appendChunk(traversal.traverse(second));
+        } else if (second.get() instanceof Expressions.Constant) {
+          ret.appendString(second.getFirstToken().getStr().replace(/\'/g, "").toLowerCase().replace("~", "$"));
         } else {
           ret.appendString("MethodSourceTranspiler-Unexpected");
         }

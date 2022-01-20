@@ -235,6 +235,12 @@ abap.Classes['ZSDFSD'].foo();`},
       js: `bar.get().name();`},
     {abap: `CALL METHOD bar->name.`,
       js: `bar.get().name();`},
+    {abap: `CALL METHOD ('CL_APJ_SCP_TOOLS')=>('IS_RESTART_REQUIRED').`,
+      js: `if (abap.Classes['CL_APJ_SCP_TOOLS'] === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }
+if (abap.Classes['CL_APJ_SCP_TOOLS'] === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'](); }
+abap.Classes['CL_APJ_SCP_TOOLS'].is_restart_required();`},
+    {abap: `CALL METHOD lo_factory->('CREATE_CLIF_SOURCE').`,
+      js: `lo_factory.get().create_clif_source();`},
 
 /*
     {abap: `CALL METHOD ('XCO_CP_ABAP_DICTIONARY')=>database_table
