@@ -235,6 +235,15 @@ abap.Classes['ZSDFSD'].foo();`},
       js: `bar.get().name();`},
     {abap: `CALL METHOD bar->name.`,
       js: `bar.get().name();`},
+
+/*
+    {abap: `CALL METHOD ('XCO_CP_ABAP_DICTIONARY')=>database_table
+      EXPORTING
+        iv_name           = lv_tabname
+      RECEIVING
+        ro_database_table = obj.`,
+    js: `sdfsd`, only: true},
+    */
   ];
 
   for (const test of tests) {
