@@ -166,6 +166,7 @@ describe("Single statements", () => {
     {abap: "INSERT INITIAL LINE INTO tab ASSIGNING <row> INDEX 1.", js: `abap.statements.insertInternal({initial: true, index: constant_1, assigning: fs_row_, table: tab});`, skip: false},
     {abap: "DELETE lt_log_temp WHERE msg-level < iv_min_level.", js: `abap.statements.deleteInternal(lt_log_temp,{where: (i) => {return abap.compare.lt(i.msg.get().level, iv_min_level);}});`, skip: false},
     {abap: "ASSIGN lv_x TO <lv_y> CASTING.", js: `abap.statements.assign({target: fs_lv_y_, source: lv_x, casting: true});`, skip: false},
+
     {abap: `CALL TRANSFORMATION id
     OPTIONS value_handling = 'accept_data_loss'
     SOURCE XML iv_string
@@ -186,6 +187,13 @@ await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",sourceXML: mi_
       SOURCE (lt_stab)
       RESULT XML li_doc.`, js: `if (abap.Classes['KERNEL_CALL_TRANSFORMATION'] === undefined) throw new Error("CallTransformation, kernel class missing");
 await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",resultXML: li_doc,options: {initial_components:new abap.types.Character({length: 8}).set('suppress')},source: (lt_stab)});`},
+    {abap: `CALL TRANSFORMATION id
+SOURCE
+  data   = <fs>
+  fields = fields
+RESULT XML writer.`, js: `if (abap.Classes['KERNEL_CALL_TRANSFORMATION'] === undefined) throw new Error("CallTransformation, kernel class missing");
+await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",resultXML: writer,source: {data:fs_fs_,fields:fields}});`},
+
     {abap: `DATA tab TYPE SORTED TABLE OF i WITH UNIQUE KEY table_line.`,
       js: `let tab = new abap.types.Table(new abap.types.Integer(), {"withHeader":false,"type":"SORTED","isUnique":true,"keyFields":["TABLE_LINE"]});`},
     {abap: `DATA foobar TYPE abap_bool.`,
@@ -218,6 +226,24 @@ await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({cond: abap.compare.initial(lo_h
     {abap: `AUTHORITY-CHECK OBJECT 'ZFOOBAR' ID 'ACTVT' FIELD '03'.`,
       js: `if (abap.Classes['KERNEL_AUTHORITY_CHECK'] === undefined) throw new Error("AuthorityCheck, kernel class missing");
 await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({});`}, // todo
+
+    {abap: `CALL METHOD ('ZSDFSD')=>foo.`,
+      js: `if (abap.Classes['ZSDFSD'] === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }
+if (abap.Classes['ZSDFSD'] === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'](); }
+abap.Classes['ZSDFSD'].foo();`},
+    {abap: `CALL METHOD bar->name( ).`,
+      js: `bar.get().name();`},
+    {abap: `CALL METHOD bar->name.`,
+      js: `bar.get().name();`},
+
+/*
+    {abap: `CALL METHOD ('XCO_CP_ABAP_DICTIONARY')=>database_table
+      EXPORTING
+        iv_name           = lv_tabname
+      RECEIVING
+        ro_database_table = obj.`,
+    js: `sdfsd`, only: true},
+    */
   ];
 
   for (const test of tests) {

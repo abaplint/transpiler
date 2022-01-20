@@ -33,7 +33,7 @@ export class CallTransformationTranspiler implements IStatementTranspiler {
       options.push("result: " + traversal.traverse(result).getCode());
     }
 
-    const source = node.findExpressionAfterToken("Source");
+    const source = node.findExpressionAfterToken("SOURCE");
     if (source && source.get() instanceof abaplint.Expressions.CallTransformationParameters) {
       options.push("source: " + traversal.traverse(source).getCode());
     }
