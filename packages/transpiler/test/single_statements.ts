@@ -226,10 +226,15 @@ await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({cond: abap.compare.initial(lo_h
     {abap: `AUTHORITY-CHECK OBJECT 'ZFOOBAR' ID 'ACTVT' FIELD '03'.`,
       js: `if (abap.Classes['KERNEL_AUTHORITY_CHECK'] === undefined) throw new Error("AuthorityCheck, kernel class missing");
 await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({});`}, // todo
-/*
+
     {abap: `CALL METHOD ('ZSDFSD')=>foo.`,
-      js: `hmm?`},
-*/
+      js: `if (abap.Classes['ZSDFSD'] === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }
+if (abap.Classes['ZSDFSD'] === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'](); }
+abap.Classes['ZSDFSD'].foo();`},
+    {abap: `CALL METHOD bar->name( ).`,
+      js: `bar.get().name();`},
+    {abap: `CALL METHOD bar->name.`,
+      js: `bar.get().name();`},
   ];
 
   for (const test of tests) {

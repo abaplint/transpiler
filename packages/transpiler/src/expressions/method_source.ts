@@ -1,13 +1,53 @@
-import {Nodes} from "@abaplint/core";
+import {Nodes, Expressions} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
-import {MethodCallChainTranspiler} from "./method_call_chain";
 import {Chunk} from "../chunk";
 
 export class MethodSourceTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
-    const ret = new MethodCallChainTranspiler().transpile(node, traversal);
+    const ret = new Chunk();
+
+    const children = node.getChildren();
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i];
+      const nextChild = children[i + 1];
+
+      if (child.get() instanceof Expressions.ClassName) {
+        ret.appendString(traversal.lookupClassOrInterface(child.concatTokens(), child.getFirstToken()));
+      } else if (child.get() instanceof Expressions.Dynamic && nextChild.concatTokens() === "=>") {
+        const second = child.getChildren()[1];
+        if (second.get() instanceof Expressions.FieldChain) {
+          ret.appendChunk(traversal.traverse(second));
+        } else if (second.get() instanceof Expressions.Constant) {
+          const lookup = traversal.lookupClassOrInterface(second.getFirstToken().getStr(), child.getFirstToken(), true);
+          const lookupException = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_CLASS'", child.getFirstToken(), true);
+          // eslint-disable-next-line max-len
+          ret.appendString(`if (${lookup} === undefined && ${lookupException} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }\n`);
+          ret.appendString(`if (${lookup} === undefined) { throw new ${lookupException}(); }\n`);
+          ret.appendString(lookup);
+        } else {
+          ret.appendString("MethodSourceTranspiler-Unexpected");
+        }
+      } else if (child.get() instanceof Expressions.MethodName) {
+        const methodName = child.concatTokens().toLowerCase().replace("~", "$");
+        ret.append(methodName, child.getFirstToken().getStart(), traversal);
+      } else if (child.concatTokens() === "=>") {
+        ret.append(".", child.getFirstToken().getStart(), traversal);
+      } else if (child.concatTokens() === "->") {
+        if (ret.getCode() === "super") {
+          ret.append(".", child, traversal);
+        } else {
+          ret.append(".get().", child, traversal);
+        }
+        ret.append(".get().", child.getFirstToken().getStart(), traversal);
+      } else if (child.get() instanceof Expressions.FieldChain) {
+        ret.appendChunk(traversal.traverse(child));
+      } else {
+        ret.appendString("MethodSourceTranspiler-" + child.get().constructor.name + "-todo");
+      }
+
+    }
 
     return ret;
   }
