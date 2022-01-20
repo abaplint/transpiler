@@ -34,7 +34,7 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
         if (second.get() instanceof Expressions.FieldChain) {
           ret.appendChunk(traversal.traverse(second));
         } else if (second.get() instanceof Expressions.Constant) {
-          ret.appendString(second.getFirstToken().getStr().replace(/\'/g, "").toLowerCase());
+          ret.appendString(second.getFirstToken().getStr().replace(/\'/g, "").toLowerCase().replace("~", "$"));
         } else {
           ret.appendString("MethodSourceTranspiler-Unexpected");
         }
