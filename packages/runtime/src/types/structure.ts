@@ -6,9 +6,11 @@ import {INumeric} from "./_numeric";
 
 export class Structure {
   private readonly value: any;
+  private readonly qualifiedName: string | undefined;
 
-  public constructor(fields: any) {
+  public constructor(fields: any, qualifiedName?: string) {
     this.value = fields;
+    this.qualifiedName = qualifiedName?.toUpperCase();
   }
 
   public clear() {
@@ -17,6 +19,10 @@ export class Structure {
       this.value[f].clear();
     }
     return this;
+  }
+
+  public getQualifiedName() {
+    return this.qualifiedName;
   }
 
   public set(input: Structure | string | INumeric | Table | ICharacter | FieldSymbol | undefined) {
