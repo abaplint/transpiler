@@ -36,6 +36,9 @@ export class TranspileTypes {
         list.push(c.name.toLowerCase() + ": " + this.toType(c.type));
       }
       extra = "{" + list.join(", ") + "}";
+      if (type.getQualifiedName() !== undefined) {
+        extra += ", \"" + type.getQualifiedName() + "\"";
+      }
     } else if (type instanceof abaplint.BasicTypes.CLikeType
         || type instanceof abaplint.BasicTypes.CSequenceType) {
       // if not supplied its a Character(1)
