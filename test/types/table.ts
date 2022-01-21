@@ -114,4 +114,20 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("1\n2\n3");
   });
 
+  it("ANY TABLE and data refs", async () => {
+    const code = `
+TYPES ty TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA tab TYPE ty.
+DATA ref TYPE REF TO data.
+FIELD-SYMBOLS <tab> TYPE ANY TABLE.
+APPEND 2 TO tab.
+CREATE DATA ref TYPE ty.
+ASSIGN ref->* TO <tab>.
+<tab> = tab.
+ASSERT lines( <tab> ) = lines( tab ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
