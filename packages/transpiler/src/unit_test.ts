@@ -118,6 +118,10 @@ run().then(() => {
     for (const obj of reg.getObjects()) {
       if (obj instanceof abaplint.Objects.Table) {
         list.push(`await import("./${obj.getName().toLowerCase()}.tabl.mjs");`);
+      } else if (obj instanceof abaplint.Objects.DataElement) {
+        list.push(`await import("./${obj.getName().toLowerCase()}.dtel.mjs");`);
+      } else if (obj instanceof abaplint.Objects.TableType) {
+        list.push(`await import("./${obj.getName().toLowerCase()}.ttyp.mjs");`);
       }
     }
 

@@ -150,7 +150,9 @@ describe("Testing Unit Testing", () => {
 
     for (const o of output.objects) {
       let contents = o.chunk.getCode();
-      if (o.object.type.toUpperCase() !== "TABL") {
+      if (o.object.type.toUpperCase() !== "TABL"
+          && o.object.type.toUpperCase() !== "DTEL"
+          && o.object.type.toUpperCase() !== "TTYP") {
         const name = o.filename + ".map";
         contents = contents + `\n//# sourceMappingURL=` + name;
         fs.writeFileSync(outputFolder + path.sep + name, o.chunk.getMap(o.filename));
