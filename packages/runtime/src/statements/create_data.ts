@@ -1,9 +1,14 @@
 import {clone} from "../clone";
-import {DataReference} from "../types";
+import {ABAPObject, DataReference, Structure, Table} from "../types";
+import {ICharacter} from "../types/_character";
+import {INumeric} from "../types/_numeric";
+
+type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Structure;
 
 export interface ICreateDataOptions {
   table?: boolean,
   name?: string,
+  type?: PointerType,
 }
 
 export function createData(target: DataReference, options?: ICreateDataOptions) {
@@ -24,6 +29,8 @@ export function createData(target: DataReference, options?: ICreateDataOptions) 
     }
     // @ts-ignore
     target.assign(clone(abap.DDIC[options.name].type));
+  } else if (options?.type) {
+    target.assign(clone(options.type));
   } else {
     target.assign(clone(target.getType()));
   }

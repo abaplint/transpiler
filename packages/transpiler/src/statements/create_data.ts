@@ -3,6 +3,7 @@ import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {FieldChainTranspiler} from "../expressions";
+import {TranspileTypes} from "../transpile_types";
 
 export class CreateDataTranspiler implements IStatementTranspiler {
 
@@ -19,6 +20,14 @@ export class CreateDataTranspiler implements IStatementTranspiler {
       dynamic = node.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.FieldChain);
       if (dynamic) {
         options.push(`"name": ` + new FieldChainTranspiler(true).transpile(dynamic, traversal).getCode());
+      }
+    }
+
+    const typeNameNode = node.findDirectExpression(abaplint.Expressions.TypeName);
+    if (typeNameNode) {
+      const id = traversal.findCurrentScopeByToken(typeNameNode.getFirstToken())?.findType(typeNameNode.concatTokens());
+      if (id) {
+        options.push(`"type": ` + new TranspileTypes().toType(id.getType()));
       }
     }
 
