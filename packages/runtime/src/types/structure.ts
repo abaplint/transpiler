@@ -5,18 +5,18 @@ import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 
 export class Structure {
-  private readonly fields: any;
+  private readonly value: any;
   private readonly qualifiedName: string | undefined;
 
   public constructor(fields: any, qualifiedName?: string) {
-    this.fields = fields;
+    this.value = fields;
     this.qualifiedName = qualifiedName?.toUpperCase();
   }
 
   public clear() {
-    for (const f in this.fields) {
+    for (const f in this.value) {
       // @ts-ignore
-      this.fields[f].clear();
+      this.value[f].clear();
     }
     return this;
   }
@@ -38,7 +38,7 @@ export class Structure {
       const obj = input.get();
       for (const f in obj) {
         // @ts-ignore
-        this.fields[f].set(clone(obj[f]));
+        this.value[f].set(clone(obj[f]));
       }
     } else {
       this.setCharacter(input);
@@ -55,14 +55,14 @@ export class Structure {
       val = val.get() + "";
     }
 
-    for (const key of Object.keys(this.fields)) {
-      const targetLength = this.fields[key].getLength();
-      this.fields[key].set(val.substr(0, targetLength));
+    for (const key of Object.keys(this.value)) {
+      const targetLength = this.value[key].getLength();
+      this.value[key].set(val.substr(0, targetLength));
       val = val.substr(targetLength);
     }
   }
 
   public get() {
-    return this.fields;
+    return this.value;
   }
 }
