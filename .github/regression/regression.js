@@ -5,9 +5,9 @@ const childProcess = require("child_process");
 
 const repos = [
   {name: "open-abap/open-abap",               command: "npm test"},
+  {name: "open-abap/open-table-maintenance",  command: "npm test"},
   {name: "abap-openapi/abap-openapi-client",  command: "npm test"},
   {name: "abapGit/abapGit",                   command: "npm run unit"},
-  {name: "open-abap/open-table-maintenance",  command: "npm test"},
   {name: "larshp/abap-advent-2020",           command: "npm test"},
   {name: "larshp/abapNTLM",                  command: "npm test"},
   //  {name: "larshp/abap-wasm",                 command: "npm test"}, hmm, guess https://github.com/larshp/abap-wasm/issues/44
