@@ -253,15 +253,14 @@ abap.Classes['CL_APJ_SCP_TOOLS'].is_restart_required();`},
     js: `if (abap.Classes['CL_ABAP_CONV_CODEPAGE'] === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }
 if (abap.Classes['CL_ABAP_CONV_CODEPAGE'] === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'](); }
 conv.set(abap.Classes['CL_ABAP_CONV_CODEPAGE'].create_out());`},
-
-/*
     {abap: `CALL METHOD ('XCO_CP_ABAP_DICTIONARY')=>database_table
       EXPORTING
         iv_name           = lv_tabname
       RECEIVING
         ro_database_table = obj.`,
-    js: `sdfsd`, only: true},
-    */
+    js: `if (abap.Classes['XCO_CP_ABAP_DICTIONARY'] === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }
+if (abap.Classes['XCO_CP_ABAP_DICTIONARY'] === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'](); }
+obj.set(abap.Classes['XCO_CP_ABAP_DICTIONARY'].database_table({iv_name: lv_tabname}));`},
   ];
 
   for (const test of tests) {

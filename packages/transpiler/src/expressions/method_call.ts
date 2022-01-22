@@ -1,7 +1,7 @@
 import {Nodes, Expressions} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
-import {MethodCallParam} from "./method_call_param";
+import {MethodCallParamTranspiler} from "./method_call_param";
 import {Chunk} from "../chunk";
 
 export class MethodCallTranspiler implements IExpressionTranspiler {
@@ -32,7 +32,7 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
 
     const ret = new Chunk();
     ret.append(name.replace("~", "$"), nameToken, traversal);
-    ret.appendChunk(new MethodCallParam(m?.def).transpile(step, traversal));
+    ret.appendChunk(new MethodCallParamTranspiler(m?.def).transpile(step, traversal));
     ret.appendString(")");
 
     return ret;
