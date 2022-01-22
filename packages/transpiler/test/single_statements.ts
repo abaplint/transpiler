@@ -142,8 +142,14 @@ describe("Single statements", () => {
     {abap: "IF if_bar~field IS NOT INITIAL. ENDIF.", js: `if (abap.compare.initial(if_bar$field) === false) {\n}`, skip: false},
     {abap: "FUNCTION-POOL zopenabap.", js: ``, skip: false},
     {abap: "INCLUDE lzopenabaptop.", js: ``, skip: false},
-    {abap: "CALL FUNCTION 'BAR'.", js: `abap.FunctionModules['BAR']();`, skip: false},
-    {abap: "CALL FUNCTION 'BAR' EXPORTING moo = boo.", js: `abap.FunctionModules['BAR']({exporting: {moo: boo}});`, skip: false},
+    {abap: "CALL FUNCTION 'BAR'.",
+      js: `abap.FunctionModules['BAR']();`, skip: false},
+    {abap: "CALL FUNCTION 'BAR' EXPORTING moo = boo.",
+      js: `abap.FunctionModules['BAR']({exporting: {moo: boo}});`, skip: false},
+    {abap: "CALL FUNCTION 'BAR' DESTINATION 'MOO'.",
+      js: `abap.statements.callFunction({name:'BAR',destination:'MOO'});`, skip: false},
+    {abap: `CALL FUNCTION 'BAR' DESTINATION 'MOO' EXPORTING foo = boo.`,
+      js: `abap.statements.callFunction({name:'BAR',destination:'MOO',exporting: {foo: boo}});`, skip: false},
     {abap: "super->method( ).",     js: `await super.method();`, skip: false},
     {abap: "super->constructor( ).",     js: ``, skip: false}, // todo, https://github.com/abaplint/transpiler/issues/133
 
@@ -241,15 +247,20 @@ if (abap.Classes['CL_APJ_SCP_TOOLS'] === undefined) { throw new abap.Classes['CX
 abap.Classes['CL_APJ_SCP_TOOLS'].is_restart_required();`},
     {abap: `CALL METHOD lo_factory->('CREATE_CLIF_SOURCE').`,
       js: `lo_factory.get().create_clif_source();`},
-
-/*
+    {abap: `CALL METHOD ('CL_ABAP_CONV_CODEPAGE')=>create_out
+      RECEIVING
+        instance = conv.`,
+    js: `if (abap.Classes['CL_ABAP_CONV_CODEPAGE'] === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }
+if (abap.Classes['CL_ABAP_CONV_CODEPAGE'] === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'](); }
+conv.set(abap.Classes['CL_ABAP_CONV_CODEPAGE'].create_out());`},
     {abap: `CALL METHOD ('XCO_CP_ABAP_DICTIONARY')=>database_table
       EXPORTING
         iv_name           = lv_tabname
       RECEIVING
         ro_database_table = obj.`,
-    js: `sdfsd`, only: true},
-    */
+    js: `if (abap.Classes['XCO_CP_ABAP_DICTIONARY'] === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }
+if (abap.Classes['XCO_CP_ABAP_DICTIONARY'] === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'](); }
+obj.set(abap.Classes['XCO_CP_ABAP_DICTIONARY'].database_table({iv_name: lv_tabname}));`},
   ];
 
   for (const test of tests) {

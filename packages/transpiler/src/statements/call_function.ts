@@ -17,9 +17,17 @@ export class CallFunctionTranspiler implements IStatementTranspiler {
       param = traversal.traverse(fmp).getCode();
     }
 
-    const ret = `abap.FunctionModules[${fmname}](${param});`;
+    const ret = new Chunk();
 
-    return new Chunk(ret);
+    const dest = node.findDirectExpression(abaplint.Expressions.Destination)?.findDirectExpression(abaplint.Expressions.Source);
+    if (dest) {
+      param = param.replace("{", ",").replace(/}$/, "");
+      ret.appendString(`abap.statements.callFunction({name:${fmname},destination:${dest.concatTokens()}${param}});`);
+    } else {
+      ret.appendString(`abap.FunctionModules[${fmname}](${param});`);
+    }
+
+    return ret;
   }
 
 }

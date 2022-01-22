@@ -1,6 +1,7 @@
 import {append} from "./append";
 import {assert} from "./assert";
 import {assign} from "./assign";
+import {callFunction} from "./call_function";
 import {clear} from "./clear";
 import {commit} from "./commit";
 import {concatenate} from "./concatenate";
@@ -47,6 +48,7 @@ export class Statements {
   public describe = describe;
   public find = find;
   public getBit = getBit;
+  public callFunction = callFunction;
   public getRunTime = getRunTime;
   public getTime = getTime;
   public insertDatabase = insertDatabase;

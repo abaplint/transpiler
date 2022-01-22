@@ -4,7 +4,7 @@ import {Chunk} from "../chunk";
 import {Traversal} from "../traversal";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 
-export class MethodCallParam implements IExpressionTranspiler {
+export class MethodCallParamTranspiler implements IExpressionTranspiler {
   private readonly m: abaplint.Types.MethodDefinition | undefined;
 
   public constructor(m?: abaplint.Types.MethodDefinition) {
