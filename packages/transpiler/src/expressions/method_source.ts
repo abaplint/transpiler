@@ -4,6 +4,11 @@ import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 
 export class MethodSourceTranspiler implements IExpressionTranspiler {
+  private readonly prepend: string;
+
+  public constructor(prepend?: string) {
+    this.prepend = prepend || "";
+  }
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     const ret = new Chunk();
@@ -25,6 +30,9 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
           // eslint-disable-next-line max-len
           ret.appendString(`if (${lookup} === undefined && ${lookupException} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }\n`);
           ret.appendString(`if (${lookup} === undefined) { throw new ${lookupException}(); }\n`);
+          if (i === 0) {
+            ret.appendString(this.prepend);
+          }
           ret.appendString(lookup);
         } else {
           ret.appendString("MethodSourceTranspiler-Unexpected");
@@ -50,6 +58,9 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
           ret.append(".get().", child, traversal);
         }
       } else if (child.get() instanceof Expressions.FieldChain) {
+        if (i === 0) {
+          ret.appendString(this.prepend);
+        }
         ret.appendChunk(traversal.traverse(child));
       } else {
         ret.appendString("MethodSourceTranspiler-" + child.get().constructor.name + "-todo");
