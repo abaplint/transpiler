@@ -7,7 +7,7 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
   private readonly prepend: string;
 
   public constructor(prepend?: string) {
-    this.prepend = prepend || "";
+    this.prepend = (prepend || "") + "await ";
   }
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
@@ -47,6 +47,9 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
           ret.appendString("MethodSourceTranspiler-Unexpected");
         }
       } else if (child.get() instanceof Expressions.MethodName) {
+        if (i === 0) {
+          ret.appendString(this.prepend + "this.");
+        }
         const methodName = child.concatTokens().toLowerCase().replace("~", "$");
         ret.append(methodName, child.getFirstToken().getStart(), traversal);
       } else if (child.concatTokens() === "=>") {

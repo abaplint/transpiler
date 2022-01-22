@@ -233,26 +233,28 @@ await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({cond: abap.compare.initial(lo_h
       js: `if (abap.Classes['KERNEL_AUTHORITY_CHECK'] === undefined) throw new Error("AuthorityCheck, kernel class missing");
 await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({});`}, // todo
 
+    {abap: `CALL METHOD bar RECEIVING field = field.`,
+      js: `field.set(await this.bar());`},
     {abap: `CALL METHOD ('ZSDFSD')=>foo.`,
       js: `if (abap.Classes['ZSDFSD'] === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }
 if (abap.Classes['ZSDFSD'] === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'](); }
-abap.Classes['ZSDFSD'].foo();`},
+await abap.Classes['ZSDFSD'].foo();`},
     {abap: `CALL METHOD bar->name( ).`,
-      js: `bar.get().name();`},
+      js: `await bar.get().name();`},
     {abap: `CALL METHOD bar->name.`,
-      js: `bar.get().name();`},
+      js: `await bar.get().name();`},
     {abap: `CALL METHOD ('CL_APJ_SCP_TOOLS')=>('IS_RESTART_REQUIRED').`,
       js: `if (abap.Classes['CL_APJ_SCP_TOOLS'] === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }
 if (abap.Classes['CL_APJ_SCP_TOOLS'] === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'](); }
-abap.Classes['CL_APJ_SCP_TOOLS'].is_restart_required();`},
+await abap.Classes['CL_APJ_SCP_TOOLS'].is_restart_required();`},
     {abap: `CALL METHOD lo_factory->('CREATE_CLIF_SOURCE').`,
-      js: `lo_factory.get().create_clif_source();`},
+      js: `await lo_factory.get().create_clif_source();`},
     {abap: `CALL METHOD ('CL_ABAP_CONV_CODEPAGE')=>create_out
       RECEIVING
         instance = conv.`,
     js: `if (abap.Classes['CL_ABAP_CONV_CODEPAGE'] === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }
 if (abap.Classes['CL_ABAP_CONV_CODEPAGE'] === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'](); }
-conv.set(abap.Classes['CL_ABAP_CONV_CODEPAGE'].create_out());`},
+conv.set(await abap.Classes['CL_ABAP_CONV_CODEPAGE'].create_out());`},
     {abap: `CALL METHOD ('XCO_CP_ABAP_DICTIONARY')=>database_table
       EXPORTING
         iv_name           = lv_tabname
@@ -260,7 +262,7 @@ conv.set(abap.Classes['CL_ABAP_CONV_CODEPAGE'].create_out());`},
         ro_database_table = obj.`,
     js: `if (abap.Classes['XCO_CP_ABAP_DICTIONARY'] === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }
 if (abap.Classes['XCO_CP_ABAP_DICTIONARY'] === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'](); }
-obj.set(abap.Classes['XCO_CP_ABAP_DICTIONARY'].database_table({iv_name: lv_tabname}));`},
+obj.set(await abap.Classes['XCO_CP_ABAP_DICTIONARY'].database_table({iv_name: lv_tabname}));`},
   ];
 
   for (const test of tests) {
