@@ -4,14 +4,15 @@
     "version": "1.0.0",
     "description": "proof of concept",
     "scripts": {
-        "install": "npm install && cd web/transpiler && npm install && cd ../../ && cd packages/runtime && npm install && cd ../cli && npm install && cd ../transpiler && npm install && cd ../..",
+        "install": "npm install && cd web/transpiler && npm install && cd ../../ && cd packages/runtime && npm install && cd ../cli && npm install && cd ../transpiler && npm install && cd ../rfc-client-soap-xml && npm install && cd ../..",
         "compile": "cd packages/runtime && npm run compile && cd ../../ && cd packages/transpiler && npm run compile && cd ../../ && cd packages/cli && npm run compile && cd ../../ && tsc",
         "performance": "npm run compile && node build/performance/index.js",
         "test": "npm run compile && mocha --timeout 10000 && npm run lint",
         "regression": "node .github/regression/regression.js",
-        "link-local": "npm run link:transpiler && npm run link:cli && npm run link:runtime",
+        "link-local": "npm run link:transpiler && npm run link:cli && npm run link:runtime && npm run link:rfc-client-soap-xml",
         "link:transpiler": "cd packages/transpiler && npm link",
         "link:runtime": "cd packages/runtime && npm link",
+        "link:rfc-client-soap-xml": "cd packages/rfc-client-soap-xml && npm link @abaplint/runtime",
         "link:cli": "cd packages/cli && npm link --force && npm link @abaplint/transpiler",
         "lint": "eslint packages/**/*.ts --format unix"
     },

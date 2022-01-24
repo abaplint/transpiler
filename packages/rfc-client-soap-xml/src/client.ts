@@ -42,7 +42,7 @@ export class Client implements runtime.RFC.RFCClient {
     // todo
   }
 
-  private buildBody(name: string, input?: CallInput): string {
+  private buildBody(name: string, input?: runtime.RFC.RFCCallInput): string {
     // eslint-disable-next-line max-len
     let body = `<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:RFCDEMO="urn:sap-com:document:sap:rfc:functions">
   <SOAP-ENV:Body>
