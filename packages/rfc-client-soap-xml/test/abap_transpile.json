@@ -1,0 +1,13 @@
+{
+  "input_folder": "test/abap",
+  "input_filter": [],
+  "output_folder": "output",
+  "lib": "https://github.com/open-abap/open-abap",
+  "write_unit_tests": true,
+  "write_source_map": true,
+  "options": {
+    "ignoreSyntaxCheck": false,
+    "addFilenames": true,
+    "addCommonJS": true
+  }
+}
