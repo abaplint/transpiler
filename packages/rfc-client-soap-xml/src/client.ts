@@ -2,7 +2,14 @@ import fetch from "cross-fetch";
 import {XMLParser} from "fast-xml-parser";
 
 // todo, move this type + interface to a core package
-export type CallInput = {exporting?: object, importing?: object, tables?: object, changing?: object};
+export type CallInput = {
+  exporting?: {[name: string]: any},
+  importing?: {[name: string]: any},
+  tables?: {[name: string]: any},
+  changing?: {[name: string]: any},
+  exceptions?: {[name: string]: number},
+};
+
 export interface RFCClient {
   call(name: string, input?: CallInput): Promise<void>;
 }
