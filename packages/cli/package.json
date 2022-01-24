@@ -5,6 +5,7 @@
   "bin": {
     "abap_transpile": "./abap_transpile"
   },
+  "types": "./build/types.d.ts",
   "keywords": [
     "ABAP",
     "abaplint"

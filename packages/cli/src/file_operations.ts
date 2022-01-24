@@ -1,8 +1,8 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as glob from "glob";
-import {ITranspilerConfig} from "./config";
 import * as Transpiler from "@abaplint/transpiler";
+import {ITranspilerConfig} from "./types";
 
 export class FileOperations {
 
