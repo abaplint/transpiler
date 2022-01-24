@@ -1,25 +1,13 @@
 import fetch from "cross-fetch";
 import {XMLParser} from "fast-xml-parser";
-
-// todo, move this type + interface to a core package
-export type CallInput = {
-  exporting?: {[name: string]: any},
-  importing?: {[name: string]: any},
-  tables?: {[name: string]: any},
-  changing?: {[name: string]: any},
-  exceptions?: {[name: string]: number},
-};
-
-export interface RFCClient {
-  call(name: string, input?: CallInput): Promise<void>;
-}
+import * as runtime from "@abaplint/runtime";
 
 export type ClientOptions = {
   username: string,
   password: string,
 };
 
-export class Client implements RFCClient {
+export class Client implements runtime.RFC.RFCClient {
   private readonly url: string;
   private readonly options: ClientOptions | undefined;
 
@@ -28,7 +16,7 @@ export class Client implements RFCClient {
     this.options = options;
   }
 
-  public async call(name: string, input?: CallInput) {
+  public async call(name: string, input?: runtime.RFC.RFCCallInput) {
     const body = this.buildBody(name, input);
 
     let auth = {};
