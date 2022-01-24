@@ -645,4 +645,14 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("CP with slash", async () => {
+    const code = `
+    DATA absolute_name TYPE string.
+    absolute_name = '\\TYPE=FOO'.
+    ASSERT absolute_name CP '\\TYPE=*'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

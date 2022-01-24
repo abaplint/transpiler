@@ -1,0 +1,30 @@
+HTTP/1.1 200 OK
+content-type: text/xml; charset=utf-8
+content-length: 592
+sap-server: true
+sap-perf-fesrec: 2735.000000
+
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope
+  xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+  <SOAP-ENV:Body>
+    <RFCDEMO:CAT_PING.Response
+      xmlns:RFCDEMO="urn:sap-com:document:sap:rfc:functions">
+      <SYSINFO>
+        <SYSTEM>A4H</SYSTEM>
+        <MAND>001</MAND>
+        <ASPRA>E</ASPRA>
+        <SNAME>DEVELOPER</SNAME>
+        <CATTOK></CATTOK>
+        <SAPRL>754</SAPRL>
+        <HOST>vhcala4h</HOST>
+        <OPSYS>Linux</OPSYS>
+        <DBSYS>HDB</DBSYS>
+        <DATEX>22012022</DATEX>
+        <DCPFM></DCPFM>
+        <MSNAME2>vhcala4hci</MSNAME2>
+      </SYSINFO>
+    </RFCDEMO:CAT_PING.Response>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

@@ -74,8 +74,12 @@ export class DatabaseSetup {
   private toType(type: abaplint.AbstractType): string {
     if (type instanceof abaplint.BasicTypes.CharacterType) {
       return `NCHAR(${type.getLength()})`;
+    } else if (type instanceof abaplint.BasicTypes.StringType) {
+      return `TEXT`;
+    } else if (type instanceof abaplint.BasicTypes.IntegerType) {
+      return `INT`;
     } else {
-      throw "transpiler todo, database_setup";
+      throw "database_setup, todo toType handle: " + type.constructor.name;
     }
   }
 

@@ -1,0 +1,10 @@
+POST http://localhost:50000/sap/bc/soap/rfc?sap-client=001 HTTP/1.1
+Authorization: Basic DEVELOPER:password
+Content-Type: text/xml
+
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:RFCDEMO="urn:sap-com:document:sap:rfc:functions">
+     <SOAP-ENV:Body>
+          <RFCDEMO:CAT_PING>
+          </RFCDEMO:CAT_PING>
+     </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

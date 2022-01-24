@@ -16,6 +16,7 @@ export function cp(left: number | string | ICharacter | INumeric, right: string 
     r = right.get().toString();
   }
 
+  r = r.replace(/\\/g, "\\\\");
   r = r.replace(/\[/g, "\\[");
   r = r.replace(/\]/g, "\\]");
   r = r.replace(/\?/g, "\\?");
