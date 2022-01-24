@@ -21,6 +21,8 @@ CLASS ltcl_test IMPLEMENTATION.
             msname2 TYPE c LENGTH 40,
           END OF ls_sysinfo.
 
+    cl_abap_unit_assert=>assert_initial( ls_sysinfo ).
+
     CALL FUNCTION 'CAT_PING'
       DESTINATION 'MYTESTTEST'
       IMPORTING
