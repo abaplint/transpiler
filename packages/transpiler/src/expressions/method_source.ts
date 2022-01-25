@@ -2,6 +2,7 @@ import {Nodes, Expressions} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
+import {FieldChainTranspiler} from ".";
 
 export class MethodSourceTranspiler implements IExpressionTranspiler {
   private readonly prepend: string;
@@ -22,8 +23,19 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
         ret.appendString(traversal.lookupClassOrInterface(child.concatTokens(), child.getFirstToken()));
       } else if (child.get() instanceof Expressions.Dynamic && nextChild?.concatTokens() === "=>") {
         const second = child.getChildren()[1];
-        if (second.get() instanceof Expressions.FieldChain) {
-          ret.appendChunk(traversal.traverse(second));
+        if (second.get() instanceof Expressions.FieldChain && second instanceof Nodes.ExpressionNode) {
+          const t = new FieldChainTranspiler(true).transpile(second, traversal).getCode();
+
+          const lookup = traversal.lookupClassOrInterface(t, child.getFirstToken(), true);
+          const lookupException = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_CLASS'", child.getFirstToken(), true);
+          // eslint-disable-next-line max-len
+          ret.appendString(`if (${lookup} === undefined && ${lookupException} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }\n`);
+          ret.appendString(`if (${lookup} === undefined) { throw new ${lookupException}(); }\n`);
+          if (i === 0) {
+            ret.appendString(this.prepend);
+          }
+          ret.appendString(lookup);
+
         } else if (second.get() instanceof Expressions.Constant) {
           const lookup = traversal.lookupClassOrInterface(second.getFirstToken().getStr(), child.getFirstToken(), true);
           const lookupException = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_CLASS'", child.getFirstToken(), true);
