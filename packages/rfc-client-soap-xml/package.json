@@ -1,19 +1,21 @@
 {
-  "name": "rfc-client-soap-xml",
+  "name": "@abaplint/rfc-client-soap-xml",
   "version": "0.1.0",
   "description": "rfc-client-soap-xml",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "rm -rf output && npx abap_transpile test/abap_transpile.json && node output/index.mjs",
     "start": "node test/mock.mjs"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@types/express": "^4.17.13",
     "express": "^4.17.2",
+    "@abaplint/transpiler-cli": "^1.7.29",
     "typescript": "^4.5.5"
   },
   "dependencies": {
+    "@abaplint/runtime": "^1.7.29",
     "cross-fetch": "^3.1.5",
     "fast-xml-parser": "^4.0.1"
   }

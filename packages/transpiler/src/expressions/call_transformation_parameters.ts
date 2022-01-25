@@ -19,7 +19,7 @@ export class CallTransformationParametersTranspiler implements IExpressionTransp
             res.appendString(",");
           }
           res.appendString(c.concatTokens());
-        } else if (c.get() instanceof abaplint.Expressions.Source) {
+        } else if (c.get() instanceof abaplint.Expressions.SimpleSource3) {
           res.appendChunk(traversal.traverse(c));
         } else if (c.concatTokens() === "=") {
           res.appendString(":");

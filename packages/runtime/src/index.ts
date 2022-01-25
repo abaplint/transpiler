@@ -3,13 +3,14 @@ import * as builtin from "./builtin";
 import * as compare from "./compare";
 import * as operators from "./operators";
 import {Statements} from "./statements";
+import * as RFC from "./rfc";
 import initSqlJs from "sql.js";
 import {Console} from "./console";
 import {UnitTestResult} from "./unit_test";
 import {OffsetLength} from "./offset_length";
 import {templateFormatting} from "./template_formatting";
 
-export {UnitTestResult};
+export {UnitTestResult, RFC};
 
 export class ABAP {
 // global objects

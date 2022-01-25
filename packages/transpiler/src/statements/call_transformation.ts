@@ -13,7 +13,7 @@ export class CallTransformationTranspiler implements IStatementTranspiler {
     const name = node.findDirectExpression(abaplint.Expressions.NamespaceSimpleName)?.concatTokens();
     options.push("name: \"" + name + "\"");
 
-    const sourceXML = node.findDirectExpression(abaplint.Expressions.Source);
+    const sourceXML = node.findDirectExpression(abaplint.Expressions.SimpleSource3);
     if (sourceXML) {
       options.push("sourceXML: " + traversal.traverse(sourceXML).getCode());
     }

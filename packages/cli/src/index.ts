@@ -6,8 +6,9 @@ import * as os from "os";
 import * as ProgressBar from "progress";
 import * as Transpiler from "@abaplint/transpiler";
 import * as abaplint from "@abaplint/core";
-import {ITranspilerConfig, TranspilerConfig} from "./config";
+import {TranspilerConfig} from "./config";
 import {FileOperations} from "./file_operations";
+import {ITranspilerConfig} from "./types";
 
 class Progress implements Transpiler.IProgress {
   private bar: ProgressBar;
