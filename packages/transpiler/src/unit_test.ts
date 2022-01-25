@@ -20,13 +20,14 @@ export async function initializeABAP(settings) {\n`;
   }
 
   public unitTestScript(reg: abaplint.IRegistry, skip?: TestMethodList, _only?: TestMethodList): string {
-    let ret = `import fs from "fs";
+    let ret = `/* eslint-disable curly */
+import fs from "fs";
 import path from "path";
-import {dirname} from 'path';
-import {fileURLToPath} from 'url';
-const __dirname = dirname(fileURLToPath(import.meta.url));
+import {fileURLToPath} from "url";
 import {initializeABAP} from "./init.mjs";
 import runtime from "@abaplint/runtime";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function run() {
   await initializeABAP();
@@ -34,14 +35,14 @@ async function run() {
   let clas;
   let locl;
   let meth;
-try {\n`;
+  try {\n`;
 
     for (const obj of reg.getObjects()) {
       if (reg.isDependency(obj) || !(obj instanceof abaplint.Objects.Class)) {
         continue;
       }
       ret += `// --------------------------------------------\n`;
-      ret += `clas = unit.addObject("${obj.getName()}");\n`;
+      ret += `    clas = unit.addObject("${obj.getName()}");\n`;
       for (const file of obj.getABAPFiles()) {
         for (const def of file.getInfo().listClassDefinitions()) {
           if (def.isForTesting === false
@@ -49,11 +50,10 @@ try {\n`;
               || def.methods.length === 0) {
             continue;
           }
-          ret += `{
-const {${def.name}} = await import("./${obj.getName().toLowerCase()}.${obj.getType().toLowerCase()}.testclasses.mjs");
-locl = clas.addTestClass("${def.name}");\n`;
-
-          ret += `if (${def.name}.class_setup) await ${def.name}.class_setup();\n`;
+          ret += `    {
+      const {${def.name}} = await import("./${obj.getName().toLowerCase()}.${obj.getType().toLowerCase()}.testclasses.mjs");
+      locl = clas.addTestClass("${def.name}");
+      if (${def.name}.class_setup) await ${def.name}.class_setup();\n`;
 
           for (const m of def.methods) {
             if (m.isForTesting === false) {
@@ -67,33 +67,33 @@ locl = clas.addTestClass("${def.name}");\n`;
               continue;
             }
 
-            ret += `{\n  const test = await (new ${def.name}()).constructor_();\n`;
-            ret += `  if (test.setup) await test.setup();\n`;
-            ret += `  console.log('${obj.getName()}: running ${def.name}->${m.name}');\n`;
-            ret += `  meth = locl.addMethod("${m.name}");\n`;
-            ret += `  await test.${m.name}();\n`;
-            ret += `  meth.pass();\n`;
-            ret += `  if (test.teardown) await test.teardown();\n`;
-            ret += `}\n`;
+            ret += `      {\n        const test = await (new ${def.name}()).constructor_();\n`;
+            ret += `        if (test.setup) await test.setup();\n`;
+            ret += `        console.log("${obj.getName()}: running ${def.name}->${m.name}");\n`;
+            ret += `        meth = locl.addMethod("${m.name}");\n`;
+            ret += `        await test.${m.name}();\n`;
+            ret += `        meth.pass();\n`;
+            ret += `        if (test.teardown) await test.teardown();\n`;
+            ret += `      }\n`;
           }
 
-          ret += `if (${def.name}.class_teardown) await ${def.name}.class_teardown();\n`;
-          ret += `}\n`;
+          ret += `      if (${def.name}.class_teardown) await ${def.name}.class_teardown();\n`;
+          ret += `    }\n`;
         }
       }
     }
 
     ret += `// -------------------END-------------------
-console.log(abap.console.get());
-fs.writeFileSync(__dirname + path.sep + "output.xml", unit.xUnitXML());
-} catch (e) {
-  if (meth) {
-    meth.fail();
+    console.log(abap.console.get());
+    fs.writeFileSync(__dirname + path.sep + "output.xml", unit.xUnitXML());
+  } catch (e) {
+    if (meth) {
+      meth.fail();
+    }
+    console.log(abap.console.get());
+    fs.writeFileSync(__dirname + path.sep + "output.xml", unit.xUnitXML());
+    throw e;
   }
-  console.log(abap.console.get());
-  fs.writeFileSync(__dirname + path.sep + "output.xml", unit.xUnitXML());
-  throw e;
-}
 }
 
 run().then(() => {
