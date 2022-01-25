@@ -1,5 +1,5 @@
 {
-  "name": "rfc-client-soap-xml",
+  "name": "@abaplint/rfc-client-soap-xml",
   "version": "0.1.0",
   "description": "rfc-client-soap-xml",
   "scripts": {
@@ -7,7 +7,7 @@
     "start": "node test/mock.mjs"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@types/express": "^4.17.13",
     "express": "^4.17.2",
