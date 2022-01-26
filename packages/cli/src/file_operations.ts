@@ -11,16 +11,7 @@ export class FileOperations {
       return;
     }
 
-    const files = fs.readdirSync(p);
-    for (const file of files) {
-      const curPath = p + path.sep + file;
-      if (fs.lstatSync(curPath).isDirectory()) {
-        this.deleteFolderRecursive(curPath);
-      } else {
-        fs.unlinkSync(curPath);
-      }
-    }
-    fs.rmdirSync(p);
+    fs.rmSync(p, {recursive: true});
   }
 
   public static loadFiles(config: ITranspilerConfig): Transpiler.IFile[] {
