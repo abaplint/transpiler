@@ -1,3 +1,4 @@
+import {clone} from "../clone";
 import {ne} from "../compare";
 import {ABAPObject, DataReference, FieldSymbol, Structure, Table, TableAccessType} from "../types";
 import {ICharacter} from "../types/_character";
@@ -8,7 +9,7 @@ import {sort} from "./sort";
 export interface IInsertInternalOptions {
   index?: INumeric,
   initial?: boolean,
-  data?: INumeric | ICharacter | Structure | ABAPObject | Table,
+  data?: INumeric | ICharacter | Structure | ABAPObject | Table | string,
   table: Table,
   referenceInto?: DataReference,
   assigning?: FieldSymbol,
@@ -39,9 +40,16 @@ export function insertInternal(options: IInsertInternalOptions): void {
     }
   }
 
-  if (options.data && options.index) {
+  let data = options.data;
+  if (typeof data === "string") {
+    const tmp = clone(options.table.getRowType()) as ICharacter;
+    tmp.set(data);
+    data = tmp;
+  }
+
+  if (data && options.index) {
     const index = options.index.get() - 1;
-    const val = options.table.insertIndex(options.data, index);
+    const val = options.table.insertIndex(data, index);
     if (options.assigning) {
       options.assigning.assign(val);
     }
@@ -58,9 +66,9 @@ export function insertInternal(options: IInsertInternalOptions): void {
     if (options.assigning) {
       options.assigning.assign(val);
     }
-  } else if (options.data) {
+  } else if (data) {
 // todo, for now it just appends, this is not correct, but currently the table type is not known
-    const val = options.table.insertIndex(options.data, options.table.array().length);
+    const val = options.table.insertIndex(data, options.table.array().length);
     if (options.assigning) {
       options.assigning.assign(val);
     }
