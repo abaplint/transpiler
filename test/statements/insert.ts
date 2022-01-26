@@ -142,4 +142,14 @@ WRITE / ref2->*.`;
     expect(abap.console.get()).to.equal("2\n2");
   });
 
+  it("INSERT string", async () => {
+    const code = `
+  DATA result TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+  INSERT || INTO TABLE result.
+  ASSERT lines( result ) = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
