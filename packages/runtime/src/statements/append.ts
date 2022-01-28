@@ -22,4 +22,7 @@ export function append(input: IAppendOptions) {
       }
     }
   }
+
+  // @ts-ignore
+  abap.builtin.sy.get().tabix.set(input.target.array().length);
 }

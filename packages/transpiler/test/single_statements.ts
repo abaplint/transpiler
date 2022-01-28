@@ -267,6 +267,15 @@ conv.set(await abap.Classes['CL_ABAP_CONV_CODEPAGE'].create_out());`},
     js: `if (abap.Classes['XCO_CP_ABAP_DICTIONARY'] === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }
 if (abap.Classes['XCO_CP_ABAP_DICTIONARY'] === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'](); }
 obj.set(await abap.Classes['XCO_CP_ABAP_DICTIONARY'].database_table({iv_name: lv_tabname}));`},
+
+    {abap: `lo_sdescr->get_component_type(
+  EXPORTING
+    p_name      = rs_node_type-target_field_name
+  RECEIVING
+    p_descr_ref = rs_node_type-dd
+  EXCEPTIONS
+    component_not_found = 4 ).`,
+    js: `rs_node_type.get().dd.set(await lo_sdescr.get().get_component_type({p_name: rs_node_type.get().target_field_name}));`},
   ];
 
   for (const test of tests) {

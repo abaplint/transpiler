@@ -142,4 +142,17 @@ describe("Running statements - APPEND", () => {
     await f(abap);
   });
 
+  it("APPEND should set tabix", async () => {
+    const code = `
+DATA int_list TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DO 2 TIMES.
+  APPEND sy-tabix TO int_list.
+  WRITE / sy-tabix.
+ENDDO.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2");
+  });
+
 });
