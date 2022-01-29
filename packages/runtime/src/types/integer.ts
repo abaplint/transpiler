@@ -17,6 +17,15 @@ export class Integer implements INumeric {
     } else if (typeof value === "string" && value.trim().length === 0) {
       this.value = 0;
     } else if (typeof value === "string") {
+      if (/[a-z]/i.test(value) === true) { // todo, match more here?
+        // @ts-ignore
+        if (abap.Classes["CX_SY_CONVERSION_NO_NUMBER"] !== undefined) {
+          // @ts-ignore
+          throw new abap.Classes["CX_SY_CONVERSION_NO_NUMBER"]();
+        } else {
+          throw "Global class CX_SY_CONVERSION_NO_NUMBER not found";
+        }
+      }
       this.value = parseInt(value, 10);
     } else if (value instanceof Float) {
       this.set(Math.round(value.getRaw()));

@@ -53,7 +53,7 @@ describe("Running statements - LOOP", () => {
     const code = `
       DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
       DO 3 TIMES.
-        APPEND 'a' TO tab.
+        APPEND 1 TO tab.
       ENDDO.
       DATA sdf TYPE i.
       LOOP AT tab INTO sdf.
