@@ -10,6 +10,7 @@ import {Console} from "../console";
 import {convert} from "./convert";
 import {createData} from "./create_data";
 import {deleteInternal} from "./delete_internal";
+import {modifyDatabase} from "./modify_database";
 import {describe} from "./describe";
 import {find} from "./find";
 import {getBit} from "./get_bit";
@@ -58,6 +59,7 @@ export class Statements {
   public modifyInternal = modifyInternal;
   public moveCorresponding = moveCorresponding;
   public readTable = readTable;
+  public modifyDatabase = modifyDatabase;
   public replace = replace;
   public rollback = rollback;
   public select = select;
