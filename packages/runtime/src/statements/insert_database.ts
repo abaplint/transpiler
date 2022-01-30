@@ -5,7 +5,7 @@ export interface IInsertDatabaseOptions {
   values: Structure,
 }
 
-export function insertDatabase(table: string | ICharacter, options: IInsertDatabaseOptions): void {
+export function insertDatabase(table: string | ICharacter, options: IInsertDatabaseOptions): number {
   if (this.db === undefined) {
     throw new Error("Runtime, database not initialized");
   }
@@ -23,14 +23,15 @@ export function insertDatabase(table: string | ICharacter, options: IInsertDatab
   const sql = `INSERT INTO ${table} (${columns.join(",")}) VALUES (${values.join(",")})`;
 //  console.dir(sql);
 
+  let subrc = 0;
   try {
     this.db.exec(sql);
-    // @ts-ignore
-    abap.builtin.sy.get().subrc.set(0);
   } catch (error) {
 // eg "UNIQUE constraint failed" errors
-    // @ts-ignore
-    abap.builtin.sy.get().subrc.set(4);
+    subrc = 4;
   }
 
+  // @ts-ignore
+  abap.builtin.sy.get().subrc.set(subrc);
+  return subrc;
 }
