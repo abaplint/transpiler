@@ -22,15 +22,15 @@ export function modifyDatabase(table: string | ICharacter, options: IInsertDatab
 
   if (options.table) {
     for (const row of options.table.array()) {
-      const subrc = insertDatabase(table, {values: row});
+      const subrc = insertDatabase.bind(this)(table, {values: row});
       if (subrc !== 0) {
-        updateDatabase(table, {from: row});
+        updateDatabase.bind(this)(table, {from: row});
       }
     }
   } else if (options.from) {
-    const subrc = insertDatabase(table, {values: options.from});
+    const subrc = insertDatabase.bind(this)(table, {values: options.from});
     if (subrc !== 0) {
-      updateDatabase(table, {from: options.from});
+      updateDatabase.bind(this)(table, {from: options.from});
     }
   } else {
     throw "modifyDatabase todo";
