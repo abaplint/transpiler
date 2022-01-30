@@ -20,6 +20,10 @@ export function insertDatabase(table: string | ICharacter, options: IInsertDatab
     values.push('"' + structure[k].get() + '"');
   }
 
+  if (typeof table !== "string") {
+    table = table.get();
+  }
+
   const sql = `INSERT INTO ${table} (${columns.join(",")}) VALUES (${values.join(",")})`;
 //  console.dir(sql);
 

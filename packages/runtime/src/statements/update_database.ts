@@ -6,7 +6,7 @@ export interface IInsertDatabaseOptions {
   table?: Table | FieldSymbol,
 }
 
-export function updateDatabase(_table: string | ICharacter, options: IInsertDatabaseOptions): void {
+export function updateDatabase(table: string | ICharacter, options: IInsertDatabaseOptions): number {
   if (this.db === undefined) {
     throw new Error("Runtime, database not initialized");
   }
@@ -18,6 +18,20 @@ export function updateDatabase(_table: string | ICharacter, options: IInsertData
     options.from = options.from.getPointer() as Structure;
   }
 
-  throw "updateDatabase todo";
+  if (typeof table !== "string") {
+    table = table.get();
+  }
 
+  const sql = "todo";
+
+  let subrc = 0;
+  try {
+    this.db.exec(sql);
+  } catch (error) {
+    subrc = 4;
+  }
+
+  // @ts-ignore
+  abap.builtin.sy.get().subrc.set(subrc);
+  return subrc;
 }
