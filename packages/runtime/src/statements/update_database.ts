@@ -22,10 +22,27 @@ export function updateDatabase(table: string | ICharacter, options: IInsertDatab
     table = table.get();
   }
 
-  const keys: string[] = [];
-  const values: string[] = [];
+  // @ts-ignore
+  const keys: string[] = abap.DDIC[table.toUpperCase()].keyFields;
+  const where: string[] = [];
+  const set: string[] = [];
 
-  const sql = `UPDATE ${table} SET ${values.join(", ")} WHERE ${keys.join(" AND ")}`;
+  if (options.from) {
+    const structure = options.from.get();
+    for (const k of Object.keys(structure)) {
+      // todo, integers should not be surrounded by '"'?
+      const str = k + ' = "' + structure[k].get() + '"';
+      if (keys.includes(k.toUpperCase())) {
+        where.push(str);
+      } else {
+        set.push(str);
+      }
+    }
+  } else {
+    throw "updateDatabase, todo";
+  }
+
+  const sql = `UPDATE ${table} SET ${set.join(", ")} WHERE ${where.join(" AND ")}`;
 
   let subrc = 0;
   try {

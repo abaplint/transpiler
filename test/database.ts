@@ -55,4 +55,31 @@ describe("Top level tests, Database", () => {
     expect(abap.console.get()).to.equal("0\nHELLO");
   });
 
+  it("MODIFY FROM, inserts and update", async () => {
+    const code = `
+    DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+    DATA row LIKE LINE OF tab.
+
+    row-arbgb = 'HELLO'.
+    APPEND row TO tab.
+    MODIFY t100 FROM TABLE tab.
+
+    CLEAR tab.
+
+    row-arbgb = 'HELLO'.
+    row-text = 'WORLD'.
+    APPEND row TO tab.
+    MODIFY t100 FROM TABLE tab.
+
+    SELECT SINGLE * FROM t100 INTO row.
+    WRITE / row-text.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    const cons = abap.console.get();
+    expect(cons).to.equal("WORLD");
+  });
+
 });
