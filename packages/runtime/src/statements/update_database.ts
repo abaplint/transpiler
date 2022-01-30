@@ -22,7 +22,10 @@ export function updateDatabase(table: string | ICharacter, options: IInsertDatab
     table = table.get();
   }
 
-  const sql = "todo";
+  const keys: string[] = [];
+  const values: string[] = [];
+
+  const sql = `UPDATE ${table} SET ${values.join(", ")} WHERE ${keys.join(" AND ")}`;
 
   let subrc = 0;
   try {
