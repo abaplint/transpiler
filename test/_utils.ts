@@ -15,7 +15,13 @@ export async function runFiles(abap: ABAP, files: IFile[]) {
   if (res.databaseSetup !== "") {
     await abap.initDB(res.databaseSetup);
   }
-  return "global.abap = abap;\n" + res.objects[0].chunk.getCode();
+  let pre = "";
+  for (const o of res.objects) {
+    if (o.object.type === "TABL") {
+      pre = o.chunk.getCode();
+    }
+  }
+  return "global.abap = abap;\n" + pre + res.objects[0].chunk.getCode();
 }
 
 export async function compileFiles(files: IFile[], options?: ITranspilerOptions) {

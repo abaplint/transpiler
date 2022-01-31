@@ -19,6 +19,7 @@ import {insertDatabase} from "./insert_database";
 import {insertInternal} from "./insert_internal";
 import {loop} from "./loop";
 import {message} from "./message";
+import {modifyDatabase} from "./modify_database";
 import {modifyInternal} from "./modify_internal";
 import {moveCorresponding} from "./move_corresponding";
 import {readTable} from "./read_table";
@@ -30,6 +31,7 @@ import {shift} from "./shift";
 import {sort} from "./sort";
 import {split} from "./split";
 import {translate} from "./translate";
+import {updateDatabase} from "./update_database";
 import {write} from "./write";
 
 // this is a class, as statements like SELECT needs access to the database object instance
@@ -58,6 +60,8 @@ export class Statements {
   public modifyInternal = modifyInternal;
   public moveCorresponding = moveCorresponding;
   public readTable = readTable;
+  public updateDatabase = updateDatabase;
+  public modifyDatabase = modifyDatabase;
   public replace = replace;
   public rollback = rollback;
   public select = select;

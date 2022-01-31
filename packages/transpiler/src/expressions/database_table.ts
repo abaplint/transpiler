@@ -1,13 +1,20 @@
-import {Nodes} from "@abaplint/core";
+import {Nodes, Expressions} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 
 export class DatabaseTableTranspiler implements IExpressionTranspiler {
 
-  public transpile(node: Nodes.ExpressionNode, _traversal: Traversal): Chunk {
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     const ret = new Chunk();
-    ret.appendString('"' + node.concatTokens() + '"');
+
+    const dyn = node.findDirectExpression(Expressions.Dynamic);
+    if (dyn) {
+      const sub = dyn.getChildren()[1];
+      return traversal.traverse(sub);
+    } else {
+      ret.appendString('"' + node.concatTokens() + '"');
+    }
     return ret;
   }
 

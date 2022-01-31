@@ -33,6 +33,10 @@ export class Numc implements ICharacter {
     return this;
   }
 
+  public getLength() {
+    return this.length;
+  }
+
   public clear(): void {
     this.value = "0".repeat(this.length);
   }

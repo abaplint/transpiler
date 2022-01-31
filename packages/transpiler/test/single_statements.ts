@@ -276,6 +276,11 @@ obj.set(await abap.Classes['XCO_CP_ABAP_DICTIONARY'].database_table({iv_name: lv
   EXCEPTIONS
     component_not_found = 4 ).`,
     js: `rs_node_type.get().dd.set(await lo_sdescr.get().get_component_type({p_name: rs_node_type.get().target_field_name}));`},
+
+    {abap: `MODIFY ztab FROM TABLE tab.`,
+      js: `abap.statements.modifyDatabase("ztab", {"table": tab});`},
+    {abap: `MODIFY (mv_table) FROM TABLE <fs>.`,
+      js: `abap.statements.modifyDatabase(mv_table, {"table": fs_fs_});`},
   ];
 
   for (const test of tests) {
