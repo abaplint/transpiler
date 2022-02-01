@@ -52,4 +52,25 @@ WRITE ls_data->field.`;
     expect(abap.console.get()).to.equal("hello");
   });
 
+  it("CREATE DATA, LIKE LINE OF", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field TYPE i,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA ref TYPE REF TO data.
+FIELD-SYMBOLS <tab> TYPE ANY TABLE.
+FIELD-SYMBOLS <row> TYPE any.
+ASSIGN tab TO <tab>.
+CREATE DATA ref LIKE LINE OF <tab>.
+ASSIGN ref->* TO <row>.
+INSERT <row> INTO TABLE <tab>.
+WRITE / lines( <tab> ).
+WRITE / lines( tab ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n1");
+  });
+
 });

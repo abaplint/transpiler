@@ -10,7 +10,7 @@ export class CreateDataTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const targetNode = node.findDirectExpression(abaplint.Expressions.Target);
     const target = traversal.traverse(targetNode);
-
+    const concat = node.concatTokens();
     const options: string[] = [];
 
     let dynamic = node.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.ConstantString);
@@ -33,6 +33,11 @@ export class CreateDataTranspiler implements IStatementTranspiler {
 
     if (node.findDirectTokenByText("TABLE")) {
       options.push(`"table": true`);
+    }
+
+    if (concat.includes(" LIKE LINE OF ")) {
+      const so = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Source));
+      options.push(`"likeLineOf": ` + so.getCode());
     }
 
     let add = "";
