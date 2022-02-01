@@ -10,13 +10,16 @@ export interface IInsertInternalOptions {
   index?: INumeric,
   initial?: boolean,
   data?: INumeric | ICharacter | Structure | ABAPObject | Table | string,
-  table: Table,
+  table: Table | FieldSymbol,
   referenceInto?: DataReference,
   assigning?: FieldSymbol,
   lines?: boolean,
 }
 
 export function insertInternal(options: IInsertInternalOptions): void {
+  if (options.table instanceof FieldSymbol) {
+    options.table = options.table.getPointer() as Table;
+  }
 
   const tableOptions = options.table.getOptions();
   const isSorted = tableOptions?.type === TableAccessType.sorted || tableOptions?.type === TableAccessType.hashed;

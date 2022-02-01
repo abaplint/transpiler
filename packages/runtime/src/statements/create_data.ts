@@ -1,17 +1,19 @@
 import {clone} from "../clone";
-import {ABAPObject, DataReference, Structure, Table} from "../types";
+import {ABAPObject, DataReference, FieldSymbol, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
-type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Structure;
+type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Structure | FieldSymbol;
 
 export interface ICreateDataOptions {
   table?: boolean,
   name?: string,
   type?: PointerType,
+  likeLineOf?: FieldSymbol | Table,
 }
 
 export function createData(target: DataReference, options?: ICreateDataOptions) {
+//  console.dir(options);
 
   if (options?.name && options?.table) {
     // @ts-ignore
@@ -36,6 +38,11 @@ export function createData(target: DataReference, options?: ICreateDataOptions) 
     target.assign(clone(abap.DDIC[options.name].type));
   } else if (options?.type) {
     target.assign(clone(options.type));
+  } else if (options?.likeLineOf) {
+    if (options.likeLineOf instanceof FieldSymbol) {
+      options.likeLineOf = options.likeLineOf.getPointer() as Table;
+    }
+    target.assign(clone(options.likeLineOf.getRowType()));
   } else {
     target.assign(clone(target.getType()));
   }
