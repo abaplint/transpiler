@@ -17,8 +17,8 @@ Playground: https://transpiler.abaplint.org
 * Everything will run as unicode, targeting [UCS-2](https://en.wikipedia.org/wiki/Universal_Coded_Character_Set)
 * Endianess ?
 * Time zone = [UTC](https://en.wikipedia.org/wiki/Coordinated_Universal_Time)
-* sysid = "ABC"
-* client = "123"
+* SY-SYSID = "ABC"
+* SY-MANDT = "123"
 
 ## Running
 

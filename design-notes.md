@@ -7,6 +7,7 @@
 * top level await possible via `.mjs` file extension
 * No runtime creation of artifacts, requires rebuild
 * Single threaded, as its running in node
+* Database table buffering settings ignored, everything is always in the db
 
 # Statements
 
