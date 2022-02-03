@@ -76,6 +76,9 @@ export class DatabaseSetup {
       return `NCHAR(${type.getLength()})`;
     } else if (type instanceof abaplint.BasicTypes.StringType) {
       return `TEXT`;
+    } else if (type instanceof abaplint.BasicTypes.XStringType) {
+      // it will be fine, the runtime representation of xstring is also text
+      return `TEXT`;
     } else if (type instanceof abaplint.BasicTypes.IntegerType) {
       return `INT`;
     } else {
