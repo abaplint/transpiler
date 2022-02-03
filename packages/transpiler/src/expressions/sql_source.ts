@@ -7,7 +7,11 @@ import {Chunk} from "../chunk";
 export class SQLSourceTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
-    return traversal.traverse(node.findDirectExpression(abaplint.Expressions.Source));
+    let s = node.findDirectExpression(abaplint.Expressions.Source);
+    if (s === undefined) {
+      s = node.findDirectExpression(abaplint.Expressions.SimpleSource3);
+    }
+    return traversal.traverse(s);
   }
 
 }
