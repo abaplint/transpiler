@@ -17,7 +17,15 @@ describe("Running statements - GET RUN TIME", () => {
   it("simple", async () => {
     const code = `
     DATA lv_start TYPE i.
-    GET RUN TIME FIELD lv_start.`;
+    DATA lv_end TYPE i.
+    DATA calc TYPE i.
+    GET RUN TIME FIELD lv_start.
+    ASSERT lv_start = 0.
+    DO 100 TIMES.
+      calc = 2 * 2 * 2.
+    ENDDO.
+    GET RUN TIME FIELD lv_end.
+    ASSERT lv_end <> 0.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);

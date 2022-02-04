@@ -1,7 +1,16 @@
-import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
-export function getRunTime(value: ICharacter | INumeric) {
-  // todo
-  value.clear();
+let prev: number | undefined = undefined;
+
+export function getRunTime(value: INumeric) {
+
+  if (prev === undefined) {
+    value.set(0);
+    prev = new Date().getTime();
+  } else {
+    const now = new Date().getTime();
+    value.set(now - prev);
+    prev = now;
+  }
+
 }
