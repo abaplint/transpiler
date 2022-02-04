@@ -74,6 +74,9 @@ export class DatabaseSetup {
   private toType(type: abaplint.AbstractType): string {
     if (type instanceof abaplint.BasicTypes.CharacterType) {
       return `NCHAR(${type.getLength()})`;
+    } else if (type instanceof abaplint.BasicTypes.NumericType) {
+      // it will be fine, the runtime representation of numc is also text
+      return `NCHAR(${type.getLength()})`;
     } else if (type instanceof abaplint.BasicTypes.StringType) {
       return `TEXT`;
     } else if (type instanceof abaplint.BasicTypes.XStringType) {
