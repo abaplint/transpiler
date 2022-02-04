@@ -21,7 +21,7 @@ describe("Running statements - GET RUN TIME", () => {
     DATA calc TYPE i.
     GET RUN TIME FIELD lv_start.
     ASSERT lv_start = 0.
-    DO 100 TIMES.
+    DO 1000 TIMES.
       calc = 2 * 2 * 2.
     ENDDO.
     GET RUN TIME FIELD lv_end.

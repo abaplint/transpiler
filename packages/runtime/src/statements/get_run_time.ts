@@ -12,5 +12,4 @@ export function getRunTime(value: INumeric) {
     value.set(now - prev);
     prev = now;
   }
-
 }
