@@ -10,13 +10,13 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@abaplint/monaco": "^2.85.7",
+    "@abaplint/monaco": "^2.85.9",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.0",
-    "css-loader": "^6.5.1",
+    "css-loader": "^6.6.0",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.5.0",
-    "monaco-editor": "^0.31.1",
+    "monaco-editor": "^0.32.1",
     "path-browserify": "^1.0.1",
     "split-grid": "^1.0.11",
     "stream-browserify": "^3.0.0",
@@ -26,6 +26,6 @@
     "typescript": "^4.5.5",
     "webpack": "^5.68.0",
     "webpack-cli": "^4.9.2",
-    "webpack-dev-server": "^4.7.3"
+    "webpack-dev-server": "^4.7.4"
   }
 }
