@@ -54,7 +54,7 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
         if (second.get() instanceof Expressions.FieldChain) {
           ret.appendString("[");
           ret.appendChunk(traversal.traverse(second));
-          ret.appendString("]");
+          ret.appendString(".get().toLowerCase()]");
         } else if (second.get() instanceof Expressions.Constant) {
           if (ret.getCode().endsWith(".") === false) {
             ret.appendString(".");

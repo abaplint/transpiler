@@ -273,7 +273,7 @@ if (abap.Classes['XCO_CP_ABAP_DICTIONARY'] === undefined) { throw new abap.Class
 obj.set(await abap.Classes['XCO_CP_ABAP_DICTIONARY'].database_table({iv_name: lv_tabname}));`},
 
     {abap: `CALL METHOD lo_obj->(ls_input-method_name).`,
-      js: `await lo_obj.get()[ls_input.get().method_name]();`},
+      js: `await lo_obj.get()[ls_input.get().method_name.get().toLowerCase()]();`},
 
     {abap: `lo_sdescr->get_component_type(
   EXPORTING
