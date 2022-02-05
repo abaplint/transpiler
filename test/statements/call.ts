@@ -14,20 +14,6 @@ describe("Running statements - CALL", () => {
     abap = new ABAP();
   });
 
-  it.skip("Dynamic, class not found", async () => {
-    const code = `
-TRY.
-    CALL METHOD ('ZSDFSD')=>foo.
-    WRITE 'fail'.
-  CATCH cx_sy_dyn_call_illegal_class.
-    WRITE 'expected'.
-ENDTRY.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("expected");
-  });
-
   it("return value", async () => {
     const code = `
 CLASS lcl DEFINITION.
