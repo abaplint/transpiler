@@ -8,6 +8,7 @@
 * No runtime creation of artifacts, requires rebuild
 * Single threaded, as its running in node
 * Database table buffering settings ignored, everything is always in the db
+* No XSLT or Simple Transformations
 
 # Statements
 
