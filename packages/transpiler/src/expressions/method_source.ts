@@ -52,8 +52,13 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
       } else if (child.get() instanceof Expressions.Dynamic) {
         const second = child.getChildren()[1];
         if (second.get() instanceof Expressions.FieldChain) {
+          ret.appendString("[");
           ret.appendChunk(traversal.traverse(second));
+          ret.appendString("]");
         } else if (second.get() instanceof Expressions.Constant) {
+          if (ret.getCode().endsWith(".") === false) {
+            ret.appendString(".");
+          }
           ret.appendString(second.getFirstToken().getStr().replace(/\'/g, "").toLowerCase().replace("~", "$"));
         } else {
           ret.appendString("MethodSourceTranspiler-Unexpected");
@@ -67,10 +72,11 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
       } else if (child.concatTokens() === "=>") {
         ret.append(".", child.getFirstToken().getStart(), traversal);
       } else if (child.concatTokens() === "->") {
-        if (ret.getCode() === "super") {
+        if (ret.getCode() !== "super") {
+          ret.append(".get()", child, traversal);
+        }
+        if (!(nextChild.get() instanceof Expressions.Dynamic)) {
           ret.append(".", child, traversal);
-        } else {
-          ret.append(".get().", child, traversal);
         }
       } else if (child.get() instanceof Expressions.FieldChain) {
         if (i === 0) {

@@ -271,10 +271,10 @@ conv.set(await abap.Classes['CL_ABAP_CONV_CODEPAGE'].create_out());`},
     js: `if (abap.Classes['XCO_CP_ABAP_DICTIONARY'] === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }
 if (abap.Classes['XCO_CP_ABAP_DICTIONARY'] === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'](); }
 obj.set(await abap.Classes['XCO_CP_ABAP_DICTIONARY'].database_table({iv_name: lv_tabname}));`},
-/*
+
     {abap: `CALL METHOD lo_obj->(ls_input-method_name).`,
-      js: `todo`},
-*/
+      js: `await lo_obj.get()[ls_input.get().method_name]();`},
+
     {abap: `lo_sdescr->get_component_type(
   EXPORTING
     p_name      = rs_node_type-target_field_name
