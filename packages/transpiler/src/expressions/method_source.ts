@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import {Nodes, Expressions} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
@@ -29,13 +30,11 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
 
           call = traversal.lookupClassOrInterface(t, child.getFirstToken(), true);
           const lookupException = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_CLASS'", child.getFirstToken(), true);
-          // eslint-disable-next-line max-len
           ret.appendString(`if (${call} === undefined && ${lookupException} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }\n`);
           ret.appendString(`if (${call} === undefined) { throw new ${lookupException}(); }\n`);
         } else if (second.get() instanceof Expressions.Constant) {
           call = traversal.lookupClassOrInterface(second.getFirstToken().getStr(), child.getFirstToken(), true);
           const lookupException = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_CLASS'", child.getFirstToken(), true);
-          // eslint-disable-next-line max-len
           ret.appendString(`if (${call} === undefined && ${lookupException} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }\n`);
           ret.appendString(`if (${call} === undefined) { throw new ${lookupException}(); }\n`);
         } else {
@@ -44,10 +43,13 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
       } else if (child.get() instanceof Expressions.Dynamic) {
         const second = child.getChildren()[1];
         if (second.get() instanceof Expressions.FieldChain) {
-//          console.dir(call);
           call += "[";
           call += traversal.traverse(second).getCode();
           call += ".get().toLowerCase()]";
+
+          const lookupException = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_METHOD'", child.getFirstToken(), true);
+          ret.appendString(`if (${call} === undefined && ${lookupException} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_METHOD not found"; }\n`);
+          ret.appendString(`if (${call} === undefined) { throw new ${lookupException}(); }\n`);
         } else if (second.get() instanceof Expressions.Constant) {
           if (call.endsWith(".") === false) {
             call += ".";
