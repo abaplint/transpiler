@@ -40,6 +40,11 @@ async function run() {
       if (reg.isDependency(obj) || !(obj instanceof abaplint.Objects.Class)) {
         continue;
       }
+      const hasTestFile = obj.getFiles().some(f => { return f.getFilename().includes(".testclasses."); });
+      if (hasTestFile === true) {
+        ret += `  await import("./${obj.getName().toLowerCase()}.${obj.getType().toLowerCase()}.testclasses.mjs");\n`;
+      }
+
       for (const file of obj.getABAPFiles()) {
         for (const def of file.getInfo().listClassDefinitions()) {
           if (def.isForTesting === false || def.isGlobal === true  || def.methods.length === 0) {
@@ -51,8 +56,7 @@ async function run() {
             if (m.isForTesting === false) {
               continue;
             }
-            ret += `
-  ls_input.get().class_name.set("${obj.getName()}");
+            ret += `  ls_input.get().class_name.set("${obj.getName()}");
   ls_input.get().testclass_name.set("${def.name.toUpperCase()}");
   ls_input.get().method_name.set("${m.name.toUpperCase()}");
   abap.statements.append({source: ls_input, target: lt_input});`;
