@@ -20,7 +20,7 @@ export async function initializeABAP(settings) {\n`;
     return ret;
   }
 
-  public unitTestScriptKernel(reg: abaplint.IRegistry, _skip?: TestMethodList, _only?: TestMethodList): string {
+  public unitTestScriptOpen(reg: abaplint.IRegistry, _skip?: TestMethodList, _only?: TestMethodList): string {
     let ret = `/* eslint-disable curly */
 import fs from "fs";
 import path from "path";

@@ -107,7 +107,7 @@ async function run() {
 
   if (config.write_unit_tests === true) {
     fs.writeFileSync(outputFolder + path.sep + "index.mjs", output.unitTestScript);
-    fs.writeFileSync(outputFolder + path.sep + "index_kernel.mjs", output.unitTestScriptKernel);
+    fs.writeFileSync(outputFolder + path.sep + "index_open.mjs", output.unitTestScriptOpen);
   }
   fs.writeFileSync(outputFolder + path.sep + "init.mjs", output.initializationScript);
 }
