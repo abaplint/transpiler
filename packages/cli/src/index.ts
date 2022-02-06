@@ -35,6 +35,9 @@ function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
     childProcess.execSync("git clone --quiet --depth 1 " + l.url + " .", {cwd: dir, stdio: "inherit"});
     let count = 0;
     for (let filename of glob.sync(dir + "/src/**", {nosort: true, nodir: true})) {
+      if (filename.endsWith(".clas.testclasses.abap")) {
+        continue;
+      }
       const contents = fs.readFileSync(filename, "utf8");
       filename = path.basename(filename);
       files.push({filename, contents});
