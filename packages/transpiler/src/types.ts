@@ -18,7 +18,7 @@ export interface IOutput {
   objects: IOutputFile[];
   reg: abaplint.IRegistry;
   unitTestScript: string;
-  unitTestScriptKernel: string;
+  unitTestScriptOpen: string;
   initializationScript: string;
   databaseSetup: string;
 }
