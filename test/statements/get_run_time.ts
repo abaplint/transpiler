@@ -23,6 +23,7 @@ describe("Running statements - GET RUN TIME", () => {
     ASSERT lv_start = 0.
     DO 1000 TIMES.
       calc = 2 * 2 * 2.
+      WRITE calc.
     ENDDO.
     GET RUN TIME FIELD lv_end.
     ASSERT lv_end <> 0.`;

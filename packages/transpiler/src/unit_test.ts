@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import * as abaplint from "@abaplint/core";
 
 export type TestMethodList = {object: string, class: string, method: string}[];
@@ -16,6 +17,64 @@ export async function initializeABAP(settings) {\n`;
       ret += `  await global.abap.initDB(\`${dbSetup}\`);\n`;
     }
     ret += `}`;
+    return ret;
+  }
+
+  public unitTestScriptKernel(reg: abaplint.IRegistry, _skip?: TestMethodList, _only?: TestMethodList): string {
+    let ret = `/* eslint-disable curly */
+import fs from "fs";
+import path from "path";
+import {fileURLToPath} from "url";
+import {initializeABAP} from "./init.mjs";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+async function run() {
+  await initializeABAP();
+  let lt_input = new abap.types.Table(new abap.types.Structure({class_name: new abap.types.Character({length: 30}), testclass_name: new abap.types.Character({length: 30}), method_name: new abap.types.Character({length: 30})}), {"withHeader":false,"type":"STANDARD","isUnique":false,"keyFields":[]});
+  let ls_input = new abap.types.Structure({class_name: new abap.types.Character({length: 30}), testclass_name: new abap.types.Character({length: 30}), method_name: new abap.types.Character({length: 30})});
+  let ls_result = new abap.types.Structure({list: new abap.types.Table(new abap.types.Structure({class_name: new abap.types.Character({length: 30}), testclass_name: new abap.types.Character({length: 30}), method_name: new abap.types.Character({length: 30}), expected: new abap.types.String(), actual: new abap.types.String(), status: new abap.types.String(), runtime: new abap.types.Integer(), message: new abap.types.String(), js_location: new abap.types.String()}), {"withHeader":false,"type":"STANDARD","isUnique":false,"keyFields":[]}), json: new abap.types.String()});
+`;
+
+    for (const obj of reg.getObjects()) {
+      if (reg.isDependency(obj) || !(obj instanceof abaplint.Objects.Class)) {
+        continue;
+      }
+      for (const file of obj.getABAPFiles()) {
+        for (const def of file.getInfo().listClassDefinitions()) {
+          if (def.isForTesting === false || def.isGlobal === true  || def.methods.length === 0) {
+          // todo, fix, there might be global test methods
+            continue;
+          }
+
+          for (const m of def.methods) {
+            if (m.isForTesting === false) {
+              continue;
+            }
+            ret += `
+  ls_input.get().class_name.set("${obj.getName()}");
+  ls_input.get().testclass_name.set("${def.name.toUpperCase()}");
+  ls_input.get().method_name.set("${m.name.toUpperCase()}");
+  abap.statements.append({source: ls_input, target: lt_input});`;
+          }
+        }
+      }
+    }
+
+    ret += `
+
+  ls_result.set(await abap.Classes["KERNEL_UNIT_RUNNER"].run({it_input: lt_input}));
+  console.dir(ls_result);
+  fs.writeFileSync(__dirname + path.sep + "output.json", ls_result.get().json.get());
+}
+
+run().then(() => {
+  process.exit(0);
+}).catch((err) => {
+  console.log(err);
+  process.exit(1);
+});`;
+
     return ret;
   }
 
@@ -45,9 +104,8 @@ async function run() {
       ret += `    clas = unit.addObject("${obj.getName()}");\n`;
       for (const file of obj.getABAPFiles()) {
         for (const def of file.getInfo().listClassDefinitions()) {
-          if (def.isForTesting === false
-              || def.isGlobal === true // todo, fix, there might be global test methods
-              || def.methods.length === 0) {
+          if (def.isForTesting === false || def.isGlobal === true || def.methods.length === 0) {
+            // todo, fix, there might be global test methods
             continue;
           }
           ret += `    {
