@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import {Nodes, Expressions} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
@@ -5,7 +6,7 @@ import {Chunk} from "../chunk";
 import {FieldChainTranspiler} from ".";
 
 export class MethodSourceTranspiler implements IExpressionTranspiler {
-  private readonly prepend: string;
+  private prepend: string;
 
   public constructor(prepend?: string) {
     this.prepend = (prepend || "") + "await ";
@@ -13,81 +14,72 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     const ret = new Chunk();
-
     const children = node.getChildren();
+    let call: string = "";
+
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
       const nextChild = children[i + 1];
 
       if (child.get() instanceof Expressions.ClassName) {
-        ret.appendString(traversal.lookupClassOrInterface(child.concatTokens(), child.getFirstToken()));
+        call += traversal.lookupClassOrInterface(child.concatTokens(), child.getFirstToken());
       } else if (child.get() instanceof Expressions.Dynamic && nextChild?.concatTokens() === "=>") {
         const second = child.getChildren()[1];
+        const lookupException = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_CLASS'", child.getFirstToken(), true);
         if (second.get() instanceof Expressions.FieldChain && second instanceof Nodes.ExpressionNode) {
           const t = new FieldChainTranspiler(true).transpile(second, traversal).getCode();
 
-          const lookup = traversal.lookupClassOrInterface(t, child.getFirstToken(), true);
-          const lookupException = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_CLASS'", child.getFirstToken(), true);
-          // eslint-disable-next-line max-len
-          ret.appendString(`if (${lookup} === undefined && ${lookupException} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }\n`);
-          ret.appendString(`if (${lookup} === undefined) { throw new ${lookupException}(); }\n`);
-          if (i === 0) {
-            ret.appendString(this.prepend);
-          }
-          ret.appendString(lookup);
-
+          call = traversal.lookupClassOrInterface(t, child.getFirstToken(), true);
+          ret.appendString(`if (${call} === undefined && ${lookupException} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }\n`);
+          ret.appendString(`if (${call} === undefined) { throw new ${lookupException}(); }\n`);
         } else if (second.get() instanceof Expressions.Constant) {
-          const lookup = traversal.lookupClassOrInterface(second.getFirstToken().getStr(), child.getFirstToken(), true);
-          const lookupException = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_CLASS'", child.getFirstToken(), true);
-          // eslint-disable-next-line max-len
-          ret.appendString(`if (${lookup} === undefined && ${lookupException} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }\n`);
-          ret.appendString(`if (${lookup} === undefined) { throw new ${lookupException}(); }\n`);
-          if (i === 0) {
-            ret.appendString(this.prepend);
-          }
-          ret.appendString(lookup);
+          call = traversal.lookupClassOrInterface(second.getFirstToken().getStr(), child.getFirstToken(), true);
+          ret.appendString(`if (${call} === undefined && ${lookupException} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }\n`);
+          ret.appendString(`if (${call} === undefined) { throw new ${lookupException}(); }\n`);
         } else {
           ret.appendString("MethodSourceTranspiler-Unexpected");
         }
       } else if (child.get() instanceof Expressions.Dynamic) {
         const second = child.getChildren()[1];
+        const lookupException = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_METHOD'", child.getFirstToken(), true);
         if (second.get() instanceof Expressions.FieldChain) {
-          ret.appendString("[");
-          ret.appendChunk(traversal.traverse(second));
-          ret.appendString(".get().toLowerCase()]");
+          call += "[";
+          call += traversal.traverse(second).getCode();
+          call += ".get().toLowerCase()]";
         } else if (second.get() instanceof Expressions.Constant) {
-          if (ret.getCode().endsWith(".") === false) {
-            ret.appendString(".");
+          if (call.endsWith(".") === false) {
+            call += ".";
           }
-          ret.appendString(second.getFirstToken().getStr().replace(/\'/g, "").toLowerCase().replace("~", "$"));
+          call += second.getFirstToken().getStr().replace(/\'/g, "").toLowerCase().replace("~", "$");
         } else {
           ret.appendString("MethodSourceTranspiler-Unexpected");
         }
+        ret.appendString(`if (${call} === undefined && ${lookupException} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_METHOD not found"; }\n`);
+        ret.appendString(`if (${call} === undefined) { throw new ${lookupException}(); }\n`);
       } else if (child.get() instanceof Expressions.MethodName) {
         if (i === 0) {
-          ret.appendString(this.prepend + "this.");
+          this.prepend += "this.";
         }
         const methodName = child.concatTokens().toLowerCase().replace("~", "$");
-        ret.append(methodName, child.getFirstToken().getStart(), traversal);
+        call += methodName;
       } else if (child.concatTokens() === "=>") {
-        ret.append(".", child.getFirstToken().getStart(), traversal);
+        call += ".";
       } else if (child.concatTokens() === "->") {
         if (ret.getCode() !== "super") {
-          ret.append(".get()", child, traversal);
+          call += ".get()";
         }
         if (!(nextChild.get() instanceof Expressions.Dynamic)) {
-          ret.append(".", child, traversal);
+          call += ".";
         }
       } else if (child.get() instanceof Expressions.FieldChain) {
-        if (i === 0) {
-          ret.appendString(this.prepend);
-        }
-        ret.appendChunk(traversal.traverse(child));
+        call += traversal.traverse(child).getCode();
       } else {
         ret.appendString("MethodSourceTranspiler-" + child.get().constructor.name + "-todo");
       }
-
     }
+
+    ret.appendString(this.prepend);
+    ret.appendString(call);
 
     return ret;
   }

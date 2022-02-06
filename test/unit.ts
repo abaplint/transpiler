@@ -1156,4 +1156,104 @@ ENDCLASS.`;
     expect(cons.split("\n")[1]).to.equal("expected");
   });
 
+  it("test-27", async () => {
+// should raise cx_sy_dyn_call_illegal_method
+
+    const clas = `CLASS zcl_call DEFINITION PUBLIC.
+  PUBLIC SECTION.
+ENDCLASS.
+
+CLASS zcl_call IMPLEMENTATION.
+ENDCLASS.`;
+
+    const tests = `
+CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS test FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD test.
+    TRY.
+        CALL METHOD zcl_call=>('NOT_FOUND').
+        ASSERT 1 = 2.
+      CATCH cx_sy_dyn_call_illegal_method.
+        WRITE 'expected'.
+    ENDTRY.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const cxroot = `
+    CLASS cx_root DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS cx_root IMPLEMENTATION.
+    ENDCLASS.`;
+
+    const cxconv = `
+    CLASS cx_sy_dyn_call_illegal_method DEFINITION PUBLIC INHERITING FROM cx_root.
+    ENDCLASS.
+    CLASS cx_sy_dyn_call_illegal_method IMPLEMENTATION.
+    ENDCLASS.`;
+
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "cx_sy_dyn_call_illegal_method.clas.abap", contents: cxconv},
+      {filename: "zcl_call.clas.abap", contents: clas},
+      {filename: "zcl_call.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("expected");
+  });
+
+  it("test-28", async () => {
+// test value from exception
+
+    const clas = `CLASS zcx_parameter_test DEFINITION PUBLIC INHERITING FROM cx_root CREATE PUBLIC.
+  PUBLIC SECTION.
+    DATA hello TYPE i .
+    METHODS constructor
+      IMPORTING
+        hello    TYPE i OPTIONAL .
+ENDCLASS.
+
+CLASS zcx_parameter_test IMPLEMENTATION.
+  METHOD constructor.
+    me->hello = hello.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const tests = `
+CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS FINAL.
+  PRIVATE SECTION.
+    METHODS sdfsd FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD sdfsd.
+    DATA lcx TYPE REF TO zcx_parameter_test.
+    TRY.
+        RAISE EXCEPTION TYPE zcx_parameter_test
+          EXPORTING
+            hello = 2.
+      CATCH zcx_parameter_test INTO lcx.
+        WRITE lcx->hello.
+    ENDTRY.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const cxroot = `
+CLASS cx_root DEFINITION PUBLIC.
+ENDCLASS.
+CLASS cx_root IMPLEMENTATION.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "zcx_parameter_test.clas.abap", contents: clas},
+      {filename: "zcx_parameter_test.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("2");
+  });
+
 });
