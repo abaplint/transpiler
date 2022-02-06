@@ -68,7 +68,6 @@ async function run() {
     ret += `
 
   ls_result.set(await abap.Classes["KERNEL_UNIT_RUNNER"].run({it_input: lt_input}));
-  console.dir(ls_result);
   fs.writeFileSync(__dirname + path.sep + "output.json", ls_result.get().json.get());
 }
 
