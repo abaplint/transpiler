@@ -164,6 +164,10 @@ describe("Testing Unit Testing", () => {
       `import runtime from "@abaplint/runtime";`,
       `import runtime from "../../packages/runtime/build/src/index.js";`);
     fs.writeFileSync(outputFolder + path.sep + "index.mjs", output.unitTestScript);
+    output.unitTestScriptKernel = output.unitTestScriptKernel.replace(
+      `import runtime from "@abaplint/runtime";`,
+      `import runtime from "../../packages/runtime/build/src/index.js";`);
+    fs.writeFileSync(outputFolder + path.sep + "index_kernel.mjs", output.unitTestScriptKernel);
     output.initializationScript = output.initializationScript.replace(
       `import runtime from "@abaplint/runtime";`,
       `import runtime from "../../packages/runtime/build/src/index.js";`);
