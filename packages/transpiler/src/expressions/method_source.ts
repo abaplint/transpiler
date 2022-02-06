@@ -22,19 +22,18 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
       const nextChild = children[i + 1];
 
       if (child.get() instanceof Expressions.ClassName) {
-        ret.appendString(traversal.lookupClassOrInterface(child.concatTokens(), child.getFirstToken()));
+        call += traversal.lookupClassOrInterface(child.concatTokens(), child.getFirstToken());
       } else if (child.get() instanceof Expressions.Dynamic && nextChild?.concatTokens() === "=>") {
         const second = child.getChildren()[1];
+        const lookupException = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_CLASS'", child.getFirstToken(), true);
         if (second.get() instanceof Expressions.FieldChain && second instanceof Nodes.ExpressionNode) {
           const t = new FieldChainTranspiler(true).transpile(second, traversal).getCode();
 
           call = traversal.lookupClassOrInterface(t, child.getFirstToken(), true);
-          const lookupException = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_CLASS'", child.getFirstToken(), true);
           ret.appendString(`if (${call} === undefined && ${lookupException} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }\n`);
           ret.appendString(`if (${call} === undefined) { throw new ${lookupException}(); }\n`);
         } else if (second.get() instanceof Expressions.Constant) {
           call = traversal.lookupClassOrInterface(second.getFirstToken().getStr(), child.getFirstToken(), true);
-          const lookupException = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_CLASS'", child.getFirstToken(), true);
           ret.appendString(`if (${call} === undefined && ${lookupException} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }\n`);
           ret.appendString(`if (${call} === undefined) { throw new ${lookupException}(); }\n`);
         } else {
@@ -42,14 +41,11 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
         }
       } else if (child.get() instanceof Expressions.Dynamic) {
         const second = child.getChildren()[1];
+        const lookupException = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_METHOD'", child.getFirstToken(), true);
         if (second.get() instanceof Expressions.FieldChain) {
           call += "[";
           call += traversal.traverse(second).getCode();
           call += ".get().toLowerCase()]";
-
-          const lookupException = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_METHOD'", child.getFirstToken(), true);
-          ret.appendString(`if (${call} === undefined && ${lookupException} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_METHOD not found"; }\n`);
-          ret.appendString(`if (${call} === undefined) { throw new ${lookupException}(); }\n`);
         } else if (second.get() instanceof Expressions.Constant) {
           if (call.endsWith(".") === false) {
             call += ".";
@@ -58,6 +54,8 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
         } else {
           ret.appendString("MethodSourceTranspiler-Unexpected");
         }
+        ret.appendString(`if (${call} === undefined && ${lookupException} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_METHOD not found"; }\n`);
+        ret.appendString(`if (${call} === undefined) { throw new ${lookupException}(); }\n`);
       } else if (child.get() instanceof Expressions.MethodName) {
         if (i === 0) {
           this.prepend += "this.";
