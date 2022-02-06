@@ -1156,7 +1156,7 @@ ENDCLASS.`;
     expect(cons.split("\n")[1]).to.equal("expected");
   });
 
-  it("test-27", async () => {
+  it.skip("test-27", async () => {
 // should raise cx_sy_dyn_call_illegal_method
 
     const clas = `CLASS zcl_call DEFINITION PUBLIC.
