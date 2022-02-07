@@ -7,14 +7,14 @@ export function concat(left: INumeric | ICharacter | string | number, right: INu
   if (typeof left === "string" || typeof left === "number") {
     val += left;
   } else if (left instanceof Character) {
-    val += left.get().trimEnd();
+    val += left.get().replace(/( )*$/, "");
   } else {
     val += left.get();
   }
   if (typeof right === "string" || typeof right === "number") {
     val += right;
   } else if (right instanceof Character) {
-    val += right.get().trimEnd();
+    val += right.get().replace(/( )*$/, "");
   } else {
     val += right.get();
   }
