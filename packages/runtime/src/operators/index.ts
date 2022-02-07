@@ -9,3 +9,4 @@ export * from "./bit-and";
 export * from "./bit-not";
 export * from "./bit-or";
 export * from "./bit-xor";
+export * from "./concat";

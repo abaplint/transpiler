@@ -31,6 +31,9 @@ export class ConstantTranspiler implements IExpressionTranspiler {
       if (res.startsWith("'") && this.addGet === false) {
         const code = "new abap.types.Character({length: " + (res.length - 2) + "}).set(" + this.escape(res) + ")";
         return new Chunk().append(code, node, traversal);
+      } else if (res.startsWith("`") && this.addGet === false) {
+        const code = "new abap.types.String().set(" + this.escape(res) + ")";
+        return new Chunk().append(code, node, traversal);
       } else {
         if (res.startsWith("'")) {
           res = "'" + res.substring(1, res.length - 1).trimEnd() + "'";
