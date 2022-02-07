@@ -235,7 +235,7 @@ START-OF-SELECTION.
       METHOD bar.
         DATA li_client TYPE REF TO if_client.
         CREATE OBJECT li_client TYPE zcl_client.
-        WRITE li_client->request.
+        CLEAR li_client->request.
       ENDMETHOD.
     ENDCLASS.`;
 
