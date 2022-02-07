@@ -31,7 +31,7 @@ export class StringTemplateTranspiler implements IExpressionTranspiler {
       }
     }
 
-    return new Chunk(ret);
+    return new Chunk("new abap.types.String().set(" + ret + ")");
   }
 
 }

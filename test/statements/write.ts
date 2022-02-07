@@ -93,4 +93,42 @@ describe("Running statements - WRITE", () => {
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("WRITE - any type, from string", async () => {
+    const code = `
+CLASS clas DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS m1 IMPORTING val TYPE any.
+ENDCLASS.
+CLASS clas IMPLEMENTATION.
+  METHOD m1.
+    WRITE |{ val }|.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  clas=>m1( \`sdfsd\` ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("WRITE - any type, from string template", async () => {
+    const code = `
+CLASS clas DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS m1 IMPORTING val TYPE any.
+ENDCLASS.
+CLASS clas IMPLEMENTATION.
+  METHOD m1.
+    WRITE |{ val }|.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  clas=>m1( |sdfsd| ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

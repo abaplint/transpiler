@@ -57,10 +57,10 @@ export class SourceTranspiler implements IExpressionTranspiler {
           ret.appendString("SourceUnknown-" + c.get().constructor.name);
         }
       } else if (c instanceof Nodes.TokenNode && (c.getFirstToken().getStr() === "&&" || c.getFirstToken().getStr() === "&")) {
-        if (this.addGet === false) {
-          return new SourceTranspiler(true).transpile(node, traversal);
-        } else {
-          ret.append(" + ", c, traversal);
+        ret = new Chunk().appendString("abap.operators.concat(").appendChunk(ret).appendString(",");
+        post.appendString(")");
+        if (this.addGet) {
+          post.append(".get()", c, traversal);
         }
       } else if (c instanceof Nodes.TokenNodeRegex && c.getFirstToken().getStr().toUpperCase() === "BOOLC") {
         ret.append("abap.builtin.boolc(", c, traversal);
