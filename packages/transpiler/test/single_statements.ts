@@ -297,6 +297,9 @@ await abap.Classes['ZCL_CALL'].not_found();`},
       js: `abap.statements.modifyDatabase("ztab", {"table": tab});`},
     {abap: `MODIFY (mv_table) FROM TABLE <fs>.`,
       js: `abap.statements.modifyDatabase(mv_table, {"table": fs_fs_});`},
+
+    {abap: `DELETE zqueue FROM TABLE lt_queue.`,
+      js: `abap.statements.deleteDatabase("zqueue", {"table": lt_queue});`},
   ];
 
   for (const test of tests) {
