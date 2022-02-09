@@ -17,6 +17,7 @@ import {getRunTime} from "./get_run_time";
 import {getTime} from "./get_time";
 import {insertDatabase} from "./insert_database";
 import {insertInternal} from "./insert_internal";
+import {deleteDatabase} from "./delete_database";
 import {loop} from "./loop";
 import {message} from "./message";
 import {modifyDatabase} from "./modify_database";
@@ -52,6 +53,7 @@ export class Statements {
   public getBit = getBit;
   public callFunction = callFunction;
   public getRunTime = getRunTime;
+  public deleteDatabase = deleteDatabase;
   public getTime = getTime;
   public insertDatabase = insertDatabase;
   public insertInternal = insertInternal;

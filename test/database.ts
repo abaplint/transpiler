@@ -82,4 +82,26 @@ describe("Top level tests, Database", () => {
     expect(cons).to.equal("WORLD");
   });
 
+  it("test, DELETE", async () => {
+    const code = `
+    DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+    DATA row LIKE LINE OF tab.
+
+    row-arbgb = 'HELLO'.
+    APPEND row TO tab.
+    MODIFY t100 FROM TABLE tab.
+
+    DELETE t100 FROM TABLE tab.
+
+    SELECT SINGLE * FROM t100 INTO row.
+    WRITE / sy-subrc.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    const cons = abap.console.get();
+    expect(cons).to.equal("4");
+  });
+
 });
