@@ -341,4 +341,29 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("calls static method", async () => {
+    const code = `
+INTERFACE lif.
+  CLASS-METHODS m1.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD lif~m1.
+    WRITE 'works'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>lif~m1( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("works");
+  });
+
 });
