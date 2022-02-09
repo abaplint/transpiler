@@ -220,4 +220,34 @@ ENDINTERFACE.`;
     expect(output[0].chunk.getCode()).to.include("T000");
   });
 
+  it("Global INTF + CLAS, static method from interface", async () => {
+    const filename1 = "if_system_uuid_rfc4122_static.intf.abap";
+    const contents1 = `INTERFACE if_system_uuid_rfc4122_static PUBLIC.
+  CLASS-METHODS create_uuid_c36_by_version
+    IMPORTING
+      version TYPE i
+    RETURNING
+      VALUE(uuid) TYPE string.
+ENDINTERFACE.`;
+    const file1 = {filename: filename1, contents: contents1};
+
+    const filename2 = "cl_system_uuid.clas.abap";
+    const contents2 = `CLASS cl_system_uuid DEFINITION PUBLIC.
+    PUBLIC SECTION.
+      INTERFACES if_system_uuid_rfc4122_static.
+  ENDCLASS.
+  CLASS cl_system_uuid IMPLEMENTATION.
+    METHOD if_system_uuid_rfc4122_static~create_uuid_c36_by_version.
+      WRITE 'hello'.
+    ENDMETHOD.
+  ENDCLASS.`;
+    const file2 = {filename: filename2, contents: contents2};
+
+    const output = await runFiles([file1, file2]);
+
+    expect(output.length).to.equal(2);
+    const code = output[1].chunk.getCode();
+    expect(code).to.include("static async");
+  });
+
 });

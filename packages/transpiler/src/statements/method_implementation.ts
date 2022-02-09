@@ -107,7 +107,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
       const intfName = split[0];
       name = split[1];
       const scope = traversal.findCurrentScopeByToken(cdef.getToken());
-      const intf = scope?.findInterfaceDefinition(intfName);
+      const intf = traversal.findInterfaceDefinition(intfName, scope);
       return intf?.getMethodDefinitions()?.getByName(name);
     } else {
       return cdef.getMethodDefinitions()?.getByName(name);
