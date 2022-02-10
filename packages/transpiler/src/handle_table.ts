@@ -15,6 +15,7 @@ export class HandleTable {
     const type = obj.parseType(reg);
 
     const chunk = new Chunk().appendString(`abap.DDIC["${obj.getName().toUpperCase()}"] = {
+  "objectType": "TABL",
   "type": ${new TranspileTypes().toType(type)},
   "keyFields": ${JSON.stringify(obj.listKeys())},
 };`);

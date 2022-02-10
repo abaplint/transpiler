@@ -250,4 +250,79 @@ ENDINTERFACE.`;
     expect(code).to.include("static async");
   });
 
+  it("DTEL + DOMA", async () => {
+    const filename1 = "zfixedval.doma.xml";
+    const contents1 = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_DOMA" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD01V>
+    <DOMNAME>ZFIXEDVAL</DOMNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <DATATYPE>CHAR</DATATYPE>
+    <LENG>000001</LENG>
+    <OUTPUTLEN>000001</OUTPUTLEN>
+    <VALEXI>X</VALEXI>
+    <DDTEXT>test</DDTEXT>
+   </DD01V>
+   <DD07V_TAB>
+    <DD07V>
+     <VALPOS>0001</VALPOS>
+     <DDLANGUAGE>E</DDLANGUAGE>
+     <DOMVALUE_L>F</DOMVALUE_L>
+     <DDTEXT>fixed</DDTEXT>
+    </DD07V>
+    <DD07V>
+     <VALPOS>0002</VALPOS>
+     <DDLANGUAGE>E</DDLANGUAGE>
+     <DOMVALUE_L>1</DOMVALUE_L>
+     <DOMVALUE_H>9</DOMVALUE_H>
+     <DDTEXT>numbers</DDTEXT>
+    </DD07V>
+   </DD07V_TAB>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+    const file1 = {filename: filename1, contents: contents1};
+
+    const filename2 = "zdtel.dtel.xml";
+    const contents2 = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_DTEL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD04V>
+    <ROLLNAME>ZDTEL</ROLLNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <DOMNAME>ZFIXEDVAL</DOMNAME>
+    <HEADLEN>55</HEADLEN>
+    <SCRLEN1>10</SCRLEN1>
+    <SCRLEN2>20</SCRLEN2>
+    <SCRLEN3>40</SCRLEN3>
+    <DDTEXT>sdfsd</DDTEXT>
+    <REPTEXT>sdfsd</REPTEXT>
+    <SCRTEXT_S>sdfsd</SCRTEXT_S>
+    <SCRTEXT_M>sdfsd</SCRTEXT_M>
+    <SCRTEXT_L>sdfsd</SCRTEXT_L>
+    <DTELMASTER>E</DTELMASTER>
+    <REFKIND>D</REFKIND>
+   </DD04V>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+    const file2 = {filename: filename2, contents: contents2};
+
+    const output = await runFiles([file1, file2]);
+
+    const expected = `abap.DDIC["ZDTEL"] = {
+  "objectType": "DTEL",
+  "type": new abap.types.Character({qualifiedName: "ZDTEL"}),
+  "domain": "ZFIXEDVAL",
+  "fixedValues": [{"description":"fixed","low":"F","language":"E"},{"description":"numbers","low":"1","high":"9","language":"E"}],
+};`;
+
+    expect(output.length).to.equal(1);
+    const code = output[0].chunk.getCode();
+    expect(code).to.equal(expected);
+  });
+
 });

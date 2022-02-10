@@ -13,8 +13,19 @@ export class HandleDataElement {
 
     const type = obj.parseType(reg);
 
+    let fixedValues: any | undefined = undefined;
+    if (obj.getDomainName()) {
+      const doma = reg.getObject("DOMA", obj.getDomainName()) as abaplint.Objects.Domain | undefined;
+      if (doma) {
+        fixedValues = doma.getFixedValues();
+      }
+    }
+
     const chunk = new Chunk().appendString(`abap.DDIC["${obj.getName().toUpperCase()}"] = {
+  "objectType": "DTEL",
   "type": ${new TranspileTypes().toType(type)},
+  "domain": ${JSON.stringify(obj.getDomainName())},
+  "fixedValues": ${JSON.stringify(fixedValues)},
 };`);
 
     const output: IOutputFile = {
