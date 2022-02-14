@@ -2,18 +2,41 @@ import {ABAPObject, FieldSymbol, Float, Hex, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
+function compareTables(left: Table, right: Table): boolean {
+  const leftArray = left.array();
+  const rightArray = right.array();
+
+  if (leftArray.length !== rightArray.length) {
+    return false;
+  }
+
+  for (let i = 0; i < leftArray.length; i++) {
+    const rowCompare = eq(leftArray[i], rightArray[i]);
+    if (rowCompare === false) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 export function eq(
   left: number | string | ICharacter | INumeric | Float | ABAPObject | Structure | Hex | Table | FieldSymbol,
   right: number | string | ICharacter | INumeric | Float | ABAPObject | Structure | Hex | Table | FieldSymbol): boolean {
-
-  if (left instanceof Table || right instanceof Table) {
-    throw "todo, eq TABLE";
-  }
 
   if (right instanceof FieldSymbol) {
     return eq(left, right.getPointer()!);
   } else if (left instanceof FieldSymbol) {
     return eq(left.getPointer()!, right);
+  }
+
+  if (left instanceof Table || right instanceof Table) {
+    if (left instanceof Table && right instanceof Table) {
+      return compareTables(left, right);
+    } else {
+// this happens in dynamic/ANY typed scenarios?
+      return false;
+    }
   }
 
   if (left instanceof Structure || right instanceof Structure) {

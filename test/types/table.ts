@@ -150,4 +150,28 @@ ASSERT lines( lt_tab ) = 2.`;
     await f(abap);
   });
 
+  it("table, EQuals", async () => {
+    const code = `
+DATA tab1 TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+DATA tab2 TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+APPEND 'hello' TO tab1.
+APPEND 'hello' TO tab2.
+ASSERT tab1 = tab2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("table, not equals", async () => {
+    const code = `
+  DATA tab1 TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+  DATA tab2 TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+  APPEND 'hello' TO tab1.
+  APPEND 'world' TO tab2.
+  ASSERT tab1 <> tab2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
