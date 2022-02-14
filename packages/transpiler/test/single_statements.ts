@@ -143,13 +143,13 @@ describe("Single statements", () => {
     {abap: "FUNCTION-POOL zopenabap.", js: ``, skip: false},
     {abap: "INCLUDE lzopenabaptop.", js: ``, skip: false},
     {abap: "CALL FUNCTION 'BAR'.",
-      js: `abap.FunctionModules['BAR']();`, skip: false},
+      js: `await abap.FunctionModules['BAR']();`, skip: false},
     {abap: "CALL FUNCTION 'BAR' EXPORTING moo = boo.",
-      js: `abap.FunctionModules['BAR']({exporting: {moo: boo}});`, skip: false},
+      js: `await abap.FunctionModules['BAR']({exporting: {moo: boo}});`, skip: false},
     {abap: "CALL FUNCTION 'BAR' DESTINATION 'MOO'.",
-      js: `abap.statements.callFunction({name:'BAR',destination:'MOO'});`, skip: false},
+      js: `await abap.statements.callFunction({name:'BAR',destination:'MOO'});`, skip: false},
     {abap: `CALL FUNCTION 'BAR' DESTINATION 'MOO' EXPORTING foo = boo.`,
-      js: `abap.statements.callFunction({name:'BAR',destination:'MOO',exporting: {foo: boo}});`, skip: false},
+      js: `await abap.statements.callFunction({name:'BAR',destination:'MOO',exporting: {foo: boo}});`, skip: false},
     {abap: "super->method( ).",     js: `await super.method();`, skip: false},
     {abap: "super->constructor( ).",     js: ``, skip: false}, // todo, https://github.com/abaplint/transpiler/issues/133
 
