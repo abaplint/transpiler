@@ -130,4 +130,24 @@ ASSERT lines( <tab> ) = lines( tab ).`;
     await f(abap);
   });
 
+  it("non-unique key", async () => {
+    const code = `
+TYPES: BEGIN OF ty_stru,
+         field1 TYPE i,
+         field2 TYPE i,
+       END OF ty_stru.
+TYPES ty_tab TYPE SORTED TABLE OF ty_stru WITH NON-UNIQUE KEY field1 field2.
+DATA lt_tab TYPE ty_tab.
+DATA ls_row TYPE ty_stru.
+
+ls_row-field1 = 1.
+ls_row-field2 = 1.
+INSERT ls_row INTO TABLE lt_tab.
+INSERT ls_row INTO TABLE lt_tab.
+ASSERT lines( lt_tab ) = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

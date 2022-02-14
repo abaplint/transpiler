@@ -34,12 +34,14 @@ export function insertInternal(options: IInsertInternalOptions): void {
       }
       return true;
     };
-    readTable(options.table, {withKey: compare});
-    // @ts-ignore
-    if (abap.builtin.sy.get().subrc.get() === 0) {
+    if (tableOptions.isUnique === true) {
+      readTable(options.table, {withKey: compare});
       // @ts-ignore
-      abap.builtin.sy.get().subrc.set(4);
-      return;
+      if (abap.builtin.sy.get().subrc.get() === 0) {
+        // @ts-ignore
+        abap.builtin.sy.get().subrc.set(4);
+        return;
+      }
     }
   }
 
