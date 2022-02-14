@@ -22,9 +22,9 @@ export class CallFunctionTranspiler implements IStatementTranspiler {
     const dest = node.findDirectExpression(abaplint.Expressions.Destination)?.findDirectExpression(abaplint.Expressions.Source);
     if (dest) {
       param = param.replace("{", ",").replace(/}$/, "");
-      ret.appendString(`abap.statements.callFunction({name:${fmname},destination:${dest.concatTokens()}${param}});`);
+      ret.appendString(`await abap.statements.callFunction({name:${fmname},destination:${dest.concatTokens()}${param}});`);
     } else {
-      ret.appendString(`abap.FunctionModules[${fmname}](${param});`);
+      ret.appendString(`await abap.FunctionModules[${fmname}](${param});`);
     }
 
     return ret;
