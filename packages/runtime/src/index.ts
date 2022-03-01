@@ -10,7 +10,7 @@ import {UnitTestResult} from "./unit_test";
 import {OffsetLength} from "./offset_length";
 import {templateFormatting} from "./template_formatting";
 
-export {UnitTestResult, RFC};
+export {UnitTestResult, RFC, types};
 
 export class ABAP {
 // global objects

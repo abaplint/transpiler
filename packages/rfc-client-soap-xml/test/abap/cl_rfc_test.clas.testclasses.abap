@@ -30,5 +30,9 @@ CLASS ltcl_test IMPLEMENTATION.
 
     cl_abap_unit_assert=>assert_not_initial( ls_sysinfo ).
 
+    cl_abap_unit_assert=>assert_equals(
+      act = ls_sysinfo-system
+      exp = 'MOO' ).
+
   ENDMETHOD.
 ENDCLASS.

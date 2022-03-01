@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "rfc-client-soap-xml",
   "scripts": {
-    "test": "rm -rf output && npx abap_transpile test/abap_transpile.json && node output/index.mjs",
+    "test": "rm -rf output && npx tsc && npx abap_transpile test/abap_transpile.json && node output/index.mjs",
     "start": "node test/mock.mjs"
   },
   "author": "",
