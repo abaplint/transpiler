@@ -55,4 +55,6 @@ export interface ITranspilerOptions {
   unknownTypes?: "compileError" | "runtimeError";
   skip?: TestMethodList;
   only?: TestMethodList;
+  /** extra setup script to be executed during initialization */
+  extraSetup?: string;
 }

@@ -7,9 +7,7 @@ export interface ICallFunctionOptions {
   changing?: any,
 }
 
+// note: this is only called if DESTNIATION is supplied
 export function callFunction(_options: ICallFunctionOptions) {
-  // note: this is only called if DESTNIATION is supplied
-
-  // todo
-  return;
+  throw new Error("CALL FUNCTION DESTINATION, todo");
 }
