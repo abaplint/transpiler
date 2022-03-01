@@ -7,7 +7,7 @@ export type ClientOptions = {
   password: string,
 };
 
-export class Client implements runtime.RFC.RFCClient {
+export class RFCSoapClient implements runtime.RFC.RFCClient {
   private readonly url: string;
   private readonly options: ClientOptions | undefined;
 
@@ -16,7 +16,7 @@ export class Client implements runtime.RFC.RFCClient {
     this.options = options;
   }
 
-  public async call(name: string, input?: runtime.RFC.RFCCallInput) {
+  public async call(name: string, input: runtime.RFC.RFCCallInput) {
     const body = this.buildBody(name, input);
 
     let auth = {};
@@ -33,13 +33,22 @@ export class Client implements runtime.RFC.RFCClient {
       },
     });
 
-    // todo
-    console.dir(res.status);
+    // todo, error handling?
+    // console.dir(res.status);
 
     const xml = await res.text();
-    console.dir(xml);
-    new XMLParser({parseTagValue: false, ignoreAttributes: true, trimValues: false}).parse(xml);
-    // todo
+    const parsed = new XMLParser({parseTagValue: false, ignoreAttributes: true, trimValues: false}).parse(xml);
+    const response = parsed["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["RFCDEMO:CAT_PING.Response"];
+
+    if (input.importing) {
+      for (const i of Object.keys(input.importing || {})) {
+        const xml = response[i.toUpperCase()];
+        const structure = input.importing[i] as any; // this is not a structure in all cases, but the unit test is
+        for (const f of Object.keys(structure.get())) {
+          structure.get()[f].set(xml[f.toUpperCase()]);
+        }
+      }
+    }
   }
 
   private buildBody(name: string, input?: runtime.RFC.RFCCallInput): string {

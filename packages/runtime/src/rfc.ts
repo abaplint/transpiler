@@ -13,5 +13,5 @@ export type RFCCallInput = {
 };
 
 export interface RFCClient {
-  call(name: string, input?: RFCCallInput): Promise<void>;
+  call(name: string, input: RFCCallInput): Promise<void>;
 }

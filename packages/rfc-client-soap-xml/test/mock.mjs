@@ -1,6 +1,6 @@
 import express from "express";
 
-const PORT = 50000;
+const PORT = 45000;
 
 const app = express();
 app.disable("x-powered-by");
@@ -14,7 +14,7 @@ app.all("*", async (req, res) => {
   <SOAP-ENV:Body>
     <RFCDEMO:CAT_PING.Response xmlns:RFCDEMO="urn:sap-com:document:sap:rfc:functions">
       <SYSINFO>
-        <SYSTEM>A4H</SYSTEM>
+        <SYSTEM>MOO</SYSTEM>
         <MAND>001</MAND>
         <ASPRA>E</ASPRA>
         <SNAME>DEVELOPER</SNAME>

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "rfc-client-soap-xml",
   "scripts": {
-    "test": "rm -rf output && npx abap_transpile test/abap_transpile.json && node output/index.mjs",
+    "test": "rm -rf output && npx tsc && npx abap_transpile test/abap_transpile.json && node output/index.mjs",
     "start": "node test/mock.mjs"
   },
   "author": "",
@@ -11,11 +11,11 @@
   "devDependencies": {
     "@types/express": "^4.17.13",
     "express": "^4.17.3",
-    "@abaplint/transpiler-cli": "^1.8.10",
+    "@abaplint/transpiler-cli": "^1.8.11",
     "typescript": "^4.6.2"
   },
   "dependencies": {
-    "@abaplint/runtime": "^1.8.10",
+    "@abaplint/runtime": "^1.8.11",
     "cross-fetch": "^3.1.5",
     "fast-xml-parser": "^4.0.3"
   }
