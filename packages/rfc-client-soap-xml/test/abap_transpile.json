@@ -8,6 +8,7 @@
   "options": {
     "ignoreSyntaxCheck": false,
     "addFilenames": true,
+    "extraSetup": "../test/extra.mjs",
     "addCommonJS": true
   }
 }

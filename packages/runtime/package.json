@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/runtime",
-  "version": "1.8.9",
+  "version": "1.8.10",
   "description": "Transpiler - Runtime",
   "main": "build/src/index.js",
   "typings": "build/src/index.d.ts",
@@ -35,8 +35,8 @@
     "@types/mocha": "^9.1.0",
     "@types/sql.js": "^1.4.3",
     "chai": "^4.3.6",
-    "mocha": "^9.2.0",
+    "mocha": "^9.2.1",
     "source-map-support": "^0.5.21",
-    "typescript": "^4.5.5"
+    "typescript": "^4.6.2"
   }
 }

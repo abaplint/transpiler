@@ -6,15 +6,21 @@ export type TestMethodList = {object: string, class: string, method: string}[];
 export class UnitTest {
 
   // todo, move this somewhere else, its much more than just unit test relevant
-  public initializationScript(reg: abaplint.IRegistry, dbSetup: string) {
-    let ret = `import runtime from "@abaplint/runtime";
+  public initializationScript(reg: abaplint.IRegistry, dbSetup: string, extraSetup?: string) {
+    let ret = `/* eslint-disable import/newline-after-import */
+import runtime from "@abaplint/runtime";
 global.abap = new runtime.ABAP();
 ${this.buildImports(reg)}
-export async function initializeABAP(settings) {\n`;
+export async function initializeABAP() {\n`;
     if (dbSetup === "") {
       ret += `// no database artifacts, skip DB initialization\n`;
     } else {
       ret += `  await global.abap.initDB(\`${dbSetup}\`);\n`;
+    }
+    if (extraSetup === undefined) {
+      ret += `// no extra setup\n`;
+    } else {
+      ret += `  await import("../test/extra.mjs");\n`;
     }
     ret += `}`;
     return ret;

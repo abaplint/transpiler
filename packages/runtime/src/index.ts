@@ -14,10 +14,13 @@ export {UnitTestResult, RFC};
 
 export class ABAP {
 // global objects
-  public FunctionModules = {};
-  public Classes = {};
-  public Interfaces = {};
-  public DDIC = {};
+  public FunctionModules: {[name: string]: any} = {};
+  public Classes: {[name: string]: any} = {};
+  public Interfaces: {[name: string]: any} = {};
+  public DDIC: {[name: string]: any} = {};
+
+// RFC Destinations
+  public RFCDestinations: {[name: string]: RFC.RFCClient} = {};
 
 // stuff for runtime
   public statements;

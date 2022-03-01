@@ -1,3 +1,5 @@
+import {RFCClient} from "../rfc";
+
 export interface ICallFunctionOptions {
   name: string,
   destination: string,
@@ -5,11 +7,22 @@ export interface ICallFunctionOptions {
   importing?: any,
   tables?: any,
   changing?: any,
+  exceptions?: any,
 }
 
-export function callFunction(_options: ICallFunctionOptions) {
-  // note: this is only called if DESTNIATION is supplied
+// note: this is only called if DESTNIATION is supplied
+export async function callFunction(options: ICallFunctionOptions) {
+  // @ts-ignore
+  const dest = abap.RFCDestinations[options.destination] as undefined | RFCClient;
+  if (dest === undefined) {
+    throw new Error(`RFC destination ${options.destination} does not exist`);
+  }
 
-  // todo
-  return;
+  await dest.call(options.name, {
+    exporting: options.exporting,
+    importing: options.importing,
+    tables: options.tables,
+    changing: options.changing,
+    exceptions: options.exceptions,
+  });
 }
