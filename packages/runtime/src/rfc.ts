@@ -4,7 +4,7 @@ import {INumeric} from "./types/_numeric";
 
 type TypeType = INumeric | Table | ICharacter | Structure | FieldSymbol;
 
-export type RFCCallInput = {
+export type RFCCallSignature = {
   exporting?: {[name: string]: TypeType},
   importing?: {[name: string]: TypeType},
   tables?: {[name: string]: TypeType},
@@ -13,5 +13,5 @@ export type RFCCallInput = {
 };
 
 export interface RFCClient {
-  call(name: string, input: RFCCallInput): Promise<void>;
+  call(name: string, signature: RFCCallSignature): Promise<void>;
 }
