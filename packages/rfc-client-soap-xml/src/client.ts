@@ -16,7 +16,7 @@ export class RFCSoapClient implements runtime.RFC.RFCClient {
     this.options = options;
   }
 
-  public async call(name: string, input: runtime.RFC.RFCCallInput) {
+  public async call(name: string, input: runtime.RFC.RFCCallSignature) {
     const body = this.buildBody(name, input);
 
     let auth = {};
@@ -51,7 +51,7 @@ export class RFCSoapClient implements runtime.RFC.RFCClient {
     }
   }
 
-  private buildBody(name: string, input?: runtime.RFC.RFCCallInput): string {
+  private buildBody(name: string, input: runtime.RFC.RFCCallSignature): string {
     // eslint-disable-next-line max-len
     let body = `<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:RFCDEMO="urn:sap-com:document:sap:rfc:functions">
   <SOAP-ENV:Body>
