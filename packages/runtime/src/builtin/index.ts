@@ -21,6 +21,7 @@ export * from "./round";
 export * from "./shift_left";
 export * from "./sign";
 export * from "./sin";
+export * from "./sqrt";
 export * from "./strlen";
 export * from "./substring_after";
 export * from "./substring_before";
