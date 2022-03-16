@@ -17,6 +17,8 @@ export class TryTranspiler implements IStructureTranspiler {
           ret.appendChunk(catchCode);
         }
         catchCode = undefined;
+      } else if (c.get() instanceof abaplint.Structures.Cleanup) {
+        ret.appendString(`} finally {\n// Transpiler todo: CLEANUP ignored\n`);
       } else {
         ret.appendChunk(traversal.traverse(c));
       }
