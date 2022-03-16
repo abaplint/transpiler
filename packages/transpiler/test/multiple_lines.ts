@@ -634,4 +634,43 @@ lcl_constant_test.area_name.set('BAR');`;
     expect(await runSingle(abap)).to.equals(expected);
   });
 
+  it("constants CaSE, default value", async () => {
+    const abap = `INTERFACE lif.
+  CONSTANTS default_value TYPE string VALUE 'sdf'.
+ENDINTERFACE.
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+
+    CLASS-METHODS foo
+      IMPORTING
+        bar TYPE string DEFAULT LIF=>DEFAULT_VALUE.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD foo.
+  ENDMETHOD.
+ENDCLASS.`;
+    const expected = `class lif {
+}
+abap.Classes['PROG-ZFOOBAR-LIF'] = lif;
+lif.lif$default_value = new abap.types.String();
+lif.lif$default_value.set('sdf');
+class lcl {
+  async constructor_() {
+    this.me = new abap.types.ABAPObject();
+    this.me.set(this);
+    return this;
+  }
+  async foo(INPUT) {
+    return lcl.foo(INPUT);
+  }
+  static async foo(INPUT) {
+    let bar = new abap.types.String();
+    if (INPUT && INPUT.bar) {bar.set(INPUT.bar);}
+    if (INPUT === undefined || INPUT.bar === undefined) {bar = abap.Classes['PROG-ZFOOBAR-LIF'].lif$default_value;}
+  }
+}
+abap.Classes['PROG-ZFOOBAR-LCL'] = lcl;`;
+    expect(await runSingle(abap)).to.equals(expected);
+  });
+
 });
