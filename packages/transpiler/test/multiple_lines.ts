@@ -559,4 +559,36 @@ blah.set(await (new abap.Classes[str.get()]()).constructor_());`;
     expect(await runSingle(abap)).to.include(`"keyFields":["PATH","NAME"]`);
   });
 
+  it("CLEANUP", async () => {
+    const abap = `
+DATA cx TYPE REF TO cx_root.
+TRY.
+    TRY.
+        RAISE EXCEPTION TYPE cx_abap_message_digest.
+      CLEANUP INTO cx.
+        WRITE / 'foo'.
+    ENDTRY.
+  CATCH cx_root.
+    WRITE / 'bar'.
+ENDTRY.`;
+
+    const expected = `let cx = (() => { throw "Void type: cx_root" })();
+try {
+  try {
+    throw await (new abap.Classes['CX_ABAP_MESSAGE_DIGEST']()).constructor_();
+  } finally {
+    // Transpiler todo: CLEANUP ignored
+  }
+} catch (e) {
+  if (e instanceof abap.Classes['CX_ROOT']) {
+    abap.statements.write(new abap.types.Character({length: 3}).set('bar'),{newLine: true});
+  } else {
+    throw e;
+  }
+}`;
+    expect(await runSingle(abap, {
+      ignoreSyntaxCheck: true,
+      unknownTypes: "runtimeError"})).to.equals(expected);
+  });
+
 });
