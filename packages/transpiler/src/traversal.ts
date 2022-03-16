@@ -325,11 +325,11 @@ export class Traversal {
 
     // handle aliases after initialization of carrier variables
     for (const a of def.getAliases().getAll()) {
-      ret += "this." + a.getName() + " = this." + a.getComponent().replace("~", "$") + ";\n";
+      ret += "this." + a.getName().toLowerCase() + " = this." + a.getComponent().replace("~", "$").toLowerCase() + ";\n";
     }
     // constants can be accessed both statically and via reference
     for (const c of def.getAttributes().getConstants()) {
-      ret += "this." + c.getName() + " = " + def.getName() + "." + c.getName() + ";\n";
+      ret += "this." + c.getName().toLowerCase() + " = " + def.getName().toLowerCase() + "." + c.getName().toLowerCase() + ";\n";
     }
 
     return ret;

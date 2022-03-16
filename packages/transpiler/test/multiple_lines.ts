@@ -613,4 +613,25 @@ await this.moo();`;
     expect(await runSingle(abap)).to.equals(expected);
   });
 
+  it("constants and class CaSe", async () => {
+    const abap = `CLASS LCL_CONSTANT_TEST DEFINITION.
+  PUBLIC SECTION.
+    constants AREA_NAME type STRING value 'BAR'.
+ENDCLASS.
+CLASS LCL_CONSTANT_TEST IMPLEMENTATION.
+ENDCLASS.`;
+    const expected = `class lcl_constant_test {
+  async constructor_() {
+    this.me = new abap.types.ABAPObject();
+    this.me.set(this);
+    this.area_name = lcl_constant_test.area_name;
+    return this;
+  }
+}
+abap.Classes['PROG-ZFOOBAR-LCL_CONSTANT_TEST'] = lcl_constant_test;
+lcl_constant_test.area_name = new abap.types.String();
+lcl_constant_test.area_name.set('BAR');`;
+    expect(await runSingle(abap)).to.equals(expected);
+  });
+
 });
