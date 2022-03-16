@@ -47,7 +47,9 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
           call += traversal.traverse(second).getCode();
           call += ".get().toLowerCase()]";
         } else if (second.get() instanceof Expressions.Constant) {
-          if (call.endsWith(".") === false) {
+          if (call === "") {
+            call = "this.";
+          } else if (call.endsWith(".") === false) {
             call += ".";
           }
           call += second.getFirstToken().getStr().replace(/\'/g, "").toLowerCase().replace("~", "$");

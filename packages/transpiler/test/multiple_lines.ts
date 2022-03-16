@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import {expect} from "chai";
 import {runSingle} from "./_utils";
 
@@ -602,6 +603,14 @@ CLASS lcl_bar IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.`;
     expect(await runSingle(abap)).to.include(`async moo() {`);
+  });
+
+  it("CALL METHOD dynamic in current class", async () => {
+    const abap = `CALL METHOD ('MOO').`;
+    const expected = `if (this.moo === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_METHOD not found"; }
+if (this.moo === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'](); }
+await this.moo();`;
+    expect(await runSingle(abap)).to.equals(expected);
   });
 
 });
