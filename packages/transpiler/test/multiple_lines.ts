@@ -591,4 +591,17 @@ try {
       unknownTypes: "runtimeError"})).to.equals(expected);
   });
 
+  it("Upper case method impl name, should transpile to lower", async () => {
+    const abap = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    METHODS moo.
+ENDCLASS.
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD MOO.
+  ENDMETHOD.
+ENDCLASS.`;
+    expect(await runSingle(abap)).to.include(`async moo() {`);
+  });
+
 });

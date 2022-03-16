@@ -83,7 +83,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
     const method = this.findMethod(methodName, classDef, traversal);
     let staticMethod = "";
 
-    methodName = methodName.replace("~", "$");
+    methodName = methodName.replace("~", "$").toLowerCase();
 
     if (method && method.isStatic()) {
       // in ABAP static methods can be called with instance arrows, "->"
