@@ -25,4 +25,15 @@ describe("Builtin functions - count", () => {
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("count(), escape regex", async () => {
+    const code = `
+  DATA lv TYPE i.
+  lv = count( val = 'ab*foo*cd' sub = '*' ).
+  WRITE lv.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
