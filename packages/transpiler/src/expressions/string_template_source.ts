@@ -32,15 +32,6 @@ export class StringTemplateSourceTranspiler implements IExpressionTranspiler {
   }
 
   private build(node: Nodes.ExpressionNode, traversal: Traversal): undefined | string {
-    const concat = node.concatTokens().toUpperCase();
-    if (concat === "TIMESTAMP = ISO") {
-      return "{timestamp: 'iso'}";
-    } else if (concat === "DATE = ISO") {
-      return "{date: 'iso'}";
-    } else if (concat === "TIME = ISO") {
-      return "{time: 'iso'}";
-    }
-
     let option = "";
     for (const c of node.getChildren()) {
       if (c instanceof Nodes.TokenNode) {
