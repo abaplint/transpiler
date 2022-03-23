@@ -1,4 +1,4 @@
-import {ABAPObject, FieldSymbol, Float, Hex, Structure, Table} from "../types";
+import {ABAPObject, Character, FieldSymbol, Float, Hex, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -63,14 +63,18 @@ export function eq(
   }
 
   let l: number | string | undefined = undefined;
-  if (typeof left === "object") {
+  if (left instanceof Character) {
+    l = left.get().trimEnd();
+  } else if (typeof left === "object") {
     l = left.get();
   } else {
     l = left;
   }
 
   let r: number | string | undefined = undefined;
-  if (typeof right === "object") {
+  if (right instanceof Character) {
+    r = right.get().trimEnd();
+  } else if (typeof right === "object") {
     r = right.get();
   } else {
     r = right;

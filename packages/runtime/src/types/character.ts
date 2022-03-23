@@ -1,5 +1,4 @@
 import {ICharacter} from "./_character";
-import {String} from "./string";
 
 export class Character implements ICharacter {
   private value: string;
@@ -48,7 +47,7 @@ export class Character implements ICharacter {
     if (input?.length !== undefined) {
       ret = ret.substr(0, input.length);
     }
-    const r = new String();
+    const r = new Character({length: ret.length});
     r.set(ret);
     return r;
   }

@@ -655,4 +655,16 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("Character compare and spaces", async () => {
+    const code = `
+    ASSERT '' = ' '.
+    ASSERT ' ' = ''.
+    ASSERT '  ' = ''.
+    ASSERT 'A' = 'A '.
+    ASSERT 'A ' = 'A'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
