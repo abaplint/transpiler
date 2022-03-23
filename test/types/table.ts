@@ -174,4 +174,21 @@ ASSERT tab1 = tab2.`;
     await f(abap);
   });
 
+  it.only("table, copy full table and perform type conversions", async () => {
+    const code = `
+    DATA strings TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+    DATA ints TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+    DATA lv_type TYPE c LENGTH 1.
+    FIELD-SYMBOLS <fs> TYPE any.
+    APPEND '2' TO strings.
+    ints = strings. " type conversion
+    READ TABLE ints INDEX 1 ASSIGNING <fs>.
+    DESCRIBE FIELD <fs> TYPE lv_type.
+    WRITE lv_type.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("I");
+  });
+
 });
