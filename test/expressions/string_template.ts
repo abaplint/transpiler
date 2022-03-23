@@ -69,4 +69,17 @@ describe("Running expressions - String templates", () => {
     expect(abap.console.get()).to.equal("abcde");
   });
 
+  it("More Output WIDTH", async () => {
+    const code = `
+    DATA row TYPE c LENGTH 255.
+    DATA width TYPE i.
+    width = 2.
+    DATA result TYPE string.
+    result = |{ row WIDTH = width }|.
+    ASSERT result = \`  \`.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
