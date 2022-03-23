@@ -44,4 +44,29 @@ describe("Running expressions - String templates", () => {
     expect(abap.console.get()).to.equal("11:22:33");
   });
 
+  it("Output WIDTH, add spaces", async () => {
+    const code = `
+    DATA row TYPE c LENGTH 1.
+    DATA result TYPE string.
+    result = |{ row WIDTH = 10 }|.
+    WRITE strlen( result ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("10");
+  });
+
+  it("Output WIDTH, nothing to add", async () => {
+    const code = `
+    DATA row TYPE string.
+    DATA result TYPE string.
+    row = 'abcde'.
+    result = |{ row WIDTH = 2 }|.
+    WRITE result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("abcde");
+  });
+
 });

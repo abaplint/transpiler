@@ -14,7 +14,7 @@ export class StringTemplateSourceTranspiler implements IExpressionTranspiler {
     let get = true;
     const next = node.findDirectExpression(Expressions.StringTemplateFormatting);
     if (next) {
-      const options = this.build(next);
+      const options = this.build(next, traversal);
       if (options) {
         pre = "abap.templateFormatting(";
         post = "," + options + ")";
@@ -31,7 +31,7 @@ export class StringTemplateSourceTranspiler implements IExpressionTranspiler {
     return new Chunk(ret);
   }
 
-  private build(node: Nodes.ExpressionNode): undefined | string {
+  private build(node: Nodes.ExpressionNode, traversal: Traversal): undefined | string {
     const concat = node.concatTokens().toUpperCase();
     if (concat === "TIMESTAMP = ISO") {
       return "{timestamp: 'iso'}";
@@ -39,6 +39,22 @@ export class StringTemplateSourceTranspiler implements IExpressionTranspiler {
       return "{date: 'iso'}";
     } else if (concat === "TIME = ISO") {
       return "{time: 'iso'}";
+    }
+
+    let option = "";
+    for (const c of node.getChildren()) {
+      if (c instanceof Nodes.TokenNode) {
+        if (c.getFirstToken().getStr() === "=") {
+          option += ":";
+        } else {
+          option += `"` + c.concatTokens().toLowerCase() + `"`;
+        }
+      } else if (c.get() instanceof Expressions.Source) {
+        option += new SourceTranspiler(true).transpile(c, traversal).getCode();
+      }
+    }
+    if (option !== "") {
+      return "{" + option + "}";
     }
     return undefined;
   }

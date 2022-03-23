@@ -4,7 +4,8 @@ import {INumeric} from "./types/_numeric";
 type options = {
   timestamp?: string,
   date?: string,
-  time?: string
+  time?: string,
+  width?: number,
 };
 
 export function templateFormatting(source: ICharacter | INumeric, options: options) {
@@ -17,6 +18,9 @@ export function templateFormatting(source: ICharacter | INumeric, options: optio
   }
   if (options.time === "iso") {
     text = text.substr(0,2) + ":" + text.substr(2,2) + ":" + text.substr(4,2);
+  }
+  if (options.width) {
+    text = text.padEnd(options.width, " ");
   }
   return text;
 }
