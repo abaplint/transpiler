@@ -20,7 +20,7 @@ export function templateFormatting(source: ICharacter | INumeric, options: optio
     text = text.substr(0,2) + ":" + text.substr(2,2) + ":" + text.substr(4,2);
   }
   if (options.width) {
-    text = text.padEnd(options.width, " ");
+    text = text.trimEnd().padEnd(options.width, " ");
   }
   return text;
 }
