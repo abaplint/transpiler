@@ -148,12 +148,21 @@ export class Table  {
 ///////////////////////////
 
   private getValue(item: TableRowType, cloneRow = true) {
+    // make sure to do conversion if needed
     if (typeof item === "number") {
-      return new Integer().set(item);
+      const tmp = clone(this.getRowType());
+      tmp.set(new Integer().set(item));
+      return tmp;
     } else if (typeof item === "string") {
-      return new String().set(item);
+      const tmp = clone(this.getRowType());
+      tmp.set(new String().set(item));
+      return tmp;
+    } else if (cloneRow === true) {
+      const tmp = clone(this.getRowType());
+      tmp.set(item);
+      return tmp;
     } else {
-      return cloneRow === true ? clone(item) : item;
+      return item;
     }
   }
 

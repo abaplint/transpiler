@@ -174,7 +174,7 @@ ASSERT tab1 = tab2.`;
     await f(abap);
   });
 
-  it.only("table, copy full table and perform type conversions", async () => {
+  it("table, copy full table and perform type conversions", async () => {
     const code = `
     DATA strings TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
     DATA ints TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
