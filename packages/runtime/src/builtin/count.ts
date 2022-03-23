@@ -5,7 +5,8 @@ export function count(input: {val: ICharacter | string, sub: ICharacter | string
   let found = 0;
 
   const val = typeof input.val === "string" ? input.val : input.val.get();
-  const sub = typeof input.sub === "string" ? input.sub : input.sub.get();
+  let sub = typeof input.sub === "string" ? input.sub : input.sub.get();
+  sub = sub.replace(/\*/g, "\\*");
 
   if (val !== "") {
     const res = val.match(new RegExp(sub, "g"));
