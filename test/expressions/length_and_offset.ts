@@ -76,7 +76,7 @@ describe("Running expressions - Length and offset", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("11223A55\nB1223A55\nB12C");
+    expect(abap.console.getTrimmed()).to.equal("11223A55\nB1223A55\nB12C");
   });
 
   it("xstring offset and length", async () => {
@@ -167,7 +167,7 @@ describe("Running expressions - Length and offset", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("0##3###7####2\n012!!!!789012\n012$$$!789012\n012££$!789012\n0123PPPP89012\n0123AAAP89012\n0123ABAP89012\nABAP");
+    expect(abap.console.getTrimmed()).to.equal("0##3###7####2\n012!!!!789012\n012$$$!789012\n012££$!789012\n0123PPPP89012\n0123AAAP89012\n0123ABAP89012\nABAP");
   });
 
   it("Field offsets and lengths with field-symbols, source", async () => {
@@ -247,7 +247,7 @@ describe("Running expressions - Length and offset", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("0##3###7####2\n012!!!!789012\n012$$$!789012\n012££$!789012\n0123PPPP89012\n0123AAAP89012\n0123ABAP89012");
+    expect(abap.console.getTrimmed()).to.equal("0##3###7####2\n012!!!!789012\n012$$$!789012\n012££$!789012\n0123PPPP89012\n0123AAAP89012\n0123ABAP89012");
   });
 
   it("getOffset for field-symbols", async () => {
@@ -365,11 +365,21 @@ describe("Running expressions - Length and offset", () => {
     res+pos(1) = abap_true.
     pos = 5.
     res+pos(1) = abap_true.
-    WRITE / res.`;
+    ASSERT res = 'X    X                    '.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("X    X");
+  });
+
+  it("Dont loose spaces", async () => {
+    const code = `
+    DATA row TYPE c LENGTH 10.
+    row = ' * '.
+    row(1) = '1'.
+    ASSERT row+2(1) = space.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
 });

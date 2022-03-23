@@ -12,4 +12,8 @@ export class Console {
   public get(): string {
     return this.data;
   }
+
+  public getTrimmed(): string {
+    return this.data.split("\n").map(a => a.trimEnd()).join("\n");
+  }
 }

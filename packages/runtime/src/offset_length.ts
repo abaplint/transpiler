@@ -82,6 +82,10 @@ export class OffsetLength {
     }
     old = old.trimEnd();
 
+    if (this.obj instanceof Character) {
+      old = old.padEnd(this.obj.getLength(), " ");
+    }
+
     this.obj.set(old);
   }
 }
