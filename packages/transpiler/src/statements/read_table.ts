@@ -54,9 +54,9 @@ export class ReadTableTranspiler implements IStatementTranspiler {
         if (s.includes("await")) {
           const id = UniqueIdentifier.get();
           prefix += "const " + id + " = " + s + ";\n";
-          conds.push("abap.compare.eq(i." + components[i].concatTokens() + ", " + id + ")");
+          conds.push("abap.compare.eq(i." + components[i].concatTokens().toLowerCase() + ", " + id + ")");
         } else {
-          conds.push("abap.compare.eq(i." + components[i].concatTokens() + ", " + s + ")");
+          conds.push("abap.compare.eq(i." + components[i].concatTokens().toLowerCase() + ", " + s + ")");
         }
       }
       extra.push("withKey: (i) => {return " + conds.join(" && ") + ";}");
