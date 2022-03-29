@@ -16,11 +16,7 @@ export interface IFindOptions {
   submatches?: ICharacter[],
 }
 
-export function find(input: ICharacter | string, options: IFindOptions) {
-  let i = input;
-  if (typeof i !== "string") {
-    i = i.get();
-  }
+export function find(input: ICharacter | Table, options: IFindOptions) {
 
   let sectionOffset = options.sectionOffset?.get();
   if (sectionOffset && options.byteMode) {
@@ -65,17 +61,31 @@ export function find(input: ICharacter | string, options: IFindOptions) {
     throw "FIND, runtime, no input";
   }
 
-  if (sectionOffset) {
-    i = i.substr(sectionOffset);
-  }
-
-  let temp: RegExpExecArray | null;
   const matches: RegExpExecArray[] = [];
-  // eslint-disable-next-line no-cond-assign
-  while(temp = s.exec(i)) {
-    matches.push(temp);
-    if (options.first === true) {
-      break;
+  if (input instanceof Table) {
+    for (const blah of input.array()) {
+      let temp: RegExpExecArray | null;
+      // eslint-disable-next-line no-cond-assign
+      while(temp = s.exec(blah.get())) {
+        matches.push(temp);
+        if (options.first === true) {
+          break;
+        }
+      }
+    }
+  } else {
+    let blah = input.get();
+    if (sectionOffset) {
+      blah = blah.substr(sectionOffset);
+    }
+
+    let temp: RegExpExecArray | null;
+    // eslint-disable-next-line no-cond-assign
+    while(temp = s.exec(blah)) {
+      matches.push(temp);
+      if (options.first === true) {
+        break;
+      }
     }
   }
 
