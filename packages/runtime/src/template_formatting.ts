@@ -1,3 +1,4 @@
+import {Integer} from "./types";
 import {ICharacter} from "./types/_character";
 import {INumeric} from "./types/_numeric";
 
@@ -6,6 +7,7 @@ type options = {
   date?: string,
   time?: string,
   width?: number,
+  decimals?: number,
 };
 
 export function templateFormatting(source: ICharacter | INumeric, options: options) {
@@ -21,6 +23,8 @@ export function templateFormatting(source: ICharacter | INumeric, options: optio
   }
   if (options.width) {
     text = text.trimEnd().padEnd(options.width, " ");
+  } else if (options.decimals && source instanceof Integer) {
+    text = source.get() + "." + "".padEnd(options.decimals, "0");
   }
   return text;
 }

@@ -84,4 +84,17 @@ describe("Running expressions - String templates", () => {
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("integer DECIMALS", async () => {
+    const code = `
+    DATA out TYPE string.
+    DATA n TYPE i.
+    n = 5.
+    out = |n = { n DECIMALS = 2 }|.
+    WRITE / out.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("n = 5.00");
+  });
+
 });

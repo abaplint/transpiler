@@ -36,4 +36,14 @@ describe("Builtin functions - count", () => {
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("count(), case false", async () => {
+    const code = `DATA cnt TYPE i.
+  cnt = count( val = 'aabb' case = abap_false regex = \`[AEIOULNRST]\` ).
+  WRITE cnt.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
