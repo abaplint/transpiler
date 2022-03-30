@@ -382,4 +382,16 @@ describe("Running expressions - Length and offset", () => {
     await f(abap);
   });
 
+  it("upper case", async () => {
+    const code = `
+    DATA garden_row TYPE c LENGTH 10.
+    DATA plant_number TYPE i.
+    plant_number = 1.
+    garden_row = 'SDFSDFSD'.
+    WRITE GARDEN_ROW+PLANT_NUMBER(1).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
