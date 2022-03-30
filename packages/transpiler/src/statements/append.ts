@@ -40,6 +40,15 @@ export class AppendTranspiler implements IStatementTranspiler {
         options.push(option);
       }
 
+      const to = node.findExpressionAfterToken("TO");
+      if (to && to.get() instanceof abaplint.Expressions.Source) {
+        options.push(new Chunk().appendString("to: " + traversal.traverse(to).getCode()));
+      }
+      const from = node.findExpressionAfterToken("FROM");
+      if (from) {
+        options.push(new Chunk().appendString("from: " + traversal.traverse(from).getCode()));
+      }
+
       if (concat.startsWith("APPEND LINES OF ")) {
         options.push(new Chunk().appendString("lines: true"));
       }
