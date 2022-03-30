@@ -139,4 +139,17 @@ describe("Running statements - REPLACE", () => {
     await f(abap);
   });
 
+  it("REPLACE, service", async () => {
+    const code = `
+    CONSTANTS lc_content_type TYPE string VALUE 'application/x-git-<service>-pack-advertisement'.
+    DATA lv_expected_content_type TYPE string.
+    lv_expected_content_type = lc_content_type.
+    REPLACE '<service>' IN lv_expected_content_type WITH 'moo'.
+    ASSERT lv_expected_content_type = 'application/x-git-moo-pack-advertisement'.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
