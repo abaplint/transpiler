@@ -116,4 +116,27 @@ describe("Running statements - REPLACE", () => {
     await f(abap);
   });
 
+  it("REPLACE, all regex", async () => {
+    const code = `
+  data str type string.
+  str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.
+  replace all occurrences of regex '[AEG]' in str with ''.
+  write str.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("BCDFHIJKLMNOPQRSTUVWXYZ");
+  });
+
+  it("REPLACE newline", async () => {
+    const code = `
+  DATA lv_xml TYPE string.
+  REPLACE ALL OCCURRENCES OF |\\n| IN lv_xml WITH ||.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

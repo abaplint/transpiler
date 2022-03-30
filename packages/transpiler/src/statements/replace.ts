@@ -8,27 +8,34 @@ export class ReplaceTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
 
-    const sources: string[] = [];
-    for (const s of node.findDirectExpressions(abaplint.Expressions.Source)) {
-      sources.push(new SourceTranspiler().transpile(s, traversal).getCode());
-    }
+    const sources = node.findDirectExpressions(abaplint.Expressions.Source);
 
     const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target)).getCode();
 
     const concat = node.concatTokens().toUpperCase();
     const all = concat.startsWith("REPLACE ALL");
 
-    if (concat.includes("SECTION LENGTH")) {
-// TODO,
-      const last = sources.pop()!;
-      sources.pop();
-      sources.push(last);
+
+    const extra: string[] = [];
+    const w = node.findExpressionAfterToken("WITH");
+    if (w) {
+      extra.push("with: " + new SourceTranspiler().transpile(w, traversal).getCode());
+    }
+    const o = node.findExpressionAfterToken("OF");
+    if (o && o.get() instanceof abaplint.Expressions.Source) {
+      extra.push("of: " + new SourceTranspiler().transpile(o, traversal).getCode());
+    }
+
+    const r = node.findDirectExpression(abaplint.Expressions.FindType);
+    const type = r?.concatTokens().toUpperCase();
+    if (type === "REGEX") {
+      extra.push("regex: " + new SourceTranspiler().transpile(sources[0], traversal).getCode());
     }
 
     return new Chunk()
-      .append("abap.statements.replace(", node, traversal)
-      .appendString(target + ", " + all + ", " + sources.join(", "))
-      .append(");", node.getLastToken(), traversal);
+      .append("abap.statements.replace({target:", node, traversal)
+      .appendString(target + ", all:" + all + ", " + extra.join(","))
+      .append("});", node.getLastToken(), traversal);
   }
 
 }

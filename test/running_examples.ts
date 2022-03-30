@@ -1045,4 +1045,14 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("constants, case", async () => {
+    const code = `constants PLANTS_PER_STUDENT type I value 2.
+    write plants_per_student.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
