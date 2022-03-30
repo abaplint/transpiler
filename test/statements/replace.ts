@@ -116,7 +116,7 @@ describe("Running statements - REPLACE", () => {
     await f(abap);
   });
 
-  it.skip("REPLACE, plus", async () => {
+  it("REPLACE, plus", async () => {
     const code = `
   data str type string.
   str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.
@@ -124,7 +124,6 @@ describe("Running statements - REPLACE", () => {
   write str.`;
 
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("BCDFHIJKLMNOPQRSTUVWXYZ");

@@ -12,11 +12,20 @@ export type replaceInput = {
 export function replace(input: replaceInput): void {
   let temp = input.target.get();
 
-  let search: string = "";
+  let search: RegExp | string = "";
+  let found = false;
   if (input.of) {
     search = input.of.get();
+    if (search.length === 0 && input.all === true) {
+      throw "REPLACE, zero length input";
+    }
+    found = temp.indexOf(search) >= 0;
   } else if (input.regex) {
-    search = input.regex.get();
+    if (input.regex.get().length === 0 && input.all === true) {
+      throw "REPLACE, zero length input";
+    }
+    found = temp.match(search) !== null;
+    search = new RegExp(input.regex.get());
   }
 
   let replace: string = "";
@@ -26,12 +35,7 @@ export function replace(input: replaceInput): void {
     replace = input.with.get();
   }
 
-  const found = temp.indexOf(search) >= 0;
-
   if (input.all === true) {
-    if (search.length === 0) {
-      throw "REPLACE, zero length input";
-    }
     while(temp.replace(search, replace) !== temp) {
       temp = temp.replace(search, replace);
     }
