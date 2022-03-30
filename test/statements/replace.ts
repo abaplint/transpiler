@@ -129,4 +129,14 @@ describe("Running statements - REPLACE", () => {
     expect(abap.console.get()).to.equal("BCDFHIJKLMNOPQRSTUVWXYZ");
   });
 
+  it("REPLACE newline", async () => {
+    const code = `
+  DATA lv_xml TYPE string.
+  REPLACE ALL OCCURRENCES OF |\\n| IN lv_xml WITH ||.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
