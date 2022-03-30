@@ -1,25 +1,34 @@
 import {ICharacter} from "../types/_character";
 
-export function replace(input: ICharacter, all: boolean, s: ICharacter | string, r: ICharacter | string): void {
-  let temp = input.get();
+export type replaceInput = {
+  target: ICharacter,
+  sectionLength?: ICharacter,
+  regex?: ICharacter,
+  all: boolean,
+  with: ICharacter,
+  of: ICharacter,
+};
+
+export function replace(input: replaceInput): void {
+  let temp = input.target.get();
 
   let search: string = "";
-  if (typeof s === "string") {
-    search = s;
-  } else {
-    search = s.get();
+  if (input.of) {
+    search = input.of.get();
+  } else if (input.regex) {
+    search = input.regex.get();
   }
 
   let replace: string = "";
-  if (typeof r === "string") {
-    replace = r;
+  if (typeof input.with === "string") {
+    replace = input.with;
   } else {
-    replace = r.get();
+    replace = input.with.get();
   }
 
   const found = temp.indexOf(search) >= 0;
 
-  if (all === true) {
+  if (input.all === true) {
     if (search.length === 0) {
       throw "REPLACE, zero length input";
     }
@@ -34,5 +43,5 @@ export function replace(input: ICharacter, all: boolean, s: ICharacter | string,
   // @ts-ignore
   abap.builtin.sy.get().subrc.set(subrc);
 
-  input.set(temp);
+  input.target.set(temp);
 }

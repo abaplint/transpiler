@@ -103,7 +103,7 @@ describe("Single statements", () => {
     {abap: "WRITE '@KERNEL let arr = 2;'.",           js: "let arr = 2;",        skip: false},
     {abap: "WRITE foo->bar.",                         js: "abap.statements.write(foo.get().bar);",        skip: false},
     {abap: "type->type_kind = 2.",                    js: "type.get().type_kind.set(constant_2);",         skip: false},
-    {abap: "REPLACE ALL OCCURRENCES OF |\\n| IN lv_norm WITH | |.",              js: "abap.statements.replace(lv_norm, true, new abap.types.String().set(`\\n`), new abap.types.String().set(` `));",         skip: false},
+    {abap: "REPLACE ALL OCCURRENCES OF |\\n| IN lv_norm WITH | |.",              js: `abap.statements.replace({target:lv_norm, all:true, with: new abap.types.String().set(\` \`),of: new abap.types.String().set(\`\\n\`)});`,         skip: false},
     {abap: "CONDENSE lv_norm.",                                                  js: "abap.statements.condense(lv_norm, {nogaps: false});",         skip: false},
     {abap: "FIND FIRST OCCURRENCE OF |bar| IN |foobar| MATCH OFFSET lv_offset.",
       js: "abap.statements.find(new abap.types.String().set(`foobar`), {find: new abap.types.String().set(`bar`), first: true, offset: lv_offset});", skip: false},
