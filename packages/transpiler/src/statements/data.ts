@@ -33,10 +33,10 @@ export class DataTranspiler implements IStatementTranspiler {
       }
       if (int) {
         const escaped = new ConstantTranspiler().escape(int.getFirstToken().getStr());
-        value = "\n" + found.getName() + ".set(" + escaped + ");";
+        value = "\n" + found.getName().toLowerCase() + ".set(" + escaped + ");";
       } else if (val.getChildren()[1].get() instanceof abaplint.Expressions.SimpleFieldChain) {
         const s = new FieldChainTranspiler().transpile(val.getChildren()[1] as abaplint.Nodes.ExpressionNode, traversal).getCode();
-        value = "\n" + found.getName() + ".set(" + s + ");";
+        value = "\n" + found.getName().toLowerCase() + ".set(" + s + ");";
       }
     }
 
