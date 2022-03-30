@@ -116,7 +116,7 @@ describe("Running statements - REPLACE", () => {
     await f(abap);
   });
 
-  it("REPLACE, plus", async () => {
+  it("REPLACE, all regex", async () => {
     const code = `
   data str type string.
   str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.
