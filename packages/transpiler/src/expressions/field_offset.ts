@@ -11,7 +11,7 @@ export class FieldOffsetTranspiler implements IExpressionTranspiler {
     for (const c of node.getChildren()) {
       if (c instanceof Nodes.ExpressionNode) {
         if (c.get() instanceof Expressions.SourceField) {
-          let sourceStr = c.getFirstToken().getStr();
+          let sourceStr = c.getFirstToken().getStr().toLowerCase();
           if (sourceStr === "sy") {
             sourceStr = "abap.builtin.sy";
           }
@@ -21,11 +21,11 @@ export class FieldOffsetTranspiler implements IExpressionTranspiler {
         } else if (c.get() instanceof Expressions.ArrowOrDash) {
           ret += ".get().";
         } else if (c.get() instanceof Expressions.ComponentName) {
-          ret += c.getFirstToken().getStr();
+          ret += c.getFirstToken().getStr().toLowerCase();
         }
       } else if(c instanceof Nodes.TokenNode) {
         if (c.get() instanceof Tokens.Identifier) {
-          ret += c.getFirstToken().getStr();
+          ret += c.getFirstToken().getStr().toLowerCase();
         }
       }
     }
