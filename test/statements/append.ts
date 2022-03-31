@@ -169,4 +169,18 @@ ENDDO.`;
     await f(abap);
   });
 
+  it("APPEND LINES OF lower case", async () => {
+    const code = `
+  DATA tab1 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA tab2 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DO 5 TIMES.
+    APPEND sy-index TO tab1.
+  ENDDO.
+  append lines of tab1 TO 2 TO tab2.
+  ASSERT lines( tab2 ) = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
