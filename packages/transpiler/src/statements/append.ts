@@ -6,11 +6,11 @@ import {Chunk} from "../chunk";
 export class AppendTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    const concat = node.concatTokens();
+    const concat = node.concatTokens().toUpperCase();
 
     const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
 
-    if (concat.toUpperCase().includes("INITIAL LINE")) {
+    if (concat.includes("INITIAL LINE")) {
       const assigning = node.findExpressionAfterToken("ASSIGNING");
       const into = node.findExpressionAfterToken("INTO");
       if (assigning) {
