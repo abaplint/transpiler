@@ -27,7 +27,6 @@
   "author": "abaplint",
   "license": "MIT",
   "dependencies": {
-    "hdb": "^0.19.1",
     "sql.js": "^1.6.2"
   },
   "devDependencies": {
