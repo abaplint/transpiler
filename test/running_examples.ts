@@ -1055,4 +1055,13 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("constants, minus one", async () => {
+    const code = `CONSTANTS lc_mine TYPE i VALUE -1.
+    ASSERT lc_mine = -1.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

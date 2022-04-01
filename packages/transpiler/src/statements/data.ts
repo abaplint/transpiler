@@ -32,7 +32,7 @@ export class DataTranspiler implements IStatementTranspiler {
         int = val.findFirstExpression(abaplint.Expressions.ConstantString);
       }
       if (int) {
-        const escaped = new ConstantTranspiler().escape(int.getFirstToken().getStr());
+        const escaped = new ConstantTranspiler().escape(int.concatTokens());
         value = "\n" + found.getName().toLowerCase() + ".set(" + escaped + ");";
       } else if (val.getChildren()[1].get() instanceof abaplint.Expressions.SimpleFieldChain) {
         const s = new FieldChainTranspiler().transpile(val.getChildren()[1] as abaplint.Nodes.ExpressionNode, traversal).getCode();

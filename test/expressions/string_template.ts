@@ -97,4 +97,16 @@ describe("Running expressions - String templates", () => {
     expect(abap.console.get()).to.equal("n = 5.00");
   });
 
+  it("WIDTH and PAD", async () => {
+    const code = `
+  data h type i value 2.
+  data m type i value 5.
+  write / |{ h WIDTH = 2 }:{ m PAD = '0' }|.
+  write / |{ h WIDTH = 2 PAD = '0' }:{ m }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2 :5\n20:5");
+  });
+
 });

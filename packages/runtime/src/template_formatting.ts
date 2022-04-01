@@ -6,6 +6,7 @@ type options = {
   timestamp?: string,
   date?: string,
   time?: string,
+  pad?: string,
   width?: number,
   decimals?: number,
 };
@@ -21,7 +22,9 @@ export function templateFormatting(source: ICharacter | INumeric, options: optio
   if (options.time === "iso") {
     text = text.substr(0,2) + ":" + text.substr(2,2) + ":" + text.substr(4,2);
   }
-  if (options.width) {
+  if (options.width && options.pad) {
+    text = text.trimEnd().padEnd(options.width, options.pad);
+  } else if (options.width) {
     text = text.trimEnd().padEnd(options.width, " ");
   } else if (options.decimals && source instanceof Integer) {
     text = source.get() + "." + "".padEnd(options.decimals, "0");
