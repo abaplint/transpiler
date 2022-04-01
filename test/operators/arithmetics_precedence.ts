@@ -89,4 +89,15 @@ describe("Running operators - Arithmetic precedence", () => {
     expect(abap.console.get()).to.equal("11");
   });
 
+  it("power and plus", async () => {
+    const code = `
+    data n type i.
+    n = 3 ** 2 + 2 ** 2.
+    write n.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("13");
+  });
+
 });
