@@ -33,11 +33,16 @@ export class StringTemplateSourceTranspiler implements IExpressionTranspiler {
 
   private build(node: Nodes.ExpressionNode, traversal: Traversal): undefined | string {
     let option = "";
+    let count = 0;
     for (const c of node.getChildren()) {
+      count++;
       if (c instanceof Nodes.TokenNode) {
         if (c.getFirstToken().getStr() === "=") {
           option += ":";
         } else {
+          if (count > 3 && count % 4 === 0) {
+            option += ",";
+          }
           option += `"` + c.concatTokens().toLowerCase() + `"`;
         }
       } else if (c.get() instanceof Expressions.Source) {
