@@ -109,4 +109,16 @@ describe("Running expressions - String templates", () => {
     expect(abap.console.get()).to.equal("2 :5\n20:5");
   });
 
+  it("WIDTH and PAD and Align", async () => {
+    const code = `
+    data result type string.
+    data hours type i.
+    result = |{ hours PAD = '0' WIDTH = 2 ALIGN = RIGHT }|.
+    write result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("00");
+  });
+
 });

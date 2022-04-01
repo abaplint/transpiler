@@ -61,17 +61,19 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
     throw "FIND, runtime, no input";
   }
 
-  const matches: RegExpExecArray[] = [];
+  const matches = [];
   if (input instanceof Table) {
+    let line = 1;
     for (const blah of input.array()) {
       let temp: RegExpExecArray | null;
       // eslint-disable-next-line no-cond-assign
       while(temp = s.exec(blah.get())) {
-        matches.push(temp);
+        matches.push({...temp, line});
         if (options.first === true) {
           break;
         }
       }
+      line++;
     }
   } else {
     let blah = input.get();
@@ -110,7 +112,7 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
         submatches: new Table(new Structure({offset: new Integer(), length: new Integer()})),
       });
 
-      match.get().line.set(0); // todo
+      match.get().line.set((m as any).line || 0);
       match.get().offset.set(m.index);
       match.get().length.set(m[0].length);
 

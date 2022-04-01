@@ -586,4 +586,33 @@ ASSERT lines( lt_matches ) = 1.`;
     await f(abap);
   });
 
+  it("FIND REGEX in TABLE, check LINE", async () => {
+    const code = `
+TYPES: BEGIN OF ty_submatch,
+              offset TYPE i,
+              length TYPE i,
+            END OF ty_submatch.
+TYPES: BEGIN OF ty_match,
+              line       TYPE i,
+              offset     TYPE i,
+              length     TYPE i,
+              submatches TYPE STANDARD TABLE OF ty_submatch WITH DEFAULT KEY,
+            END OF ty_match.
+DATA ls_submatch TYPE ty_submatch.
+DATA ls_match TYPE ty_match.
+DATA lt_matches TYPE STANDARD TABLE OF ty_match WITH DEFAULT KEY.
+DATA lt_words TYPE TABLE OF string.
+APPEND 'hello' TO lt_words.
+APPEND '__bar__' TO lt_words.
+APPEND 'world' TO lt_words.
+FIND REGEX |(bar)| IN TABLE lt_words RESULTS lt_matches.
+LOOP AT lt_matches INTO ls_match.
+  WRITE ls_match-line.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
