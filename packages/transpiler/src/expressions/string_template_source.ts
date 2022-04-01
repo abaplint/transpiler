@@ -40,7 +40,7 @@ export class StringTemplateSourceTranspiler implements IExpressionTranspiler {
         if (c.getFirstToken().getStr() === "=") {
           option += ":";
         } else {
-          if (count > 3 && count % 4 === 0) {
+          if (count > 3 && (count - 1) % 3 === 0) {
             option += ",";
           }
           option += `"` + c.concatTokens().toLowerCase() + `"`;
