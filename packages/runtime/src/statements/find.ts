@@ -30,7 +30,9 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
       s = s.get();
     }
     if (s === "") {
-      throw "FIND, runtime, no input, s empty";
+      // @ts-ignore
+      abap.builtin.sy.get().subrc.set(0);
+      return;
     }
 
     s = s.replace(/\[/g, "\\[");
