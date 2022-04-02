@@ -615,4 +615,17 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("FIND, empty, simple", async () => {
+    const code = `
+    DATA letter TYPE string.
+    DATA letters TYPE string.
+    letter = ''.
+    letters = 'abcde'.
+    FIND letter IN letters.
+    ASSERT sy-subrc = 0.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    await f(abap);
+  });
+
 });
