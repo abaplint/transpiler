@@ -252,4 +252,16 @@ WRITE / lv_type.`;
     expect(abap.console.get()).to.equal("e");
   });
 
+  it("DESCRIBE TABLE, LINES", async () => {
+    const code = `
+  DATA tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+  DATA l TYPE i.
+  APPEND 'sdf' TO tab.
+  DESCRIBE TABLE tab LINES l.
+  ASSERT l = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
