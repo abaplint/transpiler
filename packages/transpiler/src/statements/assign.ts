@@ -13,7 +13,7 @@ export class AssignTranspiler implements IStatementTranspiler {
 
     const options: string[] = [];
 
-    const concat = node.concatTokens();
+    const concat = node.concatTokens().toUpperCase();
     if (concat.startsWith("ASSIGN COMPONENT ")) {
       options.push("component: " + sources.shift());
     }

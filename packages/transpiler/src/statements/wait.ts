@@ -7,7 +7,7 @@ export class WaitTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
 
-    const concat = node.concatTokens();
+    const concat = node.concatTokens().toUpperCase();
     if (concat.includes(" FOR PUSH CHANNELS ") === false) {
       return new Chunk().appendString("WAIT_TODO");
     }

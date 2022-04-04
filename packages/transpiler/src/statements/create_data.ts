@@ -10,7 +10,7 @@ export class CreateDataTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const targetNode = node.findDirectExpression(abaplint.Expressions.Target);
     const target = traversal.traverse(targetNode);
-    const concat = node.concatTokens();
+    const concat = node.concatTokens().toUpperCase();
     const options: string[] = [];
 
     let dynamic = node.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.ConstantString);

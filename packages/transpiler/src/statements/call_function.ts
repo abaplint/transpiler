@@ -6,7 +6,7 @@ import {Chunk} from "../chunk";
 export class CallFunctionTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    const fmname = node.findDirectExpression(abaplint.Expressions.FunctionName)?.concatTokens();
+    const fmname = node.findDirectExpression(abaplint.Expressions.FunctionName)?.concatTokens().toUpperCase();
     if (fmname === undefined) {
       throw "CallFunctionTranspilerNameNotFound";
     }

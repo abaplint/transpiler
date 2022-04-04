@@ -6,7 +6,7 @@ import {Chunk} from "../chunk";
 export class ConcatenateTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    const concat = node.concatTokens();
+    const concat = node.concatTokens().toUpperCase();
 
     const slist: Chunk[] = [];
     for (const s of node.findDirectExpressions(abaplint.Expressions.Source)) {
