@@ -7,7 +7,7 @@ export class CondenseTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
-    const noGaps = node.concatTokens().includes(" NO-GAPS");
+    const noGaps = node.concatTokens().toUpperCase().includes(" NO-GAPS");
 
     const ret = new Chunk();
     ret.append("abap.statements.condense(", node, traversal);

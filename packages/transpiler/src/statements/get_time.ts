@@ -6,7 +6,7 @@ import {Chunk} from "../chunk";
 export class GetTimeTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    const concat = node.concatTokens();
+    const concat = node.concatTokens().toUpperCase();
     let options = "";
     if (concat.startsWith("GET TIME FIELD")) {
       options = "{field: " + traversal.traverse(node.findFirstExpression(abaplint.Expressions.Target)).getCode() + "}";
