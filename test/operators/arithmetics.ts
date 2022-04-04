@@ -176,4 +176,15 @@ describe("Running operators - Arithmetics", () => {
     expect(abap.console.get()).to.equal("-1,0000000000000000E+00");
   });
 
+  it("mod, negative value", async () => {
+    const code = `
+    DATA n TYPE i.
+    n = -4 MOD 3.
+    WRITE / n.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
