@@ -667,4 +667,24 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("CS should set sy-fdpos", async () => {
+    const code = `
+    IF |abc| CS |fffabc|.
+    ENDIF.
+    ASSERT sy-fdpos = 3.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("CS should set sy-fdpos, negative", async () => {
+    const code = `
+    IF |abcd| CS |werrwewerwerwer|.
+    ENDIF.
+    assert sy-fdpos = 4.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
