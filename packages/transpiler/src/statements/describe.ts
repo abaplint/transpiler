@@ -25,6 +25,16 @@ export class DescribeTranspiler implements IStatementTranspiler {
       options.push("length: " + traversal.traverse(length).getCode());
     }
 
+    const lines = node.findExpressionAfterToken("LINES");
+    if (lines) {
+      options.push("lines: " + traversal.traverse(lines).getCode());
+    }
+
+    const table = node.findExpressionAfterToken("TABLE");
+    if (table) {
+      options.push("table: " + traversal.traverse(table).getCode());
+    }
+
     if (concat.includes("IN CHARACTER MODE")) {
       options.push("mode: 'CHARACTER'");
     }

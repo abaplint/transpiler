@@ -6,6 +6,8 @@ export interface IDescribeOptions {
   field: any,
   type?: ICharacter,
   length?: INumeric,
+  lines?: INumeric,
+  table?: Table,
   mode?: "BYTE" | "CHARACTER"
 }
 
@@ -60,5 +62,9 @@ export function describe(input: IDescribeOptions) {
     } else {
       throw "DESCRIBE, unsupported or todo";
     }
+  }
+
+  if (input.table && input.lines) {
+    input.lines.set(input.table.array().length);
   }
 }
