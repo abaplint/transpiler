@@ -690,8 +690,14 @@ START-OF-SELECTION.
   });
 
   it("CS, basic", async () => {
-    const code = `
-    ASSERT 'test' CS 't'.`;
+    const code = `ASSERT 'test' CS 't'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("CS, case insensitive", async () => {
+    const code = `ASSERT 'test' CS 'T'.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
