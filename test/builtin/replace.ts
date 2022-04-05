@@ -69,18 +69,34 @@ write text.`;
     expect(abap.console.get()).to.equal("omg");
   });
 
-  it.only("replace with offset", async () => {
+  it("replace with offset, 1", async () => {
     const code = `DATA str TYPE string.
-    str = 'sdfsdfsd'.
+    str = 'abcdefg'.
     str = replace(
       val = str
       off = 2
       len = 1
       with = \`\` ).
-    ASSERT str = 'sdsdfsd'.`;
+    WRITE str.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+    expect(abap.console.get()).to.equal("abdefg");
+  });
+
+  it("replace with offset, 2", async () => {
+    const code = `DATA str TYPE string.
+    str = 'abcdefg'.
+    str = replace(
+      val = str
+      off = 2
+      len = 1
+      with = \`qqqq\` ).
+    WRITE str.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("abqqqqdefg");
   });
 
 });
