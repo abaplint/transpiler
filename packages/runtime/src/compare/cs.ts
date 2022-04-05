@@ -16,7 +16,7 @@ export function cs(left: number | string | ICharacter | INumeric, right: string 
     r = right.get().toString();
   }
 
-  const index = r.indexOf(l);
+  const index = l.indexOf(r);
   if (index < 0) {
     // @ts-ignore
     abap.builtin.sy.get().fdpos.set(l.length);
