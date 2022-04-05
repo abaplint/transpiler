@@ -69,4 +69,18 @@ write text.`;
     expect(abap.console.get()).to.equal("omg");
   });
 
+  it.only("replace with offset", async () => {
+    const code = `DATA str TYPE string.
+    str = 'sdfsdfsd'.
+    str = replace(
+      val = str
+      off = 2
+      len = 1
+      with = \`\` ).
+    ASSERT str = 'sdsdfsd'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
