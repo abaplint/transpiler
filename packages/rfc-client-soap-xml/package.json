@@ -11,11 +11,11 @@
   "devDependencies": {
     "@types/express": "^4.17.13",
     "express": "^4.17.3",
-    "@abaplint/transpiler-cli": "^1.8.38",
+    "@abaplint/transpiler-cli": "^1.8.39",
     "typescript": "^4.6.3"
   },
   "dependencies": {
-    "@abaplint/runtime": "^1.8.38",
+    "@abaplint/runtime": "^1.8.39",
     "cross-fetch": "^3.1.5",
     "fast-xml-parser": "^4.0.7"
   }
