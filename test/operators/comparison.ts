@@ -669,9 +669,11 @@ START-OF-SELECTION.
 
   it("CS should set sy-fdpos", async () => {
     const code = `
-    IF |abc| CS |fffabc|.
+    IF |ffffabc| CS |abc|.
+    ELSE.
+      ASSERT 'nah' = 1.
     ENDIF.
-    ASSERT sy-fdpos = 3.`;
+    ASSERT sy-fdpos = 4.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
@@ -682,6 +684,20 @@ START-OF-SELECTION.
     IF |abcd| CS |werrwewerwerwer|.
     ENDIF.
     assert sy-fdpos = 4.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("CS, basic", async () => {
+    const code = `ASSERT 'test' CS 't'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("CS, case insensitive", async () => {
+    const code = `ASSERT 'test' CS 'T'.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);

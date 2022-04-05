@@ -8,6 +8,7 @@ export function cs(left: number | string | ICharacter | INumeric, right: string 
   } else {
     l = left.get().toString();
   }
+  l = l.toUpperCase();
 
   let r = "";
   if (typeof right === "string") {
@@ -15,8 +16,9 @@ export function cs(left: number | string | ICharacter | INumeric, right: string 
   } else {
     r = right.get().toString();
   }
+  r = r.toUpperCase();
 
-  const index = r.indexOf(l);
+  const index = l.indexOf(r);
   if (index < 0) {
     // @ts-ignore
     abap.builtin.sy.get().fdpos.set(l.length);
