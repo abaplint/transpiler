@@ -7,6 +7,8 @@ export interface IReplaceInput {
   sub?: string | ICharacter,
   with?: string | ICharacter,
   regex?: string | ICharacter,
+  off?: INumeric,
+  len?: INumeric,
   occ?: INumeric,
 }
 
@@ -42,7 +44,11 @@ export function replace(input: IReplaceInput) {
     sub = input.regex.get();
   }
 
-  if (input.occ === undefined && sub && wi) {
+  if (input.off && input.len) {
+    const offset = input.off.get();
+    const length = input.len.get();
+    val = val.substring(0, offset) + wi + val.substring(offset + length);
+  } else if (input.occ === undefined && sub && wi) {
     val = val.replace(sub, wi);
   } else if (input.occ && input.occ.get() === 0 && sub && wi !== undefined) {
     const reg = new RegExp(sub, "g");
