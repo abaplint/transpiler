@@ -1,6 +1,6 @@
 import * as abaplint from "@abaplint/core";
 
-export class DatabaseSetup {
+export class SQLiteDatabaseSetup {
   private readonly reg: abaplint.IRegistry;
 
   public constructor(reg: abaplint.IRegistry) {

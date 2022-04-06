@@ -2,7 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {Validation, config} from "./validation";
 import {UnitTest} from "./unit_test";
 import {Keywords} from "./keywords";
-import {DatabaseSetup} from "./database_setup";
+import {SQLiteDatabaseSetup} from "./sqlite_database_setup";
 import {HandleTable} from "./handle_table";
 import {HandleABAP} from "./handle_abap";
 import {IFile, IOutput, IProgress, ITranspilerOptions, IOutputFile} from "./types";
@@ -37,7 +37,7 @@ export class Transpiler {
     new Keywords().handle(reg);
     this.validate(reg);
 
-    const dbSetup = new DatabaseSetup(reg).run();
+    const dbSetup = new SQLiteDatabaseSetup(reg).run();
 
     const output: IOutput = {
       objects: [],
