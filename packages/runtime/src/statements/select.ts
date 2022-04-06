@@ -23,6 +23,7 @@ export class SelectDatabase {
       // @ts-ignore
       target = target.getPointer();
     }
+
     target.clear();
 
     if (rows.length === 0) {
@@ -41,6 +42,7 @@ export class SelectDatabase {
       for (const row of rows) {
         const targetRow = clone(target.getRowType());
         for (const columnName in row) {
+          // todo, non structured table = table with simple rows
           // @ts-ignore
           targetRow.get()[columnName]?.set(row[columnName]);
         }
