@@ -37,7 +37,7 @@ export class ModifyDatabase {
     } else if (options.from) {
       const subrc = new InsertDatabase(this.context).insertDatabase(table, {values: options.from});
       if (subrc !== 0) {
-        new UpdateDatabase(this.context).updateDatabase.bind(this)(table, {from: options.from});
+        new UpdateDatabase(this.context).updateDatabase(table, {from: options.from});
       }
     } else {
       throw "modifyDatabase todo";
