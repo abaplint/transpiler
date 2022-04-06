@@ -43,4 +43,19 @@ export class SQLiteDatabaseClient implements DatabaseClient {
     return {subrc, dbcnt};
   }
 
+  public update(table: string, where: string, set: string[]): {subrc: number, dbcnt: number} {
+    const sql = `UPDATE ${table} SET ${set.join(", ")} WHERE ${where}`;
+
+    let subrc = 0;
+    let dbcnt = 0;
+    try {
+      const res = this.sqlite!.exec(sql);
+      dbcnt = res.length;
+    } catch (error) {
+      subrc = 4;
+    }
+
+    return {subrc, dbcnt};
+  }
+
 }
