@@ -1,7 +1,7 @@
 import initSqlJs, {Database} from "sql.js";
-import {DatabaseClient, DeleteDatabaseOptions, InsertDatabaseOptions, SelectDatabaseOptions, SelectDatabaseResult, UpdateDatabaseOptions} from "./db";
+import * as DB from "./db";
 
-export class SQLiteDatabaseClient implements DatabaseClient {
+export class SQLiteDatabaseClient implements DB.DatabaseClient {
   private sqlite: Database | undefined = undefined;
 
   public async connect() {
@@ -24,7 +24,7 @@ export class SQLiteDatabaseClient implements DatabaseClient {
     return this.sqlite!.prepare(sql);
   }
 
-  public delete(options: DeleteDatabaseOptions): {subrc: number, dbcnt: number} {
+  public delete(options: DB.DeleteDatabaseOptions): {subrc: number, dbcnt: number} {
     const sql = `DELETE FROM ${options.table} WHERE ${options.where}`;
 
     let subrc = 0;
@@ -39,7 +39,7 @@ export class SQLiteDatabaseClient implements DatabaseClient {
     return {subrc, dbcnt};
   }
 
-  public update(options: UpdateDatabaseOptions): {subrc: number, dbcnt: number} {
+  public update(options: DB.UpdateDatabaseOptions): {subrc: number, dbcnt: number} {
     const sql = `UPDATE ${options.table} SET ${options.set.join(", ")} WHERE ${options.where}`;
 
     let subrc = 0;
@@ -54,7 +54,7 @@ export class SQLiteDatabaseClient implements DatabaseClient {
     return {subrc, dbcnt};
   }
 
-  public insert(options: InsertDatabaseOptions): {subrc: number, dbcnt: number} {
+  public insert(options: DB.InsertDatabaseOptions): {subrc: number, dbcnt: number} {
     const sql = `INSERT INTO ${options.table} (${options.columns.join(",")}) VALUES (${options.values.join(",")})`;
 
     let subrc = 0;
@@ -69,7 +69,7 @@ export class SQLiteDatabaseClient implements DatabaseClient {
     return {subrc, dbcnt};
   }
 
-  public select(options: SelectDatabaseOptions): SelectDatabaseResult {
+  public select(options: DB.SelectDatabaseOptions): DB.SelectDatabaseResult {
     let res: undefined | any = undefined;
     try {
       res = this.sqlite!.exec(options.select);
