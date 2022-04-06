@@ -1,16 +1,16 @@
-import * as types from "./types";
+import {Console} from "./console";
+import {Context} from "./context";
+import {OffsetLength} from "./offset_length";
+import {SQLiteDatabaseClient} from "./db/db_sqlite";
+import {Statements} from "./statements";
+import {templateFormatting} from "./template_formatting";
+import {UnitTestResult} from "./unit_test";
 import * as builtin from "./builtin";
 import * as compare from "./compare";
+import * as DB from "./db/db";
 import * as operators from "./operators";
-import {Statements} from "./statements";
 import * as RFC from "./rfc";
-import * as DB from "./db";
-import {Console} from "./console";
-import {UnitTestResult} from "./unit_test";
-import {OffsetLength} from "./offset_length";
-import {templateFormatting} from "./template_formatting";
-import {SQLiteDatabaseClient} from "./sqlite";
-import {Context} from "./context";
+import * as types from "./types";
 
 export {UnitTestResult, RFC, types, DB};
 

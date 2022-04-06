@@ -1,5 +1,5 @@
 import {Console} from "./console";
-import {DatabaseClient} from "./db";
+import {DatabaseClient} from "./db/db";
 import * as RFC from "./rfc";
 
 export class Context {
