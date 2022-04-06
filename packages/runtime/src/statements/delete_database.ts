@@ -43,7 +43,7 @@ export class DeleteDatabase {
       }
       where = where.join(" AND ");
 
-      const {subrc, dbcnt} = this.context.db.delete(table, where);
+      const {subrc, dbcnt} = this.context.db.delete({table, where});
 
       // @ts-ignore
       abap.builtin.sy.get().subrc.set(subrc);

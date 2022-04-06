@@ -1,5 +1,5 @@
-import initSqlJs, {Database, QueryExecResult} from "sql.js";
-import {DatabaseClient} from "./db";
+import initSqlJs, {Database} from "sql.js";
+import {DatabaseClient, DeleteDatabaseOptions, InsertDatabaseOptions, SelectDatabaseOptions, SelectDatabaseResult, UpdateDatabaseOptions} from "./db";
 
 export class SQLiteDatabaseClient implements DatabaseClient {
   private sqlite: Database | undefined = undefined;
@@ -24,8 +24,8 @@ export class SQLiteDatabaseClient implements DatabaseClient {
     return this.sqlite!.prepare(sql);
   }
 
-  public delete(table: string, where: string): {subrc: number, dbcnt: number} {
-    const sql = `DELETE FROM ${table} WHERE ${where}`;
+  public delete(options: DeleteDatabaseOptions): {subrc: number, dbcnt: number} {
+    const sql = `DELETE FROM ${options.table} WHERE ${options.where}`;
 
     let subrc = 0;
     let dbcnt = 0;
@@ -39,8 +39,8 @@ export class SQLiteDatabaseClient implements DatabaseClient {
     return {subrc, dbcnt};
   }
 
-  public update(table: string, where: string, set: string[]): {subrc: number, dbcnt: number} {
-    const sql = `UPDATE ${table} SET ${set.join(", ")} WHERE ${where}`;
+  public update(options: UpdateDatabaseOptions): {subrc: number, dbcnt: number} {
+    const sql = `UPDATE ${options.table} SET ${options.set.join(", ")} WHERE ${options.where}`;
 
     let subrc = 0;
     let dbcnt = 0;
@@ -54,8 +54,8 @@ export class SQLiteDatabaseClient implements DatabaseClient {
     return {subrc, dbcnt};
   }
 
-  public insert(table: string, columns: string[], values: string[]): {subrc: number, dbcnt: number} {
-    const sql = `INSERT INTO ${table} (${columns.join(",")}) VALUES (${values.join(",")})`;
+  public insert(options: InsertDatabaseOptions): {subrc: number, dbcnt: number} {
+    const sql = `INSERT INTO ${options.table} (${options.columns.join(",")}) VALUES (${options.values.join(",")})`;
 
     let subrc = 0;
     let dbcnt = 0;
@@ -69,10 +69,10 @@ export class SQLiteDatabaseClient implements DatabaseClient {
     return {subrc, dbcnt};
   }
 
-  public select(select: string): {result: QueryExecResult[]} {
+  public select(options: SelectDatabaseOptions): SelectDatabaseResult {
     let res: undefined | any = undefined;
     try {
-      res = this.sqlite!.exec(select);
+      res = this.sqlite!.exec(options.select);
     } catch (error) {
       // @ts-ignore
       if (abap.Classes["CX_SY_DYNAMIC_OSQL_SEMANTICS"] !== undefined) {

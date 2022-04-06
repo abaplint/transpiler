@@ -32,7 +32,7 @@ export class InsertDatabase {
       table = table.get();
     }
 
-    const {subrc, dbcnt} = this.context.db.insert(table, columns, values);
+    const {subrc, dbcnt} = this.context.db.insert({table, columns, values});
 
     // @ts-ignore
     abap.builtin.sy.get().subrc.set(subrc);

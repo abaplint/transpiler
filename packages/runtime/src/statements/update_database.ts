@@ -50,7 +50,7 @@ export class UpdateDatabase {
       throw "updateDatabase, todo";
     }
 
-    const {subrc, dbcnt} = this.context.db.update(table, where.join(" AND "), set);
+    const {subrc, dbcnt} = this.context.db.update({table, where: where.join(" AND "), set});
 
     // @ts-ignore
     abap.builtin.sy.get().subrc.set(subrc);
