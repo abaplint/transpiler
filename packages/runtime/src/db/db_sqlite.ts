@@ -27,4 +27,19 @@ export class SQLiteDatabaseClient implements DatabaseClient {
     return this.sqlite!.prepare(sql);
   }
 
+  public delete(table: string, where: string): {subrc: number, dbcnt: number} {
+    const sql = `DELETE FROM ${table} WHERE ${where}`;
+
+    let subrc = 0;
+    let dbcnt = 0;
+    try {
+      const res = this.sqlite!.exec(sql);
+      dbcnt = res.length;
+    } catch (error) {
+      subrc = 4;
+    }
+
+    return {subrc, dbcnt};
+  }
+
 }

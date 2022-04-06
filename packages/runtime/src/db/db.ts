@@ -6,4 +6,6 @@ export interface DatabaseClient {
   disconnect(): Promise<void>;
   exec(sql: string): QueryExecResult[]; // todo, refactor
   prepare(sql: string): Statement; // todo, refactor
+
+  delete(table: string, where: string): {subrc: number, dbcnt: number};
 }

@@ -24,13 +24,16 @@ export class DeleteDatabase {
     if (options.from instanceof FieldSymbol) {
       options.from = options.from.getPointer() as Structure;
     }
+    if (typeof table !== "string") {
+      table = table.get();
+    }
 
     if (options.table) {
       for (const row of options.table.array()) {
         this.deleteDatabase(table, {from: row});
       }
     } else if (options.from) {
-      const where: string[] = [];
+      let where: string[] | string = [];
 
       const structure = options.from.get();
       for (const k of Object.keys(structure)) {
@@ -38,18 +41,14 @@ export class DeleteDatabase {
         const str = k + ' = "' + structure[k].get() + '"';
         where.push(str);
       }
+      where = where.join(" AND ");
 
-      const sql = `DELETE FROM ${table} WHERE ${where.join(" AND ")}`;
-
-      let subrc = 0;
-      try {
-        this.context.db.exec(sql);
-      } catch (error) {
-        subrc = 4;
-      }
+      const {subrc, dbcnt} = this.context.db.delete(table, where);
 
       // @ts-ignore
       abap.builtin.sy.get().subrc.set(subrc);
+      // @ts-ignore
+      abap.builtin.sy.get().dbcnt.set(dbcnt);
     } else {
       throw "deleteDatabase todo";
     }

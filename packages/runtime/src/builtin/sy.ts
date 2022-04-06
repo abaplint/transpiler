@@ -4,6 +4,7 @@ export const sy = new Structure({
   abcde: new Character({length: 26}).set("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
   datlo: new Date(),
   datum: new Date(),
+  dbcnt: new Integer(),
   fdpos: new Integer(),
   index: new Integer(),
   langu: new Character({length: 1}).set("E"),
