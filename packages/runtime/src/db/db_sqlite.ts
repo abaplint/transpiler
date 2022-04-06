@@ -20,10 +20,6 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     }
   }
 
-  public prepare(sql: string) {
-    return this.sqlite!.prepare(sql);
-  }
-
   public delete(options: DB.DeleteDatabaseOptions): {subrc: number, dbcnt: number} {
     const sql = `DELETE FROM ${options.table} WHERE ${options.where}`;
 

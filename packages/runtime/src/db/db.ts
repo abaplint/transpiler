@@ -1,4 +1,4 @@
-import {QueryExecResult, Statement} from "sql.js";
+import {QueryExecResult} from "sql.js";
 
 // todo defined inputs and returns?
 
@@ -31,8 +31,6 @@ export interface DatabaseClient {
   initialize(sql?: string): Promise<void>;
   connect(): Promise<void>;
   disconnect(): Promise<void>;
-
-  prepare(sql: string): Statement; // todo, refactor
 
   delete(options: DeleteDatabaseOptions): {subrc: number, dbcnt: number};
   update(options: UpdateDatabaseOptions): {subrc: number, dbcnt: number};

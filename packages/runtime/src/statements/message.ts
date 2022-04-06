@@ -38,14 +38,12 @@ function findText(context: Context, arbgb: string | undefined, msgnr: string | u
   const db = context.db;
   if (db && arbgb && msgnr) {
     try {
-      const stmt = db.prepare("SELECT * FROM t100 WHERE sprsl=:sprsl AND arbgb=:arbgb AND msgnr=:msgnr LIMIT 1");
-      const result = stmt.getAsObject({
-        ":sprsl": "E",
-        ":arbgb": arbgb,
-        ":msgnr": msgnr,
-      });
-      if (result.text) {
-        text = result.text as string;
+      // todo, sql injection?
+      const select = `SELECT * FROM t100 WHERE sprsl='E' AND arbgb='${arbgb}' AND msgnr='${msgnr}' LIMIT 1`;
+      const {result} = db.select({select});
+      if (result[0]) {
+        // todo, refactor this,
+        text = result[0].values[0][3] as string;
       }
     } catch {
       // use fallback text
