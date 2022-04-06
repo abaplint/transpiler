@@ -21,8 +21,6 @@ export class ABAP {
   public Interfaces: {[name: string]: any} = {};
   public DDIC: {[name: string]: any} = {};
 
-  public RFCDestinations: {[name: string]: RFC.RFCClient} = {};
-
 // stuff for runtime
   public statements;
   public types = types;

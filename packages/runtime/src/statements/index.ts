@@ -1,7 +1,6 @@
 import {append} from "./append";
 import {assert} from "./assert";
 import {assign} from "./assign";
-import {callFunction} from "./call_function";
 import {clear} from "./clear";
 import {commit} from "./commit";
 import {concatenate} from "./concatenate";
@@ -37,6 +36,7 @@ import {Context} from "../context";
 import {ICharacter} from "../types/_character";
 import {FieldSymbol, Structure, Table} from "../types";
 import {INumeric} from "../types/_numeric";
+import {CallFunction, ICallFunctionOptions} from "./call_function";
 
 // this is a class, as statements like SELECT needs access to the database object instance
 // and WRITE will access the Console
@@ -54,7 +54,6 @@ export class Statements {
   public describe = describe;
   public find = find;
   public getBit = getBit;
-  public callFunction = callFunction;
   public getRunTime = getRunTime;
   public getTime = getTime;
   public insertInternal = insertInternal;
@@ -102,6 +101,10 @@ export class Statements {
 
   public write(source: INumeric | ICharacter | FieldSymbol | string | number, options?: IWriteOptions) {
     return new WriteStatement(this.context).write(source, options);
+  }
+
+  public callFunction(options: ICallFunctionOptions) {
+    return new CallFunction(this.context).callFunction(options);
   }
 
 }

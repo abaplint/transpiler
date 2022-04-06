@@ -1,3 +1,4 @@
+import {Context} from "../context";
 import {RFCClient} from "../rfc";
 
 export interface ICallFunctionOptions {
@@ -10,19 +11,26 @@ export interface ICallFunctionOptions {
   exceptions?: any,
 }
 
-// note: this is only called if DESTNIATION is supplied
-export async function callFunction(options: ICallFunctionOptions) {
-  // @ts-ignore
-  const dest = abap.RFCDestinations[options.destination] as undefined | RFCClient;
-  if (dest === undefined) {
-    throw new Error(`RFC destination ${options.destination} does not exist`);
+export class CallFunction {
+  private readonly context: Context;
+
+  public constructor(context: Context) {
+    this.context = context;
   }
 
-  await dest.call(options.name, {
-    exporting: options.exporting,
-    importing: options.importing,
-    tables: options.tables,
-    changing: options.changing,
-    exceptions: options.exceptions,
-  });
+// note: this is only called if DESTINIATION is supplied
+  public async callFunction(options: ICallFunctionOptions) {
+    const dest = this.context.RFCDestinations[options.destination] as undefined | RFCClient;
+    if (dest === undefined) {
+      throw new Error(`RFC destination ${options.destination} does not exist`);
+    }
+
+    await dest.call(options.name, {
+      exporting: options.exporting,
+      importing: options.importing,
+      tables: options.tables,
+      changing: options.changing,
+      exceptions: options.exceptions,
+    });
+  }
 }
