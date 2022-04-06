@@ -10,7 +10,8 @@ export class SQLiteDatabaseClient implements DatabaseClient {
   }
 
   public async disconnect() {
-    return;
+    this.sqlite!.close();
+    this.sqlite = undefined;
   }
 
   public async initialize(sql?: string): Promise<void> {
