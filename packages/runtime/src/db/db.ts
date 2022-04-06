@@ -10,4 +10,5 @@ export interface DatabaseClient {
 
   delete(table: string, where: string): {subrc: number, dbcnt: number};
   update(table: string, where: string, set: string[]): {subrc: number, dbcnt: number};
+  insert(table: string, columns: string[], values: string[]): {subrc: number, dbcnt: number};
 }

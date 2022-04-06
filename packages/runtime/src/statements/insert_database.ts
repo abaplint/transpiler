@@ -32,19 +32,12 @@ export class InsertDatabase {
       table = table.get();
     }
 
-    const sql = `INSERT INTO ${table} (${columns.join(",")}) VALUES (${values.join(",")})`;
-    //  console.dir(sql);
-
-    let subrc = 0;
-    try {
-      this.context.db.exec(sql);
-    } catch (error) {
-      // eg "UNIQUE constraint failed" errors
-      subrc = 4;
-    }
+    const {subrc, dbcnt} = this.context.db.insert(table, columns, values);
 
     // @ts-ignore
     abap.builtin.sy.get().subrc.set(subrc);
+    // @ts-ignore
+    abap.builtin.sy.get().dbcnt.set(dbcnt);
     return subrc;
   }
 }

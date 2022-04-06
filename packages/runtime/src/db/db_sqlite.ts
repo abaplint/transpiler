@@ -58,4 +58,18 @@ export class SQLiteDatabaseClient implements DatabaseClient {
     return {subrc, dbcnt};
   }
 
+  public insert(table: string, columns: string[], values: string[]): {subrc: number, dbcnt: number} {
+    const sql = `INSERT INTO ${table} (${columns.join(",")}) VALUES (${values.join(",")})`;
+
+    let subrc = 0;
+    let dbcnt = 0;
+    try {
+      const res = this.sqlite!.exec(sql);
+      dbcnt = res.length;
+    } catch (error) {
+      // eg "UNIQUE constraint failed" errors
+      subrc = 4;
+    }
+    return {subrc, dbcnt};
+  }
 }
