@@ -2,6 +2,7 @@ import initSqlJs, {Database, QueryExecResult} from "sql.js";
 import * as DB from "./db";
 
 export class SQLiteDatabaseClient implements DB.DatabaseClient {
+  public readonly name = "sqlite";
   private sqlite: Database | undefined = undefined;
 
   public async connect() {

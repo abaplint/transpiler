@@ -28,13 +28,16 @@ export interface SelectDatabaseResult {
 }
 
 export interface DatabaseClient {
+  /*** the type/name/identifier of the database */
+  name: string;
+
   initialize(sql?: string): Promise<void>;
   connect(): Promise<void>;
   disconnect(): Promise<void>;
 
+  // there is no modify(), it has been implemented using update() and insert() in the runtime
   delete(options: DeleteDatabaseOptions): {subrc: number, dbcnt: number};
   update(options: UpdateDatabaseOptions): {subrc: number, dbcnt: number};
   insert(options: InsertDatabaseOptions): {subrc: number, dbcnt: number};
   select(options: SelectDatabaseOptions): SelectDatabaseResult;
-  // there is no modify(), it has been implemented using update() and insert() in the runtime
 }
