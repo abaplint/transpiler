@@ -36,4 +36,5 @@ export interface DatabaseClient {
   update(options: UpdateDatabaseOptions): {subrc: number, dbcnt: number};
   insert(options: InsertDatabaseOptions): {subrc: number, dbcnt: number};
   select(options: SelectDatabaseOptions): SelectDatabaseResult;
+  // there is no modify(), it has been implemented using update() and insert() in the runtime
 }
