@@ -10,6 +10,7 @@ import {UnitTestResult} from "./unit_test";
 import {OffsetLength} from "./offset_length";
 import {templateFormatting} from "./template_formatting";
 import {SQLiteDatabaseClient} from "./sqlite";
+import {Context} from "./context";
 
 export {UnitTestResult, RFC, types, DB};
 
@@ -23,9 +24,7 @@ export class ABAP {
   public RFCDestinations: {[name: string]: RFC.RFCClient} = {};
 
   // DEFAULT and secondary database connections
-  public DatabaseConnections: {[name: string]: DB.DatabaseClient} = {};
-  // the DEFAULT database connection,
-  public db: undefined | DB.DatabaseClient;
+  // todo, public DatabaseConnections: {[name: string]: DB.DatabaseClient} = {};
 
 // stuff for runtime
   public statements;
@@ -33,13 +32,19 @@ export class ABAP {
   public builtin = builtin;
   public operators = operators;
   public compare = compare;
-  public console: Console;
+
+  public readonly console: Console;
   public OffsetLength = OffsetLength;
   public templateFormatting = templateFormatting;
 
+  private context: Context;
+
   public constructor() {
+    this.context = new Context();
     this.console = new Console();
-    this.statements = new Statements(this.console);
+    this.context.console = this.console;
+
+    this.statements = new Statements(this.context);
 
     // todo, this should not be a singleton, it should be part of this instance
     // todo, move to context
@@ -49,9 +54,8 @@ export class ABAP {
   }
 
   public async initDB(sql?: string) {
-    this.db = new SQLiteDatabaseClient();
-    await this.db.connect();
-    await this.db.initialize(sql);
-    this.statements.setDb(this.db);
+    this.context.db = new SQLiteDatabaseClient();
+    await this.context.db.connect();
+    await this.context.db.initialize(sql);
   }
 }

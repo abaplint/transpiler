@@ -2,7 +2,7 @@ import {Context} from "../context";
 import {FieldSymbol, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 
-export interface IInsertDatabaseOptions {
+export interface IUpdateDatabaseOptions {
   from?: Structure | FieldSymbol,
   table?: Table | FieldSymbol,
 }
@@ -14,7 +14,7 @@ export class UpdateDatabase {
     this.context = context;
   }
 
-  public updateDatabase(table: string | ICharacter, options: IInsertDatabaseOptions): number {
+  public updateDatabase(table: string | ICharacter, options: IUpdateDatabaseOptions): number {
     if (this.context.db === undefined) {
       throw new Error("Runtime, database not initialized");
     }

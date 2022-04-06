@@ -2,7 +2,7 @@ import {Context} from "../context";
 import {FieldSymbol, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 
-export interface IInsertDatabaseOptions {
+export interface IDeleteDatabaseOptions {
   from?: Structure | FieldSymbol,
   table?: Table | FieldSymbol,
 }
@@ -14,7 +14,7 @@ export class DeleteDatabase {
     this.context = context;
   }
 
-  public deleteDatabase(table: string | ICharacter, options: IInsertDatabaseOptions): void {
+  public deleteDatabase(table: string | ICharacter, options: IDeleteDatabaseOptions): void {
     if (this.context.db === undefined) {
       throw new Error("Runtime, database not initialized");
     }
