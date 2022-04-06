@@ -24,7 +24,7 @@ export type DatabaseRow = {[name: string]: DatabaseValue};
 export type DatabaseRows = DatabaseRow[];
 
 export interface SelectDatabaseResult {
-  result: DatabaseRows;
+  rows: DatabaseRows;
 }
 
 export interface DatabaseClient {

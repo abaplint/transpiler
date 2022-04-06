@@ -14,7 +14,7 @@ export class SelectDatabase {
       throw new Error("Runtime, database not initialized");
     }
 
-    const {result: res} = this.context.db.select({select});
+    const {rows: res} = this.context.db.select({select});
 
     if (target instanceof FieldSymbol) {
       // @ts-ignore

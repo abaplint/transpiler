@@ -40,7 +40,7 @@ function findText(context: Context, arbgb: string | undefined, msgnr: string | u
     try {
       // todo, sql injection?
       const select = `SELECT * FROM t100 WHERE sprsl='E' AND arbgb='${arbgb}' AND msgnr='${msgnr}' LIMIT 1`;
-      const {result} = db.select({select});
+      const {rows: result} = db.select({select});
       if (result[0]) {
         text = result[0]["text"] as string;
       }

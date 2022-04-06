@@ -80,7 +80,7 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
 
     const rows = this.convert(res);
 
-    return {result: rows};
+    return {rows: rows};
   }
 
   private convert(res: QueryExecResult[]): DB.DatabaseRows {
