@@ -4,13 +4,14 @@ import * as compare from "./compare";
 import * as operators from "./operators";
 import {Statements} from "./statements";
 import * as RFC from "./rfc";
-import initSqlJs from "sql.js";
+import * as DB from "./db";
 import {Console} from "./console";
 import {UnitTestResult} from "./unit_test";
 import {OffsetLength} from "./offset_length";
 import {templateFormatting} from "./template_formatting";
+import {SQLiteDatabaseClient} from "./sqlite";
 
-export {UnitTestResult, RFC, types};
+export {UnitTestResult, RFC, types, DB};
 
 export class ABAP {
 // global objects
@@ -19,8 +20,12 @@ export class ABAP {
   public Interfaces: {[name: string]: any} = {};
   public DDIC: {[name: string]: any} = {};
 
-// RFC Destinations
   public RFCDestinations: {[name: string]: RFC.RFCClient} = {};
+
+  // DEFAULT and secondary database connections
+  public DatabaseConnections: {[name: string]: DB.DatabaseClient} = {};
+  // the DEFAULT database connection,
+  public db: undefined | DB.DatabaseClient;
 
 // stuff for runtime
   public statements;
@@ -29,7 +34,6 @@ export class ABAP {
   public operators = operators;
   public compare = compare;
   public console: Console;
-  public db: undefined | any;
   public OffsetLength = OffsetLength;
   public templateFormatting = templateFormatting;
 
@@ -38,17 +42,16 @@ export class ABAP {
     this.statements = new Statements(this.console);
 
     // todo, this should not be a singleton, it should be part of this instance
+    // todo, move to context
     builtin.sy.get().subrc.set(0);
     builtin.sy.get().tabix.set(0);
     builtin.sy.get().index.set(0);
   }
 
   public async initDB(sql?: string) {
-    const SQL = await initSqlJs();
-    this.db = new SQL.Database();
-    if (sql && sql !== "") {
-      this.db.run(sql);
-    }
+    this.db = new SQLiteDatabaseClient();
+    await this.db.connect();
+    await this.db.initialize(sql);
     this.statements.setDb(this.db);
   }
 }
