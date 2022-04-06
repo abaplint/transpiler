@@ -14,17 +14,7 @@ export class SelectDatabase {
       throw new Error("Runtime, database not initialized");
     }
 
-    let res: undefined | any = undefined;
-    try {
-      res = this.context.db.exec(select);
-    } catch (error) {
-      // @ts-ignore
-      if (abap.Classes["CX_SY_DYNAMIC_OSQL_SEMANTICS"] !== undefined) {
-        // @ts-ignore
-        throw new abap.Classes["CX_SY_DYNAMIC_OSQL_SEMANTICS"]();
-      }
-      throw error;
-    }
+    const {result: res} = this.context.db.select(select);
 
     if (target instanceof FieldSymbol) {
       // @ts-ignore

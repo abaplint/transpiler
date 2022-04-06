@@ -1,4 +1,4 @@
-import initSqlJs, {Database} from "sql.js";
+import initSqlJs, {Database, QueryExecResult} from "sql.js";
 import {DatabaseClient} from "./db";
 
 export class SQLiteDatabaseClient implements DatabaseClient {
@@ -18,10 +18,6 @@ export class SQLiteDatabaseClient implements DatabaseClient {
     if (sql && sql !== "") {
       this.sqlite!.run(sql);
     }
-  }
-
-  public exec(sql: string) {
-    return this.sqlite!.exec(sql);
   }
 
   public prepare(sql: string) {
@@ -71,5 +67,20 @@ export class SQLiteDatabaseClient implements DatabaseClient {
       subrc = 4;
     }
     return {subrc, dbcnt};
+  }
+
+  public select(select: string): {result: QueryExecResult[]} {
+    let res: undefined | any = undefined;
+    try {
+      res = this.sqlite!.exec(select);
+    } catch (error) {
+      // @ts-ignore
+      if (abap.Classes["CX_SY_DYNAMIC_OSQL_SEMANTICS"] !== undefined) {
+        // @ts-ignore
+        throw new abap.Classes["CX_SY_DYNAMIC_OSQL_SEMANTICS"]();
+      }
+      throw error;
+    }
+    return {result: res};
   }
 }
