@@ -15,10 +15,6 @@ export class UpdateDatabase {
   }
 
   public updateDatabase(table: string | ICharacter, options: IUpdateDatabaseOptions): number {
-    if (this.context.db === undefined) {
-      throw new Error("Runtime, database not initialized");
-    }
-
     if (options.table instanceof FieldSymbol) {
       options.table = options.table.getPointer() as Table;
     }
@@ -50,7 +46,7 @@ export class UpdateDatabase {
       throw "updateDatabase, todo";
     }
 
-    const {subrc, dbcnt} = this.context.db.update({table, where: where.join(" AND "), set});
+    const {subrc, dbcnt} = this.context.defaultDB().update({table, where: where.join(" AND "), set});
 
     // @ts-ignore
     abap.builtin.sy.get().subrc.set(subrc);

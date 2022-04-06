@@ -12,15 +12,16 @@ import runtime from "@abaplint/runtime";
 global.abap = new runtime.ABAP();
 ${this.buildImports(reg)}
 export async function initializeABAP() {\n`;
-    if (dbSetup === "") {
-      ret += `// no database artifacts, skip DB initialization\n`;
-    } else {
-      ret += `  await global.abap.initDB(\`${dbSetup}\`);\n`;
-    }
+// do extras first, so it can set the DEFAULT database connection
     if (extraSetup === undefined) {
       ret += `// no extra setup\n`;
     } else {
       ret += `  await import("../test/extra.mjs");\n`;
+    }
+    if (dbSetup === "") {
+      ret += `// no database artifacts, skip DB initialization\n`;
+    } else {
+      ret += `  await global.abap.initDB(\`${dbSetup}\`);\n`;
     }
     ret += `}`;
     return ret;

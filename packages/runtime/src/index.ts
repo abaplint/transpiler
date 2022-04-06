@@ -32,7 +32,7 @@ export class ABAP {
   public OffsetLength = OffsetLength;
   public templateFormatting = templateFormatting;
 
-  private context: Context;
+  private readonly context: Context;
 
   public constructor() {
     this.context = new Context();
@@ -49,8 +49,11 @@ export class ABAP {
   }
 
   public async initDB(sql?: string) {
-    this.context.db = new SQLiteDatabaseClient();
-    await this.context.db.connect();
-    await this.context.db.initialize(sql);
+    // skip if there is a DEFAULT db connection already established
+    if (this.context.databaseConnections["DEFAULT"] === undefined) {
+      this.context.databaseConnections["DEFAULT"] = new SQLiteDatabaseClient();
+    }
+    await this.context.databaseConnections["DEFAULT"].connect();
+    await this.context.databaseConnections["DEFAULT"].initialize(sql);
   }
 }

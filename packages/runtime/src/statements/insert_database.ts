@@ -14,10 +14,6 @@ export class InsertDatabase {
   }
 
   public insertDatabase(table: string | ICharacter, options: IInsertDatabaseOptions): number {
-    if (this.context.db === undefined) {
-      throw new Error("Runtime, database not initialized");
-    }
-
     const columns: string[] = [];
     const values: string[] = [];
 
@@ -32,7 +28,7 @@ export class InsertDatabase {
       table = table.get();
     }
 
-    const {subrc, dbcnt} = this.context.db.insert({table, columns, values});
+    const {subrc, dbcnt} = this.context.defaultDB().insert({table, columns, values});
 
     // @ts-ignore
     abap.builtin.sy.get().subrc.set(subrc);

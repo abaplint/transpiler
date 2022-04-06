@@ -35,12 +35,12 @@ function replace(text: string, w?: (ICharacter | string)[]): string {
 
 function findText(context: Context, arbgb: string | undefined, msgnr: string | undefined): string {
   let text: string | undefined = undefined;
-  const db = context.db;
-  if (db && arbgb && msgnr) {
+
+  if (arbgb && msgnr) {
     try {
       // todo, sql injection?
       const select = `SELECT * FROM t100 WHERE sprsl='E' AND arbgb='${arbgb}' AND msgnr='${msgnr}' LIMIT 1`;
-      const {rows: result} = db.select({select});
+      const {rows: result} = context.defaultDB().select({select});
       if (result[0]) {
         text = result[0]["text"] as string;
       }

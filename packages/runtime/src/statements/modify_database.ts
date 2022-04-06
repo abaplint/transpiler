@@ -17,9 +17,6 @@ export class ModifyDatabase {
   }
 
   public modifyDatabase(table: string | ICharacter, options: IModifyDatabaseOptions): void {
-    if (this.context.db === undefined) {
-      throw new Error("Runtime, database not initialized");
-    }
     if (options.table instanceof FieldSymbol) {
       options.table = options.table.getPointer() as Table;
     }

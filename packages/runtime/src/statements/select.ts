@@ -10,11 +10,7 @@ export class SelectDatabase {
   }
 
   public select(target: Structure | Table | FieldSymbol, select: string) {
-    if (this.context.db === undefined) {
-      throw new Error("Runtime, database not initialized");
-    }
-
-    const {rows: rows} = this.context.db.select({select});
+    const {rows: rows} = this.context.defaultDB().select({select});
 
     if (target instanceof FieldSymbol) {
       if (target.isAssigned() === false) {
