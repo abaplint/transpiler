@@ -15,8 +15,8 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     this.sqlite = undefined;
   }
 
-  public async initialize(sql?: string): Promise<void> {
-    if (sql && sql !== "") {
+  public async execute(sql: string): Promise<void> {
+    if (sql !== "") {
       this.sqlite!.run(sql);
     }
   }

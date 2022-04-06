@@ -54,6 +54,8 @@ export class ABAP {
       this.context.databaseConnections["DEFAULT"] = new SQLiteDatabaseClient();
     }
     await this.context.databaseConnections["DEFAULT"].connect();
-    await this.context.databaseConnections["DEFAULT"].initialize(sql);
+    if (sql) {
+      await this.context.databaseConnections["DEFAULT"].execute(sql);
+    }
   }
 }

@@ -31,9 +31,11 @@ export interface DatabaseClient {
   /*** the type/name/identifier of the database */
   name: string;
 
-  initialize(sql?: string): Promise<void>;
   connect(): Promise<void>;
   disconnect(): Promise<void>;
+
+  /*** execute any native SQL command */
+  execute(sql: string): Promise<void>;
 
   // there is no modify(), it has been implemented using update() and insert() in the runtime
   delete(options: DeleteDatabaseOptions): {subrc: number, dbcnt: number};
