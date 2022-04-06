@@ -23,9 +23,6 @@ export class ABAP {
 
   public RFCDestinations: {[name: string]: RFC.RFCClient} = {};
 
-  // DEFAULT and secondary database connections
-  // todo, public DatabaseConnections: {[name: string]: DB.DatabaseClient} = {};
-
 // stuff for runtime
   public statements;
   public types = types;
