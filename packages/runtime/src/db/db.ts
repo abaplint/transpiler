@@ -1,7 +1,3 @@
-import {QueryExecResult} from "sql.js";
-
-// todo defined inputs and returns?
-
 export interface DeleteDatabaseOptions {
   table: string,
   where: string,
@@ -23,8 +19,12 @@ export interface SelectDatabaseOptions {
   select: string,
 }
 
+export type DatabaseValue = number | string | Uint8Array | null;
+export type DatabaseRow = {[name: string]: DatabaseValue};
+export type DatabaseRows = DatabaseRow[];
+
 export interface SelectDatabaseResult {
-  result: QueryExecResult[]
+  result: DatabaseRows;
 }
 
 export interface DatabaseClient {

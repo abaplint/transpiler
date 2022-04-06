@@ -1,4 +1,4 @@
-import initSqlJs, {Database} from "sql.js";
+import initSqlJs, {Database, QueryExecResult} from "sql.js";
 import * as DB from "./db";
 
 export class SQLiteDatabaseClient implements DB.DatabaseClient {
@@ -66,7 +66,7 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
   }
 
   public select(options: DB.SelectDatabaseOptions): DB.SelectDatabaseResult {
-    let res: undefined | any = undefined;
+    let res: undefined | QueryExecResult[] = undefined;
     try {
       res = this.sqlite!.exec(options.select);
     } catch (error) {
@@ -77,6 +77,27 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
       }
       throw error;
     }
-    return {result: res};
+
+    const rows = this.convert(res);
+
+    return {result: rows};
+  }
+
+  private convert(res: QueryExecResult[]): DB.DatabaseRows {
+    if (res === undefined || res.length === 0) {
+      return [];
+    }
+
+    const rows: DB.DatabaseRows = [];
+    for (const sqliteRow of res[0].values) {
+      const row: DB.DatabaseRow = {};
+      let i = 0;
+      for (const columnName of res[0].columns) {
+        row[columnName] = sqliteRow[i];
+        i++;
+      }
+      rows.push(row);
+    }
+    return rows;
   }
 }

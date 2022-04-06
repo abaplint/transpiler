@@ -42,8 +42,7 @@ function findText(context: Context, arbgb: string | undefined, msgnr: string | u
       const select = `SELECT * FROM t100 WHERE sprsl='E' AND arbgb='${arbgb}' AND msgnr='${msgnr}' LIMIT 1`;
       const {result} = db.select({select});
       if (result[0]) {
-        // todo, refactor this,
-        text = result[0].values[0][3] as string;
+        text = result[0]["text"] as string;
       }
     } catch {
       // use fallback text
