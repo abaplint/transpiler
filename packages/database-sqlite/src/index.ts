@@ -22,7 +22,7 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     this.sqlite!.run(sql);
   }
 
-  public delete(options: DB.DeleteDatabaseOptions): {subrc: number, dbcnt: number} {
+  public async delete(options: DB.DeleteDatabaseOptions) {
     const sql = `DELETE FROM ${options.table} WHERE ${options.where}`;
 
     let subrc = 0;
@@ -37,7 +37,7 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     return {subrc, dbcnt};
   }
 
-  public update(options: DB.UpdateDatabaseOptions): {subrc: number, dbcnt: number} {
+  public async update(options: DB.UpdateDatabaseOptions) {
     const sql = `UPDATE ${options.table} SET ${options.set.join(", ")} WHERE ${options.where}`;
 
     let subrc = 0;
@@ -52,7 +52,7 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     return {subrc, dbcnt};
   }
 
-  public insert(options: DB.InsertDatabaseOptions): {subrc: number, dbcnt: number} {
+  public async insert(options: DB.InsertDatabaseOptions) {
     const sql = `INSERT INTO ${options.table} (${options.columns.join(",")}) VALUES (${options.values.join(",")})`;
 
     let subrc = 0;
@@ -67,7 +67,7 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     return {subrc, dbcnt};
   }
 
-  public select(options: DB.SelectDatabaseOptions): DB.SelectDatabaseResult {
+  public async select(options: DB.SelectDatabaseOptions) {
     let res: undefined | QueryExecResult[] = undefined;
     try {
       res = this.sqlite!.exec(options.select);

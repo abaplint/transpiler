@@ -14,7 +14,7 @@ export class UpdateDatabase {
     this.context = context;
   }
 
-  public updateDatabase(table: string | ICharacter, options: IUpdateDatabaseOptions): number {
+  public async updateDatabase(table: string | ICharacter, options: IUpdateDatabaseOptions) {
     if (options.table instanceof FieldSymbol) {
       options.table = options.table.getPointer() as Table;
     }
@@ -46,7 +46,7 @@ export class UpdateDatabase {
       throw "updateDatabase, todo";
     }
 
-    const {subrc, dbcnt} = this.context.defaultDB().update({table, where: where.join(" AND "), set});
+    const {subrc, dbcnt} = await this.context.defaultDB().update({table, where: where.join(" AND "), set});
 
     // @ts-ignore
     abap.builtin.sy.get().subrc.set(subrc);

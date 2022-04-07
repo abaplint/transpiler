@@ -14,7 +14,7 @@ export class DeleteDatabase {
     this.context = context;
   }
 
-  public deleteDatabase(table: string | ICharacter, options: IDeleteDatabaseOptions): void {
+  public async deleteDatabase(table: string | ICharacter, options: IDeleteDatabaseOptions) {
     if (options.table instanceof FieldSymbol) {
       options.table = options.table.getPointer() as Table;
     }
@@ -40,7 +40,7 @@ export class DeleteDatabase {
       }
       where = where.join(" AND ");
 
-      const {subrc, dbcnt} = this.context.defaultDB().delete({table, where});
+      const {subrc, dbcnt} = await this.context.defaultDB().delete({table, where});
 
       // @ts-ignore
       abap.builtin.sy.get().subrc.set(subrc);

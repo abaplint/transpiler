@@ -13,7 +13,7 @@ export class InsertDatabase {
     this.context = context;
   }
 
-  public insertDatabase(table: string | ICharacter, options: IInsertDatabaseOptions): number {
+  public async insertDatabase(table: string | ICharacter, options: IInsertDatabaseOptions) {
     const columns: string[] = [];
     const values: string[] = [];
 
@@ -28,7 +28,7 @@ export class InsertDatabase {
       table = table.get();
     }
 
-    const {subrc, dbcnt} = this.context.defaultDB().insert({table, columns, values});
+    const {subrc, dbcnt} = await this.context.defaultDB().insert({table, columns, values});
 
     // @ts-ignore
     abap.builtin.sy.get().subrc.set(subrc);

@@ -120,8 +120,8 @@ describe("Single statements", () => {
     {abap: "TRANSLATE rv_spras TO LOWER CASE.", js: `abap.statements.translate(rv_spras, "LOWER");`, skip: false},
     {abap: "DESCRIBE FIELD <lg_line> LENGTH lv_length IN CHARACTER MODE.", js: `abap.statements.describe({field: fs_lg_line_, length: lv_length, mode: 'CHARACTER'});`, skip: false},
     {abap: "DESCRIBE FIELD <lg_line> LENGTH lv_length IN BYTE MODE.", js: `abap.statements.describe({field: fs_lg_line_, length: lv_length, mode: 'BYTE'});`, skip: false},
-    {abap: "DESCRIBE FIELD tab TYPE type.", js: `abap.statements.describe({field: tab, type: type});`, skip: false},
-    {abap: "foo = 2 ** 2.",   js: `foo.set(abap.operators.power(constant_2,constant_2));`,                       skip: false},
+    {abap: "DESCRIBE FIELD tab TYPE type.", js: `abap.statements.describe({field: tab, type: type});`,    skip: false},
+    {abap: "foo = 2 ** 2.",   js: `foo.set(abap.operators.power(constant_2,constant_2));`,                skip: false},
     {abap: "foo = 5 DIV 2.",  js: `foo.set(abap.operators.div(constant_5,constant_2));`,                  skip: false},
     {abap: "foo+5(1) = 'A'.", js: `new abap.OffsetLength(foo, {offset: 5, length: 1}).set(new abap.types.Character({length: 1}).set('A'));`, skip: false},
     {abap: "foo(1) = 'a'.",   js: "new abap.OffsetLength(foo, {length: 1}).set(new abap.types.Character({length: 1}).set('a'));",            skip: false},
@@ -131,9 +131,9 @@ describe("Single statements", () => {
     {abap: "IF iv_cd = '' OR iv_cd = '.'.\nENDIF.", js: "if (abap.compare.eq(iv_cd, new abap.types.Character({length: 0}).set('')) || abap.compare.eq(iv_cd, new abap.types.Character({length: 1}).set('.'))) {\n}", skip: false},
     {abap: "TRY. ENDTRY.", js: `try {\n}`,    skip: false, only: false},
     {abap: "MESSAGE e058(00) WITH 'Value_1' 'Value_2' 'Value_3' 'Value_4' INTO lv_dummy.",
-      js: `abap.statements.message({into: lv_dummy, id: "00", number: "058", type: "E", with: [new abap.types.Character({length: 7}).set('Value_1'),new abap.types.Character({length: 7}).set('Value_2'),new abap.types.Character({length: 7}).set('Value_3'),new abap.types.Character({length: 7}).set('Value_4')]});`, skip: false},
+      js: `await abap.statements.message({into: lv_dummy, id: "00", number: "058", type: "E", with: [new abap.types.Character({length: 7}).set('Value_1'),new abap.types.Character({length: 7}).set('Value_2'),new abap.types.Character({length: 7}).set('Value_3'),new abap.types.Character({length: 7}).set('Value_4')]});`, skip: false},
     {abap: "MESSAGE ID sy-msgid TYPE 'S' NUMBER sy-msgno WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4 INTO rv_text.",
-      js: `abap.statements.message({into: rv_text, id: abap.builtin.sy.get().msgid, type: new abap.types.Character({length: 1}).set('S'), number: abap.builtin.sy.get().msgno, with: [abap.builtin.sy.get().msgv1,abap.builtin.sy.get().msgv2,abap.builtin.sy.get().msgv3,abap.builtin.sy.get().msgv4]});`, skip: false},
+      js: `await abap.statements.message({into: rv_text, id: abap.builtin.sy.get().msgid, type: new abap.types.Character({length: 1}).set('S'), number: abap.builtin.sy.get().msgno, with: [abap.builtin.sy.get().msgv1,abap.builtin.sy.get().msgv2,abap.builtin.sy.get().msgv3,abap.builtin.sy.get().msgv4]});`, skip: false},
     {abap: "RAISE EXCEPTION TYPE zcx_foobar EXPORTING foo = bar.", js: `throw await (new abap.Classes['ZCX_FOOBAR']()).constructor_({foo: bar});`, skip: false},
     {abap: "RAISE EXCEPTION instance.", js: `throw instance.get();`, skip: false},
     {abap: "CLASS ltcl_test DEFINITION DEFERRED.", js: ``, skip: false},
@@ -153,9 +153,9 @@ describe("Single statements", () => {
     {abap: "super->method( ).",     js: `await super.method();`, skip: false},
     {abap: "super->constructor( ).",     js: ``, skip: false}, // todo, https://github.com/abaplint/transpiler/issues/133
 
-    {abap: "SELECT SINGLE * FROM t100 INTO ls_result.", js: `abap.statements.select(ls_result, "SELECT * FROM t100 LIMIT 1");`},
-    {abap: "SELECT * FROM (mv_table) INTO TABLE lt_tab.", js: `abap.statements.select(lt_tab, "SELECT * FROM " + mv_table.get() + "");`},
-    {abap: "INSERT INTO zopentest VALUES ls_row.", js: `abap.statements.insertDatabase("zopentest", {"values": ls_row});`},
+    {abap: "SELECT SINGLE * FROM t100 INTO ls_result.", js: `await abap.statements.select(ls_result, "SELECT * FROM t100 LIMIT 1");`},
+    {abap: "SELECT * FROM (mv_table) INTO TABLE lt_tab.", js: `await abap.statements.select(lt_tab, "SELECT * FROM " + mv_table.get() + "");`},
+    {abap: "INSERT INTO zopentest VALUES ls_row.", js: `await abap.statements.insertDatabase("zopentest", {"values": ls_row});`},
 
     {abap: "ASSERT NOT foo EQ bar.",     js: `abap.statements.assert(!abap.compare.eq(foo, bar));`, skip: false},
     {abap: "GET REFERENCE OF blah INTO ref.", js: `ref.assign(blah);`, skip: false},
@@ -294,12 +294,12 @@ await abap.Classes['ZCL_CALL'].not_found();`},
     js: `rs_node_type.get().dd.set(await lo_sdescr.get().get_component_type({p_name: rs_node_type.get().target_field_name}));`},
 
     {abap: `MODIFY ztab FROM TABLE tab.`,
-      js: `abap.statements.modifyDatabase("ztab", {"table": tab});`},
+      js: `await abap.statements.modifyDatabase("ztab", {"table": tab});`},
     {abap: `MODIFY (mv_table) FROM TABLE <fs>.`,
-      js: `abap.statements.modifyDatabase(mv_table, {"table": fs_fs_});`},
+      js: `await abap.statements.modifyDatabase(mv_table, {"table": fs_fs_});`},
 
     {abap: `DELETE zqueue FROM TABLE lt_queue.`,
-      js: `abap.statements.deleteDatabase("zqueue", {"table": lt_queue});`},
+      js: `await abap.statements.deleteDatabase("zqueue", {"table": lt_queue});`},
   ];
 
   for (const test of tests) {

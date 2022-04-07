@@ -75,36 +75,36 @@ export class Statements {
     this.context = context;
   }
 
-  public deleteDatabase(table: string | ICharacter, options: IDeleteDatabaseOptions) {
+  public async deleteDatabase(table: string | ICharacter, options: IDeleteDatabaseOptions) {
     return new DeleteDatabase(this.context).deleteDatabase(table, options);
   }
 
-  public insertDatabase(table: string | ICharacter, options: IInsertDatabaseOptions) {
+  public async insertDatabase(table: string | ICharacter, options: IInsertDatabaseOptions) {
     return new InsertDatabase(this.context).insertDatabase(table, options);
   }
 
-  public message(options: IMessageOptions) {
+  public async message(options: IMessageOptions) {
     return new MessageStatement(this.context).message(options);
   }
 
-  public modifyDatabase(table: string | ICharacter, options: IModifyDatabaseOptions) {
+  public async modifyDatabase(table: string | ICharacter, options: IModifyDatabaseOptions) {
     return new ModifyDatabase(this.context).modifyDatabase(table, options);
   }
 
-  public select(target: Structure | Table | FieldSymbol, select: string) {
+  public async select(target: Structure | Table | FieldSymbol, select: string) {
     return new SelectDatabase(this.context).select(target, select);
   }
 
-  public updateDatabase(table: string | ICharacter, options: IUpdateDatabaseOptions) {
+  public async updateDatabase(table: string | ICharacter, options: IUpdateDatabaseOptions) {
     return new UpdateDatabase(this.context).updateDatabase(table, options);
+  }
+
+  public async callFunction(options: ICallFunctionOptions) {
+    return new CallFunction(this.context).callFunction(options);
   }
 
   public write(source: INumeric | ICharacter | FieldSymbol | string | number, options?: IWriteOptions) {
     return new WriteStatement(this.context).write(source, options);
-  }
-
-  public callFunction(options: ICallFunctionOptions) {
-    return new CallFunction(this.context).callFunction(options);
   }
 
 }

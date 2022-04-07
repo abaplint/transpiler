@@ -38,8 +38,8 @@ export interface DatabaseClient {
   execute(sql: string): Promise<void>;
 
   // there is no modify(), it has been implemented using update() and insert() in the runtime
-  delete(options: DeleteDatabaseOptions): {subrc: number, dbcnt: number};
-  update(options: UpdateDatabaseOptions): {subrc: number, dbcnt: number};
-  insert(options: InsertDatabaseOptions): {subrc: number, dbcnt: number};
-  select(options: SelectDatabaseOptions): SelectDatabaseResult;
+  delete(options: DeleteDatabaseOptions): Promise<{subrc: number, dbcnt: number}>;
+  update(options: UpdateDatabaseOptions): Promise<{subrc: number, dbcnt: number}>;
+  insert(options: InsertDatabaseOptions): Promise<{subrc: number, dbcnt: number}>;
+  select(options: SelectDatabaseOptions): Promise<SelectDatabaseResult>;
 }

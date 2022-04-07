@@ -33,14 +33,14 @@ function replace(text: string, w?: (ICharacter | string)[]): string {
   return text.trim();
 }
 
-function findText(context: Context, arbgb: string | undefined, msgnr: string | undefined): string {
+async function findText(context: Context, arbgb: string | undefined, msgnr: string | undefined) {
   let text: string | undefined = undefined;
 
   if (arbgb && msgnr) {
     try {
       // todo, sql injection?
       const select = `SELECT * FROM t100 WHERE sprsl='E' AND arbgb='${arbgb}' AND msgnr='${msgnr}' LIMIT 1`;
-      const {rows: result} = context.defaultDB().select({select});
+      const {rows: result} = await context.defaultDB().select({select});
       if (result[0]) {
         text = result[0]["text"] as string;
       }
@@ -64,7 +64,7 @@ export class MessageStatement {
     this.context = context;
   }
 
-  public message(options: IMessageOptions): void {
+  public async message(options: IMessageOptions) {
     let arbgb = options.id;
     if (arbgb !== undefined && typeof arbgb !== "string") {
       arbgb = arbgb.get();
@@ -79,7 +79,7 @@ export class MessageStatement {
     // @ts-ignore
     abap.builtin.sy.get().msgno.set(msgnr);
 
-    const text = findText(this.context, arbgb, msgnr);
+    const text = await findText(this.context, arbgb, msgnr);
 
     const replaced = replace(text, options.with);
 

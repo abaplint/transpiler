@@ -9,8 +9,8 @@ export class SelectDatabase {
     this.context = context;
   }
 
-  public select(target: Structure | Table | FieldSymbol, select: string) {
-    const {rows: rows} = this.context.defaultDB().select({select});
+  public async select(target: Structure | Table | FieldSymbol, select: string) {
+    const {rows: rows} = await this.context.defaultDB().select({select});
 
     if (target instanceof FieldSymbol) {
       if (target.isAssigned() === false) {
