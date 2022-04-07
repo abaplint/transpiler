@@ -5,7 +5,8 @@
   "main": "./build/index.js",
   "types": "./build/types.d.ts",
   "scripts": {
-    "test": "tsc"
+    "test": "tsc",
+    "compile": "tsc"
   },
   "repository": {
     "type": "git",
