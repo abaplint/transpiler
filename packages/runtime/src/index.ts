@@ -1,7 +1,6 @@
 import {Console} from "./console";
 import {Context} from "./context";
 import {OffsetLength} from "./offset_length";
-import {SQLiteDatabaseClient} from "./db/db_sqlite";
 import {Statements} from "./statements";
 import {templateFormatting} from "./template_formatting";
 import {UnitTestResult} from "./unit_test";
@@ -32,7 +31,7 @@ export class ABAP {
   public OffsetLength = OffsetLength;
   public templateFormatting = templateFormatting;
 
-  private readonly context: Context;
+  public readonly context: Context;
 
   public constructor() {
     this.context = new Context();
@@ -46,16 +45,5 @@ export class ABAP {
     builtin.sy.get().subrc.set(0);
     builtin.sy.get().tabix.set(0);
     builtin.sy.get().index.set(0);
-  }
-
-  public async initDB(sql?: string) {
-    // skip if there is a DEFAULT db connection already established
-    if (this.context.databaseConnections["DEFAULT"] === undefined) {
-      this.context.databaseConnections["DEFAULT"] = new SQLiteDatabaseClient();
-    }
-    await this.context.databaseConnections["DEFAULT"].connect();
-    if (sql) {
-      await this.context.databaseConnections["DEFAULT"].execute(sql);
-    }
   }
 }

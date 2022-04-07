@@ -136,13 +136,26 @@ describe("Testing Unit Testing", () => {
   });
 
   async function dumpNrun(files: IFile[]): Promise<string> {
+    const SETUP_NAME = "mysetup.mjs";
     const config: ITranspilerOptions = {
       addCommonJS: true,
+      extraSetup: "./" + SETUP_NAME,
     };
 
     for (const f of files) {
       fs.writeFileSync(outputFolder + path.sep + f.filename, f.contents);
     }
+
+    const setupLogic = `
+import {SQLiteDatabaseClient} from "../../packages/database-sqlite/build/index.js";
+
+export async function setup(abap, schemas) {
+  abap.context.databaseConnections["DEFAULT"] = new SQLiteDatabaseClient();
+  await abap.context.databaseConnections["DEFAULT"].connect();
+  await abap.context.databaseConnections["DEFAULT"].execute(schemas.sqlite);
+}
+`;
+    fs.writeFileSync(outputFolder + path.sep + SETUP_NAME, setupLogic);
 
     const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
     const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
@@ -159,7 +172,8 @@ describe("Testing Unit Testing", () => {
       }
       fs.writeFileSync(outputFolder + path.sep + o.filename, contents);
     }
-    // hack
+
+    // hacks
     output.unitTestScript = output.unitTestScript.replace(
       `import runtime from "@abaplint/runtime";`,
       `import runtime from "../../packages/runtime/build/src/index.js";`);
@@ -172,6 +186,7 @@ describe("Testing Unit Testing", () => {
       `import runtime from "@abaplint/runtime";`,
       `import runtime from "../../packages/runtime/build/src/index.js";`);
     fs.writeFileSync(outputFolder + path.sep + "init.mjs", output.initializationScript);
+
     const buf = childProcess.execSync("node unit-test/" + name + "/index.mjs");
     return buf.toString();
   }

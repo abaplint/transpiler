@@ -1,5 +1,5 @@
 import initSqlJs, {Database, QueryExecResult} from "sql.js";
-import * as DB from "./db";
+import {DB} from "@abaplint/runtime";
 
 export class SQLiteDatabaseClient implements DB.DatabaseClient {
   public readonly name = "sqlite";
@@ -16,9 +16,10 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
   }
 
   public async execute(sql: string): Promise<void> {
-    if (sql !== "") {
-      this.sqlite!.run(sql);
+    if (sql === "") {
+      return;
     }
+    this.sqlite!.run(sql);
   }
 
   public delete(options: DB.DeleteDatabaseOptions): {subrc: number, dbcnt: number} {

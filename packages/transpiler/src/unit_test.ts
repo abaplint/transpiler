@@ -5,23 +5,23 @@ export type TestMethodList = {object: string, class: string, method: string}[];
 
 export class UnitTest {
 
-  // todo, move this somewhere else, its much more than just unit test relevant
+  // todo, move this method somewhere else, its much more than just unit test relevant
   public initializationScript(reg: abaplint.IRegistry, dbSetup: string, extraSetup?: string) {
     let ret = `/* eslint-disable import/newline-after-import */
 import runtime from "@abaplint/runtime";
 global.abap = new runtime.ABAP();
 ${this.buildImports(reg)}
+
 export async function initializeABAP() {\n`;
-// do extras first, so it can set the DEFAULT database connection
+    ret += `  const SQLiteSchema = \`${dbSetup}\`;\n`;
+    ret += `  const HDBSchema = \`\`;\n`;
+    ret += `  const PGSchema = \`\`;\n`;
+    ret += `  const schemas = {sqlite: SQLiteSchema, hdb: HDBSchema, pg: PGSchema};\n`;
     if (extraSetup === undefined) {
-      ret += `// no extra setup\n`;
+      ret += `// no setup logic specified in config\n`;
     } else {
-      ret += `  await import("../test/extra.mjs");\n`;
-    }
-    if (dbSetup === "") {
-      ret += `// no database artifacts, skip DB initialization\n`;
-    } else {
-      ret += `  await global.abap.initDB(\`${dbSetup}\`);\n`;
+      ret += `  const {setup} = await import("${extraSetup}");\n` +
+             `  await setup(global.abap, schemas);\n`;
     }
     ret += `}`;
     return ret;
@@ -207,7 +207,7 @@ run().then(() => {
 
     list.sort();
 
-    return list.join("\n") + "\n";
+    return list.join("\n");
   }
 
 }

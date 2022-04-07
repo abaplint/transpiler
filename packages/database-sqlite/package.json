@@ -1,0 +1,23 @@
+{
+  "name": "@abaplint/database-sqlite",
+  "version": "1.0.0",
+  "description": "Transpiler - SQLite driver",
+  "main": "./build/index.js",
+  "types": "./build/types.d.ts",
+  "scripts": {
+    "test": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abaplint/transpiler.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "sql.js": "^1.6.2"
+  },
+  "devDependencies": {
+    "@abaplint/runtime": "^1.8.40",
+    "typescript": "^4.6.3"
+  }
+}
