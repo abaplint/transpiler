@@ -149,10 +149,11 @@ describe("Testing Unit Testing", () => {
     const setupLogic = `
 import {SQLiteDatabaseClient} from "../../packages/database-sqlite/build/index.js";
 
-export async function setup(abap, schemas) {
+export async function setup(abap, schemas, insert) {
   abap.context.databaseConnections["DEFAULT"] = new SQLiteDatabaseClient();
   await abap.context.databaseConnections["DEFAULT"].connect();
   await abap.context.databaseConnections["DEFAULT"].execute(schemas.sqlite);
+  await abap.context.databaseConnections["DEFAULT"].execute(insert);
 }
 `;
     fs.writeFileSync(outputFolder + path.sep + SETUP_NAME, setupLogic);

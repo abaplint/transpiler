@@ -1,6 +1,7 @@
 import {Chunk} from "./chunk";
 import * as abaplint from "@abaplint/core";
 import {TestMethodList} from "./unit_test";
+import {DatabaseSetupResult} from "./db/database_setup_result";
 
 export interface IFile {
   filename: string,
@@ -20,7 +21,7 @@ export interface IOutput {
   unitTestScript: string;
   unitTestScriptOpen: string;
   initializationScript: string;
-  databaseSetup: string;
+  databaseSetup: DatabaseSetupResult;
 }
 
 export interface IRequire {

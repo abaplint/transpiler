@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/database-sqlite",
-  "version": "1.0.0",
+  "version": "1.8.40",
   "description": "Transpiler - SQLite driver",
   "main": "./build/index.js",
   "types": "./build/types.d.ts",

@@ -1,27 +1,29 @@
 /* eslint-disable max-len */
 import * as abaplint from "@abaplint/core";
+import {DatabaseSetupResult} from "./db/database_setup_result";
 
 export type TestMethodList = {object: string, class: string, method: string}[];
 
 export class UnitTest {
 
   // todo, move this method somewhere else, its much more than just unit test relevant
-  public initializationScript(reg: abaplint.IRegistry, dbSetup: string, extraSetup?: string) {
+  public initializationScript(reg: abaplint.IRegistry, dbSetup: DatabaseSetupResult, extraSetup?: string) {
     let ret = `/* eslint-disable import/newline-after-import */
 import runtime from "@abaplint/runtime";
 global.abap = new runtime.ABAP();
 ${this.buildImports(reg)}
 
 export async function initializeABAP() {\n`;
-    ret += `  const SQLiteSchema = \`${dbSetup}\`;\n`;
-    ret += `  const HDBSchema = \`\`;\n`;
-    ret += `  const PGSchema = \`\`;\n`;
-    ret += `  const schemas = {sqlite: SQLiteSchema, hdb: HDBSchema, pg: PGSchema};\n`;
+    ret += `  const sqlite = \`${dbSetup.schemas.sqlite}\`;\n`;
+    ret += `  const hdb = \`${dbSetup.schemas.hdb}\`;\n`;
+    ret += `  const pg = \`${dbSetup.schemas.pg}\`;\n`;
+    ret += `  const schemas = {sqlite, hdb, pg};\n`;
+    ret += `  const insert = \`${dbSetup.insert}\`;\n`;
     if (extraSetup === undefined) {
       ret += `// no setup logic specified in config\n`;
     } else {
       ret += `  const {setup} = await import("${extraSetup}");\n` +
-             `  await setup(global.abap, schemas);\n`;
+             `  await setup(global.abap, schemas, insert);\n`;
     }
     ret += `}`;
     return ret;
