@@ -16,7 +16,7 @@ export class ModifyDatabaseTranspiler implements IStatementTranspiler {
       options.push(`"table": ` + ttab.getCode());
     }
 
-    return new Chunk(`abap.statements.modifyDatabase(${table.getCode()}, {${options.join(", ")}});`);
+    return new Chunk(`await abap.statements.modifyDatabase(${table.getCode()}, {${options.join(", ")}});`);
   }
 
 }

@@ -1,5 +1,6 @@
 import {Transpiler} from "../packages/transpiler/src/";
 import {ABAP} from "../packages/runtime/src/";
+import {SQLiteDatabaseClient} from "../packages/database-sqlite/src/";
 import * as abaplint from "@abaplint/core";
 import {IFile, ITranspilerOptions} from "../packages/transpiler/src/types";
 
@@ -12,8 +13,11 @@ export async function runFiles(abap: ABAP, files: IFile[]) {
   const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
   const res = await new Transpiler().run(reg);
   abap.console.clear();
-  if (res.databaseSetup !== "") {
-    await abap.initDB(res.databaseSetup);
+  if (res.databaseSetup.schemas.sqlite !== "") {
+    abap.context.databaseConnections["DEFAULT"] = new SQLiteDatabaseClient();
+    await abap.context.databaseConnections["DEFAULT"].connect();
+    await abap.context.databaseConnections["DEFAULT"].execute(res.databaseSetup.schemas.sqlite);
+    await abap.context.databaseConnections["DEFAULT"].execute(res.databaseSetup.insert);
   }
   let pre = "";
   for (const o of res.objects) {

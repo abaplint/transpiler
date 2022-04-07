@@ -61,7 +61,7 @@ export class MessageTranspiler implements IStatementTranspiler {
     }
 
     return new Chunk()
-      .append("abap.statements.message({", node, traversal)
+      .append("await abap.statements.message({", node, traversal)
       .appendString(options.join(", "))
       .append("});", node.getLastToken(), traversal);
   }

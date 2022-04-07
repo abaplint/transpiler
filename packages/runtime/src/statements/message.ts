@@ -1,5 +1,5 @@
+import {Context} from "../context";
 import {ICharacter} from "../types/_character";
-// import {SqlJs} from "sql.js/module"; todo
 
 export interface IMessageOptions {
   id?: ICharacter | string,
@@ -7,30 +7,6 @@ export interface IMessageOptions {
   type?: ICharacter | string,
   with?: (ICharacter | string)[],
   into?: ICharacter,
-}
-
-export function message(options: IMessageOptions): void {
-  let arbgb = options.id;
-  if (arbgb !== undefined && typeof arbgb !== "string") {
-    arbgb = arbgb.get();
-  }
-  arbgb = arbgb?.toUpperCase();
-  // @ts-ignore
-  abap.builtin.sy.get().msgid.set(arbgb);
-  let msgnr = options.number;
-  if (msgnr !== undefined && typeof msgnr !== "string") {
-    msgnr = msgnr.get();
-  }
-  // @ts-ignore
-  abap.builtin.sy.get().msgno.set(msgnr);
-
-  const text = findText.bind(this)(arbgb, msgnr);
-
-  const replaced = replace(text, options.with);
-
-  if (options.into) {
-    options.into.set(replaced);
-  }
 }
 
 function replace(text: string, w?: (ICharacter | string)[]): string {
@@ -46,7 +22,7 @@ function replace(text: string, w?: (ICharacter | string)[]): string {
       }
     }
 
-    const field = "msgv" + ( i + 1 );
+    const field = "msgv" + (i + 1);
     if (i <= 3) {
       // @ts-ignore
       abap.builtin.sy.get()[field].set(replace);
@@ -57,19 +33,16 @@ function replace(text: string, w?: (ICharacter | string)[]): string {
   return text.trim();
 }
 
-function findText(arbgb: string | undefined, msgnr: string | undefined): string {
+async function findText(context: Context, arbgb: string | undefined, msgnr: string | undefined) {
   let text: string | undefined = undefined;
-  const db = this.db as any | undefined;
-  if (db && arbgb && msgnr) {
+
+  if (arbgb && msgnr) {
     try {
-      const stmt = db.prepare("SELECT * FROM t100 WHERE sprsl=:sprsl AND arbgb=:arbgb AND msgnr=:msgnr LIMIT 1");
-      const result = stmt.getAsObject({
-        ":sprsl": "E",
-        ":arbgb": arbgb,
-        ":msgnr": msgnr,
-      });
-      if (result.text) {
-        text = result.text as string;
+      // todo, sql injection?
+      const select = `SELECT * FROM t100 WHERE sprsl='E' AND arbgb='${arbgb}' AND msgnr='${msgnr}' LIMIT 1`;
+      const {rows: result} = await context.defaultDB().select({select});
+      if (result[0]) {
+        text = result[0]["text"] as string;
       }
     } catch {
       // use fallback text
@@ -77,9 +50,42 @@ function findText(arbgb: string | undefined, msgnr: string | undefined): string 
   }
 
   if (text === undefined) {
-// fallback
+    // fallback
     text = arbgb + ":" + msgnr + " &1 &2 &3 &4";
   }
 
   return text;
+}
+
+export class MessageStatement {
+  private readonly context: Context;
+
+  public constructor(context: Context) {
+    this.context = context;
+  }
+
+  public async message(options: IMessageOptions) {
+    let arbgb = options.id;
+    if (arbgb !== undefined && typeof arbgb !== "string") {
+      arbgb = arbgb.get();
+    }
+    arbgb = arbgb?.toUpperCase();
+    // @ts-ignore
+    abap.builtin.sy.get().msgid.set(arbgb);
+    let msgnr = options.number;
+    if (msgnr !== undefined && typeof msgnr !== "string") {
+      msgnr = msgnr.get();
+    }
+    // @ts-ignore
+    abap.builtin.sy.get().msgno.set(msgnr);
+
+    const text = await findText(this.context, arbgb, msgnr);
+
+    const replaced = replace(text, options.with);
+
+    if (options.into) {
+      options.into.set(replaced);
+    }
+  }
+
 }

@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/runtime",
-  "version": "1.8.40",
+  "version": "2.0.0",
   "description": "Transpiler - Runtime",
   "main": "build/src/index.js",
   "typings": "build/src/index.d.ts",
@@ -10,6 +10,7 @@
   },
   "scripts": {
     "compile": "tsc",
+    "publish:major": "npm --no-git-tag-version version major && rm -rf build && npm install && npm run test && npm publish --access public",
     "publish:minor": "npm --no-git-tag-version version minor && rm -rf build && npm install && npm run test && npm publish --access public",
     "publish:patch": "npm --no-git-tag-version version patch && rm -rf build && npm install && npm run test && npm publish --access public",
     "test": "npm run compile && mocha"
@@ -26,9 +27,6 @@
   ],
   "author": "abaplint",
   "license": "MIT",
-  "dependencies": {
-    "sql.js": "^1.6.2"
-  },
   "devDependencies": {
     "@types/chai": "^4.3.0",
     "@types/mocha": "^9.1.0",

@@ -1,65 +1,56 @@
 import {clone} from "../clone";
+import {Context} from "../context";
 import {FieldSymbol, Structure, Table} from "../types";
 
-export function select(target: Structure | Table | FieldSymbol, select: string) {
-  if (this.db === undefined) {
-    throw new Error("Runtime, database not initialized");
+export class SelectDatabase {
+  private readonly context: Context;
+
+  public constructor(context: Context) {
+    this.context = context;
   }
 
-  let res: undefined | any = undefined;
-  try {
-    res = this.db.exec(select);
-  } catch (error) {
-    // @ts-ignore
-    if (abap.Classes["CX_SY_DYNAMIC_OSQL_SEMANTICS"] !== undefined) {
+  public async select(target: Structure | Table | FieldSymbol, select: string) {
+    const {rows: rows} = await this.context.defaultDB().select({select});
+
+    if (target instanceof FieldSymbol) {
+      if (target.isAssigned() === false) {
+        throw "select, fs not assigned";
+      }
       // @ts-ignore
-      throw new abap.Classes["CX_SY_DYNAMIC_OSQL_SEMANTICS"]();
+      target = target.getPointer();
     }
-    throw error;
-  }
 
-  if (target instanceof FieldSymbol) {
-    // @ts-ignore
-    target = target.getPointer();
-  }
+    target.clear();
 
-  target.clear();
-  if (target instanceof Structure) {
-    if (res[0]?.values[0] === undefined) {
+    if (rows.length === 0) {
       // @ts-ignore
       abap.builtin.sy.get().subrc.set(4);
-    } else {
-      const columns: string[] = res[0].columns;
-      const values: any[] = res[0].values[0];
+      return;
+    }
+
+    if (target instanceof Structure) {
       const result: any = {};
-      for (const c of columns) {
-        result[c] = clone(target.get()[c]).set(values.shift());
+      for (const column in rows[0]) {
+        result[column] = clone(target.get()[column]).set(rows[0][column]);
       }
       target.set(new Structure(result));
-      // @ts-ignore
-      abap.builtin.sy.get().subrc.set(0);
-    }
-  } else if (target instanceof Table) {
-    if (res[0]?.values[0] === undefined) {
-      // @ts-ignore
-      abap.builtin.sy.get().subrc.set(4);
-    } else {
-      for (const selectRow of res[0].values) {
+    } else if (target instanceof Table) {
+      for (const row of rows) {
         const targetRow = clone(target.getRowType());
-        const values: any[] = selectRow;
-        for (const c of res[0].columns) {
+        for (const columnName in row) {
+          // todo, non structured table = table with simple rows
           // @ts-ignore
-          targetRow.get()[c]?.set(values.shift());
+          targetRow.get()[columnName]?.set(row[columnName]);
         }
 
         // @ts-ignore
         abap.statements.insertInternal({table: target, data: targetRow});
       }
-
-      // @ts-ignore
-      abap.builtin.sy.get().subrc.set(0);
+    } else {
+      throw new Error("Runtime, SELECT todo");
     }
-  } else {
-    throw new Error("Runtime, SELECT todo");
+
+    // @ts-ignore
+    abap.builtin.sy.get().subrc.set(0);
   }
 }

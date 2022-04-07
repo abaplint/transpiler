@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/transpiler-cli",
-  "version": "1.8.40",
+  "version": "2.0.0",
   "description": "Transpiler - Command Line Interface",
   "bin": {
     "abap_transpile": "./abap_transpile"
@@ -16,6 +16,7 @@
   },
   "scripts": {
     "test": "tsc && npm run webpack",
+    "publish:major": "npm --no-git-tag-version version major && rm -rf build && npm install && npm run test && npm publish --access public",
     "publish:minor": "npm --no-git-tag-version version minor && rm -rf build && npm install && npm run test && npm publish --access public",
     "publish:patch": "npm --no-git-tag-version version patch && rm -rf build && npm install && npm run test && npm publish --access public",
     "compile": "npm test",
@@ -24,11 +25,11 @@
   "author": "abaplint",
   "license": "MIT",
   "devDependencies": {
-    "@abaplint/transpiler": "^1.8.40",
+    "@abaplint/transpiler": "^2.0.0",
     "@types/glob": "^7.2.0",
     "glob": "^7.2.0",
     "@types/progress": "^2.0.5",
-    "@abaplint/core": "^2.86.6",
+    "@abaplint/core": "^2.87.0",
     "progress": "^2.0.3",
     "webpack": "^5.71.0",
     "webpack-cli": "^4.9.2",

@@ -1,26 +1,29 @@
 /* eslint-disable max-len */
 import * as abaplint from "@abaplint/core";
+import {DatabaseSetupResult} from "./db/database_setup_result";
 
 export type TestMethodList = {object: string, class: string, method: string}[];
 
 export class UnitTest {
 
-  // todo, move this somewhere else, its much more than just unit test relevant
-  public initializationScript(reg: abaplint.IRegistry, dbSetup: string, extraSetup?: string) {
+  // todo, move this method somewhere else, its much more than just unit test relevant
+  public initializationScript(reg: abaplint.IRegistry, dbSetup: DatabaseSetupResult, extraSetup?: string) {
     let ret = `/* eslint-disable import/newline-after-import */
 import runtime from "@abaplint/runtime";
 global.abap = new runtime.ABAP();
 ${this.buildImports(reg)}
+
 export async function initializeABAP() {\n`;
-    if (dbSetup === "") {
-      ret += `// no database artifacts, skip DB initialization\n`;
-    } else {
-      ret += `  await global.abap.initDB(\`${dbSetup}\`);\n`;
-    }
+    ret += `  const sqlite = \`${dbSetup.schemas.sqlite}\`;\n`;
+    ret += `  const hdb = \`${dbSetup.schemas.hdb}\`;\n`;
+    ret += `  const pg = \`${dbSetup.schemas.pg}\`;\n`;
+    ret += `  const schemas = {sqlite, hdb, pg};\n`;
+    ret += `  const insert = \`${dbSetup.insert}\`;\n`;
     if (extraSetup === undefined) {
-      ret += `// no extra setup\n`;
+      ret += `// no setup logic specified in config\n`;
     } else {
-      ret += `  await import("../test/extra.mjs");\n`;
+      ret += `  const {setup} = await import("${extraSetup}");\n` +
+             `  await setup(global.abap, schemas, insert);\n`;
     }
     ret += `}`;
     return ret;
@@ -206,7 +209,7 @@ run().then(() => {
 
     list.sort();
 
-    return list.join("\n") + "\n";
+    return list.join("\n");
   }
 
 }

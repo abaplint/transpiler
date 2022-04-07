@@ -1,49 +1,53 @@
+import {Context} from "../context";
 import {FieldSymbol, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 
-export interface IInsertDatabaseOptions {
+export interface IDeleteDatabaseOptions {
   from?: Structure | FieldSymbol,
   table?: Table | FieldSymbol,
 }
 
-export function deleteDatabase(table: string | ICharacter, options: IInsertDatabaseOptions): void {
-  if (this.db === undefined) {
-    throw new Error("Runtime, database not initialized");
-  }
-  if (options.table instanceof FieldSymbol) {
-    options.table = options.table.getPointer() as Table;
-  }
-  if (options.from instanceof FieldSymbol) {
-    options.from = options.from.getPointer() as Structure;
+export class DeleteDatabase {
+  private readonly context: Context;
+
+  public constructor(context: Context) {
+    this.context = context;
   }
 
-  if (options.table) {
-    for (const row of options.table.array()) {
-      deleteDatabase.bind(this)(table, {from: row});
+  public async deleteDatabase(table: string | ICharacter, options: IDeleteDatabaseOptions) {
+    if (options.table instanceof FieldSymbol) {
+      options.table = options.table.getPointer() as Table;
     }
-  } else if (options.from) {
-    const where: string[] = [];
-
-    const structure = options.from.get();
-    for (const k of Object.keys(structure)) {
-      // todo, integers should not be surrounded by '"'?
-      const str = k + ' = "' + structure[k].get() + '"';
-      where.push(str);
+    if (options.from instanceof FieldSymbol) {
+      options.from = options.from.getPointer() as Structure;
+    }
+    if (typeof table !== "string") {
+      table = table.get();
     }
 
-    const sql = `DELETE FROM ${table} WHERE ${where.join(" AND ")}`;
+    if (options.table) {
+      for (const row of options.table.array()) {
+        this.deleteDatabase(table, {from: row});
+      }
+    } else if (options.from) {
+      let where: string[] | string = [];
 
-    let subrc = 0;
-    try {
-      this.db.exec(sql);
-    } catch (error) {
-      subrc = 4;
+      const structure = options.from.get();
+      for (const k of Object.keys(structure)) {
+        // todo, integers should not be surrounded by '"'?
+        const str = k + ' = "' + structure[k].get() + '"';
+        where.push(str);
+      }
+      where = where.join(" AND ");
+
+      const {subrc, dbcnt} = await this.context.defaultDB().delete({table, where});
+
+      // @ts-ignore
+      abap.builtin.sy.get().subrc.set(subrc);
+      // @ts-ignore
+      abap.builtin.sy.get().dbcnt.set(dbcnt);
+    } else {
+      throw "deleteDatabase todo";
     }
-
-    // @ts-ignore
-    abap.builtin.sy.get().subrc.set(subrc);
-  } else {
-    throw "deleteDatabase todo";
   }
-
 }

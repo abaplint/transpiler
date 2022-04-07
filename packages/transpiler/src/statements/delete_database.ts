@@ -16,7 +16,7 @@ export class DeleteDatabaseTranspiler implements IStatementTranspiler {
       options.push(`"table": ` + ttab.getCode());
     }
 
-    return new Chunk(`abap.statements.deleteDatabase(${table.getCode()}, {${options.join(", ")}});`);
+    return new Chunk(`await abap.statements.deleteDatabase(${table.getCode()}, {${options.join(", ")}});`);
   }
 
 }
