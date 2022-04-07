@@ -146,16 +146,14 @@ describe("Testing Unit Testing", () => {
       fs.writeFileSync(outputFolder + path.sep + f.filename, f.contents);
     }
 
-    const setupLogic = `
-import {SQLiteDatabaseClient} from "../../packages/database-sqlite/build/index.js";
+    const setupLogic = `import {SQLiteDatabaseClient} from "../../packages/database-sqlite/build/index.js";
 
 export async function setup(abap, schemas, insert) {
   abap.context.databaseConnections["DEFAULT"] = new SQLiteDatabaseClient();
   await abap.context.databaseConnections["DEFAULT"].connect();
   await abap.context.databaseConnections["DEFAULT"].execute(schemas.sqlite);
   await abap.context.databaseConnections["DEFAULT"].execute(insert);
-}
-`;
+}`;
     fs.writeFileSync(outputFolder + path.sep + SETUP_NAME, setupLogic);
 
     const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
