@@ -67,4 +67,12 @@ describe("Running Examples - Time type", () => {
     expect(abap.console.get()).to.equal("000242");
   });
 
+  it("sy uzeit is set", async () => {
+    const code = `WRITE sy-uzeit.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.not.equal("000000");
+  });
+
 });

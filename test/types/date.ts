@@ -100,4 +100,12 @@ describe("Running Examples - Date type", () => {
     expect(abap.console.get()).to.equal("20100908");
   });
 
+  it("sy date is set", async () => {
+    const code = `WRITE sy-datum.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.not.equal("00000000");
+  });
+
 });

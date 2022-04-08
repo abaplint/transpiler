@@ -1,8 +1,10 @@
+import {Structure} from "../types";
 import {ICharacter} from "../types/_character";
 
 type options = {
   field?: ICharacter,
-  stamp?: ICharacter
+  stamp?: ICharacter,
+  sy?: Structure,
 };
 
 export function getTime(options?: options): void {
@@ -15,14 +17,18 @@ export function getTime(options?: options): void {
                (d.getUTCMinutes() + "").padStart(2, "0") +
                (d.getUTCSeconds() + "").padStart(2, "0");
 
-  // @ts-ignore
-  abap.builtin.sy.get().datlo.set(date);
-  // @ts-ignore
-  abap.builtin.sy.get().datum.set(date);
-  // @ts-ignore
-  abap.builtin.sy.get().timlo.set(time);
-  // @ts-ignore
-  abap.builtin.sy.get().uzeit.set(time);
+  if (options === undefined) {
+    options = {};
+  }
+  if (options?.sy === undefined) {
+    // @ts-ignore
+    options.sy = abap.builtin.sy;
+  }
+
+  options.sy!.get().datlo.set(date);
+  options.sy!.get().datum.set(date);
+  options.sy!.get().timlo.set(time);
+  options.sy!.get().uzeit.set(time);
 
   if (options?.field) {
     options.field.set(time);

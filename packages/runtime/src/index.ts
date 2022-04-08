@@ -45,5 +45,6 @@ export class ABAP {
     builtin.sy.get().subrc.set(0);
     builtin.sy.get().tabix.set(0);
     builtin.sy.get().index.set(0);
+    this.statements.getTime({sy: builtin.sy});
   }
 }
