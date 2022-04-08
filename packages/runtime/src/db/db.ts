@@ -37,7 +37,12 @@ export interface DatabaseClient {
   /*** execute any native SQL command */
   execute(sql: string): Promise<void>;
 
-  // there is no modify(), it has been implemented using update() and insert() in the runtime
+  // transaction handling
+  beginTransaction(): Promise<void>;
+  commit(): Promise<void>;
+  rollback(): Promise<void>;
+
+  // operations, there is no modify(), it has been implemented using update() and insert() in the runtime
   delete(options: DeleteDatabaseOptions): Promise<{subrc: number, dbcnt: number}>;
   update(options: UpdateDatabaseOptions): Promise<{subrc: number, dbcnt: number}>;
   insert(options: InsertDatabaseOptions): Promise<{subrc: number, dbcnt: number}>;

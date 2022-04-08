@@ -9,6 +9,7 @@ type options = {
   pad?: string,
   width?: number,
   decimals?: number,
+  align?: "left" | "right",
 };
 
 export function templateFormatting(source: ICharacter | INumeric, options: options) {
@@ -23,7 +24,11 @@ export function templateFormatting(source: ICharacter | INumeric, options: optio
     text = text.substr(0,2) + ":" + text.substr(2,2) + ":" + text.substr(4,2);
   }
   if (options.width && options.pad) {
-    text = text.trimEnd().padEnd(options.width, options.pad);
+    if (options.align === "right") {
+      text = text.trimEnd().padStart(options.width, options.pad);
+    } else {
+      text = text.trimEnd().padEnd(options.width, options.pad);
+    }
   } else if (options.width) {
     text = text.trimEnd().padEnd(options.width, " ");
   } else if (options.decimals && source instanceof Integer) {

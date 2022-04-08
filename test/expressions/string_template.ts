@@ -121,4 +121,19 @@ describe("Running expressions - String templates", () => {
     expect(abap.console.get()).to.equal("00");
   });
 
+  it("more WIDTH and PAD and Align", async () => {
+    const code = `
+    DATA result TYPE string.
+    DATA hours TYPE i.
+    DATA minutes TYPE i.
+    hours = 2.
+    minutes = 2.
+    result = |{ hours PAD = '0' WIDTH = 2 ALIGN = RIGHT }:{ minutes PAD = '0' WIDTH = 2 ALIGN = RIGHT }|.
+    WRITE result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("02:02");
+  });
+
 });

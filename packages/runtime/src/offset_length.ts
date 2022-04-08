@@ -1,4 +1,4 @@
-import {Character, Hex, Integer, XString} from "./types";
+import {Character, Hex, Integer, Time, XString} from "./types";
 import {ICharacter} from "./types/_character";
 import {INumeric} from "./types/_numeric";
 
@@ -46,7 +46,6 @@ export class OffsetLength {
   }
 
   public set(value: ICharacter | string) {
-
     let val = "";
     if (typeof value === "string") {
       val = value;
@@ -68,7 +67,7 @@ export class OffsetLength {
 
     if (this.length) {
       val = val.substr(0, this.length);
-      if (this.isHex) {
+      if (this.isHex || this.obj instanceof Time) {
         val = val.padStart(this.length, "0");
       }
     }
