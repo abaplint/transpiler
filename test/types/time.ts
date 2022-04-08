@@ -75,4 +75,16 @@ describe("Running Examples - Time type", () => {
     expect(abap.console.get()).to.not.equal("000000");
   });
 
+  it("time, offset set", async () => {
+    const code = `
+    DATA clock TYPE t.
+    clock(2) = 8.
+    WRITE / clock.
+    WRITE / clock(2).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("080000\n08");
+  });
+
 });
