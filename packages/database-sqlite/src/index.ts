@@ -22,6 +22,18 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     this.sqlite!.run(sql);
   }
 
+  public async beginTransaction() {
+    return; // todo
+  }
+
+  public async commit() {
+    return; // todo
+  }
+
+  public async rollback() {
+    return; // todo
+  }
+
   public async delete(options: DB.DeleteDatabaseOptions) {
     const sql = `DELETE FROM ${options.table} WHERE ${options.where}`;
 
