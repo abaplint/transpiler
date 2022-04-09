@@ -8,7 +8,15 @@ export interface IInsertInput {
   off?: INumeric;
 }
 
-export function insert(_input: IInsertInput) {
-// todo
-  return new String().set("todo");
+export function insert(input: IInsertInput) {
+  let value = input.val.get();
+
+  let offset = 0;
+  if (input.off) {
+    offset = input.off.get();
+  }
+
+  value = value.substring(0, offset) + input.sub.get() + value.substring(offset);
+
+  return new String().set(value);
 }
