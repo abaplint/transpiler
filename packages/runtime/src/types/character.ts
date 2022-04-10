@@ -22,6 +22,8 @@ export class Character implements ICharacter {
     }
     if (this.value.length > this.length) {
       this.value = this.value.substr(0, this.length);
+    } else if (this.value.length < this.length) {
+      this.value.padEnd(this.length, " ");
     }
     return this;
   }
@@ -35,7 +37,7 @@ export class Character implements ICharacter {
   }
 
   public clear(): void {
-    this.value = "";
+    this.value = " ".repeat(this.length);
   }
 
   public get(): string {
