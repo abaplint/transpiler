@@ -3,6 +3,7 @@ import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
 export function initial(val: ICharacter | INumeric | string | number | Structure | DataReference | Table | ABAPObject) {
+  // todo, refactor? add as method in each type instead?
   if (val instanceof Table) {
     return val.array().length === 0;
   } else if (val instanceof DataReference) {

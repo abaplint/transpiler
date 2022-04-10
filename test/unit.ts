@@ -115,6 +115,18 @@ const zopentest = `<?xml version="1.0" encoding="utf-8"?>
  </asx:abap>
 </abapGit>`;
 
+const cxroot = `
+CLASS cx_root DEFINITION PUBLIC.
+ENDCLASS.
+CLASS cx_root IMPLEMENTATION.
+ENDCLASS.`;
+
+const cxcreate = `
+CLASS cx_sy_range_out_of_bounds DEFINITION PUBLIC INHERITING FROM cx_root.
+ENDCLASS.
+CLASS cx_sy_range_out_of_bounds IMPLEMENTATION.
+ENDCLASS.`;
+
 describe("Testing Unit Testing", () => {
   const base: string = path.join(__dirname, "..", "..", "unit-test/");
   let name: string | undefined = "";
@@ -450,11 +462,7 @@ export async function setup(abap, schemas, insert) {
         WRITE 'from impl'.
       ENDMETHOD.
     ENDCLASS.`;
-    const cxroot = `
-    CLASS cx_root DEFINITION PUBLIC.
-    ENDCLASS.
-    CLASS cx_root IMPLEMENTATION.
-    ENDCLASS.`;
+
     const files = [
       {filename: "cx_root.clas.abap", contents: cxroot},
       {filename: "zcl_client.clas.abap", contents: clas},
@@ -542,11 +550,7 @@ ENDCLASS.`;
         WRITE 'from impl'.
       ENDMETHOD.
     ENDCLASS.`;
-    const cxroot = `
-    CLASS cx_root DEFINITION PUBLIC.
-    ENDCLASS.
-    CLASS cx_root IMPLEMENTATION.
-    ENDCLASS.`;
+
     const files = [
       {filename: "cx_root.clas.abap", contents: cxroot},
       {filename: "zcl_client.clas.abap", contents: clas},
@@ -654,11 +658,7 @@ ENDCLASS.`;
       ENDMETHOD.
 
     ENDCLASS.`;
-    const cxroot = `
-    CLASS cx_root DEFINITION PUBLIC.
-    ENDCLASS.
-    CLASS cx_root IMPLEMENTATION.
-    ENDCLASS.`;
+
     const files = [
       {filename: "cx_root.clas.abap", contents: cxroot},
       {filename: "zcx_something.clas.abap", contents: clas2},
@@ -708,11 +708,7 @@ ENDCLASS.`;
         ENDTRY.
       ENDMETHOD.
     ENDCLASS.`;
-    const cxroot = `
-    CLASS cx_root DEFINITION PUBLIC.
-    ENDCLASS.
-    CLASS cx_root IMPLEMENTATION.
-    ENDCLASS.`;
+
     const cxcreate = `
     CLASS cx_sy_create_object_error DEFINITION PUBLIC INHERITING FROM cx_root.
     ENDCLASS.
@@ -1152,11 +1148,7 @@ CLASS ltcl_test IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.`;
 
-    const cxroot = `
-    CLASS cx_root DEFINITION PUBLIC.
-    ENDCLASS.
-    CLASS cx_root IMPLEMENTATION.
-    ENDCLASS.`;
+
 
     const cxconv = `
     CLASS cx_sy_conversion_no_number DEFINITION PUBLIC INHERITING FROM cx_root.
@@ -1201,11 +1193,7 @@ CLASS ltcl_test IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.`;
 
-    const cxroot = `
-    CLASS cx_root DEFINITION PUBLIC.
-    ENDCLASS.
-    CLASS cx_root IMPLEMENTATION.
-    ENDCLASS.`;
+
 
     const cxconv = `
     CLASS cx_sy_dyn_call_illegal_method DEFINITION PUBLIC INHERITING FROM cx_root.
@@ -1272,6 +1260,181 @@ ENDCLASS.`;
     ];
     const cons = await dumpNrun(files);
     expect(cons.split("\n")[1]).to.equal("2");
+  });
+
+  it("test-29", async () => {
+// throw cx_sy_range_out_of_bounds, character field
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA input TYPE c LENGTH 2.
+        DATA letter TYPE c LENGTH 1.
+        DATA offset TYPE i.
+        offset = 3.
+        TRY.
+            letter = input+offset(1).
+            WRITE 'bad bot'.
+          CATCH cx_sy_range_out_of_bounds.
+            WRITE 'expected'.
+        ENDTRY.
+      ENDMETHOD.
+    ENDCLASS.`;
+
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "cx_sy_range_out_of_bounds.clas.abap", contents: cxcreate},
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("expected");
+  });
+
+  it("test-30", async () => {
+// throw cx_sy_range_out_of_bounds, string
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA input TYPE string.
+        DATA letter TYPE c LENGTH 1.
+        TRY.
+            letter = input+10(1).
+            WRITE 'bad bot'.
+          CATCH cx_sy_range_out_of_bounds.
+            WRITE 'expected'.
+        ENDTRY.
+      ENDMETHOD.
+    ENDCLASS.`;
+
+
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "cx_sy_range_out_of_bounds.clas.abap", contents: cxcreate},
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("expected");
+  });
+
+  it("test-31", async () => {
+// substring() should throw cx_sy_range_out_of_bounds
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA str TYPE string.
+        TRY.
+            WRITE substring( val = str off = 5 ).
+          CATCH cx_sy_range_out_of_bounds.
+            WRITE 'expected'.
+        ENDTRY.
+      ENDMETHOD.
+    ENDCLASS.`;
+
+
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "cx_sy_range_out_of_bounds.clas.abap", contents: cxcreate},
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("expected");
+  });
+
+  it("test-32", async () => {
+// replace() should throw cx_sy_range_out_of_bounds
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA str TYPE string.
+        TRY.
+            WRITE replace( val = str off = 5 with = 'sdf' len = 2 ).
+          CATCH cx_sy_range_out_of_bounds.
+            WRITE 'expected'.
+        ENDTRY.
+      ENDMETHOD.
+    ENDCLASS.`;
+
+
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "cx_sy_range_out_of_bounds.clas.abap", contents: cxcreate},
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("expected");
+  });
+
+  it("test-33", async () => {
+// insert() should throw cx_sy_range_out_of_bounds
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA str TYPE string.
+        TRY.
+            WRITE insert( val = str off = 5 sub = 'sdf' ).
+          CATCH cx_sy_range_out_of_bounds.
+            WRITE 'expected'.
+        ENDTRY.
+      ENDMETHOD.
+    ENDCLASS.`;
+
+
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "cx_sy_range_out_of_bounds.clas.abap", contents: cxcreate},
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("expected");
   });
 
 });

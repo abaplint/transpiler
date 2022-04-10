@@ -9,13 +9,17 @@ export interface ISubstringInput {
 }
 
 export function substring(input: ISubstringInput): ICharacter {
-  const val = typeof input.val === "string" ? input.val : input.val.get();
   let off = input?.off?.get();
   if (off === undefined) {
     off = 0;
   }
   const len = input?.len?.get();
 
-  const sub = val.substr(off, len);
+  let sub = "";
+  if (typeof input.val === "string") {
+    sub = input.val.substr(off, len);
+  } else {
+    sub = input.val.getOffset({offset: off, length: len}).get();
+  }
   return new String().set(sub);
 }

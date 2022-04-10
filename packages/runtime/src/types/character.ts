@@ -6,9 +6,12 @@ export class Character implements ICharacter {
   private readonly qualifiedName: string | undefined;
 
   public constructor(input?: {length?: number, qualifiedName?: string}) {
-    this.value = "";
     this.length = input?.length ? input?.length : 1;
+    if (this.length <= 0) {
+      throw "Character, invalid length";
+    }
     this.qualifiedName = input?.qualifiedName;
+    this.clear();
   }
 
   public set(value: ICharacter | string) {
@@ -19,6 +22,9 @@ export class Character implements ICharacter {
     }
     if (this.value.length > this.length) {
       this.value = this.value.substr(0, this.length);
+// todo, maintain consistent length
+//    } else if (this.value.length < this.length) {
+//      this.value.padEnd(this.length, " ");
     }
     return this;
   }
@@ -32,6 +38,8 @@ export class Character implements ICharacter {
   }
 
   public clear(): void {
+// todo, maintain consistent length
+//    this.value = " ".repeat(this.length);
     this.value = "";
   }
 
@@ -40,6 +48,16 @@ export class Character implements ICharacter {
   }
 
   public getOffset(input: {offset?: number, length?: number}) {
+    if (input.offset && input.offset >= this.length) {
+      // @ts-ignore
+      if (abap.Classes["CX_SY_RANGE_OUT_OF_BOUNDS"] !== undefined) {
+        // @ts-ignore
+        throw new abap.Classes["CX_SY_RANGE_OUT_OF_BOUNDS"]();
+      } else {
+        throw "Global class CX_SY_RANGE_OUT_OF_BOUNDS not found";
+      }
+    }
+
     let ret = this.value;
     if (input?.offset) {
       ret = ret.substr(input.offset);

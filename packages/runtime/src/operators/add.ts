@@ -1,9 +1,10 @@
-import {Float, Integer} from "../types";
+import {Float, Hex, Integer} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
 
-export function add(left: INumeric | ICharacter | string | number, right: INumeric | ICharacter | string | number) {
+export function add(left: INumeric | ICharacter | string | number | Float | Integer | Hex,
+                    right: INumeric | ICharacter | string | number  | Float | Integer | Hex) {
   if (left instanceof Integer && right instanceof Integer) {
     return new Integer().set(left.get() + right.get());
   } else if (typeof left === "number" && typeof right === "number"
