@@ -200,6 +200,9 @@ SOURCE
 RESULT XML writer.`, js: `if (abap.Classes['KERNEL_CALL_TRANSFORMATION'] === undefined) throw new Error("CallTransformation, kernel class missing");
 await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",resultXML: writer,source: {data:fs_fs_,fields:fields}});`},
 
+    {abap: "SCAN ABAP-SOURCE src TOKENS INTO tokens STATEMENTS INTO statements.", js: `if (abap.Classes['KERNEL_SCAN_ABAP_SOURCE'] === undefined) throw new Error("ScanAbapSource, kernel class missing");
+await abap.Classes['KERNEL_SCAN_ABAP_SOURCE'].call({scan_abap_source: src, tokens_into: tokens, statements_into: statements});`},
+
     {abap: `DATA tab TYPE SORTED TABLE OF i WITH UNIQUE KEY table_line.`,
       js: `let tab = new abap.types.Table(new abap.types.Integer(), {"withHeader":false,"type":"SORTED","isUnique":true,"keyFields":["TABLE_LINE"]});`},
     {abap: `DATA foobar TYPE abap_bool.`,

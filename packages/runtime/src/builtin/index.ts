@@ -11,6 +11,7 @@ export * from "./escape";
 export * from "./find";
 export * from "./floor";
 export * from "./frac";
+export * from "./insert";
 export * from "./lines";
 export * from "./nmax";
 export * from "./nmin";
