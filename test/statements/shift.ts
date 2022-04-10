@@ -111,4 +111,28 @@ describe("Running statements - SHIFT", () => {
     await f(abap);
   });
 
+  it("SHIFT LEFT IN BYTE MODE", async () => {
+    const code = `
+    DATA foo TYPE x LENGTH 10.
+    foo = '1122'.
+    SHIFT foo LEFT IN BYTE MODE.
+    WRITE foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("22000000000000000000");
+  });
+
+  it("SHIFT LEFT CIRCULAR IN BYTE MODE", async () => {
+    const code = `
+    DATA foo TYPE x LENGTH 10.
+    foo = '1122'.
+    SHIFT foo LEFT CIRCULAR IN BYTE MODE.
+    WRITE foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("22000000000000000011");
+  });
+
 });

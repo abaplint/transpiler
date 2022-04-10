@@ -52,12 +52,10 @@ function shift_character_mode(target: ICharacter, options?: IShiftOptions) {
     if (index > 0) {
       value = value.substr(index);
     }
+  } else if (options?.circular) {
+    value = value.substr(1) + value.substr(0, 1);
   } else {
-    if (options?.circular) {
-      value = value.substr(1) + value.substr(0, 1);
-    } else {
-      value = value.substr(1);
-    }
+    value = value.substr(1);
   }
 
   target.set(value);
@@ -95,8 +93,11 @@ function shift_byte_mode(target: ICharacter, options?: IShiftOptions) {
     if (index > 0) {
       value = value.substr(index);
     }
+  } else if (options?.circular) {
+    value = value.substr(2) + value.substr(0, 2);
+  } else {
+    value = value.substr(2);
   }
 
   target.set(value);
-
 }
