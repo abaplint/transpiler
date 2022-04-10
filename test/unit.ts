@@ -1274,8 +1274,54 @@ ENDCLASS.`;
     expect(cons.split("\n")[1]).to.equal("2");
   });
 
-  it.skip("test-29", async () => {
-// throw cx_sy_range_out_of_bounds
+  it("test-29", async () => {
+// throw cx_sy_range_out_of_bounds, character field
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA input TYPE c LENGTH 2.
+        DATA letter TYPE c LENGTH 1.
+        DATA offset TYPE i.
+        offset = 3.
+        TRY.
+            letter = input+offset(1).
+            WRITE 'bad bot'.
+          CATCH cx_sy_range_out_of_bounds.
+            WRITE 'expected'.
+        ENDTRY.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const cxroot = `
+    CLASS cx_root DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS cx_root IMPLEMENTATION.
+    ENDCLASS.`;
+    const cxcreate = `
+    CLASS cx_sy_range_out_of_bounds DEFINITION PUBLIC INHERITING FROM cx_root.
+    ENDCLASS.
+    CLASS cx_sy_range_out_of_bounds IMPLEMENTATION.
+    ENDCLASS.`;
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "cx_sy_range_out_of_bounds.clas.abap", contents: cxcreate},
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("expected");
+  });
+
+  it("test-30", async () => {
+// throw cx_sy_range_out_of_bounds, string
     const clas = `
     CLASS zcl_client DEFINITION PUBLIC.
     ENDCLASS.
@@ -1315,7 +1361,7 @@ ENDCLASS.`;
       {filename: "zcl_client.clas.testclasses.abap", contents: tests},
     ];
     const cons = await dumpNrun(files);
-    expect(cons.split("\n")[1]).to.equal("not found");
+    expect(cons.split("\n")[1]).to.equal("expected");
   });
 
 });

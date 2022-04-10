@@ -37,6 +37,16 @@ export class String implements ICharacter {
   }
 
   public getOffset(input: { offset: number, length: number }) {
+    if (input.offset && input.offset >= this.value.length) {
+      // @ts-ignore
+      if (abap.Classes["CX_SY_RANGE_OUT_OF_BOUNDS"] !== undefined) {
+        // @ts-ignore
+        throw new abap.Classes["CX_SY_RANGE_OUT_OF_BOUNDS"]();
+      } else {
+        throw "Global class CX_SY_RANGE_OUT_OF_BOUNDS not found";
+      }
+    }
+
     let ret = this.value;
     if (input?.offset) {
       ret = ret.substr(input.offset);
