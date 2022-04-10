@@ -1,5 +1,6 @@
 import {minus} from "../operators";
 import {Float} from "./float";
+import {Integer} from "./integer";
 import {XString} from "./xstring";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
@@ -13,7 +14,7 @@ export class Hex implements ICharacter {
     this.value = "0".repeat(this.length * 2);
   }
 
-  public set(value: ICharacter | INumeric | string | number) {
+  public set(value: ICharacter | INumeric | string | number | Integer | Float) {
     if (typeof value === "string") {
       this.value = value;
     } else if (typeof value === "number") {

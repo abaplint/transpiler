@@ -11,7 +11,7 @@ export class Integer implements INumeric {
     this.value = 0;
   }
 
-  public set(value: INumeric | ICharacter | Hex | string | number) {
+  public set(value: INumeric | ICharacter | Hex | string | number | Integer | Float) {
     if (typeof value === "number") {
       this.value = value;
     } else if (typeof value === "string" && value.trim().length === 0) {

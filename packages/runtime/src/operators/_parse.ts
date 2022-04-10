@@ -1,9 +1,9 @@
-import {Date,Time,Hex, Float} from "../types";
+import {Date,Time,Hex, Float, Integer} from "../types";
 import {XString} from "../types/xstring";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
-export function parse(val: INumeric | ICharacter | string | number): number {
+export function parse(val: INumeric | ICharacter | string | number | Float | Integer): number {
   if (typeof val === "number") {
     return val;
   } else if (typeof val === "string") {

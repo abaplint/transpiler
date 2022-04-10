@@ -44,4 +44,8 @@ export class Numc implements ICharacter {
   public get(): string {
     return this.value;
   }
+
+  public getOffset(_input: {offset?: number, length?: number}): Numc {
+    throw "todo, runtime, numc getOffset()";
+  }
 }
