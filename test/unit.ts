@@ -115,6 +115,18 @@ const zopentest = `<?xml version="1.0" encoding="utf-8"?>
  </asx:abap>
 </abapGit>`;
 
+const cxroot = `
+CLASS cx_root DEFINITION PUBLIC.
+ENDCLASS.
+CLASS cx_root IMPLEMENTATION.
+ENDCLASS.`;
+
+const cxcreate = `
+CLASS cx_sy_range_out_of_bounds DEFINITION PUBLIC INHERITING FROM cx_root.
+ENDCLASS.
+CLASS cx_sy_range_out_of_bounds IMPLEMENTATION.
+ENDCLASS.`;
+
 describe("Testing Unit Testing", () => {
   const base: string = path.join(__dirname, "..", "..", "unit-test/");
   let name: string | undefined = "";
@@ -450,11 +462,7 @@ export async function setup(abap, schemas, insert) {
         WRITE 'from impl'.
       ENDMETHOD.
     ENDCLASS.`;
-    const cxroot = `
-    CLASS cx_root DEFINITION PUBLIC.
-    ENDCLASS.
-    CLASS cx_root IMPLEMENTATION.
-    ENDCLASS.`;
+
     const files = [
       {filename: "cx_root.clas.abap", contents: cxroot},
       {filename: "zcl_client.clas.abap", contents: clas},
@@ -542,11 +550,7 @@ ENDCLASS.`;
         WRITE 'from impl'.
       ENDMETHOD.
     ENDCLASS.`;
-    const cxroot = `
-    CLASS cx_root DEFINITION PUBLIC.
-    ENDCLASS.
-    CLASS cx_root IMPLEMENTATION.
-    ENDCLASS.`;
+
     const files = [
       {filename: "cx_root.clas.abap", contents: cxroot},
       {filename: "zcl_client.clas.abap", contents: clas},
@@ -654,11 +658,7 @@ ENDCLASS.`;
       ENDMETHOD.
 
     ENDCLASS.`;
-    const cxroot = `
-    CLASS cx_root DEFINITION PUBLIC.
-    ENDCLASS.
-    CLASS cx_root IMPLEMENTATION.
-    ENDCLASS.`;
+
     const files = [
       {filename: "cx_root.clas.abap", contents: cxroot},
       {filename: "zcx_something.clas.abap", contents: clas2},
@@ -708,11 +708,7 @@ ENDCLASS.`;
         ENDTRY.
       ENDMETHOD.
     ENDCLASS.`;
-    const cxroot = `
-    CLASS cx_root DEFINITION PUBLIC.
-    ENDCLASS.
-    CLASS cx_root IMPLEMENTATION.
-    ENDCLASS.`;
+
     const cxcreate = `
     CLASS cx_sy_create_object_error DEFINITION PUBLIC INHERITING FROM cx_root.
     ENDCLASS.
@@ -1152,11 +1148,7 @@ CLASS ltcl_test IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.`;
 
-    const cxroot = `
-    CLASS cx_root DEFINITION PUBLIC.
-    ENDCLASS.
-    CLASS cx_root IMPLEMENTATION.
-    ENDCLASS.`;
+
 
     const cxconv = `
     CLASS cx_sy_conversion_no_number DEFINITION PUBLIC INHERITING FROM cx_root.
@@ -1201,11 +1193,7 @@ CLASS ltcl_test IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.`;
 
-    const cxroot = `
-    CLASS cx_root DEFINITION PUBLIC.
-    ENDCLASS.
-    CLASS cx_root IMPLEMENTATION.
-    ENDCLASS.`;
+
 
     const cxconv = `
     CLASS cx_sy_dyn_call_illegal_method DEFINITION PUBLIC INHERITING FROM cx_root.
@@ -1300,16 +1288,7 @@ ENDCLASS.`;
         ENDTRY.
       ENDMETHOD.
     ENDCLASS.`;
-    const cxroot = `
-    CLASS cx_root DEFINITION PUBLIC.
-    ENDCLASS.
-    CLASS cx_root IMPLEMENTATION.
-    ENDCLASS.`;
-    const cxcreate = `
-    CLASS cx_sy_range_out_of_bounds DEFINITION PUBLIC INHERITING FROM cx_root.
-    ENDCLASS.
-    CLASS cx_sy_range_out_of_bounds IMPLEMENTATION.
-    ENDCLASS.`;
+
     const files = [
       {filename: "cx_root.clas.abap", contents: cxroot},
       {filename: "cx_sy_range_out_of_bounds.clas.abap", contents: cxcreate},
@@ -1344,16 +1323,8 @@ ENDCLASS.`;
         ENDTRY.
       ENDMETHOD.
     ENDCLASS.`;
-    const cxroot = `
-    CLASS cx_root DEFINITION PUBLIC.
-    ENDCLASS.
-    CLASS cx_root IMPLEMENTATION.
-    ENDCLASS.`;
-    const cxcreate = `
-    CLASS cx_sy_range_out_of_bounds DEFINITION PUBLIC INHERITING FROM cx_root.
-    ENDCLASS.
-    CLASS cx_sy_range_out_of_bounds IMPLEMENTATION.
-    ENDCLASS.`;
+
+
     const files = [
       {filename: "cx_root.clas.abap", contents: cxroot},
       {filename: "cx_sy_range_out_of_bounds.clas.abap", contents: cxcreate},
@@ -1386,16 +1357,8 @@ ENDCLASS.`;
         ENDTRY.
       ENDMETHOD.
     ENDCLASS.`;
-    const cxroot = `
-    CLASS cx_root DEFINITION PUBLIC.
-    ENDCLASS.
-    CLASS cx_root IMPLEMENTATION.
-    ENDCLASS.`;
-    const cxcreate = `
-    CLASS cx_sy_range_out_of_bounds DEFINITION PUBLIC INHERITING FROM cx_root.
-    ENDCLASS.
-    CLASS cx_sy_range_out_of_bounds IMPLEMENTATION.
-    ENDCLASS.`;
+
+
     const files = [
       {filename: "cx_root.clas.abap", contents: cxroot},
       {filename: "cx_sy_range_out_of_bounds.clas.abap", contents: cxcreate},
@@ -1428,16 +1391,8 @@ ENDCLASS.`;
         ENDTRY.
       ENDMETHOD.
     ENDCLASS.`;
-    const cxroot = `
-    CLASS cx_root DEFINITION PUBLIC.
-    ENDCLASS.
-    CLASS cx_root IMPLEMENTATION.
-    ENDCLASS.`;
-    const cxcreate = `
-    CLASS cx_sy_range_out_of_bounds DEFINITION PUBLIC INHERITING FROM cx_root.
-    ENDCLASS.
-    CLASS cx_sy_range_out_of_bounds IMPLEMENTATION.
-    ENDCLASS.`;
+
+
     const files = [
       {filename: "cx_root.clas.abap", contents: cxroot},
       {filename: "cx_sy_range_out_of_bounds.clas.abap", contents: cxcreate},
@@ -1470,16 +1425,8 @@ ENDCLASS.`;
         ENDTRY.
       ENDMETHOD.
     ENDCLASS.`;
-    const cxroot = `
-    CLASS cx_root DEFINITION PUBLIC.
-    ENDCLASS.
-    CLASS cx_root IMPLEMENTATION.
-    ENDCLASS.`;
-    const cxcreate = `
-    CLASS cx_sy_range_out_of_bounds DEFINITION PUBLIC INHERITING FROM cx_root.
-    ENDCLASS.
-    CLASS cx_sy_range_out_of_bounds IMPLEMENTATION.
-    ENDCLASS.`;
+
+
     const files = [
       {filename: "cx_root.clas.abap", contents: cxroot},
       {filename: "cx_sy_range_out_of_bounds.clas.abap", contents: cxcreate},
