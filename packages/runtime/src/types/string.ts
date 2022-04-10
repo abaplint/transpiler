@@ -37,7 +37,9 @@ export class String implements ICharacter {
   }
 
   public getOffset(input: { offset: number, length: number }) {
-    if (input.offset && input.offset > this.value.length) {
+    if ((input.offset && input.offset > this.value.length)
+        || (input.offset && input.offset < 0)
+        || (input.length && input.length < 0)) {
       // @ts-ignore
       if (abap.Classes["CX_SY_RANGE_OUT_OF_BOUNDS"] !== undefined) {
         // @ts-ignore
