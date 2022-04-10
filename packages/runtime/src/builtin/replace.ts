@@ -44,10 +44,16 @@ export function replace(input: IReplaceInput) {
     sub = input.regex.get();
   }
 
-  if (input.off && input.len) {
+  if (input.off && input.len && typeof input.val === "string") {
     const offset = input.off.get();
     const length = input.len.get();
     val = val.substring(0, offset) + wi + val.substring(offset + length);
+  } else if (input.off && input.len && !(typeof input.val === "string")) {
+    const offset = input.off.get();
+    const length = input.len.get();
+    val = input.val.getOffset({offset: 0, length: offset}).get() +
+          wi +
+          input.val.getOffset({offset: offset + length}).get();
   } else if (input.occ === undefined && sub && wi) {
     val = val.replace(sub, wi);
   } else if (input.occ && input.occ.get() === 0 && sub && wi !== undefined) {
