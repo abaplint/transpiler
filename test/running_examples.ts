@@ -1064,4 +1064,17 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("string offset, ok", async () => {
+    const code = `
+    DATA input TYPE string.
+    input = |a|.
+    DATA letter TYPE c LENGTH 1.
+    letter = input+1.
+    ASSERT letter IS INITIAL.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
