@@ -9,14 +9,14 @@ export interface IInsertInput {
 }
 
 export function insert(input: IInsertInput) {
-  let value = input.val.get();
-
   let offset = 0;
   if (input.off) {
     offset = input.off.get();
   }
 
-  value = value.substring(0, offset) + input.sub.get() + value.substring(offset);
+  const value = input.val.getOffset({offset: 0, length: offset}).get() +
+                input.sub.get() +
+                input.val.getOffset({offset: offset}).get();
 
   return new String().set(value);
 }

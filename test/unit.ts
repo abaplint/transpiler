@@ -1448,4 +1448,46 @@ ENDCLASS.`;
     expect(cons.split("\n")[1]).to.equal("expected");
   });
 
+  it("test-33", async () => {
+// insert() should throw cx_sy_range_out_of_bounds
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA str TYPE string.
+        TRY.
+            WRITE insert( val = str off = 5 sub = 'sdf' ).
+          CATCH cx_sy_range_out_of_bounds.
+            WRITE 'expected'.
+        ENDTRY.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const cxroot = `
+    CLASS cx_root DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS cx_root IMPLEMENTATION.
+    ENDCLASS.`;
+    const cxcreate = `
+    CLASS cx_sy_range_out_of_bounds DEFINITION PUBLIC INHERITING FROM cx_root.
+    ENDCLASS.
+    CLASS cx_sy_range_out_of_bounds IMPLEMENTATION.
+    ENDCLASS.`;
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "cx_sy_range_out_of_bounds.clas.abap", contents: cxcreate},
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("expected");
+  });
+
 });
