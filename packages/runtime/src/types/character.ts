@@ -6,9 +6,12 @@ export class Character implements ICharacter {
   private readonly qualifiedName: string | undefined;
 
   public constructor(input?: {length?: number, qualifiedName?: string}) {
-    this.value = "";
     this.length = input?.length ? input?.length : 1;
+    if (this.length <= 0) {
+      throw "Character, invalid length";
+    }
     this.qualifiedName = input?.qualifiedName;
+    this.clear();
   }
 
   public set(value: ICharacter | string) {
