@@ -38,7 +38,9 @@ export class Character implements ICharacter {
   }
 
   public clear(): void {
-    this.value = " ".repeat(this.length);
+// todo, maintain consistent length
+//    this.value = " ".repeat(this.length);
+    this.value = "";
   }
 
   public get(): string {
