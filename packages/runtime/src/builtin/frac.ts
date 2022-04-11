@@ -1,4 +1,5 @@
 /* eslint-disable radix */
+import {DecFloat34, Float} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -8,11 +9,15 @@ export function frac(input: {val: number | string | ICharacter | INumeric}) {
   let pre = "0.";
   if (typeof input.val === "number") {
     num_in = input.val;
-  } else if ( typeof input.val === "string") {
+  } else if (typeof input.val === "string") {
     num_in = parseFloat(input.val);
+  } else if (input.val instanceof DecFloat34
+      || input.val instanceof Float) {
+    num_in = input.val.getRaw();
   } else {
     num_in = parseFloat(input.val.get().toString());
   }
+
   const numSplit = num_in.toString().split(".");
   if (numSplit.length === 2) {
     if (num_in < 0) {
@@ -21,5 +26,11 @@ export function frac(input: {val: number | string | ICharacter | INumeric}) {
     ret = parseFloat(pre + numSplit[1]);
   }
 
-  return ret;
+  if (input.val instanceof DecFloat34) {
+    return new DecFloat34().set(ret);
+  } else if (input.val instanceof Float) {
+    return new Float().set(ret);
+  } else {
+    return ret;
+  }
 }

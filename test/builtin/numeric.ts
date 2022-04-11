@@ -81,28 +81,6 @@ describe("Builtin Numeric Functions", () => {
     expect(abap.console.get()).to.equal("12\n12\n12\n43");
   });
 
-  it("Builtin numerical: frac", async () => {
-    const code = `
-  DATA chars TYPE c LENGTH 10.
-  DATA int TYPE i.
-  DATA packed TYPE p.
-
-  chars = '12.34'.
-  WRITE / frac( chars ).
-
-  packed = chars.
-  WRITE / frac( packed ).
-
-  int = 12.
-  WRITE / frac( int ).
-
-  WRITE / frac( '-43.21' ).`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("0.34\n0.34\n0\n-0.21");
-  });
-
   it("Builtin numerical: sign", async () => {
     const code = `
   DATA chars TYPE c LENGTH 10.
