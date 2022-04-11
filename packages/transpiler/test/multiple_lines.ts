@@ -186,7 +186,8 @@ foo.set(await (new abap.Classes['PROG-ZFOOBAR-ZCL_WORDS']()).constructor_());`;
 END OF foo.
 DATA moo TYPE foo.`;
 
-    const expected = `let moo = new abap.types.Structure({bar: new abap.types.Character()}, "foo");`;
+// todo, this is wrong, "bar" is not the qualified type name,
+    const expected = `let moo = new abap.types.Structure({bar: new abap.types.Character({qualifiedName: "bar"})}, "foo");`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });
