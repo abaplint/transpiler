@@ -13,6 +13,8 @@ export class ShiftTranspiler implements IStatementTranspiler {
 
     if (node.findDirectTokenByText("LEFT")) {
       options.push("direction: 'LEFT'");
+    } else if (node.findDirectTokenByText("RIGHT")) {
+      options.push("direction: 'RIGHT'");
     }
 
     if (node.findDirectTokenByText("CIRCULAR")) {
@@ -22,6 +24,10 @@ export class ShiftTranspiler implements IStatementTranspiler {
     const leading = node.findExpressionAfterToken("LEADING");
     if (leading) {
       options.push("deletingLeading: " + traversal.traverse(leading).getCode());
+    }
+    const trailing = node.findExpressionAfterToken("TRAILING");
+    if (trailing) {
+      options.push("deletingTrailing: " + traversal.traverse(trailing).getCode());
     }
 
     const places = node.findExpressionAfterToken("BY");

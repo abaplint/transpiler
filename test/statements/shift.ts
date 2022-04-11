@@ -135,4 +135,15 @@ describe("Running statements - SHIFT", () => {
     expect(abap.console.get()).to.equal("22000000000000000011");
   });
 
+  it("SHIFT RIGHT DELETING TRAILING", async () => {
+    const code = `
+    DATA text TYPE string.
+    text = |foo |.
+    SHIFT text RIGHT DELETING TRAILING | |.
+    ASSERT text = | foo|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
