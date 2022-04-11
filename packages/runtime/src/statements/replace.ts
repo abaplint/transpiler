@@ -36,8 +36,12 @@ export function replace(input: replaceInput): void {
   }
 
   if (input.all === true) {
-    while(temp.replace(search, replace) !== temp) {
-      temp = temp.replace(search, replace);
+    if (input.regex) {
+      temp = temp.replace(new RegExp(input.regex.get(), "g"), replace);
+    } else {
+      while(temp.replace(search, replace) !== temp) {
+        temp = temp.replace(search, replace);
+      }
     }
   } else {
     temp = temp.replace(search, replace);

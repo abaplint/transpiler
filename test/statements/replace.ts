@@ -152,4 +152,17 @@ describe("Running statements - REPLACE", () => {
     await f(abap);
   });
 
+  it("REPLACE, split in fives", async () => {
+    const code = `
+    DATA cipher_text TYPE string.
+    cipher_text = |nrmwyoldrmtob|.
+    REPLACE ALL OCCURRENCES OF REGEX \`.{5}\` IN cipher_text WITH |$& |.
+    WRITE cipher_text.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("nrmwy oldrm tob");
+  });
+
 });
