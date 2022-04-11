@@ -3,6 +3,7 @@ import {INumeric} from "../types/_numeric";
 
 export interface IShiftOptions {
   deletingLeading?: string | ICharacter,
+  deletingTrailing?: string | ICharacter,
   places?: INumeric,
   to?: ICharacter | string,
   direction?: "LEFT" | "RIGHT",
@@ -11,9 +12,6 @@ export interface IShiftOptions {
 }
 
 export function shift(target: ICharacter, options?: IShiftOptions) {
-  if (options?.direction === "RIGHT") {
-    throw "SHIFT, RIGHT todo";
-  }
   if (options?.mode === "BYTE") {
     shift_byte_mode(target, options);
   } else {
@@ -32,6 +30,14 @@ function shift_character_mode(target: ICharacter, options?: IShiftOptions) {
     const split = leading.split("");
     while (split.some(s => value.substr(0, 1) === s)) {
       value = value.substr(1);
+    }
+  } else if (options?.deletingTrailing) {
+    let trailing = options.deletingTrailing;
+    if (typeof trailing !== "string") {
+      trailing = trailing.get();
+    }
+    if (value.endsWith(trailing)) {
+      value = " ".repeat(trailing.length) + value.substring(0, value.length - trailing.length);
     }
   } else if (options?.places) {
     const p = options.places.get();
