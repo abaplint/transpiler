@@ -17,6 +17,10 @@ export class SelectTranspiler implements IStatementTranspiler {
     if (orderBy) {
       select += orderBy.concatTokens() + " ";
     }
+    const upTo = node.findFirstExpression(abaplint.Expressions.SQLUpTo);
+    if (upTo) {
+      select += upTo.concatTokens() + " ";
+    }
 
     for (const d of node.findAllExpressionsRecursive(abaplint.Expressions.Dynamic)) {
       const chain = d.findFirstExpression(abaplint.Expressions.FieldChain);
@@ -28,7 +32,7 @@ export class SelectTranspiler implements IStatementTranspiler {
     }
 
     if (node.concatTokens().toUpperCase().startsWith("SELECT SINGLE ")) {
-      select += "LIMIT 1";
+      select += "UP TO 1 ROWS";
     }
 
     return new Chunk().append(`await abap.statements.select(${target}, {select: "${select.trim()}"});`, node, traversal);
