@@ -13,6 +13,10 @@ export class SelectTranspiler implements IStatementTranspiler {
     select += node.findFirstExpression(abaplint.Expressions.SQLFieldList)?.concatTokens() + " ";
     select += node.findFirstExpression(abaplint.Expressions.SQLFrom)?.concatTokens() + " ";
 
+    const where = node.findFirstExpression(abaplint.Expressions.SQLCond);
+    if (where) {
+      select += "WHERE " + where.concatTokens() + " ";
+    }
     const orderBy = node.findFirstExpression(abaplint.Expressions.SQLOrderBy);
     if (orderBy) {
       select += orderBy.concatTokens() + " ";
