@@ -37,7 +37,8 @@ export class SelectDatabase {
     } else if (target instanceof Table) {
       for (const row of rows) {
         const targetRow = clone(target.getRowType());
-        for (const columnName in row) {
+        for (let columnName in row) {
+          columnName = columnName.toLowerCase();
           // todo, non structured table = table with simple rows
           // @ts-ignore
           targetRow.get()[columnName]?.set(row[columnName]);
