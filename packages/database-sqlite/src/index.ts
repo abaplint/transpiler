@@ -82,6 +82,7 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
   public async select(options: DB.SelectDatabaseOptions) {
     let res: undefined | QueryExecResult[] = undefined;
     try {
+      options.select = options.select.replace(/ UP TO (\d+) ROWS/i, " LIMIT $1");
       res = this.sqlite!.exec(options.select);
     } catch (error) {
       // @ts-ignore

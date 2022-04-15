@@ -153,8 +153,11 @@ describe("Single statements", () => {
     {abap: "super->method( ).",     js: `await super.method();`, skip: false},
     {abap: "super->constructor( ).",     js: ``, skip: false}, // todo, https://github.com/abaplint/transpiler/issues/133
 
-    {abap: "SELECT SINGLE * FROM t100 INTO ls_result.", js: `await abap.statements.select(ls_result, "SELECT * FROM t100 LIMIT 1");`},
-    {abap: "SELECT * FROM (mv_table) INTO TABLE lt_tab.", js: `await abap.statements.select(lt_tab, "SELECT * FROM " + mv_table.get() + "");`},
+    {abap: "SELECT SINGLE * FROM t100 INTO ls_result.", js: `await abap.statements.select(ls_result, {select: "SELECT * FROM t100 UP TO 1 ROWS"});`},
+    {abap: "SELECT * FROM t100 INTO TABLE lt_result ORDER BY msgnr.", js: `await abap.statements.select(lt_result, {select: "SELECT * FROM t100 ORDER BY msgnr"});`},
+    {abap: "SELECT * FROM t100 INTO TABLE lt_result UP TO 2 ROWS.", js: `await abap.statements.select(lt_result, {select: "SELECT * FROM t100 UP TO 2 ROWS"});`},
+    {abap: "SELECT * FROM t100 INTO TABLE lt_result WHERE msgnr = '123'.", js: `await abap.statements.select(lt_result, {select: "SELECT * FROM t100 WHERE msgnr = '123'"});`},
+    {abap: "SELECT * FROM (mv_table) INTO TABLE lt_tab.", js: `await abap.statements.select(lt_tab, {select: "SELECT * FROM " + mv_table.get() + ""});`},
     {abap: "INSERT INTO zopentest VALUES ls_row.", js: `await abap.statements.insertDatabase("zopentest", {"values": ls_row});`},
 
     {abap: "ASSERT NOT foo EQ bar.",     js: `abap.statements.assert(!abap.compare.eq(foo, bar));`, skip: false},

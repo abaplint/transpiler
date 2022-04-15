@@ -13,6 +13,19 @@ export class SelectTranspiler implements IStatementTranspiler {
     select += node.findFirstExpression(abaplint.Expressions.SQLFieldList)?.concatTokens() + " ";
     select += node.findFirstExpression(abaplint.Expressions.SQLFrom)?.concatTokens() + " ";
 
+    const where = node.findFirstExpression(abaplint.Expressions.SQLCond);
+    if (where) {
+      select += "WHERE " + where.concatTokens() + " ";
+    }
+    const orderBy = node.findFirstExpression(abaplint.Expressions.SQLOrderBy);
+    if (orderBy) {
+      select += orderBy.concatTokens() + " ";
+    }
+    const upTo = node.findFirstExpression(abaplint.Expressions.SQLUpTo);
+    if (upTo) {
+      select += upTo.concatTokens() + " ";
+    }
+
     for (const d of node.findAllExpressionsRecursive(abaplint.Expressions.Dynamic)) {
       const chain = d.findFirstExpression(abaplint.Expressions.FieldChain);
       if (chain) {
@@ -23,10 +36,10 @@ export class SelectTranspiler implements IStatementTranspiler {
     }
 
     if (node.concatTokens().toUpperCase().startsWith("SELECT SINGLE ")) {
-      select += "LIMIT 1";
+      select += "UP TO 1 ROWS";
     }
 
-    return new Chunk().append(`await abap.statements.select(${target}, "${select.trim()}");`, node, traversal);
+    return new Chunk().append(`await abap.statements.select(${target}, {select: "${select.trim()}"});`, node, traversal);
   }
 
 }
