@@ -154,6 +154,7 @@ describe("Single statements", () => {
     {abap: "super->constructor( ).",     js: ``, skip: false}, // todo, https://github.com/abaplint/transpiler/issues/133
 
     {abap: "SELECT SINGLE * FROM t100 INTO ls_result.", js: `await abap.statements.select(ls_result, "SELECT * FROM t100 LIMIT 1");`},
+    {abap: "SELECT * FROM t100 INTO TABLE lt_result ORDER BY msgnr.", js: `await abap.statements.select(lt_result, "SELECT * FROM t100 ORDER BY msgnr");`},
     {abap: "SELECT * FROM (mv_table) INTO TABLE lt_tab.", js: `await abap.statements.select(lt_tab, "SELECT * FROM " + mv_table.get() + "");`},
     {abap: "INSERT INTO zopentest VALUES ls_row.", js: `await abap.statements.insertDatabase("zopentest", {"values": ls_row});`},
 
