@@ -138,6 +138,7 @@ describe("Single statements", () => {
     {abap: "RAISE EXCEPTION instance.", js: `throw instance.get();`, skip: false},
     {abap: "CLASS ltcl_test DEFINITION DEFERRED.", js: ``, skip: false},
     {abap: "CLASS sdfsdf DEFINITION LOCAL FRIENDS ltcl_test ltcl_split_text.", js: ``, skip: false},
+    {abap: "WAIT UP TO 1 SECONDS.", js: `await new Promise(r => setTimeout(r, constant_1.get() * 1000));`, skip: false},
     {abap: "if_bar~field = 2.",                      js: `if_bar$field.set(constant_2);`, skip: false},
     {abap: "IF if_bar~field IS NOT INITIAL. ENDIF.", js: `if (abap.compare.initial(if_bar$field) === false) {\n}`, skip: false},
     {abap: "FUNCTION-POOL zopenabap.", js: ``, skip: false},
@@ -214,7 +215,7 @@ await abap.Classes['KERNEL_SCAN_ABAP_SOURCE'].call({scan_abap_source: src, token
       js: `fs_table_.appendInitial();`},
     {abap: `WAIT FOR PUSH CHANNELS UNTIL lo_handler->message IS NOT INITIAL UP TO 10 SECONDS.`,
       js: `if (abap.Classes['KERNEL_PUSH_CHANNELS'] === undefined) throw new Error("Wait, kernel class missing");
-await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({cond: abap.compare.initial(lo_handler.get().message) === false,seconds: constant_10});`},
+await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({seconds: constant_10,cond: abap.compare.initial(lo_handler.get().message) === false});`},
     {abap: `ADD 2 to foo.`,
       js: `foo.set(abap.operators.add(foo,constant_2));`},
     {abap: `ASSIGN lv_test_ref->* TO <lv_test>.`,
