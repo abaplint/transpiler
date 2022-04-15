@@ -37,6 +37,7 @@ import {ICharacter} from "../types/_character";
 import {FieldSymbol, Structure, Table} from "../types";
 import {INumeric} from "../types/_numeric";
 import {CallFunction, ICallFunctionOptions} from "./call_function";
+import {SelectDatabaseOptions} from "../db/db";
 
 // this is a class, as statements like SELECT needs access to the database object instance
 // and WRITE will access the Console
@@ -91,7 +92,7 @@ export class Statements {
     return new ModifyDatabase(this.context).modifyDatabase(table, options);
   }
 
-  public async select(target: Structure | Table | FieldSymbol, select: string) {
+  public async select(target: Structure | Table | FieldSymbol, select: SelectDatabaseOptions) {
     return new SelectDatabase(this.context).select(target, select);
   }
 

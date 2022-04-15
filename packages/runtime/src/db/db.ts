@@ -16,6 +16,7 @@ export interface InsertDatabaseOptions {
 }
 
 export interface SelectDatabaseOptions {
+  /// select statement, ABAP syntaxed
   select: string,
 }
 

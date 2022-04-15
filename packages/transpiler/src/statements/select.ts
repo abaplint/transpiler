@@ -31,7 +31,7 @@ export class SelectTranspiler implements IStatementTranspiler {
       select += "LIMIT 1";
     }
 
-    return new Chunk().append(`await abap.statements.select(${target}, "${select.trim()}");`, node, traversal);
+    return new Chunk().append(`await abap.statements.select(${target}, {select: "${select.trim()}"});`, node, traversal);
   }
 
 }
