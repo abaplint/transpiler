@@ -95,6 +95,12 @@ export const msag_zag_unit_test = `<?xml version="1.0" encoding="utf-8"?>
      <MSGNR>000</MSGNR>
      <TEXT>hello world</TEXT>
     </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZAG_UNIT_TEST</ARBGB>
+     <MSGNR>123</MSGNR>
+     <TEXT>blah</TEXT>
+    </T100>
    </T100>
   </asx:values>
  </asx:abap>

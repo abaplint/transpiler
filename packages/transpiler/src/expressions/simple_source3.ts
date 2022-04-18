@@ -5,9 +5,13 @@ import {SourceTranspiler} from "./source";
 import {Chunk} from "../chunk";
 
 export class SimpleSource3Transpiler implements IExpressionTranspiler {
+  private readonly addGet: boolean;
 
-  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
-    return new SourceTranspiler().transpile(node, traversal);
+  public constructor(addGet = false) {
+    this.addGet = addGet;
   }
 
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
+    return new SourceTranspiler(this.addGet).transpile(node, traversal);
+  }
 }
