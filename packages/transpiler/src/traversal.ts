@@ -344,6 +344,11 @@ export class Traversal {
     return intf;
   }
 
+  public findTable(name: string) {
+    const tabl = this.reg.getObject("TABL", name) as abaplint.Objects.Table | undefined;
+    return tabl;
+  }
+
   public findClassDefinition(name: string, scope: abaplint.ISpaghettiScopeNode | undefined) {
     let clas = scope?.findClassDefinition(name);
     if (clas === undefined) {
