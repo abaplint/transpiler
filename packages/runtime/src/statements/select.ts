@@ -48,6 +48,8 @@ export class SelectDatabase {
         // @ts-ignore
         abap.statements.insertInternal({table: target, data: targetRow});
       }
+      // @ts-ignore
+      abap.builtin.sy.get().dbcnt.set(rows.length);
     } else {
       throw new Error("Runtime, SELECT todo");
     }

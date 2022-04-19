@@ -83,6 +83,9 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     let res: undefined | QueryExecResult[] = undefined;
     try {
       options.select = options.select.replace(/ UP TO (\d+) ROWS/i, " LIMIT $1");
+      if (options.primaryKey) {
+        options.select = options.select.replace(/ ORDER BY PRIMARY KEY/i, " ORDER BY " + options.primaryKey.join(", "));
+      }
       res = this.sqlite!.exec(options.select);
     } catch (error) {
       // @ts-ignore

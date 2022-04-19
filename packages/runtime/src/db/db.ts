@@ -18,6 +18,8 @@ export interface InsertDatabaseOptions {
 export interface SelectDatabaseOptions {
   /** select statement, in ABAP SQL syntax */
   select: string,
+  /** list of primary key fields, in lower case, if known */
+  primaryKey?: string[],
 }
 
 export type DatabaseValue = number | string | Uint8Array | null;

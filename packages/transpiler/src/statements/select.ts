@@ -39,7 +39,26 @@ export class SelectTranspiler implements IStatementTranspiler {
       select += "UP TO 1 ROWS";
     }
 
-    return new Chunk().append(`await abap.statements.select(${target}, {select: "${select.trim()}"});`, node, traversal);
+    const keys = this.findKeys(node, traversal);
+    let primaryKey = "";
+    if (keys.length > 0) {
+      primaryKey = `, primaryKey: ${JSON.stringify(keys)}`;
+    }
+
+    return new Chunk().append(`await abap.statements.select(${target}, {select: "${
+      select.trim()}"${primaryKey}});`, node, traversal);
+  }
+
+  private findKeys(node: abaplint.Nodes.StatementNode, traversal: Traversal): string[] {
+    let keys: string[] = [];
+    const from = node.findAllExpressions(abaplint.Expressions.SQLFromSource).map(e => e.concatTokens());
+    if (from.length === 1) {
+      const tabl = traversal.findTable(from[0]);
+      if (tabl) {
+        keys = tabl.listKeys().map(k => k.toLowerCase());
+      }
+    }
+    return keys;
   }
 
   private concatCond(cond: abaplint.Nodes.ExpressionNode, traversal: Traversal): string {
