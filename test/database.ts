@@ -190,4 +190,18 @@ describe("Top level tests, Database", () => {
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("SELECT INTO TABLE, ORDER BY PRIMARY KEY, dynamic", async () => {
+    const code = `
+    DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+    SELECT * FROM ('T100') INTO TABLE tab ORDER BY PRIMARY KEY.
+    WRITE sy-dbcnt.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
