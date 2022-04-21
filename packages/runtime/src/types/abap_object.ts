@@ -1,8 +1,10 @@
 export class ABAPObject  {
   private value: any | undefined;
+  private readonly qualifiedName: string | undefined;
 
-  public constructor() {
-    this.value = undefined;
+  public constructor(input?: {qualifiedName?: string}) {
+    this.qualifiedName = input?.qualifiedName;
+    this.clear();
   }
 
   public get() {
@@ -11,6 +13,10 @@ export class ABAPObject  {
 
   public clear() {
     this.value = undefined;
+  }
+
+  public getQualifiedName() {
+    return this.qualifiedName;
   }
 
   public set(value: ABAPObject | any) {

@@ -14,6 +14,9 @@ export class TranspileTypes {
     if (type instanceof abaplint.BasicTypes.ObjectReferenceType
         || type instanceof abaplint.BasicTypes.GenericObjectReferenceType) {
       resolved = "ABAPObject";
+      if (type.getQualifiedName() !== undefined) {
+        extra = "{qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\"}";
+      }
     } else if (type instanceof abaplint.BasicTypes.TableType) {
       resolved = "Table";
       extra = this.toType(type.getRowType());
