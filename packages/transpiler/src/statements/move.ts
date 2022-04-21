@@ -9,11 +9,20 @@ export class MoveTranspiler implements IStatementTranspiler {
     const source = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Source));
     const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
 
-    const ret = new Chunk()
-      .appendChunk(target)
-      .appendString(".set(")
-      .appendChunk(source)
-      .append(");", node.getLastToken(), traversal);
+    const ret = new Chunk();
+    const second = node.getChildren()[1]?.concatTokens();
+    if (second === "?=") {
+      ret.appendString("await abap.statements.cast(")
+        .appendChunk(target)
+        .appendString(", ")
+        .appendChunk(source)
+        .append(");", node.getLastToken(), traversal);
+    } else {
+      ret.appendChunk(target)
+        .appendString(".set(")
+        .appendChunk(source)
+        .append(");", node.getLastToken(), traversal);
+    }
 
     return ret;
   }
