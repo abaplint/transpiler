@@ -127,6 +127,12 @@ ENDCLASS.
 CLASS cx_sy_range_out_of_bounds IMPLEMENTATION.
 ENDCLASS.`;
 
+const cxmovecast = `
+CLASS cx_sy_move_cast_error DEFINITION PUBLIC INHERITING FROM cx_root.
+ENDCLASS.
+CLASS cx_sy_move_cast_error IMPLEMENTATION.
+ENDCLASS.`;
+
 describe("Testing Unit Testing", () => {
   const base: string = path.join(__dirname, "..", "..", "unit-test/");
   let name: string | undefined = "";
@@ -1465,6 +1471,48 @@ ENDCLASS.`;
       {filename: "cx_sy_range_out_of_bounds.clas.abap", contents: cxcreate},
       {filename: "zcl_client.clas.abap", contents: clas},
       {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("expected");
+  });
+
+  it.skip("test-35", async () => {
+// cast should throw cx_sy_move_cast_error
+    const bar = `
+    CLASS zcl_bar DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_bar IMPLEMENTATION.
+    ENDCLASS.`;
+
+    const clas = `
+    CLASS zcl_foo DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_foo IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA foo TYPE REF TO object.
+        DATA bar TYPE REF TO zcl_bar.
+        CREATE OBJECT foo TYPE zcl_foo.
+        TRY.
+            bar ?= foo.
+          CATCH cx_sy_move_cast_error.
+            WRITE 'expected'.
+        ENDTRY.
+      ENDMETHOD.
+    ENDCLASS.`;
+
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "cx_sy_move_cast_error.clas.abap", contents: cxmovecast},
+      {filename: "zcl_bar.clas.abap", contents: bar},
+      {filename: "zcl_foo.clas.abap", contents: clas},
+      {filename: "zcl_foo.clas.testclasses.abap", contents: tests},
     ];
     const cons = await dumpNrun(files);
     expect(cons.split("\n")[1]).to.equal("expected");
