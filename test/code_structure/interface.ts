@@ -365,15 +365,23 @@ START-OF-SELECTION.
     await f(abap);
     expect(abap.console.get()).to.equal("works");
   });
-/*
+
   it("constants initial value", async () => {
     const code = `
-`;
+INTERFACE bar.
+  TYPES enum_formatting_option TYPE i.
+  CONSTANTS: BEGIN OF formatting_option,
+               no_formatting TYPE enum_formatting_option VALUE IS INITIAL,
+               camel_case    TYPE enum_formatting_option VALUE 1,
+             END OF formatting_option.
+ENDINTERFACE.
+
+START-OF-SELECTION.
+  WRITE bar=>formatting_option-no_formatting.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0");
   });
-  */
 
 });
