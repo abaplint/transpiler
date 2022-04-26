@@ -11,6 +11,7 @@ export const sy = new Structure({
   mandt: new Character({length: 3}).set("123"),
   msgid: new Character({length: 20}),
   msgno: new Numc({length: 3}),
+  msgty: new Character({length: 1}),
   msgv1: new Character({length: 50}),
   msgv2: new Character({length: 50}),
   msgv3: new Character({length: 50}),
@@ -18,8 +19,8 @@ export const sy = new Structure({
   subrc: new Integer(),
   sysid: new Character({length: 3}).set("ABC"),
   tabix: new Integer(),
-  tzone: new Integer(), // 0 = UTC
   timlo: new Time(),
+  tzone: new Integer(), // 0 = UTC
   uname: new Character({length: 12}).set("USERNAME"),
   uzeit: new Time(),
 });
