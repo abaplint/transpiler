@@ -365,5 +365,15 @@ START-OF-SELECTION.
     await f(abap);
     expect(abap.console.get()).to.equal("works");
   });
+/*
+  it("constants initial value", async () => {
+    const code = `
+`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+  */
 
 });
