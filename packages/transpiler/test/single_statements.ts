@@ -314,6 +314,8 @@ await abap.Classes['ZCL_CALL'].not_found();`},
 
     {abap: `DELETE zqueue FROM TABLE lt_queue.`,
       js: `await abap.statements.deleteDatabase("zqueue", {"table": lt_queue});`},
+
+    {abap: "lo_foo ?= lo_bar.", js: "await abap.statements.cast(lo_foo, lo_bar);", skip: false},
   ];
 
   for (const test of tests) {

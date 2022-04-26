@@ -173,7 +173,7 @@ CREATE OBJECT foo.`;
   }
 }
 abap.Classes['PROG-ZFOOBAR-ZCL_WORDS'] = zcl_words;
-let foo = new abap.types.ABAPObject();
+let foo = new abap.types.ABAPObject({qualifiedName: "ZCL_WORDS"});
 foo.set(await (new abap.Classes['PROG-ZFOOBAR-ZCL_WORDS']()).constructor_());`;
 
     expect(await runSingle(abap)).to.equal(expected);
@@ -438,7 +438,7 @@ class lcl_bar {
 }
 abap.Classes['PROG-ZFOOBAR-LCL_BAR'] = lcl_bar;
 async function bar() {
-  let bar = new abap.types.ABAPObject();
+  let bar = new abap.types.ABAPObject({qualifiedName: "LCL_BAR"});
   bar.set(await (new abap.Classes['PROG-ZFOOBAR-LCL_BAR']()).constructor_({input: constant_42}));
 }`;
 

@@ -63,6 +63,9 @@ export class InterfaceTranspiler implements IStructureTranspiler {
         const a: any = val;
         for (const v of Object.keys(val)) {
           const s = a[v];
+          if (s === undefined) {
+            continue;
+          }
           ret += name + ".get()." + v + ".set(" + s + ");\n";
         }
       }
