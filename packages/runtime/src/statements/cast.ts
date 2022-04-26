@@ -9,6 +9,7 @@ export async function cast(target: ABAPObject, source: ABAPObject) {
     return;
   }
 
+  /*
   const targetName = target.getQualifiedName()?.toUpperCase();
   if (targetName?.startsWith("IF_") === false
       && targetName?.startsWith("ZIF_") === false) { // todo, interfaces are also classes but not inherited
@@ -25,6 +26,7 @@ export async function cast(target: ABAPObject, source: ABAPObject) {
       }
     }
   }
+  */
 
 // throw cx_sy_move_cast_error if incompatible
 // check with javascript instanceof?

@@ -1476,7 +1476,7 @@ ENDCLASS.`;
     expect(cons.split("\n")[1]).to.equal("expected");
   });
 
-  it("test-35", async () => {
+  it.skip("test-35", async () => {
 // cast should throw cx_sy_move_cast_error
     const bar = `
     CLASS zcl_bar DEFINITION PUBLIC.
