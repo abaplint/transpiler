@@ -99,4 +99,17 @@ write text.`;
     expect(abap.console.get()).to.equal("abqqqqdefg");
   });
 
+  it("replace(), regex character class 'punct'", async () => {
+    const code = `
+DATA plain_text TYPE string.
+DATA result TYPE string.
+plain_text = |hello, world.moo|.
+result = replace( val = plain_text regex = '[[:punct:]]' with = ' ' occ = 0 ).
+WRITE result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello worldmoo");
+  });
+
 });
