@@ -36,7 +36,7 @@ describe("Builtin functions - to_mixed", () => {
     await f(abap);
   });
 
-  it("test3", async () => {
+  it.skip("test3", async () => {
     const code = `
   DATA m TYPE string.
   m = to_mixed( val  = |Hello World| sep  = | | ).
@@ -47,7 +47,7 @@ describe("Builtin functions - to_mixed", () => {
     await f(abap);
   });
 
-  it("test4", async () => {
+  it.skip("test4", async () => {
     const code = `
   DATA m TYPE string.
   m = to_mixed( val  = |Hello World| sep  = | | case = 'a' ).
@@ -58,7 +58,7 @@ describe("Builtin functions - to_mixed", () => {
     await f(abap);
   });
 
-  it("test5", async () => {
+  it.skip("test5", async () => {
     const code = `
   DATA m TYPE string.
   m = to_mixed( val  = |Hello World| sep  = | | case = 'A' ).
@@ -69,7 +69,7 @@ describe("Builtin functions - to_mixed", () => {
     await f(abap);
   });
 
-  it("test6", async () => {
+  it.skip("test6", async () => {
     const code = `
   ASSERT |HelloTo world| = to_mixed( val  = |Hello to world| sep  = | | case = 'A' min = 3 ).
   `;
@@ -78,7 +78,7 @@ describe("Builtin functions - to_mixed", () => {
     await f(abap);
   });
 
-  it("test7", async () => {
+  it.skip("test7", async () => {
     const code = `
   ASSERT |HelloToWorld| =  to_mixed( val  = |Hello to world| sep  = | | case = 'A' ).
   `;

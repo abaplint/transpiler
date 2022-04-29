@@ -31,5 +31,11 @@ export function to_mixed(input: {
 
   val = val.substring(0, min) + val.substring(min).toLowerCase();
 
+  const regex = new RegExp(sep + "\w");
+  val = val.replace(regex, (x) => {
+    return x.substring(sep.length).toUpperCase();
+  });
+//  console.dir(val);
+
   return new String().set(val);
 }
