@@ -36,7 +36,7 @@ describe("Builtin functions - to_mixed", () => {
     await f(abap);
   });
 
-  it.skip("test3", async () => {
+  it("test3", async () => {
     const code = `
   DATA m TYPE string.
   m = to_mixed( val  = |Hello World| sep  = | | ).

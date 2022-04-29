@@ -14,10 +14,17 @@ export function to_mixed(input: {
   case?: ICharacter | string,
   min?: INumeric | number }): String {
 
-  const sep = "_";
+  let sep = input.sep;
+  if (sep === undefined) {
+    sep = "_";
+  }
+  if (typeof sep !== "string") {
+    sep = sep.get();
+  }
   if (sep.length === 0) {
     throw "CX_SY_STRG_PAR_VAL";
   }
+
 //  const to = UPPER;
   const min = 1;
   if (min < 0) {
@@ -31,9 +38,10 @@ export function to_mixed(input: {
 
   val = val.substring(0, min) + val.substring(min).toLowerCase();
 
+  const length = sep.length;
   const regex = new RegExp(sep + "\w");
   val = val.replace(regex, (x) => {
-    return x.substring(sep.length).toUpperCase();
+    return x.substring(length).toUpperCase();
   });
 //  console.dir(val);
 
