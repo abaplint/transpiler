@@ -25,4 +25,66 @@ describe("Builtin functions - to_mixed", () => {
     await f(abap);
   });
 
+  it("test2", async () => {
+    const code = `
+  DATA m TYPE string.
+  m = to_mixed( val  = |Hello_World| ).
+  ASSERT m = 'HelloWorld'.
+  `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("test3", async () => {
+    const code = `
+  DATA m TYPE string.
+  m = to_mixed( val  = |Hello World| sep  = | | ).
+  ASSERT m = 'HelloWorld'.
+  `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("test4", async () => {
+    const code = `
+  DATA m TYPE string.
+  m = to_mixed( val  = |Hello World| sep  = | | case = 'a' ).
+  ASSERT m = 'helloWorld'.
+  `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("test5", async () => {
+    const code = `
+  DATA m TYPE string.
+  m = to_mixed( val  = |Hello World| sep  = | | case = 'A' ).
+  ASSERT m = 'HelloWorld'.
+  `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("test6", async () => {
+    const code = `
+  ASSERT |HelloTo world| = to_mixed( val  = |Hello to world| sep  = | | case = 'A' min = 3 ).
+  `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("test7", async () => {
+    const code = `
+  ASSERT |HelloToWorld| =  to_mixed( val  = |Hello to world| sep  = | | case = 'A' ).
+  `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
