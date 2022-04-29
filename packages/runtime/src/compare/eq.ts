@@ -86,7 +86,10 @@ export function eq(
     l = parseInt(left.get(), 16);
   }
 
-  if (right instanceof Float && typeof l === "number") {
+  if (right instanceof Float && left instanceof Float) {
+    r = right.getRaw();
+    l = left.getRaw();
+  } else if (right instanceof Float && typeof l === "number") {
     r = right.getRaw();
   } else if (left instanceof Float) {
     if (typeof r === "number") {
