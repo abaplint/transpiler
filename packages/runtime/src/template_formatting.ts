@@ -9,11 +9,15 @@ type options = {
   pad?: string,
   width?: number,
   decimals?: number,
+  currency?: any,
   align?: "left" | "right",
 };
 
 export function templateFormatting(source: ICharacter | INumeric, options: options) {
   let text = source.get() + "";
+  if (options.currency !== undefined) {
+    throw "template formatting with currency not supported";
+  }
   if (options.timestamp === "iso") {
     text = text.substr(0,4) + "-" + text.substr(4,2) + "-" + text.substr(6,2) + "T" + text.substr(8,2) + ":" + text.substr(10,2) + ":" + text.substr(12,2);
   }
