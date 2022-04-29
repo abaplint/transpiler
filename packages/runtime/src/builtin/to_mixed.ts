@@ -3,11 +3,6 @@ import {String} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
-/*
-const UPPER = "U";
-const LOWER = "L";
-*/
-
 export function to_mixed(input: {
   val: ICharacter | string,
   sep?: ICharacter | string,
@@ -25,7 +20,6 @@ export function to_mixed(input: {
     throw "CX_SY_STRG_PAR_VAL";
   }
 
-//  const to = UPPER;
   const min = 1;
   if (min < 0) {
     throw "CX_SY_STRG_PAR_VAL";
@@ -35,15 +29,27 @@ export function to_mixed(input: {
   if (typeof val !== "string") {
     val = val.get();
   }
-
   val = val.substring(0, min) + val.substring(min).toLowerCase();
 
+  if (input.case) {
+    if (typeof input.case === "string") {
+      if (input.case === input.case.toLowerCase()) {
+        val = val.substring(0, 1).toLowerCase() + val.substring(1);
+      }
+    } else {
+      if (input.case.get() === input.case.get().toLowerCase()) {
+        val = val.substring(0, 1).toLowerCase() + val.substring(1);
+      }
+    }
+  }
+
   const length = sep.length;
-  const regex = new RegExp(sep + "\w");
-  val = val.replace(regex, (x) => {
-    return x.substring(length).toUpperCase();
-  });
-//  console.dir(val);
+  const regex = new RegExp(sep + "\\w");
+  while (val.match(regex)) {
+    val = val.replace(regex, (x) => {
+      return x.substring(length).toUpperCase();
+    });
+  }
 
   return new String().set(val);
 }

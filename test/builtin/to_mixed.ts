@@ -28,7 +28,7 @@ describe("Builtin functions - to_mixed", () => {
   it("test2", async () => {
     const code = `
   DATA m TYPE string.
-  m = to_mixed( val  = |Hello_World| ).
+  m = to_mixed( val = |Hello_World| ).
   ASSERT m = 'HelloWorld'.
   `;
     const js = await run(code);
@@ -39,7 +39,7 @@ describe("Builtin functions - to_mixed", () => {
   it("test3", async () => {
     const code = `
   DATA m TYPE string.
-  m = to_mixed( val  = |Hello World| sep  = | | ).
+  m = to_mixed( val = |Hello World| sep  = | | ).
   ASSERT m = 'HelloWorld'.
   `;
     const js = await run(code);
@@ -47,10 +47,10 @@ describe("Builtin functions - to_mixed", () => {
     await f(abap);
   });
 
-  it.skip("test4", async () => {
+  it("test4", async () => {
     const code = `
   DATA m TYPE string.
-  m = to_mixed( val  = |Hello World| sep  = | | case = 'a' ).
+  m = to_mixed( val = |Hello World| sep  = | | case = 'a' ).
   ASSERT m = 'helloWorld'.
   `;
     const js = await run(code);
@@ -58,10 +58,10 @@ describe("Builtin functions - to_mixed", () => {
     await f(abap);
   });
 
-  it.skip("test5", async () => {
+  it("test5", async () => {
     const code = `
   DATA m TYPE string.
-  m = to_mixed( val  = |Hello World| sep  = | | case = 'A' ).
+  m = to_mixed( val = |Hello World| sep  = | | case = 'A' ).
   ASSERT m = 'HelloWorld'.
   `;
     const js = await run(code);
@@ -71,16 +71,16 @@ describe("Builtin functions - to_mixed", () => {
 
   it.skip("test6", async () => {
     const code = `
-  ASSERT |HelloTo world| = to_mixed( val  = |Hello to world| sep  = | | case = 'A' min = 3 ).
+  ASSERT |HelloTo world| = to_mixed( val = |Hello to world| sep  = | | case = 'A' min = 3 ).
   `;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
 
-  it.skip("test7", async () => {
+  it("test7", async () => {
     const code = `
-  ASSERT |HelloToWorld| =  to_mixed( val  = |Hello to world| sep  = | | case = 'A' ).
+  ASSERT |HelloToWorld| = to_mixed( val = |Hello to world| sep  = | | case = 'A' ).
   `;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
