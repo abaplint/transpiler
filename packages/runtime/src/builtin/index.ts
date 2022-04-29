@@ -12,6 +12,8 @@ export * from "./find";
 export * from "./floor";
 export * from "./frac";
 export * from "./insert";
+export * from "./match";
+export * from "./matches";
 export * from "./lines";
 export * from "./nmax";
 export * from "./nmin";
