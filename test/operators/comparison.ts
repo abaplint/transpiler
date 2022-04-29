@@ -703,4 +703,26 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("equals, floats", async () => {
+    const code = `DATA radius TYPE f.
+DATA y TYPE f.
+radius = 10.
+y = 10.
+ASSERT y = radius.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("lt, floats", async () => {
+    const code = `DATA radius TYPE f.
+DATA y TYPE f.
+radius = 10.
+y = 9.
+ASSERT y < radius.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
