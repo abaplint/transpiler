@@ -25,6 +25,8 @@ export class TranspileTypes {
       resolved = "Integer";
     } else if (type instanceof abaplint.BasicTypes.StringType) {
       resolved = "String";
+    } else if (type instanceof abaplint.BasicTypes.UTCLongType) {
+      resolved = "UTCLong";
     } else if (type instanceof abaplint.BasicTypes.DateType) {
       resolved = "Date";
     } else if (type instanceof abaplint.BasicTypes.TimeType) {
