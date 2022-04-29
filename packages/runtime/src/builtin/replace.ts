@@ -1,6 +1,8 @@
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {String} from "../types/string";
+import {ABAPRegExp} from "../abap_regex";
+import {Character} from "../types";
 
 export interface IReplaceInput {
   val: string | ICharacter,
@@ -23,11 +25,13 @@ export function replace(input: IReplaceInput) {
   let wi: string | undefined = undefined;
   if (typeof input.with === "string") {
     wi = input.with;
+  } else if (input.with instanceof Character) {
+    wi = input.with.get().trimEnd();
   } else if (input.with) {
     wi = input.with.get();
   }
 
-  let sub: string | undefined = undefined;
+  let sub: string | RegExp | undefined = undefined;
   if (typeof input.sub === "string") {
     sub = input.sub;
   } else if (input.sub) {
@@ -39,9 +43,9 @@ export function replace(input: IReplaceInput) {
   }
 
   if (typeof input.regex === "string") {
-    sub = input.regex;
+    sub = new RegExp(ABAPRegExp.convert(input.regex), "g");
   } else if (input.regex) {
-    sub = input.regex.get();
+    sub = new RegExp(ABAPRegExp.convert(input.regex.get()), "g");
   }
 
   if (input.off && input.len && typeof input.val === "string") {
@@ -57,8 +61,10 @@ export function replace(input: IReplaceInput) {
   } else if (input.occ === undefined && sub && wi) {
     val = val.replace(sub, wi);
   } else if (input.occ && input.occ.get() === 0 && sub && wi !== undefined) {
-    const reg = new RegExp(sub, "g");
-    val = val.replace(reg, wi);
+    if (typeof sub === "string") {
+      sub = new RegExp(sub, "g");
+    }
+    val = val.replace(sub, wi);
   }
 
   return new String().set(val);

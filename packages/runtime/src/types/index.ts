@@ -13,4 +13,5 @@ export * from "./string";
 export * from "./structure";
 export * from "./table";
 export * from "./time";
+export * from "./utc_long";
 export * from "./xstring";
