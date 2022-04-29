@@ -10,7 +10,7 @@ const repos = [
   {name: "abapGit/abapGit",                   command: "npm run unit"},
   {name: "larshp/abap-advent-2020",           command: "npm test"},
   {name: "larshp/abapNTLM",                   command: "npm test"},
-  //  {name: "larshp/abap-wasm",                 command: "npm test"}, hmm, guess https://github.com/larshp/abap-wasm/issues/44
+  {name: "larshp/abap-wasm",                  command: "npm test"},
 ];
 
 const CWD = "./.github/regression/";
