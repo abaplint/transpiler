@@ -70,6 +70,13 @@ export class MessageStatement {
       arbgb = arbgb.get();
     }
     arbgb = arbgb?.toUpperCase();
+
+    let msgty = options.type;
+    if (msgty !== undefined && typeof msgty !== "string") {
+      msgty = msgty.get();
+    }
+    msgty = msgty?.toUpperCase();
+
     // @ts-ignore
     abap.builtin.sy.get().msgid.set(arbgb);
     let msgnr = options.number;
@@ -78,6 +85,8 @@ export class MessageStatement {
     }
     // @ts-ignore
     abap.builtin.sy.get().msgno.set(msgnr);
+    // @ts-ignore
+    abap.builtin.sy.get().msgty.set(msgty);
 
     const text = await findText(this.context, arbgb, msgnr);
 

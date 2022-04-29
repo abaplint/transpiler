@@ -19,6 +19,7 @@ describe("Running statements - MESSAGE", () => {
     const code = `
     DATA lv_text TYPE string.
     MESSAGE e001(00) WITH 'foo' 'bar' INTO lv_text.
+    WRITE / sy-msgty.
     WRITE / sy-msgid.
     WRITE / sy-msgno.
     WRITE / lv_text.`;
@@ -32,7 +33,7 @@ describe("Running statements - MESSAGE", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("00\n001\nfoobar");
+    expect(abap.console.get()).to.equal("E\n00\n001\nfoobar");
   });
 
   it("MESSAGE fallback, no database initialized", async () => {
