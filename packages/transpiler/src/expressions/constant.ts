@@ -49,10 +49,20 @@ export class ConstantTranspiler implements IExpressionTranspiler {
   public escape(str: string): string {
     str = str.replace(/\\/g, "\\\\");
 
-    const reg = new RegExp(/(.+)''(.+)/g);
-    while (reg.test(str)) {
-      str = str.replace(reg, "$1\\'$2");
+    if (str.startsWith("'")) {
+      const reg = new RegExp(/(.+)''(.+)/g);
+      while (reg.test(str)) {
+        str = str.replace(reg, "$1\\'$2");
+      }
     }
+
+    if (str.startsWith("`")) {
+      const reg = new RegExp(/(.+)``(.+)/g);
+      while (reg.test(str)) {
+        str = str.replace(reg, "$1\\`$2");
+      }
+    }
+
     return str;
   }
 
