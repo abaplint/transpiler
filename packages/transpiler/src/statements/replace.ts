@@ -36,6 +36,10 @@ export class ReplaceTranspiler implements IStatementTranspiler {
       extra.push("of: " + new SourceTranspiler().transpile(sources[0], traversal).getCode());
     }
 
+    if (concat.includes(" IGNORING CASE")) {
+      extra.push("ignoringCase: true");
+    }
+
     return new Chunk()
       .append("abap.statements.replace({target:", node, traversal)
       .appendString(target + ", all:" + all + ", " + extra.join(","))

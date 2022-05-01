@@ -165,4 +165,15 @@ describe("Running statements - REPLACE", () => {
     expect(abap.console.get()).to.equal("nrmwy oldrm tob");
   });
 
+  it("REPLACE, ignoring case", async () => {
+    const code = `
+  DATA str TYPE string VALUE '%2Fsrc%2f'.
+REPLACE ALL OCCURRENCES OF '%2F' IN str WITH '/' IGNORING CASE.
+ASSERT str = '/src/'.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
