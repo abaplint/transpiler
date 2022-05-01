@@ -7,10 +7,13 @@ export type replaceInput = {
   all: boolean,
   with: ICharacter,
   of: ICharacter,
+  ignoringCase?: boolean,
 };
 
 export function replace(input: replaceInput): void {
   let temp = input.target.get();
+
+  const ignoreCase = input.ignoringCase === true ? "i" : "";
 
   let search: RegExp | string = "";
   let found = false;
@@ -20,12 +23,15 @@ export function replace(input: replaceInput): void {
       throw "REPLACE, zero length input";
     }
     found = temp.indexOf(search) >= 0;
+    if (ignoreCase.length > 0) {
+      search = new RegExp(search, ignoreCase);
+    }
   } else if (input.regex) {
     if (input.regex.get().length === 0 && input.all === true) {
       throw "REPLACE, zero length input";
     }
     found = temp.match(search) !== null;
-    search = new RegExp(input.regex.get());
+    search = new RegExp(input.regex.get(), ignoreCase);
   }
 
   let replace: string = "";
@@ -37,7 +43,7 @@ export function replace(input: replaceInput): void {
 
   if (input.all === true) {
     if (input.regex) {
-      temp = temp.replace(new RegExp(input.regex.get(), "g"), replace);
+      temp = temp.replace(new RegExp(input.regex.get(), "g" + ignoreCase), replace);
     } else {
       while(temp.replace(search, replace) !== temp) {
         temp = temp.replace(search, replace);
