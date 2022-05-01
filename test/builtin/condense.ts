@@ -50,4 +50,14 @@ describe("Builtin functions - condense", () => {
     await f(abap);
   });
 
+  it.only("condense(), from to", async () => {
+    const code = `
+    DATA res TYPE string.
+    res = condense( val = |vcvix rhn| from = |  ,.:;|  to = || ).
+    ASSERT res = |vcvixrhn|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
