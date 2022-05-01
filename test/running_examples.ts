@@ -1077,4 +1077,26 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("escaping string", async () => {
+    const code =
+    "DATA lv_string TYPE string.\n" +
+    "lv_string = `foo``bar`.\n" +
+    "ASSERT lv_string = |foo`bar|.";
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("escaping string 2", async () => {
+    const code =
+    "DATA lv_string TYPE string.\n" +
+    "lv_string = ````.\n" +
+    "ASSERT lv_string = |`|.";
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
