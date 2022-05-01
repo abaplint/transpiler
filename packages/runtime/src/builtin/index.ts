@@ -34,6 +34,7 @@ export * from "./tan";
 export * from "./to_lower";
 export * from "./to_mixed";
 export * from "./to_upper";
+export * from "./translate";
 export * from "./trunc";
 export * from "./xstrlen";
 export const abap_true = new Character({length: 1, qualifiedName: "ABAP_BOOL"}).set("X");
