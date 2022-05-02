@@ -9,10 +9,13 @@ export function translate(input: {val: ICharacter | string, from: ICharacter | s
   const fromSplit = from.split("");
   const toSplit = to.split("");
 
+  const chars: {[index: string]: string} = {};
   for (let i = 0; i < fromSplit.length; i++) {
-    const reg = new RegExp(fromSplit[i], "g");
-    val = val.replace(reg, toSplit[i] || "");
+    chars[fromSplit[i]] = toSplit[i] || "";
   }
+
+  const reg = new RegExp("[" + from + "]", "g");
+  val = val.replace(reg, m => chars[m] || "");
 
   return new String().set(val);
 }
