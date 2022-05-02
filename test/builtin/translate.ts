@@ -54,4 +54,24 @@ ASSERT foo = 'foo'.`;
     await f(abap);
   });
 
+  it("translate(), should single step", async () => {
+    const code = `
+DATA foo TYPE string.
+foo = translate( val = |a| from = |ab| to = |bc| ).
+ASSERT foo = 'b'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("translate(), should single step, 2", async () => {
+    const code = `
+DATA foo TYPE string.
+foo = translate( val = |aa| from = |ab| to = |bc| ).
+ASSERT foo = 'bb'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
