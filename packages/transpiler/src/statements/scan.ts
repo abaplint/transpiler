@@ -15,6 +15,10 @@ export class ScanTranspiler implements IStatementTranspiler {
         options.push(name + ": " + traversal.traverse(c).getCode());
         name = "";
       } else {
+        if (c.concatTokens().toUpperCase() === "WITH" && name !== "") {
+          options.push(name + ": true");
+          name = "";
+        }
         if (name !== "" && name.endsWith("_") === false) {
           name += "_";
         }

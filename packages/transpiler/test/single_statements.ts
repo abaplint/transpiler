@@ -213,6 +213,13 @@ await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",resultXML: wri
 
     {abap: "SCAN ABAP-SOURCE src TOKENS INTO tokens STATEMENTS INTO statements.", js: `if (abap.Classes['KERNEL_SCAN_ABAP_SOURCE'] === undefined) throw new Error("ScanAbapSource, kernel class missing");
 await abap.Classes['KERNEL_SCAN_ABAP_SOURCE'].call({scan_abap_source: src, tokens_into: tokens, statements_into: statements});`},
+    {abap: `SCAN ABAP-SOURCE source
+  TOKENS INTO tokens
+  STATEMENTS INTO statements
+  WITH ANALYSIS
+  WITH COMMENTS
+  WITH PRAGMAS '*'.`, js: `if (abap.Classes['KERNEL_SCAN_ABAP_SOURCE'] === undefined) throw new Error("ScanAbapSource, kernel class missing");
+await abap.Classes['KERNEL_SCAN_ABAP_SOURCE'].call({scan_abap_source: source, tokens_into: tokens, statements_into: statements, with_analysis: true, with_comments: true, with_pragmas: new abap.types.Character({length: 1}).set('*')});`},
 
     {abap: `DATA tab TYPE SORTED TABLE OF i WITH UNIQUE KEY table_line.`,
       js: `let tab = new abap.types.Table(new abap.types.Integer(), {"withHeader":false,"type":"SORTED","isUnique":true,"keyFields":["TABLE_LINE"]});`},
