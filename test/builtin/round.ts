@@ -35,4 +35,18 @@ describe("Builtin functions - round", () => {
     expect(abap.console.get()).to.equal( `2\n2\n3`);
   });
 
+  it("half should round up", async () => {
+    const code = `ASSERT round( val = 1 / 2 dec = 0 mode = 1 ) = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("2 div 5", async () => {
+    const code = `ASSERT round( val = 2 / 5 dec = 0 mode = 1 ) = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

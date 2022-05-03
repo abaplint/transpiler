@@ -18,7 +18,7 @@ export function round(input: {val: ICharacter | string, dec: INumeric | number, 
   const ret = new Float();
   switch (mode) {
     case 1:
-      ret.set(Math.round(val));
+      ret.set(Math.ceil(val));
       break;
     case 4:
       ret.set(-Math.round(-val));
