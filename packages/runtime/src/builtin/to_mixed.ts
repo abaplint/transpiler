@@ -6,8 +6,7 @@ import {INumeric} from "../types/_numeric";
 export function to_mixed(input: {
   val: ICharacter | string,
   sep?: ICharacter | string,
-  case?: ICharacter | string,
-  min?: INumeric | number }): String {
+  case?: ICharacter | string }): String {
 
   let sep = input.sep;
   if (sep === undefined) {
