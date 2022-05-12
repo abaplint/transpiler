@@ -103,7 +103,7 @@ write text.`;
     const code = `
 DATA plain_text TYPE string.
 DATA result TYPE string.
-plain_text = |H-\{\}[...]ello, Wo:,rld!?.();'|.
+plain_text = |H-\\{\\}[...]ello, Wo:,rld!?.();'|.
 result = replace( val = plain_text regex = '[[:punct:]]' with = ' ' occ = 0 ).
 WRITE result.`;
     const js = await run(code);
