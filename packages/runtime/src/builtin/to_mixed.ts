@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import {String} from "../types";
 import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
 
 export function to_mixed(input: {
   val: ICharacter | string,
