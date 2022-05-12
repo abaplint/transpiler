@@ -27,11 +27,11 @@
   "devDependencies": {
     "@abaplint/transpiler": "^2.0.22",
     "@types/glob": "^7.2.0",
-    "glob": "^7.2.0",
+    "glob": "=7.2.0",
     "@types/progress": "^2.0.5",
-    "@abaplint/core": "^2.90.0",
+    "@abaplint/core": "^2.90.2",
     "progress": "^2.0.3",
-    "webpack": "^5.72.0",
+    "webpack": "^5.72.1",
     "webpack-cli": "^4.9.2",
     "typescript": "^4.6.4"
   }
