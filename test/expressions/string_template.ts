@@ -136,4 +136,16 @@ describe("Running expressions - String templates", () => {
     expect(abap.console.get()).to.equal("02:02");
   });
 
+  it("packed and DECIMALS", async () => {
+    const code = `
+TYPES lty_dec2 TYPE p DECIMALS 2.
+DATA cost TYPE lty_dec2.
+cost = 2.
+WRITE |Your sign costs { cost DECIMALS = 2 }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("Your sign costs 2.00");
+  });
+
 });
