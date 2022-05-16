@@ -148,4 +148,19 @@ WRITE |Your sign costs { cost DECIMALS = 2 }|.`;
     expect(abap.console.get()).to.equal("Your sign costs 2.00");
   });
 
+  it("packed and DECIMALS, 2", async () => {
+    const code = `
+TYPES lty_dec2 TYPE p DECIMALS 2.
+DATA cost TYPE lty_dec2.
+DATA result TYPE string.
+cost = 20.
+cost = cost + strlen( \`sdfs\` ) * 2 .
+result = |blah { cost DECIMALS = 2 }|.
+WRITE result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("blah 28.00");
+  });
+
 });
