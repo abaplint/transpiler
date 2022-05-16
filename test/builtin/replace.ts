@@ -103,13 +103,13 @@ write text.`;
     const code = `
 DATA plain_text TYPE string.
 DATA result TYPE string.
-plain_text = |hello, world.moo|.
+plain_text = |H-\\{\\}[...]ello, Wo:,rld!?.();'|.
 result = replace( val = plain_text regex = '[[:punct:]]' with = ' ' occ = 0 ).
 WRITE result.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("hello worldmoo");
+    expect(abap.console.get()).to.equal("Hello World");
   });
 
 });
