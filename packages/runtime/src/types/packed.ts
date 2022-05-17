@@ -1,3 +1,4 @@
+import {Float} from "./float";
 import {INumeric} from "./_numeric";
 
 export class Packed implements INumeric {
@@ -24,6 +25,8 @@ export class Packed implements INumeric {
       this.value = value;
     } else if (typeof value === "string") {
       this.value = parseFloat(value);
+    } else if (value instanceof Float) {
+      this.value = value.getRaw();
     } else {
       this.value = value.get();
     }
