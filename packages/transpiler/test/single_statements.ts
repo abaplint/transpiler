@@ -56,7 +56,7 @@ describe("Single statements", () => {
     {abap: "foo->method( ).",                         js: "await foo.get().method();",                       skip: false},
     {abap: "foo->method( 1 ).",                       js: "await foo.get().method(constant_1);",             skip: true}, // todo, hmm, need to know the default parameter name?
     {abap: "foo->method( bar = 2 moo = 1 ).",         js: "await foo.get().method({bar: constant_2, moo: constant_1});",       skip: false},
-    {abap: "moo = foo->method( ).",                   js: "moo.set(await foo.get().method());",              skip: false},
+    {abap: "moo = foo->method( ).",                   js: "moo.set((await foo.get().method()));",              skip: false},
     {abap: "FORM foo. ENDFORM.",                      js: "async function foo() {\n}",                       skip: false},
     {abap: "PERFORM foo.",                            js: "await foo();",                       skip: false},
     {abap: "DATA foo TYPE STANDARD TABLE OF string.", js: `let foo = new abap.types.Table(new abap.types.String(), {"withHeader":false,"type":"STANDARD","isUnique":false,"keyFields":[]});`,         skip: false},

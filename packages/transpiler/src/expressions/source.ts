@@ -34,13 +34,12 @@ export class SourceTranspiler implements IExpressionTranspiler {
           }
         } else if (c.get() instanceof Expressions.MethodCallChain) {
           ret.appendChunk(traversal.traverse(c));
+          const code = ret.getCode();
+          if (code.includes("await")) {
+            ret = new Chunk().appendString("(").appendChunk(ret).appendString(")");
+          }
           if (this.addGet) {
-            const code = ret.getCode();
-            if (code.includes("await")) {
-              ret = new Chunk().appendString("(").appendChunk(ret).appendString(").get()");
-            } else {
-              ret.append(".get()", c, traversal);
-            }
+            ret.append(".get()", c, traversal);
           }
         } else if (c.get() instanceof Expressions.Source) {
           ret.appendChunk(new SourceTranspiler(this.addGet).transpile(c, traversal));

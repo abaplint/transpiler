@@ -163,4 +163,32 @@ WRITE result.`;
     expect(abap.console.get()).to.equal("blah 28.00");
   });
 
+  it.skip("return structured field to string template", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    TYPES: BEGIN OF ty_structure,
+             field TYPE string,
+           END OF ty_structure.
+    CLASS-METHODS run.
+    CLASS-METHODS method RETURNING VALUE(structure) TYPE ty_structure.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    WRITE |{ method( )-field } world|.
+  ENDMETHOD.
+  METHOD method.
+    structure-field = 'hello'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>run( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello world");
+  });
+
 });
