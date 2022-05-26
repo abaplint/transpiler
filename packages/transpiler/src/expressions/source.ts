@@ -16,7 +16,11 @@ export class SourceTranspiler implements IExpressionTranspiler {
     let ret = new Chunk();
     const post = new Chunk();
 
-    for (const c of node.getChildren()) {
+    const children = node.getChildren();
+    for (let i = 0; i < children.length; i++) {
+      const c = children[i];
+      const last = i === children.length - 1;
+
       if (c instanceof Nodes.ExpressionNode) {
         if (c.get() instanceof Expressions.FieldChain) {
           ret.appendChunk(new FieldChainTranspiler(this.addGet).transpile(c, traversal));
@@ -34,13 +38,12 @@ export class SourceTranspiler implements IExpressionTranspiler {
           }
         } else if (c.get() instanceof Expressions.MethodCallChain) {
           ret.appendChunk(traversal.traverse(c));
-          if (this.addGet) {
-            const code = ret.getCode();
-            if (code.includes("await")) {
-              ret = new Chunk().appendString("(").appendChunk(ret).appendString(").get()");
-            } else {
-              ret.append(".get()", c, traversal);
-            }
+          const code = ret.getCode();
+          if (code.includes("await")) {
+            ret = new Chunk().appendString("(").appendChunk(ret).appendString(")");
+          }
+          if (this.addGet && last === true) {
+            ret.append(".get()", c, traversal);
           }
         } else if (c.get() instanceof Expressions.Source) {
           ret.appendChunk(new SourceTranspiler(this.addGet).transpile(c, traversal));
@@ -51,6 +54,9 @@ export class SourceTranspiler implements IExpressionTranspiler {
         } else if (c.get() instanceof Expressions.ComponentChain) {
           ret = new Chunk().appendString("(").appendChunk(ret).appendString(").get().");
           ret.appendChunk(new ComponentChainTranspiler().transpile(c, traversal));
+          if (this.addGet && last === true) {
+            ret.append(".get()", c, traversal);
+          }
         } else if (c.get() instanceof Expressions.Dereference) {
           ret = new Chunk().appendString("(").appendChunk(ret).appendString(").getPointer()");
         } else {
@@ -72,6 +78,8 @@ export class SourceTranspiler implements IExpressionTranspiler {
     }
 
     ret.appendChunk(post);
+
+//    console.dir(ret.getCode());
 
     return ret;
   }
