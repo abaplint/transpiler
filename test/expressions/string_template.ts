@@ -163,7 +163,7 @@ WRITE result.`;
     expect(abap.console.get()).to.equal("blah 28.00");
   });
 
-  it.skip("return structured field to string template", async () => {
+  it("return structured field to string template", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
