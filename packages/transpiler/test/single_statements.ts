@@ -166,8 +166,11 @@ describe("Single statements", () => {
       js: `await abap.statements.select(lt_tab, {select: "SELECT * FROM " + mv_table.get() + ""});`},
     {abap: "SELECT SINGLE * FROM t100 INTO ls_result WHERE arbgb = lv_arbgb.",
       js: `await abap.statements.select(ls_result, {select: "SELECT * FROM t100 WHERE arbgb = '" + lv_arbgb.get() + "' UP TO 1 ROWS"});`},
+    {abap: "SELECT * FROM sflight INTO CORRESPONDING FIELDS OF TABLE mt_sflight UP TO 10 ROWS ORDER BY carrid.",
+      js: `await abap.statements.select(mt_sflight, {select: "SELECT * FROM sflight UP TO 10 ROWS ORDER BY carrid"});`},
+    {abap: "SELECT * FROM sflight INNER JOIN scarr AS carrier ON carrier~carrid = sflight~carrid INTO CORRESPONDING FIELDS OF TABLE mt_sflight_join WHERE sflight~carrid = 'AA' ORDER BY sflight~fldate.",
+      js: `await abap.statements.select(mt_sflight_join, {select: "SELECT * FROM sflight INNER JOIN scarr AS carrier ON carrier~carrid = sflight~carrid WHERE sflight~carrid = 'AA' ORDER BY sflight~fldate"});`},
     {abap: "INSERT INTO zopentest VALUES ls_row.", js: `await abap.statements.insertDatabase("zopentest", {"values": ls_row});`},
-
     {abap: "ASSERT NOT foo EQ bar.",     js: `abap.statements.assert(!abap.compare.eq(foo, bar));`, skip: false},
     {abap: "GET REFERENCE OF blah INTO ref.", js: `ref.assign(blah);`, skip: false},
     {abap: `GET REFERENCE OF <item> INTO lr_stack_top.`, js: `lr_stack_top.assign(fs_item_.getPointer());`, skip: false},
