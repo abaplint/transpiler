@@ -1518,7 +1518,7 @@ ENDCLASS.`;
     expect(cons.split("\n")[1]).to.equal("expected");
   });
 
-  it.only("test-36", async () => {
+  it("test-36", async () => {
 // check namespaces work
     const clas = `
     CLASS /foo/cl_client DEFINITION PUBLIC.
