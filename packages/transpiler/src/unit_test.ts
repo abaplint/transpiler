@@ -29,6 +29,11 @@ export async function initializeABAP() {\n`;
     return ret;
   }
 
+  private escapeNamespace(filename: string): string {
+// ES modules are resolved and cached as URLs. This means that special characters must be percent-encoded, such as # with %23 and ? with %3F.
+    return filename.replace(/\//g, "%23");
+  }
+
   public unitTestScriptOpen(reg: abaplint.IRegistry, _skip?: TestMethodList, _only?: TestMethodList): string {
     let ret = `/* eslint-disable curly */
 import fs from "fs";
@@ -51,7 +56,7 @@ async function run() {
       }
       const hasTestFile = obj.getFiles().some(f => { return f.getFilename().includes(".testclasses."); });
       if (hasTestFile === true) {
-        ret += `  await import("./${obj.getName().toLowerCase()}.${obj.getType().toLowerCase()}.testclasses.mjs");\n`;
+        ret += `  await import("./${this.escapeNamespace(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}.testclasses.mjs");\n`;
       }
 
       for (const file of obj.getABAPFiles()) {
@@ -121,7 +126,7 @@ async function run() {
             continue;
           }
           ret += `    {
-      const {${def.name}} = await import("./${obj.getName().toLowerCase()}.${obj.getType().toLowerCase()}.testclasses.mjs");
+      const {${def.name}} = await import("./${this.escapeNamespace(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}.testclasses.mjs");
       locl = clas.addTestClass("${def.name}");
       if (${def.name}.class_setup) await ${def.name}.class_setup();\n`;
 
@@ -187,23 +192,23 @@ run().then(() => {
 
     for (const obj of reg.getObjects()) {
       if (obj instanceof abaplint.Objects.Table) {
-        list.push(`await import("./${obj.getName().toLowerCase()}.tabl.mjs");`);
+        list.push(`await import("./${this.escapeNamespace(obj.getName().toLowerCase())}.tabl.mjs");`);
       } else if (obj instanceof abaplint.Objects.DataElement) {
-        list.push(`await import("./${obj.getName().toLowerCase()}.dtel.mjs");`);
+        list.push(`await import("./${this.escapeNamespace(obj.getName().toLowerCase())}.dtel.mjs");`);
       } else if (obj instanceof abaplint.Objects.TableType) {
-        list.push(`await import("./${obj.getName().toLowerCase()}.ttyp.mjs");`);
+        list.push(`await import("./${this.escapeNamespace(obj.getName().toLowerCase())}.ttyp.mjs");`);
       }
     }
 
     for (const obj of reg.getObjects()) {
       if (obj instanceof abaplint.Objects.FunctionGroup) {
         for (const m of obj.getModules()) {
-          list.push(`await import("./${obj.getName().toLowerCase()}.fugr.${m.getName().toLowerCase()}.mjs");`);
+          list.push(`await import("./${this.escapeNamespace(obj.getName().toLowerCase())}.fugr.${m.getName().toLowerCase()}.mjs");`);
         }
       } else if (obj instanceof abaplint.Objects.Class) {
-        list.push(`await import("./${obj.getName().toLowerCase()}.clas.mjs");`);
+        list.push(`await import("./${this.escapeNamespace(obj.getName().toLowerCase())}.clas.mjs");`);
       } else if (obj instanceof abaplint.Objects.Interface) {
-        list.push(`await import("./${obj.getName().toLowerCase()}.intf.mjs");`);
+        list.push(`await import("./${this.escapeNamespace(obj.getName().toLowerCase())}.intf.mjs");`);
       }
     }
 

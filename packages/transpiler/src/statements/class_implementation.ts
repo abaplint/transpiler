@@ -10,7 +10,7 @@ export class ClassImplementationTranspiler implements IStatementTranspiler {
 
     const def = traversal.getClassDefinition(token);
 
-    let ret = "class " + token.getStr().toLowerCase();
+    let ret = "class " + Traversal.escapeClassName(token.getStr().toLowerCase());
 
     if (token.getStr().toLowerCase() === "cx_root") {
       // special case for exceptions

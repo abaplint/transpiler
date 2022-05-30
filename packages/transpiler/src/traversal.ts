@@ -25,6 +25,10 @@ export class Traversal {
     this.runtimeTypeError = runtimeTypeError;
   }
 
+  public static escapeClassName(name: string | undefined) {
+    return name?.replace(/\//g, "$");
+  }
+
   public getCurrentObject(): abaplint.ABAPObject {
     return this.obj;
   }
@@ -411,9 +415,9 @@ export class Traversal {
     const name = def.getName();
     if (def.isGlobal() === false) {
       const prefix = this.buildPrefix(def);
-      return `abap.Classes['${prefix}-${name.toUpperCase()}'] = ${name.toLowerCase()};`;
+      return `abap.Classes['${prefix}-${name.toUpperCase()}'] = ${Traversal.escapeClassName(name.toLowerCase())};`;
     } else {
-      return `abap.Classes['${name.toUpperCase()}'] = ${name.toLowerCase()};`;
+      return `abap.Classes['${name.toUpperCase()}'] = ${Traversal.escapeClassName(name.toLowerCase())};`;
     }
   }
 

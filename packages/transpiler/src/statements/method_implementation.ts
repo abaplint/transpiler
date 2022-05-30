@@ -89,7 +89,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
       // in ABAP static methods can be called with instance arrows, "->"
       const className = scope.getParent()?.getIdentifier().sname?.toLowerCase();
       staticMethod = "async " + methodName + "(" + unique + ") {\n" +
-        "return " + className + "." + methodName + "(" + unique + ");\n" +
+        "return " + Traversal.escapeClassName(className) + "." + methodName + "(" + unique + ");\n" +
         "}\n" + "static ";
     }
 
