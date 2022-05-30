@@ -13,17 +13,22 @@ export class SelectTranspiler implements IStatementTranspiler {
     select += node.findFirstExpression(abaplint.Expressions.SQLFieldList)?.concatTokens() + " ";
     select += node.findFirstExpression(abaplint.Expressions.SQLFrom)?.concatTokens() + " ";
 
-    const where = node.findFirstExpression(abaplint.Expressions.SQLCond);
+    let where;
+    for(const sqlCond of node.findAllExpressions(abaplint.Expressions.SQLCond)){
+      if(this.isWhereExpression(node,sqlCond)){
+        where = sqlCond;
+      }
+    }
     if (where) {
       select += "WHERE " + this.concatCond(where, traversal) + " ";
-    }
-    const orderBy = node.findFirstExpression(abaplint.Expressions.SQLOrderBy);
-    if (orderBy) {
-      select += orderBy.concatTokens() + " ";
     }
     const upTo = node.findFirstExpression(abaplint.Expressions.SQLUpTo);
     if (upTo) {
       select += upTo.concatTokens() + " ";
+    }
+    const orderBy = node.findFirstExpression(abaplint.Expressions.SQLOrderBy);
+    if (orderBy) {
+      select += orderBy.concatTokens() + " ";
     }
 
     for (const d of node.findAllExpressionsRecursive(abaplint.Expressions.Dynamic)) {
@@ -75,6 +80,23 @@ export class SelectTranspiler implements IStatementTranspiler {
       }
     }
     return ret.trim();
+  }
+
+  private isWhereExpression(node: abaplint.Nodes.StatementNode, expression: abaplint.Nodes.ExpressionNode): boolean {
+    // check if previous token before sqlCond is "WHERE". It could also be "ON" in case of join condition
+    let prevToken;
+    const sqlCondToken = expression.getFirstToken();
+    for(const token of node.getTokens()){
+      if(token.getStart() === sqlCondToken.getStart()){
+        break;
+      }
+      prevToken = token;
+    }
+    if(prevToken && prevToken.getStr() === "WHERE"){
+      return true;
+    }else{
+      return false;
+    }
   }
 
 }
