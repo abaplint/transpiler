@@ -1524,9 +1524,12 @@ ENDCLASS.`;
     CLASS /foo/cl_client DEFINITION PUBLIC.
       PUBLIC SECTION.
         CLASS-METHODS foo.
+        CLASS-DATA bar TYPE i.
     ENDCLASS.
     CLASS /foo/cl_client IMPLEMENTATION.
       METHOD foo.
+        CLEAR bar.
+        bar = 2.
         WRITE 'expected'.
       ENDMETHOD.
     ENDCLASS.`;
