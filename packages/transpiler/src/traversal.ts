@@ -156,9 +156,9 @@ export class Traversal {
         const found = this.reg.findObjectForFile(file);
         if (found) {
           if (found instanceof abaplint.Objects.Interface) {
-            return this.lookupClassOrInterface(found.getName(), t) + "." + found.getName().toLowerCase() + "$" + name;
+            return Traversal.escapeClassName(this.lookupClassOrInterface(found.getName(), t)) + "." + found.getName().toLowerCase() + "$" + name;
           } else {
-            return this.lookupClassOrInterface(found.getName(), t) + "." + name;
+            return Traversal.escapeClassName(this.lookupClassOrInterface(found.getName(), t)) + "." + name;
           }
         }
       }
@@ -166,7 +166,7 @@ export class Traversal {
 
     const className = this.isStaticClassAttribute(t);
     if (className) {
-      name = className + "." + name;
+      name = Traversal.escapeClassName(className) + "." + name;
     } else if (name === "super") {
       return name;
     } else if (this.isClassAttribute(t)) {
