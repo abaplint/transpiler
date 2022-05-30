@@ -1518,4 +1518,35 @@ ENDCLASS.`;
     expect(cons.split("\n")[1]).to.equal("expected");
   });
 
+  it.only("test-36", async () => {
+// check namespaces work
+    const clas = `
+    CLASS /foo/cl_client DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        CLASS-METHODS foo.
+    ENDCLASS.
+    CLASS /foo/cl_client IMPLEMENTATION.
+      METHOD foo.
+        WRITE 'expected'.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        /foo/cl_client=>foo( ).
+      ENDMETHOD.
+    ENDCLASS.`;
+
+    const files = [
+      {filename: "#foo#cl_client.clas.abap", contents: clas},
+      {filename: "#foo#cl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("expected");
+  });
+
 });

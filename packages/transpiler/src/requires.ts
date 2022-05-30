@@ -32,7 +32,7 @@ export class Requires {
     if (obj.getType() === "CLAS") {
       // add the superclass
       const clas = obj as abaplint.Objects.Class;
-      const sup = clas.getDefinition()?.getSuperClass()?.toLowerCase();
+      const sup = clas.getDefinition()?.getSuperClass()?.toLowerCase().replace(/\//g, "%23");
       if (sup) {
         add({filename: sup + ".clas.abap", name: sup});
       }
