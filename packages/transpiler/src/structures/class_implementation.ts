@@ -83,7 +83,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     const clasName = node.getFirstToken().getStr().toLowerCase();
     const staticAttributes = this.findStaticAttributes(cdef, scope);
     for (const attr of staticAttributes) {
-      const name = clasName + "." + attr.prefix + attr.identifier.getName().toLowerCase();
+      const name = Traversal.escapeClassName(clasName) + "." + attr.prefix + attr.identifier.getName().toLowerCase();
       ret += name + " = " + new TranspileTypes().toType(attr.identifier.getType()) + ";\n";
       const val = attr.identifier.getValue();
       if (typeof val === "string") {
