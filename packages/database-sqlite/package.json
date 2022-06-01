@@ -18,7 +18,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "sql.js": "^1.6.2"
+    "sql.js": "^1.7.0"
   },
   "devDependencies": {
     "@abaplint/runtime": "^2.0.29",

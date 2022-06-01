@@ -16,7 +16,7 @@ export function matches(input: {val: ICharacter | string, regex: ICharacter | st
   if (res !== null) {
     return new Character().set("X");
   } else {
-    return new Character().set(" ");
+    return new Character().set("");
   }
 
 }
