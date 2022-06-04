@@ -176,4 +176,16 @@ ASSERT str = '/src/'.`;
     await f(abap);
   });
 
+  it("REPLACE, with escaped values", async () => {
+    const code =
+      "DATA string_to_parse TYPE string.\n" +
+      "string_to_parse = 'Description first $values{@link cl_aff_test_types_for_writer.data:enum_values} Unused Text'.\n" +
+      "REPLACE ALL OCCURRENCES OF REGEX `\\$values[\\s]*(:[\\s]*)?\\{[\\s]*@link` IN string_to_parse WITH `\\$values\\{@link`.\n" +
+      "ASSERT string_to_parse = 'Description first $values{@link cl_aff_test_types_for_writer.data:enum_values} Unused Text'.";
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

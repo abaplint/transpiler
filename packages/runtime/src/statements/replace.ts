@@ -39,6 +39,9 @@ export function replace(input: replaceInput): void {
     replace = input.with;
   } else {
     replace = input.with.get();
+    replace = replace.replace(/\\\$/g, "$");
+    replace = replace.replace(/\\\{/g, "{");
+    replace = replace.replace(/\\\}/g, "}");
   }
 
   if (input.all === true) {
