@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/database-sqlite",
-  "version": "2.0.11",
+  "version": "2.0.30",
   "description": "Transpiler - SQLite driver",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
@@ -18,10 +18,11 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "sql.js": "^1.6.2"
+    "sql.js": "^1.7.0"
   },
   "devDependencies": {
-    "@abaplint/runtime": "^2.0.29",
-    "typescript": "^4.7.2"
+    "@types/sql.js": "^1.4.3",
+    "@abaplint/runtime": "^2.0.30",
+    "typescript": "^4.7.3"
   }
 }
