@@ -28,7 +28,7 @@
   "author": "abaplint",
   "license": "MIT",
   "dependencies": {
-    "@abaplint/core": "^2.90.10",
+    "@abaplint/core": "^2.90.11",
     "source-map": "^0.7.3"
   },
   "devDependencies": {
@@ -37,6 +37,6 @@
     "chai": "^4.3.6",
     "mocha": "^10.0.0",
     "source-map-support": "^0.5.21",
-    "typescript": "^4.7.2"
+    "typescript": "^4.7.3"
   }
 }
