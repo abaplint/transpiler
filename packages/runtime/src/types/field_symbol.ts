@@ -46,7 +46,8 @@ export class FieldSymbol  {
   public get() {
     if (this.casting) {
       // @ts-ignore
-      return new String().set(Buffer.from(this.pointer?.get(), "hex").toString()).get();
+      const ret = new String().set(Buffer.from(this.pointer?.get(), "hex").toString("utf16le"));
+      return ret.get();
     } else {
       // @ts-ignore
       return this.pointer?.get();

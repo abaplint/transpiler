@@ -40,6 +40,9 @@ export class Hex implements ICharacter {
         this.value = this.value.padStart(this.length * 2, "0");
       } else {
         this.value = v;
+        if (this.value.match(/^(?![A-F0-9])/)) {
+          this.value = "";
+        }
       }
     }
     if (this.value.length > this.length * 2) {
