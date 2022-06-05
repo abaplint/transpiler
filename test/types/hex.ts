@@ -109,4 +109,14 @@ describe("Running Examples - Hex type", () => {
     expect(abap.console.get()).to.equal(`31000000000000`);
   });
 
+  it("Hex, bad values", async () => {
+    const code = `
+  DATA foo TYPE x LENGTH 2.
+  foo = 'QWER'.
+  ASSERT foo = '0000'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

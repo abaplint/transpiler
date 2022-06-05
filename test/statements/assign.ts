@@ -155,11 +155,46 @@ ENDLOOP.`;
   DATA lv_x TYPE x LENGTH 2 VALUE '0000'.
   FIELD-SYMBOLS <lv_y> TYPE c.
   ASSIGN lv_x TO <lv_y> CASTING.
-  WRITE: / <lv_y>.`;
+  WRITE strlen( <lv_y> ).`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("\u0000\u0000");
+    expect(abap.console.get()).to.equal("1");
+  });
+
+  it("ASSIGN CASTING, 2", async () => {
+    const code = `
+TYPES:
+  tv_char_4 TYPE c LENGTH 5,
+  BEGIN OF ts_test,
+    a TYPE tv_char_4,
+  END OF ts_test.
+DATA ls_test TYPE ts_test.
+FIELD-SYMBOLS <lv> TYPE tv_char_4.
+ls_test-a = '1234'.
+ASSIGN COMPONENT 'A' OF STRUCTURE ls_test TO <lv> CASTING.
+WRITE <lv>.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1234");
+  });
+
+  it("ASSIGN CASTING, 3", async () => {
+// note, this ABAP code doesnt actually test the right thing?
+    const code = `
+DATA lv_c   TYPE c LENGTH 1.
+DATA lv_out TYPE x LENGTH 2.
+DATA lv_x   TYPE x LENGTH 4 VALUE '00000000'.
+FIELD-SYMBOLS <lv_y> TYPE c.
+ASSIGN lv_x TO <lv_y> CASTING.
+lv_c = <lv_y>.
+lv_out = lv_c.
+WRITE lv_out.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0000");
   });
 
 });
