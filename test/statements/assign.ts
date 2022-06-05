@@ -197,4 +197,16 @@ WRITE lv_out.`;
     expect(abap.console.get()).to.equal("0000");
   });
 
+  it("ASSIGN CASTING, 4", async () => {
+    const code = `
+    DATA lv_c TYPE c LENGTH 1.
+    FIELD-SYMBOLS <lv_x> TYPE x.
+    lv_c = 'A'.
+    ASSIGN lv_c TO <lv_x> CASTING.
+    ASSERT <lv_x> = '4100'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
