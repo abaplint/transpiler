@@ -4,17 +4,19 @@ import {ABAPObject} from "./abap_object";
 import {Table} from "./table";
 import {String} from "./string";
 import {Structure} from "./structure";
+import {Hex} from "./hex";
 
 type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Structure;
 
 export class FieldSymbol  {
   private pointer: PointerType;
   private casting: boolean;
-  // todo, add typing, so its possible to get runtime errors?
+  private readonly type: PointerType;
 
-  public constructor() {
+  public constructor(type?: PointerType) {
     this.pointer = undefined;
     this.casting = false;
+    this.type = type;
   }
 
   public assign(pointer: PointerType) {
@@ -34,6 +36,10 @@ export class FieldSymbol  {
   }
 
   public getPointer() {
+    if (this.casting) {
+      // todo, this wont work for everything, eg changing CASTING'ed values
+      return this.get();
+    }
     return this.pointer;
   }
 
@@ -45,9 +51,15 @@ export class FieldSymbol  {
 
   public get() {
     if (this.casting) {
-      // @ts-ignore
-      const ret = new String().set(Buffer.from(this.pointer?.get(), "hex").toString("utf16le"));
-      return ret.get();
+      if (this.type instanceof Hex) {
+        // @ts-ignore
+        const ret = new String().set(Buffer.from(this.pointer?.get(), "utf16le").toString("hex"));
+        return ret.get();
+      } else {
+        // @ts-ignore
+        const ret = new String().set(Buffer.from(this.pointer?.get(), "hex").toString("utf16le"));
+        return ret.get();
+      }
     } else {
       // @ts-ignore
       return this.pointer?.get();

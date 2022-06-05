@@ -84,7 +84,7 @@ describe("Single statements", () => {
     {abap: "SET BIT foo OF bar TO moo.",              js: "abap.statements.setBit(foo, bar, moo);",                skip: false},
     {abap: "GET BIT foo OF bar INTO moo.",            js: "abap.statements.getBit(foo, bar, moo);",                skip: false},
     {abap: "WRITE sy-index.",                         js: "abap.statements.write(abap.builtin.sy.get().index);",   skip: false},
-    {abap: "FIELD-SYMBOLS <bar> TYPE i.",             js: "let fs_bar_ = new abap.types.FieldSymbol();",                    skip: false},
+    {abap: "FIELD-SYMBOLS <bar> TYPE i.",             js: "let fs_bar_ = new abap.types.FieldSymbol(new abap.types.Integer());",                    skip: false},
     {abap: "ASSIGN da TO <name>.",                    js: "abap.statements.assign({target: fs_name_, source: da});",        skip: false},
     {abap: "ASSIGN <fs1> TO <fs2>.",                  js: "abap.statements.assign({target: fs_fs2_, source: fs_fs1_});",    skip: false},
     {abap: "ASSERT <name> = 1.",                      js: "abap.statements.assert(abap.compare.eq(fs_name_, constant_1));", skip: false},
