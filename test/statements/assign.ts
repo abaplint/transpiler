@@ -162,4 +162,22 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("\u0000\u0000");
   });
 
+  it("ASSIGN CASTING, 2", async () => {
+    const code = `
+TYPES:
+  tv_char_4 TYPE c LENGTH 5,
+  BEGIN OF ts_test,
+    a TYPE tv_char_4,
+  END OF ts_test.
+DATA ls_test TYPE ts_test.
+FIELD-SYMBOLS <lv> TYPE tv_char_4.
+ls_test-a = '1234'.
+ASSIGN COMPONENT 'A' OF STRUCTURE ls_test TO <lv> CASTING.
+WRITE <lv>.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1234");
+  });
+
 });
