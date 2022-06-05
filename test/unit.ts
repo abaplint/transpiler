@@ -1552,4 +1552,50 @@ ENDCLASS.`;
     expect(cons.split("\n")[1]).to.equal("expected");
   });
 
+  it("test-38", async () => {
+// local class inheriting from global
+    const sup = `
+    CLASS cl_sup DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        METHODS sup.
+    ENDCLASS.
+    CLASS cl_sup IMPLEMENTATION.
+      METHOD sup.
+        WRITE 'expected'.
+      ENDMETHOD.
+    ENDCLASS.`;
+
+    const clas = `
+    CLASS cl_client DEFINITION PUBLIC.
+      PUBLIC SECTION.
+    ENDCLASS.
+    CLASS cl_client IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS lcl DEFINITION INHERITING FROM cl_sup.
+    ENDCLASS.
+    CLASS lcl IMPLEMENTATION.
+    ENDCLASS.
+
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA ref TYPE REF TO lcl.
+        CREATE OBJECT ref.
+        ref->sup( ).
+      ENDMETHOD.
+    ENDCLASS.`;
+
+    const files = [
+      {filename: "cl_client.clas.abap", contents: clas},
+      {filename: "cl_sup.clas.abap", contents: sup},
+      {filename: "cl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("expected");
+  });
+
 });

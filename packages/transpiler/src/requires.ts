@@ -95,6 +95,25 @@ export class Requires {
           });
         }
       }
+
+      // include global super classes for local class definitions
+      for (const f of obj.getSequencedFiles()) {
+        for (const c of f.getInfo().listClassDefinitions()) {
+          if (c.superClassName === undefined) {
+            continue;
+          }
+          const found = this.reg.getObject("CLAS", c.superClassName);
+          if (found && found instanceof abaplint.ABAPObject) {
+            const main = found.getMainABAPFile()?.getFilename();
+            if (main) {
+              add({
+                filename: main,
+                name: found.getName().toLowerCase(),
+              });
+            }
+          }
+        }
+      }
     }
 
     return ret;
