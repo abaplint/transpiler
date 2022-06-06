@@ -50,14 +50,13 @@ WRITE foo.`;
     expect(abap.console.get()).to.equal("10");
   });
 
-  it.skip("DATA, VALUE, structured", async () => {
+  it("DATA, VALUE, structured", async () => {
     const code = `
 DATA: BEGIN OF ls_struc,
         c TYPE i VALUE 10,
       END OF ls_struc.
 WRITE ls_struc-c.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("10");
