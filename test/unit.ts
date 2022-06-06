@@ -1154,8 +1154,6 @@ CLASS ltcl_test IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.`;
 
-
-
     const cxconv = `
     CLASS cx_sy_conversion_no_number DEFINITION PUBLIC INHERITING FROM cx_root.
     ENDCLASS.
@@ -1593,6 +1591,49 @@ ENDCLASS.`;
       {filename: "cl_client.clas.abap", contents: clas},
       {filename: "cl_sup.clas.abap", contents: sup},
       {filename: "cl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("expected");
+  });
+
+  it("test-39", async () => {
+// should raise cx_sy_conversion_no_number
+
+    const clas = `CLASS zcl_conv DEFINITION PUBLIC.
+  PUBLIC SECTION.
+ENDCLASS.
+
+CLASS zcl_conv IMPLEMENTATION.
+ENDCLASS.`;
+
+    const tests = `
+CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS test FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD test.
+    DATA int TYPE i.
+    TRY.
+        int = '123-456'.
+      CATCH cx_sy_conversion_no_number.
+        WRITE 'expected'.
+    ENDTRY.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const cxconv = `
+    CLASS cx_sy_conversion_no_number DEFINITION PUBLIC INHERITING FROM cx_root.
+    ENDCLASS.
+    CLASS cx_sy_conversion_no_number IMPLEMENTATION.
+    ENDCLASS.`;
+
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "cx_sy_conversion_no_number.clas.abap", contents: cxconv},
+      {filename: "zcl_conv.clas.abap", contents: clas},
+      {filename: "zcl_conv.clas.testclasses.abap", contents: tests},
     ];
     const cons = await dumpNrun(files);
     expect(cons.split("\n")[1]).to.equal("expected");

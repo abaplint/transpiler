@@ -17,7 +17,7 @@ export class Integer implements INumeric {
     } else if (typeof value === "string" && value.trim().length === 0) {
       this.value = 0;
     } else if (typeof value === "string") {
-      if (/[a-z]/i.test(value) === true) { // todo, match more here?
+      if (/^\s*-?\d+\.?\d*$/i.test(value) === false) {
         // @ts-ignore
         if (abap.Classes["CX_SY_CONVERSION_NO_NUMBER"] !== undefined) {
           // @ts-ignore
