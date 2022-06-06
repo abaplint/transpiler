@@ -57,4 +57,15 @@ describe("Running Examples - Integer type", () => {
     await f(abap);
     expect(abap.console.get()).to.equal("2000");
   });
+
+  it("convert plus 1", async () => {
+    const code = `
+    DATA int TYPE i.
+    int = '+1.0'.
+    WRITE int.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
 });

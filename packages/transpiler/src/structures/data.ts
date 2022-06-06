@@ -12,7 +12,16 @@ export class DataTranspiler implements IStructureTranspiler {
       return new Chunk("");
     }
 
+    const topName = begin.findDirectExpression(abaplint.Expressions.DefinitionName)?.concatTokens().toLowerCase();
     const chunk = new DataStatementTranspiler().transpile(begin, traversal);
+
+    for (const d of node.findDirectStatements(abaplint.Statements.Data)) {
+      const subName = d.findFirstExpression(abaplint.Expressions.DefinitionName)?.concatTokens().toLowerCase();
+      if (subName && topName) {
+        chunk.appendString(DataStatementTranspiler.buildValue(d, topName + ".get()." + subName, traversal));
+      }
+    }
+
     chunk.appendString("\n");
     return chunk;
   }
