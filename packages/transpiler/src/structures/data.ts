@@ -14,6 +14,11 @@ export class DataTranspiler implements IStructureTranspiler {
 
     const chunk = new DataStatementTranspiler().transpile(begin, traversal);
     chunk.appendString("\n");
+/*
+    for (const d of node.findAllStatements(abaplint.Statements.Data)) {
+
+    }
+*/
     return chunk;
   }
 
