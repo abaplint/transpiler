@@ -9,6 +9,10 @@ export function multiply(left: INumeric | ICharacter | string | number, right: I
   } else if (typeof left === "number" && typeof right === "number"
       && Number.isInteger(left) && Number.isInteger(right)) {
     return new Integer().set(left * right);
+  } else if (typeof left === "number" && Number.isInteger(left) && right instanceof Integer) {
+    return new Integer().set(left * right.get());
+  } else if (typeof right === "number" && Number.isInteger(right) && left instanceof Integer) {
+    return new Integer().set(left.get() * right);
   }
   return new Float().set(parse(left) * parse(right));
 }
