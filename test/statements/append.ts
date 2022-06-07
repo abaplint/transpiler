@@ -183,4 +183,26 @@ ENDDO.`;
     await f(abap);
   });
 
+  it("APPEND, ASSIGNING fs, structured", async () => {
+    const code = `
+TYPES:
+  BEGIN OF ty_node,
+    name     TYPE string,
+    children TYPE i,
+  END OF ty_node.
+TYPES:
+  ty_nodes_tt TYPE STANDARD TABLE OF ty_node WITH DEFAULT KEY.
+DATA ct_nodes TYPE ty_nodes_tt.
+DATA ls_root LIKE LINE OF ct_nodes.
+FIELD-SYMBOLS <root> LIKE ls_root.
+APPEND ls_root TO ct_nodes ASSIGNING <root>.
+<root>-children = <root>-children + 123.
+READ TABLE ct_nodes INDEX 1 INTO ls_root.
+WRITE ls_root-children.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("123");
+  });
+
 });
