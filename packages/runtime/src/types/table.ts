@@ -129,7 +129,7 @@ export class Table  {
       const p = clone(this.rowType);
       p.set(val);
       this.value.push(p);
-      return val;
+      return p;
     }
   }
 
