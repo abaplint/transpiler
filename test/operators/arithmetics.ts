@@ -187,4 +187,17 @@ describe("Running operators - Arithmetics", () => {
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("strlen plussed in string template", async () => {
+    const code = `
+  DATA result TYPE string.
+DATA duplicates TYPE string.
+duplicates = |sdf|.
+result = |bar{ strlen( duplicates ) + 1 }foo|.
+WRITE result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("bar4foo");
+  });
+
 });
