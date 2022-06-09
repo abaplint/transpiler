@@ -10,7 +10,7 @@ export class UnitTest {
   public initializationScript(reg: abaplint.IRegistry, dbSetup: DatabaseSetupResult, extraSetup?: string) {
     let ret = `/* eslint-disable import/newline-after-import */
 import runtime from "@abaplint/runtime";
-global.abap = new runtime.ABAP();
+globalThis.abap = new runtime.ABAP();
 ${this.buildImports(reg)}
 
 export async function initializeABAP() {\n`;
@@ -23,7 +23,7 @@ export async function initializeABAP() {\n`;
       ret += `// no setup logic specified in config\n`;
     } else {
       ret += `  const {setup} = await import("${extraSetup}");\n` +
-             `  await setup(global.abap, schemas, insert);\n`;
+             `  await setup(globalThis.abap, schemas, insert);\n`;
     }
     ret += `}`;
     return ret;
