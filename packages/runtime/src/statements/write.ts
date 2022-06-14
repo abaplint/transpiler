@@ -37,7 +37,11 @@ export class WriteStatement {
           this.write(obj[f], {...options});
         }
       } else if (source instanceof Float) {
-        result = source.get().toString();
+        if (options?.exponent?.get() === 0) {
+          result = source.getRaw().toFixed(16).replace(".", ",");
+        } else {
+          result = source.get().toString();
+        }
       } else {
         result = source.get().toString();
       }

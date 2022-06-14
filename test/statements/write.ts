@@ -131,18 +131,18 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.skip("float, EXPONENT 0 NO-GROUPING NO-SIGN", async () => {
+  it("float, EXPONENT 0 NO-GROUPING NO-SIGN", async () => {
     const code = `
 DATA foo TYPE f.
 foo = 1 / 1000.
 DATA char TYPE c LENGTH 100.
 WRITE foo TO char EXPONENT 0 NO-GROUPING NO-SIGN.
 CONDENSE char.
-ASSERT char = '0,0010000000000000'.`;
+WRITE char.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+    expect(abap.console.get()).to.equal("0,0010000000000000");
   });
 
   it("float, normal", async () => {
