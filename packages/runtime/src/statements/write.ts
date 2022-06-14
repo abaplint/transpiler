@@ -8,6 +8,9 @@ export interface IWriteOptions {
   newLine?: boolean,
   skipLine?: boolean,
   target?: ICharacter,
+  exponent?: ICharacter | INumeric,
+  noGrouping?: boolean,
+  noSign?: boolean,
 }
 
 export class WriteStatement {

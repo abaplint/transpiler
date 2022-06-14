@@ -8,11 +8,26 @@ export class WriteTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const extra: string[] = [];
     let source: Chunk | undefined;
+
     const newLine = node.findFirstExpression(abaplint.Expressions.WriteOffsetLength)?.findDirectTokenByText("/") !== undefined;
+    const concat = node.concatTokens().toUpperCase();
 
     const target = node.findDirectExpression(abaplint.Expressions.Target);
     if (target) {
       extra.push("target: " + traversal.traverse(target).getCode());
+    }
+
+    const exponent = node.findExpressionAfterToken("EXPONENT");
+    if (exponent) {
+      extra.push("exponent: " + traversal.traverse(exponent).getCode());
+    }
+
+    if (concat.includes("NO-GROUPING")) {
+      extra.push("noGrouping: true");
+    }
+
+    if (concat.includes("NO-SIGN")) {
+      extra.push("noSign: true");
     }
 
     const expr = node.findDirectExpression(abaplint.Expressions.Source);

@@ -131,4 +131,31 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it.skip("float, EXPONENT 0 NO-GROUPING NO-SIGN", async () => {
+    const code = `
+DATA foo TYPE f.
+foo = 1 / 1000.
+DATA char TYPE c LENGTH 100.
+WRITE foo TO char EXPONENT 0 NO-GROUPING NO-SIGN.
+CONDENSE char.
+ASSERT char = '0,0010000000000000'.`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("float, normal", async () => {
+    const code = `
+DATA foo TYPE f.
+foo = 1 / 1000.
+DATA ch TYPE c LENGTH 100.
+WRITE foo TO ch.
+CONDENSE ch.
+ASSERT ch = '1,0000000000000000E-03'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
