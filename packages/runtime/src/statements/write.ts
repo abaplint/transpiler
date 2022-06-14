@@ -1,5 +1,5 @@
 import {Context} from "../context";
-import {Structure} from "../types";
+import {Float, Structure} from "../types";
 import {FieldSymbol} from "../types/field_symbol";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
@@ -28,23 +28,24 @@ export class WriteStatement {
         this.context.console.add("\n");
       }
 
+      let result = "";
       if (typeof source === "string" || typeof source === "number") {
-        if (options?.target) {
-          options.target.set(source.toString());
-        } else {
-          this.context.console.add(source.toString());
-        }
+        result = source.toString();
       } else if (source instanceof Structure) {
         const obj = source.get();
         for (const f in obj) {
           this.write(obj[f], {...options});
         }
+      } else if (source instanceof Float) {
+        result = source.get().toString();
       } else {
-        if (options?.target) {
-          options.target.set(source.get().toString());
-        } else {
-          this.context.console.add(source.get().toString());
-        }
+        result = source.get().toString();
+      }
+
+      if (options?.target) {
+        options.target.set(result);
+      } else {
+        this.context.console.add(result);
       }
 
     }
