@@ -85,6 +85,8 @@ export class TranspileTypes {
       }
     } else if (type instanceof abaplint.BasicTypes.FloatType) {
       resolved = "Float";
+    } else if (type instanceof abaplint.BasicTypes.FloatingPointType) {
+      resolved = "Float";
     } else if (type instanceof abaplint.BasicTypes.DecFloat34Type) {
       resolved = "DecFloat34";
     } else if (type instanceof abaplint.BasicTypes.UnknownType) {
