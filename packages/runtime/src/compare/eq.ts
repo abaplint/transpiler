@@ -23,7 +23,10 @@ function compareTables(left: Table, right: Table): boolean {
 export function eq(
   left: number | string | ICharacter | INumeric | Float | ABAPObject | Structure | Hex | Table | FieldSymbol,
   right: number | string | ICharacter | INumeric | Float | ABAPObject | Structure | Hex | Table | FieldSymbol): boolean {
-
+/*
+  console.dir(left);
+  console.dir(right);
+*/
   if (right instanceof FieldSymbol) {
     return eq(left, right.getPointer()!);
   } else if (left instanceof FieldSymbol) {
@@ -64,7 +67,7 @@ export function eq(
 
   let l: number | string | undefined = undefined;
   if (left instanceof Character) {
-    l = left.get().trimEnd();
+    l = left.get().replace(/ *$/, "");
   } else if (typeof left === "object") {
     l = left.get();
   } else {
@@ -73,7 +76,7 @@ export function eq(
 
   let r: number | string | undefined = undefined;
   if (right instanceof Character) {
-    r = right.get().trimEnd();
+    r = right.get().replace(/ *$/, "");
   } else if (typeof right === "object") {
     r = right.get();
   } else {
@@ -112,6 +115,9 @@ export function eq(
       }
     }
   }
-
+/*
+  console.dir(l);
+  console.dir(r);
+*/
   return l === r;
 }
