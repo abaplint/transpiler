@@ -38,7 +38,13 @@ export class WriteStatement {
         }
       } else if (source instanceof Float) {
         if (options?.exponent?.get() === 0) {
-          result = source.getRaw().toFixed(16).replace(".", ",");
+          const tens = source.getRaw().toFixed(0).length - 1;
+          if (options.noSign === true  && source.getRaw() < 0) {
+            result = source.getRaw().toFixed(17 - tens).replace(".", ",");
+            result = result.replace("-", "");
+          } else {
+            result = source.getRaw().toFixed(16 - tens).replace(".", ",");
+          }
         } else {
           result = source.get().toString();
         }

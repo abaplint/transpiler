@@ -145,6 +145,34 @@ WRITE char.`;
     expect(abap.console.get()).to.equal("0,0010000000000000");
   });
 
+  it("float, EXPONENT 0 NO-GROUPING NO-SIGN, 5000", async () => {
+    const code = `
+  DATA foo TYPE f.
+  foo = 5000.
+  DATA char TYPE c LENGTH 100.
+  WRITE foo TO char EXPONENT 0 NO-GROUPING NO-SIGN.
+  CONDENSE char.
+  WRITE char.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("5000,0000000000000");
+  });
+
+  it("float, EXPONENT 0 NO-GROUPING NO-SIGN, minus one", async () => {
+    const code = `
+    DATA foo TYPE f.
+    foo = -1.
+    DATA char TYPE c LENGTH 100.
+    WRITE foo TO char EXPONENT 0 NO-GROUPING NO-SIGN.
+    CONDENSE char.
+    WRITE char.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1,0000000000000000");
+  });
+
   it("float, normal", async () => {
     const code = `
 DATA foo TYPE f.
