@@ -200,4 +200,34 @@ WRITE result.`;
     expect(abap.console.get()).to.equal("bar4foo");
   });
 
+  it("string plus integer into string", async () => {
+    const code = `
+    DATA lv_trow1 TYPE string.
+    DATA lv_trow2 TYPE string.
+    DATA iv_shift_rows TYPE i.
+    lv_trow1 = '1'.
+    iv_shift_rows = 2.
+    lv_trow2 = lv_trow1 + iv_shift_rows.
+    WRITE lv_trow2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3 ");
+  });
+
+  it("char plus integer into char", async () => {
+    const code = `
+    DATA lv_trow1 TYPE string.
+    DATA lv_trow2 TYPE string.
+    DATA iv_shift_rows TYPE i.
+    lv_trow1 = '1'.
+    iv_shift_rows = 2.
+    lv_trow2 = lv_trow1 + iv_shift_rows.
+    WRITE lv_trow2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3 ");
+  });
+
 });
