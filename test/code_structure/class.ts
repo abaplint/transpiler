@@ -992,7 +992,7 @@ ENDCLASS.`;
     await f(abap);
   });
 
-  it.only("something strange", async () => {
+  it("something strange", async () => {
     const zcl_abapgit_ajson = `
 CLASS zcl_abapgit_ajson DEFINITION PUBLIC.
 ENDCLASS.
@@ -1035,7 +1035,6 @@ ENDCLASS.`;
     ]);
 
     const js = result.objects[1].chunk.getCode();
-    console.dir(js);
     expect(js).to.contain("abap.Classes['CL_ABAP_CHAR_UTILITIES'].newline");
   });
 

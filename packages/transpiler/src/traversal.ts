@@ -262,9 +262,11 @@ export class Traversal {
     }
 
     // local classes
-    const scope = this.findCurrentScopeByToken(ref.getToken());
-    if (scope?.getIdentifier().stype === abaplint.ScopeType.Interface) {
-      return scope?.getIdentifier().sname;
+    if (ref.getFilename() === this.getFilename()) {
+      const scope = this.findCurrentScopeByToken(ref.getToken());
+      if (scope?.getIdentifier().stype === abaplint.ScopeType.Interface) {
+        return scope?.getIdentifier().sname;
+      }
     }
 
     // global classes
