@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
-import {AsyncFunction, runFiles} from "../_utils";
+import {AsyncFunction, compileFiles, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -990,6 +990,53 @@ ENDCLASS.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it.only("something strange", async () => {
+    const zcl_abapgit_ajson = `
+CLASS zcl_abapgit_ajson DEFINITION PUBLIC.
+ENDCLASS.
+CLASS zcl_abapgit_ajson IMPLEMENTATION.
+ENDCLASS.`;
+
+    const locals = `INTERFACE lif_kind.
+  TYPES ty_kind TYPE c LENGTH 1.
+  CONSTANTS: any TYPE ty_kind VALUE 'A'.
+ENDINTERFACE.
+
+CLASS lcl_json_serializer DEFINITION FINAL CREATE PRIVATE.
+  PUBLIC SECTION.
+    CLASS-METHODS class_constructor.
+  PRIVATE SECTION.
+    CLASS-DATA gv_comma_with_lf TYPE string.
+ENDCLASS.
+
+CLASS lcl_json_serializer IMPLEMENTATION.
+  METHOD class_constructor.
+    gv_comma_with_lf = ',' && cl_abap_char_utilities=>newline.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const cl_abap_char_utilities = `CLASS cl_abap_char_utilities DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    CONSTANTS newline TYPE c LENGTH 1 VALUE '_'.
+    CLASS-METHODS class_constructor.
+ENDCLASS.
+CLASS cl_abap_char_utilities IMPLEMENTATION.
+  METHOD class_constructor.
+    WRITE '@KERNEL cl_abap_char_utilities.newline.set("\\n");'.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const result = await compileFiles([
+      {filename: "zcl_abapgit_ajson.clas.abap", contents: zcl_abapgit_ajson},
+      {filename: "cl_abap_char_utilities.clas.abap", contents: cl_abap_char_utilities},
+      {filename: "zcl_abapgit_ajson.clas.locals_imp.abap", contents: locals},
+    ]);
+
+    const js = result.objects[1].chunk.getCode();
+    console.dir(js);
+    expect(js).to.contain("abap.Classes['CL_ABAP_CHAR_UTILITIES'].newline");
   });
 
 });
