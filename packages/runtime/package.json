@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/runtime",
-  "version": "2.0.44",
+  "version": "2.0.45",
   "description": "Transpiler - Runtime",
   "main": "build/src/index.js",
   "typings": "build/src/index.d.ts",
@@ -33,6 +33,6 @@
     "chai": "^4.3.6",
     "mocha": "^10.0.0",
     "source-map-support": "^0.5.21",
-    "typescript": "^4.7.3"
+    "typescript": "^4.7.4"
   }
 }
