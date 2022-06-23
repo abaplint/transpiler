@@ -28,7 +28,7 @@ export class SQLiteDatabaseSchema {
 
     const fields: string[] = [];
     for (const field of type.getComponents()) {
-      fields.push(field.name.toLowerCase() + " " + this.toType(field.type));
+      fields.push(field.name.toLowerCase() + " " + this.toType(field.type, field.name, tabl.getName()));
     }
 
     // assumption: all transparent tables have primary keys
@@ -37,7 +37,7 @@ export class SQLiteDatabaseSchema {
     return `CREATE TABLE ${tabl.getName().toLowerCase()} (${fields.join(", ")}${key});\n`;
   }
 
-  private toType(type: abaplint.AbstractType): string {
+  private toType(type: abaplint.AbstractType, fieldname: string, table: string): string {
     if (type instanceof abaplint.BasicTypes.CharacterType) {
       return `NCHAR(${type.getLength()})`;
     } else if (type instanceof abaplint.BasicTypes.NumericType) {
@@ -50,6 +50,8 @@ export class SQLiteDatabaseSchema {
       return `TEXT`;
     } else if (type instanceof abaplint.BasicTypes.IntegerType) {
       return `INT`;
+    } else if (type instanceof abaplint.BasicTypes.VoidType) {
+      throw `Type of ${table}-${fieldname} is VoidType(${type.getVoided()}), make sure the type is know, enable strict syntax checking`;
     } else {
       throw "database_setup, todo toType handle: " + type.constructor.name;
     }
