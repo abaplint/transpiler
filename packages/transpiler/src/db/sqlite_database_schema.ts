@@ -40,6 +40,10 @@ export class SQLiteDatabaseSchema {
   private toType(type: abaplint.AbstractType, fieldname: string, table: string): string {
     if (type instanceof abaplint.BasicTypes.CharacterType) {
       return `NCHAR(${type.getLength()})`;
+    } else if (type instanceof abaplint.BasicTypes.TimeType) {
+      return `NCHAR(6)`;
+    } else if (type instanceof abaplint.BasicTypes.DateType) {
+      return `NCHAR(8)`;
     } else if (type instanceof abaplint.BasicTypes.NumericType) {
       // it will be fine, the runtime representation of numc is also text
       return `NCHAR(${type.getLength()})`;
