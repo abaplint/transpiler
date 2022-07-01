@@ -36,7 +36,7 @@ export class DeleteInternalTranspiler implements IStatementTranspiler {
 
     const from = node.findExpressionAfterToken("FROM");
     if (from && node.findDirectTokenByText("ADJACENT") === undefined) {
-      if (concat.startsWith("DELETE TABLE")) {
+      if (concat.startsWith("DELETE TABLE ") === true) {
         extra.push("fromValue: " + traversal.traverse(from).getCode());
       } else {
         extra.push("fromIndex: " + traversal.traverse(from).getCode());

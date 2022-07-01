@@ -20,6 +20,7 @@ export function deleteInternal(target: Table, options?: IDeleteInternalOptions):
   if (options?.index
       && options?.where === undefined
       && options?.adjacent === undefined
+      && options?.fromValue === undefined
       && options?.fromIndex === undefined
       && options?.toIndex === undefined) {
     target.deleteIndex(options.index.get() - 1);
@@ -56,6 +57,8 @@ export function deleteInternal(target: Table, options?: IDeleteInternalOptions):
       target.deleteIndex(index);
     } else if (options?.fromIndex && options.fromIndex.get() <= index + 1) {
       target.deleteIndex(index);
+    } else if (options?.toIndex && options.toIndex.get() <= index + 1) {
+      target.deleteIndex(0);
     }
 
     prev = i;

@@ -243,4 +243,21 @@ ASSERT lines( ignore ) = 0.`;
     await f(abap);
   });
 
+  it("TO index", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i.
+DATA int TYPE i.
+DO 5 TIMES.
+  APPEND sy-index TO tab.
+ENDDO.
+DELETE tab TO 3.
+LOOP AT tab INTO int.
+  WRITE / int.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n5");
+  });
+
 });
