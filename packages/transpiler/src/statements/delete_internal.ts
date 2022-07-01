@@ -39,13 +39,13 @@ export class DeleteInternalTranspiler implements IStatementTranspiler {
       if (concat.startsWith("DELETE TABLE ") === true) {
         extra.push("fromValue: " + traversal.traverse(from).getCode());
       } else {
-        extra.push("fromIndex: " + traversal.traverse(from).getCode());
+        extra.push("from: " + traversal.traverse(from).getCode());
       }
     }
 
     const to = node.findExpressionAfterToken("TO");
     if (to) {
-      extra.push("toIndex: " + traversal.traverse(to).getCode());
+      extra.push("to: " + traversal.traverse(to).getCode());
     }
 
     let blah = "";
