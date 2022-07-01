@@ -57,10 +57,8 @@ export function deleteInternal(target: Table, options?: IDeleteInternalOptions):
       target.deleteIndex(index);
     } else if (options?.from && options.from.get() <= index + 1) {
       target.deleteIndex(index);
-      /*
     } else if (options?.to && options.to.get() <= index + 1) {
       target.deleteIndex(0);
-      */
     }
 
     prev = i;

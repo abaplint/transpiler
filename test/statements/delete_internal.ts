@@ -243,7 +243,7 @@ ASSERT lines( ignore ) = 0.`;
     await f(abap);
   });
 
-  it.skip("TO index", async () => {
+  it("TO index", async () => {
     const code = `
 DATA tab TYPE STANDARD TABLE OF i.
 DATA int TYPE i.
