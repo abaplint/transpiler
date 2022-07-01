@@ -229,4 +229,18 @@ START-OF-SELECTION.
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
+
+  it.only("DELETE from table line", async () => {
+    const code = `
+DATA ignore TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+DATA lv_name TYPE string.
+APPEND 'foo' TO ignore.
+lv_name = 'foo'.
+DELETE TABLE ignore FROM lv_name.
+ASSERT lines( ignore ) = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
