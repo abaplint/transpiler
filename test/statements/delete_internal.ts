@@ -230,7 +230,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.skip("DELETE from table line", async () => {
+  it("DELETE from table line", async () => {
     const code = `
 DATA ignore TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
 DATA lv_name TYPE string.

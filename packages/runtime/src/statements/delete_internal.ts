@@ -52,6 +52,8 @@ export function deleteInternal(target: Table, options?: IDeleteInternalOptions):
       }
     } else if (options?.index && options.index.get() === index) {
       target.deleteIndex(options.index.get() - 1);
+    } else if (options?.fromValue && eq(options.fromValue, i)) {
+      target.deleteIndex(index);
     } else if (options?.fromIndex && options.fromIndex.get() <= index + 1) {
       target.deleteIndex(index);
     }
