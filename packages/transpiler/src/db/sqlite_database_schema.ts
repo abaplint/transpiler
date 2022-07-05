@@ -52,6 +52,9 @@ export class SQLiteDatabaseSchema {
     } else if (type instanceof abaplint.BasicTypes.XStringType) {
       // it will be fine, the runtime representation of xstring is also text
       return `TEXT`;
+    } else if (type instanceof abaplint.BasicTypes.HexType) {
+      // it will be fine, the runtime representation of hex is also text
+      return `TEXT`;
     } else if (type instanceof abaplint.BasicTypes.IntegerType) {
       return `INT`;
     } else if (type instanceof abaplint.BasicTypes.PackedType){
