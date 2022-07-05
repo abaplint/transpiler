@@ -725,4 +725,24 @@ ASSERT y < radius.`;
     await f(abap);
   });
 
+  it("CO, structure", async () => {
+    const code = `
+CONSTANTS:
+  BEGIN OF texts,
+    chara  TYPE c LENGTH 1 VALUE 'a',
+    numc   TYPE c LENGTH 1 VALUE 'b',
+    string TYPE c LENGTH 1 VALUE 'g',
+  END OF texts.
+
+IF 'g' CO texts.
+  WRITE 'yes'.
+ELSE.
+  WRITE 'no'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`yes`);
+  });
+
 });
