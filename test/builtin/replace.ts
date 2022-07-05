@@ -112,4 +112,23 @@ WRITE result.`;
     expect(abap.console.get()).to.equal("Hello World");
   });
 
+  it("newlines", async () => {
+    const code = `
+  DATA foo TYPE string.
+  DATA newl TYPE c LENGTH 2.
+  newl = |\\n|.
+  foo = 'abc\\ndef\\nbar'.
+  WRITE / strlen( foo ).
+  foo = replace(
+    val = foo
+    sub = '\\n'
+    with = newl
+    occ = 0 ).
+  WRITE / strlen( foo ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("13\n11");
+  });
+
 });

@@ -7,6 +7,7 @@ export class DeleteInternalTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const target = traversal.traverse(node.findFirstExpression(abaplint.Expressions.Target)).getCode();
+    const concat = node.concatTokens().toUpperCase();
 
     const extra: string[] = [];
     const where = node.findFirstExpression(abaplint.Expressions.ComponentCond);
@@ -35,7 +36,11 @@ export class DeleteInternalTranspiler implements IStatementTranspiler {
 
     const from = node.findExpressionAfterToken("FROM");
     if (from && node.findDirectTokenByText("ADJACENT") === undefined) {
-      extra.push("from: " + traversal.traverse(from).getCode());
+      if (concat.startsWith("DELETE TABLE ") === true) {
+        extra.push("fromValue: " + traversal.traverse(from).getCode());
+      } else {
+        extra.push("from: " + traversal.traverse(from).getCode());
+      }
     }
 
     const to = node.findExpressionAfterToken("TO");
@@ -43,12 +48,12 @@ export class DeleteInternalTranspiler implements IStatementTranspiler {
       extra.push("to: " + traversal.traverse(to).getCode());
     }
 
-    let concat = "";
+    let blah = "";
     if (extra.length > 0) {
-      concat = ",{" + extra.join(",") + "}";
+      blah = ",{" + extra.join(",") + "}";
     }
 
-    return new Chunk("abap.statements.deleteInternal(" + target + concat + ");");
+    return new Chunk("abap.statements.deleteInternal(" + target + blah + ");");
   }
 
 }

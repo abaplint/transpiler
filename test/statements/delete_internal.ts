@@ -229,4 +229,35 @@ START-OF-SELECTION.
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
+
+  it("DELETE from table line", async () => {
+    const code = `
+DATA ignore TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+DATA lv_name TYPE string.
+APPEND 'foo' TO ignore.
+lv_name = 'foo'.
+DELETE TABLE ignore FROM lv_name.
+ASSERT lines( ignore ) = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("TO index", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i.
+DATA int TYPE i.
+DO 5 TIMES.
+  APPEND sy-index TO tab.
+ENDDO.
+DELETE tab TO 3.
+LOOP AT tab INTO int.
+  WRITE / int.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n5");
+  });
+
 });
