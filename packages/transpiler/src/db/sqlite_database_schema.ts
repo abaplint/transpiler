@@ -52,8 +52,12 @@ export class SQLiteDatabaseSchema {
     } else if (type instanceof abaplint.BasicTypes.XStringType) {
       // it will be fine, the runtime representation of xstring is also text
       return `TEXT`;
+    } else if (type instanceof abaplint.BasicTypes.HexType) {
+      return `NCHAR(${type.getLength() * 2})`;
     } else if (type instanceof abaplint.BasicTypes.IntegerType) {
       return `INT`;
+    } else if (type instanceof abaplint.BasicTypes.PackedType){
+      return `DECIMAL(${type.getLength()},${type.getDecimals()})`;
     } else if (type instanceof abaplint.BasicTypes.VoidType) {
       throw `Type of ${table}-${fieldname} is VoidType(${type.getVoided()}), make sure the type is know, enable strict syntax checking`;
     } else {
