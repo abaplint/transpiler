@@ -13,7 +13,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
 
     const scope = traversal.findCurrentScopeByToken(token);
     if (scope === undefined) {
-      throw new Error("MethodTranspiler, scope not found");
+      throw new Error("MethodTranspiler, scope not found, " + methodName);
     } else if (scope.getIdentifier().sname !== methodName) {
       throw new Error("MethodTranspiler, wrong scope found, " + scope.getIdentifier().sname);
     }
