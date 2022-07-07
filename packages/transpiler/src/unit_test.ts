@@ -7,11 +7,11 @@ export type TestMethodList = {object: string, class: string, method: string}[];
 export class UnitTest {
 
   // todo, move this method somewhere else, its much more than just unit test relevant
-  public initializationScript(reg: abaplint.IRegistry, dbSetup: DatabaseSetupResult, extraSetup?: string) {
+  public initializationScript(reg: abaplint.IRegistry, dbSetup: DatabaseSetupResult, extraSetup?: string, useImport?: boolean) {
     let ret = `/* eslint-disable import/newline-after-import */
 import runtime from "@abaplint/runtime";
 globalThis.abap = new runtime.ABAP();
-${this.buildImports(reg)}
+${this.buildImports(reg, useImport)}
 
 export async function initializeABAP() {\n`;
     ret += `  const sqlite = \`${dbSetup.schemas.sqlite}\`;\n`;
@@ -181,40 +181,41 @@ run().then(() => {
     return ret;
   }
 
-  private buildImports(reg: abaplint.IRegistry): string {
-// note: ES modules are hoised, so use the dynamic import()
-
+  private buildImports(reg: abaplint.IRegistry, useImport?: boolean): string {
+// note: ES modules are hoised, so use the dynamic import(), hmm, but why?
 // todo, some sorting might be required? eg. a class constructor using constant from interface?
-
 // temporary sorting: by filename
 
     const list: string[] = [];
 
+    const imp = (filename: string) => {
+      if (useImport === true) {
+        return `import "./${filename}.mjs";`;
+      } else {
+        return `await import("./${filename}.mjs");`;
+      }
+    };
+
     for (const obj of reg.getObjects()) {
-      if (obj instanceof abaplint.Objects.Table) {
-        list.push(`await import("./${this.escapeNamespace(obj.getName().toLowerCase())}.tabl.mjs");`);
-      } else if (obj instanceof abaplint.Objects.DataElement) {
-        list.push(`await import("./${this.escapeNamespace(obj.getName().toLowerCase())}.dtel.mjs");`);
-      } else if (obj instanceof abaplint.Objects.TableType) {
-        list.push(`await import("./${this.escapeNamespace(obj.getName().toLowerCase())}.ttyp.mjs");`);
+      if (obj instanceof abaplint.Objects.Table
+          || obj instanceof abaplint.Objects.DataElement
+          || obj instanceof abaplint.Objects.TableType) {
+        list.push(imp(`${this.escapeNamespace(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}`));
       }
     }
 
     for (const obj of reg.getObjects()) {
       if (obj instanceof abaplint.Objects.FunctionGroup) {
         for (const m of obj.getModules()) {
-          list.push(`await import("./${this.escapeNamespace(obj.getName().toLowerCase())}.fugr.${m.getName().toLowerCase()}.mjs");`);
+          list.push(imp(`${this.escapeNamespace(obj.getName().toLowerCase())}.fugr.${m.getName().toLowerCase()}`));
         }
-      } else if (obj instanceof abaplint.Objects.Class) {
-        list.push(`await import("./${this.escapeNamespace(obj.getName().toLowerCase())}.clas.mjs");`);
-      } else if (obj instanceof abaplint.Objects.Interface) {
-        list.push(`await import("./${this.escapeNamespace(obj.getName().toLowerCase())}.intf.mjs");`);
+      } else if (obj instanceof abaplint.Objects.Class
+          || obj instanceof abaplint.Objects.Interface) {
+        list.push(imp(`${this.escapeNamespace(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}`));
       }
     }
 
-    list.sort();
-
-    return list.join("\n");
+    return list.sort().join("\n");
   }
 
 }

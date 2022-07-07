@@ -44,6 +44,7 @@ export class Transpiler {
       unitTestScript: new UnitTest().unitTestScript(reg, this.options?.skip, this.options?.only),
       unitTestScriptOpen: new UnitTest().unitTestScriptOpen(reg, this.options?.skip, this.options?.only),
       initializationScript: new UnitTest().initializationScript(reg, dbSetup, this.options?.extraSetup),
+      initializationScript2: new UnitTest().initializationScript(reg, dbSetup, this.options?.extraSetup, true),
       databaseSetup: dbSetup,
       reg: reg,
     };
