@@ -110,6 +110,7 @@ async function run() {
     fs.writeFileSync(outputFolder + path.sep + "index_open.mjs", output.unitTestScriptOpen);
   }
   fs.writeFileSync(outputFolder + path.sep + "init.mjs", output.initializationScript);
+  fs.writeFileSync(outputFolder + path.sep + "init2.mjs", output.initializationScript2);
 }
 
 run().then(() => {

@@ -21,6 +21,7 @@ export interface IOutput {
   unitTestScript: string;
   unitTestScriptOpen: string;
   initializationScript: string;
+  initializationScript2: string;
   databaseSetup: DatabaseSetupResult;
 }
 
