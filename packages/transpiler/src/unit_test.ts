@@ -8,10 +8,17 @@ export class UnitTest {
 
   // todo, move this method somewhere else, its much more than just unit test relevant
   public initializationScript(reg: abaplint.IRegistry, dbSetup: DatabaseSetupResult, extraSetup?: string, useImport?: boolean) {
-    let ret = `/* eslint-disable import/newline-after-import */
+    let ret = "";
+    if (useImport === true) {
+      ret = `/* eslint-disable import/newline-after-import */
+import "./_top.mjs";\n`;
+    } else {
+      ret = `/* eslint-disable import/newline-after-import */
 import runtime from "@abaplint/runtime";
-globalThis.abap = new runtime.ABAP();
-${this.buildImports(reg, useImport)}
+globalThis.abap = new runtime.ABAP();\n`;
+    }
+
+    ret += `${this.buildImports(reg, useImport)}
 
 export async function initializeABAP() {\n`;
     ret += `  const sqlite = \`${dbSetup.schemas.sqlite}\`;\n`;
@@ -182,7 +189,7 @@ run().then(() => {
   }
 
   private buildImports(reg: abaplint.IRegistry, useImport?: boolean): string {
-// note: ES modules are hoised, so use the dynamic import(), hmm, but why?
+// note: ES modules are hoised, so use the dynamic import(), due to setting of globalThis.abap
 // todo, some sorting might be required? eg. a class constructor using constant from interface?
 // temporary sorting: by filename
 
