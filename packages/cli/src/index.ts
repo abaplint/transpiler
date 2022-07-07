@@ -110,7 +110,11 @@ async function run() {
     fs.writeFileSync(outputFolder + path.sep + "index_open.mjs", output.unitTestScriptOpen);
   }
   fs.writeFileSync(outputFolder + path.sep + "init.mjs", output.initializationScript);
-  fs.writeFileSync(outputFolder + path.sep + "init2.mjs", output.initializationScript2);
+
+// new static referenced imports,
+  fs.writeFileSync(outputFolder + path.sep + "_init.mjs", output.initializationScript2);
+  fs.writeFileSync(outputFolder + path.sep + "_top.mjs", `import runtime from "@abaplint/runtime";
+globalThis.abap = new runtime.ABAP();`);
 }
 
 run().then(() => {
