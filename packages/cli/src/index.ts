@@ -106,9 +106,11 @@ async function run() {
   console.log(output.objects.length + " objects written to disk");
 
   if (config.write_unit_tests === true) {
+    // breaking change? rename this output file,
     fs.writeFileSync(outputFolder + path.sep + "index.mjs", output.unitTestScript);
-    fs.writeFileSync(outputFolder + path.sep + "index_open.mjs", output.unitTestScriptOpen);
+    fs.writeFileSync(outputFolder + path.sep + "_unit_open.mjs", output.unitTestScriptOpen);
   }
+  // breaking change? rename this output file,
   fs.writeFileSync(outputFolder + path.sep + "init.mjs", output.initializationScript);
 
 // new static referenced imports,

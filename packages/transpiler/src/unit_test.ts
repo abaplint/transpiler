@@ -80,7 +80,7 @@ async function run() {
             ret += `  ls_input.get().class_name.set("${obj.getName()}");
   ls_input.get().testclass_name.set("${def.name.toUpperCase()}");
   ls_input.get().method_name.set("${m.name.toUpperCase()}");
-  abap.statements.append({source: ls_input, target: lt_input});`;
+  abap.statements.append({source: ls_input, target: lt_input});\n`;
           }
         }
       }
@@ -167,13 +167,13 @@ async function run() {
 
     ret += `// -------------------END-------------------
     console.log(abap.console.get());
-    fs.writeFileSync(__dirname + path.sep + "output.xml", unit.xUnitXML());
+    fs.writeFileSync(__dirname + path.sep + "_output.xml", unit.xUnitXML());
   } catch (e) {
     if (meth) {
       meth.fail();
     }
     console.log(abap.console.get());
-    fs.writeFileSync(__dirname + path.sep + "output.xml", unit.xUnitXML());
+    fs.writeFileSync(__dirname + path.sep + "_output.xml", unit.xUnitXML());
     throw e;
   }
 }
