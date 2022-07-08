@@ -205,4 +205,34 @@ WRITE ls_root-children.`;
     expect(abap.console.get()).to.equal("123");
   });
 
+  it("APPEND, TO TO, 1", async () => {
+    const code = `
+  DATA tab1 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA tab2 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DO 10 TIMES.
+    APPEND 2 TO tab1.
+  ENDDO.
+
+  APPEND LINES OF tab1 FROM 2 TO tab2.
+  ASSERT lines( tab2 ) = 9.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("APPEND, TO TO, 2", async () => {
+    const code = `
+  DATA tab1 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA tab2 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DO 10 TIMES.
+    APPEND 2 TO tab1.
+  ENDDO.
+
+  APPEND LINES OF tab1 FROM 1 TO 3 TO tab2.
+  ASSERT lines( tab2 ) = 3.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

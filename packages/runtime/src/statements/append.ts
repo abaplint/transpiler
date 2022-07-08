@@ -24,6 +24,7 @@ export function append(input: IAppendOptions) {
     let index = 1;
     for (const a of input.source.array()) {
       if (index < from || index > to) {
+        index++;
         continue;
       }
       input.target.append(a);
