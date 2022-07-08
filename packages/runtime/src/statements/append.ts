@@ -3,7 +3,7 @@ import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
 export interface IAppendOptions {
-  source: TableRowType,
+  source: TableRowType | FieldSymbol,
   target: Table | FieldSymbol | undefined,
   lines?: boolean,
   assigning?: FieldSymbol,
@@ -17,6 +17,10 @@ export function append(input: IAppendOptions) {
   }
   if (input.target === undefined) {
     throw "Field symbol not assigned";
+  }
+
+  if (input.source instanceof FieldSymbol) {
+    input.source = input.source.getPointer() as TableRowType;
   }
 
   if (input.lines === true && input.source instanceof Table) {

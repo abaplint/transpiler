@@ -290,4 +290,22 @@ ASSERT lines( <tab2> ) = 1.`;
     await f(abap);
   });
 
+  it("APPEND LINES, source field symbol", async () => {
+    const code = `
+  DATA tab1 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA tab2 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA row LIKE LINE OF tab2.
+  FIELD-SYMBOLS <tab1> LIKE tab1.
+  APPEND 1 TO tab1.
+  ASSIGN tab1 TO <tab1>.
+  APPEND LINES OF <tab1> TO tab2.
+  LOOP AT tab2 INTO row.
+    WRITE row.
+  ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });
