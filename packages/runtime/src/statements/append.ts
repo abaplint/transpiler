@@ -4,7 +4,7 @@ import {INumeric} from "../types/_numeric";
 
 export interface IAppendOptions {
   source: TableRowType,
-  target: Table,
+  target: Table | FieldSymbol | undefined,
   lines?: boolean,
   assigning?: FieldSymbol,
   from?: ICharacter | INumeric,
@@ -12,6 +12,13 @@ export interface IAppendOptions {
 }
 
 export function append(input: IAppendOptions) {
+  if (input.target instanceof FieldSymbol) {
+    input.target = input.target.getPointer() as Table | undefined;
+  }
+  if (input.target === undefined) {
+    throw "Field symbol not assigned";
+  }
+
   if (input.lines === true && input.source instanceof Table) {
     let from = 1;
     if (input.from) {
@@ -21,6 +28,7 @@ export function append(input: IAppendOptions) {
     if (input.to) {
       to = parseInt(input.to.get() + "", 10);
     }
+
     let index = 1;
     for (const a of input.source.array()) {
       if (index < from || index > to) {

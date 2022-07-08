@@ -235,4 +235,18 @@ WRITE ls_root-children.`;
     await f(abap);
   });
 
+  it("APPEND, TO field symbol target", async () => {
+    const code = `
+    DATA tab1 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+    DATA tab2 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+    FIELD-SYMBOLS <tab2> LIKE tab2.
+    APPEND 1 TO tab1.
+    ASSIGN tab2 TO <tab2>.
+    APPEND LINES OF tab1 TO <tab2>.
+    ASSERT lines( tab2 ) = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
