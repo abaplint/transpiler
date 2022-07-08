@@ -1038,4 +1038,26 @@ ENDCLASS.`;
     expect(js).to.contain("abap.Classes['CL_ABAP_CHAR_UTILITIES'].newline");
   });
 
+  it.only("local abstract class, no implementation", async () => {
+    const code = `
+CLASS lcl_zip DEFINITION ABSTRACT.
+  PUBLIC SECTION.
+    METHODS read ABSTRACT.
+ENDCLASS.
+
+CLASS lcl DEFINITION INHERITING FROM lcl_zip.
+  PUBLIC SECTION.
+    METHODS read REDEFINITION.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD read.
+  ENDMETHOD.
+ENDCLASS.`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
