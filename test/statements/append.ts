@@ -249,4 +249,63 @@ WRITE ls_root-children.`;
     await f(abap);
   });
 
+  it("APPEND, TO field symbol target, structured", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         foo TYPE i,
+       END OF ty.
+DATA ls TYPE ty.
+DATA tab1 TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA tab2 TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+FIELD-SYMBOLS <tab2> LIKE tab2.
+ls-foo = 5.
+APPEND ls TO tab1.
+ASSIGN tab2 TO <tab2>.
+APPEND LINES OF tab1 TO <tab2>.
+ASSERT lines( tab2 ) = 1.
+ASSERT lines( <tab2> ) = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("APPEND, TO field symbol target, structured, table typed", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         foo TYPE i,
+       END OF ty.
+TYPES tytab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA ls TYPE ty.
+DATA tab1 TYPE tytab.
+DATA tab2 TYPE tytab.
+FIELD-SYMBOLS <tab2> TYPE tytab.
+ls-foo = 5.
+APPEND ls TO tab1.
+ASSIGN tab2 TO <tab2>.
+APPEND LINES OF tab1 TO <tab2>.
+ASSERT lines( tab2 ) = 1.
+ASSERT lines( <tab2> ) = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("APPEND LINES, source field symbol", async () => {
+    const code = `
+  DATA tab1 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA tab2 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA row LIKE LINE OF tab2.
+  FIELD-SYMBOLS <tab1> LIKE tab1.
+  APPEND 1 TO tab1.
+  ASSIGN tab1 TO <tab1>.
+  APPEND LINES OF <tab1> TO tab2.
+  LOOP AT tab2 INTO row.
+    WRITE row.
+  ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });
