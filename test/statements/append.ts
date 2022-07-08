@@ -269,4 +269,25 @@ ASSERT lines( <tab2> ) = 1.`;
     await f(abap);
   });
 
+  it("APPEND, TO field symbol target, structured, table typed", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         foo TYPE i,
+       END OF ty.
+TYPES tytab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA ls TYPE ty.
+DATA tab1 TYPE tytab.
+DATA tab2 TYPE tytab.
+FIELD-SYMBOLS <tab2> TYPE tytab.
+ls-foo = 5.
+APPEND ls TO tab1.
+ASSIGN tab2 TO <tab2>.
+APPEND LINES OF tab1 TO <tab2>.
+ASSERT lines( tab2 ) = 1.
+ASSERT lines( <tab2> ) = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
