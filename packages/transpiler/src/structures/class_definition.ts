@@ -5,8 +5,31 @@ import {Chunk} from "../chunk";
 
 export class ClassDefinitionTranspiler implements IStructureTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StructureNode, _traversal: Traversal): Chunk {
-    return new Chunk("");
+  public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): Chunk {
+    const className = node.findFirstExpression(abaplint.Expressions.ClassName)?.concatTokens().toUpperCase();
+
+    let found = false;
+    if (className !== undefined) {
+      for (const a of traversal.getCurrentObject().getABAPFiles()) {
+        if (a.getInfo().getClassImplementationByName(className) !== undefined) {
+          found = true;
+        }
+      }
+    }
+
+    if (found) {
+      return new Chunk("");
+    } else {
+// its an abstract class with only abstract methods
+      return new Chunk(`
+class ${className?.toLowerCase()} {
+  async constructor_() {
+    this.me = new abap.types.ABAPObject();
+    this.me.set(this);
+    return this;
+  }
+}`);
+    }
   }
 
 }
