@@ -1099,4 +1099,14 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("js keyword, protected", async () => {
+    const code = `
+DATA protected TYPE string.
+CLEAR protected.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

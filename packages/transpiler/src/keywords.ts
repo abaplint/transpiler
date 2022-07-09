@@ -44,7 +44,7 @@ export class Keywords {
       "goto",	"if", "implements", "import",
       "in",	"instanceof", "interface",
       "let",	"long", "native", "new",
-      "null",	"package", "private", "protected",
+      "null",	"package", "private", // "protected",
       "public",	"return", "short", "static",
       "switch", "synchronized", "this",
       "throw",	"throws", "transient", "true",
