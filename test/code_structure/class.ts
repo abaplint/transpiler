@@ -1059,4 +1059,23 @@ ENDCLASS.`;
     await f(abap);
   });
 
+  it("escaped preferred parameter, check valid JS syntax", async () => {
+    const code = `
+INTERFACE zif_abaplint_code_inspector.
+  METHODS run
+    IMPORTING
+      in1 TYPE string optional
+      in2 type string optional
+      PREFERRED PARAMETER !in1.
+endinterface.
+
+FORM bar.
+  DATA li_code_inspector TYPE REF TO zif_abaplint_code_inspector.
+  li_code_inspector->run( |sdf| ).
+ENDFORM.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
