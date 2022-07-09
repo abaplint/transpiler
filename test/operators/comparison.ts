@@ -745,4 +745,24 @@ ENDIF.`;
     expect(abap.console.get()).to.equal(`yes`);
   });
 
+  it("IS NOT SUPPLIED", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS foo IMPORTING bar TYPE string OPTIONAL.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD foo.
+    ASSERT bar IS NOT SUPPLIED.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>foo( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
