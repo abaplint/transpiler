@@ -1038,7 +1038,7 @@ ENDCLASS.`;
     expect(js).to.contain("abap.Classes['CL_ABAP_CHAR_UTILITIES'].newline");
   });
 
-  it.only("local abstract class, no implementation", async () => {
+  it("local abstract class, no implementation", async () => {
     const code = `
 CLASS lcl_zip DEFINITION ABSTRACT.
   PUBLIC SECTION.
@@ -1055,7 +1055,6 @@ CLASS lcl IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
