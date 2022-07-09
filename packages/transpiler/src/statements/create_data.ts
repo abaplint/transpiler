@@ -40,6 +40,12 @@ export class CreateDataTranspiler implements IStatementTranspiler {
       options.push(`"likeLineOf": ` + so.getCode());
     }
 
+    const handle = node.findExpressionAfterToken("HANDLE");
+    if (handle) {
+      const so = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Source));
+      options.push(`"typeHandle": ` + so.getCode());
+    }
+
     let add = "";
     if (options.length > 0) {
       add = ",{" + options.join(",") + "}";

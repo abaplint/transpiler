@@ -9,6 +9,7 @@ export interface ICreateDataOptions {
   table?: boolean,
   name?: string,
   type?: PointerType,
+  typeHandle?: ABAPObject,
   likeLineOf?: FieldSymbol | Table,
 }
 

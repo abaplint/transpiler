@@ -254,6 +254,8 @@ await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({seconds: constant_10,cond: abap
       js: `abap.statements.createData(dref,{"name": mv_tab.get(),"table": true});`},
     {abap: `CREATE DATA ref LIKE LINE OF <tab>.`,
       js: `abap.statements.createData(ref,{"likeLineOf": fs_tab_});`},
+    {abap: `CREATE DATA abc1 TYPE HANDLE abc2.`,
+      js: `abap.statements.createData(abc1,{"typeHandle": abc2});`},
 
     {abap: `ASSERT <fs> IS ASSIGNED.`,
       js: `abap.statements.assert(abap.compare.assigned(fs_fs_));`},
