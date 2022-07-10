@@ -209,4 +209,29 @@ WRITE lv_out.`;
     await f(abap);
   });
 
+  it("ASSIGN COMPONENT of non STRUCTURE, should set subrc", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    DATA bar TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+FORM run.
+  DATA ref TYPE REF TO lcl.
+  FIELD-SYMBOLS <fs> TYPE any.
+  CREATE OBJECT ref.
+  ASSIGN COMPONENT 'BAR' OF STRUCTURE ref TO <fs>.
+  ASSERT sy-subrc = 4.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

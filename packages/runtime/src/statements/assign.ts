@@ -17,7 +17,9 @@ export function assign(input: IAssignInput) {
       assign(input);
       return;
     } else if (!(input.source instanceof Structure)) {
-      throw "ASSIGN, not a structure"; // todo, this should be a runtime error?
+      // @ts-ignore
+      abap.builtin.sy.get().subrc.set(4);
+      return;
     }
 
     let component = input.component;
