@@ -234,7 +234,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.skip("ASSIGN dynamic, class attribute", async () => {
+  it("ASSIGN dynamic, class attribute", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
@@ -258,7 +258,6 @@ ENDFORM.
 START-OF-SELECTION.
   PERFORM run.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0");

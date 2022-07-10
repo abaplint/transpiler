@@ -1,20 +1,25 @@
-import {DataReference, FieldSymbol, Structure} from "../types";
+import {ABAPObject, DataReference, FieldSymbol, Structure} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
 export interface IAssignInput {
   source?: INumeric | ICharacter | Structure | DataReference,
   target: FieldSymbol,
-  dynamicText?: string | ICharacter,
+  dynamicText?: string,
   dynamicSource?: ICharacter,
   casting?: boolean,
   component?: string | ICharacter,
 }
 
 export function assign(input: IAssignInput) {
-//  console.dir(input);
+
   if (input.dynamicText) {
-    // todo, check for "->"'s in input text
+    if (input.dynamicText.includes("->") && input.dynamicSource instanceof ABAPObject) {
+      const split = input.dynamicText.split("->");
+      // @ts-ignore
+      input.dynamicSource = input.dynamicSource.get()[split[1].toLowerCase() as any];
+    }
+
     if (input.dynamicSource) {
       input.target.assign(input.dynamicSource);
       // @ts-ignore
