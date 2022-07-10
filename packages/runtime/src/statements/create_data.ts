@@ -1,5 +1,5 @@
 import {clone} from "../clone";
-import {ABAPObject, DataReference, FieldSymbol, Structure, Table} from "../types";
+import {ABAPObject, DataReference, Date, FieldSymbol, Float, Integer, Structure, Table, Time} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -9,6 +9,7 @@ export interface ICreateDataOptions {
   table?: boolean,
   name?: string,
   type?: PointerType,
+  typeHandle?: ABAPObject,
   likeLineOf?: FieldSymbol | Table,
 }
 
@@ -23,6 +24,23 @@ export function createData(target: DataReference, options?: ICreateDataOptions) 
     }
     // @ts-ignore
     target.assign(new abap.types.Table(abap.DDIC[options.name].type));
+  } else if (options?.typeHandle) {
+    switch (options.typeHandle.get().type_kind.get()) {
+      case "F":
+        target.assign(new Float());
+        break;
+      case "I":
+        target.assign(new Integer());
+        break;
+      case "D":
+        target.assign(new Date());
+        break;
+      case "T":
+        target.assign(new Time());
+        break;
+      default:
+        throw "CREATE DATA, unknown handle type";
+    }
   } else if (options?.name) {
     // @ts-ignore
     if (abap.DDIC[options.name] === undefined) {

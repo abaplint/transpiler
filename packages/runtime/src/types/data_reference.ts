@@ -4,8 +4,9 @@ import {ABAPObject} from "./abap_object";
 import {Table} from "./table";
 import {String} from "./string";
 import {Structure} from "./structure";
+import {Float} from "./float";
 
-type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Structure;
+type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Structure | Float;
 
 export class DataReference  {
   private pointer: PointerType;
