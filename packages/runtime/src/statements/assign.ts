@@ -3,15 +3,26 @@ import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
 export interface IAssignInput {
-  source: INumeric | ICharacter | Structure|DataReference,
+  source?: INumeric | ICharacter | Structure | DataReference,
   target: FieldSymbol,
+  dynamicText?: string | ICharacter,
+  dynamicSource?: ICharacter,
   casting?: boolean,
   component?: string | ICharacter,
 }
 
 export function assign(input: IAssignInput) {
 
-  if (input.component) {
+  if (input.dynamicText) {
+    if (input.dynamicSource) {
+      input.target.assign(input.dynamicSource);
+      // @ts-ignore
+      abap.builtin.sy.get().subrc.set(0);
+    } else {
+      // @ts-ignore
+      abap.builtin.sy.get().subrc.set(4);
+    }
+  } else if (input.component) {
     if (input.source instanceof FieldSymbol || input.source instanceof DataReference) {
       input.source = input.source.getPointer() as any;
       assign(input);

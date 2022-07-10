@@ -1,6 +1,6 @@
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
-import {FieldSymbolTranspiler, SourceTranspiler} from "../expressions";
+import {FieldChainTranspiler, FieldSymbolTranspiler, SourceTranspiler} from "../expressions";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 
@@ -19,7 +19,21 @@ export class AssignTranspiler implements IStatementTranspiler {
     }
 
     options.push("target: " + fs);
-    options.push("source: " + sources.pop());
+    if (sources.length !== 0) {
+      options.push("source: " + sources.pop());
+    } else {
+      let dynamic = node.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.ConstantString);
+      if (dynamic) {
+        options.push(`dynamicText: ` + dynamic.getFirstToken().getStr());
+        const s = dynamic.getFirstToken().getStr().toLowerCase().match(/\w+/);
+        options.push(`dynamicSource: (() => {try { return ${s}; } catch {}})()`);
+      } else {
+        dynamic = node.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.FieldChain);
+        if (dynamic) {
+          options.push(`dynamicText: ` + new FieldChainTranspiler(true).transpile(dynamic, traversal).getCode());
+        }
+      }
+    }
 
     if (concat.endsWith(" CASTING.")) {
       options.push("casting: true");
