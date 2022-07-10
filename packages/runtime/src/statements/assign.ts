@@ -12,7 +12,7 @@ export interface IAssignInput {
 }
 
 export function assign(input: IAssignInput) {
-  console.dir(input);
+//  console.dir(input);
   if (input.dynamicText) {
     // todo, check for "->"'s in input text
     if (input.dynamicSource) {
