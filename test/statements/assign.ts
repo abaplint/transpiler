@@ -274,7 +274,7 @@ ASSERT <fs> IS ASSIGNED.`;
     await f(abap);
   });
 
-  it.skip("ASSIGN dynamic, ok, text based", async () => {
+  it("ASSIGN dynamic, ok, text based", async () => {
     const code = `
 DATA foo TYPE i.
 DATA text TYPE string.

@@ -30,7 +30,9 @@ export class AssignTranspiler implements IStatementTranspiler {
       } else {
         dynamic = node.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.FieldChain);
         if (dynamic) {
-          options.push(`dynamicText: ` + new FieldChainTranspiler(true).transpile(dynamic, traversal).getCode());
+          const code = new FieldChainTranspiler(true).transpile(dynamic, traversal).getCode();
+          options.push(`dynamicText: ` + code);
+          options.push(`dynamicSource: (() => {try { return eval(${code}.toLowerCase().match(/\\w+/)[0]); } catch {}})()`);
         }
       }
     }
