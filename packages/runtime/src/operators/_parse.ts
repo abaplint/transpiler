@@ -14,7 +14,15 @@ export function parse(val: INumeric | ICharacter | string | number | Float | Int
     if (val.get() === "") {
       return 0;
     }
-    return parseInt(val.get(), 16);
+    let num = parseInt(val.get(), 16);
+// handle two complement,
+    if (val instanceof Hex && val.getLength() >= 4) {
+      const maxVal = Math.pow(2, val.get().length / 2 * 8);
+      if (num > maxVal / 2 - 1) {
+        num = num - maxVal;
+      }
+    }
+    return num;
   } else if (val instanceof Time || val instanceof Date) {
     return val.getNumeric();
   } else {

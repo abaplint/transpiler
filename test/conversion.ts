@@ -20,11 +20,26 @@ describe("Value conversions", () => {
   DATA integer TYPE i.
   hex = 'AA'.
   integer = hex.
-  ASSERT integer = 170.`;
+  WRITE integer.`;
 
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+    expect(abap.console.get()).to.equal("170");
+  });
+
+  it("hex value conversion, longer", async () => {
+    const code = `
+    DATA hex TYPE x LENGTH 4.
+    DATA integer TYPE i.
+    hex = 'AAAAAAAA'.
+    integer = hex.
+    WRITE integer.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("-1431655766");
   });
 
   it("character to string value conversion", async () => {

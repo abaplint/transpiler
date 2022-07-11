@@ -1,4 +1,3 @@
-import {minus} from "../operators";
 import {Float} from "./float";
 import {Integer} from "./integer";
 import {XString} from "./xstring";
@@ -19,25 +18,20 @@ export class Hex implements ICharacter {
       this.value = value;
     } else if (typeof value === "number") {
       if (value < 0) {
-        this.value = "F".repeat(this.length * 2);
-        this.set(minus(this, Math.abs(value) - 1));
-        return;
+        const maxVal = Math.pow(2, this.length * 8);
+        this.value = Math.round(value + maxVal).toString(16);
+      } else {
+        this.value = Math.round(value).toString(16);
       }
-      this.value = Math.round(value).toString(16);
       this.value = this.value.padStart(this.length * 2, "0");
     } else {
       let v = value.get();
       if (value instanceof Float) {
         v = value.getRaw();
-        if (v < 0) {
-          this.value = "F".repeat(this.length * 2);
-          this.set(minus(this, Math.abs(v) - 1));
-          return;
-        }
+        this.set(v);
       }
       if (typeof v === "number") {
-        this.value = Math.round(v).toString(16);
-        this.value = this.value.padStart(this.length * 2, "0");
+        this.set(v);
       } else {
         this.value = v;
         if (this.value.match(/^(?![A-F0-9])/)) {

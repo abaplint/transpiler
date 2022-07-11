@@ -30,7 +30,15 @@ export class Integer implements INumeric {
     } else if (value instanceof Float) {
       this.set(Math.round(value.getRaw()));
     } else if (value instanceof Hex || value instanceof XString) {
-      this.set(parseInt(value.get(), 16));
+      let num = parseInt(value.get(), 16);
+// handle two complement,
+      if (value instanceof Hex && value.getLength() >= 4) {
+        const maxVal = Math.pow(2, value.get().length / 2 * 8);
+        if (num > maxVal / 2 - 1) {
+          num = num - maxVal;
+        }
+      }
+      this.set(num);
     } else {
       this.set(value.get());
     }

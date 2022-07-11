@@ -138,4 +138,105 @@ describe("Running Examples - Hex type", () => {
     await f(abap);
   });
 
+  it("Hex, to integer, two complement", async () => {
+    const code = `
+    DATA crc TYPE x LENGTH 4.
+    DATA int TYPE i.
+    crc = '8F001100'.
+    int = crc.
+    WRITE int.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`-1895821056`);
+  });
+
+  it("Hex, to integer, two complement, negative value, 1", async () => {
+    const code = `
+  DATA hex TYPE x LENGTH 4.
+  hex = -1.
+  WRITE hex.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`FFFFFFFF`);
+  });
+
+  it("Hex, to integer, two complement, negative value, 2", async () => {
+    const code = `
+  DATA hex TYPE x LENGTH 4.
+  hex = -2.
+  WRITE hex.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`FFFFFFFE`);
+  });
+
+  it("Hex, DIV1", async () => {
+    const code = `
+    DATA crc TYPE x LENGTH 4.
+    crc = 'FFFFFFFF'.
+    crc = crc DIV 256.
+    ASSERT crc = 'FFFFFFFF'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it.skip("Hex, DIV2, length = 8 should operate on length 4", async () => {
+    const code = `
+    DATA crc TYPE x LENGTH 8.
+    crc = 'FFFFFFFFFFFFFFFA'.
+    crc = crc DIV 256.
+    ASSERT crc = '00000000FFFFFFFF'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("Hex, DIV3", async () => {
+    const code = `
+    DATA crc TYPE x LENGTH 4.
+    crc = 'EFFFFFFF'.
+    crc = crc DIV 256.
+    ASSERT crc = 'FFEFFFFF'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("Hex, DIV4", async () => {
+    const code = `
+    DATA crc TYPE x LENGTH 4.
+    crc = 'FF001100'.
+    crc = crc DIV 256.
+    ASSERT crc = 'FFFF0011'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("Hex, DIV5", async () => {
+    const code = `
+    DATA crc TYPE x LENGTH 4.
+    crc = '8F001100'.
+    crc = crc DIV 256.
+    ASSERT crc = 'FF8F0011'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("Hex, DIV6", async () => {
+    const code = `
+    DATA crc TYPE x LENGTH 4.
+    crc = '7F001100'.
+    crc = crc DIV 256.
+    ASSERT crc = '007F0011'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
