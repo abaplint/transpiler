@@ -79,7 +79,8 @@ export class FieldSymbol  {
   }
 
   public set(value: any) {
-    return this.pointer?.set(value);
+    this.pointer?.set(value);
+    return this;
   }
 
   public getOffset(input: {offset: number, length: number}) {
