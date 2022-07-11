@@ -12,6 +12,7 @@ export interface IDescribeOptions {
 }
 
 export function describe(input: IDescribeOptions) {
+//  console.dir(input);
   if (input.type) {
     if (input.field instanceof FieldSymbol) {
       describe({field: input.field.getPointer(), type: input.type, length: input.length, mode: input.mode});

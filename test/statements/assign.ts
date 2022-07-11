@@ -300,4 +300,23 @@ ASSERT <fs> IS NOT ASSIGNED.`;
     await f(abap);
   });
 
+  it("ASSIGN another test", async () => {
+    const code = `
+DATA: BEGIN OF stru,
+        bar TYPE i,
+      END OF stru.
+DATA lv TYPE c LENGTH 1.
+FIELD-SYMBOLS <stru> TYPE any.
+FIELD-SYMBOLS <field> TYPE simple.
+ASSIGN stru TO <stru>.
+ASSIGN COMPONENT 'BAR' OF STRUCTURE <stru> TO <field>.
+ASSERT sy-subrc = 0.
+DESCRIBE FIELD <field> TYPE lv.
+WRITE lv.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("I");
+  });
+
 });
