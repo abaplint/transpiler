@@ -14,10 +14,20 @@ export interface IAssignInput {
 export function assign(input: IAssignInput) {
 
   if (input.dynamicText) {
-    if (input.dynamicText.includes("->") && input.dynamicSource instanceof ABAPObject) {
-      const split = input.dynamicText.split("->");
-      // @ts-ignore
-      input.dynamicSource = input.dynamicSource.get()[split[1].toLowerCase() as any];
+    if (input.dynamicSource instanceof FieldSymbol) {
+      input.dynamicSource = input.dynamicSource.getPointer();
+    }
+
+    if (input.dynamicText.includes("->")) {
+      if (input.dynamicSource instanceof ABAPObject) {
+        const split = input.dynamicText.split("->");
+        // @ts-ignore
+        input.dynamicSource = input.dynamicSource.get()[split[1].toLowerCase() as any];
+      } else {
+        // @ts-ignore
+        abap.builtin.sy.get().subrc.set(4);
+        return;
+      }
     }
 
     if (input.dynamicSource) {

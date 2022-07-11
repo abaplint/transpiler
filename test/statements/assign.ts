@@ -319,4 +319,52 @@ WRITE lv.`;
     expect(abap.console.get()).to.equal("I");
   });
 
+  it("recursion and field symbols", async () => {
+    const code = `
+CLASS lcl_font DEFINITION.
+  PUBLIC SECTION.
+    DATA bold TYPE c LENGTH 1.
+ENDCLASS.
+
+CLASS lcl_font IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lcl_style DEFINITION.
+  PUBLIC SECTION.
+    DATA font TYPE REF TO lcl_font.
+    METHODS constructor.
+    CLASS-METHODS run1.
+    CLASS-METHODS run2 IMPORTING foo TYPE any.
+ENDCLASS.
+
+CLASS lcl_style IMPLEMENTATION.
+  METHOD constructor.
+    CREATE OBJECT font.
+  ENDMETHOD.
+
+  METHOD run2.
+    FIELD-SYMBOLS <attribute> TYPE any.
+    ASSIGN ('foo->bold') TO <attribute>.
+    ASSERT sy-subrc = 0.
+    <attribute> = abap_true.
+  ENDMETHOD.
+
+  METHOD run1.
+    DATA style TYPE REF TO lcl_style.
+    FIELD-SYMBOLS <attribute> TYPE any.
+    CREATE OBJECT style.
+    ASSIGN ('style->font') TO <attribute>.
+    run2( <attribute> ).
+    WRITE style->font->bold.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl_style=>run1( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("X");
+  });
+
 });
