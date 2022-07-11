@@ -29,11 +29,7 @@ export class FieldOffsetTranspiler implements IExpressionTranspiler {
         }
       }
     }
-    if (/^\d+$/.test(ret)) {
-      return new Chunk(ret);
-    } else {
-      return new Chunk(ret + ".get()");
-    }
+    return new Chunk(ret);
   }
 
 }

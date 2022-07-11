@@ -128,7 +128,7 @@ describe("Single statements", () => {
     {abap: "foo(1) = 'a'.",   js: "new abap.OffsetLength(foo, {length: 1}).set(new abap.types.Character({length: 1}).set('a'));",            skip: false},
     {abap: "foo+1 = 'a'.",    js: "new abap.OffsetLength(foo, {offset: 1}).set(new abap.types.Character({length: 1}).set('a'));",            skip: false},
     {abap: "foo+1(1) = 'a'.", js: "new abap.OffsetLength(foo, {offset: 1, length: 1}).set(new abap.types.Character({length: 1}).set('a'));", skip: false},
-    {abap: "foo(bar) = 'a'.", js: "new abap.OffsetLength(foo, {length: bar.get()}).set(new abap.types.Character({length: 1}).set('a'));",    skip: false},
+    {abap: "foo(bar) = 'a'.", js: "new abap.OffsetLength(foo, {length: bar}).set(new abap.types.Character({length: 1}).set('a'));",    skip: false},
     {abap: "IF iv_cd = '' OR iv_cd = '.'.\nENDIF.", js: "if (abap.compare.eq(iv_cd, new abap.types.Character({length: 0}).set('')) || abap.compare.eq(iv_cd, new abap.types.Character({length: 1}).set('.'))) {\n}", skip: false},
     {abap: "TRY. ENDTRY.", js: `try {\n}`,    skip: false, only: false},
     {abap: "MESSAGE e058(00) WITH 'Value_1' 'Value_2' 'Value_3' 'Value_4' INTO lv_dummy.",

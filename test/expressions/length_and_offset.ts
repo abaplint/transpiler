@@ -394,4 +394,22 @@ describe("Running expressions - Length and offset", () => {
     await f(abap);
   });
 
+  it("hex based offset", async () => {
+    const code = `
+    DATA xstr TYPE xstring.
+    DATA hex100 TYPE x LENGTH 100.
+    DATA hex TYPE x LENGTH 1.
+    hex = '11'.
+    DO 100 TIMES.
+      CONCATENATE xstr hex INTO xstr IN BYTE MODE.
+    ENDDO.
+    hex100 = xstr.
+    hex100+10(1) = '22'.
+    hex = '0A'.
+    ASSERT hex100+hex(1) = '22'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
