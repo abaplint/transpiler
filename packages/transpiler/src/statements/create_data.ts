@@ -38,6 +38,9 @@ export class CreateDataTranspiler implements IStatementTranspiler {
     if (concat.includes(" LIKE LINE OF ")) {
       const so = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Source));
       options.push(`"likeLineOf": ` + so.getCode());
+    } else if (concat.includes(" LIKE ")) {
+      const so = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Source));
+      options.push(`"like": ` + so.getCode());
     }
 
     const handle = node.findExpressionAfterToken("HANDLE");
