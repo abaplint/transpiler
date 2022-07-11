@@ -10,7 +10,7 @@ export class UTCLong implements ICharacter {
   }
 
   public getOffset(_input: { offset?: number | undefined; length?: number | undefined; }): ICharacter {
-    throw new Error("Method not implemented.");
+    throw new Error("Method not implemented, getOffset(), utcLong");
   }
 
   public set(_value: INumeric | ICharacter | Hex | string | number) {

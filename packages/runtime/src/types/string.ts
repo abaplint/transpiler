@@ -1,6 +1,9 @@
+import {parse} from "../operators/_parse";
 import {Character} from "./character";
+import {Hex} from "./hex";
 import {Integer} from "./integer";
 import {ICharacter} from "./_character";
+import {INumeric} from "./_numeric";
 
 export class String implements ICharacter {
   private value: string;
@@ -36,7 +39,13 @@ export class String implements ICharacter {
     return this.value;
   }
 
-  public getOffset(input: { offset: number, length: number }) {
+  public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}) {
+    if (input?.offset) {
+      input.offset = parse(input.offset);
+    }
+    if (input?.length) {
+      input.length = parse(input.length);
+    }
     if ((input.offset && input.offset > this.value.length)
         || (input.offset && input.offset < 0)
         || (input.length && input.length < 0)) {
@@ -51,9 +60,11 @@ export class String implements ICharacter {
 
     let ret = this.value;
     if (input?.offset) {
+      // @ts-ignore
       ret = ret.substr(input.offset);
     }
     if (input?.length !== undefined) {
+      // @ts-ignore
       ret = ret.substr(0, input.length);
     }
     const r = new String();

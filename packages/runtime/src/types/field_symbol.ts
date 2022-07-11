@@ -5,6 +5,7 @@ import {Table} from "./table";
 import {String} from "./string";
 import {Structure} from "./structure";
 import {Hex} from "./hex";
+import {parse} from "../operators/_parse";
 
 type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Structure;
 
@@ -83,7 +84,13 @@ export class FieldSymbol  {
     return this;
   }
 
-  public getOffset(input: {offset: number, length: number}) {
+  public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}) {
+    if (input?.offset) {
+      input.offset = parse(input.offset);
+    }
+    if (input?.length) {
+      input.length = parse(input.length);
+    }
     // Assuming we're interested in Strings here, for now...
     let ret = this.get();
     if (input?.offset) {

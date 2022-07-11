@@ -1,3 +1,5 @@
+import {parse} from "../operators/_parse";
+import {Hex} from "./hex";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 
@@ -33,12 +35,20 @@ export class XString implements ICharacter {
     return this.value;
   }
 
-  public getOffset(input: {offset: number, length: number}) {
+  public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}) {
+    if (input?.offset) {
+      input.offset = parse(input.offset);
+    }
+    if (input?.length) {
+      input.length = parse(input.length);
+    }
     let ret = this.value;
     if (input?.offset) {
+      // @ts-ignore
       ret = ret.substr(input.offset * 2);
     }
     if (input?.length !== undefined) {
+      // @ts-ignore
       ret = ret.substr(0, input.length * 2);
     }
     const r = new XString();
