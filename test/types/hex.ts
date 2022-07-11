@@ -119,4 +119,23 @@ describe("Running Examples - Hex type", () => {
     await f(abap);
   });
 
+  it("Hex, assert initial", async () => {
+    const code = `
+    DATA foo TYPE x LENGTH 16.
+    ASSERT foo IS INITIAL.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("Hex, assert not initial", async () => {
+    const code = `
+    DATA foo TYPE x LENGTH 16.
+    foo = 1.
+    ASSERT foo IS NOT INITIAL.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

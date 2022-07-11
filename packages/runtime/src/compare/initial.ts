@@ -1,4 +1,4 @@
-import {ABAPObject, DataReference, Date, Numc, Structure, Table, Time} from "../types";
+import {ABAPObject, DataReference, Date, Hex, Numc, Structure, Table, Time} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -11,6 +11,8 @@ export function initial(val: ICharacter | INumeric | string | number | Structure
   } else if (val instanceof Date) {
     return val.get() === "00000000";
   } else if (val instanceof Numc) {
+    return val.get().match(/^0+$/) !== null;
+  } else if (val instanceof Hex) {
     return val.get().match(/^0+$/) !== null;
   } else if (val instanceof Time) {
     return val.get() === "000000";
