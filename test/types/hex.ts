@@ -239,4 +239,14 @@ describe("Running Examples - Hex type", () => {
     await f(abap);
   });
 
+  it("Hex, minus one, length 1", async () => {
+    const code = `
+    DATA crc TYPE x LENGTH 1.
+    crc = -1.
+    WRITE crc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`FF`);
+  });
 });
