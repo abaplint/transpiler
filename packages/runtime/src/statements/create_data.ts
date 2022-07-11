@@ -11,6 +11,7 @@ export interface ICreateDataOptions {
   type?: PointerType,
   typeHandle?: ABAPObject,
   likeLineOf?: FieldSymbol | Table,
+  like?: any,
 }
 
 export function createData(target: DataReference, options?: ICreateDataOptions) {
@@ -61,6 +62,11 @@ export function createData(target: DataReference, options?: ICreateDataOptions) 
       options.likeLineOf = options.likeLineOf.getPointer() as Table;
     }
     target.assign(clone(options.likeLineOf.getRowType()));
+  } else if (options?.like) {
+    if (options.like instanceof FieldSymbol) {
+      options.like = options.like.getPointer();
+    }
+    target.assign(clone(options.like));
   } else {
     target.assign(clone(target.getType()));
   }

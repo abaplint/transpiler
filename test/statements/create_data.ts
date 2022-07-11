@@ -73,4 +73,20 @@ WRITE / lines( tab ).`;
     expect(abap.console.get()).to.equal("1\n1");
   });
 
+  it("CREATE DATA, LIKE", async () => {
+    const code = `
+DATA ip_value TYPE t.
+DATA lo_value TYPE REF TO data.
+FIELD-SYMBOLS <fs_value> TYPE simple.
+ip_value = '115555'.
+CREATE DATA lo_value LIKE ip_value.
+ASSIGN lo_value->* TO <fs_value>.
+<fs_value> = ip_value.
+WRITE <fs_value>.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("115555");
+  });
+
 });
