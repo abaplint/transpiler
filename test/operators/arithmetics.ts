@@ -268,4 +268,16 @@ WRITE result.`;
     expect(abap.console.get()).to.equal("6553");
   });
 
+  it("DIV, short hex, length 1", async () => {
+    const code = `
+    DATA crc TYPE x LENGTH 1.
+    crc = -1.
+    crc = crc DIV 2.
+    WRITE crc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("7F");
+  });
+
 });
