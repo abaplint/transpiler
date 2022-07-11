@@ -209,4 +209,95 @@ WRITE lv_out.`;
     await f(abap);
   });
 
+  it("ASSIGN COMPONENT of non STRUCTURE, should set subrc", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    DATA bar TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+FORM run.
+  DATA ref TYPE REF TO lcl.
+  FIELD-SYMBOLS <fs> TYPE any.
+  CREATE OBJECT ref.
+  ASSIGN COMPONENT 'BAR' OF STRUCTURE ref TO <fs>.
+  ASSERT sy-subrc = 4.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("ASSIGN dynamic, class attribute", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    DATA bar TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+FORM run.
+  DATA ref TYPE REF TO lcl.
+  DATA attribute_name TYPE string.
+  FIELD-SYMBOLS <fs> TYPE any.
+  CREATE OBJECT ref.
+  CONCATENATE 'ref->' 'bar' INTO attribute_name.
+  ASSIGN (attribute_name) TO <fs>.
+  ASSERT sy-subrc = 0.
+  WRITE <fs>.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
+  it("ASSIGN dynamic, ok", async () => {
+    const code = `
+DATA foo TYPE i.
+FIELD-SYMBOLS <fs> TYPE any.
+ASSIGN ('FOO') TO <fs>.
+ASSERT sy-subrc = 0.
+ASSERT <fs> IS ASSIGNED.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("ASSIGN dynamic, ok, text based", async () => {
+    const code = `
+DATA foo TYPE i.
+DATA text TYPE string.
+FIELD-SYMBOLS <fs> TYPE any.
+text = 'FOO'.
+ASSIGN (text) TO <fs>.
+ASSERT sy-subrc = 0.
+ASSERT <fs> IS ASSIGNED.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("ASSIGN dynamic, set subrc", async () => {
+    const code = `
+FIELD-SYMBOLS <fs> TYPE any.
+ASSIGN ('SDFDSFS') TO <fs>.
+ASSERT sy-subrc = 4.
+ASSERT <fs> IS NOT ASSIGNED.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
