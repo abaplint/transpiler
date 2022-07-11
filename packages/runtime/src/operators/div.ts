@@ -4,5 +4,8 @@ import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
 
 export function div(left: INumeric | ICharacter | string | number, right: INumeric | ICharacter | string | number) {
-  return new Integer().set(Math.floor(parse(left) / parse(right)));
+  const l = parse(left);
+  const r = parse(right);
+  const ret = new Integer().set(Math.floor(l / r));
+  return ret;
 }
