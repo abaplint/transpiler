@@ -257,4 +257,21 @@ ASSERT sy-subrc = 8.`;
     await f(abap);
   });
 
+  it("nested structure", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         BEGIN OF sub,
+           foo TYPE i,
+         END OF sub,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+APPEND INITIAL LINE TO tab.
+READ TABLE tab WITH KEY sub-foo = 2 TRANSPORTING NO FIELDS.
+WRITE sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4");
+  });
+
 });

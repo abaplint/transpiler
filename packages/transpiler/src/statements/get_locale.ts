@@ -5,8 +5,9 @@ import {Chunk} from "../chunk";
 
 export class GetLocaleTranspiler implements IStatementTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    return new Chunk(`throw new Error("GetLocale, transpiler todo");`);
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
+    const t = traversal.traverse(node.findFirstExpression(abaplint.Expressions.Target));
+    return new Chunk(`abap.statements.getLocale(${t.getCode()});`);
   }
 
 }

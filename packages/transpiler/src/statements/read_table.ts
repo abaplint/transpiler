@@ -51,12 +51,13 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       const conds: string[] = [];
       for (let i = 0; i < components.length; i++) {
         const s = traversal.traverse(sources[i]).getCode();
+        const field = components[i].concatTokens().toLowerCase().replace("-", ".get().");
         if (s.includes("await")) {
           const id = UniqueIdentifier.get();
           prefix += "const " + id + " = " + s + ";\n";
-          conds.push("abap.compare.eq(i." + components[i].concatTokens().toLowerCase() + ", " + id + ")");
+          conds.push("abap.compare.eq(i." + field + ", " + id + ")");
         } else {
-          conds.push("abap.compare.eq(i." + components[i].concatTokens().toLowerCase() + ", " + s + ")");
+          conds.push("abap.compare.eq(i." + field + ", " + s + ")");
         }
       }
       extra.push("withKey: (i) => {return " + conds.join(" && ") + ";}");
