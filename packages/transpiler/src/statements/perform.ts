@@ -8,7 +8,7 @@ export class PerformTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
     const formName = node.findDirectExpression(abaplint.Expressions.FormName);
     if (formName === undefined) {
-      throw new Error("PerformTranspiler, FormName not found");
+      throw new Error("PerformTranspiler, FormName not found: " + node.concatTokens());
     }
 
     // todo, parameters
