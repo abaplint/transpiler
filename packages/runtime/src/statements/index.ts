@@ -12,6 +12,8 @@ import {describe} from "./describe";
 import {find} from "./find";
 import {cast} from "./cast";
 import {getBit} from "./get_bit";
+import {getLocale} from "./get_locale";
+import {setLocale} from "./set_locale";
 import {getRunTime} from "./get_run_time";
 import {getTime} from "./get_time";
 import {IInsertDatabaseOptions, InsertDatabase} from "./insert_database";
@@ -57,6 +59,7 @@ export class Statements {
   public describe = describe;
   public find = find;
   public getBit = getBit;
+  public getLocale = getLocale;
   public getRunTime = getRunTime;
   public getTime = getTime;
   public insertInternal = insertInternal;
@@ -67,6 +70,7 @@ export class Statements {
   public replace = replace;
   public rollback = rollback;
   public setBit = setBit;
+  public setLocale = setLocale;
   public shift = shift;
   public sort = sort;
   public split = split;
