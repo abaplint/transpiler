@@ -13,6 +13,7 @@ export class InterfaceTranspiler implements IStructureTranspiler {
     for (const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.Interface) {
         name = c.findDirectExpression(abaplint.Expressions.InterfaceName)?.getFirstToken().getStr().toLowerCase();
+        name = Traversal.escapeClassName(name);
         ret += `class ${name} {\n`;
       } else if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.EndInterface) {
         ret += "}\n";
@@ -41,7 +42,7 @@ export class InterfaceTranspiler implements IStructureTranspiler {
           || identifier.getMeta().includes(abaplint.IdentifierMeta.ReadOnly) === false) {
         continue;
       }
-      const interfaceName = node.getFirstToken().getStr().toLowerCase();
+      const interfaceName = Traversal.escapeClassName(node.getFirstToken().getStr().toLowerCase());
       const name = interfaceName + "." + interfaceName + "$" + n.toLowerCase();
       ret += name + " = " + new TranspileTypes().toType(identifier.getType()) + ";\n";
 

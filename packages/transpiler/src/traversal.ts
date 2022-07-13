@@ -335,7 +335,7 @@ export class Traversal {
     }
     // constants can be accessed both statically and via reference
     for (const c of def.getAttributes().getConstants()) {
-      ret += "this." + c.getName().toLowerCase() + " = " + def.getName().toLowerCase() + "." + c.getName().toLowerCase() + ";\n";
+      ret += "this." + c.getName().toLowerCase() + " = " + Traversal.escapeClassName(def.getName().toLowerCase()) + "." + c.getName().toLowerCase() + ";\n";
     }
 
     return ret;
