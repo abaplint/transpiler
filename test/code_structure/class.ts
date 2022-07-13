@@ -1078,4 +1078,32 @@ ENDFORM.`;
     await f(abap);
   });
 
+  it("test escaping of namespace in class constants", async () => {
+    const code = `
+CLASS /dsdf/sdf DEFINITION.
+  PUBLIC SECTION.
+    CONSTANTS: BEGIN OF pretty_mode,
+                 low_case TYPE string VALUE 'low_case',
+               END OF pretty_mode.
+ENDCLASS.
+
+CLASS /dsdf/sdf IMPLEMENTATION.
+ENDCLASS.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("test escaping of namespace in interface constants", async () => {
+    const code = `
+INTERFACE /dsdf/sdf.
+  CONSTANTS: BEGIN OF pretty_mode,
+               low_case TYPE string VALUE 'low_case',
+             END OF pretty_mode.
+ENDINTERFACE.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
