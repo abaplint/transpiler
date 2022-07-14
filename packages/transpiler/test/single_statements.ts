@@ -19,6 +19,7 @@ describe("Single statements", () => {
     {abap: "IF foo EQ bar. ENDIF.",                js: "if (abap.compare.eq(foo, bar)) {\n}",       skip: false},
     {abap: "IF foo CP 'bar*'. ENDIF.",             js: "if (abap.compare.cp(foo, new abap.types.Character({length: 4}).set('bar*'))) {\n}",    skip: false},
     {abap: "CONTINUE.",                            js: "continue;",                                 skip: false},
+    {abap: "IMPORT variscreens = lt_variscreens FROM MEMORY ID '%_SCRNR_%'.",                       js: `throw new Error("Import, transpiler todo");`,                                 skip: false},
     {abap: "CASE bar. ENDCASE.",                   js: "let unique1 = bar;",                        skip: false},
     {abap: "DATA foo TYPE c.",                     js: "let foo = new abap.types.Character();",     skip: false},
     {abap: "DATA foo TYPE string.",                js: "let foo = new abap.types.String();",        skip: false},
@@ -319,6 +320,17 @@ await abap.Classes['ZCL_CALL'].not_found();`},
   EXCEPTIONS
     component_not_found = 4 ).`,
     js: `rs_node_type.get().dd.set(await lo_sdescr.get().get_component_type({p_name: rs_node_type.get().target_field_name}));`},
+
+    {abap: `RECEIVE RESULTS FROM FUNCTION 'Z_ABAPGIT_SERIALIZE_PARALLEL'
+      IMPORTING
+        ev_result             = lv_result
+        ev_path               = lv_path
+      EXCEPTIONS
+        error                 = 1
+        system_failure        = 2 MESSAGE lv_mess
+        communication_failure = 3 MESSAGE lv_mess
+        OTHERS = 4.`,
+    js: `throw new Error("Receive, transpiler todo");`},
 
     {abap: `MODIFY ztab FROM TABLE tab.`,
       js: `await abap.statements.modifyDatabase("ztab", {"table": tab});`},
