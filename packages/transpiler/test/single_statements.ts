@@ -321,6 +321,17 @@ await abap.Classes['ZCL_CALL'].not_found();`},
     component_not_found = 4 ).`,
     js: `rs_node_type.get().dd.set(await lo_sdescr.get().get_component_type({p_name: rs_node_type.get().target_field_name}));`},
 
+    {abap: `RECEIVE RESULTS FROM FUNCTION 'Z_ABAPGIT_SERIALIZE_PARALLEL'
+      IMPORTING
+        ev_result             = lv_result
+        ev_path               = lv_path
+      EXCEPTIONS
+        error                 = 1
+        system_failure        = 2 MESSAGE lv_mess
+        communication_failure = 3 MESSAGE lv_mess
+        OTHERS = 4.`,
+    js: `throw new Error("Receive, transpiler todo");`},
+
     {abap: `MODIFY ztab FROM TABLE tab.`,
       js: `await abap.statements.modifyDatabase("ztab", {"table": tab});`},
     {abap: `MODIFY (mv_table) FROM TABLE <fs>.`,
