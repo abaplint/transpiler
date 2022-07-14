@@ -19,6 +19,7 @@ describe("Single statements", () => {
     {abap: "IF foo EQ bar. ENDIF.",                js: "if (abap.compare.eq(foo, bar)) {\n}",       skip: false},
     {abap: "IF foo CP 'bar*'. ENDIF.",             js: "if (abap.compare.cp(foo, new abap.types.Character({length: 4}).set('bar*'))) {\n}",    skip: false},
     {abap: "CONTINUE.",                            js: "continue;",                                 skip: false},
+    {abap: "IMPORT variscreens = lt_variscreens FROM MEMORY ID '%_SCRNR_%'.",                       js: `throw new Error("Import, transpiler todo");`,                                 skip: false},
     {abap: "CASE bar. ENDCASE.",                   js: "let unique1 = bar;",                        skip: false},
     {abap: "DATA foo TYPE c.",                     js: "let foo = new abap.types.Character();",     skip: false},
     {abap: "DATA foo TYPE string.",                js: "let foo = new abap.types.String();",        skip: false},
