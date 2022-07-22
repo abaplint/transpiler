@@ -30,11 +30,23 @@ function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
   }
 
   for (const l of config.libs || []) {
-    console.log("Clone: " + l.url);
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "abap_transpile-"));
-    childProcess.execSync("git clone --quiet --depth 1 " + l.url + " .", {cwd: dir, stdio: "inherit"});
+    let dir = "";
+    if (l.folder !== undefined && l.folder !== "") {
+      console.log("From folder: " + l.folder);
+      dir = l.folder;
+    } else {
+      console.log("Clone: " + l.url);
+      dir = fs.mkdtempSync(path.join(os.tmpdir(), "abap_transpile-"));
+      childProcess.execSync("git clone --quiet --depth 1 " + l.url + " .", {cwd: dir, stdio: "inherit"});
+    }
+
     let count = 0;
-    for (let filename of glob.sync(dir + "/src/**", {nosort: true, nodir: true})) {
+    let pattern = "/src/**";
+    if (l.files !== undefined && l.files !== "") {
+      pattern = l.files;
+    }
+
+    for (let filename of glob.sync(dir + pattern, {nosort: true, nodir: true})) {
       if (filename.endsWith(".clas.testclasses.abap")) {
         continue;
       }
