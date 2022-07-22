@@ -31,9 +31,9 @@ function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
 
   for (const l of config.libs || []) {
     let dir = "";
-    if (l.folder !== undefined && l.folder !== "") {
+    if (l.folder !== undefined && l.folder !== "" && fs.existsSync(process.cwd() + l.folder)) {
       console.log("From folder: " + l.folder);
-      dir = l.folder;
+      dir = process.cwd() + l.folder;
     } else {
       console.log("Clone: " + l.url);
       dir = fs.mkdtempSync(path.join(os.tmpdir(), "abap_transpile-"));
