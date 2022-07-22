@@ -59,7 +59,7 @@ export class SQLiteDatabaseSchema {
     } else if (type instanceof abaplint.BasicTypes.PackedType){
       return `DECIMAL(${type.getLength()},${type.getDecimals()})`;
     } else if (type instanceof abaplint.BasicTypes.VoidType) {
-      throw `Type of ${table}-${fieldname} is VoidType(${type.getVoided()}), make sure the type is know, enable strict syntax checking`;
+      throw `Type of ${table}-${fieldname} is VoidType(${type.getVoided()}), make sure the type is known, enable strict syntax checking`;
     } else {
       throw "database_setup: " + table + "-" + fieldname + ", todo toType handle: " + type.constructor.name;
     }
