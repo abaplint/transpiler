@@ -219,4 +219,21 @@ describe("Top level tests, Database", () => {
     expect(abap.console.get()).to.equal("hello world\nblah");
   });
 
+  it.skip("SELECT loop, field list", async () => {
+    const code = `
+    DATA lv_msgnr TYPE t100-msgnr.
+    DATA lv_text TYPE t100-text.
+    SELECT msgnr text FROM t100 INTO (lv_msgnr, lv_text).
+      WRITE / lv_text.
+    ENDSELECT.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    console.dir(js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello world\nblah");
+  });
+
 });

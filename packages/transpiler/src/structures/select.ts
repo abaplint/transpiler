@@ -16,6 +16,7 @@ export class SelectTranspiler implements IStructureTranspiler {
     const from = selectStatement.findFirstExpression(abaplint.Expressions.SQLFromSource)?.concatTokens().toUpperCase();
     const intoName = selectStatement.findFirstExpression(abaplint.Expressions.SQLTarget)?.concatTokens();
 
+    // note: this implementation SELECTs everything into memory, which might be bad, and sometimes not correct
     const targetName = UniqueIdentifier.get();
     const loopName = UniqueIdentifier.get();
     ret.appendString(`let ${targetName} = new abap.types.Table(abap.DDIC["${from}"].type);\n`);
