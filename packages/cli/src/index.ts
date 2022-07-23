@@ -31,6 +31,7 @@ function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
 
   for (const l of config.libs || []) {
     let dir = "";
+    let cleanupFolder = false;
     if (l.folder !== undefined && l.folder !== "" && fs.existsSync(process.cwd() + l.folder)) {
       console.log("From folder: " + l.folder);
       dir = process.cwd() + l.folder;
@@ -38,6 +39,7 @@ function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
       console.log("Clone: " + l.url);
       dir = fs.mkdtempSync(path.join(os.tmpdir(), "abap_transpile-"));
       childProcess.execSync("git clone --quiet --depth 1 " + l.url + " .", {cwd: dir, stdio: "inherit"});
+      cleanupFolder = true;
     }
 
     let count = 0;
@@ -56,7 +58,9 @@ function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
       count++;
     }
     console.log(count + " files added from lib");
-    FileOperations.deleteFolderRecursive(dir);
+    if (cleanupFolder === true) {
+      FileOperations.deleteFolderRecursive(dir);
+    }
   }
   return files;
 }
