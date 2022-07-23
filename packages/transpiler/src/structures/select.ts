@@ -22,7 +22,7 @@ export class SelectTranspiler implements IStructureTranspiler {
     ret.appendString(`let ${targetName} = new abap.types.Table(abap.DDIC["${from}"].type);\n`);
     ret.appendChunk(new SelectStatementTranspiler().transpile(selectStatement, traversal, targetName));
     ret.appendString(`\nfor (const ${loopName} of ${targetName}.array()) {\n`);
-    ret.appendString(`${intoName} = ${loopName};\n`);
+    ret.appendString(`${intoName?.replace("-", ".get().")}.set(${loopName});\n`);
 
     const body = node.findDirectStructure(abaplint.Structures.Body);
     if (body) {

@@ -219,7 +219,7 @@ describe("Top level tests, Database", () => {
     expect(abap.console.get()).to.equal("hello world\nblah");
   });
 
-  it.skip("SELECT loop, field list", async () => {
+  it("SELECT loop, field list", async () => {
     const code = `
     DATA lv_msgnr TYPE t100-msgnr.
     DATA lv_text TYPE t100-text.
@@ -231,9 +231,28 @@ describe("Top level tests, Database", () => {
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
     const f = new AsyncFunction("abap", js);
-    console.dir(js);
     await f(abap);
-    expect(abap.console.get()).to.equal("hello world\nblah");
+// TODO, for now it only checks that it compiles to valid JS
+    // expect(abap.console.get()).to.equal("hello world\nblah");
+  });
+
+  it("SELECT loop, field list", async () => {
+    const code = `
+DATA: BEGIN OF stru,
+        msgnr TYPE t100-msgnr,
+        text  TYPE t100-text,
+      END OF stru.
+SELECT msgnr text FROM t100 INTO (stru-msgnr, stru-text).
+  WRITE / stru-text.
+ENDSELECT.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+// TODO, for now it only checks that it compiles to valid JS
+    // expect(abap.console.get()).to.equal("hello world\nblah");
   });
 
 });
