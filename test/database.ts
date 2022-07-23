@@ -204,4 +204,19 @@ describe("Top level tests, Database", () => {
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("basic SELECT loop", async () => {
+    const code = `
+    DATA bar TYPE t100.
+    SELECT * FROM t100 INTO bar.
+      WRITE / bar-text.
+    ENDSELECT.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello world\nblah");
+  });
+
 });
