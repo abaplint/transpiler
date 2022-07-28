@@ -69,7 +69,11 @@ export class TranspileTypes {
       }
     } else if (type instanceof abaplint.BasicTypes.PackedType) {
       resolved = "Packed";
-      extra = "{length: " + type.getLength() + ", decimals: " + type.getDecimals() + "}";
+      if (type.getQualifiedName()) {
+        extra = "{length: " + type.getLength() + ", decimals: " + type.getDecimals() + ", qualifiedName: \"" + type.getQualifiedName() + "\"}";
+      } else {
+        extra = "{length: " + type.getLength() + ", decimals: " + type.getDecimals() + "}";
+      }
     } else if (type instanceof abaplint.BasicTypes.NumericGenericType) {
       resolved = "Packed";
       extra = "{length: 8, decimals: 0}";
