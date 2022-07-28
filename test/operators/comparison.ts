@@ -765,4 +765,23 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("char1 is initial", async () => {
+    const code = `
+DATA foo TYPE c LENGTH 1.
+foo = boolc( 1 = 2 ).
+ASSERT foo IS INITIAL.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("char1 is initial, def", async () => {
+    const code = `
+DATA foo TYPE c LENGTH 1.
+ASSERT foo IS INITIAL.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
