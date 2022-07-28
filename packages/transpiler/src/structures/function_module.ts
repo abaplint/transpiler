@@ -14,7 +14,7 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
         if (name === undefined) {
           name = "FunctionModuleTranspilerNameNotFound";
         }
-        r += `async function ${name}(input) {\n`;
+        r += `async function ${name}(INPUT) {\n`;
         r += this.findSignature(traversal, name);
       } else if (c.get() instanceof abaplint.Statements.EndFunction) {
         r += "}\n";
@@ -48,7 +48,7 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
       } else if (direction === "exporting") {
         direction = "importing";
       }
-      ret += `let ${p.name.toLowerCase()} = input.${direction}.${p.name.toLowerCase()};\n`;
+      ret += `let ${p.name.toLowerCase()} = INPUT.${direction}.${p.name.toLowerCase()};\n`;
     }
     return ret;
   }
