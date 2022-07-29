@@ -33,7 +33,7 @@ function replace(text: string, w?: (ICharacter | string)[]): string {
   return text.trim();
 }
 
-async function findText(context: Context, arbgb: string | undefined, msgnr: string | undefined) {
+async function findText(context: Context, arbgb: string | undefined, msgnr: string | undefined, msgty: string | undefined) {
   let text: string | undefined = undefined;
 
   if (arbgb && msgnr) {
@@ -51,7 +51,7 @@ async function findText(context: Context, arbgb: string | undefined, msgnr: stri
 
   if (text === undefined) {
     // fallback
-    text = arbgb + ":" + msgnr + " &1 &2 &3 &4";
+    text = msgty + ":" + arbgb + ":" + msgnr + " &1 &2 &3 &4";
   }
 
   return text;
@@ -88,7 +88,7 @@ export class MessageStatement {
     // @ts-ignore
     abap.builtin.sy.get().msgty.set(msgty);
 
-    const text = await findText(this.context, arbgb, msgnr);
+    const text = await findText(this.context, arbgb, msgnr, msgty);
 
     const replaced = replace(text, options.with);
 
