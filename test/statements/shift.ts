@@ -146,4 +146,18 @@ describe("Running statements - SHIFT", () => {
     await f(abap);
   });
 
+  it("SHIFT RIGHT/LEFT DELETING TRAILING", async () => {
+    const code = `
+  DATA string_to_work_on TYPE string.
+  string_to_work_on = \`Title  \`.
+  SHIFT string_to_work_on RIGHT DELETING TRAILING space.
+  ASSERT string_to_work_on = \`  Title\`.
+  SHIFT string_to_work_on LEFT DELETING LEADING space.
+  ASSERT string_to_work_on = \`Title\`.
+  ASSERT strlen( string_to_work_on ) = 5.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

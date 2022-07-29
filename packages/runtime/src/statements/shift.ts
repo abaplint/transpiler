@@ -36,7 +36,7 @@ function shift_character_mode(target: ICharacter, options?: IShiftOptions) {
     if (typeof trailing !== "string") {
       trailing = trailing.get();
     }
-    if (value.endsWith(trailing)) {
+    while (value.endsWith(trailing)) {
       value = " ".repeat(trailing.length) + value.substring(0, value.length - trailing.length);
     }
   } else if (options?.places) {
