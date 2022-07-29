@@ -160,4 +160,38 @@ describe("Running statements - SHIFT", () => {
     await f(abap);
   });
 
+  it("SHIFT DELETING TRAILING space space", async () => {
+    const code = `
+    DATA string_to_work_on TYPE string.
+    string_to_work_on = \` \`.
+    SHIFT string_to_work_on RIGHT DELETING TRAILING space.
+    ASSERT string_to_work_on = \` \`.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("SHIFT DELETING TRAILING one one", async () => {
+    const code = `
+    DATA string_to_work_on TYPE string.
+    string_to_work_on = \`1\`.
+    SHIFT string_to_work_on RIGHT DELETING TRAILING '1'.
+    ASSERT string_to_work_on = \` \`.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("SHIFT DELETING TRAILING spaced up", async () => {
+    const code = `
+    DATA string_to_work_on TYPE string.
+    string_to_work_on = \`  \`.
+    SHIFT string_to_work_on RIGHT DELETING TRAILING space.
+    WRITE strlen( string_to_work_on ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });

@@ -1,3 +1,4 @@
+import {co} from "../compare";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -36,8 +37,10 @@ function shift_character_mode(target: ICharacter, options?: IShiftOptions) {
     if (typeof trailing !== "string") {
       trailing = trailing.get();
     }
-    while (value.endsWith(trailing)) {
-      value = " ".repeat(trailing.length) + value.substring(0, value.length - trailing.length);
+    if (co(value, " ") === false) {
+      while (value.endsWith(trailing)) {
+        value = " ".repeat(trailing.length) + value.substring(0, value.length - trailing.length);
+      }
     }
   } else if (options?.places) {
     const p = options.places.get();
