@@ -194,4 +194,15 @@ describe("Running statements - SHIFT", () => {
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("SHIFT LEFT DELETING LEADING space space", async () => {
+    const code = `
+  DATA string_to_work_on TYPE string.
+  string_to_work_on = \`  \`.
+  SHIFT string_to_work_on LEFT DELETING LEADING space.
+  ASSERT string_to_work_on = \`\`.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
