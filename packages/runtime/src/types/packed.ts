@@ -5,8 +5,9 @@ export class Packed implements INumeric {
   private value: number;
   private readonly length: number;
   private readonly decimals: number;
+  private readonly qualifiedName: string | undefined;
 
-  public constructor(input?: {length?: number, decimals?: number}) {
+  public constructor(input?: {length?: number, decimals?: number, qualifiedName?: string}) {
     this.value = 0;
 
     this.length = 666;
@@ -18,6 +19,12 @@ export class Packed implements INumeric {
     if (input?.decimals) {
       this.decimals = input.decimals;
     }
+
+    this.qualifiedName = input?.qualifiedName;
+  }
+
+  public getQualifiedName() {
+    return this.qualifiedName;
   }
 
   public set(value: INumeric | number | string) {
