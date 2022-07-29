@@ -47,7 +47,21 @@ describe("Running statements - MESSAGE", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("ABC\n123\nABC:123 foo bar");
+    expect(abap.console.get()).to.equal("ABC\n123\nE:ABC:123 foo bar");
+  });
+
+  it("MESSAGE empty msgid", async () => {
+    const code = `
+  DATA result TYPE string.
+  CLEAR sy-msgid.
+  CLEAR sy-msgno.
+  MESSAGE ID sy-msgid TYPE 'I' NUMBER sy-msgno INTO result WITH 'moo'.
+  WRITE result.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("I::000 moo");
   });
 
 });
