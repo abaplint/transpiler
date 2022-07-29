@@ -60,6 +60,7 @@ describe("Single statements", () => {
     {abap: "moo = foo->method( ).",                   js: "moo.set((await foo.get().method()));",              skip: false},
     {abap: "FORM foo. ENDFORM.",                      js: "async function foo() {\n}",                       skip: false},
     {abap: "PERFORM foo.",                            js: "await foo();",                       skip: false},
+    {abap: "PERFORM ('ASDF') IN PROGRAM ('ASDF') TABLES bar.",      js: `throw new Error("PerformTranspiler FormName not found");`,                       skip: false},
     {abap: "DATA foo TYPE STANDARD TABLE OF string.", js: `let foo = new abap.types.Table(new abap.types.String(), {"withHeader":false,"type":"STANDARD","isUnique":false,"keyFields":[]});`,         skip: false},
     {abap: "SPLIT foo AT bar INTO TABLE moo.",            js: "abap.statements.split({source: foo, at: bar, table: moo});",    skip: false},
     {abap: "SPLIT |blah| AT '.' INTO lv_major lv_minor.", js: "abap.statements.split({source: new abap.types.String().set(`blah`), at: new abap.types.Character({length: 1}).set('.'), targets: [lv_major,lv_minor]});",    skip: false},
