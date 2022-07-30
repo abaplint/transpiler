@@ -7,7 +7,12 @@ import {FieldChainTranspiler, SimpleSource3Transpiler} from "../expressions";
 export class SelectTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal, targetOverride?: string): Chunk {
-    const target = targetOverride || traversal.traverse(node.findFirstExpression(abaplint.Expressions.Target)).getCode();
+    let target = "undefined";
+    if (targetOverride) {
+      target = targetOverride;
+    } else if(node.findFirstExpression(abaplint.Expressions.Target)) {
+      target = traversal.traverse(node.findFirstExpression(abaplint.Expressions.Target)).getCode();
+    }
 
     let select = "SELECT ";
     select += (node.findFirstExpression(abaplint.Expressions.SQLFieldList)?.concatTokens()
