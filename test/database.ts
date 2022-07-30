@@ -255,4 +255,17 @@ ENDSELECT.`;
     // expect(abap.console.get()).to.equal("hello world\nblah");
   });
 
+  it("SELECT COUNT(*)", async () => {
+    const code = `
+    SELECT COUNT(*) FROM t100.
+    WRITE sy-dbcnt.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });

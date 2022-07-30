@@ -21,7 +21,7 @@ export class SelectDatabase {
       target = target.getPointer();
     }
 
-    target.clear();
+    target?.clear();
 
     if (rows.length === 0) {
       // @ts-ignore
@@ -48,12 +48,17 @@ export class SelectDatabase {
         // @ts-ignore
         abap.statements.insertInternal({table: target, data: targetRow});
       }
-      // @ts-ignore
-      abap.builtin.sy.get().dbcnt.set(rows.length);
-    } else {
+    } else if (target !== undefined) {
       throw new Error("Runtime, SELECT todo");
     }
 
+    if (target === undefined && rows.length === 1) {
+      // @ts-ignore
+      abap.builtin.sy.get().dbcnt.set(Object.values(rows[0])[0]);
+    } else {
+      // @ts-ignore
+      abap.builtin.sy.get().dbcnt.set(rows.length);
+    }
     // @ts-ignore
     abap.builtin.sy.get().subrc.set(0);
   }
