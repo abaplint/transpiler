@@ -105,3 +105,24 @@ export const msag_zag_unit_test = `<?xml version="1.0" encoding="utf-8"?>
   </asx:values>
  </asx:abap>
 </abapGit>`;
+
+export const msag_escape = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_MSAG" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <T100A>
+    <ARBGB>ZESCAPE</ARBGB>
+    <MASTERLANG>E</MASTERLANG>
+    <STEXT>test</STEXT>
+   </T100A>
+   <T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZESCAPE</ARBGB>
+     <MSGNR>000</MSGNR>
+     <TEXT>FOO 'HELLO' bar</TEXT>
+    </T100>
+   </T100>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;

@@ -1,7 +1,7 @@
 import {expect} from "chai";
 import {AsyncFunction, runFiles} from "./_utils";
 import {ABAP} from "../packages/runtime/src/";
-import {msag_zag_unit_test, tabl_t100xml} from "./_data";
+import {msag_escape, msag_zag_unit_test, tabl_t100xml} from "./_data";
 
 describe("Top level tests, Database", () => {
   let abap: ABAP;
@@ -346,6 +346,20 @@ WRITE sy-dbcnt.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
+  });
+
+  it("Test escaping single ping", async () => {
+    const code = `
+    DATA ls_result TYPE t100.
+    SELECT SINGLE * FROM t100 INTO ls_result.
+    WRITE ls_result-text.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zescape.msag.xml", contents: msag_escape}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("FOO 'HELLO' bar");
   });
 
 });
