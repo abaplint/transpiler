@@ -283,7 +283,7 @@ ENDSELECT.`;
     expect(abap.console.get()).to.equal("4");
   });
 
-  it.skip("FOR ALL ENTRIES, basic, single row", async () => {
+  it("FOR ALL ENTRIES, basic, single row", async () => {
     const code = `
     DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
     DATA lt_fae TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
@@ -300,7 +300,6 @@ ENDSELECT.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");

@@ -3,6 +3,7 @@ import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {FieldChainTranspiler, SimpleSource3Transpiler} from "../expressions";
+import {UniqueIdentifier} from "../unique_identifier";
 
 export class SelectTranspiler implements IStatementTranspiler {
 
@@ -61,8 +62,25 @@ export class SelectTranspiler implements IStatementTranspiler {
       extra = `, primaryKey: ${JSON.stringify(keys)}`;
     }
 
-    return new Chunk().append(`await abap.statements.select(${target}, {select: "${
-      select.trim()}"${extra}}${runtimeOptions});`, node, traversal);
+    if (node.findFirstExpression(abaplint.Expressions.SQLForAllEntries)) {
+      const unique = UniqueIdentifier.get();
+      const faeName = node.findFirstExpression(abaplint.Expressions.SQLForAllEntries
+      )?.findDirectExpression(abaplint.Expressions.SQLSource)?.concatTokens();
+      select = select.replace(faeName!, unique);
+
+      const code = `if (${faeName}.array().length === 0) {
+  throw "FAE, todo, empty table";
+} else {
+  abap.statements.clear(${target});
+  for (const ${unique} of abap.statements.loop(${faeName})) {
+    await abap.statements.select(${target}, {select: "${select.trim()}"${extra}}, {appending: true});
+  }
+}`;
+      return new Chunk().append(code, node, traversal);
+    } else {
+      return new Chunk().append(`await abap.statements.select(${target}, {select: "${
+        select.trim()}"${extra}}${runtimeOptions});`, node, traversal);
+    }
   }
 
   private findKeys(node: abaplint.Nodes.StatementNode, traversal: Traversal): string[] {
