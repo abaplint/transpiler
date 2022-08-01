@@ -268,4 +268,41 @@ ENDSELECT.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("SELECT APPENDING TABLE", async () => {
+    const code = `
+    DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+    SELECT * FROM t100 APPENDING TABLE tab ORDER BY PRIMARY KEY.
+    SELECT * FROM t100 APPENDING TABLE tab ORDER BY PRIMARY KEY.
+    WRITE lines( tab ).`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4");
+  });
+
+  it("FOR ALL ENTRIES, basic, single row", async () => {
+    const code = `
+    DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+    DATA lt_fae TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+    DATA ls_fae LIKE LINE OF lt_fae.
+
+    ls_fae-msgnr = '123'.
+    INSERT ls_fae INTO TABLE lt_fae.
+
+    SELECT * FROM t100 INTO TABLE lt_t100
+      FOR ALL ENTRIES IN lt_fae
+      WHERE msgnr = lt_fae-msgnr.
+    WRITE sy-dbcnt.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });
