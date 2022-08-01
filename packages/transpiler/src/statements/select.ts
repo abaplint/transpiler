@@ -66,7 +66,8 @@ export class SelectTranspiler implements IStatementTranspiler {
       const unique = UniqueIdentifier.get();
       const faeName = node.findFirstExpression(abaplint.Expressions.SQLForAllEntries
       )?.findDirectExpression(abaplint.Expressions.SQLSource)?.concatTokens()?.toLowerCase();
-      select = select.replace(new RegExp(" " + faeName!, "g"), unique);
+      select = select.replace(new RegExp(" " + faeName!, "g"), " " + unique);
+      select = select.replace(unique + ".get().table_line.get()", unique + ".get()");  // there can be only one?
 
       const code = `if (${faeName}.array().length === 0) {
   throw "FAE, todo, empty table";
