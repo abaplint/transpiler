@@ -330,4 +330,22 @@ WRITE lines( lt_t100 ).`;
     expect(abap.console.get()).to.equal("00");
   });
 
+  it("FOR ALL ENTRIES, table line", async () => {
+    const code = `
+DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+DATA lt_msgnr TYPE STANDARD TABLE OF t100-msgnr WITH DEFAULT KEY.
+INSERT '123' INTO TABLE lt_msgnr.
+SELECT * FROM t100 INTO TABLE lt_t100
+  FOR ALL ENTRIES IN lt_msgnr
+  WHERE msgnr = lt_msgnr-table_line.
+WRITE sy-dbcnt.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });
