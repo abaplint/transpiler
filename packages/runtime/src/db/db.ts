@@ -22,6 +22,10 @@ export interface SelectDatabaseOptions {
   primaryKey?: string[],
 }
 
+export interface SelectRuntimeOptions {
+  appending?: boolean,
+}
+
 export type DatabaseValue = number | string | Uint8Array | null;
 export type DatabaseRow = {[name: string]: DatabaseValue};
 export type DatabaseRows = DatabaseRow[];

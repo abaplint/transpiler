@@ -50,14 +50,19 @@ export class SelectTranspiler implements IStatementTranspiler {
       select += "UP TO 1 ROWS";
     }
 
+    let runtimeOptions = "";
+    if (node.concatTokens().toUpperCase().includes(" APPENDING TABLE ")) {
+      runtimeOptions = `, {appending: true}`;
+    }
+
+    let extra = "";
     const keys = this.findKeys(node, traversal);
-    let primaryKey = "";
     if (keys.length > 0) {
-      primaryKey = `, primaryKey: ${JSON.stringify(keys)}`;
+      extra = `, primaryKey: ${JSON.stringify(keys)}`;
     }
 
     return new Chunk().append(`await abap.statements.select(${target}, {select: "${
-      select.trim()}"${primaryKey}});`, node, traversal);
+      select.trim()}"${extra}}${runtimeOptions});`, node, traversal);
   }
 
   private findKeys(node: abaplint.Nodes.StatementNode, traversal: Traversal): string[] {

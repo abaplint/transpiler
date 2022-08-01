@@ -1,6 +1,6 @@
 import {clone} from "../clone";
 import {Context} from "../context";
-import {SelectDatabaseOptions} from "../db/db";
+import {SelectDatabaseOptions, SelectRuntimeOptions} from "../db/db";
 import {FieldSymbol, Structure, Table} from "../types";
 
 export class SelectDatabase {
@@ -10,7 +10,7 @@ export class SelectDatabase {
     this.context = context;
   }
 
-  public async select(target: Structure | Table | FieldSymbol, input: SelectDatabaseOptions) {
+  public async select(target: Structure | Table | FieldSymbol, input: SelectDatabaseOptions, runtimeOptions?: SelectRuntimeOptions) {
     const {rows: rows} = await this.context.defaultDB().select(input);
 
     if (target instanceof FieldSymbol) {
@@ -21,7 +21,9 @@ export class SelectDatabase {
       target = target.getPointer();
     }
 
-    target?.clear();
+    if (runtimeOptions?.appending !== true) {
+      target?.clear();
+    }
 
     if (rows.length === 0) {
       // @ts-ignore
