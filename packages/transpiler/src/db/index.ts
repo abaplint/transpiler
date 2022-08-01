@@ -56,7 +56,7 @@ export class DatabaseSetup {
     }
     let ret = "";
     for (const m of msag.getMessages()) {
-      ret += `INSERT INTO t100 VALUES ('E', '${msag.getName()}', '${m.getNumber()}', '${m.getMessage()}');\n`;
+      ret += `INSERT INTO t100 VALUES ('E', '${msag.getName()}', '${m.getNumber()}', '${m.getMessage().replace(/\'/g, "''")}');\n`;
     }
     return ret;
   }
