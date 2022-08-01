@@ -65,8 +65,8 @@ export class SelectTranspiler implements IStatementTranspiler {
     if (node.findFirstExpression(abaplint.Expressions.SQLForAllEntries)) {
       const unique = UniqueIdentifier.get();
       const faeName = node.findFirstExpression(abaplint.Expressions.SQLForAllEntries
-      )?.findDirectExpression(abaplint.Expressions.SQLSource)?.concatTokens();
-      select = select.replace(faeName!, unique);
+      )?.findDirectExpression(abaplint.Expressions.SQLSource)?.concatTokens()?.toLowerCase();
+      select = select.replace(new RegExp(" " + faeName!, "g"), unique);
 
       const code = `if (${faeName}.array().length === 0) {
   throw "FAE, todo, empty table";
@@ -75,6 +75,7 @@ export class SelectTranspiler implements IStatementTranspiler {
   for (const ${unique} of abap.statements.loop(${faeName})) {
     await abap.statements.select(${target}, {select: "${select.trim()}"${extra}}, {appending: true});
   }
+  abap.builtin.sy.get().dbcnt.set(${target}.array().length);
 }`;
       return new Chunk().append(code, node, traversal);
     } else {
