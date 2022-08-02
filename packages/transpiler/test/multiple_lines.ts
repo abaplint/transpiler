@@ -92,7 +92,7 @@ abap.Classes['PROG-ZFOOBAR-LCL_FOOBAR'] = lcl_foobar;`;
     return this;
   }
   async moo(INPUT) {
-    let iv_foo = new abap.types.String();
+    let iv_foo = new abap.types.String({qualifiedName: "STRING"});
     if (INPUT && INPUT.iv_foo) {iv_foo.set(INPUT.iv_foo);}
   }
 }
@@ -122,7 +122,7 @@ abap.Classes['PROG-ZFOOBAR-LCL_FOOBAR'] = lcl_foobar;`;
     return this;
   }
   async moo() {
-    let rv_foo = new abap.types.String();
+    let rv_foo = new abap.types.String({qualifiedName: "STRING"});
     return rv_foo;
   }
 }
@@ -209,7 +209,7 @@ DATA moo TYPE foo.`;
   async constructor_() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
-    this.bar = new abap.types.Integer();
+    this.bar = new abap.types.Integer({qualifiedName: "I"});
     return this;
   }
   async run() {
@@ -241,7 +241,7 @@ class zcl_words {
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
-    this.bar = new abap.types.Integer();
+    this.bar = new abap.types.Integer({qualifiedName: "I"});
     this.bar.set(constant_2);
     abap.statements.write(this.bar);
     return this;
@@ -271,14 +271,14 @@ ENDCLASS.`;
   async constructor_() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
-    this.bar = new abap.types.Integer();
+    this.bar = new abap.types.Integer({qualifiedName: "I"});
     return this;
   }
   async run() {
     return zcl_ret.run();
   }
   static async run() {
-    let rv_ret = new abap.types.String();
+    let rv_ret = new abap.types.String({qualifiedName: "STRING"});
     rv_ret.set(new abap.types.Character({length: 1}).set('X'));
     return rv_ret;
   }
@@ -342,7 +342,7 @@ class zcl_ret {
   }
 }
 abap.Classes['PROG-ZFOOBAR-ZCL_RET'] = zcl_ret;
-zcl_ret.c_maxdcodes = new abap.types.Integer();
+zcl_ret.c_maxdcodes = new abap.types.Integer({qualifiedName: "I"});
 zcl_ret.c_maxdcodes.set(30);`;
 
     expect(await runSingle(abap)).to.equal(expected);
@@ -365,7 +365,7 @@ ENDCLASS.`;
   }
 }
 abap.Classes['PROG-ZFOOBAR-LCL_BAR'] = lcl_bar;
-lcl_bar.foo = new abap.types.Integer();`;
+lcl_bar.foo = new abap.types.Integer({qualifiedName: "I"});`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });
@@ -396,7 +396,7 @@ class lcl_bar {
     return lcl_bar.bar(INPUT);
   }
   static async bar(INPUT) {
-    let imp = new abap.types.Integer();
+    let imp = new abap.types.Integer({qualifiedName: "I"});
     if (INPUT && INPUT.imp) {imp.set(INPUT.imp);}
   }
 }
@@ -430,7 +430,7 @@ class lcl_bar {
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
-    let input = new abap.types.Integer();
+    let input = new abap.types.Integer({qualifiedName: "I"});
     if (INPUT && INPUT.input) {input.set(INPUT.input);}
     abap.statements.write(input);
     return this;
@@ -462,7 +462,7 @@ async function bar() {
   }
 }
 abap.Classes['PROG-ZFOOBAR-LCL_BAR'] = lcl_bar;
-lcl_bar.foo = new abap.types.String();
+lcl_bar.foo = new abap.types.String({qualifiedName: "STRING"});
 lcl_bar.foo.set('\\'');`;
     expect(await runSingle(abap)).to.equal(expected);
   });
@@ -533,7 +533,7 @@ blah.set(await (new abap.Classes['ZCL_BLAH']()).constructor_());`;
     DATA str TYPE string.
     DATA blah TYPE REF TO OBJECT.
     CREATE OBJECT blah TYPE (str).`;
-    const expected = `let str = new abap.types.String();
+    const expected = `let str = new abap.types.String({qualifiedName: "STRING"});
 let blah = new abap.types.ABAPObject();
 if (abap.Classes[str.get()] === undefined) { throw new abap.Classes['CX_SY_CREATE_OBJECT_ERROR']; }
 blah.set(await (new abap.Classes[str.get()]()).constructor_());`;
@@ -630,7 +630,7 @@ ENDCLASS.`;
   }
 }
 abap.Classes['PROG-ZFOOBAR-LCL_CONSTANT_TEST'] = lcl_constant_test;
-lcl_constant_test.area_name = new abap.types.String();
+lcl_constant_test.area_name = new abap.types.String({qualifiedName: "STRING"});
 lcl_constant_test.area_name.set('BAR');`;
     expect(await runSingle(abap)).to.equals(expected);
   });
@@ -653,7 +653,7 @@ ENDCLASS.`;
     const expected = `class lif {
 }
 abap.Classes['PROG-ZFOOBAR-LIF'] = lif;
-lif.lif$default_value = new abap.types.String();
+lif.lif$default_value = new abap.types.String({qualifiedName: "STRING"});
 lif.lif$default_value.set('sdf');
 class lcl {
   async constructor_() {
@@ -665,7 +665,7 @@ class lcl {
     return lcl.foo(INPUT);
   }
   static async foo(INPUT) {
-    let bar = new abap.types.String();
+    let bar = new abap.types.String({qualifiedName: "STRING"});
     if (INPUT && INPUT.bar) {bar.set(INPUT.bar);}
     if (INPUT === undefined || INPUT.bar === undefined) {bar = abap.Classes['PROG-ZFOOBAR-LIF'].lif$default_value;}
   }

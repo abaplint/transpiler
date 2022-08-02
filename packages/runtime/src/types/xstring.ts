@@ -5,9 +5,15 @@ import {INumeric} from "./_numeric";
 
 export class XString implements ICharacter {
   private value: string;
+  private readonly qualifiedName: string | undefined;
 
-  public constructor() {
+  public constructor(input?: {qualifiedName?: string}) {
     this.value = "";
+    this.qualifiedName = input?.qualifiedName;
+  }
+
+  public getQualifiedName() {
+    return this.qualifiedName;
   }
 
   public set(value: ICharacter | INumeric | string) {
