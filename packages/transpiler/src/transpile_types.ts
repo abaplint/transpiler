@@ -23,14 +23,29 @@ export class TranspileTypes {
       extra += ", " + JSON.stringify(type.getOptions());
     } else if (type instanceof abaplint.BasicTypes.IntegerType) {
       resolved = "Integer";
+      if (type.getQualifiedName() !== undefined) {
+        extra = "{qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\"}";
+      }
     } else if (type instanceof abaplint.BasicTypes.StringType) {
       resolved = "String";
+      if (type.getQualifiedName() !== undefined) {
+        extra = "{qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\"}";
+      }
     } else if (type instanceof abaplint.BasicTypes.UTCLongType) {
       resolved = "UTCLong";
+      if (type.getQualifiedName() !== undefined) {
+        extra = "{qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\"}";
+      }
     } else if (type instanceof abaplint.BasicTypes.DateType) {
       resolved = "Date";
+      if (type.getQualifiedName() !== undefined) {
+        extra = "{qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\"}";
+      }
     } else if (type instanceof abaplint.BasicTypes.TimeType) {
       resolved = "Time";
+      if (type.getQualifiedName() !== undefined) {
+        extra = "{qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\"}";
+      }
     } else if (type instanceof abaplint.BasicTypes.DataReference) {
       resolved = "DataReference";
       extra = this.toType(type.getType());
@@ -79,6 +94,9 @@ export class TranspileTypes {
       extra = "{length: 8, decimals: 0}";
     } else if (type instanceof abaplint.BasicTypes.XStringType) {
       resolved = "XString";
+      if (type.getQualifiedName() !== undefined) {
+        extra = "{qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\"}";
+      }
     } else if (type instanceof abaplint.BasicTypes.XSequenceType) {
       // if not supplied itsa a Hex(1)
       resolved = "Hex";

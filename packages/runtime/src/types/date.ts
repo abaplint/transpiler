@@ -8,9 +8,15 @@ import {parse} from "../operators/_parse";
 
 export class Date implements ICharacter {
   private value: string;
+  private readonly qualifiedName: string | undefined;
 
-  public constructor() {
+  public constructor(input?: {qualifiedName?: string}) {
     this.clear();
+    this.qualifiedName = input?.qualifiedName;
+  }
+
+  public getQualifiedName() {
+    return this.qualifiedName;
   }
 
   public set(value: INumeric | ICharacter | Hex | string | number) {

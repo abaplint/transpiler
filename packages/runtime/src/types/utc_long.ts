@@ -4,9 +4,15 @@ import {INumeric} from "./_numeric";
 
 export class UTCLong implements ICharacter {
   private value: string;
+  private readonly qualifiedName: string | undefined;
 
-  public constructor() {
+  public constructor(input?: {qualifiedName?: string}) {
     this.clear();
+    this.qualifiedName = input?.qualifiedName;
+  }
+
+  public getQualifiedName() {
+    return this.qualifiedName;
   }
 
   public getOffset(_input: { offset?: number | undefined; length?: number | undefined; }): ICharacter {

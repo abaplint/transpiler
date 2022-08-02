@@ -9,7 +9,7 @@ describe("Unknown types, errors at runtime", () => {
   it("test 1, ok", async () => {
     const abap = `DATA foo TYPE i.`;
 
-    const expected = `let foo = new abap.types.Integer();`;
+    const expected = `let foo = new abap.types.Integer({qualifiedName: "I"});`;
 
     expect(await runSingle(abap, options)).to.equal(expected);
   });
