@@ -56,6 +56,9 @@ export class SQLiteDatabaseSchema {
       return `NCHAR(${type.getLength() * 2})`;
     } else if (type instanceof abaplint.BasicTypes.IntegerType) {
       return `INT`;
+    } else if (type instanceof abaplint.BasicTypes.FloatType
+        || type instanceof abaplint.BasicTypes.FloatingPointType) {
+      return `REAL`;
     } else if (type instanceof abaplint.BasicTypes.PackedType){
       return `DECIMAL(${type.getLength()},${type.getDecimals()})`;
     } else if (type instanceof abaplint.BasicTypes.VoidType) {
