@@ -28,11 +28,12 @@ export class SQLiteDatabaseSchema {
 
     const fields: string[] = [];
     for (const field of type.getComponents()) {
-      fields.push(field.name.toLowerCase() + " " + this.toType(field.type, field.name, tabl.getName()));
+      fields.push("'" + field.name.toLowerCase() + "' " + this.toType(field.type, field.name, tabl.getName()));
     }
 
     // assumption: all transparent tables have primary keys
-    const key = ", PRIMARY KEY(" + tabl.listKeys().map(e => e.toLowerCase()).join(",") + ")";
+    // add single quotes to field names to allow for keywords as field names
+    const key = ", PRIMARY KEY(" + tabl.listKeys().map(e => "'" + e.toLowerCase() + "'").join(",") + ")";
 
     return `CREATE TABLE ${tabl.getName().toLowerCase()} (${fields.join(", ")}${key});\n`;
   }
