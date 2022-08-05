@@ -376,14 +376,21 @@ WRITE sy-dbcnt.`;
     expect(abap.console.get()).to.equal("ZAG_UNIT_TEST");
   });
 
-/*
+  it("SELECT WHERE value from structure", async () => {
+    const code = `
 DATA: BEGIN OF foo,
         arbgb TYPE t100-arbgb,
       END OF foo.
 foo-arbgb = 'ZAG_UNIT_TEST'.
 DATA ls_result TYPE t100.
 SELECT SINGLE * FROM t100 INTO ls_result WHERE arbgb = foo-arbgb.
-ASSERT sy-subrc = 0.
-*/
+ASSERT sy-subrc = 0.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
 
 });
