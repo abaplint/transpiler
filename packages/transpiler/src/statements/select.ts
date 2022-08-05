@@ -16,8 +16,15 @@ export class SelectTranspiler implements IStatementTranspiler {
     }
 
     let select = "SELECT ";
-    select += (node.findFirstExpression(abaplint.Expressions.SQLFieldList)?.concatTokens()
-      || node.findFirstExpression(abaplint.Expressions.SQLFieldListLoop)?.concatTokens()) + " ";
+    const fieldList = node.findFirstExpression(abaplint.Expressions.SQLFieldList)
+      || node.findFirstExpression(abaplint.Expressions.SQLFieldListLoop);
+    if (fieldList?.getChildren().length === 1) {
+      select += fieldList.concatTokens();
+    } else {
+// add commas between field names, this is required for SQLite, and easy to remove in other clients?
+      select += fieldList?.findAllExpressions(abaplint.Expressions.SQLField).map(e => e.concatTokens()).join(", ");
+    }
+    select += " ";
     select += node.findFirstExpression(abaplint.Expressions.SQLFrom)?.concatTokens() + " ";
 
     let where;

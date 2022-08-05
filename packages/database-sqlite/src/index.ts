@@ -93,7 +93,7 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
       // @ts-ignore
       if (abap.Classes["CX_SY_DYNAMIC_OSQL_SEMANTICS"] !== undefined) {
         // @ts-ignore
-        throw new abap.Classes["CX_SY_DYNAMIC_OSQL_SEMANTICS"]();
+        throw await new abap.Classes["CX_SY_DYNAMIC_OSQL_SEMANTICS"]().constructor_({sqlmsg: error.message || ""});
       }
       throw error;
     }
