@@ -362,7 +362,7 @@ WRITE sy-dbcnt.`;
     expect(abap.console.get()).to.equal("FOO 'HELLO' bar");
   });
 
-  it.skip("SELECT list of columns", async () => {
+  it("SELECT list of columns", async () => {
     const code = `
     DATA ls_result TYPE t100.
     SELECT SINGLE arbgb msgnr text FROM t100 INTO CORRESPONDING FIELDS OF ls_result.
@@ -375,5 +375,15 @@ WRITE sy-dbcnt.`;
     await f(abap);
     expect(abap.console.get()).to.equal("ZAG_UNIT_TEST");
   });
+
+/*
+DATA: BEGIN OF foo,
+        arbgb TYPE t100-arbgb,
+      END OF foo.
+foo-arbgb = 'ZAG_UNIT_TEST'.
+DATA ls_result TYPE t100.
+SELECT SINGLE * FROM t100 INTO ls_result WHERE arbgb = foo-arbgb.
+ASSERT sy-subrc = 0.
+*/
 
 });
