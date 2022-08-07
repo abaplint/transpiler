@@ -16,7 +16,7 @@ export class LoopTranspiler implements IStatementTranspiler {
 
     const unique1 = UniqueIdentifier.get();
     let target = "";
-    const into = node.findDirectExpression(abaplint.Expressions.Target);
+    const into = node.findDirectExpression(abaplint.Expressions.LoopTarget)?.findDirectExpression(abaplint.Expressions.Target);
     if (into) {
       const concat = node.concatTokens().toUpperCase();
       const t = traversal.traverse(into).getCode();

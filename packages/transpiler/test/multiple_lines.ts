@@ -186,7 +186,7 @@ foo.set(await (new abap.Classes['PROG-ZFOOBAR-ZCL_WORDS']()).constructor_());`;
 END OF foo.
 DATA moo TYPE foo.`;
 
-    const expected = `let moo = new abap.types.Structure({bar: new abap.types.Character()}, "foo");`;
+    const expected = `let moo = new abap.types.Structure({bar: new abap.types.Character({qualifiedName: "foo-bar"})}, "foo");`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 

@@ -244,6 +244,10 @@ await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({seconds: constant_10,cond: abap
       js: `for (const unique1 of abap.statements.loop(mr_source_tree.getPointer())) {
   ls_node.set(unique1);
 }`},
+    {abap: `LOOP AT foo ASSIGNING <fs>. ENDLOOP.`,
+      js: `for (const unique1 of abap.statements.loop(foo)) {
+  fs_fs_.assign(unique1);
+}`},
     {abap: `lo_result->if_ci_test~navigate( ).`,
       js: `await lo_result.get().if_ci_test$navigate();`},
     {abap: `WRITE bar+30(*).`,
