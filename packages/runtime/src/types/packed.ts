@@ -35,7 +35,7 @@ export class Packed implements INumeric {
     } else if (value instanceof Float) {
       this.value = value.getRaw();
     } else {
-      this.value = value.get();
+      this.set(value.get());
     }
   }
 
