@@ -784,4 +784,26 @@ ASSERT foo IS INITIAL.`;
     await f(abap);
   });
 
+  it("NP example", async () => {
+    const code = `
+    ASSERT 'aa 01.01.0001 foo' NP |++.++.++++ *|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("CP stuff", async () => {
+    const code = `
+  DATA lt_text TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+  APPEND '01.01.0001 foo' TO lt_text.
+  APPEND '213  123 456456' TO lt_text.
+  APPEND 'aa 01.01.0001 foo' TO lt_text.
+  DELETE lt_text WHERE table_line CP |++.++.++++ *|.
+  WRITE lines( lt_text ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`2`);
+  });
+
 });

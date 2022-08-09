@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/runtime",
-  "version": "2.1.23",
+  "version": "2.1.24",
   "description": "Transpiler - Runtime",
   "main": "build/src/index.js",
   "typings": "build/src/index.d.ts",
@@ -28,7 +28,7 @@
   "author": "abaplint",
   "license": "MIT",
   "devDependencies": {
-    "@types/chai": "^4.3.1",
+    "@types/chai": "^4.3.3",
     "@types/mocha": "^9.1.1",
     "chai": "^4.3.6",
     "mocha": "^10.0.0",
