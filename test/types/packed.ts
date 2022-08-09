@@ -101,13 +101,12 @@ ASSERT foo = '12345'.`;
     expect(abap.console.get()).to.equal("1212,13");
   });
 
-  it.only("parse from char", async () => {
+  it("parse from char", async () => {
     const code = `
     DATA foo TYPE p.
     foo = '2.00'.
     ASSERT foo = 2.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
