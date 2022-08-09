@@ -26,7 +26,7 @@ export function cp(left: number | string | ICharacter | INumeric, right: string 
   r = r.replace(/\|/g, "\\|");
 
   r = r.replace(/\*/g, "[\\s\\S]*");
-  r = r.replace(/\+/g, "[\\s\\S]+");
+  r = r.replace(/\+/g, "[\\s\\S]");
 
   const reg = new RegExp("^" + r + "$", "i");
 
