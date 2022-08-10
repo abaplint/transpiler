@@ -50,7 +50,7 @@ export class DatabaseSetup {
       return "";
     }
 
-    return `INSERT INTO reposrc ('PROGNAME', 'DATA') VALUES ('${name}', '${this.escape(raw)}');\n`;
+    return `INSERT INTO reposrc ('PROGNAME', 'DATA') VALUES ('${name}', '${this.escape(raw)}');`;
   }
 
   private insertT000(): string {
@@ -62,7 +62,7 @@ export class DatabaseSetup {
     const type = tabl.parseType(this.reg);
     if (type instanceof abaplint.BasicTypes.StructureType && type.getComponents().length >= 3) {
       // todo, this should take the client number from the settings
-      return `INSERT INTO t000 ('MANDT', 'CCCATEGORY', 'CCNOCLIIND') VALUES ('123', '', '');\n`;
+      return `INSERT INTO t000 ('MANDT', 'CCCATEGORY', 'CCNOCLIIND') VALUES ('123', '', '');`;
     } else {
       return "";
     }
@@ -75,7 +75,7 @@ export class DatabaseSetup {
     }
     let ret = "";
     for (const m of msag.getMessages()) {
-      ret += `INSERT INTO t100 ('SPRSL', 'ARBGB', 'MSGNR', 'TEXT') VALUES ('E', '${msag.getName()}', '${m.getNumber()}', '${this.escape(m.getMessage())}');\n`;
+      ret += `INSERT INTO t100 ('SPRSL', 'ARBGB', 'MSGNR', 'TEXT') VALUES ('E', '${msag.getName()}', '${m.getNumber()}', '${this.escape(m.getMessage())}');`;
     }
     return ret;
   }
