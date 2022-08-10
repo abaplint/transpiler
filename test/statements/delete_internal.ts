@@ -260,4 +260,17 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("4\n5");
   });
 
+  it("DELETE fs INDEX", async () => {
+    const code = `
+DATA chain_tokens TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+FIELD-SYMBOLS <tokens> TYPE STANDARD TABLE.
+ASSIGN chain_tokens TO <tokens>.
+DELETE <tokens> INDEX 1.
+WRITE sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4");
+  });
+
 });

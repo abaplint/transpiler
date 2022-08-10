@@ -1,4 +1,4 @@
-import {Structure, Table} from "../types";
+import {FieldSymbol, Structure, Table} from "../types";
 import {eq} from "../compare";
 import {INumeric} from "../types/_numeric";
 import {loop} from "./loop";
@@ -13,9 +13,16 @@ export interface IDeleteInternalOptions {
   to?: any,
 }
 
-export function deleteInternal(target: Table, options?: IDeleteInternalOptions): void {
+export function deleteInternal(target: Table | FieldSymbol, options?: IDeleteInternalOptions): void {
   let prev: any = undefined;
   let index = 0;
+
+  if (target instanceof FieldSymbol) {
+    target = target.getPointer() as Table;
+    if (target === undefined) {
+      throw "FS not assigned";
+    }
+  }
 
   if (options?.index
       && options?.where === undefined
@@ -23,8 +30,16 @@ export function deleteInternal(target: Table, options?: IDeleteInternalOptions):
       && options?.fromValue === undefined
       && options?.from === undefined
       && options?.to === undefined) {
-    target.deleteIndex(options.index.get() - 1);
-    return;
+    if (target.array()[options.index.get() - 1] === undefined) {
+      // @ts-ignore
+      abap.builtin.sy.get().subrc.set(4);
+      return;
+    } else {
+      target.deleteIndex(options.index.get() - 1);
+      // @ts-ignore
+      abap.builtin.sy.get().subrc.set(0);
+      return;
+    }
   }
 
   for (const i of loop(target)) {
