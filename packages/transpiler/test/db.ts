@@ -19,7 +19,7 @@ describe("transpiler, database setup", () => {
     const msag = new abaplint.MemoryFile("zag_unit_test.msag.xml", msag_zag_unit_test);
     const reg = new abaplint.Registry().addFiles([tabl, msag]).parse();
     const result = new DatabaseSetup(reg).run().insert;
-    expect(result).to.include(`INSERT INTO t100 VALUES ('E', 'ZAG_UNIT_TEST', '000', 'hello world');`);
+    expect(result).to.include(`VALUES ('E', 'ZAG_UNIT_TEST', '000', 'hello world');`);
   });
 
 });
