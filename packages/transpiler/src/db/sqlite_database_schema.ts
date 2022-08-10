@@ -7,15 +7,16 @@ export class SQLiteDatabaseSchema {
     this.reg = reg;
   }
 
-  public run(): string {
-    let ret = "";
+  public run(): string[] {
+    const statements: string[] = [];
     // CREATE TABLEs
     for (const obj of this.reg.getObjects()) {
-      if (obj instanceof abaplint.Objects.Table && obj.getTableCategory() === abaplint.Objects.TableCategory.Transparent) {
-        ret += this.transparentTable(obj);
+      if (obj instanceof abaplint.Objects.Table
+          && obj.getTableCategory() === abaplint.Objects.TableCategory.Transparent) {
+        statements.push(this.transparentTable(obj).trim());
       }
     }
-    return ret.trim();
+    return statements;
   }
 
 //////////////////

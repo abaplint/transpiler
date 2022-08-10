@@ -1,8 +1,8 @@
 export type DatabaseSetupResult = {
   schemas: {
-    sqlite: string,
-    pg: string,
-    hdb: string,
+    sqlite: string[],
+    pg: string[],
+    hdb: string[],
   },
-  insert: string,
+  insert: string[],
 };

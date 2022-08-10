@@ -21,11 +21,17 @@ globalThis.abap = new runtime.ABAP();\n`;
     ret += `${this.buildImports(reg, useImport)}
 
 export async function initializeABAP() {\n`;
-    ret += `  const sqlite = \`${dbSetup.schemas.sqlite}\`;\n`;
+    ret += `  const sqlite = [];\n`;
+    for (const i of dbSetup.schemas.sqlite) {
+      ret += `sqlite.push(\`${i}\`);\n`;
+    }
     ret += `  const hdb = \`${dbSetup.schemas.hdb}\`;\n`;
     ret += `  const pg = \`${dbSetup.schemas.pg}\`;\n`;
     ret += `  const schemas = {sqlite, hdb, pg};\n`;
-    ret += `  const insert = \`${dbSetup.insert}\`;\n`;
+    ret += `  const insert = [];\n`;
+    for (const i of dbSetup.insert) {
+      ret += `insert.push(\`${i}\`);\n`;
+    }
     if (extraSetup === undefined) {
       ret += `// no setup logic specified in config\n`;
     } else {

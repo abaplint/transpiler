@@ -14,8 +14,8 @@ export class DatabaseSetup {
     return {
       schemas: {
         sqlite: new SQLiteDatabaseSchema(this.reg).run(),
-        hdb: "todo",
-        pg: "todo",
+        hdb: ["todo"],
+        pg: ["todo"],
       },
       insert: this.buildInsert(),
     };
@@ -23,18 +23,19 @@ export class DatabaseSetup {
 
 ////////////////////
 
-  private buildInsert(): string {
-    let insert = "";
+  private buildInsert(): string[] {
+    // note: avoid hitting maximum statement size by splitting into multiple statements
+    const insert: string[] = [];
     // INSERT data
     for (const obj of this.reg.getObjects()) {
       if (obj instanceof abaplint.Objects.MessageClass) {
-        insert += this.insertT100(obj);
+        insert.push(this.insertT100(obj));
       } else if (obj instanceof abaplint.Objects.Class
           || obj instanceof abaplint.Objects.Interface) {
-        insert += this.insertREPOSRC(obj);
+        insert.push(this.insertREPOSRC(obj));
       }
     }
-    insert += this.insertT000();
+    insert.push(this.insertT000());
     return insert;
   }
 
@@ -49,7 +50,7 @@ export class DatabaseSetup {
       return "";
     }
 
-    return `INSERT INTO reposrc ('PROGNAME', 'DATA') VALUES ('${name}', '${this.escape(raw)}');\n`;
+    return `INSERT INTO reposrc ('PROGNAME', 'DATA') VALUES ('${name}', '${this.escape(raw)}');`;
   }
 
   private insertT000(): string {
@@ -61,7 +62,7 @@ export class DatabaseSetup {
     const type = tabl.parseType(this.reg);
     if (type instanceof abaplint.BasicTypes.StructureType && type.getComponents().length >= 3) {
       // todo, this should take the client number from the settings
-      return `INSERT INTO t000 ('MANDT', 'CCCATEGORY', 'CCNOCLIIND') VALUES ('123', '', '');\n`;
+      return `INSERT INTO t000 ('MANDT', 'CCCATEGORY', 'CCNOCLIIND') VALUES ('123', '', '');`;
     } else {
       return "";
     }
@@ -74,13 +75,17 @@ export class DatabaseSetup {
     }
     let ret = "";
     for (const m of msag.getMessages()) {
-      ret += `INSERT INTO t100 ('SPRSL', 'ARBGB', 'MSGNR', 'TEXT') VALUES ('E', '${msag.getName()}', '${m.getNumber()}', '${this.escape(m.getMessage())}');\n`;
+      ret += `INSERT INTO t100 ('SPRSL', 'ARBGB', 'MSGNR', 'TEXT') VALUES ('E', '${msag.getName()}', '${m.getNumber()}', '${this.escape(m.getMessage())}');`;
     }
     return ret;
   }
 
   private escape(value: string): string {
-    return value.replace(/\'/g, "''");
+    let ret = value.replace(/\'/g, "''");
+    // statements are inside a javascript string stemplate
+    ret = ret.replace(/\\/g, "\\\\");
+    ret = ret.replace(/`/g, "\\`");
+    return ret;
   }
 
 }
