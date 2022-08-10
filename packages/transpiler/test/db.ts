@@ -11,7 +11,7 @@ describe("transpiler, database setup", () => {
     const tabl = new abaplint.MemoryFile("t100.tabl.xml", tabl_t100xml);
     const reg = new abaplint.Registry().addFile(tabl).parse();
     const result = new SQLiteDatabaseSchema(reg).run();
-    expect(result).to.equal(`CREATE TABLE t100 ('sprsl' NCHAR(1), 'arbgb' NCHAR(20), 'msgnr' NCHAR(3), 'text' NCHAR(73), PRIMARY KEY('sprsl','arbgb','msgnr'));`);
+    expect(result[0]).to.equal(`CREATE TABLE t100 ('sprsl' NCHAR(1), 'arbgb' NCHAR(20), 'msgnr' NCHAR(3), 'text' NCHAR(73), PRIMARY KEY('sprsl','arbgb','msgnr'));`);
   });
 
   it("t100 create table, insert MSAG entries", async () => {
@@ -19,7 +19,7 @@ describe("transpiler, database setup", () => {
     const msag = new abaplint.MemoryFile("zag_unit_test.msag.xml", msag_zag_unit_test);
     const reg = new abaplint.Registry().addFiles([tabl, msag]).parse();
     const result = new DatabaseSetup(reg).run().insert;
-    expect(result).to.include(`VALUES ('E', 'ZAG_UNIT_TEST', '000', 'hello world');`);
+    expect(result[0]).to.include(`VALUES ('E', 'ZAG_UNIT_TEST', '000', 'hello world');`);
   });
 
 });

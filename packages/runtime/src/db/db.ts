@@ -42,7 +42,7 @@ export interface DatabaseClient {
   disconnect(): Promise<void>;
 
   /*** execute any native SQL command */
-  execute(sql: string): Promise<void>;
+  execute(sql: string | string[]): Promise<void>;
 
   // transaction handling
   beginTransaction(): Promise<void>;

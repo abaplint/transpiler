@@ -14,8 +14,8 @@ export class DatabaseSetup {
     return {
       schemas: {
         sqlite: new SQLiteDatabaseSchema(this.reg).run(),
-        hdb: "todo",
-        pg: "todo",
+        hdb: ["todo"],
+        pg: ["todo"],
       },
       insert: this.buildInsert(),
     };
@@ -23,18 +23,19 @@ export class DatabaseSetup {
 
 ////////////////////
 
-  private buildInsert(): string {
-    let insert = "";
+  private buildInsert(): string[] {
+    // note: avoid hitting maximum statement size by splitting into multiple statements
+    const insert: string[] = [];
     // INSERT data
     for (const obj of this.reg.getObjects()) {
       if (obj instanceof abaplint.Objects.MessageClass) {
-        insert += this.insertT100(obj);
+        insert.push(this.insertT100(obj));
       } else if (obj instanceof abaplint.Objects.Class
           || obj instanceof abaplint.Objects.Interface) {
-        insert += this.insertREPOSRC(obj);
+        insert.push(this.insertREPOSRC(obj));
       }
     }
-    insert += this.insertT000();
+    insert.push(this.insertT000());
     return insert;
   }
 

@@ -15,11 +15,17 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     this.sqlite = undefined;
   }
 
-  public async execute(sql: string): Promise<void> {
-    if (sql === "") {
-      return;
+  public async execute(sql: string | string[]): Promise<void> {
+    if (typeof sql === "string") {
+      if (sql === "") {
+        return;
+      }
+      this.sqlite!.run(sql);
+    } else {
+      for (const s of sql) {
+        await this.execute(s);
+      }
     }
-    this.sqlite!.run(sql);
   }
 
   public async beginTransaction() {
