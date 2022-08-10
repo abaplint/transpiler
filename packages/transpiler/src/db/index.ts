@@ -80,7 +80,11 @@ export class DatabaseSetup {
   }
 
   private escape(value: string): string {
-    return value.replace(/\'/g, "''");
+    let ret = value.replace(/\'/g, "''");
+    // statements are inside a javascript string stemplate
+    ret = ret.replace(/\\/g, "\\\\");
+    ret = ret.replace(/`/g, "\\`");
+    return ret;
   }
 
 }
