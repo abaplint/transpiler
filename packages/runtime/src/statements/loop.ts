@@ -47,10 +47,10 @@ export function* loop(table: Table | FieldSymbol | undefined, options?: ILoopOpt
 
       // @ts-ignore
       abap.builtin.sy.get().tabix.set(loopIndex.index + 1);
+      entered = true;
 
       yield current;
 
-      entered = true;
       loopIndex.index++;
       loopTo = options?.to && options.to.get() < array.length ? options.to.get() : array.length;
     }
