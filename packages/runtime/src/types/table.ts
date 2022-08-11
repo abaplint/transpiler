@@ -39,12 +39,18 @@ export class Table  {
   private readonly rowType: TableRowType;
   private readonly loops: Set<LoopIndex>;
   private readonly options: ITableOptions | undefined;
+  private readonly qualifiedName: string | undefined;
 
-  public constructor(rowType: TableRowType, options?: ITableOptions) {
+  public constructor(rowType: TableRowType, options?: ITableOptions, qualifiedName?: string) {
     this.value = [];
     this.loops = new Set();
     this.rowType = rowType;
     this.options = options;
+    this.qualifiedName = qualifiedName?.toUpperCase();
+  }
+
+  public getQualifiedName() {
+    return this.qualifiedName;
   }
 
   public getOptions() {
