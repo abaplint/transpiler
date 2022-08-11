@@ -21,6 +21,9 @@ export class TranspileTypes {
       resolved = "Table";
       extra = this.toType(type.getRowType());
       extra += ", " + JSON.stringify(type.getOptions());
+      if (type.getQualifiedName() !== undefined) {
+        extra += ", \"" + type.getQualifiedName() + "\"";
+      }
     } else if (type instanceof abaplint.BasicTypes.IntegerType) {
       resolved = "Integer";
       if (type.getQualifiedName() !== undefined) {
