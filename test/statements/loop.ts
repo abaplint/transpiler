@@ -300,6 +300,24 @@ ENDIF.`;
     expect(abap.console.get()).to.equal("bye");
   });
 
+  it("LOOP, sy-subrc and EXIT first row", async () => {
+    const code = `
+    DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+    DATA row LIKE LINE OF tab.
+    APPEND 1 TO tab.
+    sy-subrc = 4.
+    LOOP AT tab INTO row.
+      EXIT.
+    ENDLOOP.
+    IF sy-subrc = 0.
+      WRITE 'entered'.
+    ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("entered");
+  });
+
   it("LOOP, REFERENCE INTO", async () => {
     const code = `
 TYPES: BEGIN OF ty_node,
