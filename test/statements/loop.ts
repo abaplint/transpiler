@@ -284,6 +284,22 @@ describe("Running statements - LOOP", () => {
     expect(abap.console.get()).to.equal("4\n0");
   });
 
+  it("LOOP, sy-subrc empty table", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA row LIKE LINE OF tab.
+LOOP AT tab INTO row.
+  WRITE 'hello'.
+ENDLOOP.
+IF sy-subrc <> 0.
+  WRITE 'bye'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("bye");
+  });
+
   it("LOOP, REFERENCE INTO", async () => {
     const code = `
 TYPES: BEGIN OF ty_node,

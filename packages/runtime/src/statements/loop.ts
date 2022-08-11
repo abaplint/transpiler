@@ -17,6 +17,8 @@ export function* loop(table: Table | FieldSymbol | undefined, options?: ILoopOpt
 
   const length = table.array().length;
   if (length === 0) {
+    // @ts-ignore
+    abap.builtin.sy.get().subrc.set(4);
     return;
   }
 
@@ -57,5 +59,4 @@ export function* loop(table: Table | FieldSymbol | undefined, options?: ILoopOpt
     // @ts-ignore
     abap.builtin.sy.get().subrc.set(entered ? 0 : 4);
   }
-
 }
