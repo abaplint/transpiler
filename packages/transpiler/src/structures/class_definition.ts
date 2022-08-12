@@ -23,6 +23,7 @@ export class ClassDefinitionTranspiler implements IStructureTranspiler {
 // its an abstract class with only abstract methods
       return new Chunk(`
 class ${className?.toLowerCase()} {
+  static INTERNAL_TYPE = 'CLAS';
   async constructor_() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
