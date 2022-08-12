@@ -11,14 +11,15 @@ export class InterfaceTranspiler implements IStructureTranspiler {
     let ret = "";
     let name: string | undefined;
     for (const c of node.getChildren()) {
+      const def = traversal.getInterfaceDefinition(node.getFirstToken());
       if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.Interface) {
         name = c.findDirectExpression(abaplint.Expressions.InterfaceName)?.getFirstToken().getStr().toLowerCase();
         name = Traversal.escapeClassName(name);
         ret += `class ${name} {\n`;
         ret += `static INTERNAL_TYPE = 'INTF';\n`;
+        ret += `static IMPLEMENTED_INTERFACES = [${def?.getImplementing().map(e => `"` + e.name.toUpperCase() + `"`).join(",")}];\n`;
       } else if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.EndInterface) {
         ret += "}\n";
-        const def = traversal.getInterfaceDefinition(node.getFirstToken());
         ret += traversal.registerClassOrInterface(def);
       }
     }
