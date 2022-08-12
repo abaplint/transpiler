@@ -15,6 +15,7 @@ export class InterfaceTranspiler implements IStructureTranspiler {
         name = c.findDirectExpression(abaplint.Expressions.InterfaceName)?.getFirstToken().getStr().toLowerCase();
         name = Traversal.escapeClassName(name);
         ret += `class ${name} {\n`;
+        ret += `static INTERNAL_TYPE = 'INTF';\n`;
       } else if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.EndInterface) {
         ret += "}\n";
         const def = traversal.getInterfaceDefinition(node.getFirstToken());

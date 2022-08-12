@@ -19,7 +19,7 @@ export class ClassImplementationTranspiler implements IStatementTranspiler {
       ret += " extends " + def?.getSuperClass()?.toLowerCase();
     }
 
-    return new Chunk().append(ret + " {", node, traversal);
+    return new Chunk().append(ret + " {\nstatic INTERNAL_TYPE = 'CLAS';", node, traversal);
   }
 
 }

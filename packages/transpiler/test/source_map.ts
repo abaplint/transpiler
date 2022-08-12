@@ -90,6 +90,7 @@ ENDCLASS.`;
 
     const js =
 `class zcl_maptest {
+  static INTERNAL_TYPE = 'CLAS';
   async constructor_() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -106,7 +107,7 @@ export {zcl_maptest};`;
     expect(result?.js).to.equal(js);
 
     const perLine = await countMappingsPerGeneratedLine(result?.map);
-    expect(perLine[8]).to.equal(3); // the WRITE statement
+    expect(perLine[9]).to.equal(3); // the WRITE statement
   });
 
 });
