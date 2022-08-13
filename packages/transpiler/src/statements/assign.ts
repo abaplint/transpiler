@@ -24,14 +24,14 @@ export class AssignTranspiler implements IStatementTranspiler {
     } else {
       let dynamic = node.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.ConstantString);
       if (dynamic) {
-        options.push(`dynamicText: ` + dynamic.getFirstToken().getStr());
+        options.push(`dynamicName: ` + dynamic.getFirstToken().getStr());
         const s = dynamic.getFirstToken().getStr().toLowerCase().match(/\w+/);
         options.push(`dynamicSource: (() => {try { return ${s}; } catch {}})()`);
       } else {
         dynamic = node.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.FieldChain);
         if (dynamic) {
           const code = new FieldChainTranspiler(true).transpile(dynamic, traversal).getCode();
-          options.push(`dynamicText: ` + code);
+          options.push(`dynamicName: ` + code);
           options.push(`dynamicSource: (() => {try { return eval(${code}.toLowerCase().match(/\\w+/)[0]); } catch {}})()`);
         }
       }

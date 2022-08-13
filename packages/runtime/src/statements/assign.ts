@@ -5,7 +5,7 @@ import {INumeric} from "../types/_numeric";
 export interface IAssignInput {
   source?: INumeric | ICharacter | Structure | DataReference,
   target: FieldSymbol,
-  dynamicText?: string,
+  dynamicName?: string,
   dynamicSource?: ICharacter,
   casting?: boolean,
   component?: string | ICharacter,
@@ -13,14 +13,14 @@ export interface IAssignInput {
 
 export function assign(input: IAssignInput) {
 
-  if (input.dynamicText) {
+  if (input.dynamicName) {
     if (input.dynamicSource instanceof FieldSymbol) {
       input.dynamicSource = input.dynamicSource.getPointer();
     }
 
-    if (input.dynamicText.includes("->")) {
+    if (input.dynamicName.includes("->")) {
       if (input.dynamicSource instanceof ABAPObject) {
-        const split = input.dynamicText.split("->");
+        const split = input.dynamicName.split("->");
         // @ts-ignore
         input.dynamicSource = input.dynamicSource.get()[split[1].toLowerCase() as any];
       } else {
