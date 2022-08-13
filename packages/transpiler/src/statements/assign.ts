@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {FieldChainTranspiler, FieldSymbolTranspiler, SourceTranspiler} from "../expressions";
@@ -7,8 +8,9 @@ import {Chunk} from "../chunk";
 export class AssignTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    const sources = node.findDirectExpressions(abaplint.Expressions.Source).map(
-      e => new SourceTranspiler(false).transpile(e, traversal).getCode());
+    const assignSource = node.findDirectExpression(abaplint.Expressions.AssignSource);
+    const sources = assignSource?.findDirectExpressions(abaplint.Expressions.Source).map(
+      e => new SourceTranspiler(false).transpile(e, traversal).getCode()) || [];
     const fs = new FieldSymbolTranspiler().transpile(node.findDirectExpression(abaplint.Expressions.FSTarget)!, traversal).getCode();
 
     const options: string[] = [];
@@ -22,13 +24,13 @@ export class AssignTranspiler implements IStatementTranspiler {
     if (sources.length !== 0) {
       options.push("source: " + sources.pop());
     } else {
-      let dynamic = node.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.ConstantString);
+      let dynamic = assignSource?.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.ConstantString);
       if (dynamic) {
         options.push(`dynamicName: ` + dynamic.getFirstToken().getStr());
         const s = dynamic.getFirstToken().getStr().toLowerCase().match(/\w+/);
         options.push(`dynamicSource: (() => {try { return ${s}; } catch {}})()`);
       } else {
-        dynamic = node.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.FieldChain);
+        dynamic = assignSource?.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.FieldChain);
         if (dynamic) {
           const code = new FieldChainTranspiler(true).transpile(dynamic, traversal).getCode();
           options.push(`dynamicName: ` + code);
