@@ -24,16 +24,40 @@ export class AssignTranspiler implements IStatementTranspiler {
     if (sources.length !== 0) {
       options.push("source: " + sources.pop());
     } else {
+
+      let dynamicName = "";
+      for (const c of assignSource?.getChildren() || []) {
+        if (c instanceof abaplint.Nodes.ExpressionNode
+            && c.get() instanceof abaplint.Expressions.Dynamic
+            && c.findFirstExpression(abaplint.Expressions.ConstantString)) {
+          if (dynamicName !== "") {
+            dynamicName += " + ";
+          }
+          dynamicName += c.findFirstExpression(abaplint.Expressions.ConstantString)?.getFirstToken().getStr();
+        } else if (c instanceof abaplint.Nodes.ExpressionNode
+            && c.get() instanceof abaplint.Expressions.Dynamic
+            && c.findDirectExpression(abaplint.Expressions.FieldChain)) {
+          if (dynamicName !== "") {
+            dynamicName += " + ";
+          }
+          dynamicName +=  new FieldChainTranspiler(true).transpile(c.findDirectExpression(abaplint.Expressions.FieldChain) as abaplint.Nodes.ExpressionNode, traversal).getCode();
+        } else if (c.concatTokens() === "(" || c.concatTokens() === ")") {
+          continue;
+        } else if (c.concatTokens() === "=>" || c.concatTokens() === "->") {
+          dynamicName += " + '" + c.concatTokens() + "'";
+        }
+      }
+      options.push(`dynamicName: ` + dynamicName);
+
+      // dynamicSource is the first part only
       let dynamic = assignSource?.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.ConstantString);
       if (dynamic) {
-        options.push(`dynamicName: ` + dynamic.getFirstToken().getStr());
         const s = dynamic.getFirstToken().getStr().toLowerCase().match(/\w+/);
         options.push(`dynamicSource: (() => {try { return ${s}; } catch {}})()`);
       } else {
         dynamic = assignSource?.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.FieldChain);
         if (dynamic) {
           const code = new FieldChainTranspiler(true).transpile(dynamic, traversal).getCode();
-          options.push(`dynamicName: ` + code);
           options.push(`dynamicSource: (() => {try { return eval(${code}.toLowerCase().match(/\\w+/)[0]); } catch {}})()`);
         }
       }
