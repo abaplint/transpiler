@@ -6,7 +6,7 @@ export interface IAssignInput {
   source?: INumeric | ICharacter | Structure | DataReference,
   target: FieldSymbol,
   dynamicName?: string,
-  dynamicSource?: ICharacter,
+  dynamicSource?: ICharacter, // first part only
   casting?: boolean,
   component?: string | ICharacter,
 }
