@@ -12,7 +12,7 @@ export interface IAssignInput {
 }
 
 export function assign(input: IAssignInput) {
-
+  //console.dir(input);
   if (input.dynamicName) {
     if (input.dynamicSource instanceof FieldSymbol) {
       input.dynamicSource = input.dynamicSource.getPointer();

@@ -1639,4 +1639,44 @@ ENDCLASS.`;
     expect(cons.split("\n")[1]).to.equal("expected");
   });
 
+  it("test-40", async () => {
+// assign constant from global interface
+
+    const clas = `CLASS zcl_conv DEFINITION PUBLIC.
+  PUBLIC SECTION.
+ENDCLASS.
+
+CLASS zcl_conv IMPLEMENTATION.
+ENDCLASS.`;
+
+    const tests = `
+CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS test FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD test.
+    DATA first TYPE string VALUE 'IF_INTF'.
+    DATA second TYPE string VALUE 'foo'.
+    FIELD-SYMBOLS <fs> TYPE any.
+    ASSIGN (first)=>(second) TO <fs>.
+    WRITE sy-subrc.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const intf = `
+INTERFACE if_intf PUBLIC.
+  CONSTANTS foo TYPE i VALUE 2.
+ENDINTERFACE.`;
+
+    const files = [
+      {filename: "if_intf.intf.abap", contents: intf},
+      {filename: "zcl_assign.clas.abap", contents: clas},
+      {filename: "zcl_assign.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("0");
+  });
+
 });
