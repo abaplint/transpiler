@@ -12,7 +12,7 @@ export interface IAssignInput {
 }
 
 export function assign(input: IAssignInput) {
-  //console.dir(input);
+  // console.dir(input);
   if (input.dynamicName) {
     if (input.dynamicSource instanceof FieldSymbol) {
       input.dynamicSource = input.dynamicSource.getPointer();
@@ -26,6 +26,28 @@ export function assign(input: IAssignInput) {
       } else {
         // @ts-ignore
         abap.builtin.sy.get().subrc.set(4);
+        return;
+      }
+    } else if (input.dynamicName.includes("=>")) {
+      const split = input.dynamicName.split("=>");
+
+      // @ts-ignore
+      const clas = abap.Classes[split[0].toUpperCase()];
+      if (clas === undefined) {
+        // @ts-ignore
+        abap.builtin.sy.get().subrc.set(4);
+        return;
+      }
+
+      if (clas[split[1].toLowerCase()] !== undefined) {
+        input.target.assign(clas[split[1].toLowerCase()]);
+        // @ts-ignore
+        abap.builtin.sy.get().subrc.set(0);
+        return;
+      } else if(clas[split[0].toLowerCase() + "$" + split[1].toLowerCase()] !== undefined) {
+        input.target.assign(clas[split[0].toLowerCase() + "$" + split[1].toLowerCase()]);
+        // @ts-ignore
+        abap.builtin.sy.get().subrc.set(0);
         return;
       }
     }
