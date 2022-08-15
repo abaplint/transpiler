@@ -21,9 +21,15 @@ function getNumberParts(x: number) {
 
 export class Float {
   private value: number;
+  private readonly qualifiedName: string | undefined;
 
-  public constructor() {
+  public constructor(input?: {qualifiedName?: string}) {
     this.value = 0;
+    this.qualifiedName = input?.qualifiedName;
+  }
+
+  public getQualifiedName() {
+    return this.qualifiedName;
   }
 
   public set(value: INumeric | ICharacter | Hex | string | number) {
