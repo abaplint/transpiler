@@ -274,4 +274,25 @@ WRITE sy-subrc.`;
     expect(abap.console.get()).to.equal("4");
   });
 
+  it("READ TABLE table_line, structured", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         name TYPE string,
+         int  TYPE i,
+       END OF ty.
+DATA nodes TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA l_node LIKE LINE OF nodes.
+l_node-name = 'ASDF'.
+l_node-int = 2.
+READ TABLE nodes WITH KEY table_line = l_node TRANSPORTING NO FIELDS.
+WRITE / sy-subrc.
+INSERT l_node INTO TABLE nodes.
+READ TABLE nodes WITH KEY table_line = l_node TRANSPORTING NO FIELDS.
+WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n0");
+  });
+
 });

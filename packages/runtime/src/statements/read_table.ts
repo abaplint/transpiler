@@ -32,7 +32,7 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
     const isStructured = arr[0] instanceof Structure;
     for (const a of arr) {
       foundIndex++;
-      const row = isStructured ? a.get() : {table_line: a};
+      const row = isStructured ? {table_line: a, ...a.get()} : {table_line: a};
       if (options.withKey(row) === true) {
         found = a;
         break;
