@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {FieldChainTranspiler, FieldSymbolTranspiler, SourceTranspiler} from "../expressions";
@@ -7,8 +8,9 @@ import {Chunk} from "../chunk";
 export class AssignTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    const sources = node.findDirectExpressions(abaplint.Expressions.Source).map(
-      e => new SourceTranspiler(false).transpile(e, traversal).getCode());
+    const assignSource = node.findDirectExpression(abaplint.Expressions.AssignSource);
+    const sources = assignSource?.findDirectExpressions(abaplint.Expressions.Source).map(
+      e => new SourceTranspiler(false).transpile(e, traversal).getCode()) || [];
     const fs = new FieldSymbolTranspiler().transpile(node.findDirectExpression(abaplint.Expressions.FSTarget)!, traversal).getCode();
 
     const options: string[] = [];
@@ -22,16 +24,40 @@ export class AssignTranspiler implements IStatementTranspiler {
     if (sources.length !== 0) {
       options.push("source: " + sources.pop());
     } else {
-      let dynamic = node.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.ConstantString);
+
+      let dynamicName = "";
+      for (const c of assignSource?.getChildren() || []) {
+        if (c instanceof abaplint.Nodes.ExpressionNode
+            && c.get() instanceof abaplint.Expressions.Dynamic
+            && c.findFirstExpression(abaplint.Expressions.ConstantString)) {
+          if (dynamicName !== "") {
+            dynamicName += " + ";
+          }
+          dynamicName += c.findFirstExpression(abaplint.Expressions.ConstantString)?.getFirstToken().getStr();
+        } else if (c instanceof abaplint.Nodes.ExpressionNode
+            && c.get() instanceof abaplint.Expressions.Dynamic
+            && c.findDirectExpression(abaplint.Expressions.FieldChain)) {
+          if (dynamicName !== "") {
+            dynamicName += " + ";
+          }
+          dynamicName +=  new FieldChainTranspiler(true).transpile(c.findDirectExpression(abaplint.Expressions.FieldChain) as abaplint.Nodes.ExpressionNode, traversal).getCode();
+        } else if (c.concatTokens() === "(" || c.concatTokens() === ")") {
+          continue;
+        } else if (c.concatTokens() === "=>" || c.concatTokens() === "->") {
+          dynamicName += " + '" + c.concatTokens() + "'";
+        }
+      }
+      options.push(`dynamicName: ` + dynamicName);
+
+      // dynamicSource is the first part only
+      let dynamic = assignSource?.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.ConstantString);
       if (dynamic) {
-        options.push(`dynamicText: ` + dynamic.getFirstToken().getStr());
         const s = dynamic.getFirstToken().getStr().toLowerCase().match(/\w+/);
         options.push(`dynamicSource: (() => {try { return ${s}; } catch {}})()`);
       } else {
-        dynamic = node.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.FieldChain);
+        dynamic = assignSource?.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.FieldChain);
         if (dynamic) {
           const code = new FieldChainTranspiler(true).transpile(dynamic, traversal).getCode();
-          options.push(`dynamicText: ` + code);
           options.push(`dynamicSource: (() => {try { return eval(${code}.toLowerCase().match(/\\w+/)[0]); } catch {}})()`);
         }
       }

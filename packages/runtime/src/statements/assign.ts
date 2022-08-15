@@ -5,27 +5,49 @@ import {INumeric} from "../types/_numeric";
 export interface IAssignInput {
   source?: INumeric | ICharacter | Structure | DataReference,
   target: FieldSymbol,
-  dynamicText?: string,
-  dynamicSource?: ICharacter,
+  dynamicName?: string,
+  dynamicSource?: ICharacter, // first part only
   casting?: boolean,
   component?: string | ICharacter,
 }
 
 export function assign(input: IAssignInput) {
-
-  if (input.dynamicText) {
+  // console.dir(input);
+  if (input.dynamicName) {
     if (input.dynamicSource instanceof FieldSymbol) {
       input.dynamicSource = input.dynamicSource.getPointer();
     }
 
-    if (input.dynamicText.includes("->")) {
+    if (input.dynamicName.includes("->")) {
       if (input.dynamicSource instanceof ABAPObject) {
-        const split = input.dynamicText.split("->");
+        const split = input.dynamicName.split("->");
         // @ts-ignore
         input.dynamicSource = input.dynamicSource.get()[split[1].toLowerCase() as any];
       } else {
         // @ts-ignore
         abap.builtin.sy.get().subrc.set(4);
+        return;
+      }
+    } else if (input.dynamicName.includes("=>")) {
+      const split = input.dynamicName.split("=>");
+
+      // @ts-ignore
+      const clas = abap.Classes[split[0].toUpperCase()];
+      if (clas === undefined) {
+        // @ts-ignore
+        abap.builtin.sy.get().subrc.set(4);
+        return;
+      }
+
+      if (clas[split[1].toLowerCase()] !== undefined) {
+        input.target.assign(clas[split[1].toLowerCase()]);
+        // @ts-ignore
+        abap.builtin.sy.get().subrc.set(0);
+        return;
+      } else if(clas[split[0].toLowerCase() + "$" + split[1].toLowerCase()] !== undefined) {
+        input.target.assign(clas[split[0].toLowerCase() + "$" + split[1].toLowerCase()]);
+        // @ts-ignore
+        abap.builtin.sy.get().subrc.set(0);
         return;
       }
     }
