@@ -82,8 +82,12 @@ export class TranspileTypes {
       }
     } else if (type instanceof abaplint.BasicTypes.NumericType) {
       resolved = "Numc";
-      if (type.getLength() !== 1) {
+      if (type.getQualifiedName() && type.getLength() !== 1) {
+        extra = "{length: " + type.getLength() + ", qualifiedName: \"" + type.getQualifiedName() + "\"}";
+      } else if (type.getLength() !== 1) {
         extra = "{length: " + type.getLength() + "}";
+      } else if (type.getQualifiedName()) {
+        extra = "{qualifiedName: \"" + type.getQualifiedName() + "\"}";
       }
     } else if (type instanceof abaplint.BasicTypes.PackedType) {
       resolved = "Packed";
@@ -110,8 +114,14 @@ export class TranspileTypes {
       }
     } else if (type instanceof abaplint.BasicTypes.FloatType) {
       resolved = "Float";
+      if (type.getQualifiedName() !== undefined) {
+        extra = "{qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\"}";
+      }
     } else if (type instanceof abaplint.BasicTypes.FloatingPointType) {
       resolved = "Float";
+      if (type.getQualifiedName() !== undefined) {
+        extra = "{qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\"}";
+      }
     } else if (type instanceof abaplint.BasicTypes.DecFloat34Type) {
       resolved = "DecFloat34";
     } else if (type instanceof abaplint.BasicTypes.UnknownType) {
