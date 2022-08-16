@@ -806,4 +806,21 @@ ASSERT foo IS INITIAL.`;
     expect(abap.console.get()).to.equal(`2`);
   });
 
+  it("NE integer and numc", async () => {
+    const code = `
+DATA int TYPE i.
+DATA num TYPE n LENGTH 6.
+int = 3.
+num = 3.
+IF num <> int.
+  WRITE 'ne'.
+ELSE.
+  WRITE 'eq'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`eq`);
+  });
+
 });
