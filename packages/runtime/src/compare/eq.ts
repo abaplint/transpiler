@@ -1,4 +1,4 @@
-import {ABAPObject, Character, FieldSymbol, Float, Hex, Structure, Table} from "../types";
+import {ABAPObject, Character, FieldSymbol, Float, Hex, Integer, Numc, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -101,6 +101,14 @@ export function eq(
       l = left.getRaw();
       r = Number(r);
     }
+  }
+
+  if (right instanceof Numc && left instanceof Integer) {
+    l = left.get();
+    r = parseInt(right.get(), 10);
+  } else if (right instanceof Integer && left instanceof Numc) {
+    r = right.get();
+    l = parseInt(left.get(), 10);
   }
 
   // assumption: typically no casts are required, so start checking if the types doesnt match
