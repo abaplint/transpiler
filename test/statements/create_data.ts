@@ -89,4 +89,21 @@ WRITE <fs_value>.`;
     expect(abap.console.get()).to.equal("115555");
   });
 
+  it.skip("CREATE DATA, LENGTH", async () => {
+    const code = `
+DATA ref TYPE REF TO data.
+DATA lv_len TYPE i.
+FIELD-SYMBOLS <fs> TYPE any.
+lv_len = 2.
+CREATE DATA ref TYPE c LENGTH lv_len.
+ASSIGN ref->* TO <fs>.
+<fs> = '123'.
+WRITE <fs>.`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("12");
+  });
+
 });

@@ -10,6 +10,7 @@ export interface ICreateDataOptions {
   name?: string,
   type?: PointerType,
   typeHandle?: ABAPObject,
+  length?: INumeric,
   likeLineOf?: FieldSymbol | Table,
   like?: any,
 }
