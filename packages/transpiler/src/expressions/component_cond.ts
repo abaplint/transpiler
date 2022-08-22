@@ -23,7 +23,7 @@ export class ComponentCondTranspiler implements IExpressionTranspiler {
             ret += " || ";
             break;
           default:
-            // todo, runtime error
+            throw new Error("ComponentCondTranspiler, unexpected");
         }
       }
     }
