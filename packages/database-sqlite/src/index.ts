@@ -85,15 +85,17 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     return {subrc, dbcnt};
   }
 
+  // // https://www.sqlite.org/lang_select.html
   public async select(options: DB.SelectDatabaseOptions) {
     let res: undefined | QueryExecResult[] = undefined;
     try {
-      options.select = options.select.replace(/ UP TO (\d+) ROWS/i, " LIMIT $1");
+      options.select = options.select.replace(/ UP TO (\d+) ROWS(.*)/i, "$2 LIMIT $1");
       if (options.primaryKey) {
         options.select = options.select.replace(/ ORDER BY PRIMARY KEY/i, " ORDER BY " + options.primaryKey.join(", "));
       } else {
         options.select = options.select.replace(/ ORDER BY PRIMARY KEY/i, "");
       }
+//      console.dir(options.select);
       res = this.sqlite!.exec(options.select);
     } catch (error) {
       // @ts-ignore
