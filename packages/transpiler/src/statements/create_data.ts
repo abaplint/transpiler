@@ -49,6 +49,12 @@ export class CreateDataTranspiler implements IStatementTranspiler {
       options.push(`"typeHandle": ` + so.getCode());
     }
 
+    const length = node.findExpressionAfterToken("LENGTH");
+    if (length) {
+      const so = traversal.traverse(length);
+      options.push(`"length": ` + so.getCode());
+    }
+
     let add = "";
     if (options.length > 0) {
       add = ",{" + options.join(",") + "}";
