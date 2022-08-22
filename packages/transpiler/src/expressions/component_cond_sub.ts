@@ -4,7 +4,7 @@ import {Traversal} from "../traversal";
 import * as abaplint from "@abaplint/core";
 import {Chunk} from "../chunk";
 
-export class ComponentCondTranspiler implements IExpressionTranspiler {
+export class ComponentCondSubTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     let ret = "";
@@ -16,14 +16,14 @@ export class ComponentCondTranspiler implements IExpressionTranspiler {
         ret += cond;
       } else if (c instanceof abaplint.Nodes.TokenNode) {
         switch (c.get().getStr().toUpperCase()) {
-          case "AND":
-            ret += " && ";
+          case "(":
+            ret += "(";
             break;
-          case "OR":
-            ret += " || ";
+          case ")":
+            ret += ")";
             break;
           default:
-            // todo, runtime error
+            throw new Error("ComponentCondSubTranspiler, unexpected");
         }
       }
     }
