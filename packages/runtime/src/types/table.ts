@@ -46,6 +46,14 @@ export class Table  {
     this.loops = new Set();
     this.rowType = rowType;
     this.options = options;
+    if (this.options === undefined) {
+      this.options = {
+        type: TableAccessType.standard,
+        keyFields: [],
+        isUnique: false,
+        withHeader: false,
+      };
+    }
     this.qualifiedName = qualifiedName?.toUpperCase();
   }
 
