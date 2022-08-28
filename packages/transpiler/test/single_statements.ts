@@ -18,6 +18,7 @@ describe("Single statements", () => {
     {abap: "IF foo = bar. ENDIF.",                 js: "if (abap.compare.eq(foo, bar)) {\n}",       skip: false},
     {abap: "IF foo EQ bar. ENDIF.",                js: "if (abap.compare.eq(foo, bar)) {\n}",       skip: false},
     {abap: "IF foo CP 'bar*'. ENDIF.",             js: "if (abap.compare.cp(foo, new abap.types.Character({length: 4}).set('bar*'))) {\n}",    skip: false},
+    {abap: "IF item IS INITIAL AND NOT ( foo = bar AND bar = moo ). ENDIF.",             js: "if (abap.compare.initial(item) && !(abap.compare.eq(foo, bar) && abap.compare.eq(bar, moo))) {\n}",    skip: false},
     {abap: "CONTINUE.",                            js: "continue;",                                 skip: false},
     {abap: "IMPORT variscreens = lt_variscreens FROM MEMORY ID '%_SCRNR_%'.",                       js: `throw new Error("Import, transpiler todo");`,                                 skip: false},
     {abap: "CASE bar. ENDCASE.",                   js: "let unique1 = bar;",                        skip: false},
@@ -346,6 +347,12 @@ await abap.Classes['ZCL_CALL'].not_found();`},
 
     {abap: `DELETE zqueue FROM TABLE lt_queue.`,
       js: `await abap.statements.deleteDatabase("zqueue", {"table": lt_queue});`},
+
+    {abap: `DELETE ct_files
+      WHERE item IS INITIAL
+      AND NOT ( file-path = zif=>c_dir
+      AND file-filename = zif=>c_dot ).`,
+    js: `abap.statements.deleteInternal(ct_files,{where: (i) => {return abap.compare.initial(i.item) && !(abap.compare.eq(i.file.get().path, abap.Classes['ZIF'].c_dir) && abap.compare.eq(i.file.get().filename, abap.Classes['ZIF'].c_dot));}});`},
 
     {abap: "lo_foo ?= lo_bar.", js: "await abap.statements.cast(lo_foo, lo_bar);", skip: false},
   ];

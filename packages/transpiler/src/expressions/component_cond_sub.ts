@@ -22,8 +22,11 @@ export class ComponentCondSubTranspiler implements IExpressionTranspiler {
           case ")":
             ret += ")";
             break;
+          case "NOT":
+            ret += "!";
+            break;
           default:
-            throw new Error("ComponentCondSubTranspiler, unexpected");
+            throw new Error("ComponentCondSubTranspiler, unexpected: " + node.concatTokens());
         }
       }
     }
