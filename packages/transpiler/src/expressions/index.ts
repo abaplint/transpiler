@@ -15,6 +15,7 @@ export * from "./constant";
 export * from "./database_table";
 export * from "./field_chain";
 export * from "./field_length";
+export * from "./component_cond_sub";
 export * from "./field_offset";
 export * from "./field_symbol";
 export * from "./function_exporting";
