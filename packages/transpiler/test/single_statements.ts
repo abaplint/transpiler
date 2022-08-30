@@ -177,6 +177,7 @@ describe("Single statements", () => {
     {abap: "SELECT * FROM sflight INNER JOIN scarr AS carrier ON carrier~carrid = sflight~carrid INTO CORRESPONDING FIELDS OF TABLE mt_sflight_join WHERE sflight~carrid = 'AA' ORDER BY sflight~fldate.",
       js: `await abap.statements.select(mt_sflight_join, {select: "SELECT * FROM sflight INNER JOIN scarr AS carrier ON carrier~carrid = sflight~carrid WHERE sflight~carrid = 'AA' ORDER BY sflight~fldate"});`},
     {abap: "INSERT INTO zopentest VALUES ls_row.", js: `await abap.statements.insertDatabase("zopentest", {"values": ls_row});`},
+    {abap: "INSERT t100 FROM ls_t100.", js: `await abap.statements.insertDatabase("t100", {"values": ls_t100});`},
     {abap: "ASSERT NOT foo EQ bar.",     js: `abap.statements.assert(!abap.compare.eq(foo, bar));`, skip: false},
     {abap: "GET REFERENCE OF blah INTO ref.", js: `ref.assign(blah);`, skip: false},
     {abap: `GET REFERENCE OF <item> INTO lr_stack_top.`, js: `lr_stack_top.assign(fs_item_.getPointer());`, skip: false},
