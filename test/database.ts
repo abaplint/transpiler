@@ -445,4 +445,25 @@ ASSERT sy-subrc = 0.`;
     await f(abap);
   });
 
+  it.only("SELECT, IN", async () => {
+    const code = `
+    TYPES ty_range TYPE RANGE OF t100-arbgb.
+    DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+    DATA lt_range TYPE ty_range.
+    DATA ls_range LIKE LINE OF lt_range.
+    ls_range-low = 'ZAG_UNIT_TEST'.
+    ls_range-sign = 'I'.
+    ls_range-option = 'EQ'.
+    APPEND ls_range TO lt_range.
+    SELECT * FROM t100 INTO TABLE lt_t100 WHERE arbgb IN lt_range.
+    WRITE sy-dbcnt.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
