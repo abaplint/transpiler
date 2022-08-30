@@ -21,7 +21,7 @@ export class InsertDatabase {
     for (const k of Object.keys(structure)) {
       columns.push(k);
       // todo, integers should not be surrounded by '"'?
-      values.push('"' + structure[k].get() + '"');
+      values.push('"' + structure[k].get().replace(/"/g, "\"\"") + '"');
     }
 
     if (typeof table !== "string") {
