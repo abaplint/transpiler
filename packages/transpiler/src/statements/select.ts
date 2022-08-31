@@ -107,10 +107,16 @@ export class SelectTranspiler implements IStatementTranspiler {
   private concatCond(cond: abaplint.Nodes.ExpressionNode, traversal: Traversal): string {
     let ret = "";
     for (const c of cond.getChildren()) {
-      if (c.get() instanceof abaplint.Expressions.SimpleSource3
-          && c instanceof abaplint.Nodes.ExpressionNode
-          && c.findDirectExpression(abaplint.Expressions.Constant) === undefined) {
-        ret += " '\" + " + new SimpleSource3Transpiler(true).transpile(c, traversal).getCode() + " + \"'";
+      if (c instanceof abaplint.Nodes.ExpressionNode
+          && c.get() instanceof abaplint.Expressions.SQLCompare) {
+        if (ret !== "") {
+          ret += " ";
+        }
+        if (c.findDirectExpression(abaplint.Expressions.SQLIn)) {
+          ret += this.sqlIn(c, traversal);
+        } else {
+          ret += this.basicCondition(c, traversal);
+        }
       } else if (c instanceof abaplint.Nodes.ExpressionNode) {
         ret += " " + this.concatCond(c, traversal);
       } else {
@@ -118,6 +124,42 @@ export class SelectTranspiler implements IStatementTranspiler {
       }
     }
     return ret.trim();
+  }
+
+  private sqlIn(c: abaplint.Nodes.ExpressionNode, _traversal: Traversal): string {
+    const fieldName = c.findDirectExpression(abaplint.Expressions.SQLFieldName);
+    const slqin = c.findDirectExpression(abaplint.Expressions.SQLIn);
+    const source = c.findFirstExpression(abaplint.Expressions.SimpleSource3);
+    if (fieldName === undefined || slqin === undefined || source === undefined) {
+      throw new Error("SQL Condition, transpiler todo, " + c.concatTokens());
+    }
+
+    const ret = `" + abap.expandIN("${fieldName.concatTokens()}", ${source.concatTokens()}) + "`;
+
+    return ret;
+  }
+
+  private basicCondition(c: abaplint.Nodes.ExpressionNode, traversal: Traversal): string {
+    let ret = "";
+    if (c.getChildren().length !== 3) {
+      throw new Error("SQL Condition, transpiler todo, " + c.concatTokens() + ", " + c.getChildren().length);
+    }
+    const fieldName = c.findDirectExpression(abaplint.Expressions.SQLFieldName);
+    const operator = c.findDirectExpression(abaplint.Expressions.SQLCompareOperator);
+    const source = c.findDirectExpression(abaplint.Expressions.SQLSource);
+    if (fieldName === undefined || operator === undefined || source === undefined) {
+      throw new Error("SQL Condition, transpiler todo, " + c.concatTokens());
+    }
+
+    ret += fieldName.concatTokens() + " " + operator.concatTokens() + " ";
+
+    const simple = source.findDirectExpression(abaplint.Expressions.SimpleSource3);
+    if (simple && simple.findDirectExpression(abaplint.Expressions.Constant) === undefined) {
+      ret += "'\" + " + new SimpleSource3Transpiler(true).transpile(simple, traversal).getCode() + " + \"'";
+    } else {
+      ret += source.concatTokens();
+    }
+    return ret;
   }
 
   private isWhereExpression(node: abaplint.Nodes.StatementNode, expression: abaplint.Nodes.ExpressionNode): boolean {

@@ -70,7 +70,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
               }
             }
           } else {
-            throw "MethodImplementationTranspiler, unknown default param type";
+            throw new Error("MethodImplementationTranspiler, unknown default param type");
           }
           after += "if (" + unique + " === undefined || " + unique + "." + varName + " === undefined) {" + varName + " = " + val + ";}\n";
         }

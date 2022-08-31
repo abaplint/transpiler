@@ -10,6 +10,7 @@ import * as DB from "./db/db";
 import * as operators from "./operators";
 import * as RFC from "./rfc";
 import * as types from "./types";
+import {expandIN} from "./expand_in";
 
 export {UnitTestResult, RFC, types, DB};
 
@@ -30,6 +31,7 @@ export class ABAP {
   public readonly console: Console;
   public OffsetLength = OffsetLength;
   public templateFormatting = templateFormatting;
+  public expandIN = expandIN;
 
   public readonly context: Context;
 
