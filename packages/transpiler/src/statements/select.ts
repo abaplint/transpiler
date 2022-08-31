@@ -112,7 +112,11 @@ export class SelectTranspiler implements IStatementTranspiler {
         if (ret !== "") {
           ret += " ";
         }
-        ret += this.basicCondition(c, traversal);
+        if (c.findDirectExpression(abaplint.Expressions.SQLIn)) {
+          ret += this.sqlIn(c, traversal);
+        } else {
+          ret += this.basicCondition(c, traversal);
+        }
       } else if (c instanceof abaplint.Nodes.ExpressionNode) {
         ret += " " + this.concatCond(c, traversal);
       } else {
@@ -120,6 +124,19 @@ export class SelectTranspiler implements IStatementTranspiler {
       }
     }
     return ret.trim();
+  }
+
+  private sqlIn(c: abaplint.Nodes.ExpressionNode, _traversal: Traversal): string {
+    const fieldName = c.findDirectExpression(abaplint.Expressions.SQLFieldName);
+    const slqin = c.findDirectExpression(abaplint.Expressions.SQLIn);
+    const source = c.findFirstExpression(abaplint.Expressions.SimpleSource3);
+    if (fieldName === undefined || slqin === undefined || source === undefined) {
+      throw new Error("SQL Condition, transpiler todo, " + c.concatTokens());
+    }
+
+    const ret = `" + abap.expandIN("${fieldName.concatTokens()}", ${source.concatTokens()}) + "`;
+
+    return ret;
   }
 
   private basicCondition(c: abaplint.Nodes.ExpressionNode, traversal: Traversal): string {
