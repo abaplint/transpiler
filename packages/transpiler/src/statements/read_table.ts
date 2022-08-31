@@ -43,15 +43,19 @@ export class ReadTableTranspiler implements IStatementTranspiler {
 
     const compare = node.findDirectExpression(abaplint.Expressions.ComponentCompareSimple);
     if (compare) {
-      const components = compare.findDirectExpressions(abaplint.Expressions.ComponentChainSimple);
-      const sources = compare.findDirectExpressions(abaplint.Expressions.Source);
-      if (components.length !== sources.length) {
-        throw new Error("READ TABLE, transpiler unexpected lengths");
-      }
       const conds: string[] = [];
-      for (let i = 0; i < components.length; i++) {
-        const s = traversal.traverse(sources[i]).getCode();
-        const field = components[i].concatTokens().toLowerCase().replace("-", ".get().");
+      const count = compare.getChildren().length / 3;
+      for (let i = 0; i < count; i++) {
+        const left = compare.getChildren()[i * 3];
+        const source = compare.getChildren()[(i * 3) + 2];
+
+        const s = traversal.traverse(source).getCode();
+        let field = left.concatTokens().toLowerCase().replace("-", ".get().");
+        if (left.get() instanceof abaplint.Expressions.Dynamic
+            && left instanceof abaplint.Nodes.ExpressionNode) {
+          const concat = left.concatTokens().toLowerCase();
+          field = concat.substring(2, concat.length - 2);
+        }
         if (s.includes("await")) {
           const id = UniqueIdentifier.get();
           prefix += "const " + id + " = " + s + ";\n";
