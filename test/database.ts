@@ -471,4 +471,23 @@ ASSERT sy-subrc = 0.`;
     expect(abap.console.get()).to.equal("2\n2");
   });
 
+  it("SELECT, dynamic WHERE condition", async () => {
+    const code = `
+    DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+    DATA lv_where TYPE string.
+    lv_where = |ARBGB = 'ZAG_UNIT_TEST'|.
+    SELECT * FROM t100
+      INTO TABLE lt_t100
+      WHERE (lv_where)
+      ORDER BY PRIMARY KEY.
+    WRITE / sy-dbcnt.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
