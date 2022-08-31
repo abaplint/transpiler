@@ -99,6 +99,9 @@ describe("Single statements", () => {
     {abap: "READ TABLE tab INDEX i INTO target.",          js: "abap.statements.readTable(tab,{index: i,into: target});", skip: false},
     {abap: "READ TABLE tab INTO line WITH KEY field = 2.", js: "abap.statements.readTable(tab,{into: line,withKey: (i) => {return abap.compare.eq(i.field, constant_2);}});", skip: false},
     {abap: "READ TABLE tab INDEX i ASSIGNING <nam>.",      js: "abap.statements.readTable(tab,{index: i,assigning: fs_nam_});",   skip: false},
+    {abap: "READ TABLE <lt_indices> WITH KEY ('PROGRAM_NDX') = lv_program_ndx ASSIGNING <ls_alert_by_index>.",
+      js: "abap.statements.readTable(fs_lt_indices_,{assigning: fs_ls_alert_by_index_,withKey: (i) => {return abap.compare.eq(i.program_ndx, lv_program_ndx);}});",   skip: false},
+
     {abap: "MODIFY result INDEX 1 FROM 4.",           js: "abap.statements.modifyInternal(result,{index: constant_1,from: constant_4});",   skip: false},
     {abap: "WRITE |foo| && |bar|.",                   js: "abap.statements.write(abap.operators.concat(new abap.types.String().set(`foo`),new abap.types.String().set(`bar`)));",                 skip: false},
     {abap: "WRITE zcl_name=>c_maxbits.",              js: "abap.statements.write(abap.Classes['ZCL_NAME'].c_maxbits);",            skip: false},
