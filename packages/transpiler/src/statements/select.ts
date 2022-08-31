@@ -112,7 +112,15 @@ export class SelectTranspiler implements IStatementTranspiler {
         if (ret !== "") {
           ret += " ";
         }
-        if (c.findDirectExpression(abaplint.Expressions.SQLIn)) {
+        if (c.findDirectExpression(abaplint.Expressions.Dynamic)) {
+          const chain = c.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.FieldChain);
+          if (chain) {
+            const code = new FieldChainTranspiler(true).transpile(chain, traversal).getCode();
+            ret += `" + ${code} + "`;
+          } else {
+            throw new Error("SQL Condition, transpiler todo, dyn cond, " + c.concatTokens());
+          }
+        } else if (c.findDirectExpression(abaplint.Expressions.SQLIn)) {
           ret += this.sqlIn(c, traversal);
         } else {
           ret += this.basicCondition(c, traversal);
