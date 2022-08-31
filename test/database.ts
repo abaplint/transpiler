@@ -445,7 +445,7 @@ ASSERT sy-subrc = 0.`;
     await f(abap);
   });
 
-  it.only("SELECT, IN", async () => {
+  it.skip("SELECT, IN", async () => {
     const code = `
     TYPES ty_range TYPE RANGE OF t100-arbgb.
     DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.

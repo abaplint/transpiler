@@ -107,10 +107,29 @@ export class SelectTranspiler implements IStatementTranspiler {
   private concatCond(cond: abaplint.Nodes.ExpressionNode, traversal: Traversal): string {
     let ret = "";
     for (const c of cond.getChildren()) {
-      if (c.get() instanceof abaplint.Expressions.SimpleSource3
-          && c instanceof abaplint.Nodes.ExpressionNode
-          && c.findDirectExpression(abaplint.Expressions.Constant) === undefined) {
-        ret += " '\" + " + new SimpleSource3Transpiler(true).transpile(c, traversal).getCode() + " + \"'";
+      if (c instanceof abaplint.Nodes.ExpressionNode
+          && c.get() instanceof abaplint.Expressions.SQLCompare) {
+        if (c.getChildren().length !== 3) {
+          throw new Error("SQL Condition, transpiler todo, " + c.concatTokens());
+        }
+        const fieldName = c.findDirectExpression(abaplint.Expressions.SQLFieldName);
+        const operator = c.findDirectExpression(abaplint.Expressions.SQLCompareOperator);
+        const source = c.findDirectExpression(abaplint.Expressions.SQLSource);
+        if (fieldName === undefined || operator === undefined || source === undefined) {
+          throw new Error("SQL Condition, transpiler todo, " + c.concatTokens());
+        }
+
+        if (ret !== "") {
+          ret += " ";
+        }
+        ret += fieldName.concatTokens() + " " + operator.concatTokens() + " ";
+
+        const simple = source.findDirectExpression(abaplint.Expressions.SimpleSource3);
+        if (simple && simple.findDirectExpression(abaplint.Expressions.Constant) === undefined) {
+          ret += "'\" + " + new SimpleSource3Transpiler(true).transpile(simple, traversal).getCode() + " + \"'";
+        } else {
+          ret += source.concatTokens();
+        }
       } else if (c instanceof abaplint.Nodes.ExpressionNode) {
         ret += " " + this.concatCond(c, traversal);
       } else {
