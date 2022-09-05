@@ -46,4 +46,16 @@ WRITE / lv_time.`;
     expect(abap.console.get()).to.equal("120000");
   });
 
+  it("initial date and time", async () => {
+    const code = `
+DATA lv_timestamp TYPE p LENGTH 8.
+DATA lv_date TYPE d.
+DATA lv_time TYPE t.
+CONVERT DATE lv_date TIME lv_time INTO TIME STAMP lv_timestamp TIME ZONE 'UTC'.
+ASSERT lv_timestamp IS INITIAL.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

@@ -45,6 +45,13 @@ export function convert(source: IConvertSource, target: IConvertTarget) {
   str = templateFormatting(new Character({length: 14}).set(str), {timestamp: "iso"});
   str += "Z";
 
+  if (str === "0000-00-00T00:00:00Z") {
+    target.stamp?.clear();
+    target.date?.clear();
+    target.time?.clear();
+    return;
+  }
+
   const t1 = new Date(Date.parse(str));
   const out = t1.toISOString().slice(0, 19).replace(/-/g, "").replace(/:/g, "").replace("T", "");
 
