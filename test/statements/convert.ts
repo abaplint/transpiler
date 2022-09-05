@@ -58,4 +58,18 @@ ASSERT lv_timestamp IS INITIAL.`;
     await f(abap);
   });
 
+  it("initial ts to date and time", async () => {
+    const code = `
+CONSTANTS lc_utc TYPE c LENGTH 6 VALUE 'UTC'.
+DATA lv_date TYPE d.
+DATA lv_time TYPE t.
+DATA iv_ts TYPE p LENGTH 8.
+CONVERT TIME STAMP iv_ts TIME ZONE lc_utc INTO DATE lv_date TIME lv_time.
+ASSERT lv_date IS INITIAL.
+ASSERT lv_time IS INITIAL.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
