@@ -20,6 +20,9 @@ export function templateFormatting(source: ICharacter | INumeric, options: optio
   }
   if (options.timestamp === "iso") {
     text = text.substr(0,4) + "-" + text.substr(4,2) + "-" + text.substr(6,2) + "T" + text.substr(8,2) + ":" + text.substr(10,2) + ":" + text.substr(12,2);
+    if (text === "0--T::") {
+      text = "0000-00-00T00:00:00";
+    }
   }
   if (options.date === "iso") {
     text = text.substr(0,4) + "-" + text.substr(4,2) + "-" + text.substr(6,2);
