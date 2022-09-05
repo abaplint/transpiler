@@ -202,4 +202,17 @@ WRITE lv_str.`;
     expect(abap.console.get()).to.equal("sdfABC");
   });
 
+  it("char out, spaces", async () => {
+    const code = `
+DATA lv_key TYPE c LENGTH 120.
+DATA lv_str TYPE string.
+lv_key = 'ESHORT               001'.
+lv_str = |{ lv_key(10) }ABC|.
+WRITE lv_str.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ESHORTABC");
+  });
+
 });
