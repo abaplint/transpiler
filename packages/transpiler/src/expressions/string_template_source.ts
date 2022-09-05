@@ -9,16 +9,13 @@ export class StringTemplateSourceTranspiler implements IExpressionTranspiler {
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     let ret = "";
 
-    let pre = "";
-    let post = "";
-    let get = true;
-    const next = node.findDirectExpression(Expressions.StringTemplateFormatting);
-    if (next) {
-      const options = this.build(next, traversal);
+    const pre = "abap.templateFormatting(";
+    let post = ")";
+    const formatting = node.findDirectExpression(Expressions.StringTemplateFormatting);
+    if (formatting) {
+      const options = this.build(formatting, traversal);
       if (options) {
-        pre = "abap.templateFormatting(";
         post = "," + options + ")";
-        get = false;
       }
     }
 
@@ -26,7 +23,7 @@ export class StringTemplateSourceTranspiler implements IExpressionTranspiler {
     if (c === undefined) {
       throw new Error("StringTemplateSourceTranspiler, Source not found");
     }
-    ret += pre + new SourceTranspiler(get).transpile(c, traversal).getCode() + post;
+    ret += pre + new SourceTranspiler().transpile(c, traversal).getCode() + post;
 
     return new Chunk(ret);
   }

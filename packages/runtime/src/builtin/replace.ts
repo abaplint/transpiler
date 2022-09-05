@@ -26,7 +26,7 @@ export function replace(input: IReplaceInput) {
   if (typeof input.with === "string") {
     wi = input.with;
   } else if (input.with instanceof Character) {
-    wi = input.with.get().replace(/ *$/, "");
+    wi = input.with.getTrimEnd();
   } else if (input.with) {
     wi = input.with.get();
   }
