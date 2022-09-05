@@ -191,4 +191,15 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello world");
   });
 
+  it("char out", async () => {
+    const code = `
+DATA lv_str TYPE string.
+lv_str = |{ 'sdf   ' }{ 'ABC' }|.
+WRITE lv_str.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("sdfABC");
+  });
+
 });
