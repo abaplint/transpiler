@@ -6,6 +6,7 @@ export interface IConcatenateInput {
   source: [number | string | INumeric | ICharacter | Table],
   target: ICharacter,
   separatedBy?: number | string | INumeric | ICharacter,
+  respectingBlanks?: boolean,
   lines?: boolean,
 }
 
