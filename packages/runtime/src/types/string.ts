@@ -25,7 +25,7 @@ export class String implements ICharacter {
       this.value = value.toString();
     } else if (value instanceof Character) {
       // replace trailing blanks if the source is a Character string
-      this.value = value.get().replace(/[ ]*$/g, "");
+      this.value = value.getTrimEnd();
     } else if (value instanceof Integer) {
       const lv_sign = (parseInt(value.get(), 10) >= 0) ? " " : "-";
       this.value = value.get() + lv_sign;

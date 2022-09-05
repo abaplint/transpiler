@@ -50,6 +50,10 @@ export class Character implements ICharacter {
     return this.value;
   }
 
+  public getTrimEnd(): string {
+    return this.value.replace(/ *$/, "");
+  }
+
   public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}) {
     if (input?.offset) {
       input.offset = parse(input.offset);

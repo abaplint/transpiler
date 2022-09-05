@@ -16,7 +16,7 @@ type options = {
 export function templateFormatting(source: ICharacter | INumeric, options?: options) {
   let text = "";
   if (source instanceof Character) {
-    text = source.get().trimEnd();
+    text = source.getTrimEnd();
   } else {
     text = source.get() + "";
   }

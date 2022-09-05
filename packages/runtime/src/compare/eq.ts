@@ -67,7 +67,7 @@ export function eq(
 
   let l: number | string | undefined = undefined;
   if (left instanceof Character) {
-    l = left.get().replace(/ *$/, "");
+    l = left.getTrimEnd();
   } else if (typeof left === "object") {
     l = left.get();
   } else {
@@ -76,7 +76,7 @@ export function eq(
 
   let r: number | string | undefined = undefined;
   if (right instanceof Character) {
-    r = right.get().replace(/ *$/, "");
+    r = right.getTrimEnd();
   } else if (typeof right === "object") {
     r = right.get();
   } else {
