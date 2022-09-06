@@ -72,4 +72,16 @@ ASSERT lv_time IS INITIAL.`;
     await f(abap);
   });
 
+  it.only("Convert UTC to CET", async () => {
+    const code = `
+DATA lv_timestamp TYPE p LENGTH 8.
+CONVERT DATE '20220905' TIME '175055' INTO TIME STAMP lv_timestamp TIME ZONE 'CET'.
+WRITE / |{ lv_timestamp TIMESTAMP = ISO }|.`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2022-09-05T15:50:55");
+  });
+
 });
