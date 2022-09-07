@@ -84,4 +84,24 @@ WRITE / |{ lv_timestamp TIMESTAMP = ISO }|.`;
     expect(abap.console.get()).to.equal("2022-09-05T15:50:55");
   });
 
+  it("More convert", async () => {
+    const code = `
+DATA iv_ts TYPE p LENGTH 8.
+
+CONSTANTS lc_utc TYPE c LENGTH 6 VALUE 'UTC'.
+
+DATA lv_date TYPE d.
+DATA lv_time TYPE t.
+
+iv_ts = '20220401200103'.
+
+CONVERT TIME STAMP iv_ts TIME ZONE lc_utc
+  INTO DATE lv_date TIME lv_time.
+WRITE lv_time.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("200103");
+  });
+
 });

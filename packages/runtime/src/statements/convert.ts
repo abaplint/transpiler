@@ -65,7 +65,7 @@ export function convert(source: IConvertSource, target: IConvertTarget) {
       target.stamp?.clear();
       return;
     }
-    const pt = Temporal.PlainTime.from(time);
+    const pt = Temporal.PlainTime.from(time.substring(0, 2) + ":" + time.substring(2, 4) + ":" + time.substring(4, 6));
     zoned = Temporal.PlainDate.from(date).toZonedDateTime({timeZone: zone, plainTime: pt});
     zoned = zoned.withTimeZone("UTC");
   } else {
@@ -74,7 +74,7 @@ export function convert(source: IConvertSource, target: IConvertTarget) {
       target.time?.clear();
       return;
     }
-    const pt = Temporal.PlainTime.from(stamp.substring(8, 14));
+    const pt = Temporal.PlainTime.from(stamp.substring(8, 10) + ":" + stamp.substring(10, 12) + ":" + stamp.substring(12, 14));
     zoned = Temporal.PlainDate.from(stamp.substring(0, 8)).toZonedDateTime({timeZone: "UTC", plainTime: pt});
   }
 
