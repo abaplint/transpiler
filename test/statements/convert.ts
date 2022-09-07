@@ -23,10 +23,11 @@ describe("Running statements - CONVERT", () => {
     lv_date = '19500505'.
     lv_time = '185024'.
     CONVERT DATE lv_date TIME lv_time INTO TIME STAMP lv_timestamp TIME ZONE lv_utc.
-    ASSERT lv_timestamp = '19500505185024'.`;
+    WRITE lv_timestamp.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+    expect(abap.console.get()).to.equal("19500505185024");
   });
 
   it("test 02", async () => {
@@ -72,13 +73,12 @@ ASSERT lv_time IS INITIAL.`;
     await f(abap);
   });
 
-  it.only("Convert UTC to CET", async () => {
+  it("Convert UTC to CET", async () => {
     const code = `
 DATA lv_timestamp TYPE p LENGTH 8.
 CONVERT DATE '20220905' TIME '175055' INTO TIME STAMP lv_timestamp TIME ZONE 'CET'.
 WRITE / |{ lv_timestamp TIMESTAMP = ISO }|.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2022-09-05T15:50:55");

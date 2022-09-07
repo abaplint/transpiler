@@ -1,11 +1,15 @@
+/*
 import {templateFormatting} from "../template_formatting";
 import {Character} from "../types";
+*/
 import {ICharacter} from "../types/_character";
+import {Temporal} from "temporal-polyfill";
+import {INumeric} from "../types/_numeric";
 
 export interface IConvertSource {
   date?: ICharacter | string,
   time?: ICharacter | string,
-  stamp?: ICharacter | string,
+  stamp?: ICharacter | INumeric | string,
   zone: ICharacter | string,
 }
 
@@ -16,52 +20,75 @@ export interface IConvertTarget {
 }
 
 export function convert(source: IConvertSource, target: IConvertTarget) {
-  let str = "";
 
+  let date = "";
   if (source.date) {
     if (typeof source.date === "string") {
-      str += source.date;
+      date = source.date;
     } else {
-      str += source.date.get();
+      date = source.date.get();
     }
   }
 
+  let time = "";
   if (source.time) {
     if (typeof source.time === "string") {
-      str += source.time;
+      time = source.time;
     } else {
-      str += source.time.get();
+      time = source.time.get();
     }
   }
 
+  let stamp = "";
   if (source.stamp) {
     if (typeof source.stamp === "string") {
-      str += source.stamp;
+      stamp = source.stamp;
     } else {
-      str += source.stamp.get();
+      stamp = source.stamp.get() + "";
     }
   }
 
-  str = templateFormatting(new Character({length: 14}).set(str), {timestamp: "iso"});
-  str += "Z";
-
-  if (str === "0000-00-00T00:00:00Z") {
-    target.stamp?.clear();
-    target.date?.clear();
-    target.time?.clear();
-    return;
+  let zone = "";
+  if (source.zone) {
+    if (typeof source.zone === "string") {
+      zone = source.zone;
+    } else {
+      zone = source.zone.get() + "";
+    }
   }
 
-  const t1 = new Date(Date.parse(str));
-  const out = t1.toISOString().slice(0, 19).replace(/-/g, "").replace(/:/g, "").replace("T", "");
+////////////////////////
+
+  let zoned: Temporal.ZonedDateTime | undefined = undefined;
+  if (date !== "" && time !== "") {
+    if (date === "00000000" && time === "000000") {
+      target.stamp?.clear();
+      return;
+    }
+    const pt = Temporal.PlainTime.from(time);
+    zoned = Temporal.PlainDate.from(date).toZonedDateTime({timeZone: zone, plainTime: pt});
+    zoned = zoned.withTimeZone("UTC");
+  } else {
+    if (stamp === "0") {
+      target.date?.clear();
+      target.time?.clear();
+      return;
+    }
+    const pt = Temporal.PlainTime.from(stamp.substring(8, 14));
+    zoned = Temporal.PlainDate.from(stamp.substring(0, 8)).toZonedDateTime({timeZone: "UTC", plainTime: pt});
+  }
+
+  const d = zoned.toPlainDate().toString().replace(/-/g, "");
+  const t = zoned.toPlainTime().toString().replace(/:/g, "");
 
   if (target.stamp) {
-    target.stamp.set(out);
+    target.stamp.set(d + t);
   }
   if (target.date) {
-    target.date.set(out.substr(0,8)); // + out.substr(2,2) + out.substr(0,2));
+    target.date.set(d);
   }
   if (target.time) {
-    target.time.set(out.substring(8));
+    target.time.set(t);
   }
+
 }
