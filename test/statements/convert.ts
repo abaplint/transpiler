@@ -104,4 +104,16 @@ WRITE lv_time.`;
     expect(abap.console.get()).to.equal("200103");
   });
 
+  it("Empty time zone", async () => {
+    const code = `
+DATA lv_timestamp TYPE p LENGTH 8.
+CONVERT DATE '20220831' TIME '000000'
+  INTO TIME STAMP lv_timestamp TIME ZONE ''.
+WRITE lv_timestamp.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("20220831000000");
+  });
+
 });
