@@ -21,6 +21,9 @@ export class ConcatenateTranspiler implements IStatementTranspiler {
     if (concat.startsWith("CONCATENATE LINES OF ")) {
       extra += ", lines: true";
     }
+    if (concat.includes(" RESPECTING BLANKS")) {
+      extra += ", respectingBlanks: true";
+    }
 
     const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
 

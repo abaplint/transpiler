@@ -1,3 +1,4 @@
+import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -48,6 +49,19 @@ describe("Running statements - CONCATENATE", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("CONCATENATE, respecting blanks", async () => {
+    const code = `
+    DATA character TYPE c LENGTH 1.
+    DATA lv_str TYPE string.
+    character = ' '.
+    CONCATENATE lv_str character INTO lv_str RESPECTING BLANKS.
+    WRITE strlen( lv_str ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
   });
 
 });
