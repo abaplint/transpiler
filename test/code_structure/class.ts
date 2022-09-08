@@ -1127,4 +1127,31 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello");
   });
 
+  it("should call super class constructor with identical input", async () => {
+    const code = `
+CLASS lcl_top DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor IMPORTING foo TYPE i.
+ENDCLASS.
+
+CLASS lcl_top IMPLEMENTATION.
+  METHOD constructor.
+    ASSERT foo IS NOT INITIAL.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_sub DEFINITION INHERITING FROM lcl_top.
+ENDCLASS.
+
+CLASS lcl_sub IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl_sub.
+  CREATE OBJECT ref EXPORTING foo = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

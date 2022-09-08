@@ -298,7 +298,7 @@ export class Traversal {
   }
 
   public buildConstructorContents(scope: abaplint.ISpaghettiScopeNode | undefined,
-                                  def: abaplint.IClassDefinition, inputName: string): string {
+                                  def: abaplint.IClassDefinition): string {
 
     /*
     const vars = scope?.getData().vars;
@@ -311,7 +311,7 @@ export class Traversal {
     if (def.getSuperClass() !== undefined) {
       // todo, more here, there might be parameters to pass
       // for now just pass the same input
-      ret += `await super.constructor_(${inputName});\n`;
+      ret += `await super.constructor_(INPUT);\n`;
     }
 
     ret += "this.me = new abap.types.ABAPObject();\n";

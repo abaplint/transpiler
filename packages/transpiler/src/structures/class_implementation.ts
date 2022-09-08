@@ -128,12 +128,12 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
       throw "buildConstructorCDEFNotFound";
     }
 
-    const ret = traversal.buildConstructorContents(scope, cdef, "");
+    const ret = traversal.buildConstructorContents(scope, cdef);
     if (ret === "") {
       return ret;
     }
 
-    return "async constructor_() {\n" + ret + "return this;\n}\n";
+    return "async constructor_(INPUT) {\n" + ret + "return this;\n}\n";
   }
 
 }
