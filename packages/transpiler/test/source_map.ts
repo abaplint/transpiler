@@ -92,7 +92,7 @@ ENDCLASS.`;
 `class zcl_maptest {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
-  async constructor_() {
+  async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     return this;
