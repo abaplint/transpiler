@@ -24,6 +24,8 @@ for (const repo of repos) {
   childProcess.execSync(repo.command, {stdio: "inherit", cwd: CWD + repo.folderName});
 }
 
+console.log("START NEW START NEW START NEW START NEW START NEW START NEW START NEW");
+
 // compile local/new version
 childProcess.execSync("npm run install", {stdio: "inherit"});
 childProcess.execSync("npm run link-local", {stdio: "inherit"});
@@ -37,9 +39,10 @@ for (const repo of repos) {
     childProcess.execSync(repo.command, {stdio: "inherit", cwd: CWD + repo.folderName});
     repo.success = true;
   } catch (e) {
+    console.log("ERROR ERROR ERROR");
     console.dir(e);
     repo.success = false;
-    childProcess.execSync("cat /output/cl_abap_zip.clas.mjs", {stdio: "inherit", cwd: CWD + repo.folderName});
+    childProcess.execSync("cat ./output/cl_abap_zip.clas.mjs", {stdio: "inherit", cwd: CWD + repo.folderName});
   }
 }
 
