@@ -188,4 +188,17 @@ ASSERT str = '/src/'.`;
     await f(abap);
   });
 
+  it.skip("REPLACE, all occur, no infinite loop", async () => {
+    const code = `
+DATA lv_pattern TYPE string.
+lv_pattern = '#foo#'.
+REPLACE ALL OCCURRENCES OF '#' IN lv_pattern WITH '##'.
+WRITE lv_pattern.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("##foo##");
+  });
+
 });
