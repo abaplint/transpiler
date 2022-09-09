@@ -437,4 +437,30 @@ ENDLOOP.`;
     await f(abap);
   });
 
+  it("LOOP condition with method call", async () => {
+    const code = `
+CLASS lcl_sub DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS foo RETURNING VALUE(foo) TYPE i.
+ENDCLASS.
+
+CLASS lcl_sub IMPLEMENTATION.
+  METHOD foo.
+    foo = 2.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA row LIKE LINE OF tab.
+  APPEND 1 TO tab.
+  APPEND 2 TO tab.
+  LOOP AT tab INTO row WHERE table_line = lcl_sub=>foo( ).
+    WRITE row.
+  ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

@@ -610,7 +610,7 @@ LOOP AT lt_matches INTO ls_match.
   WRITE ls_match-line.
 ENDLOOP.`;
     const js = await run(code);
-    const f = new Function("abap", js);
+    const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
   });

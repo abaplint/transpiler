@@ -1,12 +1,12 @@
 import {FieldSymbol, Integer, Structure, Table} from "../types";
 
 export interface ILoopOptions {
-  where?: (i: any) => boolean,
+  where?: (i: any) => Promise<boolean>,
   from?: Integer,
   to?: Integer
 }
 
-export function* loop(table: Table | FieldSymbol | undefined, options?: ILoopOptions): Generator<any, void, unknown> {
+export async function* loop(table: Table | FieldSymbol | undefined, options?: ILoopOptions): AsyncGenerator<any, void, unknown> {
   if (table === undefined) {
     throw new Error("LOOP at undefined");
   } else if (table instanceof FieldSymbol) {
@@ -39,7 +39,7 @@ export function* loop(table: Table | FieldSymbol | undefined, options?: ILoopOpt
 
       if (options?.where) {
         const row = isStructured ? current.get() : {table_line: current};
-        if (options.where(row) === false) {
+        if (await options.where(row) === false) {
           loopIndex.index++;
           continue;
         }
