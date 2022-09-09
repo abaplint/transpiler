@@ -437,7 +437,7 @@ ENDLOOP.`;
     await f(abap);
   });
 
-  it.only("LOOP condition with method call", async () => {
+  it.skip("LOOP condition with method call", async () => {
     const code = `
 CLASS lcl_sub DEFINITION.
   PUBLIC SECTION.
