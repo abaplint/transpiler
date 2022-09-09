@@ -58,7 +58,7 @@ for (const repo of repos) {
   if (repos.success === true) {
     comment += "| " + link + " | :green_circle: |\n";
   } else {
-    comment += "| " + link + " | :green_red: |\n";
+    comment += "| " + link + " | :red_circle: |\n";
   }
 }
 comment += "\n";
