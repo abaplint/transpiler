@@ -10,6 +10,10 @@ export type replaceInput = {
   ignoringCase?: boolean,
 };
 
+function escapeRegExp(text: string) {
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+}
+
 export function replace(input: replaceInput): void {
   let temp = input.target.get();
 
@@ -19,11 +23,12 @@ export function replace(input: replaceInput): void {
   let search: RegExp | undefined = undefined;
   let found = false;
   if (input.of) {
-    const inp = input.of.get();
+    let inp = input.of.get();
     if (inp.length === 0 && input.all === true) {
       throw "REPLACE, zero length input";
     }
     found = temp.indexOf(inp) >= 0;
+    inp = escapeRegExp(inp);
     search = new RegExp(inp, ignoreCase + allOccurrences);
   } else if (input.regex) {
     if (input.regex.get().length === 0 && input.all === true) {
@@ -45,20 +50,7 @@ export function replace(input: replaceInput): void {
     replace = replace.replace(/\\\}/g, "}");
   }
 
-  if (input.all === true) {
-    if (input.regex) {
-      temp = temp.replace(new RegExp(input.regex.get(), "g" + ignoreCase), replace);
-    } else {
-      temp = temp.replace(search, replace);
-/*
-      while(temp.replace(search, replace) !== temp) {
-        temp = temp.replace(search, replace);
-      }
-*/
-    }
-  } else {
-    temp = temp.replace(search, replace);
-  }
+  temp = temp.replace(search, replace);
 
   const subrc = found ? 0 : 4;
   // @ts-ignore
