@@ -43,7 +43,6 @@ for (const repo of repos) {
     console.log("ERROR ERROR ERROR");
     console.dir(e);
     repo.success = false;
-    childProcess.execSync("cat ./output/cl_abap_zip.clas.mjs", {stdio: "inherit", cwd: CWD + repo.folderName});
   }
 }
 
