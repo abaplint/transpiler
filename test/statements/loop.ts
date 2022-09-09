@@ -437,7 +437,7 @@ ENDLOOP.`;
     await f(abap);
   });
 
-  it.skip("LOOP condition with method call", async () => {
+  it("LOOP condition with method call", async () => {
     const code = `
 CLASS lcl_sub DEFINITION.
   PUBLIC SECTION.
@@ -459,7 +459,6 @@ START-OF-SELECTION.
     WRITE row.
   ENDLOOP.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });

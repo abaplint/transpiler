@@ -55,14 +55,15 @@ export class LoopTranspiler implements IStatementTranspiler {
     const whereNode = node.findFirstExpression(abaplint.Expressions.ComponentCond);
     if (whereNode) {
       const where = traversal.traverse(whereNode).getCode();
-      extra.push("where: " + where);
+      // todo, evil workaround removing "await",
+      extra.push("where: async " + where);
     }
 
     let concat = "";
     if (extra.length > 0) {
       concat = ",{" + extra.join(",") + "}";
     }
-    return new Chunk(`for (const ${unique1} of abap.statements.loop(${source}${concat})) {\n${target}`);
+    return new Chunk(`for await (const ${unique1} of abap.statements.loop(${source}${concat})) {\n${target}`);
   }
 
 }

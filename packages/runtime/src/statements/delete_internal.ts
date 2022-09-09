@@ -13,7 +13,7 @@ export interface IDeleteInternalOptions {
   to?: any,
 }
 
-export function deleteInternal(target: Table | FieldSymbol, options?: IDeleteInternalOptions): void {
+export async function deleteInternal(target: Table | FieldSymbol, options?: IDeleteInternalOptions): Promise<void> {
   let prev: any = undefined;
   let index = 0;
 
@@ -42,7 +42,7 @@ export function deleteInternal(target: Table | FieldSymbol, options?: IDeleteInt
     }
   }
 
-  for (const i of loop(target)) {
+  for await (const i of loop(target)) {
     // @ts-ignore
     index = abap.builtin.sy.get().tabix.get() - 1;
 

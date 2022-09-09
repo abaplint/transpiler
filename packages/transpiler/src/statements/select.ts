@@ -80,7 +80,7 @@ export class SelectTranspiler implements IStatementTranspiler {
   throw "FAE, todo, empty table";
 } else {
   abap.statements.clear(${target});
-  for (const ${unique} of abap.statements.loop(${faeName})) {
+  for await (const ${unique} of abap.statements.loop(${faeName})) {
     await abap.statements.select(${target}, {select: "${select.trim()}"${extra}}, {appending: true});
   }
   abap.builtin.sy.get().dbcnt.set(${target}.array().length);

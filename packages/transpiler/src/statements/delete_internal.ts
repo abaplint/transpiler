@@ -53,7 +53,7 @@ export class DeleteInternalTranspiler implements IStatementTranspiler {
       blah = ",{" + extra.join(",") + "}";
     }
 
-    return new Chunk("abap.statements.deleteInternal(" + target + blah + ");");
+    return new Chunk("await abap.statements.deleteInternal(" + target + blah + ");");
   }
 
 }
