@@ -32,17 +32,17 @@ childProcess.execSync("npm run link-local", {stdio: "inherit"});
 childProcess.execSync("npm run compile", {stdio: "inherit"});
 childProcess.execSync("npm run link-local", {stdio: "inherit"});
 
-for (const repo of repos) {
-  console.dir("New Version: " + repo.name + ", " + repo.folderName);
-  childProcess.execSync("npm link @abaplint/transpiler-cli", {stdio: "inherit", cwd: CWD + repo.folderName});
-  childProcess.execSync("npm link @abaplint/runtime", {stdio: "inherit", cwd: CWD + repo.folderName});
+for (let index = 0; index < repos.length; index++) {
+  console.dir("New Version: " + repos[index].name + ", " + repos[index].folderName);
+  childProcess.execSync("npm link @abaplint/transpiler-cli", {stdio: "inherit", cwd: CWD + repos[index].folderName});
+  childProcess.execSync("npm link @abaplint/runtime", {stdio: "inherit", cwd: CWD + repos[index].folderName});
   try {
-    childProcess.execSync(repo.command, {stdio: "inherit", cwd: CWD + repo.folderName});
-    repo.success = true;
+    childProcess.execSync(repos[index].command, {stdio: "inherit", cwd: CWD + repos[index].folderName});
+    repos[index].success = true;
   } catch (e) {
     console.log("ERROR ERROR ERROR");
     console.dir(e);
-    repo.success = false;
+    repos[index].success = false;
   }
 }
 
