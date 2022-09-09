@@ -80,6 +80,32 @@ describe("Running statements - REPLACE", () => {
     expect(abap.console.get()).to.equal("fooab");
   });
 
+  it("REPLACE, regex not found", async () => {
+    const code = `
+    DATA lv_var TYPE string.
+    lv_var = '1'.
+    REPLACE REGEX 'sdfds' IN lv_var WITH ''.
+    WRITE sy-subrc.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4");
+  });
+
+  it("REPLACE, regex found", async () => {
+    const code = `
+    DATA lv_var TYPE string.
+    lv_var = 'sdfds'.
+    REPLACE REGEX 'sdfds' IN lv_var WITH ''.
+    WRITE sy-subrc.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
   it("REPLACE, not found, should set subrc", async () => {
     const code = `
     DATA foo TYPE string.
@@ -188,7 +214,7 @@ ASSERT str = '/src/'.`;
     await f(abap);
   });
 
-  it.skip("REPLACE, all occur, no infinite loop", async () => {
+  it("REPLACE, all occur, no infinite loop", async () => {
     const code = `
 DATA lv_pattern TYPE string.
 lv_pattern = '#foo#'.
