@@ -30,6 +30,7 @@ console.log("START NEW START NEW START NEW START NEW START NEW START NEW START N
 childProcess.execSync("npm run install", {stdio: "inherit"});
 childProcess.execSync("npm run link-local", {stdio: "inherit"});
 childProcess.execSync("npm run compile", {stdio: "inherit"});
+childProcess.execSync("npm run link-local", {stdio: "inherit"});
 
 for (const repo of repos) {
   console.dir("New Version: " + repo.name + ", " + repo.folderName);
