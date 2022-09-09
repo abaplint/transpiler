@@ -54,7 +54,7 @@ comment += "| Repository | Result |\n";
 comment += "| :--- | :---: |\n";
 for (const repo of repos) {
   const link = "[" + repo.name + "](https://github.com/" + repo.name + ")"
-  if (repos.success === true) {
+  if (repo.success === true) {
     comment += "| " + link + " | :green_circle: |\n";
   } else {
     comment += "| " + link + " | :red_circle: |\n";
