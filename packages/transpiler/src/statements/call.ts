@@ -24,10 +24,41 @@ export class CallTranspiler implements IStatementTranspiler {
         post = ")";
       }
 
+      const exceptions = node.findFirstExpression(abaplint.Expressions.ParameterListExceptions);
+      if (exceptions) {
+        pre = "try {\n" + pre;
+      }
+
+      post += ";";
+
+      if (exceptions) {
+        post += `\nabap.builtin.sy.get().subrc.set(0);
+} catch (e) {
+if (e.classic) {
+  switch (e.classic.toUpperCase()) {\n`;
+        for (const e of exceptions.findAllExpressions(abaplint.Expressions.ParameterException)) {
+          const name = e.getFirstToken().getStr().toUpperCase();
+          const value = e.findFirstExpression(abaplint.Expressions.SimpleName)?.getFirstToken().getStr().toUpperCase();
+          if (value === undefined) {
+            continue;
+          }
+          if (name === "OTHERS") {
+            post += `default: abap.builtin.sy.get().subrc.set(${value}); break;\n`;
+          } else {
+            post += `case "${name}": abap.builtin.sy.get().subrc.set(${value}); break;\n`;
+          }
+        }
+        post += `  }
+} else {
+  throw e;
+}
+}`;
+      }
+
       return new Chunk()
         .appendString(pre)
         .appendChunk(traversal.traverse(chain))
-        .append(post + ";", node.getLastToken(), traversal);
+        .append(post, node.getLastToken(), traversal);
     }
 
     const methodSource = node.findDirectExpression(abaplint.Expressions.MethodSource);
