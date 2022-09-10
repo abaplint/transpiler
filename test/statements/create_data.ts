@@ -89,7 +89,7 @@ WRITE <fs_value>.`;
     expect(abap.console.get()).to.equal("115555");
   });
 
-  it.skip("CREATE DATA, LENGTH", async () => {
+  it("CREATE DATA, LENGTH", async () => {
     const code = `
 DATA ref TYPE REF TO data.
 DATA lv_len TYPE i.
@@ -100,13 +100,12 @@ ASSIGN ref->* TO <fs>.
 <fs> = '123'.
 WRITE <fs>.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("12");
   });
 
-  it.skip("CREATE DATA, date", async () => {
+  it("CREATE DATA, date", async () => {
     const code = `
 DATA dref TYPE REF TO data.
 FIELD-SYMBOLS <fs> TYPE any.
@@ -114,7 +113,6 @@ CREATE DATA dref TYPE d.
 ASSIGN dref->* TO <fs>.
 WRITE <fs>.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("00000000");
