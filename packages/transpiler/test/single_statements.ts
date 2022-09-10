@@ -331,7 +331,18 @@ await abap.Classes['ZCL_CALL'].not_found();`},
     p_descr_ref = rs_node_type-dd
   EXCEPTIONS
     component_not_found = 4 ).`,
-    js: `rs_node_type.get().dd.set(await lo_sdescr.get().get_component_type({p_name: rs_node_type.get().target_field_name}));`},
+    js: `try {
+  rs_node_type.get().dd.set(await lo_sdescr.get().get_component_type({p_name: rs_node_type.get().target_field_name}));
+  abap.builtin.sy.get().subrc.set(0);
+} catch (e) {
+  if (e.classic) {
+      switch (e.classic.toUpperCase()) {
+      case "COMPONENT_NOT_FOUND": abap.builtin.sy.get().subrc.set(4); break;
+        }
+    } else {
+        throw e;
+    }
+  }`},
 
     {abap: `RECEIVE RESULTS FROM FUNCTION 'Z_ABAPGIT_SERIALIZE_PARALLEL'
       IMPORTING

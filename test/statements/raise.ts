@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -29,6 +29,54 @@ ENDCLASS.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("basic, classic exception in method call", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS method EXCEPTIONS hello_world.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD method.
+    RAISE hello_world.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>method(
+    EXCEPTIONS hello_world = 5
+    OTHERS = 7 ).
+  WRITE sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("5");
+  });
+
+  it("no exception, should reset subrc", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS method EXCEPTIONS hello_world.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD method.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  sy-subrc = 2.
+  lcl=>method(
+    EXCEPTIONS hello_world = 5
+    OTHERS = 7 ).
+  WRITE sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
   });
 
 });

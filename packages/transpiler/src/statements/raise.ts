@@ -13,7 +13,7 @@ export class RaiseTranspiler implements IStatementTranspiler {
       const s = node.findFirstExpression(abaplint.Expressions.SimpleSource2);
       if (s === undefined) {
         const name = node.findFirstExpression(abaplint.Expressions.ExceptionName)?.concatTokens().toLowerCase();
-        return new Chunk().append(`throw new Error({classic: "${name}"});`, node, traversal);
+        return new Chunk().append(`throw new abap.ClassicError({classic: "${name}"});`, node, traversal);
       }
       const sCode = new SourceTranspiler(true).transpile(s, traversal).getCode();
       return new Chunk().append(`throw ${sCode};`, node, traversal);
