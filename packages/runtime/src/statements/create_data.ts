@@ -15,14 +15,23 @@ export interface ICreateDataOptions {
   like?: any,
 }
 
+function throwGlobalException(name: string) {
+  // @ts-ignore
+  if (abap.Classes[name] !== undefined) {
+    // @ts-ignore
+    throw new abap.Classes[name]();
+  } else {
+    throw `Global class ${name} not found`;
+  }
+}
+
 export function createData(target: DataReference, options?: ICreateDataOptions) {
 //  console.dir(options);
 
   if (options?.name && options?.table) {
     // @ts-ignore
     if (abap.DDIC[options.name] === undefined) {
-      // todo, throw exception CX_SY_CREATE_DATA_ERROR
-      return;
+      throwGlobalException("CX_SY_CREATE_DATA_ERROR");
     }
     // @ts-ignore
     target.assign(new abap.types.Table(abap.DDIC[options.name].type));
@@ -46,13 +55,7 @@ export function createData(target: DataReference, options?: ICreateDataOptions) 
   } else if (options?.name) {
     // @ts-ignore
     if (abap.DDIC[options.name] === undefined) {
-      // @ts-ignore
-      if (abap.Classes["CX_SY_CREATE_DATA_ERROR"] !== undefined) {
-        // @ts-ignore
-        throw new abap.Classes["CX_SY_CREATE_DATA_ERROR"]();
-      } else {
-        throw "Global class CX_SY_CREATE_DATA_ERROR not found";
-      }
+      throwGlobalException("CX_SY_CREATE_DATA_ERROR");
     }
     // @ts-ignore
     target.assign(clone(abap.DDIC[options.name].type));
