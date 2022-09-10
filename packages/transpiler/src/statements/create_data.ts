@@ -46,7 +46,10 @@ export class CreateDataTranspiler implements IStatementTranspiler {
     const handle = node.findExpressionAfterToken("HANDLE");
     if (handle) {
       const so = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Source));
-      options.push(`"typeHandle": ` + so.getCode());
+      const lookup = traversal.lookupClassOrInterface("KERNEL_CREATE_DATA_HANDLE", node.getFirstToken());
+      const call = `await ${lookup}.call({handle: ${so.getCode()}, dref: ${target.getCode()}});`;
+      return new Chunk().append(
+        `if (${lookup} === undefined) throw new Error("CreateData, kernel class missing");\n${call}`, node, traversal);
     }
 
     const length = node.findExpressionAfterToken("LENGTH");

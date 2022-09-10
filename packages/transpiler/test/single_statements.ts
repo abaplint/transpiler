@@ -269,7 +269,8 @@ await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({seconds: constant_10,cond: abap
     {abap: `CREATE DATA ref LIKE LINE OF <tab>.`,
       js: `abap.statements.createData(ref,{"likeLineOf": fs_tab_});`},
     {abap: `CREATE DATA abc1 TYPE HANDLE abc2.`,
-      js: `abap.statements.createData(abc1,{"typeHandle": abc2});`},
+      js: `if (abap.Classes['KERNEL_CREATE_DATA_HANDLE'] === undefined) throw new Error("CreateData, kernel class missing");
+await abap.Classes['KERNEL_CREATE_DATA_HANDLE'].call({handle: abc2, dref: abc1});`},
 
     {abap: `ASSERT <fs> IS ASSIGNED.`,
       js: `abap.statements.assert(abap.compare.assigned(fs_fs_));`},

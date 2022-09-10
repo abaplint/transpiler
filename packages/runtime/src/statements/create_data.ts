@@ -1,5 +1,5 @@
 import {clone} from "../clone";
-import {ABAPObject, DataReference, Date, FieldSymbol, Float, Integer, Structure, Table, Time} from "../types";
+import {ABAPObject, DataReference, FieldSymbol, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -9,10 +9,19 @@ export interface ICreateDataOptions {
   table?: boolean,
   name?: string,
   type?: PointerType,
-  typeHandle?: ABAPObject,
   length?: INumeric,
   likeLineOf?: FieldSymbol | Table,
   like?: any,
+}
+
+function throwGlobalException(name: string) {
+  // @ts-ignore
+  if (abap.Classes[name] !== undefined) {
+    // @ts-ignore
+    throw new abap.Classes[name]();
+  } else {
+    throw `Global class ${name} not found`;
+  }
 }
 
 export function createData(target: DataReference, options?: ICreateDataOptions) {
@@ -21,38 +30,14 @@ export function createData(target: DataReference, options?: ICreateDataOptions) 
   if (options?.name && options?.table) {
     // @ts-ignore
     if (abap.DDIC[options.name] === undefined) {
-      // todo, throw exception CX_SY_CREATE_DATA_ERROR
-      return;
+      throwGlobalException("CX_SY_CREATE_DATA_ERROR");
     }
     // @ts-ignore
     target.assign(new abap.types.Table(abap.DDIC[options.name].type));
-  } else if (options?.typeHandle) {
-    switch (options.typeHandle.get().type_kind.get()) {
-      case "F":
-        target.assign(new Float());
-        break;
-      case "I":
-        target.assign(new Integer());
-        break;
-      case "D":
-        target.assign(new Date());
-        break;
-      case "T":
-        target.assign(new Time());
-        break;
-      default:
-        throw "CREATE DATA, unknown handle type";
-    }
   } else if (options?.name) {
     // @ts-ignore
     if (abap.DDIC[options.name] === undefined) {
-      // @ts-ignore
-      if (abap.Classes["CX_SY_CREATE_DATA_ERROR"] !== undefined) {
-        // @ts-ignore
-        throw new abap.Classes["CX_SY_CREATE_DATA_ERROR"]();
-      } else {
-        throw "Global class CX_SY_CREATE_DATA_ERROR not found";
-      }
+      throwGlobalException("CX_SY_CREATE_DATA_ERROR");
     }
     // @ts-ignore
     target.assign(clone(abap.DDIC[options.name].type));
