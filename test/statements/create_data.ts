@@ -89,7 +89,7 @@ WRITE <fs_value>.`;
     expect(abap.console.get()).to.equal("115555");
   });
 
-  it.only("CREATE DATA, LENGTH", async () => {
+  it.skip("CREATE DATA, LENGTH", async () => {
     const code = `
 DATA ref TYPE REF TO data.
 DATA lv_len TYPE i.
@@ -106,7 +106,7 @@ WRITE <fs>.`;
     expect(abap.console.get()).to.equal("12");
   });
 
-  it.only("CREATE DATA, date", async () => {
+  it.skip("CREATE DATA, date", async () => {
     const code = `
 DATA dref TYPE REF TO data.
 FIELD-SYMBOLS <fs> TYPE any.
