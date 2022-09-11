@@ -1,4 +1,4 @@
-import {Float, Integer} from "../types";
+import {Character, Float, Integer} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
@@ -17,9 +17,9 @@ export function minus(left: INumeric | ICharacter | string | number | Integer | 
   } else if (typeof right === "number" && Number.isInteger(right) && left instanceof Integer) {
     return new Integer().set(left.get() - right);
 
-  } else if (left instanceof String && Number.isInteger(Number(left.get())) && right instanceof Integer) {
+  } else if ((left instanceof String || left instanceof Character) && Number.isInteger(Number(left.get())) && right instanceof Integer) {
     return new Integer().set(Number.parseInt(left.get(), 10) - right.get());
-  } else if (right instanceof String && Number.isInteger(Number(right)) && left instanceof Integer) {
+  } else if ((right instanceof String || right instanceof Character) && Number.isInteger(Number(right)) && left instanceof Integer) {
     return new Integer().set(left.get() - Number.parseInt(right.get(), 10));
   }
 
