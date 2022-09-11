@@ -1,5 +1,5 @@
 import {clone} from "../clone";
-import {ABAPObject, Character, DataReference, Date, String, FieldSymbol, Float, Integer, Structure, Table, Time, XString, Hex} from "../types";
+import {ABAPObject, Character, DataReference, Date, String, FieldSymbol, Float, Integer, Structure, Table, Time, XString, Hex, Packed} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -60,6 +60,15 @@ export function createData(target: DataReference, options?: ICreateDataOptions) 
             length = options.length.get();
           }
           target.assign(new Hex({length: length}));
+        }
+        break;
+      case "P":
+        {
+          let length = 1;
+          if (options.length) {
+            length = options.length.get();
+          }
+          target.assign(new Packed({length: length}));
         }
         break;
       case "F":
