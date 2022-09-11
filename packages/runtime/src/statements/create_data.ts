@@ -1,5 +1,5 @@
 import {clone} from "../clone";
-import {ABAPObject, Character, DataReference, Date, FieldSymbol, Float, Structure, Table, Time} from "../types";
+import {ABAPObject, Character, DataReference, Date, FieldSymbol, Float, Integer, Structure, Table, Time} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -61,6 +61,9 @@ export function createData(target: DataReference, options?: ICreateDataOptions) 
         break;
       case "T":
         target.assign(new Time());
+        break;
+      case "I":
+        target.assign(new Integer());
         break;
       default:
         throw "CREATE DATA, unknown type " + options.typeName;
