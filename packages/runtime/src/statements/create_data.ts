@@ -1,5 +1,5 @@
 import {clone} from "../clone";
-import {ABAPObject, Character, DataReference, Date, FieldSymbol, Float, Integer, Structure, Table, Time} from "../types";
+import {ABAPObject, Character, DataReference, Date, String, FieldSymbol, Float, Integer, Structure, Table, Time, XString, Hex} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -53,6 +53,15 @@ export function createData(target: DataReference, options?: ICreateDataOptions) 
           target.assign(new Character({length: length}));
         }
         break;
+      case "X":
+        {
+          let length = 1;
+          if (options.length) {
+            length = options.length.get();
+          }
+          target.assign(new Hex({length: length}));
+        }
+        break;
       case "F":
         target.assign(new Float());
         break;
@@ -64,6 +73,12 @@ export function createData(target: DataReference, options?: ICreateDataOptions) 
         break;
       case "I":
         target.assign(new Integer());
+        break;
+      case "STRING":
+        target.assign(new String());
+        break;
+      case "XSTRING":
+        target.assign(new XString());
         break;
       default:
         throw "CREATE DATA, unknown type " + options.typeName;
