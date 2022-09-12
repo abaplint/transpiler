@@ -280,4 +280,28 @@ WRITE result.`;
     expect(abap.console.get()).to.equal("7F");
   });
 
+  it("character field plus 1", async () => {
+    const code = `
+    DATA foo TYPE c LENGTH 10.
+    foo = '1000'.
+    foo = foo + 1.
+    WRITE / foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("1001");
+  });
+
+  it("character field minus 1", async () => {
+    const code = `
+    DATA foo TYPE c LENGTH 10.
+    foo = '1000'.
+    foo = foo - 1.
+    WRITE / foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("999");
+  });
+
 });
