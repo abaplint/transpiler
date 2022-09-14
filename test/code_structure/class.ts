@@ -1154,4 +1154,37 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("constructor call, different input parameter names", async () => {
+    const code = `
+CLASS lcl_sup DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor IMPORTING foo TYPE i.
+ENDCLASS.
+
+CLASS lcl_sup IMPLEMENTATION.
+  METHOD constructor.
+    WRITE foo.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_sub DEFINITION INHERITING FROM lcl_sup.
+  PUBLIC SECTION.
+    METHODS constructor IMPORTING bar TYPE i.
+ENDCLASS.
+
+CLASS lcl_sub IMPLEMENTATION.
+  METHOD constructor.
+    super->constructor( bar ).
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA sub TYPE REF TO lcl_sub.
+  CREATE OBJECT sub EXPORTING bar = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
