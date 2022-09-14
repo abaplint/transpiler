@@ -124,4 +124,78 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("CREATE OBJECT, determine correct class", async () => {
+    const code = `
+CLASS lcl_foo DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS lcl_foo IMPLEMENTATION.
+  METHOD constructor.
+    WRITE 'world'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    DATA foo TYPE REF TO lcl_foo.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD constructor.
+    WRITE 'hello'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA bar TYPE REF TO lcl_bar.
+  CREATE OBJECT bar.
+  CREATE OBJECT bar->foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("helloworld");
+  });
+
+  it("CREATE OBJECT, determine correct class, interfaced", async () => {
+    const code = `
+CLASS lcl_foo DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS lcl_foo IMPLEMENTATION.
+  METHOD constructor.
+    WRITE 'world'.
+  ENDMETHOD.
+ENDCLASS.
+
+INTERFACE lif_bar.
+  DATA foo TYPE REF TO lcl_foo.
+ENDINTERFACE.
+
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif_bar.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD constructor.
+    WRITE 'hello'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA bar TYPE REF TO lcl_bar.
+  CREATE OBJECT bar.
+  CREATE OBJECT bar->lif_bar~foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("helloworld");
+  });
+
 });

@@ -2,7 +2,7 @@ import {ABAPObject, Character, DataReference, Date, FieldSymbol, Hex, Numc, Stru
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
-export function initial(val: ICharacter | INumeric | string | number | Structure | DataReference | Table | ABAPObject) {
+export function initial(val: ICharacter | INumeric | string | number | Structure | DataReference | FieldSymbol | Table | ABAPObject) {
   // todo, refactor? add as method in each type instead?
   if (val instanceof Table) {
     return val.array().length === 0;
@@ -20,6 +20,9 @@ export function initial(val: ICharacter | INumeric | string | number | Structure
     return val.get().match(/^ *$/) !== null;
   } else if (val instanceof FieldSymbol && val.getPointer() === undefined) {
     throw "FS not assigned";
+  } else if (val instanceof FieldSymbol) {
+    const res: any = initial(val.getPointer());
+    return res as boolean;
   }
 
   if (typeof val === "string") {

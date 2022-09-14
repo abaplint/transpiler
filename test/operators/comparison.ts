@@ -823,4 +823,15 @@ ENDIF.`;
     expect(abap.console.get()).to.equal(`eq`);
   });
 
+  it("Table initial via field symbol", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+FIELD-SYMBOLS <fs> TYPE ANY TABLE.
+ASSIGN tab TO <fs>.
+ASSERT <fs> IS INITIAL.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

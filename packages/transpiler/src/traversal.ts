@@ -395,6 +395,19 @@ export class Traversal {
       } else if (c.get() instanceof abaplint.Expressions.ComponentName
           && context instanceof abaplint.BasicTypes.StructureType) {
         context = context.getComponentByName(c.getFirstToken().getStr());
+      } else if (c.get() instanceof abaplint.Expressions.AttributeName
+          && context instanceof abaplint.BasicTypes.ObjectReferenceType) {
+        const id = context.getIdentifier();
+        if (id instanceof abaplint.Types.ClassDefinition || id instanceof abaplint.Types.InterfaceDefinition) {
+          const concat = c.concatTokens();
+          if (concat.includes("~")) {
+            const [iname, aname] = concat.split("~");
+            const intf = scope.findInterfaceDefinition(iname);
+            context = intf?.getAttributes().findByName(aname)?.getType();
+          } else {
+            context = id.getAttributes().findByName(concat)?.getType();
+          }
+        }
       }
     }
 
