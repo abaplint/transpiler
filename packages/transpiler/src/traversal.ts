@@ -300,17 +300,10 @@ export class Traversal {
   public buildConstructorContents(scope: abaplint.ISpaghettiScopeNode | undefined,
                                   def: abaplint.IClassDefinition): string {
 
-    /*
-    const vars = scope?.getData().vars;
-    if (vars === undefined || Object.keys(vars).length === 0) {
-      return "";
-    }
-    */
     let ret = "";
 
-    if (def.getSuperClass() !== undefined) {
-      // todo, more here, there might be parameters to pass
-      // for now just pass the same input
+    if (def.getSuperClass() !== undefined
+        && def.getMethodDefinitions().getByName("CONSTRUCTOR") === undefined) {
       ret += `await super.constructor_(INPUT);\n`;
     }
 

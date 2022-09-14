@@ -7,10 +7,6 @@ import {MethodSourceTranspiler} from "../expressions";
 export class CallTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    if (node.concatTokens().toLowerCase().includes("super->constructor")) {
-      // todo, https://github.com/abaplint/transpiler/issues/133
-      return new Chunk("");
-    }
 
     const chain = node.findDirectExpression(abaplint.Expressions.MethodCallChain);
     if (chain) {
@@ -55,9 +51,16 @@ if (e.classic) {
 }`;
       }
 
+      const chainChunk = traversal.traverse(chain);
+      let chainCode = chainChunk.getCode();
+      if (chainCode.startsWith("await super.constructor(")) {
+// semantics of constructors in JS vs ABAP is different, so the "constructor_" has been introduced,
+        chainCode = chainCode.replace("await super.constructor(", "await super.constructor_(");
+      }
+
       return new Chunk()
         .appendString(pre)
-        .appendChunk(traversal.traverse(chain))
+        .appendString(chainCode)
         .append(post, node.getLastToken(), traversal);
     }
 
@@ -78,9 +81,13 @@ if (e.classic) {
         post = ")";
       }
 
-      const ms = new MethodSourceTranspiler(pre).transpile(methodSource, traversal);
+      let ms = new MethodSourceTranspiler(pre).transpile(methodSource, traversal).getCode();
+      if (ms === "await super.get().constructor") {
+// semantics of constructors in JS vs ABAP is different, so the "constructor_" has been introduced,
+        ms = "await super.constructor_";
+      }
 
-      return new Chunk().appendChunk(ms).appendString("(" + body + ")" + post + ";");
+      return new Chunk().appendString(ms).appendString("(" + body + ")" + post + ";");
     }
 
     throw new Error("CallTranspiler, todo");
