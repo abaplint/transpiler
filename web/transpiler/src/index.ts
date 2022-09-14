@@ -13,6 +13,8 @@ global.MonacoEnvironment = {
 };
 
 import "./index.css";
+import "../public/favicon-16x16.png";
+import "../public/favicon-32x32.png";
 import * as monaco from "monaco-editor";
 import {config, Transpiler} from "@abaplint/transpiler";
 import {ABAP} from "@abaplint/runtime";
