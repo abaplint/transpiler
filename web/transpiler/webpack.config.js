@@ -52,6 +52,16 @@ module.exports = {
         use: ["style-loader", "css-loader"],
       },
       {
+        test: /\.png$/,
+        include: /favicon/,
+        use: "file-loader?name=[name].[ext]",
+      },
+      {
+        test: /\.png$|\.svg$/,
+        exclude: /favicon/,
+        use: "url-loader?limit=1024",
+      },
+      {
         test: /\.ttf$/,
         type: "asset/resource",
         generator: {
