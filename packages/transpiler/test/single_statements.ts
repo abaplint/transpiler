@@ -160,8 +160,8 @@ describe("Single statements", () => {
       js: `await abap.statements.callFunction({name:'BAR',destination:'MOO'});`, skip: false},
     {abap: `CALL FUNCTION 'BAR' DESTINATION 'MOO' EXPORTING foo = boo.`,
       js: `await abap.statements.callFunction({name:'BAR',destination:'MOO',exporting: {foo: boo}});`, skip: false},
-    {abap: "super->method( ).",     js: `await super.method();`, skip: false},
-    {abap: "super->constructor( ).",     js: ``, skip: false}, // todo, https://github.com/abaplint/transpiler/issues/133
+    {abap: "super->method( ).",      js: `await super.method();`, skip: false},
+    {abap: "super->constructor( ).", js: `await super.constructor_();`, skip: false},
 
     {abap: "SELECT SINGLE * FROM t100 INTO ls_result.",
       js: `await abap.statements.select(ls_result, {select: "SELECT * FROM t100 UP TO 1 ROWS"});`},
