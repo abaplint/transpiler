@@ -56,6 +56,10 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
     }
 
     const target = node.findDirectExpression(abaplint.Expressions.Target);
+    if (target === undefined) {
+      throw new Error(`CreateObjectTranspiler, target not found`);
+    }
+
     const type = traversal.determineType(node, scope);
     if (type === undefined) {
       throw new Error(`CreateObjectTranspiler, target variable "${target?.concatTokens()}" not found in scope`);

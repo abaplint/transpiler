@@ -395,6 +395,12 @@ export class Traversal {
       } else if (c.get() instanceof abaplint.Expressions.ComponentName
           && context instanceof abaplint.BasicTypes.StructureType) {
         context = context.getComponentByName(c.getFirstToken().getStr());
+      } else if (c.get() instanceof abaplint.Expressions.AttributeName
+          && context instanceof abaplint.BasicTypes.ObjectReferenceType) {
+        const id = context.getIdentifier();
+        if (id instanceof abaplint.Types.ClassDefinition || id instanceof abaplint.Types.InterfaceDefinition) {
+          context = id.getAttributes().findByName(c.concatTokens())?.getType();
+        }
       }
     }
 
