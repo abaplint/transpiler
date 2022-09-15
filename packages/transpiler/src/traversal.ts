@@ -402,7 +402,7 @@ export class Traversal {
           const concat = c.concatTokens();
           if (concat.includes("~")) {
             const [iname, aname] = concat.split("~");
-            const intf = scope.findInterfaceDefinition(iname);
+            const intf = this.findInterfaceDefinition(iname, scope);
             context = intf?.getAttributes().findByName(aname)?.getType();
           } else {
             context = id.getAttributes().findByName(concat)?.getType();
