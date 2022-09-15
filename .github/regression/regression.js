@@ -11,7 +11,7 @@ const repos = [
   {name: "larshp/abap-advent-2020",          success: undefined, command: "npm test"},
   {name: "larshp/abapNTLM",                  success: undefined, command: "npm test"},
   {name: "larshp/abap-wasm",                 success: undefined, command: "npm test"},
-//  {name: "SAP/abap-file-formats-tools",       command: "npm test"},
+  {name: "SAP/abap-file-formats-tools",      success: undefined, command: "npm test"},
 ];
 
 const CWD = "./.github/regression/";
