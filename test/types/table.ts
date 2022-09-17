@@ -191,4 +191,40 @@ ASSERT tab1 = tab2.`;
     expect(abap.console.get()).to.equal("I");
   });
 
+  it("copy, different column names1", async () => {
+    const code = `
+TYPES: BEGIN OF type1,
+         foo TYPE i,
+       END OF type1.
+TYPES: BEGIN OF type2,
+         bar TYPE i,
+       END OF type2.
+DATA tab1 TYPE STANDARD TABLE OF type1 WITH DEFAULT KEY.
+DATA tab2 TYPE STANDARD TABLE OF type2 WITH DEFAULT KEY.
+APPEND INITIAL LINE TO tab2.
+tab1 = tab2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("copy, different column names2", async () => {
+    const code = `
+TYPES: BEGIN OF alphatab_type,
+         cola TYPE string,
+       END OF alphatab_type.
+TYPES alphas TYPE STANDARD TABLE OF alphatab_type.
+TYPES: BEGIN OF combined_data_type,
+         colx TYPE string,
+       END OF combined_data_type.
+TYPES combined_data TYPE STANDARD TABLE OF combined_data_type.
+DATA alphas         TYPE alphas.
+DATA combined_data  TYPE combined_data.
+APPEND INITIAL LINE TO alphas.
+combined_data[] = alphas[].`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
