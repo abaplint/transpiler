@@ -36,7 +36,8 @@ export class SelectDatabase {
       for (const column in rows[0]) {
         result[column] = clone(target.get()[column]).set(rows[0][column]);
       }
-      target.set(new Structure(result));
+      // @ts-ignore
+      abap.statements.moveCorresponding(new Structure(result), target);
     } else if (target instanceof Table) {
       for (const row of rows) {
         const targetRow = clone(target.getRowType());

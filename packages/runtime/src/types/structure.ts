@@ -36,10 +36,23 @@ export class Structure {
       throw "Structure, input is a table";
     } else if (input instanceof Structure) {
       const obj = input.get();
+      const keys1 = Object.keys(obj);
+      const keys2 = Object.keys(this.value);
+      /*
+      console.dir(keys1);
+      console.dir(keys2);
+*/
+      for (let i = 0; i < keys1.length; i++) {
+        const key1 = keys1[i];
+        const key2 = keys2[i];
+        this.value[key2].set(clone(obj[key1]));
+      }
+/*
       for (const f in obj) {
         // @ts-ignore
         this.value[f].set(clone(obj[f]));
       }
+      */
     } else {
       this.setCharacter(input);
     }
