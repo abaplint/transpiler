@@ -407,6 +407,22 @@ ASSERT sy-subrc = 0.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("INTO TABLE UP TO ORDER BY, var", async () => {
+    const code = `
+    DATA lt_t100 TYPE STANDARD TABLE OF t100.
+    DATA lv_count TYPE i.
+    lv_count = 5.
+    SELECT * FROM t100 INTO TABLE lt_t100 UP TO lv_count ROWS ORDER BY PRIMARY KEY.
+    WRITE sy-dbcnt.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
   it("INSERT FROM", async () => {
     const code = `
     DATA ls_t100 TYPE t100.
