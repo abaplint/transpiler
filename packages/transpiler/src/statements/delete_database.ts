@@ -16,6 +16,12 @@ export class DeleteDatabaseTranspiler implements IStatementTranspiler {
       options.push(`"table": ` + ttab.getCode());
     }
 
+    const w = node.findExpressionAfterToken("WHERE");
+    if (w && w.get() instanceof abaplint.Expressions.SQLCond) {
+      const ttab = traversal.traverse(w);
+      options.push(`"where": "` + ttab.getCode() + `"`);
+    }
+
     return new Chunk(`await abap.statements.deleteDatabase(${table.getCode()}, {${options.join(", ")}});`);
   }
 

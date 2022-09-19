@@ -27,15 +27,16 @@ export class SelectTranspiler implements IStatementTranspiler {
     select += " ";
     select += node.findFirstExpression(abaplint.Expressions.SQLFrom)?.concatTokens() + " ";
 
-    let where;
+    let where: abaplint.Nodes.ExpressionNode | undefined = undefined;
     for(const sqlCond of node.findAllExpressions(abaplint.Expressions.SQLCond)){
-      if(this.isWhereExpression(node,sqlCond)){
+      if(this.isWhereExpression(node, sqlCond)){
         where = sqlCond;
       }
     }
     if (where) {
       select += "WHERE " + this.concatCond(where, traversal) + " ";
     }
+
     const upTo = node.findFirstExpression(abaplint.Expressions.SQLUpTo);
     if (upTo) {
       const s = upTo.findFirstExpression(abaplint.Expressions.SimpleSource3);
