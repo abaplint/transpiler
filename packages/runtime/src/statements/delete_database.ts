@@ -4,6 +4,7 @@ import {ICharacter} from "../types/_character";
 
 export interface IDeleteDatabaseOptions {
   from?: Structure | FieldSymbol,
+  where?: string,
   table?: Table | FieldSymbol,
 }
 
@@ -41,6 +42,13 @@ export class DeleteDatabase {
       where = where.join(" AND ");
 
       const {subrc, dbcnt} = await this.context.defaultDB().delete({table, where});
+
+      // @ts-ignore
+      abap.builtin.sy.get().subrc.set(subrc);
+      // @ts-ignore
+      abap.builtin.sy.get().dbcnt.set(dbcnt);
+    } else if (options.where) {
+      const {subrc, dbcnt} = await this.context.defaultDB().delete({table, where: options.where});
 
       // @ts-ignore
       abap.builtin.sy.get().subrc.set(subrc);

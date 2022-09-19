@@ -2,7 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {FieldChainTranspiler, SimpleSource3Transpiler, SourceTranspiler} from "../expressions";
+import {FieldChainTranspiler, SourceTranspiler} from "../expressions";
 import {UniqueIdentifier} from "../unique_identifier";
 
 export class SelectTranspiler implements IStatementTranspiler {
@@ -27,15 +27,16 @@ export class SelectTranspiler implements IStatementTranspiler {
     select += " ";
     select += node.findFirstExpression(abaplint.Expressions.SQLFrom)?.concatTokens() + " ";
 
-    let where;
+    let where: abaplint.Nodes.ExpressionNode | undefined = undefined;
     for(const sqlCond of node.findAllExpressions(abaplint.Expressions.SQLCond)){
-      if(this.isWhereExpression(node,sqlCond)){
+      if(this.isWhereExpression(node, sqlCond)){
         where = sqlCond;
       }
     }
     if (where) {
-      select += "WHERE " + this.concatCond(where, traversal) + " ";
+      select += "WHERE " + traversal.traverse(where).getCode() + " ";
     }
+
     const upTo = node.findFirstExpression(abaplint.Expressions.SQLUpTo);
     if (upTo) {
       const s = upTo.findFirstExpression(abaplint.Expressions.SimpleSource3);
@@ -107,72 +108,6 @@ export class SelectTranspiler implements IStatementTranspiler {
       }
     }
     return keys;
-  }
-
-  private concatCond(cond: abaplint.Nodes.ExpressionNode, traversal: Traversal): string {
-    let ret = "";
-    for (const c of cond.getChildren()) {
-      if (c instanceof abaplint.Nodes.ExpressionNode
-          && c.get() instanceof abaplint.Expressions.SQLCompare) {
-        if (ret !== "") {
-          ret += " ";
-        }
-        if (c.findDirectExpression(abaplint.Expressions.Dynamic)) {
-          const chain = c.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.FieldChain);
-          if (chain) {
-            const code = new FieldChainTranspiler(true).transpile(chain, traversal).getCode();
-            ret += `" + ${code} + "`;
-          } else {
-            throw new Error("SQL Condition, transpiler todo, dyn cond, " + c.concatTokens());
-          }
-        } else if (c.findDirectExpression(abaplint.Expressions.SQLIn)) {
-          ret += this.sqlIn(c, traversal);
-        } else {
-          ret += this.basicCondition(c, traversal);
-        }
-      } else if (c instanceof abaplint.Nodes.ExpressionNode) {
-        ret += " " + this.concatCond(c, traversal);
-      } else {
-        ret += " " + c.concatTokens();
-      }
-    }
-    return ret.trim();
-  }
-
-  private sqlIn(c: abaplint.Nodes.ExpressionNode, _traversal: Traversal): string {
-    const fieldName = c.findDirectExpression(abaplint.Expressions.SQLFieldName);
-    const slqin = c.findDirectExpression(abaplint.Expressions.SQLIn);
-    const source = c.findFirstExpression(abaplint.Expressions.SimpleSource3);
-    if (fieldName === undefined || slqin === undefined || source === undefined) {
-      throw new Error("SQL Condition, transpiler todo, " + c.concatTokens());
-    }
-
-    const ret = `" + abap.expandIN("${fieldName.concatTokens()}", ${source.concatTokens()}) + "`;
-
-    return ret;
-  }
-
-  private basicCondition(c: abaplint.Nodes.ExpressionNode, traversal: Traversal): string {
-    let ret = "";
-    if (c.getChildren().length !== 3) {
-      throw new Error("SQL Condition, transpiler todo, " + c.concatTokens() + ", " + c.getChildren().length);
-    }
-    const fieldName = c.findDirectExpression(abaplint.Expressions.SQLFieldName);
-    const operator = c.findDirectExpression(abaplint.Expressions.SQLCompareOperator);
-    const source = c.findDirectExpression(abaplint.Expressions.SQLSource);
-    if (fieldName === undefined || operator === undefined || source === undefined) {
-      throw new Error("SQL Condition, transpiler todo, " + c.concatTokens());
-    }
-
-    ret += fieldName.concatTokens() + " " + operator.concatTokens() + " ";
-
-    const simple = source.findDirectExpression(abaplint.Expressions.SimpleSource3);
-    if (simple && simple.findDirectExpression(abaplint.Expressions.Constant) === undefined) {
-      ret += "'\" + " + new SimpleSource3Transpiler(true).transpile(simple, traversal).getCode() + " + \"'";
-    } else {
-      ret += source.concatTokens();
-    }
-    return ret;
   }
 
   private isWhereExpression(node: abaplint.Nodes.StatementNode, expression: abaplint.Nodes.ExpressionNode): boolean {
