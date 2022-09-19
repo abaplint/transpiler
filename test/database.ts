@@ -506,4 +506,24 @@ ASSERT sy-subrc = 0.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it.only("DELETE WHERE", async () => {
+    const code = `
+    DATA ls_t100 TYPE t100.
+
+    SELECT SINGLE * FROM t100 INTO ls_t100.
+    ASSERT sy-subrc = 4.
+
+    ls_t100-arbgb = 'HELLO'.
+    INSERT t100 FROM ls_t100.
+    ASSERT sy-subrc = 0.
+
+    DELETE FROM t100 WHERE arbgb = 'HELLO'.
+    ASSERT sy-subrc = 0.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
