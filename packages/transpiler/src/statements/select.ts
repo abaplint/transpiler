@@ -2,7 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {FieldChainTranspiler, SimpleSource3Transpiler} from "../expressions";
+import {FieldChainTranspiler, SimpleSource3Transpiler, SourceTranspiler} from "../expressions";
 import {UniqueIdentifier} from "../unique_identifier";
 
 export class SelectTranspiler implements IStatementTranspiler {
@@ -38,7 +38,12 @@ export class SelectTranspiler implements IStatementTranspiler {
     }
     const upTo = node.findFirstExpression(abaplint.Expressions.SQLUpTo);
     if (upTo) {
-      select += upTo.concatTokens() + " ";
+      const s = upTo.findFirstExpression(abaplint.Expressions.SimpleSource3);
+      if (s) {
+        select += `UP TO " + ${new SourceTranspiler(true).transpile(s, traversal).getCode()} + " ROWS `;
+      } else {
+        select += upTo.concatTokens() + " ";
+      }
     }
     const orderBy = node.findFirstExpression(abaplint.Expressions.SQLOrderBy);
     if (orderBy) {
