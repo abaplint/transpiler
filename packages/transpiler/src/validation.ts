@@ -37,6 +37,7 @@ export const config: IConfig = {
     "ambiguous_statement": true,
     "implement_methods": true,
     "begin_end_names": true,
+    "no_chained_assignment": true,
     "check_syntax": true,
     "form_no_dash": true,
     "omit_preceding_zeros": true,
