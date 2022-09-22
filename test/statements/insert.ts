@@ -152,4 +152,19 @@ WRITE / ref2->*.`;
     await f(abap);
   });
 
+  it("INSERT and references", async () => {
+    const code = `
+TYPES: BEGIN OF aggregated_data_type,
+         group   TYPE i,
+       END OF aggregated_data_type.
+DATA aggregated_data TYPE STANDARD TABLE OF aggregated_data_type WITH DEFAULT KEY.
+DATA temp1 LIKE LINE OF aggregated_data.
+DATA aggregated LIKE REF TO temp1.
+INSERT INITIAL LINE INTO TABLE aggregated_data REFERENCE INTO aggregated.
+aggregated->group = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
