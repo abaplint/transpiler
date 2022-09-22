@@ -1,7 +1,13 @@
 import {ICharacter} from "../types/_character";
 import {Character} from "../types";
 
-export function matches(input: {val: ICharacter | string, regex: ICharacter | string}): ICharacter {
+export function matches(input: {val: ICharacter | string, regex?: ICharacter | string, pcre?: ICharacter | string}): ICharacter {
+  if (input.pcre !== undefined) {
+    throw "matches(), todo, pcre";
+  } else if (input.regex === undefined) {
+    throw "matches(), regex input expected";
+  }
+
   const val = typeof input.val === "string" ? input.val : input.val.get();
   let reg = "";
   if (typeof input.regex === "string") {
