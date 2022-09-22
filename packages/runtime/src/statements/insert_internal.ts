@@ -71,6 +71,9 @@ export function insertInternal(options: IInsertInternalOptions): void {
     if (options.assigning) {
       options.assigning.assign(val);
     }
+    if (options.referenceInto) {
+      options.referenceInto.assign(val);
+    }
   } else if (data) {
 // todo, for now it just appends, this is not correct, but currently the table type is not known
     const val = options.table.insertIndex(data, options.table.array().length);
