@@ -43,7 +43,6 @@ export const config: IConfig = {
     "omit_preceding_zeros": true,
     "obsolete_statement": {
       "compute": true,
-      "requested": true,
       "setExtended": true,
       "occurs": true,
     },
