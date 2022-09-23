@@ -42,6 +42,11 @@ export class CompareTranspiler implements IExpressionTranspiler {
       } else if (concat.endsWith(" IS NOT SUPPLIED")) {
         return new Chunk().appendString(pre + "INPUT && INPUT." + concat.replace(" IS NOT SUPPLIED", "").toLowerCase() + " === undefined");
       }
+      if (concat.endsWith(" IS REQUESTED")) {
+        return new Chunk().appendString(pre + "INPUT && INPUT." + concat.replace(" IS REQUESTED", "").toLowerCase());
+      } else if (concat.endsWith(" IS NOT REQUESTED")) {
+        return new Chunk().appendString(pre + "INPUT && INPUT." + concat.replace(" IS NOT REQUESTED", "").toLowerCase() + " === undefined");
+      }
     } else if (sources.length === 2 && node.findDirectTokenByText("IN")) {
       if (concat.search(" NOT IN ") >= 0) {
         pre = pre === "!" ? "" : "!";
