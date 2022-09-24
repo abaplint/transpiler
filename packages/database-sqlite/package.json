@@ -1,9 +1,8 @@
 {
   "name": "@abaplint/database-sqlite",
-  "version": "2.1.70",
+  "version": "2.1.74",
   "description": "Transpiler - SQLite driver",
   "main": "./build/index.js",
-  "types": "./build/index.d.ts",
   "scripts": {
     "test": "tsc",
     "compile": "tsc",
@@ -21,8 +20,8 @@
     "sql.js": "^1.8.0"
   },
   "devDependencies": {
-    "@types/sql.js": "^1.4.3",
-    "@abaplint/runtime": "^2.1.70",
+    "@types/sql.js": "^1.4.4",
+    "@abaplint/runtime": "^2.1.74",
     "typescript": "^4.8.3"
   }
 }
