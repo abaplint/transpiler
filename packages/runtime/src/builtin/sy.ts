@@ -19,6 +19,7 @@ export const sy = new Structure({
   subrc: new Integer(),
   sysid: new Character({length: 3}).set("ABC"),
   tabix: new Integer(),
+  tfill: new Integer(),
   timlo: new Time(),
   tzone: new Integer(), // 0 = UTC
   uname: new Character({length: 12}).set("USERNAME"),

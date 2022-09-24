@@ -65,7 +65,10 @@ export function describe(input: IDescribeOptions) {
     }
   }
 
-  if (input.table && input.lines) {
-    input.lines.set(input.table.array().length);
+  if (input.table) {
+    // @ts-ignore
+    abap.builtin.sy.get().tfill.set(input.table.array().length);
+
+    input.lines?.set(input.table.array().length);
   }
 }

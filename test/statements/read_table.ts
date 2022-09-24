@@ -295,4 +295,14 @@ WRITE / sy-subrc.`;
     expect(abap.console.get()).to.equal("4\n0");
   });
 
+  it("READ TABLE assigning index", async () => {
+    const code = `
+data tab type standard table of i.
+field-symbols <fs> like line of tab.
+read table tab assigning <fs> index sy-tfill.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

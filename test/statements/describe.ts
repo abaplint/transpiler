@@ -264,4 +264,16 @@ WRITE / lv_type.`;
     await f(abap);
   });
 
+  it("DESCRIBE TABLE, set tfill", async () => {
+    const code = `
+    DATA tab TYPE STANDARD TABLE OF i.
+    APPEND INITIAL LINE TO tab.
+    DESCRIBE TABLE tab.
+    WRITE sy-tfill.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });
