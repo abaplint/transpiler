@@ -1187,4 +1187,29 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
+  it.only("escape namespace in method name", async () => {
+    const intf = `
+INTERFACE /dsdf/intf PUBLIC.
+  METHODS foo.
+ENDINTERFACE.`;
+    const clas = `
+CLASS /dsdf/clas DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    INTERFACES /dsdf/intf.
+ENDCLASS.
+CLASS /dsdf/clas IMPLEMENTATION.
+  METHOD /dsdf/intf~foo.
+    RETURN.
+  ENDMETHOD.
+ENDCLASS.`;
+    const result = await compileFiles([
+      {filename: "#dsdf#intf.intf.abap", contents: intf},
+      {filename: "#dsdf#clas.clas.abap", contents: clas},
+    ]);
+
+    const js = result.objects[1].chunk.getCode();
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
