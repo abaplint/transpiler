@@ -1187,7 +1187,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
-  it.only("escape namespace in method name", async () => {
+  it("escape namespace in method name", async () => {
     const intf = `
 INTERFACE /dsdf/intf PUBLIC.
   METHODS foo.
@@ -1199,7 +1199,7 @@ CLASS /dsdf/clas DEFINITION PUBLIC.
 ENDCLASS.
 CLASS /dsdf/clas IMPLEMENTATION.
   METHOD /dsdf/intf~foo.
-    RETURN.
+    /dsdf/intf~foo( ).
   ENDMETHOD.
 ENDCLASS.`;
     const result = await compileFiles([
