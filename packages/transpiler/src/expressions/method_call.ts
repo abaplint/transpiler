@@ -31,7 +31,7 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
     }
 
     const ret = new Chunk();
-    ret.append(name.replace("~", "$"), nameToken, traversal);
+    ret.append(Traversal.escapeClassName(name.replace("~", "$"))!, nameToken, traversal);
     ret.appendChunk(new MethodCallParamTranspiler(m?.def).transpile(step, traversal));
     ret.appendString(")");
 

@@ -40,6 +40,19 @@ describe("Running statements - MOVE", () => {
     expect(abap.console.get()).to.equal("1 ");
   });
 
+  it("Chained assignment", async () => {
+    const code = `
+    DATA foo TYPE i.
+    DATA bar TYPE i.
+    foo = bar = 2.
+    WRITE foo.
+    WRITE bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("22");
+  });
+
   it.skip("MOVE - integer to integer structure", async () => {
     const code = `
         TYPES:
