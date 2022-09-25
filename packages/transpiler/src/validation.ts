@@ -15,7 +15,7 @@ export const config: IConfig = {
   "rules": {
     "when_others_last": true,
     "avoid_use": {
-      "define": true,
+//      "define": true,
       "execSQL": true,
       "kernelCall": true,
       "communication": true,
