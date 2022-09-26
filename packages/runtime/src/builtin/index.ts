@@ -16,6 +16,7 @@ export * from "./lines";
 export * from "./match";
 export * from "./matches";
 export * from "./nmax";
+export * from "./count_any_of";
 export * from "./nmin";
 export * from "./repeat";
 export * from "./replace";

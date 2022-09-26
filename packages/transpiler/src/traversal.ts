@@ -170,7 +170,7 @@ export class Traversal {
     } else if (name === "super") {
       return name;
     } else if (this.isClassAttribute(t)) {
-      name = "this." + name;
+      name = "this." + Traversal.escapeClassName(name);
     } else if (this.isBuiltinVariable(t)) {
       name = "abap.builtin." + name;
     }
@@ -366,7 +366,7 @@ export class Traversal {
       if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
         continue;
       }
-      const n = name.toLowerCase() + "$" + a.getName().toLowerCase();
+      const n = Traversal.escapeClassName(name.toLowerCase()) + "$" + a.getName().toLowerCase();
       ret += "this." + n + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
     }
 
