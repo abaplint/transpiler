@@ -110,7 +110,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     // this is not correct, ABAP does not invocate the class constructor at require time,
     // but this will probably work
     if (cdef.getMethodDefinitions().getByName("class_constructor")) {
-      ret += "await " + node.getFirstToken().getStr().toLowerCase() + ".class_constructor();\n";
+      ret += "await " + Traversal.escapeClassName(node.getFirstToken().getStr().toLowerCase()) + ".class_constructor();\n";
     }
 
     return ret;
