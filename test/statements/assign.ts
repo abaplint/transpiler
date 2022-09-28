@@ -319,6 +319,19 @@ WRITE lv.`;
     expect(abap.console.get()).to.equal("I");
   });
 
+  it("ASSIGN float CASTING TYPE x", async () => {
+    const code = `
+    DATA lv_f TYPE f.
+    FIELD-SYMBOLS <lv_hex> TYPE x.
+    lv_f = 2.
+    ASSIGN lv_f TO <lv_hex> CASTING TYPE x.
+    WRITE <lv_hex>.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0000000000000040");
+  });
+
   it("recursion and field symbols", async () => {
     const code = `
 CLASS lcl_font DEFINITION.

@@ -63,7 +63,7 @@ export class AssignTranspiler implements IStatementTranspiler {
       }
     }
 
-    if (concat.endsWith(" CASTING.")) {
+    if (concat.endsWith(" CASTING.") || concat.includes(" CASTING TYPE ")) {
       options.push("casting: true");
     }
 
