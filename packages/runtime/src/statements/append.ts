@@ -1,4 +1,4 @@
-import {FieldSymbol, Table, TableRowType} from "../types";
+import {DataReference, FieldSymbol, Table, TableRowType} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -7,6 +7,7 @@ export interface IAppendOptions {
   target: Table | FieldSymbol | undefined,
   lines?: boolean,
   assigning?: FieldSymbol,
+  referenceInto?: DataReference,
   from?: ICharacter | INumeric,
   to?: ICharacter | INumeric,
 }
@@ -49,6 +50,12 @@ export function append(input: IAppendOptions) {
         input.assigning.assign(val.getPointer());
       } else {
         input.assigning.assign(val);
+      }
+    } else if (input.referenceInto) {
+      if (val instanceof FieldSymbol) {
+        input.referenceInto.assign(val.getPointer());
+      } else {
+        input.referenceInto.assign(val);
       }
     }
   }
