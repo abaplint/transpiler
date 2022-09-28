@@ -6,6 +6,7 @@ import {String} from "./string";
 import {Structure} from "./structure";
 import {Hex} from "./hex";
 import {parse} from "../operators/_parse";
+import {Float} from "./float";
 
 type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Structure;
 
@@ -53,9 +54,16 @@ export class FieldSymbol  {
   public get() {
     if (this.casting) {
       if (this.type instanceof Hex) {
-        // @ts-ignore
-        const ret = new String().set(Buffer.from(this.pointer?.get(), "utf16le").toString("hex"));
-        return ret.get();
+        const pt = this.pointer;
+        if (pt instanceof Float) {
+          const buf = Buffer.allocUnsafe(8);
+          buf.writeDoubleLE(pt.getRaw());
+          return buf.toString("hex").toUpperCase();
+        } else {
+          // @ts-ignore
+          const ret = new String().set(Buffer.from(this.pointer?.get(), "utf16le").toString("hex"));
+          return ret.get();
+        }
       } else {
         // @ts-ignore
         const ret = new String().set(Buffer.from(this.pointer?.get(), "hex").toString("utf16le"));
