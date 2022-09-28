@@ -215,4 +215,17 @@ WRITE lv_str.`;
     expect(abap.console.get()).to.equal("ESHORTABC");
   });
 
+  it("output field symbol", async () => {
+    const code = `
+DATA char TYPE c LENGTH 2.
+FIELD-SYMBOLS <fs> TYPE any.
+char = 'hi'.
+ASSIGN char TO <fs>.
+WRITE |{ <fs> }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hi");
+  });
+
 });

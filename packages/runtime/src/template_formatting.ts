@@ -1,4 +1,4 @@
-import {Character, Integer, Packed} from "./types";
+import {Character, FieldSymbol, Integer, Packed, Table} from "./types";
 import {ICharacter} from "./types/_character";
 import {INumeric} from "./types/_numeric";
 
@@ -15,7 +15,11 @@ type options = {
 
 export function templateFormatting(source: ICharacter | INumeric, options?: options) {
   let text = "";
-  if (source instanceof Character) {
+  if (source instanceof FieldSymbol && source.getPointer() === undefined) {
+    throw "GETWA_NOT_ASSIGNED";
+  } else if (source instanceof Table) {
+    throw "STRG_ILLEGAL_DATA_TYPE";
+  } else if (source instanceof Character) {
     text = source.getTrimEnd();
   } else {
     text = source.get() + "";
