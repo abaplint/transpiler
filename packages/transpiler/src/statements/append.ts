@@ -40,6 +40,11 @@ export class AppendTranspiler implements IStatementTranspiler {
         options.push(option);
       }
 
+      const referenceInto = node.findExpressionAfterToken("INTO");
+      if (referenceInto && referenceInto.get() instanceof abaplint.Expressions.Target) {
+        options.push(new Chunk().appendString("referenceInto: " + traversal.traverse(referenceInto).getCode()));
+      }
+
       const to = node.findExpressionAfterToken("TO");
       if (to && to.get() instanceof abaplint.Expressions.Source) {
         options.push(new Chunk().appendString("to: " + traversal.traverse(to).getCode()));

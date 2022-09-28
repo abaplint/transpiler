@@ -308,4 +308,21 @@ ASSERT lines( <tab2> ) = 1.`;
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("APPEND reference into", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field TYPE i,
+       END OF ty.
+DATA nested_data TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA temp2 TYPE ty.
+DATA nested_artist TYPE REF TO ty.
+temp2-field = 2.
+APPEND temp2 TO nested_data REFERENCE INTO nested_artist.
+WRITE nested_artist->field.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
