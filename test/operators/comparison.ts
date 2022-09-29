@@ -866,4 +866,70 @@ ASSERT <fs> IS INITIAL.`;
     await f(abap);
   });
 
+  it("empty xstr gt x", async () => {
+    const code = `
+data foo type xstring.
+data bar type x length 1.
+if foo > bar.
+  write 'yes'.
+ELSE.
+  WRITE 'no'.
+endif.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`no`);
+  });
+
+  it("xstr longer", async () => {
+    const code = `
+DATA foo TYPE xstring.
+DATA bar TYPE x LENGTH 1.
+foo = '0101'.
+bar = '01'.
+IF foo > bar.
+  WRITE 'yes'.
+ELSE.
+  WRITE 'no'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`yes`);
+  });
+
+  it("xstr eq", async () => {
+    const code = `
+DATA foo TYPE xstring.
+DATA bar TYPE x LENGTH 1.
+foo = '01'.
+bar = '01'.
+IF foo = bar.
+  WRITE 'yes'.
+ELSE.
+  WRITE 'no'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`yes`);
+  });
+
+  it("xstr gt, yes", async () => {
+    const code = `
+    DATA foo TYPE xstring.
+    DATA bar TYPE x LENGTH 1.
+    foo = '02'.
+    bar = '01'.
+    IF foo > bar.
+      WRITE 'yes'.
+    ELSE.
+      WRITE 'no'.
+    ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`yes`);
+  });
+
 });
