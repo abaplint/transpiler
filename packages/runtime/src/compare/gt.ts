@@ -1,4 +1,4 @@
-import {ABAPObject, Float, Hex, Structure, Table} from "../types";
+import {ABAPObject, Float, Hex, Structure, Table, XString} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {Integer} from "../types/integer";
@@ -87,13 +87,15 @@ function get_hex_from_parameter(comparison_part: number | string | ICharacter | 
         if (hex_from_parameter.length % 2 === 1) {
           hex_from_parameter = "0" + hex_from_parameter;
         }
+      } else if (comparison_part instanceof XString) {
+        hex_from_parameter = comparison_part.get();
       } else {
-        throw "runtime_todo, gt hex";
+        throw "runtime_todo, gt hex1";
       }
 
       break;
     default:
-      throw "runtime_todo, gt hex";
+      throw "runtime_todo, gt hex2";
 
   }
 
