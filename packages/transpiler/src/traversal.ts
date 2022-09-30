@@ -414,7 +414,29 @@ export class Traversal {
     return context;
   }
 
-////////////////////////////
+  public isInsideLoop(node: abaplint.Nodes.StatementNode): boolean {
+    const stack: abaplint.Nodes.StatementNode[] = [];
+
+    for (const statement of this.getFile().getStatements()) {
+      const get = statement.get();
+      if (get instanceof abaplint.Statements.Loop
+          || get instanceof abaplint.Statements.While
+          || get instanceof abaplint.Statements.SelectLoop
+          || get instanceof abaplint.Statements.Do) {
+        stack.push(statement);
+      } else if (get instanceof abaplint.Statements.EndLoop
+          || get instanceof abaplint.Statements.EndWhile
+          || get instanceof abaplint.Statements.EndSelect
+          || get instanceof abaplint.Statements.EndDo) {
+        stack.pop();
+      }
+      if (statement === node) {
+        break;
+      }
+    }
+
+    return stack.length > 0;
+  }
 
   public registerClassOrInterface(def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined): string {
     if (def === undefined) {
