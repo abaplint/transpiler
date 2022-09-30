@@ -14,7 +14,7 @@ describe("Running statements - EXIT", () => {
     abap = new ABAP();
   });
 
-  it.skip("EXIT outside of loop", async () => {
+  it("EXIT outside of loop", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
