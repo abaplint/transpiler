@@ -1,4 +1,5 @@
 import {parse} from "../operators/_parse";
+import {Float} from "./float";
 import {Hex} from "./hex";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
@@ -16,14 +17,22 @@ export class XString implements ICharacter {
     return this.qualifiedName;
   }
 
-  public set(value: ICharacter | INumeric | string) {
+  public set(value: ICharacter | INumeric | string | number) {
     if (typeof value === "string") {
       this.value = value;
       const finalLength = Math.ceil(this.value.length / 2 ) * 2;
       this.value = this.value.padEnd(finalLength, "0");
+    } else if (typeof value === "number") {
+      this.value = Math.round(value).toString(16);
+      if (this.value.length % 2 === 1) {
+        this.value = "0" + this.value;
+      }
     } else {
-      const v = value.get();
-      if (typeof v === "number") {
+      let v = value.get();
+      if (value instanceof Float) {
+        v = value.getRaw();
+        this.set(v);
+      } else if (typeof v === "number") {
         this.value = v.toString(16);
         const finalLength = Math.ceil(this.value.length / 2 ) * 2;
         this.value = this.value.padStart(finalLength, "0");

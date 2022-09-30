@@ -30,8 +30,7 @@ export class Hex implements ICharacter {
       if (value instanceof Float) {
         v = value.getRaw();
         this.set(v);
-      }
-      if (typeof v === "number") {
+      } else if (typeof v === "number") {
         this.set(v);
       } else {
         this.value = v;
