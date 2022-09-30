@@ -30,7 +30,7 @@ export async function initializeABAP() {\n`;
     ret += `  const schemas = {sqlite, hdb, pg};\n`;
     ret += `  const insert = [];\n`;
     for (const i of dbSetup.insert) {
-      ret += `insert.push(\`${i}\`);\n`;
+      ret += `  insert.push(\`${i}\`);\n`;
     }
     if (extraSetup === undefined) {
       ret += `// no setup logic specified in config\n`;
@@ -196,10 +196,10 @@ run().then(() => {
 
   private buildImports(reg: abaplint.IRegistry, useImport?: boolean): string {
 // note: ES modules are hoised, so use the dynamic import(), due to setting of globalThis.abap
-// todo, some sorting might be required? eg. a class constructor using constant from interface?
-// temporary sorting: by filename
+// some sorting required: eg. a class constructor using constant from interface
 
     const list: string[] = [];
+    const late: string[] = [];
 
     const imp = (filename: string) => {
       if (useImport === true) {
@@ -222,13 +222,20 @@ run().then(() => {
         for (const m of obj.getModules()) {
           list.push(imp(`${this.escapeNamespace(obj.getName().toLowerCase())}.fugr.${m.getName().toLowerCase()}`));
         }
-      } else if (obj instanceof abaplint.Objects.Class
-          || obj instanceof abaplint.Objects.Interface) {
+      } else if (obj instanceof abaplint.Objects.Class) {
+        if (obj.getName().toUpperCase() !== "CL_ABAP_CHAR_UTILITIES"
+            && obj.getDefinition()?.getMethodDefinitions().getByName("CLASS_CONSTRUCTOR") !== undefined) {
+          // this will not solve all problems with class constors 100%, but probably good enough
+          late.push(imp(`${this.escapeNamespace(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}`));
+        } else {
+          list.push(imp(`${this.escapeNamespace(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}`));
+        }
+      } else if (obj instanceof abaplint.Objects.Interface) {
         list.push(imp(`${this.escapeNamespace(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}`));
       }
     }
 
-    return list.sort().join("\n");
+    return [...list.sort(), ...late].join("\n");
   }
 
 }

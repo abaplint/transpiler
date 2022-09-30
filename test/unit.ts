@@ -1679,4 +1679,31 @@ ENDINTERFACE.`;
     expect(cons.split("\n")[1]).to.equal("0");
   });
 
+  it("test-41", async () => {
+// class_constructor using constant value from interface
+
+    const clas = `CLASS zcl_cc DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    CLASS-METHODS class_constructor.
+ENDCLASS.
+
+CLASS zcl_cc IMPLEMENTATION.
+  METHOD class_constructor.
+    WRITE zif_intf=>foo.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const intf = `
+INTERFACE zif_intf PUBLIC.
+  CONSTANTS foo TYPE i VALUE 123.
+ENDINTERFACE.`;
+
+    const files = [
+      {filename: "zcl_cc.clas.abap", contents: clas},
+      {filename: "zif_intf.intf.abap", contents: intf},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[0]).to.equal("123");
+  });
+
 });
