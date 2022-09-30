@@ -31,7 +31,7 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
         const interfaceName = traversal.isInterfaceAttribute(c.getFirstToken());
         let name = c.getFirstToken().getStr().replace("~", "$").toLowerCase();
         if (prefix && interfaceName && name.startsWith(interfaceName) === false) {
-          name = interfaceName + "$" + name;
+          name = Traversal.escapeClassName(interfaceName) + "$" + name;
         }
         ret.append(name, c, traversal);
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.Dereference) {
