@@ -32,9 +32,9 @@ export class Requires {
     if (obj.getType() === "CLAS") {
       // add the superclass
       const clas = obj as abaplint.Objects.Class;
-      const sup = clas.getDefinition()?.getSuperClass()?.toLowerCase().replace(/\//g, "%23");
+      const sup = clas.getDefinition()?.getSuperClass()?.toLowerCase().replace(/\//g, "#");
       if (sup) {
-        add({filename: sup + ".clas.abap", name: sup});
+        add({filename: sup + ".clas.abap", name: clas.getDefinition()?.getSuperClass()?.toLowerCase()});
       }
 
       for (const f of clas.getSequencedFiles()) {

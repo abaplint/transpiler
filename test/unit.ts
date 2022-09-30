@@ -1706,4 +1706,27 @@ ENDINTERFACE.`;
     expect(cons.split("\n")[0]).to.equal("123");
   });
 
+  it("test-42", async () => {
+// escaping, namespaced class inheriting from namespaced class
+
+    const clas1 = `CLASS /foo/cl_nn1 DEFINITION PUBLIC.
+  PUBLIC SECTION.
+ENDCLASS.
+CLASS /foo/cl_nn1 IMPLEMENTATION.
+ENDCLASS.`;
+
+    const clas2 = `CLASS /foo/cl_nn2 DEFINITION PUBLIC INHERITING FROM /foo/cl_nn1.
+  PUBLIC SECTION.
+ENDCLASS.
+CLASS /foo/cl_nn2 IMPLEMENTATION.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "#foo#cl_nn1.clas.abap", contents: clas1},
+      {filename: "#foo#cl_nn2.clas.abap", contents: clas2},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[0]).to.equal("");
+  });
+
 });
