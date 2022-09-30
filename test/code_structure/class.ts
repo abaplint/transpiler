@@ -1317,4 +1317,29 @@ ENDCLASS.`;
     await f(abap);
   });
 
+  it("escape aliased method", async () => {
+    const intf = `
+INTERFACE /dsdf/intf PUBLIC.
+  METHODS method1.
+ENDINTERFACE.`;
+    const clas = `
+CLASS /dsdf/clas DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    INTERFACES /dsdf/intf.
+    ALIASES method1 FOR /dsdf/intf~method1.
+ENDCLASS.
+CLASS /dsdf/clas IMPLEMENTATION.
+  METHOD /dsdf/intf~method1.
+  ENDMETHOD.
+ENDCLASS.`;
+    const result = await compileFiles([
+      {filename: "#dsdf#intf.intf.abap", contents: intf},
+      {filename: "#dsdf#clas.clas.abap", contents: clas},
+    ]);
+
+    const js = result.objects[1].chunk.getCode();
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
