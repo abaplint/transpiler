@@ -21,9 +21,9 @@ export class TargetTranspiler implements IExpressionTranspiler {
         ret.append(c.getFirstToken().getStr().toLowerCase(), c, traversal);
       } else if (c.get() instanceof Expressions.AttributeName) {
         const intf = traversal.isInterfaceAttribute(c.getFirstToken());
-        let name = c.getFirstToken().getStr().replace("~", "$").toLowerCase();
+        let name = Traversal.escapeClassName(c.getFirstToken().getStr())!.replace("~", "$").toLowerCase();
         if (intf && name.startsWith(intf) === false) {
-          name = intf + "$" + name;
+          name = Traversal.escapeClassName(intf) + "$" + name;
         }
         ret.append(name, c, traversal);
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.FieldOffset) {

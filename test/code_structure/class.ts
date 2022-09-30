@@ -1265,7 +1265,7 @@ ENDCLASS.`;
     await f(abap);
   });
 
-  it("escape namespace in me->", async () => {
+  it("escape namespace in me->, source position", async () => {
     const intf = `
 INTERFACE /dsdf/intf PUBLIC.
   DATA bar TYPE string.
@@ -1279,6 +1279,32 @@ ENDCLASS.
 CLASS /dsdf/clas IMPLEMENTATION.
   METHOD foo.
     WRITE me->/dsdf/intf~bar.
+  ENDMETHOD.
+ENDCLASS.`;
+    const result = await compileFiles([
+      {filename: "#dsdf#intf.intf.abap", contents: intf},
+      {filename: "#dsdf#clas.clas.abap", contents: clas},
+    ]);
+
+    const js = result.objects[1].chunk.getCode();
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("escape namespace in me->, target position", async () => {
+    const intf = `
+INTERFACE /dsdf/intf PUBLIC.
+  DATA bar TYPE string.
+ENDINTERFACE.`;
+    const clas = `
+CLASS /dsdf/clas DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    INTERFACES /dsdf/intf.
+    METHODS foo.
+ENDCLASS.
+CLASS /dsdf/clas IMPLEMENTATION.
+  METHOD foo.
+    me->/dsdf/intf~bar = 'hello'.
   ENDMETHOD.
 ENDCLASS.`;
     const result = await compileFiles([

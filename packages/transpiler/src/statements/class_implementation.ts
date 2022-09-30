@@ -16,7 +16,7 @@ export class ClassImplementationTranspiler implements IStatementTranspiler {
       // special case for exceptions
       ret += " extends Error";
     } else if (def?.getSuperClass()) {
-      ret += " extends " + def?.getSuperClass()?.toLowerCase();
+      ret += " extends " + Traversal.escapeClassName(def?.getSuperClass()?.toLowerCase());
     }
 
     return new Chunk().append(ret + ` {
