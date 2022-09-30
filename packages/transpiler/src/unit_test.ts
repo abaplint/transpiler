@@ -224,7 +224,7 @@ run().then(() => {
         }
       } else if (obj instanceof abaplint.Objects.Class) {
         if (obj.getName().toUpperCase() !== "CL_ABAP_CHAR_UTILITIES"
-            && obj.getDefinition()?.getMethodDefinitions().getByName("CLASS_CONSTRUCTOR") !== undefined) {
+            && this.hasClassConstructor(reg, obj)) {
           // this will not solve all problems with class constors 100%, but probably good enough
           late.push(imp(`${this.escapeNamespace(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}`));
         } else {
@@ -236,6 +236,22 @@ run().then(() => {
     }
 
     return [...list.sort(), ...late].join("\n");
+  }
+
+  private hasClassConstructor(reg: abaplint.IRegistry, clas: abaplint.Objects.Class): boolean {
+    if (clas.getDefinition()?.getMethodDefinitions().getByName("CLASS_CONSTRUCTOR") !== undefined) {
+      return true;
+    }
+
+    const sup = clas.getDefinition()?.getSuperClass();
+    if (sup !== undefined) {
+      const superClass = reg.getObject("CLAS", sup) as abaplint.Objects.Class | undefined;
+      if (superClass) {
+        return this.hasClassConstructor(reg, superClass);
+      }
+    }
+
+    return false;
   }
 
 }
