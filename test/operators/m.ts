@@ -18,7 +18,7 @@ describe("Running operators - Bit compare M", () => {
     const code = `
     DATA hex1 TYPE xstring.
     DATA hex2 TYPE xstring.
-    hex1 = 'FF'.
+    hex1 = 'FF01'.
     hex2 = '11'.
     IF hex1 M hex2.
       WRITE 'yes'.

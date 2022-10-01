@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -16,11 +16,19 @@ describe("Running operators - Bit compare O", () => {
 
   it("test", async () => {
     const code = `
-`;
+    DATA hex1 TYPE xstring.
+    DATA hex2 TYPE xstring.
+    hex1 = 'FF01'.
+    hex2 = '11'.
+    IF hex1 O hex2.
+      WRITE 'yes'.
+    ELSE.
+      WRITE 'no'.
+    ENDIF.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-//    expect(abap.console.get()).to.equal("");
+    expect(abap.console.get()).to.equal("yes");
   });
 
 });
