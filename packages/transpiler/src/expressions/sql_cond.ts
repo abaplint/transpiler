@@ -56,22 +56,55 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
   private basicCondition(c: abaplint.Nodes.ExpressionNode, traversal: Traversal): string {
     let ret = "";
     if (c.getChildren().length !== 3) {
-      throw new Error("SQL Condition, transpiler todo, " + c.concatTokens() + ", " + c.getChildren().length);
+      return this.basicConditionNew(c, traversal);
+//      throw new Error("SQL Condition, transpiler todo1, " + c.concatTokens() + ", " + c.getChildren().length);
     }
+
     const fieldName = c.findDirectExpression(abaplint.Expressions.SQLFieldName);
     const operator = c.findDirectExpression(abaplint.Expressions.SQLCompareOperator);
     const source = c.findDirectExpression(abaplint.Expressions.SQLSource);
     if (fieldName === undefined || operator === undefined || source === undefined) {
-      throw new Error("SQL Condition, transpiler todo, " + c.concatTokens());
+      throw new Error("SQL Condition, transpiler todo2, " + c.concatTokens());
     }
 
     ret += fieldName.concatTokens() + " " + operator.concatTokens() + " ";
-
+    ret += this.sqlSource(source, traversal);
+    /*
     const simple = source.findDirectExpression(abaplint.Expressions.SimpleSource3);
     if (simple && simple.findDirectExpression(abaplint.Expressions.Constant) === undefined) {
       ret += "'\" + " + new SimpleSource3Transpiler(true).transpile(simple, traversal).getCode() + " + \"'";
     } else {
       ret += source.concatTokens();
+    }
+    */
+    return ret;
+  }
+
+  private sqlSource(source: abaplint.Nodes.ExpressionNode, traversal: Traversal) {
+    let ret = "";
+    const simple = source.findDirectExpression(abaplint.Expressions.SimpleSource3);
+    if (simple && simple.findDirectExpression(abaplint.Expressions.Constant) === undefined) {
+      ret += "'\" + " + new SimpleSource3Transpiler(true).transpile(simple, traversal).getCode() + " + \"'";
+    } else {
+      ret += source.concatTokens();
+    }
+    return ret;
+  }
+
+  private basicConditionNew(node: abaplint.Nodes.ExpressionNode, traversal: Traversal): string {
+    let ret = "";
+    for (const child of node.getChildren()) {
+      if (ret !== "") {
+        ret += " ";
+      }
+      if (child.get() instanceof abaplint.Expressions.SQLFieldName) {
+        ret += child.concatTokens();
+      } else if (child.get() instanceof abaplint.Expressions.SQLSource
+          && child instanceof abaplint.Nodes.ExpressionNode) {
+        ret += this.sqlSource(child, traversal);
+      } else {
+        ret += child.concatTokens();
+      }
     }
     return ret;
   }
