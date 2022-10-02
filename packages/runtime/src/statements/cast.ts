@@ -1,6 +1,16 @@
 import {initial} from "../compare";
 import {ABAPObject} from "../types";
 
+function throwError() {
+  // @ts-ignore
+  if (abap.Classes["CX_SY_MOVE_CAST_ERROR"] !== undefined) {
+    // @ts-ignore
+    throw new abap.Classes["CX_SY_MOVE_CAST_ERROR"]();
+  } else {
+    throw "Global class CX_SY_MOVE_CAST_ERROR not found";
+  }
+}
+
 // todo, field symbols as input?
 // todo, local classes?
 // check with javascript instanceof?
@@ -20,26 +30,21 @@ export async function cast(target: ABAPObject, source: ABAPObject) {
         && targetName?.startsWith("ZIF_") === false) { // todo, interfaces are also classes but not inherited
 */
     // @ts-ignore
-    const found = abap.Classes[targetName];
-    if (found?.INTERNAL_TYPE === "CLAS") {
+    const targetClass = abap.Classes[targetName];
+
+    if (targetClass?.INTERNAL_TYPE === "CLAS") {
       // using "instanceof" is probably wrong in some cases,
       // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/instanceof
-      if (source.get() instanceof found === false) {
-        // @ts-ignore
-        if (abap.Classes["CX_SY_MOVE_CAST_ERROR"] !== undefined) {
-          // @ts-ignore
-          throw new abap.Classes["CX_SY_MOVE_CAST_ERROR"]();
-        } else {
-          throw "Global class CX_SY_MOVE_CAST_ERROR not found";
-        }
+      if (source.get() instanceof targetClass === false) {
+        throwError();
       }
-    } else if (found?.INTERNAL_TYPE === "INTF") {
-      console.dir("intf, todo");
-      // @ts-ignore
-      console.dir(abap.Classes["ZCL_FOO"]);
-      console.dir(source);
-      console.dir(source.get());
-      console.dir(source.get().IMPLEMENTED_INTERFACES);
+    } else if (targetClass?.INTERNAL_TYPE === "INTF") {
+      const list: string[] = source.get().IMPLEMENTED_INTERFACES;
+      // todo: ammend list with super implemented and interfaces implemented by interfaces
+      const isImplemented = list.some(i => i === targetName);
+      if (isImplemented === false) {
+        throwError();
+      }
     }
 //    }
     target.set(source);
