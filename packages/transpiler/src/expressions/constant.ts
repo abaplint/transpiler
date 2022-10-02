@@ -22,9 +22,9 @@ export class ConstantTranspiler implements IExpressionTranspiler {
       return new Chunk().append(ret, node, traversal);
     }
 
-    let str = node.findFirstExpression(Expressions.ConstantString);
+    let str = node.findDirectExpression(Expressions.ConstantString);
     if (str === undefined) {
-      str = node.findFirstExpression(Expressions.TextElementString);
+      str = node.findDirectExpression(Expressions.TextElementString);
     }
     if (str) {
       let res = str.getFirstToken().getStr();
@@ -41,6 +41,29 @@ export class ConstantTranspiler implements IExpressionTranspiler {
         const code = this.escape(res);
         return new Chunk().append(code, node, traversal);
       }
+    }
+
+    const concat = node.findDirectExpression(Expressions.ConcatenatedConstant);
+    if (concat) {
+      const chunk = new Chunk().appendString("abap.operators.concat([");
+      let first = true;
+      for (const child of concat.getChildren()) {
+        const res = child.getFirstToken().getStr();
+        if (first === true) {
+          first = false;
+        } else if (res !== "&"){
+          chunk.appendString(",");
+        }
+        if (res.startsWith("'") && this.addGet === false) {
+          const code = "new abap.types.Character({length: " + (res.length - 2) + "}).set(" + this.escape(res) + ")";
+          chunk.append(code, node, traversal);
+        } else if (res.startsWith("`") && this.addGet === false) {
+          const code = "new abap.types.String().set(" + this.escape(res) + ")";
+          chunk.append(code, node, traversal);
+        }
+      }
+      chunk.appendString("])");
+      return chunk;
     }
 
     return new Chunk(`todo, Constant`);
