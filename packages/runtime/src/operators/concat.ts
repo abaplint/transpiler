@@ -2,7 +2,16 @@ import {Character, String} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
-export function concat(left: INumeric | ICharacter | string | number, right: INumeric | ICharacter | string | number) {
+export function concat(left: INumeric | ICharacter | string | number | any[], right: INumeric | ICharacter | string | number): String {
+  if (Array.isArray(left)) {
+// used in ampersand concatenation
+    let res = concat(left[0], left[1]);
+    for (let i = 2; i < left.length; i++) {
+      res = concat(res, left[i]);
+    }
+    return res;
+  }
+
   let val = "";
   if (typeof left === "string" || typeof left === "number") {
     val += left;
