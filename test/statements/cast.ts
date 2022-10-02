@@ -112,7 +112,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.only("ok, implements interface", async () => {
+  it("ok, implements interface, local", async () => {
     const code = `
 INTERFACE lif.
   DATA moo TYPE i.
