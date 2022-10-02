@@ -22,38 +22,37 @@ export async function cast(target: ABAPObject, source: ABAPObject) {
   }
 
   // eslint-disable-next-line prefer-const
-  let castEnabled = true;
-  if (castEnabled === true) {
-    const targetName = target.getQualifiedName()?.toUpperCase();
+  let checkIntf = true;
+
+  const targetName = target.getQualifiedName()?.toUpperCase();
+
+  // @ts-ignore
+  const targetClass = abap.Classes[targetName];
+
     /*
     if (targetName?.startsWith("IF_") === false
         && targetName?.startsWith("ZIF_") === false) { // todo, interfaces are also classes but not inherited
 */
-    // @ts-ignore
-    const targetClass = abap.Classes[targetName];
 
-    if (targetClass?.INTERNAL_TYPE === "CLAS") {
-      // using "instanceof" is probably wrong in some cases,
-      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/instanceof
-      if (source.get() instanceof targetClass === false) {
-        throwError();
-      }
-    } else if (targetClass?.INTERNAL_TYPE === "INTF") {
-      const list: string[] = [...source.get().IMPLEMENTED_INTERFACES];
-      let sup = source.get().super;
-      while (sup !== undefined) {
-        list.push(...sup.get().IMPLEMENTED_INTERFACES);
-        sup = sup.get().super;
-      }
-      // todo: ammend list with interfaces implemented by interfaces
-      const isImplemented = list.some(i => i === targetName);
-      if (isImplemented === false) {
-        throwError();
-      }
+  if (targetClass?.INTERNAL_TYPE === "CLAS") {
+    // using "instanceof" is probably wrong in some cases,
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/instanceof
+    if (source.get() instanceof targetClass === false) {
+      throwError();
     }
-//    }
-    target.set(source);
-  } else {
-    target.set(source);
+  } else if (checkIntf === true && targetClass?.INTERNAL_TYPE === "INTF") {
+    const list: string[] = [...source.get().IMPLEMENTED_INTERFACES];
+    let sup = source.get().super;
+    while (sup !== undefined) {
+      list.push(...sup.get().IMPLEMENTED_INTERFACES);
+      sup = sup.get().super;
+    }
+    // todo: ammend list with interfaces implemented by interfaces
+    const isImplemented = list.some(i => i === targetName);
+    if (isImplemented === false) {
+      throwError();
+    }
   }
+  target.set(source);
+
 }
