@@ -112,6 +112,30 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it.only("ok, implements interface", async () => {
+    const code = `
+INTERFACE lif.
+  DATA moo TYPE i.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lcl.
+  DATA li TYPE REF TO lif.
+  CREATE OBJECT lo.
+  li ?= lo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 // unit tests throwing cx_sy_move_cast_error not part of this file
 
 });
