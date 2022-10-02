@@ -22,9 +22,9 @@ export class ConstantTranspiler implements IExpressionTranspiler {
       return new Chunk().append(ret, node, traversal);
     }
 
-    let str = node.findFirstExpression(Expressions.ConstantString);
+    let str = node.findDirectExpression(Expressions.ConstantString);
     if (str === undefined) {
-      str = node.findFirstExpression(Expressions.TextElementString);
+      str = node.findDirectExpression(Expressions.TextElementString);
     }
     if (str) {
       let res = str.getFirstToken().getStr();

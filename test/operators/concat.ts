@@ -28,4 +28,15 @@ describe("Running operators - concat", () => {
     await f(abap);
   });
 
+  it.skip("simple ampersand concat", async () => {
+    const code = `
+    DATA lv_value TYPE string.
+    lv_value = 'foo' & 'bar'.
+    ASSERT lv_value = 'foobar'.`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
