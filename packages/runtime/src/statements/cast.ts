@@ -39,8 +39,13 @@ export async function cast(target: ABAPObject, source: ABAPObject) {
         throwError();
       }
     } else if (targetClass?.INTERNAL_TYPE === "INTF") {
-      const list: string[] = source.get().IMPLEMENTED_INTERFACES;
-      // todo: ammend list with super implemented and interfaces implemented by interfaces
+      const list: string[] = [...source.get().IMPLEMENTED_INTERFACES];
+      let sup = source.get().super;
+      while (sup !== undefined) {
+        list.push(...sup.get().IMPLEMENTED_INTERFACES);
+        sup = sup.get().super;
+      }
+      // todo: ammend list with interfaces implemented by interfaces
       const isImplemented = list.some(i => i === targetName);
       if (isImplemented === false) {
         throwError();
