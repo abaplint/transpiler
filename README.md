@@ -20,7 +20,7 @@ Playground: https://transpiler.abaplint.org
 * `SY-SYSID` = `ABC`
 * `SY-MANDT` = `123`
 
-##  Running
+## Running
 
 Prerequisites: [Node.js](https://nodejs.org/) 16+
 
