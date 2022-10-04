@@ -14,7 +14,12 @@ export class SQLiteDatabaseSchema {
       if (obj instanceof abaplint.Objects.Table
           && obj.getTableCategory() === abaplint.Objects.TableCategory.Transparent) {
         statements.push(this.buildTABL(obj).trim());
-      } else if (obj instanceof abaplint.Objects.View) {
+      }
+    }
+    // CREATE VIEWs after TABLEs
+    // todo: what if the view is based on another view?
+    for (const obj of this.reg.getObjects()) {
+      if (obj instanceof abaplint.Objects.View) {
         statements.push(this.buildVIEW(obj).trim());
       }
     }
