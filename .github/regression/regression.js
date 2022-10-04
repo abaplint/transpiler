@@ -22,7 +22,13 @@ for (const repo of repos) {
   console.dir("Old Version: " + repo.name + ", " + repo.folderName);
   childProcess.execSync("git clone --depth=1 --recurse-submodules https://github.com/" + repo.name + ".git " + repo.folderName, {stdio: "inherit", cwd: CWD});
   childProcess.execSync("npm install", {stdio: "inherit", cwd: CWD + repo.folderName}); // install the transpiler version from NPM or fixed in the repo
-  childProcess.execSync(repo.command, {stdio: "inherit", cwd: CWD + repo.folderName});
+  try {
+    childProcess.execSync(repo.command, {stdio: "inherit", cwd: CWD + repo.folderName});
+  } catch (e) {
+    console.log("ERROR ERROR ERROR");
+    console.dir(e);
+    repo.success = false;
+  }
 }
 
 console.log("START NEW START NEW START NEW START NEW START NEW START NEW START NEW");

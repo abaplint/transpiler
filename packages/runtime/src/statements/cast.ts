@@ -42,12 +42,29 @@ export async function cast(target: ABAPObject, source: ABAPObject) {
     }
   } else if (checkIntf === true && targetClass?.INTERNAL_TYPE === "INTF") {
     const list: string[] = [...source.get().IMPLEMENTED_INTERFACES];
+
+    // interfaces implemented in super classes
     let sup = source.get().super;
     while (sup !== undefined) {
       list.push(...sup.get().IMPLEMENTED_INTERFACES);
       sup = sup.get().super;
     }
-    // todo: ammend list with interfaces implemented by interfaces
+
+    // interfaces implemented by interfaces
+    const visit = new Set<string>(list);
+    while (visit.size > 0) {
+      const intfName = visit.values().next().value;
+      // @ts-ignore
+      const intf = abap.Classes[intfName];
+      for (const i of intf?.IMPLEMENTED_INTERFACES || []) {
+        if (visit.has(i) === false) {
+          visit.add(i);
+          list.push(i);
+        }
+      }
+      visit.delete(intfName);
+    }
+
     const isImplemented = list.some(i => i === targetName);
     if (isImplemented === false) {
       throwError();
