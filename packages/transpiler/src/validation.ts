@@ -27,7 +27,7 @@ export const config: IConfig = {
     },
     "parser_error": true,
     "allowed_object_types": {
-      "allowed": ["INTF", "CLAS", "PROG", "DEVC", "TABL", "SHLP", "XSLT", "SHMA", "SICF", "NROB","TYPE", "DTEL", "DOMA", "TTYP", "MSAG", "FUGR"],
+      "allowed": ["INTF", "CLAS", "PROG", "DEVC", "TABL", "SHLP", "VIEW", "XSLT", "SHMA", "SICF", "NROB","TYPE", "DTEL", "DOMA", "TTYP", "MSAG", "FUGR"],
     },
 /*
     "exit_or_check": {
