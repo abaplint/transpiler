@@ -1729,4 +1729,83 @@ ENDCLASS.`;
     expect(cons.split("\n")[0]).to.equal("");
   });
 
+  it("test-43", async () => {
+// casting with interfaces, should throw cx_sy_move_cast_error
+    const bar = `
+    INTERFACE zif_bar PUBLIC.
+    ENDINTERFACE.`;
+
+    const clas = `
+    CLASS zcl_foo DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_foo IMPLEMENTATION.
+    ENDCLASS.`;
+
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA foo TYPE REF TO object.
+        DATA bar TYPE REF TO zif_bar.
+        CREATE OBJECT foo TYPE zcl_foo.
+        TRY.
+            bar ?= foo.
+          CATCH cx_sy_move_cast_error.
+            WRITE 'expected'.
+        ENDTRY.
+      ENDMETHOD.
+    ENDCLASS.`;
+
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "cx_sy_move_cast_error.clas.abap", contents: cxmovecast},
+      {filename: "zif_bar.intf.abap", contents: bar},
+      {filename: "zcl_foo.clas.abap", contents: clas},
+      {filename: "zcl_foo.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("expected");
+  });
+
+  it("test-44", async () => {
+// casting with interfaces, ok
+    const bar = `
+    INTERFACE zif_bar PUBLIC.
+    ENDINTERFACE.`;
+
+    const clas = `
+    CLASS zcl_foo DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        INTERFACES zif_bar.
+    ENDCLASS.
+    CLASS zcl_foo IMPLEMENTATION.
+    ENDCLASS.`;
+
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA foo TYPE REF TO object.
+        DATA bar TYPE REF TO zif_bar.
+        CREATE OBJECT foo TYPE zcl_foo.
+        bar ?= foo.
+        WRITE 'ok'.
+      ENDMETHOD.
+    ENDCLASS.`;
+
+    const files = [
+      {filename: "zif_bar.intf.abap", contents: bar},
+      {filename: "zcl_foo.clas.abap", contents: clas},
+      {filename: "zcl_foo.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("ok");
+  });
+
 });

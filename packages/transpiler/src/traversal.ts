@@ -307,6 +307,10 @@ export class Traversal {
       ret += `await super.constructor_(INPUT);\n`;
     }
 
+    const cName = Traversal.escapeClassName(def.getName().toLowerCase());
+
+    ret += "this.INTERNAL_TYPE = " + cName + ".INTERNAL_TYPE;\n";
+    ret += "this.IMPLEMENTED_INTERFACES = " + cName + ".IMPLEMENTED_INTERFACES;\n";
     ret += "this.me = new abap.types.ABAPObject();\n";
     ret += "this.me.set(this);\n";
     for (const a of def.getAttributes().getAll()) {
@@ -328,7 +332,7 @@ export class Traversal {
     }
     // constants can be accessed both statically and via reference
     for (const c of def.getAttributes().getConstants()) {
-      ret += "this." + c.getName().toLowerCase() + " = " + Traversal.escapeClassName(def.getName().toLowerCase()) + "." + c.getName().toLowerCase() + ";\n";
+      ret += "this." + c.getName().toLowerCase() + " = " + cName + "." + c.getName().toLowerCase() + ";\n";
     }
 
     return ret;

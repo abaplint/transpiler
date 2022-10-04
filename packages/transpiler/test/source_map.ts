@@ -93,6 +93,8 @@ ENDCLASS.`;
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
   async constructor_(INPUT) {
+    this.INTERNAL_TYPE = zcl_maptest.INTERNAL_TYPE;
+    this.IMPLEMENTED_INTERFACES = zcl_maptest.IMPLEMENTED_INTERFACES;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     return this;
@@ -108,7 +110,7 @@ export {zcl_maptest};`;
     expect(result?.js).to.equal(js);
 
     const perLine = await countMappingsPerGeneratedLine(result?.map);
-    expect(perLine[10]).to.equal(3); // the WRITE statement
+    expect(perLine[12]).to.equal(3); // the WRITE statement
   });
 
 });
