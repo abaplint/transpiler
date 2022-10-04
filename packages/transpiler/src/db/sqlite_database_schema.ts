@@ -30,9 +30,8 @@ export class SQLiteDatabaseSchema {
 
   // https://www.sqlite.org/lang_createview.html
   private buildVIEW(view: abaplint.Objects.View): string {
-    // @ts-ignore
-    const fields = view.parsedData.fields; // todo, call method introduced in https://github.com/abaplint/abaplint/pull/2714
-    const columns = fields.map((f: any) => f.TABNAME.toLowerCase() + "." + f.FIELDNAME.toLowerCase() + " AS " + f.VIEWFIELD.toLowerCase()).join(", ");
+    const fields = view.getFields();
+    const columns = fields?.map((f) => f.TABNAME.toLowerCase() + "." + f.FIELDNAME.toLowerCase() + " AS " + f.VIEWFIELD.toLowerCase()).join(", ");
 
     let from = "";
     let previous = "";
