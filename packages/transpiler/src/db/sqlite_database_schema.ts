@@ -13,7 +13,9 @@ export class SQLiteDatabaseSchema {
     for (const obj of this.reg.getObjects()) {
       if (obj instanceof abaplint.Objects.Table
           && obj.getTableCategory() === abaplint.Objects.TableCategory.Transparent) {
-        statements.push(this.transparentTable(obj).trim());
+        statements.push(this.buildTABL(obj).trim());
+      } else if (obj instanceof abaplint.Objects.View) {
+        statements.push(this.buildVIEW(obj).trim());
       }
     }
     return statements;
@@ -21,7 +23,30 @@ export class SQLiteDatabaseSchema {
 
 //////////////////
 
-  private transparentTable(tabl: abaplint.Objects.Table): string {
+  // https://www.sqlite.org/lang_createview.html
+  private buildVIEW(view: abaplint.Objects.View): string {
+    // @ts-ignore
+    const fields = view.parsedData.fields; // todo, call method introduced in https://github.com/abaplint/abaplint/pull/2714
+    const columns = fields.map((f: any) => f.TABNAME.toLowerCase() + "." + f.FIELDNAME.toLowerCase() + " AS " + f.VIEWFIELD.toLowerCase()).join(", ");
+
+    let from = "";
+    let previous = "";
+    for (const j of view.getJoin() || []) {
+      if (previous === "") {
+        from += j.LTAB.toLowerCase() + " INNER JOIN " + j.RTAB.toLowerCase() + " ON " + j.LTAB.toLowerCase() + "." + j.LFIELD.toLowerCase() + " = " + j.RTAB.toLowerCase() + "." + j.RFIELD.toLowerCase();
+      } else if (previous === j.LTAB + "," + j.RTAB) {
+        from += " AND " + j.LTAB.toLowerCase() + "." + j.LFIELD.toLowerCase() + " = " + j.RTAB.toLowerCase() + "." + j.RFIELD.toLowerCase();
+      } else {
+        from += " INNER JOIN " + j.RTAB.toLowerCase() + " ON " + j.LTAB.toLowerCase() + "." + j.LFIELD.toLowerCase() + " = " + j.RTAB.toLowerCase() + "." + j.RFIELD.toLowerCase();
+      }
+      previous = j.LTAB + "," + j.RTAB;
+    }
+    from = from.trim();
+
+    return `CREATE VIEW ${view.getName().toLowerCase()} AS SELECT ${columns} FROM ${from};\n`;
+  }
+
+  private buildTABL(tabl: abaplint.Objects.Table): string {
     const type = tabl.parseType(this.reg);
     if (!(type instanceof abaplint.BasicTypes.StructureType)) {
       return "";
@@ -39,7 +64,7 @@ export class SQLiteDatabaseSchema {
     return `CREATE TABLE ${tabl.getName().toLowerCase()} (${fields.join(", ")}${key});\n`;
   }
 
-  private toType(type: abaplint.AbstractType, fieldname: string, table: string): string {
+  private toType(type: abaplint.AbstractType, fieldname: string, errorInfo: string): string {
     if (type instanceof abaplint.BasicTypes.CharacterType) {
       return `NCHAR(${type.getLength()})`;
     } else if (type instanceof abaplint.BasicTypes.TimeType) {
@@ -64,9 +89,10 @@ export class SQLiteDatabaseSchema {
     } else if (type instanceof abaplint.BasicTypes.PackedType){
       return `DECIMAL(${type.getLength()},${type.getDecimals()})`;
     } else if (type instanceof abaplint.BasicTypes.VoidType) {
-      throw `Type of ${table}-${fieldname} is VoidType(${type.getVoided()}), make sure the type is known, enable strict syntax checking`;
+      throw `Type of ${errorInfo}-${fieldname} is VoidType(${type.getVoided()
+      }), make sure the type is known, enable strict syntax checking`;
     } else {
-      throw "database_setup: " + table + "-" + fieldname + ", todo toType handle: " + type.constructor.name;
+      throw "database_setup: " + errorInfo + "-" + fieldname + ", todo toType handle: " + type.constructor.name;
     }
   }
 

@@ -2,12 +2,13 @@ import * as abaplint from "@abaplint/core";
 import {Validation, config} from "./validation";
 import {UnitTest} from "./unit_test";
 import {Keywords} from "./keywords";
-import {HandleTable} from "./handle_table";
-import {HandleABAP} from "./handle_abap";
 import {IFile, IOutput, IProgress, ITranspilerOptions, IOutputFile} from "./types";
-import {HandleDataElement} from "./handle_data_element";
-import {HandleTableType} from "./handle_table_type";
 import {DatabaseSetup} from "./db";
+import {HandleTable} from "./handlers/handle_table";
+import {HandleABAP} from "./handlers/handle_abap";
+import {HandleDataElement} from "./handlers/handle_data_element";
+import {HandleTableType} from "./handlers/handle_table_type";
+import {HandleView} from "./handlers/handle_view";
 
 export {config, ITranspilerOptions, IFile, IProgress, IOutputFile};
 
@@ -65,6 +66,8 @@ export class Transpiler {
         output.objects.push(...new HandleABAP(this.options).runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.Table) {
         output.objects.push(...new HandleTable().runObject(obj, reg));
+      } else if (obj instanceof abaplint.Objects.View) {
+        output.objects.push(...new HandleView().runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.DataElement) {
         output.objects.push(...new HandleDataElement().runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.TableType) {
