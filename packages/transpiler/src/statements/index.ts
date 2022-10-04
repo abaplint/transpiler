@@ -4,6 +4,7 @@ export * from "./assert";
 export * from "./assign";
 export * from "./at";
 export * from "./authority_check";
+export * from "./break_id";
 export * from "./call_function";
 export * from "./call_kernel";
 export * from "./call_transformation";
