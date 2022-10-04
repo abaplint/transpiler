@@ -34,4 +34,18 @@ describe("Keywords", () => {
     expect(after).to.equal("data abstract_ type i.");
   });
 
+  it("abstract, exclamation", async () => {
+    const file = new MemoryFile("zfoo1.prog.abap", `INTERFACE lif.
+  METHODS bar EXPORTING !return TYPE i.
+ENDINTERFACE.`);
+    const reg = new Registry().addFile(file);
+
+    new Keywords().handle(reg);
+
+    const after = reg.getFirstObject()?.getFiles()[0].getRaw();
+    expect(after).to.equal(`INTERFACE lif.
+  METHODS bar EXPORTING !return_ TYPE i.
+ENDINTERFACE.`);
+  });
+
 });

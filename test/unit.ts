@@ -1808,4 +1808,49 @@ ENDCLASS.`;
     expect(cons.split("\n")[1]).to.equal("ok");
   });
 
+  it("test-45", async () => {
+// handling of JS keywords
+
+    const clas = `
+    CLASS zcl_keywords DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        METHODS foo
+          RETURNING VALUE(return) TYPE i.
+        METHODS bar
+          EXPORTING return TYPE i.
+    ENDCLASS.
+    CLASS zcl_keywords IMPLEMENTATION.
+      METHOD foo.
+        return = 2.
+      ENDMETHOD.
+
+      METHOD bar.
+        return = 1.
+      ENDMETHOD.
+    ENDCLASS.`;
+
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA obj TYPE REF TO zcl_keywords.
+        DATA lv type i.
+        CREATE OBJECT obj TYPE zcl_keywords.
+        obj->foo( ).
+        obj->bar( IMPORTING return = lv ).
+        WRITE / 'ok'.
+      ENDMETHOD.
+    ENDCLASS.`;
+
+    const files = [
+      {filename: "zcl_keywords.clas.abap", contents: clas},
+      {filename: "zcl_keywords.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("ok");
+  });
+
 });
