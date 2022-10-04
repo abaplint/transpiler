@@ -107,6 +107,7 @@ export * from "./try";
 export * from "./type_pools";
 export * from "./type";
 export * from "./unassign";
+export * from "./unpack";
 export * from "./update_database";
 export * from "./wait";
 export * from "./when";
