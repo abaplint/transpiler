@@ -63,8 +63,6 @@ abap.Classes['PROG-ZFOOBAR-LIF_FOOBAR'] = lif_foobar;`;
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
   async constructor_(INPUT) {
-    this.INTERNAL_TYPE = lcl_foobar.INTERNAL_TYPE;
-    this.IMPLEMENTED_INTERFACES = lcl_foobar.IMPLEMENTED_INTERFACES;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     return this;
@@ -95,8 +93,6 @@ abap.Classes['PROG-ZFOOBAR-LCL_FOOBAR'] = lcl_foobar;`;
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
   async constructor_(INPUT) {
-    this.INTERNAL_TYPE = lcl_foobar.INTERNAL_TYPE;
-    this.IMPLEMENTED_INTERFACES = lcl_foobar.IMPLEMENTED_INTERFACES;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     return this;
@@ -129,8 +125,6 @@ abap.Classes['PROG-ZFOOBAR-LCL_FOOBAR'] = lcl_foobar;`;
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
   async constructor_(INPUT) {
-    this.INTERNAL_TYPE = lcl_foobar.INTERNAL_TYPE;
-    this.IMPLEMENTED_INTERFACES = lcl_foobar.IMPLEMENTED_INTERFACES;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     return this;
@@ -183,8 +177,6 @@ CREATE OBJECT foo.`;
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
   async constructor_(INPUT) {
-    this.INTERNAL_TYPE = zcl_words.INTERNAL_TYPE;
-    this.IMPLEMENTED_INTERFACES = zcl_words.IMPLEMENTED_INTERFACES;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     return this;
@@ -225,8 +217,6 @@ DATA moo TYPE foo.`;
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
   async constructor_(INPUT) {
-    this.INTERNAL_TYPE = zcl_words.INTERNAL_TYPE;
-    this.IMPLEMENTED_INTERFACES = zcl_words.IMPLEMENTED_INTERFACES;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.bar = new abap.types.Integer({qualifiedName: "I"});
@@ -261,8 +251,6 @@ class zcl_words {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
   async constructor_(INPUT) {
-    this.INTERNAL_TYPE = zcl_words.INTERNAL_TYPE;
-    this.IMPLEMENTED_INTERFACES = zcl_words.IMPLEMENTED_INTERFACES;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.bar = new abap.types.Integer({qualifiedName: "I"});
@@ -295,8 +283,6 @@ ENDCLASS.`;
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
   async constructor_(INPUT) {
-    this.INTERNAL_TYPE = zcl_ret.INTERNAL_TYPE;
-    this.IMPLEMENTED_INTERFACES = zcl_ret.IMPLEMENTED_INTERFACES;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.bar = new abap.types.Integer({qualifiedName: "I"});
@@ -365,8 +351,6 @@ class zcl_ret {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
   async constructor_(INPUT) {
-    this.INTERNAL_TYPE = zcl_ret.INTERNAL_TYPE;
-    this.IMPLEMENTED_INTERFACES = zcl_ret.IMPLEMENTED_INTERFACES;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.c_maxdcodes = zcl_ret.c_maxdcodes;
@@ -393,8 +377,6 @@ ENDCLASS.`;
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
   async constructor_(INPUT) {
-    this.INTERNAL_TYPE = lcl_bar.INTERNAL_TYPE;
-    this.IMPLEMENTED_INTERFACES = lcl_bar.IMPLEMENTED_INTERFACES;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     return this;
@@ -426,8 +408,6 @@ class lcl_bar {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
   async constructor_(INPUT) {
-    this.INTERNAL_TYPE = lcl_bar.INTERNAL_TYPE;
-    this.IMPLEMENTED_INTERFACES = lcl_bar.IMPLEMENTED_INTERFACES;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     return this;
@@ -470,8 +450,6 @@ class lcl_bar {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
   async constructor_(INPUT) {
-    this.INTERNAL_TYPE = lcl_bar.INTERNAL_TYPE;
-    this.IMPLEMENTED_INTERFACES = lcl_bar.IMPLEMENTED_INTERFACES;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     let input = new abap.types.Integer({qualifiedName: "I"});
@@ -501,8 +479,6 @@ async function bar() {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
   async constructor_(INPUT) {
-    this.INTERNAL_TYPE = lcl_bar.INTERNAL_TYPE;
-    this.IMPLEMENTED_INTERFACES = lcl_bar.IMPLEMENTED_INTERFACES;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.foo = lcl_bar.foo;
@@ -551,8 +527,6 @@ class lcl_bar {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
   async constructor_(INPUT) {
-    this.INTERNAL_TYPE = lcl_bar.INTERNAL_TYPE;
-    this.IMPLEMENTED_INTERFACES = lcl_bar.IMPLEMENTED_INTERFACES;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.first = lcl_bar.first;
@@ -679,8 +653,6 @@ ENDCLASS.`;
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
   async constructor_(INPUT) {
-    this.INTERNAL_TYPE = lcl_constant_test.INTERNAL_TYPE;
-    this.IMPLEMENTED_INTERFACES = lcl_constant_test.IMPLEMENTED_INTERFACES;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.area_name = lcl_constant_test.area_name;
@@ -719,8 +691,6 @@ class lcl {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
   async constructor_(INPUT) {
-    this.INTERNAL_TYPE = lcl.INTERNAL_TYPE;
-    this.IMPLEMENTED_INTERFACES = lcl.IMPLEMENTED_INTERFACES;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     return this;

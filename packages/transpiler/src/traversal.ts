@@ -309,8 +309,6 @@ export class Traversal {
 
     const cName = Traversal.escapeClassName(def.getName().toLowerCase());
 
-    ret += "this.INTERNAL_TYPE = " + cName + ".INTERNAL_TYPE;\n";
-    ret += "this.IMPLEMENTED_INTERFACES = " + cName + ".IMPLEMENTED_INTERFACES;\n";
     ret += "this.me = new abap.types.ABAPObject();\n";
     ret += "this.me.set(this);\n";
     for (const a of def.getAttributes().getAll()) {
