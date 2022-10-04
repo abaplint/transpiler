@@ -136,6 +136,22 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("ok, not bound", async () => {
+    const code = `
+INTERFACE lif1.
+ENDINTERFACE.
+
+INTERFACE lif2.
+ENDINTERFACE.
+
+DATA li_node TYPE REF TO lif1.
+DATA li_val TYPE REF TO lif2.
+li_node ?= li_val.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 // unit tests throwing cx_sy_move_cast_error not part of this file
 
 });
