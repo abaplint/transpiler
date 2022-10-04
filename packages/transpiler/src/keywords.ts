@@ -11,9 +11,9 @@ export class Keywords {
         continue;
       }
       for (const f of o.getABAPFiles()) {
-        let tokens: abaplint.Token[] = [];
+        const tokens: abaplint.Token[] = [];
         for (const s of f.getStatements()) {
-          tokens = tokens.concat(this.traverse(s, f));
+          tokens.push(...this.traverse(s, f));
         }
         if (tokens.length === 0) {
           continue;
@@ -52,6 +52,8 @@ export class Keywords {
       "volatile",	"while", "yield"];
 // "with"
 // "delete"
+
+    keywords.push(...keywords.map(k => "!" + k));
 
     let ret: abaplint.Token[] = [];
     for (const c of node.getChildren()) {
