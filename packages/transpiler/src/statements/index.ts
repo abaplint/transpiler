@@ -18,6 +18,7 @@ export * from "./clear";
 export * from "./close_dataset";
 export * from "./collect";
 export * from "./commit";
+export * from "./log_point";
 export * from "./concatenate";
 export * from "./condense";
 export * from "./constant";
