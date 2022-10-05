@@ -9,7 +9,12 @@ export class MethodCallBodyTranspiler implements IExpressionTranspiler {
     const ret = new Chunk();
 
     for (const c of node.getChildren()) {
-      ret.appendChunk(traversal.traverse(c));
+      if (c instanceof Nodes.TokenNode) {
+        // PARAMETER-TABLE
+        continue;
+      } else {
+        ret.appendChunk(traversal.traverse(c));
+      }
     }
 
     return ret;
