@@ -2,7 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {FieldChainTranspiler} from "../expressions";
+import {FieldChainTranspiler, SourceTranspiler} from "../expressions";
 
 export class CallFunctionTranspiler implements IStatementTranspiler {
 
@@ -29,8 +29,9 @@ export class CallFunctionTranspiler implements IStatementTranspiler {
 
     const dest = node.findDirectExpression(abaplint.Expressions.Destination)?.findDirectExpression(abaplint.Expressions.Source);
     if (dest) {
+      const s = new SourceTranspiler(true).transpile(dest, traversal);
       param = param.replace("{", ",").replace(/}$/, "");
-      ret.appendString(`await abap.statements.callFunction({name:${fmname},destination:${dest.concatTokens()}${param}});`);
+      ret.appendString(`await abap.statements.callFunction({name:${fmname},destination:${s.getCode()}${param}});`);
     } else {
       ret.appendString(`await abap.FunctionModules[${fmname}](${param});`);
     }
