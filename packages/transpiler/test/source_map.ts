@@ -26,31 +26,6 @@ async function countMappingsPerGeneratedLine(map: string | undefined) {
 
 describe("Source Map", () => {
 
-  it("TRY", async () => {
-    const abap = `TRY.
-ENDTRY.`;
-
-    const js =
-`try {
-}`;
-
-    const map =
-`{
-  "version": 3,
-  "sources": [
-    "zfoobar.prog.abap"
-  ],
-  "names": [],
-  "mappings": "AAAA;AACA",
-  "file": "zfoobar.prog.mjs",
-  "sourceRoot": ""
-}`;
-
-    const result = await runSingleMapped(abap, OPTIONS);
-    expect(result?.js).to.equal(js);
-    expect(result?.map).to.equal(map);
-  });
-
   it("IF, count mappings", async () => {
     const abap = `IF foo CP bar.
 ENDIF.`;
