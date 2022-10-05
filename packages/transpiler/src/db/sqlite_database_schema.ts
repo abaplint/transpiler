@@ -47,7 +47,7 @@ export class SQLiteDatabaseSchema {
     }
     from = from.trim();
 
-    return `CREATE VIEW ${view.getName().toLowerCase()} AS SELECT ${columns} FROM ${from};\n`;
+    return `CREATE VIEW '${view.getName().toLowerCase()}' AS SELECT ${columns} FROM ${from};\n`;
   }
 
   private buildTABL(tabl: abaplint.Objects.Table): string {
@@ -65,7 +65,7 @@ export class SQLiteDatabaseSchema {
     // add single quotes to field names to allow for keywords as field names
     const key = ", PRIMARY KEY(" + tabl.listKeys().map(e => "'" + e.toLowerCase() + "'").join(",") + ")";
 
-    return `CREATE TABLE ${tabl.getName().toLowerCase()} (${fields.join(", ")}${key});\n`;
+    return `CREATE TABLE '${tabl.getName().toLowerCase()}' (${fields.join(", ")}${key});\n`;
   }
 
   private toType(type: abaplint.AbstractType, fieldname: string, errorInfo: string): string {
