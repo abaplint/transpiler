@@ -63,7 +63,7 @@ export class SQLiteDatabaseSchema {
 
     // assumption: all transparent tables have primary keys
     // add single quotes to field names to allow for keywords as field names
-    const key = ", PRIMARY KEY(" + tabl.listKeys().map(e => "'" + e.toLowerCase() + "'").join(",") + ")";
+    const key = ", PRIMARY KEY(" + tabl.listKeys(this.reg).map(e => "'" + e.toLowerCase() + "'").join(",") + ")";
 
     return `CREATE TABLE '${tabl.getName().toLowerCase()}' (${fields.join(", ")}${key});\n`;
   }

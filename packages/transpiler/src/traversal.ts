@@ -13,7 +13,7 @@ export class Traversal {
   private readonly spaghetti: abaplint.ISpaghettiScope;
   private readonly file: abaplint.ABAPFile;
   private readonly obj: abaplint.ABAPObject;
-  private readonly reg: abaplint.IRegistry;
+  public readonly reg: abaplint.IRegistry;
   public readonly runtimeTypeError: boolean;
 
   public constructor(spaghetti: abaplint.ISpaghettiScope, file: abaplint.ABAPFile,
