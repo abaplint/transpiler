@@ -104,7 +104,7 @@ export class SelectTranspiler implements IStatementTranspiler {
     if (from.length === 1) {
       const tabl = traversal.findTable(from[0]);
       if (tabl) {
-        keys = tabl.listKeys().map(k => k.toLowerCase());
+        keys = tabl.listKeys(traversal.reg).map(k => k.toLowerCase());
       }
     }
     return keys;
