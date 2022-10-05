@@ -305,4 +305,19 @@ read table tab assigning <fs> index sy-tfill.`;
     await f(abap);
   });
 
+  it("ref, arrow", async () => {
+    const code = `
+TYPES: BEGIN OF bar,
+         name TYPE string,
+       END OF bar.
+TYPES ty TYPE REF TO bar.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row LIKE LINE OF tab.
+READ TABLE tab WITH KEY table_line->name = 'hello' INTO row.
+ASSERT sy-subrc = 4.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

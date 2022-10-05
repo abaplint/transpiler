@@ -50,7 +50,7 @@ export class ReadTableTranspiler implements IStatementTranspiler {
         const source = compare.getChildren()[(i * 3) + 2];
 
         const s = traversal.traverse(source).getCode();
-        let field = left.concatTokens().toLowerCase().replace("-", ".get().");
+        let field = left.concatTokens().toLowerCase().replace("->", ".get().").replace("-", ".get().");
         if (left.get() instanceof abaplint.Expressions.Dynamic
             && left instanceof abaplint.Nodes.ExpressionNode) {
           const concat = left.concatTokens().toLowerCase();

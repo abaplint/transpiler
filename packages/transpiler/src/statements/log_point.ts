@@ -6,7 +6,8 @@ import {Chunk} from "../chunk";
 export class LogPointTranspiler implements IStatementTranspiler {
 
   public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    return new Chunk(`throw new Error("LogPoint, transpiler todo");`);
+    // for now, do nothing,
+    return new Chunk(``);
   }
 
 }

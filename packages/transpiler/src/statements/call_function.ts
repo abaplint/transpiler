@@ -2,13 +2,21 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
+import {FieldChainTranspiler} from "../expressions";
 
 export class CallFunctionTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    const fmname = node.findDirectExpression(abaplint.Expressions.FunctionName)?.concatTokens().toUpperCase();
-    if (fmname === undefined) {
+    const fmchild = node.findDirectExpression(abaplint.Expressions.FunctionName)?.getFirstChild();
+    if (fmchild === undefined) {
       throw new Error("CallFunctionTranspilerNameNotFound");
+    }
+    let fmname = "";
+    if (fmchild instanceof abaplint.Nodes.ExpressionNode
+        && fmchild.get() instanceof abaplint.Expressions.FieldChain) {
+      fmname = new FieldChainTranspiler(true).transpile(fmchild, traversal).getCode();
+    } else {
+      fmname = fmchild.concatTokens().toUpperCase();
     }
 
     let param = "";
