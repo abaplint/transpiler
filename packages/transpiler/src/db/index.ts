@@ -85,6 +85,7 @@ export class DatabaseSetup {
     // statements are inside a javascript string stemplate
     ret = ret.replace(/\\/g, "\\\\");
     ret = ret.replace(/`/g, "\\`");
+    ret = ret.replace(/\${/g, "\\${");
     return ret;
   }
 
