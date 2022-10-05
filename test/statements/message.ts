@@ -64,4 +64,16 @@ describe("Running statements - MESSAGE", () => {
     expect(abap.console.get()).to.equal("I::000 moo");
   });
 
+  it("MESSAGE, MessageNumber", async () => {
+    const code = `
+  DATA result TYPE string.
+  MESSAGE ID 'ZFOO' TYPE 'I' NUMBER 100 INTO result WITH 'moo'.
+  WRITE result.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("I:ZFOO:100 moo");
+  });
+
 });
