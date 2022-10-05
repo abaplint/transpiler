@@ -9,6 +9,7 @@ export class TryTranspiler implements IStructureTranspiler {
     const ret = new Chunk();
 
     const catches = node.findDirectStructures(abaplint.Structures.Catch);
+    const cleanup = node.findDirectStructures(abaplint.Structures.Cleanup);
     let catchCode: Chunk | undefined = this.buildCatchCode(catches, traversal);
 
     for (const c of node.getChildren()) {
@@ -19,12 +20,20 @@ export class TryTranspiler implements IStructureTranspiler {
         catchCode = undefined;
       } else if (c.get() instanceof abaplint.Structures.Cleanup) {
         ret.appendString(`} finally {\n// Transpiler todo: CLEANUP ignored\n`);
+      } else if (c.get() instanceof abaplint.Statements.Try
+          || c.get() instanceof abaplint.Statements.EndTry) {
+        if (catches.length === 0 && cleanup.length === 0) {
+          continue;
+        }
+        ret.appendChunk(traversal.traverse(c));
       } else {
         ret.appendChunk(traversal.traverse(c));
       }
     }
     return ret;
   }
+
+/////////////////////
 
   private buildCatchCode(nodes: abaplint.Nodes.StructureNode[], traversal: Traversal): Chunk {
     let ret = "";
