@@ -1368,4 +1368,32 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("call method, find default parameter name", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS foo IMPORTING foo TYPE i.
+    METHODS run.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD foo.
+    WRITE foo.
+  ENDMETHOD.
+
+  METHOD run.
+    CALL METHOD foo( 5 ) .
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lcl.
+  CREATE OBJECT lo.
+  lo->run( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("5");
+  });
+
 });

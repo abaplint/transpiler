@@ -13,7 +13,6 @@ export class MethodCallParamTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     let name = "";
-
     if (!(node.get() instanceof Expressions.MethodCallParam)) {
       throw new Error("MethodCallParam, unexpected node, " + node?.get().constructor.name);
     }

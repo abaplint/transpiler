@@ -2,7 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {MethodSourceTranspiler} from "../expressions";
+import {MethodCallBodyTranspiler, MethodSourceTranspiler} from "../expressions";
 
 export class CallTranspiler implements IStatementTranspiler {
 
@@ -67,9 +67,13 @@ if (e.classic) {
     const methodSource = node.findDirectExpression(abaplint.Expressions.MethodSource);
     if (methodSource) {
       let body = "";
+
+      const nameToken = methodSource.getLastChild()?.getFirstToken();
+      const m = nameToken ? traversal.findMethodReference(nameToken, traversal.findCurrentScopeByToken(nameToken)) : undefined;
+
       const methodCallBody = node.findDirectExpression(abaplint.Expressions.MethodCallBody);
       if (methodCallBody) {
-        body = traversal.traverse(methodCallBody).getCode();
+        body = new MethodCallBodyTranspiler(m?.def).transpile(methodCallBody, traversal).getCode();
       }
 
       let pre = "";
