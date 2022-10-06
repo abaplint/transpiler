@@ -412,4 +412,25 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("default = SPACE in interface", async () => {
+    const code = `
+INTERFACE /foo/bar.
+  METHODS bar IMPORTING foo TYPE i DEFAULT SPACE.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES /foo/bar.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD /foo/bar~bar.
+    WRITE foo.
+  ENDMETHOD.
+ENDCLASS.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
