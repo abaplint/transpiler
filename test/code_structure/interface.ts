@@ -384,4 +384,32 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("0");
   });
 
+  it("local, namespaced, me", async () => {
+    const code = `
+INTERFACE /foo/lif.
+  DATA go TYPE i.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES /foo/lif.
+    METHODS foo.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD foo.
+    ASSERT /foo/lif~go IS INITIAL.
+    ASSERT me->/foo/lif~go IS INITIAL.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lcl.
+  CREATE OBJECT lo.
+  lo->foo( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
