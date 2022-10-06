@@ -84,4 +84,21 @@ WRITE 'hello'.`;
     await f(abap);
   });
 
+  it.skip("js keyword in macro, true", async () => {
+    const code = `
+CONSTANTS: BEGIN OF c_bool,
+             true TYPE c LENGTH 1 VALUE 'X',
+           END OF c_bool.
+
+DEFINE test.
+  WRITE c_bool-true.
+end-of-definition.
+
+test.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("X");
+  });
+
 });
