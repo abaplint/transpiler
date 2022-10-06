@@ -40,4 +40,48 @@ WRITE bar.`;
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("js keyword in macro contents", async () => {
+    const code = `
+DEFINE foo.
+  WHILE 1 = 2.
+  ENDWHILE.
+END-OF-DEFINITION.
+
+foo.
+WRITE 'hello'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("js keyword in macro comment contents", async () => {
+    const code = `
+DEFINE foo.
+*  else. offset = pos. endif.
+  WHILE 1 = 2.
+  ENDWHILE.
+END-OF-DEFINITION.
+
+foo.
+WRITE 'hello'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("js keyword in macro, if", async () => {
+    const code = `
+DEFINE test.
+  IF 1 = 2.
+  else.
+  ENDIF.
+end-of-definition.
+
+TEST.
+WRITE 'hello'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
