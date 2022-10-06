@@ -13,6 +13,7 @@ import {find} from "./find";
 import {cast} from "./cast";
 import {getBit} from "./get_bit";
 import {getLocale} from "./get_locale";
+import {getParameter} from "./get_parameter";
 import {setLocale} from "./set_locale";
 import {getRunTime} from "./get_run_time";
 import {getTime} from "./get_time";
@@ -58,6 +59,7 @@ export class Statements {
   public deleteInternal = deleteInternal;
   public describe = describe;
   public find = find;
+  public getParameter = getParameter;
   public getBit = getBit;
   public getLocale = getLocale;
   public getRunTime = getRunTime;
