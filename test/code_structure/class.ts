@@ -1342,4 +1342,30 @@ ENDCLASS.`;
     await f(abap);
   });
 
+  it("local class, default from class constant", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CONSTANTS:
+      BEGIN OF gc_actvt,
+        create TYPE i VALUE '01',
+      END OF gc_actvt.
+
+    CLASS-METHODS check
+      IMPORTING
+        iv_actvt TYPE i DEFAULT GC_ACTVT-create.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD check.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>check( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
