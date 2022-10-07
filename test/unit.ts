@@ -1853,4 +1853,50 @@ ENDCLASS.`;
     expect(cons.split("\n")[1]).to.equal("ok");
   });
 
+  it("test-46", async () => {
+// CLAS locals includes and macros
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        lcl_mapping_camel=>run( ).
+      ENDMETHOD.
+    ENDCLASS.`;
+    const def = `
+    CLASS lcl_mapping_camel DEFINITION.
+      PUBLIC SECTION.
+        CLASS-METHODS run.
+    ENDCLASS.`;
+    const imp = `
+    CLASS lcl_mapping_camel IMPLEMENTATION.
+      METHOD run.
+        WRITE 'from impl'.
+        moo.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const macros = `
+    DEFINE moo.
+      WRITE 'moo'.
+    END-OF-DEFINITION.`;
+
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "zcl_client.clas.macros.abap", contents: macros},
+      {filename: "zcl_client.clas.locals_def.abap", contents: def},
+      {filename: "zcl_client.clas.locals_imp.abap", contents: imp},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("from implmoo");
+  });
+
 });
