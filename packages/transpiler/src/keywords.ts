@@ -58,8 +58,12 @@ export class Keywords {
     let ret: abaplint.Token[] = [];
     for (const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.TokenNodeRegex) {
-        if (keywords.some(k => k === c.getFirstToken().getStr().toLowerCase())) {
-          ret.push(c.getFirstToken());
+        const token = c.getFirstToken();
+        if (keywords.some(k => k === token.getStr().toLowerCase())) {
+          const start = token.getStart();
+          if (!(start instanceof abaplint.VirtualPosition)) {
+            ret.push(token);
+          }
         }
       } else if (c instanceof abaplint.Nodes.TokenNode) {
         continue;

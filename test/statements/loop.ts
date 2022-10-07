@@ -437,6 +437,19 @@ ENDLOOP.`;
     await f(abap);
   });
 
+  it("variable i exists", async () => {
+    const code = `
+DATA basket TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA row LIKE LINE OF basket.
+DATA i TYPE i.
+APPEND 2 TO basket.
+LOOP AT basket INTO row WHERE table_line = i.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("LOOP condition with method call", async () => {
     const code = `
 CLASS lcl_sub DEFINITION.

@@ -11,7 +11,7 @@ export class ComponentCondTranspiler implements IExpressionTranspiler {
     for(const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.ExpressionNode) {
         let cond = traversal.traverse(c).getCode();
-        cond = cond.replace(/^\(i\) => \{return /,"");
+        cond = cond.replace(/^\(I\) => \{return /,"");
         cond = cond.replace(/;\}$/, "");
         ret += cond;
       } else if (c instanceof abaplint.Nodes.TokenNode) {
@@ -27,7 +27,7 @@ export class ComponentCondTranspiler implements IExpressionTranspiler {
         }
       }
     }
-    ret = `(i) => {return ${ret};}`;
+    ret = `(I) => {return ${ret};}`;
     return new Chunk(ret);
   }
 }
