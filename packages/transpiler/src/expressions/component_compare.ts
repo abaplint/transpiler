@@ -14,28 +14,28 @@ export class ComponentCompareTranspiler implements IExpressionTranspiler {
     if (node.findDirectExpression(Expressions.CompareOperator)) {
       const compare = traversal.traverse(node.findDirectExpression(Expressions.CompareOperator)).getCode();
       const source = traversal.traverse(node.findDirectExpression(Expressions.Source)).getCode();
-      return new Chunk(`(i) => {return ${pre}abap.compare.${compare}(i.${component}, ${source});}`);
+      return new Chunk(`(I) => {return ${pre}abap.compare.${compare}(I.${component}, ${source});}`);
     }
 
     if ((concat.startsWith("NOT") && concat.endsWith("IS INITIAL"))
         || concat.endsWith("IS NOT INITIAL")) {
-      return new Chunk(`(i) => {return abap.compare.initial(i.${component}) === false;}`);
+      return new Chunk(`(I) => {return abap.compare.initial(I.${component}) === false;}`);
     } else if (concat.endsWith("IS INITIAL")) {
-      return new Chunk(`(i) => {return abap.compare.initial(i.${component});}`);
+      return new Chunk(`(I) => {return abap.compare.initial(I.${component});}`);
     }
 
     if ((concat.startsWith("NOT") && concat.endsWith("IS BOUND"))
         || concat.endsWith("IS NOT BOUND")) {
-      return new Chunk(`(i) => {return abap.compare.initial(i.${component});}`);
+      return new Chunk(`(I) => {return abap.compare.initial(I.${component});}`);
     } else if (concat.endsWith("IS BOUND")) {
-      return new Chunk(`(i) => {return abap.compare.initial(i.${component}) === false;}`);
+      return new Chunk(`(I) => {return abap.compare.initial(I.${component}) === false;}`);
     }
 
     if ((concat.startsWith("NOT") && concat.endsWith("IS ASSIGNED"))
         || concat.endsWith("IS NOT ASSIGNED")) {
-      return new Chunk(`(i) => {return abap.compare.assigned(i.${component}) === false;}`);
+      return new Chunk(`(I) => {return abap.compare.assigned(I.${component}) === false;}`);
     } else if (concat.endsWith("IS ASSIGNED")) {
-      return new Chunk(`(i) => {return abap.compare.assigned(i.${component});}`);
+      return new Chunk(`(I) => {return abap.compare.assigned(I.${component});}`);
     }
 
     return new Chunk("ComponentCompareTodo");
