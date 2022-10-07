@@ -45,6 +45,7 @@ export class Requires {
 
         if (f.getFilename() === filename
             || f.getFilename().endsWith(".clas.testclasses.abap")
+            || f.getFilename().endsWith(".clas.macros.abap")
             || f.getFilename() === clas.getMainABAPFile()?.getFilename()) {
           continue;
         }
