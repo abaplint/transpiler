@@ -35,4 +35,28 @@ WRITE stru2-bar.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("assigning via object", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS foo.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD foo.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref1 TYPE REF TO lcl.
+  DATA ref2 TYPE REF TO lcl.
+  FIELD-SYMBOLS <fs> TYPE any.
+  CREATE OBJECT ref1.
+  ASSIGN ref1 TO <fs>.
+  ref2 = <fs>.
+  ref2->foo( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
