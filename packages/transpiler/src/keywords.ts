@@ -53,8 +53,6 @@ export class Keywords {
 // "with"
 // "delete"
 
-    keywords.push(...keywords.map(k => "!" + k));
-
     const ret: abaplint.Token[] = [];
     for (const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.TokenNodeRegex) {
@@ -63,8 +61,14 @@ export class Keywords {
         if (start instanceof abaplint.VirtualPosition) {
           continue;
         }
-        if (keywords.some(k => k === token.getStr().toLowerCase())) {
-          ret.push(token);
+        for (const k of keywords) {
+          const lower = token.getStr().toLowerCase();
+          if (k === lower
+              || "!" + k === lower
+              || lower.endsWith("~" + k)) {
+            ret.push(token);
+            break;
+          }
         }
       } else if (c instanceof abaplint.Nodes.TokenNode) {
         continue;

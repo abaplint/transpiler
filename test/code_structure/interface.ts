@@ -433,7 +433,7 @@ ENDCLASS.`;
     await f(abap);
   });
 
-  it.skip("keyword new", async () => {
+  it("keyword new", async () => {
     const code = `
 INTERFACE lif.
   METHODS new.
