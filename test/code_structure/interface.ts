@@ -453,4 +453,24 @@ ENDCLASS.`;
     await f(abap);
   });
 
+  it.only("default uname", async () => {
+    const code = `
+INTERFACE lif.
+  METHODS foo IMPORTING u LIKE sy-uname DEFAULT sy-uname.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD lif~foo.
+  ENDMETHOD.
+ENDCLASS.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
