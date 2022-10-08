@@ -55,7 +55,7 @@ export class Keywords {
 
     keywords.push(...keywords.map(k => "!" + k));
 
-    let ret: abaplint.Token[] = [];
+    const ret: abaplint.Token[] = [];
     for (const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.TokenNodeRegex) {
         const token = c.getFirstToken();
@@ -68,7 +68,7 @@ export class Keywords {
       } else if (c instanceof abaplint.Nodes.TokenNode) {
         continue;
       } else {
-        ret = ret.concat(this.traverse(c, file));
+        ret.push(...this.traverse(c, file));
       }
     }
 

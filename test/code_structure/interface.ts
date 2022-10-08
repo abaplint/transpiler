@@ -433,4 +433,24 @@ ENDCLASS.`;
     await f(abap);
   });
 
+  it.skip("keyword new", async () => {
+    const code = `
+INTERFACE lif.
+  METHODS new.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD lif~new.
+  ENDMETHOD.
+ENDCLASS.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
