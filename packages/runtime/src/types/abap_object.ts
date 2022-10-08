@@ -1,3 +1,5 @@
+import {FieldSymbol} from "./field_symbol";
+
 export class ABAPObject  {
   private value: any | undefined;
   private readonly qualifiedName: string | undefined;
@@ -22,6 +24,8 @@ export class ABAPObject  {
   public set(value: ABAPObject | any) {
     if (value instanceof ABAPObject) {
       this.value = value.get();
+    } else if (value instanceof FieldSymbol) {
+      this.value = value.getPointer().get();
     } else {
       this.value = value;
     }

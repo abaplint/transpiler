@@ -64,6 +64,8 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
               val = "abap.builtin.abap_false";
             } else if (parameterDefault.getFirstToken().getStr().toLowerCase() === "space") {
               val = "abap.builtin.space";
+            } else if (parameterDefault.concatTokens().toLowerCase() === "sy-uname") {
+              val = "abap.builtin.sy.get().uname";
             } else {
               // note: this can be difficult, the "def" might be from an interface, ie. a different scope than the method
               val = new FieldChainTranspiler().transpile(parameterDefault, traversal, true, methodDef?.getFilename()).getCode();
