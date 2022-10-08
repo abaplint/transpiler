@@ -453,7 +453,7 @@ ENDCLASS.`;
     await f(abap);
   });
 
-  it.only("default uname", async () => {
+  it("default uname", async () => {
     const code = `
 INTERFACE lif.
   METHODS foo IMPORTING u LIKE sy-uname DEFAULT sy-uname.
