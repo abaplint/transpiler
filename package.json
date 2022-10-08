@@ -214,7 +214,7 @@
         "@typescript-eslint/eslint-plugin": "^5.39.0",
         "@typescript-eslint/parser": "^5.39.0",
         "chai": "^4.3.6",
-        "eslint": "^8.24.0",
+        "eslint": "^8.25.0",
         "cross-fetch": "^3.1.5",
         "fast-xml-parser": "^4.0.11",
         "eslint-plugin-import": "^2.26.0",
