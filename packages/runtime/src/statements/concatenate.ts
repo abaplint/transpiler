@@ -30,7 +30,7 @@ export function concatenate(input: IConcatenateInput) {
       } else if (source instanceof Character) {
         val = source.get().toString();
         if (input.respectingBlanks !== true) {
-          val = val.trimEnd();
+          val = val.replace(/ +$/, "");
         }
       } else {
         val = source.get().toString();

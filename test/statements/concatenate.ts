@@ -105,4 +105,18 @@ describe("Running statements - CONCATENATE", () => {
     expect(abap.console.get()).to.equal("hello world");
   });
 
+  it("new line", async () => {
+    const code = `
+    DATA foo TYPE c LENGTH 1.
+    DATA bar TYPE string.
+    DATA res TYPE string.
+    foo = |\\n|.
+    bar = |1|.
+    CONCATENATE foo bar INTO res.
+    ASSERT strlen( res ) = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
