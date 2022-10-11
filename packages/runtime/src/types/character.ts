@@ -4,7 +4,7 @@ import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 
 // eslint-disable-next-line prefer-const
-let featureFixLength = false;
+let featureFixLength = true;
 
 export class Character implements ICharacter {
   private value: string;
