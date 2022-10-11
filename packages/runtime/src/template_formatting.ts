@@ -1,4 +1,4 @@
-import {Character, FieldSymbol, Integer, Packed, Table} from "./types";
+import {Character, FieldSymbol, Float, Integer, Packed, Table} from "./types";
 import {ICharacter} from "./types/_character";
 import {INumeric} from "./types/_numeric";
 
@@ -49,9 +49,11 @@ export function templateFormatting(source: ICharacter | INumeric, options?: opti
   } else if (options?.width) {
     text = text.trimEnd().padEnd(options.width, " ");
   } else if (options?.decimals && source instanceof Integer) {
-    text = source.get() + "." + "".padEnd(options.decimals, "0");
+    text = source.get().toFixed(options.decimals);
   } else if (options?.decimals && source instanceof Packed) {
     text = source.get().toFixed(options.decimals);
+  } else if (options?.decimals && source instanceof Float) {
+    text = source.getRaw().toFixed(options.decimals);
   }
   return text;
 }
