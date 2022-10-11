@@ -1,4 +1,4 @@
-import {Character, Hex, Integer, Time, XString} from "./types";
+import {Character, Hex, Integer, Structure, Time, XString} from "./types";
 import {ICharacter} from "./types/_character";
 import {INumeric} from "./types/_numeric";
 
@@ -8,12 +8,12 @@ export interface IOffsetLengthOptions {
 }
 
 export class OffsetLength {
-  private readonly obj: Character;
+  private readonly obj: Character | Hex | XString | Structure;
   private readonly offset?: number;
   private readonly length?: number;
   private readonly isHex: boolean;
 
-  public constructor(obj: Character, options: IOffsetLengthOptions) {
+  public constructor(obj: Character | Hex | XString | Structure, options: IOffsetLengthOptions) {
     this.obj = obj;
 
     this.isHex = obj instanceof Hex || obj instanceof XString;
@@ -60,7 +60,8 @@ export class OffsetLength {
       val = value.get() + "";
     }
 
-    let old = this.obj.get();
+    let old = this.obj instanceof Structure ? this.obj.getCharacter() : this.obj.get();
+
     if (this.obj instanceof Character) {
       old = old.padEnd(this.obj.getLength(), " ");
     }

@@ -3,6 +3,9 @@ import {FieldSymbol} from "./field_symbol";
 import {Table} from "./table";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
+import {parse} from "../operators/_parse";
+import {Hex} from "./hex";
+import {Character} from "./character";
 
 export class Structure {
   private readonly value: any;
@@ -77,5 +80,49 @@ export class Structure {
 
   public get() {
     return this.value;
+  }
+
+  public getCharacter(): string {
+    let val = "";
+    for (const v in this.value) {
+      val += this.value[v].get();
+    }
+    return val;
+  }
+
+  public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}) {
+    if (input?.offset) {
+      input.offset = parse(input.offset);
+    }
+    if (input?.length) {
+      input.length = parse(input.length);
+    }
+
+    const val = this.getCharacter();
+
+    if ((input.offset && input.offset >= val.length)
+         || (input.offset && input.offset < 0)
+         || (input.length && input.length < 0)) {
+      // @ts-ignore
+      if (abap.Classes["CX_SY_RANGE_OUT_OF_BOUNDS"] !== undefined) {
+        // @ts-ignore
+        throw new abap.Classes["CX_SY_RANGE_OUT_OF_BOUNDS"]();
+      } else {
+        throw "Global class CX_SY_RANGE_OUT_OF_BOUNDS not found";
+      }
+    }
+
+    let ret = val;
+    if (input?.offset) {
+      // @ts-ignore
+      ret = ret.substr(input.offset);
+    }
+    if (input?.length !== undefined) {
+      // @ts-ignore
+      ret = ret.substr(0, input.length);
+    }
+    const r = new Character({length: ret.length});
+    r.set(ret);
+    return r;
   }
 }

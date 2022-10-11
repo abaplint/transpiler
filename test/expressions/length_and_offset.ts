@@ -412,4 +412,21 @@ describe("Running expressions - Length and offset", () => {
     await f(abap);
   });
 
+  it("structure based offset and length", async () => {
+    const code = `
+  TYPES: BEGIN OF ty,
+         field1 TYPE c LENGTH 2,
+         field2 TYPE c LENGTH 2,
+       END OF ty.
+  DATA dat TYPE ty.
+  dat = '1111'.
+  dat+1(2) = 'AB'.
+  WRITE / dat.
+  WRITE / dat+1(2).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1AB1\nAB");
+  });
+
 });
