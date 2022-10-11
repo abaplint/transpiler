@@ -90,4 +90,19 @@ describe("Running statements - CONCATENATE", () => {
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("spaces, spaces and strings", async () => {
+    const code = `
+    DATA foo TYPE string.
+    DATA bar TYPE string.
+    DATA res TYPE string.
+    foo = |hello |.
+    bar = |world|.
+    CONCATENATE foo bar INTO res.
+    WRITE res.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello world");
+  });
+
 });

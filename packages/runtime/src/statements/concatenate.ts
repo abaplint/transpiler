@@ -1,6 +1,6 @@
 import {INumeric} from "../types/_numeric";
 import {ICharacter} from "../types/_character";
-import {Table} from "../types";
+import {Character, Table} from "../types";
 
 export interface IConcatenateInput {
   source: [number | string | INumeric | ICharacter | Table],
@@ -27,11 +27,13 @@ export function concatenate(input: IConcatenateInput) {
         throw new Error("concatenate, error input is table");
       } else if (typeof source === "string" || typeof source === "number") {
         val = source.toString();
+      } else if (source instanceof Character) {
+        val = source.get().toString();
+        if (input.respectingBlanks !== true) {
+          val = val.trimEnd();
+        }
       } else {
         val = source.get().toString();
-      }
-      if (input.respectingBlanks !== true) {
-        val = val.trimEnd();
       }
       list.push(val);
     }
