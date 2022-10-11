@@ -14,8 +14,7 @@ describe("Running statements - OVERLAY", () => {
     abap = new ABAP();
   });
 
-  // todo, Character feature flag...
-  it.skip("basic", async () => {
+  it("basic", async () => {
     const code = `
     DATA foo TYPE c LENGTH 3.
     OVERLAY foo WITH sy-abcde.
@@ -23,10 +22,10 @@ describe("Running statements - OVERLAY", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("abc");
+    expect(abap.console.get()).to.equal("ABC");
   });
 
-  it.skip("structure", async () => {
+  it("structure", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          field1 TYPE c LENGTH 1,
