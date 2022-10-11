@@ -5,8 +5,19 @@ import {Chunk} from "../chunk";
 
 export class OverlayTranspiler implements IStatementTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    return new Chunk(`throw new Error("Overlay, transpiler todo");`);
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
+    const ret = new Chunk().append("abap.statements.overlay(", node, traversal);
+
+    ret.appendChunk(traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target)));
+
+    for (const s of node.findDirectExpressions(abaplint.Expressions.Source)) {
+      ret.appendString(",");
+      ret.appendChunk(traversal.traverse(s));
+    }
+
+    ret.append(");", node.getLastToken(), traversal);
+
+    return ret;
   }
 
 }
