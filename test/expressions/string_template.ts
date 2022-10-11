@@ -110,6 +110,33 @@ describe("Running expressions - String templates", () => {
     expect(abap.console.get()).to.equal("f = 10.24");
   });
 
+  it("basic float", async () => {
+    const code = `
+    DATA f TYPE f.
+    DATA out TYPE string.
+    f = '10.239'.
+    out = |f = { f }|.
+    WRITE / out.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+// hmm, something is a bit off?
+    expect(abap.console.get()).to.equal("f = 10.2390000000000008");
+  });
+
+  it("basic float, integer", async () => {
+    const code = `
+    DATA f TYPE f.
+    DATA out TYPE string.
+    f = '10'.
+    out = |f = { f }|.
+    WRITE / out.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("f = 10");
+  });
+
   it("float DECIMALS, zeros", async () => {
     const code = `
     DATA f TYPE f.

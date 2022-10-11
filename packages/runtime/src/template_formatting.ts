@@ -54,6 +54,14 @@ export function templateFormatting(source: ICharacter | INumeric, options?: opti
     text = source.get().toFixed(options.decimals);
   } else if (options?.decimals && source instanceof Float) {
     text = source.getRaw().toFixed(options.decimals);
+  } else if (source instanceof Float) {
+    const raw = source.getRaw();
+    if (Number.isInteger(raw)) {
+      text = raw.toFixed(0);
+    } else {
+      text = raw.toFixed(16);
+
+    }
   }
   return text;
 }
