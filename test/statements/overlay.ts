@@ -14,6 +14,7 @@ describe("Running statements - OVERLAY", () => {
     abap = new ABAP();
   });
 
+  // todo, Character feature flag...
   it.skip("basic", async () => {
     const code = `
     DATA foo TYPE c LENGTH 3.
@@ -23,6 +24,21 @@ describe("Running statements - OVERLAY", () => {
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("abc");
+  });
+
+  it.skip("structure", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field1 TYPE c LENGTH 1,
+         field2 TYPE c LENGTH 1,
+       END OF ty.
+DATA ls_parts TYPE ty.
+OVERLAY ls_parts WITH 'XXXXXXXXXXXXXXXXXXXXXX'.
+WRITE ls_parts.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("XX");
   });
 
 });
