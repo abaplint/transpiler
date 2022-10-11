@@ -22,13 +22,18 @@ export function concatenate(input: IConcatenateInput) {
     }
   } else {
     for (const source of input.source) {
-      if (typeof source === "string" || typeof source === "number") {
-        list.push(source.toString());
-      } else if (source instanceof Table) {
+      let val = "";
+      if (source instanceof Table) {
         throw new Error("concatenate, error input is table");
+      } else if (typeof source === "string" || typeof source === "number") {
+        val = source.toString();
       } else {
-        list.push(source.get().toString());
+        val = source.get().toString();
       }
+      if (input.respectingBlanks !== true) {
+        val = val.trimEnd();
+      }
+      list.push(val);
     }
   }
 

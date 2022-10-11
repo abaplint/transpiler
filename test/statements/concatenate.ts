@@ -64,4 +64,30 @@ describe("Running statements - CONCATENATE", () => {
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("more CONCATENATE", async () => {
+    const code = `
+    DATA foo TYPE c LENGTH 2.
+    DATA bar TYPE c LENGTH 2.
+    DATA res TYPE c LENGTH 4.
+    foo = '1'.
+    bar = '2'.
+    CONCATENATE foo bar INTO res.
+    WRITE res.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("12");
+  });
+
+  it("spaces, spaces", async () => {
+    const code = `
+    DATA foo TYPE c LENGTH 2.
+    CONCATENATE foo '1' INTO foo.
+    WRITE foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });
