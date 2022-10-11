@@ -43,4 +43,31 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("helloworld");
   });
 
+  it("dynamic method call", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS foo.
+    CLASS-METHODS run.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD foo.
+    WRITE 'hello'.
+  ENDMETHOD.
+
+  METHOD run.
+    DATA lv_bar TYPE string.
+    lv_bar = 'FOO'.
+    CALL METHOD lcl=>(lv_bar).
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>run( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello");
+  });
+
 });

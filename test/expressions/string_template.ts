@@ -97,6 +97,59 @@ describe("Running expressions - String templates", () => {
     expect(abap.console.get()).to.equal("n = 5.00");
   });
 
+  it("float DECIMALS", async () => {
+    const code = `
+    DATA f TYPE f.
+    DATA out TYPE string.
+    f = '10.239'.
+    out = |f = { f DECIMALS = 2 }|.
+    WRITE / out.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("f = 10.24");
+  });
+
+  it("basic float", async () => {
+    const code = `
+    DATA f TYPE f.
+    DATA out TYPE string.
+    f = '10.239'.
+    out = |f = { f }|.
+    WRITE / out.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+// hmm, something is a bit off?
+    expect(abap.console.get()).to.equal("f = 10.2390000000000008");
+  });
+
+  it("basic float, integer", async () => {
+    const code = `
+    DATA f TYPE f.
+    DATA out TYPE string.
+    f = '10'.
+    out = |f = { f }|.
+    WRITE / out.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("f = 10");
+  });
+
+  it("float DECIMALS, zeros", async () => {
+    const code = `
+    DATA f TYPE f.
+    DATA out TYPE string.
+    f = '10.200'.
+    out = |f = { f DECIMALS = 2 }|.
+    WRITE / out.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("f = 10.20");
+  });
+
   it("WIDTH and PAD", async () => {
     const code = `
   data h type i value 2.

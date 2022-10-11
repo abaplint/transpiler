@@ -3,6 +3,9 @@ import {Hex} from "./hex";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 
+// eslint-disable-next-line prefer-const
+let featureFixLength = false;
+
 export class Character implements ICharacter {
   private value: string;
   private readonly length: number;
@@ -25,9 +28,8 @@ export class Character implements ICharacter {
     }
     if (this.value.length > this.length) {
       this.value = this.value.substr(0, this.length);
-// todo, maintain consistent length
-//    } else if (this.value.length < this.length) {
-//      this.value.padEnd(this.length, " ");
+    } else if (featureFixLength && this.value.length < this.length) {
+      this.value.padEnd(this.length, " ");
     }
     return this;
   }
@@ -41,9 +43,11 @@ export class Character implements ICharacter {
   }
 
   public clear(): void {
-// todo, maintain consistent length
-//    this.value = " ".repeat(this.length);
-    this.value = "";
+    if (featureFixLength) {
+      this.value = " ".repeat(this.length);
+    } else {
+      this.value = "";
+    }
   }
 
   public get(): string {

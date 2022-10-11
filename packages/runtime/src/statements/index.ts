@@ -10,6 +10,7 @@ import {createData} from "./create_data";
 import {deleteInternal} from "./delete_internal";
 import {describe} from "./describe";
 import {find} from "./find";
+import {overlay} from "./overlay";
 import {cast} from "./cast";
 import {getBit} from "./get_bit";
 import {getLocale} from "./get_locale";
@@ -59,6 +60,7 @@ export class Statements {
   public deleteInternal = deleteInternal;
   public describe = describe;
   public find = find;
+  public overlay = overlay;
   public getParameter = getParameter;
   public getBit = getBit;
   public getLocale = getLocale;

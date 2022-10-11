@@ -32,10 +32,8 @@ export class WriteStatement {
       if (typeof source === "string" || typeof source === "number") {
         result = source.toString();
       } else if (source instanceof Structure) {
-        const obj = source.get();
-        for (const f in obj) {
-          this.write(obj[f], {...options});
-        }
+        const obj = source.getCharacter();
+        this.write(obj, {...options});
       } else if (source instanceof Float) {
         if (options?.exponent?.get() === 0) {
           const tens = source.getRaw().toFixed(0).length - 1;
