@@ -12,14 +12,14 @@ export class HandleEnqu {
     }
 
     const chunk = new Chunk().appendString(`// enqueue object
-abap.FunctionModules["ENQUEUE_${obj.getName().toUpperCase()}_LOCK"] = async (INPUT) => {
+abap.FunctionModules["ENQUEUE_${obj.getName().toUpperCase()}"] = async (INPUT) => {
   const lookup = abap.Classes["KERNEL_LOCK"];
   if (lookup === undefined) {
     throw new Error("Lock, kernel class missing");
   }
   await lookup.enqueue(INPUT);
 };
-abap.FunctionModules["DEQUEUE_${obj.getName().toUpperCase()}_LOCK"] = async (INPUT) => {
+abap.FunctionModules["DEQUEUE_${obj.getName().toUpperCase()}"] = async (INPUT) => {
   const lookup = abap.Classes["KERNEL_LOCK"];
   if (lookup === undefined) {
     throw new Error("Lock, kernel class missing");
