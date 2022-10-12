@@ -64,4 +64,59 @@ describe("Running statements - CONCATENATE", () => {
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("more CONCATENATE", async () => {
+    const code = `
+    DATA foo TYPE c LENGTH 2.
+    DATA bar TYPE c LENGTH 2.
+    DATA res TYPE c LENGTH 4.
+    foo = '1'.
+    bar = '2'.
+    CONCATENATE foo bar INTO res.
+    WRITE res.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("12");
+  });
+
+  it("spaces, spaces", async () => {
+    const code = `
+    DATA foo TYPE c LENGTH 2.
+    CONCATENATE foo '1' INTO foo.
+    WRITE foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
+  it("spaces, spaces and strings", async () => {
+    const code = `
+    DATA foo TYPE string.
+    DATA bar TYPE string.
+    DATA res TYPE string.
+    foo = |hello |.
+    bar = |world|.
+    CONCATENATE foo bar INTO res.
+    WRITE res.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello world");
+  });
+
+  it("new line", async () => {
+    const code = `
+    DATA foo TYPE c LENGTH 1.
+    DATA bar TYPE string.
+    DATA res TYPE string.
+    foo = |\\n|.
+    bar = |1|.
+    CONCATENATE foo bar INTO res.
+    ASSERT strlen( res ) = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
