@@ -9,6 +9,7 @@ import {HandleABAP} from "./handlers/handle_abap";
 import {HandleDataElement} from "./handlers/handle_data_element";
 import {HandleTableType} from "./handlers/handle_table_type";
 import {HandleView} from "./handlers/handle_view";
+import {HandleEnqu} from "./handlers/handle_enqu";
 
 export {config, ITranspilerOptions, IFile, IProgress, IOutputFile};
 
@@ -68,6 +69,8 @@ export class Transpiler {
         output.objects.push(...new HandleTable().runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.View) {
         output.objects.push(...new HandleView().runObject(obj, reg));
+      } else if (obj instanceof abaplint.Objects.LockObject) {
+        output.objects.push(...new HandleEnqu().runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.DataElement) {
         output.objects.push(...new HandleDataElement().runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.TableType) {

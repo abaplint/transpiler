@@ -71,6 +71,7 @@ function writeObjects(objects: Transpiler.IOutputFile[], writeSourceMaps: boolea
     if (writeSourceMaps === true
         && o.object.type.toUpperCase() !== "TABL"
         && o.object.type.toUpperCase() !== "DTEL"
+        && o.object.type.toUpperCase() !== "ENQU"
         && o.object.type.toUpperCase() !== "TTYP") {
       const name = o.filename + ".map";
       contents = contents + `\n//# sourceMappingURL=` + name;

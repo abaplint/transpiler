@@ -15,7 +15,6 @@ export const config: IConfig = {
   "rules": {
     "when_others_last": true,
     "avoid_use": {
-//      "define": true,
       "execSQL": true,
       "kernelCall": true,
       "communication": true,
@@ -27,19 +26,12 @@ export const config: IConfig = {
     },
     "parser_error": true,
     "allowed_object_types": {
-      "allowed": ["INTF", "CLAS", "PROG", "DEVC", "TABL", "SHLP", "VIEW", "XSLT", "SHMA", "SICF", "NROB","TYPE", "DTEL", "DOMA", "TTYP", "MSAG", "FUGR"],
+      "allowed": ["INTF", "CLAS", "PROG", "DEVC", "TABL", "SHLP", "VIEW", "XSLT", "ENQU", "SHMA", "SICF", "NROB","TYPE", "DTEL", "DOMA", "TTYP", "MSAG", "FUGR"],
     },
-/*
-    "exit_or_check": {
-      "allowCheck": true,
-      "allowExit": false,
-    },
-*/
     "unknown_types": true,
     "ambiguous_statement": true,
     "implement_methods": true,
     "begin_end_names": true,
-//    "no_chained_assignment": true,
     "check_syntax": true,
     "form_no_dash": true,
     "omit_preceding_zeros": true,

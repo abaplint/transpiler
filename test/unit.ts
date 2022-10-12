@@ -133,6 +133,69 @@ ENDCLASS.
 CLASS cx_sy_move_cast_error IMPLEMENTATION.
 ENDCLASS.`;
 
+const ezlock = `
+<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_ENQU" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD25V>
+    <VIEWNAME>EZLOCK</VIEWNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <AGGTYPE>E</AGGTYPE>
+    <ROOTTAB>ZLOCK</ROOTTAB>
+    <DDTEXT>Lock</DDTEXT>
+   </DD25V>
+   <DD26E_TABLE>
+    <DD26E>
+     <VIEWNAME>EZLOCK</VIEWNAME>
+     <TABNAME>ZLOCK</TABNAME>
+     <TABPOS>0001</TABPOS>
+     <FORTABNAME>ZLOCK</FORTABNAME>
+     <ENQMODE>E</ENQMODE>
+    </DD26E>
+   </DD26E_TABLE>
+   <DD27P_TABLE>
+    <DD27P>
+     <VIEWNAME>EZLOCK</VIEWNAME>
+     <OBJPOS>0001</OBJPOS>
+     <VIEWFIELD>FIELD</VIEWFIELD>
+     <TABNAME>ZLOCK</TABNAME>
+     <FIELDNAME>FIELD</FIELDNAME>
+     <KEYFLAG>X</KEYFLAG>
+     <ENQMODE>E</ENQMODE>
+    </DD27P>
+   </DD27P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
+const zlock = `
+<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V>
+    <TABNAME>ZLOCK</TABNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <TABCLASS>INTTAB</TABCLASS>
+    <DDTEXT>Lock</DDTEXT>
+    <EXCLASS>1</EXCLASS>
+   </DD02V>
+   <DD03P_TABLE>
+    <DD03P>
+     <FIELDNAME>FIELD</FIELDNAME>
+     <ADMINFIELD>0</ADMINFIELD>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000008</INTLEN>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000004</LENG>
+     <MASK>  CHAR</MASK>
+    </DD03P>
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
 describe("Testing Unit Testing", () => {
   const base: string = path.join(__dirname, "..", "..", "unit-test/");
   let name: string | undefined = "";
@@ -182,6 +245,7 @@ export async function setup(abap, schemas, insert) {
       let contents = o.chunk.getCode();
       if (o.object.type.toUpperCase() !== "TABL"
           && o.object.type.toUpperCase() !== "DTEL"
+          && o.object.type.toUpperCase() !== "ENQU"
           && o.object.type.toUpperCase() !== "TTYP") {
         const name = o.filename + ".map";
         contents = contents + `\n//# sourceMappingURL=` + name;
@@ -1897,6 +1961,16 @@ ENDCLASS.`;
     ];
     const cons = await dumpNrun(files);
     expect(cons.split("\n")[1]).to.equal("from implmoo");
+  });
+
+  it("test-47", async () => {
+// basic ENQU
+
+    const files = [
+      {filename: "ezlock.enqu.xml", contents: ezlock},
+      {filename: "zlock.tabl.xml", contents: zlock},
+    ];
+    await dumpNrun(files);
   });
 
 });
