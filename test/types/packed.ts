@@ -111,4 +111,15 @@ ASSERT foo = '12345'.`;
     await f(abap);
   });
 
+  it("compare, 2 decimals", async () => {
+    const code = `
+    TYPES total TYPE p LENGTH 3 DECIMALS 2.
+    DATA val TYPE total.
+    val = '15.2'.
+    ASSERT val = '15.2'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

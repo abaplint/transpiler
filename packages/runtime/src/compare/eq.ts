@@ -118,6 +118,8 @@ export function eq(
     } else if (typeof l === "number" && typeof r === "string") {
       if (r === "") {
         r = 0;
+      } else if (r.includes(".")) {
+        r = parseFloat(r);
       } else {
         r = parseInt(r, 10);
       }
