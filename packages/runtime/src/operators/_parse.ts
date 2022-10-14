@@ -7,7 +7,11 @@ export function parse(val: INumeric | ICharacter | string | number | Float | Int
   if (typeof val === "number") {
     return val;
   } else if (typeof val === "string") {
-    return parseInt(val, 10);
+    if (val.includes(".")) {
+      return parseFloat(val);
+    } else {
+      return parseInt(val, 10);
+    }
   } else if (val instanceof Float) {
     return val.getRaw();
   } else if (val instanceof XString || val instanceof Hex) {

@@ -33,7 +33,7 @@ describe("Builtin functions - frac", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("0.34\n0.34\n0\n-0.21");
+    expect(abap.console.get()).to.equal("0.34\n0\n0\n-0.21");
   });
 
   it("frac, decfloat34", async () => {

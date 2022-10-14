@@ -24,5 +24,6 @@ export function add(left: INumeric | ICharacter | string | number | Float | Inte
     return new Integer().set(left.get() + Number.parseInt(right.get(), 10));
   }
 
-  return new Float().set(parse(left) + parse(right));
+  const ret = new Float().set(parse(left) + parse(right));
+  return ret;
 }

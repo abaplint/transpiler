@@ -89,16 +89,15 @@ ASSERT foo = '12345'.`;
     expect(abap.console.get()).to.equal("1212,12");
   });
 
-  it.skip("length 5, decimals 2, rounding", async () => {
+  it("length 5, decimals 2, rounding", async () => {
     const code = `
     DATA foo TYPE p LENGTH 4 DECIMALS 2.
     foo = '1212.127'.
     WRITE foo.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("1212,13");
+    expect(abap.console.get()).to.equal("1212.13");
   });
 
   it("parse from char", async () => {
@@ -120,6 +119,33 @@ ASSERT foo = '12345'.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("one hundred", async () => {
+    const code = `
+    TYPES total TYPE p LENGTH 3 DECIMALS 2.
+    DATA val TYPE total.
+    val = 100.
+    val = val + '0.01'.
+    ASSERT val = '100.01'.
+    WRITE val.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("100.01");
+  });
+
+  it("two thirds", async () => {
+    const code = `
+    TYPES total TYPE p LENGTH 3 DECIMALS 2.
+    DATA val TYPE total.
+    val = 100.
+    val = val + ( 2 / 3 ).
+    WRITE val.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("100.67");
   });
 
 });

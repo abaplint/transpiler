@@ -56,7 +56,7 @@ describe("Builtin Numeric Functions", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("13\n13\n12\n44");
+    expect(abap.console.get()).to.equal("13\n12\n12\n44");
   });
 
   it("Builtin numerical: floor", async () => {
