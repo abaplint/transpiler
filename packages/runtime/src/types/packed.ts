@@ -27,13 +27,18 @@ export class Packed implements INumeric {
     return this.qualifiedName;
   }
 
+  private round(value: number, places: number) {
+    // @ts-ignore
+    return +(Math.round(value + "e+" + places)  + "e-" + places);
+  }
+
   public set(value: INumeric | number | string) {
     if (typeof value === "number") {
       this.value = value;
     } else if (typeof value === "string") {
-      this.value = parseFloat(value);
+      this.value = this.round(parseFloat(value), this.decimals);
     } else if (value instanceof Float) {
-      this.value = value.getRaw();
+      this.value = this.round(value.getRaw(), this.decimals);
     } else {
       this.set(value.get());
     }
