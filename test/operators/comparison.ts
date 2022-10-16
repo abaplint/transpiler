@@ -932,4 +932,19 @@ ENDIF.`;
     expect(abap.console.get()).to.equal(`yes`);
   });
 
+  it("CP, escaping", async () => {
+    const code = `
+    DATA lv_text TYPE string.
+    lv_text = '* regen'.
+    IF lv_text CP '#**regen'.
+      WRITE 'yes'.
+    ELSE.
+      WRITE 'no'.
+    ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`yes`);
+  });
+
 });
