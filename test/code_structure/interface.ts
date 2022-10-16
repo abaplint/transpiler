@@ -473,7 +473,7 @@ ENDCLASS.`;
     await f(abap);
   });
 
-  it.only("call method should prefix intf name", async () => {
+  it("call method should prefix intf name", async () => {
     const code = `
 INTERFACE lif.
   METHODS foo.
@@ -493,7 +493,6 @@ START-OF-SELECTION.
   CREATE OBJECT lo TYPE lcl.
   CALL METHOD lo->foo.`;
     const js = await run(code);
-    console.dir(js); // findMethodReference
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });

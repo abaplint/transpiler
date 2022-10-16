@@ -65,8 +65,14 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
         if (i === 0) {
           this.prepend += "this.";
         }
-        const methodName = Traversal.escapeClassName(child.concatTokens().toLowerCase().replace("~", "$"));
-        call += methodName;
+        const nameToken = child.getFirstToken();
+        const m = traversal.findMethodReference(nameToken, traversal.findCurrentScopeByToken(nameToken));
+        if (m) {
+          call += m.name;
+        } else {
+          const methodName = Traversal.escapeClassName(child.concatTokens().toLowerCase().replace("~", "$"));
+          call += methodName;
+        }
       } else if (child.concatTokens() === "=>") {
         call += ".";
       } else if (child.concatTokens() === "->") {
