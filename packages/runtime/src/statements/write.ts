@@ -1,5 +1,5 @@
 import {Context} from "../context";
-import {Float, Structure} from "../types";
+import {Float, Packed, Structure} from "../types";
 import {FieldSymbol} from "../types/field_symbol";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
@@ -46,6 +46,8 @@ export class WriteStatement {
         } else {
           result = source.get().toString();
         }
+      } else if (source instanceof Packed) {
+        result = source.get().toFixed(source.getDecimals());
       } else {
         result = source.get().toString();
       }

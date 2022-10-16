@@ -19,16 +19,21 @@ export function cp(left: number | string | ICharacter | INumeric, right: string 
   r = r.replace(/\\/g, "\\\\");
   r = r.replace(/\[/g, "\\[");
   r = r.replace(/\]/g, "\\]");
+  r = r.replace(/\}/g, "\\}");
+  r = r.replace(/\{/g, "\\{");
   r = r.replace(/\?/g, "\\?");
   r = r.replace(/\(/g, "\\(");
   r = r.replace(/\)/g, "\\)");
   r = r.replace(/\./g, "\\.");
   r = r.replace(/\|/g, "\\|");
 
+  r = r.replace(/#\*/g, "\\u{002A}");
+  r = r.replace(/#\+/g, "\\u{002B}");
+
   r = r.replace(/\*/g, "[\\s\\S]*");
   r = r.replace(/\+/g, "[\\s\\S]");
 
-  const reg = new RegExp("^" + r + "$", "i");
+  const reg = new RegExp("^" + r + "$", "iu");
 
   return l.match(reg) !== null;
 }

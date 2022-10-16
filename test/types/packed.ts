@@ -147,4 +147,30 @@ ASSERT foo = '12345'.`;
     expect(abap.console.get()).to.equal("100.67");
   });
 
+  it("changed over iteration", async () => {
+    const code = `
+    DATA lv_test TYPE p LENGTH 6 DECIMALS 3.
+    lv_test = 100.
+
+    DO 10 TIMES.
+      lv_test = lv_test / 3.
+      lv_test = lv_test * 3.
+      lv_test = lv_test + 1.
+      WRITE / lv_test.
+    ENDDO.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`100.999
+101.998
+102.997
+103.996
+104.995
+105.994
+106.993
+107.992
+108.991
+109.990`);
+  });
+
 });

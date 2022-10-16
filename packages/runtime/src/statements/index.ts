@@ -10,6 +10,7 @@ import {createData} from "./create_data";
 import {deleteInternal} from "./delete_internal";
 import {describe} from "./describe";
 import {find} from "./find";
+import {collect} from "./collect";
 import {overlay} from "./overlay";
 import {cast} from "./cast";
 import {getBit} from "./get_bit";
@@ -53,6 +54,7 @@ export class Statements {
   public cast = cast;
   public clear = clear;
   public commit = commit;
+  public collect = collect;
   public concatenate = concatenate;
   public condense = condense;
   public convert = convert;
