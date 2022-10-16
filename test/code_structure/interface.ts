@@ -493,6 +493,7 @@ START-OF-SELECTION.
   CREATE OBJECT lo TYPE lcl.
   CALL METHOD lo->foo.`;
     const js = await run(code);
+    console.dir(js); // findMethodReference
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
