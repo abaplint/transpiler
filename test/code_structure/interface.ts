@@ -473,4 +473,28 @@ ENDCLASS.`;
     await f(abap);
   });
 
+  it("call method should prefix intf name", async () => {
+    const code = `
+INTERFACE lif.
+  METHODS foo.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD lif~foo.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lif.
+  CREATE OBJECT lo TYPE lcl.
+  CALL METHOD lo->foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
