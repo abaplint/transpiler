@@ -19,6 +19,8 @@ export function cp(left: number | string | ICharacter | INumeric, right: string 
   r = r.replace(/\\/g, "\\\\");
   r = r.replace(/\[/g, "\\[");
   r = r.replace(/\]/g, "\\]");
+  r = r.replace(/\}/g, "\\}");
+  r = r.replace(/\{/g, "\\{");
   r = r.replace(/\?/g, "\\?");
   r = r.replace(/\(/g, "\\(");
   r = r.replace(/\)/g, "\\)");
