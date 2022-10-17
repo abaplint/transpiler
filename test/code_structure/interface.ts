@@ -497,4 +497,27 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("call method should prefix intf name, static", async () => {
+    const code = `
+INTERFACE lif.
+  CLASS-METHODS foo.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD lif~foo.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  CALL METHOD lcl=>lif~foo.
+  lcl=>lif~foo( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
