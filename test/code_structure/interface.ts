@@ -497,7 +497,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.only("call method should prefix intf name, static", async () => {
+  it("call method should prefix intf name, static", async () => {
     const code = `
 INTERFACE lif.
   CLASS-METHODS foo.
