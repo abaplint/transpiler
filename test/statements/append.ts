@@ -325,4 +325,15 @@ WRITE nested_artist->field.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("OCCURS", async () => {
+    const code = `
+DATA tab TYPE i OCCURS 0.
+APPEND 2 TO tab.
+WRITE lines( tab ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });

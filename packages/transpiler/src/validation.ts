@@ -38,7 +38,6 @@ export const config: IConfig = {
     "obsolete_statement": {
       "compute": true,
       "setExtended": true,
-      "occurs": true,
     },
     "forbidden_identifier": {
       "check": [
