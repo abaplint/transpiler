@@ -14,11 +14,11 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
         if (name === undefined) {
           name = "FunctionModuleTranspilerNameNotFound";
         }
-        r += `async function ${name}(INPUT) {\n`;
+        r += `async function ${Traversal.escapeClassName(name)}(INPUT) {\n`;
         r += this.findSignature(traversal, name);
       } else if (c.get() instanceof abaplint.Statements.EndFunction) {
         r += "}\n";
-        r += `abap.FunctionModules['${name.toUpperCase()}'] = ${name};\n`;
+        r += `abap.FunctionModules['${name.toUpperCase()}'] = ${Traversal.escapeClassName(name)};\n`;
       } else {
         r += traversal.traverse(c).getCode();
       }
