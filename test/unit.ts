@@ -1973,7 +1973,7 @@ ENDCLASS.`;
     await dumpNrun(files);
   });
 
-  it.only("test-48", async () => {
+  it.skip("test-48", async () => {
 // namespaced function group with function module
 
     const fmname = `FUNCTION /foo/fmname.
