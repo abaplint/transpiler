@@ -116,6 +116,7 @@ export * from "./truncate_dataset";
 export * from "./try";
 export * from "./type_pools";
 export * from "./type";
+export * from "./retry";
 export * from "./unassign";
 export * from "./unpack";
 export * from "./update_database";
