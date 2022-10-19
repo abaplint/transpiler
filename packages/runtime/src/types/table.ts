@@ -36,6 +36,7 @@ export type TableRowType = INumeric | Structure | ICharacter | Table | ABAPObjec
 
 export class Table  {
   private value: TableRowType[];
+  private readonly header: TableRowType | undefined;
   private readonly rowType: TableRowType;
   private readonly loops: Set<LoopIndex>;
   private readonly options: ITableOptions | undefined;
@@ -46,6 +47,11 @@ export class Table  {
     this.loops = new Set();
     this.rowType = rowType;
     this.options = options;
+
+    if (options?.withHeader === true) {
+      this.header = clone(this.rowType);
+    }
+
     if (this.options === undefined) {
       this.options = {
         type: TableAccessType.standard,
@@ -88,12 +94,26 @@ export class Table  {
     this.value = [];
   }
 
-  public set(tab: Table) {
-    this.clear();
-    for (const a of tab.array()) {
-      // this clones the values, and add sorting if required
-      insertInternal({table: this, data: a});
+  public set(tab: Table | TableRowType) {
+    if (this.options?.withHeader === true) {
+      this.header?.set(tab);
+    } else {
+      if (!(tab instanceof Table) && !(tab instanceof FieldSymbol)) {
+        throw "Table, set error";
+      }
+      this.clear();
+      for (const a of tab.array()) {
+        // this clones the values, and add sorting if required
+        insertInternal({table: this, data: a});
+      }
     }
+  }
+
+  public getHeader() {
+    if (this.header === undefined) {
+      throw "table, getHeader";
+    }
+    return this.header;
   }
 
   public insertIndex(item: TableRowType, index: number) {
