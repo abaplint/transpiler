@@ -336,4 +336,14 @@ WRITE lines( tab ).`;
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("WITH HEADER LINE, short APPEND", async () => {
+    const code = `
+DATA tab TYPE i OCCURS 0 WITH HEADER LINE.
+tab = 3.
+APPEND tab.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

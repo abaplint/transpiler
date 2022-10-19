@@ -10,7 +10,11 @@ export class TargetTranspiler implements IExpressionTranspiler {
     const offset: string[] = [];
     const ret = new Chunk();
 
-    for (const c of node.getChildren()) {
+    const children = node.getChildren();
+    for (let i = 0; i < children.length; i++) {
+      const c = children[i];
+      const next: Nodes.ExpressionNode | Nodes.TokenNode | undefined = children[i + 1];
+
       if (c.get() instanceof Expressions.TargetField) {
         const prefix = traversal.prefixAndName(c.getFirstToken()).replace("~", "$");
         ret.append(prefix, c, traversal);
@@ -36,13 +40,11 @@ export class TargetTranspiler implements IExpressionTranspiler {
         ret.append(".get().", c, traversal);
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.Dereference) {
         ret.append(".getPointer()", c, traversal);
-        break;
       } else if (c.getFirstToken().getStr() === "=>") {
         ret.append(".", c, traversal);
       } else if (c.getFirstToken().getStr() === "->") {
-        if (node.concatTokens().endsWith("->*")) {
+        if (next.concatTokens() === "*") {
           ret.append(".getPointer()", c, traversal);
-          break;
         } else {
           ret.append(".get().", c, traversal);
         }

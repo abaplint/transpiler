@@ -8,9 +8,13 @@ export class AppendTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const concat = node.concatTokens().toUpperCase();
 
-    const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
+    const t = node.findDirectExpression(abaplint.Expressions.Target);
+    let target: Chunk | undefined = undefined;
+    if (t) {
+      target = traversal.traverse(t);
+    }
 
-    if (concat.includes("INITIAL LINE")) {
+    if (concat.includes("INITIAL LINE") && target) {
       const assigning = node.findExpressionAfterToken("ASSIGNING");
       const into = node.findExpressionAfterToken("INTO");
       if (assigning) {
@@ -58,7 +62,9 @@ export class AppendTranspiler implements IStatementTranspiler {
         options.push(new Chunk().appendString("lines: true"));
       }
 
-      options.push(new Chunk().appendString("target: ").appendChunk(target));
+      if (target) {
+        options.push(new Chunk().appendString("target: ").appendChunk(target));
+      }
 
       const ret = new Chunk();
       ret.append("abap.statements.append({", node, traversal);

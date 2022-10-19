@@ -3,7 +3,7 @@ import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
 export interface IAppendOptions {
-  source: TableRowType | FieldSymbol,
+  source: TableRowType | FieldSymbol | Table,
   target: Table | FieldSymbol | undefined,
   lines?: boolean,
   assigning?: FieldSymbol,
@@ -15,16 +15,25 @@ export interface IAppendOptions {
 export function append(input: IAppendOptions) {
   if (input.target instanceof FieldSymbol) {
     input.target = input.target.getPointer() as Table | undefined;
-  }
-  if (input.target === undefined) {
-    throw "Field symbol not assigned";
+    if (input.target === undefined) {
+      throw "Field symbol not assigned";
+    }
   }
 
   if (input.source instanceof FieldSymbol) {
     input.source = input.source.getPointer() as TableRowType;
   }
 
-  if (input.lines === true && input.source instanceof Table) {
+  if (input.target === undefined) {
+    // short APPEND, use header field
+    if (!(input.source instanceof Table)) {
+      throw "APPEND, header, table";
+    }
+    input.source.append(input.source.getHeader());
+    // @ts-ignore
+    abap.builtin.sy.get().tabix.set(input.source.array().length);
+    return;
+  } else if (input.lines === true && input.source instanceof Table) {
     let from = 1;
     if (input.from) {
       from = parseInt(input.from.get() + "", 10);
