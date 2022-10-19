@@ -56,5 +56,20 @@ WRITE ref->bar.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("chained set", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         descr TYPE string,
+       END OF ty.
+DATA foo TYPE REF TO ty.
+CREATE DATA foo.
+foo->*-descr = 'hello'.
+WRITE foo->*-descr.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello");
+  });
+
 
 });
