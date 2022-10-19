@@ -371,6 +371,7 @@ await abap.Classes['ZCL_CALL'].not_found();`},
     js: `await abap.statements.deleteInternal(ct_files,{where: (I) => {return abap.compare.initial(I.item) && !(abap.compare.eq(I.file.get().path, abap.Classes['ZIF'].c_dir) && abap.compare.eq(I.file.get().filename, abap.Classes['ZIF'].c_dot));}});`},
 
     {abap: "lo_foo ?= lo_bar.", js: "await abap.statements.cast(lo_foo, lo_bar);", skip: false},
+    {abap: "RETRY.", js: `throw new Error("Retry, not supported, transpiler");`, skip: false},
   ];
 
   for (const test of tests) {
