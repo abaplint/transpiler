@@ -48,7 +48,8 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
       } else if (direction === "exporting") {
         direction = "importing";
       }
-      ret += `let ${p.name.toLowerCase()} = INPUT.${direction}.${p.name.toLowerCase()};\n`;
+      // note: all directions are optional
+      ret += `let ${p.name.toLowerCase()} = INPUT.${direction}?.${p.name.toLowerCase()};\n`;
     }
     return ret;
   }
