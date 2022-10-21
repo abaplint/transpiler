@@ -6,7 +6,10 @@ import {IExpressionTranspiler} from "./_expression_transpiler";
 export class ArithOperatorTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
-    switch(node.concatTokens().toUpperCase()) {
+    let search = node.concatTokens().toUpperCase();
+    // macro workaround,
+    search = search.replace(/ /g, "");
+    switch(search) {
       case "+":
         return new Chunk().append("abap.operators.add", node, traversal);
       case "-":
@@ -28,6 +31,7 @@ export class ArithOperatorTranspiler implements IExpressionTranspiler {
       case "BIT-XOR":
         return new Chunk().append("abap.operators.bitxor", node, traversal);
       default:
+        console.dir(search);
         return new Chunk().append(".ArithOperatorUnknown", node, traversal);
     }
   }
