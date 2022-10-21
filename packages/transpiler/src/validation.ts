@@ -58,7 +58,7 @@ export const config: IConfig = {
         "^throw$",	"^throws$", "^transient$", "^true$",
         "^try$",	"^typeof$", "^var$", "^void$",
         "^volatile$",	"^while$", "^yield$",
-        "^unique\\d+$", "^constant_\\d+$"],
+        "^unique\\d+$"],
     },
   },
 };

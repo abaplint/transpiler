@@ -177,7 +177,6 @@ ENDINTERFACE.`;
 
     expect(output.length).to.equal(2);
     expect(output[0].chunk.getCode()).to.include("zcl_index");
-    expect(output[0].chunk.getCode()).to.include("const constant_25 = ");
   });
 
   it("Global Class implementing global intf, whitespace lookup default parameter value", async () => {

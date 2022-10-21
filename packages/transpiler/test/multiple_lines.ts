@@ -150,12 +150,10 @@ WHEN OTHERS.
 ENDCASE.`;
 
     const expected =
-`const constant_1 = new abap.types.Integer().set(1);
-const constant_2 = new abap.types.Integer().set(2);
-let unique1 = bar;
+`let unique1 = bar;
 if (abap.compare.eq(unique1, new abap.types.Character({length: 3}).set('foo'))) {
-  abap.statements.write(constant_2);
-} else if (abap.compare.eq(unique1, constant_1) || abap.compare.eq(unique1, constant_2)) {
+  abap.statements.write(new abap.types.Integer().set(2));
+} else if (abap.compare.eq(unique1, new abap.types.Integer().set(1)) || abap.compare.eq(unique1, new abap.types.Integer().set(2))) {
 } else if (abap.compare.eq(unique1, foo)) {
 } else {
 }`;
@@ -246,15 +244,14 @@ abap.Classes['PROG-ZFOOBAR-ZCL_WORDS'] = zcl_words;`;
         ENDMETHOD.
       ENDCLASS.`;
 
-    const expected = `const constant_2 = new abap.types.Integer().set(2);
-class zcl_words {
+    const expected = `class zcl_words {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.bar = new abap.types.Integer({qualifiedName: "I"});
-    this.bar.set(constant_2);
+    this.bar.set(new abap.types.Integer().set(2));
     abap.statements.write(this.bar);
     return this;
   }
@@ -346,8 +343,7 @@ ENDCLASS.
 CLASS zcl_ret IMPLEMENTATION.
 ENDCLASS.`;
 
-    const expected = `const constant_30 = new abap.types.Integer().set(30);
-class zcl_ret {
+    const expected = `class zcl_ret {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
   async constructor_(INPUT) {
@@ -403,8 +399,7 @@ FORM bar.
   lcl_bar=>bar( 2 ).
 ENDFORM.`;
 
-    const expected = `const constant_2 = new abap.types.Integer().set(2);
-class lcl_bar {
+    const expected = `class lcl_bar {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
   async constructor_(INPUT) {
@@ -422,7 +417,7 @@ class lcl_bar {
 }
 abap.Classes['PROG-ZFOOBAR-LCL_BAR'] = lcl_bar;
 async function bar() {
-  await abap.Classes['PROG-ZFOOBAR-LCL_BAR'].bar({imp: constant_2});
+  await abap.Classes['PROG-ZFOOBAR-LCL_BAR'].bar({imp: new abap.types.Integer().set(2)});
 }`;
 
     expect(await runSingle(abap)).to.equal(expected);
@@ -445,8 +440,7 @@ FORM bar.
   CREATE OBJECT bar EXPORTING input = 42.
 ENDFORM.`;
 
-    const expected = `const constant_42 = new abap.types.Integer().set(42);
-class lcl_bar {
+    const expected = `class lcl_bar {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
   async constructor_(INPUT) {
@@ -461,7 +455,7 @@ class lcl_bar {
 abap.Classes['PROG-ZFOOBAR-LCL_BAR'] = lcl_bar;
 async function bar() {
   let bar = new abap.types.ABAPObject({qualifiedName: "LCL_BAR"});
-  bar.set(await (new abap.Classes['PROG-ZFOOBAR-LCL_BAR']()).constructor_({input: constant_42}));
+  bar.set(await (new abap.Classes['PROG-ZFOOBAR-LCL_BAR']()).constructor_({input: new abap.types.Integer().set(42)}));
 }`;
 
     expect(await runSingle(abap)).to.equal(expected);
@@ -495,8 +489,7 @@ lcl_bar.foo.set('\\'');`;
     const abap = `
   CONSTANTS first TYPE c LENGTH 1 VALUE 'b'.
   CONSTANTS next TYPE c LENGTH 1 VALUE first.`;
-    const expected = `const constant_1 = new abap.types.Integer().set(1);
-let first = new abap.types.Character();
+    const expected = `let first = new abap.types.Character();
 first.set('b');
 let next = new abap.types.Character();
 next.set(first);`;
@@ -522,8 +515,7 @@ ENDCLASS.
 INTERFACE bar.
   CONSTANTS next TYPE c LENGTH 1 VALUE lcl_bar=>first.
 ENDINTERFACE.`;
-    const expected = `const constant_1 = new abap.types.Integer().set(1);
-class lcl_bar {
+    const expected = `class lcl_bar {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
   async constructor_(INPUT) {

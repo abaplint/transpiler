@@ -14,12 +14,11 @@ export class ConstantTranspiler implements IExpressionTranspiler {
     const int = node.findFirstExpression(Expressions.Integer);
     if (int) {
       const concat = int.concatTokens().trim();
-      const post = concat.startsWith("-") ? "minus_" : "";
-      let ret = "constant_" + post + int.getLastToken().getStr();
+      let code = `new abap.types.Integer().set(${concat})`;
       if (this.addGet === true) {
-        ret += ".get()";
+        code += ".get()";
       }
-      return new Chunk().append(ret, node, traversal);
+      return new Chunk().append(code, node, traversal);
     }
 
     let str = node.findDirectExpression(Expressions.ConstantString);
