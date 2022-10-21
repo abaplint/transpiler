@@ -40,10 +40,17 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.Dereference) {
         ret.append(".getPointer()", c, traversal);
       } else if (c.get() instanceof Expressions.ComponentName) {
-        ret.append(c.getFirstToken().getStr().toLowerCase(), c, traversal);
+        const name = c.getFirstToken().getStr().toLowerCase();
+        if (name.match(/^\d/)) {
+          ret.append(`["` + name + `"]`, c, traversal);
+        } else {
+          ret.append(`.` + name, c, traversal);
+        }
       } else if (c instanceof Nodes.TokenNode) {
         const str = c.getFirstToken().getStr();
-        if (str === "-" || str === "->") {
+        if (str === "-") {
+          ret.append(".get()", c, traversal);
+        } else if (str === "->") {
           ret.append(".get().", c, traversal);
         }
       } else if (c instanceof Nodes.ExpressionNode
