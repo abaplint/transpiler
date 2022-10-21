@@ -56,9 +56,9 @@ DATA: BEGIN OF hex,
         11 TYPE x LENGTH 1,
       END   OF hex.
 CLEAR hex-01.
-* CLEAR hex-11.
-* WRITE hex-01.
-* WRITE hex-11.`;
+CLEAR hex-11.
+WRITE hex-01.
+WRITE hex-11.`;
     const js = await run(code);
     console.dir(js);
     const f = new AsyncFunction("abap", js);

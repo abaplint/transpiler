@@ -22,7 +22,12 @@ export class TargetTranspiler implements IExpressionTranspiler {
         const name = traversal.lookupClassOrInterface(c.getFirstToken().getStr(), c.getFirstToken());
         ret.append(name, c, traversal);
       } else if (c.get() instanceof Expressions.ComponentName) {
-        ret.append(c.getFirstToken().getStr().toLowerCase(), c, traversal);
+        const name = c.getFirstToken().getStr().toLowerCase();
+        if (name.startsWith("0")) {
+          ret.append(`["` + name + `"]`, c, traversal);
+        } else {
+          ret.append(`.` + name, c, traversal);
+        }
       } else if (c.get() instanceof Expressions.AttributeName) {
         const intf = traversal.isInterfaceAttribute(c.getFirstToken());
         let name = Traversal.escapeClassName(c.getFirstToken().getStr())!.replace("~", "$").toLowerCase();
@@ -37,7 +42,7 @@ export class TargetTranspiler implements IExpressionTranspiler {
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.TargetFieldSymbol) {
         ret.appendChunk(new FieldSymbolTranspiler().transpile(c, traversal));
       } else if (c.getFirstToken().getStr() === "-") {
-        ret.append(".get().", c, traversal);
+        ret.append(".get()", c, traversal);
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.Dereference) {
         ret.append(".getPointer()", c, traversal);
       } else if (c.getFirstToken().getStr() === "=>") {

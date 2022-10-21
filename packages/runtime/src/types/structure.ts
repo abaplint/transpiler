@@ -79,6 +79,7 @@ export class Structure {
   }
 
   public get() {
+    console.dir(this.value);
     return this.value;
   }
 
