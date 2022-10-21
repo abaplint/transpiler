@@ -429,4 +429,17 @@ describe("Running expressions - Length and offset", () => {
     expect(abap.console.get()).to.equal("1AB1\nAB");
   });
 
+  it("more numeric field names", async () => {
+    const code = `
+DATA: BEGIN OF hex,
+        01 TYPE x LENGTH 1,
+        11 TYPE x LENGTH 1,
+      END   OF hex.
+DATA val TYPE c LENGTH 10.
+WRITE val+hex-01(1).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

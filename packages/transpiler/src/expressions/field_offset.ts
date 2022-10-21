@@ -19,9 +19,14 @@ export class FieldOffsetTranspiler implements IExpressionTranspiler {
         } else if (c.get() instanceof Expressions.SourceFieldSymbol) {
           ret += new FieldSymbolTranspiler().transpile(c, traversal).getCode();
         } else if (c.get() instanceof Expressions.ArrowOrDash) {
-          ret += ".get().";
+          ret += ".get()";
         } else if (c.get() instanceof Expressions.ComponentName) {
-          ret += c.getFirstToken().getStr().toLowerCase();
+          const name = c.getFirstToken().getStr().toLowerCase();
+          if (name.match(/^\d/)) {
+            ret += `["` + name + `"]`;
+          } else {
+            ret += `.` + name;
+          }
         }
       } else if(c instanceof Nodes.TokenNode) {
         if (c.get() instanceof Tokens.Identifier) {
