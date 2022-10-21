@@ -24,8 +24,6 @@ export class HandleABAP {
         chunk.appendString("// " + file.getFilename() + "\n");
       }
 
-      chunk.appendString(this.handleConstants(obj, file, reg));
-
       const rearranged = new Rearranger().run(obj.getType(), file.getStructure());
 
       const contents = new Traversal(spaghetti, file, obj, reg, this.options?.unknownTypes === "runtimeError").traverse(rearranged);
@@ -152,43 +150,6 @@ export class HandleABAP {
       }
     }
     return res;
-  }
-
-
-  protected handleConstants(obj: abaplint.ABAPObject, file: abaplint.ABAPFile, reg: abaplint.IRegistry): string {
-    let result = "";
-    const constants = this.findConstants(obj, file, reg);
-
-    if (this.options?.skipConstants === false || this.options?.skipConstants === undefined) {
-      for (const concat of Array.from(constants).sort()) {
-        const post = concat.startsWith("-") ? "minus_" : "";
-        result += `const constant_${post}${concat.replace("-", "")} = new abap.types.Integer().set(${concat});\n`;
-      }
-    }
-
-    return result;
-  }
-
-  protected findConstants(obj: abaplint.ABAPObject, file: abaplint.ABAPFile, reg: abaplint.IRegistry): Set<string> {
-    let constants = new Set<string>();
-
-    for (const i of file.getStructure()?.findAllExpressions(abaplint.Expressions.Integer) || []) {
-      constants.add(i.concatTokens().replace(" ", ""));
-    }
-
-    // extra constants from interfaces, used for default values
-    if (obj.getType() === "CLAS") {
-      const clas = obj as abaplint.Objects.Class;
-      for (const i of clas.getClassDefinition()?.interfaces || []) {
-        const intf = reg.getObject("INTF", i.name) as abaplint.ABAPObject | undefined;
-        const main = intf?.getMainABAPFile();
-        if (intf && main) {
-          constants = new Set([...constants, ...this.findConstants(intf, main, reg).values()]);
-        }
-      }
-    }
-
-    return constants;
   }
 
 }
