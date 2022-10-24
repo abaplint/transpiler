@@ -131,7 +131,7 @@ WRITE result.`;
     expect(abap.console.get()).to.equal("13\n11");
   });
 
-  it.skip("more punct", async () => {
+  it("more punct", async () => {
     const code = `
     DATA str TYPE string.
     str = '@1%!'.
