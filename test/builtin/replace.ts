@@ -131,4 +131,19 @@ WRITE result.`;
     expect(abap.console.get()).to.equal("13\n11");
   });
 
+  it.skip("more punct", async () => {
+    const code = `
+    DATA str TYPE string.
+    str = '@1%!'.
+    str = replace( val   = str
+                   regex = '[[:punct:]]'
+                   with  = ' '
+                   occ   = 0 ).
+    WRITE str.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });
