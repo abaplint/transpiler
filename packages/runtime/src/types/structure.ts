@@ -6,6 +6,7 @@ import {INumeric} from "./_numeric";
 import {parse} from "../operators/_parse";
 import {Hex} from "./hex";
 import {Character} from "./character";
+import {throwError} from "../throw_error";
 
 export class Structure {
   private readonly value: any;
@@ -103,13 +104,7 @@ export class Structure {
     if ((input.offset && input.offset >= val.length)
          || (input.offset && input.offset < 0)
          || (input.length && input.length < 0)) {
-      // @ts-ignore
-      if (abap.Classes["CX_SY_RANGE_OUT_OF_BOUNDS"] !== undefined) {
-        // @ts-ignore
-        throw new abap.Classes["CX_SY_RANGE_OUT_OF_BOUNDS"]();
-      } else {
-        throw "Global class CX_SY_RANGE_OUT_OF_BOUNDS not found";
-      }
+      throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
     }
 
     let ret = val;

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
+import {throwError} from "../throw_error";
 import {String} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
@@ -17,12 +18,12 @@ export function to_mixed(input: {
     sep = sep.get();
   }
   if (sep.length === 0) {
-    throw "CX_SY_STRG_PAR_VAL";
+    throwError("CX_SY_STRG_PAR_VAL");
   }
 
   const min = 1;
   if (min < 0) {
-    throw "CX_SY_STRG_PAR_VAL";
+    throwError("CX_SY_STRG_PAR_VAL");
   }
 
   let val = input.val;

@@ -1,3 +1,4 @@
+import {throwError} from "../throw_error";
 import {Float} from "./float";
 import {Hex} from "./hex";
 import {XString} from "./xstring";
@@ -24,13 +25,7 @@ export class Integer implements INumeric {
       this.value = 0;
     } else if (typeof value === "string") {
       if (/^\s*-?\+?\d+\.?\d*$/i.test(value) === false) {
-        // @ts-ignore
-        if (abap.Classes["CX_SY_CONVERSION_NO_NUMBER"] !== undefined) {
-          // @ts-ignore
-          throw new abap.Classes["CX_SY_CONVERSION_NO_NUMBER"]();
-        } else {
-          throw "Global class CX_SY_CONVERSION_NO_NUMBER not found";
-        }
+        throwError("CX_SY_CONVERSION_NO_NUMBER");
       }
       this.value = parseInt(value, 10);
     } else if (value instanceof Float) {

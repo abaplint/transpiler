@@ -1,4 +1,5 @@
 import {parse} from "../operators/_parse";
+import {throwError} from "../throw_error";
 import {Character} from "./character";
 import {Hex} from "./hex";
 import {Integer} from "./integer";
@@ -55,13 +56,7 @@ export class String implements ICharacter {
     if ((input.offset && input.offset > this.value.length)
         || (input.offset && input.offset < 0)
         || (input.length && input.length < 0)) {
-      // @ts-ignore
-      if (abap.Classes["CX_SY_RANGE_OUT_OF_BOUNDS"] !== undefined) {
-        // @ts-ignore
-        throw new abap.Classes["CX_SY_RANGE_OUT_OF_BOUNDS"]();
-      } else {
-        throw "Global class CX_SY_RANGE_OUT_OF_BOUNDS not found";
-      }
+      throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
     }
 
     let ret = this.value;
