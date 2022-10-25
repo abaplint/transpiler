@@ -1,8 +1,11 @@
+import {OffsetLength} from "../offset_length";
 import {ICharacter} from "../types/_character";
+import {INumeric} from "../types/_numeric";
 
 export type replaceInput = {
   target: ICharacter,
-  sectionLength?: ICharacter,
+  sectionLength?: INumeric,
+  sectionOffset?: INumeric,
   regex?: ICharacter,
   all: boolean,
   with: ICharacter,
@@ -36,6 +39,11 @@ export function replace(input: replaceInput): void {
     }
     found = temp.match(input.regex.get()) !== null;
     search = new RegExp(input.regex.get(), ignoreCase + allOccurrences);
+  } else if (input.sectionLength && input.sectionOffset) {
+    new OffsetLength(input.target, {length: input.sectionLength, offset: input.sectionOffset}).set(input.with);
+    // @ts-ignore
+    abap.builtin.sy.get().subrc.set(0);
+    return;
   } else {
     throw "REPLACE, unexpected input";
   }

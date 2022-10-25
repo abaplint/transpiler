@@ -26,6 +26,15 @@ export class ReplaceTranspiler implements IStatementTranspiler {
       extra.push("of: " + new SourceTranspiler().transpile(o, traversal).getCode());
     }
 
+    const length = node.findExpressionAfterToken("LENGTH");
+    if (length && length.get() instanceof abaplint.Expressions.Source) {
+      extra.push("sectionLength: " + new SourceTranspiler().transpile(length, traversal).getCode());
+    }
+    const offset = node.findExpressionAfterToken("OFFSET");
+    if (offset && offset.get() instanceof abaplint.Expressions.Source) {
+      extra.push("sectionOffset: " + new SourceTranspiler().transpile(offset, traversal).getCode());
+    }
+
     const r = node.findDirectExpression(abaplint.Expressions.FindType);
     const type = r?.concatTokens().toUpperCase();
     if (type === "REGEX") {

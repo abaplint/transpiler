@@ -227,4 +227,17 @@ WRITE lv_pattern.`;
     expect(abap.console.get()).to.equal("##foo##");
   });
 
+  it("REPLACE, SECTION OFFSET LENGTH", async () => {
+    const code = `
+DATA val TYPE string.
+val = 'bbbb'.
+REPLACE SECTION OFFSET 1 LENGTH 2 OF val WITH 'aa'.
+WRITE val.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("baab");
+  });
+
 });
