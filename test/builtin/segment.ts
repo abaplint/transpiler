@@ -25,7 +25,18 @@ WRITE val.`;
     expect(abap.console.get()).to.equal("hello");
   });
 
-  it.skip("segment 2", async () => {
+  it("segment 2", async () => {
+    const code = `
+DATA val TYPE string.
+val = segment( val = 'hello world' index = 2 sep = | | ).
+WRITE val.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("world");
+  });
+
+  it("segment, negative index", async () => {
     const code = `
 DATA val TYPE string.
 val = segment( val = 'hello world' index = -1 sep = | | ).

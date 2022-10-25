@@ -17,11 +17,20 @@ export function segment(input: {val: ICharacter | string, index: INumeric | numb
     index = index.get();
   }
 
-//  const array = val.split(sep);
-
-  if (index === 0) {
+  if (index === 0 || sep.length === 0) {
     throwError("CX_SY_STRG_PAR_VAL");
   }
 
-  return new String().set("hello");
+  const array = val.split(sep);
+
+  if (index < 0) {
+    array.reverse();
+    index = Math.abs( index );
+  }
+
+  if (index > array.length) {
+    throwError("CX_SY_STRG_PAR_VAL");
+  }
+
+  return new String().set(array[index - 1]);
 }
