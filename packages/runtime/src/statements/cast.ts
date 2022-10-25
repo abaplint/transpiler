@@ -1,15 +1,6 @@
 import {initial} from "../compare";
+import {throwError} from "../throw_error";
 import {ABAPObject} from "../types";
-
-function throwError() {
-  // @ts-ignore
-  if (abap.Classes["CX_SY_MOVE_CAST_ERROR"] !== undefined) {
-    // @ts-ignore
-    throw new abap.Classes["CX_SY_MOVE_CAST_ERROR"]();
-  } else {
-    throw "Global class CX_SY_MOVE_CAST_ERROR not found";
-  }
-}
 
 // todo, field symbols as input?
 // todo, local classes?
@@ -38,7 +29,7 @@ export async function cast(target: ABAPObject, source: ABAPObject) {
     // using "instanceof" is probably wrong in some cases,
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/instanceof
     if (source.get() instanceof targetClass === false) {
-      throwError();
+      throwError("CX_SY_MOVE_CAST_ERROR");
     }
   } else if (checkIntf === true && targetClass?.INTERNAL_TYPE === "INTF") {
     const list: string[] = [...source.get().constructor.IMPLEMENTED_INTERFACES];
@@ -67,7 +58,7 @@ export async function cast(target: ABAPObject, source: ABAPObject) {
 
     const isImplemented = list.some(i => i === targetName);
     if (isImplemented === false) {
-      throwError();
+      throwError("CX_SY_MOVE_CAST_ERROR");
     }
   }
   target.set(source);

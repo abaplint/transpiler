@@ -8,12 +8,12 @@ export interface IOffsetLengthOptions {
 }
 
 export class OffsetLength {
-  private readonly obj: Character | Hex | XString | Structure;
+  private readonly obj: ICharacter | Character | Hex | XString | Structure;
   private readonly offset?: number;
   private readonly length?: number;
   private readonly isHex: boolean;
 
-  public constructor(obj: Character | Hex | XString | Structure, options: IOffsetLengthOptions) {
+  public constructor(obj: ICharacter | Character | Hex | XString | Structure, options: IOffsetLengthOptions) {
     this.obj = obj;
 
     this.isHex = obj instanceof Hex || obj instanceof XString;

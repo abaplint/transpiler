@@ -1,4 +1,5 @@
 import {clone} from "../clone";
+import {throwError} from "../throw_error";
 import {ABAPObject, Character, DataReference, Date, String, FieldSymbol, Float, Integer, Structure, Table, Time, XString, Hex, Packed} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
@@ -15,30 +16,20 @@ export interface ICreateDataOptions {
   like?: any,
 }
 
-function throwGlobalException(name: string) {
-  // @ts-ignore
-  if (abap.Classes[name] !== undefined) {
-    // @ts-ignore
-    throw new abap.Classes[name]();
-  } else {
-    throw `Global class ${name} not found`;
-  }
-}
-
 export function createData(target: DataReference, options?: ICreateDataOptions) {
 //  console.dir(options);
 
   if (options?.name && options?.table) {
     // @ts-ignore
     if (abap.DDIC[options.name] === undefined) {
-      throwGlobalException("CX_SY_CREATE_DATA_ERROR");
+      throwError("CX_SY_CREATE_DATA_ERROR");
     }
     // @ts-ignore
     target.assign(new abap.types.Table(abap.DDIC[options.name].type));
   } else if (options?.name) {
     // @ts-ignore
     if (abap.DDIC[options.name] === undefined) {
-      throwGlobalException("CX_SY_CREATE_DATA_ERROR");
+      throwError("CX_SY_CREATE_DATA_ERROR");
     }
     // @ts-ignore
     target.assign(clone(abap.DDIC[options.name].type));
