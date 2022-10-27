@@ -74,7 +74,8 @@ function writeObjects(objects: Transpiler.IOutputFile[], writeSourceMaps: boolea
         && o.object.type.toUpperCase() !== "ENQU"
         && o.object.type.toUpperCase() !== "TTYP") {
       const name = o.filename + ".map";
-      contents = contents + `\n//# sourceMappingURL=` + name;
+// SourceMappingUrl needs to be percent-encoded, ref https://github.com/microsoft/TypeScript/issues/40951
+      contents = contents + `\n//# sourceMappingURL=` + name.replace(/#/g, "%23");
       let map = o.chunk.getMap(o.filename);
       for (const f of files) { // hack the paths to the original files
         if (f.relative === undefined) {
@@ -87,6 +88,11 @@ function writeObjects(objects: Transpiler.IOutputFile[], writeSourceMaps: boolea
         }
       }
       fs.writeFileSync(outputFolder + path.sep + name, map);
+    }
+
+    if (o.object.type.toUpperCase() === "PROG") {
+      // hmm, will this work for INCLUDEs ?
+      contents = `await import("./_init.mjs");\n` + contents;
     }
     fs.writeFileSync(outputFolder + path.sep + o.filename, contents);
   }
