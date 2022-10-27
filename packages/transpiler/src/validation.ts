@@ -19,7 +19,7 @@ export const config: IConfig = {
       "kernelCall": true,
       "communication": true,
       "systemCall": true,
-      "break": true,
+      "break": false,
       "statics": true,
       "endselect": false,
       "defaultKey": false,
