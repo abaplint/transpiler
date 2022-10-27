@@ -6,6 +6,8 @@ import {runSingle} from "./_utils";
 
 describe("Single statements", () => {
   const tests = [
+    {abap: "BREAK-POINT.",                         js: `debugger;`,       skip: false, only: false},
+    {abap: "BREAK username.",                      js: `debugger;`,       skip: false, only: false},
     {abap: "DATA foo TYPE i.",                     js: `let foo = new abap.types.Integer({qualifiedName: "I"});`,       skip: false, only: false},
     {abap: "DATA ref TYPE REF TO i.",              js: `let ref = new abap.types.DataReference(new abap.types.Integer({qualifiedName: "I"}));`,       skip: false},
     {abap: "foo = 2.",                             js: "foo.set(new abap.types.Integer().set(2));",                      skip: false},
