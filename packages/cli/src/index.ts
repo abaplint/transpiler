@@ -89,6 +89,11 @@ function writeObjects(objects: Transpiler.IOutputFile[], writeSourceMaps: boolea
       }
       fs.writeFileSync(outputFolder + path.sep + name, map);
     }
+
+    if (o.object.type.toUpperCase() === "PROG") {
+      // hmm, will this work for INCLUDEs ?
+      contents = `await import("./_init.mjs");\n` + contents;
+    }
     fs.writeFileSync(outputFolder + path.sep + o.filename, contents);
   }
 }
