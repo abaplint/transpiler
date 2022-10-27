@@ -74,7 +74,8 @@ function writeObjects(objects: Transpiler.IOutputFile[], writeSourceMaps: boolea
         && o.object.type.toUpperCase() !== "ENQU"
         && o.object.type.toUpperCase() !== "TTYP") {
       const name = o.filename + ".map";
-      contents = contents + `\n//# sourceMappingURL=` + name;
+// SourceMappingUrl needs to be percent-encoded, ref https://github.com/microsoft/TypeScript/issues/40951
+      contents = contents + `\n//# sourceMappingURL=` + name.replace(/#/g, "%23");
       let map = o.chunk.getMap(o.filename);
       for (const f of files) { // hack the paths to the original files
         if (f.relative === undefined) {
