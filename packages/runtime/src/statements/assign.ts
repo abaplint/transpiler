@@ -1,9 +1,9 @@
-import {ABAPObject, DataReference, FieldSymbol, Structure} from "../types";
+import {ABAPObject, DataReference, FieldSymbol, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
 export interface IAssignInput {
-  source?: INumeric | ICharacter | Structure | DataReference,
+  source?: INumeric | ICharacter | Table | Structure | DataReference,
   target: FieldSymbol,
   dynamicName?: string,
   dynamicSource?: ICharacter, // first part only
@@ -12,7 +12,6 @@ export interface IAssignInput {
 }
 
 export function assign(input: IAssignInput) {
-  // console.dir(input);
   if (input.dynamicName) {
     if (input.dynamicSource instanceof FieldSymbol) {
       input.dynamicSource = input.dynamicSource.getPointer();
@@ -65,7 +64,8 @@ export function assign(input: IAssignInput) {
       input.source = input.source.getPointer() as any;
       assign(input);
       return;
-    } else if (!(input.source instanceof Structure)) {
+    } else if (!(input.source instanceof Structure)
+        && !(input.source instanceof Table)) {
       // @ts-ignore
       abap.builtin.sy.get().subrc.set(4);
       return;
@@ -75,15 +75,24 @@ export function assign(input: IAssignInput) {
     if (typeof component !== "string") {
       component = component.get();
     }
+    if (input.source instanceof Table) {
+      input.source = input.source.getHeader();
+    }
+    if (input.source instanceof Table) {
+      throw "ASSIGN, nested table";
+    }
     let result: any = undefined;
     if (typeof component === "number") {
-      const structure_as_object = input.source.get();
-      const keys = Object.keys(structure_as_object);
-      const component_name = keys[(component - 1)];
-      result = structure_as_object[component_name];
+      if (component === 0) {
+        result = input.source;
+      } else if (input.source instanceof Structure) {
+        const structure_as_object = input.source.get();
+        const keys = Object.keys(structure_as_object);
+        const component_name = keys[component - 1];
+        result = structure_as_object[component_name];
+      }
     } else {
       result = input.source.get()[component.toLowerCase()];
-
     }
 
     if (result === undefined) {
