@@ -380,4 +380,22 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("X");
   });
 
+  it("ASSIGN float CASTING TYPE x", async () => {
+    const code = `
+  TYPES hex TYPE x LENGTH 10.
+  DATA tab TYPE STANDARD TABLE OF hex WITH HEADER LINE.
+  DATA len TYPE i.
+  FIELD-SYMBOLS <binary> TYPE x.
+  ASSIGN COMPONENT 1 OF STRUCTURE tab TO <binary> TYPE 'X'.
+  ASSERT sy-subrc = 4.
+  ASSIGN COMPONENT 0 OF STRUCTURE tab TO <binary> TYPE 'X'.
+  ASSERT sy-subrc = 0.
+  DESCRIBE FIELD <binary> LENGTH len IN BYTE MODE.
+  WRITE len.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("10");
+  });
+
 });

@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -19,6 +19,18 @@ describe("Builtin functions - shift_left", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("places", async () => {
+    const code = `
+    DATA phrase TYPE string.
+    phrase = |abc|.
+    phrase = shift_left( val = phrase places = 1 ).
+    WRITE phrase.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("bc");
   });
 
 });

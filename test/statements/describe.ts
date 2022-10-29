@@ -276,4 +276,16 @@ WRITE / lv_type.`;
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("DESCRIBE TABLE, IN BYTE MODE", async () => {
+    const code = `
+    DATA binary TYPE x LENGTH 10.
+    DATA len TYPE i.
+    DESCRIBE FIELD binary LENGTH len IN BYTE MODE.
+    WRITE len.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("10");
+  });
+
 });
