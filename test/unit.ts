@@ -2047,4 +2047,38 @@ INCLUDE /foo/lbaruxx.`;
     await dumpNrun(files);
   });
 
+  it("test-49", async () => {
+// CREATE data, global class type
+
+    const clas = `
+    CLASS zcl_create DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        TYPES ty_foo TYPE i.
+    ENDCLASS.
+    CLASS zcl_create IMPLEMENTATION.
+
+    ENDCLASS.`;
+
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA ref1 TYPE REF TO data.
+        CREATE DATA ref1 TYPE zcl_create=>ty_foo.
+
+        DATA ref2 TYPE REF TO data.
+        CREATE DATA ref2 TYPE ('zcl_create=>ty_foo').
+      ENDMETHOD.
+    ENDCLASS.`;
+
+    const files = [
+      {filename: "zcl_create.clas.abap", contents: clas},
+      {filename: "zcl_create.clas.testclasses.abap", contents: tests},
+    ];
+    await dumpNrun(files);
+  });
+
 });

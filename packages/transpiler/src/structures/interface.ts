@@ -10,8 +10,8 @@ export class InterfaceTranspiler implements IStructureTranspiler {
   public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): Chunk {
     let ret = "";
     let name: string | undefined;
+    const def = traversal.getInterfaceDefinition(node.getFirstToken());
     for (const c of node.getChildren()) {
-      const def = traversal.getInterfaceDefinition(node.getFirstToken());
       if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.Interface) {
         name = c.findDirectExpression(abaplint.Expressions.InterfaceName)?.getFirstToken().getStr().toLowerCase();
         name = Traversal.escapeClassName(name);
@@ -24,8 +24,22 @@ export class InterfaceTranspiler implements IStructureTranspiler {
       }
     }
     ret += this.buildConstants(node.findFirstExpression(abaplint.Expressions.InterfaceName), traversal);
+    ret += this.buildTypes(def);
 
     return new Chunk(ret);
+  }
+
+  private buildTypes(idef: abaplint.IInterfaceDefinition | undefined): string {
+    if (idef === undefined) {
+      return "";
+    }
+
+    const prefix = Traversal.escapeClassName(idef.getName()) + ".";
+    let ret = "";
+    for (const ty of idef.getTypeDefinitions().getAll()) {
+      ret += new TranspileTypes().declareStatic(prefix, ty.type);
+    }
+    return ret;
   }
 
   private buildConstants(node: abaplint.Nodes.ExpressionNode | undefined, traversal: Traversal): string {

@@ -7,6 +7,11 @@ export class TranspileTypes {
     return "let " + t.getName().toLowerCase() + " = " + this.toType(type) + ";";
   }
 
+  public declareStatic(pre: string, t: abaplint.TypedIdentifier): string {
+    const type = t.getType();
+    return pre + t.getName().toLowerCase() + " = " + this.toType(type) + ";";
+  }
+
   public toType(type: abaplint.AbstractType): string {
     let resolved = "";
     let extra = "";

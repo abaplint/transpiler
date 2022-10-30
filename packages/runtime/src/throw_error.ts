@@ -4,6 +4,6 @@ export function throwError(name: string) {
     // @ts-ignore
     throw new abap.Classes[name]();
   } else {
-    throw "Global class name not found";
+    throw `Global class ${name} not found`;
   }
 }
