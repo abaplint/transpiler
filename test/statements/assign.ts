@@ -380,7 +380,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("X");
   });
 
-  it("ASSIGN float CASTING TYPE x", async () => {
+  it("ASSIGN tab CASTING TYPE x", async () => {
     const code = `
   TYPES hex TYPE x LENGTH 10.
   DATA tab TYPE STANDARD TABLE OF hex WITH HEADER LINE.
@@ -396,6 +396,22 @@ START-OF-SELECTION.
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("10");
+  });
+
+  it("ASSIGN tab", async () => {
+    const code = `
+    TYPES char TYPE c LENGTH 10.
+    DATA tab TYPE STANDARD TABLE OF char WITH DEFAULT KEY.
+    FIELD-SYMBOLS <any> TYPE any.
+
+    ASSIGN COMPONENT 1 OF STRUCTURE tab TO <any>.
+    WRITE / sy-subrc.
+    ASSIGN COMPONENT 0 OF STRUCTURE tab TO <any>.
+    WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n0");
   });
 
 });

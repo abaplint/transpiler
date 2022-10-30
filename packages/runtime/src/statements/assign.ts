@@ -76,11 +76,13 @@ export function assign(input: IAssignInput) {
       component = component.get();
     }
     if (input.source instanceof Table) {
-      input.source = input.source.getHeader();
+      if (input.source.getOptions()?.withHeader === true) {
+        input.source = input.source.getHeader();
+      } else {
+        // result is the table itself, no change of input.source
+      }
     }
-    if (input.source instanceof Table) {
-      throw "ASSIGN, nested table";
-    }
+
     let result: any = undefined;
     if (typeof component === "number") {
       if (component === 0) {
@@ -91,7 +93,7 @@ export function assign(input: IAssignInput) {
         const component_name = keys[component - 1];
         result = structure_as_object[component_name];
       }
-    } else {
+    } else if (!(input.source instanceof Table)){
       result = input.source.get()[component.toLowerCase()];
     }
 
