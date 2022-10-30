@@ -60,6 +60,12 @@ export class CreateDataTranspiler implements IStatementTranspiler {
       options.push(`"length": ` + so.getCode());
     }
 
+    const decimals = node.findExpressionAfterToken("DECIMALS");
+    if (decimals) {
+      const so = traversal.traverse(decimals);
+      options.push(`"decimals": ` + so.getCode());
+    }
+
     let add = "";
     if (options.length > 0) {
       add = ",{" + options.join(",") + "}";

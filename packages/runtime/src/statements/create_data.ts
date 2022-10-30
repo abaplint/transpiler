@@ -12,6 +12,7 @@ export interface ICreateDataOptions {
   type?: PointerType,
   typeName?: string,
   length?: INumeric,
+  decimals?: INumeric,
   likeLineOf?: FieldSymbol | Table,
   like?: any,
 }
@@ -74,7 +75,11 @@ export function createData(target: DataReference, options?: ICreateDataOptions) 
           if (options.length) {
             length = options.length.get();
           }
-          target.assign(new Packed({length: length}));
+          let decimals = 0;
+          if (options.decimals) {
+            decimals = options.decimals.get();
+          }
+          target.assign(new Packed({length: length, decimals: decimals}));
         }
         break;
       case "F":

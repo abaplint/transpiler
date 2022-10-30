@@ -173,4 +173,18 @@ ASSERT foo = '12345'.`;
 109.990`);
   });
 
+  it("max value", async () => {
+    const code = `
+    DATA out TYPE REF TO data.
+    FIELD-SYMBOLS <out> TYPE any.
+    CREATE DATA out TYPE p LENGTH 3 DECIMALS 1.
+    ASSIGN out->* TO <out>.
+    <out> = '9999.9'.
+    WRITE <out>.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("9999.9");
+  });
+
 });
