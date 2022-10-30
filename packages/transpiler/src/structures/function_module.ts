@@ -50,16 +50,17 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
         direction = "importing";
       }
       // note: all directions are optional
-      ret += `let ${p.name.toLowerCase()} = INPUT.${direction}?.${p.name.toLowerCase()};\n`;
+      const name = p.name.toLowerCase();
+      ret += `let ${name} = INPUT.${direction}?.${name};\n`;
 
       if (direction === "exporting" || direction === "importing" || direction === "changing") {
         const scope = traversal.findCurrentScopeByToken(node.getLastToken());
-        const type = scope?.findVariable(p.name.toLowerCase())?.getType();
+        const type = scope?.findVariable(name)?.getType();
         if (type !== undefined) {
           // todo, set DEFAULT value
           // todo, check for OPTIONALness and raise exceptions and stuff
-          ret += `if (${p.name.toLowerCase()} === undefined) {
-            ${p.name.toLowerCase()} = ${new TranspileTypes().toType(type)};
+          ret += `if (${name} === undefined) {
+            ${name} = ${new TranspileTypes().toType(type)};
           }\n`;
         }
       }
