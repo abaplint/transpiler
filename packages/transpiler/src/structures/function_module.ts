@@ -40,6 +40,8 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
       throw "FunctionModuleTranspilerModuleNotFound";
     }
 
+    const scope = traversal.findCurrentScopeByToken(node.getLastToken());
+
     let ret = "";
     for (const p of module.getParameters()) {
       ret += `// ${p.direction} ${p.name} ${p.type}\n`;
@@ -54,7 +56,6 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
       ret += `let ${name} = INPUT.${direction}?.${name};\n`;
 
       if (direction === "exporting" || direction === "importing" || direction === "changing") {
-        const scope = traversal.findCurrentScopeByToken(node.getLastToken());
         const type = scope?.findVariable(name)?.getType();
         if (type !== undefined) {
           // todo, set DEFAULT value
