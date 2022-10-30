@@ -11,7 +11,7 @@ export class TranspileTypes {
     const type = t.getType();
     const code = this.toType(type);
     // todo, this should look at the configuration, for runtime vs compile time errors
-    if (code.includes("Void type")) {
+    if (code.includes("Void type") || code.includes("abap.types.typeTodo")) {
       return "";
     }
     return pre + t.getName().toLowerCase() + " = " + code + ";";
