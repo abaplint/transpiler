@@ -75,10 +75,10 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
       return "ERROR_CDEF_NOT_FOUND";
     }
 
-    const prefix = Traversal.escapeClassName(cdef.getName()) + ".";
+    const prefix = Traversal.escapeClassName(cdef.getName().toLowerCase()) + ".";
     let ret = "";
     for (const ty of cdef.getTypeDefinitions().getAll()) {
-      ret += new TranspileTypes().declareStatic(prefix, ty.type);
+      ret += new TranspileTypes().declareStaticSkipVoid(prefix, ty.type);
     }
     return ret;
   }
