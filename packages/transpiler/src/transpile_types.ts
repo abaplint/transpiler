@@ -14,7 +14,7 @@ export class TranspileTypes {
     if (code.includes("Void type") || code.includes("abap.types.typeTodo")) {
       return "";
     }
-    return pre + t.getName().toLowerCase() + " = " + code + ";";
+    return pre + t.getName().toLowerCase() + " = " + code + ";\n";
   }
 
   public toType(type: abaplint.AbstractType): string {
