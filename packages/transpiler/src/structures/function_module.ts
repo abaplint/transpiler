@@ -50,6 +50,13 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
       }
       // note: all directions are optional
       ret += `let ${p.name.toLowerCase()} = INPUT.${direction}?.${p.name.toLowerCase()};\n`;
+      /*
+      if (direction === "exporting") {
+        ret += `if (${p.name.toLowerCase()} === undefined) {
+          ${p.name.toLowerCase()} = todo, initialize
+        }\n`;
+      }
+      */
     }
     return ret;
   }
