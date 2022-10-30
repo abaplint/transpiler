@@ -2,6 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
+import {TranspileTypes} from "../transpile_types";
 
 export class FunctionModuleTranspiler implements IStructureTranspiler {
 
@@ -15,7 +16,7 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
           name = "FunctionModuleTranspilerNameNotFound";
         }
         r += `async function ${Traversal.escapeClassName(name)}(INPUT) {\n`;
-        r += this.findSignature(traversal, name);
+        r += this.findSignature(traversal, name, c);
       } else if (c.get() instanceof abaplint.Statements.EndFunction) {
         r += "}\n";
         r += `abap.FunctionModules['${name.toUpperCase()}'] = ${Traversal.escapeClassName(name)};\n`;
@@ -28,7 +29,7 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
 
 //////////////////////
 
-  private findSignature(traversal: Traversal, name: string) {
+  private findSignature(traversal: Traversal, name: string, node: abaplint.Nodes.StatementNode) {
     const group = traversal.getCurrentObject() as abaplint.Objects.FunctionGroup | undefined;
     if (group === undefined) {
       throw "FunctionModuleTranspilerGroupNotFound";
@@ -50,13 +51,19 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
       }
       // note: all directions are optional
       ret += `let ${p.name.toLowerCase()} = INPUT.${direction}?.${p.name.toLowerCase()};\n`;
-      /*
-      if (direction === "exporting") {
-        ret += `if (${p.name.toLowerCase()} === undefined) {
-          ${p.name.toLowerCase()} = todo, initialize
-        }\n`;
+
+      if (direction === "exporting" || direction === "importing" || direction === "changing") {
+        const scope = traversal.findCurrentScopeByToken(node.getLastToken());
+        const type = scope?.findVariable(p.name.toLowerCase())?.getType();
+        if (type !== undefined) {
+          // todo, set DEFAULT value
+          // todo, check for OPTIONALness and raise exceptions and stuff
+          ret += `if (${p.name.toLowerCase()} === undefined) {
+            ${p.name.toLowerCase()} = ${new TranspileTypes().toType(type)};
+          }\n`;
+        }
       }
-      */
+
     }
     return ret;
   }
