@@ -2066,8 +2066,11 @@ INCLUDE /foo/lbaruxx.`;
     ENDCLASS.
     CLASS ltcl_test IMPLEMENTATION.
       METHOD test01.
-        DATA ref TYPE REF TO data.
-        CREATE DATA ref TYPE zcl_create=>ty_foo.
+        DATA ref1 TYPE REF TO data.
+        CREATE DATA ref1 TYPE zcl_create=>ty_foo.
+
+        DATA ref2 TYPE REF TO data.
+        CREATE DATA ref2 TYPE ('zcl_create=>ty_foo').
       ENDMETHOD.
     ENDCLASS.`;
 

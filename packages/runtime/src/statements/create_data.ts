@@ -28,11 +28,26 @@ export function createData(target: DataReference, options?: ICreateDataOptions) 
     target.assign(new abap.types.Table(abap.DDIC[options.name].type));
   } else if (options?.name) {
     // @ts-ignore
-    if (abap.DDIC[options.name] === undefined) {
+    if (abap.DDIC[options.name]) {
+      // @ts-ignore
+      target.assign(clone(abap.DDIC[options.name].type));
+    } else if (options.name.includes("=>")) {
+      const [className, typeName] = options.name.toUpperCase().split("=>");
+
+      // @ts-ignore
+      if (abap.Classes[className] === undefined) {
+        throwError("CX_SY_CREATE_DATA_ERROR");
+      }
+      // @ts-ignore
+      if (abap.Classes[className][typeName.toLowerCase()] === undefined) {
+        throwError("CX_SY_CREATE_DATA_ERROR");
+      }
+
+      // @ts-ignore
+      target.assign(clone(abap.Classes[className][typeName.toLowerCase()]));
+    } else {
       throwError("CX_SY_CREATE_DATA_ERROR");
     }
-    // @ts-ignore
-    target.assign(clone(abap.DDIC[options.name].type));
   } else if (options?.typeName) {
     switch (options.typeName) {
       case "C":
@@ -82,7 +97,7 @@ export function createData(target: DataReference, options?: ICreateDataOptions) 
         break;
       default:
         if (options.typeName.includes("=>")) {
-          const [className, typeName] = options.typeName.split("=>");
+          const [className, typeName] = options.typeName.toUpperCase().split("=>");
 
           // @ts-ignore
           if (abap.Classes[className] === undefined) {
