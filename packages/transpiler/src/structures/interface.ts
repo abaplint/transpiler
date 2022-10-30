@@ -10,8 +10,8 @@ export class InterfaceTranspiler implements IStructureTranspiler {
   public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): Chunk {
     let ret = "";
     let name: string | undefined;
+    const def = traversal.getInterfaceDefinition(node.getFirstToken());
     for (const c of node.getChildren()) {
-      const def = traversal.getInterfaceDefinition(node.getFirstToken());
       if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.Interface) {
         name = c.findDirectExpression(abaplint.Expressions.InterfaceName)?.getFirstToken().getStr().toLowerCase();
         name = Traversal.escapeClassName(name);

@@ -81,7 +81,23 @@ export function createData(target: DataReference, options?: ICreateDataOptions) 
         target.assign(new XString());
         break;
       default:
-        throw "CREATE DATA, unknown type " + options.typeName;
+        if (options.typeName.includes("=>")) {
+          const [className, typeName] = options.typeName.split("=>");
+
+          // @ts-ignore
+          if (abap.Classes[className] === undefined) {
+            throwError("CX_SY_CREATE_DATA_ERROR");
+          }
+          // @ts-ignore
+          if (abap.Classes[className][typeName.toLowerCase()] === undefined) {
+            throwError("CX_SY_CREATE_DATA_ERROR");
+          }
+
+          // @ts-ignore
+          target.assign(clone(abap.Classes[className][typeName.toLowerCase()]));
+        } else {
+          throw "CREATE DATA, unknown type " + options.typeName;
+        }
     }
   } else if (options?.type) {
     target.assign(clone(options.type));

@@ -19,6 +19,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
       }
     }
     ret.appendString(this.buildStatic(node.findFirstExpression(abaplint.Expressions.ClassName), traversal));
+    ret.appendString(this.buildTypes(node.findFirstExpression(abaplint.Expressions.ClassName), traversal));
 
     return ret;
   }
@@ -62,6 +63,23 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
       ret.push(...intf.getAttributes().getConstants().map(a => {return {identifier: a, prefix: intf.getName().toLowerCase() + "$"};}));
     }
 
+    return ret;
+  }
+
+  private buildTypes(node: abaplint.Nodes.ExpressionNode | undefined, traversal: Traversal): string {
+    if (node === undefined) {
+      return "";
+    }
+    const cdef = traversal.getClassDefinition(node.getFirstToken());
+    if (cdef === undefined) {
+      return "ERROR_CDEF_NOT_FOUND";
+    }
+
+    const prefix = Traversal.escapeClassName(cdef.getName()) + ".";
+    let ret = "";
+    for (const ty of cdef.getTypeDefinitions().getAll()) {
+      ret += new TranspileTypes().declareStatic(prefix, ty.type);
+    }
     return ret;
   }
 
