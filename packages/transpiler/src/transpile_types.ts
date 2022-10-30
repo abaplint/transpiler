@@ -7,9 +7,14 @@ export class TranspileTypes {
     return "let " + t.getName().toLowerCase() + " = " + this.toType(type) + ";";
   }
 
-  public declareStatic(pre: string, t: abaplint.TypedIdentifier): string {
+  public declareStaticSkipVoid(pre: string, t: abaplint.TypedIdentifier): string {
     const type = t.getType();
-    return pre + t.getName().toLowerCase() + " = " + this.toType(type) + ";";
+    const code = this.toType(type);
+    // todo, this should look at the configuration, for runtime vs compile time errors
+    if (code.includes("Void type")) {
+      return "";
+    }
+    return pre + t.getName().toLowerCase() + " = " + code + ";";
   }
 
   public toType(type: abaplint.AbstractType): string {

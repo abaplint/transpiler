@@ -37,7 +37,7 @@ export class InterfaceTranspiler implements IStructureTranspiler {
     const prefix = Traversal.escapeClassName(idef.getName()) + ".";
     let ret = "";
     for (const ty of idef.getTypeDefinitions().getAll()) {
-      ret += new TranspileTypes().declareStatic(prefix, ty.type);
+      ret += new TranspileTypes().declareStaticSkipVoid(prefix, ty.type);
     }
     return ret;
   }

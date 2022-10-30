@@ -78,7 +78,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     const prefix = Traversal.escapeClassName(cdef.getName()) + ".";
     let ret = "";
     for (const ty of cdef.getTypeDefinitions().getAll()) {
-      ret += new TranspileTypes().declareStatic(prefix, ty.type);
+      ret += new TranspileTypes().declareStaticSkipVoid(prefix, ty.type);
     }
     return ret;
   }
