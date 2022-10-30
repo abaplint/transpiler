@@ -25,6 +25,11 @@ export class DescribeTranspiler implements IStatementTranspiler {
       options.push("length: " + traversal.traverse(length).getCode());
     }
 
+    const decimals = node.findExpressionAfterToken("DECIMALS");
+    if (decimals) {
+      options.push("decimals: " + traversal.traverse(decimals).getCode());
+    }
+
     const lines = node.findExpressionAfterToken("LINES");
     if (lines) {
       options.push("lines: " + traversal.traverse(lines).getCode());

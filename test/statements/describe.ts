@@ -288,4 +288,18 @@ WRITE / lv_type.`;
     expect(abap.console.get()).to.equal("10");
   });
 
+  it("DESCRIBE, packed IN BYTE MODE", async () => {
+    const code = `
+    DATA foo         TYPE p LENGTH 3 DECIMALS 1.
+    DATA lv_length   TYPE i.
+    DATA lv_decimals TYPE i.
+    DESCRIBE FIELD foo LENGTH lv_length IN BYTE MODE DECIMALS lv_decimals.
+    WRITE / lv_length.
+    WRITE / lv_decimals.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3\n1");
+  });
+
 });

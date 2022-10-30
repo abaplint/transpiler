@@ -6,6 +6,7 @@ export interface IDescribeOptions {
   field: any,
   type?: ICharacter,
   length?: INumeric,
+  decimals?: INumeric,
   lines?: INumeric,
   table?: Table,
   mode?: "BYTE" | "CHARACTER"
@@ -53,15 +54,25 @@ export function describe(input: IDescribeOptions) {
     }
   }
 
+  if (input.field instanceof FieldSymbol) {
+    input.field = input.field.getPointer();
+  }
+
   if (input.length) {
-    if (input.field instanceof FieldSymbol) {
-      input.field = input.field.getPointer();
-    }
     if (input.field instanceof Character
+        || input.field instanceof Packed
         || input.field instanceof Hex) {
       input.length.set(input.field.getLength());
     } else {
-      throw "DESCRIBE, unsupported or todo";
+      throw "DESCRIBE length, unsupported or todo";
+    }
+  }
+
+  if (input.decimals) {
+    if (input.field instanceof Packed) {
+      input.decimals.set(input.field.getDecimals());
+    } else {
+      throw "DESCRIBE decimals, unsupported or todo";
     }
   }
 
