@@ -71,6 +71,7 @@ DO 2 TIMES.
 ENDDO.
 WRITE / sy-index.`;
     const js = await run(code);
+    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1\n2\n10");
