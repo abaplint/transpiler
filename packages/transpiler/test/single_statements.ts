@@ -41,8 +41,6 @@ describe("Single statements", () => {
     {abap: "IF foo IS NOT INITIAL. ENDIF.",        js: "if (abap.compare.initial(foo) === false) {\n}",   skip: false},
     {abap: "IF NOT foo IS INITIAL. ENDIF.",        js: "if (abap.compare.initial(foo) === false) {\n}",   skip: false},
     {abap: "DO. ENDDO.",                           js: "for (;;) {\n}",                                   skip: true},
-    {abap: "DO 5 TIMES. ENDDO.",                   js: "const unique1 = new abap.types.Integer().set(5).get();\nfor (let unique2 = 0; unique2 < unique1; unique2++) {\n  abap.builtin.sy.get().index.set(unique2 + 1);\n}",         skip: false},
-    {abap: "DO foo TIMES.  ENDDO.",                js: "const unique1 = foo.get();\nfor (let unique2 = 0; unique2 < unique1; unique2++) {\n  abap.builtin.sy.get().index.set(unique2 + 1);\n}", skip: false},
     {abap: "WHILE foo = bar. ENDWHILE.",           js: "let unique1 = 1;\nwhile (abap.compare.eq(foo, bar)) {\n  abap.builtin.sy.get().index.set(unique1++);\n}",    skip: false},
     {abap: "foo-bar = 2.",                         js: "foo.bar.set(2);",                           skip: true}, // hmm, will this kind of member access work?
     {abap: "CLEAR foo.",                           js: "abap.statements.clear(foo);",               skip: false},

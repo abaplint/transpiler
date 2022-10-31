@@ -6,6 +6,11 @@ import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 
 export class DoTranspiler implements IStatementTranspiler {
+  private readonly syIndexBackup: string;
+
+  public constructor(syIndexBackup: string) {
+    this.syIndexBackup = syIndexBackup;
+  }
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const found = node.findFirstExpression(abaplint.Expressions.Source);
@@ -13,12 +18,14 @@ export class DoTranspiler implements IStatementTranspiler {
       const source = new SourceTranspiler(true).transpile(found, traversal).getCode();
       const idSource = UniqueIdentifier.get();
       const id = UniqueIdentifier.get();
-      return new Chunk(`const ${idSource} = ${source};
+      return new Chunk(`const ${this.syIndexBackup} = abap.builtin.sy.get().index.get();
+const ${idSource} = ${source};
 for (let ${id} = 0; ${id} < ${idSource}; ${id}++) {
 abap.builtin.sy.get().index.set(${id} + 1);`);
     } else {
       const unique = UniqueIdentifier.get();
-      return new Chunk(`let ${unique} = 1;
+      return new Chunk(`const ${this.syIndexBackup} = abap.builtin.sy.get().index.get();
+let ${unique} = 1;
 while (true) {
 abap.builtin.sy.get().index.set(${unique}++);`);
     }

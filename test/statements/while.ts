@@ -27,4 +27,19 @@ ENDWHILE.`;
     expect(abap.console.get()).to.equal("1\n2\n3\n4");
   });
 
+  it.skip("reset sytabix", async () => {
+    const code = `
+DATA i TYPE i.
+sy-index = 10.
+WHILE i < 5.
+  WRITE / sy-index.
+  i = i + 1.
+ENDWHILE.
+WRITE / sy-index.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n3\n4\n5\n10");
+  });
+
 });
