@@ -76,4 +76,37 @@ WRITE / sy-index.`;
     expect(abap.console.get()).to.equal("1\n2\n10");
   });
 
+  it("DO, early RETURN, should also reset sy-tabix", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS method1.
+    CLASS-METHODS method2.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD method1.
+    DO 2 TIMES.
+      WRITE / sy-index.
+      method2( ).
+      WRITE / sy-index.
+    ENDDO.
+  ENDMETHOD.
+
+  METHOD method2.
+    DO 2 TIMES.
+      WRITE / sy-index.
+      RETURN.
+    ENDDO.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>method1( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n1\n1\n2\n1\n2");
+  });
+
 });
