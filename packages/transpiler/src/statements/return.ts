@@ -2,6 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
+import {UniqueIdentifier} from "../unique_identifier";
 
 export class ReturnTranspiler implements IStatementTranspiler {
 
@@ -16,7 +17,12 @@ export class ReturnTranspiler implements IStatementTranspiler {
       }
     }
 
-    return new Chunk().append("return" + extra + ";", node, traversal);
+    let pre = "";
+    if (traversal.isInsideDoOrWhile(node)) {
+      pre = `abap.builtin.sy.get().index.set(${UniqueIdentifier.getIndexBackup1()});\n`;
+    }
+
+    return new Chunk().append(pre + "return" + extra + ";", node, traversal);
   }
 
 }
