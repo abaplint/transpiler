@@ -63,4 +63,17 @@ ENDDO.`;
     expect(abap.console.get()).to.equal("1\n2\n3");
   });
 
+  it.skip("DO, should reset to prev value after loop", async () => {
+    const code = `
+sy-index = 10.
+DO 2 TIMES.
+  WRITE / sy-index.
+ENDDO.
+WRITE / sy-index.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n10");
+  });
+
 });
