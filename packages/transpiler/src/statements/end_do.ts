@@ -12,7 +12,7 @@ export class EndDoTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     return new Chunk().append(`}
-abap.builtin.sy.get().index.set(${this.syIndexBackup});`, node, traversal);
+abap.builtin.sy.get().index.set(${this.syIndexBackup});\n`, node, traversal);
   }
 
 }
