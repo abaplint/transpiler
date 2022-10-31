@@ -4,6 +4,7 @@ import {TranspileTypes} from "../transpile_types";
 import {Traversal} from "../traversal";
 import {ConstantTranspiler, FieldChainTranspiler} from "../expressions";
 import {Chunk} from "../chunk";
+import {UniqueIdentifier} from "../unique_identifier";
 
 export class MethodImplementationTranspiler implements IStatementTranspiler {
 
@@ -101,9 +102,13 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
         "}\n" + "static ";
     }
 
+    UniqueIdentifier.resetIndexBackup();
+
     const str = staticMethod + "async " + Traversal.escapeClassName(methodName) + "(" + unique + ") {" + after;
     return new Chunk().append(str, node, traversal);
   }
+
+/////////////////////////////
 
   private findMethod(name: string, cdef: abaplint.IClassDefinition | undefined, traversal: Traversal) {
     if (cdef === undefined) {

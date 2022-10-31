@@ -440,6 +440,26 @@ export class Traversal {
     return stack.length > 0;
   }
 
+  public isInsideDoOrWhile(node: abaplint.Nodes.StatementNode): boolean {
+    const stack: abaplint.Nodes.StatementNode[] = [];
+
+    for (const statement of this.getFile().getStatements()) {
+      const get = statement.get();
+      if (get instanceof abaplint.Statements.While
+          || get instanceof abaplint.Statements.Do) {
+        stack.push(statement);
+      } else if (get instanceof abaplint.Statements.EndWhile
+          || get instanceof abaplint.Statements.EndDo) {
+        stack.pop();
+      }
+      if (statement === node) {
+        break;
+      }
+    }
+
+    return stack.length > 0;
+  }
+
   public registerClassOrInterface(def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined): string {
     if (def === undefined) {
       return "";

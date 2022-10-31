@@ -9,7 +9,7 @@ export class WhileTranspiler implements IStructureTranspiler {
 
   public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): Chunk {
     const ret = new Chunk();
-    const syIndexBackup = UniqueIdentifier.get();
+    const syIndexBackup = UniqueIdentifier.getIndexBackup();
     for (const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.While) {
         ret.appendChunk(new WhileStatementTranspiler(syIndexBackup).transpile(c, traversal));

@@ -3,6 +3,7 @@ import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {TranspileTypes} from "../transpile_types";
+import {UniqueIdentifier} from "../unique_identifier";
 
 export class FunctionModuleTranspiler implements IStructureTranspiler {
 
@@ -24,6 +25,7 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
         r += traversal.traverse(c).getCode();
       }
     }
+    UniqueIdentifier.resetIndexBackup();
     return new Chunk(r);
   }
 

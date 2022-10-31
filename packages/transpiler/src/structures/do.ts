@@ -9,7 +9,7 @@ export class DoTranspiler implements IStructureTranspiler {
 
   public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): Chunk {
     const ret = new Chunk();
-    const syIndexBackup = UniqueIdentifier.get();
+    const syIndexBackup = UniqueIdentifier.getIndexBackup();
     for (const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.Do) {
         ret.appendChunk(new DoStatementTranspiler(syIndexBackup).transpile(c, traversal));

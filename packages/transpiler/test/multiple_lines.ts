@@ -325,12 +325,12 @@ DO.
 ENDDO.`;
 
     const expected =
-`const unique1 = abap.builtin.sy.get().index.get();
-let unique2 = 1;
+`const indexBackup1 = abap.builtin.sy.get().index.get();
+let unique1 = 1;
 while (true) {
-  abap.builtin.sy.get().index.set(unique2++);
+  abap.builtin.sy.get().index.set(unique1++);
 }
-abap.builtin.sy.get().index.set(unique1);`;
+abap.builtin.sy.get().index.set(indexBackup1);`;
 
     expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.equal(expected);
   });
