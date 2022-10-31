@@ -1,4 +1,4 @@
-import {Date,Time,Hex, Float, Integer} from "../types";
+import {Date,Time,Hex, Float, Integer, DecFloat34} from "../types";
 import {XString} from "../types/xstring";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
@@ -29,6 +29,8 @@ export function parse(val: INumeric | ICharacter | string | number | Float | Int
     return num;
   } else if (val instanceof Time || val instanceof Date) {
     return val.getNumeric();
+  } else if (val instanceof DecFloat34) {
+    return val.getRaw();
   } else {
     return parse(val.get());
   }

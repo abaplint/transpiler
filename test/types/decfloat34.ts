@@ -28,4 +28,16 @@ WRITE / foo.`;
     expect(abap.console.get()).to.equal("1\n1,12345");
   });
 
+  it("multiply", async () => {
+    const code = `
+    DATA dec TYPE decfloat34.
+    dec = 1 / 2.
+    dec = dec * 10.
+    WRITE / dec.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("5");
+  });
+
 });
