@@ -7,6 +7,7 @@ export * from "./define";
 export * from "./do";
 export * from "./function_module";
 export * from "./interface";
+export * from "./while";
 export * from "./select";
 export * from "./try";
 export * from "./types";

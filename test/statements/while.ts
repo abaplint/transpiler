@@ -27,7 +27,7 @@ ENDWHILE.`;
     expect(abap.console.get()).to.equal("1\n2\n3\n4");
   });
 
-  it.skip("reset sytabix", async () => {
+  it("reset sytabix", async () => {
     const code = `
 DATA i TYPE i.
 sy-index = 10.
