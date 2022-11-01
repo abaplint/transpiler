@@ -10,7 +10,7 @@ const repos = [
   {name: "larshp/abap-advent-2020",          success: undefined, command: "npm test"},
   {name: "larshp/abap-wasm",                 success: undefined, command: "npm test"},
   {name: "larshp/abapNTLM",                  success: undefined, command: "npm test"},
-  {name: "open-abap/open-abap",              success: undefined, command: "npm test"},
+  {name: "open-abap/open-abap-core",         success: undefined, command: "npm test"},
   {name: "open-abap/open-table-maintenance", success: undefined, command: "npm test"},
   {name: "SAP/abap-file-formats-tools",      success: undefined, command: "npm test"},
 ];
