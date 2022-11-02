@@ -7,7 +7,7 @@ export function round(input: {val: ICharacter | string, dec: INumeric | number, 
 
   let mode = input.mode;
   if (mode === undefined) {
-    mode = 1;
+    mode = 2;
   } else if (typeof mode !== "number") {
     mode = mode?.get();
   }
@@ -23,8 +23,14 @@ export function round(input: {val: ICharacter | string, dec: INumeric | number, 
     case 1:
       ret.set(Math.ceil(val));
       break;
+    case 2:
+      ret.set(Math.round(val));
+      break;
     case 4:
       ret.set(-Math.round(-val));
+      break;
+    case 5:
+      ret.set(Math.trunc(val));
       break;
     case 6:
       ret.set(Math.floor(val));

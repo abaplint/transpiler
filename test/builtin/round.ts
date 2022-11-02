@@ -68,4 +68,17 @@ describe("Builtin functions - round", () => {
     await f(abap);
   });
 
+  it("more rounding", async () => {
+    const code = `
+    DATA p TYPE p LENGTH 10 DECIMALS 2.
+    p = round( val = '7.1' dec = 0 ).
+    WRITE / p.
+    p = round( val = '7.6' dec = 0 ).
+    WRITE / p.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal( `7.00\n8.00`);
+  });
+
 });
