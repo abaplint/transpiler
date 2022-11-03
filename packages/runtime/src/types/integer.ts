@@ -20,7 +20,7 @@ export class Integer implements INumeric {
 
   public set(value: INumeric | ICharacter | Hex | string | number | Integer | Float) {
     if (typeof value === "number") {
-      this.value = value;
+      this.value = Math.round(value);
     } else if (typeof value === "string" && value.trim().length === 0) {
       this.value = 0;
     } else if (typeof value === "string") {
