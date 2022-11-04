@@ -186,4 +186,12 @@ ASSERT ch = '1,0000000000000000E-03'.`;
     await f(abap);
   });
 
+  it("text element", async () => {
+    // todo, more work is needed on text elements
+    const code = `WRITE TEXT-001.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

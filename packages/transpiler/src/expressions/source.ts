@@ -59,6 +59,8 @@ export class SourceTranspiler implements IExpressionTranspiler {
           }
         } else if (c.get() instanceof Expressions.Dereference) {
           ret = new Chunk().appendString("(").appendChunk(ret).appendString(").getPointer()");
+        } else if (c.get() instanceof Expressions.TextElement) {
+          ret = new Chunk().appendString(`new abap.types.String().set("${c.concatTokens()}")`);
         } else {
           ret.appendString("SourceUnknown-" + c.get().constructor.name);
         }
