@@ -52,7 +52,8 @@ export class SelectDatabase {
         abap.statements.insertInternal({table: target, data: targetRow});
       }
     } else if (target !== undefined) {
-      throw new Error("Runtime, SELECT todo");
+      // its a simple type
+      target.set(rows[0][Object.keys(rows[0])[0]]);
     }
 
     if (target === undefined && rows.length === 1) {
