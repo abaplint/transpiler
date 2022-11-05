@@ -5,7 +5,7 @@ import {InsertDatabase} from "./insert_database";
 import {UpdateDatabase} from "./update_database";
 
 export interface IModifyDatabaseOptions {
-  from?: Structure | FieldSymbol,
+  values?: Structure,
   table?: Table | FieldSymbol,
 }
 
@@ -20,8 +20,8 @@ export class ModifyDatabase {
     if (options.table instanceof FieldSymbol) {
       options.table = options.table.getPointer() as Table;
     }
-    if (options.from instanceof FieldSymbol) {
-      options.from = options.from.getPointer() as Structure;
+    if (options.values instanceof FieldSymbol) {
+      options.values = options.values.getPointer() as Structure;
     }
 
     const insert = new InsertDatabase(this.context);
@@ -33,10 +33,10 @@ export class ModifyDatabase {
           await update.updateDatabase(table, {from: row});
         }
       }
-    } else if (options.from) {
-      const subrc = await insert.insertDatabase(table, {values: options.from});
+    } else if (options.values) {
+      const subrc = await insert.insertDatabase(table, {values: options.values});
       if (subrc !== 0) {
-        await update.updateDatabase(table, {from: options.from});
+        await update.updateDatabase(table, {from: options.values});
       }
     } else {
       throw "modifyDatabase todo";

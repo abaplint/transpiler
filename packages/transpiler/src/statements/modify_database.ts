@@ -16,6 +16,12 @@ export class ModifyDatabaseTranspiler implements IStatementTranspiler {
       options.push(`"table": ` + ttab.getCode());
     }
 
+    const from = node.findExpressionAfterToken("FROM");
+    if (from && from.get() instanceof abaplint.Expressions.SQLSource) {
+      const tvalues = traversal.traverse(from);
+      options.push(`"values": ` + tvalues.getCode());
+    }
+
     return new Chunk(`await abap.statements.modifyDatabase(${table.getCode()}, {${options.join(", ")}});`);
   }
 
