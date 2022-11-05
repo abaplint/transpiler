@@ -15,5 +15,4 @@ export class AuthorityCheckTranspiler implements IStatementTranspiler {
     return new Chunk().append(
       `if (${lookup} === undefined) throw new Error("AuthorityCheck, kernel class missing");\n${call}`, node, traversal);
   }
-
 }
