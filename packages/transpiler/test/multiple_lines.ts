@@ -702,4 +702,14 @@ abap.Classes['PROG-ZFOOBAR-LCL'] = lcl;`;
     expect(await runSingle(abap)).to.equals(expected);
   });
 
+  it.only("kernel call", async () => {
+    const abap = `
+    DATA hex16 TYPE x LENGTH 16.
+    CALL 'RFCControl'
+        ID 'CODE' FIELD 'U'
+        ID 'UUID' FIELD hex16.`;
+    const expected = `todo`;
+    expect(await runSingle(abap)).to.equals(expected);
+  });
+
 });

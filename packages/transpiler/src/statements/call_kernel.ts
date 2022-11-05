@@ -5,8 +5,18 @@ import {Chunk} from "../chunk";
 
 export class CallKernelTranspiler implements IStatementTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    return new Chunk(`throw new Error("CallKernel, transpiler todo");`);
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
+    const lookup = traversal.lookupClassOrInterface("KERNEL_CALL", node.getFirstToken());
+
+    const options: string[] = [];
+
+    const name = traversal.traverse(node.getChildren()[1]);
+    options.push("name: " + name.getCode());
+
+    const call = `await ${lookup}.call({${options.join(",")}});`;
+
+    return new Chunk().append(
+      `if (${lookup} === undefined) throw new Error("Call kernel class missing");\n${call}`, node, traversal);
   }
 
 }
