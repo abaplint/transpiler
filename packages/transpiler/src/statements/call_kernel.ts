@@ -13,6 +13,10 @@ export class CallKernelTranspiler implements IStatementTranspiler {
     const name = traversal.traverse(node.getChildren()[1]);
     options.push("name: " + name.getCode());
 
+    for (const id of node.findDirectExpressions(abaplint.Expressions.KernelId)) {
+      console.dir(id);
+    }
+
     const call = `await ${lookup}.call({${options.join(",")}});`;
 
     return new Chunk().append(
