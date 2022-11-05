@@ -14,7 +14,9 @@ export class CallKernelTranspiler implements IStatementTranspiler {
     options.push("name: " + name.getCode());
 
     for (const id of node.findDirectExpressions(abaplint.Expressions.KernelId)) {
-      console.dir(id);
+      const key = id.getChildren()[1].concatTokens().replace(/'/g, "").toLowerCase();
+      const value = traversal.traverse(id.getChildren()[3]);
+      options.push(key + ": " + value.getCode());
     }
 
     const call = `await ${lookup}.call({${options.join(",")}});`;
