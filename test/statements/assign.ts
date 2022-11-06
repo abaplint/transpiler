@@ -431,7 +431,7 @@ WRITE foo->field.`;
     expect(abap.console.get()).to.equal("2");
   });
 
-  it.skip("ASSIGN dynamic 2", async () => {
+  it("ASSIGN dynamic 2", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          field TYPE i,
@@ -447,7 +447,6 @@ ASSIGN foo->(symb-name) TO <field>.
 <field> = 2.
 WRITE foo->field.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
