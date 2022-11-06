@@ -579,4 +579,23 @@ ASSERT sy-subrc = 0.`;
 //    expect(abap.console.get()).to.equal("2");
   });
 
+  it.skip("INSERT FROM TABLE", async () => {
+    const code = `
+    DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+    DATA lv_count TYPE i.
+
+    APPEND INITIAL LINE TO tab.
+    INSERT t100 FROM TABLE tab.
+
+    SELECT COUNT(*) FROM t100 INTO lv_count.
+    WRITE lv_count.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3");
+  });
+
 });
