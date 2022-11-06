@@ -414,7 +414,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("4\n0");
   });
 
-  it.only("ASSIGN dynamic", async () => {
+  it.skip("ASSIGN dynamic", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          field TYPE i,
