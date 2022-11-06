@@ -9,6 +9,7 @@ export class AssignTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const assignSource = node.findDirectExpression(abaplint.Expressions.AssignSource);
+
     const sources = assignSource?.findDirectExpressions(abaplint.Expressions.Source).map(
       e => new SourceTranspiler(false).transpile(e, traversal).getCode()) || [];
     const fs = new FieldSymbolTranspiler().transpile(node.findDirectExpression(abaplint.Expressions.FSTarget)!, traversal).getCode();
@@ -21,7 +22,8 @@ export class AssignTranspiler implements IStatementTranspiler {
     }
 
     options.push("target: " + fs);
-    if (sources.length !== 0) {
+    if (sources.length !== 0
+        && assignSource?.findDirectExpression(abaplint.Expressions.Dynamic) === undefined) {
       options.push("source: " + sources.pop());
     } else {
 
@@ -45,21 +47,28 @@ export class AssignTranspiler implements IStatementTranspiler {
           continue;
         } else if (c.concatTokens() === "=>" || c.concatTokens() === "->") {
           dynamicName += " + '" + c.concatTokens() + "'";
+        } else {
+          if (dynamicName !== "") {
+            dynamicName += " + ";
+          }
+          dynamicName += "'" + c.concatTokens() + "'";
         }
       }
       options.push(`dynamicName: ` + dynamicName);
 
-      // dynamicSource is the first part only
-      let dynamic = assignSource?.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.ConstantString);
-      if (dynamic) {
-        const s = dynamic.getFirstToken().getStr().toLowerCase().match(/\w+/);
-        options.push(`dynamicSource: (() => {try { return ${s}; } catch {}})()`);
-      } else {
-        dynamic = assignSource?.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.FieldChain);
-        if (dynamic) {
-          const code = new FieldChainTranspiler(true).transpile(dynamic, traversal).getCode();
+      // dynamicSource is the first part of the dynamic part
+      const first = assignSource?.getFirstChild();
+      if (first?.get() instanceof abaplint.Expressions.Dynamic && first instanceof abaplint.Nodes.ExpressionNode) {
+        const firstFirst = first.getChildren()[1];
+        if (firstFirst?.get() instanceof abaplint.Expressions.Constant) {
+          const s = firstFirst.getFirstToken().getStr().toLowerCase().match(/\w+/);
+          options.push(`dynamicSource: (() => {try { return ${s}; } catch {}})()`);
+        } else if (firstFirst?.get() instanceof abaplint.Expressions.FieldChain && firstFirst instanceof abaplint.Nodes.ExpressionNode) {
+          const code = new FieldChainTranspiler(true).transpile(firstFirst, traversal).getCode();
           options.push(`dynamicSource: (() => {try { return eval(${code}.toLowerCase().match(/\\w+/)[0]); } catch {}})()`);
         }
+      } else if (first?.get() instanceof abaplint.Expressions.Source && first instanceof abaplint.Nodes.ExpressionNode) {
+        options.push(`dynamicSource: (() => {try { return ${first.concatTokens()}; } catch {}})()`);
       }
     }
 
