@@ -29,5 +29,6 @@ export class ABAPObject  {
     } else {
       this.value = value;
     }
+    return this;
   }
 }
