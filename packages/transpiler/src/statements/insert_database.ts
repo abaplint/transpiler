@@ -22,6 +22,12 @@ export class InsertDatabaseTranspiler implements IStatementTranspiler {
       options.push(`"values": ` + tvalues.getCode());
     }
 
+    const fromTable = node.findExpressionAfterToken("TABLE");
+    if (fromTable && fromTable.get() instanceof abaplint.Expressions.SQLSource) {
+      const tvalues = traversal.traverse(fromTable);
+      options.push(`"table": ` + tvalues.getCode());
+    }
+
     return new Chunk(`await abap.statements.insertDatabase(${table.getCode()}, {${options.join(", ")}});`);
   }
 

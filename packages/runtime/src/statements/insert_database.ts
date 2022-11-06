@@ -1,9 +1,10 @@
 import {Context} from "../context";
-import {Structure} from "../types";
+import {Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 
 export interface IInsertDatabaseOptions {
-  values: Structure,
+  values?: Structure,
+  table?: Table,
 }
 
 export class InsertDatabase {
@@ -17,7 +18,20 @@ export class InsertDatabase {
     const columns: string[] = [];
     const values: string[] = [];
 
-    const structure = options.values.get();
+    if (options.values === undefined && options.table === undefined) {
+      throw "insertDatabase, wrong input";
+    }
+
+    if (options.table !== undefined) {
+      for (const row of options.table.array()) {
+        await this.insertDatabase(table, {values: row});
+      }
+//     todo, set sy-subrc
+//     todo, set sy-dbcnt
+      return;
+    }
+
+    const structure = options.values!.get();
     for (const k of Object.keys(structure)) {
       columns.push(k);
       // todo, integers should not be surrounded by '"'?

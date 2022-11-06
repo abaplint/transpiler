@@ -579,7 +579,7 @@ ASSERT sy-subrc = 0.`;
 //    expect(abap.console.get()).to.equal("2");
   });
 
-  it.skip("INSERT FROM TABLE", async () => {
+  it("INSERT FROM TABLE", async () => {
     const code = `
     DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
     DATA lv_count TYPE i.
