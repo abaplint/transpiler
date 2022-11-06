@@ -414,7 +414,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("4\n0");
   });
 
-  it.skip("ASSIGN dynamic", async () => {
+  it("ASSIGN dynamic", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          field TYPE i,
@@ -426,7 +426,6 @@ ASSIGN foo->('FIELD') TO <field>.
 <field> = 2.
 WRITE foo->field.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");

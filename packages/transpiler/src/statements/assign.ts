@@ -47,6 +47,11 @@ export class AssignTranspiler implements IStatementTranspiler {
           continue;
         } else if (c.concatTokens() === "=>" || c.concatTokens() === "->") {
           dynamicName += " + '" + c.concatTokens() + "'";
+        } else {
+          if (dynamicName !== "") {
+            dynamicName += " + ";
+          }
+          dynamicName += "'" + c.concatTokens() + "'";
         }
       }
       options.push(`dynamicName: ` + dynamicName);
@@ -62,6 +67,8 @@ export class AssignTranspiler implements IStatementTranspiler {
           const code = new FieldChainTranspiler(true).transpile(firstFirst, traversal).getCode();
           options.push(`dynamicSource: (() => {try { return eval(${code}.toLowerCase().match(/\\w+/)[0]); } catch {}})()`);
         }
+      } else if (first?.get() instanceof abaplint.Expressions.Source && first instanceof abaplint.Nodes.ExpressionNode) {
+        options.push(`dynamicSource: (() => {try { return ${first.concatTokens()}; } catch {}})()`);
       }
     }
 
