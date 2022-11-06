@@ -414,4 +414,44 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("4\n0");
   });
 
+  it.only("ASSIGN dynamic", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field TYPE i,
+       END OF ty.
+DATA foo TYPE REF TO ty.
+FIELD-SYMBOLS <field> TYPE any.
+CREATE DATA foo.
+ASSIGN foo->('FIELD') TO <field>.
+<field> = 2.
+WRITE foo->field.`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+  it.skip("ASSIGN dynamic 2", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field TYPE i,
+       END OF ty.
+DATA foo TYPE REF TO ty.
+DATA: BEGIN OF symb,
+        name TYPE string,
+      END OF symb.
+FIELD-SYMBOLS <field> TYPE any.
+CREATE DATA foo.
+symb-name = 'FIELD'.
+ASSIGN foo->(symb-name) TO <field>.
+<field> = 2.
+WRITE foo->field.`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
