@@ -28,13 +28,13 @@
   "author": "abaplint",
   "license": "MIT",
   "dependencies": {
-    "@abaplint/core": "^2.93.74",
+    "@abaplint/core": "^2.93.79",
     "source-map": "^0.7.4"
   },
   "devDependencies": {
-    "@types/chai": "^4.3.3",
+    "@types/chai": "^4.3.4",
     "@types/mocha": "^10.0.0",
-    "chai": "^4.3.6",
+    "chai": "^4.3.7",
     "mocha": "^10.1.0",
     "source-map-support": "^0.5.21",
     "typescript": "^4.8.4"
