@@ -1,3 +1,4 @@
+import {ABAPRegExp} from "../abap_regex";
 import {Integer, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
@@ -56,9 +57,9 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
     }
     // check type, it can also be a CL_ABAP_REGEX
     if (typeof r === "string") {
-      r = r.replace("[[:space:]]", "\\s");
+      r = ABAPRegExp.convert(r);
     }
-    s = new RegExp(r, "g" + (options.ignoringCase === true ? "i" : ""));
+    s = new RegExp(r, "gm" + (options.ignoringCase === true ? "i" : ""));
   } else {
     throw "FIND, runtime, no input";
   }
