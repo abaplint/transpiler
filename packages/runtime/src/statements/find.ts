@@ -1,12 +1,12 @@
 import {ABAPRegExp} from "../abap_regex";
-import {Integer, Structure, Table} from "../types";
+import {ABAPObject, Integer, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
 export interface IFindOptions {
   find?: ICharacter | string,
   first?: boolean,
-  regex?: string | ICharacter,
+  regex?: string | ICharacter | ABAPObject,
   offset?: INumeric,
   sectionOffset?: INumeric,
   byteMode?: boolean,
@@ -55,11 +55,22 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
     if (typeof r !== "string") {
       r = r.get();
     }
-    // check type, it can also be a CL_ABAP_REGEX
+
     if (typeof r === "string") {
       r = ABAPRegExp.convert(r);
+    } else if (r.constructor.name === "cl_abap_regex") {
+      const obj = r;
+      // @ts-ignore
+      r = obj.mv_pattern.get();
+      // @ts-ignore
+      if (obj.mv_ignore_case.get() === "X") {
+        options.ignoringCase = true;
+      }
+    } else {
+      throw "find(), unexpected input";
     }
-    s = new RegExp(r, "gm" + (options.ignoringCase === true ? "i" : ""));
+
+    s = new RegExp(r as string, "gm" + (options.ignoringCase === true ? "i" : ""));
   } else {
     throw "FIND, runtime, no input";
   }
