@@ -37,6 +37,29 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("yes");
   });
 
+  it("structured CP compare, via field symbol", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         line TYPE c LENGTH 200,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+FIELD-SYMBOLS <line> LIKE LINE OF tab.
+
+APPEND '* regenerated at 06.06.2022 10:47:40' TO tab.
+
+LOOP AT tab ASSIGNING <line>.
+  IF <line> CP '#**regenerated at *'.
+    WRITE 'yes'.
+  ELSE.
+    WRITE 'no'.
+  ENDIF.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("yes");
+  });
+
   it("CP", async () => {
     const code = `
       DATA bar TYPE string.
