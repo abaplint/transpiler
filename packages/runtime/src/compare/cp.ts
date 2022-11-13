@@ -1,10 +1,13 @@
+import {Structure} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
-export function cp(left: number | string | ICharacter | INumeric, right: string | ICharacter): boolean {
+export function cp(left: number | string | ICharacter | INumeric | Structure, right: string | ICharacter): boolean {
   let l = "";
   if (typeof left === "number" || typeof left === "string") {
     l = left.toString();
+  } else if (left instanceof Structure) {
+    l = left.getCharacter();
   } else {
     l = left.get().toString();
   }
