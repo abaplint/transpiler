@@ -14,7 +14,7 @@ describe("Running operators - CP", () => {
     abap = new ABAP();
   });
 
-  it.skip("test", async () => {
+  it("structured CP compare", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          line TYPE c LENGTH 200,
