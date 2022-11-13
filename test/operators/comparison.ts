@@ -80,28 +80,6 @@ describe("Running operators - Comparison", () => {
     await f(abap);
   });
 
-  it("CP", async () => {
-    const code = `
-      DATA bar TYPE string.
-      bar = 'abc'.
-      ASSERT bar CP 'a*'.
-      ASSERT bar CP 'A*'.
-      ASSERT bar CP '*b*'.
-      ASSERT bar CP '*c'.
-      ASSERT bar CP 'abc'.
-      ASSERT bar CP '*abc*'.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-  });
-
-  it("CP 2", async () => {
-    const code = `ASSERT |comment\\n| CP 'comment+'.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-  });
-
   it("ASSERT strlen gt", async () => {
     const code = `
       DATA lv_len TYPE i.
@@ -375,13 +353,6 @@ describe("Running operators - Comparison", () => {
     await f(abap);
   });
 
-  it("CP, whitespace", async () => {
-    const code = `ASSERT |hello\\nfoobar\\nmoo| CP '*oo*'.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-  });
-
   it("CA, empty left -> space", async () => {
     const code = `
       ASSERT NOT '' CA 'AB'.
@@ -637,19 +608,6 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal(`expected2`);
   });
 
-  it("more CP", async () => {
-    const code = `
-    ASSERT '<?xml' CP '<?xml'.
-    ASSERT '<?xml sdf' CP '<?xml *'.
-    ASSERT '()' CP '()'.
-    ASSERT '[]' CP '[]'.
-    ASSERT '.' CP '.'.
-    ASSERT '|' CP '|'.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-  });
-
   it("CN", async () => {
     const code = `
     ASSERT 'foboar' CN 'moo'.
@@ -672,16 +630,6 @@ START-OF-SELECTION.
     ASSERT 'sdf' NP '*a'.
     ASSERT 'sdf' NP '*b*'.
     ASSERT 'sdf' NP 'c*'.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-  });
-
-  it("CP with slash", async () => {
-    const code = `
-    DATA absolute_name TYPE string.
-    absolute_name = '\\TYPE=FOO'.
-    ASSERT absolute_name CP '\\TYPE=*'.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
@@ -824,20 +772,6 @@ ASSERT foo IS INITIAL.`;
     await f(abap);
   });
 
-  it("CP stuff", async () => {
-    const code = `
-  DATA lt_text TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
-  APPEND '01.01.0001 foo' TO lt_text.
-  APPEND '213  123 456456' TO lt_text.
-  APPEND 'aa 01.01.0001 foo' TO lt_text.
-  DELETE lt_text WHERE table_line CP |++.++.++++ *|.
-  WRITE lines( lt_text ).`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal(`2`);
-  });
-
   it("NE integer and numc", async () => {
     const code = `
 DATA int TYPE i.
@@ -922,36 +856,6 @@ ENDIF.`;
     foo = '02'.
     bar = '01'.
     IF foo > bar.
-      WRITE 'yes'.
-    ELSE.
-      WRITE 'no'.
-    ENDIF.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal(`yes`);
-  });
-
-  it("CP, escaping", async () => {
-    const code = `
-    DATA lv_text TYPE string.
-    lv_text = '* regen'.
-    IF lv_text CP '#**regen'.
-      WRITE 'yes'.
-    ELSE.
-      WRITE 'no'.
-    ENDIF.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal(`yes`);
-  });
-
-  it("CP, bracket", async () => {
-    const code = `
-    DATA lv_text TYPE string.
-    lv_text = 'foo{'.
-    IF lv_text CP '*{'.
       WRITE 'yes'.
     ELSE.
       WRITE 'no'.
