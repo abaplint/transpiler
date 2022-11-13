@@ -1,4 +1,4 @@
-import {Structure} from "../types";
+import {FieldSymbol, Structure} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -8,6 +8,11 @@ export function cp(left: number | string | ICharacter | INumeric | Structure, ri
     l = left.toString();
   } else if (left instanceof Structure) {
     l = left.getCharacter();
+  } else if (left instanceof FieldSymbol) {
+    if (left.getPointer() === undefined) {
+      throw "GETWA_NOT_ASSIGNED";
+    }
+    return cp(left.getPointer(), right);
   } else {
     l = left.get().toString();
   }
