@@ -66,11 +66,7 @@ export class TranspileTypes {
       resolved = "Structure";
       const list: string[] = [];
       for (const c of type.getComponents()) {
-        if (c.name.toLowerCase().startsWith("0")) {
-          list.push(`"` + c.name.toLowerCase() + `": ` + this.toType(c.type));
-        } else {
-          list.push(c.name.toLowerCase() + ": " + this.toType(c.type));
-        }
+        list.push(`"` + c.name.toLowerCase() + `": ` + this.toType(c.type));
       }
       extra = "{" + list.join(", ") + "}";
       if (type.getQualifiedName() !== undefined) {
