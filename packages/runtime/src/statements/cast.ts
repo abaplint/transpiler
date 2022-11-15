@@ -1,12 +1,12 @@
 import {initial} from "../compare";
 import {throwError} from "../throw_error";
-import {ABAPObject} from "../types";
+import {ABAPObject, FieldSymbol} from "../types";
 
 // todo, field symbols as input?
 // todo, local classes?
 // check with javascript instanceof?
 // handling interfaces?
-export async function cast(target: ABAPObject, source: ABAPObject) {
+export async function cast(target: ABAPObject | FieldSymbol, source: ABAPObject) {
   if (initial(source)) {
     target.clear();
     return;
@@ -14,6 +14,10 @@ export async function cast(target: ABAPObject, source: ABAPObject) {
 
   // eslint-disable-next-line prefer-const
   let checkIntf = true;
+
+  if (target instanceof FieldSymbol && target.getPointer() === undefined) {
+    throw "GETWA_NOT_ASSIGNED";
+  }
 
   const targetName = target.getQualifiedName()?.toUpperCase();
 

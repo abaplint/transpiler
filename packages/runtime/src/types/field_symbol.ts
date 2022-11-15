@@ -21,6 +21,11 @@ export class FieldSymbol  {
     this.type = type;
   }
 
+  public getQualifiedName() {
+    // @ts-ignore
+    return this.type.getQualifiedName();
+  }
+
   public assign(pointer: PointerType) {
     this.pointer = pointer;
   }

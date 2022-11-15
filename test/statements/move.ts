@@ -53,6 +53,19 @@ describe("Running statements - MOVE", () => {
     expect(abap.console.get()).to.equal("22");
   });
 
+  it("namespaced field", async () => {
+    const code = `
+DATA: BEGIN OF foo,
+        /bar/moo TYPE i,
+      END OF foo.
+foo-/bar/moo = 2.
+WRITE foo-/bar/moo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
   it.skip("MOVE - integer to integer structure", async () => {
     const code = `
         TYPES:

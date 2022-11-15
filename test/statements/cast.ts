@@ -152,6 +152,24 @@ li_node ?= li_val.`;
     await f(abap);
   });
 
+  it("ok, field symbol", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA foo TYPE REF TO lcl.
+  FIELD-SYMBOLS <fs> TYPE REF TO lcl.
+  CREATE OBJECT foo.
+  ASSIGN foo TO <fs>.
+  <fs> ?= foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 // unit tests throwing cx_sy_move_cast_error not part of this file
 
 });
