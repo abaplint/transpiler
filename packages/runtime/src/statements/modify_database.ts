@@ -5,7 +5,7 @@ import {InsertDatabase} from "./insert_database";
 import {UpdateDatabase} from "./update_database";
 
 export interface IModifyDatabaseOptions {
-  values?: Structure,
+  values?: Structure | FieldSymbol,
   table?: Table | FieldSymbol,
 }
 
