@@ -1,5 +1,6 @@
 import {parse} from "../operators/_parse";
 import {throwError} from "../throw_error";
+import {FieldSymbol} from "./field_symbol";
 import {Hex} from "./hex";
 import {Structure} from "./structure";
 import {ICharacter} from "./_character";
@@ -22,9 +23,15 @@ export class Character implements ICharacter {
     this.clear();
   }
 
-  public set(value: ICharacter | string | Structure) {
+  public set(value: ICharacter | string | Structure | FieldSymbol) {
     if (typeof value === "string" || typeof value === "number") {
       this.value = value;
+    } else if (value instanceof FieldSymbol) {
+      if (value.getPointer() === undefined) {
+        throw "GETWA_NOT_ASSIGNED";
+      }
+      this.set(value.getPointer());
+      return this;
     } else if (value instanceof Structure) {
       this.set(value.getCharacter());
       return this;
