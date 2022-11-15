@@ -23,7 +23,7 @@ export class TargetTranspiler implements IExpressionTranspiler {
         ret.append(name, c, traversal);
       } else if (c.get() instanceof Expressions.ComponentName) {
         const name = c.getFirstToken().getStr().toLowerCase();
-        if (name.match(/^\d/)) {
+        if (name.match(/^\d/) || name.includes("/")) {
           ret.append(`["` + name + `"]`, c, traversal);
         } else {
           ret.append(`.` + name, c, traversal);
