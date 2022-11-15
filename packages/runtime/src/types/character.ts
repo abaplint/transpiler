@@ -1,6 +1,7 @@
 import {parse} from "../operators/_parse";
 import {throwError} from "../throw_error";
 import {Hex} from "./hex";
+import {Structure} from "./structure";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 
@@ -21,12 +22,16 @@ export class Character implements ICharacter {
     this.clear();
   }
 
-  public set(value: ICharacter | string) {
+  public set(value: ICharacter | string | Structure) {
     if (typeof value === "string" || typeof value === "number") {
       this.value = value;
+    } else if (value instanceof Structure) {
+      this.set(value.getCharacter());
+      return this;
     } else {
       this.value = value.get() + "";
     }
+
     if (this.value.length > this.length) {
       this.value = this.value.substr(0, this.length);
     } else if (featureFixLength && this.value.length < this.length) {

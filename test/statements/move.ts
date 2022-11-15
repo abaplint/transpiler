@@ -66,6 +66,23 @@ WRITE foo-/bar/moo.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("move structured into basic", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field1 TYPE c LENGTH 2,
+         field2 TYPE c LENGTH 2,
+       END OF ty.
+DATA foo TYPE ty.
+DATA char TYPE c LENGTH 1.
+foo-field1 = 'HE'.
+char = foo.
+WRITE char.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("H");
+  });
+
   it.skip("MOVE - integer to integer structure", async () => {
     const code = `
         TYPES:
