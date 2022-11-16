@@ -167,4 +167,28 @@ aggregated->group = 2.`;
     await f(abap);
   });
 
+  it.only("INSERT, unique dashed key", async () => {
+    const code = `
+TYPES: BEGIN OF ty_file,
+         path     TYPE string,
+         filename TYPE string,
+       END OF ty_file.
+TYPES: BEGIN OF ty_stage,
+         file TYPE ty_file,
+       END OF ty_stage .
+DATA tab TYPE SORTED TABLE OF ty_stage WITH UNIQUE KEY file-path file-filename.
+DATA row LIKE LINE OF tab.
+row-file-path = '1'.
+row-file-filename = '1'.
+INSERT row INTO TABLE tab.
+row-file-path = '1'.
+row-file-filename = '2'.
+INSERT row INTO TABLE tab.
+WRITE lines( tab ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
