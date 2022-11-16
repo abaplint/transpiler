@@ -156,4 +156,21 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal(`yes`);
   });
 
+  it("CP, dollar", async () => {
+    const code = `
+    DATA lv_val1 TYPE string.
+    DATA lv_val2 TYPE string.
+    lv_val1 = |Package $MAIN_SUB already exists but is not a sub-package of $MAIN. Check|.
+    lv_val2 = |Package $MAIN_SUB already exists but is not a sub-package of $MAIN*|.
+    IF lv_val1 CP lv_val2.
+      WRITE 'yes'.
+    ELSE.
+      WRITE 'no'.
+    ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`yes`);
+  });
+
 });
