@@ -167,7 +167,7 @@ aggregated->group = 2.`;
     await f(abap);
   });
 
-  it.only("INSERT, unique dashed key", async () => {
+  it("INSERT, unique dashed key", async () => {
     const code = `
 TYPES: BEGIN OF ty_file,
          path     TYPE string,
