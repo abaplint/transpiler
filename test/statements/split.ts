@@ -232,4 +232,30 @@ WRITE / lv_int.`;
     expect(abap.console.get()).to.equal(`1 a\n2d`);
   });
 
+  it("split 7", async () => {
+    const code = `
+    DATA lv_path TYPE string.
+    DATA lv_new TYPE string.
+    lv_path = 'foo/bar/'.
+    SPLIT lv_path AT '/' INTO lv_new lv_path.
+    ASSERT lv_path = 'bar/'.
+    ASSERT lv_new = 'foo'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("split 8", async () => {
+    const code = `
+    DATA lv_path TYPE string.
+    DATA tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+    lv_path = 'foo/bar/'.
+    SPLIT lv_path AT '/' INTO TABLE tab.
+    WRITE lines( tab ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`2`);
+  });
+
 });
