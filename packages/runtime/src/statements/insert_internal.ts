@@ -26,14 +26,23 @@ export function insertInternal(options: IInsertInternalOptions): void {
 
   if (isSorted) {
     const insert = options.data instanceof Structure ? options.data.get() : {table_line: options.data};
+
     const compare = (row: any): boolean => {
       for (const key of tableOptions?.keyFields || []) {
-        if (ne(row[key.toLowerCase()], insert[key.toLowerCase()])) {
-          return false;
+        if (key.includes("-")) {
+          const [first, second] = key.split("-");
+          if (ne(row[first.toLowerCase()].get()[second.toLowerCase()], insert[first.toLowerCase()].get()[second.toLowerCase()])) {
+            return false;
+          }
+        } else {
+          if (ne(row[key.toLowerCase()], insert[key.toLowerCase()])) {
+            return false;
+          }
         }
       }
       return true;
     };
+
     if (tableOptions.isUnique === true) {
       readTable(options.table, {withKey: compare});
       // @ts-ignore
