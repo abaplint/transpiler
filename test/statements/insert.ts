@@ -191,4 +191,23 @@ WRITE lines( tab ).`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("INSERT, unique key", async () => {
+    const code = `
+TYPES:
+  BEGIN OF ty_config,
+    type TYPE string,
+    name TYPE string,
+  END OF ty_config .
+TYPES ty_config_tt TYPE SORTED TABLE OF ty_config WITH UNIQUE KEY type name.
+DATA tab TYPE ty_config_tt.
+DATA row LIKE LINE OF tab.
+INSERT row INTO TABLE tab.
+INSERT row INTO TABLE tab.
+WRITE / lines( tab ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });
