@@ -43,7 +43,7 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
     }
   } else if (options?.from) {
     if (table instanceof Table && options.from instanceof Structure) {
-      const keys = table.getOptions()?.keyFields;
+      const keys = table.getOptions()?.primaryKey?.keyFields;
       const isStructured = arr[0] instanceof Structure;
       if (keys !== undefined && isStructured === true) {
 //        console.dir(keys);

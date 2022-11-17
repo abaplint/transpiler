@@ -25,11 +25,17 @@ export class LoopIndex {
   }
 }
 
-export type ITableOptions = {
+export type ITableKey = {
+  name: string,
   type?: TableAccessType,
-  keyFields?: string[],
-  isUnique?: boolean,
+  keyFields: string[],
+  isUnique: boolean,
+};
+
+export type ITableOptions = {
   withHeader: boolean,
+  primaryKey?: ITableKey,
+  secondary?: ITableKey[],
 };
 
 export type TableRowType = INumeric | Structure | ICharacter | Table | ABAPObject;
@@ -54,9 +60,12 @@ export class Table  {
 
     if (this.options === undefined) {
       this.options = {
-        type: TableAccessType.standard,
-        keyFields: [],
-        isUnique: false,
+        primaryKey: {
+          name: "primary_key",
+          type: TableAccessType.standard,
+          keyFields: [],
+          isUnique: false,
+        },
         withHeader: false,
       };
     }
