@@ -476,7 +476,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.skip("LOOP USING secondary KEY", async () => {
+  it("LOOP USING secondary KEY, non-unique", async () => {
     const code = `
 TYPES: BEGIN OF ty_node,
          name  TYPE string,
@@ -498,12 +498,102 @@ INSERT row INTO TABLE nodes.
 
 LOOP AT nodes INTO row USING KEY array_index.
   WRITE / row-name.
+ENDLOOP.
+LOOP AT nodes INTO row.
+  WRITE / row-name.
 ENDLOOP.`;
     const js = await run(code);
-    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("b\na\na\nb");
+  });
+
+  it("LOOP USING secondary KEY, dynamic hardcoded", async () => {
+    const code = `
+TYPES: BEGIN OF ty_node,
+         name  TYPE string,
+         index TYPE i,
+       END OF ty_node.
+
+DATA nodes TYPE SORTED TABLE OF ty_node
+  WITH UNIQUE KEY name
+  WITH NON-UNIQUE SORTED KEY array_index COMPONENTS index.
+DATA row LIKE LINE OF nodes.
+
+row-name = 'a'.
+row-index = 2.
+INSERT row INTO TABLE nodes.
+
+row-name = 'b'.
+row-index = 1.
+INSERT row INTO TABLE nodes.
+
+LOOP AT nodes INTO row USING KEY ('ARRAY_INDEX').
+  WRITE / row-name.
+ENDLOOP.`;
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("b\na");
+  });
+
+  it("LOOP USING secondary KEY, dynamic dynamic", async () => {
+    const code = `
+TYPES: BEGIN OF ty_node,
+         name  TYPE string,
+         index TYPE i,
+       END OF ty_node.
+
+DATA nodes TYPE SORTED TABLE OF ty_node
+  WITH UNIQUE KEY name
+  WITH NON-UNIQUE SORTED KEY array_index COMPONENTS index.
+DATA row LIKE LINE OF nodes.
+
+row-name = 'a'.
+row-index = 2.
+INSERT row INTO TABLE nodes.
+
+row-name = 'b'.
+row-index = 1.
+INSERT row INTO TABLE nodes.
+
+DATA name TYPE string.
+name = 'ARRAY_INDEX'.
+LOOP AT nodes INTO row USING KEY (name).
+  WRITE / row-name.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("b\na");
+  });
+
+  it("LOOP, ASSIGNING KEY WHERE", async () => {
+    const code = `
+TYPES: BEGIN OF ty_node,
+         name  TYPE string,
+         index TYPE i,
+       END OF ty_node.
+
+DATA nodes TYPE HASHED TABLE OF ty_node
+  WITH UNIQUE KEY index
+  WITH NON-UNIQUE SORTED KEY array_name COMPONENTS name.
+DATA row LIKE LINE OF nodes.
+FIELD-SYMBOLS <n> LIKE LINE OF nodes.
+
+row-name = 'a'.
+row-index = 1.
+INSERT row INTO TABLE nodes.
+
+DATA lv_tab_key TYPE string.
+lv_tab_key = 'array_name'.
+LOOP AT nodes ASSIGNING <n> USING KEY (lv_tab_key) WHERE name = 'a'.
+  WRITE / row-name.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("a");
   });
 
 });

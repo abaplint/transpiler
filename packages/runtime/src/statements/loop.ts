@@ -1,4 +1,7 @@
+import {clone} from "../clone";
 import {FieldSymbol, Integer, Structure, Table} from "../types";
+// import {deleteInternal} from "./delete_internal";
+import {sort} from "./sort";
 
 export interface ILoopOptions {
   where?: (i: any) => Promise<boolean>,
@@ -28,8 +31,25 @@ export async function* loop(table: Table | FieldSymbol | undefined, options?: IL
   const loopIndex = table.startLoop(loopFrom);
   let entered = false;
 
+  let array = table.array();
+
+  if (options?.usingKey && options.usingKey !== undefined && options.usingKey !== "primary_key") {
+    const secondary = table.getOptions()?.secondary?.find(s => s.name.toUpperCase() === options.usingKey?.toUpperCase());
+    if (secondary === undefined) {
+      throw `LOOP, secondary key "${options.usingKey}" not found`;
+    }
+    const copy = clone(table);
+    sort(copy, {by: secondary.keyFields.map(k => {return {component: k.toLowerCase()};})});
+
+    /*
+    if (secondary?.isUnique === true) {
+      deleteInternal(copy, {adjacent: true, comparing: secondary.keyFields});
+    }
+    */
+    array = copy.array();
+  }
+
   try {
-    const array = table.array();
     const isStructured = array[0] instanceof Structure;
 
     while (loopIndex.index < loopTo) {
