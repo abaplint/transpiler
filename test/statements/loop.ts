@@ -568,4 +568,32 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("b\na");
   });
 
+  it("LOOP, ASSIGNING KEY WHERE", async () => {
+    const code = `
+TYPES: BEGIN OF ty_node,
+         name  TYPE string,
+         index TYPE i,
+       END OF ty_node.
+
+DATA nodes TYPE HASHED TABLE OF ty_node
+  WITH UNIQUE KEY index
+  WITH NON-UNIQUE SORTED KEY array_name COMPONENTS name.
+DATA row LIKE LINE OF nodes.
+FIELD-SYMBOLS <n> LIKE LINE OF nodes.
+
+row-name = 'a'.
+row-index = 1.
+INSERT row INTO TABLE nodes.
+
+DATA lv_tab_key TYPE string.
+lv_tab_key = 'array_name'.
+LOOP AT nodes ASSIGNING <n> USING KEY (lv_tab_key) WHERE name = 'a'.
+  WRITE / row-name.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("a");
+  });
+
 });
