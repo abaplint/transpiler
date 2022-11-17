@@ -41,9 +41,11 @@ export async function* loop(table: Table | FieldSymbol | undefined, options?: IL
     const copy = clone(table);
     sort(copy, {by: secondary.keyFields.map(k => {return {component: k.toLowerCase()};})});
 
+    /*
     if (secondary?.isUnique === true) {
       deleteInternal(copy, {adjacent: true, comparing: secondary.keyFields});
     }
+    */
     array = copy.array();
   }
 
