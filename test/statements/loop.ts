@@ -476,7 +476,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.skip("LOOP USING secondary KEY", async () => {
+  it.only("LOOP USING secondary KEY", async () => {
     const code = `
 TYPES: BEGIN OF ty_node,
          name  TYPE string,
