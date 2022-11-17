@@ -476,7 +476,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.skip("LOOP USING secondary KEY", async () => {
+  it.only("LOOP USING secondary KEY", async () => {
     const code = `
 TYPES: BEGIN OF ty_node,
          name  TYPE string,
@@ -500,6 +500,7 @@ LOOP AT nodes INTO row USING KEY array_index.
   WRITE / row-name.
 ENDLOOP.`;
     const js = await run(code);
+    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("b\na");
