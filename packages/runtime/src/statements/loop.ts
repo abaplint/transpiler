@@ -1,6 +1,6 @@
 import {clone} from "../clone";
 import {FieldSymbol, Integer, Structure, Table} from "../types";
-import {deleteInternal} from "./delete_internal";
+// import {deleteInternal} from "./delete_internal";
 import {sort} from "./sort";
 
 export interface ILoopOptions {

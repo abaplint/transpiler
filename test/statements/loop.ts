@@ -498,11 +498,14 @@ INSERT row INTO TABLE nodes.
 
 LOOP AT nodes INTO row USING KEY array_index.
   WRITE / row-name.
+ENDLOOP.
+LOOP AT nodes INTO row.
+  WRITE / row-name.
 ENDLOOP.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("b\na");
+    expect(abap.console.get()).to.equal("b\na\na\nb");
   });
 
 });
