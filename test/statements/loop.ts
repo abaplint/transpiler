@@ -508,4 +508,64 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("b\na\na\nb");
   });
 
+  it("LOOP USING secondary KEY, dynamic hardcoded", async () => {
+    const code = `
+TYPES: BEGIN OF ty_node,
+         name  TYPE string,
+         index TYPE i,
+       END OF ty_node.
+
+DATA nodes TYPE SORTED TABLE OF ty_node
+  WITH UNIQUE KEY name
+  WITH NON-UNIQUE SORTED KEY array_index COMPONENTS index.
+DATA row LIKE LINE OF nodes.
+
+row-name = 'a'.
+row-index = 2.
+INSERT row INTO TABLE nodes.
+
+row-name = 'b'.
+row-index = 1.
+INSERT row INTO TABLE nodes.
+
+LOOP AT nodes INTO row USING KEY ('ARRAY_INDEX').
+  WRITE / row-name.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("b\na");
+  });
+
+  it("LOOP USING secondary KEY, dynamic dynamic", async () => {
+    const code = `
+TYPES: BEGIN OF ty_node,
+         name  TYPE string,
+         index TYPE i,
+       END OF ty_node.
+
+DATA nodes TYPE SORTED TABLE OF ty_node
+  WITH UNIQUE KEY name
+  WITH NON-UNIQUE SORTED KEY array_index COMPONENTS index.
+DATA row LIKE LINE OF nodes.
+
+row-name = 'a'.
+row-index = 2.
+INSERT row INTO TABLE nodes.
+
+row-name = 'b'.
+row-index = 1.
+INSERT row INTO TABLE nodes.
+
+DATA name TYPE string.
+name = 'ARRAY_INDEX'.
+LOOP AT nodes INTO row USING KEY (name).
+  WRITE / row-name.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("b\na");
+  });
+
 });

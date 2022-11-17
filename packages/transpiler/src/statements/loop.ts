@@ -2,7 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {UniqueIdentifier} from "../unique_identifier";
-import {SourceTranspiler} from "../expressions";
+import {FieldChainTranspiler, SourceTranspiler} from "../expressions";
 import {Chunk} from "../chunk";
 
 export class LoopTranspiler implements IStatementTranspiler {
@@ -54,7 +54,18 @@ export class LoopTranspiler implements IStatementTranspiler {
 
     const keyNode = node.findExpressionAfterToken("KEY");
     if (keyNode) {
-      extra.push(`usingKey: "${keyNode.concatTokens()}"`);
+      if (keyNode.get() instanceof abaplint.Expressions.Dynamic) {
+        const children = keyNode.getChildren();
+        if (children[1] instanceof abaplint.Nodes.ExpressionNode
+            && children[1].get() instanceof abaplint.Expressions.FieldChain) {
+          const t = new FieldChainTranspiler(true).transpile(children[1], traversal);
+          extra.push(`usingKey: ${t.getCode()}`);
+        } else {
+          extra.push(`usingKey: ${keyNode.concatTokens()}`);
+        }
+      } else {
+        extra.push(`usingKey: "${keyNode.concatTokens()}"`);
+      }
     }
 
     const whereNode = node.findFirstExpression(abaplint.Expressions.ComponentCond);
