@@ -22,13 +22,13 @@ export function insertInternal(options: IInsertInternalOptions): void {
   }
 
   const tableOptions = options.table.getOptions();
-  const isSorted = tableOptions?.type === TableAccessType.sorted || tableOptions?.type === TableAccessType.hashed;
+  const isSorted = tableOptions?.primaryKey?.type === TableAccessType.sorted || tableOptions?.primaryKey?.type === TableAccessType.hashed;
 
   if (isSorted) {
     const insert = options.data instanceof Structure ? options.data.get() : {table_line: options.data};
 
     const compare = (row: any): boolean => {
-      for (const key of tableOptions?.keyFields || []) {
+      for (const key of tableOptions?.primaryKey?.keyFields || []) {
         if (key.includes("-")) {
           const [first, second] = key.split("-");
           if (ne(row[first.toLowerCase()].get()[second.toLowerCase()], insert[first.toLowerCase()].get()[second.toLowerCase()])) {
@@ -43,7 +43,7 @@ export function insertInternal(options: IInsertInternalOptions): void {
       return true;
     };
 
-    if (tableOptions.isUnique === true) {
+    if (tableOptions.primaryKey?.isUnique === true) {
       readTable(options.table, {withKey: compare});
       // @ts-ignore
       if (abap.builtin.sy.get().subrc.get() === 0) {
@@ -99,7 +99,7 @@ export function insertInternal(options: IInsertInternalOptions): void {
 
   if (isSorted) {
 // slow, but works for now
-    const by = tableOptions?.keyFields?.map(f => {return {component: f.toLowerCase()}; });
+    const by = tableOptions?.primaryKey?.keyFields?.map(f => {return {component: f.toLowerCase()}; });
     sort(options.table, {by: by});
   }
 

@@ -52,6 +52,11 @@ export class LoopTranspiler implements IStatementTranspiler {
       extra.push("to: " + to);
     }
 
+    const keyNode = node.findExpressionAfterToken("KEY");
+    if (keyNode) {
+      extra.push(`usingKey: "${keyNode.concatTokens()}"`);
+    }
+
     const whereNode = node.findFirstExpression(abaplint.Expressions.ComponentCond);
     if (whereNode) {
       const where = traversal.traverse(whereNode).getCode();

@@ -2,6 +2,7 @@ import {FieldSymbol, Integer, Structure, Table} from "../types";
 
 export interface ILoopOptions {
   where?: (i: any) => Promise<boolean>,
+  usingKey?: string,
   from?: Integer,
   to?: Integer
 }
