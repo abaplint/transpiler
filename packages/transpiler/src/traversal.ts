@@ -8,6 +8,7 @@ import {IStructureTranspiler} from "./structures/_structure_transpiler";
 import {TranspileTypes} from "./transpile_types";
 import {ISpaghettiScopeNode} from "@abaplint/core";
 import {Chunk} from "./chunk";
+import {ConstantTranspiler} from "./expressions";
 
 export class Traversal {
   private readonly spaghetti: abaplint.ISpaghettiScope;
@@ -471,6 +472,25 @@ export class Traversal {
     } else {
       return `abap.Classes['${name.toUpperCase()}'] = ${Traversal.escapeClassName(name.toLowerCase())};`;
     }
+  }
+
+  public setValues(identifier: abaplint.TypedIdentifier, name: string) {
+    const val = identifier.getValue();
+    let ret = "";
+    if (typeof val === "string") {
+      const e = new ConstantTranspiler().escape(val);
+      ret += name + ".set(" + e + ");\n";
+    } else if (typeof val === "object") {
+      const a: any = val;
+      for (const v of Object.keys(val)) {
+        const s = a[v];
+        if (s === undefined) {
+          continue;
+        }
+        ret += name + ".get()." + v + ".set(" + s + ");\n";
+      }
+    }
+    return ret;
   }
 
   public lookupClassOrInterface(name: string | undefined, token: abaplint.Token | undefined, directGlobal = false): string {

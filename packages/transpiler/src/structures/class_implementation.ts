@@ -2,7 +2,6 @@ import * as abaplint from "@abaplint/core";
 import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
 import {TranspileTypes} from "../transpile_types";
-import {ConstantTranspiler} from "../expressions";
 import {Chunk} from "../chunk";
 
 export class ClassImplementationTranspiler implements IStructureTranspiler {
@@ -103,18 +102,8 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     for (const attr of staticAttributes) {
       const name = Traversal.escapeClassName(clasName) + "." + attr.prefix + attr.identifier.getName().toLowerCase();
       ret += name + " = " + new TranspileTypes().toType(attr.identifier.getType()) + ";\n";
-      const val = attr.identifier.getValue();
-      if (typeof val === "string") {
-        const e = new ConstantTranspiler().escape(val);
-        ret += name + ".set(" + e + ");\n";
-      } else if (typeof val === "object") {
-        const a: any = val;
-        for (const v of Object.keys(val)) {
-          let s = a[v];
-          s = new ConstantTranspiler().escape(s);
-          ret += name + ".get()." + v + ".set(" + s + ");\n";
-        }
-      }
+
+      ret += traversal.setValues(attr.identifier, name);
     }
 
     for (const alias of cdef.getAliases().getAll()) {
