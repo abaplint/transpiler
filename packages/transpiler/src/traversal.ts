@@ -484,10 +484,11 @@ export class Traversal {
     } else if (typeof val === "object") {
       const a: any = val;
       for (const v of Object.keys(val)) {
-        const s = a[v];
+        let s = a[v];
         if (s === undefined) {
           continue;
         }
+        s = new ConstantTranspiler().escape(s);
         ret += name + ".get()." + v + ".set(" + s + ");\n";
       }
     }
