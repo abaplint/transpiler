@@ -8,6 +8,7 @@ import {IStructureTranspiler} from "./structures/_structure_transpiler";
 import {TranspileTypes} from "./transpile_types";
 import {ISpaghettiScopeNode} from "@abaplint/core";
 import {Chunk} from "./chunk";
+import {ConstantTranspiler} from "./expressions";
 
 export class Traversal {
   private readonly spaghetti: abaplint.ISpaghettiScope;
@@ -315,8 +316,9 @@ export class Traversal {
       if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
         continue;
       }
-      const name = a.getName().toLowerCase();
-      ret += "this." + name + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
+      const name = "this." + a.getName().toLowerCase();
+      ret += name + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
+      ret += this.setValues(a, name);
     }
 
     // attributes from directly implemented interfaces(not interfaces implemented in super classes)
@@ -471,6 +473,26 @@ export class Traversal {
     } else {
       return `abap.Classes['${name.toUpperCase()}'] = ${Traversal.escapeClassName(name.toLowerCase())};`;
     }
+  }
+
+  public setValues(identifier: abaplint.TypedIdentifier, name: string) {
+    const val = identifier.getValue();
+    let ret = "";
+    if (typeof val === "string") {
+      const e = new ConstantTranspiler().escape(val);
+      ret += name + ".set(" + e + ");\n";
+    } else if (typeof val === "object") {
+      const a: any = val;
+      for (const v of Object.keys(val)) {
+        let s = a[v];
+        if (s === undefined) {
+          continue;
+        }
+        s = new ConstantTranspiler().escape(s);
+        ret += name + ".get()." + v + ".set(" + s + ");\n";
+      }
+    }
+    return ret;
   }
 
   public lookupClassOrInterface(name: string | undefined, token: abaplint.Token | undefined, directGlobal = false): string {

@@ -72,20 +72,7 @@ export class InterfaceTranspiler implements IStructureTranspiler {
         continue;
       }
 
-      const val = identifier.getValue();
-      if (typeof val === "string") {
-        const e = new ConstantTranspiler().escape(val);
-        ret += name + ".set(" + e + ");\n";
-      } else if (typeof val === "object") {
-        const a: any = val;
-        for (const v of Object.keys(val)) {
-          const s = a[v];
-          if (s === undefined) {
-            continue;
-          }
-          ret += name + ".get()." + v + ".set(" + s + ");\n";
-        }
-      }
+      ret += traversal.setValues(identifier, name);
     }
     return ret;
   }
