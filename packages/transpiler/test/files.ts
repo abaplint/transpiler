@@ -314,7 +314,7 @@ ENDINTERFACE.`;
 
     const expected = `abap.DDIC["ZDTEL"] = {
   "objectType": "DTEL",
-  "type": new abap.types.Character({qualifiedName: "ZDTEL"}),
+  "type": new abap.types.Character({"qualifiedName":"ZDTEL"}),
   "domain": "ZFIXEDVAL",
   "fixedValues": [{"description":"fixed","low":"F","language":"E"},{"description":"numbers","low":"1","high":"9","language":"E"}],
 };`;

@@ -13,13 +13,15 @@ export class Character implements ICharacter {
   private value: string;
   private readonly length: number;
   private readonly qualifiedName: string | undefined;
+  private readonly conversionExit: string | undefined;
 
-  public constructor(input?: {length?: number, qualifiedName?: string}) {
+  public constructor(input?: {length?: number, qualifiedName?: string, conversionExit?: string}) {
     this.length = input?.length ? input?.length : 1;
     if (this.length <= 0) {
       throw "Character, invalid length";
     }
     this.qualifiedName = input?.qualifiedName;
+    this.conversionExit = input?.conversionExit;
     this.clear();
   }
 
@@ -49,6 +51,10 @@ export class Character implements ICharacter {
 
   public getQualifiedName() {
     return this.qualifiedName;
+  }
+
+  public getConversionexit() {
+    return this.conversionExit;
   }
 
   public getLength() {

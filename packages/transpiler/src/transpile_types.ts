@@ -85,11 +85,25 @@ export class TranspileTypes {
       resolved = "Character";
     } else if (type instanceof abaplint.BasicTypes.CharacterType) {
       resolved = "Character";
+      const e = {
+        length: type.getLength() || undefined,
+        qualifiedName: type.getQualifiedName(),
+        conversionExit: type.getConversionExit(),
+      };
+      if (type.getLength() === 1) {
+        delete e.length;
+      }
+      extra = JSON.stringify(e);
+      if (extra === "{}") {
+        extra = "";
+      }
+      /*
       if (type.getLength() !== 1) {
         extra = "{length: " + type.getLength() + ", qualifiedName: \"" + type.getQualifiedName() + "\"}";
       } else if (type.getQualifiedName() !== undefined) {
         extra = "{qualifiedName: \"" + type.getQualifiedName() + "\"}";
       }
+      */
     } else if (type instanceof abaplint.BasicTypes.NumericType) {
       resolved = "Numc";
       if (type.getQualifiedName() && type.getLength() !== 1) {

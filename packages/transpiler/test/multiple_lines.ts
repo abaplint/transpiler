@@ -194,7 +194,7 @@ foo.set(await (new abap.Classes['PROG-ZFOOBAR-ZCL_WORDS']()).constructor_());`;
 END OF foo.
 DATA moo TYPE foo.`;
 
-    const expected = `let moo = new abap.types.Structure({"bar": new abap.types.Character({qualifiedName: "foo-bar"})}, "foo");`;
+    const expected = `let moo = new abap.types.Structure({"bar": new abap.types.Character({"qualifiedName":"foo-bar"})}, "foo");`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
@@ -500,7 +500,7 @@ next.set(first);`;
 
   it("bool VALUE abap_true", async () => {
     const abap = `DATA bool TYPE abap_bool VALUE abap_true.`;
-    const expected = `let bool = new abap.types.Character({qualifiedName: "ABAP_BOOL"});
+    const expected = `let bool = new abap.types.Character({"qualifiedName":"ABAP_BOOL"});
 bool.set(abap.builtin.abap_true);`;
     expect(await runSingle(abap)).to.equal(expected);
   });
