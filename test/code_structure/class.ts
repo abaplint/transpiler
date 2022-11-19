@@ -1396,4 +1396,40 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("5");
   });
 
+  it("data with value, static", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-DATA mc_hello TYPE string READ-ONLY VALUE 'hello'.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  WRITE lcl=>mc_hello.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello");
+  });
+
+  it("data with value, instance", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    DATA mc_hello TYPE string READ-ONLY VALUE 'hello'.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA foo TYPE REF TO lcl.
+  CREATE OBJECT foo.
+  WRITE foo->mc_hello.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello");
+  });
+
 });
