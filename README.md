@@ -21,10 +21,8 @@ Playground: https://transpiler.abaplint.org
 * `SY-SYSID` = `ABC`
 * `SY-MANDT` = `123`
 
-## Running
+## Testing Locally
 
-Prerequisites: [Node.js](https://nodejs.org/) 16+
+Prerequisites: [Node.js](https://nodejs.org) 16+
 
-`npm run install`
-
-`npm test`
+`npm run install && npm test`
