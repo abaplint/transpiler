@@ -714,4 +714,13 @@ await abap.Classes['KERNEL_CALL'].call({name: new abap.types.Character({length: 
     expect(await runSingle(abap)).to.equals(expected);
   });
 
+  it("LAISO", async () => {
+    const abap = `
+TYPES ty TYPE sy-langu.
+DATA foo TYPE ty.`;
+    const expected = `
+let foo = new abap.types.Character({"qualifiedName":"ty","conversionExit":"ISOLA"});`;
+    expect(await runSingle(abap)).to.equals(expected);
+  });
+
 });
