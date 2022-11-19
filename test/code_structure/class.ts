@@ -1413,7 +1413,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello");
   });
 
-  it.skip("data with value, instance", async () => {
+  it("data with value, instance", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.

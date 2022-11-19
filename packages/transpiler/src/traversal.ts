@@ -316,8 +316,9 @@ export class Traversal {
       if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
         continue;
       }
-      const name = a.getName().toLowerCase();
-      ret += "this." + name + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
+      const name = "this." + a.getName().toLowerCase();
+      ret += name + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
+      ret += this.setValues(a, name);
     }
 
     // attributes from directly implemented interfaces(not interfaces implemented in super classes)
