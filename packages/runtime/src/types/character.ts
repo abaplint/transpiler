@@ -3,6 +3,7 @@ import {throwError} from "../throw_error";
 import {FieldSymbol} from "./field_symbol";
 import {Hex} from "./hex";
 import {Structure} from "./structure";
+import {AbstractTypeData} from "./_abstract_type_data";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 
@@ -12,16 +13,14 @@ let featureFixLength = true;
 export class Character implements ICharacter {
   private value: string;
   private readonly length: number;
-  private readonly qualifiedName: string | undefined;
-  private readonly conversionExit: string | undefined;
+  private readonly extra: AbstractTypeData | undefined;
 
-  public constructor(input?: {length?: number, qualifiedName?: string, conversionExit?: string}) {
-    this.length = input?.length ? input?.length : 1;
+  public constructor(length?: number, extra?: AbstractTypeData) {
+    this.length = length || 1;
     if (this.length <= 0) {
       throw "Character, invalid length";
     }
-    this.qualifiedName = input?.qualifiedName;
-    this.conversionExit = input?.conversionExit;
+    this.extra = extra;
     this.clear();
   }
 
@@ -50,11 +49,15 @@ export class Character implements ICharacter {
   }
 
   public getQualifiedName() {
-    return this.qualifiedName;
+    return this.extra?.qualifiedName;
   }
 
-  public getConversionexit() {
-    return this.conversionExit;
+  public getConversionExit() {
+    return this.extra?.conversionExit;
+  }
+
+  public getDDICName() {
+    return this.extra?.ddicName;
   }
 
   public getLength() {
@@ -99,7 +102,7 @@ export class Character implements ICharacter {
       // @ts-ignore
       ret = ret.substr(0, input.length);
     }
-    const r = new Character({length: ret.length});
+    const r = new Character(ret.length);
     r.set(ret);
     return r;
   }

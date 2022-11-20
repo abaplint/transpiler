@@ -116,7 +116,7 @@ export class Structure {
       // @ts-ignore
       ret = ret.substr(0, input.length);
     }
-    const r = new Character({length: ret.length});
+    const r = new Character(ret.length);
     r.set(ret);
     return r;
   }
