@@ -194,7 +194,19 @@ foo.set(await (new abap.Classes['PROG-ZFOOBAR-ZCL_WORDS']()).constructor_());`;
 END OF foo.
 DATA moo TYPE foo.`;
 
-    const expected = `let moo = new abap.types.Structure({"bar": new abap.types.Character({"qualifiedName":"foo-bar"})}, "foo");`;
+    const expected = `let moo = new abap.types.Structure({"bar": new abap.types.Character(1, {"qualifiedName":"foo-bar"})}, "foo");`;
+    expect(await runSingle(abap)).to.equal(expected);
+  });
+
+  it("Locally defined structure, bool", async () => {
+    const abap = `
+  TYPES: BEGIN OF foo,
+  bar TYPE abap_bool,
+END OF foo.
+DATA moo TYPE foo.`;
+
+// hmm, the qualified name is wrong?
+    const expected = `let moo = new abap.types.Structure({"bar": new abap.types.Character(1, {"qualifiedName":"ABAP_BOOL","ddicName":"ABAP_BOOL"})}, "foo");`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
@@ -491,16 +503,16 @@ lcl_bar.foo.set('\\'');`;
     const abap = `
   CONSTANTS first TYPE c LENGTH 1 VALUE 'b'.
   CONSTANTS next TYPE c LENGTH 1 VALUE first.`;
-    const expected = `let first = new abap.types.Character();
+    const expected = `let first = new abap.types.Character(1, {});
 first.set('b');
-let next = new abap.types.Character();
+let next = new abap.types.Character(1, {});
 next.set(first);`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
   it("bool VALUE abap_true", async () => {
     const abap = `DATA bool TYPE abap_bool VALUE abap_true.`;
-    const expected = `let bool = new abap.types.Character({"qualifiedName":"ABAP_BOOL"});
+    const expected = `let bool = new abap.types.Character(1, {"qualifiedName":"ABAP_BOOL","ddicName":"ABAP_BOOL"});
 bool.set(abap.builtin.abap_true);`;
     expect(await runSingle(abap)).to.equal(expected);
   });
@@ -528,14 +540,14 @@ ENDINTERFACE.`;
   }
 }
 abap.Classes['PROG-ZFOOBAR-LCL_BAR'] = lcl_bar;
-lcl_bar.first = new abap.types.Character();
+lcl_bar.first = new abap.types.Character(1, {});
 lcl_bar.first.set('b');
 class bar {
   static INTERNAL_TYPE = 'INTF';
   static IMPLEMENTED_INTERFACES = [];
 }
 abap.Classes['PROG-ZFOOBAR-BAR'] = bar;
-bar.bar$next = new abap.types.Character();
+bar.bar$next = new abap.types.Character(1, {});
 bar.bar$next.set(abap.Classes['PROG-ZFOOBAR-LCL_BAR'].first);`;
     expect(await runSingle(abap)).to.equal(expected);
   });
@@ -719,7 +731,7 @@ await abap.Classes['KERNEL_CALL'].call({name: new abap.types.Character({length: 
 TYPES ty TYPE sy-langu.
 DATA foo TYPE ty.`;
     const expected = `
-let foo = new abap.types.Character({"qualifiedName":"ty","conversionExit":"ISOLA"});`;
+let foo = new abap.types.Character(1, {"qualifiedName":"ty","conversionExit":"ISOLA"});`;
     expect(await runSingle(abap)).to.equals(expected);
   });
 

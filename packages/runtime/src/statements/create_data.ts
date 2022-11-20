@@ -57,7 +57,7 @@ export function createData(target: DataReference, options?: ICreateDataOptions) 
           if (options.length) {
             length = options.length.get();
           }
-          target.assign(new Character({length: length}));
+          target.assign(new Character(length));
         }
         break;
       case "X":
