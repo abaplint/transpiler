@@ -324,7 +324,7 @@ ENDINTERFACE.`;
     expect(code).to.equal(expected);
   });
 
-  it.skip("qualified names", async () => {
+  it("qualified names", async () => {
     const filename1 = "zif_aff_intf_v1.intf.abap";
     const contents1 = `INTERFACE zif_aff_intf_v1 PUBLIC.
     TYPES: BEGIN OF ty_main,
