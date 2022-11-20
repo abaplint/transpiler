@@ -2,7 +2,7 @@ import {Hex} from "./hex";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {String} from "./string";
-import {getDateFromNumber, getNumberFromDate} from "./_javascript_date";
+import {getDateFromNumber, getNumberFromDate} from "./_date_helper";
 import {Float} from "./float";
 import {parse} from "../operators/_parse";
 
