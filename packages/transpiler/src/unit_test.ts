@@ -58,9 +58,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function run() {
   await initializeABAP();
-  let lt_input = new abap.types.Table(new abap.types.Structure({class_name: new abap.types.Character({length: 30}), testclass_name: new abap.types.Character({length: 30}), method_name: new abap.types.Character({length: 30})}), {"withHeader":false,"type":"STANDARD","isUnique":false,"keyFields":[]});
-  let ls_input = new abap.types.Structure({class_name: new abap.types.Character({length: 30}), testclass_name: new abap.types.Character({length: 30}), method_name: new abap.types.Character({length: 30})});
-  let ls_result = new abap.types.Structure({list: new abap.types.Table(new abap.types.Structure({class_name: new abap.types.Character({length: 30}), testclass_name: new abap.types.Character({length: 30}), method_name: new abap.types.Character({length: 30}), expected: new abap.types.String(), actual: new abap.types.String(), status: new abap.types.String(), runtime: new abap.types.Integer(), message: new abap.types.String(), js_location: new abap.types.String()}), {"withHeader":false,"type":"STANDARD","isUnique":false,"keyFields":[]}), json: new abap.types.String()});
+  let lt_input = new abap.types.Table(new abap.types.Structure({class_name: new abap.types.Character(30), testclass_name: new abap.types.Character(30), method_name: new abap.types.Character(30})}), {"withHeader":false,"type":"STANDARD","isUnique":false,"keyFields":[]});
+  let ls_input = new abap.types.Structure({class_name: new abap.types.Character(30), testclass_name: new abap.types.Character(30), method_name: new abap.types.Character(30)});
+  let ls_result = new abap.types.Structure({list: new abap.types.Table(new abap.types.Structure({class_name: new abap.types.Character(30), testclass_name: new abap.types.Character(30), method_name: new abap.types.Character(30), expected: new abap.types.String(), actual: new abap.types.String(), status: new abap.types.String(), runtime: new abap.types.Integer(), message: new abap.types.String(), js_location: new abap.types.String()}), {"withHeader":false,"type":"STANDARD","isUnique":false,"keyFields":[]}), json: new abap.types.String()});
 `;
 
     for (const obj of reg.getObjects()) {

@@ -73,7 +73,7 @@ ENDCLASS.`;
     return this;
   }
   async bar() {
-    abap.statements.write(new abap.types.Character({length: 3}).set('moo'));
+    abap.statements.write(new abap.types.Character(3).set('moo'));
   }
 }
 abap.Classes['ZCL_MAPTEST'] = zcl_maptest;

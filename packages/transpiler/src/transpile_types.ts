@@ -79,7 +79,7 @@ export class TranspileTypes {
     } else if (type instanceof abaplint.BasicTypes.AnyType) {
       // if not supplied its a Character(4)
       resolved = "Character";
-      extra = "{length: 4}";
+      extra = "4";
     } else if (type instanceof abaplint.BasicTypes.SimpleType) {
       // if not supplied its a Character(1)
       resolved = "Character";
