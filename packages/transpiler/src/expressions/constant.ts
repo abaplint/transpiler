@@ -28,7 +28,7 @@ export class ConstantTranspiler implements IExpressionTranspiler {
     if (str) {
       let res = str.getFirstToken().getStr();
       if (res.startsWith("'") && this.addGet === false) {
-        const code = "new abap.types.Character({length: " + (res.length - 2) + "}).set(" + this.escape(res) + ")";
+        const code = "new abap.types.Character(" + (res.length - 2) + ").set(" + this.escape(res) + ")";
         return new Chunk().append(code, node, traversal);
       } else if (res.startsWith("`") && this.addGet === false) {
         const code = "new abap.types.String().set(" + this.escape(res) + ")";
@@ -54,7 +54,7 @@ export class ConstantTranspiler implements IExpressionTranspiler {
           chunk.appendString(",");
         }
         if (res.startsWith("'") && this.addGet === false) {
-          const code = "new abap.types.Character({length: " + (res.length - 2) + "}).set(" + this.escape(res) + ")";
+          const code = "new abap.types.Character(" + (res.length - 2) + ").set(" + this.escape(res) + ")";
           chunk.append(code, node, traversal);
         } else if (res.startsWith("`") && this.addGet === false) {
           const code = "new abap.types.String().set(" + this.escape(res) + ")";

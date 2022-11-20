@@ -17,8 +17,11 @@ export class Character implements ICharacter {
 
   public constructor(length?: number, extra?: AbstractTypeData) {
     this.length = length || 1;
-    if (this.length <= 0) {
-      throw "Character, invalid length";
+    if (typeof this.length === "object") {
+      console.dir(length);
+      throw "Character, invalid length, object";
+    } else if (this.length <= 0) {
+      throw "Character, invalid length, less than zero";
     }
     this.extra = extra;
     this.clear();

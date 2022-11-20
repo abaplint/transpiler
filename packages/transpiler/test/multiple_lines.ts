@@ -151,7 +151,7 @@ ENDCASE.`;
 
     const expected =
 `let unique1 = bar;
-if (abap.compare.eq(unique1, new abap.types.Character({length: 3}).set('foo'))) {
+if (abap.compare.eq(unique1, new abap.types.Character(3).set('foo'))) {
   abap.statements.write(new abap.types.Integer().set(2));
 } else if (abap.compare.eq(unique1, new abap.types.Integer().set(1)) || abap.compare.eq(unique1, new abap.types.Integer().set(2))) {
 } else if (abap.compare.eq(unique1, foo)) {
@@ -302,7 +302,7 @@ ENDCLASS.`;
   }
   static async run() {
     let rv_ret = new abap.types.String({qualifiedName: "STRING"});
-    rv_ret.set(new abap.types.Character({length: 1}).set('X'));
+    rv_ret.set(new abap.types.Character(1).set('X'));
     return rv_ret;
   }
 }
@@ -617,7 +617,7 @@ try {
   }
 } catch (e) {
   if (e instanceof abap.Classes['CX_ROOT']) {
-    abap.statements.write(new abap.types.Character({length: 3}).set('bar'),{newLine: true});
+    abap.statements.write(new abap.types.Character(3).set('bar'),{newLine: true});
   } else {
     throw e;
   }
@@ -722,7 +722,7 @@ CALL 'RFCControl'
   ID 'UUID' FIELD hex16.`;
     const expected = `let hex16 = new abap.types.Hex({length: 16});
 if (abap.Classes['KERNEL_CALL'] === undefined) throw new Error("Call kernel class missing");
-await abap.Classes['KERNEL_CALL'].call({name: new abap.types.Character({length: 10}).set('RFCControl'),code: new abap.types.Character({length: 1}).set('U'),uuid: hex16});`;
+await abap.Classes['KERNEL_CALL'].call({name: new abap.types.Character(10).set('RFCControl'),code: new abap.types.Character(1).set('U'),uuid: hex16});`;
     expect(await runSingle(abap)).to.equals(expected);
   });
 
