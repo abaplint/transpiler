@@ -324,4 +324,37 @@ ENDINTERFACE.`;
     expect(code).to.equal(expected);
   });
 
+  it.skip("qualified names", async () => {
+    const filename1 = "zif_aff_intf_v1.intf.abap";
+    const contents1 = `INTERFACE zif_aff_intf_v1 PUBLIC.
+    TYPES: BEGIN OF ty_main,
+             header TYPE zif_aff_types_v1=>ty_header_60_src,
+           END OF ty_main.
+  ENDINTERFACE.`;
+    const file1 = {filename: filename1, contents: contents1};
+
+    const filename2 = "zif_aff_types_v1.intf.abap";
+    const contents2 = `INTERFACE zif_aff_types_v1 PUBLIC.
+  TYPES ty_description_60 TYPE c LENGTH 60.
+  TYPES: BEGIN OF ty_header_60_src,
+           description TYPE ty_description_60,
+         END OF ty_header_60_src.
+ENDINTERFACE.`;
+    const file2 = {filename: filename2, contents: contents2};
+
+    const filename3 = "zif_aff_oo_types_v1.intf.abap";
+    const contents3 = `INTERFACE zif_aff_oo_types_v1 PUBLIC.
+  TYPES: BEGIN OF ty_event,
+           description TYPE zif_aff_types_v1=>ty_description_60,
+         END OF ty_event.
+ENDINTERFACE.`;
+    const file3 = {filename: filename3, contents: contents3};
+
+    const output = await runFiles([file1, file2, file3]);
+
+    const code = output[0].chunk.getCode();
+    expect(code).to.include("class zif_aff_intf_v1");
+    expect(code).to.not.include("zif_aff_oo_types");
+  });
+
 });
