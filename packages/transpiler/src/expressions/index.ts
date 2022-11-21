@@ -20,6 +20,7 @@ export * from "./field_offset";
 export * from "./field_symbol";
 export * from "./function_exporting";
 export * from "./sql_from";
+export * from "./sql_join";
 export * from "./function_parameters";
 export * from "./message_number";
 export * from "./method_call_body";
