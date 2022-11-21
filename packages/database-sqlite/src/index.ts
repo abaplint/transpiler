@@ -103,6 +103,7 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
       } else {
         options.select = options.select.replace(/ ORDER BY PRIMARY KEY/i, "");
       }
+      options.select = options.select.replace(/~/g, ".");
 //      console.dir(options.select);
       res = this.sqlite!.exec(options.select);
     } catch (error) {
