@@ -629,4 +629,19 @@ ASSERT sy-subrc = 0.`;
     expect(abap.console.get()).to.equal("1");
   });
 
+  it.only("inner join with variable", async () => {
+    const code = `
+    DATA lv_msgnr TYPE t100-msgnr.
+    SELECT SINGLE t100~msgnr INTO lv_msgnr FROM t100
+      INNER JOIN t100 AS foo
+      ON t100~msgnr = foo~msgnr
+      AND t100~msgnr = lv_msgnr.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
