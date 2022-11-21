@@ -15,6 +15,7 @@ export class SQLFromTranspiler implements IExpressionTranspiler {
         chunk.appendString(c.concatTokens() + " ");
       } else if (c.get() instanceof abaplint.Expressions.SQLJoin) {
         chunk.appendChunk(new SQLJoinTranspiler().transpile(c, traversal));
+        chunk.appendString(" ");
       } else {
         chunk.appendString(c.concatTokens() + " ");
       }
