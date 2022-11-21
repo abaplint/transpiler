@@ -598,7 +598,7 @@ ASSERT sy-subrc = 0.`;
     expect(abap.console.get()).to.equal("3");
   });
 
-  it.only("tilde", async () => {
+  it("tilde", async () => {
     const code = `
     DATA lv_msgnr TYPE t100-msgnr.
     SELECT SINGLE t100~msgnr FROM t100 INTO lv_msgnr.
