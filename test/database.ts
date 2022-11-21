@@ -629,7 +629,7 @@ ASSERT sy-subrc = 0.`;
     expect(abap.console.get()).to.equal("1");
   });
 
-  it.only("inner join with variable", async () => {
+  it.skip("inner join with variable", async () => {
     const code = `
     DATA lv_msgnr TYPE t100-msgnr.
     SELECT SINGLE t100~msgnr INTO lv_msgnr FROM t100
