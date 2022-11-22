@@ -41,7 +41,7 @@ export class ReplaceTranspiler implements IStatementTranspiler {
       extra.push("regex: " + new SourceTranspiler().transpile(sources[0], traversal).getCode());
     }
 
-    if (o === undefined && o === undefined) {
+    if (o === undefined && o === undefined && type !== "REGEX") {
       extra.push("of: " + new SourceTranspiler().transpile(sources[0], traversal).getCode());
     }
 
@@ -50,8 +50,8 @@ export class ReplaceTranspiler implements IStatementTranspiler {
     }
 
     return new Chunk()
-      .append("abap.statements.replace({target:", node, traversal)
-      .appendString(target + ", all:" + all + ", " + extra.join(","))
+      .append("abap.statements.replace({target: ", node, traversal)
+      .appendString(target + ", all: " + all + ", " + extra.join(", "))
       .append("});", node.getLastToken(), traversal);
   }
 

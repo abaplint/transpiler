@@ -240,11 +240,11 @@ WRITE val.`;
     expect(abap.console.get()).to.equal("baab");
   });
 
-  it.only("REPLACE, REGEX", async () => {
+  it("REPLACE, REGEX", async () => {
     const code = `
 DATA lv_url TYPE string.
 lv_url = |https://github.com/abapGit/abapGit.git|.
-REPLACE REGEX '\.git$' IN lv_url WITH space.
+REPLACE REGEX '\\.git$' IN lv_url WITH space.
 WRITE / lv_url.
 WRITE / strlen( lv_url ).`;
 
