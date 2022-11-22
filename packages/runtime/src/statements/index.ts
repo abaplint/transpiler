@@ -34,6 +34,7 @@ import {SelectDatabase} from "./select";
 import {setBit} from "./set_bit";
 import {shift} from "./shift";
 import {sort} from "./sort";
+import {setHandler} from "./set_handler";
 import {split} from "./split";
 import {translate} from "./translate";
 import {IUpdateDatabaseOptions, UpdateDatabase} from "./update_database";
@@ -81,6 +82,7 @@ export class Statements {
   public sort = sort;
   public split = split;
   public translate = translate;
+  public setHandler = setHandler;
 
   private readonly context: Context;
 
