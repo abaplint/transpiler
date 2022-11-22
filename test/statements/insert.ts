@@ -210,4 +210,16 @@ WRITE / lines( tab ).`;
     expect(abap.console.get()).to.equal("1");
   });
 
+  it.only("INSERT, hashed table with default key", async () => {
+    const code = `
+DATA lt_tab TYPE HASHED TABLE OF string WITH UNIQUE DEFAULT KEY.
+data val type string.
+val = |sdfsd|.
+INSERT val INTO TABLE lt_tab.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });
