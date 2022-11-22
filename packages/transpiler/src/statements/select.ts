@@ -4,6 +4,7 @@ import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {FieldChainTranspiler, SourceTranspiler} from "../expressions";
 import {UniqueIdentifier} from "../unique_identifier";
+import {SQLFromTranspiler} from "../expressions/sql_from";
 
 export class SelectTranspiler implements IStatementTranspiler {
 
@@ -25,7 +26,11 @@ export class SelectTranspiler implements IStatementTranspiler {
       select += fieldList?.findAllExpressions(abaplint.Expressions.SQLField).map(e => e.concatTokens()).join(", ");
     }
     select += " ";
-    select += node.findFirstExpression(abaplint.Expressions.SQLFrom)?.concatTokens() + " ";
+
+    const from = node.findFirstExpression(abaplint.Expressions.SQLFrom);
+    if (from) {
+      select += new SQLFromTranspiler().transpile(from, traversal).getCode();
+    }
 
     let where: abaplint.Nodes.ExpressionNode | undefined = undefined;
     for(const sqlCond of node.findAllExpressions(abaplint.Expressions.SQLCond)){
