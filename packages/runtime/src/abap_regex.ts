@@ -13,4 +13,8 @@ export class ABAPRegExp {
 
     return ret;
   }
+
+  public static escapeRegExp(text: string) {
+    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+  }
 }
