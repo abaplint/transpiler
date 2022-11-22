@@ -14,6 +14,7 @@ import {collect} from "./collect";
 import {overlay} from "./overlay";
 import {cast} from "./cast";
 import {getBit} from "./get_bit";
+import {raiseEvent} from "./raise_event";
 import {getLocale} from "./get_locale";
 import {getParameter} from "./get_parameter";
 import {setLocale} from "./set_locale";
@@ -54,8 +55,8 @@ export class Statements {
   public assign = assign;
   public cast = cast;
   public clear = clear;
-  public commit = commit;
   public collect = collect;
+  public commit = commit;
   public concatenate = concatenate;
   public condense = condense;
   public convert = convert;
@@ -63,26 +64,27 @@ export class Statements {
   public deleteInternal = deleteInternal;
   public describe = describe;
   public find = find;
-  public overlay = overlay;
-  public getParameter = getParameter;
   public getBit = getBit;
   public getLocale = getLocale;
+  public getParameter = getParameter;
   public getRunTime = getRunTime;
   public getTime = getTime;
   public insertInternal = insertInternal;
   public loop = loop;
   public modifyInternal = modifyInternal;
   public moveCorresponding = moveCorresponding;
+  public overlay = overlay;
+  public raiseEvent = raiseEvent;
   public readTable = readTable;
   public replace = replace;
   public rollback = rollback;
   public setBit = setBit;
+  public setHandler = setHandler;
   public setLocale = setLocale;
   public shift = shift;
   public sort = sort;
   public split = split;
   public translate = translate;
-  public setHandler = setHandler;
 
   private readonly context: Context;
 
