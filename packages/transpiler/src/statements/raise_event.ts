@@ -5,8 +5,9 @@ import {Chunk} from "../chunk";
 
 export class RaiseEventTranspiler implements IStatementTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    return new Chunk(`throw new Error("RaiseEvent, transpiler todo");`);
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
+// todo
+    return new Chunk().append(`abap.statements.raiseEvent();`, node, traversal);
   }
 
 }

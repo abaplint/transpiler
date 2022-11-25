@@ -47,6 +47,14 @@ export class CompareTranspiler implements IExpressionTranspiler {
       } else if (concat.endsWith(" IS NOT REQUESTED")) {
         return new Chunk().appendString(pre + "INPUT && INPUT." + concat.replace(" IS NOT REQUESTED", "").toLowerCase() + " === undefined");
       }
+
+      if (concat.startsWith("NOT ") || concat.includes(" IS NOT INSTANCE OF ")) {
+        const cname = node.findDirectExpression(Expressions.ClassName)?.concatTokens();
+        return new Chunk().appendString("abap.compare.instance_of(").appendChunk(s0).appendString(`, ${cname}) === false`);
+      } else if (concat.includes(" IS INSTANCE OF ")) {
+        const cname = node.findDirectExpression(Expressions.ClassName)?.concatTokens();
+        return new Chunk().appendString("abap.compare.instance_of(").appendChunk(s0).appendString(`, ${cname})`);
+      }
     } else if (sources.length === 2 && node.findDirectTokenByText("IN")) {
       if (concat.search(" NOT IN ") >= 0) {
         pre = pre === "!" ? "" : "!";
@@ -68,6 +76,9 @@ export class CompareTranspiler implements IExpressionTranspiler {
       const s2 = traversal.traverse(sources[2]);
       return new Chunk().appendString(pre + "abap.compare.between(").join([s0, s1, s2]).appendString(")");
     }
+
+    console.dir(sources.length);
+    console.dir(concat);
 
     return new Chunk("CompareTodo");
   }
