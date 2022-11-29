@@ -1457,4 +1457,40 @@ CONSTANTS END OF mode.`;
     expect(js).to.contain("mode");
   });
 
+  it("aliased redefinition", async () => {
+    const code = `
+INTERFACE ifile.
+  METHODS getraw RETURNING VALUE(foo) TYPE string.
+ENDINTERFACE.
+
+CLASS abstractfile DEFINITION ABSTRACT.
+  PUBLIC SECTION.
+    INTERFACES ifile.
+    ALIASES getraw FOR ifile~getraw.
+ENDCLASS.
+CLASS abstractfile IMPLEMENTATION.
+  METHOD ifile~getraw.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS memoryfile DEFINITION INHERITING FROM abstractfile.
+  PUBLIC SECTION.
+    METHODS getraw REDEFINITION.
+ENDCLASS.
+CLASS memoryfile IMPLEMENTATION.
+  METHOD getraw.
+    foo = |hello|.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA mf TYPE REF TO memoryfile.
+  CREATE OBJECT mf.
+  WRITE mf->getraw( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello");
+  });
+
 });
