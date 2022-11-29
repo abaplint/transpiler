@@ -1460,7 +1460,7 @@ CONSTANTS END OF mode.`;
   it.only("aliased redefinition", async () => {
     const code = `
 INTERFACE ifile.
-  METHODS getraw RETURNING VALUE(return) TYPE string.
+  METHODS getraw RETURNING VALUE(foo) TYPE string.
 ENDINTERFACE.
 
 CLASS abstractfile DEFINITION ABSTRACT.
@@ -1479,7 +1479,7 @@ CLASS memoryfile DEFINITION INHERITING FROM abstractfile.
 ENDCLASS.
 CLASS memoryfile IMPLEMENTATION.
   METHOD getraw.
-    return = |hello|.
+    foo = |hello|.
   ENDMETHOD.
 ENDCLASS.
 
@@ -1488,6 +1488,7 @@ START-OF-SELECTION.
   CREATE OBJECT mf.
   WRITE mf->getraw( ).`;
     const js = await run(code);
+    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("hello");
