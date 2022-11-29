@@ -1457,7 +1457,7 @@ CONSTANTS END OF mode.`;
     expect(js).to.contain("mode");
   });
 
-  it.only("aliased redefinition", async () => {
+  it("aliased redefinition", async () => {
     const code = `
 INTERFACE ifile.
   METHODS getraw RETURNING VALUE(foo) TYPE string.
@@ -1488,7 +1488,6 @@ START-OF-SELECTION.
   CREATE OBJECT mf.
   WRITE mf->getraw( ).`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("hello");

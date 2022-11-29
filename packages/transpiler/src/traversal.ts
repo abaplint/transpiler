@@ -352,8 +352,11 @@ export class Traversal {
     return tabl;
   }
 
-  public findClassDefinition(name: string, scope: abaplint.ISpaghettiScopeNode | undefined) {
-    let clas = scope?.findClassDefinition(name);
+  public findClassDefinition(name: string | undefined, scope: abaplint.ISpaghettiScopeNode | undefined) {
+    if (name === undefined || scope === undefined) {
+      return undefined;
+    }
+    let clas = scope.findClassDefinition(name);
     if (clas === undefined) {
       const iglobal = this.reg.getObject("CLAS", name) as abaplint.Objects.Class | undefined;
       clas = iglobal?.getDefinition();

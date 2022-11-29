@@ -94,6 +94,13 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
 
     methodName = methodName.replace("~", "$").toLowerCase();
 
+    const superDef = traversal.findClassDefinition(classDef?.getSuperClass(), scope);
+    for (const a of superDef?.getAliases().getAll() || []) {
+      if (a.getName().toLowerCase() === methodName) {
+        methodName = a.getComponent().replace("~", "$").toLowerCase();
+      }
+    }
+
     if (method && method.isStatic()) {
       // in ABAP static methods can be called with instance arrows, "->"
       const className = scope.getParent()?.getIdentifier().sname?.toLowerCase();
