@@ -1432,4 +1432,29 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello");
   });
 
+  it.skip("top level constants in locals imp", async () => {
+    const clas = `
+CLASS zcl_alint_lexer DEFINITION PUBLIC.
+  PUBLIC SECTION.
+ENDCLASS.
+
+CLASS zcl_alint_lexer IMPLEMENTATION.
+ENDCLASS.`;
+
+    const locals = `
+CONSTANTS BEGIN OF mode.
+  CONSTANTS normal TYPE i VALUE 1.
+  CONSTANTS ping TYPE i VALUE 2.
+  CONSTANTS str TYPE i VALUE 3.
+CONSTANTS END OF mode.`;
+
+    const result = await compileFiles([
+      {filename: "zcl_alint_lexer.clas.abap", contents: clas},
+      {filename: "zcl_alint_lexer.clas.locals_imp.abap", contents: locals},
+    ]);
+
+    const js = result.objects[1].chunk.getCode();
+    expect(js).to.contain("mode");
+  });
+
 });

@@ -16,10 +16,12 @@ export class CompareTranspiler implements IExpressionTranspiler {
     if (sources.length === 1) {
       const s0 = traversal.traverse(sources[0]);
 
-      if ((concat.startsWith("NOT ") && concat.endsWith(" IS INITIAL"))
-          || concat.endsWith("IS NOT INITIAL")) {
+      if (concat.startsWith("NOT ") && concat.endsWith(" IS NOT INITIAL")) {
+        return new Chunk().appendString("abap.compare.initial(").appendChunk(s0).appendString(") === true");
+      } else if ((concat.startsWith("NOT ") && concat.endsWith(" IS INITIAL"))
+          || concat.endsWith(" IS NOT INITIAL")) {
         return new Chunk().appendString("abap.compare.initial(").appendChunk(s0).appendString(") === false");
-      } else if (concat.endsWith("IS INITIAL")) {
+      } else if (concat.endsWith(" IS INITIAL")) {
         return new Chunk().appendString("abap.compare.initial(").appendChunk(s0).appendString(")");
       }
 
