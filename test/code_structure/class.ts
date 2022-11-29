@@ -1432,7 +1432,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello");
   });
 
-  it.only("top level constants in locals imp", async () => {
+  it.skip("top level constants in locals imp", async () => {
     const clas = `
 CLASS zcl_alint_lexer DEFINITION PUBLIC.
   PUBLIC SECTION.
