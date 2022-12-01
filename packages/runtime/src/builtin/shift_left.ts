@@ -6,7 +6,8 @@ import {throwError} from "../throw_error";
 export interface IShiftLeftInput {
   val: ICharacter | string,
   sub?: ICharacter | string,
-  places?: ICharacter | INumeric | string,
+  places?: ICharacter | INumeric | string
+  circular?: INumeric;
 }
 
 export function shift_left(input: IShiftLeftInput): ICharacter {
@@ -27,6 +28,9 @@ export function shift_left(input: IShiftLeftInput): ICharacter {
     }
     val = val.substring(places);
   }
-
+  else if (input.circular) {
+    const leftShifts = input.circular.get() % val.length;
+    val =  val.slice(leftShifts) + val.slice(0, leftShifts);
+  }
   return new String().set(val);
 }

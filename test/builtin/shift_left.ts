@@ -33,4 +33,27 @@ describe("Builtin functions - shift_left", () => {
     expect(abap.console.get()).to.equal("bc");
   });
 
+  it("circular", async () => {
+    const code = `
+    DATA phrase TYPE string.
+    phrase = |abc|.
+    phrase = shift_left( val = phrase circular = 1 ).
+    WRITE phrase.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("bca");
+  });
+
+  it("circular overflow", async () => {
+    const code = `
+    DATA phrase TYPE string.
+    phrase = |abc|.
+    phrase = shift_left( val = phrase circular = 4 ).
+    WRITE phrase.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("bca");
+  });
 });
