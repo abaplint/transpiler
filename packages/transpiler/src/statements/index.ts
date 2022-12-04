@@ -90,6 +90,7 @@ export * from "./read_dataset";
 export * from "./read_line";
 export * from "./read_report";
 export * from "./read_table";
+export * from "./read_textpool";
 export * from "./receive";
 export * from "./refresh";
 export * from "./replace";
