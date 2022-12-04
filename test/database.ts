@@ -1,7 +1,7 @@
 import {expect} from "chai";
 import {AsyncFunction, runFiles} from "./_utils";
 import {ABAP} from "../packages/runtime/src/";
-import {msag_escape, msag_zag_unit_test, tabl_t100xml} from "./_data";
+import {msag_escape, msag_zag_unit_test, tabl_t100xml, zt111, zt222} from "./_data";
 
 describe("Top level tests, Database", () => {
   let abap: ABAP;
@@ -640,6 +640,18 @@ ASSERT sy-subrc = 0.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it(".INCLUDE with GROUPNAME", async () => {
+    const code = `
+    DATA foo TYPE zt111.
+    SELECT SINGLE * FROM zt111 INTO foo.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "zt111.tabl.xml", contents: zt111},
+      {filename: "zt222.tabl.xml", contents: zt222}]);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
