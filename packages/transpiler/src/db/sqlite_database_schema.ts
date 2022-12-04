@@ -58,6 +58,10 @@ export class SQLiteDatabaseSchema {
 
     const fields: string[] = [];
     for (const field of type.getComponents()) {
+      if (field.type instanceof abaplint.BasicTypes.StructureType) {
+        // is a GROUP NAME
+        continue;
+      }
       fields.push("'" + field.name.toLowerCase() + "' " + this.toType(field.type, field.name, tabl.getName()));
     }
 
