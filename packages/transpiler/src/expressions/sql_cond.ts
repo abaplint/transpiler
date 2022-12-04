@@ -63,6 +63,13 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
     const fieldName = c.findDirectExpression(abaplint.Expressions.SQLFieldName);
     const operator = c.findDirectExpression(abaplint.Expressions.SQLCompareOperator);
     const source = c.findDirectExpression(abaplint.Expressions.SQLSource);
+
+    if (fieldName && source && operator === undefined && c.findDirectTokenByText("LIKE")) {
+      ret += fieldName.concatTokens() + " LIKE ";
+      ret += this.sqlSource(source, traversal);
+      return ret;
+    }
+
     if (fieldName === undefined || operator === undefined || source === undefined) {
       throw new Error("SQL Condition, transpiler todo2, " + c.concatTokens());
     }
