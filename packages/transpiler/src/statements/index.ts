@@ -113,6 +113,7 @@ export * from "./split";
 export * from "./start_of_selection";
 export * from "./submit";
 export * from "./subtract";
+export * from "./syntax_check";
 export * from "./translate";
 export * from "./truncate_dataset";
 export * from "./try";
