@@ -104,6 +104,7 @@ export * from "./select";
 export * from "./set_bit";
 export * from "./set_dataset";
 export * from "./set_handler";
+export * from "./set_language";
 export * from "./set_locale";
 export * from "./set_parameter";
 export * from "./set_screen";
