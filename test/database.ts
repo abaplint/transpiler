@@ -656,4 +656,18 @@ ASSERT sy-subrc = 0.`;
     await f(abap);
   });
 
+  it("SELECT LIKE", async () => {
+    const code = `
+    DATA ls_result TYPE t100.
+    SELECT SINGLE * FROM t100 INTO ls_result WHERE text LIKE 'h%'.
+    WRITE ls_result-text.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello world");
+  });
+
 });
