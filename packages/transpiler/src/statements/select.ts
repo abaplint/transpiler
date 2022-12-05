@@ -2,7 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {FieldChainTranspiler, SourceTranspiler} from "../expressions";
+import {FieldChainTranspiler, SourceTranspiler, SQLSourceTranspiler} from "../expressions";
 import {UniqueIdentifier} from "../unique_identifier";
 import {SQLFromTranspiler} from "../expressions/sql_from";
 
@@ -82,16 +82,16 @@ export class SelectTranspiler implements IStatementTranspiler {
 
     if (node.findFirstExpression(abaplint.Expressions.SQLForAllEntries)) {
       const unique = UniqueIdentifier.get();
-      const faeName = node.findFirstExpression(abaplint.Expressions.SQLForAllEntries
-      )?.findDirectExpression(abaplint.Expressions.SQLSource)?.concatTokens()?.toLowerCase();
-      select = select.replace(new RegExp(" " + faeName!, "g"), " " + unique);
+      const fn = node.findFirstExpression(abaplint.Expressions.SQLForAllEntries)?.findDirectExpression(abaplint.Expressions.SQLSource);
+      const faeTranspiled = new SQLSourceTranspiler().transpile(fn!, traversal).getCode();
+      select = select.replace(new RegExp(" " + faeTranspiled!, "g"), " " + unique);
       select = select.replace(unique + ".get().table_line.get()", unique + ".get()");  // there can be only one?
 
-      const code = `if (${faeName}.array().length === 0) {
+      const code = `if (${faeTranspiled}.array().length === 0) {
   throw "FAE, todo, empty table";
 } else {
   abap.statements.clear(${target});
-  for await (const ${unique} of abap.statements.loop(${faeName})) {
+  for await (const ${unique} of abap.statements.loop(${faeTranspiled})) {
     await abap.statements.select(${target}, {select: "${select.trim()}"${extra}}, {appending: true});
   }
   abap.builtin.sy.get().dbcnt.set(${target}.array().length);
