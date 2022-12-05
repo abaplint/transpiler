@@ -692,7 +692,7 @@ SELECT * FROM t100 INTO TABLE result
     await f(abap);
   });
 
-  it.skip("dynamic INTO CORRESPONDING FIELDS OF field symbol", async () => {
+  it("dynamic INTO CORRESPONDING FIELDS OF field symbol", async () => {
     const code = `
 DATA row TYPE t100.
 FIELD-SYMBOLS <fs> TYPE t100.
@@ -702,7 +702,6 @@ ENDSELECT.`;
     const js = await runFiles(abap, [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });

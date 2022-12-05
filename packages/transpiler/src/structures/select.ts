@@ -4,6 +4,7 @@ import {Traversal} from "../traversal";
 import {SelectTranspiler as SelectStatementTranspiler} from "../statements/select";
 import {Chunk} from "../chunk";
 import {UniqueIdentifier} from "../unique_identifier";
+import {SQLTargetTranspiler} from "../expressions";
 
 export class SelectTranspiler implements IStructureTranspiler {
 
@@ -14,7 +15,8 @@ export class SelectTranspiler implements IStructureTranspiler {
       throw "Structure, select loop not found";
     }
     const from = selectStatement.findFirstExpression(abaplint.Expressions.SQLFromSource)?.concatTokens().toUpperCase();
-    const intoName = selectStatement.findFirstExpression(abaplint.Expressions.SQLTarget)?.concatTokens();
+    const intoName = new SQLTargetTranspiler().transpile(
+      selectStatement.findFirstExpression(abaplint.Expressions.SQLTarget)!, traversal).getCode();
 
     // note: this implementation SELECTs everything into memory, which might be bad, and sometimes not correct
     const targetName = UniqueIdentifier.get();
@@ -22,7 +24,7 @@ export class SelectTranspiler implements IStructureTranspiler {
     ret.appendString(`let ${targetName} = new abap.types.Table(abap.DDIC["${from}"].type);\n`);
     ret.appendChunk(new SelectStatementTranspiler().transpile(selectStatement, traversal, targetName));
     ret.appendString(`\nfor (const ${loopName} of ${targetName}.array()) {\n`);
-    ret.appendString(`${intoName?.replace("-", ".get().")}.set(${loopName});\n`);
+    ret.appendString(`${intoName}.set(${loopName});\n`);
 
     const body = node.findDirectStructure(abaplint.Structures.Body);
     if (body) {
