@@ -59,4 +59,6 @@ export interface ITranspilerOptions {
   only?: TestMethodList;
   /** extra setup script to be executed during initialization */
   extraSetup?: string;
+  /** list of keywords to rename, if not supplied default will be used */
+  keywords?: string[];
 }

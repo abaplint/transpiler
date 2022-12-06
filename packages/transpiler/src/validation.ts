@@ -27,6 +27,7 @@ export const config: IConfig = {
     "parser_error": true,
     "allowed_object_types": {
       "allowed": [
+        "AUTH",
         "CLAS",
         "DEVC",
         "DOMA",
@@ -42,7 +43,11 @@ export const config: IConfig = {
         "SHMA",
         "SICF",
         "SMIM",
+        "SRFC",
+        "SUSO",
         "TABL",
+        "TOBJ",
+        "TRAN",
         "TTYP",
         "TYPE",
         "VIEW",

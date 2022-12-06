@@ -36,7 +36,7 @@ export class Transpiler {
   public async run(reg: abaplint.IRegistry, progress?: IProgress): Promise<IOutput> {
 
     reg.parse();
-    new Keywords().handle(reg);
+    new Keywords(this.options?.keywords).handle(reg);
     this.validate(reg);
 
     const dbSetup = new DatabaseSetup(reg).run();
