@@ -1,7 +1,37 @@
 import * as abaplint from "@abaplint/core";
 
+// https://www.w3schools.com/js/js_reserved.asp
+const defaultKeywords: string[] = [
+  "abstract",	"arguments", "await",
+  "break",	"byte", "catch",
+  "char",	"class", "const", "continue",
+  "debugger",	"default", "do",
+  "double",	"else", "enum", "eval",
+  "export",	"extends", "false", "final",
+  "finally", "for", "function",
+  "goto",	"if", "implements", "import",
+  "in",	"instanceof", "interface",
+  "let",	"long", "native", "new",
+  "null",	"package", "private", // "protected",
+  "public",	"return", "short", "static",
+  "switch", "synchronized", "this",
+  "throw",	"throws", "transient", "true",
+  "try",	"typeof", "var", "void",
+  "volatile",	"while", "yield"];
+// "with"
+// "delete"
+
 /** Replaces javascript keywords in ABAP source code, in-memory only */
 export class Keywords {
+  private readonly keywords: string[] = [];
+
+  public constructor(keywords?: string[]) {
+    if (keywords !== undefined) {
+      this.keywords = keywords;
+    } else {
+      this.keywords = defaultKeywords;
+    }
+  }
 
   public handle(reg: abaplint.IRegistry) {
     reg.parse();
@@ -32,26 +62,6 @@ export class Keywords {
   }
 
   private traverse(node: abaplint.INode, file: abaplint.ABAPFile): abaplint.Token[] {
-// https://www.w3schools.com/js/js_reserved.asp
-    const keywords: string[] = [
-      "abstract",	"arguments", "await",
-      "break",	"byte", "catch",
-      "char",	"class", "const", "continue",
-      "debugger",	"default", "do",
-      "double",	"else", "enum", "eval",
-      "export",	"extends", "false", "final",
-      "finally", "for", "function",
-      "goto",	"if", "implements", "import",
-      "in",	"instanceof", "interface",
-      "let",	"long", "native", "new",
-      "null",	"package", "private", // "protected",
-      "public",	"return", "short", "static",
-      "switch", "synchronized", "this",
-      "throw",	"throws", "transient", "true",
-      "try",	"typeof", "var", "void",
-      "volatile",	"while", "yield"];
-// "with"
-// "delete"
 
     const ret: abaplint.Token[] = [];
     for (const c of node.getChildren()) {
@@ -61,7 +71,7 @@ export class Keywords {
         if (start instanceof abaplint.VirtualPosition) {
           continue;
         }
-        for (const k of keywords) {
+        for (const k of this.keywords) {
           const lower = token.getStr().toLowerCase();
           if (k === lower
               || "!" + k === lower
