@@ -36,6 +36,7 @@ export * from "./delete_internal";
 export * from "./delete_textpool";
 export * from "./describe";
 export * from "./do";
+export * from "./editor_call";
 export * from "./else_if";
 export * from "./else";
 export * from "./end_at";
