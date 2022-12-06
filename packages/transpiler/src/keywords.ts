@@ -1,7 +1,7 @@
 import * as abaplint from "@abaplint/core";
 
 // https://www.w3schools.com/js/js_reserved.asp
-const defaultKeywords: string[] = [
+export const defaultKeywords: string[] = [
   "abstract",	"arguments", "await",
   "break",	"byte", "catch",
   "char",	"class", "const", "continue",

@@ -1,4 +1,5 @@
 import {Issue, IRegistry, Config, IConfig, Version} from "@abaplint/core";
+import {defaultKeywords} from "./keywords";
 import {ITranspilerOptions} from "./types";
 
 export const config: IConfig = {
@@ -66,31 +67,14 @@ export const config: IConfig = {
       "setExtended": true,
     },
     "forbidden_identifier": {
-      "check": [
-        "^abstract$",	"^arguments$", "^await$",
-        "^break$",	"^byte$", "^catch$",
-        "^char$",	"^class$", "^const$", "^continue$",
-        "^debugger$",	"^default$", "^do$",
-        "^double$",	"^else$", "^enum$", "^eval$",
-        "^export$",	"^extends$", "^false$", "^final$",
-        "^finally$", "^for$", "^function$",
-        "^goto$",	"^if$", "^implements$", "^import$",
-        "^in$",	"^instanceof$", "^interface$",
-        "^let$",	"^long$", "^native$", "^new$",
-        "^null$",	"^package$", "^private$",
-//        "^protected$",
-        "^public$",	"^return$", "^short$", "^static$",
-        "^switch$", "^synchronized$", "^this$",
-        "^throw$",	"^throws$", "^transient$", "^true$",
-        "^try$",	"^typeof$", "^var$", "^void$",
-        "^volatile$",	"^while$", "^yield$",
-        "^unique\\d+$"],
+      "check": [],
     },
   },
 };
 
 
 // todo, make sure nothing is overloaded, eg "lines()", there is a rule for this in abaplint now
+// hmm this ^ is okay? since lines will be prefixed with "abap.builtin"?
 
 export class Validation {
 
@@ -106,10 +90,25 @@ export class Validation {
     } else {
       config.rules["check_syntax"] = true;
     }
-    if (this.options?.unknownTypes === "runtimeError") {
-      config.syntax.errorNamespace = "VOID_EVERYTHING"; // this is not a constant, just a regex that happens to not match anything
-//      config.rules["unknown_types"] = false;
+
+    config.rules["forbidden_identifier"]["check"] = ["^unique\\d+$"];
+    if (this.options?.keywords === undefined) {
+      for (const d of defaultKeywords) {
+        const add = "^" + d + "$";
+        config.rules["forbidden_identifier"]["check"].push(add);
+      }
+    } else {
+      for (const d of this.options.keywords) {
+        const add = "^" + d + "$";
+        config.rules["forbidden_identifier"]["check"].push(add);
+      }
     }
+
+    if (this.options?.unknownTypes === "runtimeError") {
+      // this is not a constant, just a regex that happens to not match anything
+      config.syntax.errorNamespace = "VOID_EVERYTHING";
+    }
+
     const conf = new Config(JSON.stringify(config));
     reg.setConfig(conf);
     const issues = reg.findIssues();
