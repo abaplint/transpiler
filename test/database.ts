@@ -670,4 +670,40 @@ ASSERT sy-subrc = 0.`;
     expect(abap.console.get()).to.equal("hello world");
   });
 
+  it("FAE with field symbol", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         msgnr TYPE t100-msgnr,
+       END OF ty.
+
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA result TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+FIELD-SYMBOLS <foo> LIKE tab.
+ASSIGN tab TO <foo>.
+APPEND INITIAL LINE TO tab.
+
+SELECT * FROM t100 INTO TABLE result
+  FOR ALL ENTRIES IN <foo>
+  WHERE msgnr = <foo>-msgnr.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("dynamic INTO CORRESPONDING FIELDS OF field symbol", async () => {
+    const code = `
+DATA row TYPE t100.
+FIELD-SYMBOLS <fs> TYPE t100.
+ASSIGN row TO <fs>.
+SELECT * INTO CORRESPONDING FIELDS OF <fs> FROM t100.
+ENDSELECT.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
