@@ -706,4 +706,15 @@ ENDSELECT.`;
     await f(abap);
   });
 
+  it("basic TABLES", async () => {
+    const code = `
+TABLES t100.
+CLEAR t100.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
