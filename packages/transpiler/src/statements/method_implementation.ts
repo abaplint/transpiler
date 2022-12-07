@@ -67,6 +67,8 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
               val = "abap.builtin.space";
             } else if (parameterDefault.concatTokens().toLowerCase() === "sy-langu") {
               val = "abap.builtin.sy.get().langu";
+            } else if (parameterDefault.concatTokens().toLowerCase() === "sy-mandt") {
+              val = "abap.builtin.sy.get().mandt";
             } else if (parameterDefault.concatTokens().toLowerCase() === "sy-uname") {
               val = "abap.builtin.sy.get().uname";
             } else {
