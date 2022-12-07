@@ -38,6 +38,7 @@ export const config: IConfig = {
         "INTF",
         "MSAG",
         "NROB",
+        "NSPC",
         "PARA",
         "PROG",
         "SHLP",

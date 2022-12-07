@@ -58,6 +58,7 @@ export class ReadTableTranspiler implements IStatementTranspiler {
         while(field.includes("-")) {
           field = field.replace("-", ".get().");
         }
+        field = Traversal.escapeClassName(field)!;
 
         if (left.get() instanceof abaplint.Expressions.Dynamic
             && left instanceof abaplint.Nodes.ExpressionNode) {
