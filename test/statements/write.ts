@@ -194,4 +194,11 @@ ASSERT ch = '1,0000000000000000E-03'.`;
     await f(abap);
   });
 
+  it("escaping of js string", async () => {
+    const code = "DATA foo TYPE string. foo = `hello ${ world`. WRITE foo.";
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
