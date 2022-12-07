@@ -72,6 +72,7 @@ export * from "./insert_database";
 export * from "./insert_internal";
 export * from "./insert_report";
 export * from "./insert_textpool";
+export * from "./leave";
 export * from "./log_point";
 export * from "./loop";
 export * from "./macro_call";
