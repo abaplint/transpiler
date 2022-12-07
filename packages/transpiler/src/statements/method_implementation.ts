@@ -71,6 +71,22 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
               val = "abap.builtin.sy.get().mandt";
             } else if (parameterDefault.concatTokens().toLowerCase() === "sy-uname") {
               val = "abap.builtin.sy.get().uname";
+            } else if (parameterDefault.concatTokens().toLowerCase() === "sy-sysid") {
+              val = "abap.builtin.sy.get().sysid";
+            } else if (parameterDefault.concatTokens().toLowerCase() === "sy-msgid") {
+              val = "abap.builtin.sy.get().msgid";
+            } else if (parameterDefault.concatTokens().toLowerCase() === "sy-msgty") {
+              val = "abap.builtin.sy.get().msgty";
+            } else if (parameterDefault.concatTokens().toLowerCase() === "sy-msgno") {
+              val = "abap.builtin.sy.get().msgno";
+            } else if (parameterDefault.concatTokens().toLowerCase() === "sy-msgv1") {
+              val = "abap.builtin.sy.get().msgv1";
+            } else if (parameterDefault.concatTokens().toLowerCase() === "sy-msgv2") {
+              val = "abap.builtin.sy.get().msgv2";
+            } else if (parameterDefault.concatTokens().toLowerCase() === "sy-msgv3") {
+              val = "abap.builtin.sy.get().msgv3";
+            } else if (parameterDefault.concatTokens().toLowerCase() === "sy-msgv4") {
+              val = "abap.builtin.sy.get().msgv4";
             } else {
               // note: this can be difficult, the "def" might be from an interface, ie. a different scope than the method
               val = new FieldChainTranspiler().transpile(parameterDefault, traversal, true, methodDef?.getFilename()).getCode();
