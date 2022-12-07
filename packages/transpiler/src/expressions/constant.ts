@@ -83,6 +83,7 @@ export class ConstantTranspiler implements IExpressionTranspiler {
       while (reg.test(str)) {
         str = str.replace(reg, "$1\\`$2");
       }
+      str = str.replace(/\$\{/g, "\\${");
     }
 
     return str;
