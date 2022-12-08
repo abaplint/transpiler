@@ -17,6 +17,11 @@ export class HandleABAP {
 
     let ret: IOutputFile[] = [];
 
+    if (obj instanceof abaplint.Objects.Program && obj.isInclude() === true) {
+      // includes are only compiled along with the programs where its used?
+      return [];
+    }
+
     for (const file of obj.getSequencedFiles()) {
       const chunk = new Chunk();
 
