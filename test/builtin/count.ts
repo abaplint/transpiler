@@ -46,4 +46,35 @@ describe("Builtin functions - count", () => {
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("offset and length", async () => {
+    const code = `
+    ASSERT count( val = 'hello' sub = 'l' off = 2 len = 1 ) = 1.
+    ASSERT count( val = 'hello' sub = 'l' off = 2 len = 2 ) = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("offset", async () => {
+    const code = `
+    DATA c TYPE i.
+    c = count( val = 'hello' sub = 'l' off = 2 ).
+    WRITE / c.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+  it("length", async () => {
+    const code = `
+    DATA c TYPE i.
+    c = count( val = 'hello' sub = 'l' len = 2 ).
+    WRITE / c.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
 });

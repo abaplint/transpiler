@@ -21,5 +21,17 @@ export function co(left: number | string | ICharacter | INumeric, right: string 
 
   const characters = r.split("");
 
-  return l.split("").every(c => characters.includes(c));
+  let fdpos = 0;
+  for (const c of l.split("")) {
+    if (characters.includes(c) === false) {
+      // @ts-ignore
+      abap.builtin.sy.get().fdpos.set(fdpos);
+      return false;
+    }
+    fdpos++;
+  }
+  // @ts-ignore
+  abap.builtin.sy.get().fdpos.set(fdpos);
+
+  return true;
 }

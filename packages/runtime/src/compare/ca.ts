@@ -19,7 +19,19 @@ export function ca(left: number | string | ICharacter | INumeric, right: string 
     r = right.get().toString();
   }
 
-  const split = r.split("");
+  const characters = r.split("");
 
-  return split.some(c => l.includes(c));
+  let fdpos = 0;
+  for (const c of l.split("")) {
+    if (characters.includes(c) === true) {
+      // @ts-ignore
+      abap.builtin.sy.get().fdpos.set(fdpos);
+      return true;
+    }
+    fdpos++;
+  }
+  // @ts-ignore
+  abap.builtin.sy.get().fdpos.set(fdpos);
+
+  return false;
 }

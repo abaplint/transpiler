@@ -19,6 +19,7 @@ export * from "./match";
 export * from "./matches";
 export * from "./nmax";
 export * from "./nmin";
+export * from "./numofchar";
 export * from "./repeat";
 export * from "./replace";
 export * from "./reverse";
