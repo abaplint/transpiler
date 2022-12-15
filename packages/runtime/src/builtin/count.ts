@@ -1,18 +1,30 @@
 import {initial} from "../compare";
 import {Integer} from "../types";
 import {ICharacter} from "../types/_character";
+import {INumeric} from "../types/_numeric";
 
 export type countInput = {
   val: ICharacter,
   sub: ICharacter,
   regex?: ICharacter,
   case?: ICharacter,
+  len?: INumeric,
+  off?: INumeric,
 };
 
 export function count(input: countInput) {
   let found = 0;
 
-  const val = input.val.get();
+  let val = input.val.get();
+
+  if (input.off) {
+    const off = input.off.get();
+    val = val.substring(off);
+  }
+  if (input.len) {
+    const len = input.len.get();
+    val = val.substring(0, len);
+  }
 
   let reg = "";
   if (input.sub) {
