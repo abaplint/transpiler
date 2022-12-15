@@ -866,4 +866,32 @@ ENDIF.`;
     expect(abap.console.get()).to.equal(`yes`);
   });
 
+  it("set fdpos, CO", async () => {
+    const code = `
+IF 'AB' CO sy-abcde.
+  WRITE / sy-fdpos.
+ENDIF.
+IF NOT 'ABC1' CO sy-abcde.
+  WRITE / sy-fdpos.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`2\n3`);
+  });
+
+  it.skip("set fdpos, CA", async () => {
+    const code = `
+IF '12C' CA sy-abcde.
+  WRITE / sy-fdpos.
+ENDIF.
+IF NOT '123' CA sy-abcde.
+  WRITE / sy-fdpos.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`2\n3`);
+  });
+
 });
