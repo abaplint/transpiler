@@ -880,7 +880,7 @@ ENDIF.`;
     expect(abap.console.get()).to.equal(`2\n3`);
   });
 
-  it.skip("set fdpos, CA", async () => {
+  it("set fdpos, CA", async () => {
     const code = `
 IF '12C' CA sy-abcde.
   WRITE / sy-fdpos.
