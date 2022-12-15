@@ -717,4 +717,16 @@ CLEAR t100.`;
     await f(abap);
   });
 
+  it.only("DESCENDING", async () => {
+    const code = `
+DATA ls_t100 TYPE t100.
+SELECT * FROM t100 INTO ls_t100 UP TO 1 ROWS ORDER BY msgnr DESCENDING.
+ENDSELECT.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
