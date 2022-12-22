@@ -1500,8 +1500,14 @@ CLASS foo DEFINITION.
     CONSTANTS: BEGIN OF /foo/bar,
                  msgid TYPE i VALUE 2,
                END OF /foo/bar.
+    METHODS m.
 ENDCLASS.
+
 CLASS foo IMPLEMENTATION.
+  METHOD m.
+    DATA foo LIKE /foo/bar.
+    foo = /foo/bar.
+  ENDMETHOD.
 ENDCLASS.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
