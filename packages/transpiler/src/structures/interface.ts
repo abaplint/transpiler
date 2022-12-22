@@ -14,7 +14,7 @@ export class InterfaceTranspiler implements IStructureTranspiler {
     for (const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.Interface) {
         name = c.findDirectExpression(abaplint.Expressions.InterfaceName)?.getFirstToken().getStr().toLowerCase();
-        name = Traversal.escapeClassName(name);
+        name = Traversal.escapeNamespace(name);
         ret += `class ${name} {\n`;
         ret += `static INTERNAL_TYPE = 'INTF';\n`;
         ret += `static IMPLEMENTED_INTERFACES = [${def?.getImplementing().map(e => `"` + e.name.toUpperCase() + `"`).join(",")}];\n`;
@@ -34,7 +34,7 @@ export class InterfaceTranspiler implements IStructureTranspiler {
       return "";
     }
 
-    const prefix = Traversal.escapeClassName(idef.getName().toLowerCase()) + ".";
+    const prefix = Traversal.escapeNamespace(idef.getName().toLowerCase()) + ".";
     let ret = "";
     for (const ty of idef.getTypeDefinitions().getAll()) {
       ret += new TranspileTypes().declareStaticSkipVoid(prefix, ty.type);
@@ -58,7 +58,7 @@ export class InterfaceTranspiler implements IStructureTranspiler {
           || identifier.getMeta().includes(abaplint.IdentifierMeta.ReadOnly) === false) {
         continue;
       }
-      const interfaceName = Traversal.escapeClassName(node.getFirstToken().getStr().toLowerCase());
+      const interfaceName = Traversal.escapeNamespace(node.getFirstToken().getStr().toLowerCase());
       const name = interfaceName + "." + interfaceName + "$" + n.toLowerCase();
       ret += name + " = " + new TranspileTypes().toType(identifier.getType()) + ";\n";
 
