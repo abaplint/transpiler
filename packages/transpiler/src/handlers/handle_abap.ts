@@ -125,14 +125,14 @@ export class HandleABAP {
         continue;
       }
       if (name) {
-        contents.appendString("const {" + Traversal.escapeClassName(name) + "} = await import(\"./" + filename.replace(/#/g, "%23") + "\");\n");
+        contents.appendString("const {" + Traversal.escapeNamespace(name) + "} = await import(\"./" + filename.replace(/#/g, "%23") + "\");\n");
       } else {
         contents.appendString("await import(\"./" + filename.replace(/#/g, "%23") + "\");\n");
       }
     }
     contents.appendChunk(output.chunk);
     if (output.exports.length > 0) {
-      contents.appendString("\nexport {" + output.exports.map(Traversal.escapeClassName).join(", ") + "};");
+      contents.appendString("\nexport {" + output.exports.map(Traversal.escapeNamespace).join(", ") + "};");
     }
     return contents;
   }

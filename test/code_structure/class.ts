@@ -1493,4 +1493,20 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello");
   });
 
+  it("namespace prefixed constant", async () => {
+    const code = `
+CLASS foo DEFINITION.
+  PUBLIC SECTION.
+    CONSTANTS: BEGIN OF /foo/bar,
+                 msgid TYPE i VALUE 2,
+               END OF /foo/bar.
+ENDCLASS.
+CLASS foo IMPLEMENTATION.
+ENDCLASS.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    // check no syntax errors
+    await f(abap);
+  });
+
 });

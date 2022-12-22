@@ -124,14 +124,14 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
     if (method && method.isStatic()) {
       // in ABAP static methods can be called with instance arrows, "->"
       const className = scope.getParent()?.getIdentifier().sname?.toLowerCase();
-      staticMethod = "async " + Traversal.escapeClassName(methodName) + "(" + unique + ") {\n" +
-        "return " + Traversal.escapeClassName(className) + "." + Traversal.escapeClassName(methodName) + "(" + unique + ");\n" +
+      staticMethod = "async " + Traversal.escapeNamespace(methodName) + "(" + unique + ") {\n" +
+        "return " + Traversal.escapeNamespace(className) + "." + Traversal.escapeNamespace(methodName) + "(" + unique + ");\n" +
         "}\n" + "static ";
     }
 
     UniqueIdentifier.resetIndexBackup();
 
-    const str = staticMethod + "async " + Traversal.escapeClassName(methodName) + "(" + unique + ") {" + after;
+    const str = staticMethod + "async " + Traversal.escapeNamespace(methodName) + "(" + unique + ") {" + after;
     return new Chunk().append(str, node, traversal);
   }
 

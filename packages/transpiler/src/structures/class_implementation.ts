@@ -74,7 +74,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
       return "ERROR_CDEF_NOT_FOUND";
     }
 
-    const prefix = Traversal.escapeClassName(cdef.getName().toLowerCase()) + ".";
+    const prefix = Traversal.escapeNamespace(cdef.getName().toLowerCase()) + ".";
     let ret = "";
     for (const ty of cdef.getTypeDefinitions().getAll()) {
       ret += new TranspileTypes().declareStaticSkipVoid(prefix, ty.type);
@@ -100,7 +100,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     const clasName = node.getFirstToken().getStr().toLowerCase();
     const staticAttributes = this.findStaticAttributes(cdef, scope);
     for (const attr of staticAttributes) {
-      const name = Traversal.escapeClassName(clasName) + "." + attr.prefix + attr.identifier.getName().toLowerCase();
+      const name = Traversal.escapeNamespace(clasName) + "." + attr.prefix + Traversal.escapeNamespace(attr.identifier.getName().toLowerCase());
       ret += name + " = " + new TranspileTypes().toType(attr.identifier.getType()) + ";\n";
 
       ret += traversal.setValues(attr.identifier, name);
@@ -117,7 +117,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     // this is not correct, ABAP does not invocate the class constructor at require time,
     // but this will probably work
     if (cdef.getMethodDefinitions().getByName("class_constructor")) {
-      ret += "await " + Traversal.escapeClassName(node.getFirstToken().getStr().toLowerCase()) + ".class_constructor();\n";
+      ret += "await " + Traversal.escapeNamespace(node.getFirstToken().getStr().toLowerCase()) + ".class_constructor();\n";
     }
 
     return ret;

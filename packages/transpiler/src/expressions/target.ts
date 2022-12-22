@@ -30,9 +30,9 @@ export class TargetTranspiler implements IExpressionTranspiler {
         }
       } else if (c.get() instanceof Expressions.AttributeName) {
         const intf = traversal.isInterfaceAttribute(c.getFirstToken());
-        let name = Traversal.escapeClassName(c.getFirstToken().getStr())!.replace("~", "$").toLowerCase();
+        let name = Traversal.escapeNamespace(c.getFirstToken().getStr())!.replace("~", "$").toLowerCase();
         if (intf && name.startsWith(intf) === false) {
-          name = Traversal.escapeClassName(intf) + "$" + name;
+          name = Traversal.escapeNamespace(intf) + "$" + name;
         }
         ret.append(name, c, traversal);
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.FieldOffset) {

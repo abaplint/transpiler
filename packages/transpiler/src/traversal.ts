@@ -26,7 +26,7 @@ export class Traversal {
     this.runtimeTypeError = runtimeTypeError;
   }
 
-  public static escapeClassName(name: string | undefined) {
+  public static escapeNamespace(name: string | undefined) {
     return name?.replace(/\//g, "$");
   }
 
@@ -157,9 +157,9 @@ export class Traversal {
         const found = this.reg.findObjectForFile(file);
         if (found) {
           if (found instanceof abaplint.Objects.Interface) {
-            return Traversal.escapeClassName(this.lookupClassOrInterface(found.getName(), t)) + "." + found.getName().toLowerCase() + "$" + name;
+            return Traversal.escapeNamespace(this.lookupClassOrInterface(found.getName(), t)) + "." + found.getName().toLowerCase() + "$" + name;
           } else {
-            return Traversal.escapeClassName(this.lookupClassOrInterface(found.getName(), t)) + "." + name;
+            return Traversal.escapeNamespace(this.lookupClassOrInterface(found.getName(), t)) + "." + name;
           }
         }
       }
@@ -167,11 +167,11 @@ export class Traversal {
 
     const className = this.isStaticClassAttribute(t);
     if (className) {
-      name = Traversal.escapeClassName(className) + "." + name;
+      name = Traversal.escapeNamespace(className) + "." + name;
     } else if (name === "super") {
       return name;
     } else if (this.isClassAttribute(t)) {
-      name = "this." + Traversal.escapeClassName(name);
+      name = "this." + Traversal.escapeNamespace(name);
     } else if (this.isBuiltinVariable(t)) {
       name = "abap.builtin." + name;
     }
@@ -308,7 +308,7 @@ export class Traversal {
       ret += `await super.constructor_(INPUT);\n`;
     }
 
-    const cName = Traversal.escapeClassName(def.getName().toLowerCase());
+    const cName = Traversal.escapeNamespace(def.getName().toLowerCase());
 
     ret += "this.me = new abap.types.ABAPObject();\n";
     ret += "this.me.set(this);\n";
@@ -316,7 +316,7 @@ export class Traversal {
       if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
         continue;
       }
-      const name = "this." + a.getName().toLowerCase();
+      const name = "this." + Traversal.escapeNamespace(a.getName().toLowerCase());
       ret += name + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
       ret += this.setValues(a, name);
     }
@@ -328,11 +328,11 @@ export class Traversal {
 
     // handle aliases after initialization of carrier variables
     for (const a of def.getAliases().getAll()) {
-      ret += "this." + a.getName().toLowerCase() + " = this." + Traversal.escapeClassName(a.getComponent().replace("~", "$").toLowerCase()) + ";\n";
+      ret += "this." + a.getName().toLowerCase() + " = this." + Traversal.escapeNamespace(a.getComponent().replace("~", "$").toLowerCase()) + ";\n";
     }
     // constants can be accessed both statically and via reference
     for (const c of def.getAttributes().getConstants()) {
-      ret += "this." + c.getName().toLowerCase() + " = " + cName + "." + c.getName().toLowerCase() + ";\n";
+      ret += "this." + Traversal.escapeNamespace(c.getName().toLowerCase()) + " = " + cName + "." + Traversal.escapeNamespace(c.getName().toLowerCase()) + ";\n";
     }
 
     return ret;
@@ -373,7 +373,7 @@ export class Traversal {
       if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
         continue;
       }
-      const n = Traversal.escapeClassName(name.toLowerCase()) + "$" + a.getName().toLowerCase();
+      const n = Traversal.escapeNamespace(name.toLowerCase()) + "$" + a.getName().toLowerCase();
       ret += "this." + n + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
     }
 
@@ -472,9 +472,9 @@ export class Traversal {
     const name = def.getName();
     if (def.isGlobal() === false) {
       const prefix = this.buildPrefix(def);
-      return `abap.Classes['${prefix}-${name.toUpperCase()}'] = ${Traversal.escapeClassName(name.toLowerCase())};`;
+      return `abap.Classes['${prefix}-${name.toUpperCase()}'] = ${Traversal.escapeNamespace(name.toLowerCase())};`;
     } else {
-      return `abap.Classes['${name.toUpperCase()}'] = ${Traversal.escapeClassName(name.toLowerCase())};`;
+      return `abap.Classes['${name.toUpperCase()}'] = ${Traversal.escapeNamespace(name.toLowerCase())};`;
     }
   }
 

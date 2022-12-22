@@ -10,13 +10,13 @@ export class ClassImplementationTranspiler implements IStatementTranspiler {
 
     const def = traversal.getClassDefinition(token);
 
-    let ret = "class " + Traversal.escapeClassName(token.getStr().toLowerCase());
+    let ret = "class " + Traversal.escapeNamespace(token.getStr().toLowerCase());
 
     if (token.getStr().toLowerCase() === "cx_root") {
       // special case for exceptions
       ret += " extends Error";
     } else if (def?.getSuperClass()) {
-      ret += " extends " + Traversal.escapeClassName(def?.getSuperClass()?.toLowerCase());
+      ret += " extends " + Traversal.escapeNamespace(def?.getSuperClass()?.toLowerCase());
     }
 
     return new Chunk().append(ret + ` {
