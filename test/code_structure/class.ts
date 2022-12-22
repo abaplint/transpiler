@@ -1515,4 +1515,28 @@ ENDCLASS.`;
     await f(abap);
   });
 
+  it("namespaced interface target variable, static", async () => {
+    const code = `
+INTERFACE /foo/bar.
+  CLASS-DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+ENDINTERFACE.
+
+CLASS cls DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES /foo/bar.
+    METHODS m.
+ENDCLASS.
+
+CLASS cls IMPLEMENTATION.
+  METHOD m.
+    DATA wa TYPE i.
+    APPEND wa TO /foo/bar~tab.
+  ENDMETHOD.
+ENDCLASS.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    // check no syntax errors
+    await f(abap);
+  });
+
 });
