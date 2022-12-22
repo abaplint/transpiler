@@ -1493,17 +1493,24 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello");
   });
 
-  it("namespace prefixed constant", async () => {
+  it.only("namespace prefixed constant", async () => {
     const code = `
 CLASS foo DEFINITION.
   PUBLIC SECTION.
     CONSTANTS: BEGIN OF /foo/bar,
                  msgid TYPE i VALUE 2,
                END OF /foo/bar.
+    METHODS m.
 ENDCLASS.
+
 CLASS foo IMPLEMENTATION.
+  METHOD m.
+    DATA foo LIKE /foo/bar.
+    foo = /foo/bar.
+  ENDMETHOD.
 ENDCLASS.`;
     const js = await run(code);
+    console.dir(js);
     const f = new AsyncFunction("abap", js);
     // check no syntax errors
     await f(abap);
