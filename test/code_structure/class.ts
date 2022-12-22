@@ -1493,7 +1493,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello");
   });
 
-  it.only("namespace prefixed constant", async () => {
+  it("namespace prefixed constant", async () => {
     const code = `
 CLASS foo DEFINITION.
   PUBLIC SECTION.
@@ -1510,7 +1510,6 @@ CLASS foo IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     // check no syntax errors
     await f(abap);
