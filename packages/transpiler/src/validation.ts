@@ -33,6 +33,7 @@ export const config: IConfig = {
         "DEVC",
         "DOMA",
         "DTEL",
+        "ENHS",
         "ENQU",
         "FUGR",
         "INTF",

@@ -26,7 +26,7 @@ describe("transpiler, database setup", () => {
     const view = new abaplint.MemoryFile("zag_unit_test_v.view.xml", zag_unit_test_v);
     const reg = new abaplint.Registry().addFiles([view]).parse();
     const result = new SQLiteDatabaseSchema(reg).run();
-    expect(result[0]).to.equal(`CREATE VIEW 'zag_unit_test_v' AS SELECT zag_unit_test_t1.mandt AS mandt, zag_unit_test_t1.key_field AS key_field, zag_unit_test_t1.data_field AS data_field, zag_unit_test_t2.data AS data FROM zag_unit_test_t1 INNER JOIN zag_unit_test_t2 ON zag_unit_test_t1.data_field = zag_unit_test_t2.key_field;`);
+    expect(result[0]).to.equal(`CREATE VIEW 'zag_unit_test_v' AS SELECT 'zag_unit_test_t1'.mandt AS mandt, 'zag_unit_test_t1'.key_field AS key_field, 'zag_unit_test_t1'.data_field AS data_field, 'zag_unit_test_t2'.data AS data FROM 'zag_unit_test_t1' INNER JOIN 'zag_unit_test_t2' ON 'zag_unit_test_t1'.data_field = 'zag_unit_test_t2'.key_field;`);
   });
 
 });

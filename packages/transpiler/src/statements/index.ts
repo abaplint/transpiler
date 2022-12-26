@@ -19,6 +19,7 @@ export * from "./class_definition_load";
 export * from "./class_implementation";
 export * from "./class_local_friends";
 export * from "./clear";
+export * from "./initialization";
 export * from "./close_dataset";
 export * from "./collect";
 export * from "./commit";
