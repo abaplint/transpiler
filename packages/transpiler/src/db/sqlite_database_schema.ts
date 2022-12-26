@@ -31,17 +31,17 @@ export class SQLiteDatabaseSchema {
   // https://www.sqlite.org/lang_createview.html
   private buildVIEW(view: abaplint.Objects.View): string {
     const fields = view.getFields();
-    const columns = fields?.map((f) => f.TABNAME.toLowerCase() + "." + f.FIELDNAME.toLowerCase() + " AS " + f.VIEWFIELD.toLowerCase()).join(", ");
+    const columns = fields?.map((f) => "'" + f.TABNAME.toLowerCase() + "'." + f.FIELDNAME.toLowerCase() + " AS " + f.VIEWFIELD.toLowerCase()).join(", ");
 
     let from = "";
     let previous = "";
     for (const j of view.getJoin() || []) {
       if (previous === "") {
-        from += j.LTAB.toLowerCase() + " INNER JOIN " + j.RTAB.toLowerCase() + " ON " + j.LTAB.toLowerCase() + "." + j.LFIELD.toLowerCase() + " = " + j.RTAB.toLowerCase() + "." + j.RFIELD.toLowerCase();
+        from += "'" + j.LTAB.toLowerCase() + "' INNER JOIN '" + j.RTAB.toLowerCase() + "' ON '" + j.LTAB.toLowerCase() + "'." + j.LFIELD.toLowerCase() + " = '" + j.RTAB.toLowerCase() + "'." + j.RFIELD.toLowerCase();
       } else if (previous === j.LTAB + "," + j.RTAB) {
-        from += " AND " + j.LTAB.toLowerCase() + "." + j.LFIELD.toLowerCase() + " = " + j.RTAB.toLowerCase() + "." + j.RFIELD.toLowerCase();
+        from += " AND '" + j.LTAB.toLowerCase() + "'." + j.LFIELD.toLowerCase() + " = '" + j.RTAB.toLowerCase() + "'." + j.RFIELD.toLowerCase();
       } else {
-        from += " INNER JOIN " + j.RTAB.toLowerCase() + " ON " + j.LTAB.toLowerCase() + "." + j.LFIELD.toLowerCase() + " = " + j.RTAB.toLowerCase() + "." + j.RFIELD.toLowerCase();
+        from += " INNER JOIN '" + j.RTAB.toLowerCase() + "' ON '" + j.LTAB.toLowerCase() + "'." + j.LFIELD.toLowerCase() + " = '" + j.RTAB.toLowerCase() + "'." + j.RFIELD.toLowerCase();
       }
       previous = j.LTAB + "," + j.RTAB;
     }
