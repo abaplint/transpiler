@@ -138,6 +138,10 @@ async function run() {
             // todo, fix, there might be global test methods
             continue;
           }
+          const hasTestFile = obj.getFiles().some(f => { return f.getFilename().includes(".testclasses."); });
+          if (hasTestFile === false) {
+            break;
+          }
           ret += `    {
       const {${def.name}} = await import("./${this.escapeNamespace(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}.testclasses.mjs");
       locl = clas.addTestClass("${def.name}");
