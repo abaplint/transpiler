@@ -12,8 +12,22 @@ export function translate(input: ICharacter, i: ICharacter | string): void {
   } else {
     const chunks = c.match(/.{1,2}/g);
     for (const chunk of chunks || []) {
-      const search = chunk.substr(0, 1);
+      let search = chunk.substr(0, 1);
       const replace = chunk.substr(1, 1);
+
+      // regexp escaping
+      if (search === "+"
+          || search === "."
+          || search === "^"
+          || search === "$"
+          || search === "|"
+          || search === "["
+          || search === "]"
+          || search === "("
+          || search === ")") {
+        search = "\\" + search;
+      }
+
       input.set(input.get().replace(new RegExp(search, "g"), replace));
     }
   }
