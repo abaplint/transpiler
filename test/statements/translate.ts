@@ -82,4 +82,16 @@ WRITE str.`;
     expect(abap.console.get()).to.equal("HelloWorld");
   });
 
+  it("TRANSLATE USING special characters", async () => {
+    const code = `
+    DATA lv_special_chars(50) TYPE c VALUE '. _ ! " & / = + : , - ( ) # @ % ^ $ | ~ '.
+    DATA plain_text_lc TYPE string.
+    plain_text_lc = 'foo'.
+    TRANSLATE plain_text_lc USING lv_special_chars.
+    ASSERT plain_text_lc = 'foo'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
