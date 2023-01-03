@@ -94,4 +94,17 @@ WRITE str.`;
     await f(abap);
   });
 
+  it("more special characters", async () => {
+    const code = `
+CONSTANTS c_symbols TYPE string VALUE \` _/_\\_:_;_~_._,_-_+_=_>_<_|_(_)_[_]_{_}_@_+_*_?_!_&_$_#_%_^_'_§_\`.
+DATA name TYPE string.
+name = 's d~f'.
+TRANSLATE name USING c_symbols.
+WRITE name.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("s_d_f");
+  });
+
 });
