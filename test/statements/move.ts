@@ -53,6 +53,24 @@ describe("Running statements - MOVE", () => {
     expect(abap.console.get()).to.equal("22");
   });
 
+  it.only("Chained assignment, truncating", async () => {
+    const code = `
+DATA foo1 TYPE c LENGTH 10.
+DATA foo2 TYPE c LENGTH 5.
+DATA foo3 TYPE c LENGTH 10.
+
+foo3 = 'HELLOWORLD'.
+
+foo1 = foo2 = foo3.
+WRITE / foo1.
+WRITE / foo2.`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("HELLO\nHELLO");
+  });
+
   it("namespaced field", async () => {
     const code = `
 DATA: BEGIN OF foo,
