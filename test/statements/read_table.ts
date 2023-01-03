@@ -320,4 +320,54 @@ ASSERT sy-subrc = 4.`;
     await f(abap);
   });
 
+  it("FROM INTO", async () => {
+    const code = `
+TYPES: BEGIN OF t_name_value,
+         name  TYPE string,
+         value TYPE string,
+       END OF t_name_value.
+DATA params TYPE SORTED TABLE OF t_name_value WITH UNIQUE KEY name.
+DATA row LIKE LINE OF params.
+DATA res LIKE LINE OF params.
+DATA lr_res TYPE REF TO t_name_value.
+
+row-name = 'foo'.
+row-value = 'hello'.
+APPEND row TO params.
+CLEAR row-value.
+
+READ TABLE params FROM row INTO res.
+WRITE res-value.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello");
+  });
+
+  it("FROM field symbol INTO", async () => {
+    const code = `
+TYPES: BEGIN OF t_name_value,
+         name  TYPE string,
+         value TYPE string,
+       END OF t_name_value.
+DATA params TYPE SORTED TABLE OF t_name_value WITH UNIQUE KEY name.
+DATA row LIKE LINE OF params.
+FIELD-SYMBOLS <row> LIKE row.
+DATA res LIKE LINE OF params.
+DATA lr_res TYPE REF TO t_name_value.
+
+row-name = 'foo'.
+row-value = 'hello'.
+APPEND row TO params.
+CLEAR row-value.
+ASSIGN row TO <row>.
+
+READ TABLE params FROM <row> INTO res.
+WRITE res-value.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello");
+  });
+
 });
