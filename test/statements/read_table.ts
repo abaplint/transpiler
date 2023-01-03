@@ -398,4 +398,25 @@ WRITE res-value.`;
     expect(abap.console.get()).to.equal("hello");
   });
 
+  it("clike structure into string", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         name TYPE c LENGTH 10,
+       END OF ty.
+DATA keys TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row LIKE LINE OF keys.
+DATA key_name TYPE string.
+
+row-name = 'hello'.
+APPEND row TO keys.
+
+READ TABLE keys INDEX 1 INTO key_name.
+
+WRITE key_name.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello");
+  });
+
 });

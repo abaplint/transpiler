@@ -3,6 +3,7 @@ import {throwError} from "../throw_error";
 import {Character} from "./character";
 import {Hex} from "./hex";
 import {Integer} from "./integer";
+import {Structure} from "./structure";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 
@@ -27,12 +28,12 @@ export class String implements ICharacter {
     } else if (value instanceof Character) {
       // replace trailing blanks if the source is a Character string
       this.value = value.getTrimEnd();
+    } else if (value instanceof Structure) {
+      this.value = value.getCharacter();
     } else if (value instanceof Integer) {
       const lv_sign = (parseInt(value.get(), 10) >= 0) ? " " : "-";
       this.value = value.get() + lv_sign;
-    }
-
-    else {
+    } else {
       this.value = value.get() + "";
     }
     return this;
