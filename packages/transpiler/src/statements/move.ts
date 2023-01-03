@@ -6,7 +6,7 @@ import {Chunk} from "../chunk";
 export class MoveTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    const source = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Source));
+    let source = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Source));
 
     const targets: Chunk[] = [];
     for (const t of node.findDirectExpressions(abaplint.Expressions.Target)) {
@@ -22,11 +22,12 @@ export class MoveTranspiler implements IStatementTranspiler {
         .appendChunk(source)
         .append(");", node.getLastToken(), traversal);
     } else {
-      for (const target of targets) {
+      for (const target of targets.reverse()) {
         ret.appendChunk(target)
           .appendString(".set(")
           .appendChunk(source)
           .append(");", node.getLastToken(), traversal);
+        source = target;
       }
     }
 
