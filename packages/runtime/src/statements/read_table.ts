@@ -45,6 +45,9 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
     if (options.from instanceof FieldSymbol) {
       options.from = options.from.getPointer();
     }
+    if (table instanceof FieldSymbol) {
+      table = table.getPointer();
+    }
     if (table instanceof Table && options.from instanceof Structure) {
       const keys = table.getOptions()?.primaryKey?.keyFields;
       const isStructured = arr[0] instanceof Structure;
