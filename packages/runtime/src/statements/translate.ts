@@ -17,12 +17,15 @@ export function translate(input: ICharacter, i: ICharacter | string): void {
 
       // regexp escaping
       if (search === "+"
+          || search === "*"
+          || search === "?"
           || search === "."
           || search === "^"
           || search === "$"
           || search === "|"
           || search === "["
           || search === "]"
+          || search === "\\"
           || search === "("
           || search === ")") {
         search = "\\" + search;
