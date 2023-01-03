@@ -42,6 +42,9 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
       foundIndex = 0;
     }
   } else if (options?.from) {
+    if (options.from instanceof FieldSymbol) {
+      options.from = options.from.getPointer();
+    }
     if (table instanceof Table && options.from instanceof Structure) {
       const keys = table.getOptions()?.primaryKey?.keyFields;
       const isStructured = arr[0] instanceof Structure;
@@ -58,7 +61,7 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
             }
           }
           if (matches === true) {
-            found = arr;
+            found = a;
             break;
           }
         }
