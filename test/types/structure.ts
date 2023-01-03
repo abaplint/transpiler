@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src/";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -28,6 +28,22 @@ foo1 = foo2.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("Move, cstructure into string", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         name TYPE c LENGTH 10,
+       END OF ty.
+DATA row TYPE ty.
+DATA key_name TYPE string.
+row-name = 'hello'.
+key_name = row.
+WRITE key_name.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello");
   });
 
 });
