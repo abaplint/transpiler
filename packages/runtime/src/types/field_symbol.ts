@@ -7,6 +7,7 @@ import {Structure} from "./structure";
 import {Hex} from "./hex";
 import {parse} from "../operators/_parse";
 import {Float} from "./float";
+import {DataReference} from "./data_reference";
 
 type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Structure | Float;
 
@@ -51,7 +52,11 @@ export class FieldSymbol  {
   }
 
   public dereference() {
-    return this.pointer;
+    if (this.pointer instanceof DataReference) {
+      return this.pointer.getPointer();
+    } else {
+      return this.pointer;
+    }
   }
 
 ///////////////

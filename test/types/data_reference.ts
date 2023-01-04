@@ -126,7 +126,7 @@ WRITE <data>.`;
     expect(abap.console.get()).to.equal("2");
   });
 
-  it.skip("type after assign", async () => {
+  it("type after assign", async () => {
     const code = `
 DATA lv_typ TYPE c LENGTH 1.
 DATA ref TYPE REF TO i.
@@ -138,7 +138,6 @@ ASSIGN <ref>->* TO <data>.
 DESCRIBE FIELD <data> TYPE lv_typ.
 WRITE lv_typ.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("I");
