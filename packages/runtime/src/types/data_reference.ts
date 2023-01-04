@@ -7,6 +7,7 @@ import {Structure} from "./structure";
 import {Float} from "./float";
 import {Hex} from "./hex";
 import {parse} from "../operators/_parse";
+import {FieldSymbol} from "./field_symbol";
 
 type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Structure | Float;
 
@@ -57,6 +58,8 @@ export class DataReference  {
 
   public set(value: any) {
     if (value instanceof DataReference) {
+      return this.pointer = value.getPointer();
+    } else if (value instanceof FieldSymbol && value.getPointer() instanceof DataReference) {
       return this.pointer = value.getPointer();
     } else {
       return this.pointer?.set(value);

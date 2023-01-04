@@ -71,5 +71,28 @@ WRITE foo->*-descr.`;
     expect(abap.console.get()).to.equal("hello");
   });
 
+  it("data references and field symbols", async () => {
+    const code = `
+DATA int TYPE i.
+DATA ref1 TYPE REF TO data.
+DATA ref2 TYPE REF TO data.
+FIELD-SYMBOLS <fs> TYPE data.
+FIELD-SYMBOLS <any> TYPE any.
+
+GET REFERENCE OF int INTO ref1.
+ASSIGN ref1 TO <fs>.
+
+ref2 = <fs>.
+
+ASSIGN ref2->* TO <any>.
+<any> = 2.
+
+WRITE int.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 
 });
