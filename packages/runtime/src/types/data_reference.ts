@@ -60,7 +60,13 @@ export class DataReference  {
     if (value instanceof DataReference) {
       return this.pointer = value.getPointer();
     } else if (value instanceof FieldSymbol) {
-      return this.pointer = value.getPointer();
+      if (value.getPointer() === undefined) {
+        throw "GETWA_NOT_ASSIGNED";
+      } else if (value.getPointer() instanceof DataReference) {
+        return this.pointer = value.getPointer();
+      } else {
+        throw "OBJECTS_MOVE_NOT_SUPPORTED";
+      }
     } else {
       return this.pointer?.set(value);
     }
