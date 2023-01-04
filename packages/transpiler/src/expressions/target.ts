@@ -38,7 +38,10 @@ export class TargetTranspiler implements IExpressionTranspiler {
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.FieldOffset) {
         offset.push("offset: " + new FieldOffsetTranspiler().transpile(c, traversal).getCode());
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.FieldLength) {
-        offset.push("length: " + new FieldLengthTranspiler().transpile(c, traversal).getCode());
+        const len = new FieldLengthTranspiler().transpile(c, traversal).getCode();
+        if (len !== "*") {
+          offset.push("length: " + len);
+        }
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.TargetFieldSymbol) {
         ret.appendChunk(new FieldSymbolTranspiler().transpile(c, traversal));
       } else if (c.getFirstToken().getStr() === "-") {

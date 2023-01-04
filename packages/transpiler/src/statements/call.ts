@@ -89,6 +89,8 @@ if (e.classic) {
       if (ms === "await super.get().constructor") {
 // semantics of constructors in JS vs ABAP is different, so the "constructor_" has been introduced,
         ms = "await super.constructor_";
+      } else if (ms.startsWith("await super.get()")) {
+        ms = ms.replace("await super.get()", "await super");
       }
 
       return new Chunk().appendString(ms).appendString("(" + body + ")" + post + ";");

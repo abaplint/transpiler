@@ -442,4 +442,15 @@ WRITE val+hex-01(1).`;
     await f(abap);
   });
 
+  it("more numeric field names", async () => {
+    const code = `
+DATA char TYPE c LENGTH 10.
+char+2(*) = 'sdf'.
+WRITE char+2(*).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trim()).to.equal("sdf");
+  });
+
 });

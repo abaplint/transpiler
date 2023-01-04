@@ -348,6 +348,40 @@ describe("Running code structure - Class", () => {
     expect(abap.console.get()).to.equal("a\nb");
   });
 
+  it("another call super in redefined method", async () => {
+    const code = `
+CLASS sup DEFINITION.
+  PUBLIC SECTION.
+    METHODS init.
+ENDCLASS.
+CLASS sup IMPLEMENTATION.
+  METHOD init.
+    WRITE / 'hello'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS sub DEFINITION INHERITING FROM sup.
+  PUBLIC SECTION.
+    METHODS init REDEFINITION.
+ENDCLASS.
+
+CLASS sub IMPLEMENTATION.
+  METHOD init.
+    CALL METHOD super->init.
+    WRITE / 'world'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO sub.
+  CREATE OBJECT ref.
+  ref->init( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello\nworld");
+  });
+
   it("testing initialization of variables in constructor", async () => {
     const code = `
       CLASS zcl_super DEFINITION.
