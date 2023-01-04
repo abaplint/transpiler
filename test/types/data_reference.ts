@@ -94,5 +94,20 @@ WRITE int.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("more data references and field symbols", async () => {
+    const code = `
+DATA ref TYPE REF TO i.
+FIELD-SYMBOLS <ref> TYPE data.
+FIELD-SYMBOLS <data> TYPE data.
+CREATE DATA ref.
+ASSIGN ref TO <ref>.
+ASSIGN <ref>->* TO <data>.
+ref->* = 2.
+WRITE <data>.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
 
 });
