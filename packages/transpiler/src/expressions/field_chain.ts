@@ -38,7 +38,7 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
         }
         ret.append(name, c, traversal);
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.Dereference) {
-        ret.append(".getPointer()", c, traversal);
+        ret.append(".dereference()", c, traversal);
       } else if (c.get() instanceof Expressions.ComponentName) {
         const name = c.getFirstToken().getStr().toLowerCase();
         if (name.match(/^\d/) || name.includes("/")) {

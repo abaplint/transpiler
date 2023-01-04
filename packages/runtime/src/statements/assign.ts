@@ -112,8 +112,12 @@ export function assign(input: IAssignInput) {
     }
 
   } else {
+//    console.dir(input);
     if (input.source instanceof FieldSymbol) {
       input.target.assign(input.source.getPointer());
+//    } else if (input.source instanceof DataReference) {
+//      input.target.assign(input.source.getPointer());
+//      console.dir(input.target);
     } else {
       if (input.casting) {
         input.target.setCasting();

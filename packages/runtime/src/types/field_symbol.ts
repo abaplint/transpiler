@@ -7,8 +7,9 @@ import {Structure} from "./structure";
 import {Hex} from "./hex";
 import {parse} from "../operators/_parse";
 import {Float} from "./float";
+import {DataReference} from "./data_reference";
 
-type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Structure;
+type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Structure | Float;
 
 export class FieldSymbol  {
   private pointer: PointerType;
@@ -48,6 +49,14 @@ export class FieldSymbol  {
       return this.get();
     }
     return this.pointer;
+  }
+
+  public dereference() {
+    if (this.pointer instanceof DataReference) {
+      return this.pointer.getPointer();
+    } else {
+      return this.pointer;
+    }
   }
 
 ///////////////

@@ -36,6 +36,10 @@ export class DataReference  {
     return this.pointer;
   }
 
+  public dereference() {
+    return this.pointer;
+  }
+
 ///////////////
 
   public clear() {
@@ -58,9 +62,17 @@ export class DataReference  {
 
   public set(value: any) {
     if (value instanceof DataReference) {
-      return this.pointer = value.getPointer();
-    } else if (value instanceof FieldSymbol && value.getPointer() instanceof DataReference) {
-      return this.pointer = value.getPointer();
+      this.pointer = value.getPointer();
+      return this;
+    } else if (value instanceof FieldSymbol) {
+      if (value.getPointer() === undefined) {
+        throw "GETWA_NOT_ASSIGNED";
+      } else if (value.getPointer() instanceof DataReference) {
+        this.pointer = value.getPointer();
+        return this;
+      } else {
+        throw "OBJECTS_MOVE_NOT_SUPPORTED";
+      }
     } else {
       return this.pointer?.set(value);
     }

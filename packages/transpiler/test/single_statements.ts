@@ -247,9 +247,9 @@ await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({seconds: new abap.types.Integer
     {abap: `ADD 2 to foo.`,
       js: `foo.set(abap.operators.add(foo,new abap.types.Integer().set(2)));`},
     {abap: `ASSIGN lv_test_ref->* TO <lv_test>.`,
-      js: `abap.statements.assign({target: fs_lv_test_, source: (lv_test_ref).getPointer()});`},
+      js: `abap.statements.assign({target: fs_lv_test_, source: (lv_test_ref).dereference()});`},
     {abap: `LOOP AT mr_source_tree->* INTO ls_node. ENDLOOP.`,
-      js: `for await (const unique1 of abap.statements.loop(mr_source_tree.getPointer())) {
+      js: `for await (const unique1 of abap.statements.loop(mr_source_tree.dereference())) {
   ls_node.set(unique1);
 }`},
     {abap: `LOOP AT foo ASSIGNING <fs>. ENDLOOP.`,
