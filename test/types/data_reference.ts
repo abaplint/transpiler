@@ -110,4 +110,37 @@ WRITE <data>.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("another data references and field symbols", async () => {
+    const code = `
+DATA ref TYPE REF TO i.
+FIELD-SYMBOLS <ref> TYPE data.
+FIELD-SYMBOLS <data> TYPE data.
+CREATE DATA ref.
+ASSIGN ref TO <ref>.
+ASSIGN <ref>->* TO <data>.
+<data> = 2.
+WRITE <data>.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+  it("type after assign", async () => {
+    const code = `
+DATA lv_typ TYPE c LENGTH 1.
+DATA ref TYPE REF TO i.
+FIELD-SYMBOLS <ref> TYPE data.
+FIELD-SYMBOLS <data> TYPE data.
+CREATE DATA ref.
+ASSIGN ref TO <ref>.
+ASSIGN <ref>->* TO <data>.
+DESCRIBE FIELD <data> TYPE lv_typ.
+WRITE lv_typ.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("I");
+  });
+
 });

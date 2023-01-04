@@ -59,7 +59,7 @@ export class DataReference  {
   public set(value: any) {
     if (value instanceof DataReference) {
       return this.pointer = value.getPointer();
-    } else if (value instanceof FieldSymbol && value.getPointer() instanceof DataReference) {
+    } else if (value instanceof FieldSymbol) {
       return this.pointer = value.getPointer();
     } else {
       return this.pointer?.set(value);

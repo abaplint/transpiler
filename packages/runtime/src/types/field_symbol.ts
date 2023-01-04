@@ -8,7 +8,7 @@ import {Hex} from "./hex";
 import {parse} from "../operators/_parse";
 import {Float} from "./float";
 
-type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Structure;
+type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Structure | Float;
 
 export class FieldSymbol  {
   private pointer: PointerType;

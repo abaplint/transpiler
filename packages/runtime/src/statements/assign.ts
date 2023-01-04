@@ -114,6 +114,8 @@ export function assign(input: IAssignInput) {
   } else {
     if (input.source instanceof FieldSymbol) {
       input.target.assign(input.source.getPointer());
+    } else if (input.source instanceof DataReference) {
+      input.target.assign(input.source.getPointer());
     } else {
       if (input.casting) {
         input.target.setCasting();
