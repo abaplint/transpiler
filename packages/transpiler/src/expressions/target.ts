@@ -44,12 +44,12 @@ export class TargetTranspiler implements IExpressionTranspiler {
       } else if (c.getFirstToken().getStr() === "-") {
         ret.append(".get()", c, traversal);
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.Dereference) {
-        ret.append(".getPointer()", c, traversal);
+        ret.append(".dereference()", c, traversal);
       } else if (c.getFirstToken().getStr() === "=>") {
         ret.append(".", c, traversal);
       } else if (c.getFirstToken().getStr() === "->") {
         if (next.concatTokens() === "*") {
-          ret.append(".getPointer()", c, traversal);
+          ret.append(".dereference()", c, traversal);
         } else {
           ret.append(".get().", c, traversal);
         }

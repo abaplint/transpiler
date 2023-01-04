@@ -50,6 +50,10 @@ export class FieldSymbol  {
     return this.pointer;
   }
 
+  public dereference() {
+    return this.pointer;
+  }
+
 ///////////////
 
   public clear() {
