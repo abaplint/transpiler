@@ -57,17 +57,21 @@ export class SQLiteDatabaseSchema {
     }
 
     const fields: string[] = [];
+    const fieldsRaw: string[] = [];
     for (const field of type.getComponents()) {
       if (field.type instanceof abaplint.BasicTypes.StructureType) {
         // is a GROUP NAME
         continue;
       }
+      fieldsRaw.push(field.name.toLowerCase());
       fields.push("'" + field.name.toLowerCase() + "' " + this.toType(field.type, field.name, tabl.getName()));
     }
 
     // assumption: all transparent tables have primary keys
     // add single quotes to field names to allow for keywords as field names
-    const key = ", PRIMARY KEY(" + tabl.listKeys(this.reg).map(e => "'" + e.toLowerCase() + "'").join(",") + ")";
+    const key = ", PRIMARY KEY(" + tabl.listKeys(this.reg)
+      .filter(e => fieldsRaw.includes(e.toLowerCase()))
+      .map(e => "'" + e.toLowerCase() + "'").join(",") + ")";
 
     return `CREATE TABLE '${tabl.getName().toLowerCase()}' (${fields.join(", ")}${key});\n`;
   }
