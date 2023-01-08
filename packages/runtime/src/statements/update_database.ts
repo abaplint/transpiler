@@ -5,6 +5,7 @@ import {ICharacter} from "../types/_character";
 export interface IUpdateDatabaseOptions {
   from?: Structure | FieldSymbol,
   table?: Table | FieldSymbol,
+  where?: string,
 }
 
 export class UpdateDatabase {

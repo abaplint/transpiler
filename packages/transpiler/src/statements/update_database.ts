@@ -5,8 +5,18 @@ import {Chunk} from "../chunk";
 
 export class UpdateDatabaseTranspiler implements IStatementTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    return new Chunk(`throw new Error("UpdateDatabase, transpiler todo");`);
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
+    const table = traversal.traverse(node.findFirstExpression(abaplint.Expressions.DatabaseTable));
+
+    const options: string[] = [];
+
+    const cond = node.findFirstExpression(abaplint.Expressions.SQLCond);
+    if (cond) {
+      const ttab = traversal.traverse(cond);
+      options.push(`"where": "` + ttab.getCode() + `"`);
+    }
+
+    return new Chunk(`await abap.statements.updateDatabase(${table.getCode()}, {${options.join(", ")}});`);
   }
 
 }
