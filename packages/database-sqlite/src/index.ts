@@ -67,8 +67,14 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     let subrc = 0;
     let dbcnt = 0;
     try {
-      const res = this.sqlite!.exec(sql);
-      dbcnt = res.length;
+      this.sqlite!.exec(sql);
+
+      // https://www.sqlite.org/c3ref/changes.html
+      const chg = this.sqlite!.exec("SELECT changes()");
+      dbcnt = chg[0]["values"][0][0] as number;
+      if (dbcnt === 0) {
+        subrc = 4;
+      }
     } catch (error) {
       subrc = 4;
     }

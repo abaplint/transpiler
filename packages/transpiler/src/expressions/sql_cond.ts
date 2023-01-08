@@ -76,14 +76,7 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
 
     ret += fieldName.concatTokens() + " " + operator.concatTokens() + " ";
     ret += this.sqlSource(source, traversal);
-    /*
-    const simple = source.findDirectExpression(abaplint.Expressions.SimpleSource3);
-    if (simple && simple.findDirectExpression(abaplint.Expressions.Constant) === undefined) {
-      ret += "'\" + " + new SimpleSource3Transpiler(true).transpile(simple, traversal).getCode() + " + \"'";
-    } else {
-      ret += source.concatTokens();
-    }
-    */
+
     return ret;
   }
 
