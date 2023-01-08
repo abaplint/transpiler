@@ -5,6 +5,8 @@ import {ICharacter} from "../types/_character";
 export interface IUpdateDatabaseOptions {
   from?: Structure | FieldSymbol,
   table?: Table | FieldSymbol,
+  set?: string[],
+  where?: string,
 }
 
 export class UpdateDatabase {
@@ -42,6 +44,11 @@ export class UpdateDatabase {
           set.push(str);
         }
       }
+    } else if (options.set) {
+      if (options.where) {
+        where.push(options.where);
+      }
+      set.push(...options.set);
     } else {
       throw "updateDatabase, todo";
     }

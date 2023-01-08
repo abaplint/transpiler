@@ -741,4 +741,19 @@ ENDSELECT.`;
     await f(abap);
   });
 
+  it("UPDATE, success", async () => {
+    const code = `
+UPDATE t100 SET text = 'sdf' WHERE msgnr = '123'.
+WRITE / sy-dbcnt.
+WRITE / sy-subrc.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test},
+    ]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n0");
+  });
+
 });
