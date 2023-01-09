@@ -106,6 +106,7 @@ export * from "./return";
 export * from "./rollback";
 export * from "./scan";
 export * from "./search";
+export * from "./select_option";
 export * from "./select";
 export * from "./selection_screen";
 export * from "./set_bit";
