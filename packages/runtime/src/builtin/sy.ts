@@ -6,6 +6,7 @@ export const sy = new Structure({
   datum: new Date(),
   dbcnt: new Integer(),
   fdpos: new Integer(),
+  host: new Character(32).set("localhost"),
   index: new Integer(),
   langu: new Character(1).set("E"),
   mandt: new Character(3).set("123"),
