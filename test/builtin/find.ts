@@ -120,11 +120,24 @@ WRITE lv_offset.`;
     expect(abap.console.get()).to.equal("8");
   });
 
+  it("find wich occ positive, 3", async () => {
+    const code = `
+    DATA path TYPE string.
+    DATA res TYPE i.
+    path = 'foo/barr/moosdfsdf/'.
+    res = find( val = path sub = '/' occ = 3 ).
+    WRITE res.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("18");
+  });
+
   it("find wich occ negative, two", async () => {
     const code = `
     DATA path TYPE string.
     DATA res TYPE i.
-    path = 'foo/barr/moo'.
+    path = 'foo/barr/sdfddmoo'.
     res = find( val = path sub = '/' occ = -2 ).
     WRITE res.`;
     const js = await run(code);
@@ -157,6 +170,34 @@ WRITE lv_offset.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("-1");
+  });
+
+  it("find wich occ negative, first", async () => {
+    const code = `
+    DATA res TYPE i.
+    res = find(
+      val = '/test/path/file.xml'
+      sub = '/'
+      occ = -3 ).
+    WRITE res.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
+  it("find wich occ negative, first", async () => {
+    const code = `
+    DATA res TYPE i.
+    res = find(
+      val = '/test/path/file.xml'
+      sub = '/'
+      occ = 2 ).
+    WRITE res.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("5");
   });
 
 });
