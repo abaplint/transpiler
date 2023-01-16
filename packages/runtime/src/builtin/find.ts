@@ -8,6 +8,7 @@ export interface IFindInput {
   sub?: ICharacter | string;
   off?: INumeric | number;
   occ?: INumeric | number;
+  len?: INumeric | number;
   regex?: ICharacter | string;
   case?: ICharacter | string;
 }
@@ -15,7 +16,15 @@ export interface IFindInput {
 export function find(input: IFindInput) {
   let val = typeof input.val === "string" ? input.val : input.val.get();
 
+  if (input.len !== undefined) {
+    throw "transpiler find(), todo len";
+  }
+
   if (input.regex) {
+    if (input.off !== undefined) {
+      throw "transpiler find(), todo off regex";
+    }
+
     const caseInput = typeof input.case === "string" ? input.case : input.case?.get();
     const regex = typeof input.regex === "string" ? input.regex : input.regex.get();
 
