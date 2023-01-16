@@ -49,12 +49,12 @@ export function find(input: IFindInput) {
     let found = -1;
     for (let i = 0; i < occ; i++) {
       found = val.indexOf(sub || "", off);
-      if (found > 0) {
-        off = off + found + 1;
+      if (found >= 0) {
+        off = found + 1;
       }
     }
 
-    if (negative === true && found > 0) {
+    if (negative === true && found >= 0) {
       found = val.length - found - 1;
     }
 
