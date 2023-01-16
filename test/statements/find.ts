@@ -628,4 +628,30 @@ ENDLOOP.`;
     await f(abap);
   });
 
+  it("find printable, zero", async () => {
+    const code = `
+DATA lv_count TYPE i.
+DATA lv_string TYPE string.
+lv_string = |hello|.
+FIND ALL OCCURRENCES OF REGEX '[^[:print:]]' IN lv_string MATCH COUNT lv_count.
+WRITE lv_count.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
+  it("find printable, one", async () => {
+    const code = `
+DATA lv_count TYPE i.
+DATA lv_string TYPE string.
+lv_string = |\\n|.
+FIND ALL OCCURRENCES OF REGEX '[^[:print:]]' IN lv_string MATCH COUNT lv_count.
+WRITE lv_count.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });
