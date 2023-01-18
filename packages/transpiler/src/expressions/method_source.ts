@@ -61,7 +61,7 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
         }
         ret.appendString(`if (${call} === undefined && ${lookupException} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_METHOD not found"; }\n`);
         ret.appendString(`if (${call} === undefined) { throw new ${lookupException}(); }\n`);
-      } else if (child.get() instanceof Expressions.MethodName) {
+      } else if (child.get() instanceof Expressions.MethodName || child.get() instanceof Expressions.AttributeName) {
         if (i === 0) {
           this.prepend += "this.";
         }
@@ -82,7 +82,7 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
         if (!(nextChild.get() instanceof Expressions.Dynamic)) {
           call += ".";
         }
-      } else if (child.get() instanceof Expressions.FieldChain) {
+      } else if (child.get() instanceof Expressions.FieldChain || child.get() instanceof Expressions.SourceField) {
         call += traversal.traverse(child).getCode();
       } else {
         ret.appendString("MethodSourceTranspiler-" + child.get().constructor.name + "-todo");
