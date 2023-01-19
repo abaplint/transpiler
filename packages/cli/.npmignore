@@ -1,4 +1,5 @@
 build/*
+output/*
 !build/bundle.js
 !build/types.d.ts
 src/*

@@ -214,6 +214,7 @@ export class Traversal {
 
   public findMethodReference(token: abaplint.Token, scope: ISpaghettiScopeNode | undefined):
   undefined | {def: abaplint.Types.MethodDefinition, name: string} {
+    let candidate: undefined | {def: abaplint.Types.MethodDefinition, name: string} = undefined;
 
     if (scope === undefined) {
       return undefined;
@@ -228,7 +229,13 @@ export class Traversal {
           name = r.extra.ooName + "$" + name;
         }
 
-        return {def: r.resolved, name};
+        candidate = {def: r.resolved, name};
+        if (token.getStart() instanceof abaplint.VirtualPosition
+          && name.toLowerCase().includes(token.getStr().toLowerCase()) === false) {
+          // if its macros and they are nested everything can go wrong, so try looking for a better candidate
+          continue;
+        }
+        return candidate;
       } else if (r.referenceType === abaplint.ReferenceType.BuiltinMethodReference
           && r.position.getStart().equals(token.getStart())) {
         const def = r.resolved as abaplint.Types.MethodDefinition;
@@ -238,7 +245,7 @@ export class Traversal {
       }
     }
 
-    return undefined;
+    return candidate;
   }
 
   private isBuiltinVariable(token: abaplint.Token): boolean {
