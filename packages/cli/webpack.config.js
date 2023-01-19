@@ -5,6 +5,7 @@ const path = require("path");
 module.exports = {
   entry: "./build/index.js",
   mode: "development",
+  devtool: false,
   target: "node",
   output: {
     filename: "bundle.js",
