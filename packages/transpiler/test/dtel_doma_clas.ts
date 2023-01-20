@@ -12,7 +12,7 @@ async function runFiles(files: IFile[]) {
 
 describe("DTEL + DOMA + CLAS", () => {
 
-  it.only("Testing qualified names", async () => {
+  it("Testing qualified names", async () => {
     const amoo_dtel = `<?xml version="1.0" encoding="utf-8"?>
 <abapGit version="v1.0.0" serializer="LCL_OBJECT_DTEL" serializer_version="v1.0.0">
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
@@ -85,7 +85,7 @@ ENDCLASS.`;
     const output = await runFiles([file1, file2, file3, file4]);
 
     expect(output.length).to.equal(3);
-    console.dir(output[2].chunk.getCode());
+//    console.dir(output[2].chunk.getCode());
     expect(output[2].chunk.getCode()).to.not.contain("AMOO");
   });
 
