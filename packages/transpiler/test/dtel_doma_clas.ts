@@ -74,8 +74,7 @@ describe("DTEL + DOMA + CLAS", () => {
 
     const clas = `CLASS zcl_foobar DEFINITION PUBLIC FINAL CREATE PUBLIC.
   PUBLIC SECTION.
-    TYPES bool TYPE char1.
-    DATA mv_compress TYPE bool.
+    DATA mv_compress TYPE char1.
 ENDCLASS.
 
 CLASS zcl_foobar IMPLEMENTATION.
