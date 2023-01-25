@@ -40,4 +40,44 @@ WRITE / foo.`;
     expect(abap.console.get()).to.equal("5");
   });
 
+  it("compare, LT", async () => {
+    const code = `
+    DATA val1 TYPE decfloat34.
+    DATA val2 TYPE decfloat34.
+    val1 = 20.
+    val2 = 100.
+    ASSERT val1 LT val2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("compare, LT, field symbols", async () => {
+    const code = `
+    DATA val1 TYPE decfloat34.
+    DATA val2 TYPE decfloat34.
+    FIELD-SYMBOLS <fs1> TYPE decfloat34.
+    FIELD-SYMBOLS <fs2> TYPE decfloat34.
+    val1 = 20.
+    val2 = 100.
+    ASSIGN val1 TO <fs1>.
+    ASSIGN val2 TO <fs2>.
+    ASSERT <fs1> LT <fs2>.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("compare, EQ", async () => {
+    const code = `
+    DATA val1 TYPE decfloat34.
+    DATA val2 TYPE decfloat34.
+    val1 = 100.
+    val2 = 100.
+    ASSERT val1 EQ val2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
