@@ -520,4 +520,30 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("interface var set with prefix", async () => {
+    const code = `
+INTERFACE /foo/lif.
+  DATA foo TYPE i.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES /foo/lif.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD constructor.
+    me->/foo/lif~foo = 2.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lcl.
+  CREATE OBJECT lo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
