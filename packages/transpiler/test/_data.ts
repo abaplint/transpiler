@@ -171,3 +171,49 @@ export const zag_unit_test_v = `<?xml version="1.0" encoding="utf-8"?>
   </asx:values>
  </asx:abap>
 </abapGit>`;
+
+export const zsingletablview = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_VIEW" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD25V>
+    <VIEWNAME>ZSINGLETABLVIEW</VIEWNAME>
+    <AS4LOCAL>A</AS4LOCAL>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <AGGTYPE>V</AGGTYPE>
+    <ROOTTAB>SFLIGHT</ROOTTAB>
+    <DDTEXT>sdfsd</DDTEXT>
+    <VIEWCLASS>D</VIEWCLASS>
+    <VIEWGRANT>R</VIEWGRANT>
+   </DD25V>
+   <DD26V_TABLE>
+    <DD26V>
+     <VIEWNAME>ZSINGLETABLVIEW</VIEWNAME>
+     <TABNAME>SFLIGHT</TABNAME>
+     <TABPOS>0001</TABPOS>
+     <FORTABNAME>SFLIGHT</FORTABNAME>
+    </DD26V>
+   </DD26V_TABLE>
+   <DD27P_TABLE>
+    <DD27P>
+     <VIEWFIELD>MANDT</VIEWFIELD>
+     <TABNAME>SFLIGHT</TABNAME>
+     <FIELDNAME>MANDT</FIELDNAME>
+     <KEYFLAG>X</KEYFLAG>
+     <CHECKTABLE>T000</CHECKTABLE>
+     <SHLPORIGIN>P</SHLPORIGIN>
+    </DD27P>
+    <DD27P>
+     <VIEWFIELD>CARRID</VIEWFIELD>
+     <TABNAME>SFLIGHT</TABNAME>
+     <FIELDNAME>CARRID</FIELDNAME>
+     <KEYFLAG>X</KEYFLAG>
+     <CHECKTABLE>SCARR</CHECKTABLE>
+     <SHLPORIGIN>P</SHLPORIGIN>
+     <SHLPNAME>S_CARRIER_ID</SHLPNAME>
+     <SHLPFIELD>CARRID</SHLPFIELD>
+    </DD27P>
+   </DD27P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
