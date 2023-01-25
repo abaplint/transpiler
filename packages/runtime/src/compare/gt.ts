@@ -1,4 +1,4 @@
-import {ABAPObject, Float, Hex, Structure, Table, XString} from "../types";
+import {ABAPObject, DecFloat34, FieldSymbol, Float, Hex, Structure, Table, XString} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {Integer} from "../types/integer";
@@ -7,6 +7,19 @@ import {Integer} from "../types/integer";
 export function gt(
   left: number | string | ICharacter | INumeric | ABAPObject | Structure | Table,
   right: number | string | ICharacter | INumeric | ABAPObject | Structure | Table): boolean {
+
+  if (left instanceof FieldSymbol) {
+    if (left.getPointer() === undefined) {
+      throw "GETWA_NOT_ASSIGNED";
+    }
+    return gt(left.getPointer(), right);
+  } else if (right instanceof FieldSymbol) {
+    if (right.getPointer() === undefined) {
+      throw "GETWA_NOT_ASSIGNED";
+    }
+    return gt(left, right.getPointer());
+  }
+
 
   if (left instanceof Table || right instanceof Table) {
     throw "runtime_todo, gt TABLE";
@@ -19,7 +32,7 @@ export function gt(
   let l: number | string | undefined = undefined;
   if (typeof left === "number" || typeof left === "string") {
     l = left;
-  } else if (left instanceof Float) {
+  } else if (left instanceof Float || left instanceof DecFloat34) {
     l = left.getRaw();
   } else {
     l = left.get();
@@ -28,7 +41,7 @@ export function gt(
   let r: number | string | undefined = undefined;
   if (typeof right === "number" || typeof right === "string") {
     r = right;
-  } else if (right instanceof Float) {
+  } else if (right instanceof Float || right instanceof DecFloat34) {
     r = right.getRaw();
   } else {
     r = right.get();
