@@ -31,7 +31,11 @@ export class SQLiteDatabaseSchema {
   // https://www.sqlite.org/lang_createview.html
   private buildVIEW(view: abaplint.Objects.View): string {
     const fields = view.getFields();
-    const columns = fields?.map((f) => "'" + f.TABNAME.toLowerCase() + "'." + f.FIELDNAME.toLowerCase() + " AS " + f.VIEWFIELD.toLowerCase()).join(", ");
+    let firstTabname = "";
+    const columns = fields?.map((f) => {
+      firstTabname = "'" + f.TABNAME.toLowerCase() + "'";
+      return firstTabname + "." + f.FIELDNAME.toLowerCase() + " AS " + f.VIEWFIELD.toLowerCase();
+    }).join(", ");
 
     let from = "";
     let previous = "";
@@ -46,6 +50,9 @@ export class SQLiteDatabaseSchema {
       previous = j.LTAB + "," + j.RTAB;
     }
     from = from.trim();
+    if (from === "") {
+      from = firstTabname;
+    }
 
     return `CREATE VIEW '${view.getName().toLowerCase()}' AS SELECT ${columns} FROM ${from};\n`;
   }

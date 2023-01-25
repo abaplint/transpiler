@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import {expect} from "chai";
 import * as abaplint from "@abaplint/core";
-import {msag_zag_unit_test, tabl_t100xml, zag_unit_test_v} from "./_data";
+import {msag_zag_unit_test, tabl_t100xml, zag_unit_test_v, zsingletablview} from "./_data";
 import {SQLiteDatabaseSchema} from "../src/db/sqlite_database_schema";
 import {DatabaseSetup} from "../src/db";
 
@@ -27,6 +27,13 @@ describe("transpiler, database setup", () => {
     const reg = new abaplint.Registry().addFiles([view]).parse();
     const result = new SQLiteDatabaseSchema(reg).run();
     expect(result[0]).to.equal(`CREATE VIEW 'zag_unit_test_v' AS SELECT 'zag_unit_test_t1'.mandt AS mandt, 'zag_unit_test_t1'.key_field AS key_field, 'zag_unit_test_t1'.data_field AS data_field, 'zag_unit_test_t2'.data AS data FROM 'zag_unit_test_t1' INNER JOIN 'zag_unit_test_t2' ON 'zag_unit_test_t1'.data_field = 'zag_unit_test_t2'.key_field;`);
+  });
+
+  it("VIEW, single TABL no join", async () => {
+    const view = new abaplint.MemoryFile("zsingletablview.view.xml", zsingletablview);
+    const reg = new abaplint.Registry().addFiles([view]).parse();
+    const result = new SQLiteDatabaseSchema(reg).run();
+    expect(result[0]).to.equal(`CREATE VIEW 'zsingletablview' AS SELECT 'sflight'.mandt AS mandt, 'sflight'.carrid AS carrid FROM 'sflight';`);
   });
 
 });
