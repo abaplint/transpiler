@@ -46,6 +46,14 @@ export function createData(target: DataReference, options?: ICreateDataOptions) 
 
       // @ts-ignore
       target.assign(clone(abap.Classes[className][typeName.toLowerCase()]));
+    } else if (options.name.startsWith("\\TYPE=%")) {
+      // currently, only the runtime knows the references to the anonymous types
+      // @ts-ignore
+      const clas = abap.Classes[options.name];
+      if (clas === undefined) {
+        throw new Error("CreateData, kernel class missing");
+      }
+      clas.anonymous({name: options.name, dref: target});
     } else {
       throwError("CX_SY_CREATE_DATA_ERROR");
     }
