@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
 import * as abaplint from "@abaplint/core";
+import {ITranspilerOptions} from "../types";
 import {DatabaseSetupResult} from "./database_setup_result";
 import {SQLiteDatabaseSchema} from "./sqlite_database_schema";
 
@@ -10,20 +11,20 @@ export class DatabaseSetup {
     this.reg = reg;
   }
 
-  public run(): DatabaseSetupResult {
+  public run(options?: ITranspilerOptions | undefined): DatabaseSetupResult {
     return {
       schemas: {
         sqlite: new SQLiteDatabaseSchema(this.reg).run(),
         hdb: ["todo"],
         pg: ["todo"],
       },
-      insert: this.buildInsert(),
+      insert: this.buildInsert(options),
     };
   }
 
 ////////////////////
 
-  private buildInsert(): string[] {
+  private buildInsert(options?: ITranspilerOptions | undefined): string[] {
     // note: avoid hitting maximum statement size by splitting into multiple statements
     const insert: string[] = [];
     // INSERT data
@@ -32,7 +33,9 @@ export class DatabaseSetup {
         insert.push(this.insertT100(obj));
       } else if (obj instanceof abaplint.Objects.Class
           || obj instanceof abaplint.Objects.Interface) {
-        insert.push(this.insertREPOSRC(obj));
+        if (options?.skipReposrc !== true) {
+          insert.push(this.insertREPOSRC(obj));
+        }
       }
     }
     insert.push(this.insertT000());
