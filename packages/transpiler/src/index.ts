@@ -39,7 +39,7 @@ export class Transpiler {
     new Keywords(this.options?.keywords).handle(reg);
     this.validate(reg);
 
-    const dbSetup = new DatabaseSetup(reg).run();
+    const dbSetup = new DatabaseSetup(reg).run(this.options);
 
     const output: IOutput = {
       objects: [],

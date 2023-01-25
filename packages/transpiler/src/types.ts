@@ -61,4 +61,6 @@ export interface ITranspilerOptions {
   extraSetup?: string;
   /** list of keywords to rename, if not supplied default will be used */
   keywords?: string[];
+  /** dont insert into REPOSRC */
+  skipReposrc?: boolean;
 }
