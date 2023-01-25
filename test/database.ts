@@ -756,4 +756,20 @@ WRITE / sy-subrc.`;
     expect(abap.console.get()).to.equal("1\n0");
   });
 
+  it("WHERE, empty dynamic condition", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+DATA lv TYPE string.
+SELECT * FROM t100 INTO TABLE tab WHERE (lv).
+WRITE sy-dbcnt.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test},
+    ]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
