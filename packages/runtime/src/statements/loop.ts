@@ -10,6 +10,11 @@ export interface ILoopOptions {
   topEquals?: {[name: string]: INumeric | ICharacter},
 }
 
+function determineFromTo(array: readonly any[], _options: ILoopOptions): { from: any; to: any; } {
+// todo
+  return {from: 0, to: array.length};
+}
+
 export async function* loop(table: Table | FieldSymbol | undefined, options?: ILoopOptions): AsyncGenerator<any, void, unknown> {
   if (table === undefined) {
     throw new Error("LOOP at undefined");
@@ -26,7 +31,7 @@ export async function* loop(table: Table | FieldSymbol | undefined, options?: IL
     return;
   }
 
-  const loopFrom = options?.from && options?.from.get() > 0 ? options.from.get() - 1 : 0;
+  let loopFrom = options?.from && options?.from.get() > 0 ? options.from.get() - 1 : 0;
   let loopTo = options?.to && options.to.get() < length ? options.to.get() : length;
   const loopIndex = table.startLoop(loopFrom);
   let entered = false;
@@ -35,6 +40,9 @@ export async function* loop(table: Table | FieldSymbol | undefined, options?: IL
 
   if (options?.usingKey && options.usingKey !== undefined && options.usingKey !== "primary_key") {
     array = table.getSecondaryIndex(options.usingKey);
+    const {from, to} = determineFromTo(array, options);
+    loopFrom = Math.max(loopFrom, from);
+    loopTo = Math.min(loopTo, to);
   }
 
   try {
