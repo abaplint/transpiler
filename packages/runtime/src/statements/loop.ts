@@ -1,8 +1,6 @@
-import {clone} from "../clone";
 import {FieldSymbol, Integer, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
-import {sort} from "./sort";
 
 export interface ILoopOptions {
   where?: (i: any) => Promise<boolean>,
@@ -36,14 +34,7 @@ export async function* loop(table: Table | FieldSymbol | undefined, options?: IL
   let array = table.array();
 
   if (options?.usingKey && options.usingKey !== undefined && options.usingKey !== "primary_key") {
-    const secondary = table.getOptions()?.secondary?.find(s => s.name.toUpperCase() === options.usingKey?.toUpperCase());
-    if (secondary === undefined) {
-      throw `LOOP, secondary key "${options.usingKey}" not found`;
-    }
-    const copy = clone(table);
-    sort(copy, {by: secondary.keyFields.map(k => {return {component: k.toLowerCase()};})});
-
-    array = copy.array();
+    array = table.getSecondaryIndex(options.usingKey);
   }
 
   try {

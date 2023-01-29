@@ -568,7 +568,7 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("b\na");
   });
 
-  it.only("LOOP, ASSIGNING KEY WHERE", async () => {
+  it("LOOP, ASSIGNING KEY WHERE", async () => {
     const code = `
     TYPES: BEGIN OF ty_node,
     name  TYPE string,

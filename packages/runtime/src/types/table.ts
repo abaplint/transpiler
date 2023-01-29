@@ -8,6 +8,7 @@ import {Structure} from "./structure";
 import {FieldSymbol} from "./field_symbol";
 import {DataReference} from "./data_reference";
 import {insertInternal} from "../statements/insert_internal";
+import {sort} from "../statements/sort";
 
 export enum TableAccessType {
   standard = "STANDARD",
@@ -47,9 +48,11 @@ export class Table  {
   private readonly loops: Set<LoopIndex>;
   private readonly options: ITableOptions | undefined;
   private readonly qualifiedName: string | undefined;
+  private secondaryIndexes: {[name: string]: TableRowType[]};
 
   public constructor(rowType: TableRowType, options?: ITableOptions, qualifiedName?: string) {
     this.value = [];
+    this.secondaryIndexes = {};
     this.loops = new Set();
     this.rowType = rowType;
     this.options = options;
@@ -70,6 +73,22 @@ export class Table  {
       };
     }
     this.qualifiedName = qualifiedName?.toUpperCase();
+  }
+
+  public getSecondaryIndex(name: string) {
+    if (this.secondaryIndexes[name.toUpperCase()]) {
+      return this.secondaryIndexes[name.toUpperCase()];
+    }
+
+    const secondary = this.getOptions()?.secondary?.find(s => s.name.toUpperCase() === name.toUpperCase());
+    if (secondary === undefined) {
+      throw `Table, secondary key "${name}" not found`;
+    }
+    const copy = clone(this.value);
+    sort(copy as any, {by: secondary.keyFields.map(k => {return {component: k.toLowerCase()};})});
+
+    this.secondaryIndexes[name] = copy;
+    return copy;
   }
 
   public getQualifiedName() {
@@ -101,9 +120,11 @@ export class Table  {
 
   public clear(): void {
     this.value = [];
+    this.secondaryIndexes = {};
   }
 
   public set(tab: Table | TableRowType) {
+    this.secondaryIndexes = {};
     if (this.options?.withHeader === true) {
       this.header?.set(tab);
     } else {
@@ -126,6 +147,7 @@ export class Table  {
   }
 
   public insertIndex(item: TableRowType, index: number) {
+    this.secondaryIndexes = {};
     const val = this.getValue(item);
     this.value.splice(index, 0, val);
     for (const l of this.loops.values()) {
@@ -137,6 +159,7 @@ export class Table  {
   }
 
   public deleteIndex(index: number) {
+    this.secondaryIndexes = {};
     if (index > this.value.length) {
       return;
     }
@@ -155,6 +178,7 @@ export class Table  {
   }
 
   public append(item: TableRowType, cloneRow = true) {
+    this.secondaryIndexes = {};
     if (item instanceof FieldSymbol) {
       const p = item.getPointer();
       if (p === undefined) {
@@ -177,6 +201,7 @@ export class Table  {
   }
 
   public appendInitial() {
+    this.secondaryIndexes = {};
     // note that this will clone the object
     this.append(this.rowType);
     // @ts-ignore
