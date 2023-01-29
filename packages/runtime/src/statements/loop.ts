@@ -40,7 +40,7 @@ function binarySearchTo(array: readonly any[], left: number, right: number, keyF
 function determineFromTo(array: readonly any[], topEquals: topType | undefined, key: ITableKey): { from: any; to: any; } {
   if (topEquals === undefined) {
     // if there is no WHERE supplied, its using the sorting of the secondary key
-    return {from: 0, to: array.length};
+    return {from: 1, to: array.length};
   }
 
   let from = 0;
@@ -79,22 +79,19 @@ export async function* loop(table: Table | FieldSymbol | undefined, options?: IL
 
   let loopFrom = options?.from && options?.from.get() > 0 ? options.from.get() - 1 : 0;
   let loopTo = options?.to && options.to.get() < length ? options.to.get() : length;
-  const loopIndex = table.startLoop(loopFrom);
 
-  let array = table.array();
+  let array: readonly any[] = [];
   if (options?.usingKey && options.usingKey !== undefined && options.usingKey !== "primary_key") {
     array = table.getSecondaryIndex(options.usingKey);
 
     const {from, to} = determineFromTo(array, options.topEquals, table.getKeyByName(options.usingKey)!);
     loopFrom = Math.max(loopFrom, from) - 1;
     loopTo = Math.min(loopTo, to);
-/*
-    console.dir("from: " + loopFrom);
-    console.dir("to: " + loopTo);
-*/
+  } else {
+    array = table.array();
   }
-//  const toTo = loopTo;
 
+  const loopIndex = table.startLoop(loopFrom);
   let entered = false;
 
   try {
@@ -105,7 +102,6 @@ export async function* loop(table: Table | FieldSymbol | undefined, options?: IL
         break;
       }
       const current = array[loopIndex.index];
-//      console.dir("looppp");
 
       if (options?.where) {
         const row = isStructured ? current.get() : {table_line: current};
