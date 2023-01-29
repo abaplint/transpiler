@@ -2,18 +2,24 @@ import {FieldSymbol, Integer, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
+type topType = {[name: string]: INumeric | ICharacter};
+
 export interface ILoopOptions {
   where?: (i: any) => Promise<boolean>,
   usingKey?: string,
   from?: Integer,
   to?: Integer,
-  topEquals?: {[name: string]: INumeric | ICharacter},
+  topEquals?: topType,
 }
 
-function determineFromTo(array: readonly any[], _options: ILoopOptions): { from: any; to: any; } {
+/*
+function determineFromTo(array: readonly any[], topEquals: topType, key: ITableKey): { from: any; to: any; } {
+  console.dir(topEquals);
+  console.dir(key);
 // todo
-  return {from: 0, to: array.length};
+  return {from: 0, to: array.length - 1};
 }
+*/
 
 export async function* loop(table: Table | FieldSymbol | undefined, options?: ILoopOptions): AsyncGenerator<any, void, unknown> {
   if (table === undefined) {
@@ -31,7 +37,7 @@ export async function* loop(table: Table | FieldSymbol | undefined, options?: IL
     return;
   }
 
-  let loopFrom = options?.from && options?.from.get() > 0 ? options.from.get() - 1 : 0;
+  const loopFrom = options?.from && options?.from.get() > 0 ? options.from.get() - 1 : 0;
   let loopTo = options?.to && options.to.get() < length ? options.to.get() : length;
   const loopIndex = table.startLoop(loopFrom);
   let entered = false;
@@ -40,9 +46,11 @@ export async function* loop(table: Table | FieldSymbol | undefined, options?: IL
 
   if (options?.usingKey && options.usingKey !== undefined && options.usingKey !== "primary_key") {
     array = table.getSecondaryIndex(options.usingKey);
+    /*
     const {from, to} = determineFromTo(array, options);
     loopFrom = Math.max(loopFrom, from);
     loopTo = Math.min(loopTo, to);
+    */
   }
 
   try {

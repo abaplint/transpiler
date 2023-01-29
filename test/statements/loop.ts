@@ -570,10 +570,10 @@ ENDLOOP.`;
 
   it("LOOP, ASSIGNING KEY WHERE", async () => {
     const code = `
-    TYPES: BEGIN OF ty_node,
-    name  TYPE string,
-    index TYPE i,
-  END OF ty_node.
+TYPES: BEGIN OF ty_node,
+         name  TYPE string,
+         index TYPE i,
+       END OF ty_node.
 
 DATA nodes TYPE HASHED TABLE OF ty_node
 WITH UNIQUE KEY index

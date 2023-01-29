@@ -75,12 +75,16 @@ export class Table  {
     this.qualifiedName = qualifiedName?.toUpperCase();
   }
 
+  public getKeyByName(name: string) {
+    return this.getOptions()?.secondary?.find(s => s.name.toUpperCase() === name.toUpperCase());
+  }
+
   public getSecondaryIndex(name: string) {
     if (this.secondaryIndexes[name.toUpperCase()]) {
       return this.secondaryIndexes[name.toUpperCase()];
     }
 
-    const secondary = this.getOptions()?.secondary?.find(s => s.name.toUpperCase() === name.toUpperCase());
+    const secondary = this.getKeyByName(name);
     if (secondary === undefined) {
       throw `Table, secondary key "${name}" not found`;
     }
