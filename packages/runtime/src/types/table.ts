@@ -87,7 +87,7 @@ export class Table  {
     const copy = clone(this.value);
     sort(copy as any, {by: secondary.keyFields.map(k => {return {component: k.toLowerCase()};})});
 
-    this.secondaryIndexes[name] = copy;
+    this.secondaryIndexes[name.toUpperCase()] = copy;
     return copy;
   }
 
