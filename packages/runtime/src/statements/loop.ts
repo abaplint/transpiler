@@ -46,11 +46,13 @@ function determineFromTo(array: readonly any[], topEquals: topType | undefined, 
   let from = 0;
   let to = array.length;
 
+// todo: multi field
   const keyField = key.keyFields[0].toLowerCase();
   const keyValue = topEquals[keyField];
   if (keyField && keyValue) {
     from = binarySearchFrom(array, from, to, keyField, keyValue);
     to = binarySearchTo(array, from, to, keyField, keyValue);
+//    console.dir("from: " + from + ", to: " + to);
   }
 
   return {
