@@ -600,7 +600,7 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("a");
   });
 
-  it("LOOP, ASSIGNING KEY WHERE hello", async () => {
+  it("LOOP, ASSIGNING KEY WHERE hello, single occurrences", async () => {
     const code = `
 FORM run.
 

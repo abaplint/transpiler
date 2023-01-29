@@ -1,3 +1,4 @@
+import {ge, le} from "../compare";
 import {FieldSymbol, Integer, ITableKey, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
@@ -12,16 +13,50 @@ export interface ILoopOptions {
   topEquals?: topType,
 }
 
+function binarySearchFrom(array: readonly any[], left: number, right: number, keyField: string, keyValue: INumeric | ICharacter) {
+  while (right - left > 1) {
+    const middle = Math.floor(((right - left) / 2) + left);
+    if (ge(array[middle].get()[keyField], keyValue)) {
+      right = middle;
+    } else {
+      left = middle;
+    }
+  }
+  return right;
+}
+
+function binarySearchTo(array: readonly any[], left: number, right: number, keyField: string, keyValue: INumeric | ICharacter) {
+  while (right - left > 1) {
+    const middle = Math.floor(((right - left) / 2) + left);
+    if (le(array[middle].get()[keyField], keyValue)) {
+      left = middle;
+    } else {
+      right = middle;
+    }
+  }
+  return right;
+}
+
 function determineFromTo(array: readonly any[], topEquals: topType | undefined, key: ITableKey): { from: any; to: any; } {
   if (topEquals === undefined) {
     // if there is no WHERE supplied, its using the sorting of the secondary key
     return {from: 0, to: array.length};
   }
 
-  // todo
-  console.dir(key);
+  let from = 0;
+  let to = array.length;
 
-  return {from: 0, to: array.length};
+  const keyField = key.keyFields[0].toLowerCase();
+  const keyValue = topEquals[keyField];
+  if (keyField && keyValue) {
+    from = binarySearchFrom(array, from, to, keyField, keyValue);
+    to = binarySearchTo(array, from, to, keyField, keyValue);
+  }
+
+  return {
+    from: from,
+    to: to,
+  };
 }
 
 export async function* loop(table: Table | FieldSymbol | undefined, options?: ILoopOptions): AsyncGenerator<any, void, unknown> {
