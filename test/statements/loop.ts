@@ -645,7 +645,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it("LOOP, ASSIGNING KEY WHERE hello, uneven, double occurrences", async () => {
+  it("LOOP, ASSIGNING KEY WHERE hello, double occurrences", async () => {
     const code = `
 FORM run.
 
