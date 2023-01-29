@@ -600,4 +600,46 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("a");
   });
 
+  it("LOOP, ASSIGNING KEY WHERE hello", async () => {
+    const code = `
+FORM run.
+
+  TYPES: BEGIN OF ty_node,
+           path  TYPE string,
+           name  TYPE string,
+           index TYPE i,
+           order TYPE i,
+         END OF ty_node.
+
+  TYPES:
+    ty_nodes_ts TYPE SORTED TABLE OF ty_node WITH UNIQUE KEY path name
+      WITH NON-UNIQUE SORTED KEY foobar COMPONENTS path index.
+
+  DATA table TYPE ty_nodes_ts.
+  FIELD-SYMBOLS <n> LIKE LINE OF table.
+  DATA row LIKE LINE OF table.
+  DATA lv_found TYPE i.
+
+  DO 20 TIMES.
+    row-path = 'hello' && sy-index.
+    INSERT row INTO TABLE table.
+  ENDDO.
+
+  DO 20 TIMES.
+    lv_found = 0.
+    LOOP AT table ASSIGNING <n> USING KEY foobar WHERE path = 'hello' && sy-index.
+      lv_found = lv_found + 1.
+    ENDLOOP.
+    ASSERT lv_found = 1.
+  ENDDO.
+
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
