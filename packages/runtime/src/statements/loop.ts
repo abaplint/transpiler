@@ -90,7 +90,12 @@ export async function* loop(table: Table | FieldSymbol | undefined, options?: IL
     const {from, to} = determineFromTo(array, options.topEquals, table.getKeyByName(options.usingKey)!);
     loopFrom = Math.max(loopFrom, from);
     loopTo = Math.min(loopTo, to);
+    /*
+    console.dir("from: " + loopFrom);
+    console.dir("to: " + loopTo);
+    */
   }
+//  const toTo = loopTo;
 
   try {
     const isStructured = array[0] instanceof Structure;
@@ -116,7 +121,11 @@ export async function* loop(table: Table | FieldSymbol | undefined, options?: IL
       yield current;
 
       loopIndex.index++;
-      loopTo = options?.to && options.to.get() < array.length ? options.to.get() : array.length;
+
+      if (options?.to === undefined && options?.usingKey === undefined) {
+        // extra rows might have been inserted inside the loop
+        loopTo = array.length;
+      }
     }
   } finally {
     table.unregisterLoop(loopIndex);
