@@ -6,6 +6,8 @@ import * as path from "path";
 import {test1} from "./test1";
 import {test2} from "./test2";
 import {test3} from "./test3";
+import {test4} from "./test4";
+import {test5} from "./test5";
 
 // NOTES
 // * does not run via Mocha
@@ -26,6 +28,8 @@ const tests: Tests = [
   {name: "Internal table, APPEND and DELETE", abap: test1},
   {name: "Internal table, READ TABLE, table_line", abap: test2},
   {name: "Internal table, LOOP USING KEY", abap: test3},
+  {name: "Internal table, copy, same sorting", abap: test4},
+  {name: "Internal table, copy, becomes sorted", abap: test5},
 ];
 
 async function execute(t: Test) {
@@ -43,10 +47,10 @@ async function start() {
   const results: Results = [];
   const time = new Date().toLocaleTimeString([], {hour: "2-digit", minute: "2-digit", hour12: false}) + " (" + Intl.DateTimeFormat().resolvedOptions().timeZone + ")";
   console.log("START RUNTIME PERFORMANCE TEST, " + time);
+  let index = 1;
   for (const t of tests) {
     const result = await execute(t);
     results.push(result);
-    let index = 1;
     console.log(`${ (index++ + "").padStart(3, "0") }: ${ result.name.padEnd(50, " ") } ${ result.runtime }ms`);
   }
   fs.writeFileSync(__dirname + path.sep + "results.json", JSON.stringify(results, null, 2));
