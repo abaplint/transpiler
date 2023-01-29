@@ -68,11 +68,31 @@ export class LoopTranspiler implements IStatementTranspiler {
       }
     }
 
-    const whereNode = node.findFirstExpression(abaplint.Expressions.ComponentCond);
+    const whereNode = node.findDirectExpression(abaplint.Expressions.ComponentCond);
     if (whereNode) {
       const where = traversal.traverse(whereNode).getCode();
       // todo, evil workaround removing "await",
       extra.push("where: async " + where);
+    }
+
+    const topEquals: {[key: string]: string} = {};
+    for (const compare of whereNode?.findDirectExpressions(abaplint.Expressions.ComponentCompare) || []) {
+      const op = compare.findDirectExpression(abaplint.Expressions.CompareOperator)?.concatTokens().toUpperCase();
+      if (op !== "=" && op !== "EQ") {
+        continue;
+      } else if (compare.findDirectTokenByText("NOT")) {
+        continue;
+      }
+      const tchain = traversal.traverse(compare.findDirectExpression(abaplint.Expressions.ComponentChainSimple));
+      const tsource = traversal.traverse(compare.findDirectExpression(abaplint.Expressions.Source));
+      topEquals[tchain.getCode()] = tsource.getCode();
+    }
+    if (Object.keys(topEquals).length > 0) {
+      const fields: string[] = [];
+      for (const n in topEquals) {
+        fields.push(`"${n}": ` + topEquals[n]);
+      }
+      extra.push("topEquals: {" + fields.join(",") + "}");
     }
 
     let concat = "";

@@ -257,11 +257,11 @@ await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({seconds: new abap.types.Integer
   fs_fs_.assign(unique1);
 }`},
     {abap: `LOOP AT table ASSIGNING <n> USING KEY array_index WHERE path = 'hello1'. ENDLOOP.`,
-      js: `for await (const unique1 of abap.statements.loop(table,{usingKey: "array_index",where: async (I) => {return abap.compare.eq(I.path, new abap.types.Character(6).set('hello1'));}})) {
+      js: `for await (const unique1 of abap.statements.loop(table,{usingKey: "array_index",where: async (I) => {return abap.compare.eq(I.path, new abap.types.Character(6).set('hello1'));},topEquals: {"path": new abap.types.Character(6).set('hello1')}})) {
   fs_n_.assign(unique1);
 }`},
     {abap: `LOOP AT mt_json_tree ASSIGNING <n> USING KEY (lv_tab_key) WHERE path = iv_parent_path. ENDLOOP.`,
-      js: `for await (const unique1 of abap.statements.loop(mt_json_tree,{usingKey: lv_tab_key.get(),where: async (I) => {return abap.compare.eq(I.path, iv_parent_path);}})) {
+      js: `for await (const unique1 of abap.statements.loop(mt_json_tree,{usingKey: lv_tab_key.get(),where: async (I) => {return abap.compare.eq(I.path, iv_parent_path);},topEquals: {"path": iv_parent_path}})) {
   fs_n_.assign(unique1);
 }`},
     {abap: `lo_result->if_ci_test~navigate( ).`,

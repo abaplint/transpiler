@@ -1,13 +1,15 @@
 import {clone} from "../clone";
 import {FieldSymbol, Integer, Structure, Table} from "../types";
-// import {deleteInternal} from "./delete_internal";
+import {ICharacter} from "../types/_character";
+import {INumeric} from "../types/_numeric";
 import {sort} from "./sort";
 
 export interface ILoopOptions {
   where?: (i: any) => Promise<boolean>,
   usingKey?: string,
   from?: Integer,
-  to?: Integer
+  to?: Integer,
+  topEquals?: {[name: string]: INumeric | ICharacter},
 }
 
 export async function* loop(table: Table | FieldSymbol | undefined, options?: ILoopOptions): AsyncGenerator<any, void, unknown> {
