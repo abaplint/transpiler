@@ -1,13 +1,64 @@
-import {clone} from "../clone";
-import {FieldSymbol, Integer, Structure, Table} from "../types";
-// import {deleteInternal} from "./delete_internal";
-import {sort} from "./sort";
+import {ge, le} from "../compare";
+import {FieldSymbol, Integer, ITableKey, Structure, Table} from "../types";
+import {ICharacter} from "../types/_character";
+import {INumeric} from "../types/_numeric";
+
+type topType = {[name: string]: INumeric | ICharacter};
 
 export interface ILoopOptions {
   where?: (i: any) => Promise<boolean>,
   usingKey?: string,
   from?: Integer,
-  to?: Integer
+  to?: Integer,
+  topEquals?: topType,
+}
+
+function binarySearchFrom(array: readonly any[], left: number, right: number, keyField: string, keyValue: INumeric | ICharacter) {
+  while (right - left > 1) {
+    const middle = Math.floor(((right - left) / 2) + left);
+    if (ge(array[middle].get()[keyField], keyValue)) {
+      right = middle;
+    } else {
+      left = middle;
+    }
+  }
+  return right;
+}
+
+function binarySearchTo(array: readonly any[], left: number, right: number, keyField: string, keyValue: INumeric | ICharacter) {
+  while (right - left > 1) {
+    const middle = Math.floor(((right - left) / 2) + left);
+    if (le(array[middle].get()[keyField], keyValue)) {
+      left = middle;
+    } else {
+      right = middle;
+    }
+  }
+  return right;
+}
+
+function determineFromTo(array: readonly any[], topEquals: topType | undefined, key: ITableKey): { from: any; to: any; } {
+  if (topEquals === undefined) {
+    // if there is no WHERE supplied, its using the sorting of the secondary key
+    return {from: 1, to: array.length};
+  }
+
+  let from = 0;
+  let to = array.length;
+
+// todo: multi field
+  const keyField = key.keyFields[0].toLowerCase();
+  const keyValue = topEquals[keyField];
+  if (keyField && keyValue) {
+    from = binarySearchFrom(array, from, to, keyField, keyValue);
+    to = binarySearchTo(array, from, to, keyField, keyValue);
+//    console.dir("from: " + from + ", to: " + to);
+  }
+
+  return {
+    from: from,
+    to: to,
+  };
 }
 
 export async function* loop(table: Table | FieldSymbol | undefined, options?: ILoopOptions): AsyncGenerator<any, void, unknown> {
@@ -26,28 +77,22 @@ export async function* loop(table: Table | FieldSymbol | undefined, options?: IL
     return;
   }
 
-  const loopFrom = options?.from && options?.from.get() > 0 ? options.from.get() - 1 : 0;
+  let loopFrom = options?.from && options?.from.get() > 0 ? options.from.get() - 1 : 0;
   let loopTo = options?.to && options.to.get() < length ? options.to.get() : length;
+
+  let array: readonly any[] = [];
+  if (options?.usingKey && options.usingKey !== undefined && options.usingKey !== "primary_key") {
+    array = table.getSecondaryIndex(options.usingKey);
+
+    const {from, to} = determineFromTo(array, options.topEquals, table.getKeyByName(options.usingKey)!);
+    loopFrom = Math.max(loopFrom, from) - 1;
+    loopTo = Math.min(loopTo, to);
+  } else {
+    array = table.array();
+  }
+
   const loopIndex = table.startLoop(loopFrom);
   let entered = false;
-
-  let array = table.array();
-
-  if (options?.usingKey && options.usingKey !== undefined && options.usingKey !== "primary_key") {
-    const secondary = table.getOptions()?.secondary?.find(s => s.name.toUpperCase() === options.usingKey?.toUpperCase());
-    if (secondary === undefined) {
-      throw `LOOP, secondary key "${options.usingKey}" not found`;
-    }
-    const copy = clone(table);
-    sort(copy, {by: secondary.keyFields.map(k => {return {component: k.toLowerCase()};})});
-
-    /*
-    if (secondary?.isUnique === true) {
-      deleteInternal(copy, {adjacent: true, comparing: secondary.keyFields});
-    }
-    */
-    array = copy.array();
-  }
 
   try {
     const isStructured = array[0] instanceof Structure;
@@ -73,7 +118,11 @@ export async function* loop(table: Table | FieldSymbol | undefined, options?: IL
       yield current;
 
       loopIndex.index++;
-      loopTo = options?.to && options.to.get() < array.length ? options.to.get() : array.length;
+
+      if (options?.to === undefined && options?.usingKey === undefined) {
+        // extra rows might have been inserted inside the loop
+        loopTo = array.length;
+      }
     }
   } finally {
     table.unregisterLoop(loopIndex);

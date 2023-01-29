@@ -576,8 +576,8 @@ TYPES: BEGIN OF ty_node,
        END OF ty_node.
 
 DATA nodes TYPE HASHED TABLE OF ty_node
-  WITH UNIQUE KEY index
-  WITH NON-UNIQUE SORTED KEY array_name COMPONENTS name.
+WITH UNIQUE KEY index
+WITH NON-UNIQUE SORTED KEY array_name COMPONENTS name.
 DATA row LIKE LINE OF nodes.
 FIELD-SYMBOLS <n> LIKE LINE OF nodes.
 
@@ -585,15 +585,110 @@ row-name = 'a'.
 row-index = 1.
 INSERT row INTO TABLE nodes.
 
+row-name = 'b'.
+row-index = 2.
+INSERT row INTO TABLE nodes.
+
 DATA lv_tab_key TYPE string.
 lv_tab_key = 'array_name'.
 LOOP AT nodes ASSIGNING <n> USING KEY (lv_tab_key) WHERE name = 'a'.
-  WRITE / row-name.
+  WRITE / <n>-name.
 ENDLOOP.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("a");
+  });
+
+  it("LOOP, ASSIGNING KEY WHERE hello, single occurrences", async () => {
+    const code = `
+FORM run.
+
+  TYPES: BEGIN OF ty_node,
+           path  TYPE string,
+           name  TYPE string,
+           index TYPE i,
+           order TYPE i,
+         END OF ty_node.
+
+  TYPES:
+    ty_nodes_ts TYPE SORTED TABLE OF ty_node WITH UNIQUE KEY path name
+      WITH NON-UNIQUE SORTED KEY foobar COMPONENTS path index.
+
+  DATA table TYPE ty_nodes_ts.
+  DATA numc TYPE n LENGTH 2.
+  FIELD-SYMBOLS <n> LIKE LINE OF table.
+  DATA row LIKE LINE OF table.
+  DATA lv_found TYPE i.
+
+  DO 20 TIMES.
+    numc = sy-index.
+    row-path = 'hello' && numc.
+    INSERT row INTO TABLE table.
+  ENDDO.
+
+  DO 20 TIMES.
+    lv_found = 0.
+    numc = sy-index.
+    LOOP AT table ASSIGNING <n> USING KEY foobar WHERE path = 'hello' && numc.
+      lv_found = lv_found + 1.
+    ENDLOOP.
+    ASSERT lv_found = 1.
+  ENDDO.
+
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("LOOP, ASSIGNING KEY WHERE hello, double occurrences", async () => {
+    const code = `
+FORM run.
+
+  TYPES: BEGIN OF ty_node,
+           path  TYPE string,
+           name  TYPE string,
+           index TYPE i,
+           order TYPE i,
+         END OF ty_node.
+
+  TYPES:
+    ty_nodes_ts TYPE SORTED TABLE OF ty_node WITH NON-UNIQUE KEY path name
+      WITH NON-UNIQUE SORTED KEY foobar COMPONENTS path index.
+
+  DATA table TYPE ty_nodes_ts.
+  DATA numc TYPE n LENGTH 2.
+  FIELD-SYMBOLS <n> LIKE LINE OF table.
+  DATA row LIKE LINE OF table.
+  DATA lv_found TYPE i.
+
+  DO 9 TIMES.
+    numc = sy-index.
+    row-path = 'hello' && numc.
+    INSERT row INTO TABLE table.
+    INSERT row INTO TABLE table.
+  ENDDO.
+
+  DO 9 TIMES.
+    lv_found = 0.
+    numc = sy-index.
+    LOOP AT table ASSIGNING <n> USING KEY foobar WHERE path = 'hello' && numc.
+      lv_found = lv_found + 1.
+    ENDLOOP.
+    ASSERT lv_found = 2.
+  ENDDO.
+
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
 });
