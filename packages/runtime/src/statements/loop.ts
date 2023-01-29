@@ -80,22 +80,22 @@ export async function* loop(table: Table | FieldSymbol | undefined, options?: IL
   let loopFrom = options?.from && options?.from.get() > 0 ? options.from.get() - 1 : 0;
   let loopTo = options?.to && options.to.get() < length ? options.to.get() : length;
   const loopIndex = table.startLoop(loopFrom);
-  let entered = false;
 
   let array = table.array();
-
   if (options?.usingKey && options.usingKey !== undefined && options.usingKey !== "primary_key") {
     array = table.getSecondaryIndex(options.usingKey);
 
     const {from, to} = determineFromTo(array, options.topEquals, table.getKeyByName(options.usingKey)!);
-    loopFrom = Math.max(loopFrom, from);
+    loopFrom = Math.max(loopFrom, from) - 1;
     loopTo = Math.min(loopTo, to);
-    /*
+/*
     console.dir("from: " + loopFrom);
     console.dir("to: " + loopTo);
-    */
+*/
   }
 //  const toTo = loopTo;
+
+  let entered = false;
 
   try {
     const isStructured = array[0] instanceof Structure;
@@ -105,6 +105,7 @@ export async function* loop(table: Table | FieldSymbol | undefined, options?: IL
         break;
       }
       const current = array[loopIndex.index];
+//      console.dir("looppp");
 
       if (options?.where) {
         const row = isStructured ? current.get() : {table_line: current};
