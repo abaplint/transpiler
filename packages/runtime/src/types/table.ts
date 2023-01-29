@@ -136,10 +136,11 @@ export class Table  {
         throw "Table, set error";
       }
       this.clear();
-      for (const a of tab.array()) {
-        // this clones the values, and add sorting if required
-        insertInternal({table: this, data: a});
+      if (tab instanceof FieldSymbol) {
+        tab = tab.getPointer();
       }
+      // this clones the values, and add sorting if required
+      insertInternal({table: this, data: tab, lines: true});
     }
   }
 
