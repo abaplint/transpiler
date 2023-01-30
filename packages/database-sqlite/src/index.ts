@@ -28,6 +28,10 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     }
   }
 
+  public export() {
+    return this.sqlite?.export();
+  }
+
   public async beginTransaction() {
     return; // todo
   }
