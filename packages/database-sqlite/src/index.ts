@@ -5,9 +5,9 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
   public readonly name = "sqlite";
   private sqlite: Database | undefined = undefined;
 
-  public async connect() {
+  public async connect(data?: ArrayLike<number> | Buffer | null) {
     const SQL = await initSqlJs();
-    this.sqlite = new SQL.Database();
+    this.sqlite = new SQL.Database(data);
   }
 
   public async disconnect() {
