@@ -42,8 +42,13 @@ export class InsertDatabase {
     const structure = options.values!.get();
     for (const k of Object.keys(structure)) {
       columns.push(k);
-      // todo, integers should not be surrounded by '"'?
-      values.push('"' + structure[k].get().replace(/"/g, "\"\"") + '"');
+
+      const value = structure[k].get();
+      if (typeof value === "string") {
+        values.push('"' + value.replace(/"/g, "\"\"") + '"');
+      } else {
+        values.push(value);
+      }
     }
 
     if (typeof table !== "string") {
