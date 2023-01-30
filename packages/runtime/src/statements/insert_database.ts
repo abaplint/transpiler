@@ -23,11 +23,19 @@ export class InsertDatabase {
     }
 
     if (options.table !== undefined) {
+      let subrc = 0;
+      let dbcnt = 0;
       for (const row of options.table.array()) {
         await this.insertDatabase(table, {values: row});
+        // @ts-ignore
+        subrc = Math.max(subrc, abap.builtin.sy.get().subrc.get());
+        // @ts-ignore
+        dbcnt += abap.builtin.sy.get().dbcnt.get();
       }
-//     todo, set sy-subrc
-//     todo, set sy-dbcnt
+      // @ts-ignore
+      abap.builtin.sy.get().subrc.set(subrc);
+      // @ts-ignore
+      abap.builtin.sy.get().dbcnt.set(dbcnt);
       return;
     }
 
