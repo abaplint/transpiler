@@ -2081,4 +2081,37 @@ INCLUDE /foo/lbaruxx.`;
     await dumpNrun(files);
   });
 
+  it.only("test-50", async () => {
+// TYPE GROUP used in where
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        TYPES: BEGIN OF ty,
+                 cmptype TYPE c LENGTH 1,
+               END OF ty.
+        DATA table TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+        DATA row LIKE LINE OF table.
+        LOOP AT table INTO row WHERE cmptype = seoo_cmptype_attribute.
+        ENDLOOP.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const type = `TYPE-POOL seoo.
+CONSTANTS seoo_cmptype_attribute TYPE n LENGTH 1 VALUE 'A'.`;
+    const files = [
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "seoo.type.abap", contents: type},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    await dumpNrun(files);
+  });
+
 });
