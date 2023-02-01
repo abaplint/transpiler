@@ -30,7 +30,7 @@ export class HandleTypePool {
         name: obj.getName(),
         type: obj.getType(),
       },
-      filename: obj.getName().toLowerCase() + ".mjs",
+      filename: obj.getName().toLowerCase() + "." + obj.getType().toLowerCase() + ".mjs",
       chunk: chunk,
       requires: [],
       exports: [],

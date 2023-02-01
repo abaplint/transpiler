@@ -174,6 +174,9 @@ export class Traversal {
       name = "this." + Traversal.escapeNamespace(name);
     } else if (this.isBuiltinVariable(t)) {
       name = "abap.builtin." + name;
+    } else if (this.isTypePool(t)) {
+      const tp = this.isTypePool(t);
+      name = `abap.TypePools["${tp}"].` + name.toLowerCase();
     }
     return name;
   }
@@ -260,6 +263,19 @@ export class Traversal {
       return true;
     }
     return false;
+  }
+
+  public isTypePool(token: abaplint.Token): string | undefined {
+    const ref = this.findReadOrWriteReference(token);
+    if (ref?.getFilename().endsWith(".type.abap")) {
+      const file = this.reg.getFileByName(ref.getFilename());
+      if (file === undefined) {
+        return undefined;
+      }
+      const obj = this.reg.findObjectForFile(file);
+      return obj?.getName();
+    }
+    return undefined;
   }
 
   // returns the interface name if interfaced

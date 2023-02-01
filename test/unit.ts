@@ -2081,7 +2081,7 @@ INCLUDE /foo/lbaruxx.`;
     await dumpNrun(files);
   });
 
-  it.skip("test-50", async () => {
+  it("test-50", async () => {
 // TYPE GROUP used in where
     const clas = `
     CLASS zcl_client DEFINITION PUBLIC.
