@@ -486,6 +486,10 @@ export class Traversal {
   }
 
   public setValues(identifier: abaplint.TypedIdentifier, name: string) {
+    return Traversal.setValues(identifier, name);
+  }
+
+  public static setValues(identifier: abaplint.TypedIdentifier, name: string) {
     const val = identifier.getValue();
     let ret = "";
     if (typeof val === "string") {

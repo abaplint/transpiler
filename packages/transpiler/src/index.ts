@@ -10,6 +10,7 @@ import {HandleDataElement} from "./handlers/handle_data_element";
 import {HandleTableType} from "./handlers/handle_table_type";
 import {HandleView} from "./handlers/handle_view";
 import {HandleEnqu} from "./handlers/handle_enqu";
+import {HandleTypePool} from "./handlers/handle_type_pool";
 
 export {config, ITranspilerOptions, IFile, IProgress, IOutputFile};
 
@@ -65,6 +66,8 @@ export class Transpiler {
       await progress?.tick("Building, " + obj.getName());
       if (obj instanceof abaplint.ABAPObject && !(obj instanceof abaplint.Objects.TypePool)) {
         output.objects.push(...new HandleABAP(this.options).runObject(obj, reg));
+      } else if (obj instanceof abaplint.Objects.TypePool) {
+        output.objects.push(...new HandleTypePool().runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.Table) {
         output.objects.push(...new HandleTable().runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.View) {

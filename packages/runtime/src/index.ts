@@ -21,6 +21,7 @@ export class ABAP {
   public Classes: {[name: string]: any} = {};
   public Interfaces: {[name: string]: any} = {};
   public DDIC: {[name: string]: any} = {};
+  public TypePools: {[name: string]: any} = {};
 
 // stuff for runtime
   public statements;
