@@ -227,4 +227,29 @@ combined_data[] = alphas[].`;
     await f(abap);
   });
 
+  it("copy, sorted table line", async () => {
+    const code = `
+TYPES:
+  BEGIN OF ty_s_data,
+    key1 TYPE string,
+  END OF ty_s_data.
+
+DATA: lt_table1  TYPE STANDARD TABLE OF ty_s_data,
+      lt_table6  TYPE HASHED TABLE OF ty_s_data WITH UNIQUE KEY table_line,
+      ls_table   TYPE ty_s_data,
+      lv_counter TYPE n LENGTH 2.
+
+DO 2 TIMES.
+  CONCATENATE 'k1' lv_counter INTO ls_table-key1.
+  APPEND ls_table TO lt_table1.
+  lv_counter = lv_counter + 1.
+ENDDO.
+
+lt_table6 = lt_table1.
+ASSERT lines( lt_table6 ) = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
