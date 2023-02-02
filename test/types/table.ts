@@ -227,11 +227,11 @@ combined_data[] = alphas[].`;
     await f(abap);
   });
 
-  it.only("copy, sorted table line", async () => {
+  it("copy, sorted table line", async () => {
     const code = `
 TYPES:
   BEGIN OF ty_s_data,
-    key1   TYPE string,
+    key1 TYPE string,
   END OF ty_s_data.
 
 DATA: lt_table1  TYPE STANDARD TABLE OF ty_s_data,

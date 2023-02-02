@@ -99,7 +99,12 @@ export function insertInternal(options: IInsertInternalOptions): void {
 
   if (isSorted) {
 // slow, but works for now
-    const by = tableOptions?.primaryKey?.keyFields?.map(f => {return {component: f.toLowerCase()}; });
+    let by = tableOptions?.primaryKey?.keyFields?.map(f => {
+      return {component: f.toLowerCase()};
+    });
+    if (by?.length === 1 && by[0].component === "table_line") {
+      by = [];
+    }
     if (by && by.length > 0) {
       sort(options.table, {by: by});
     } else {
