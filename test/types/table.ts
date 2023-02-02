@@ -245,7 +245,8 @@ DO 2 TIMES.
   lv_counter = lv_counter + 1.
 ENDDO.
 
-lt_table6 = lt_table1.`;
+lt_table6 = lt_table1.
+ASSERT lines( lt_table6 ) = 2.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
