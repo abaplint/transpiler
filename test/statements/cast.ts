@@ -170,6 +170,58 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("ok, references 1", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS test
+      IMPORTING
+        data TYPE data.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD test.
+    DATA data_ref TYPE REF TO data.
+    data_ref ?= data.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA ref TYPE REF TO data.
+  GET REFERENCE OF tab INTO ref.
+  lcl=>test( ref ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("ok, references 2, with field symbol", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS test
+      IMPORTING
+        data TYPE data.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD test.
+    DATA data_ref TYPE REF TO data.
+    data_ref ?= data.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA ref TYPE REF TO data.
+  FIELD-SYMBOLS <fs> TYPE any.
+  GET REFERENCE OF tab INTO ref.
+  ASSIGN ref TO <fs>.
+  lcl=>test( <fs> ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 // unit tests throwing cx_sy_move_cast_error not part of this file
 
 });
