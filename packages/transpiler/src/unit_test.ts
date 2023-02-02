@@ -217,6 +217,7 @@ run().then(() => {
       if (obj instanceof abaplint.Objects.Table
           || obj instanceof abaplint.Objects.DataElement
           || obj instanceof abaplint.Objects.LockObject
+          || obj instanceof abaplint.Objects.TypePool
           || obj instanceof abaplint.Objects.TableType) {
         list.push(imp(`${this.escapeNamespace(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}`));
       }
