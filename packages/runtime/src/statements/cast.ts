@@ -19,15 +19,13 @@ export async function cast(target: ABAPObject | FieldSymbol, source: ABAPObject)
     throw "GETWA_NOT_ASSIGNED";
   }
 
-  const targetName = target.getQualifiedName()?.toUpperCase();
+  let targetName: string | undefined = undefined;
+  if (target.getQualifiedName) {
+    targetName = target.getQualifiedName()?.toUpperCase();
+  }
 
   // @ts-ignore
   const targetClass = abap.Classes[targetName];
-
-    /*
-    if (targetName?.startsWith("IF_") === false
-        && targetName?.startsWith("ZIF_") === false) { // todo, interfaces are also classes but not inherited
-*/
 
   if (targetClass?.INTERNAL_TYPE === "CLAS") {
     // using "instanceof" is probably wrong in some cases,
