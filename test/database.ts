@@ -819,4 +819,36 @@ WRITE sy-dbcnt.`;
     expect(abap.console.get()).to.equal("0");
   });
 
+  it.only("SELECT SINGLE, constant from interface", async () => {
+    const code = `
+INTERFACE /foo/bar.
+  CONSTANTS foo TYPE t100-arbgb VALUE 'ZAG_UNIT_TEST'.
+ENDINTERFACE.
+
+CLASS foo DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES /foo/bar.
+    CLASS-METHODS run.
+ENDCLASS.
+
+CLASS foo IMPLEMENTATION.
+  METHOD run.
+    DATA ls_result TYPE t100.
+    SELECT SINGLE * FROM t100 INTO ls_result WHERE arbgb EQ /foo/bar~foo.
+    WRITE sy-subrc.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  foo=>run( ).`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
 });
