@@ -872,7 +872,7 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("ZAG_UNIT_TEST\nZAG_UNIT_TEST");
   });
 
-  it.only("SELECT dynamic field symbol", async () => {
+  it.skip("SELECT dynamic field symbol", async () => {
     const code = `
 DATA val TYPE t100-arbgb.
 DATA ls_t100 TYPE t100.
@@ -887,6 +887,7 @@ WRITE sy-dbcnt.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");

@@ -11,6 +11,7 @@ import * as operators from "./operators";
 import * as RFC from "./rfc";
 import * as types from "./types";
 import {expandIN} from "./expand_in";
+import {expandDynamic} from "./expand_dynamic";
 import {ClassicError} from "./classic_error";
 
 export {UnitTestResult, RFC, types, DB};
@@ -34,6 +35,7 @@ export class ABAP {
   public OffsetLength = OffsetLength;
   public templateFormatting = templateFormatting;
   public expandIN = expandIN;
+  public expandDynamic = expandDynamic;
   public ClassicError = ClassicError;
 
   public readonly context: Context;
