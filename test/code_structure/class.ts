@@ -1573,7 +1573,7 @@ ENDCLASS.`;
     await f(abap);
   });
 
-  it.only("early CHECK in constructor", async () => {
+  it("early CHECK in constructor", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.

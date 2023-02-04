@@ -22,6 +22,11 @@ export class ReturnTranspiler implements IStatementTranspiler {
       pre = `abap.builtin.sy.get().index.set(${UniqueIdentifier.getIndexBackup1()});\n`;
     }
 
+    if (scope?.getIdentifier().stype === abaplint.ScopeType.Method
+        && scope?.getIdentifier().sname.toLowerCase() === "constructor") {
+      extra = " this";
+    }
+
     return new Chunk().append(pre + "return" + extra + ";", node, traversal);
   }
 
