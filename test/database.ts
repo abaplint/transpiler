@@ -850,4 +850,26 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("0");
   });
 
+  it.only("SELECT into non structured table", async () => {
+    const code = `
+DATA lt_data TYPE STANDARD TABLE OF t100-arbgb WITH NON-UNIQUE KEY table_line.
+DATA lv_data LIKE LINE OF lt_data.
+
+SELECT arbgb
+  FROM t100
+  INTO TABLE lt_data
+  WHERE arbgb = 'ZAG_UNIT_TEST'.
+
+LOOP AT lt_data INTO lv_data.
+  WRITE / lv_data.
+ENDLOOP.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ZAG_UNIT_TEST\nZAG_UNIT_TEST");
+  });
+
 });
