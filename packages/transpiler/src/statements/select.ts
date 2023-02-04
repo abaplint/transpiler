@@ -125,7 +125,7 @@ export class SelectTranspiler implements IStatementTranspiler {
       }
       prevToken = token;
     }
-    if(prevToken && prevToken.getStr() === "WHERE"){
+    if(prevToken && prevToken.getStr().toUpperCase() === "WHERE"){
       return true;
     }else{
       return false;
