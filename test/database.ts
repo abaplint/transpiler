@@ -348,6 +348,25 @@ WRITE sy-dbcnt.`;
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("FOR ALL ENTRIES, table line, hmm", async () => {
+    const code = `
+DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+DATA lt_msgnr TYPE STANDARD TABLE OF t100-msgnr WITH DEFAULT KEY.
+INSERT '123' INTO TABLE lt_msgnr.
+select * from t100
+         into table lt_t100
+         for all entries in lt_msgnr
+         where msgnr = lt_msgnr-table_line.
+WRITE sy-dbcnt.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
   it("Test escaping single ping", async () => {
     const code = `
     DATA ls_result TYPE t100.
