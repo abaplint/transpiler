@@ -506,7 +506,7 @@ ASSERT sy-subrc = 0.`;
     expect(abap.console.get()).to.equal("2\n2");
   });
 
-  it("SELECT, dynamic WHERE condition", async () => {
+  it("SELECT, dynamic WHERE condition, constants", async () => {
     const code = `
     DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
     DATA lv_where TYPE string.
@@ -870,6 +870,26 @@ ENDLOOP.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("ZAG_UNIT_TEST\nZAG_UNIT_TEST");
+  });
+
+  it.only("SELECT dynamic field symbol", async () => {
+    const code = `
+DATA val TYPE t100-arbgb.
+DATA ls_t100 TYPE t100.
+FIELD-SYMBOLS <fs> TYPE t100-arbgb.
+DATA lv_bar TYPE string.
+val = 'ZAG_UNIT_TEST'.
+ASSIGN val TO <fs>.
+lv_bar = 'arbgb = <fs>'.
+SELECT SINGLE * FROM t100 INTO ls_t100 WHERE (lv_bar).
+WRITE sy-dbcnt.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
   });
 
 });
