@@ -1573,4 +1573,34 @@ ENDCLASS.`;
     await f(abap);
   });
 
+  it.only("early CHECK in constructor", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor.
+    METHODS out.
+  PRIVATE SECTION.
+    DATA val TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD constructor.
+    val = 2.
+    CHECK val <> 2.
+  ENDMETHOD.
+  METHOD out.
+    WRITE val.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA foo TYPE REF TO lcl.
+  CREATE OBJECT foo.
+  foo->out( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
