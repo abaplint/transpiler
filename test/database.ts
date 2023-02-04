@@ -850,7 +850,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("0");
   });
 
-  it.only("SELECT into non structured table", async () => {
+  it("SELECT into non structured table", async () => {
     const code = `
 DATA lt_data TYPE STANDARD TABLE OF t100-arbgb WITH NON-UNIQUE KEY table_line.
 DATA lv_data LIKE LINE OF lt_data.

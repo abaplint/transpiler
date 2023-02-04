@@ -41,11 +41,15 @@ export class SelectDatabase {
     } else if (target instanceof Table) {
       for (const row of rows) {
         const targetRow = clone(target.getRowType());
-        for (let columnName in row) {
-          columnName = columnName.toLowerCase();
-          // todo, non structured table = table with simple rows
-          // @ts-ignore
-          targetRow.get()[columnName]?.set(row[columnName]);
+        if (targetRow instanceof Structure) {
+          for (let columnName in row) {
+            columnName = columnName.toLowerCase();
+            // @ts-ignore
+            targetRow.get()[columnName]?.set(row[columnName]);
+          }
+        } else {
+          const columnName = Object.keys(row)[0];
+          targetRow.set(row[columnName]);
         }
 
         // @ts-ignore
