@@ -27,7 +27,7 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
         } else if (c.findDirectExpression(abaplint.Expressions.SQLIn)) {
           ret += this.sqlIn(c, traversal);
         } else {
-          ret += this.basicCondition(c, traversal);
+          ret += this.basicCondition(c, traversal, traversal.getFilename());
         }
       } else if (c instanceof abaplint.Nodes.ExpressionNode) {
         ret += " " + this.transpile(c, traversal).getCode();
@@ -53,11 +53,10 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
     return ret;
   }
 
-  private basicCondition(c: abaplint.Nodes.ExpressionNode, traversal: Traversal): string {
+  private basicCondition(c: abaplint.Nodes.ExpressionNode, traversal: Traversal, filename: string): string {
     let ret = "";
     if (c.getChildren().length !== 3) {
-      return this.basicConditionNew(c, traversal);
-//      throw new Error("SQL Condition, transpiler todo1, " + c.concatTokens() + ", " + c.getChildren().length);
+      return this.basicConditionNew(c, traversal, filename);
     }
 
     const fieldName = c.findDirectExpression(abaplint.Expressions.SQLFieldName);
@@ -66,7 +65,7 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
 
     if (fieldName && source && operator === undefined && c.findDirectTokenByText("LIKE")) {
       ret += fieldName.concatTokens() + " LIKE ";
-      ret += this.sqlSource(source, traversal);
+      ret += this.sqlSource(source, traversal, filename);
       return ret;
     }
 
@@ -81,23 +80,35 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
       op = "<>";
     }
     ret += fieldName.concatTokens() + " " + op + " ";
-    ret += this.sqlSource(source, traversal);
+    ret += this.sqlSource(source, traversal, filename);
 
     return ret;
   }
 
-  private sqlSource(source: abaplint.Nodes.ExpressionNode, traversal: Traversal) {
+  private sqlSource(source: abaplint.Nodes.ExpressionNode, traversal: Traversal, filename: string) {
     let ret = "";
     const simple = source.findDirectExpression(abaplint.Expressions.SimpleSource3);
+    const alias = source.findDirectExpression(abaplint.Expressions.SQLAliasField);
     if (simple && simple.findDirectExpression(abaplint.Expressions.Constant) === undefined) {
       ret += "'\" + " + new SimpleSource3Transpiler(true).transpile(simple, traversal).getCode() + " + \"'";
+    } else if (alias) {
+      // SQLAliasField might be a SQL reference or value from ABAP interface
+      const pre = alias.concatTokens().split("~")[0];
+      const found = traversal.findInterfaceDefinition(pre, traversal.findCurrentScopeByToken(alias.getFirstToken()));
+      if (found) {
+        let name = traversal.prefixAndName(alias.getFirstToken(), filename).replace("~", "$");
+        name = Traversal.escapeNamespace(name)!;
+        ret += "'\" + " + name + ".get() + \"'";
+      } else {
+        ret += source.concatTokens();
+      }
     } else {
       ret += source.concatTokens();
     }
     return ret;
   }
 
-  private basicConditionNew(node: abaplint.Nodes.ExpressionNode, traversal: Traversal): string {
+  private basicConditionNew(node: abaplint.Nodes.ExpressionNode, traversal: Traversal, filename: string): string {
     let ret = "";
     for (const child of node.getChildren()) {
       if (ret !== "") {
@@ -107,7 +118,7 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
         ret += child.concatTokens();
       } else if (child.get() instanceof abaplint.Expressions.SQLSource
           && child instanceof abaplint.Nodes.ExpressionNode) {
-        ret += this.sqlSource(child, traversal);
+        ret += this.sqlSource(child, traversal, filename);
       } else {
         ret += child.concatTokens();
       }

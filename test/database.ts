@@ -819,7 +819,7 @@ WRITE sy-dbcnt.`;
     expect(abap.console.get()).to.equal("0");
   });
 
-  it.only("SELECT SINGLE, constant from interface", async () => {
+  it("SELECT SINGLE, constant from interface", async () => {
     const code = `
 INTERFACE /foo/bar.
   CONSTANTS foo TYPE t100-arbgb VALUE 'ZAG_UNIT_TEST'.
@@ -845,7 +845,6 @@ START-OF-SELECTION.
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0");
