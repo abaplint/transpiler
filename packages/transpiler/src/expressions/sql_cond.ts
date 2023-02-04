@@ -74,7 +74,13 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
       throw new Error("SQL Condition, transpiler todo2, " + c.concatTokens());
     }
 
-    ret += fieldName.concatTokens() + " " + operator.concatTokens() + " ";
+    let op = operator.concatTokens();
+    if (op.toUpperCase() === "EQ") {
+      op = "=";
+    } else if (op.toUpperCase() === "NE") {
+      op = "<>";
+    }
+    ret += fieldName.concatTokens() + " " + op + " ";
     ret += this.sqlSource(source, traversal);
 
     return ret;

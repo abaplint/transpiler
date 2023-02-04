@@ -791,4 +791,32 @@ WRITE sy-dbcnt.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("SELECT SINGLE, WHERE eq", async () => {
+    const code = `
+    DATA ls_result TYPE t100.
+    SELECT SINGLE * FROM t100 INTO ls_result WHERE arbgb eq 'ZAG_UNIT_TEST'.
+    WRITE sy-subrc.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
+  it("SELECT SINGLE, WHERE EQ", async () => {
+    const code = `
+    DATA ls_result TYPE t100.
+    SELECT SINGLE * FROM t100 INTO ls_result WHERE arbgb EQ 'ZAG_UNIT_TEST'.
+    WRITE sy-subrc.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
 });
