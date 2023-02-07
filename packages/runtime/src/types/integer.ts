@@ -5,6 +5,8 @@ import {XString} from "./xstring";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 
+const digits = new RegExp(/^\s*-?\+?\d+\.?\d*$/i);
+
 export class Integer implements INumeric {
   private value: number;
   private readonly qualifiedName: string | undefined;
@@ -21,10 +23,10 @@ export class Integer implements INumeric {
   public set(value: INumeric | ICharacter | Hex | string | number | Integer | Float) {
     if (typeof value === "number") {
       this.value = Math.round(value);
-    } else if (typeof value === "string" && value.trim().length === 0) {
-      this.value = 0;
     } else if (typeof value === "string") {
-      if (/^\s*-?\+?\d+\.?\d*$/i.test(value) === false) {
+      if (value.trim().length === 0) {
+        value = "0";
+      } else if (digits.test(value) === false) {
         throwError("CX_SY_CONVERSION_NO_NUMBER");
       }
       this.value = parseInt(value, 10);
