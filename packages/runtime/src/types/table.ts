@@ -155,7 +155,12 @@ export class Table  {
     this.secondaryIndexes = {};
     const val = this.getValue(item);
 
-    this.value.splice(index, 0, val);
+    if (index === 0) {
+      this.value.unshift(val);
+    } else {
+      this.value.splice(index, 0, val);
+    }
+
     for (const l of this.loops.values()) {
       if (l.index <= index) {
         l.index++;
