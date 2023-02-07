@@ -8,10 +8,9 @@ import {test2} from "./test2";
 import {test3} from "./test3";
 import {test4} from "./test4";
 import {test5} from "./test5";
+import {test6} from "./test6";
 
-// NOTES
-// * does not run via Mocha
-// * Each test targeted to run around 1-2 seconds
+// NOTE: does not run via Mocha
 
 const abap: ABAP = new ABAP();
 
@@ -28,8 +27,9 @@ const tests: Tests = [
   {name: "Internal table, APPEND and DELETE", abap: test1},
   {name: "Internal table, READ TABLE, table_line", abap: test2},
   {name: "Internal table, LOOP USING KEY", abap: test3},
-  {name: "Internal table, copy, same sorting", abap: test4},
-  {name: "Internal table, copy, becomes sorted", abap: test5},
+  {name: "Internal table, Copy, same sorting", abap: test4},
+  {name: "Internal table, Copy, becomes sorted", abap: test5},
+  {name: "Internal table, INSERT INDEX 1", abap: test6},
 ];
 
 async function execute(t: Test) {
