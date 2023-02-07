@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src/";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -24,6 +24,23 @@ describe("Running Examples - Character type", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("compare with new line", async () => {
+    const code = `
+DATA: BEGIN OF stru,
+        field1 TYPE c LENGTH 2,
+        field2 TYPE c LENGTH 2,
+      END OF stru.
+DATA target TYPE c LENGTH 3.
+stru-field1 = '12'.
+stru-field2 = '34'.
+target = stru.
+WRITE target.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("123");
   });
 
 });
