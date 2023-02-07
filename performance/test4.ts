@@ -15,7 +15,7 @@ DO lc_rows TIMES.
   INSERT row INTO TABLE tab1.
 ENDDO.
 
-DO 20 TIMES.
+DO 30 TIMES.
   tab2 = tab1.
 ENDDO.
 
