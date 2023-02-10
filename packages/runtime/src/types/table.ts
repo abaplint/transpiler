@@ -197,8 +197,8 @@ export class Table  {
       if (p === undefined) {
         throw new Error("APPEND, fs not assigned");
       }
-      this.value.push(p);
-      return item;
+      this.append(p);
+      return p;
     } else if (item instanceof DataReference) {
       const ref = new DataReference(item.getType());
       ref.assign(item.getPointer());
