@@ -48,6 +48,7 @@ export class Table  {
   private readonly loops: Set<LoopIndex>;
   private readonly options: ITableOptions | undefined;
   private readonly qualifiedName: string | undefined;
+  private readonly isStructured: boolean;
   private secondaryIndexes: {[name: string]: TableRowType[]};
 
   public constructor(rowType: TableRowType, options?: ITableOptions, qualifiedName?: string) {
@@ -56,6 +57,7 @@ export class Table  {
     this.loops = new Set();
     this.rowType = rowType;
     this.options = options;
+    this.isStructured = rowType instanceof Structure;
 
     if (options?.withHeader === true) {
       this.header = clone(this.rowType);
@@ -188,7 +190,7 @@ export class Table  {
     }
   }
 
-  public append(item: TableRowType, cloneRow = true) {
+  public append(item: TableRowType) {
     this.secondaryIndexes = {};
     if (item instanceof FieldSymbol) {
       const p = item.getPointer();
@@ -202,13 +204,18 @@ export class Table  {
       ref.assign(item.getPointer());
       this.value.push(ref);
       return ref;
+    // @ts-ignore
+    // eslint-disable-next-line max-len
+    } else if (this.isStructured === true && item.getQualifiedName && this.rowType.getQualifiedName && item.getQualifiedName() !== "" && item.getQualifiedName() === this.rowType.getQualifiedName()) {
+// hmm, moving this to getValue() should, but does not work
+// types match, so no need to do conversions, just clone the item
+      const val = clone(item);
+      this.value.push(val);
+      return val;
     } else {
-// todoooo
-      const val = this.getValue(item, cloneRow);
-      const p = clone(this.rowType);
-      p.set(val);
-      this.value.push(p);
-      return p;
+      const val = this.getValue(item);
+      this.value.push(val);
+      return val;
     }
   }
 
@@ -227,7 +234,7 @@ export class Table  {
 
 ///////////////////////////
 
-  private getValue(item: TableRowType, cloneRow = true) {
+  private getValue(item: TableRowType) {
     // make sure to do conversion if needed
     if (typeof item === "number") {
       const tmp = clone(this.getRowType());
@@ -237,12 +244,10 @@ export class Table  {
       const tmp = clone(this.getRowType());
       tmp.set(new String().set(item));
       return tmp;
-    } else if (cloneRow === true) {
+    } else {
       const tmp = clone(this.getRowType());
       tmp.set(item);
       return tmp;
-    } else {
-      return item;
     }
   }
 
