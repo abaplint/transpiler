@@ -155,6 +155,16 @@ export class Table  {
 
   public insertIndex(item: TableRowType, index: number) {
     this.secondaryIndexes = {};
+
+    if (item instanceof FieldSymbol) {
+      const p = item.getPointer();
+      if (p === undefined) {
+        throw new Error("APPEND, fs not assigned");
+      }
+      this.insertIndex(p, index);
+      return p;
+    }
+
     const val = this.getValue(item);
 
     if (index === 0) {
