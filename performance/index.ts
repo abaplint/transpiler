@@ -9,6 +9,7 @@ import {test3} from "./test3";
 import {test4} from "./test4";
 import {test5} from "./test5";
 import {test6} from "./test6";
+import {test7} from "./test7";
 
 // NOTE: does not run via Mocha
 
@@ -30,6 +31,7 @@ const tests: Tests = [
   {name: "Internal table, Copy, same sorting", abap: test4},
   {name: "Internal table, Copy, becomes sorted", abap: test5},
   {name: "Internal table, INSERT INDEX 1", abap: test6},
+  {name: "Internal table, APPEND matching types", abap: test7},
 ];
 
 async function execute(t: Test) {
