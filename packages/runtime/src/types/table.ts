@@ -238,7 +238,7 @@ export class Table  {
       return tmp;
     // @ts-ignore
     // eslint-disable-next-line max-len
-    } else if (this.isStructured === true && item.getQualifiedName && this.rowType.getQualifiedName && item.getQualifiedName() === this.rowType.getQualifiedName()) {
+    } else if (this.isStructured === true && item.getQualifiedName && this.rowType.getQualifiedName && item.getQualifiedName() !== "" && item.getQualifiedName() === this.rowType.getQualifiedName()) {
 // types match, so no need to do conversions, just clone the item
       const val = clone(item);
       return val;
