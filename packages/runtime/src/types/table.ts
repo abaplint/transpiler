@@ -154,7 +154,7 @@ export class Table  {
   public insertIndex(item: TableRowType, index: number) {
     this.secondaryIndexes = {};
     const val = this.getValue(item);
-
+// todo, types might not match?
     if (index === 0) {
       this.value.unshift(val);
     } else {
