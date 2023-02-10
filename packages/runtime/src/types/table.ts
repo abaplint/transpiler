@@ -203,6 +203,7 @@ export class Table  {
       this.value.push(ref);
       return ref;
     } else {
+// todoooo
       const val = this.getValue(item, cloneRow);
       const p = clone(this.rowType);
       p.set(val);
