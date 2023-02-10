@@ -213,10 +213,8 @@ export class Table  {
       return val;
     } else {
       const val = this.getValue(item);
-      const p = clone(this.rowType);
-      p.set(val);
-      this.value.push(p);
-      return p;
+      this.value.push(val);
+      return val;
     }
   }
 
