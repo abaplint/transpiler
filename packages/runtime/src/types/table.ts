@@ -188,7 +188,7 @@ export class Table  {
     }
   }
 
-  public append(item: TableRowType, cloneRow = true) {
+  public append(item: TableRowType) {
     this.secondaryIndexes = {};
     if (item instanceof FieldSymbol) {
       const p = item.getPointer();
@@ -204,7 +204,7 @@ export class Table  {
       return ref;
     } else {
 // todoooo
-      const val = this.getValue(item, cloneRow);
+      const val = this.getValue(item);
       const p = clone(this.rowType);
       p.set(val);
       this.value.push(p);
@@ -227,7 +227,7 @@ export class Table  {
 
 ///////////////////////////
 
-  private getValue(item: TableRowType, cloneRow = true) {
+  private getValue(item: TableRowType) {
     // make sure to do conversion if needed
     if (typeof item === "number") {
       const tmp = clone(this.getRowType());
@@ -237,12 +237,10 @@ export class Table  {
       const tmp = clone(this.getRowType());
       tmp.set(new String().set(item));
       return tmp;
-    } else if (cloneRow === true) {
+    } else {
       const tmp = clone(this.getRowType());
       tmp.set(item);
       return tmp;
-    } else {
-      return item;
     }
   }
 
