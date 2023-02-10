@@ -48,6 +48,7 @@ export class Table  {
   private readonly loops: Set<LoopIndex>;
   private readonly options: ITableOptions | undefined;
   private readonly qualifiedName: string | undefined;
+  private readonly isStructured: boolean;
   private secondaryIndexes: {[name: string]: TableRowType[]};
 
   public constructor(rowType: TableRowType, options?: ITableOptions, qualifiedName?: string) {
@@ -56,6 +57,7 @@ export class Table  {
     this.loops = new Set();
     this.rowType = rowType;
     this.options = options;
+    this.isStructured = rowType instanceof Structure;
 
     if (options?.withHeader === true) {
       this.header = clone(this.rowType);
@@ -154,7 +156,7 @@ export class Table  {
   public insertIndex(item: TableRowType, index: number) {
     this.secondaryIndexes = {};
     const val = this.getValue(item);
-// todo, types might not match?
+
     if (index === 0) {
       this.value.unshift(val);
     } else {
@@ -202,8 +204,14 @@ export class Table  {
       ref.assign(item.getPointer());
       this.value.push(ref);
       return ref;
+    // @ts-ignore
+    // eslint-disable-next-line max-len
+    } else if (this.isStructured === true && item.getQualifiedName && this.rowType.getQualifiedName && item.getQualifiedName() === this.rowType.getQualifiedName()) {
+// types match, so no need to do conversions, just clone the item and push
+      const val = clone(item);
+      this.value.push(val);
+      return val;
     } else {
-// todoooo
       const val = this.getValue(item);
       const p = clone(this.rowType);
       p.set(val);
