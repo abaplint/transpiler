@@ -20,6 +20,18 @@ export class CallFunction {
 
 // note: this is only called if DESTINIATION is supplied
   public async callFunction(options: ICallFunctionOptions) {
+    if (options.destination === "") {
+      const param = {
+        exporting: options.exporting,
+        importing: options.importing,
+        tables: options.tables,
+        changing: options.changing,
+        exceptions: options.exceptions,
+      };
+      // @ts-ignore
+      await abap.FunctionModules[options.name](param);
+    }
+
     const dest = this.context.RFCDestinations[options.destination] as undefined | RFCClient;
     if (dest === undefined) {
       throw new Error(`RFC destination ${options.destination} does not exist`);
