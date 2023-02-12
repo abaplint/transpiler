@@ -159,7 +159,7 @@ export class Table  {
     if (item instanceof FieldSymbol) {
       const p = item.getPointer();
       if (p === undefined) {
-        throw new Error("APPEND, fs not assigned");
+        throw new Error("insertIndex, fs not assigned");
       }
       this.insertIndex(p, index);
       return p;
@@ -249,7 +249,6 @@ export class Table  {
     // @ts-ignore
     // eslint-disable-next-line max-len
     } else if (this.isStructured === true && item.getQualifiedName && this.rowType.getQualifiedName && item.getQualifiedName() !== "" && item.getQualifiedName() === this.rowType.getQualifiedName()) {
-    // hmm, moving this to getValue() should, but does not work
     // types match, so no need to do conversions, just clone the item
       const val = clone(item);
       return val;
