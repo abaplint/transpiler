@@ -10,6 +10,7 @@ import {test4} from "./test4";
 import {test5} from "./test5";
 import {test6} from "./test6";
 import {test7} from "./test7";
+import {test8} from "./test8";
 
 // NOTE: does not run via Mocha
 
@@ -25,13 +26,14 @@ type Result = {name: string, runtime: number};
 type Results = Result[];
 
 const tests: Tests = [
-  {name: "Internal table, APPEND and DELETE", abap: test1},
-  {name: "Internal table, READ TABLE, table_line", abap: test2},
-  {name: "Internal table, LOOP USING KEY", abap: test3},
-  {name: "Internal table, Copy, same sorting", abap: test4},
-  {name: "Internal table, Copy, becomes sorted", abap: test5},
-  {name: "Internal table, INSERT INDEX 1", abap: test6},
-  {name: "Internal table, APPEND matching types", abap: test7},
+  {name: "1: Internal table, APPEND and DELETE", abap: test1},
+  {name: "2: Internal table, READ TABLE, table_line", abap: test2},
+  {name: "3: Internal table, LOOP USING KEY", abap: test3},
+  {name: "4: Internal table, Copy, same sorting", abap: test4},
+  {name: "5: Internal table, Copy, becomes sorted", abap: test5},
+  {name: "6: Internal table, INSERT INDEX 1", abap: test6},
+  {name: "7: Internal table, APPEND matching types", abap: test7},
+  {name: "8: Internal table, READ TABLE BINARY SEARCH", abap: test8},
 ];
 
 async function execute(t: Test) {
