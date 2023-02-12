@@ -30,6 +30,7 @@ export class CallFunction {
       };
       // @ts-ignore
       await abap.FunctionModules[options.name](param);
+      return;
     }
 
     const dest = this.context.RFCDestinations[options.destination] as undefined | RFCClient;
