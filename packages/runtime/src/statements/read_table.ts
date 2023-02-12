@@ -10,6 +10,7 @@ export interface IReadTableOptions {
   from?: INumeric | ICharacter | Structure | Table | DataReference,
   referenceInto?: DataReference,
   assigning?: FieldSymbol,
+  binarySearch?: boolean,
 }
 
 export function readTable(table: Table | FieldSymbol, options?: IReadTableOptions) {
