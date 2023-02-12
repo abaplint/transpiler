@@ -13,14 +13,14 @@ export class HandleABAP {
   }
 
   public runObject(obj: abaplint.ABAPObject, reg: abaplint.IRegistry): IOutputFile[] {
-    const spaghetti = new abaplint.SyntaxLogic(reg, obj).run().spaghetti;
-
     let ret: IOutputFile[] = [];
 
     if (obj instanceof abaplint.Objects.Program && obj.isInclude() === true) {
       // includes are only compiled along with the programs where its used?
       return [];
     }
+
+    const spaghetti = new abaplint.SyntaxLogic(reg, obj).run().spaghetti;
 
     for (const file of obj.getSequencedFiles()) {
       const chunk = new Chunk();
