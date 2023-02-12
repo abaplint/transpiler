@@ -6,6 +6,10 @@ import {FieldChainTranspiler, SourceTranspiler, SQLSourceTranspiler} from "../ex
 import {UniqueIdentifier} from "../unique_identifier";
 import {SQLFromTranspiler} from "../expressions/sql_from";
 
+function escapeRegExp(string: string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
+}
+
 export class SelectTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal, targetOverride?: string): Chunk {
@@ -84,7 +88,7 @@ export class SelectTranspiler implements IStatementTranspiler {
       const unique = UniqueIdentifier.get();
       const fn = node.findFirstExpression(abaplint.Expressions.SQLForAllEntries)?.findDirectExpression(abaplint.Expressions.SQLSource);
       const faeTranspiled = new SQLSourceTranspiler().transpile(fn!, traversal).getCode();
-      select = select.replace(new RegExp(" " + faeTranspiled!, "g"), " " + unique);
+      select = select.replace(new RegExp(" " + escapeRegExp(faeTranspiled!), "g"), " " + unique);
       select = select.replace(unique + ".get().table_line.get()", unique + ".get()");  // there can be only one?
 
       const code = `if (${faeTranspiled}.array().length === 0) {

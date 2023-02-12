@@ -892,4 +892,28 @@ WRITE sy-dbcnt.`;
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("FOR ALL ENTRIES, two level", async () => {
+    const code = `
+DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+DATA: BEGIN OF data_work,
+        it_content TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY,
+      END OF data_work.
+DATA row TYPE t100.
+row-arbgb = 'ZAG_UNIT_TEST'.
+APPEND row TO data_work-it_content.
+SELECT *
+  FROM t100
+  INTO TABLE lt_t100
+  FOR ALL ENTRIES IN data_work-it_content
+  WHERE arbgb EQ data_work-it_content-arbgb.
+WRITE sy-dbcnt.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });

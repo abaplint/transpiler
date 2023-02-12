@@ -155,6 +155,16 @@ export class Table  {
 
   public insertIndex(item: TableRowType, index: number) {
     this.secondaryIndexes = {};
+
+    if (item instanceof FieldSymbol) {
+      const p = item.getPointer();
+      if (p === undefined) {
+        throw new Error("insertIndex, fs not assigned");
+      }
+      this.insertIndex(p, index);
+      return p;
+    }
+
     const val = this.getValue(item);
 
     if (index === 0) {
@@ -197,21 +207,13 @@ export class Table  {
       if (p === undefined) {
         throw new Error("APPEND, fs not assigned");
       }
-      this.value.push(p);
-      return item;
+      this.append(p);
+      return p;
     } else if (item instanceof DataReference) {
       const ref = new DataReference(item.getType());
       ref.assign(item.getPointer());
       this.value.push(ref);
       return ref;
-    // @ts-ignore
-    // eslint-disable-next-line max-len
-    } else if (this.isStructured === true && item.getQualifiedName && this.rowType.getQualifiedName && item.getQualifiedName() !== "" && item.getQualifiedName() === this.rowType.getQualifiedName()) {
-// hmm, moving this to getValue() should, but does not work
-// types match, so no need to do conversions, just clone the item
-      const val = clone(item);
-      this.value.push(val);
-      return val;
     } else {
       const val = this.getValue(item);
       this.value.push(val);
@@ -244,6 +246,12 @@ export class Table  {
       const tmp = clone(this.getRowType());
       tmp.set(new String().set(item));
       return tmp;
+    // @ts-ignore
+    // eslint-disable-next-line max-len
+    } else if (this.isStructured === true && item.getQualifiedName && this.rowType.getQualifiedName && item.getQualifiedName() !== "" && item.getQualifiedName() === this.rowType.getQualifiedName()) {
+    // types match, so no need to do conversions, just clone the item
+      const val = clone(item);
+      return val;
     } else {
       const tmp = clone(this.getRowType());
       tmp.set(item);
