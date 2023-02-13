@@ -20,7 +20,7 @@ export class CallFunction {
 
 // note: this is only called if DESTINIATION is supplied
   public async callFunction(options: ICallFunctionOptions) {
-    if (options.destination === "") {
+    if (options.destination.trim() === "") {
       const param = {
         exporting: options.exporting,
         importing: options.importing,
