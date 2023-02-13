@@ -96,10 +96,10 @@ describe("Single statements", () => {
     {abap: "<name> = 1.",                             js: "fs_name_.set(new abap.types.Integer().set(1));",                                      skip: false},
     {abap: "CONSTANTS c TYPE i VALUE 1.",             js: `let c = new abap.types.Integer({qualifiedName: "I"});\nc.set(1);`,           skip: false},
     {abap: "READ TABLE tab INDEX i INTO target.",          js: "abap.statements.readTable(tab,{index: i,into: target});", skip: false},
-    {abap: "READ TABLE tab INTO line WITH KEY field = 2.", js: "abap.statements.readTable(tab,{into: line,withKey: (i) => {return abap.compare.eq(i.field, new abap.types.Integer().set(2));}});", skip: false},
+    {abap: "READ TABLE tab INTO line WITH KEY field = 2.", js: "abap.statements.readTable(tab,{into: line,withKey: (i) => {return abap.compare.eq(i.field, new abap.types.Integer().set(2));},withKeyValue: [{key: (i) => {return i.field}, value: new abap.types.Integer().set(2)}]});", skip: false},
     {abap: "READ TABLE tab INDEX i ASSIGNING <nam>.",      js: "abap.statements.readTable(tab,{index: i,assigning: fs_nam_});",   skip: false},
     {abap: "READ TABLE <lt_indices> WITH KEY ('PROGRAM_NDX') = lv_program_ndx ASSIGNING <ls_alert_by_index>.",
-      js: "abap.statements.readTable(fs_lt_indices_,{assigning: fs_ls_alert_by_index_,withKey: (i) => {return abap.compare.eq(i.program_ndx, lv_program_ndx);}});",   skip: false},
+      js: "abap.statements.readTable(fs_lt_indices_,{assigning: fs_ls_alert_by_index_,withKey: (i) => {return abap.compare.eq(i.program_ndx, lv_program_ndx);},withKeyValue: [{key: (i) => {return i.program_ndx}, value: lv_program_ndx}]});",   skip: false},
 
     {abap: "MODIFY result INDEX 1 FROM 4.",           js: "abap.statements.modifyInternal(result,{index: new abap.types.Integer().set(1),from: new abap.types.Integer().set(4)});",   skip: false},
     {abap: "WRITE |foo| && |bar|.",                   js: "abap.statements.write(abap.operators.concat(new abap.types.String().set(`foo`),new abap.types.String().set(`bar`)));",                 skip: false},

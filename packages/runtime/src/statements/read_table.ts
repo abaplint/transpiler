@@ -11,6 +11,7 @@ export interface IReadTableOptions {
   referenceInto?: DataReference,
   assigning?: FieldSymbol,
   binarySearch?: boolean,
+  withKeyValue?: {key: (i: any) => any, value: any}[],
 }
 
 export function readTable(table: Table | FieldSymbol, options?: IReadTableOptions) {
