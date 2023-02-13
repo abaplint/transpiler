@@ -26,6 +26,11 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       extra.push("from: " + s);
     }
 
+    const binary = node.findTokenSequencePosition("BINARY", "SEARCH");
+    if (binary) {
+      extra.push("binarySearch: true");
+    }
+
     const rt = node.findDirectExpression(abaplint.Expressions.ReadTableTarget);
     const target = rt?.findDirectExpression(abaplint.Expressions.Target);
     const fs = rt?.findDirectExpression(abaplint.Expressions.FSTarget);
