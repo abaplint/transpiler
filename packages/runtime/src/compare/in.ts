@@ -9,10 +9,10 @@ export function compareIn(left: number | string | ICharacter | INumeric, right: 
   }
 
   for (const row of right.array()) {
-    if (eq(row.get()["sign"], "I")
-        && eq(row.get()["option"], "EQ")
-        && eq(row.get()["low"], left)) {
-      return true;
+    if (eq(row.get()["sign"], "I") && eq(row.get()["option"], "EQ")) {
+      return eq(row.get()["low"], left);
+    } else {
+      throw "compareIn todo";
     }
   }
 
