@@ -24,6 +24,14 @@ export class ComponentCompareTranspiler implements IExpressionTranspiler {
       return new Chunk(`(I) => {return abap.compare.initial(I.${component});}`);
     }
 
+    if (concat.startsWith(component.toUpperCase() + " IN ")) {
+      const source = traversal.traverse(node.findDirectExpression(Expressions.Source)).getCode();
+      return new Chunk(`(I) => {return ${pre}abap.compare.in(I.${component}, ${source});}`);
+    } else if (concat.startsWith(component.toUpperCase() + " NOT IN ")) {
+      const source = traversal.traverse(node.findDirectExpression(Expressions.Source)).getCode();
+      return new Chunk(`(I) => {return !abap.compare.in(I.${component}, ${source});}`);
+    }
+
     if ((concat.startsWith("NOT") && concat.endsWith("IS BOUND"))
         || concat.endsWith("IS NOT BOUND")) {
       return new Chunk(`(I) => {return abap.compare.initial(I.${component});}`);
