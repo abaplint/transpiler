@@ -447,7 +447,7 @@ ASSERT sy-tabix = 2.`;
     await f(abap);
   });
 
-  it.skip("simple binary search, not found", async () => {
+  it("simple binary search, not found", async () => {
     const code = `
 DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
 DO 5 TIMES.
