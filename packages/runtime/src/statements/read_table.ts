@@ -14,7 +14,12 @@ export interface IReadTableOptions {
   withKeyValue?: {key: (i: any) => any, value: any}[],
 }
 
-export function readTable(table: Table | FieldSymbol, options?: IReadTableOptions) {
+export type ReadTableReturn = {
+  subrc: number;
+  foundIndex: number;
+};
+
+export function readTable(table: Table | FieldSymbol, options?: IReadTableOptions): ReadTableReturn {
   let found: any = undefined;
   let foundIndex = 0;
 
@@ -30,6 +35,12 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
     if (found) {
       foundIndex = index;
     }
+  } else if (options?.binarySearch === true) {
+    // todo
+    const optionsCopy = {...options};
+    delete optionsCopy.binarySearch;
+    delete optionsCopy.withKeyValue;
+    return readTable(table, optionsCopy);
   } else if (options?.withKey) {
     const isStructured = arr[0] instanceof Structure;
     for (const a of arr) {
