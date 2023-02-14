@@ -419,7 +419,7 @@ WRITE key_name.`;
     expect(abap.console.get()).to.equal("hello");
   });
 
-  it("simple binary search", async () => {
+  it("simple binary search, last found", async () => {
     const code = `
 DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
 DO 5 TIMES.
@@ -427,11 +427,34 @@ DO 5 TIMES.
 ENDDO.
 READ TABLE tab WITH KEY table_line = 5 TRANSPORTING NO FIELDS BINARY SEARCH.
 ASSERT sy-subrc = 0.
-ASSERT sy-tabix = 5.
+ASSERT sy-tabix = 5.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
 
+  it("simple binary search, middle found", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DO 5 TIMES.
+  APPEND sy-index TO tab.
+ENDDO.
 READ TABLE tab WITH KEY table_line = 2 TRANSPORTING NO FIELDS BINARY SEARCH.
 ASSERT sy-subrc = 0.
 ASSERT sy-tabix = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it.skip("simple binary search, not found", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DO 5 TIMES.
+  APPEND sy-index TO tab.
+ENDDO.
+READ TABLE tab WITH KEY table_line = 456 TRANSPORTING NO FIELDS BINARY SEARCH.
+ASSERT sy-subrc = 8.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);

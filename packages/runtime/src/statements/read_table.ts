@@ -1,3 +1,4 @@
+// import {binarySearchFromRow} from "../binary_search";
 import {eq} from "../compare";
 import {DataReference, FieldSymbol, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
@@ -35,8 +36,12 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
     if (found) {
       foundIndex = index;
     }
-  } else if (options?.binarySearch === true) {
-    // todo
+  } else if (options?.binarySearch === true && options.withKeyValue) {
+// note: it currently only uses the first key field for binary search, todo
+/*
+    const first = options.withKeyValue[0];
+    const startIndex = binarySearchFromRow(arr, 0, arr.length, first.key, first.value);
+*/
     const optionsCopy = {...options};
     delete optionsCopy.binarySearch;
     delete optionsCopy.withKeyValue;
@@ -91,7 +96,8 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
   }
 
   let subrc = found ? 0 : 4;
-  if (options?.from && subrc === 4) {
+  if ((options?.from || options?.binarySearch === true)
+      && subrc === 4) {
     subrc = 8;
   }
 
