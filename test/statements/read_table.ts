@@ -419,4 +419,66 @@ WRITE key_name.`;
     expect(abap.console.get()).to.equal("hello");
   });
 
+  it("simple binary search, last found", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DO 5 TIMES.
+  APPEND sy-index TO tab.
+ENDDO.
+READ TABLE tab WITH KEY table_line = 5 TRANSPORTING NO FIELDS BINARY SEARCH.
+ASSERT sy-subrc = 0.
+ASSERT sy-tabix = 5.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("simple binary search, middle found", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DO 5 TIMES.
+  APPEND sy-index TO tab.
+ENDDO.
+READ TABLE tab WITH KEY table_line = 2 TRANSPORTING NO FIELDS BINARY SEARCH.
+ASSERT sy-subrc = 0.
+ASSERT sy-tabix = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("simple binary search, not found", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DO 5 TIMES.
+  APPEND sy-index TO tab.
+ENDDO.
+READ TABLE tab WITH KEY table_line = 456 TRANSPORTING NO FIELDS BINARY SEARCH.
+ASSERT sy-subrc = 8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("binary search, find first occurrence", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field1 TYPE i,
+         field2 TYPE i,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row LIKE LINE OF tab.
+DO 5 TIMES.
+  row-field1 = 5.
+  row-field2 = sy-index.
+  APPEND row TO tab.
+ENDDO.
+READ TABLE tab WITH KEY field1 = 5 TRANSPORTING NO FIELDS BINARY SEARCH.
+ASSERT sy-subrc = 0.
+ASSERT sy-tabix = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

@@ -1,4 +1,4 @@
-import {ge, le} from "../compare";
+import {binarySearchFrom, binarySearchTo} from "../binary_search";
 import {FieldSymbol, Integer, ITableKey, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
@@ -11,30 +11,6 @@ export interface ILoopOptions {
   from?: Integer,
   to?: Integer,
   topEquals?: topType,
-}
-
-function binarySearchFrom(array: readonly any[], left: number, right: number, keyField: string, keyValue: INumeric | ICharacter) {
-  while (right - left > 1) {
-    const middle = Math.floor(((right - left) / 2) + left);
-    if (ge(array[middle].get()[keyField], keyValue)) {
-      right = middle;
-    } else {
-      left = middle;
-    }
-  }
-  return right;
-}
-
-function binarySearchTo(array: readonly any[], left: number, right: number, keyField: string, keyValue: INumeric | ICharacter) {
-  while (right - left > 1) {
-    const middle = Math.floor(((right - left) / 2) + left);
-    if (le(array[middle].get()[keyField], keyValue)) {
-      left = middle;
-    } else {
-      right = middle;
-    }
-  }
-  return right;
 }
 
 function determineFromTo(array: readonly any[], topEquals: topType | undefined, key: ITableKey): { from: any; to: any; } {

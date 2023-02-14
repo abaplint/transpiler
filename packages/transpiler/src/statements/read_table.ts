@@ -26,6 +26,11 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       extra.push("from: " + s);
     }
 
+    const binary = node.findTokenSequencePosition("BINARY", "SEARCH");
+    if (binary) {
+      extra.push("binarySearch: true");
+    }
+
     const rt = node.findDirectExpression(abaplint.Expressions.ReadTableTarget);
     const target = rt?.findDirectExpression(abaplint.Expressions.Target);
     const fs = rt?.findDirectExpression(abaplint.Expressions.FSTarget);
@@ -44,6 +49,7 @@ export class ReadTableTranspiler implements IStatementTranspiler {
     const compare = node.findDirectExpression(abaplint.Expressions.ComponentCompareSimple);
     if (compare) {
       const conds: string[] = [];
+      const blah: string[] = [];
       const count = compare.getChildren().length / 3;
       for (let i = 0; i < count; i++) {
         const left = compare.getChildren()[i * 3];
@@ -69,11 +75,15 @@ export class ReadTableTranspiler implements IStatementTranspiler {
           const id = UniqueIdentifier.get();
           prefix += "const " + id + " = " + s + ";\n";
           conds.push("abap.compare.eq(i." + field + ", " + id + ")");
+          blah.push(`{key: (i) => {return i.${field}}, value: ${id}}`);
         } else {
           conds.push("abap.compare.eq(i." + field + ", " + s + ")");
+          blah.push(`{key: (i) => {return i.${field}}, value: ${s}}`);
         }
       }
       extra.push("withKey: (i) => {return " + conds.join(" && ") + ";}");
+
+      extra.push(`withKeyValue: [${blah.join(",")}]`);
     }
 
     let concat = "";
