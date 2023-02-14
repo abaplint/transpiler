@@ -1603,4 +1603,42 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
+  it.only("doubly implemented sub sub interface classes", async () => {
+    const code = `
+INTERFACE lif.
+  DATA field TYPE i.
+ENDINTERFACE.
+
+INTERFACE subif.
+  INTERFACES lif.
+ENDINTERFACE.
+
+CLASS top DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+    METHODS constructor IMPORTING foo TYPE i.
+ENDCLASS.
+CLASS top IMPLEMENTATION.
+  METHOD constructor.
+    lif~field = foo.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS sub DEFINITION INHERITING FROM top.
+  PUBLIC SECTION.
+    INTERFACES subif.
+ENDCLASS.
+CLASS sub IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO sub.
+  CREATE OBJECT lo EXPORTING foo = 2.
+  WRITE lo->lif~field.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
