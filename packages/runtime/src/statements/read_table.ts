@@ -48,11 +48,12 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
     return readTable(table, optionsCopy);
   } else if (options?.withKey) {
     const isStructured = arr[0] instanceof Structure;
-    for (const a of arr) {
-      foundIndex++;
+    for (let index = 0; index < arr.length; index++) {
+      const a = arr[index];
       const row = isStructured ? {table_line: a, ...a.get()} : {table_line: a};
       if (options.withKey(row) === true) {
         found = a;
+        foundIndex = index + 1;
         break;
       }
     }
