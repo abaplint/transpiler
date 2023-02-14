@@ -11,9 +11,13 @@ export function compareIn(left: number | string | ICharacter | INumeric, right: 
 
   for (const row of right.array()) {
     if (eq(row.get()["sign"], "I") && eq(row.get()["option"], "EQ")) {
-      return eq(row.get()["low"], left);
+      if (eq(row.get()["low"], left)) {
+        return true;
+      }
     } else if (eq(row.get()["sign"], "I") && eq(row.get()["option"], "CP")) {
-      return cp(left, row.get()["low"]);
+      if (cp(left, row.get()["low"])) {
+        return true;
+      }
     } else {
       console.dir(row);
       throw "compareIn todo";
