@@ -916,4 +916,24 @@ WRITE sy-dbcnt.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it.only("FOR ALL ENTRIES, duplicate results", async () => {
+    const code = `
+DATA input TYPE STANDARD TABLE OF t100-arbgb WITH DEFAULT KEY.
+DATA result TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+APPEND 'ZAG_UNIT_TEST' TO input.
+APPEND 'ZAG_UNIT_TEST' TO input.
+SELECT * FROM t100 INTO TABLE result FOR ALL ENTRIES IN input
+  WHERE sprsl = 'E'
+  AND msgnr = '000'
+  AND arbgb = input-table_line.
+WRITE sy-dbcnt.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });
