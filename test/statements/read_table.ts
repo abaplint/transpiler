@@ -433,4 +433,25 @@ ASSERT sy-tabix = 5.`;
     await f(abap);
   });
 
+  it("binary search, find first occurrence", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field1 TYPE i,
+         field2 TYPE i,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row LIKE LINE OF tab.
+DO 5 TIMES.
+  row-field1 = 5.
+  row-field2 = sy-index.
+  APPEND row TO tab.
+ENDDO.
+READ TABLE tab WITH KEY field1 = 5 TRANSPORTING NO FIELDS BINARY SEARCH.
+ASSERT sy-subrc = 0.
+ASSERT sy-tabix = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
