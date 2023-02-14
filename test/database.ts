@@ -916,7 +916,7 @@ WRITE sy-dbcnt.`;
     expect(abap.console.get()).to.equal("2");
   });
 
-  it.skip("FOR ALL ENTRIES, duplicate results", async () => {
+  it("FOR ALL ENTRIES, duplicate results", async () => {
     const code = `
 DATA input TYPE STANDARD TABLE OF t100-arbgb WITH DEFAULT KEY.
 DATA result TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
