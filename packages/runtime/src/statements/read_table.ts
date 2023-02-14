@@ -20,6 +20,26 @@ export type ReadTableReturn = {
   foundIndex: number;
 };
 
+function searchWithKey(arr: any, withKey: (i: any) => boolean, startIndex = 0) {
+  const isStructured = arr[0] instanceof Structure;
+  for (let index = startIndex; index < arr.length; index++) {
+    const a = arr[index];
+    const row = isStructured ? {table_line: a, ...a.get()} : {table_line: a};
+    if (withKey(row) === true) {
+      return {
+        found: a,
+        foundIndex: index + 1,
+      };
+    }
+  }
+  return {
+    found: undefined,
+    foundIndex: 0,
+  };
+}
+
+/////////////////
+
 export function readTable(table: Table | FieldSymbol, options?: IReadTableOptions): ReadTableReturn {
   let found: any = undefined;
   let foundIndex = 0;
@@ -47,19 +67,9 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
     delete optionsCopy.withKeyValue;
     return readTable(table, optionsCopy);
   } else if (options?.withKey) {
-    const isStructured = arr[0] instanceof Structure;
-    for (let index = 0; index < arr.length; index++) {
-      const a = arr[index];
-      const row = isStructured ? {table_line: a, ...a.get()} : {table_line: a};
-      if (options.withKey(row) === true) {
-        found = a;
-        foundIndex = index + 1;
-        break;
-      }
-    }
-    if (found === undefined) {
-      foundIndex = 0;
-    }
+    const searchResult = searchWithKey(arr, options.withKey);
+    found = searchResult.found;
+    foundIndex = searchResult.foundIndex;
   } else if (options?.from) {
     if (options.from instanceof FieldSymbol) {
       options.from = options.from.getPointer();
