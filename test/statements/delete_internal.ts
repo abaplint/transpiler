@@ -315,4 +315,29 @@ ASSERT lines( tab ) = 3.`;
     await f(abap);
   });
 
+  it("DELETE more IN", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA bar TYPE RANGE OF i.
+FIELD-SYMBOLS <moo> LIKE LINE OF bar.
+APPEND INITIAL LINE TO bar ASSIGNING <moo>.
+<moo>-sign = 'I'.
+<moo>-option = 'EQ'.
+<moo>-low = 2.
+APPEND INITIAL LINE TO bar ASSIGNING <moo>.
+<moo>-sign = 'I'.
+<moo>-option = 'EQ'.
+<moo>-low = 4.
+
+DO 4 TIMES.
+  APPEND sy-index TO tab.
+ENDDO.
+DELETE tab WHERE table_line NOT IN bar.
+
+ASSERT lines( tab ) = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
