@@ -1603,7 +1603,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
-  it.only("doubly implemented sub sub interface classes", async () => {
+  it("doubly implemented sub sub interface classes", async () => {
     const code = `
 INTERFACE lif.
   DATA field TYPE i.

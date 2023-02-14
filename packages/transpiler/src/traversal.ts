@@ -397,7 +397,8 @@ export class Traversal {
         continue;
       }
       const n = Traversal.escapeNamespace(name.toLowerCase()) + "$" + a.getName().toLowerCase();
-      ret += "this." + n + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
+      // note: interface inheritenace and super inheritance might be strange,
+      ret += "if (this." + n + " === undefined) this." + n + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
     }
 
     for (const i of intf?.getImplementing() || []) {
