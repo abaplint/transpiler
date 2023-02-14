@@ -427,7 +427,11 @@ DO 5 TIMES.
 ENDDO.
 READ TABLE tab WITH KEY table_line = 5 TRANSPORTING NO FIELDS BINARY SEARCH.
 ASSERT sy-subrc = 0.
-ASSERT sy-tabix = 5.`;
+ASSERT sy-tabix = 5.
+
+READ TABLE tab WITH KEY table_line = 2 TRANSPORTING NO FIELDS BINARY SEARCH.
+ASSERT sy-subrc = 0.
+ASSERT sy-tabix = 2.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
