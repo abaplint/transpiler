@@ -29,7 +29,7 @@ function compare(a: any, b: any, input: {component: string, descending?: boolean
 }
 
 export function sort(input: Table, options?: ISortOptions) {
-
+//  console.dir(options);
   if (options?.by) {
     if (options.by.length === 0) {
       throw "SortByLengthZero";
@@ -46,7 +46,7 @@ export function sort(input: Table, options?: ISortOptions) {
     });
 
   } else {
-    const descending = options?.descending === true ? true : false;
+    const descending = options?.descending === true;
     input.sort((a: TableRowType, b: TableRowType) => {
       if (eq(a,b)) {
         return 0;
