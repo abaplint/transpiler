@@ -542,44 +542,6 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal(`1B > 4i`);
   });
 
-  it("IN empty", async () => {
-    const code = `
-  DATA bar TYPE RANGE OF i.
-  ASSERT 5 IN bar.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-  });
-
-  it("NOT IN", async () => {
-    const code = `
-  DATA bar TYPE RANGE OF i.
-  FIELD-SYMBOLS <moo> LIKE LINE OF bar.
-  APPEND INITIAL LINE TO bar ASSIGNING <moo>.
-  <moo>-sign = 'I'.
-  <moo>-option = 'EQ'.
-  <moo>-low = 2.
-  ASSERT 5 NOT IN bar.
-  ASSERT NOT 5 IN bar.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-  });
-
-  it("2 IN 2", async () => {
-    const code = `
-  DATA bar TYPE RANGE OF i.
-  FIELD-SYMBOLS <moo> LIKE LINE OF bar.
-  APPEND INITIAL LINE TO bar ASSIGNING <moo>.
-  <moo>-sign = 'I'.
-  <moo>-option = 'EQ'.
-  <moo>-low = 2.
-  ASSERT 2 IN bar.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-  });
-
   it("Compare string with integer, gt", async () => {
     const code = `
   DATA lv_data TYPE string.

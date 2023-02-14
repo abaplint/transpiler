@@ -273,4 +273,46 @@ WRITE sy-subrc.`;
     expect(abap.console.get()).to.equal("4");
   });
 
+  it("DELETE WHERE NOT IN", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA bar TYPE RANGE OF i.
+FIELD-SYMBOLS <moo> LIKE LINE OF bar.
+APPEND INITIAL LINE TO bar ASSIGNING <moo>.
+<moo>-sign = 'I'.
+<moo>-option = 'EQ'.
+<moo>-low = 2.
+
+DO 4 TIMES.
+  APPEND sy-index TO tab.
+ENDDO.
+DELETE tab WHERE table_line NOT IN bar.
+
+ASSERT lines( tab ) = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("DELETE WHERE IN", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA bar TYPE RANGE OF i.
+FIELD-SYMBOLS <moo> LIKE LINE OF bar.
+APPEND INITIAL LINE TO bar ASSIGNING <moo>.
+<moo>-sign = 'I'.
+<moo>-option = 'EQ'.
+<moo>-low = 2.
+
+DO 4 TIMES.
+  APPEND sy-index TO tab.
+ENDDO.
+DELETE tab WHERE table_line IN bar.
+
+ASSERT lines( tab ) = 3.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
