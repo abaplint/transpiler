@@ -1,4 +1,4 @@
-import {Table, TableRowType} from "../types";
+import {FieldSymbol, Table, TableRowType} from "../types";
 import {eq, lt, gt} from "../compare";
 
 export interface ISortOptions {
@@ -28,8 +28,18 @@ function compare(a: any, b: any, input: {component: string, descending?: boolean
   }
 }
 
-export function sort(input: Table, options?: ISortOptions) {
+export function sort(input: Table | FieldSymbol, options?: ISortOptions) {
 //  console.dir(options);
+
+  if (input instanceof FieldSymbol) {
+    const pnt = input.getPointer();
+    if (pnt === undefined) {
+      throw "GETWA_NOT_ASSIGNED";
+    }
+    sort(pnt, options);
+    return;
+  }
+
   if (options?.by) {
     if (options.by.length === 0) {
       throw "SortByLengthZero";
