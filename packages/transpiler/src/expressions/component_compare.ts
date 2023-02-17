@@ -9,7 +9,8 @@ export class ComponentCompareTranspiler implements IExpressionTranspiler {
 
     const concat = node.concatTokens().toUpperCase();
     const pre = concat.startsWith("NOT") ? "!" : "";
-    const component = traversal.traverse(node.findDirectExpression(Expressions.ComponentChainSimple)).getCode();
+    const componentExpression = node.findDirectExpression(Expressions.ComponentChainSimple);
+    const component = traversal.traverse(componentExpression).getCode();
 
     if (node.findDirectExpression(Expressions.CompareOperator)) {
       const compare = traversal.traverse(node.findDirectExpression(Expressions.CompareOperator)).getCode();
@@ -24,10 +25,10 @@ export class ComponentCompareTranspiler implements IExpressionTranspiler {
       return new Chunk(`(I) => {return abap.compare.initial(I.${component});}`);
     }
 
-    if (concat.startsWith(component.toUpperCase() + " IN ")) {
+    if (concat.startsWith(componentExpression?.concatTokens().toUpperCase() + " IN ")) {
       const source = traversal.traverse(node.findDirectExpression(Expressions.Source)).getCode();
       return new Chunk(`(I) => {return ${pre}abap.compare.in(I.${component}, ${source});}`);
-    } else if (concat.startsWith(component.toUpperCase() + " NOT IN ")) {
+    } else if (concat.startsWith(componentExpression?.concatTokens().toUpperCase() + " NOT IN ")) {
       const source = traversal.traverse(node.findDirectExpression(Expressions.Source)).getCode();
       return new Chunk(`(I) => {return !abap.compare.in(I.${component}, ${source});}`);
     }
