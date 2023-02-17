@@ -41,8 +41,11 @@ export async function* loop(table: Table | FieldSymbol | undefined, options?: IL
   if (table === undefined) {
     throw new Error("LOOP at undefined");
   } else if (table instanceof FieldSymbol) {
-    // @ts-ignore
-    yield* loop(table.getPointer(), options);
+    const pnt = table.getPointer();
+    if (pnt === undefined) {
+      throw "GETWA_NOT_ASSIGNED";
+    }
+    yield* loop(pnt, options);
     return;
   }
 
