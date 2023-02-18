@@ -16,9 +16,9 @@ type options = {
 export function templateFormatting(source: ICharacter | INumeric, options?: options) {
   let text = "";
   if (source instanceof FieldSymbol && source.getPointer() === undefined) {
-    throw "GETWA_NOT_ASSIGNED";
+    throw new Error("GETWA_NOT_ASSIGNED");
   } else if (source instanceof Table) {
-    throw "STRG_ILLEGAL_DATA_TYPE";
+    throw new Error("STRG_ILLEGAL_DATA_TYPE");
   } else if (source instanceof Character) {
     text = source.getTrimEnd();
   } else {

@@ -16,7 +16,7 @@ export async function cast(target: ABAPObject | FieldSymbol, source: ABAPObject)
   let checkIntf = true;
 
   if (target instanceof FieldSymbol && target.getPointer() === undefined) {
-    throw "GETWA_NOT_ASSIGNED";
+    throw new Error("GETWA_NOT_ASSIGNED");
   }
 
   let targetName: string | undefined = undefined;

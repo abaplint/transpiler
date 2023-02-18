@@ -34,7 +34,7 @@ export function sort(input: Table | FieldSymbol, options?: ISortOptions) {
   if (input instanceof FieldSymbol) {
     const pnt = input.getPointer();
     if (pnt === undefined) {
-      throw "GETWA_NOT_ASSIGNED";
+      throw new Error("GETWA_NOT_ASSIGNED");
     }
     sort(pnt, options);
     return;

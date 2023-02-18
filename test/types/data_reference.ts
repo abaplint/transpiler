@@ -154,7 +154,7 @@ ref = <fs>.`;
       await f(abap);
       expect.fail();
     } catch(e) {
-      expect(e).to.equal("GETWA_NOT_ASSIGNED");
+      expect(e.toString()).to.contain("GETWA_NOT_ASSIGNED");
     }
   });
 
@@ -171,7 +171,7 @@ ref = <fs>.`;
       await f(abap);
       expect.fail();
     } catch(e) {
-      expect(e).to.equal("OBJECTS_MOVE_NOT_SUPPORTED");
+      expect(e.toString()).to.contain("OBJECTS_MOVE_NOT_SUPPORTED");
     }
   });
 

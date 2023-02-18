@@ -31,7 +31,7 @@ export class Character implements ICharacter {
       this.value = value;
     } else if (value instanceof FieldSymbol) {
       if (value.getPointer() === undefined) {
-        throw "GETWA_NOT_ASSIGNED";
+        throw new Error("GETWA_NOT_ASSIGNED");
       }
       this.set(value.getPointer());
       return this;

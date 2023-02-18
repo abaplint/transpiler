@@ -12,6 +12,7 @@ export interface IAssignInput {
 }
 
 export function assign(input: IAssignInput) {
+//  console.dir(input);
   if (input.dynamicName) {
     if (input.dynamicSource instanceof FieldSymbol) {
       input.dynamicSource = input.dynamicSource.getPointer();
@@ -114,18 +115,25 @@ export function assign(input: IAssignInput) {
   } else {
 //    console.dir(input);
     if (input.source instanceof FieldSymbol) {
-      input.target.assign(input.source.getPointer());
-//    } else if (input.source instanceof DataReference) {
-//      input.target.assign(input.source.getPointer());
-//      console.dir(input.target);
+      const pnt = input.source.getPointer();
+      if (pnt === undefined) {
+        throw new Error("GETWA_NOT_ASSIGNED");
+      }
+      input.target.assign(pnt);
+      // @ts-ignore
+      abap.builtin.sy.get().subrc.set(0);
+    } else if (input.source === undefined) {
+      // @ts-ignore
+      abap.builtin.sy.get().subrc.set(4);
     } else {
       if (input.casting) {
         input.target.setCasting();
       }
       input.target.assign(input.source);
+      // @ts-ignore
+      abap.builtin.sy.get().subrc.set(0);
     }
-    // @ts-ignore
-    abap.builtin.sy.get().subrc.set(0);
+
   }
 
 }
