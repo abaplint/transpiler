@@ -465,4 +465,19 @@ WRITE sy-subrc.`;
     expect(abap.console.get()).to.equal("4");
   });
 
+  it("unassigned fs", async () => {
+    const code = `
+    FIELD-SYMBOLS <table1> TYPE ANY TABLE.
+    FIELD-SYMBOLS <table2> TYPE ANY TABLE.
+    ASSIGN <table1> TO <table2>.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch(e) {
+      expect(e.toString()).to.contain("GETWA_NOT_ASSIGNED");
+    }
+  });
+
 });
