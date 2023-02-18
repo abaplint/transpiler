@@ -1641,7 +1641,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
-  it.only("structured default values", async () => {
+  it("structured default values", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
