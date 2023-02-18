@@ -1650,6 +1650,7 @@ CLASS lcl DEFINITION.
         text       TYPE string VALUE 'foo',
         empty_text TYPE string VALUE '',
       END OF gs_test_data.
+    CLASS-DATA bar TYPE string VALUE 'bar'.
 ENDCLASS.
 CLASS lcl IMPLEMENTATION.
 ENDCLASS.
