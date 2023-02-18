@@ -66,12 +66,12 @@ export class DataReference  {
       return this;
     } else if (value instanceof FieldSymbol) {
       if (value.getPointer() === undefined) {
-        throw "GETWA_NOT_ASSIGNED";
+        throw new Error("GETWA_NOT_ASSIGNED");
       } else if (value.getPointer() instanceof DataReference) {
         this.pointer = value.getPointer();
         return this;
       } else {
-        throw "OBJECTS_MOVE_NOT_SUPPORTED";
+        throw new Error("OBJECTS_MOVE_NOT_SUPPORTED");
       }
     } else {
       return this.pointer?.set(value);

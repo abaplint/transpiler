@@ -10,12 +10,12 @@ export function gt(
 
   if (left instanceof FieldSymbol) {
     if (left.getPointer() === undefined) {
-      throw "GETWA_NOT_ASSIGNED";
+      throw new Error("GETWA_NOT_ASSIGNED");
     }
     return gt(left.getPointer(), right);
   } else if (right instanceof FieldSymbol) {
     if (right.getPointer() === undefined) {
-      throw "GETWA_NOT_ASSIGNED";
+      throw new Error("GETWA_NOT_ASSIGNED");
     }
     return gt(left, right.getPointer());
   }

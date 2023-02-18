@@ -10,7 +10,7 @@ export function cp(left: number | string | ICharacter | INumeric | Structure, ri
     l = left.getCharacter();
   } else if (left instanceof FieldSymbol) {
     if (left.getPointer() === undefined) {
-      throw "GETWA_NOT_ASSIGNED";
+      throw new Error("GETWA_NOT_ASSIGNED");
     }
     return cp(left.getPointer(), right);
   } else {
