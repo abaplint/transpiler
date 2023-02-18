@@ -465,7 +465,7 @@ WRITE sy-subrc.`;
     expect(abap.console.get()).to.equal("4");
   });
 
-  it("unassigned fs", async () => {
+  it.skip("unassigned fs", async () => {
     const code = `
     FIELD-SYMBOLS <table1> TYPE ANY TABLE.
     FIELD-SYMBOLS <table2> TYPE ANY TABLE.

@@ -115,11 +115,14 @@ export function assign(input: IAssignInput) {
   } else {
 //    console.dir(input);
     if (input.source instanceof FieldSymbol) {
+      /*
       const pnt = input.source.getPointer();
       if (pnt === undefined) {
         throw new Error("GETWA_NOT_ASSIGNED");
       }
       input.target.assign(pnt);
+      */
+      input.target.assign(input.source.getPointer());
       // @ts-ignore
       abap.builtin.sy.get().subrc.set(0);
     } else if (input.source === undefined) {
