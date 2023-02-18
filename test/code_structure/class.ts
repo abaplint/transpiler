@@ -1641,4 +1641,25 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
+  it.only("structured default values", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-DATA:
+      BEGIN OF gs_test_data,
+        text       TYPE string VALUE 'foo',
+        empty_text TYPE string VALUE '',
+      END OF gs_test_data.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  WRITE lcl=>gs_test_data-text.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("foo");
+  });
+
 });
