@@ -452,4 +452,17 @@ WRITE foo->field.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("ASSIGN unassigned deref data reference", async () => {
+    const code = `
+DATA ref TYPE REF TO data.
+FIELD-SYMBOLS <table> TYPE ANY TABLE.
+
+ASSIGN ref->* TO <table>.
+WRITE sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4");
+  });
+
 });
