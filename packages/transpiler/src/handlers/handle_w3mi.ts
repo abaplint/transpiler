@@ -11,9 +11,10 @@ export class HandleW3MI {
     }
 
     obj.parse();
+    const dataFile = obj.getDataFile();
     const chunk = new Chunk().appendString(`abap.W3MI["${obj.getName().toUpperCase()}"] = {
   "objectType": "W3MI",
-  "filename": ${JSON.stringify(obj.getDataFile()?.getFilename())},
+  "filename": ${JSON.stringify(dataFile?.getFilename())},
 };`);
 
     const output: IOutputFile = {
@@ -27,6 +28,22 @@ export class HandleW3MI {
       exports: [],
     };
 
-    return [output];
+    const ret = [output];
+
+    if (dataFile) {
+      const data: IOutputFile = {
+        object: {
+          name: obj.getName(),
+          type: obj.getType(),
+        },
+        filename: dataFile?.getFilename(),
+        chunk: new Chunk().appendString(dataFile?.getRaw()),
+        requires: [],
+        exports: [],
+      };
+      ret.push(data);
+    }
+
+    return ret;
   }
 }

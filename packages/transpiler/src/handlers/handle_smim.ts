@@ -11,9 +11,10 @@ export class HandleSMIM {
     }
 
     obj.parse();
+    const dataFile = obj.getDataFile();
     const chunk = new Chunk().appendString(`abap.SMIM["${obj.getName().toUpperCase()}"] = {
   "objectType": "SMIM",
-  "filename": ${JSON.stringify(obj.getDataFile()?.getFilename())},
+  "filename": ${JSON.stringify(dataFile?.getFilename())},
   "url": ${JSON.stringify(obj.getURL())},
   "class": ${JSON.stringify(obj.getClass())},
 };`);
@@ -29,6 +30,22 @@ export class HandleSMIM {
       exports: [],
     };
 
-    return [output];
+    const ret = [output];
+
+    if (dataFile) {
+      const data: IOutputFile = {
+        object: {
+          name: obj.getName(),
+          type: obj.getType(),
+        },
+        filename: dataFile?.getFilename(),
+        chunk: new Chunk().appendString(dataFile?.getRaw()),
+        requires: [],
+        exports: [],
+      };
+      ret.push(data);
+    }
+
+    return ret;
   }
 }
