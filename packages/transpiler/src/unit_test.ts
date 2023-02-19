@@ -134,7 +134,10 @@ async function run() {
       ret += `    clas = unit.addObject("${obj.getName()}");\n`;
       for (const file of obj.getABAPFiles()) {
         for (const def of file.getInfo().listClassDefinitions()) {
-          if (def.isForTesting === false || def.isGlobal === true || def.methods.length === 0) {
+          if (def.isForTesting === false
+              || def.isGlobal === true
+              || def.methods.length === 0
+              || def.isAbstract === true) {
             // todo, fix, there might be global test methods
             continue;
           }
