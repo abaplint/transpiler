@@ -23,6 +23,8 @@ export class ABAP {
   public Interfaces: {[name: string]: any} = {};
   public DDIC: {[name: string]: any} = {};
   public TypePools: {[name: string]: any} = {};
+  public SMIM: {[name: string]: any} = {};
+  public W3MI: {[name: string]: any} = {};
 
 // stuff for runtime
   public statements;

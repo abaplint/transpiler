@@ -11,6 +11,8 @@ import {HandleTableType} from "./handlers/handle_table_type";
 import {HandleView} from "./handlers/handle_view";
 import {HandleEnqu} from "./handlers/handle_enqu";
 import {HandleTypePool} from "./handlers/handle_type_pool";
+import {HandleW3MI} from "./handlers/handle_w3mi";
+import {HandleSMIM} from "./handlers/handle_smim";
 
 export {config, ITranspilerOptions, IFile, IProgress, IOutputFile};
 
@@ -78,6 +80,10 @@ export class Transpiler {
         output.objects.push(...new HandleDataElement().runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.TableType) {
         output.objects.push(...new HandleTableType().runObject(obj, reg));
+      } else if (obj instanceof abaplint.Objects.MIMEObject) {
+        output.objects.push(...new HandleSMIM().runObject(obj, reg));
+      } else if (obj instanceof abaplint.Objects.WebMIME) {
+        output.objects.push(...new HandleW3MI().runObject(obj, reg));
       }
     }
 
