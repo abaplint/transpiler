@@ -221,7 +221,7 @@ INSERT val INTO TABLE lt_tab.`;
     await f(abap);
   });
 
-  it.only("INSERT, with FS in sorted table", async () => {
+  it("INSERT, with FS in sorted table", async () => {
     const code = `
 TYPES:
   BEGIN OF ty_css_var,
