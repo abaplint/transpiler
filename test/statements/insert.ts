@@ -221,4 +221,36 @@ INSERT val INTO TABLE lt_tab.`;
     await f(abap);
   });
 
+  it.only("INSERT, with FS in sorted table", async () => {
+    const code = `
+TYPES:
+  BEGIN OF ty_css_var,
+    name  TYPE string,
+    value TYPE string,
+  END OF ty_css_var,
+  ty_css_vars TYPE SORTED TABLE OF ty_css_var WITH UNIQUE KEY name.
+DATA tab TYPE ty_css_vars.
+DATA row LIKE LINE OF tab.
+FIELD-SYMBOLS <fs> LIKE row.
+
+ASSIGN row TO <fs>.
+
+row-name = 'foo1'.
+row-value = 1.
+INSERT <fs> INTO TABLE tab.
+
+row-name = 'foo2'.
+row-value = 2.
+INSERT <fs> INTO TABLE tab.
+
+row-name = 'foo1'.
+row-value = 3.
+INSERT <fs> INTO TABLE tab.
+
+ASSERT sy-subrc = 4.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
