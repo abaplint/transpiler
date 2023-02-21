@@ -9,7 +9,7 @@ import {sort} from "./sort";
 export interface IInsertInternalOptions {
   index?: INumeric,
   initial?: boolean,
-  data?: INumeric | ICharacter | Structure | ABAPObject | Table | string,
+  data?: INumeric | ICharacter | Structure | ABAPObject | Table | FieldSymbol | string,
   table: Table | FieldSymbol,
   referenceInto?: DataReference,
   assigning?: FieldSymbol,
@@ -18,7 +18,15 @@ export interface IInsertInternalOptions {
 
 export function insertInternal(options: IInsertInternalOptions): void {
   if (options.table instanceof FieldSymbol) {
+    if (options.table.getPointer() === undefined) {
+      throw new Error("GETWA_NOT_ASSIGNED");
+    }
     options.table = options.table.getPointer() as Table;
+  } else if (options.data instanceof FieldSymbol) {
+    if (options.data.getPointer() === undefined) {
+      throw new Error("GETWA_NOT_ASSIGNED");
+    }
+    options.data = options.data.getPointer();
   }
 
   const tableOptions = options.table.getOptions();
