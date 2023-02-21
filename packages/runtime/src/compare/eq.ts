@@ -44,10 +44,10 @@ export function eq(
 
   if (left instanceof Structure || right instanceof Structure) {
     if (!(right instanceof Structure)) {
-      return false;
+      return eq((left as Structure).getCharacter(), right);
     }
     if (!(left instanceof Structure)) {
-      return false;
+      return eq(left, (right as Structure).getCharacter());
     }
     const l = left.get();
     const r = right.get();
