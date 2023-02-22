@@ -3,7 +3,12 @@ import {DB} from "@abaplint/runtime";
 
 export class SQLiteDatabaseClient implements DB.DatabaseClient {
   public readonly name = "sqlite";
+  private readonly trace: boolean;
   private sqlite: Database | undefined = undefined;
+
+  public constructor(input?: {trace?: boolean}) {
+    this.trace = input?.trace === true;
+  }
 
   public async connect(data?: ArrayLike<number> | Buffer | null) {
     const SQL = await initSqlJs();
@@ -116,7 +121,11 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
       options.select = options.select.replace(/ ASCENDING/ig, " ASC");
       options.select = options.select.replace(/ DESCENDING/ig, " DESC");
       options.select = options.select.replace(/~/g, ".");
-//      console.dir(options.select);
+
+      if (this.trace === true) {
+        console.log(options.select);
+      }
+
       res = this.sqlite!.exec(options.select);
     } catch (error) {
       // @ts-ignore
