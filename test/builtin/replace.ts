@@ -146,4 +146,94 @@ WRITE result.`;
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("replace quotes", async () => {
+    const code = `
+    DATA rv_escaped TYPE string.
+
+    rv_escaped = '"'.
+
+    rv_escaped = replace(
+      val = rv_escaped
+      sub = '"'
+      with = '\\"'
+      occ = 0 ).
+
+    ASSERT rv_escaped = '\\"'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("replace newline", async () => {
+    const code = `
+    DATA rv_escaped TYPE string.
+
+    rv_escaped = |\\n|.
+
+    rv_escaped = replace(
+      val = rv_escaped
+      sub = |\\n|
+      with = '\\n'
+      occ = 0 ).
+
+    ASSERT rv_escaped = '\\n'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("replace slash", async () => {
+    const code = `
+    DATA rv_escaped TYPE string.
+
+    rv_escaped = '\\'.
+
+    rv_escaped = replace(
+      val = rv_escaped
+      sub = '\\'
+      with = '\\\\'
+      occ = 0 ).
+
+    ASSERT rv_escaped = '\\\\'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("replace CR", async () => {
+    const code = `
+    DATA rv_escaped TYPE string.
+
+    rv_escaped = |\\r|.
+
+    rv_escaped = replace(
+      val = rv_escaped
+      sub = |\\r|
+      with = '\\r'
+      occ = 0 ).
+
+    ASSERT rv_escaped = '\\r'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("replace slash in CR", async () => {
+    const code = `
+    DATA rv_escaped TYPE string.
+
+    rv_escaped = |\\r|.
+
+    rv_escaped = replace(
+      val = rv_escaped
+      sub = |\\\\|
+      with = '\\'
+      occ = 0 ).
+
+    ASSERT rv_escaped = |\\r|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
