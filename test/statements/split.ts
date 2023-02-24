@@ -258,4 +258,17 @@ WRITE / lv_int.`;
     expect(abap.console.get()).to.equal(`2`);
   });
 
+  it("split 9", async () => {
+    const code = `
+DATA val1 TYPE string.
+DATA val2 TYPE string.
+DATA rv_escaped TYPE string.
+rv_escaped = | \\|a"\\\\\\t|.
+SPLIT rv_escaped AT '|' INTO val1 val2.
+ASSERT val2 = |a"\\\\\\t|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

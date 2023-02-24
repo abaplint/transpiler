@@ -80,4 +80,31 @@ WRITE / foo.`;
     await f(abap);
   });
 
+  it("thousand", async () => {
+    const code = `
+DATA foo TYPE decfloat34.
+DATA out TYPE string.
+foo = 1000.
+out = |{ foo }|.
+WRITE / out.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1000");
+  });
+
+  it("parsing", async () => {
+    const code = `
+DATA foo TYPE decfloat34.
+DATA out TYPE string.
+foo = '1.123'.
+out = |{ foo }|.
+WRITE / foo.
+WRITE / out.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1,123\n1.123");
+  });
+
 });
