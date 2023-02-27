@@ -54,7 +54,10 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
         direction = "importing";
       }
       // note: all directions are optional
-      const name = p.name.toLowerCase();
+      let name = p.name.toLowerCase();
+      if (traversal.options?.keywords?.some(a => a === name)) {
+        name += "_";
+      }
       ret += `let ${name} = INPUT.${direction}?.${name};\n`;
 
       if (direction === "exporting" || direction === "importing" || direction === "changing") {

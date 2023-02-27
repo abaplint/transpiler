@@ -9,21 +9,22 @@ import {TranspileTypes} from "./transpile_types";
 import {ISpaghettiScopeNode} from "@abaplint/core";
 import {Chunk} from "./chunk";
 import {ConstantTranspiler} from "./expressions";
+import {ITranspilerOptions} from "./types";
 
 export class Traversal {
   private readonly spaghetti: abaplint.ISpaghettiScope;
   private readonly file: abaplint.ABAPFile;
   private readonly obj: abaplint.ABAPObject;
   public readonly reg: abaplint.IRegistry;
-  public readonly runtimeTypeError: boolean;
+  public readonly options: ITranspilerOptions | undefined;
 
   public constructor(spaghetti: abaplint.ISpaghettiScope, file: abaplint.ABAPFile,
-                     obj: abaplint.ABAPObject, reg: abaplint.IRegistry, runtimeTypeError = false) {
+                     obj: abaplint.ABAPObject, reg: abaplint.IRegistry, options?: ITranspilerOptions) {
     this.spaghetti = spaghetti;
     this.file = file;
     this.obj = obj;
     this.reg = reg;
-    this.runtimeTypeError = runtimeTypeError;
+    this.options = options;
   }
 
   public static escapeNamespace(name: string | undefined) {
