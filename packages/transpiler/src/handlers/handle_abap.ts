@@ -31,7 +31,7 @@ export class HandleABAP {
 
       const rearranged = new Rearranger().run(obj.getType(), file.getStructure());
 
-      const contents = new Traversal(spaghetti, file, obj, reg, this.options?.unknownTypes === "runtimeError").traverse(rearranged);
+      const contents = new Traversal(spaghetti, file, obj, reg, this.options).traverse(rearranged);
       chunk.appendChunk(contents);
       chunk.stripLastNewline();
       chunk.runIndentationLogic();

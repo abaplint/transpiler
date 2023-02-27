@@ -66,7 +66,7 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
     } else if (type instanceof abaplint.BasicTypes.GenericObjectReferenceType) {
       return "object";
     } else if (!(type instanceof abaplint.BasicTypes.ObjectReferenceType)) {
-      if (traversal.runtimeTypeError === false) {
+      if (traversal.options?.unknownTypes !== "runtimeError") {
         throw new Error(`CreateObjectTranspiler, target variable "${target?.concatTokens()}" not a object reference`);
       } else {
         return "RUNTIME_ERROR";
