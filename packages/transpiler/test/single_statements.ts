@@ -385,6 +385,9 @@ await abap.Classes['ZCL_CALL'].not_found();`},
 
     {abap: "delete foo where instance->field_type not in types.",
       js: `await abap.statements.deleteInternal(foo,{where: (I) => {return !abap.compare.in(I.instance.get().field_type, types);}});`, skip: false},
+
+    {abap: "READ REPORT name INTO text STATE 'A'.",
+      js: `abap.statements.readReport(name, {into: text,state: new abap.types.Character(1).set('A')});`, skip: false},
   ];
 
   for (const test of tests) {
