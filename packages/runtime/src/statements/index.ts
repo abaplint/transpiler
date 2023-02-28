@@ -14,6 +14,7 @@ import {collect} from "./collect";
 import {overlay} from "./overlay";
 import {cast} from "./cast";
 import {getBit} from "./get_bit";
+import {readReport} from "./read_report";
 import {raiseEvent} from "./raise_event";
 import {getLocale} from "./get_locale";
 import {getParameter} from "./get_parameter";
@@ -65,6 +66,7 @@ export class Statements {
   public describe = describe;
   public find = find;
   public getBit = getBit;
+  public readReport = readReport;
   public getLocale = getLocale;
   public getParameter = getParameter;
   public getRunTime = getRunTime;
