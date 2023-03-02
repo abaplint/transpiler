@@ -546,4 +546,27 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it.skip("interface constant referenced via instance", async () => {
+    const code = `
+INTERFACE lif.
+  CONSTANTS foo TYPE i VALUE 6.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl.
+  CREATE OBJECT ref.
+  WRITE ref->lif~foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("6");
+  });
+
 });
