@@ -54,7 +54,7 @@ function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
       }
       let encoding: BufferEncoding = "utf8";
       if (filename.endsWith(".woff")) {
-// hmm, this is a test
+// hmm, this is a test, https://www.npmjs.com/package/isbinaryfile ??
         encoding = "binary";
       }
       const contents = fs.readFileSync(filename, {encoding});
