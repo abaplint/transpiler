@@ -393,6 +393,16 @@ export class Traversal {
 
     const intf = this.findInterfaceDefinition(name, scope);
 
+    for (const a of intf?.getAttributes().getConstants() || []) {
+      const fname = Traversal.escapeNamespace(a.getName().toLowerCase());
+      const iname = Traversal.escapeNamespace(intf?.getName().toLowerCase());
+      if (intf?.isGlobal() === true) {
+        ret += "this." + iname + "$" + fname + " = abap.Classes['" + intf?.getName().toUpperCase() + "']." + iname + "$" + fname + ";\n";
+      } else {
+        ret += "this." + iname + "$" + fname + " = " + iname + "." + iname + "$" + fname + ";\n";
+      }
+    }
+
     for (const a of intf?.getAttributes().getAll() || []) {
       if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
         continue;
