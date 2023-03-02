@@ -39,6 +39,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
       const varName = n.toLowerCase();
       if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
           || identifier.getMeta().includes(abaplint.IdentifierMeta.MethodChanging)
+          || identifier.getMeta().includes(abaplint.IdentifierMeta.EventParameter)
           || identifier.getMeta().includes(abaplint.IdentifierMeta.MethodExporting)) {
         if (unique === "") {
           unique = "INPUT";
