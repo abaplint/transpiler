@@ -397,7 +397,7 @@ export class Traversal {
       const fname = Traversal.escapeNamespace(a.getName().toLowerCase());
       const iname = Traversal.escapeNamespace(intf?.getName().toLowerCase());
       if (intf?.isGlobal() === true) {
-        ret += "this." + iname + "$" + fname + " = abap.Classes['" + intf?.getName().toUpperCase() + "']['" + iname + "$" + fname + "'];\n";
+        ret += "this." + iname + "$" + fname + " = abap.Classes['" + intf?.getName().toUpperCase() + "']." + iname + "$" + fname + ";\n";
       } else {
         ret += "this." + iname + "$" + fname + " = " + iname + "." + iname + "$" + fname + ";\n";
       }
