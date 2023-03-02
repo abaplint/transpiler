@@ -691,4 +691,24 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it.only("AT FIRST, AT LAST", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA row LIKE LINE OF tab.
+APPEND 2 TO tab.
+LOOP AT tab INTO row.
+  AT FIRST.
+    WRITE 1.
+  ENDAT.
+  WRITE row.
+  AT LAST.
+    WRITE 3.
+  ENDAT.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("123");
+  });
+
 });

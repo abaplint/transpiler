@@ -52,12 +52,7 @@ function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
       if (filename.endsWith(".clas.testclasses.abap")) {
         continue;
       }
-      let encoding: BufferEncoding = "utf8";
-      if (filename.endsWith(".woff")) {
-// hmm, this is a test, https://www.npmjs.com/package/isbinaryfile ??
-        encoding = "binary";
-      }
-      const contents = fs.readFileSync(filename, {encoding});
+      const contents = fs.readFileSync(filename, "utf8");
       filename = path.basename(filename);
       files.push({filename, contents});
       count++;
