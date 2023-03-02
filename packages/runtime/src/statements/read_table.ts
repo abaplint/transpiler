@@ -12,6 +12,7 @@ export interface IReadTableOptions {
   referenceInto?: DataReference,
   assigning?: FieldSymbol,
   binarySearch?: boolean,
+  keyName?: string,
   withKeyValue?: {key: (i: any) => any, value: any}[],
 }
 
@@ -108,7 +109,7 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
   }
 
   let subrc = found ? 0 : 4;
-  if ((options?.from || options?.binarySearch === true)
+  if ((options?.from || options?.binarySearch === true || options?.keyName !== undefined)
       && subrc === 4) {
     subrc = 8;
   }
