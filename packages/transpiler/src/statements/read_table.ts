@@ -26,6 +26,11 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       extra.push("from: " + s);
     }
 
+    const keyName = node.findExpressionAfterToken("KEY");
+    if (keyName && node.findDirectTokenByText("COMPONENTS")) {
+      extra.push("keyName: \"" + keyName.concatTokens() + "\"");
+    }
+
     const binary = node.findTokenSequencePosition("BINARY", "SEARCH");
     if (binary) {
       extra.push("binarySearch: true");

@@ -481,4 +481,25 @@ ASSERT sy-tabix = 1.`;
     await f(abap);
   });
 
+  it("COMPONENTS subrc 8", async () => {
+    const code = `
+TYPES: BEGIN OF ty_file,
+         path     TYPE string,
+         filename TYPE string,
+       END OF ty_file.
+TYPES ty_files_tt TYPE STANDARD TABLE OF ty_file WITH DEFAULT KEY
+      WITH UNIQUE SORTED KEY file_path COMPONENTS path filename.
+
+DATA ct_remote TYPE ty_files_tt.
+FIELD-SYMBOLS <ls_remote> LIKE LINE OF ct_remote.
+
+READ TABLE ct_remote ASSIGNING <ls_remote>
+  WITH KEY file_path COMPONENTS path = 'sdf'.
+WRITE sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("8");
+  });
+
 });
