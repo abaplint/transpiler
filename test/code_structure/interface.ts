@@ -546,7 +546,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.skip("interface constant referenced via instance", async () => {
+  it("interface constant referenced via instance", async () => {
     const code = `
 INTERFACE lif.
   CONSTANTS foo TYPE i VALUE 6.
