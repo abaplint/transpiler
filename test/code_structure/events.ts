@@ -50,4 +50,32 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("handled");
   });
 
+  it.only("call event handler method", async () => {
+    const code = `
+INTERFACE lif.
+  EVENTS foo EXPORTING VALUE(action) TYPE string.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS on_event FOR EVENT foo OF lif IMPORTING action.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD on_event.
+    WRITE action.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl.
+  CREATE OBJECT ref.
+  ref->on_event( 'sdf' ).`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("sdf");
+  });
+
 });
