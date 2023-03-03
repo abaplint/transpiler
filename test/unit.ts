@@ -2114,7 +2114,7 @@ CONSTANTS seoo_cmptype_attribute TYPE n LENGTH 1 VALUE 'A'.`;
     await dumpNrun(files);
   });
 
-  it.only("test-51", async () => {
+  it("test-51", async () => {
 // INTF default parameter from constant
     const intf = `
 INTERFACE zif_html PUBLIC.

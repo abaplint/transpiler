@@ -90,7 +90,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
               val = "abap.builtin.sy.get().msgv4";
             } else {
               // note: this can be difficult, the "def" might be from an interface, ie. a different scope than the method
-              val = new FieldChainTranspiler().transpile(parameterDefault, traversal, true, methodDef?.getFilename()).getCode();
+              val = new FieldChainTranspiler().transpile(parameterDefault, traversal, true, methodDef?.getFilename(), true).getCode();
               if (val.startsWith(parameterDefault.getFirstToken().getStr().toLowerCase()) === true) {
                 val = "this." + val;
               }

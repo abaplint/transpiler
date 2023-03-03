@@ -13,7 +13,7 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
     this.addGet = addGet;
   }
 
-  public transpile(node: Nodes.ExpressionNode, traversal: Traversal, prefix = true, filename?: string): Chunk {
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal, prefix = true, filename?: string, wrongScope = false): Chunk {
     const ret = new Chunk();
     const extra: string[] = [];
 
@@ -27,6 +27,9 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.ClassName) {
         const name = traversal.lookupClassOrInterface(c.getFirstToken().getStr(), c.getFirstToken());
         ret.append(name + ".", c, traversal);
+        if (wrongScope === true && traversal.reg.getObject("INTF", c.getFirstToken().getStr())) {
+          ret.append(Traversal.escapeNamespace(c.getFirstToken().getStr().toLocaleLowerCase())! + "$", c, traversal);
+        }
       } else if (c.get() instanceof Expressions.AttributeName) {
         const interfaceName = traversal.isInterfaceAttribute(c.getFirstToken());
         let name = c.getFirstToken().getStr()!.toLowerCase();
