@@ -2114,4 +2114,47 @@ CONSTANTS seoo_cmptype_attribute TYPE n LENGTH 1 VALUE 'A'.`;
     await dumpNrun(files);
   });
 
+  it.only("test-51", async () => {
+// INTF default parameter from constant
+    const intf = `
+INTERFACE zif_html PUBLIC.
+  CONSTANTS:
+    BEGIN OF c_action_type,
+      sapevent TYPE c VALUE 'E',
+    END OF c_action_type.
+
+  METHODS a
+    IMPORTING
+      iv_typ TYPE c DEFAULT zif_html=>c_action_type-sapevent.
+ENDINTERFACE.`;
+    const clas = `
+    CLASS zcl_html DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        INTERFACES zif_html.
+    ENDCLASS.
+    CLASS zcl_html IMPLEMENTATION.
+      METHOD zif_html~a.
+        RETURN.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA ref TYPE REF TO zif_html.
+        CREATE OBJECT ref TYPE zcl_html.
+        ref->a( ).
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zcl_html.clas.abap", contents: clas},
+      {filename: "zif_html.intf.abap", contents: intf},
+      {filename: "zcl_html.clas.testclasses.abap", contents: tests},
+    ];
+    await dumpNrun(files);
+  });
+
 });
