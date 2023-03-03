@@ -24,4 +24,18 @@ describe("Running statements - CASE", () => {
     await f(abap);
   });
 
+  it("CASE, only OTHERS inside loop", async () => {
+    const code = `DATA lv_code TYPE i.
+    DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+    DATA row LIKE LINE OF tab.
+    LOOP AT tab INTO row.
+      CASE lv_code.
+        WHEN OTHERS.
+      ENDCASE.
+    ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

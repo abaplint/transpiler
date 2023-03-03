@@ -582,14 +582,15 @@ export class Traversal {
     const list: any = StructureTranspilers;
     const ret = new Chunk();
 
+    const search = node.get().constructor.name + "Transpiler";
+    if (list[search]) {
+      const transpiler = new list[search]() as IStructureTranspiler;
+      ret.appendChunk(transpiler.transpile(node, this));
+      return ret;
+    }
+
     for (const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.StructureNode) {
-        const search = c.get().constructor.name + "Transpiler";
-        if (list[search]) {
-          const transpiler = new list[search]() as IStructureTranspiler;
-          ret.appendChunk(transpiler.transpile(c, this));
-          continue;
-        }
         ret.appendChunk(this.traverseStructure(c));
       } else if (c instanceof abaplint.Nodes.StatementNode) {
         ret.appendChunk(this.traverseStatement(c));
