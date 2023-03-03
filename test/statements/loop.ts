@@ -691,7 +691,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.skip("AT FIRST, AT LAST", async () => {
+  it.only("AT FIRST, AT LAST", async () => {
     const code = `
 DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
 DATA row LIKE LINE OF tab.
@@ -710,6 +710,26 @@ ENDLOOP.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("123");
+  });
+
+  it("AT FIRST, AT LAST, empty", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA row LIKE LINE OF tab.
+LOOP AT tab INTO row.
+  AT FIRST.
+    WRITE 1.
+  ENDAT.
+  WRITE row.
+  AT LAST.
+    WRITE 3.
+  ENDAT.
+ENDLOOP.`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("");
   });
 
 });
