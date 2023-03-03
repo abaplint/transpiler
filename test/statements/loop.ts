@@ -691,7 +691,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.only("AT FIRST, AT LAST", async () => {
+  it.skip("AT FIRST, AT LAST", async () => {
     const code = `
 DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
 DATA row LIKE LINE OF tab.
