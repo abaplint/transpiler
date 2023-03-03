@@ -16,6 +16,7 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal, prefix = true, filename?: string, wrongScope = false): Chunk {
     const ret = new Chunk();
     const extra: string[] = [];
+    let interfaceNameAdded = false;
 
     for (const c of node.getChildren()) {
       if (c.get() instanceof Expressions.SourceField
@@ -29,11 +30,12 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
         ret.append(name + ".", c, traversal);
         if (wrongScope === true && traversal.reg.getObject("INTF", c.getFirstToken().getStr())) {
           ret.append(Traversal.escapeNamespace(c.getFirstToken().getStr().toLocaleLowerCase())! + "$", c, traversal);
+          interfaceNameAdded = true;
         }
       } else if (c.get() instanceof Expressions.AttributeName) {
         const interfaceName = traversal.isInterfaceAttribute(c.getFirstToken());
         let name = c.getFirstToken().getStr()!.toLowerCase();
-        if (prefix && interfaceName && name.startsWith(interfaceName) === false) {
+        if (prefix && interfaceName && name.startsWith(interfaceName) === false && interfaceNameAdded === false) {
           name = Traversal.escapeNamespace(name)!.replace("~", "$");
           name = Traversal.escapeNamespace(interfaceName) + "$" + name;
         } else {

@@ -2141,12 +2141,19 @@ ENDINTERFACE.`;
     CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
       PRIVATE SECTION.
         METHODS test01 FOR TESTING.
+        METHODS foo
+          IMPORTING
+            iv_type TYPE c DEFAULT zif_html=>c_action_type-sapevent.
     ENDCLASS.
     CLASS ltcl_test IMPLEMENTATION.
       METHOD test01.
         DATA ref TYPE REF TO zif_html.
         CREATE OBJECT ref TYPE zcl_html.
         ref->a( ).
+        foo( ).
+      ENDMETHOD.
+
+      METHOD foo.
       ENDMETHOD.
     ENDCLASS.`;
     const files = [
