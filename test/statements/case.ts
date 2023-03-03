@@ -24,7 +24,7 @@ describe("Running statements - CASE", () => {
     await f(abap);
   });
 
-  it.only("CASE, only OTHERS inside loop", async () => {
+  it("CASE, only OTHERS inside loop", async () => {
     const code = `DATA lv_code TYPE i.
     DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
     DATA row LIKE LINE OF tab.
