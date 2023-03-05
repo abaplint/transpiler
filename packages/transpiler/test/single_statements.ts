@@ -388,6 +388,9 @@ await abap.Classes['ZCL_CALL'].not_found();`},
 
     {abap: "READ REPORT name INTO text STATE 'A'.",
       js: `abap.statements.readReport(name, {into: text,state: new abap.types.Character(1).set('A')});`, skip: false},
+
+    {abap: "MESSAGE lx_exception TYPE 'S' DISPLAY LIKE 'E'.",
+      js: `await abap.statements.message({exception: lx_exception, type: new abap.types.Character(1).set('S'), displayLike: new abap.types.Character(1).set('E')});`, skip: false},
   ];
 
   for (const test of tests) {

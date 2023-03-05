@@ -1,10 +1,13 @@
 import {Context} from "../context";
+import {ABAPObject} from "../types";
 import {ICharacter} from "../types/_character";
 
 export interface IMessageOptions {
   id?: ICharacter | string,
   number?: ICharacter | string,
   type?: ICharacter | string,
+  displayLike?: ICharacter | string,
+  exception?: ABAPObject,
   with?: (ICharacter | string)[],
   into?: ICharacter,
 }
@@ -88,12 +91,19 @@ export class MessageStatement {
     // @ts-ignore
     abap.builtin.sy.get().msgty.set(msgty);
 
-    const text = await findText(this.context, arbgb, msgnr, msgty);
-
-    const replaced = replace(text, options.with);
+    let replaced = "";
+    if (options.exception) {
+      replaced = await options.exception.get().if_message$get_text();
+    } else {
+      const text = await findText(this.context, arbgb, msgnr, msgty);
+      replaced = replace(text, options.with);
+    }
 
     if (options.into) {
       options.into.set(replaced);
+    } else {
+// hmm, add option on how/if to write messages to console? or it should be the abap.console() ?
+      console.log(replaced);
     }
   }
 

@@ -41,6 +41,25 @@ export class MessageTranspiler implements IStatementTranspiler {
         options.push("number: \"" + str.substr(1, 3) + "\"");
         options.push("type: \"" + str.substr(0, 1).toUpperCase() + "\"");
       }
+
+      const like = messagesource.findExpressionAfterToken("LIKE");
+      if (like) {
+        options.push("displayLike: " + traversal.traverse(like).getCode());
+      }
+    } else {
+// exception based
+      const exception = node.findDirectExpression(abaplint.Expressions.SimpleSource3);
+      options.push("exception: " + traversal.traverse(exception).getCode());
+
+      const type = node.findExpressionAfterToken("TYPE");
+      if (type) {
+        options.push("type: " + traversal.traverse(type).getCode());
+      }
+
+      const like = node.findExpressionAfterToken("LIKE");
+      if (like) {
+        options.push("displayLike: " + traversal.traverse(like).getCode());
+      }
     }
 
     const w: string[] = [];
