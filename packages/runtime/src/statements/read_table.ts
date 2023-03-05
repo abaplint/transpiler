@@ -1,6 +1,6 @@
 import {binarySearchFromRow} from "../binary_search";
 import {eq} from "../compare";
-import {DataReference, FieldSymbol, Structure, Table} from "../types";
+import {DataReference, DecFloat34, FieldSymbol, Float, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -50,7 +50,11 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
   if (options?.index) {
     let index = options.index;
     if (typeof index !== "number") {
-      index = index.get();
+      if (index instanceof Float || index instanceof DecFloat34) {
+        index = index.getRaw();
+      } else {
+        index = index.get();
+      }
     }
 
     found = arr[index - 1];

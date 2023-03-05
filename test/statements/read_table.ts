@@ -518,4 +518,18 @@ ASSERT sy-subrc = 0.`;
     await f(abap);
   });
 
+  it("floated index", async () => {
+    const code = `
+DATA mt_symbol TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA lv_f TYPE f.
+FIELD-SYMBOLS <lv_offset> LIKE LINE OF mt_symbol.
+lv_f = 1.
+APPEND 1 TO mt_symbol.
+READ TABLE mt_symbol INDEX lv_f ASSIGNING <lv_offset>.
+ASSERT sy-subrc = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
