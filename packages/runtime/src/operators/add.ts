@@ -1,11 +1,25 @@
-import {Character, Float, Hex, Integer} from "../types";
+import {Character, FieldSymbol, Float, Hex, Integer} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {String} from "../types/string";
 import {parse} from "./_parse";
 
-export function add(left: INumeric | ICharacter | string | number | Float | Integer | Hex,
-                    right: INumeric | ICharacter | string | number  | Float | Integer | Hex) {
+export function add(left: INumeric | ICharacter | string | number | Float | Integer | Hex | FieldSymbol,
+                    right: INumeric | ICharacter | string | number  | Float | Integer | Hex | FieldSymbol): Integer | Float {
+
+  if (left instanceof FieldSymbol) {
+    if (left.getPointer() === undefined) {
+      throw new Error("GETWA_NOT_ASSIGNED");
+    }
+    return add(left.getPointer(), right);
+  }
+
+  if (right instanceof FieldSymbol) {
+    if (right.getPointer() === undefined) {
+      throw new Error("GETWA_NOT_ASSIGNED");
+    }
+    return add(left, right.getPointer());
+  }
 
   if (left instanceof Integer && right instanceof Integer) {
     return new Integer().set(left.get() + right.get());

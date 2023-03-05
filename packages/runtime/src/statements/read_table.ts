@@ -1,11 +1,11 @@
 import {binarySearchFromRow} from "../binary_search";
 import {eq} from "../compare";
-import {DataReference, FieldSymbol, Structure, Table} from "../types";
+import {DataReference, DecFloat34, FieldSymbol, Float, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
 export interface IReadTableOptions {
-  index?: INumeric | number,
+  index?: INumeric | FieldSymbol | number,
   withKey?: (i: any) => boolean,
   into?: INumeric | ICharacter | Structure | Table | DataReference,
   from?: INumeric | ICharacter | Structure | Table | DataReference,
@@ -50,7 +50,18 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
   if (options?.index) {
     let index = options.index;
     if (typeof index !== "number") {
-      index = index.get();
+      if (index instanceof FieldSymbol) {
+        if (index.getPointer() === undefined) {
+          throw new Error("GETWA_NOT_ASSIGNED");
+        }
+        index = index.getPointer() as INumeric;
+      }
+
+      if (index instanceof Float || index instanceof DecFloat34) {
+        index = index.getRaw();
+      } else {
+        index = index.get();
+      }
     }
 
     found = arr[index - 1];
