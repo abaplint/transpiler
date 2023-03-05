@@ -1,10 +1,13 @@
 import {Context} from "../context";
+import {ABAPObject} from "../types";
 import {ICharacter} from "../types/_character";
 
 export interface IMessageOptions {
   id?: ICharacter | string,
   number?: ICharacter | string,
   type?: ICharacter | string,
+  displayLike?: ICharacter | string,
+  exception?: ABAPObject,
   with?: (ICharacter | string)[],
   into?: ICharacter,
 }
