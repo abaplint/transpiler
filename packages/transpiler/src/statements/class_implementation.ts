@@ -19,9 +19,30 @@ export class ClassImplementationTranspiler implements IStatementTranspiler {
       ret += " extends " + Traversal.escapeNamespace(def?.getSuperClass()?.toLowerCase());
     }
 
+    const scope = traversal.findCurrentScopeByToken(token);
+
     return new Chunk().append(ret + ` {
 static INTERNAL_TYPE = 'CLAS';
-static IMPLEMENTED_INTERFACES = [${def?.getImplementing().map(e => `"` + e.name.toUpperCase() + `"`).join(",")}];`, node, traversal);
+static IMPLEMENTED_INTERFACES = [${this.findImplemented(traversal, def, scope).map(e => `"` + e.toUpperCase() + `"`).join(",")}];`, node, traversal);
+  }
+
+  private findImplemented(traversal: Traversal, def?: abaplint.IClassDefinition, scope?: abaplint.ISpaghettiScopeNode): string[] {
+    if (def === undefined || scope === undefined) {
+      return [];
+    }
+
+    const list = def.getImplementing().map(i => i.name.toUpperCase());
+
+// todo, interfaces implemented by interfaces?
+
+    let sup = def.getSuperClass();
+    while (sup !== undefined) {
+      const sdef = traversal.findClassDefinition(sup, scope);
+      list.push(...this.findImplemented(traversal, sdef, scope));
+      sup = sdef?.getSuperClass();
+    }
+
+    return list;
   }
 
 }

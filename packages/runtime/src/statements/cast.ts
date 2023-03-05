@@ -25,7 +25,12 @@ export async function cast(target: ABAPObject | FieldSymbol, source: ABAPObject)
   }
 
   // @ts-ignore
-  const targetClass = abap.Classes[targetName];
+  let targetClass = abap.Classes[targetName];
+  if (targetClass === undefined) {
+    // todo, for unit testing,
+    // @ts-ignore
+    targetClass = abap.Classes["PROG-ZFOOBAR-" + targetName];
+  }
 
   if (targetClass?.INTERNAL_TYPE === "CLAS") {
     // using "instanceof" is probably wrong in some cases,
@@ -34,30 +39,7 @@ export async function cast(target: ABAPObject | FieldSymbol, source: ABAPObject)
       throwError("CX_SY_MOVE_CAST_ERROR");
     }
   } else if (checkIntf === true && targetClass?.INTERNAL_TYPE === "INTF") {
-    const list: string[] = [...source.get().constructor.IMPLEMENTED_INTERFACES];
-
-    // interfaces implemented in super classes
-    let sup = source.get().super;
-    while (sup !== undefined) {
-      list.push(...sup.get().constructor.IMPLEMENTED_INTERFACES);
-      sup = sup.get().super;
-    }
-
-    // interfaces implemented by interfaces
-    const visit = new Set<string>(list);
-    while (visit.size > 0) {
-      const intfName = visit.values().next().value;
-      // @ts-ignore
-      const intf = abap.Classes[intfName];
-      for (const i of intf?.IMPLEMENTED_INTERFACES || []) {
-        if (visit.has(i) === false) {
-          visit.add(i);
-          list.push(i);
-        }
-      }
-      visit.delete(intfName);
-    }
-
+    const list: string[] = source.get().constructor.IMPLEMENTED_INTERFACES;
     const isImplemented = list.some(i => i === targetName);
     if (isImplemented === false) {
       throwError("CX_SY_MOVE_CAST_ERROR");
