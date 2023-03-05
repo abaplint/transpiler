@@ -502,4 +502,20 @@ WRITE sy-subrc.`;
     expect(abap.console.get()).to.equal("8");
   });
 
+  it("Fieldsymbol index", async () => {
+    const code = `
+DATA mt_symbol TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+FIELD-SYMBOLS <lv_symbol> LIKE LINE OF mt_symbol.
+FIELD-SYMBOLS <lv_offset> LIKE LINE OF mt_symbol.
+APPEND 1 TO mt_symbol.
+APPEND 1 TO mt_symbol.
+READ TABLE mt_symbol INDEX 1 ASSIGNING <lv_offset>.
+ASSERT sy-subrc = 0.
+READ TABLE mt_symbol INDEX <lv_offset> + 1 ASSIGNING <lv_symbol>.
+ASSERT sy-subrc = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

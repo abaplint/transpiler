@@ -1,11 +1,26 @@
-import {Character, Float, Integer} from "../types";
+import {Character, FieldSymbol, Float, Integer} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
 import {String} from "../types/string";
 
-export function minus(left: INumeric | ICharacter | string | number | Integer | Float,
-                      right: INumeric | ICharacter | string | number | Integer | Float) {
+export function minus(left: INumeric | ICharacter | string | number | Integer | Float | FieldSymbol,
+                      right: INumeric | ICharacter | string | number | Integer | Float | FieldSymbol): Integer | Float {
+
+  if (left instanceof FieldSymbol) {
+    if (left.getPointer() === undefined) {
+      throw new Error("GETWA_NOT_ASSIGNED");
+    }
+    return minus(left.getPointer(), right);
+  }
+
+  if (right instanceof FieldSymbol) {
+    if (right.getPointer() === undefined) {
+      throw new Error("GETWA_NOT_ASSIGNED");
+    }
+    return minus(left, right.getPointer());
+  }
+
   if (left instanceof Integer && right instanceof Integer) {
     return new Integer().set(left.get() - right.get());
   } else if (typeof left === "number" && typeof right === "number"
