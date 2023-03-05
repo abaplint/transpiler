@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
@@ -23,22 +24,40 @@ export class ClassImplementationTranspiler implements IStatementTranspiler {
 
     return new Chunk().append(ret + ` {
 static INTERNAL_TYPE = 'CLAS';
-static IMPLEMENTED_INTERFACES = [${this.findImplemented(traversal, def, scope).map(e => `"` + e.toUpperCase() + `"`).join(",")}];`, node, traversal);
+static IMPLEMENTED_INTERFACES = [${this.findImplementedClass(traversal, def, scope).map(e => `"` + e.toUpperCase() + `"`).join(",")}];`, node, traversal);
   }
 
-  private findImplemented(traversal: Traversal, def?: abaplint.IClassDefinition, scope?: abaplint.ISpaghettiScopeNode): string[] {
+  private findImplementedInterface(traversal: Traversal, def?: abaplint.IInterfaceDefinition, scope?: abaplint.ISpaghettiScopeNode): string[] {
     if (def === undefined || scope === undefined) {
       return [];
     }
 
     const list = def.getImplementing().map(i => i.name.toUpperCase());
 
-// todo, interfaces implemented by interfaces?
+    for (const i of def.getImplementing()) {
+      const idef = traversal.findInterfaceDefinition(i.name, scope);
+      list.push(...this.findImplementedInterface(traversal, idef, scope));
+    }
+
+    return list;
+  }
+
+  private findImplementedClass(traversal: Traversal, def?: abaplint.IClassDefinition, scope?: abaplint.ISpaghettiScopeNode): string[] {
+    if (def === undefined || scope === undefined) {
+      return [];
+    }
+
+    const list = def.getImplementing().map(i => i.name.toUpperCase());
+
+    for (const i of def.getImplementing()) {
+      const idef = traversal.findInterfaceDefinition(i.name, scope);
+      list.push(...this.findImplementedInterface(traversal, idef, scope));
+    }
 
     let sup = def.getSuperClass();
     while (sup !== undefined) {
       const sdef = traversal.findClassDefinition(sup, scope);
-      list.push(...this.findImplemented(traversal, sdef, scope));
+      list.push(...this.findImplementedClass(traversal, sdef, scope));
       sup = sdef?.getSuperClass();
     }
 
