@@ -340,4 +340,21 @@ ASSERT lines( tab ) = 2.`;
     await f(abap);
   });
 
+  it("DELETE TO", async () => {
+    const code = `
+DATA lt_dists TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA lv_val LIKE LINE OF lt_dists.
+DO 10 TIMES.
+  APPEND sy-index TO lt_dists.
+ENDDO.
+DELETE lt_dists TO 5.
+ASSERT lines( lt_dists ) = 5.
+READ TABLE lt_dists INDEX 1 INTO lv_val.
+WRITE lv_val.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("6");
+  });
+
 });

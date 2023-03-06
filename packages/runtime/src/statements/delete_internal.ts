@@ -42,6 +42,16 @@ export async function deleteInternal(target: Table | FieldSymbol, options?: IDel
     }
   }
 
+  if (options?.to) {
+    if (options?.from !== undefined || options?.where !== undefined) {
+      throw "DeleteInternalTodo";
+    }
+    for (let i = 0; i < options.to.get(); i++) {
+      target.deleteIndex(0);
+    }
+    return;
+  }
+
   for await (const i of loop(target)) {
     // @ts-ignore
     index = abap.builtin.sy.get().tabix.get() - 1;
@@ -72,8 +82,6 @@ export async function deleteInternal(target: Table | FieldSymbol, options?: IDel
       target.deleteIndex(index);
     } else if (options?.from && options.from.get() <= index + 1) {
       target.deleteIndex(index);
-    } else if (options?.to && options.to.get() <= index + 1) {
-      target.deleteIndex(0);
     }
 
     prev = i;
