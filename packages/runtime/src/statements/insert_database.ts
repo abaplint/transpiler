@@ -2,6 +2,14 @@ import {Context} from "../context";
 import {Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 
+export function toValue(value: any) {
+  if (typeof value === "string") {
+    return '"' + value.replace(/"/g, "\"\"") + '"';
+  } else {
+    return value;
+  }
+}
+
 export interface IInsertDatabaseOptions {
   values?: Structure,
   table?: Table,
@@ -44,11 +52,7 @@ export class InsertDatabase {
       columns.push(k);
 
       const value = structure[k].get();
-      if (typeof value === "string") {
-        values.push('"' + value.replace(/"/g, "\"\"") + '"');
-      } else {
-        values.push(value);
-      }
+      values.push(toValue(value));
     }
 
     if (typeof table !== "string") {

@@ -590,7 +590,7 @@ ASSERT sy-subrc = 0.`;
     ls_t100-text = 'foo'.
     MODIFY t100 FROM ls_t100.
     WRITE sy-subrc.
-    ls_t100-text = 'bar'.
+    ls_t100-text = '"'.
     MODIFY t100 FROM ls_t100.
     WRITE sy-subrc.`;
     const js = await runFiles(abap, [
