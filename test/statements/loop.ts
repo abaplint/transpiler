@@ -730,7 +730,7 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("");
   });
 
-  it.only("AT NEW", async () => {
+  it.skip("AT NEW", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          obj_name TYPE string,
@@ -752,6 +752,7 @@ LOOP AT lt_status ASSIGNING <ls_status>.
   WRITE: / 'middle', <ls_status>-obj_name.
 ENDLOOP.`;
     const js = await run(code);
+    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal(`new
