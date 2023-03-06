@@ -6,6 +6,7 @@ import {AtFirstTranspiler} from "./at_first";
 import {AtLastTranspiler} from "./at_last";
 import {UniqueIdentifier} from "../unique_identifier";
 import {LoopTranspiler as LoopStatementTranspiler} from "../statements";
+import {AtTranspiler} from "./at";
 
 
 export class LoopTranspiler implements IStructureTranspiler {
@@ -15,7 +16,7 @@ export class LoopTranspiler implements IStructureTranspiler {
     let pre = "";
     let atFirst: Chunk | undefined = undefined;
     let atLast: Chunk | undefined = undefined;
-    let prevUnique = "";
+    let previous = "";
     let loopTarget = "";
 
     const hasAt = node.findDirectStructure(abaplint.Structures.Body)
@@ -37,7 +38,7 @@ export class LoopTranspiler implements IStructureTranspiler {
             } else if (n instanceof abaplint.Nodes.StructureNode && n.get() instanceof abaplint.Structures.AtLast) {
               atLast = new AtLastTranspiler().transpile(n, traversal);
             } else if (n instanceof abaplint.Nodes.StructureNode && n.get() instanceof abaplint.Structures.At) {
-//              ret.appendString("the real at\n");
+              ret.appendChunk(new AtTranspiler().transpile(n, traversal, previous, loopTarget));
             } else {
               ret.appendChunk(traversal.traverse(n));
             }
@@ -45,8 +46,8 @@ export class LoopTranspiler implements IStructureTranspiler {
         }
       } else if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.Loop) {
         if (hasAt === true) {
-          prevUnique = UniqueIdentifier.get();
-          ret.appendString(`let ${prevUnique} = undefined;\n`);
+          previous = UniqueIdentifier.get();
+          ret.appendString(`let ${previous} = undefined;\n`);
         }
         const loop = new LoopStatementTranspiler();
         ret.appendChunk(loop.transpile(c, traversal));
@@ -54,7 +55,7 @@ export class LoopTranspiler implements IStructureTranspiler {
         loopTarget = loop.getTarget();
       } else if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.EndLoop) {
         if (hasAt === true) {
-          ret.appendString(`${prevUnique} = ${loopTarget};\n`);
+          ret.appendString(`${previous} = ${loopTarget};\n`);
         }
         ret.appendChunk(traversal.traverse(c));
       } else {
