@@ -730,6 +730,68 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("");
   });
 
+  it.only("AT NEW", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         obj_name TYPE string,
+       END OF ty.
+DATA lt_status TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row LIKE LINE OF lt_status.
+FIELD-SYMBOLS <ls_status> LIKE LINE OF lt_status.
+
+row-obj_name = 'foo'.
+APPEND row TO lt_status.
+APPEND row TO lt_status.
+row-obj_name = 'bar'.
+APPEND row TO lt_status.
+
+LOOP AT lt_status ASSIGNING <ls_status>.
+  AT NEW obj_name.
+    WRITE / 'new'.
+  ENDAT.
+  WRITE: / 'middle', <ls_status>-obj_name.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`new
+middle foo
+middle foo
+new
+middle bar`);
+  });
+
+  it.skip("AT END", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         obj_name TYPE string,
+       END OF ty.
+DATA lt_status TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row LIKE LINE OF lt_status.
+FIELD-SYMBOLS <ls_status> LIKE LINE OF lt_status.
+
+row-obj_name = 'foo'.
+APPEND row TO lt_status.
+APPEND row TO lt_status.
+row-obj_name = 'bar'.
+APPEND row TO lt_status.
+
+LOOP AT lt_status ASSIGNING <ls_status>.
+  WRITE: / 'middle', <ls_status>-obj_name.
+  AT END OF obj_name.
+    WRITE / 'end'.
+  ENDAT.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`middle foo
+middle foo
+end
+middle bar
+end`);
+  });
+
   it.skip("AT NEW, AT END", async () => {
     const code = `
 TYPES: BEGIN OF ty,
