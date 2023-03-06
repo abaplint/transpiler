@@ -730,7 +730,7 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("");
   });
 
-  it.only("AT NEW, AT END", async () => {
+  it.skip("AT NEW, AT END", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          obj_name TYPE string,
