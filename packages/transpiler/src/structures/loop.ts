@@ -55,6 +55,7 @@ export class LoopTranspiler implements IStructureTranspiler {
           previous = UniqueIdentifier.get();
           tabix = UniqueIdentifier.get();
           ret.appendString(`let ${previous} = undefined;\n`);
+          ret.appendString(`let ${tabix} = undefined;\n`);
         }
         const loop = new LoopStatementTranspiler();
         ret.appendChunk(loop.transpile(c, traversal));
