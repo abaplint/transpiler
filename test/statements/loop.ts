@@ -792,7 +792,7 @@ middle bar
 end`);
   });
 
-  it.skip("AT NEW, AT END", async () => {
+  it("AT NEW, AT END", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          obj_name TYPE string,
@@ -811,7 +811,7 @@ LOOP AT lt_status ASSIGNING <ls_status>.
   AT NEW obj_name.
     WRITE / 'new'.
   ENDAT.
-  WRITE: / 'middle', <ls_status>-obj_name.
+  WRITE / |middle { <ls_status>-obj_name }|.
   AT END OF obj_name.
     WRITE / 'end'.
   ENDAT.
