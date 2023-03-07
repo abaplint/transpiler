@@ -6,6 +6,18 @@ import {FieldChainTranspiler, SourceTranspiler} from "../expressions";
 import {Chunk} from "../chunk";
 
 export class LoopTranspiler implements IStatementTranspiler {
+  private unique = "";
+  private readonly injectFrom: string | undefined = undefined;
+  private readonly skipInto: boolean | undefined = undefined;
+
+  public constructor(options?: {injectFrom?: string, skipInto?: boolean}) {
+    this.injectFrom = options?.injectFrom;
+    this.skipInto = options?.skipInto;
+  }
+
+  public getTarget() {
+    return this.unique;
+  }
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     if (!(node.get() instanceof abaplint.Statements.Loop)) {
@@ -14,10 +26,10 @@ export class LoopTranspiler implements IStatementTranspiler {
 
     const source = traversal.traverse(node.findDirectExpression(abaplint.Expressions.SimpleSource2)).getCode();
 
-    const unique1 = UniqueIdentifier.get();
+    this.unique = UniqueIdentifier.get();
     let target = "";
     const into = node.findDirectExpression(abaplint.Expressions.LoopTarget)?.findDirectExpression(abaplint.Expressions.Target);
-    if (into) {
+    if (into && this.skipInto !== true) {
       const concat = node.concatTokens().toUpperCase();
       const t = traversal.traverse(into).getCode();
 
@@ -25,17 +37,17 @@ export class LoopTranspiler implements IStatementTranspiler {
       const typ = traversal.determineType(node, scope);
       if (concat.includes(" REFERENCE INTO ")) {
         // target is assumed to be a data reference
-        target = t + ".assign(" + unique1 + ");";
+        target = t + ".assign(" + this.unique + ");";
       } else if (typ instanceof abaplint.BasicTypes.DataReference) {
         // row type and target is assumed to be data references
-        target = t + ".assign(" + unique1 + ".getPointer());";
+        target = t + ".assign(" + this.unique + ".getPointer());";
       } else {
-        target = t + ".set(" + unique1 + ");";
+        target = t + ".set(" + this.unique + ");";
       }
-    } else {
+    } else if (this.skipInto !== true) {
       const assigning = node.findFirstExpression(abaplint.Expressions.FSTarget)?.findFirstExpression(abaplint.Expressions.FieldSymbol);
       if (assigning) {
-        target = traversal.traverse(assigning).getCode() + ".assign(" + unique1 + ");";
+        target = traversal.traverse(assigning).getCode() + ".assign(" + this.unique + ");";
       }
     }
 
@@ -44,6 +56,8 @@ export class LoopTranspiler implements IStatementTranspiler {
     if (fromNode) {
       const from = new SourceTranspiler().transpile(fromNode, traversal).getCode();
       extra.push("from: " + from);
+    } else if (this.injectFrom) {
+      extra.push("from: " + this.injectFrom);
     }
 
     const toNode = node.findExpressionAfterToken("TO");
@@ -99,7 +113,7 @@ export class LoopTranspiler implements IStatementTranspiler {
     if (extra.length > 0) {
       concat = ",{" + extra.join(",") + "}";
     }
-    return new Chunk(`for await (const ${unique1} of abap.statements.loop(${source}${concat})) {\n${target}`);
+    return new Chunk(`for await (const ${this.unique} of abap.statements.loop(${source}${concat})) {\n${target}`);
   }
 
 }
