@@ -777,12 +777,13 @@ row-obj_name = 'bar'.
 APPEND row TO lt_status.
 
 LOOP AT lt_status ASSIGNING <ls_status>.
-  WRITE: / 'middle', <ls_status>-obj_name.
+  WRITE / |middle { <ls_status>-obj_name }|.
   AT END OF obj_name.
     WRITE / 'end'.
   ENDAT.
 ENDLOOP.`;
     const js = await run(code);
+    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal(`middle foo

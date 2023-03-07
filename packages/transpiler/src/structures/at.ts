@@ -16,8 +16,18 @@ export class AtTranspiler implements IStructureTranspiler {
       ?.concatTokens()
       ?.toLowerCase();
 
-    if (concat?.startsWith("AT NEW")) {
-    // eslint-disable-next-line max-len
+// todo: handle "table_line"
+
+    if (concat?.startsWith("AT NEW ")) {
+      // eslint-disable-next-line max-len
+      ret.appendString(`if (${previous} === undefined || abap.compare.eq(${previous}.get().${name}, ${loopTarget}.get().${name}) === false) {\n`);
+      const body = node.findDirectStructure(abaplint.Structures.Body);
+      if (body) {
+        ret.appendChunk(traversal.traverse(body));
+      }
+      ret.appendString("}\n");
+    } else if (concat?.startsWith("AT END OF ")) {
+      // eslint-disable-next-line max-len
       ret.appendString(`if (${previous} === undefined || abap.compare.eq(${previous}.get().${name}, ${loopTarget}.get().${name}) === false) {\n`);
       const body = node.findDirectStructure(abaplint.Structures.Body);
       if (body) {
