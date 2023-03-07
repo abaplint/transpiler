@@ -761,7 +761,7 @@ new
 middle bar`);
   });
 
-  it.skip("AT END", async () => {
+  it("AT END", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          obj_name TYPE string,
@@ -783,7 +783,6 @@ LOOP AT lt_status ASSIGNING <ls_status>.
   ENDAT.
 ENDLOOP.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal(`middle foo

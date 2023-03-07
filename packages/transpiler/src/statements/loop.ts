@@ -7,6 +7,13 @@ import {Chunk} from "../chunk";
 
 export class LoopTranspiler implements IStatementTranspiler {
   private unique = "";
+  private readonly injectFrom: string | undefined = undefined;
+  private readonly skipInto: boolean | undefined = undefined;
+
+  public constructor(options?: {injectFrom?: string, skipInto?: boolean}) {
+    this.injectFrom = options?.injectFrom;
+    this.skipInto = options?.skipInto;
+  }
 
   public getTarget() {
     return this.unique;
@@ -22,7 +29,7 @@ export class LoopTranspiler implements IStatementTranspiler {
     this.unique = UniqueIdentifier.get();
     let target = "";
     const into = node.findDirectExpression(abaplint.Expressions.LoopTarget)?.findDirectExpression(abaplint.Expressions.Target);
-    if (into) {
+    if (into && this.skipInto !== true) {
       const concat = node.concatTokens().toUpperCase();
       const t = traversal.traverse(into).getCode();
 
@@ -37,7 +44,7 @@ export class LoopTranspiler implements IStatementTranspiler {
       } else {
         target = t + ".set(" + this.unique + ");";
       }
-    } else {
+    } else if (this.skipInto !== true) {
       const assigning = node.findFirstExpression(abaplint.Expressions.FSTarget)?.findFirstExpression(abaplint.Expressions.FieldSymbol);
       if (assigning) {
         target = traversal.traverse(assigning).getCode() + ".assign(" + this.unique + ");";
@@ -49,6 +56,8 @@ export class LoopTranspiler implements IStatementTranspiler {
     if (fromNode) {
       const from = new SourceTranspiler().transpile(fromNode, traversal).getCode();
       extra.push("from: " + from);
+    } else if (this.injectFrom) {
+      extra.push("from: " + this.injectFrom);
     }
 
     const toNode = node.findExpressionAfterToken("TO");
