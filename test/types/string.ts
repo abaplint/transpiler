@@ -14,7 +14,7 @@ describe("Running Examples - string type", () => {
     abap = new ABAP();
   });
 
-  it.skip("set from field symbol", async () => {
+  it("set from field symbol", async () => {
     const code = `
     DATA char3 TYPE c LENGTH 3.
     DATA str TYPE string.

@@ -1,6 +1,7 @@
 import {parse} from "../operators/_parse";
 import {throwError} from "../throw_error";
 import {Character} from "./character";
+import {FieldSymbol} from "./field_symbol";
 import {Hex} from "./hex";
 import {Integer} from "./integer";
 import {Structure} from "./structure";
@@ -20,8 +21,13 @@ export class String implements ICharacter {
     return this.qualifiedName;
   }
 
-  public set(value: ICharacter | string | number) {
-    if (typeof value === "string") {
+  public set(value: ICharacter | string | number | FieldSymbol): String {
+    if (value instanceof FieldSymbol) {
+      if (value.getPointer() === undefined) {
+        throw new Error("GETWA_NOT_ASSIGNED");
+      }
+      return this.set(value.getPointer());
+    } else if (typeof value === "string") {
       this.value = value;
     } else if (typeof value === "number") {
       this.value = value.toString();
