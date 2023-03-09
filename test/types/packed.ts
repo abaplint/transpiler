@@ -187,4 +187,30 @@ ASSERT foo = '12345'.`;
     expect(abap.console.get()).to.equal("9999.9");
   });
 
+  it("output via string", async () => {
+    const code = `
+    DATA foo TYPE p LENGTH 6 DECIMALS 2.
+    DATA str TYPE string.
+    foo = 1.
+    str = foo.
+    WRITE str.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1.00 ");
+  });
+
+  it("output via string, negative", async () => {
+    const code = `
+    DATA foo TYPE p LENGTH 6 DECIMALS 2.
+    DATA str TYPE string.
+    foo = -1.
+    str = foo.
+    WRITE str.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1.00-");
+  });
+
 });
