@@ -59,7 +59,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.only("fs and references and string and integer", async () => {
+  it("fs and references and string and integer", async () => {
     const code = `
 DATA int TYPE i.
 DATA min_val TYPE REF TO i.

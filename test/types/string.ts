@@ -44,4 +44,17 @@ describe("Running Examples - string type", () => {
     expect(abap.console.get()).to.equal(`"2 "`);
   });
 
+  it("set from integer field symbol", async () => {
+    const code = `
+    DATA foo TYPE i.
+    DATA str TYPE string.
+    foo = -10.
+    str = foo.
+    WRITE str.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`10-`);
+  });
+
 });
