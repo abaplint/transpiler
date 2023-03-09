@@ -68,4 +68,17 @@ describe("Running Examples - Integer type", () => {
     await f(abap);
     expect(abap.console.get()).to.equal("1");
   });
+
+  it("output negative via string", async () => {
+    const code = `
+    DATA foo TYPE i.
+    DATA str TYPE string.
+    foo = -68.
+    str = foo.
+    WRITE str.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("68-");
+  });
 });
