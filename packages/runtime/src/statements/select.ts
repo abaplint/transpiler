@@ -15,7 +15,7 @@ export class SelectDatabase {
 
     if (target instanceof FieldSymbol) {
       if (target.isAssigned() === false) {
-        throw "select, fs not assigned";
+        throw new Error("GETWA_NOT_ASSIGNED");
       }
       // @ts-ignore
       target = target.getPointer();
@@ -34,6 +34,9 @@ export class SelectDatabase {
     if (target instanceof Structure) {
       const result: any = {};
       for (const column in rows[0]) {
+        if (rows[0][column] === null) {
+          continue;
+        }
         result[column] = clone(target.get()[column]).set(rows[0][column]);
       }
       // @ts-ignore
@@ -44,6 +47,10 @@ export class SelectDatabase {
         if (targetRow instanceof Structure) {
           for (let columnName in row) {
             columnName = columnName.toLowerCase();
+            if (row[columnName] === null) {
+              targetRow.get()[columnName]?.clear();
+              continue;
+            }
             // @ts-ignore
             targetRow.get()[columnName]?.set(row[columnName]);
           }
