@@ -13,10 +13,13 @@ type options = {
   align?: "left" | "right",
 };
 
-export function templateFormatting(source: ICharacter | INumeric, options?: options) {
+export function templateFormatting(source: ICharacter | INumeric, options?: options): string {
   let text = "";
-  if (source instanceof FieldSymbol && source.getPointer() === undefined) {
-    throw new Error("GETWA_NOT_ASSIGNED");
+  if (source instanceof FieldSymbol) {
+    if (source.getPointer() === undefined) {
+      throw new Error("GETWA_NOT_ASSIGNED");
+    }
+    return templateFormatting(source.getPointer(), options);
   } else if (source instanceof Table) {
     throw new Error("STRG_ILLEGAL_DATA_TYPE");
   } else if (source instanceof Character) {
