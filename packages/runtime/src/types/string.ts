@@ -38,7 +38,7 @@ export class String implements ICharacter {
       this.value = value.getCharacter();
     } else if (value instanceof Integer) {
       const lv_sign = (parseInt(value.get(), 10) >= 0) ? " " : "-";
-      this.value = value.get() + lv_sign;
+      this.value = Math.abs(parseInt(value.get(), 10)) + lv_sign;
     } else {
       this.value = value.get() + "";
     }
