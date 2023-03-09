@@ -34,6 +34,9 @@ export class SelectDatabase {
     if (target instanceof Structure) {
       const result: any = {};
       for (const column in rows[0]) {
+        if (rows[0][column] === null) {
+          continue;
+        }
         result[column] = clone(target.get()[column]).set(rows[0][column]);
       }
       // @ts-ignore
