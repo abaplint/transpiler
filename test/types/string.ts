@@ -29,4 +29,19 @@ describe("Running Examples - string type", () => {
     expect(abap.console.get()).to.equal(`""`);
   });
 
+  it("set from integer field symbol", async () => {
+    const code = `
+    DATA foo TYPE i VALUE 2.
+    DATA str TYPE string.
+    FIELD-SYMBOLS <fs> LIKE foo.
+    ASSIGN foo TO <fs>.
+    str = <fs>.
+    str = '"' && str && '"'.
+    WRITE str.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`"2 "`);
+  });
+
 });
