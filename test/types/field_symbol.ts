@@ -59,4 +59,21 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it.only("fs and references and string and integer", async () => {
+    const code = `
+DATA int TYPE i.
+DATA min_val TYPE REF TO i.
+FIELD-SYMBOLS <min> TYPE any.
+int = -10.
+GET REFERENCE OF int INTO min_val.
+ASSIGN min_val->* TO <min>.
+DATA min_str TYPE string.
+min_str = <min>.
+WRITE min_str.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("10-");
+  });
+
 });
