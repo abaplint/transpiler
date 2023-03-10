@@ -15,7 +15,13 @@ export async function cast(target: ABAPObject | FieldSymbol, source: ABAPObject)
   // eslint-disable-next-line prefer-const
   let checkIntf = true;
 
-  if (target instanceof FieldSymbol && target.getPointer() === undefined) {
+  if (source instanceof FieldSymbol) {
+    if (source.getPointer() === undefined) {
+      throw new Error("GETWA_NOT_ASSIGNED");
+    }
+    await cast(target, source.getPointer());
+    return;
+  } else if (target instanceof FieldSymbol && target.getPointer() === undefined) {
     throw new Error("GETWA_NOT_ASSIGNED");
   }
 

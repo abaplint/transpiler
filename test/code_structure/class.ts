@@ -1663,4 +1663,36 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("foo");
   });
 
+  it("importing VALUE with redefinition", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS foo IMPORTING VALUE(bar) TYPE abap_bool.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD foo.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS sub DEFINITION INHERITING FROM lcl.
+  PUBLIC SECTION.
+    METHODS foo REDEFINITION.
+ENDCLASS.
+CLASS sub IMPLEMENTATION.
+  METHOD foo.
+    bar = abap_true.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO sub.
+  CREATE OBJECT lo.
+  ASSERT abap_false = ''.
+  lo->foo( abap_false ).
+  ASSERT abap_false = ''.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

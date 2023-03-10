@@ -4,6 +4,7 @@ import {Character} from "./character";
 import {FieldSymbol} from "./field_symbol";
 import {Hex} from "./hex";
 import {Integer} from "./integer";
+import {Packed} from "./packed";
 import {Structure} from "./structure";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
@@ -36,9 +37,14 @@ export class String implements ICharacter {
       this.value = value.getTrimEnd();
     } else if (value instanceof Structure) {
       this.value = value.getCharacter();
+    } else if (value instanceof Packed) {
+      const lv_sign = (value as Packed).get() >= 0 ? " " : "-";
+      this.value = Math.abs((value as Packed).get()).toFixed(value.getDecimals());
+      this.value += lv_sign;
     } else if (value instanceof Integer) {
-      const lv_sign = (parseInt(value.get(), 10) >= 0) ? " " : "-";
-      this.value = Math.abs(parseInt(value.get(), 10)) + lv_sign;
+      const lv_sign = (value as Integer).get() >= 0 ? " " : "-";
+      this.value = Math.abs((value as Integer).get()) + "";
+      this.value += lv_sign;
     } else {
       this.value = value.get() + "";
     }
