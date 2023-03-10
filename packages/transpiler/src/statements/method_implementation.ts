@@ -46,10 +46,13 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
         }
         after = after + new TranspileTypes().declare(identifier) + "\n";
         const type = identifier.getType();
-        const charOne = type instanceof abaplint.BasicTypes.CharacterType && type.getLength() === 1;
+        const charGeneric = type instanceof abaplint.BasicTypes.CharacterType
+          && type.getLength() === 1
+          && type.getDDICName() === undefined
+          && type.getQualifiedName() === undefined;
         if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
             && type.isGeneric() === false
-            && charOne === false) {
+            && charGeneric === false) {
           after += "if (" + unique + " && " + unique + "." + varName + ") {" + varName + ".set(" + unique + "." + varName + ");}\n";
         } else {
           after += "if (" + unique + " && " + unique + "." + varName + ") {" + varName + " = " + unique + "." + varName + ";}\n";
