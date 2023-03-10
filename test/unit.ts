@@ -2164,4 +2164,45 @@ ENDINTERFACE.`;
     await dumpNrun(files);
   });
 
+  it("test-52", async () => {
+// constant from interface accessed in implementing class
+    const intf = `
+INTERFACE zif_html PUBLIC.
+  CONSTANTS:
+    BEGIN OF c_action_type,
+      sapevent TYPE c VALUE 'E',
+    END OF c_action_type.
+ENDINTERFACE.`;
+    const clas = `
+    CLASS zcl_html DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        INTERFACES zif_html.
+        METHODS run.
+    ENDCLASS.
+    CLASS zcl_html IMPLEMENTATION.
+      METHOD run.
+        WRITE / zif_html~c_action_type-sapevent.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA ref TYPE REF TO zcl_html.
+        CREATE OBJECT ref TYPE zcl_html.
+        ref->run( ).
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zcl_html.clas.abap", contents: clas},
+      {filename: "zif_html.intf.abap", contents: intf},
+      {filename: "zcl_html.clas.testclasses.abap", contents: tests},
+    ];
+    await dumpNrun(files);
+  });
+
 });
