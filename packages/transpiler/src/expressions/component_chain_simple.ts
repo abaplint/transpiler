@@ -11,6 +11,10 @@ export class ComponentChainSimpleTranspiler implements IExpressionTranspiler {
       const type = c.get();
       if (type instanceof Expressions.ComponentName) {
         let field = c.getFirstToken().getStr().toLowerCase();
+        const interfaceName = traversal.isInterfaceAttribute(c.getFirstToken());
+        if (interfaceName && field.startsWith(interfaceName) === false) {
+          field = interfaceName + "$" + field;
+        }
         field = Traversal.escapeNamespace(field)!.replace("~", "$");
         ret.append(field, c, traversal);
       } else if (type instanceof Expressions.ArrowOrDash) {

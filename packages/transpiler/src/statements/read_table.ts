@@ -51,8 +51,6 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       }
     }
 
-//    traversal.isInterfaceAttribute()
-
     const compare = node.findDirectExpression(abaplint.Expressions.ComponentCompareSimple);
     if (compare) {
       const conds: string[] = [];
@@ -63,8 +61,6 @@ export class ReadTableTranspiler implements IStatementTranspiler {
         const source = compare.getChildren()[(i * 3) + 2];
 
         const s = traversal.traverse(source).getCode();
-
-        //        field = Traversal.escapeNamespace(field)!.replace("~", "$");
 
         let field = "";
         if (left.get() instanceof abaplint.Expressions.Dynamic

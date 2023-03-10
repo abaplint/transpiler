@@ -532,7 +532,7 @@ ASSERT sy-subrc = 0.`;
     await f(abap);
   });
 
-  it.skip("read table with table line type = interface", async () => {
+  it("read table with table line type = interface", async () => {
     const code = `
 INTERFACE lif.
   DATA foo TYPE string.
@@ -558,7 +558,6 @@ START-OF-SELECTION.
   READ TABLE tab WITH KEY table_line->foo = 'bar' TRANSPORTING NO FIELDS.
   ASSERT sy-subrc = 0.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
