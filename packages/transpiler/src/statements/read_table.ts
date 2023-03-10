@@ -51,7 +51,7 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       }
     }
 
-//    isInterfaceAttribute
+//    traversal.isInterfaceAttribute()
 
     const compare = node.findDirectExpression(abaplint.Expressions.ComponentCompareSimple);
     if (compare) {
@@ -64,20 +64,17 @@ export class ReadTableTranspiler implements IStatementTranspiler {
 
         const s = traversal.traverse(source).getCode();
 
-        let field = left.concatTokens().toLowerCase();
-        while(field.includes("->")) {
-          field = field.replace("->", ".get().");
-        }
-        while(field.includes("-")) {
-          field = field.replace("-", ".get().");
-        }
-        field = Traversal.escapeNamespace(field)!.replace("~", "$");
+        //        field = Traversal.escapeNamespace(field)!.replace("~", "$");
 
+        let field = "";
         if (left.get() instanceof abaplint.Expressions.Dynamic
             && left instanceof abaplint.Nodes.ExpressionNode) {
           const concat = left.concatTokens().toLowerCase();
           field = concat.substring(2, concat.length - 2);
+        } else {
+          field = traversal.traverse(left).getCode();
         }
+
         if (s.includes("await")) {
           const id = UniqueIdentifier.get();
           prefix += "const " + id + " = " + s + ";\n";
