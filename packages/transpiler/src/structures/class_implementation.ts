@@ -36,7 +36,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
   }
 
   /** Finds static attributes + constants including those from interfaces (from superclass is ingored) */
-  private findStaticAttributes(cdef: abaplint.IClassDefinition, scope: abaplint.ISpaghettiScopeNode){
+  private findStaticAttributes(cdef: abaplint.IClassDefinition, scope: abaplint.ISpaghettiScopeNode, traversal: Traversal){
 
     const ret: {identifier: abaplint.Types.ClassAttribute | abaplint.Types.ClassConstant, prefix: string}[] = [];
 
@@ -50,16 +50,17 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
         break;
       }
 
-      const intf = scope.findInterfaceDefinition(i.name);
+      const intf = traversal.findInterfaceDefinition(i.name, scope);
       if (intf === undefined) {
         continue;
       }
-// todo, constants from interface?
 
       implementing.push(...intf.getImplementing());
 
-      ret.push(...intf.getAttributes().getStatic().map(a => {return {identifier: a, prefix: intf.getName().toLowerCase() + "$"};}));
-      ret.push(...intf.getAttributes().getConstants().map(a => {return {identifier: a, prefix: intf.getName().toLowerCase() + "$"};}));
+      ret.push(...intf.getAttributes().getStatic().map(a => {
+        return {identifier: a, prefix: intf.getName().toLowerCase() + "$"};}));
+      ret.push(...intf.getAttributes().getConstants().map(a => {
+        return {identifier: a, prefix: intf.getName().toLowerCase() + "$"};}));
     }
 
     return ret;
@@ -98,7 +99,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
 
     let ret = "";
     const clasName = node.getFirstToken().getStr().toLowerCase();
-    const staticAttributes = this.findStaticAttributes(cdef, scope);
+    const staticAttributes = this.findStaticAttributes(cdef, scope, traversal);
     for (const attr of staticAttributes) {
       const name = Traversal.escapeNamespace(clasName) + "." + Traversal.escapeNamespace(attr.prefix) + Traversal.escapeNamespace(attr.identifier.getName().toLowerCase());
       ret += name + " = " + new TranspileTypes().toType(attr.identifier.getType()) + ";\n";
