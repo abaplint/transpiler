@@ -205,4 +205,16 @@ describe("Running statements - SHIFT", () => {
     await f(abap);
   });
 
+  it("SHIFT right circular", async () => {
+    const code = `
+    DATA str TYPE string.
+    str = '2343.342454332245-'.
+    SHIFT str RIGHT CIRCULAR.
+    write str.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("-2343.342454332245");
+  });
+
 });

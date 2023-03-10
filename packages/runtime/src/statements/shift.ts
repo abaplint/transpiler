@@ -62,7 +62,11 @@ function shift_character_mode(target: ICharacter, options?: IShiftOptions) {
       value = value.substr(index);
     }
   } else if (options?.circular) {
-    value = value.substr(1) + value.substr(0, 1);
+    if (options.direction === "RIGHT") {
+      value = value.substring(value.length - 1, value.length) + value.substring(0, value.length - 1);
+    } else {
+      value = value.substr(1) + value.substr(0, 1);
+    }
   } else {
     value = value.substr(1);
   }
