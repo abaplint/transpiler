@@ -532,4 +532,35 @@ ASSERT sy-subrc = 0.`;
     await f(abap);
   });
 
+  it.only("read table with table line type = interface", async () => {
+    const code = `
+INTERFACE lif.
+  DATA foo TYPE string.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD constructor.
+    lif~foo = 'bar'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lcl.
+  DATA tab TYPE STANDARD TABLE OF REF TO lif WITH DEFAULT KEY.
+  CREATE OBJECT lo.
+  APPEND lo TO tab.
+  READ TABLE tab WITH KEY table_line->foo = 'bar' TRANSPORTING NO FIELDS.
+  ASSERT sy-subrc = 0.`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
