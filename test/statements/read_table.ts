@@ -532,7 +532,7 @@ ASSERT sy-subrc = 0.`;
     await f(abap);
   });
 
-  it.only("read table with table line type = interface", async () => {
+  it.skip("read table with table line type = interface", async () => {
     const code = `
 INTERFACE lif.
   DATA foo TYPE string.

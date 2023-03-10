@@ -51,6 +51,8 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       }
     }
 
+//    isInterfaceAttribute
+
     const compare = node.findDirectExpression(abaplint.Expressions.ComponentCompareSimple);
     if (compare) {
       const conds: string[] = [];
