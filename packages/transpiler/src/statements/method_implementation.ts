@@ -46,6 +46,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
         }
         after = after + new TranspileTypes().declare(identifier) + "\n";
         const type = identifier.getType();
+// todo, type X is also generic in method definitions, the real fix will be in abaplint
         const charGeneric = type instanceof abaplint.BasicTypes.CharacterType
           && type.getLength() === 1
           && type.getDDICName() === undefined
