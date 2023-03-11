@@ -252,4 +252,33 @@ ASSERT lines( lt_table6 ) = 2.`;
     await f(abap);
   });
 
+  it.only("copy, sorted table line, deep key", async () => {
+    const code = `
+TYPES: BEGIN OF ty_item,
+         obj_type TYPE string,
+         obj_name TYPE string,
+       END OF ty_item.
+TYPES: BEGIN OF ty,
+         item TYPE ty_item,
+       END OF ty.
+DATA row TYPE ty.
+DATA normal TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA sorted TYPE SORTED TABLE OF ty WITH NON-UNIQUE KEY item-obj_type item-obj_name.
+
+row-item-obj_type = 'B'.
+APPEND row TO normal.
+row-item-obj_type = 'A'.
+APPEND row TO normal.
+
+sorted = normal.
+
+LOOP AT sorted INTO row.
+  WRITE / row-item-obj_type.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("A\nB");
+  });
+
 });
