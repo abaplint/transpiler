@@ -10,11 +10,23 @@ function compare(a: any, b: any, input: {component: string, descending?: boolean
   const componentName = input.component;
   const descending = input.descending;
 
-  let vala = a.get()[componentName];
-  let valb = b.get()[componentName];
+  let vala: any = undefined;
+  let valb: any = undefined;
+
   if (componentName.toLowerCase() === "table_line") {
     vala = a.get();
     valb = b.get();
+  } else {
+    const sub = componentName.split("-");
+    vala = a;
+    valb = b;
+    for (const s of sub) {
+      vala = vala.get()[s];
+      valb = valb.get()[s];
+    }
+  }
+  if (vala === undefined || valb === undefined) {
+    throw new Error("sort compare, wrong component name, " + componentName);
   }
 
   if (eq(vala,valb)) {

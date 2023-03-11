@@ -252,7 +252,7 @@ ASSERT lines( lt_table6 ) = 2.`;
     await f(abap);
   });
 
-  it.only("copy, sorted table line, deep key", async () => {
+  it("copy, sorted table line, deep key", async () => {
     const code = `
 TYPES: BEGIN OF ty_item,
          obj_type TYPE string,
