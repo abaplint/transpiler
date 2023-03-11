@@ -13,7 +13,7 @@ export class PerformTranspiler implements IStatementTranspiler {
 
     // todo, parameters
 
-    if (node.concatTokens().includes(" IN PROGRAM ")) {
+    if (node.concatTokens().toUpperCase().includes(" IN PROGRAM ")) {
       return new Chunk(`throw new Error("PerformTranspiler IN PROGRAM, transpiler todo");`);
     }
 
