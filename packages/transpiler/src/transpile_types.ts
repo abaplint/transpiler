@@ -71,6 +71,11 @@ export class TranspileTypes {
       extra = "{" + list.join(", ") + "}";
       if (type.getQualifiedName() !== undefined) {
         extra += ", \"" + type.getQualifiedName() + "\"";
+      } else {
+        extra += ", undefined";
+      }
+      if (type.getDDICName() !== undefined) {
+        extra += ", \"" + type.getQualifiedName() + "\"";
       }
     } else if (type instanceof abaplint.BasicTypes.CLikeType
         || type instanceof abaplint.BasicTypes.CSequenceType) {

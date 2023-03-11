@@ -11,10 +11,12 @@ import {throwError} from "../throw_error";
 export class Structure {
   private readonly value: any;
   private readonly qualifiedName: string | undefined;
+  private readonly ddicName: string | undefined;
 
-  public constructor(fields: any, qualifiedName?: string) {
+  public constructor(fields: any, qualifiedName?: string, ddicName?: string) {
     this.value = fields;
     this.qualifiedName = qualifiedName?.toUpperCase();
+    this.ddicName = ddicName?.toUpperCase();
   }
 
   public clear() {
@@ -23,6 +25,10 @@ export class Structure {
       this.value[f].clear();
     }
     return this;
+  }
+
+  public getDDICName() {
+    return this.ddicName;
   }
 
   public getQualifiedName() {
