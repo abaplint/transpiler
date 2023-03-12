@@ -203,19 +203,18 @@ CLASS lcl IMPLEMENTATION.
 
     ASSIGN result->* TO <fs>.
     DESCRIBE FIELD <fs> TYPE lv_type.
-    ASSERT lv_type = 'I'.
+    WRITE / lv_type.
   ENDMETHOD.
 
   METHOD deref.
     DATA lv_type TYPE c LENGTH 1.
     FIELD-SYMBOLS <data> TYPE data.
     rr_data = ir_data.
-    IF rr_data IS NOT INITIAL.
-      ASSIGN ir_data->* TO <data>.
-      DESCRIBE FIELD <data> TYPE lv_type.
-      IF lv_type = 'l'.
-        rr_data = deref( <data> ).
-      ENDIF.
+    ASSIGN ir_data->* TO <data>.
+    DESCRIBE FIELD <data> TYPE lv_type.
+    IF lv_type = 'l'.
+WRITE '@KERNEL console.dir("sub");'.
+      rr_data = deref( <data> ).
     ENDIF.
   ENDMETHOD.
 ENDCLASS.
@@ -225,6 +224,7 @@ START-OF-SELECTION.
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+    expect(abap.console.get()).to.equal("I");
   });
 
 });
