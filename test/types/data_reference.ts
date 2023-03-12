@@ -175,4 +175,55 @@ ref = <fs>.`;
     }
   });
 
+  it.only("many references and stuff", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS test.
+    CLASS-METHODS deref
+      IMPORTING
+        !ir_data       TYPE REF TO data
+      RETURNING
+        VALUE(rr_data) TYPE REF TO data .
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD test.
+    DATA lv_type TYPE c LENGTH 1.
+    DATA dat TYPE i.
+    DATA foo TYPE REF TO i.
+    DATA bar TYPE REF TO data.
+    DATA sdf TYPE REF TO data.
+    FIELD-SYMBOLS <fs> TYPE any.
+    GET REFERENCE OF dat INTO foo.
+    GET REFERENCE OF foo INTO bar.
+
+    sdf = deref( bar ).
+
+    ASSIGN sdf->* TO <fs>.
+    DESCRIBE FIELD <fs> TYPE lv_type.
+    ASSERT lv_type = 'I'.
+  ENDMETHOD.
+
+  METHOD deref.
+    DATA lv_type TYPE c LENGTH 1.
+    FIELD-SYMBOLS <data> TYPE data.
+    rr_data = ir_data.
+    IF rr_data IS NOT INITIAL.
+      ASSIGN ir_data->* TO <data>.
+      DESCRIBE FIELD <data> TYPE lv_type.
+      IF lv_type = 'l'.
+        rr_data = deref( <data> ).
+      ENDIF.
+    ENDIF.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>test( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
