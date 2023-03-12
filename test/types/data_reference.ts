@@ -195,6 +195,7 @@ CLASS lcl IMPLEMENTATION.
     DATA bar TYPE REF TO data.
     DATA result TYPE REF TO data.
     FIELD-SYMBOLS <fs> TYPE any.
+
     GET REFERENCE OF dat INTO foo.
     GET REFERENCE OF foo INTO bar.
 
