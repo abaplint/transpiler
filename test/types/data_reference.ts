@@ -175,7 +175,7 @@ ref = <fs>.`;
     }
   });
 
-  it.only("many references and stuff", async () => {
+  it("many references and stuff", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
@@ -199,6 +199,7 @@ CLASS lcl IMPLEMENTATION.
     GET REFERENCE OF dat INTO foo.
     GET REFERENCE OF foo INTO bar.
 
+* WRITE '@KERNEL console.dir("call deref");'.
     result = deref( bar ).
 
     ASSIGN result->* TO <fs>.
@@ -213,8 +214,9 @@ CLASS lcl IMPLEMENTATION.
     ASSIGN ir_data->* TO <data>.
     DESCRIBE FIELD <data> TYPE lv_type.
     IF lv_type = 'l'.
-WRITE '@KERNEL console.dir("sub");'.
+* WRITE '@KERNEL console.dir("sub");'.
       rr_data = deref( <data> ).
+* WRITE '@KERNEL console.dir("sub done");'.
     ENDIF.
   ENDMETHOD.
 ENDCLASS.

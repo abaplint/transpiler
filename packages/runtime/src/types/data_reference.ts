@@ -68,7 +68,7 @@ export class DataReference  {
       if (value.getPointer() === undefined) {
         throw new Error("GETWA_NOT_ASSIGNED");
       } else if (value.getPointer() instanceof DataReference) {
-        this.pointer = value.getPointer();
+        this.pointer = value.getPointer().getPointer();
         return this;
       } else {
         throw new Error("OBJECTS_MOVE_NOT_SUPPORTED");
