@@ -175,4 +175,58 @@ ref = <fs>.`;
     }
   });
 
+  it("many references and stuff", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS test.
+    CLASS-METHODS deref
+      IMPORTING
+        !ir_data       TYPE REF TO data
+      RETURNING
+        VALUE(rr_data) TYPE REF TO data .
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD test.
+    DATA lv_type TYPE c LENGTH 1.
+    DATA dat TYPE i.
+    DATA foo TYPE REF TO i.
+    DATA bar TYPE REF TO data.
+    DATA result TYPE REF TO data.
+    FIELD-SYMBOLS <fs> TYPE any.
+
+    GET REFERENCE OF dat INTO foo.
+    GET REFERENCE OF foo INTO bar.
+
+* WRITE '@KERNEL console.dir("call deref");'.
+    result = deref( bar ).
+
+    ASSIGN result->* TO <fs>.
+    DESCRIBE FIELD <fs> TYPE lv_type.
+    WRITE / lv_type.
+  ENDMETHOD.
+
+  METHOD deref.
+    DATA lv_type TYPE c LENGTH 1.
+    FIELD-SYMBOLS <data> TYPE data.
+    rr_data = ir_data.
+    ASSIGN ir_data->* TO <data>.
+    DESCRIBE FIELD <data> TYPE lv_type.
+    IF lv_type = 'l'.
+* WRITE '@KERNEL console.dir("sub");'.
+      rr_data = deref( <data> ).
+* WRITE '@KERNEL console.dir("sub done");'.
+    ENDIF.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>test( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("I");
+  });
+
 });
