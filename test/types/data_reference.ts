@@ -193,14 +193,14 @@ CLASS lcl IMPLEMENTATION.
     DATA dat TYPE i.
     DATA foo TYPE REF TO i.
     DATA bar TYPE REF TO data.
-    DATA sdf TYPE REF TO data.
+    DATA result TYPE REF TO data.
     FIELD-SYMBOLS <fs> TYPE any.
     GET REFERENCE OF dat INTO foo.
     GET REFERENCE OF foo INTO bar.
 
-    sdf = deref( bar ).
+    result = deref( bar ).
 
-    ASSIGN sdf->* TO <fs>.
+    ASSIGN result->* TO <fs>.
     DESCRIBE FIELD <fs> TYPE lv_type.
     ASSERT lv_type = 'I'.
   ENDMETHOD.
