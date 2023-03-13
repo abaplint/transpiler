@@ -46,7 +46,7 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
 
     let ret = "";
     for (const p of module.getParameters()) {
-      ret += `// ${p.direction} ${p.name} ${p.type}\n`;
+      ret += `// ${p.direction} ${p.name} ${p.type} ${p.optional}\n`;
       let direction: string = p.direction;
       if (direction === "importing") {
         direction = "exporting";
