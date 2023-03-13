@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -64,6 +64,31 @@ ASSERT 'hello world' IN bar.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("E EQ", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA row LIKE LINE OF tab.
+DATA range TYPE RANGE OF i.
+DATA rr LIKE LINE OF range.
+
+DO 3 TIMES.
+  APPEND sy-index TO tab.
+ENDDO.
+
+rr-sign = 'E'.
+rr-option = 'EQ'.
+rr-low = 2.
+APPEND rr TO range.
+
+LOOP AT tab INTO row WHERE table_line IN range.
+  WRITE / row.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n3");
   });
 
 });
