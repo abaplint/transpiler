@@ -40,6 +40,7 @@ export class XString implements ICharacter {
         this.set(v);
       }
     }
+    return this;
   }
 
   public clear(): void {
