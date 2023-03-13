@@ -76,6 +76,7 @@ export class DataReference  {
     } else {
       return this.pointer?.set(value);
     }
+    return this;
   }
 
   public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}) {

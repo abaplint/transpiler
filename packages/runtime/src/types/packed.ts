@@ -42,6 +42,7 @@ export class Packed implements INumeric {
     } else {
       this.set(value.get());
     }
+    return this;
   }
 
   public getLength() {

@@ -46,6 +46,7 @@ export class Hex implements ICharacter {
       this.value = this.value.padEnd(this.length * 2, "0");
     }
     this.value = this.value.toUpperCase();
+    return this;
   }
 
   public getLength() {
