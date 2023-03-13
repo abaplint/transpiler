@@ -46,7 +46,7 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
 
     let ret = "";
     for (const p of module.getParameters()) {
-      ret += `// ${p.direction} ${p.name} ${p.type}\n`;
+      ret += `// ${p.direction} ${p.name} ${p.type} ${p.optional}\n`;
       let direction: string = p.direction;
       if (direction === "importing") {
         direction = "exporting";
@@ -60,15 +60,12 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
       }
       ret += `let ${name} = INPUT.${direction}?.${name};\n`;
 
-      if (direction === "exporting" || direction === "importing" || direction === "changing") {
-        const type = scope?.findVariable(name)?.getType();
-        if (type !== undefined) {
-          // todo, set DEFAULT value
-          // todo, check for OPTIONALness and raise exceptions and stuff
-          ret += `if (${name} === undefined) {
-            ${name} = ${new TranspileTypes().toType(type)};
-          }\n`;
-        }
+      const type = scope?.findVariable(name)?.getType();
+      if (type !== undefined && p.optional === true) {
+        // todo, set DEFAULT value
+        ret += `if (${name} === undefined) {
+  ${name} = ${new TranspileTypes().toType(type)};
+}\n`;
       }
 
     }
