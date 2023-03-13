@@ -60,15 +60,12 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
       }
       ret += `let ${name} = INPUT.${direction}?.${name};\n`;
 
-      if (direction === "exporting" || direction === "importing" || direction === "changing") {
-        const type = scope?.findVariable(name)?.getType();
-        if (type !== undefined) {
-          // todo, set DEFAULT value
-          // todo, check for OPTIONALness and raise exceptions and stuff
-          ret += `if (${name} === undefined) {
-            ${name} = ${new TranspileTypes().toType(type)};
-          }\n`;
-        }
+      const type = scope?.findVariable(name)?.getType();
+      if (type !== undefined && p.optional === true) {
+        // todo, set DEFAULT value
+        ret += `if (${name} === undefined) {
+  ${name} = ${new TranspileTypes().toType(type)};
+}\n`;
       }
 
     }
