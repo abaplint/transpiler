@@ -118,4 +118,38 @@ WRITE <fs>.`;
     expect(abap.console.get()).to.equal("00000000");
   });
 
+  it("CREATE DATA, str fs and refs", async () => {
+    const code = `
+DATA ref TYPE REF TO data.
+DATA lv_type TYPE c LENGTH 1.
+FIELD-SYMBOLS <foo> TYPE any.
+FIELD-SYMBOLS <sub> TYPE any.
+ASSIGN ref TO <foo>.
+CREATE DATA <foo> TYPE string.
+ASSIGN <foo>->* TO <sub>.
+DESCRIBE FIELD <sub> TYPE lv_type.
+WRITE lv_type.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("g");
+  });
+
+  it("CREATE DATA, more str fs and refs", async () => {
+    const code = `
+DATA ref TYPE REF TO data.
+DATA lv_type TYPE c LENGTH 1.
+FIELD-SYMBOLS <foo> TYPE any.
+FIELD-SYMBOLS <sub> TYPE any.
+ASSIGN ref TO <foo>.
+CREATE DATA <foo> TYPE string.
+ASSIGN ref->* TO <sub>.
+DESCRIBE FIELD <sub> TYPE lv_type.
+WRITE lv_type.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("g");
+  });
+
 });

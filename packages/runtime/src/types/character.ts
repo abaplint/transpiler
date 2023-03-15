@@ -12,6 +12,7 @@ let featureFixLength = true;
 
 export class Character implements ICharacter {
   private value: string;
+  private constant: boolean = false;
   private readonly length: number;
   private readonly extra: AbstractTypeData | undefined;
 
@@ -26,7 +27,16 @@ export class Character implements ICharacter {
     this.clear();
   }
 
+  public setConstant() {
+    this.constant = true;
+    return this;
+  }
+
   public set(value: ICharacter | string | Structure | FieldSymbol) {
+    if (this.constant === true) {
+      throw new Error("Changing constant");
+    }
+
     if (typeof value === "string" || typeof value === "number") {
       this.value = value;
     } else if (value instanceof FieldSymbol) {
