@@ -1695,4 +1695,23 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it.only("importing VALUE with set", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS run IMPORTING VALUE(foo) TYPE abap_bool DEFAULT abap_false.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    foo = abap_true.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>run( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
