@@ -213,4 +213,17 @@ ASSERT foo = '12345'.`;
     expect(abap.console.get()).to.equal("1.00-");
   });
 
+  it("output via template", async () => {
+    const code = `
+    DATA rv_result TYPE string.
+    DATA lv_sec    TYPE p LENGTH 10 DECIMALS 2.
+    lv_sec = 1.
+    rv_result = |{ lv_sec } seconds|.
+    WRITE rv_result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1.00 seconds");
+  });
+
 });
