@@ -102,7 +102,11 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
           } else {
             throw new Error("MethodImplementationTranspiler, unknown default param type");
           }
-          after += "if (" + unique + " === undefined || " + unique + "." + varName + " === undefined) {" + varName + " = " + val + ";}\n";
+          if (identifier.getMeta().includes(abaplint.IdentifierMeta.PassByValue)) {
+            after += "if (" + unique + " === undefined || " + unique + "." + varName + " === undefined) {" + varName + ".set(" + val + ");}\n";
+          } else {
+            after += "if (" + unique + " === undefined || " + unique + "." + varName + " === undefined) {" + varName + " = " + val + ";}\n";
+          }
         }
       } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodReturning)) {
         after = after + new TranspileTypes().declare(identifier) + "\n";
