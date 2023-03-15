@@ -1695,7 +1695,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.only("importing VALUE with set", async () => {
+  it("importing VALUE with set", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
