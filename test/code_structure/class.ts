@@ -1704,6 +1704,8 @@ ENDCLASS.
 CLASS lcl IMPLEMENTATION.
   METHOD run.
     foo = abap_true.
+    ASSERT abap_true = 'X'.
+    ASSERT abap_false = ''.
   ENDMETHOD.
 ENDCLASS.
 
