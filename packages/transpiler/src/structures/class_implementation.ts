@@ -119,15 +119,20 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     // but this will probably work
     if (traversal.getCurrentObject().getType() === "CLAS") {
 // gather call of all class constructors together for a global class, also local classes
-// as they might use the global class
+// as they might use the global class, except for local testclass constructors
       if (cdef.isGlobal() === true) {
         for (const f of traversal.getCurrentObject().getABAPFiles()) {
           for (const def of f.getInfo().listClassDefinitions()) {
-            if (def.methods.some(m => m.name.toLowerCase() === "class_constructor")) {
+            if (def.isForTesting === true) {
+              continue;
+            } else if (def.methods.some(m => m.name.toLowerCase() === "class_constructor")) {
               ret += "await " + traversal.lookupClassOrInterface(def.name, node.getFirstToken()) + ".class_constructor();\n";
             }
           }
         }
+      }
+      if (cdef.isGlobal() === false && cdef.isForTesting() === true && cdef.getMethodDefinitions().getByName("class_constructor")) {
+        ret += "await " + Traversal.escapeNamespace(node.getFirstToken().getStr().toLowerCase()) + ".class_constructor();\n";
       }
     } else if (cdef.getMethodDefinitions().getByName("class_constructor")) {
       ret += "await " + Traversal.escapeNamespace(node.getFirstToken().getStr().toLowerCase()) + ".class_constructor();\n";
