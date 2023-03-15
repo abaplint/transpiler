@@ -17,8 +17,15 @@ export interface ICreateDataOptions {
   like?: any,
 }
 
-export function createData(target: DataReference, options?: ICreateDataOptions) {
+export function createData(target: DataReference | FieldSymbol, options?: ICreateDataOptions) {
 //  console.dir(options);
+
+  if (target instanceof FieldSymbol) {
+    createData(target.getPointer(), options);
+    return;
+  } else if (!(target instanceof DataReference)) {
+    throw new Error("CREATE_DATA_REFERENCE_EXPECTED");
+  }
 
   if (options?.name && options?.table) {
     // @ts-ignore

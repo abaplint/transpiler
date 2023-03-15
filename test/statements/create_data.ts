@@ -135,7 +135,7 @@ WRITE lv_type.`;
     expect(abap.console.get()).to.equal("g");
   });
 
-  it.only("CREATE DATA, more str fs and refs", async () => {
+  it("CREATE DATA, more str fs and refs", async () => {
     const code = `
 DATA ref TYPE REF TO data.
 DATA lv_type TYPE c LENGTH 1.
