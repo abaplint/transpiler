@@ -2205,4 +2205,34 @@ ENDINTERFACE.`;
     await dumpNrun(files);
   });
 
+  it("test-53", async () => {
+// class constructor in locals using global
+
+    const clas = `
+CLASS zcl_html DEFINITION PUBLIC.
+  PUBLIC SECTION.
+ENDCLASS.
+CLASS zcl_html IMPLEMENTATION.
+ENDCLASS.`;
+
+    const locals = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS class_constructor.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD class_constructor.
+    DATA ref TYPE REF TO zcl_html.
+    CREATE OBJECT ref.
+    WRITE 'hello hello'.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "zcl_html.clas.locals.abap", contents: locals},
+      {filename: "zcl_html.clas.abap", contents: clas},
+    ];
+    await dumpNrun(files);
+  });
+
 });
