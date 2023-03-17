@@ -21,7 +21,8 @@
   },
   "devDependencies": {
     "@types/sql.js": "^1.4.4",
-    "@abaplint/runtime": "^2.5.4",
-    "typescript": "=4.8.4"
+    "@types/node": "^18.15.3",
+    "@abaplint/runtime": "^2.5.38",
+    "typescript": "^5.0.2"
   }
 }
