@@ -60,26 +60,28 @@ export class String implements ICharacter {
   }
 
   public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}) {
-    if (input?.offset) {
-      input.offset = parse(input.offset);
+    let offset = input?.offset;
+    if (offset) {
+      offset = parse(offset);
     }
-    if (input?.length) {
-      input.length = parse(input.length);
+
+    let length = input?.length;
+    if (length) {
+      length = parse(length);
     }
-    if ((input.offset && input.offset > this.value.length)
-        || (input.offset && input.offset < 0)
-        || (input.length && input.length < 0)) {
+
+    if ((offset && offset > this.value.length)
+        || (offset && offset < 0)
+        || (length && length < 0)) {
       throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
     }
 
     let ret = this.value;
-    if (input?.offset) {
-      // @ts-ignore
-      ret = ret.substr(input.offset);
+    if (offset) {
+      ret = ret.substr(offset);
     }
-    if (input?.length !== undefined) {
-      // @ts-ignore
-      ret = ret.substr(0, input.length);
+    if (length !== undefined) {
+      ret = ret.substr(0, length);
     }
     const r = new String();
     r.set(ret);
