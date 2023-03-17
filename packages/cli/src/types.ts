@@ -10,7 +10,7 @@ export interface ITranspilerConfig {
   libs?: {
     url?: string,
     folder?: string,
-    files?: string,
+    files?: string | string[],
   }[],
   write_unit_tests: boolean;
   write_source_map: boolean;
