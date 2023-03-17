@@ -54,15 +54,6 @@ export class Transpiler {
       reg: reg,
     };
 
-    progress?.set(reg.getObjectCount(false), "Building, Syntax Logic");
-    for (const obj of reg.getObjects()) {
-      await progress?.tick("Building, Syntax Logic, " + obj.getName());
-      if (obj instanceof abaplint.ABAPObject) {
-// todo, this is already done inside reg.parse()?
-        new abaplint.SyntaxLogic(reg, obj).run();
-      }
-    }
-
     progress?.set(reg.getObjectCount(false), "Building");
     for (const obj of reg.getObjects()) {
       await progress?.tick("Building, " + obj.getName());

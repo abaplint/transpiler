@@ -43,19 +43,23 @@ function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
     }
 
     let count = 0;
-    let pattern = "/src/**";
-    if (l.files !== undefined && l.files !== "") {
-      pattern = l.files;
+    let patterns = ["/src/**"];
+    if (l.files !== undefined && typeof l.files === "string" && l.files !== "") {
+      patterns = [l.files];
+    } else if (Array.isArray(l.files)) {
+      patterns = l.files;
     }
 
-    for (let filename of glob.sync(dir + pattern, {nosort: true, nodir: true})) {
-      if (filename.endsWith(".clas.testclasses.abap")) {
-        continue;
+    for (const pattern of patterns) {
+      for (let filename of glob.sync(dir + pattern, {nosort: true, nodir: true})) {
+        if (filename.endsWith(".clas.testclasses.abap")) {
+          continue;
+        }
+        const contents = fs.readFileSync(filename, "utf8");
+        filename = path.basename(filename);
+        files.push({filename, contents});
+        count++;
       }
-      const contents = fs.readFileSync(filename, "utf8");
-      filename = path.basename(filename);
-      files.push({filename, contents});
-      count++;
     }
     console.log(count + " files added from lib");
     if (cleanupFolder === true) {

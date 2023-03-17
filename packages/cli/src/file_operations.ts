@@ -32,8 +32,8 @@ export class FileOperations {
       });
       added++;
     }
-    console.log(added + " files added");
-    console.log(skipped + " files skipped");
+    console.log(added + " files added from source");
+    console.log(skipped + " files skipped in source");
     return files;
   }
 

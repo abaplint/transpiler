@@ -98,29 +98,30 @@ export class Structure {
   }
 
   public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}) {
-    if (input?.offset) {
-      input.offset = parse(input.offset);
+    let offset = input?.offset;
+    if (offset) {
+      offset = parse(offset);
     }
-    if (input?.length) {
-      input.length = parse(input.length);
+
+    let length = input?.length;
+    if (length) {
+      length = parse(length);
     }
 
     const val = this.getCharacter();
 
-    if ((input.offset && input.offset >= val.length)
-         || (input.offset && input.offset < 0)
-         || (input.length && input.length < 0)) {
+    if ((offset && offset >= val.length)
+         || (offset && offset < 0)
+         || (length && length < 0)) {
       throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
     }
 
     let ret = val;
-    if (input?.offset) {
-      // @ts-ignore
-      ret = ret.substr(input.offset);
+    if (offset) {
+      ret = ret.substr(offset);
     }
-    if (input?.length !== undefined) {
-      // @ts-ignore
-      ret = ret.substr(0, input.length);
+    if (length !== undefined) {
+      ret = ret.substr(0, length);
     }
     const r = new Character(ret.length);
     r.set(ret);

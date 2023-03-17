@@ -107,7 +107,9 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
 
   if (options.submatches) {
     for (let index = 0; index < options.submatches.length; index++) {
+// @ts-ignore
       if (matches[0] && matches[0][index + 1]) {
+// @ts-ignore
         options.submatches[index].set(matches[0][index + 1]);
       } else if (matches.length > 0) {
         options.submatches[index].clear();
@@ -132,11 +134,14 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
 
       const submatch = new Structure({offset: new Integer(), length: new Integer()});
       for (let i = 1; i < m.length; i++) {
+// @ts-ignore
         if (m[i] === undefined) {
           submatch.get().offset.set(-1);
           submatch.get().length.set(0);
         } else {
+// @ts-ignore
           submatch.get().offset.set(m.index + m[0].indexOf(m[i]));
+// @ts-ignore
           submatch.get().length.set(m[i].length);
         }
         match.get().submatches.append(submatch);
