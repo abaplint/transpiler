@@ -11,6 +11,7 @@ import {test5} from "./test5";
 import {test6} from "./test6";
 import {test7} from "./test7";
 import {test8} from "./test8";
+import {test9} from "./test9";
 
 // NOTE: does not run via Mocha
 
@@ -34,6 +35,7 @@ const tests: Tests = [
   {name: "6: Internal table, INSERT INDEX 1", abap: test6},
   {name: "7: Internal table, APPEND matching types", abap: test7},
   {name: "8: Internal table, READ TABLE BINARY SEARCH", abap: test8},
+  {name: "9: Internal table, INSERT INTO TABLE hashed", abap: test9},
 ];
 
 async function execute(t: Test) {
@@ -51,11 +53,10 @@ async function start() {
   const results: Results = [];
   const time = new Date().toLocaleTimeString([], {hour: "2-digit", minute: "2-digit", hour12: false}) + " (" + Intl.DateTimeFormat().resolvedOptions().timeZone + ")";
   console.log("START RUNTIME PERFORMANCE TEST, " + time);
-  let index = 1;
   for (const t of tests) {
     const result = await execute(t);
     results.push(result);
-    console.log(`${ (index++ + "").padStart(3, "0") }: ${ result.name.padEnd(50, " ") } ${ result.runtime }ms`);
+    console.log(`${ result.name.padEnd(50, " ") } ${ result.runtime }ms`);
   }
   fs.writeFileSync(__dirname + path.sep + "results.json", JSON.stringify(results, null, 2));
 }
