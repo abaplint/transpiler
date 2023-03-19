@@ -14,7 +14,6 @@ export interface IDeleteInternalOptions {
 }
 
 export async function deleteInternal(target: Table | FieldSymbol, options?: IDeleteInternalOptions): Promise<void> {
-  let prev: any = undefined;
   let index = 0;
 
   if (target instanceof FieldSymbol) {
@@ -52,16 +51,12 @@ export async function deleteInternal(target: Table | FieldSymbol, options?: IDel
     return;
   }
 
-  for await (const i of loop(target)) {
-    // @ts-ignore
-    index = abap.builtin.sy.get().tabix.get() - 1;
+  if (options?.adjacent === true) {
+    const array = target.array();
 
-    if (options?.where) {
-      const row = i instanceof Structure ? i.get() : {table_line: i};
-      if (options.where(row) === true) {
-        target.deleteIndex(index);
-      }
-    } else if (options?.adjacent === true && prev !== undefined) {
+    for (let index = 1; index < array.length; index++) {
+      const prev = array[ index - 1];
+      const i = array[ index ];
       if (options?.comparing) {
         let match = false;
         for (const compareField of options.comparing) {
@@ -72,8 +67,23 @@ export async function deleteInternal(target: Table | FieldSymbol, options?: IDel
         }
         if (match) {
           target.deleteIndex(index);
+          index--;
         }
       } else if (eq(prev, i) === true) {
+        target.deleteIndex(index);
+        index--;
+      }
+    }
+    return;
+  }
+
+  for await (const i of loop(target)) {
+    // @ts-ignore
+    index = abap.builtin.sy.get().tabix.get() - 1;
+
+    if (options?.where) {
+      const row = i instanceof Structure ? i.get() : {table_line: i};
+      if (options.where(row) === true) {
         target.deleteIndex(index);
       }
     } else if (options?.index && options.index.get() === index) {
@@ -83,7 +93,5 @@ export async function deleteInternal(target: Table | FieldSymbol, options?: IDel
     } else if (options?.from && options.from.get() <= index + 1) {
       target.deleteIndex(index);
     }
-
-    prev = i;
   }
 }
