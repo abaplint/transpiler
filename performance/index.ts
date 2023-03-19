@@ -54,6 +54,8 @@ async function start() {
   const time = new Date().toLocaleTimeString([], {hour: "2-digit", minute: "2-digit", hour12: false}) + " (" + Intl.DateTimeFormat().resolvedOptions().timeZone + ")";
   console.log("START RUNTIME PERFORMANCE TEST, " + time);
   for (const t of tests) {
+    // @ts-ignore
+    global.gc();
     const result = await execute(t);
     results.push(result);
     console.log(`${ result.name.padEnd(50, " ") } ${ ( result.runtime + "").padStart(4, " ") }ms`);
