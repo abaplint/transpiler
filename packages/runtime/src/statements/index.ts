@@ -47,6 +47,7 @@ import {FieldSymbol, Structure, Table} from "../types";
 import {INumeric} from "../types/_numeric";
 import {CallFunction, ICallFunctionOptions} from "./call_function";
 import {SelectDatabaseOptions, SelectRuntimeOptions} from "../db/db";
+import {isAsyncFunction} from "util/types";
 
 // this is a class, as statements like SELECT needs access to the database object instance
 // and WRITE will access the Console
@@ -92,6 +93,47 @@ export class Statements {
 
   public constructor(context: Context) {
     this.context = context;
+  }
+
+  private _trace(func: any, name: string, min: number) {
+    const exec = (...options: any[]) => {
+      const start = Date.now();
+      const result = func.bind(this)(...options);
+      const runtime = Date.now() - start;
+      if (runtime >= min) {
+        console.log(`STATEMENT: ${name}, ${runtime} ms`);
+      }
+      return result;
+    };
+    return exec;
+  }
+
+  private _traceAsync(func: any, name: string, min: number) {
+    const exec = async (...options: any[]) => {
+      const start = Date.now();
+      const result = await func.bind(this)(...options);
+      const runtime = Date.now() - start;
+      if (runtime >= min) {
+        console.log(`STATEMENT: ${name}, ${runtime} ms`);
+      }
+      return result;
+    };
+    return exec;
+  }
+
+  public _setTrace(min = 10) {
+    const candidates = [...Object.keys(this),...Object.getOwnPropertyNames(Statements.prototype)];
+    for (const c of candidates) {
+      if (c === "context" || c === "constructor" || c.startsWith("_") || c === "loop") {
+        continue;
+      }
+      const func = (this as any)[c];
+      if (isAsyncFunction(func)) {
+        (this as any)[c] = this._traceAsync(func, c, min);
+      } else {
+        (this as any)[c] = this._trace(func, c, min);
+      }
+    }
   }
 
   public async deleteDatabase(table: string | ICharacter, options: IDeleteDatabaseOptions) {
