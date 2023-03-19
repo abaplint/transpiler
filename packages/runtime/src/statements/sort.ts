@@ -16,7 +16,7 @@ function compare(a: any, b: any, input: {component: string, descending?: boolean
   if (componentName.toLowerCase() === "table_line") {
     vala = a.get();
     valb = b.get();
-  } else {
+  } else if (componentName.includes("-")) {
     const sub = componentName.split("-");
     vala = a;
     valb = b;
@@ -24,6 +24,9 @@ function compare(a: any, b: any, input: {component: string, descending?: boolean
       vala = vala.get()[s];
       valb = valb.get()[s];
     }
+  } else {
+    vala = a.get()[componentName];
+    valb = b.get()[componentName];
   }
   if (vala === undefined || valb === undefined) {
     throw new Error("sort compare, wrong component name, " + componentName);
