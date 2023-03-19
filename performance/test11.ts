@@ -7,6 +7,7 @@ DATA tab TYPE HASHED TABLE OF ty WITH UNIQUE KEY field1 field2.
 DATA row LIKE LINE OF tab.
 FIELD-SYMBOLS <fs> LIKE LINE OF tab.
 
+
 DO 1000 TIMES.
   row-field1 = |foo{ sy-index }|.
   row-field2 = sy-index.
