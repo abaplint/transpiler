@@ -56,7 +56,7 @@ async function start() {
   for (const t of tests) {
     const result = await execute(t);
     results.push(result);
-    console.log(`${ result.name.padEnd(50, " ") } ${ result.runtime }ms`);
+    console.log(`${ result.name.padEnd(50, " ") } ${ ( result.runtime + "").padStart(4, " ") }ms`);
   }
   fs.writeFileSync(__dirname + path.sep + "results.json", JSON.stringify(results, null, 2));
 }
