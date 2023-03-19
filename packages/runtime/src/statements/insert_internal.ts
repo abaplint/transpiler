@@ -52,7 +52,15 @@ export function insertInternal(options: IInsertInternalOptions): void {
     };
 
     if (tableOptions.primaryKey?.isUnique === true) {
-      readTable(options.table, {withKey: compare});
+
+      const withKeyValue: {key: (i: any) => any, value: any}[] = [];
+      const data = options?.data;
+      if (data instanceof Structure) {
+        const fieldName = tableOptions.primaryKey.keyFields[0].toLowerCase();
+        withKeyValue.push({key: (i) => {return i[fieldName];}, value: data.get()[fieldName]});
+      }
+
+      readTable(options.table, {withKey: compare, withKeyValue: withKeyValue, binarySearch: true});
       // @ts-ignore
       if (abap.builtin.sy.get().subrc.get() === 0) {
         // @ts-ignore
