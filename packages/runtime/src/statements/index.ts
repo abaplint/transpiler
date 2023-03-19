@@ -120,7 +120,7 @@ export class Statements {
   public _setTrace() {
     const candidates = [...Object.keys(this),...Object.getOwnPropertyNames(Statements.prototype)];
     for (const c of candidates) {
-      if (c === "context" || c === "constructor" || c.startsWith("_")) {
+      if (c === "context" || c === "constructor" || c.startsWith("_") || c === "loop") {
         continue;
       }
       const func = (this as any)[c];
