@@ -125,10 +125,7 @@ export class Statements {
       }
       const func = (this as any)[c];
       if (isAsyncFunction(func)) {
-        console.dir(c);
-        console.dir((this as any)[c]);
         (this as any)[c] = this._traceAsync(func, c);
-        console.dir((this as any)[c]);
       } else {
         (this as any)[c] = this._trace(func, c);
       }
