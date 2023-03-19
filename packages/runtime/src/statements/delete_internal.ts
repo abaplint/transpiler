@@ -54,9 +54,11 @@ export async function deleteInternal(target: Table | FieldSymbol, options?: IDel
   if (options?.adjacent === true) {
     const array = target.array();
 
-    for (let index = 1; index < array.length; index++) {
+    for (let index = array.length - 1; index > 0; index--) {
+
       const prev = array[ index - 1];
       const i = array[ index ];
+
       if (options?.comparing) {
         let match = false;
         for (const compareField of options.comparing) {
@@ -67,11 +69,9 @@ export async function deleteInternal(target: Table | FieldSymbol, options?: IDel
         }
         if (match) {
           target.deleteIndex(index);
-          index--;
         }
       } else if (eq(prev, i) === true) {
         target.deleteIndex(index);
-        index--;
       }
     }
     return;
