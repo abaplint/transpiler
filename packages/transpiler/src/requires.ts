@@ -65,24 +65,6 @@ export class Requires {
       }
     }
 
-// this finds all OO references
-/*
-    for (const v of node.getData().references) {
-      // todo, use the enum from abaplint, when its exported
-      if (v.referenceType === "ObjectOrientedReference"
-          && v.position.getFilename() === filename
-          && v.resolved) {
-        add({filename: v.resolved.getFilename(), name: v.resolved.getName().toLowerCase()});
-      }
-    }
-
-    for (const c of node.getChildren()) {
-      for (const f of this.find(obj, c, filename)) {
-        add(f);
-      }
-    }
-*/
-
     // always add CX_ROOT, it is used for CATCH, no catches in global interfaces
     // todo, it might be possible to remove this, as CATCH uses instanceof with dynamic registered classes
     if (obj.getType() !== "INTF") {
