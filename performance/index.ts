@@ -13,6 +13,7 @@ import {test7} from "./test7";
 import {test8} from "./test8";
 import {test9} from "./test9";
 import {test10} from "./test10";
+import {test11} from "./test11";
 
 // NOTE: does not run via Mocha
 
@@ -28,16 +29,17 @@ type Result = {name: string, runtime: number};
 type Results = Result[];
 
 const tests: Tests = [
-  {name: "1: Internal table, APPEND and DELETE", abap: test1},
-  {name: "2: Internal table, READ TABLE, table_line", abap: test2},
-  {name: "3: Internal table, LOOP USING KEY", abap: test3},
-  {name: "4: Internal table, Copy, same sorting", abap: test4},
-  {name: "5: Internal table, Copy, becomes sorted", abap: test5},
-  {name: "6: Internal table, INSERT INDEX 1", abap: test6},
-  {name: "7: Internal table, APPEND matching types", abap: test7},
-  {name: "8: Internal table, READ TABLE BINARY SEARCH", abap: test8},
-  {name: "9: Internal table, INSERT INTO TABLE hashed", abap: test9},
-  {name: "10: Internal table, DELETE ADJACENT", abap: test10},
+  {name: "1: APPEND and DELETE", abap: test1},
+  {name: "2: READ TABLE, table_line", abap: test2},
+  {name: "3: LOOP USING KEY", abap: test3},
+  {name: "4: Copy, same sorting", abap: test4},
+  {name: "5: Copy, becomes sorted", abap: test5},
+  {name: "6: INSERT INDEX 1", abap: test6},
+  {name: "7: APPEND matching types", abap: test7},
+  {name: "8: READ TABLE BINARY SEARCH", abap: test8},
+  {name: "9: INSERT INTO TABLE hashed", abap: test9},
+  {name: "10: DELETE ADJACENT", abap: test10},
+  {name: "11: READ WITH TABLE KEY HASHED", abap: test11},
 ];
 
 async function execute(t: Test) {
