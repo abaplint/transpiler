@@ -13,7 +13,7 @@ function compare(a: any, b: any, input: {component: string, descending?: boolean
   let vala: any = undefined;
   let valb: any = undefined;
 
-  if (componentName.toLowerCase() === "table_line") {
+  if (componentName === "table_line") {
     vala = a.get();
     valb = b.get();
   } else if (componentName.includes("-")) {
@@ -32,12 +32,12 @@ function compare(a: any, b: any, input: {component: string, descending?: boolean
     throw new Error("sort compare, wrong component name, " + componentName);
   }
 
-  if (eq(vala,valb)) {
-    return 0;
-  } else if (descending && gt(vala, valb))  {
+  if (descending && gt(vala, valb))  {
     return -1;
   } else if (!descending && lt(vala, valb)) {
     return -1;
+  } else if (eq(vala, valb)) {
+    return 0;
   } else {
     return 1;
   }
