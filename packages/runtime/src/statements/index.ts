@@ -106,7 +106,7 @@ export class Statements {
     return exec;
   }
 
-  private async _traceAsync(func: any, name: string) {
+  private _traceAsync(func: any, name: string) {
     const exec = async (...options: any[]) => {
       const start = Date.now();
       const result = await func.bind(this)(...options);
@@ -125,7 +125,10 @@ export class Statements {
       }
       const func = (this as any)[c];
       if (isAsyncFunction(func)) {
+        console.dir(c);
+        console.dir((this as any)[c]);
         (this as any)[c] = this._traceAsync(func, c);
+        console.dir((this as any)[c]);
       } else {
         (this as any)[c] = this._trace(func, c);
       }
