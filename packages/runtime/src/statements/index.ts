@@ -95,29 +95,33 @@ export class Statements {
     this.context = context;
   }
 
-  private _trace(func: any, name: string) {
+  private _trace(func: any, name: string, min: number) {
     const exec = (...options: any[]) => {
       const start = Date.now();
       const result = func.bind(this)(...options);
-      const end = Date.now();
-      console.log(`STATEMENT: ${name}, ${end - start} ms`);
+      const runtime = Date.now() - start;
+      if (runtime >= min) {
+        console.log(`STATEMENT: ${name}, ${runtime} ms`);
+      }
       return result;
     };
     return exec;
   }
 
-  private _traceAsync(func: any, name: string) {
+  private _traceAsync(func: any, name: string, min: number) {
     const exec = async (...options: any[]) => {
       const start = Date.now();
       const result = await func.bind(this)(...options);
-      const end = Date.now();
-      console.log(`STATEMENT: ${name}, ${end - start} ms`);
+      const runtime = Date.now() - start;
+      if (runtime >= min) {
+        console.log(`STATEMENT: ${name}, ${runtime} ms`);
+      }
       return result;
     };
     return exec;
   }
 
-  public _setTrace() {
+  public _setTrace(min = 10) {
     const candidates = [...Object.keys(this),...Object.getOwnPropertyNames(Statements.prototype)];
     for (const c of candidates) {
       if (c === "context" || c === "constructor" || c.startsWith("_") || c === "loop") {
@@ -125,9 +129,9 @@ export class Statements {
       }
       const func = (this as any)[c];
       if (isAsyncFunction(func)) {
-        (this as any)[c] = this._traceAsync(func, c);
+        (this as any)[c] = this._traceAsync(func, c, min);
       } else {
-        (this as any)[c] = this._trace(func, c);
+        (this as any)[c] = this._trace(func, c, min);
       }
     }
   }
