@@ -22,7 +22,7 @@ export function gt(
 
 
   if (left instanceof Table || right instanceof Table) {
-    throw "runtime_todo, gt TABLE";
+    throw new Error("runtime_todo, gt TABLE");
   }
   if (left instanceof Hex || right instanceof Hex) {
     return gt_with_hex(left, right);
@@ -103,12 +103,12 @@ function get_hex_from_parameter(comparison_part: number | string | ICharacter | 
       } else if (comparison_part instanceof XString) {
         hex_from_parameter = comparison_part.get();
       } else {
-        throw "runtime_todo, gt hex1";
+        throw new Error("runtime_todo, gt hex1");
       }
 
       break;
     default:
-      throw "runtime_todo, gt hex2";
+      throw new Error("runtime_todo, gt hex2");
 
   }
 
