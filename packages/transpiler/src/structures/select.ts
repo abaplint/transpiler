@@ -14,6 +14,7 @@ export class SelectTranspiler implements IStructureTranspiler {
     if (selectStatement === undefined) {
       throw "Structure, select loop not found";
     }
+    const concat = selectStatement.concatTokens().toUpperCase();
     const from = selectStatement.findFirstExpression(abaplint.Expressions.SQLFromSource)?.concatTokens().toUpperCase();
     const intoName = new SQLTargetTranspiler().transpile(
       selectStatement.findFirstExpression(abaplint.Expressions.SQLTarget)!, traversal).getCode();
@@ -24,7 +25,11 @@ export class SelectTranspiler implements IStructureTranspiler {
     ret.appendString(`let ${targetName} = new abap.types.Table(abap.DDIC["${from}"].type);\n`);
     ret.appendChunk(new SelectStatementTranspiler().transpile(selectStatement, traversal, targetName));
     ret.appendString(`\nfor (const ${loopName} of ${targetName}.array()) {\n`);
-    ret.appendString(`${intoName}.set(${loopName});\n`);
+    if (concat.includes(" INTO CORRESPONDING FIELDS OF ")) {
+      ret.appendString(`abap.statements.moveCorresponding(${loopName}, ${intoName});\n`);
+    } else {
+      ret.appendString(`${intoName}.set(${loopName});\n`);
+    }
 
     const body = node.findDirectStructure(abaplint.Structures.Body);
     if (body) {

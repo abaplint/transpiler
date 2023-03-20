@@ -103,7 +103,12 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
         ret += source.concatTokens();
       }
     } else {
-      ret += source.concatTokens();
+      const concat = source.concatTokens();
+      if (concat.startsWith("`")) {
+        ret += "'" + concat.substring(1, concat.length - 1) + "'";
+      } else {
+        ret += concat;
+      }
     }
     return ret;
   }
