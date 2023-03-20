@@ -964,4 +964,24 @@ WRITE res-arbgb.`;
     expect(abap.console.get()).to.equal("ZAG_UNIT_TEST");
   });
 
+  it("SINGLE ``", async () => {
+    const code = `
+DATA: BEGIN OF res,
+        arbgb TYPE t100-arbgb,
+        something TYPE i,
+      END OF RES.
+SELECT SINGLE arbgb
+  INTO CORRESPONDING FIELDS OF res
+  FROM t100
+  WHERE arbgb = \`ZAG_UNIT_TEST\`.
+WRITE res-arbgb.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ZAG_UNIT_TEST");
+  });
+
 });
