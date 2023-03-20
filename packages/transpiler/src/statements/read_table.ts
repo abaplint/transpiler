@@ -31,8 +31,9 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       extra.push("keyName: \"" + keyName.concatTokens() + "\"");
     }
 
+    const withTableKey = node.findTokenSequencePosition("WITH", "TABLE");
     const binary = node.findTokenSequencePosition("BINARY", "SEARCH");
-    if (binary) {
+    if (binary || withTableKey) {
       extra.push("binarySearch: true");
     }
 
