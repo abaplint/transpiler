@@ -14,7 +14,6 @@ export class SQLSourceTranspiler implements IExpressionTranspiler {
       if (concat.includes("~") && concat.split("~")[0].includes("/")) {
         concat = "'" + concat.replace("~", "'~");
       }
-      concat = concat.replace("~", ".");
       chunk.appendString(concat);
       return chunk;
     }

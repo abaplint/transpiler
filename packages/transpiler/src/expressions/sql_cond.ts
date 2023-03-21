@@ -105,7 +105,11 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
         name = Traversal.escapeNamespace(name)!;
         ret += "'\" + " + name + ".get() + \"'";
       } else {
-        ret += source.concatTokens();
+        let concat = source.concatTokens();
+        if (concat.includes("~") && concat.split("~")[0].includes("/")) {
+          concat = "'" + concat.replace("~", "'~");
+        }
+        ret += concat;
       }
     } else {
       const concat = source.concatTokens();
