@@ -5,6 +5,7 @@ import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {SimpleSource3Transpiler} from "./simple_source3";
 import {FieldChainTranspiler} from "./field_chain";
+import {SQLFieldNameTranspiler} from "./sql_field_name";
 
 export class SQLCondTranspiler implements IExpressionTranspiler {
 
@@ -59,12 +60,16 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
       return this.basicConditionNew(c, traversal, filename);
     }
 
-    const fieldName = c.findDirectExpression(abaplint.Expressions.SQLFieldName);
+    let fieldName: string | undefined = undefined;
+    const fieldNameExpression = c.findDirectExpression(abaplint.Expressions.SQLFieldName);
+    if (fieldNameExpression) {
+      fieldName = new SQLFieldNameTranspiler().transpile(fieldNameExpression, traversal).getCode();
+    }
     const operator = c.findDirectExpression(abaplint.Expressions.SQLCompareOperator);
     const source = c.findDirectExpression(abaplint.Expressions.SQLSource);
 
     if (fieldName && source && operator === undefined && c.findDirectTokenByText("LIKE")) {
-      ret += fieldName.concatTokens() + " LIKE ";
+      ret += fieldName + " LIKE ";
       ret += this.sqlSource(source, traversal, filename);
       return ret;
     }
@@ -79,7 +84,7 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
     } else if (op.toUpperCase() === "NE") {
       op = "<>";
     }
-    ret += fieldName.concatTokens() + " " + op + " ";
+    ret += fieldName + " " + op + " ";
     ret += this.sqlSource(source, traversal, filename);
 
     return ret;
@@ -100,7 +105,11 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
         name = Traversal.escapeNamespace(name)!;
         ret += "'\" + " + name + ".get() + \"'";
       } else {
-        ret += source.concatTokens();
+        let concat = source.concatTokens();
+        if (concat.includes("~") && concat.split("~")[0].includes("/")) {
+          concat = "'" + concat.replace("~", "'~");
+        }
+        ret += concat;
       }
     } else {
       const concat = source.concatTokens();
@@ -119,8 +128,9 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
       if (ret !== "") {
         ret += " ";
       }
-      if (child.get() instanceof abaplint.Expressions.SQLFieldName) {
-        ret += child.concatTokens();
+      if (child.get() instanceof abaplint.Expressions.SQLFieldName
+          && child instanceof abaplint.Nodes.ExpressionNode) {
+        ret += new SQLFieldNameTranspiler().transpile(child, traversal).getCode();
       } else if (child.get() instanceof abaplint.Expressions.SQLSource
           && child instanceof abaplint.Nodes.ExpressionNode) {
         ret += this.sqlSource(child, traversal, filename);

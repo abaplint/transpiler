@@ -4,6 +4,7 @@ import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {SQLJoinTranspiler} from "./sql_join";
+import {SQLFromSourceTranspiler} from "./sql_from_source";
 
 export class SQLFromTranspiler implements IExpressionTranspiler {
 
@@ -17,6 +18,8 @@ export class SQLFromTranspiler implements IExpressionTranspiler {
       } else if (c.get() instanceof abaplint.Expressions.SQLJoin) {
         chunk.appendChunk(new SQLJoinTranspiler().transpile(c, traversal));
         chunk.appendString(" ");
+      } else if (c.get() instanceof abaplint.Expressions.SQLFromSource) {
+        chunk.appendChunk(new SQLFromSourceTranspiler().transpile(c, traversal));
       } else {
         if (c.findFirstExpression(abaplint.Expressions.Dynamic)) {
           chunk.appendString(c.concatTokens() + " ");
