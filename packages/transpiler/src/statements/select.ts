@@ -91,6 +91,11 @@ export class SelectTranspiler implements IStatementTranspiler {
       select = select.replace(new RegExp(" " + escapeRegExp(faeTranspiled!), "g"), " " + unique);
       select = select.replace(unique + ".get().table_line.get()", unique + ".get()");  // there can be only one?
 
+      let by = `Object.keys(${target}.getRowType().get())`;
+      if (keys.length > 0) {
+        by = JSON.stringify(keys);
+      }
+
       const code = `if (${faeTranspiled}.array().length === 0) {
   throw "FAE, todo, empty table";
 } else {
@@ -98,8 +103,8 @@ export class SelectTranspiler implements IStatementTranspiler {
   for await (const ${unique} of abap.statements.loop(${faeTranspiled})) {
     await abap.statements.select(${target}, {select: "${select.trim()}"${extra}}, {appending: true});
   }
-  abap.statements.sort(${target}, {by: Object.keys(${target}.getRowType().get()).map(k => { return {component: k}; })});
-  await abap.statements.deleteInternal(${target}, {adjacent: true});
+  abap.statements.sort(${target}, {by: ${by}.map(k => { return {component: k}; })});
+  await abap.statements.deleteInternal(${target}, {adjacent: true, by: ${by}});
   abap.builtin.sy.get().dbcnt.set(${target}.array().length);
 }`;
       return new Chunk().append(code, node, traversal);
