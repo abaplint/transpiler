@@ -249,4 +249,14 @@ describe("Running Examples - Hex type", () => {
     await f(abap);
     expect(abap.console.get()).to.equal(`FF`);
   });
+
+  it("Hex, compare with empty char", async () => {
+    const code = `
+    DATA hex TYPE x LENGTH 1.
+    DATA char TYPE c LENGTH 1.
+    ASSERT hex > char.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
 });

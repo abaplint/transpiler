@@ -1,4 +1,4 @@
-import {ABAPObject, DecFloat34, FieldSymbol, Float, Hex, Structure, Table, XString} from "../types";
+import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, Hex, Structure, Table, XString} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {Integer} from "../types/integer";
@@ -100,6 +100,8 @@ function get_hex_from_parameter(comparison_part: number | string | ICharacter | 
         if (hex_from_parameter.length % 2 === 1) {
           hex_from_parameter = "0" + hex_from_parameter;
         }
+      } else if (comparison_part instanceof Character) {
+        hex_from_parameter = comparison_part.get();
       } else if (comparison_part instanceof XString) {
         hex_from_parameter = comparison_part.get();
       } else {
