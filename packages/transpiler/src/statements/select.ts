@@ -2,7 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {FieldChainTranspiler, SourceTranspiler, SQLSourceTranspiler} from "../expressions";
+import {FieldChainTranspiler, SourceTranspiler, SQLField, SQLSourceTranspiler} from "../expressions";
 import {UniqueIdentifier} from "../unique_identifier";
 import {SQLFromTranspiler} from "../expressions/sql_from";
 
@@ -23,13 +23,16 @@ export class SelectTranspiler implements IStatementTranspiler {
     let select = "SELECT ";
     const fieldList = node.findFirstExpression(abaplint.Expressions.SQLFieldList)
       || node.findFirstExpression(abaplint.Expressions.SQLFieldListLoop);
-    if (fieldList?.getChildren().length === 1) {
-      select += fieldList.concatTokens();
-    } else {
-// add commas between field names, this is required for SQLite, and easy to remove in other clients?
-      select += fieldList?.findAllExpressions(abaplint.Expressions.SQLField).map(e => e.concatTokens()).join(", ");
+    const fields: string[] = [];
+    for (const f of fieldList?.getChildren() || []) {
+      if (f instanceof abaplint.Nodes.ExpressionNode && f.get() instanceof abaplint.Expressions.SQLField) {
+        const code = new SQLField().transpile(f, traversal).getCode();
+        fields.push(code);
+      } else {
+        fields.push(f.concatTokens());
+      }
     }
-    select += " ";
+    select += fields.join(", ") + " ";
 
     const from = node.findFirstExpression(abaplint.Expressions.SQLFrom);
     if (from) {
@@ -91,6 +94,11 @@ export class SelectTranspiler implements IStatementTranspiler {
       select = select.replace(new RegExp(" " + escapeRegExp(faeTranspiled!), "g"), " " + unique);
       select = select.replace(unique + ".get().table_line.get()", unique + ".get()");  // there can be only one?
 
+      let by = `Object.keys(${target}.getRowType().get())`;
+      if (keys.length > 0) {
+        by = JSON.stringify(keys);
+      }
+
       const code = `if (${faeTranspiled}.array().length === 0) {
   throw "FAE, todo, empty table";
 } else {
@@ -98,8 +106,8 @@ export class SelectTranspiler implements IStatementTranspiler {
   for await (const ${unique} of abap.statements.loop(${faeTranspiled})) {
     await abap.statements.select(${target}, {select: "${select.trim()}"${extra}}, {appending: true});
   }
-  abap.statements.sort(${target}, {by: Object.keys(${target}.getRowType().get()).map(k => { return {component: k}; })});
-  await abap.statements.deleteInternal(${target}, {adjacent: true});
+  abap.statements.sort(${target}, {by: ${by}.map(k => { return {component: k}; })});
+  await abap.statements.deleteInternal(${target}, {adjacent: true, by: ${by}});
   abap.builtin.sy.get().dbcnt.set(${target}.array().length);
 }`;
       return new Chunk().append(code, node, traversal);
