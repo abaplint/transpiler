@@ -12,12 +12,19 @@ export class SQLFromTranspiler implements IExpressionTranspiler {
 
     for (const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.TokenNode) {
+        // keywords
         chunk.appendString(c.concatTokens() + " ");
       } else if (c.get() instanceof abaplint.Expressions.SQLJoin) {
         chunk.appendChunk(new SQLJoinTranspiler().transpile(c, traversal));
         chunk.appendString(" ");
       } else {
-        chunk.appendString(c.concatTokens() + " ");
+        if (c.findFirstExpression(abaplint.Expressions.Dynamic)) {
+          chunk.appendString(c.concatTokens() + " ");
+        } else if (c.concatTokens().includes("/")) {
+          chunk.appendString("'" + c.concatTokens() + "' ");
+        } else {
+          chunk.appendString(c.concatTokens() + " ");
+        }
       }
     }
 
