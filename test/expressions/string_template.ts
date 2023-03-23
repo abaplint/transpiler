@@ -281,4 +281,15 @@ WRITE |{ <fs> }|.`;
     expect(abap.console.get()).to.equal("hi");
   });
 
+  it.only("Output long TIMESTAMP = ISO", async () => {
+    const code = `
+    DATA ts TYPE p LENGTH 11 DECIMALS 7.
+    ts = '19700101000000'.
+    WRITE |{ ts TIMESTAMP = ISO }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1970-01-01T00:00:00,0000000");
+  });
+
 });
