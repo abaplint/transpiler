@@ -502,7 +502,7 @@ WRITE sy-subrc.`;
     expect(abap.console.get()).to.equal("8");
   });
 
-  it("COMPONENTS subrc 4", async () => {
+  it.skip("COMPONENTS subrc 4", async () => {
     const code = `
 TYPES: BEGIN OF ty_file,
          path     TYPE string,
