@@ -502,6 +502,31 @@ WRITE sy-subrc.`;
     expect(abap.console.get()).to.equal("8");
   });
 
+  it("COMPONENTS subrc 4", async () => {
+    const code = `
+TYPES: BEGIN OF ty_file,
+         path     TYPE string,
+         filename TYPE string,
+       END OF ty_file.
+TYPES ty_files_tt TYPE STANDARD TABLE OF ty_file WITH DEFAULT KEY
+      WITH UNIQUE SORTED KEY file_path COMPONENTS path filename.
+
+DATA ct_remote TYPE ty_files_tt.
+DATA row LIKE LINE OF ct_remote.
+FIELD-SYMBOLS <ls_remote> LIKE LINE OF ct_remote.
+
+row-path = 'zzz'.
+INSERT row INTO TABLE ct_remote.
+
+READ TABLE ct_remote ASSIGNING <ls_remote>
+  WITH KEY file_path COMPONENTS path = 'sdf'.
+WRITE sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4");
+  });
+
   it("Fieldsymbol index", async () => {
     const code = `
 DATA mt_symbol TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
