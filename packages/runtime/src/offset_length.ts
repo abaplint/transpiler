@@ -70,6 +70,8 @@ export class OffsetLength {
       val = val.substr(0, this.length);
       if (this.isHex || this.obj instanceof Time) {
         val = val.padStart(this.length, "0");
+      } else if (val.length < this.length) {
+        val = val.padEnd(this.length, " ");
       }
     }
 
