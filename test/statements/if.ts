@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -34,6 +34,22 @@ describe("Running statements - IF", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("lower case not", async () => {
+    const code = `
+DATA: lv_equal_offset     TYPE i,
+      lv_semicolon_offset TYPE i.
+lv_equal_offset = 2.
+lv_semicolon_offset = 0.
+IF lv_equal_offset NE 0 AND not ( lv_semicolon_offset NE 0 AND lv_semicolon_offset LT lv_equal_offset ).
+  WRITE 'yup'.
+ENDIF.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("yup");
   });
 
 });

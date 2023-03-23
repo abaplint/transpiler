@@ -11,7 +11,7 @@ export class CondSubTranspiler implements IExpressionTranspiler {
     for (const c of node.getChildren()) {
       if (c.get() instanceof Expressions.Cond) {
         ret.appendChunk(traversal.traverse(c));
-      } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr() === "NOT") {
+      } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "NOT") {
         ret.append("!", c, traversal);
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().trim() === "(") {
         ret.append("(", c, traversal);
