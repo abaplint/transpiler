@@ -38,7 +38,9 @@ export function templateFormatting(source: ICharacter | INumeric, options?: opti
     text = text.substr(0,2) + ":" + text.substr(2,2) + ":" + text.substr(4,2);
   }
   if (options?.timestamp === "iso") {
-    text = text.substr(0,4) + "-" + text.substr(4,2) + "-" + text.substr(6,2) + "T" + text.substr(8,2) + ":" + text.substr(10,2) + ":" + text.substr(12,2);
+    // make sure to get decimals from packed number,
+    text = templateFormatting(source).replace(".", ",");
+    text = text.substr(0,4) + "-" + text.substr(4,2) + "-" + text.substr(6,2) + "T" + text.substr(8,2) + ":" + text.substr(10,2) + ":" + text.substr(12,2) + text.substr(14);
     if (text === "0--T::") {
       text = "0000-00-00T00:00:00";
     }
