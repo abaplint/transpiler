@@ -281,7 +281,7 @@ WRITE |{ <fs> }|.`;
     expect(abap.console.get()).to.equal("hi");
   });
 
-  it.only("Output long TIMESTAMP = ISO", async () => {
+  it("Output long TIMESTAMP = ISO", async () => {
     const code = `
     DATA ts TYPE p LENGTH 11 DECIMALS 7.
     ts = '19700101000000'.
