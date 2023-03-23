@@ -453,4 +453,32 @@ WRITE char+2(*).`;
     expect(abap.console.get().trim()).to.equal("sdf");
   });
 
+  it("short", async () => {
+    const code = `
+    DATA foo TYPE c LENGTH 4.
+    DATA bar TYPE c LENGTH 1.
+    bar = 'A'.
+    foo = '1234'.
+    foo+1(2) = bar.
+    WRITE foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trim()).to.equal("1A 4");
+  });
+
+  it("long", async () => {
+    const code = `
+    DATA foo TYPE c LENGTH 4.
+    DATA bar TYPE c LENGTH 5.
+    bar = 'A'.
+    foo = '1234'.
+    foo+1(2) = bar.
+    WRITE foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trim()).to.equal("1A 4");
+  });
+
 });
