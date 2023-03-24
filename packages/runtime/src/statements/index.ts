@@ -90,38 +90,57 @@ export class Statements {
   public translate = translate;
 
   private readonly context: Context;
+  private traceTotals: {[name: string]: number} = {};
 
   public constructor(context: Context) {
     this.context = context;
   }
 
-  private _trace(func: any, name: string, min: number) {
+  private _trace(func: any, name: string, min: number, totals: boolean) {
     const exec = (...options: any[]) => {
       const start = Date.now();
       const result = func.bind(this)(...options);
       const runtime = Date.now() - start;
+      if (totals === true) {
+        if (this.traceTotals[name] === undefined) {
+          this.traceTotals[name] = 0;
+        }
+        this.traceTotals[name] += runtime;
+      }
       if (runtime >= min) {
         console.log(`STATEMENT: ${name}, ${runtime} ms`);
+        if (totals === true) {
+          console.log(JSON.stringify(this.traceTotals));
+        }
       }
       return result;
     };
     return exec;
   }
 
-  private _traceAsync(func: any, name: string, min: number) {
+  private _traceAsync(func: any, name: string, min: number, totals: boolean) {
     const exec = async (...options: any[]) => {
       const start = Date.now();
       const result = await func.bind(this)(...options);
       const runtime = Date.now() - start;
+      if (totals === true) {
+        if (this.traceTotals[name] === undefined) {
+          this.traceTotals[name] = 0;
+        }
+        this.traceTotals[name] += runtime;
+      }
       if (runtime >= min) {
         console.log(`STATEMENT: ${name}, ${runtime} ms`);
+        if (totals === true) {
+          console.log(JSON.stringify(this.traceTotals));
+        }
       }
       return result;
     };
     return exec;
   }
 
-  public _setTrace(min = 10) {
+  public _setTrace(min = 10, totals = false) {
     const candidates = [...Object.keys(this),...Object.getOwnPropertyNames(Statements.prototype)];
     for (const c of candidates) {
       if (c === "context" || c === "constructor" || c.startsWith("_") || c === "loop") {
@@ -129,9 +148,9 @@ export class Statements {
       }
       const func = (this as any)[c];
       if (isAsyncFunction(func)) {
-        (this as any)[c] = this._traceAsync(func, c, min);
+        (this as any)[c] = this._traceAsync(func, c, min, totals);
       } else {
-        (this as any)[c] = this._trace(func, c, min);
+        (this as any)[c] = this._trace(func, c, min, totals);
       }
     }
   }
