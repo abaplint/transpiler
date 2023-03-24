@@ -90,27 +90,29 @@ export class Statements {
   public translate = translate;
 
   private readonly context: Context;
-  private traceTotals: {[name: string]: number} = {};
+  private readonly traceTotals: {[name: string]: number};
 
   public constructor(context: Context) {
     this.context = context;
+    this.traceTotals = {};
   }
 
   private _trace(func: any, name: string, min: number, totals: boolean) {
+    const tt = this.traceTotals;
     const exec = (...options: any[]) => {
       const start = Date.now();
       const result = func.bind(this)(...options);
       const runtime = Date.now() - start;
       if (totals === true) {
-        if (this.traceTotals[name] === undefined) {
-          this.traceTotals[name] = 0;
+        if (tt[name] === undefined) {
+          tt[name] = 0;
         }
-        this.traceTotals[name] += runtime;
+        tt[name] += runtime;
       }
       if (runtime >= min) {
         console.log(`STATEMENT: ${name}, ${runtime} ms`);
         if (totals === true) {
-          console.log(JSON.stringify(this.traceTotals));
+          console.log(JSON.stringify(tt));
         }
       }
       return result;
@@ -119,20 +121,21 @@ export class Statements {
   }
 
   private _traceAsync(func: any, name: string, min: number, totals: boolean) {
+    const tt = this.traceTotals;
     const exec = async (...options: any[]) => {
       const start = Date.now();
       const result = await func.bind(this)(...options);
       const runtime = Date.now() - start;
       if (totals === true) {
-        if (this.traceTotals[name] === undefined) {
-          this.traceTotals[name] = 0;
+        if (tt[name] === undefined) {
+          tt[name] = 0;
         }
-        this.traceTotals[name] += runtime;
+        tt[name] += runtime;
       }
       if (runtime >= min) {
         console.log(`STATEMENT: ${name}, ${runtime} ms`);
         if (totals === true) {
-          console.log(JSON.stringify(this.traceTotals));
+          console.log(JSON.stringify(tt));
         }
       }
       return result;
