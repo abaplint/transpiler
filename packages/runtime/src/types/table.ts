@@ -105,13 +105,24 @@ export class HashedTable implements ITable {
     this.qualifiedName = qualifiedName?.toUpperCase();
   }
 
-  public insert(data: TableRowType): {value: TableRowType, subrc: number} {
-    throw new Error("sdfsd");
-    this.getValue(data);
+  public insert(data: TableRowType): {value: TableRowType | undefined, subrc: number} {
+    let hash = "";
+    for (const k of this.options.primaryKey!.keyFields) {
+      // @ts-ignore
+      hash += k + ":" + data.get()[k.toLowerCase()].get();
+    }
+
+    if (this.value[hash] !== undefined) {
+      return {value: undefined, subrc: 4};
+    } else {
+      const val = this.getValue(data);
+      this.value[hash] = val;
+      return {value: val, subrc: 0};
+    }
   }
 
   public array(): readonly any[] {
-    throw new Error("Hash table insert index");
+    throw new Error("Hash table array");
   }
 
   public insertIndex(_item: TableRowType, _index: number) {
@@ -139,7 +150,7 @@ export class HashedTable implements ITable {
   }
 
   public set(_tab: TableRowType): ITable {
-    throw new Error("Method not implemented.");
+    throw new Error("Method not implemented, set hashed table");
   }
 
   public getHeader(): TableRowType {

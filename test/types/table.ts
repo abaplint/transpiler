@@ -281,4 +281,32 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("A\nB");
   });
 
+  it.skip("hashed table, sequence", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field1 TYPE c LENGTH 2,
+         field2 TYPE i,
+       END OF ty.
+DATA tab TYPE HASHED TABLE OF ty WITH UNIQUE KEY field1.
+DATA row LIKE LINE OF tab.
+
+row-field1 = 'CC'.
+INSERT row INTO TABLE tab.
+row-field1 = 'CC'.
+INSERT row INTO TABLE tab.
+row-field1 = 'AA'.
+INSERT row INTO TABLE tab.
+row-field1 = 'BB'.
+INSERT row INTO TABLE tab.
+
+LOOP AT tab INTO row.
+WRITE / row-field1.
+ENDLOOP.`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("CC\nAA\nBB");
+  });
+
 });
