@@ -56,9 +56,9 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
   let found: any = undefined;
   let foundIndex = 0;
 
-  const arr = table.array();
 
   if (options?.index) {
+    const arr = table.array();
     let index = options.index;
     if (typeof index !== "number") {
       if (index instanceof FieldSymbol) {
@@ -84,12 +84,14 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
       && options.withKey) {
 // note: it currently only uses the first key field for binary search, todo
     const first = options.withKeyValue[0];
+    const arr = table.array();
     const startIndex = binarySearchFromRow(arr, 0, arr.length, first.key, first.value, options.usesTableLine) - 1;
 
     const searchResult = searchWithKey(arr, options.withKey, startIndex, options.usesTableLine);
     found = searchResult.found;
     foundIndex = searchResult.foundIndex;
   } else if (options?.withKey) {
+    const arr = table.array();
     const searchResult = searchWithKey(arr, options.withKey, 0, options.usesTableLine);
     found = searchResult.found;
     foundIndex = searchResult.foundIndex;
@@ -101,6 +103,7 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
       table = table.getPointer();
     }
     if (table instanceof Table && options.from instanceof Structure) {
+      const arr = table.array();
       const keys = table.getOptions()?.primaryKey?.keyFields;
       const isStructured = arr[0] instanceof Structure;
       if (keys !== undefined && isStructured === true) {
