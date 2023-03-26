@@ -587,4 +587,26 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it.only("READ TABLE HASHED WITH TABLE KEY, non sorted sequence", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field1 TYPE c LENGTH 2,
+       END OF ty.
+DATA src TYPE HASHED TABLE OF ty WITH UNIQUE KEY field1.
+DATA row TYPE ty.
+
+row-field1 = 'BB'.
+INSERT row INTO TABLE src.
+row-field1 = 'AA'.
+INSERT row INTO TABLE src.
+
+READ TABLE src WITH TABLE KEY field1 = 'AA' INTO row.
+ASSERT sy-subrc = 0.
+READ TABLE src WITH TABLE KEY field1 = 'BB' INTO row.
+ASSERT sy-subrc = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
