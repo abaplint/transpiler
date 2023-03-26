@@ -227,7 +227,7 @@ combined_data[] = alphas[].`;
     await f(abap);
   });
 
-  it("copy, sorted table line", async () => {
+  it("copy, standard table into hashed", async () => {
     const code = `
 TYPES:
   BEGIN OF ty_s_data,
@@ -299,13 +299,12 @@ INSERT row INTO TABLE tab.
 row-field1 = 'BB'.
 INSERT row INTO TABLE tab.
 
-WRITE / lines( tab ).
+ASSERT lines( tab ) = 3.
 
 LOOP AT tab INTO row.
   WRITE / row-field1.
 ENDLOOP.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("CC\nAA\nBB");

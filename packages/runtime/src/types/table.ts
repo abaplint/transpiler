@@ -85,15 +85,16 @@ export class HashedTable implements ITable {
   private value: {[hash: string]: TableRowType};
   private readonly header: TableRowType | undefined;
   private readonly rowType: TableRowType;
-//  private readonly loops: Set<LoopIndex>;
+  private readonly loops: Set<LoopIndex>;
   private readonly options: ITableOptions;
   private readonly qualifiedName: string | undefined;
 //  private readonly isStructured: boolean;
-//  private secondaryIndexes: {[name: string]: TableRowType[]};
+  private secondaryIndexes: {[name: string]: TableRowType[]};
 
   public constructor(rowType: TableRowType, options: ITableOptions, qualifiedName?: string) {
     this.value = {};
-//    this.loops = new Set();
+    this.secondaryIndexes = {};
+    this.loops = new Set();
     this.rowType = rowType;
     this.options = options;
 //    this.isStructured = rowType instanceof Structure;
@@ -110,7 +111,31 @@ export class HashedTable implements ITable {
     return Object.keys(this.value).length;
   }
 
+  public getKeyByName(name: string) {
+    return this.getOptions()?.secondary?.find(s => s.name.toUpperCase() === name.toUpperCase());
+  }
+
+  public getSecondaryIndex(name: string) {
+    if (this.secondaryIndexes[name.toUpperCase()]) {
+      return this.secondaryIndexes[name.toUpperCase()];
+    }
+
+    const secondary = this.getKeyByName(name);
+    if (secondary === undefined) {
+      throw `Table, secondary key "${name}" not found`;
+    }
+    const copy = clone([...this.array()]);
+    sort(copy as any, {by: secondary.keyFields.map(k => {return {component: k.toLowerCase()};})});
+
+    this.secondaryIndexes[name.toUpperCase()] = copy;
+    return copy;
+  }
+
   public insert(data: TableRowType): {value: TableRowType | undefined, subrc: number} {
+    if (this.loops.size !== 0) {
+      throw new Error("Hash table insert inside LOOP");
+    }
+
     let hash = "";
     for (const k of this.options.primaryKey!.keyFields) {
       // @ts-ignore
@@ -127,7 +152,22 @@ export class HashedTable implements ITable {
   }
 
   public array(): readonly any[] {
-    throw new Error("Hash table array");
+    // used for LOOP
+    const ret = [];
+    for (const hash in this.value) {
+      ret.push(this.value[hash]);
+    }
+    return ret;
+  }
+
+  public startLoop(start: number = 0): LoopIndex {
+    const l = new LoopIndex(start);
+    this.loops.add(l);
+    return l;
+  }
+
+  public unregisterLoop(loop: LoopIndex) {
+    this.loops.delete(loop);
   }
 
   public insertIndex(_item: TableRowType, _index: number) {
