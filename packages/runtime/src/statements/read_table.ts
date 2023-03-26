@@ -83,7 +83,7 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
       && options.withKey) {
 // note: it currently only uses the first key field for binary search, todo
     const first = options.withKeyValue[0];
-    const startIndex = binarySearchFromRow(arr, 0, arr.length, first.key, first.value) - 1;
+    const startIndex = binarySearchFromRow(arr, 0, arr.length, first.key, first.value, options.usesTableLine) - 1;
 
     const searchResult = searchWithKey(arr, options.withKey, startIndex, options.usesTableLine);
     found = searchResult.found;
