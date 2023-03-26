@@ -54,8 +54,9 @@ export class ReadTableTranspiler implements IStatementTranspiler {
 
     const compare = node.findDirectExpression(abaplint.Expressions.ComponentCompareSimple);
     if (compare) {
-      const conds: string[] = [];
-      const blah: string[] = [];
+      const withKey: string[] = [];
+      const withKeyValue: string[] = [];
+      const withKeySimple: string[] = [];
       const count = compare.getChildren().length / 3;
       for (let i = 0; i < count; i++) {
         const left = compare.getChildren()[i * 3];
@@ -75,21 +76,23 @@ export class ReadTableTranspiler implements IStatementTranspiler {
         if (s.includes("await")) {
           const id = UniqueIdentifier.get();
           prefix += "const " + id + " = " + s + ";\n";
-          conds.push("abap.compare.eq(i." + field + ", " + id + ")");
-          blah.push(`{key: (i) => {return i.${field}}, value: ${id}}`);
+          withKey.push("abap.compare.eq(i." + field + ", " + id + ")");
+          withKeyValue.push(`{key: (i) => {return i.${field}}, value: ${id}}`);
+          withKeySimple.push(`"${field}": ${id}`);
         } else {
-          conds.push("abap.compare.eq(i." + field + ", " + s + ")");
-          blah.push(`{key: (i) => {return i.${field}}, value: ${s}}`);
+          withKey.push("abap.compare.eq(i." + field + ", " + s + ")");
+          withKeyValue.push(`{key: (i) => {return i.${field}}, value: ${s}}`);
+          withKeySimple.push(`"${field}": ${s}`);
         }
       }
-      extra.push("withKey: (i) => {return " + conds.join(" && ") + ";}");
-
-      extra.push(`withKeyValue: [${blah.join(",")}]`);
+      extra.push("withKey: (i) => {return " + withKey.join(" && ") + ";}");
+      extra.push(`withKeyValue: [${withKeyValue.join(",")}]`);
+      extra.push(`withKeySimple: {${withKeySimple.join(",")}}`);
     }
 
     let concat = "";
     if (extra.length > 0) {
-      concat = ",{" + extra.join(",") + "}";
+      concat = ",{" + extra.join(",\n  ") + "}";
     }
 
     return new Chunk()

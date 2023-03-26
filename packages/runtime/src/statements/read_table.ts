@@ -6,14 +6,18 @@ import {INumeric} from "../types/_numeric";
 
 export interface IReadTableOptions {
   index?: INumeric | FieldSymbol | number,
-  withKey?: (i: any) => boolean,
   into?: INumeric | ICharacter | Structure | Table | DataReference,
   from?: INumeric | ICharacter | Structure | Table | DataReference,
   referenceInto?: DataReference,
   assigning?: FieldSymbol,
   binarySearch?: boolean,
   keyName?: string,
+  // single function, evaluates full condition
+  withKey?: (i: any) => boolean,
+  // used for binary search, one function per field
   withKeyValue?: {key: (i: any) => any, value: any}[],
+  // only simple single level field access, plus no use of table_line
+  withKeySimple?: {[key: string]: any},
 }
 
 export type ReadTableReturn = {
