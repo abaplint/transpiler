@@ -253,4 +253,48 @@ ASSERT sy-subrc = 4.`;
     await f(abap);
   });
 
+  it("INSERT, LINES OF into HASHED from standard", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field1 TYPE c LENGTH 2,
+       END OF ty.
+DATA normal TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA hashed TYPE HASHED TABLE OF ty WITH UNIQUE KEY field1.
+DATA row TYPE ty.
+
+row-field1 = 'AA'.
+INSERT row INTO TABLE normal.
+row-field1 = 'BB'.
+INSERT row INTO TABLE normal.
+
+INSERT LINES OF normal INTO TABLE hashed.
+WRITE lines( hashed ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+  it("INSERT, LINES OF into HASHED from HASHED", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field1 TYPE c LENGTH 2,
+       END OF ty.
+DATA src TYPE HASHED TABLE OF ty WITH UNIQUE KEY field1.
+DATA hashed TYPE HASHED TABLE OF ty WITH UNIQUE KEY field1.
+DATA row TYPE ty.
+
+row-field1 = 'AA'.
+INSERT row INTO TABLE src.
+row-field1 = 'BB'.
+INSERT row INTO TABLE src.
+
+INSERT LINES OF src INTO TABLE hashed.
+WRITE lines( hashed ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
