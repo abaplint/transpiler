@@ -281,6 +281,26 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("A\nB");
   });
 
+  it("hashed table with table_line key", async () => {
+    const code = `
+DATA tab TYPE HASHED TABLE OF string WITH UNIQUE KEY table_line.
+DATA row LIKE LINE OF tab.
+
+row = 'CC'.
+INSERT row INTO TABLE tab.
+row = 'CC'.
+INSERT row INTO TABLE tab.
+row = 'AA'.
+INSERT row INTO TABLE tab.
+row = 'BB'.
+INSERT row INTO TABLE tab.
+
+ASSERT lines( tab ) = 3.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it.skip("hashed table, sequence", async () => {
     const code = `
 TYPES: BEGIN OF ty,
