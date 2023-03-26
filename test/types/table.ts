@@ -227,7 +227,7 @@ combined_data[] = alphas[].`;
     await f(abap);
   });
 
-  it("copy, sorted table line", async () => {
+  it("copy, standard table into hashed", async () => {
     const code = `
 TYPES:
   BEGIN OF ty_s_data,
@@ -279,6 +279,55 @@ ENDLOOP.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("A\nB");
+  });
+
+  it("hashed table with table_line key", async () => {
+    const code = `
+DATA tab TYPE HASHED TABLE OF string WITH UNIQUE KEY table_line.
+DATA row LIKE LINE OF tab.
+
+row = 'CC'.
+INSERT row INTO TABLE tab.
+row = 'CC'.
+INSERT row INTO TABLE tab.
+row = 'AA'.
+INSERT row INTO TABLE tab.
+row = 'BB'.
+INSERT row INTO TABLE tab.
+
+ASSERT lines( tab ) = 3.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it.skip("hashed table, sequence", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field1 TYPE c LENGTH 2,
+         field2 TYPE i,
+       END OF ty.
+DATA tab TYPE HASHED TABLE OF ty WITH UNIQUE KEY field1.
+DATA row LIKE LINE OF tab.
+
+row-field1 = 'CC'.
+INSERT row INTO TABLE tab.
+row-field1 = 'CC'.
+INSERT row INTO TABLE tab.
+row-field1 = 'AA'.
+INSERT row INTO TABLE tab.
+row-field1 = 'BB'.
+INSERT row INTO TABLE tab.
+
+ASSERT lines( tab ) = 3.
+
+LOOP AT tab INTO row.
+  WRITE / row-field1.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("CC\nAA\nBB");
   });
 
 });

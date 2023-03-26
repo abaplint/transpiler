@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/transpiler-cli",
-  "version": "2.5.57",
+  "version": "2.5.58",
   "description": "Transpiler - Command Line Interface",
   "bin": {
     "abap_transpile": "./abap_transpile"
@@ -25,12 +25,12 @@
   "author": "abaplint",
   "license": "MIT",
   "devDependencies": {
-    "@abaplint/transpiler": "^2.5.57",
+    "@abaplint/transpiler": "^2.5.58",
     "@types/glob": "^7.2.0",
     "glob": "=7.2.0",
     "@types/progress": "^2.0.5",
-    "@types/node": "^18.15.6",
-    "@abaplint/core": "^2.95.49",
+    "@types/node": "^18.15.10",
+    "@abaplint/core": "^2.95.50",
     "progress": "^2.0.3",
     "webpack": "^5.76.3",
     "webpack-cli": "^5.0.1",

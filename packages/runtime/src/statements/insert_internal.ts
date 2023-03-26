@@ -1,6 +1,6 @@
 import {clone} from "../clone";
 import {ne} from "../compare";
-import {ABAPObject, DataReference, FieldSymbol, Structure, Table, TableAccessType} from "../types";
+import {ABAPObject, DataReference, FieldSymbol, HashedTable, Structure, Table, TableAccessType} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {readTable} from "./read_table";
@@ -10,7 +10,7 @@ export interface IInsertInternalOptions {
   index?: INumeric,
   initial?: boolean,
   data?: INumeric | ICharacter | Structure | ABAPObject | Table | FieldSymbol | string,
-  table: Table | FieldSymbol,
+  table: Table | HashedTable | FieldSymbol,
   referenceInto?: DataReference,
   assigning?: FieldSymbol,
   lines?: boolean,
@@ -30,9 +30,12 @@ export function insertInternal(options: IInsertInternalOptions): void {
   }
 
   const tableOptions = options.table.getOptions();
-  const isSorted = tableOptions?.primaryKey?.type === TableAccessType.sorted || tableOptions?.primaryKey?.type === TableAccessType.hashed;
+  let isSorted = tableOptions?.primaryKey?.type === TableAccessType.sorted
+    || tableOptions?.primaryKey?.type === TableAccessType.hashed;
 
-  if (isSorted) {
+  if (options.table instanceof HashedTable) {
+    isSorted = false;
+  } else if (isSorted) {
     const insert = options.data instanceof Structure ? options.data.get() : {table_line: options.data};
 
     const compare = (row: any): boolean => {
@@ -103,8 +106,19 @@ export function insertInternal(options: IInsertInternalOptions): void {
     if (options.referenceInto) {
       options.referenceInto.assign(val);
     }
+  } else if (options.table instanceof HashedTable && data) {
+    const {value: val, subrc: subrc} = options.table.insert(data);
+    if (options.assigning) {
+      options.assigning.assign(val);
+    }
+    if (options.referenceInto) {
+      options.referenceInto.assign(val);
+    }
+    // @ts-ignore
+    abap.builtin.sy.get().subrc.set(subrc);
+    return;
   } else if (data) {
-// todo, for now it just appends, this is not correct, but currently the table type is not known
+    // todo, for now it just appends, this is not correct, but currently the table type is not known
     const val = options.table.insertIndex(data, options.table.array().length);
     if (options.assigning) {
       options.assigning.assign(val);
@@ -117,7 +131,7 @@ export function insertInternal(options: IInsertInternalOptions): void {
   // @ts-ignore
   abap.builtin.sy.get().subrc.set(0);
 
-  if (isSorted) {
+  if (isSorted && !(options.table instanceof HashedTable)) {
 // slow, but works for now
     let by = tableOptions?.primaryKey?.keyFields?.map(f => {
       return {component: f.toLowerCase()};

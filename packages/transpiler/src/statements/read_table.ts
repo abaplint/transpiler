@@ -31,10 +31,13 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       extra.push("keyName: \"" + keyName.concatTokens() + "\"");
     }
 
-    const withTableKey = node.findTokenSequencePosition("WITH", "TABLE");
     const binary = node.findTokenSequencePosition("BINARY", "SEARCH");
-    if (binary || withTableKey) {
+    if (binary) {
       extra.push("binarySearch: true");
+    }
+    const withTableKey = node.findTokenSequencePosition("WITH", "TABLE");
+    if (withTableKey) {
+      extra.push("withTableKey: true");
     }
 
     const rt = node.findDirectExpression(abaplint.Expressions.ReadTableTarget);
@@ -54,9 +57,12 @@ export class ReadTableTranspiler implements IStatementTranspiler {
 
     const compare = node.findDirectExpression(abaplint.Expressions.ComponentCompareSimple);
     if (compare) {
-      const conds: string[] = [];
-      const blah: string[] = [];
+      const withKey: string[] = [];
+      const withKeyValue: string[] = [];
+      const withKeySimple: string[] = [];
       const count = compare.getChildren().length / 3;
+      let skipSimple = false;
+      let usesTableLine = false;
       for (let i = 0; i < count; i++) {
         const left = compare.getChildren()[i * 3];
         const source = compare.getChildren()[(i * 3) + 2];
@@ -71,25 +77,37 @@ export class ReadTableTranspiler implements IStatementTranspiler {
         } else {
           field = traversal.traverse(left).getCode();
         }
+        if (field.includes(".")) {
+          skipSimple = true;
+        }
+        if (field === "table_line") {
+          skipSimple = true;
+          usesTableLine = true;
+        }
 
         if (s.includes("await")) {
           const id = UniqueIdentifier.get();
           prefix += "const " + id + " = " + s + ";\n";
-          conds.push("abap.compare.eq(i." + field + ", " + id + ")");
-          blah.push(`{key: (i) => {return i.${field}}, value: ${id}}`);
+          withKey.push("abap.compare.eq(i." + field + ", " + id + ")");
+          withKeyValue.push(`{key: (i) => {return i.${field}}, value: ${id}}`);
+          withKeySimple.push(`"${field}": ${id}`);
         } else {
-          conds.push("abap.compare.eq(i." + field + ", " + s + ")");
-          blah.push(`{key: (i) => {return i.${field}}, value: ${s}}`);
+          withKey.push("abap.compare.eq(i." + field + ", " + s + ")");
+          withKeyValue.push(`{key: (i) => {return i.${field}}, value: ${s}}`);
+          withKeySimple.push(`"${field}": ${s}`);
         }
       }
-      extra.push("withKey: (i) => {return " + conds.join(" && ") + ";}");
-
-      extra.push(`withKeyValue: [${blah.join(",")}]`);
+      extra.push("withKey: (i) => {return " + withKey.join(" && ") + ";}");
+      extra.push(`withKeyValue: [${withKeyValue.join(",")}]`);
+      extra.push(`usesTableLine: ${usesTableLine}`);
+      if (skipSimple !== true) {
+        extra.push(`withKeySimple: {${withKeySimple.join(",")}}`);
+      }
     }
 
     let concat = "";
     if (extra.length > 0) {
-      concat = ",{" + extra.join(",") + "}";
+      concat = ",{" + extra.join(",\n  ") + "}";
     }
 
     return new Chunk()
