@@ -58,6 +58,7 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       const withKeyValue: string[] = [];
       const withKeySimple: string[] = [];
       const count = compare.getChildren().length / 3;
+      let skipSimple = false;
       for (let i = 0; i < count; i++) {
         const left = compare.getChildren()[i * 3];
         const source = compare.getChildren()[(i * 3) + 2];
@@ -71,6 +72,9 @@ export class ReadTableTranspiler implements IStatementTranspiler {
           field = concat.substring(2, concat.length - 2);
         } else {
           field = traversal.traverse(left).getCode();
+        }
+        if (field.includes(".") || field === "table_line") {
+          skipSimple = true;
         }
 
         if (s.includes("await")) {
@@ -87,7 +91,9 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       }
       extra.push("withKey: (i) => {return " + withKey.join(" && ") + ";}");
       extra.push(`withKeyValue: [${withKeyValue.join(",")}]`);
-      extra.push(`withKeySimple: {${withKeySimple.join(",")}}`);
+      if (skipSimple !== true) {
+        extra.push(`withKeySimple: {${withKeySimple.join(",")}}`);
+      }
     }
 
     let concat = "";
