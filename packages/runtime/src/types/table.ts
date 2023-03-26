@@ -47,7 +47,7 @@ interface ITable {
   getRowType(): TableRowType;
   getLength(): number;
   clear(): void;
-  set(tab: Table | TableRowType): ITable;
+  set(tab: Table | HashedTable | TableRowType): ITable;
   getHeader(): TableRowType;
 }
 
@@ -138,8 +138,17 @@ export class HashedTable implements ITable {
 
     let hash = "";
     for (const k of this.options.primaryKey!.keyFields) {
-      // @ts-ignore
-      hash += k + ":" + data.get()[k.toLowerCase()].get();
+      if (k === "TABLE_LINE") {
+        if (data instanceof Structure) {
+          hash += k + ":" + data.getCharacter();
+        } else {
+          // @ts-ignore
+          hash += k + ":" + data.get();
+        }
+      } else {
+        // @ts-ignore
+        hash += k + ":" + data.get()[k.toLowerCase()].get();
+      }
     }
 
     if (this.value[hash] !== undefined) {
@@ -194,8 +203,16 @@ export class HashedTable implements ITable {
     this.value = {};
   }
 
-  public set(_tab: TableRowType): ITable {
-    throw new Error("Method not implemented, set hashed table");
+  public set(tab: TableRowType): ITable {
+    this.clear();
+    if (tab instanceof Table || tab instanceof HashedTable) {
+      for (const a of tab.array()) {
+        this.insert(a);
+      }
+      return this;
+    } else {
+      throw new Error("Method not implemented, set hashed table");
+    }
   }
 
   public getHeader(): TableRowType {
