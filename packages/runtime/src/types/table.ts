@@ -85,7 +85,7 @@ export class HashedTable implements ITable {
   private readonly header: TableRowType | undefined;
   private readonly rowType: TableRowType;
 //  private readonly loops: Set<LoopIndex>;
-  private readonly options: ITableOptions | undefined;
+  private readonly options: ITableOptions;
   private readonly qualifiedName: string | undefined;
 //  private readonly isStructured: boolean;
 //  private secondaryIndexes: {[name: string]: TableRowType[]};
@@ -105,11 +105,28 @@ export class HashedTable implements ITable {
     this.qualifiedName = qualifiedName?.toUpperCase();
   }
 
+  public insert(data: TableRowType): {value: TableRowType, subrc: number} {
+    throw new Error("sdfsd");
+    this.getValue(data);
+  }
+
+  public array(): readonly any[] {
+    throw new Error("Hash table insert index");
+  }
+
+  public insertIndex(_item: TableRowType, _index: number) {
+    throw new Error("Hash table insert index");
+  }
+
+  public append(_item: TableRowType) {
+    throw new Error("Hash table append");
+  }
+
   public getQualifiedName(): string | undefined {
     return this.qualifiedName;
   }
 
-  public getOptions(): ITableOptions | undefined {
+  public getOptions(): ITableOptions {
     return this.options;
   }
 
@@ -130,6 +147,31 @@ export class HashedTable implements ITable {
       throw "table, getHeader";
     }
     return this.header;
+  }
+
+  ///////////////////////////
+
+  private getValue(item: TableRowType) {
+    // make sure to do conversion if needed
+    if (typeof item === "number") {
+      const tmp = clone(this.getRowType());
+      tmp.set(new Integer().set(item));
+      return tmp;
+    } else if (typeof item === "string") {
+      const tmp = clone(this.getRowType());
+      tmp.set(new String().set(item));
+      return tmp;
+    // @ts-ignore
+    // eslint-disable-next-line max-len
+    } else if (this.isStructured === true && item.getQualifiedName && this.rowType.getQualifiedName && item.getQualifiedName() !== "" && item.getQualifiedName() === this.rowType.getQualifiedName()) {
+    // types match, so no need to do conversions, just clone the item
+      const val = clone(item);
+      return val;
+    } else {
+      const tmp = clone(this.getRowType());
+      tmp.set(item);
+      return tmp;
+    }
   }
 }
 
