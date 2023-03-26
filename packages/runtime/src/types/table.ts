@@ -45,6 +45,7 @@ interface ITable {
   getQualifiedName(): string | undefined;
   getOptions(): ITableOptions | undefined;
   getRowType(): TableRowType;
+  getLength(): number;
   clear(): void;
   set(tab: Table | TableRowType): ITable;
   getHeader(): TableRowType;
@@ -103,6 +104,10 @@ export class HashedTable implements ITable {
     }
 
     this.qualifiedName = qualifiedName?.toUpperCase();
+  }
+
+  public getLength() {
+    return Object.keys(this.value).length;
   }
 
   public insert(data: TableRowType): {value: TableRowType | undefined, subrc: number} {
@@ -186,7 +191,7 @@ export class HashedTable implements ITable {
   }
 }
 
-export class Table  {
+export class Table implements ITable {
   private value: TableRowType[];
   private readonly header: TableRowType | undefined;
   private readonly rowType: TableRowType;
@@ -209,6 +214,10 @@ export class Table  {
     }
 
     this.qualifiedName = qualifiedName?.toUpperCase();
+  }
+
+  public getLength() {
+    return this.value.length;
   }
 
   public getKeyByName(name: string) {

@@ -49,7 +49,7 @@ export async function* loop(table: Table | FieldSymbol | undefined, options?: IL
     return;
   }
 
-  const length = table.array().length;
+  const length = table.getLength();
   if (length === 0) {
     // @ts-ignore
     abap.builtin.sy.get().subrc.set(4);

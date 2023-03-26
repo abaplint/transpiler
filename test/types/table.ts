@@ -299,8 +299,10 @@ INSERT row INTO TABLE tab.
 row-field1 = 'BB'.
 INSERT row INTO TABLE tab.
 
+WRITE / lines( tab ).
+
 LOOP AT tab INTO row.
-WRITE / row-field1.
+  WRITE / row-field1.
 ENDLOOP.`;
     const js = await run(code);
     console.dir(js);
