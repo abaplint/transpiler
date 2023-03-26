@@ -11,6 +11,7 @@ export interface IReadTableOptions {
   referenceInto?: DataReference,
   assigning?: FieldSymbol,
   binarySearch?: boolean,
+  withTableKey?: boolean,
   keyName?: string,
   usesTableLine?: boolean,
   // single function, evaluates full condition
@@ -78,7 +79,7 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
     if (found) {
       foundIndex = index;
     }
-  } else if (options?.binarySearch === true
+  } else if ((options?.binarySearch === true || options?.withTableKey === true)
       && options.withKeyValue
       && options.withKey) {
 // note: it currently only uses the first key field for binary search, todo

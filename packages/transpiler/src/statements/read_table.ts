@@ -31,10 +31,13 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       extra.push("keyName: \"" + keyName.concatTokens() + "\"");
     }
 
-    const withTableKey = node.findTokenSequencePosition("WITH", "TABLE");
     const binary = node.findTokenSequencePosition("BINARY", "SEARCH");
-    if (binary || withTableKey) {
+    if (binary) {
       extra.push("binarySearch: true");
+    }
+    const withTableKey = node.findTokenSequencePosition("WITH", "TABLE");
+    if (withTableKey) {
+      extra.push("withTableKey: true");
     }
 
     const rt = node.findDirectExpression(abaplint.Expressions.ReadTableTarget);
