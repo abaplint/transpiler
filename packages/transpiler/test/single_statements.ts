@@ -102,6 +102,7 @@ describe("Single statements", () => {
     {abap: "READ TABLE tab INTO line WITH KEY field = 2.", js: `abap.statements.readTable(tab,{into: line,
   withKey: (i) => {return abap.compare.eq(i.field, new abap.types.Integer().set(2));},
   withKeyValue: [{key: (i) => {return i.field}, value: new abap.types.Integer().set(2)}],
+  usesTableLine: false,
   withKeySimple: {"field": new abap.types.Integer().set(2)}});`, skip: false},
     {abap: "READ TABLE tab INDEX i ASSIGNING <nam>.",      js: `abap.statements.readTable(tab,{index: i,
   assigning: fs_nam_});`,   skip: false},
@@ -109,6 +110,7 @@ describe("Single statements", () => {
       js: `abap.statements.readTable(fs_lt_indices_,{assigning: fs_ls_alert_by_index_,
   withKey: (i) => {return abap.compare.eq(i.program_ndx, lv_program_ndx);},
   withKeyValue: [{key: (i) => {return i.program_ndx}, value: lv_program_ndx}],
+  usesTableLine: false,
   withKeySimple: {"program_ndx": lv_program_ndx}});`,   skip: false},
 
     {abap: "MODIFY result INDEX 1 FROM 4.",           js: "abap.statements.modifyInternal(result,{index: new abap.types.Integer().set(1),from: new abap.types.Integer().set(4)});",   skip: false},

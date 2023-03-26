@@ -12,6 +12,7 @@ export interface IReadTableOptions {
   assigning?: FieldSymbol,
   binarySearch?: boolean,
   keyName?: string,
+  usesTableLine?: boolean,
   // single function, evaluates full condition
   withKey?: (i: any) => boolean,
   // used for binary search, one function per field
@@ -25,11 +26,16 @@ export type ReadTableReturn = {
   foundIndex: number;
 };
 
-function searchWithKey(arr: any, withKey: (i: any) => boolean, startIndex = 0) {
+function searchWithKey(arr: any, withKey: (i: any) => boolean, startIndex = 0, usesTableLine: boolean | undefined) {
   const isStructured = arr[0] instanceof Structure;
   for (let index = startIndex; index < arr.length; index++) {
     const a = arr[index];
-    const row = isStructured ? {table_line: a, ...a.get()} : {table_line: a};
+    let row: any = undefined;
+    if (usesTableLine === false && isStructured === true) {
+      row = a.get();
+    } else {
+      row = isStructured ? {table_line: a, ...a.get()} : {table_line: a};
+    }
     if (withKey(row) === true) {
       return {
         found: a,
@@ -79,11 +85,11 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
     const first = options.withKeyValue[0];
     const startIndex = binarySearchFromRow(arr, 0, arr.length, first.key, first.value) - 1;
 
-    const searchResult = searchWithKey(arr, options.withKey, startIndex);
+    const searchResult = searchWithKey(arr, options.withKey, startIndex, options.usesTableLine);
     found = searchResult.found;
     foundIndex = searchResult.foundIndex;
   } else if (options?.withKey) {
-    const searchResult = searchWithKey(arr, options.withKey);
+    const searchResult = searchWithKey(arr, options.withKey, 0, options.usesTableLine);
     found = searchResult.found;
     foundIndex = searchResult.foundIndex;
   } else if (options?.from) {
