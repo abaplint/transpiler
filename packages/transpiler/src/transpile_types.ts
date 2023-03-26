@@ -34,6 +34,7 @@ export class TranspileTypes {
       if (type.getQualifiedName() !== undefined) {
         extra += ", \"" + type.getQualifiedName() + "\"";
       }
+      return "abap.types.TableFactory.construct(" + extra + ")";
     } else if (type instanceof abaplint.BasicTypes.IntegerType) {
       resolved = "Integer";
       if (type.getQualifiedName() !== undefined) {

@@ -1,5 +1,5 @@
 import {ABAPRegExp} from "../abap_regex";
-import {ABAPObject, Integer, Structure, Table} from "../types";
+import {ABAPObject, Integer, Structure, Table, TableFactory} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -125,7 +125,7 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
         line: new Integer(),
         offset: new Integer(),
         length: new Integer(),
-        submatches: new Table(new Structure({offset: new Integer(), length: new Integer()})),
+        submatches: TableFactory.construct(new Structure({offset: new Integer(), length: new Integer()})),
       });
 
       match.get().line.set((m as any).line || 0);

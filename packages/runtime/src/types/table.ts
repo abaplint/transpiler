@@ -41,17 +41,109 @@ export type ITableOptions = {
 
 export type TableRowType = INumeric | Structure | ICharacter | Table | ABAPObject;
 
+interface ITable {
+  getQualifiedName(): string | undefined;
+  getOptions(): ITableOptions | undefined;
+  getRowType(): TableRowType;
+  clear(): void;
+  set(tab: Table | TableRowType): ITable;
+  getHeader(): TableRowType;
+}
+
+// eslint-disable-next-line prefer-const
+let featureHashedTables = false;
+
+export class TableFactory {
+  public static construct(rowType: TableRowType, options?: ITableOptions, qualifiedName?: string) {
+    if (options === undefined) {
+      options = {
+        primaryKey: {
+          name: "primary_key",
+          type: TableAccessType.standard,
+          keyFields: [],
+          isUnique: false,
+        },
+        withHeader: false,
+      };
+    }
+
+    if (featureHashedTables === true && options.primaryKey?.type === TableAccessType.hashed) {
+      return new HashedTable(rowType, options, qualifiedName);
+    } else {
+      return new Table(rowType, options, qualifiedName);
+    }
+  }
+}
+
+export class SortedTable {
+  // todo
+}
+
+export class HashedTable implements ITable {
+  // @ts-ignore
+  private value: {[hash: string]: TableRowType};
+  private readonly header: TableRowType | undefined;
+  private readonly rowType: TableRowType;
+//  private readonly loops: Set<LoopIndex>;
+  private readonly options: ITableOptions | undefined;
+  private readonly qualifiedName: string | undefined;
+//  private readonly isStructured: boolean;
+//  private secondaryIndexes: {[name: string]: TableRowType[]};
+
+  public constructor(rowType: TableRowType, options: ITableOptions, qualifiedName?: string) {
+    this.value = {};
+//    this.loops = new Set();
+    this.rowType = rowType;
+    this.options = options;
+//    this.isStructured = rowType instanceof Structure;
+    this.options = options;
+
+    if (options?.withHeader === true) {
+      this.header = clone(this.rowType);
+    }
+
+    this.qualifiedName = qualifiedName?.toUpperCase();
+  }
+
+  public getQualifiedName(): string | undefined {
+    return this.qualifiedName;
+  }
+
+  public getOptions(): ITableOptions | undefined {
+    return this.options;
+  }
+
+  public getRowType(): TableRowType {
+    return this.rowType;
+  }
+
+  public clear(): void {
+    this.value = {};
+  }
+
+  public set(_tab: TableRowType): ITable {
+    throw new Error("Method not implemented.");
+  }
+
+  public getHeader(): TableRowType {
+    if (this.header === undefined) {
+      throw "table, getHeader";
+    }
+    return this.header;
+  }
+}
+
 export class Table  {
   private value: TableRowType[];
   private readonly header: TableRowType | undefined;
   private readonly rowType: TableRowType;
   private readonly loops: Set<LoopIndex>;
-  private readonly options: ITableOptions | undefined;
+  private readonly options: ITableOptions;
   private readonly qualifiedName: string | undefined;
   private readonly isStructured: boolean;
   private secondaryIndexes: {[name: string]: TableRowType[]};
 
-  public constructor(rowType: TableRowType, options?: ITableOptions, qualifiedName?: string) {
+  public constructor(rowType: TableRowType, options: ITableOptions, qualifiedName?: string) {
     this.value = [];
     this.secondaryIndexes = {};
     this.loops = new Set();
@@ -63,17 +155,6 @@ export class Table  {
       this.header = clone(this.rowType);
     }
 
-    if (this.options === undefined) {
-      this.options = {
-        primaryKey: {
-          name: "primary_key",
-          type: TableAccessType.standard,
-          keyFields: [],
-          isUnique: false,
-        },
-        withHeader: false,
-      };
-    }
     this.qualifiedName = qualifiedName?.toUpperCase();
   }
 
@@ -144,6 +225,7 @@ export class Table  {
       // this clones the values, and add sorting if required
       insertInternal({table: this, data: tab, lines: true});
     }
+    return this;
   }
 
   public getHeader() {

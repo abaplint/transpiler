@@ -63,7 +63,7 @@ describe("Single statements", () => {
     {abap: "PERFORM foo IN PROGRAM zsdfsd.",                            js: `throw new Error("PerformTranspiler IN PROGRAM, transpiler todo");`,                       skip: false},
     {abap: "PERFORM foo in program zsdfsd.",                            js: `throw new Error("PerformTranspiler IN PROGRAM, transpiler todo");`,                       skip: false},
     {abap: "PERFORM ('ASDF') IN PROGRAM ('ASDF') TABLES bar.",      js: `throw new Error("PerformTranspiler FormName not found");`,                       skip: false},
-    {abap: "DATA foo TYPE STANDARD TABLE OF string.", js: `let foo = new abap.types.Table(new abap.types.String({qualifiedName: "STRING"}), {"withHeader":false,"primaryKey":{"name":"primary_key","type":"STANDARD","isUnique":false,"keyFields":[]},"secondary":[]}, "");`,         skip: false},
+    {abap: "DATA foo TYPE STANDARD TABLE OF string.", js: `let foo = abap.types.TableFactory.construct(new abap.types.String({qualifiedName: "STRING"}), {"withHeader":false,"primaryKey":{"name":"primary_key","type":"STANDARD","isUnique":false,"keyFields":[]},"secondary":[]}, "");`,         skip: false},
     {abap: "SPLIT foo AT bar INTO TABLE moo.",            js: "abap.statements.split({source: foo, at: bar, table: moo});",    skip: false},
     {abap: "SPLIT |blah| AT '.' INTO lv_major lv_minor.", js: "abap.statements.split({source: new abap.types.String().set(`blah`), at: new abap.types.Character(1).set('.'), targets: [lv_major,lv_minor]});",    skip: false},
     {abap: "WRITE |moo|.",                            js: "abap.statements.write(new abap.types.String().set(`moo`));",                                  skip: false},
@@ -246,7 +246,7 @@ await abap.Classes['KERNEL_SCAN_ABAP_SOURCE'].call({scan_abap_source: src, token
 await abap.Classes['KERNEL_SCAN_ABAP_SOURCE'].call({scan_abap_source: source, tokens_into: tokens, statements_into: statements, with_analysis: true, with_comments: true, with_pragmas: new abap.types.Character(1).set('*')});`},
 
     {abap: `DATA tab TYPE SORTED TABLE OF i WITH UNIQUE KEY table_line.`,
-      js: `let tab = new abap.types.Table(new abap.types.Integer({qualifiedName: "I"}), {"withHeader":false,"primaryKey":{"name":"primary_key","type":"SORTED","isUnique":true,"keyFields":["TABLE_LINE"]},"secondary":[]}, "");`},
+      js: `let tab = abap.types.TableFactory.construct(new abap.types.Integer({qualifiedName: "I"}), {"withHeader":false,"primaryKey":{"name":"primary_key","type":"SORTED","isUnique":true,"keyFields":["TABLE_LINE"]},"secondary":[]}, "");`},
     {abap: `DATA foobar TYPE abap_bool.`,
       js: `let foobar = new abap.types.Character(1, {"qualifiedName":"ABAP_BOOL","ddicName":"ABAP_BOOL"});`},
     {abap: `DATA foobar TYPE sy-langu.`,
