@@ -143,16 +143,37 @@ export class HashedTable implements ITable {
         }
       } else {
         // @ts-ignore
-        hash += k + ":" + data.get()[k.toLowerCase()].get() + "|";
+        let val = data.get()[k.toLowerCase()];
+        if (val instanceof Structure) {
+          val = val.getCharacter();
+        } else {
+          val = val.get();
+        }
+        hash += k + ":" + val + "|";
       }
     }
     return hash;
   }
 
+  public deleteIndex(_index: number) {
+    throw new Error("HashedTable, deleteIndex");
+  }
+
+  public deleteFrom(row: TableRowType) {
+    const hash = this.buildHashFromData(row);
+    delete this.value[hash];
+  }
+
   public buildHashFromSimple(data: {[key: string]: any}): string {
     let hash = "";
     for (const k of this.options.primaryKey!.keyFields) {
-      hash += k + ":" + data[k.toLowerCase()].get() + "|";
+      let val = data[k.toLowerCase()];
+      if (val instanceof Structure) {
+        val = val.getCharacter();
+      } else {
+        val = val.get();
+      }
+      hash += k + ":" + val + "|";
     }
     return hash;
   }

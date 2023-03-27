@@ -20,6 +20,7 @@ export interface IReadTableOptions {
   withKeyValue?: {key: (i: any) => any, value: any}[],
   // key is raw concatenated, not eval'uable
   withKeySimple?: {[key: string]: any},
+// TODO: TRANSPORTING
 }
 
 export type ReadTableReturn = {

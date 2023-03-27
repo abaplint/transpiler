@@ -357,4 +357,25 @@ WRITE lv_val.`;
     expect(abap.console.get()).to.equal("6");
   });
 
+  it("DELETE HASHED WHERE", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field1 TYPE c LENGTH 2,
+         field2 TYPE c LENGTH 2,
+       END OF ty.
+DATA tab TYPE HASHED TABLE OF ty WITH UNIQUE KEY field1 field2.
+DATA row LIKE LINE OF tab.
+
+row-field1 = 'AA'.
+INSERT row INTO TABLE tab.
+
+DELETE tab WHERE field1 = 'AA'.
+
+WRITE lines( tab ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
 });

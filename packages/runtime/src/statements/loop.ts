@@ -1,5 +1,5 @@
 import {binarySearchFrom, binarySearchTo} from "../binary_search";
-import {FieldSymbol, Integer, ITableKey, Structure, Table} from "../types";
+import {FieldSymbol, HashedTable, Integer, ITableKey, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -37,7 +37,9 @@ function determineFromTo(array: readonly any[], topEquals: topType | undefined, 
   };
 }
 
-export async function* loop(table: Table | FieldSymbol | undefined, options?: ILoopOptions): AsyncGenerator<any, void, unknown> {
+export async function* loop(table: Table | HashedTable | FieldSymbol | undefined,
+                            options?: ILoopOptions): AsyncGenerator<any, void, unknown> {
+
   if (table === undefined) {
     throw new Error("LOOP at undefined");
   } else if (table instanceof FieldSymbol) {
