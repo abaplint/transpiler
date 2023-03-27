@@ -52,10 +52,29 @@ function searchWithKey(arr: any, withKey: (i: any) => boolean, startIndex = 0, u
 
 /////////////////
 
-export function readTable(table: Table | FieldSymbol, options?: IReadTableOptions): ReadTableReturn {
+export function readTable(table: Table | HashedTable | FieldSymbol, options?: IReadTableOptions): ReadTableReturn {
   let found: any = undefined;
   let foundIndex = 0;
 
+  if (table instanceof FieldSymbol) {
+    if (table.getPointer() === undefined) {
+      throw new Error("GETWA_NOT_ASSIGNED");
+    }
+    return readTable(table.getPointer(), options);
+  }
+
+  // check if it is a primary index read specified with WITH KEY instead of WITH TABLE KEY
+  if (options?.withTableKey === undefined
+      && options?.withKeySimple
+      && (table.getOptions().primaryKey?.keyFields || []).length > 0) {
+    const fields = new Set<string>(table.getOptions().primaryKey!.keyFields);
+    for (const name in options.withKeySimple) {
+      fields.delete(name.toUpperCase());
+    }
+    if (fields.size === 0) {
+      options.withTableKey = true;
+    }
+  }
 
   if (options?.index) {
     const arr = table.array();
@@ -107,9 +126,6 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
   } else if (options?.from) {
     if (options.from instanceof FieldSymbol) {
       options.from = options.from.getPointer();
-    }
-    if (table instanceof FieldSymbol) {
-      table = table.getPointer();
     }
     if (table instanceof Table && options.from instanceof Structure) {
       const arr = table.array();

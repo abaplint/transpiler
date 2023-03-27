@@ -648,4 +648,30 @@ ASSERT sy-tabix = 0.`;
     await f(abap);
   });
 
+  it("READ TABLE HASHED WITH free key overlapping primary key", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field1 TYPE string,
+         field2 TYPE i,
+       END OF ty.
+DATA tab TYPE HASHED TABLE OF ty WITH UNIQUE KEY field1 field2.
+DATA row LIKE LINE OF tab.
+FIELD-SYMBOLS <fs> LIKE LINE OF tab.
+
+DO 2 TIMES.
+  row-field1 = |foo{ sy-index }|.
+  row-field2 = sy-index.
+  INSERT row INTO TABLE tab.
+ENDDO.
+
+READ TABLE tab WITH KEY
+  field1 = |foo1|
+  field2 = 1
+  ASSIGNING <fs>.
+ASSERT sy-subrc = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
