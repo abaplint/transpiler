@@ -52,7 +52,7 @@ interface ITable {
 }
 
 // eslint-disable-next-line prefer-const
-let featureHashedTables = false;
+let featureHashedTables = true;
 
 export class TableFactory {
   public static construct(rowType: TableRowType, options?: ITableOptions, qualifiedName?: string) {
@@ -143,7 +143,13 @@ export class HashedTable implements ITable {
         }
       } else {
         // @ts-ignore
-        hash += k + ":" + data.get()[k.toLowerCase()].get() + "|";
+        let val = data.get()[k.toLowerCase()];
+        if (val instanceof Structure) {
+          val = val.getCharacter();
+        } else {
+          val = val.get();
+        }
+        hash += k + ":" + val + "|";
       }
     }
     return hash;
@@ -152,7 +158,13 @@ export class HashedTable implements ITable {
   public buildHashFromSimple(data: {[key: string]: any}): string {
     let hash = "";
     for (const k of this.options.primaryKey!.keyFields) {
-      hash += k + ":" + data[k.toLowerCase()].get() + "|";
+      let val = data[k.toLowerCase()];
+      if (val instanceof Structure) {
+        val = val.getCharacter();
+      } else {
+        val = val.get();
+      }
+      hash += k + ":" + val + "|";
     }
     return hash;
   }

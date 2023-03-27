@@ -311,7 +311,7 @@ ASSERT tab1 = tab2.`;
     await f(abap);
   });
 
-  it("HASHED and AS", async () => {
+  it("HASHED and AS, found", async () => {
     const code = `
 TYPES:
   BEGIN OF ty_instance_key,
@@ -343,6 +343,42 @@ WRITE / ls_instance-instance.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0\n5");
+  });
+
+  it("HASHED and AS, not found", async () => {
+    const code = `
+TYPES:
+  BEGIN OF ty_instance_key,
+    val1 TYPE c LENGTH 4,
+    val2 TYPE n LENGTH 2,
+  END OF ty_instance_key .
+TYPES:
+  BEGIN OF ty_instance.
+    INCLUDE TYPE ty_instance_key AS key.
+    TYPES: instance TYPE i,
+  END OF ty_instance.
+TYPES ty_t_instances TYPE HASHED TABLE OF ty_instance WITH UNIQUE KEY key.
+DATA gt_instances TYPE ty_t_instances.
+DATA ls_instance TYPE ty_instance.
+
+ls_instance-key-val1 = 'FOOB'.
+ls_instance-key-val2 = '42'.
+ls_instance-instance = 5.
+INSERT ls_instance INTO TABLE gt_instances.
+CLEAR ls_instance-instance.
+
+ls_instance-key-val1 = 'NOOO'.
+
+READ TABLE gt_instances
+  WITH TABLE KEY key = ls_instance-key
+  INTO ls_instance
+  TRANSPORTING instance.
+WRITE / sy-subrc.
+WRITE / ls_instance-instance.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n0");
   });
 
   it.skip("hashed table, sequence", async () => {
