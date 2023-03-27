@@ -75,6 +75,18 @@ describe("Running statements - DESCRIBE", () => {
     expect(abap.console.get()).to.equal("h");
   });
 
+  it("DESCRIBE FIELD hashed table", async () => {
+    const code = `
+DATA tab TYPE HASHED TABLE OF i WITH UNIQUE KEY table_line.
+DATA type TYPE c LENGTH 1.
+DESCRIBE FIELD tab TYPE type.
+WRITE type.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("h");
+  });
+
   it("DESCRIBE FIELD 1", async () => {
     const code = `
   DATA f TYPE c LENGTH 4.
