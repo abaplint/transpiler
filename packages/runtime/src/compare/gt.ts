@@ -1,12 +1,12 @@
-import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, Hex, Structure, Table, XString} from "../types";
+import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Hex, Structure, Table, XString} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {Integer} from "../types/integer";
 
 
 export function gt(
-  left: number | string | ICharacter | INumeric | ABAPObject | Structure | Table,
-  right: number | string | ICharacter | INumeric | ABAPObject | Structure | Table): boolean {
+  left: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | HashedTable,
+  right: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | HashedTable): boolean {
 
   if (left instanceof FieldSymbol) {
     if (left.getPointer() === undefined) {
@@ -21,7 +21,7 @@ export function gt(
   }
 
 
-  if (left instanceof Table || right instanceof Table) {
+  if (left instanceof Table || right instanceof Table || left instanceof HashedTable || right instanceof HashedTable) {
     throw new Error("runtime_todo, gt TABLE");
   }
   if (left instanceof Hex || right instanceof Hex) {

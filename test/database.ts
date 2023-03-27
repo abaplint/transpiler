@@ -984,4 +984,18 @@ WRITE res-arbgb.`;
     expect(abap.console.get()).to.equal("ZAG_UNIT_TEST");
   });
 
+  it("SELECT into hashed", async () => {
+    const code = `
+DATA hashed TYPE HASHED TABLE OF t100 WITH UNIQUE KEY sprsl arbgb msgnr.
+SELECT * FROM t100 INTO TABLE hashed.
+WRITE sy-dbcnt.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
