@@ -155,6 +155,15 @@ export class HashedTable implements ITable {
     return hash;
   }
 
+  public deleteIndex(_index: number) {
+    throw new Error("HashedTable, deleteIndex");
+  }
+
+  public deleteFrom(row: TableRowType) {
+    const hash = this.buildHashFromData(row);
+    delete this.value[hash];
+  }
+
   public buildHashFromSimple(data: {[key: string]: any}): string {
     let hash = "";
     for (const k of this.options.primaryKey!.keyFields) {

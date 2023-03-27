@@ -13,13 +13,13 @@ export interface IDeleteInternalOptions {
   to?: any,
 }
 
-export async function deleteInternal(target: Table | FieldSymbol, options?: IDeleteInternalOptions): Promise<void> {
+export async function deleteInternal(target: Table | HashedTable | FieldSymbol, options?: IDeleteInternalOptions): Promise<void> {
   let index = 0;
 
   if (target instanceof FieldSymbol) {
     target = target.getPointer() as Table;
     if (target === undefined) {
-      throw "FS not assigned";
+      throw new Error("deleteInternal, FS not assigned");
     }
   }
 
@@ -55,6 +55,7 @@ export async function deleteInternal(target: Table | FieldSymbol, options?: IDel
     if (target instanceof HashedTable) {
       throw new Error("delete adjacent, hashed table");
     }
+
     const array = target.array();
 
     for (let index = array.length - 1; index > 0; index--) {
@@ -87,7 +88,11 @@ export async function deleteInternal(target: Table | FieldSymbol, options?: IDel
     if (options?.where) {
       const row = i instanceof Structure ? i.get() : {table_line: i};
       if (options.where(row) === true) {
-        target.deleteIndex(index);
+        if (target instanceof HashedTable) {
+          target.deleteFrom(i);
+        } else {
+          target.deleteIndex(index);
+        }
       }
     } else if (options?.index && options.index.get() === index) {
       target.deleteIndex(options.index.get() - 1);
