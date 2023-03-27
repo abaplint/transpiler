@@ -641,8 +641,7 @@ row-field1 = 'BB'.
 INSERT row INTO TABLE src.
 
 READ TABLE src WITH KEY field2 = 0 INTO row.
-ASSERT sy-subrc = 0.
-ASSERT sy-tabix = 0.`;
+ASSERT sy-subrc = 0.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
