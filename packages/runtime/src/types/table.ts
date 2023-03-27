@@ -52,7 +52,7 @@ interface ITable {
 }
 
 // eslint-disable-next-line prefer-const
-let featureHashedTables = true;
+let featureHashedTables = false;
 
 export class TableFactory {
   public static construct(rowType: TableRowType, options?: ITableOptions, qualifiedName?: string) {
