@@ -18,7 +18,7 @@ export interface IReadTableOptions {
   withKey?: (i: any) => boolean,
   // used for binary search, one function per field
   withKeyValue?: {key: (i: any) => any, value: any}[],
-  // only simple single level field access, plus no use of table_line
+  // key is raw concatenated, not eval'uable
   withKeySimple?: {[key: string]: any},
 }
 
@@ -83,8 +83,11 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
     const hash = table.buildHashFromSimple(options.withKeySimple);
     found = table.read(hash);
     foundIndex = 0;
-  } else if (table instanceof HashedTable) {
-    throw new Error("read hashed todo, READ TABLE");
+  } else if (table instanceof HashedTable && options?.withKey) {
+    // this is slow..
+    const searchResult = searchWithKey(table.array(), options.withKey, 0, options?.usesTableLine);
+    found = searchResult.found;
+    foundIndex = 0;
   } else if ((options?.binarySearch === true || options?.withTableKey === true)
       && options.withKeyValue
       && options.withKey) {

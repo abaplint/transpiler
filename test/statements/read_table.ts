@@ -609,4 +609,43 @@ ASSERT sy-subrc = 0.`;
     await f(abap);
   });
 
+  it("READ TABLE HASHED WITH TABLE KEY table_line", async () => {
+    const code = `
+DATA src TYPE HASHED TABLE OF string WITH UNIQUE KEY table_line.
+DATA row TYPE string.
+
+row = 'BB'.
+INSERT row INTO TABLE src.
+row = 'AA'.
+INSERT row INTO TABLE src.
+
+READ TABLE src WITH TABLE KEY table_line = 'AA' INTO row.
+ASSERT sy-subrc = 0.
+READ TABLE src WITH TABLE KEY table_line = 'BB' INTO row.
+ASSERT sy-subrc = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("READ TABLE HASHED WITH free key", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field1 TYPE c LENGTH 2,
+         field2 TYPE i,
+       END OF ty.
+DATA src TYPE HASHED TABLE OF ty WITH UNIQUE KEY field1.
+DATA row TYPE ty.
+
+row-field1 = 'BB'.
+INSERT row INTO TABLE src.
+
+READ TABLE src WITH KEY field2 = 0 INTO row.
+ASSERT sy-subrc = 0.
+ASSERT sy-tabix = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
