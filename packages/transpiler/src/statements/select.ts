@@ -110,7 +110,7 @@ export class SelectTranspiler implements IStatementTranspiler {
     abap.statements.sort(${target}, {by: ${by}.map(k => { return {component: k}; })});
     await abap.statements.deleteInternal(${target}, {adjacent: true, by: ${by}});
   }
-  abap.builtin.sy.get().dbcnt.set(${target}.getLength());
+  abap.builtin.sy.get().dbcnt.set(${target}.getArrayLength());
 }`;
       return new Chunk().append(code, node, traversal);
     } else {

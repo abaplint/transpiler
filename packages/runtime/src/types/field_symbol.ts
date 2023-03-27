@@ -101,9 +101,9 @@ export class FieldSymbol  {
     return this.pointer?.array();
   }
 
-  public getLength() {
+  public getArrayLength() {
     // @ts-ignore
-    return this.pointer?.getLength();
+    return this.pointer?.getArrayLength();
   }
 
   public set(value: any) {
