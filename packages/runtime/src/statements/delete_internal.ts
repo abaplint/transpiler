@@ -1,4 +1,4 @@
-import {FieldSymbol, Structure, Table} from "../types";
+import {FieldSymbol, HashedTable, Structure, Table} from "../types";
 import {eq} from "../compare";
 import {INumeric} from "../types/_numeric";
 import {loop} from "./loop";
@@ -52,6 +52,9 @@ export async function deleteInternal(target: Table | FieldSymbol, options?: IDel
   }
 
   if (options?.adjacent === true) {
+    if (target instanceof HashedTable) {
+      throw new Error("delete adjacent, hashed table");
+    }
     const array = target.array();
 
     for (let index = array.length - 1; index > 0; index--) {

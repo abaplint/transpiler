@@ -1,7 +1,7 @@
 import {clone} from "../clone";
 import {Context} from "../context";
 import {SelectDatabaseOptions, SelectRuntimeOptions} from "../db/db";
-import {FieldSymbol, Structure, Table} from "../types";
+import {FieldSymbol, HashedTable, Structure, Table} from "../types";
 
 export class SelectDatabase {
   private readonly context: Context;
@@ -10,7 +10,9 @@ export class SelectDatabase {
     this.context = context;
   }
 
-  public async select(target: Structure | Table | FieldSymbol, input: SelectDatabaseOptions, runtimeOptions?: SelectRuntimeOptions) {
+  public async select(target: Structure | Table | HashedTable | FieldSymbol,
+                      input: SelectDatabaseOptions,
+                      runtimeOptions?: SelectRuntimeOptions) {
     const {rows: rows} = await this.context.defaultDB().select(input);
 
     if (target instanceof FieldSymbol) {
@@ -41,7 +43,7 @@ export class SelectDatabase {
       }
       // @ts-ignore
       abap.statements.moveCorresponding(new Structure(result), target);
-    } else if (target instanceof Table) {
+    } else if (target instanceof Table || target instanceof HashedTable) {
       for (const row of rows) {
         const targetRow = clone(target.getRowType());
         if (targetRow instanceof Structure) {

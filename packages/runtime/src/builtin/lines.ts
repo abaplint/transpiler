@@ -8,5 +8,5 @@ export function lines(input: {val: Table | FieldSymbol}): Integer {
     return lines({val: input.val.getPointer()});
   }
 
-  return new Integer().set(input.val.getLength());
+  return new Integer().set(input.val.getArrayLength());
 }

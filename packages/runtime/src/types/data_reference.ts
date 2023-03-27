@@ -60,6 +60,11 @@ export class DataReference  {
     return this.pointer?.array();
   }
 
+  public getArrayLength() {
+    // @ts-ignore
+    return this.pointer?.getArrayLength();
+  }
+
   public set(value: any) {
     if (value instanceof DataReference) {
       this.pointer = value.getPointer();
