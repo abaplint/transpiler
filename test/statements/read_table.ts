@@ -587,4 +587,90 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("READ TABLE HASHED WITH TABLE KEY, non sorted sequence", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field1 TYPE c LENGTH 2,
+       END OF ty.
+DATA src TYPE HASHED TABLE OF ty WITH UNIQUE KEY field1.
+DATA row TYPE ty.
+
+row-field1 = 'BB'.
+INSERT row INTO TABLE src.
+row-field1 = 'AA'.
+INSERT row INTO TABLE src.
+
+READ TABLE src WITH TABLE KEY field1 = 'AA' INTO row.
+ASSERT sy-subrc = 0.
+READ TABLE src WITH TABLE KEY field1 = 'BB' INTO row.
+ASSERT sy-subrc = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("READ TABLE HASHED WITH TABLE KEY table_line", async () => {
+    const code = `
+DATA src TYPE HASHED TABLE OF string WITH UNIQUE KEY table_line.
+DATA row TYPE string.
+
+row = 'BB'.
+INSERT row INTO TABLE src.
+row = 'AA'.
+INSERT row INTO TABLE src.
+
+READ TABLE src WITH TABLE KEY table_line = 'AA' INTO row.
+ASSERT sy-subrc = 0.
+READ TABLE src WITH TABLE KEY table_line = 'BB' INTO row.
+ASSERT sy-subrc = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("READ TABLE HASHED WITH free key", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field1 TYPE c LENGTH 2,
+         field2 TYPE i,
+       END OF ty.
+DATA src TYPE HASHED TABLE OF ty WITH UNIQUE KEY field1.
+DATA row TYPE ty.
+
+row-field1 = 'BB'.
+INSERT row INTO TABLE src.
+
+READ TABLE src WITH KEY field2 = 0 INTO row.
+ASSERT sy-subrc = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("READ TABLE HASHED WITH free key overlapping primary key", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field1 TYPE string,
+         field2 TYPE i,
+       END OF ty.
+DATA tab TYPE HASHED TABLE OF ty WITH UNIQUE KEY field1 field2.
+DATA row LIKE LINE OF tab.
+FIELD-SYMBOLS <fs> LIKE LINE OF tab.
+
+DO 2 TIMES.
+  row-field1 = |foo{ sy-index }|.
+  row-field2 = sy-index.
+  INSERT row INTO TABLE tab.
+ENDDO.
+
+READ TABLE tab WITH KEY
+  field1 = |foo1|
+  field2 = 1
+  ASSIGNING <fs>.
+ASSERT sy-subrc = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

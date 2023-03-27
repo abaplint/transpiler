@@ -301,6 +301,16 @@ ASSERT lines( tab ) = 3.`;
     await f(abap);
   });
 
+  it("compare hashed tables", async () => {
+    const code = `
+DATA tab1 TYPE HASHED TABLE OF string WITH UNIQUE KEY table_line.
+DATA tab2 TYPE HASHED TABLE OF string WITH UNIQUE KEY table_line.
+ASSERT tab1 = tab2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it.skip("hashed table, sequence", async () => {
     const code = `
 TYPES: BEGIN OF ty,

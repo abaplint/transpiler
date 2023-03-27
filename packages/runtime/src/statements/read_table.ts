@@ -1,6 +1,6 @@
 import {binarySearchFromRow} from "../binary_search";
 import {eq} from "../compare";
-import {DataReference, DecFloat34, FieldSymbol, Float, Structure, Table} from "../types";
+import {DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -18,7 +18,7 @@ export interface IReadTableOptions {
   withKey?: (i: any) => boolean,
   // used for binary search, one function per field
   withKeyValue?: {key: (i: any) => any, value: any}[],
-  // only simple single level field access, plus no use of table_line
+  // key is raw concatenated, not eval'uable
   withKeySimple?: {[key: string]: any},
 }
 
@@ -52,12 +52,34 @@ function searchWithKey(arr: any, withKey: (i: any) => boolean, startIndex = 0, u
 
 /////////////////
 
-export function readTable(table: Table | FieldSymbol, options?: IReadTableOptions): ReadTableReturn {
+export function readTable(table: Table | HashedTable | FieldSymbol, options?: IReadTableOptions): ReadTableReturn {
   let found: any = undefined;
   let foundIndex = 0;
 
+  if (table instanceof FieldSymbol) {
+    if (table.getPointer() === undefined) {
+      throw new Error("GETWA_NOT_ASSIGNED");
+    }
+    return readTable(table.getPointer(), options);
+  }
+
+  // check if it is a primary index read specified with WITH KEY instead of WITH TABLE KEY
+  if (options?.withTableKey === undefined
+      && options?.withKeySimple
+      && (table.getOptions().primaryKey?.keyFields || []).length > 0) {
+    const fields = new Set<string>(table.getOptions().primaryKey!.keyFields);
+    for (const name in options.withKeySimple) {
+      fields.delete(name.toUpperCase());
+    }
+    if (fields.size === 0) {
+      options.withTableKey = true;
+    }
+  }
 
   if (options?.index) {
+    if (table instanceof HashedTable) {
+      throw new Error("Hashed table, READ INDEX not possible");
+    }
     const arr = table.array();
     let index = options.index;
     if (typeof index !== "number") {
@@ -79,6 +101,15 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
     if (found) {
       foundIndex = index;
     }
+  } else if (table instanceof HashedTable && options?.withTableKey === true && options.withKeySimple) {
+    const hash = table.buildHashFromSimple(options.withKeySimple);
+    found = table.read(hash);
+    foundIndex = 0;
+  } else if (table instanceof HashedTable && options?.withKey) {
+    // this is slow..
+    const searchResult = searchWithKey(table.array(), options.withKey, 0, options?.usesTableLine);
+    found = searchResult.found;
+    foundIndex = 0;
   } else if ((options?.binarySearch === true || options?.withTableKey === true)
       && options.withKeyValue
       && options.withKey) {
@@ -99,8 +130,8 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
     if (options.from instanceof FieldSymbol) {
       options.from = options.from.getPointer();
     }
-    if (table instanceof FieldSymbol) {
-      table = table.getPointer();
+    if (table instanceof HashedTable) {
+      throw new Error("runtime, todo readTable Hashed FROM");
     }
     if (table instanceof Table && options.from instanceof Structure) {
       const arr = table.array();

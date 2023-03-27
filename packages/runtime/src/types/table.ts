@@ -131,25 +131,42 @@ export class HashedTable implements ITable {
     return copy;
   }
 
+  public buildHashFromData(data: TableRowType): string {
+    let hash = "";
+    for (const k of this.options.primaryKey!.keyFields) {
+      if (k === "TABLE_LINE") {
+        if (data instanceof Structure) {
+          hash += k + ":" + data.getCharacter() + "|";
+        } else {
+          // @ts-ignore
+          hash += k + ":" + data.get() + "|";
+        }
+      } else {
+        // @ts-ignore
+        hash += k + ":" + data.get()[k.toLowerCase()].get() + "|";
+      }
+    }
+    return hash;
+  }
+
+  public buildHashFromSimple(data: {[key: string]: any}): string {
+    let hash = "";
+    for (const k of this.options.primaryKey!.keyFields) {
+      hash += k + ":" + data[k.toLowerCase()].get() + "|";
+    }
+    return hash;
+  }
+
+  public read(hash: string): TableRowType | undefined {
+    return this.value[hash];
+  }
+
   public insert(data: TableRowType): {value: TableRowType | undefined, subrc: number} {
     if (this.loops.size !== 0) {
       throw new Error("Hash table insert inside LOOP");
     }
 
-    let hash = "";
-    for (const k of this.options.primaryKey!.keyFields) {
-      if (k === "TABLE_LINE") {
-        if (data instanceof Structure) {
-          hash += k + ":" + data.getCharacter();
-        } else {
-          // @ts-ignore
-          hash += k + ":" + data.get();
-        }
-      } else {
-        // @ts-ignore
-        hash += k + ":" + data.get()[k.toLowerCase()].get();
-      }
-    }
+    const hash = this.buildHashFromData(data);
 
     if (this.value[hash] !== undefined) {
       return {value: undefined, subrc: 4};

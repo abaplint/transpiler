@@ -1,8 +1,8 @@
-import {ABAPObject, Character, FieldSymbol, Float, Hex, Integer, Numc, Structure, Table} from "../types";
+import {ABAPObject, Character, FieldSymbol, Float, HashedTable, Hex, Integer, Numc, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
-function compareTables(left: Table, right: Table): boolean {
+function compareTables(left: Table | HashedTable, right: Table | HashedTable): boolean {
   const leftArray = left.array();
   const rightArray = right.array();
 
@@ -21,8 +21,8 @@ function compareTables(left: Table, right: Table): boolean {
 }
 
 export function eq(
-  left: number | string | ICharacter | INumeric | Float | ABAPObject | Structure | Hex | Table | FieldSymbol,
-  right: number | string | ICharacter | INumeric | Float | ABAPObject | Structure | Hex | Table | FieldSymbol): boolean {
+  left: number | string | ICharacter | INumeric | Float | ABAPObject | Structure | Hex | HashedTable | Table | FieldSymbol,
+  right: number | string | ICharacter | INumeric | Float | ABAPObject | Structure | Hex | HashedTable | Table | FieldSymbol): boolean {
 /*
   console.dir(left);
   console.dir(right);
@@ -33,8 +33,9 @@ export function eq(
     return eq(left.getPointer()!, right);
   }
 
-  if (left instanceof Table || right instanceof Table) {
-    if (left instanceof Table && right instanceof Table) {
+  if (left instanceof Table || right instanceof Table || left instanceof HashedTable || right instanceof HashedTable) {
+    if ((left instanceof Table || left instanceof HashedTable)
+        && (right instanceof Table || right instanceof HashedTable)) {
       return compareTables(left, right);
     } else {
 // this happens in dynamic/ANY typed scenarios?

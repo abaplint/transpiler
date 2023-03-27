@@ -90,9 +90,20 @@ export function insertInternal(options: IInsertInternalOptions): void {
     if (options.assigning) {
       options.assigning.assign(val);
     }
-  } else if (options.lines && options.data instanceof Table) {
-    for (const i of options.data.array()) {
-      options.table.append(i);
+  } else if (options.lines
+      && (options.data instanceof Table
+      || options.data instanceof HashedTable)) {
+    if (options.table instanceof HashedTable) {
+      for (const source of options.data.array()) {
+        const result = options.table.insert(source);
+        if (result.subrc !== 0) {
+          throw new Error("ITAB_DUPLICATE_KEY");
+        }
+      }
+    } else {
+      for (const i of options.data.array()) {
+        options.table.append(i);
+      }
     }
   } else if (options.initial === true) {
     let index = options.table.array().length;

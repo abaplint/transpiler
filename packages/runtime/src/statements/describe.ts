@@ -1,4 +1,4 @@
-import {Character, String, FieldSymbol, Hex, Table, ABAPObject, Structure, DataReference, Integer, Float, Numc, XString, Packed, Time, Date, DecFloat34} from "../types";
+import {Character, String, FieldSymbol, Hex, Table, ABAPObject, Structure, DataReference, Integer, Float, Numc, XString, Packed, Time, Date, DecFloat34, HashedTable} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -19,7 +19,7 @@ export function describe(input: IDescribeOptions) {
       describe({field: input.field.getPointer(), type: input.type, length: input.length, mode: input.mode});
       return;
     }
-    if (input.field instanceof Table) {
+    if (input.field instanceof Table || input.field instanceof HashedTable) {
       input.type.set("h");
     } else if (input.field instanceof Character || typeof input.field === "string") {
       input.type.set("C");
