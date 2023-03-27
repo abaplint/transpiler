@@ -1,10 +1,10 @@
-import {ABAPObject, Character, DataReference, Date, FieldSymbol, Hex, Numc, Structure, Table, Time} from "../types";
+import {ABAPObject, Character, DataReference, Date, FieldSymbol, HashedTable, Hex, Numc, Structure, Table, Time} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
 export function initial(val: ICharacter | INumeric | string | number | Structure | DataReference | FieldSymbol | Table | ABAPObject) {
   // todo, refactor? add as method in each type instead?
-  if (val instanceof Table) {
+  if (val instanceof Table || val instanceof HashedTable) {
     return val.array().length === 0;
   } else if (val instanceof DataReference) {
     return val.getPointer() === undefined;

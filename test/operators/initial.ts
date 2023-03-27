@@ -40,4 +40,13 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("ok");
   });
 
+  it("hashed table initial", async () => {
+    const code = `
+DATA tab TYPE HASHED TABLE OF i WITH UNIQUE KEY table_line.
+ASSERT tab IS INITIAL.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
