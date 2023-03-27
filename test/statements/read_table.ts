@@ -587,7 +587,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.only("READ TABLE HASHED WITH TABLE KEY, non sorted sequence", async () => {
+  it("READ TABLE HASHED WITH TABLE KEY, non sorted sequence", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          field1 TYPE c LENGTH 2,

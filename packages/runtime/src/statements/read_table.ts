@@ -1,6 +1,6 @@
 import {binarySearchFromRow} from "../binary_search";
 import {eq} from "../compare";
-import {DataReference, DecFloat34, FieldSymbol, Float, Structure, Table} from "../types";
+import {DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -79,6 +79,12 @@ export function readTable(table: Table | FieldSymbol, options?: IReadTableOption
     if (found) {
       foundIndex = index;
     }
+  } else if (table instanceof HashedTable && options?.withTableKey === true && options.withKeySimple) {
+    const hash = table.buildHashFromSimple(options.withKeySimple);
+    found = table.read(hash);
+    foundIndex = 0;
+  } else if (table instanceof HashedTable) {
+    throw new Error("read hashed todo, READ TABLE");
   } else if ((options?.binarySearch === true || options?.withTableKey === true)
       && options.withKeyValue
       && options.withKey) {
