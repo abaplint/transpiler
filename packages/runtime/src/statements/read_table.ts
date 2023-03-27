@@ -77,6 +77,9 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
   }
 
   if (options?.index) {
+    if (table instanceof HashedTable) {
+      throw new Error("Hashed table, READ INDEX not possible");
+    }
     const arr = table.array();
     let index = options.index;
     if (typeof index !== "number") {
@@ -126,6 +129,9 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
   } else if (options?.from) {
     if (options.from instanceof FieldSymbol) {
       options.from = options.from.getPointer();
+    }
+    if (table instanceof HashedTable) {
+      throw new Error("runtime, todo readTable Hashed FROM");
     }
     if (table instanceof Table && options.from instanceof Structure) {
       const arr = table.array();
