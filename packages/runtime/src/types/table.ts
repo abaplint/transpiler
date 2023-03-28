@@ -92,7 +92,6 @@ export class HashedTable implements ITable {
   private readonly loops: Set<LoopController>;
   private readonly options: ITableOptions;
   private readonly qualifiedName: string | undefined;
-//  private readonly isStructured: boolean;
   private secondaryIndexes: {[name: string]: TableRowType[]};
 
   public constructor(rowType: TableRowType, options: ITableOptions, qualifiedName?: string) {
@@ -101,7 +100,6 @@ export class HashedTable implements ITable {
     this.loops = new Set();
     this.rowType = rowType;
     this.options = options;
-//    this.isStructured = rowType instanceof Structure;
     this.options = options;
 
     if (options?.withHeader === true) {
@@ -244,6 +242,7 @@ export class HashedTable implements ITable {
 
   public clear(): void {
     this.value = {};
+    this.secondaryIndexes = {};
   }
 
   public set(tab: TableRowType): ITable {
