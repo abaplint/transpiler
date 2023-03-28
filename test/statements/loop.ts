@@ -828,7 +828,7 @@ middle bar
 end`);
   });
 
-  it.skip("insert into standard table during loop", async () => {
+  it("insert into standard table during loop", async () => {
     const code = `
 DATA tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
 DATA row LIKE LINE OF tab.

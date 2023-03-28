@@ -410,13 +410,15 @@ export class Table implements ITable {
 
     if (index === 0) {
       this.value.unshift(val);
+    } else if (index === this.value.length) {
+      this.value.push(val);
     } else {
       this.value.splice(index, 0, val);
     }
 
-    for (const l of this.loops.values()) {
-      if (l.index <= index) {
-        l.index++;
+    for (const loopController of this.loops.values()) {
+      if (index <= loopController.index) {
+        loopController.index++;
       }
     }
     return val;
