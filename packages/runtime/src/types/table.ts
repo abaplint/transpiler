@@ -18,11 +18,13 @@ export enum TableAccessType {
   any = "ANY",
 }
 
-export class LoopIndex {
+export class LoopController {
   public index: number;
+  public loopTo: number;
 
-  public constructor(start: number) {
-    this.index = start;
+  public constructor(from: number, loopTo: number) {
+    this.index = from;
+    this.loopTo = loopTo;
   }
 }
 
@@ -85,7 +87,7 @@ export class HashedTable implements ITable {
   private value: {[hash: string]: TableRowType};
   private readonly header: TableRowType | undefined;
   private readonly rowType: TableRowType;
-  private readonly loops: Set<LoopIndex>;
+  private readonly loops: Set<LoopController>;
   private readonly options: ITableOptions;
   private readonly qualifiedName: string | undefined;
 //  private readonly isStructured: boolean;
@@ -207,13 +209,13 @@ export class HashedTable implements ITable {
     return ret;
   }
 
-  public startLoop(start: number = 0): LoopIndex {
-    const l = new LoopIndex(start);
+  public startLoop(from: number, to: number): LoopController {
+    const l = new LoopController(from, to);
     this.loops.add(l);
     return l;
   }
 
-  public unregisterLoop(loop: LoopIndex) {
+  public unregisterLoop(loop: LoopController) {
     this.loops.delete(loop);
   }
 
@@ -290,7 +292,7 @@ export class Table implements ITable {
   private value: TableRowType[];
   private readonly header: TableRowType | undefined;
   private readonly rowType: TableRowType;
-  private readonly loops: Set<LoopIndex>;
+  private readonly loops: Set<LoopController>;
   private readonly options: ITableOptions;
   private readonly qualifiedName: string | undefined;
   private readonly isStructured: boolean;
@@ -343,13 +345,13 @@ export class Table implements ITable {
     return this.options;
   }
 
-  public startLoop(start: number = 0): LoopIndex {
-    const l = new LoopIndex(start);
+  public startLoop(from: number, to: number): LoopController {
+    const l = new LoopController(from, to);
     this.loops.add(l);
     return l;
   }
 
-  public unregisterLoop(loop: LoopIndex) {
+  public unregisterLoop(loop: LoopController) {
     this.loops.delete(loop);
   }
 

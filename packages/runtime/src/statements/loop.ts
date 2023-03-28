@@ -72,13 +72,13 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
     array = table.array();
   }
 
-  const loopIndex = table.startLoop(loopFrom);
+  const loopIndex = table.startLoop(loopFrom, loopTo);
   let entered = false;
 
   try {
     const isStructured = array[0] instanceof Structure;
 
-    while (loopIndex.index < loopTo) {
+    while (loopIndex.index < loopIndex.loopTo) {
       if (loopIndex.index > array.length) {
         break;
       }
@@ -102,7 +102,7 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
 
       if (options?.to === undefined && options?.usingKey === undefined) {
         // extra rows might have been inserted inside the loop
-        loopTo = array.length;
+        loopIndex.loopTo = array.length;
       }
     }
   } finally {
