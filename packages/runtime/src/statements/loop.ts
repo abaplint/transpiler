@@ -61,7 +61,7 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
   let loopFrom = options?.from && options?.from.get() > 0 ? options.from.get() - 1 : 0;
   let loopTo = options?.to && options.to.get() < length ? options.to.get() : length;
 
-  let array: readonly any[] = [];
+  let array: any[] = [];
   if (options?.usingKey && options.usingKey !== undefined && options.usingKey !== "primary_key") {
     array = table.getSecondaryIndex(options.usingKey);
 
@@ -72,7 +72,7 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
     array = table.array();
   }
 
-  const loopController = table.startLoop(loopFrom, loopTo);
+  const loopController = table.startLoop(loopFrom, loopTo, array);
   let entered = false;
 
   try {

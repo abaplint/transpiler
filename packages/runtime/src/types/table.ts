@@ -21,10 +21,12 @@ export enum TableAccessType {
 export class LoopController {
   public index: number;
   public loopTo: number;
+  public array: any[];
 
-  public constructor(from: number, loopTo: number) {
+  public constructor(from: number, loopTo: number, array: any[]) {
     this.index = from;
     this.loopTo = loopTo;
+    this.array = array;
   }
 }
 
@@ -54,7 +56,7 @@ interface ITable {
 }
 
 // eslint-disable-next-line prefer-const
-export let featureHashedTables = false;
+export let featureHashedTables = true;
 
 export class TableFactory {
   public static construct(rowType: TableRowType, options?: ITableOptions, qualifiedName?: string) {
@@ -185,22 +187,23 @@ export class HashedTable implements ITable {
   }
 
   public insert(data: TableRowType): {value: TableRowType | undefined, subrc: number} {
-    if (this.loops.size !== 0) {
-      throw new Error("Hash table insert inside LOOP");
-    }
-
     const hash = this.buildHashFromData(data);
 
     if (this.value[hash] !== undefined) {
       return {value: undefined, subrc: 4};
     } else {
       const val = this.getValue(data);
+
+      for (const loopController of this.loops.values()) {
+        loopController.array.push(val);
+      }
+
       this.value[hash] = val;
       return {value: val, subrc: 0};
     }
   }
 
-  public array(): readonly any[] {
+  public array(): any[] {
     // used for LOOP
     const ret = [];
     for (const hash in this.value) {
@@ -209,8 +212,8 @@ export class HashedTable implements ITable {
     return ret;
   }
 
-  public startLoop(from: number, to: number): LoopController {
-    const l = new LoopController(from, to);
+  public startLoop(from: number, to: number, array: any[]): LoopController {
+    const l = new LoopController(from, to, array);
     this.loops.add(l);
     return l;
   }
@@ -345,8 +348,8 @@ export class Table implements ITable {
     return this.options;
   }
 
-  public startLoop(from: number, to: number): LoopController {
-    const l = new LoopController(from, to);
+  public startLoop(from: number, to: number, array: any[]): LoopController {
+    const l = new LoopController(from, to, array);
     this.loops.add(l);
     return l;
   }
@@ -360,7 +363,7 @@ export class Table implements ITable {
   }
 
   // Modifications to the array must be done inside this class, in order to keep track of LOOP indexes
-  public array(): readonly any[] {
+  public array(): any[] {
     return this.value;
   }
 
