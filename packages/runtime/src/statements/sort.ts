@@ -1,4 +1,4 @@
-import {FieldSymbol, Table, TableRowType} from "../types";
+import {FieldSymbol, HashedTable, Table, TableRowType} from "../types";
 import {eq, lt, gt} from "../compare";
 
 export interface ISortOptions {
@@ -53,6 +53,10 @@ export function sort(input: Table | FieldSymbol, options?: ISortOptions) {
     }
     sort(pnt, options);
     return;
+  }
+
+  if (input instanceof HashedTable) {
+    throw new Error("Sort hashed table, ugh?");
   }
 
   if (options?.by) {
