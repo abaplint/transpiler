@@ -72,41 +72,41 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
     array = table.array();
   }
 
-  const loopIndex = table.startLoop(loopFrom, loopTo);
+  const loopController = table.startLoop(loopFrom, loopTo);
   let entered = false;
 
   try {
     const isStructured = array[0] instanceof Structure;
 
-    while (loopIndex.index < loopIndex.loopTo) {
-      if (loopIndex.index > array.length) {
+    while (loopController.index < loopController.loopTo) {
+      if (loopController.index > array.length) {
         break;
       }
-      const current = array[loopIndex.index];
+      const current = array[loopController.index];
 
       if (options?.where) {
         const row = isStructured ? current.get() : {table_line: current};
         if (await options.where(row) === false) {
-          loopIndex.index++;
+          loopController.index++;
           continue;
         }
       }
 
       // @ts-ignore
-      abap.builtin.sy.get().tabix.set(loopIndex.index + 1);
+      abap.builtin.sy.get().tabix.set(loopController.index + 1);
       entered = true;
 
       yield current;
 
-      loopIndex.index++;
+      loopController.index++;
 
       if (options?.to === undefined && options?.usingKey === undefined) {
         // extra rows might have been inserted inside the loop
-        loopIndex.loopTo = array.length;
+        loopController.loopTo = array.length;
       }
     }
   } finally {
-    table.unregisterLoop(loopIndex);
+    table.unregisterLoop(loopController);
     // @ts-ignore
     abap.builtin.sy.get().subrc.set(entered ? 0 : 4);
   }
