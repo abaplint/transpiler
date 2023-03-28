@@ -1,4 +1,5 @@
 import {expect} from "chai";
+import {featureHashedTables} from "../../packages/runtime/src/types";
 import {ABAP} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -851,7 +852,10 @@ WRITE / lines( tab ).`;
     expect(abap.console.get()).to.equal("foo\nbar\n2");
   });
 
-  it.skip("insert into hashed table during loop", async () => {
+  it("insert into hashed table during loop", async () => {
+    if (featureHashedTables === false) {
+      return;
+    }
     const code = `
 DATA tab TYPE HASHED TABLE OF string WITH UNIQUE KEY table_line.
 DATA row LIKE LINE OF tab.
