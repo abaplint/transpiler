@@ -18,11 +18,15 @@ export enum TableAccessType {
   any = "ANY",
 }
 
-export class LoopIndex {
+export class LoopController {
   public index: number;
+  public loopTo: number;
+  public array: any[];
 
-  public constructor(start: number) {
-    this.index = start;
+  public constructor(from: number, loopTo: number, array: any[]) {
+    this.index = from;
+    this.loopTo = loopTo;
+    this.array = array;
   }
 }
 
@@ -52,7 +56,7 @@ interface ITable {
 }
 
 // eslint-disable-next-line prefer-const
-let featureHashedTables = false;
+export let featureHashedTables = true;
 
 export class TableFactory {
   public static construct(rowType: TableRowType, options?: ITableOptions, qualifiedName?: string) {
@@ -85,7 +89,7 @@ export class HashedTable implements ITable {
   private value: {[hash: string]: TableRowType};
   private readonly header: TableRowType | undefined;
   private readonly rowType: TableRowType;
-  private readonly loops: Set<LoopIndex>;
+  private readonly loops: Set<LoopController>;
   private readonly options: ITableOptions;
   private readonly qualifiedName: string | undefined;
 //  private readonly isStructured: boolean;
@@ -183,22 +187,23 @@ export class HashedTable implements ITable {
   }
 
   public insert(data: TableRowType): {value: TableRowType | undefined, subrc: number} {
-    if (this.loops.size !== 0) {
-      throw new Error("Hash table insert inside LOOP");
-    }
-
     const hash = this.buildHashFromData(data);
 
     if (this.value[hash] !== undefined) {
       return {value: undefined, subrc: 4};
     } else {
       const val = this.getValue(data);
+
+      for (const loopController of this.loops.values()) {
+        loopController.array.push(val);
+      }
+
       this.value[hash] = val;
       return {value: val, subrc: 0};
     }
   }
 
-  public array(): readonly any[] {
+  public array(): any[] {
     // used for LOOP
     const ret = [];
     for (const hash in this.value) {
@@ -207,13 +212,13 @@ export class HashedTable implements ITable {
     return ret;
   }
 
-  public startLoop(start: number = 0): LoopIndex {
-    const l = new LoopIndex(start);
+  public startLoop(from: number, to: number, array: any[]): LoopController {
+    const l = new LoopController(from, to, array);
     this.loops.add(l);
     return l;
   }
 
-  public unregisterLoop(loop: LoopIndex) {
+  public unregisterLoop(loop: LoopController) {
     this.loops.delete(loop);
   }
 
@@ -290,7 +295,7 @@ export class Table implements ITable {
   private value: TableRowType[];
   private readonly header: TableRowType | undefined;
   private readonly rowType: TableRowType;
-  private readonly loops: Set<LoopIndex>;
+  private readonly loops: Set<LoopController>;
   private readonly options: ITableOptions;
   private readonly qualifiedName: string | undefined;
   private readonly isStructured: boolean;
@@ -343,13 +348,13 @@ export class Table implements ITable {
     return this.options;
   }
 
-  public startLoop(start: number = 0): LoopIndex {
-    const l = new LoopIndex(start);
+  public startLoop(from: number, to: number, array: any[]): LoopController {
+    const l = new LoopController(from, to, array);
     this.loops.add(l);
     return l;
   }
 
-  public unregisterLoop(loop: LoopIndex) {
+  public unregisterLoop(loop: LoopController) {
     this.loops.delete(loop);
   }
 
@@ -358,7 +363,7 @@ export class Table implements ITable {
   }
 
   // Modifications to the array must be done inside this class, in order to keep track of LOOP indexes
-  public array(): readonly any[] {
+  public array(): any[] {
     return this.value;
   }
 
@@ -408,13 +413,15 @@ export class Table implements ITable {
 
     if (index === 0) {
       this.value.unshift(val);
+    } else if (index === this.value.length) {
+      this.value.push(val);
     } else {
       this.value.splice(index, 0, val);
     }
 
-    for (const l of this.loops.values()) {
-      if (l.index <= index) {
-        l.index++;
+    for (const loopController of this.loops.values()) {
+      if (index <= loopController.index) {
+        loopController.index++;
       }
     }
     return val;

@@ -1,4 +1,5 @@
 import {expect} from "chai";
+import {featureHashedTables} from "../../packages/runtime/src/types";
 import {ABAP} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -20,11 +21,11 @@ describe("Running statements - LOOP", () => {
       data val type i.
       append 2 to tab.
       loop at tab into val.
-      write / val.
-      val = 1.
+        write / val.
+        val = 1.
       endloop.
       loop at tab into val.
-      write / val.
+        write / val.
       endloop.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
@@ -826,6 +827,55 @@ end
 new
 middle bar
 end`);
+  });
+
+  it("insert into standard table during loop", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+DATA row LIKE LINE OF tab.
+DATA lv_str TYPE string.
+lv_str = |foo|.
+INSERT lv_str INTO TABLE tab.
+
+LOOP AT tab INTO row.
+  IF lines( tab ) = 1.
+    lv_str = |bar|.
+    INSERT lv_str INTO TABLE tab.
+  ENDIF.
+  WRITE / row.
+ENDLOOP.
+
+WRITE / lines( tab ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("foo\nbar\n2");
+  });
+
+  it("insert into hashed table during loop", async () => {
+    if (featureHashedTables === false) {
+      return;
+    }
+    const code = `
+DATA tab TYPE HASHED TABLE OF string WITH UNIQUE KEY table_line.
+DATA row LIKE LINE OF tab.
+DATA lv_str TYPE string.
+lv_str = |foo|.
+INSERT lv_str INTO TABLE tab.
+
+LOOP AT tab INTO row.
+  IF lines( tab ) = 1.
+    lv_str = |bar|.
+    INSERT lv_str INTO TABLE tab.
+  ENDIF.
+  WRITE / row.
+ENDLOOP.
+
+WRITE / lines( tab ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("foo\nbar\n2");
   });
 
 });

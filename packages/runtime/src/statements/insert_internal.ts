@@ -106,7 +106,7 @@ export function insertInternal(options: IInsertInternalOptions): void {
       }
     }
   } else if (options.initial === true) {
-    let index = options.table.array().length;
+    let index = options.table.getArrayLength();
     if (options.index) {
       index = options.index.get() - 1;
     }
@@ -130,7 +130,7 @@ export function insertInternal(options: IInsertInternalOptions): void {
     return;
   } else if (data) {
     // todo, for now it just appends, this is not correct, but currently the table type is not known
-    const val = options.table.insertIndex(data, options.table.array().length);
+    const val = options.table.insertIndex(data, options.table.getArrayLength());
     if (options.assigning) {
       options.assigning.assign(val);
     }

@@ -78,8 +78,8 @@ export function describe(input: IDescribeOptions) {
 
   if (input.table) {
     // @ts-ignore
-    abap.builtin.sy.get().tfill.set(input.table.array().length);
+    abap.builtin.sy.get().tfill.set(input.table.getArrayLength());
 
-    input.lines?.set(input.table.array().length);
+    input.lines?.set(input.table.getArrayLength());
   }
 }

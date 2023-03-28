@@ -1,4 +1,5 @@
 import {expect} from "chai";
+import {featureHashedTables} from "../../packages/runtime/src/types";
 import {ABAP} from "../../packages/runtime/src/";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -381,7 +382,10 @@ WRITE / ls_instance-instance.`;
     expect(abap.console.get()).to.equal("4\n0");
   });
 
-  it.skip("hashed table, sequence", async () => {
+  it("hashed table, sequence", async () => {
+    if (featureHashedTables === false) {
+      return;
+    }
     const code = `
 TYPES: BEGIN OF ty,
          field1 TYPE c LENGTH 2,

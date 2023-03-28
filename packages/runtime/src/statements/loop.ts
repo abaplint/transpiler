@@ -61,7 +61,7 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
   let loopFrom = options?.from && options?.from.get() > 0 ? options.from.get() - 1 : 0;
   let loopTo = options?.to && options.to.get() < length ? options.to.get() : length;
 
-  let array: readonly any[] = [];
+  let array: any[] = [];
   if (options?.usingKey && options.usingKey !== undefined && options.usingKey !== "primary_key") {
     array = table.getSecondaryIndex(options.usingKey);
 
@@ -72,41 +72,41 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
     array = table.array();
   }
 
-  const loopIndex = table.startLoop(loopFrom);
+  const loopController = table.startLoop(loopFrom, loopTo, array);
   let entered = false;
 
   try {
     const isStructured = array[0] instanceof Structure;
 
-    while (loopIndex.index < loopTo) {
-      if (loopIndex.index > array.length) {
+    while (loopController.index < loopController.loopTo) {
+      if (loopController.index > array.length) {
         break;
       }
-      const current = array[loopIndex.index];
+      const current = array[loopController.index];
 
       if (options?.where) {
         const row = isStructured ? current.get() : {table_line: current};
         if (await options.where(row) === false) {
-          loopIndex.index++;
+          loopController.index++;
           continue;
         }
       }
 
       // @ts-ignore
-      abap.builtin.sy.get().tabix.set(loopIndex.index + 1);
+      abap.builtin.sy.get().tabix.set(loopController.index + 1);
       entered = true;
 
       yield current;
 
-      loopIndex.index++;
+      loopController.index++;
 
       if (options?.to === undefined && options?.usingKey === undefined) {
         // extra rows might have been inserted inside the loop
-        loopTo = array.length;
+        loopController.loopTo = array.length;
       }
     }
   } finally {
-    table.unregisterLoop(loopIndex);
+    table.unregisterLoop(loopController);
     // @ts-ignore
     abap.builtin.sy.get().subrc.set(entered ? 0 : 4);
   }
