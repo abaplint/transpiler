@@ -65,7 +65,11 @@ export class AssignTranspiler implements IStatementTranspiler {
           options.push(`dynamicSource: (() => {try { return ${s}; } catch {}})()`);
         } else if (firstFirst?.get() instanceof abaplint.Expressions.FieldChain && firstFirst instanceof abaplint.Nodes.ExpressionNode) {
           const code = new FieldChainTranspiler(true).transpile(firstFirst, traversal).getCode();
-          options.push(`dynamicSource: (() => {try { return eval(${code}.toLowerCase().match(/\\w+/)[0]); } catch {}})()`);
+          options.push(`dynamicSource: (() => {
+            const name = ${code}.toLowerCase().replace(/[~\\/]/g, "$").match(/[\\w\\$\\/]+/)[0];
+            try { return eval(name); } catch {}
+            try { return eval("this." + name); } catch {}
+          })()`);
         }
       } else if (first?.get() instanceof abaplint.Expressions.Source && first instanceof abaplint.Nodes.ExpressionNode) {
         options.push(`dynamicSource: (() => {try { return ${first.concatTokens()}; } catch {}})()`);

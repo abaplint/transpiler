@@ -480,4 +480,36 @@ WRITE sy-subrc.`;
     }
   });
 
+  it("value from namespaced intf", async () => {
+    const code = `
+INTERFACE /foo/if.
+  DATA int TYPE i.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES /foo/if.
+    METHODS run.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    DATA lv_str TYPE string.
+    FIELD-SYMBOLS <fs> TYPE i.
+    lv_str = '/FOO/IF~INT'.
+    ASSIGN (lv_str) TO <fs>.
+    WRITE sy-subrc.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lcl.
+  CREATE OBJECT lo.
+  lo->run( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
 });
