@@ -46,6 +46,9 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
           if (call.endsWith(".")) {
             call = call.substring(0, call.length - 1);
           }
+          if (call === "") {
+            call = "this";
+          }
           call += "[";
           call += traversal.traverse(second).getCode();
           call += ".get().toLowerCase()]";
