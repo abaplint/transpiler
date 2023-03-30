@@ -24,7 +24,11 @@ export class SelectDatabase {
     }
 
     if (runtimeOptions?.appending !== true) {
-      target?.clear();
+      if (Array.isArray(target)) {
+        target.forEach(f => f.clear());
+      } else {
+        target?.clear();
+      }
     }
 
     if (rows.length === 0) {
@@ -63,6 +67,11 @@ export class SelectDatabase {
 
         // @ts-ignore
         abap.statements.insertInternal({table: target, data: targetRow});
+      }
+    } else if (Array.isArray(target)) {
+      for (let index = 0; index < target.length; index++) {
+        const element = target[index];
+        element.set(rows[0][Object.keys(rows[0])[index]]);
       }
     } else if (target !== undefined) {
       // its a simple type

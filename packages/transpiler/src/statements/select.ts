@@ -10,6 +10,7 @@ function escapeRegExp(string: string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
 }
 
+// TODO: currently SELECT into are always handled as CORRESPONDING
 export class SelectTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal, targetOverride?: string): Chunk {
@@ -19,7 +20,7 @@ export class SelectTranspiler implements IStatementTranspiler {
     } else if (node.findFirstExpression(abaplint.Expressions.SQLIntoTable)) {
       target = traversal.traverse(node.findFirstExpression(abaplint.Expressions.Target)).getCode();
     } else if (node.findFirstExpression(abaplint.Expressions.SQLIntoStructure)) {
-      target = traversal.traverse(node.findFirstExpression(abaplint.Expressions.Target)).getCode();
+      target = traversal.traverse(node.findFirstExpression(abaplint.Expressions.SQLIntoStructure)).getCode();
     }
 
     let select = "SELECT ";
