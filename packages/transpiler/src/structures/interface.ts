@@ -17,6 +17,8 @@ export class InterfaceTranspiler implements IStructureTranspiler {
         name = Traversal.escapeNamespace(name);
         ret += `class ${name} {\n`;
         ret += `static INTERNAL_TYPE = 'INTF';\n`;
+        ret += `static ATTRIBUTES = {};\n`;
+        ret += this.buildAttributes(def);
       } else if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.EndInterface) {
         ret += "}\n";
         ret += traversal.registerClassOrInterface(def);
@@ -26,6 +28,15 @@ export class InterfaceTranspiler implements IStructureTranspiler {
     ret += this.buildTypes(def);
 
     return new Chunk(ret);
+  }
+
+  private buildAttributes(_idef: abaplint.IInterfaceDefinition | undefined): string {
+    return "";
+    // TODO
+    // name
+    // type
+    // visibility
+    // is_constant
   }
 
   private buildTypes(idef: abaplint.IInterfaceDefinition | undefined): string {
