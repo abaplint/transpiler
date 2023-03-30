@@ -29,6 +29,7 @@ describe("Multiple lines", () => {
 
     const expected = `class lif_foobar {
   static INTERNAL_TYPE = 'INTF';
+  static ATTRIBUTES = {};
 }
 abap.Classes['PROG-ZFOOBAR-LIF_FOOBAR'] = lif_foobar;`;
 
@@ -61,6 +62,7 @@ abap.Classes['PROG-ZFOOBAR-LIF_FOOBAR'] = lif_foobar;`;
 `class lcl_foobar {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
+  static ATTRIBUTES = {};
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -91,6 +93,7 @@ abap.Classes['PROG-ZFOOBAR-LCL_FOOBAR'] = lcl_foobar;`;
 `class lcl_foobar {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
+  static ATTRIBUTES = {};
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -123,6 +126,7 @@ abap.Classes['PROG-ZFOOBAR-LCL_FOOBAR'] = lcl_foobar;`;
 `class lcl_foobar {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
+  static ATTRIBUTES = {};
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -173,6 +177,7 @@ CREATE OBJECT foo.`;
 `class zcl_words {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
+  static ATTRIBUTES = {};
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -225,6 +230,7 @@ DATA moo TYPE foo.`;
     const expected = `class zcl_words {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
+  static ATTRIBUTES = {};
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -258,6 +264,7 @@ abap.Classes['PROG-ZFOOBAR-ZCL_WORDS'] = zcl_words;`;
     const expected = `class zcl_words {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
+  static ATTRIBUTES = {};
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -290,6 +297,7 @@ ENDCLASS.`;
     const expected = `class zcl_ret {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
+  static ATTRIBUTES = {};
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -359,6 +367,7 @@ ENDCLASS.`;
     const expected = `class zcl_ret {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
+  static ATTRIBUTES = {};
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -385,6 +394,7 @@ ENDCLASS.`;
     const expected = `class lcl_bar {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
+  static ATTRIBUTES = {};
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -415,6 +425,7 @@ ENDFORM.`;
     const expected = `class lcl_bar {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
+  static ATTRIBUTES = {};
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -456,6 +467,7 @@ ENDFORM.`;
     const expected = `class lcl_bar {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
+  static ATTRIBUTES = {};
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -485,6 +497,7 @@ async function bar() {
     const expected = `class lcl_bar {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
+  static ATTRIBUTES = {};
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -531,6 +544,7 @@ ENDINTERFACE.`;
     const expected = `class lcl_bar {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
+  static ATTRIBUTES = {};
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -543,6 +557,7 @@ lcl_bar.first = new abap.types.Character(1, {});
 lcl_bar.first.set('b');
 class bar {
   static INTERNAL_TYPE = 'INTF';
+  static ATTRIBUTES = {"NEXT": {"type": new abap.types.Character(1, {}), "visibility": "U", "is_constant": "X"}};
 }
 abap.Classes['PROG-ZFOOBAR-BAR'] = bar;
 bar.bar$next = new abap.types.Character(1, {});
@@ -656,6 +671,7 @@ ENDCLASS.`;
     const expected = `class lcl_constant_test {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
+  static ATTRIBUTES = {};
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -686,6 +702,7 @@ CLASS lcl IMPLEMENTATION.
 ENDCLASS.`;
     const expected = `class lif {
   static INTERNAL_TYPE = 'INTF';
+  static ATTRIBUTES = {"DEFAULT_VALUE": {"type": new abap.types.String({qualifiedName: "STRING"}), "visibility": "U", "is_constant": "X"}};
 }
 abap.Classes['PROG-ZFOOBAR-LIF'] = lif;
 lif.lif$default_value = new abap.types.String({qualifiedName: "STRING"});
@@ -693,6 +710,7 @@ lif.lif$default_value.set('sdf');
 class lcl {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
+  static ATTRIBUTES = {};
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);

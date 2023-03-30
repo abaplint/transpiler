@@ -24,7 +24,8 @@ export class ClassImplementationTranspiler implements IStatementTranspiler {
 
     return new Chunk().append(ret + ` {
 static INTERNAL_TYPE = 'CLAS';
-static IMPLEMENTED_INTERFACES = [${this.findImplementedClass(traversal, def, scope).map(e => `"` + e.toUpperCase() + `"`).join(",")}];`, node, traversal);
+static IMPLEMENTED_INTERFACES = [${this.findImplementedClass(traversal, def, scope).map(e => `"` + e.toUpperCase() + `"`).join(",")}];
+static ATTRIBUTES = {};`, node, traversal);
   }
 
   private findImplementedInterface(traversal: Traversal, def?: abaplint.IInterfaceDefinition, scope?: abaplint.ISpaghettiScopeNode): string[] {
