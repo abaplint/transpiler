@@ -1020,4 +1020,21 @@ WRITE sy-dbcnt.`;
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("SELECT into list of basic", async () => {
+    const code = `
+    DATA lv_arbgb TYPE t100-arbgb.
+    DATA lv_text TYPE t100-text.
+
+    SELECT SINGLE arbgb text INTO (lv_arbgb, lv_text) FROM t100.
+    WRITE / lv_arbgb.
+    WRITE / lv_text.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ZAG_UNIT_TEST\nhello world");
+  });
+
 });
