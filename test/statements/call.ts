@@ -70,7 +70,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello");
   });
 
-  it.only("dynamic method call, method in this", async () => {
+  it("dynamic method call, method in this", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
@@ -97,7 +97,7 @@ START-OF-SELECTION.
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("hello");
+    expect(abap.console.get()).to.equal("hello world");
   });
 
 });
