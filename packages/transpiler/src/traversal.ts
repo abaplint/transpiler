@@ -206,11 +206,11 @@ export class Traversal {
     // TODO: visibility is wrong for classes
     for (const a of def?.getAttributes().getAll() || []) {
       const type = new TranspileTypes().toType(a.getType());
-      attr.push(`"${a.getName().toUpperCase()}": {"type": ${type}, "visibility": "U", "is_constant": " "}`);
+      attr.push(`"${a.getName().toUpperCase()}": {"type": () => {return ${type};}, "visibility": "U", "is_constant": " "}`);
     }
     for (const a of def?.getAttributes().getConstants() || []) {
       const type = new TranspileTypes().toType(a.getType());
-      attr.push(`"${a.getName().toUpperCase()}": {"type": ${type}, "visibility": "U", "is_constant": "X"}`);
+      attr.push(`"${a.getName().toUpperCase()}": {"type": () => {return ${type};}, "visibility": "U", "is_constant": "X"}`);
     }
     return attr.join(",\n");
   }
