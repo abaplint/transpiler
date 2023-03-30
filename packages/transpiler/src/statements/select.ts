@@ -16,7 +16,9 @@ export class SelectTranspiler implements IStatementTranspiler {
     let target = "undefined";
     if (targetOverride) {
       target = targetOverride;
-    } else if(node.findFirstExpression(abaplint.Expressions.Target)) {
+    } else if (node.findFirstExpression(abaplint.Expressions.SQLIntoTable)) {
+      target = traversal.traverse(node.findFirstExpression(abaplint.Expressions.Target)).getCode();
+    } else if (node.findFirstExpression(abaplint.Expressions.SQLIntoStructure)) {
       target = traversal.traverse(node.findFirstExpression(abaplint.Expressions.Target)).getCode();
     }
 
