@@ -557,7 +557,7 @@ lcl_bar.first = new abap.types.Character(1, {});
 lcl_bar.first.set('b');
 class bar {
   static INTERNAL_TYPE = 'INTF';
-  static ATTRIBUTES = {};
+  static ATTRIBUTES = {"NEXT": {"type": new abap.types.Character(1, {}), "visibility": "U", "is_constant": "X"}};
 }
 abap.Classes['PROG-ZFOOBAR-BAR'] = bar;
 bar.bar$next = new abap.types.Character(1, {});
@@ -702,7 +702,7 @@ CLASS lcl IMPLEMENTATION.
 ENDCLASS.`;
     const expected = `class lif {
   static INTERNAL_TYPE = 'INTF';
-  static ATTRIBUTES = {};
+  static ATTRIBUTES = {"DEFAULT_VALUE": {"type": new abap.types.String({qualifiedName: "STRING"}), "visibility": "U", "is_constant": "X"}};
 }
 abap.Classes['PROG-ZFOOBAR-LIF'] = lif;
 lif.lif$default_value = new abap.types.String({qualifiedName: "STRING"});

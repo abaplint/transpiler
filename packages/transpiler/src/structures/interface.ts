@@ -17,8 +17,7 @@ export class InterfaceTranspiler implements IStructureTranspiler {
         name = Traversal.escapeNamespace(name);
         ret += `class ${name} {\n`;
         ret += `static INTERNAL_TYPE = 'INTF';\n`;
-        ret += `static ATTRIBUTES = {};\n`;
-        ret += this.buildAttributes(def);
+        ret += `static ATTRIBUTES = {${this.buildAttributes(def)}};\n`;
       } else if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.EndInterface) {
         ret += "}\n";
         ret += traversal.registerClassOrInterface(def);
@@ -30,13 +29,17 @@ export class InterfaceTranspiler implements IStructureTranspiler {
     return new Chunk(ret);
   }
 
-  private buildAttributes(_idef: abaplint.IInterfaceDefinition | undefined): string {
-    return "";
-    // TODO
-    // name
-    // type
-    // visibility
-    // is_constant
+  private buildAttributes(idef: abaplint.IInterfaceDefinition | undefined): string {
+    const attr: string[] = [];
+    for (const a of idef?.getAttributes().getAll() || []) {
+      const type = new TranspileTypes().toType(a.getType());
+      attr.push(`"${a.getName().toUpperCase()}": {"type": ${type}, "visibility": "U", "is_constant": " "}`);
+    }
+    for (const a of idef?.getAttributes().getConstants() || []) {
+      const type = new TranspileTypes().toType(a.getType());
+      attr.push(`"${a.getName().toUpperCase()}": {"type": ${type}, "visibility": "U", "is_constant": "X"}`);
+    }
+    return attr.join(",\n");
   }
 
   private buildTypes(idef: abaplint.IInterfaceDefinition | undefined): string {
