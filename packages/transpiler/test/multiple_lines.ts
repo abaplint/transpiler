@@ -230,7 +230,7 @@ DATA moo TYPE foo.`;
     const expected = `class zcl_words {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
-  static ATTRIBUTES = {};
+  static ATTRIBUTES = {"BAR": {"type": new abap.types.Integer({qualifiedName: "I"}), "visibility": "U", "is_constant": " "}};
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -264,7 +264,7 @@ abap.Classes['PROG-ZFOOBAR-ZCL_WORDS'] = zcl_words;`;
     const expected = `class zcl_words {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
-  static ATTRIBUTES = {};
+  static ATTRIBUTES = {"BAR": {"type": new abap.types.Integer({qualifiedName: "I"}), "visibility": "U", "is_constant": " "}};
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -297,7 +297,7 @@ ENDCLASS.`;
     const expected = `class zcl_ret {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
-  static ATTRIBUTES = {};
+  static ATTRIBUTES = {"BAR": {"type": new abap.types.Integer({qualifiedName: "I"}), "visibility": "U", "is_constant": " "}};
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -367,7 +367,7 @@ ENDCLASS.`;
     const expected = `class zcl_ret {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
-  static ATTRIBUTES = {};
+  static ATTRIBUTES = {"C_MAXDCODES": {"type": new abap.types.Integer({qualifiedName: "I"}), "visibility": "U", "is_constant": "X"}};
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -394,7 +394,7 @@ ENDCLASS.`;
     const expected = `class lcl_bar {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
-  static ATTRIBUTES = {};
+  static ATTRIBUTES = {"FOO": {"type": new abap.types.Integer({qualifiedName: "I"}), "visibility": "U", "is_constant": " "}};
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -497,7 +497,7 @@ async function bar() {
     const expected = `class lcl_bar {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
-  static ATTRIBUTES = {};
+  static ATTRIBUTES = {"FOO": {"type": new abap.types.String({qualifiedName: "STRING"}), "visibility": "U", "is_constant": "X"}};
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -544,7 +544,7 @@ ENDINTERFACE.`;
     const expected = `class lcl_bar {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
-  static ATTRIBUTES = {};
+  static ATTRIBUTES = {"FIRST": {"type": new abap.types.Character(1, {}), "visibility": "U", "is_constant": "X"}};
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -671,7 +671,7 @@ ENDCLASS.`;
     const expected = `class lcl_constant_test {
   static INTERNAL_TYPE = 'CLAS';
   static IMPLEMENTED_INTERFACES = [];
-  static ATTRIBUTES = {};
+  static ATTRIBUTES = {"AREA_NAME": {"type": new abap.types.String({qualifiedName: "STRING"}), "visibility": "U", "is_constant": "X"}};
   async constructor_(INPUT) {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);

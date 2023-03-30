@@ -201,6 +201,20 @@ export class Traversal {
     return undefined;
   }
 
+  public buildAttributes(def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined): string {
+    const attr: string[] = [];
+    // TODO: visibility is wrong for classes
+    for (const a of def?.getAttributes().getAll() || []) {
+      const type = new TranspileTypes().toType(a.getType());
+      attr.push(`"${a.getName().toUpperCase()}": {"type": ${type}, "visibility": "U", "is_constant": " "}`);
+    }
+    for (const a of def?.getAttributes().getConstants() || []) {
+      const type = new TranspileTypes().toType(a.getType());
+      attr.push(`"${a.getName().toUpperCase()}": {"type": ${type}, "visibility": "U", "is_constant": "X"}`);
+    }
+    return attr.join(",\n");
+  }
+
   public isBuiltinMethod(token: abaplint.Token): boolean {
     const scope = this.findCurrentScopeByToken(token);
     if (scope === undefined) {
