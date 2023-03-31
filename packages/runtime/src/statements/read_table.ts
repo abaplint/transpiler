@@ -1,6 +1,6 @@
 import {binarySearchFromRow} from "../binary_search";
 import {eq} from "../compare";
-import {DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Structure, Table} from "../types";
+import {DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Structure, Table, TableAccessType} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -113,6 +113,7 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
     foundIndex = 0;
   } else if ((options?.binarySearch === true || options?.withTableKey === true)
       && options.withKeyValue
+      && ( options?.binarySearch === true || table.getOptions().primaryKey?.type !== TableAccessType.standard )
       && options.withKey) {
 // note: it currently only uses the first key field for binary search, todo
     const first = options.withKeyValue[0];
