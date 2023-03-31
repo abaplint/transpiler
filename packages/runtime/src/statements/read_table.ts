@@ -113,7 +113,7 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
     foundIndex = 0;
   } else if ((options?.binarySearch === true || options?.withTableKey === true)
       && options.withKeyValue
-      && table.getOptions().primaryKey?.type !== TableAccessType.standard
+      && ( options?.binarySearch === true || table.getOptions().primaryKey?.type !== TableAccessType.standard )
       && options.withKey) {
 // note: it currently only uses the first key field for binary search, todo
     const first = options.withKeyValue[0];
