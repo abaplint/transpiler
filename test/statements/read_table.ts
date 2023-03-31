@@ -673,4 +673,60 @@ ASSERT sy-subrc = 0.`;
     await f(abap);
   });
 
+  it("READ TABLE standard, unsorted WITH KEY", async () => {
+    const code = `
+TYPES: BEGIN OF ty_asset_entry,
+         url TYPE string,
+       END OF ty_asset_entry.
+TYPES ty_asset_register TYPE STANDARD TABLE OF ty_asset_entry WITH KEY url.
+DATA tab TYPE ty_asset_register.
+DATA row LIKE LINE OF tab.
+
+row-url = 'url3'.
+INSERT row INTO TABLE tab.
+row-url = 'url2'.
+INSERT row INTO TABLE tab.
+row-url = 'url1'.
+INSERT row INTO TABLE tab.
+
+READ TABLE tab WITH KEY url = 'url1' TRANSPORTING NO FIELDS.
+WRITE / sy-subrc.
+READ TABLE tab WITH KEY url = 'url2' TRANSPORTING NO FIELDS.
+WRITE / sy-subrc.
+READ TABLE tab WITH KEY url = 'url3' TRANSPORTING NO FIELDS.
+WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("0\n0\n0");
+  });
+
+  it("READ TABLE standard, unsorted WITH TABLE KEY", async () => {
+    const code = `
+TYPES: BEGIN OF ty_asset_entry,
+         url TYPE string,
+       END OF ty_asset_entry.
+TYPES ty_asset_register TYPE STANDARD TABLE OF ty_asset_entry WITH KEY url.
+DATA tab TYPE ty_asset_register.
+DATA row LIKE LINE OF tab.
+
+row-url = 'url1'.
+INSERT row INTO TABLE tab.
+row-url = 'url3'.
+INSERT row INTO TABLE tab.
+row-url = 'url2'.
+INSERT row INTO TABLE tab.
+
+READ TABLE tab WITH TABLE KEY url = 'url1' TRANSPORTING NO FIELDS.
+WRITE / sy-subrc.
+READ TABLE tab WITH TABLE KEY url = 'url2' TRANSPORTING NO FIELDS.
+WRITE / sy-subrc.
+READ TABLE tab WITH TABLE KEY url = 'url3' TRANSPORTING NO FIELDS.
+WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("0\n0\n0");
+  });
+
 });
