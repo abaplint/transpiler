@@ -1716,4 +1716,37 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("Class, simple method call", async () => {
+    const code = `
+    INTERFACE /tst/test PUBLIC.
+      CONSTANTS test_constant TYPE string VALUE 'working'.
+    ENDINTERFACE.
+    
+    
+    CLASS /tst/cl_test DEFINITION.
+      PUBLIC SECTION.
+        INTERFACES /tst/test.
+    
+        ALIASES test_constant
+          FOR /tst/test~test_constant .
+        METHODS
+                run.
+    ENDCLASS.
+    
+    CLASS /tst/cl_test IMPLEMENTATION.
+      METHOD run.
+        WRITE test_constant.
+      ENDMETHOD.
+    ENDCLASS.
+    
+    DATA foo TYPE REF TO /tst/cl_test.
+    CREATE OBJECT foo.
+    foo->run( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("working");
+  });
+
 });
