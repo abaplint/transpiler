@@ -350,7 +350,7 @@ export class Traversal {
 
     ret += "this.me = new abap.types.ABAPObject();\n";
     ret += "this.me.set(this);\n";
-    for (const a of def.getAttributes().getAll()) {
+    for (const a of def.getAttributes()?.getAll() || []) {
       if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
         continue;
       }
@@ -365,7 +365,7 @@ export class Traversal {
     }
 
     // handle aliases after initialization of carrier variables
-    for (const a of def.getAliases().getAll()) {
+    for (const a of def.getAliases()?.getAll() || []) {
       ret += "this." + a.getName().toLowerCase() + " = this." + Traversal.escapeNamespace(a.getComponent().replace("~", "$").toLowerCase()) + ";\n";
     }
     // constants can be accessed both statically and via reference
