@@ -112,7 +112,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
       if (isStatic === false) {
         continue;
       }
-      ret += clasName + "." + alias.getName().toLowerCase() + " = " + clasName + "." + alias.getComponent().replace("~", "$") + ";\n";
+      ret += Traversal.escapeNamespace(clasName) + "." + alias.getName().toLowerCase() + " = " + Traversal.escapeNamespace(clasName) + "." + Traversal.escapeNamespace(alias.getComponent().replace("~", "$")) + ";\n";
     }
 
     // this is not correct, ABAP does not invocate the class constructor at require time,
