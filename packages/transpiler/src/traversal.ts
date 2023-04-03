@@ -369,7 +369,7 @@ export class Traversal {
       ret += "this." + a.getName().toLowerCase() + " = this." + Traversal.escapeNamespace(a.getComponent().replace("~", "$").toLowerCase()) + ";\n";
     }
     // constants can be accessed both statically and via reference
-    for (const c of def.getAttributes().getConstants()) {
+    for (const c of def.getAttributes()?.getConstants() || []) {
       ret += "this." + Traversal.escapeNamespace(c.getName().toLowerCase()) + " = " + cName + "." + Traversal.escapeNamespace(c.getName().toLowerCase()) + ";\n";
     }
 
