@@ -18,6 +18,12 @@ export enum TableAccessType {
   any = "ANY",
 }
 
+export enum TableKeyType {
+  default = "DEFAULT",
+  user = "USER",
+  empty = "EMPTY",
+}
+
 export class LoopController {
   public index: number;
   public loopTo: number;
@@ -39,6 +45,7 @@ export type ITableKey = {
 
 export type ITableOptions = {
   withHeader: boolean,
+  keyType: TableKeyType,
   primaryKey?: ITableKey,
   secondary?: ITableKey[],
 };
@@ -68,6 +75,7 @@ export class TableFactory {
           keyFields: [],
           isUnique: false,
         },
+        keyType: TableKeyType.default,
         withHeader: false,
       };
     }
