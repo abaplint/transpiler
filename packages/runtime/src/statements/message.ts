@@ -81,13 +81,13 @@ export class MessageStatement {
     msgty = msgty?.toUpperCase();
 
     // @ts-ignore
-    abap.builtin.sy.get().msgid.set(arbgb);
+    abap.builtin.sy.get().msgid.set(arbgb || "");
     let msgnr = options.number;
     if (msgnr !== undefined && typeof msgnr !== "string") {
       msgnr = msgnr.get();
     }
     // @ts-ignore
-    abap.builtin.sy.get().msgno.set(msgnr);
+    abap.builtin.sy.get().msgno.set(msgnr || "");
     // @ts-ignore
     abap.builtin.sy.get().msgty.set(msgty);
 
