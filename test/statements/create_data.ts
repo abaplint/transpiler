@@ -164,6 +164,7 @@ WRITE lv_type.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
+
   it("CREATE DATA, TYPE t100", async () => {
     const code = `
     DATA foo type ref to data.
