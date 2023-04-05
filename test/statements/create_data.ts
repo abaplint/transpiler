@@ -1,6 +1,7 @@
 import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
+import {tabl_t100xml} from "../_data";
 
 let abap: ABAP;
 
@@ -152,4 +153,27 @@ WRITE lv_type.`;
     expect(abap.console.get()).to.equal("g");
   });
 
+  it("CREATE DATA, TYPE T100", async () => {
+    const code = `
+    DATA foo type ref to data.
+    CREATE DATA foo TYPE T100.
+    ASSERT foo IS NOT INITIAL.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("CREATE DATA, TYPE t100", async () => {
+    const code = `
+    DATA foo type ref to data.
+    CREATE DATA foo TYPE t100.
+    ASSERT foo IS NOT INITIAL.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
 });
