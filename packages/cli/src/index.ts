@@ -61,7 +61,7 @@ function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
         count++;
       }
     }
-    console.log(count + " files added from lib");
+    console.log("\t" + count + " files added from lib");
     if (cleanupFolder === true) {
       FileOperations.deleteFolderRecursive(dir);
     }
