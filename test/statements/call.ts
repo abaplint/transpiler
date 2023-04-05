@@ -100,4 +100,26 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello world");
   });
 
+  it("throw CX_SY_DYN_CALL_ILLEGAL_METHOD", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+* workaround for avoid testing a global class,
+  CALL METHOD ('PROG-ZFOOBAR-LCL')=>nononono_limit.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch (e) {
+      expect(e.toString()).to.contain("CX_SY_DYN_CALL_ILLEGAL_METHOD");
+    }
+  });
+
 });

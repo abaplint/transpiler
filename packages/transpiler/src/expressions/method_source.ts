@@ -25,17 +25,25 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
         call += traversal.lookupClassOrInterface(child.concatTokens(), child.getFirstToken());
       } else if (child.get() instanceof Expressions.Dynamic && nextChild?.concatTokens() === "=>") {
         const second = child.getChildren()[1];
-        const lookupException = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_CLASS'", child.getFirstToken(), true);
+        const illegalClass = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_CLASS'", child.getFirstToken(), true);
+        const illegalMethod = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_METHOD'", child.getFirstToken(), true);
         if (second.get() instanceof Expressions.FieldChain && second instanceof Nodes.ExpressionNode) {
           const t = new FieldChainTranspiler(true).transpile(second, traversal).getCode();
 
           call = traversal.lookupClassOrInterface(t, child.getFirstToken(), true);
-          ret.appendString(`if (${call} === undefined && ${lookupException} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }\n`);
-          ret.appendString(`if (${call} === undefined) { throw new ${lookupException}(); }\n`);
+          ret.appendString(`if (${call} === undefined && ${illegalClass} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }\n`);
+          ret.appendString(`if (${call} === undefined) { throw new ${illegalClass}(); }\n`);
         } else if (second.get() instanceof Expressions.Constant) {
           call = traversal.lookupClassOrInterface(second.getFirstToken().getStr(), child.getFirstToken(), true);
-          ret.appendString(`if (${call} === undefined && ${lookupException} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }\n`);
-          ret.appendString(`if (${call} === undefined) { throw new ${lookupException}(); }\n`);
+          ret.appendString(`if (${call} === undefined && ${illegalClass} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }\n`);
+          ret.appendString(`if (${call} === undefined) { throw new ${illegalClass}(); }\n`);
+
+          const name = children[i + 2];
+          if (name.get() instanceof Expressions.AttributeName) {
+            const suffix = "." + name.concatTokens().toLowerCase();
+            ret.appendString(`if (${call + suffix} === undefined && ${illegalMethod} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_METHOD not found"; }\n`);
+            ret.appendString(`if (${call + suffix} === undefined) { throw new ${illegalMethod}(); }\n`);
+          }
         } else {
           ret.appendString("MethodSourceTranspiler-Unexpected");
         }
