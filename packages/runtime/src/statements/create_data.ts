@@ -18,15 +18,12 @@ export interface ICreateDataOptions {
 }
 
 export function createData(target: DataReference | FieldSymbol, options?: ICreateDataOptions) {
-//  console.dir(options);
-
   if (target instanceof FieldSymbol) {
     createData(target.getPointer(), options);
     return;
   } else if (!(target instanceof DataReference)) {
     throw new Error("CREATE_DATA_REFERENCE_EXPECTED");
-  }
-
+  }  
   if (options?.name && options?.table) {
     // @ts-ignore
     if (abap.DDIC[options.name] === undefined) {
@@ -125,7 +122,12 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
         target.assign(new XString());
         break;
       default:
-        if (options.typeName.includes("=>")) {
+          // @ts-ignore
+        if (abap.DDIC[options.typeName]) {
+          // @ts-ignore
+          target.assign(clone(abap.DDIC[options.typeName].type));
+        }        
+        else if (options.typeName.includes("=>")) {
           const [className, typeName] = options.typeName.toUpperCase().split("=>");
 
           // @ts-ignore
