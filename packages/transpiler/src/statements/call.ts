@@ -20,35 +20,13 @@ export class CallTranspiler implements IStatementTranspiler {
         post = ")";
       }
 
-      const exceptions = node.findFirstExpression(abaplint.Expressions.ParameterListExceptions);
-      if (exceptions) {
-        pre = "try {\n" + pre;
-      }
-
       post += ";";
 
+      const exceptions = node.findFirstExpression(abaplint.Expressions.ParameterListExceptions);
       if (exceptions) {
-        post += `\nabap.builtin.sy.get().subrc.set(0);
-} catch (e) {
-if (e.classic) {
-  switch (e.classic.toUpperCase()) {\n`;
-        for (const e of exceptions.findAllExpressions(abaplint.Expressions.ParameterException)) {
-          const name = e.getFirstToken().getStr().toUpperCase();
-          const value = e.findFirstExpression(abaplint.Expressions.SimpleName)?.getFirstToken().getStr().toUpperCase();
-          if (value === undefined) {
-            continue;
-          }
-          if (name === "OTHERS") {
-            post += `default: abap.builtin.sy.get().subrc.set(${value}); break;\n`;
-          } else {
-            post += `case "${name}": abap.builtin.sy.get().subrc.set(${value}); break;\n`;
-          }
-        }
-        post += `  }
-} else {
-  throw e;
-}
-}`;
+        const build = this.buildExceptions(exceptions);
+        pre = build.pre + pre;
+        post += build.post;
       }
 
       const chainChunk = traversal.traverse(chain);
@@ -78,11 +56,19 @@ if (e.classic) {
 
       let pre = "";
       let post = "";
+
       const receiving = node.findFirstExpression(abaplint.Expressions.MethodParameters)?.findExpressionAfterToken("RECEIVING");
       if (receiving) {
         const target = traversal.traverse(receiving.findDirectExpression(abaplint.Expressions.Target));
         pre = target.getCode() + ".set(";
         post = ")";
+      }
+
+      const exceptions = node.findFirstExpression(abaplint.Expressions.ParameterListExceptions);
+      if (exceptions) {
+        const build = this.buildExceptions(exceptions);
+        pre = build.pre + pre;
+        post += build.post;
       }
 
       let ms = new MethodSourceTranspiler(pre).transpile(methodSource, traversal).getCode();
@@ -97,6 +83,37 @@ if (e.classic) {
     }
 
     throw new Error("CallTranspiler, todo");
+  }
+
+  private buildExceptions(node: abaplint.Nodes.ExpressionNode) {
+    let pre = "";
+    let post = "";
+
+    pre = "try {\n" + pre;
+
+    post += `\nabap.builtin.sy.get().subrc.set(0);
+} catch (e) {
+if (e.classic) {
+  switch (e.classic.toUpperCase()) {\n`;
+    for (const e of node.findAllExpressions(abaplint.Expressions.ParameterException)) {
+      const name = e.getFirstToken().getStr().toUpperCase();
+      const value = e.findFirstExpression(abaplint.Expressions.SimpleName)?.getFirstToken().getStr().toUpperCase();
+      if (value === undefined) {
+        continue;
+      }
+      if (name === "OTHERS") {
+        post += `default: abap.builtin.sy.get().subrc.set(${value}); break;\n`;
+      } else {
+        post += `case "${name}": abap.builtin.sy.get().subrc.set(${value}); break;\n`;
+      }
+    }
+    post += `  }
+} else {
+  throw e;
+}
+}`;
+
+    return {pre, post};
   }
 
 }
