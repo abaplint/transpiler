@@ -20,14 +20,12 @@ export class CallTranspiler implements IStatementTranspiler {
         post = ")";
       }
 
+      post += ";";
+
       const exceptions = node.findFirstExpression(abaplint.Expressions.ParameterListExceptions);
       if (exceptions) {
         pre = "try {\n" + pre;
-      }
 
-      post += ";";
-
-      if (exceptions) {
         post += `\nabap.builtin.sy.get().subrc.set(0);
 } catch (e) {
 if (e.classic) {
