@@ -129,7 +129,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.skip("Classic exceptions, raise, CALL METHOD", async () => {
+  it("Classic exceptions, raise, CALL METHOD", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
@@ -151,7 +151,6 @@ START-OF-SELECTION.
       OTHERS = 5.
   ASSERT sy-subrc = 1.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
