@@ -24,6 +24,10 @@ export class CallTranspiler implements IStatementTranspiler {
 
       const exceptions = node.findFirstExpression(abaplint.Expressions.ParameterListExceptions);
       if (exceptions) {
+        const build = this.buildExceptions(exceptions);
+        pre = build.pre + pre;
+        post += build.post;
+        /*
         pre = "try {\n" + pre;
 
         post += `\nabap.builtin.sy.get().subrc.set(0);
@@ -47,6 +51,7 @@ if (e.classic) {
   throw e;
 }
 }`;
+*/
       }
 
       const chainChunk = traversal.traverse(chain);
@@ -95,6 +100,37 @@ if (e.classic) {
     }
 
     throw new Error("CallTranspiler, todo");
+  }
+
+  private buildExceptions(node: abaplint.Nodes.ExpressionNode) {
+    let pre = "";
+    let post = "";
+
+    pre = "try {\n" + pre;
+
+    post += `\nabap.builtin.sy.get().subrc.set(0);
+} catch (e) {
+if (e.classic) {
+  switch (e.classic.toUpperCase()) {\n`;
+    for (const e of node.findAllExpressions(abaplint.Expressions.ParameterException)) {
+      const name = e.getFirstToken().getStr().toUpperCase();
+      const value = e.findFirstExpression(abaplint.Expressions.SimpleName)?.getFirstToken().getStr().toUpperCase();
+      if (value === undefined) {
+        continue;
+      }
+      if (name === "OTHERS") {
+        post += `default: abap.builtin.sy.get().subrc.set(${value}); break;\n`;
+      } else {
+        post += `case "${name}": abap.builtin.sy.get().subrc.set(${value}); break;\n`;
+      }
+    }
+    post += `  }
+} else {
+  throw e;
+}
+}`;
+
+    return {pre, post};
   }
 
 }
