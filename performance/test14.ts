@@ -3,7 +3,7 @@ DATA: BEGIN OF data,
         field1 TYPE string,
         field2 TYPE string,
       END OF data.
-DO 50000 TIMES.
+DO 100000 TIMES.
   data-field1 = 'FOO'.
   data-field2 = 'BAR'.
 ENDDO.`;

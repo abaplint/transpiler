@@ -7,6 +7,8 @@ import {AbstractTypeData} from "./_abstract_type_data";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 
+const TRIMREGEX = / *$/;
+
 export class Character implements ICharacter {
   private value: string;
   private constant: boolean = false;
@@ -82,7 +84,11 @@ export class Character implements ICharacter {
   }
 
   public getTrimEnd(): string {
-    return this.value.replace(/ *$/, "");
+    if (this.value.endsWith(" ") === true) {
+      return this.value.replace(TRIMREGEX, "");
+    } else {
+      return this.value;
+    }
   }
 
   public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}) {
