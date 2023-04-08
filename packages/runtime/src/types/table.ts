@@ -134,7 +134,8 @@ export class HashedTable implements ITable {
     if (secondary === undefined) {
       throw `Table, secondary key "${name}" not found`;
     }
-    const copy = clone([...this.array()]);
+    // note, array() already is a copy, so it acn be used,
+    const copy = this.array();
     sort(copy as any, {by: secondary.keyFields.map(k => {return {component: k.toLowerCase()};})});
 
     this.secondaryIndexes[name.toUpperCase()] = copy;
@@ -340,7 +341,7 @@ export class Table implements ITable {
     if (secondary === undefined) {
       throw `Table, secondary key "${name}" not found`;
     }
-    const copy = clone(this.value);
+    const copy = [...this.value];
     sort(copy as any, {by: secondary.keyFields.map(k => {return {component: k.toLowerCase()};})});
 
     this.secondaryIndexes[name.toUpperCase()] = copy;
