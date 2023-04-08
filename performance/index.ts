@@ -16,6 +16,7 @@ import {test10} from "./test10";
 import {test11} from "./test11";
 import {test12} from "./test12";
 import {test13} from "./test13";
+import {test14} from "./test14";
 
 // NOTE: does not run via Mocha
 
@@ -44,6 +45,7 @@ const tests: Tests = [
   {name: "11: READ WITH TABLE KEY HASHED", abap: test11},
   {name: "12: READ WITH KEY HASHED, primary", abap: test12},
   {name: "13: INSERT INTO TABLE standard", abap: test13},
+  {name: "14: Constant characters", abap: test14},
 ];
 
 async function execute(t: Test) {
