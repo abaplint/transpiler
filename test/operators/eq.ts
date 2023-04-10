@@ -37,4 +37,16 @@ ASSERT c_package_file = str.`;
     await f(abap);
   });
 
+  it("dates", async () => {
+    const code = `
+    DATA lv_date1 TYPE d.
+    DATA lv_date2 TYPE d.
+    lv_date1 = sy-datum.
+    lv_date2 = sy-datum.
+    ASSERT lv_date1 = lv_date2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

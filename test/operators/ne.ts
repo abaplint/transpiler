@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -21,6 +21,21 @@ ASSERT |FOO | <> 'FOO'.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("dates", async () => {
+    const code = `
+    DATA lv_date1 TYPE d.
+    DATA lv_date2 TYPE d.
+    lv_date1 = sy-datum.
+    lv_date2 = sy-datum.
+    IF lv_date1 <> lv_date2.
+      WRITE 'error'.
+    ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("");
   });
 
 });

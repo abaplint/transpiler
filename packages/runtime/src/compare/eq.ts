@@ -92,7 +92,7 @@ export function eq(
   if (right instanceof Character) {
     r = right.getTrimEnd();
   } else if (right instanceof Date) {
-    l = right.get().trimEnd();
+    r = right.get().trimEnd();
   } else if (typeof right === "object") {
     r = right.get();
   } else {
