@@ -304,20 +304,6 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({});`}, // todo
       js: `await bar.get().name();`},
     {abap: `CALL METHOD bar->name.`,
       js: `await bar.get().name();`},
-    {abap: `CALL METHOD ('CL_APJ_SCP_TOOLS')=>('IS_RESTART_REQUIRED').`,
-      js: `if (abap.Classes['CL_APJ_SCP_TOOLS'] === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }
-if (abap.Classes['CL_APJ_SCP_TOOLS'] === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'](); }
-if (abap.Classes['CL_APJ_SCP_TOOLS'].is_restart_required === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_METHOD not found"; }
-if (abap.Classes['CL_APJ_SCP_TOOLS'].is_restart_required === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'](); }
-await abap.Classes['CL_APJ_SCP_TOOLS'].is_restart_required();`},
-    {abap: `CALL METHOD lo_factory->('CREATE_CLIF_SOURCE').`,
-      js: `if (lo_factory.get().create_clif_source === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_METHOD not found"; }
-if (lo_factory.get().create_clif_source === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'](); }
-await lo_factory.get().create_clif_source();`},
-    {abap: `CALL METHOD zcl_call=>('NOT_FOUND').`,
-      js: `if (abap.Classes['ZCL_CALL'].not_found === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_METHOD not found"; }
-if (abap.Classes['ZCL_CALL'].not_found === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'](); }
-await abap.Classes['ZCL_CALL'].not_found();`},
 
     {abap: `lo_sdescr->get_component_type(
   EXPORTING
