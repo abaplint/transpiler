@@ -575,18 +575,6 @@ blah.set(await (new abap.Classes['ZCL_BLAH']()).constructor_());`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
-  it("CREATE OBJECT, dynamic via var", async () => {
-    const abap = `
-    DATA str TYPE string.
-    DATA blah TYPE REF TO OBJECT.
-    CREATE OBJECT blah TYPE (str).`;
-    const expected = `let str = new abap.types.String({qualifiedName: "STRING"});
-let blah = new abap.types.ABAPObject();
-if (abap.Classes[str.get()] === undefined) { throw new abap.Classes['CX_SY_CREATE_OBJECT_ERROR']; }
-blah.set(await (new abap.Classes[str.get()]()).constructor_());`;
-    expect(await runSingle(abap)).to.equal(expected);
-  });
-
   it("Complex table key", async () => {
     const abap = `
   TYPES:

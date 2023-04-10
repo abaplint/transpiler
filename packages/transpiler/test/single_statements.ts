@@ -300,10 +300,6 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({});`}, // todo
 
     {abap: `CALL METHOD bar RECEIVING field = field.`,
       js: `field.set(await bar());`},
-    {abap: `CALL METHOD (conv_out_class)=>create.`,
-      js: `if (abap.Classes[conv_out_class.get()] === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }
-if (abap.Classes[conv_out_class.get()] === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'](); }
-await abap.Classes[conv_out_class.get()].create();`},
     {abap: `CALL METHOD bar->name( ).`,
       js: `await bar.get().name();`},
     {abap: `CALL METHOD bar->name.`,

@@ -557,7 +557,11 @@ export class Traversal {
     }
 
     if (directGlobal === true) {
-      return "abap.Classes[" + name + "]";
+      if (name.startsWith("'")) {
+        return "abap.Classes[" + name + "]";
+      } else {
+        return "abap.Classes[" + name + ".trimEnd()]";
+      }
     }
 
     const scope = this.findCurrentScopeByToken(token);
