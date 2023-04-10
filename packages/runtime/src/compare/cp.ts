@@ -21,7 +21,7 @@ export function cp(left: number | string | ICharacter | INumeric | Structure, ri
   if (typeof right === "string") {
     r = right.toString();
   } else {
-    r = right.get().toString();
+    r = right.get().toString().trimEnd();
   }
 
   r = r.replace(/\\/g, "\\\\");
