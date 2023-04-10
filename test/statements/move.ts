@@ -67,7 +67,7 @@ WRITE / foo2.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("HELLO\nHELLO");
+    expect(abap.console.get()).to.equal("HELLO     \nHELLO");
   });
 
   it("namespaced field", async () => {

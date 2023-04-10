@@ -114,7 +114,7 @@ ENDLOOP.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("asd");
+    expect(abap.console.get()).to.equal("asd ");
   });
 
   it("ASSIGN by number", async () => {
@@ -177,7 +177,7 @@ WRITE <lv>.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("1234");
+    expect(abap.console.get()).to.equal("1234 ");
   });
 
   it("ASSIGN CASTING, 3", async () => {

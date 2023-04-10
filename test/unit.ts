@@ -660,7 +660,7 @@ TYPES abap_encoding TYPE c LENGTH 20.`;
       {filename: "zcl_client.clas.testclasses.abap", contents: tests},
     ];
     const cons = await dumpNrun(files);
-    expect(cons.split("\n")[1]).to.equal("UTF");
+    expect(cons.split("\n")[1].trimEnd()).to.equal("UTF");
   });
 
   it("test-12", async () => {

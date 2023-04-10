@@ -28,7 +28,7 @@ export class ConstantTranspiler implements IExpressionTranspiler {
     if (str) {
       let res = str.getFirstToken().getStr();
       if (res.startsWith("'") && this.addGet === false) {
-        const code = "new abap.types.Character(" + (res.length - 2) + ").set(" + this.escape(res) + ")";
+        const code = this.character(res);
         return new Chunk().append(code, node, traversal);
       } else if (res.startsWith("`") && this.addGet === false) {
         const code = "new abap.types.String().set(" + this.escape(res) + ")";
@@ -54,7 +54,7 @@ export class ConstantTranspiler implements IExpressionTranspiler {
           chunk.appendString(",");
         }
         if (res.startsWith("'") && this.addGet === false) {
-          const code = "new abap.types.Character(" + (res.length - 2) + ").set(" + this.escape(res) + ")";
+          const code = this.character(res);
           chunk.append(code, node, traversal);
         } else if (res.startsWith("`") && this.addGet === false) {
           const code = "new abap.types.String().set(" + this.escape(res) + ")";
@@ -66,6 +66,17 @@ export class ConstantTranspiler implements IExpressionTranspiler {
     }
 
     return new Chunk(`todo, Constant`);
+  }
+
+  private character(res: string): string {
+    const foo = res.replace(/''/g, "'");
+    let length = foo.length - 2;
+    if (length <= 0) {
+      // note: Characters cannot have length = zero, 1 is minimum
+      length = 1;
+    }
+    const code = "new abap.types.Character(" + length + ").set(" + this.escape(res) + ")";
+    return code;
   }
 
   public escape(str: string): string {

@@ -33,7 +33,7 @@ describe("Running statements - MESSAGE", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("E\n00\n001\nfoobar");
+    expect(abap.console.get()).to.equal("E\n00                  \n001\nfoobar");
   });
 
   it("MESSAGE fallback, no database initialized", async () => {
@@ -47,7 +47,7 @@ describe("Running statements - MESSAGE", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("ABC\n123\nE:ABC:123 foo bar");
+    expect(abap.console.get()).to.equal("ABC                 \n123\nE:ABC:123 foo bar");
   });
 
   it("MESSAGE empty msgid", async () => {

@@ -33,7 +33,7 @@ describe("Running statements - WRITE", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("A");
+    expect(abap.console.get().trimEnd()).to.equal("A");
   });
 
   it("WRITE - single positive integer ", async () => {
@@ -61,7 +61,7 @@ describe("Running statements - WRITE", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("A");
+    expect(abap.console.get().trimEnd()).to.equal("A");
   });
 
   it.skip("WRITE - structure with 2 components", async () => {
@@ -90,7 +90,7 @@ describe("Running statements - WRITE", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("2");
+    expect(abap.console.get().trimEnd()).to.equal("2");
   });
 
   it("WRITE - any type, from string", async () => {
@@ -142,7 +142,7 @@ WRITE char.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("0,0010000000000000");
+    expect(abap.console.get().trimEnd()).to.equal("0,0010000000000000");
   });
 
   it("float, EXPONENT 0 NO-GROUPING NO-SIGN, 5000", async () => {
@@ -156,7 +156,7 @@ WRITE char.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("5000,0000000000000");
+    expect(abap.console.get().trimEnd()).to.equal("5000,0000000000000");
   });
 
   it("float, EXPONENT 0 NO-GROUPING NO-SIGN, minus one", async () => {
@@ -170,7 +170,7 @@ WRITE char.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("1,0000000000000000");
+    expect(abap.console.get().trimEnd()).to.equal("1,0000000000000000");
   });
 
   it("float, normal", async () => {

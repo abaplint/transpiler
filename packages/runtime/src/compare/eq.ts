@@ -33,6 +33,15 @@ export function eq(
     return eq(left.getPointer()!, right);
   }
 
+// for performance, do the typicaly/easy cases first
+  if (right instanceof Character && left instanceof Character && right.getLength() === left.getLength()) {
+    return right.get() === left.get();
+  } else if (right instanceof Numc && left instanceof Numc && right.getLength() === left.getLength()) {
+    return right.get() === left.get();
+  } else if (right instanceof Integer && left instanceof Integer) {
+    return right.get() === left.get();
+  }
+
   if (left instanceof Table || right instanceof Table || left instanceof HashedTable || right instanceof HashedTable) {
     if ((left instanceof Table || left instanceof HashedTable)
         && (right instanceof Table || right instanceof HashedTable)) {

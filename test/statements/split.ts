@@ -50,7 +50,7 @@ describe("Running statements - SPLIT", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("blah\nboo");
+    expect(abap.console.get()).to.equal("blah\nboo ");
   });
 
   it("split 3", async () => {
@@ -65,7 +65,7 @@ describe("Running statements - SPLIT", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("1\n2\n3");
+    expect(abap.console.get()).to.equal("1   \n2   \n3   ");
   });
 
   it("SPLIT empty string, should give empty table", async () => {

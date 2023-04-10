@@ -43,7 +43,7 @@ WRITE key_name.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("hello");
+    expect(abap.console.get().trimEnd()).to.equal("hello");
   });
 
 });

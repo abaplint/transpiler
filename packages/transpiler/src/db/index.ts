@@ -53,7 +53,7 @@ export class DatabaseSetup {
       return "";
     }
 
-    return `INSERT INTO reposrc ('PROGNAME', 'DATA') VALUES ('${name}', '${this.escape(raw)}');`;
+    return `INSERT INTO reposrc ('PROGNAME', 'DATA') VALUES ('${name.padEnd(40, " ")}', '${this.escape(raw)}');`;
   }
 
   private insertT000(): string {
@@ -73,12 +73,13 @@ export class DatabaseSetup {
 
   private insertT100(msag: abaplint.Objects.MessageClass): string {
     // ignore if T100 is unknown
-    if (this.reg.getObject("TABL", "T100") === undefined) {
+    const obj = this.reg.getObject("TABL", "T100") as abaplint.Objects.Table | undefined;
+    if (obj === undefined) {
       return "";
     }
     let ret = "";
     for (const m of msag.getMessages()) {
-      ret += `INSERT INTO t100 ('SPRSL', 'ARBGB', 'MSGNR', 'TEXT') VALUES ('E', '${msag.getName()}', '${m.getNumber()}', '${this.escape(m.getMessage())}');`;
+      ret += `INSERT INTO t100 ('SPRSL', 'ARBGB', 'MSGNR', 'TEXT') VALUES ('E', '${msag.getName().padEnd(20, " ")}', '${m.getNumber()}', '${this.escape(m.getMessage().padEnd(73, " "))}');\n`;
     }
     return ret;
   }

@@ -55,8 +55,9 @@ export function convert(source: IConvertSource, target: IConvertTarget) {
     } else {
       zone = source.zone.get() + "";
     }
+    zone = zone.trimEnd();
   }
-  if (zone === "") {
+  if (zone.trim() === "") {
     zone = "UTC";
   }
 

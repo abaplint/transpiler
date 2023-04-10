@@ -39,7 +39,7 @@ describe("Running statements - CONDENSE", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("5");
+    expect(abap.console.get().trimEnd()).to.equal("5");
   });
 
   it("CONDENSE int'ed string", async () => {
@@ -51,7 +51,7 @@ describe("Running statements - CONDENSE", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("5");
+    expect(abap.console.get()).to.equal("5         ");
   });
 
   it("CONDENSE, another test", async () => {
