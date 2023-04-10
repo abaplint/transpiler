@@ -416,7 +416,7 @@ WRITE key_name.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("hello     ");
+    expect(abap.console.get()).to.equal("hello");
   });
 
   it("simple binary search, last found", async () => {
@@ -727,6 +727,38 @@ WRITE / sy-subrc.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get().trimEnd()).to.equal("0\n0\n0");
+  });
+
+  it("READ TABLE, char into string", async () => {
+    const code = `
+    TYPES ty TYPE c LENGTH 10.
+    DATA lt_names TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+    DATA row LIKE LINE OF lt_names.
+    DATA key_name TYPE string.
+    row = |foo |.
+    INSERT row INTO TABLE lt_names.
+    read table lt_names index 1 into key_name.
+    ASSERT key_name = |foo|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("READ TABLE, structured into string", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         foo TYPE c LENGTH 10,
+       END OF ty.
+DATA lt_names TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row LIKE LINE OF lt_names.
+DATA key_name TYPE string.
+row-foo = |foo |.
+INSERT row INTO TABLE lt_names.
+READ TABLE lt_names INDEX 1 INTO key_name.
+ASSERT key_name = |foo|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
 });

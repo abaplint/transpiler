@@ -36,7 +36,7 @@ export class String implements ICharacter {
       // replace trailing blanks if the source is a Character string
       this.value = value.getTrimEnd();
     } else if (value instanceof Structure) {
-      this.value = value.getCharacter();
+      this.value = value.getCharacter().trimEnd();
     } else if (value instanceof Packed) {
       const lv_sign = (value as Packed).get() >= 0 ? " " : "-";
       this.value = Math.abs((value as Packed).get()).toFixed(value.getDecimals());
