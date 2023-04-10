@@ -76,7 +76,7 @@ describe("Running statements - CONCATENATE", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("12");
+    expect(abap.console.get()).to.equal("12  ");
   });
 
   it("spaces, spaces", async () => {
@@ -87,7 +87,7 @@ describe("Running statements - CONCATENATE", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("1");
+    expect(abap.console.get()).to.equal("1 ");
   });
 
   it("spaces, spaces and strings", async () => {

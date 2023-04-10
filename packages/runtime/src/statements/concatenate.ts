@@ -17,7 +17,7 @@ export function concatenate(input: IConcatenateInput) {
     const tab = input.source[0];
     if (tab instanceof Table) {
       for (const l of tab.array()) {
-        list.push(l.get());
+        list.push(l.get().trimEnd());
       }
     }
   } else {

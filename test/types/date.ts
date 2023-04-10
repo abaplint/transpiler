@@ -108,4 +108,16 @@ describe("Running Examples - Date type", () => {
     expect(abap.console.get()).to.not.equal("00000000");
   });
 
+  it("compare empty", async () => {
+    const code = `
+    DATA var1 TYPE d.
+    var1 = ''.
+    ASSERT var1 = ''.
+    ASSERT var1 = ' '.
+    ASSERT var1 = '   '.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

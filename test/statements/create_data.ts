@@ -176,4 +176,42 @@ WRITE lv_type.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
+
+  it("CREATE DATA, TYPE dynamic T100", async () => {
+    const code = `
+    DATA foo type ref to data.
+    CREATE DATA foo TYPE ('T100').
+    ASSERT foo IS NOT INITIAL.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("CREATE DATA, TYPE dynamic T100 space", async () => {
+    const code = `
+    DATA foo type ref to data.
+    CREATE DATA foo TYPE ('T100 ').
+    ASSERT foo IS NOT INITIAL.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("CREATE DATA, TYPE dynamic var", async () => {
+    const code = `
+    DATA lv_name TYPE c LENGTH 10.
+    DATA foo TYPE REF TO data.
+    lv_name = 'T100'.
+    CREATE DATA foo TYPE (lv_name).
+    ASSERT foo IS NOT INITIAL.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
 });

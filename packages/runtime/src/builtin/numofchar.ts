@@ -8,5 +8,6 @@ export function numofchar(input: {val: ICharacter | string}): Integer {
   } else {
     str = input.val.get();
   }
+  str = str.trimEnd();
   return new Integer().set(str.length);
 }

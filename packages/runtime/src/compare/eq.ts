@@ -1,4 +1,4 @@
-import {ABAPObject, Character, FieldSymbol, Float, HashedTable, Hex, Integer, Numc, Structure, Table} from "../types";
+import {ABAPObject, Character, Date, FieldSymbol, Float, HashedTable, Hex, Integer, Numc, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -32,6 +32,17 @@ export function eq(
   } else if (left instanceof FieldSymbol) {
     return eq(left.getPointer()!, right);
   }
+
+// for performance, do the typicaly/easy cases first
+/*
+  if (right instanceof Character && left instanceof Character && right.getLength() === left.getLength()) {
+    return right.get() === left.get();
+  } else if (right instanceof Numc && left instanceof Numc && right.getLength() === left.getLength()) {
+    return right.get() === left.get();
+  } else if (right instanceof Integer && left instanceof Integer) {
+    return right.get() === left.get();
+  }
+  */
 
   if (left instanceof Table || right instanceof Table || left instanceof HashedTable || right instanceof HashedTable) {
     if ((left instanceof Table || left instanceof HashedTable)
@@ -69,6 +80,8 @@ export function eq(
   let l: number | string | undefined = undefined;
   if (left instanceof Character) {
     l = left.getTrimEnd();
+  } else if (left instanceof Date) {
+    l = left.get().trimEnd();
   } else if (typeof left === "object") {
     l = left.get();
   } else {
@@ -78,6 +91,8 @@ export function eq(
   let r: number | string | undefined = undefined;
   if (right instanceof Character) {
     r = right.getTrimEnd();
+  } else if (right instanceof Date) {
+    r = right.get().trimEnd();
   } else if (typeof right === "object") {
     r = right.get();
   } else {

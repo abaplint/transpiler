@@ -54,7 +54,7 @@ export class Character implements ICharacter {
     if (this.value.length > this.length) {
       this.value = this.value.substr(0, this.length);
     } else if (this.value.length < this.length) {
-      this.value.padEnd(this.length, " ");
+      this.value = this.value.padEnd(this.length, " ");
     }
     return this;
   }

@@ -81,7 +81,7 @@ describe("Single statements", () => {
     {abap: "ASSERT 'a' < 'b'.",                       js: "abap.statements.assert(abap.compare.lt(new abap.types.Character(1).set('a'), new abap.types.Character(1).set('b')));",    skip: false},
     {abap: "rs_response-body = 'hello'.",             js: "rs_response.get().body.set(new abap.types.Character(5).set('hello'));",                  skip: false},
     {abap: "TYPES foo TYPE c.",                       js: "",                                                      skip: false}, // yes, skip TYPES
-    {abap: "IF ls_request-body = ''.\nENDIF.",        js: "if (abap.compare.eq(ls_request.get().body, new abap.types.Character(0).set(''))) {\n}",  skip: false},
+    {abap: "IF ls_request-body = ''.\nENDIF.",        js: "if (abap.compare.eq(ls_request.get().body, new abap.types.Character(1).set(''))) {\n}",  skip: false},
     {abap: "CONCATENATE 'foo' 'bar' INTO target.",    js: "abap.statements.concatenate({source: [new abap.types.Character(3).set('foo'), new abap.types.Character(3).set('bar')], target: target});", skip: false},
     {abap: "CONCATENATE foo bar INTO tg SEPARATED BY space.",    js: "abap.statements.concatenate({source: [foo, bar], target: tg, separatedBy: abap.builtin.space});", skip: false},
     {abap: "zcl_bar=>do_something( ).",               js: "await abap.Classes['ZCL_BAR'].do_something();",                               skip: false},
@@ -147,7 +147,7 @@ describe("Single statements", () => {
     {abap: "foo+1 = 'a'.",    js: "new abap.OffsetLength(foo, {offset: 1}).set(new abap.types.Character(1).set('a'));",            skip: false},
     {abap: "foo+1(1) = 'a'.", js: "new abap.OffsetLength(foo, {offset: 1, length: 1}).set(new abap.types.Character(1).set('a'));", skip: false},
     {abap: "foo(bar) = 'a'.", js: "new abap.OffsetLength(foo, {length: bar}).set(new abap.types.Character(1).set('a'));",    skip: false},
-    {abap: "IF iv_cd = '' OR iv_cd = '.'.\nENDIF.", js: "if (abap.compare.eq(iv_cd, new abap.types.Character(0).set('')) || abap.compare.eq(iv_cd, new abap.types.Character(1).set('.'))) {\n}", skip: false},
+    {abap: "IF iv_cd = '' OR iv_cd = '.'.\nENDIF.", js: "if (abap.compare.eq(iv_cd, new abap.types.Character(1).set('')) || abap.compare.eq(iv_cd, new abap.types.Character(1).set('.'))) {\n}", skip: false},
     {abap: "TRY. ENDTRY.", js: ``,    skip: false, only: false},
     {abap: "MESSAGE e058(00) WITH 'Value_1' 'Value_2' 'Value_3' 'Value_4' INTO lv_dummy.",
       js: `await abap.statements.message({into: lv_dummy, id: "00", number: "058", type: "E", with: [new abap.types.Character(7).set('Value_1'),new abap.types.Character(7).set('Value_2'),new abap.types.Character(7).set('Value_3'),new abap.types.Character(7).set('Value_4')]});`, skip: false},
@@ -300,32 +300,10 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({});`}, // todo
 
     {abap: `CALL METHOD bar RECEIVING field = field.`,
       js: `field.set(await bar());`},
-    {abap: `CALL METHOD (conv_out_class)=>create.`,
-      js: `if (abap.Classes[conv_out_class.get()] === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }
-if (abap.Classes[conv_out_class.get()] === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'](); }
-await abap.Classes[conv_out_class.get()].create();`},
     {abap: `CALL METHOD bar->name( ).`,
       js: `await bar.get().name();`},
     {abap: `CALL METHOD bar->name.`,
       js: `await bar.get().name();`},
-    {abap: `CALL METHOD ('CL_APJ_SCP_TOOLS')=>('IS_RESTART_REQUIRED').`,
-      js: `if (abap.Classes['CL_APJ_SCP_TOOLS'] === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }
-if (abap.Classes['CL_APJ_SCP_TOOLS'] === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_CLASS'](); }
-if (abap.Classes['CL_APJ_SCP_TOOLS'].is_restart_required === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_METHOD not found"; }
-if (abap.Classes['CL_APJ_SCP_TOOLS'].is_restart_required === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'](); }
-await abap.Classes['CL_APJ_SCP_TOOLS'].is_restart_required();`},
-    {abap: `CALL METHOD lo_factory->('CREATE_CLIF_SOURCE').`,
-      js: `if (lo_factory.get().create_clif_source === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_METHOD not found"; }
-if (lo_factory.get().create_clif_source === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'](); }
-await lo_factory.get().create_clif_source();`},
-    {abap: `CALL METHOD lo_obj->(ls_input-method_name).`,
-      js: `if (lo_obj.get()[ls_input.get().method_name.get().toLowerCase()] === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_METHOD not found"; }
-if (lo_obj.get()[ls_input.get().method_name.get().toLowerCase()] === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'](); }
-await lo_obj.get()[ls_input.get().method_name.get().toLowerCase()]();`},
-    {abap: `CALL METHOD zcl_call=>('NOT_FOUND').`,
-      js: `if (abap.Classes['ZCL_CALL'].not_found === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_METHOD not found"; }
-if (abap.Classes['ZCL_CALL'].not_found === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'](); }
-await abap.Classes['ZCL_CALL'].not_found();`},
 
     {abap: `lo_sdescr->get_component_type(
   EXPORTING

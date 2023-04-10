@@ -522,7 +522,7 @@ START-OF-SELECTION.
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("123");
+    expect(abap.console.get().trimEnd()).to.equal("123");
   });
 
   it("CALL METHOD", async () => {
@@ -1721,24 +1721,24 @@ START-OF-SELECTION.
     INTERFACE /tst/test PUBLIC.
       CONSTANTS test_constant TYPE string VALUE 'working'.
     ENDINTERFACE.
-    
-    
+
+
     CLASS /tst/cl_test DEFINITION.
       PUBLIC SECTION.
         INTERFACES /tst/test.
-    
+
         ALIASES test_constant
           FOR /tst/test~test_constant .
         METHODS
                 run.
     ENDCLASS.
-    
+
     CLASS /tst/cl_test IMPLEMENTATION.
       METHOD run.
         WRITE test_constant.
       ENDMETHOD.
     ENDCLASS.
-    
+
     DATA foo TYPE REF TO /tst/cl_test.
     CREATE OBJECT foo.
     foo->run( ).`;

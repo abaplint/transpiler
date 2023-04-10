@@ -85,7 +85,7 @@ export class SQLiteDatabaseSchema {
 
   private toType(type: abaplint.AbstractType, fieldname: string, errorInfo: string): string {
     if (type instanceof abaplint.BasicTypes.CharacterType) {
-      return `NCHAR(${type.getLength()})`;
+      return `NCHAR(${type.getLength()}) COLLATE RTRIM`;
     } else if (type instanceof abaplint.BasicTypes.TimeType) {
       return `NCHAR(6)`;
     } else if (type instanceof abaplint.BasicTypes.DateType) {
@@ -94,7 +94,7 @@ export class SQLiteDatabaseSchema {
       // it will be fine, the runtime representation of numc is also text
       return `NCHAR(${type.getLength()})`;
     } else if (type instanceof abaplint.BasicTypes.StringType) {
-      return `TEXT`;
+      return `TEXT COLLATE RTRIM`;
     } else if (type instanceof abaplint.BasicTypes.XStringType) {
       // it will be fine, the runtime representation of xstring is also text
       return `TEXT`;

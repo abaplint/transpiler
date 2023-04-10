@@ -39,17 +39,6 @@ describe("Builtin functions", () => {
     await f(abap);
   });
 
-  it("basic strlen", async () => {
-    const code = `
-      DATA foo TYPE string.
-      foo = '123'.
-      WRITE strlen( foo ).`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("3");
-  });
-
   it("basic xstrlen", async () => {
     const code = `
       DATA foo TYPE xstring.

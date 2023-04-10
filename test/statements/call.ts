@@ -122,4 +122,29 @@ START-OF-SELECTION.
     }
   });
 
+  it("call method, spaces, var", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS m1.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD m1.
+    WRITE 'foo'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lcl.
+  DATA lv_name TYPE c LENGTH 10.
+  lv_name = 'M1'.
+  CREATE OBJECT lo.
+  CALL METHOD lo->(lv_name).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("foo");
+  });
+
 });

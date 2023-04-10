@@ -52,4 +52,19 @@ describe("Builtin functions - substring_before", () => {
     expect(abap.console.get()).to.equal( `ZSOME_PROG_ENDING_WITH_CP` );
   });
 
+  it("substring_before 04", async () => {
+    const code = `
+    DATA res TYPE string.
+    DATA iv_program_name TYPE c LENGTH 40.
+    iv_program_name = 'HELLO=CP'.
+    res = substring_before(
+      val   = iv_program_name
+      regex = '(=+CP)?$' ).
+    WRITE res.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal( `HELLO` );
+  });
+
 });

@@ -138,7 +138,7 @@ describe("Running statements - LOOP", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("8910\n123\n56");
+    expect(abap.console.get()).to.equal("8910\n 123\n 56");
   });
 
   it("LOOPing FROM and TO with var and fs", async () => {
@@ -266,7 +266,7 @@ describe("Running statements - LOOP", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("2-2.3-4.5-2.6-7.8-2.9-3.\n6-7.27-7.30-3.\n18-5.24-4.27-7.30-3.");
+    expect(abap.console.get()).to.equal("2-2.3-4.5-2.6-7.8-2.9-3.\n 6-7.27-7.30-3.\n 18-5.24-4.27-7.30-3.");
   });
 
   it("LOOP should set sy-subrc", async () => {

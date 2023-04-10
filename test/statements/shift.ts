@@ -72,7 +72,7 @@ describe("Running statements - SHIFT", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("3355");
+    expect(abap.console.get()).to.equal("3355      ");
   });
 
   it("SHIFT LEFT CIRCULAR", async () => {

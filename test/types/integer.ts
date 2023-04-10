@@ -81,4 +81,15 @@ describe("Running Examples - Integer type", () => {
     await f(abap);
     expect(abap.console.get()).to.equal("68-");
   });
+
+  it("character spaces", async () => {
+    const code = `
+    DATA foo TYPE i.
+    DATA char TYPE c LENGTH 3.
+    char = '3 '.
+    foo = char.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
 });

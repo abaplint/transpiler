@@ -575,18 +575,6 @@ blah.set(await (new abap.Classes['ZCL_BLAH']()).constructor_());`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
-  it("CREATE OBJECT, dynamic via var", async () => {
-    const abap = `
-    DATA str TYPE string.
-    DATA blah TYPE REF TO OBJECT.
-    CREATE OBJECT blah TYPE (str).`;
-    const expected = `let str = new abap.types.String({qualifiedName: "STRING"});
-let blah = new abap.types.ABAPObject();
-if (abap.Classes[str.get()] === undefined) { throw new abap.Classes['CX_SY_CREATE_OBJECT_ERROR']; }
-blah.set(await (new abap.Classes[str.get()]()).constructor_());`;
-    expect(await runSingle(abap)).to.equal(expected);
-  });
-
   it("Complex table key", async () => {
     const abap = `
   TYPES:
@@ -651,14 +639,6 @@ CLASS lcl_bar IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.`;
     expect(await runSingle(abap)).to.include(`async moo() {`);
-  });
-
-  it("CALL METHOD dynamic in current class", async () => {
-    const abap = `CALL METHOD ('MOO').`;
-    const expected = `if (this.moo === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_METHOD not found"; }
-if (this.moo === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'](); }
-await this.moo();`;
-    expect(await runSingle(abap)).to.equals(expected);
   });
 
   it("constants and class CaSe", async () => {

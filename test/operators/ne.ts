@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -8,27 +8,34 @@ async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
 }
 
-describe("Builtin functions - to_lower", () => {
+describe("Running operators - NE", () => {
 
   beforeEach(async () => {
     abap = new ABAP();
   });
 
-  it("to_lower()", async () => {
-    const code = `ASSERT to_lower( 'ABC' ) = 'abc'.`;
+  it("char vs string", async () => {
+    const code = `
+ASSERT 'FOO' <> |FOO |.
+ASSERT |FOO | <> 'FOO'.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
 
-  it("test", async () => {
+  it("dates", async () => {
     const code = `
-    DATA foo TYPE c LENGTH 40.
-    foo = 'sdf'.
-    ASSERT foo = to_lower( foo ).`;
+    DATA lv_date1 TYPE d.
+    DATA lv_date2 TYPE d.
+    lv_date1 = sy-datum.
+    lv_date2 = sy-datum.
+    IF lv_date1 <> lv_date2.
+      WRITE 'error'.
+    ENDIF.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+    expect(abap.console.get()).to.equal("");
   });
 
 });

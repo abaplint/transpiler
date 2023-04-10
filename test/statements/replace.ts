@@ -30,7 +30,7 @@ describe("Running statements - REPLACE", () => {
     const code = `
   DATA lv_string TYPE string.
   lv_string = 'foobar'.
-  REPLACE ALL OCCURRENCES OF '' IN lv_string WITH 'sdfs'.
+  REPLACE ALL OCCURRENCES OF || IN lv_string WITH 'sdfs'.
   ASSERT lv_string = 'foobar'.`;
 
     const js = await run(code);

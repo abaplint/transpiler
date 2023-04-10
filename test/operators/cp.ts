@@ -173,4 +173,28 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal(`yes`);
   });
 
+  it("CP, spaces", async () => {
+    const code = `
+    DATA foo1 TYPE c LENGTH 5.
+    DATA foo2 TYPE c LENGTH 5.
+    foo1 = 'ABC'.
+    foo2 = '*'.
+    ASSERT foo1 CP foo2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("CP, more spaces", async () => {
+    const code = `
+    DATA foo1 TYPE c LENGTH 5.
+    DATA foo2 TYPE c LENGTH 5.
+    foo1 = 'ABC'.
+    foo2 = 'AB*'.
+    ASSERT foo1 CP foo2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

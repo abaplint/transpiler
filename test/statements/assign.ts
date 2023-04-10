@@ -30,6 +30,22 @@ describe("Running statements - ASSIGN", () => {
     expect(abap.console.get()).to.equal("foo");
   });
 
+  it("basic ASSIGN COMPONENT, space", async () => {
+    const code = `
+      TYPES: BEGIN OF ty_stru,
+              bar TYPE string,
+            END OF ty_stru.
+      DATA: ls_stru TYPE ty_stru.
+      FIELD-SYMBOLS <lv_val> TYPE any.
+      ls_stru-bar = 'foo'.
+      ASSIGN COMPONENT 'BAR ' OF STRUCTURE ls_stru TO <lv_val>.
+      WRITE <lv_val>.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("foo");
+  });
+
   it("ASSIGN fs TO fs", async () => {
     const code = `
       FIELD-SYMBOLS <fs1> TYPE i.
@@ -114,7 +130,7 @@ ENDLOOP.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("asd");
+    expect(abap.console.get()).to.equal("asd ");
   });
 
   it("ASSIGN by number", async () => {
@@ -177,7 +193,7 @@ WRITE <lv>.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("1234");
+    expect(abap.console.get()).to.equal("1234 ");
   });
 
   it("ASSIGN CASTING, 3", async () => {

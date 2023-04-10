@@ -33,6 +33,13 @@ export class Date implements ICharacter {
     } else {
       this.set(value.get());
     }
+
+    if (this.value.length > 8) {
+      this.value = this.value.substr(0, 8);
+    } else if (this.value.length < 8) {
+      this.value = this.value.padEnd(8, " ");
+    }
+
     return this;
   }
 

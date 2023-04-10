@@ -8,47 +8,45 @@ async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
 }
 
-describe("Running operators - concat", () => {
+describe("Builtin functions - strlen", () => {
 
   beforeEach(async () => {
     abap = new ABAP();
   });
 
-  it("char ends with newline", async () => {
+  it("basic strlen", async () => {
     const code = `
-    DATA char1 TYPE c LENGTH 3.
-    DATA char2 TYPE c LENGTH 3.
-    DATA res TYPE string.
-    char1 = |ab\\n|.
-    char2 = |cde|.
-    res = char1 && char2.
-    ASSERT res = |ab\\ncde|.`;
+      DATA foo TYPE string.
+      foo = '123'.
+      WRITE strlen( foo ).`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+    expect(abap.console.get()).to.equal("3");
   });
 
-  it("simple ampersand concat", async () => {
+  it("basic strlen, character", async () => {
     const code = `
-    DATA lv_value TYPE string.
-    lv_value = 'foo' & 'bar' & 'moo'.
-    ASSERT lv_value = 'foobarmoo'.`;
+      DATA foo TYPE c LENGTH 10.
+      foo = '123'.
+      WRITE strlen( foo ).`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+    expect(abap.console.get()).to.equal("3");
   });
 
-  it("simple ampersand concat", async () => {
+  it("sdf", async () => {
     const code = `
-    DATA lv_str1 TYPE string.
-    DATA lv_str2 TYPE string.
-    lv_str1 = |foo  |.
-    lv_str2 = lv_str1 && '-'.
-    WRITE lv_str2.`;
+    DATA foo TYPE c LENGTH 40.
+    DATA str TYPE string.
+    foo = 'sdf'.
+    str = foo.
+    WRITE strlen( str ).`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("foo  -");
+    expect(abap.console.get()).to.equal("3");
   });
 
 });
