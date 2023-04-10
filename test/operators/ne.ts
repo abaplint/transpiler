@@ -8,24 +8,16 @@ async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
 }
 
-describe("Builtin functions - to_lower", () => {
+describe("Running operators - NE", () => {
 
   beforeEach(async () => {
     abap = new ABAP();
   });
 
-  it("to_lower()", async () => {
-    const code = `ASSERT to_lower( 'ABC' ) = 'abc'.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-  });
-
-  it("test", async () => {
+  it("char vs string", async () => {
     const code = `
-    DATA foo TYPE c LENGTH 40.
-    foo = 'sdf'.
-    ASSERT foo = to_lower( foo ).`;
+ASSERT 'FOO' <> |FOO |.
+ASSERT |FOO | <> 'FOO'.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);

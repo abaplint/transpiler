@@ -25,4 +25,14 @@ describe("Builtin functions - to_upper", () => {
     await f(abap);
   });
 
+  it("test", async () => {
+    const code = `
+    DATA foo TYPE c LENGTH 40.
+    foo = 'SDF'.
+    ASSERT foo = to_upper( foo ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

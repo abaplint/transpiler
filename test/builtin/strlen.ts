@@ -36,4 +36,17 @@ describe("Builtin functions - strlen", () => {
     expect(abap.console.get()).to.equal("3");
   });
 
+  it("sdf", async () => {
+    const code = `
+    DATA foo TYPE c LENGTH 40.
+    DATA str TYPE string.
+    foo = 'sdf'.
+    str = foo.
+    WRITE strlen( str ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3");
+  });
+
 });
