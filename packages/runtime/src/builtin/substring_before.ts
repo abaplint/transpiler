@@ -1,8 +1,17 @@
+import {Character} from "../types";
 import {ICharacter} from "../types/_character";
 import {String} from "../types/string";
 
 export function substring_before(input: {val: ICharacter | string, sub?: ICharacter | string, regex?: ICharacter | string}): ICharacter {
-  const val = typeof input.val === "string" ? input.val : input.val.get();
+  let val = "";
+  if (typeof input.val === "string") {
+    val = input.val;
+  } else if (input.val instanceof Character){
+    val = input.val.getTrimEnd();
+  } else {
+    val = input.val.get();
+  }
+
   let reg = "";
   if (typeof input.regex === "string") {
     reg = input.regex;
