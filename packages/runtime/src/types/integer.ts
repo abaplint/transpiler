@@ -5,7 +5,7 @@ import {XString} from "./xstring";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 
-const digits = new RegExp(/^\s*-?\+?\d+\.?\d*$/i);
+const digits = new RegExp(/^\s*-?\+?\d+\.?\d* *$/i);
 
 export class Integer implements INumeric {
   private value: number;
