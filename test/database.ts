@@ -1036,4 +1036,21 @@ WRITE sy-dbcnt.`;
     expect(abap.console.get().trimEnd()).to.equal("ZAG_UNIT_TEST       \nhello world");
   });
 
+  it("INSERT dynamic", async () => {
+    const code = `
+    DATA lv_name type c length 30.
+    DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+    lv_name = 'T100'.
+    APPEND INITIAL LINE TO tab.
+    INSERT (lv_name) FROM TABLE tab.
+    WRITE sy-subrc.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("0");
+  });
+
 });

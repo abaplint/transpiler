@@ -23,7 +23,7 @@ export class DeleteDatabase {
       options.from = options.from.getPointer() as Structure;
     }
     if (typeof table !== "string") {
-      table = table.get();
+      table = table.get().trimEnd();
     }
 
     if (options.table) {
