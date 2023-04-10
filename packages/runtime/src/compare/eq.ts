@@ -1,4 +1,4 @@
-import {ABAPObject, Character, FieldSymbol, Float, HashedTable, Hex, Integer, Numc, Structure, Table} from "../types";
+import {ABAPObject, Character, Date, FieldSymbol, Float, HashedTable, Hex, Integer, Numc, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -78,6 +78,8 @@ export function eq(
   let l: number | string | undefined = undefined;
   if (left instanceof Character) {
     l = left.getTrimEnd();
+  } else if (left instanceof Date) {
+    l = left.get().trimEnd();
   } else if (typeof left === "object") {
     l = left.get();
   } else {
@@ -87,6 +89,8 @@ export function eq(
   let r: number | string | undefined = undefined;
   if (right instanceof Character) {
     r = right.getTrimEnd();
+  } else if (right instanceof Date) {
+    l = right.get().trimEnd();
   } else if (typeof right === "object") {
     r = right.get();
   } else {

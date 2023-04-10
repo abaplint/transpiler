@@ -59,14 +59,14 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
           }
           call += "[";
           call += traversal.traverse(second).getCode();
-          call += ".get().toLowerCase()]";
+          call += ".get().toLowerCase().trimEnd()]";
         } else if (second.get() instanceof Expressions.Constant) {
           if (call === "") {
             call = "this.";
           } else if (call.endsWith(".") === false) {
             call += ".";
           }
-          call += second.getFirstToken().getStr().replace(/\'/g, "").toLowerCase().replace("~", "$");
+          call += second.getFirstToken().getStr().replace(/\'/g, "").toLowerCase().replace("~", "$").trimEnd();
         } else {
           ret.appendString("MethodSourceTranspiler-Unexpected");
         }

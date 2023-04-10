@@ -318,10 +318,6 @@ await abap.Classes['CL_APJ_SCP_TOOLS'].is_restart_required();`},
       js: `if (lo_factory.get().create_clif_source === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_METHOD not found"; }
 if (lo_factory.get().create_clif_source === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'](); }
 await lo_factory.get().create_clif_source();`},
-    {abap: `CALL METHOD lo_obj->(ls_input-method_name).`,
-      js: `if (lo_obj.get()[ls_input.get().method_name.get().toLowerCase()] === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_METHOD not found"; }
-if (lo_obj.get()[ls_input.get().method_name.get().toLowerCase()] === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'](); }
-await lo_obj.get()[ls_input.get().method_name.get().toLowerCase()]();`},
     {abap: `CALL METHOD zcl_call=>('NOT_FOUND').`,
       js: `if (abap.Classes['ZCL_CALL'].not_found === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_METHOD not found"; }
 if (abap.Classes['ZCL_CALL'].not_found === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'](); }
