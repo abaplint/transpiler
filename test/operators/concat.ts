@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -36,6 +36,19 @@ describe("Running operators - concat", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("simple ampersand concat", async () => {
+    const code = `
+    DATA lv_str1 TYPE string.
+    DATA lv_str2 TYPE string.
+    lv_str1 = |foo  |.
+    lv_str2 = lv_str1 && '-'.
+    WRITE lv_str2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("foo  -");
   });
 
 });

@@ -271,4 +271,36 @@ ASSERT val2 = |a"\\\\\\t|.`;
     await f(abap);
   });
 
+  it("split 10", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+DATA str TYPE string.
+DATA val TYPE c LENGTH 20.
+val = 'foo#bar'.
+SPLIT val AT '#' INTO TABLE tab.
+LOOP AT tab INTO str.
+  WRITE / strlen( str ).
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal(`3\n3`);
+  });
+
+  it("split 11", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+DATA str TYPE string.
+DATA val TYPE c LENGTH 20.
+val = 'foo#bar'.
+SPLIT val AT '# ' INTO TABLE tab.
+LOOP AT tab INTO str.
+  WRITE / strlen( str ).
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal(`7`);
+  });
+
 });

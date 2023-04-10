@@ -1,5 +1,5 @@
 import {ICharacter} from "../types/_character";
-import {Table, String} from "../types";
+import {Table, String, Character} from "../types";
 
 export interface ISplitOptions {
   source: ICharacter | string,
@@ -9,7 +9,15 @@ export interface ISplitOptions {
 }
 
 export function split(param: ISplitOptions) {
-  const source = typeof param.source === "string" ? param.source : param.source.get();
+  let source = "";
+  if (typeof param.source === "string") {
+    source = param.source;
+  } else if (param.source instanceof Character) {
+    source = param.source.getTrimEnd();
+  } else {
+    source = param.source.get();
+  }
+
   const at = typeof param.at === "string" ? param.at : param.at.get();
 
   const split = source.includes(at) ? source.split(at) : [];
