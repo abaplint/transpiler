@@ -33,9 +33,9 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
     target.assign(new abap.types.Table(abap.DDIC[options.name].type));
   } else if (options?.name) {
     // @ts-ignore
-    if (abap.DDIC[options.name]) {
+    if (abap.DDIC[options.name.trimEnd()]) {
       // @ts-ignore
-      target.assign(clone(abap.DDIC[options.name].type));
+      target.assign(clone(abap.DDIC[options.name.trimEnd()].type));
     } else if (options.name.includes("=>")) {
       const [className, typeName] = options.name.toUpperCase().split("=>");
 
@@ -123,9 +123,9 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
         break;
       default:
           // @ts-ignore
-        if (abap.DDIC[options.typeName]) {
+        if (abap.DDIC[options.typeName.trimEnd()]) {
           // @ts-ignore
-          target.assign(clone(abap.DDIC[options.typeName].type));
+          target.assign(clone(abap.DDIC[options.typeName.trimEnd()].type));
         }
         else if (options.typeName.includes("=>")) {
           const [className, typeName] = options.typeName.toUpperCase().split("=>");
@@ -135,12 +135,12 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
             throwError("CX_SY_CREATE_DATA_ERROR");
           }
           // @ts-ignore
-          if (abap.Classes[className][typeName.toLowerCase()] === undefined) {
+          if (abap.Classes[className][typeName.toLowerCase().trimEnd()] === undefined) {
             throwError("CX_SY_CREATE_DATA_ERROR");
           }
 
           // @ts-ignore
-          target.assign(clone(abap.Classes[className][typeName.toLowerCase()]));
+          target.assign(clone(abap.Classes[className][typeName.toLowerCase().trimEnd()]));
         } else {
           throw "CREATE DATA, unknown type " + options.typeName;
         }
