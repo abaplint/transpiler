@@ -528,11 +528,11 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("0");
   });
 
-  it.only("spaces in dynname", async () => {
+  it("spaces in dynname", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
-    DATA var TYPE i.
+    DATA vart TYPE i.
 ENDCLASS.
 
 CLASS lcl IMPLEMENTATION.
@@ -542,20 +542,19 @@ START-OF-SELECTION.
   DATA lo TYPE REF TO lcl.
   FIELD-SYMBOLS <fs> TYPE i.
   CREATE OBJECT lo.
-  ASSIGN ('LO->VAR   ') TO <fs>.
+  ASSIGN ('LO->VART   ') TO <fs>.
   ASSERT sy-subrc = 0.
   <fs> = 2.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("0");
   });
 
-  it.only("spaces in dynname, another example", async () => {
+  it("spaces in dynname, another example", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
-    DATA var TYPE i.
+    DATA vari TYPE i.
 ENDCLASS.
 
 CLASS lcl IMPLEMENTATION.
@@ -565,13 +564,12 @@ START-OF-SELECTION.
   DATA lo TYPE REF TO lcl.
   FIELD-SYMBOLS <fs> TYPE i.
   CREATE OBJECT lo.
-  ASSIGN lo->('VAR   ') TO <fs>.
+  ASSIGN lo->('VARI   ') TO <fs>.
   ASSERT sy-subrc = 0.
   <fs> = 2.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("0");
   });
 
 });

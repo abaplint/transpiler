@@ -569,7 +569,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("6");
   });
 
-  it.only("interface static constant accessed via instance", async () => {
+  it("interface static constant accessed via instance", async () => {
     const code = `
 INTERFACE lif.
   CLASS-DATA field TYPE i.
