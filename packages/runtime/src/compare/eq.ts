@@ -55,11 +55,10 @@ export function eq(
     return right.get() === left.get();
   } else if (right instanceof Integer && left instanceof Integer) {
     return right.get() === left.get();
-  }
-
-  if (left instanceof Table || right instanceof Table || left instanceof HashedTable || right instanceof HashedTable) {
-    if ((left instanceof Table || left instanceof HashedTable)
-        && (right instanceof Table || right instanceof HashedTable)) {
+  } else if (right instanceof Table
+      || right instanceof HashedTable) {
+    if (left instanceof Table
+        || left instanceof HashedTable) {
       return compareTables(left, right);
     } else {
 // this happens in dynamic/ANY typed scenarios?
@@ -94,6 +93,8 @@ export function eq(
     l = left.getTrimEnd();
   } else if (left instanceof Date) {
     l = left.get().trimEnd();
+  } else if (left instanceof Table || left instanceof HashedTable) {
+    return false;
   } else if (typeof left === "object") {
     l = left.get();
   } else {
