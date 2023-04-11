@@ -23,7 +23,7 @@ export function clone<T>(obj: T): T {
     // @ts-ignore
     // eslint-disable-next-line no-prototype-builtins
     if (obj.hasOwnProperty(attr)) {
-      if (null == obj[attr] || "object" != typeof obj[attr]) {
+      if (null === obj[attr] || "object" !== typeof obj[attr]) {
         copy[attr] = obj[attr];
       } else {
         copy[attr] = clone(obj[attr]);

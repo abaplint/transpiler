@@ -66,7 +66,7 @@ export class SelectDatabase {
         }
 
         // @ts-ignore
-        abap.statements.insertInternal({table: target, data: targetRow});
+        abap.statements.insertInternal({table: target, data: targetRow, noClone: true});
       }
     } else if (Array.isArray(target)) {
       for (let index = 0; index < target.length; index++) {
