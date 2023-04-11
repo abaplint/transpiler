@@ -119,4 +119,20 @@ describe("Running statements - CONCATENATE", () => {
     await f(abap);
   });
 
+  it.only("concatenate, blanks", async () => {
+    const code = `
+DATA input TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+DATA count TYPE i.
+DATA field TYPE string.
+APPEND \`  \` TO input.
+APPEND \`   \` TO input.
+CONCATENATE LINES OF input INTO field RESPECTING BLANKS.
+count = strlen( field ).
+WRITE count.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(5);
+  });
+
 });
