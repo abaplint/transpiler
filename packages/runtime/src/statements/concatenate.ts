@@ -17,7 +17,11 @@ export function concatenate(input: IConcatenateInput) {
     const tab = input.source[0];
     if (tab instanceof Table) {
       for (const l of tab.array()) {
-        list.push(l.get().trimEnd());
+        if (input.respectingBlanks !== true) {
+          list.push(l.get().trimEnd());
+        } else {
+          list.push(l.get());
+        }
       }
     }
   } else {
@@ -28,9 +32,10 @@ export function concatenate(input: IConcatenateInput) {
       } else if (typeof source === "string" || typeof source === "number") {
         val = source.toString();
       } else if (source instanceof Character) {
-        val = source.get().toString();
         if (input.respectingBlanks !== true) {
-          val = val.replace(/ +$/, "");
+          val = source.getTrimEnd();
+        } else {
+          val = source.get();
         }
       } else {
         val = source.get().toString();
