@@ -26,11 +26,11 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
   }
   if (options?.name && options?.table) {
     // @ts-ignore
-    if (abap.DDIC[options.name] === undefined) {
+    if (abap.DDIC[options.name.trimEnd()] === undefined) {
       throwError("CX_SY_CREATE_DATA_ERROR");
     }
     // @ts-ignore
-    target.assign(new abap.types.Table(abap.DDIC[options.name].type));
+    target.assign(new abap.types.Table(abap.DDIC[options.name.trimEnd()].type));
   } else if (options?.name) {
     // @ts-ignore
     if (abap.DDIC[options.name.trimEnd()]) {
