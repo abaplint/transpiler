@@ -147,4 +147,27 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("foo");
   });
 
+  it("call method, escape interface method name", async () => {
+    const code = `
+INTERFACE lif.
+  CLASS-METHODS method.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD lif~method.
+    WRITE 'hello'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  CALL METHOD ('LCL')=>lif~method.`;
+    const js = await run(code);
+    expect(js).to.include("].lif$method");
+  });
+
 });
