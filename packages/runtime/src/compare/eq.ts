@@ -36,17 +36,23 @@ export function eq(
 
 // for performance, do the typicaly/easy cases first
   if (right instanceof Character) {
-    if (left instanceof Character && right.getLength() === left.getLength()) {
-      return right.get() === left.get();
+    if (left instanceof Character) {
+      if (right.getLength() === left.getLength()) {
+        return right.get() === left.get();
+      } else {
+        return right.getTrimEnd() === left.getTrimEnd();
+      }
     } else if (left instanceof String) {
       return right.getTrimEnd() === left.get();
     }
-  } else if (left instanceof Character) {
-    if (right instanceof Character && right.getLength() === left.getLength()) {
+    /*
+  } else if (right instanceof String) {
+    if (left instanceof String) {
       return right.get() === left.get();
-    } else if (right instanceof String) {
-      return left.getTrimEnd() === right.get();
+    } else if (left instanceof Character) {
+      return right.get() === left.get();
     }
+    */
   } else if (right instanceof Numc && left instanceof Numc && right.getLength() === left.getLength()) {
     return right.get() === left.get();
   } else if (right instanceof Integer && left instanceof Integer) {
