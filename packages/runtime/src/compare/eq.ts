@@ -1,4 +1,5 @@
-import {ABAPObject, Character, Date, FieldSymbol, Float, HashedTable, Hex, Integer, Numc, Structure, Table} from "../types";
+/* eslint-disable max-len */
+import {ABAPObject, Character, Date, FieldSymbol, Float, HashedTable, String, Hex, Integer, Numc, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -21,8 +22,8 @@ function compareTables(left: Table | HashedTable, right: Table | HashedTable): b
 }
 
 export function eq(
-  left: number | string | ICharacter | INumeric | Float | ABAPObject | Structure | Hex | HashedTable | Table | FieldSymbol,
-  right: number | string | ICharacter | INumeric | Float | ABAPObject | Structure | Hex | HashedTable | Table | FieldSymbol): boolean {
+  left: number | string | ICharacter | INumeric | Float | String |ABAPObject | Structure | Hex | HashedTable | Table | FieldSymbol,
+  right: number | string | ICharacter | INumeric | Float | String | ABAPObject | Structure | Hex | HashedTable | Table | FieldSymbol): boolean {
 /*
   console.dir(left);
   console.dir(right);
@@ -34,8 +35,18 @@ export function eq(
   }
 
 // for performance, do the typicaly/easy cases first
-  if (right instanceof Character && left instanceof Character && right.getLength() === left.getLength()) {
-    return right.get() === left.get();
+  if (right instanceof Character) {
+    if (left instanceof Character && right.getLength() === left.getLength()) {
+      return right.get() === left.get();
+    } else if (left instanceof String) {
+      return right.getTrimEnd() === left.get();
+    }
+  } else if (left instanceof Character) {
+    if (right instanceof Character && right.getLength() === left.getLength()) {
+      return right.get() === left.get();
+    } else if (right instanceof String) {
+      return left.getTrimEnd() === right.get();
+    }
   } else if (right instanceof Numc && left instanceof Numc && right.getLength() === left.getLength()) {
     return right.get() === left.get();
   } else if (right instanceof Integer && left instanceof Integer) {
@@ -55,8 +66,7 @@ export function eq(
   if (left instanceof Structure || right instanceof Structure) {
     if (!(right instanceof Structure)) {
       return eq((left as Structure).getCharacter(), right);
-    }
-    if (!(left instanceof Structure)) {
+    } else if (!(left instanceof Structure)) {
       return eq(left, (right as Structure).getCharacter());
     }
     const l = left.get();
