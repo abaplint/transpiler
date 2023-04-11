@@ -49,4 +49,20 @@ ASSERT c_package_file = str.`;
     await f(abap);
   });
 
+  it("string and char", async () => {
+    const code = `
+    ASSERT |hello| = 'hello '.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("char and char, different lengths", async () => {
+    const code = `
+    ASSERT 'a' = 'a '.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
