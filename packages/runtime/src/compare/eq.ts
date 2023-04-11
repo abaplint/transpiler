@@ -45,14 +45,12 @@ export function eq(
     } else if (left instanceof String) {
       return right.getTrimEnd() === left.get();
     }
-    /*
   } else if (right instanceof String) {
-    if (left instanceof String) {
-      return right.get() === left.get();
-    } else if (left instanceof Character) {
+    if (left instanceof Character) {
+      return right.get() === left.getTrimEnd();
+    } else if (left instanceof String) {
       return right.get() === left.get();
     }
-    */
   } else if (right instanceof Numc && left instanceof Numc && right.getLength() === left.getLength()) {
     return right.get() === left.get();
   } else if (right instanceof Integer && left instanceof Integer) {
