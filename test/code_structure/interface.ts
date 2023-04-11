@@ -569,4 +569,28 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("6");
   });
 
+  it("interface static constant accessed via instance", async () => {
+    const code = `
+INTERFACE lif.
+  CLASS-DATA field TYPE i.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lif.
+  CREATE OBJECT lo TYPE lcl.
+  WRITE lo->field.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("0");
+  });
+
 });

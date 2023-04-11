@@ -528,4 +528,48 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("0");
   });
 
+  it("spaces in dynname", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    DATA vart TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lcl.
+  FIELD-SYMBOLS <fs> TYPE i.
+  CREATE OBJECT lo.
+  ASSIGN ('LO->VART   ') TO <fs>.
+  ASSERT sy-subrc = 0.
+  <fs> = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("spaces in dynname, another example", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    DATA vari TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lcl.
+  FIELD-SYMBOLS <fs> TYPE i.
+  CREATE OBJECT lo.
+  ASSIGN lo->('VARI   ') TO <fs>.
+  ASSERT sy-subrc = 0.
+  <fs> = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

@@ -18,6 +18,8 @@ export function assign(input: IAssignInput) {
       input.dynamicSource = input.dynamicSource.getPointer();
     }
 
+    input.dynamicName = input.dynamicName.trimEnd();
+
     if (input.dynamicName.includes("->")) {
       if (input.dynamicSource instanceof ABAPObject) {
         const split = input.dynamicName.split("->");

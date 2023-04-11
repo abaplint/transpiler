@@ -361,7 +361,7 @@ export class Traversal {
 
     // attributes from directly implemented interfaces(not interfaces implemented in super classes)
     for (const i of def.getImplementing()) {
-      ret += this.dataFromInterfaces(i.name, scope);
+      ret += this.dataFromInterfaces(i.name, scope, cName!);
     }
 
     // handle aliases after initialization of carrier variables
@@ -402,7 +402,7 @@ export class Traversal {
     return clas;
   }
 
-  private dataFromInterfaces(name: string, scope: abaplint.ISpaghettiScopeNode | undefined): string {
+  private dataFromInterfaces(name: string, scope: abaplint.ISpaghettiScopeNode | undefined, cname: string): string {
     let ret = "";
 
     const intf = this.findInterfaceDefinition(name, scope);
@@ -418,16 +418,17 @@ export class Traversal {
     }
 
     for (const a of intf?.getAttributes().getAll() || []) {
-      if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
-        continue;
-      }
       const n = Traversal.escapeNamespace(name.toLowerCase()) + "$" + a.getName().toLowerCase();
       // note: interface inheritenace and super inheritance might be strange,
-      ret += "if (this." + n + " === undefined) this." + n + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
+      if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
+        ret += "if (this." + n + " === undefined) this." + n + " = " + cname + "." + n + ";\n";
+      } else {
+        ret += "if (this." + n + " === undefined) this." + n + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
+      }
     }
 
     for (const i of intf?.getImplementing() || []) {
-      ret += this.dataFromInterfaces(i.name, scope);
+      ret += this.dataFromInterfaces(i.name, scope, cname);
     }
 
     return ret;
