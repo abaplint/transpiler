@@ -405,7 +405,7 @@ export class Table implements ITable {
     return this.header;
   }
 
-  public insertIndex(item: TableRowType, index: number) {
+  public insertIndex(item: TableRowType, index: number, noClone = false) {
     this.secondaryIndexes = {};
 
     if (item instanceof FieldSymbol) {
@@ -417,7 +417,12 @@ export class Table implements ITable {
       return p;
     }
 
-    const val = this.getValue(item);
+    let val: TableRowType;
+    if (noClone === false) {
+      val = this.getValue(item);
+    } else {
+      val = item;
+    }
 
     if (index === 0) {
       this.value.unshift(val);

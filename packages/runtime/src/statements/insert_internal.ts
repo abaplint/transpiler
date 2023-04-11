@@ -13,6 +13,7 @@ export interface IInsertInternalOptions {
   table: Table | HashedTable | FieldSymbol,
   referenceInto?: DataReference,
   assigning?: FieldSymbol,
+  noClone?: boolean,
   lines?: boolean,
 }
 
@@ -130,7 +131,7 @@ export function insertInternal(options: IInsertInternalOptions): void {
     return;
   } else if (data) {
     // todo, for now it just appends, this is not correct, but currently the table type is not known
-    const val = options.table.insertIndex(data, options.table.getArrayLength());
+    const val = options.table.insertIndex(data, options.table.getArrayLength(), options.noClone);
     if (options.assigning) {
       options.assigning.assign(val);
     }
