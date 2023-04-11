@@ -40,7 +40,7 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
 
           const name = children[i + 2];
           if (name.get() instanceof Expressions.AttributeName) {
-            const suffix = "." + name.concatTokens().toLowerCase();
+            const suffix = "." + name.concatTokens().toLowerCase().replace("~", "$");
             ret.appendString(`if (${call + suffix} === undefined && ${illegalMethod} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_METHOD not found"; }\n`);
             ret.appendString(`if (${call + suffix} === undefined) { throw new ${illegalMethod}(); }\n`);
           }
