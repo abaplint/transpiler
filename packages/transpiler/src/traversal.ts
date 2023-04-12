@@ -300,7 +300,7 @@ export class Traversal {
       return undefined;
     }
 
-    // local classes
+    // local
     if (ref.getFilename() === this.getFilename()) {
       const scope = this.findCurrentScopeByToken(ref.getToken());
       if (scope?.getIdentifier().stype === abaplint.ScopeType.Interface) {
@@ -308,7 +308,13 @@ export class Traversal {
       }
     }
 
-    // global classes
+    // global
+    for (const obj of this.reg.getObjectsByType("INTF")) {
+      if (obj.getFiles().some(f => f.getFilename() === ref.getFilename())) {
+        return obj.getName().toLowerCase();
+      }
+    }
+    /*
     const file = this.reg.getFileByName(ref.getFilename());
     if (file) {
       const obj = this.reg.findObjectForFile(file);
@@ -316,6 +322,7 @@ export class Traversal {
         return obj.getName().toLowerCase();
       }
     }
+    */
 
     return undefined;
   }
