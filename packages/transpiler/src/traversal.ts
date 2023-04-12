@@ -528,7 +528,7 @@ export class Traversal {
     }
     const name = def.getName();
     if (def.isGlobal() === false) {
-      const prefix = this.buildPrefix(def);
+      const prefix = this.buildPrefix();
       return `abap.Classes['${prefix}-${name.toUpperCase()}'] = ${Traversal.escapeNamespace(name.toLowerCase())};`;
     } else {
       return `abap.Classes['${name.toUpperCase()}'] = ${Traversal.escapeNamespace(name.toLowerCase())};`;
@@ -578,7 +578,7 @@ export class Traversal {
 
     if (def) {
       if (def.isGlobal() === false) {
-        const prefix = this.buildPrefix(def);
+        const prefix = this.buildPrefix();
         return `abap.Classes['${prefix}-${def?.getName()?.toUpperCase()}']`;
       } else {
         return `abap.Classes['${def?.getName()?.toUpperCase()}']`;
@@ -589,13 +589,8 @@ export class Traversal {
     }
   }
 
-  private buildPrefix(def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition ): string {
-    const file = this.reg.getFileByName(def.getFilename());
-    if (file === undefined) {
-      return "NOT_FOUND";
-    }
-    const obj = this.reg.findObjectForFile(file);
-    return obj?.getType() + "-" + obj?.getName();
+  private buildPrefix(): string {
+    return this.obj.getType() + "-" + this.obj.getName();
   }
 
 ////////////////////////////
