@@ -79,6 +79,7 @@ export class TranspileTypes {
         extra += ", \"" + type.getQualifiedName() + "\"";
       }
     } else if (type instanceof abaplint.BasicTypes.CLikeType
+        || type instanceof abaplint.BasicTypes.CGenericType
         || type instanceof abaplint.BasicTypes.CSequenceType) {
       // if not supplied its a Character(1)
       resolved = "Character";
