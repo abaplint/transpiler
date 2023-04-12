@@ -49,7 +49,7 @@ export class Chunk {
     const lines = this.raw.split("\n");
     const lineCount = lines.length;
     const lastLine = lines[lines.length - 1];
-    append.mappings.forEach(m => {
+    for (const m of append.mappings) {
       // original stays the same, but adjust the generated positions
       const add = m;
       if (add.generated.line === 1 && this.raw.endsWith("\n") === false) {
@@ -58,7 +58,7 @@ export class Chunk {
         add.generated.line += lineCount - 1;
       }
       this.mappings.push(add);
-    });
+    }
 
     this.raw += append.getCode();
     return this;
