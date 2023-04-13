@@ -120,10 +120,14 @@ export class Chunk {
     throw "error, dont toString a Chunk";
   }
 
-  public runIndentationLogic() {
+  public runIndentationLogic(ignoreSourceMap = false) {
     let i = 0;
     let line = 1;
     const output: string[] = [];
+
+    if (ignoreSourceMap === true) {
+      this.mappings = [];
+    }
 
     for (const l of this.raw.split("\n")) {
       if (l.startsWith("}")) {

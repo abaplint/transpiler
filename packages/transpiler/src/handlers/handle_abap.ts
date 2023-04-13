@@ -34,7 +34,7 @@ export class HandleABAP {
       const contents = new Traversal(spaghetti, file, obj, reg, this.options).traverse(rearranged);
       chunk.appendChunk(contents);
       chunk.stripLastNewline();
-      chunk.runIndentationLogic();
+      chunk.runIndentationLogic(this.options?.ignoreSourceMap);
 
       const exports = this.findExports(file.getStructure());
       const filename = file.getFilename().replace(".abap", ".mjs").toLowerCase();
