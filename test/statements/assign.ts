@@ -572,4 +572,35 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("dynamic assign ME->", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    DATA foo TYPE i.
+    METHODS run.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    FIELD-SYMBOLS <fs1> TYPE any.
+    FIELD-SYMBOLS <fs2> TYPE any.
+    ASSIGN ('me->FOO') TO <fs1>.
+    WRITE / sy-subrc.
+    <fs1> = 2.
+    ASSIGN ('ME->FOO') TO <fs2>.
+    WRITE / sy-subrc.
+    WRITE / <fs2>.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lcl.
+  CREATE OBJECT lo.
+  lo->run( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("0\n0\n2");
+  });
+
 });

@@ -63,4 +63,6 @@ export interface ITranspilerOptions {
   keywords?: string[];
   /** dont insert into REPOSRC */
   skipReposrc?: boolean;
+  /** ignore source map */
+  ignoreSourceMap?: boolean;
 }
