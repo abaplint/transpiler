@@ -92,7 +92,6 @@ describe("Single statements", () => {
     {abap: "FIELD-SYMBOLS <bar> TYPE i.",             js: `let fs_bar_ = new abap.types.FieldSymbol(new abap.types.Integer({qualifiedName: "I"}));`, skip: false},
     {abap: "ASSIGN da TO <name>.",                    js: "abap.statements.assign({target: fs_name_, source: da});",        skip: false},
     {abap: "ASSIGN <fs1> TO <fs2>.",                  js: "abap.statements.assign({target: fs_fs2_, source: fs_fs1_});",    skip: false},
-    {abap: "ASSIGN ('SDF') TO <fs2>.",                js: "abap.statements.assign({target: fs_fs2_, dynamicName: 'SDF', dynamicSource: (() => {try { return sdf; } catch {}})()});",    skip: false},
     {abap: "ASSERT <name> = 1.",                      js: "abap.statements.assert(abap.compare.eq(fs_name_, new abap.types.Integer().set(1)));", skip: false},
     {abap: "<name> = 1.",                             js: "fs_name_.set(new abap.types.Integer().set(1));",                                      skip: false},
     {abap: "CONSTANTS c TYPE i VALUE 1.",             js: `let c = new abap.types.Integer({qualifiedName: "I"});\nc.set(1);`,           skip: false},

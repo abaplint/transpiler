@@ -603,4 +603,60 @@ START-OF-SELECTION.
     expect(abap.console.getTrimmed()).to.equal("0\n0\n2");
   });
 
+  it("dynamic assign ME->, another case", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    DATA foo TYPE i.
+    METHODS run.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    DATA lv_name TYPE c LENGTH 10.
+    FIELD-SYMBOLS <fs1> TYPE any.
+    lv_name = 'FOO'.
+    ASSIGN me->(lv_name) TO <fs1>.
+    WRITE / sy-subrc.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lcl.
+  CREATE OBJECT lo.
+  lo->run( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("0");
+  });
+
+  it("dynamic assign ME->, another case, upper", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    DATA foo TYPE i.
+    METHODS run.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    DATA lv_name TYPE c LENGTH 10.
+    FIELD-SYMBOLS <fs1> TYPE any.
+    lv_name = 'FOO'.
+    ASSIGN ME->(lv_name) TO <fs1>.
+    WRITE / sy-subrc.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lcl.
+  CREATE OBJECT lo.
+  lo->run( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("0");
+  });
+
 });

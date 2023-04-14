@@ -62,11 +62,10 @@ export class AssignTranspiler implements IStatementTranspiler {
         const firstFirst = first.getChildren()[1];
         if (firstFirst?.get() instanceof abaplint.Expressions.Constant) {
           const s = firstFirst.getFirstToken().getStr().toLowerCase().match(/\w+/)?.toString();
-          if (s === "me") {
-            options.push(`dynamicSource: this.me`);
-          } else {
-            options.push(`dynamicSource: (() => {try { return ${s}; } catch {}})()`);
-          }
+          options.push(`dynamicSource: (() => {
+            try { return ${s}; } catch {}
+            try { return this.${s}; } catch {}
+          })()`);
         } else if (firstFirst?.get() instanceof abaplint.Expressions.FieldChain && firstFirst instanceof abaplint.Nodes.ExpressionNode) {
           const code = new FieldChainTranspiler(true).transpile(firstFirst, traversal).getCode();
           options.push(`dynamicSource: (() => {
@@ -76,7 +75,11 @@ export class AssignTranspiler implements IStatementTranspiler {
           })()`);
         }
       } else if (first?.get() instanceof abaplint.Expressions.Source && first instanceof abaplint.Nodes.ExpressionNode) {
-        options.push(`dynamicSource: (() => {try { return ${first.concatTokens()}; } catch {}})()`);
+        const name = first.concatTokens().toLowerCase();
+        options.push(`dynamicSource: (() => {
+          try { return ${name}; } catch {}
+          try { return this.${name}; } catch {}
+        })()`);
       }
     }
 
