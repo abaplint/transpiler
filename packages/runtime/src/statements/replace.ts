@@ -1,11 +1,11 @@
 import {ABAPRegExp} from "../abap_regex";
 import {OffsetLength} from "../offset_length";
-import {Character} from "../types";
+import {Character, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
 export type replaceInput = {
-  target: ICharacter,
+  target: ICharacter | Table,
   sectionLength?: INumeric,
   sectionOffset?: INumeric,
   regex?: ICharacter,
@@ -16,6 +16,14 @@ export type replaceInput = {
 };
 
 export function replace(input: replaceInput): void {
+
+  if (input.target instanceof Table) {
+    for (const row of input.target.array()) {
+      replace({...input, target: row});
+    }
+    return;
+  }
+
   let temp = input.target.get();
 
   const ignoreCase = input.ignoringCase === true ? "i" : "";
@@ -47,21 +55,21 @@ export function replace(input: replaceInput): void {
     throw "REPLACE, unexpected input";
   }
 
-  let replace: string = "";
+  let rr: string = "";
   if (typeof input.with === "string") {
-    replace = input.with;
+    rr = input.with;
   } else {
     if (input.with instanceof Character) {
-      replace = input.with.getTrimEnd();
+      rr = input.with.getTrimEnd();
     } else {
-      replace = input.with.get();
+      rr = input.with.get();
     }
-    replace = replace.replace(/\\\$/g, "$");
-    replace = replace.replace(/\\\{/g, "{");
-    replace = replace.replace(/\\\}/g, "}");
+    rr = rr.replace(/\\\$/g, "$");
+    rr = rr.replace(/\\\{/g, "{");
+    rr = rr.replace(/\\\}/g, "}");
   }
 
-  temp = temp.replace(search, replace);
+  temp = temp.replace(search, rr);
 
   const subrc = found ? 0 : 4;
   // @ts-ignore

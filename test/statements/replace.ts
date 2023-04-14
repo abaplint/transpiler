@@ -254,4 +254,15 @@ WRITE / strlen( lv_url ).`;
     expect(abap.console.get()).to.equal("https://github.com/abapGit/abapGit\n34");
   });
 
+  it("REPLACE, IN TABLE", async () => {
+    const code = `
+TYPES char20 TYPE c LENGTH 20.
+DATA tab TYPE STANDARD TABLE OF char20 WITH DEFAULT KEY.
+REPLACE ALL OCCURRENCES OF 'foo' IN TABLE tab WITH 'bar'.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
