@@ -21,14 +21,13 @@ export function assign(input: IAssignInput) {
     input.dynamicName = input.dynamicName.trimEnd();
 
     if (input.dynamicName.includes("->")) {
-      if (input.dynamicSource instanceof ABAPObject) {
-        const split = input.dynamicName.split("->");
-        // @ts-ignore
-        input.dynamicSource = input.dynamicSource.get()[split[1].toLowerCase() as any];
-      } else if (input.dynamicSource instanceof DataReference) {
-        const [_before, after] = input.dynamicName.split("->");
-        // @ts-ignore
-        input.dynamicSource = input.dynamicSource.get()[after.toLowerCase() as any];
+      if (input.dynamicSource instanceof ABAPObject || input.dynamicSource instanceof DataReference) {
+        const split = input.dynamicName.split(/->|-/);
+        split.shift();
+        for (const s of split) {
+          // @ts-ignore
+          input.dynamicSource = input.dynamicSource.get()[s.toLowerCase() as any];
+        }
       } else {
         // @ts-ignore
         abap.builtin.sy.get().subrc.set(4);
@@ -101,7 +100,11 @@ export function assign(input: IAssignInput) {
         result = structure_as_object[component_name];
       }
     } else if (!(input.source instanceof Table)){
-      result = input.source.get()[component.toLowerCase().trimEnd()];
+      const split = component.toLowerCase().trimEnd().split("-");
+      result = input.source;
+      for (const s of split) {
+        result = result.get()[s];
+      }
     }
 
     if (result === undefined) {

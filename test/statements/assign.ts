@@ -659,4 +659,50 @@ START-OF-SELECTION.
     expect(abap.console.getTrimmed()).to.equal("0");
   });
 
+  it("dynamic assign ref deep", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    DATA: BEGIN OF foo,
+            field TYPE i,
+          END OF foo.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo_ref TYPE REF TO lcl.
+  FIELD-SYMBOLS <any> TYPE any.
+  CREATE OBJECT lo_ref.
+  lo_ref->foo-field = 2.
+  ASSIGN ('LO_REF->FOO-FIELD') TO <any>.
+  WRITE / sy-subrc.
+  WRITE / <any>.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("0\n2");
+  });
+
+  it("component deep", async () => {
+    const code = `
+FIELD-SYMBOLS <test> TYPE data.
+DATA: BEGIN OF foo,
+        BEGIN OF bar,
+          baz TYPE string,
+        END OF bar,
+      END OF foo.
+
+ASSIGN COMPONENT 'BAR-BAZ' OF STRUCTURE foo TO <test>.
+IF sy-subrc <> 0.
+  WRITE / 'BUG'.
+ELSE.
+  WRITE / 'OK'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("OK");
+  });
+
 });
