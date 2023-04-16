@@ -21,14 +21,16 @@ export function assign(input: IAssignInput) {
     input.dynamicName = input.dynamicName.trimEnd();
 
     if (input.dynamicName.includes("->")) {
-      if (input.dynamicSource instanceof ABAPObject) {
+      if (input.dynamicSource instanceof ABAPObject || input.dynamicSource instanceof DataReference) {
         const split = input.dynamicName.split("->");
         // @ts-ignore
         input.dynamicSource = input.dynamicSource.get()[split[1].toLowerCase() as any];
+        /*
       } else if (input.dynamicSource instanceof DataReference) {
         const [_before, after] = input.dynamicName.split("->");
         // @ts-ignore
         input.dynamicSource = input.dynamicSource.get()[after.toLowerCase() as any];
+        */
       } else {
         // @ts-ignore
         abap.builtin.sy.get().subrc.set(4);
