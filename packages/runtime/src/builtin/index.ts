@@ -26,6 +26,7 @@ export * from "./replace";
 export * from "./reverse";
 export * from "./round";
 export * from "./segment";
+export * from "./shift_right";
 export * from "./shift_left";
 export * from "./sign";
 export * from "./sin";

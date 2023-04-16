@@ -56,4 +56,14 @@ describe("Builtin functions - shift_left", () => {
     await f(abap);
     expect(abap.console.get()).to.equal("bca");
   });
+
+  it("remote whitespace", async () => {
+    const code = `
+    DATA lv_str TYPE string.
+    lv_str = | sdf|.
+    ASSERT strlen( shift_left( lv_str ) ) = 3.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
 });
