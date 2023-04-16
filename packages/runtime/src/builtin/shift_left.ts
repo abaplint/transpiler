@@ -27,10 +27,11 @@ export function shift_left(input: IShiftLeftInput): ICharacter {
       throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
     }
     val = val.substring(places);
-  }
-  else if (input.circular) {
+  } else if (input.circular) {
     const leftShifts = input.circular.get() % val.length;
     val =  val.slice(leftShifts) + val.slice(0, leftShifts);
+  } else {
+    return shift_left({val: input.val, sub: " "});
   }
   return new String().set(val);
 }
