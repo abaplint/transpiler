@@ -659,4 +659,27 @@ START-OF-SELECTION.
     expect(abap.console.getTrimmed()).to.equal("0");
   });
 
+  it.only("dynamic assign ref deep", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    DATA: BEGIN OF foo,
+            field TYPE i,
+          END OF foo.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo_ref TYPE REF TO lcl.
+  FIELD-SYMBOLS <any> TYPE any.
+  CREATE OBJECT lo_ref.
+  ASSIGN ('LO_REF->FOO-FIELD') TO <any>.
+  WRITE sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("0");
+  });
+
 });
