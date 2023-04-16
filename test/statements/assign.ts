@@ -659,7 +659,7 @@ START-OF-SELECTION.
     expect(abap.console.getTrimmed()).to.equal("0");
   });
 
-  it.skip("dynamic assign ref deep", async () => {
+  it.only("dynamic assign ref deep", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
