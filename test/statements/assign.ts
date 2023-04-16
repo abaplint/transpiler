@@ -684,4 +684,25 @@ START-OF-SELECTION.
     expect(abap.console.getTrimmed()).to.equal("0\n2");
   });
 
+  it("component deep", async () => {
+    const code = `
+FIELD-SYMBOLS <test> TYPE data.
+DATA: BEGIN OF foo,
+        BEGIN OF bar,
+          baz TYPE string,
+        END OF bar,
+      END OF foo.
+
+ASSIGN COMPONENT 'BAR-BAZ' OF STRUCTURE foo TO <test>.
+IF sy-subrc <> 0.
+  WRITE / 'BUG'.
+ELSE.
+  WRITE / 'OK'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("OK");
+  });
+
 });

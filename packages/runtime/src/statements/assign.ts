@@ -100,7 +100,11 @@ export function assign(input: IAssignInput) {
         result = structure_as_object[component_name];
       }
     } else if (!(input.source instanceof Table)){
-      result = input.source.get()[component.toLowerCase().trimEnd()];
+      const split = component.toLowerCase().trimEnd().split("-");
+      result = input.source;
+      for (const s of split) {
+        result = result.get()[s];
+      }
     }
 
     if (result === undefined) {
