@@ -9,6 +9,8 @@ export function escape(input: {val: ICharacter | string, format: INumeric | numb
   const format = typeof input.format === "number" ? input.format : input.format.get();
 
   switch (format) {
+    case 1: // e_xml_attr
+      break;
     case 4: // e_html_text
       val = val.replace(/&/g, "&amp;");
       val = val.replace(/</g, "&lt;");
@@ -23,6 +25,10 @@ export function escape(input: {val: ICharacter | string, format: INumeric | numb
       break;
     case 12: // e_url
       val = encodeURI(val);
+      break;
+    case 24: // e_json_string
+      val = val.replace(/"/g, "\\\"");
+      val = val.replace(/\n/g, "\\n");
       break;
     default:
 // todo, runtime error
