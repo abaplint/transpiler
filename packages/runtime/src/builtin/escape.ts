@@ -10,6 +10,10 @@ export function escape(input: {val: ICharacter | string, format: INumeric | numb
 
   switch (format) {
     case 1: // e_xml_attr
+      val = val.replace(/&/g, "&amp;");
+      val = val.replace(/</g, "&lt;");
+      val = val.replace(/"/g, "&quot;");
+      val = val.replace(/'/g, "&apos;");
       break;
     case 4: // e_html_text
       val = val.replace(/&/g, "&amp;");

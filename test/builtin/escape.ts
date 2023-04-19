@@ -97,4 +97,18 @@ describe("Builtin functions - escape", () => {
     await f(abap);
   });
 
+  it("escape(), xml attr", async () => {
+    const code = `
+    CONSTANTS e_xml_attr TYPE i VALUE 1.
+    DATA lv_result TYPE string.
+    lv_result = escape(
+      val    = |abc123&<>"'|
+      format = e_xml_attr ).
+    WRITE lv_result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`abc123&amp;&lt;>&quot;&apos;`);
+  });
+
 });
