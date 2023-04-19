@@ -42,7 +42,6 @@ describe("Builtin functions - escape", () => {
       `abc123&amp;&lt;&gt;"'`);
   });
 
-
   it("escape() for url", async () => {
     const code = `
       CONSTANTS e_url TYPE i VALUE 12.
@@ -55,6 +54,61 @@ describe("Builtin functions - escape", () => {
     await f(abap);
     expect(abap.console.get()).to.equal(
       `abc123&%3C%3E%22'`);
+  });
+
+  it("escape(), json1", async () => {
+    const code = `
+    CONSTANTS e_json_string TYPE i VALUE 24.
+    DATA lv_result TYPE string.
+    lv_result = escape(
+      val    = |abc123&<>"'|
+      format = e_json_string ).
+    WRITE lv_result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`abc123&<>\\"'`);
+  });
+
+  it("escape(), json2", async () => {
+    const code = `
+    CONSTANTS e_json_string TYPE i VALUE 24.
+    DATA lv_result TYPE string.
+    lv_result = escape(
+      val    = '{"foo": 0}'
+      format = e_json_string ).
+    WRITE lv_result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`{\\"foo\\": 0}`);
+  });
+
+  it("escape(), json3", async () => {
+    const code = `
+    CONSTANTS e_json_string TYPE i VALUE 24.
+    DATA lv_result TYPE string.
+    lv_result = escape(
+      val    = |\\n|
+      format = e_json_string ).
+    ASSERT lv_result = |\\\\n|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("escape(), xml attr", async () => {
+    const code = `
+    CONSTANTS e_xml_attr TYPE i VALUE 1.
+    DATA lv_result TYPE string.
+    lv_result = escape(
+      val    = |abc123&<>"'|
+      format = e_xml_attr ).
+    WRITE lv_result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`abc123&amp;&lt;>&quot;&apos;`);
   });
 
 });
