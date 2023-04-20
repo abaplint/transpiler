@@ -58,6 +58,9 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
         throw new Error("CreateData, kernel class missing");
       }
       clas.anonymous({name: options.name, dref: target});
+    } else if (options.name === "ABAP_BOOL") {
+// ABAP_BOOL is special, its not part of the type pool, its built-into abaplint
+      target.assign(new Character(1, {qualifiedName: "ABAP_BOOL", ddicName: "ABAP_BOOL"}));
     } else {
       throwError("CX_SY_CREATE_DATA_ERROR");
     }

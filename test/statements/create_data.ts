@@ -251,4 +251,13 @@ START-OF-SELECTION.
     await f(abap);
     expect(abap.console.get()).to.equal("0");
   });
+
+  it("CREATE DATA, ABAP_BOOL", async () => {
+    const code = `
+DATA lo_data  TYPE REF TO data.
+CREATE DATA lo_data TYPE ('ABAP_BOOL').`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
 });
