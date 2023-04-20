@@ -229,4 +229,47 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("I");
   });
 
+  it("many references and stuff", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS foo1 CHANGING foo TYPE data.
+    CLASS-METHODS foo2 CHANGING foo TYPE data.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD foo1.
+    FIELD-SYMBOLS <any> TYPE any.
+    ASSIGN foo->* TO <any>.
+    <any> = 2.
+  ENDMETHOD.
+
+  METHOD foo2.
+    FIELD-SYMBOLS <any> TYPE any.
+    ASSIGN foo->* TO <any>.
+    ASSIGN COMPONENT 'FIELD' OF STRUCTURE <any> TO <any>.
+    foo1( CHANGING foo = <any> ).
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  TYPES: BEGIN OF ty,
+           field TYPE REF TO i,
+         END OF ty.
+  DATA bar TYPE REF TO ty.
+  CREATE DATA bar.
+  CREATE DATA bar->field.
+  FIELD-SYMBOLS <any> TYPE any.
+  lcl=>foo2( CHANGING foo = bar ).
+
+  ASSIGN bar->* TO <any>.
+  ASSIGN COMPONENT 'FIELD' OF STRUCTURE <any> TO <any>.
+  ASSIGN <any>->* TO <any>.
+  WRITE <any>.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });

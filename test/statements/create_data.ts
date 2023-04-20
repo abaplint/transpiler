@@ -226,4 +226,38 @@ WRITE lv_type.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
+
+  it("CREATE DATA, references", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS foo CHANGING foo TYPE REF TO data.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD foo.
+    CREATE DATA foo TYPE i.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA bar TYPE REF TO data.
+  FIELD-SYMBOLS <any> TYPE any.
+  lcl=>foo( CHANGING foo = bar ).
+  ASSIGN bar->* TO <any>.
+  WRITE <any>.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
+  it("CREATE DATA, ABAP_BOOL", async () => {
+    const code = `
+DATA lo_data  TYPE REF TO data.
+CREATE DATA lo_data TYPE ('ABAP_BOOL').`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
 });
