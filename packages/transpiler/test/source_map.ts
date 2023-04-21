@@ -66,6 +66,7 @@ ENDCLASS.`;
     const js =
 `class zcl_maptest {
   static INTERNAL_TYPE = 'CLAS';
+  static INTERNAL_NAME = 'ZCL_MAPTEST';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
   async constructor_(INPUT) {
@@ -84,7 +85,7 @@ export {zcl_maptest};`;
     expect(result?.js).to.equal(js);
 
     const perLine = await countMappingsPerGeneratedLine(result?.map);
-    expect(perLine[11]).to.equal(3); // the WRITE statement
+    expect(perLine[12]).to.equal(3); // the WRITE statement
   });
 
 });
