@@ -24,6 +24,7 @@ export class ClassDefinitionTranspiler implements IStructureTranspiler {
       return new Chunk(`
 class ${className?.toLowerCase()} {
   static INTERNAL_TYPE = 'CLAS';
+  static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
   async constructor_() {
     this.me = new abap.types.ABAPObject();
