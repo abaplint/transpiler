@@ -581,6 +581,20 @@ export class Traversal {
     return ret;
   }
 
+  public buildInternalName(name: string, def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined): string {
+    if (def) {
+      if (def.isGlobal() === false) {
+        const prefix = this.buildPrefix();
+        return `${prefix}-${def?.getName()?.toUpperCase()}`;
+      } else {
+        return def?.getName()?.toUpperCase();
+      }
+    }
+
+// assume global
+    return name.toUpperCase();
+  }
+
   public lookupClassOrInterface(name: string | undefined, token: abaplint.Token | undefined, directGlobal = false): string {
     if (name === undefined || token === undefined) {
       return "abap.Classes['undefined']";
@@ -591,24 +605,13 @@ export class Traversal {
     }
 
     const scope = this.findCurrentScopeByToken(token);
-
-    // todo, add explicit type,
-    let def: any | undefined = scope?.findClassDefinition(name);
+    let def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined = scope?.findClassDefinition(name);
     if (def === undefined) {
       def = scope?.findInterfaceDefinition(name);
     }
 
-    if (def) {
-      if (def.isGlobal() === false) {
-        const prefix = this.buildPrefix();
-        return `abap.Classes['${prefix}-${def?.getName()?.toUpperCase()}']`;
-      } else {
-        return `abap.Classes['${def?.getName()?.toUpperCase()}']`;
-      }
-    } else {
-// assume global
-      return "abap.Classes['" + name.toUpperCase() + "']";
-    }
+    const internalName = this.buildInternalName(name, def);
+    return "abap.Classes['" + internalName + "']";
   }
 
   private buildPrefix(): string {
