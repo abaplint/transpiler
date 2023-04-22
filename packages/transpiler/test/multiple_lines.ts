@@ -64,9 +64,12 @@ abap.Classes['PROG-ZFOOBAR-LIF_FOOBAR'] = lif_foobar;`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_FOOBAR';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
-  async constructor_(INPUT) {
+  constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+  }
+  async constructor_(INPUT) {
+    if (super.constructor_) { await super.constructor_(INPUT); }
     return this;
   }
   async moo() {
@@ -96,9 +99,12 @@ abap.Classes['PROG-ZFOOBAR-LCL_FOOBAR'] = lcl_foobar;`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_FOOBAR';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
-  async constructor_(INPUT) {
+  constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+  }
+  async constructor_(INPUT) {
+    if (super.constructor_) { await super.constructor_(INPUT); }
     return this;
   }
   async moo(INPUT) {
@@ -130,9 +136,12 @@ abap.Classes['PROG-ZFOOBAR-LCL_FOOBAR'] = lcl_foobar;`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_FOOBAR';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
-  async constructor_(INPUT) {
+  constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+  }
+  async constructor_(INPUT) {
+    if (super.constructor_) { await super.constructor_(INPUT); }
     return this;
   }
   async moo() {
@@ -182,9 +191,12 @@ CREATE OBJECT foo.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-ZCL_WORDS';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
-  async constructor_(INPUT) {
+  constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+  }
+  async constructor_(INPUT) {
+    if (super.constructor_) { await super.constructor_(INPUT); }
     return this;
   }
 }
@@ -236,10 +248,13 @@ DATA moo TYPE foo.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-ZCL_WORDS';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"BAR": {"type": () => {return new abap.types.Integer({qualifiedName: "I"});}, "visibility": "U", "is_constant": " "}};
-  async constructor_(INPUT) {
+  constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.bar = new abap.types.Integer({qualifiedName: "I"});
+  }
+  async constructor_(INPUT) {
+    if (super.constructor_) { await super.constructor_(INPUT); }
     return this;
   }
   async run() {
@@ -271,10 +286,12 @@ abap.Classes['PROG-ZFOOBAR-ZCL_WORDS'] = zcl_words;`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-ZCL_WORDS';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"BAR": {"type": () => {return new abap.types.Integer({qualifiedName: "I"});}, "visibility": "U", "is_constant": " "}};
-  async constructor_(INPUT) {
+  constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.bar = new abap.types.Integer({qualifiedName: "I"});
+  }
+  async constructor_(INPUT) {
     this.bar.set(new abap.types.Integer().set(2));
     abap.statements.write(this.bar);
     return this;
@@ -305,10 +322,13 @@ ENDCLASS.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-ZCL_RET';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"BAR": {"type": () => {return new abap.types.Integer({qualifiedName: "I"});}, "visibility": "U", "is_constant": " "}};
-  async constructor_(INPUT) {
+  constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.bar = new abap.types.Integer({qualifiedName: "I"});
+  }
+  async constructor_(INPUT) {
+    if (super.constructor_) { await super.constructor_(INPUT); }
     return this;
   }
   async run() {
@@ -376,10 +396,13 @@ ENDCLASS.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-ZCL_RET';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"C_MAXDCODES": {"type": () => {return new abap.types.Integer({qualifiedName: "I"});}, "visibility": "I", "is_constant": "X"}};
-  async constructor_(INPUT) {
+  constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.c_maxdcodes = zcl_ret.c_maxdcodes;
+  }
+  async constructor_(INPUT) {
+    if (super.constructor_) { await super.constructor_(INPUT); }
     return this;
   }
 }
@@ -404,9 +427,12 @@ ENDCLASS.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_BAR';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"FOO": {"type": () => {return new abap.types.Integer({qualifiedName: "I"});}, "visibility": "U", "is_constant": " "}};
-  async constructor_(INPUT) {
+  constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+  }
+  async constructor_(INPUT) {
+    if (super.constructor_) { await super.constructor_(INPUT); }
     return this;
   }
 }
@@ -436,9 +462,12 @@ ENDFORM.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_BAR';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
-  async constructor_(INPUT) {
+  constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+  }
+  async constructor_(INPUT) {
+    if (super.constructor_) { await super.constructor_(INPUT); }
     return this;
   }
   async bar(INPUT) {
@@ -479,9 +508,11 @@ ENDFORM.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_BAR';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
-  async constructor_(INPUT) {
+  constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+  }
+  async constructor_(INPUT) {
     let input = new abap.types.Integer({qualifiedName: "I"});
     if (INPUT && INPUT.input) {input.set(INPUT.input);}
     abap.statements.write(input);
@@ -510,10 +541,13 @@ async function bar() {
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_BAR';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"FOO": {"type": () => {return new abap.types.String({qualifiedName: "STRING"});}, "visibility": "U", "is_constant": "X"}};
-  async constructor_(INPUT) {
+  constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.foo = lcl_bar.foo;
+  }
+  async constructor_(INPUT) {
+    if (super.constructor_) { await super.constructor_(INPUT); }
     return this;
   }
 }
@@ -558,10 +592,13 @@ ENDINTERFACE.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_BAR';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"FIRST": {"type": () => {return new abap.types.Character(1, {});}, "visibility": "U", "is_constant": "X"}};
-  async constructor_(INPUT) {
+  constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.first = lcl_bar.first;
+  }
+  async constructor_(INPUT) {
+    if (super.constructor_) { await super.constructor_(INPUT); }
     return this;
   }
 }
@@ -666,10 +703,13 @@ ENDCLASS.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_CONSTANT_TEST';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"AREA_NAME": {"type": () => {return new abap.types.String({qualifiedName: "STRING"});}, "visibility": "U", "is_constant": "X"}};
-  async constructor_(INPUT) {
+  constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.area_name = lcl_constant_test.area_name;
+  }
+  async constructor_(INPUT) {
+    if (super.constructor_) { await super.constructor_(INPUT); }
     return this;
   }
 }
@@ -706,9 +746,12 @@ class lcl {
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
-  async constructor_(INPUT) {
+  constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+  }
+  async constructor_(INPUT) {
+    if (super.constructor_) { await super.constructor_(INPUT); }
     return this;
   }
   async foo(INPUT) {

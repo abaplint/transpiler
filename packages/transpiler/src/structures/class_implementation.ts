@@ -9,14 +9,19 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
   public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): Chunk {
 
     const ret = new Chunk();
+
     for (const c of node.getChildren()) {
       ret.appendChunk(traversal.traverse(c));
+      if (c.get() instanceof abaplint.Statements.ClassImplementation) {
+        ret.appendString(this.buildConstructor(node.getFirstStatement(), traversal));
+      }
       if (c instanceof abaplint.Nodes.StatementNode
           && c.get() instanceof abaplint.Statements.ClassImplementation
           && this.hasConstructor(node) === false) {
-        ret.appendString(this.buildConstructor(c, traversal));
+        ret.appendString("async constructor_(INPUT) {\nif (super.constructor_) { await super.constructor_(INPUT); }\nreturn this;\n}\n");
       }
     }
+
     ret.appendString(this.buildStatic(node.findFirstExpression(abaplint.Expressions.ClassName), traversal));
     ret.appendString(this.buildTypes(node.findFirstExpression(abaplint.Expressions.ClassName), traversal));
 
@@ -141,7 +146,11 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     return ret;
   }
 
-  private buildConstructor(node: abaplint.Nodes.StatementNode, traversal: Traversal): string {
+  private buildConstructor(node: abaplint.Nodes.StatementNode | undefined, traversal: Traversal): string {
+    if (node === undefined) {
+      throw new Error("buildConstructor node undefined");
+    }
+
     const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
 
     const token = node.findFirstExpression(abaplint.Expressions.ClassName)?.getFirstToken();
@@ -157,8 +166,8 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     if (ret === "") {
       return ret;
     }
-
-    return "async constructor_(INPUT) {\n" + ret + "return this;\n}\n";
+// note: for CALL TRANSFORMATION, its nice that the values are initialized by the JS constructor,
+    return "constructor() {\n" + ret + "}\n";
   }
 
 }

@@ -27,7 +27,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
     if (methodName.toUpperCase() === "CONSTRUCTOR" && classDef) {
 // note that all ABAP identifiers are lower cased, sometimes the kernel does magic, so it needs to know the method input name
       unique = "INPUT";
-      after = traversal.buildConstructorContents(scope.getParent(), classDef);
+//      after = traversal.buildConstructorContents(scope.getParent(), classDef);
       methodName = "constructor_";
     }
 
