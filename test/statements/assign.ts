@@ -705,7 +705,7 @@ ENDIF.`;
     expect(abap.console.getTrimmed()).to.equal("OK");
   });
 
-  it.only("fs", async () => {
+  it("fs", async () => {
     const code = `
 CLASS lcl_attribute DEFINITION.
   PUBLIC SECTION.
