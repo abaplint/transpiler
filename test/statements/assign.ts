@@ -705,4 +705,27 @@ ENDIF.`;
     expect(abap.console.getTrimmed()).to.equal("OK");
   });
 
+  it.only("fs", async () => {
+    const code = `
+CLASS lcl_attribute DEFINITION.
+  PUBLIC SECTION.
+    DATA foo TYPE i.
+ENDCLASS.
+CLASS lcl_attribute IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl_attribute.
+  FIELD-SYMBOLS <any> TYPE REF TO lcl_attribute.
+  FIELD-SYMBOLS <feld> TYPE any.
+  CREATE OBJECT ref.
+  ASSIGN ref TO <any>.
+  ASSIGN <any>->('FOO') TO <feld>.
+  WRITE <feld>.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("0");
+  });
+
 });
