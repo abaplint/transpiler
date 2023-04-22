@@ -75,7 +75,8 @@ export class AssignTranspiler implements IStatementTranspiler {
           })()`);
         }
       } else if (first?.get() instanceof abaplint.Expressions.Source && first instanceof abaplint.Nodes.ExpressionNode) {
-        const name = first.concatTokens().toLowerCase();
+//        const name = first.concatTokens().toLowerCase();
+        const name = new SourceTranspiler().transpile(first, traversal).getCode();
         options.push(`dynamicSource: (() => {
           try { return ${name}; } catch {}
           try { return this.${name}; } catch {}
