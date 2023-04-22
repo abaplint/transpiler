@@ -4,10 +4,12 @@ export class ABAPObject  {
   private value: any | undefined;
   private readonly qualifiedName: string | undefined;
   private readonly internalName: string | undefined;
+  private readonly RTTIName: string | undefined;
 
-  public constructor(input?: {qualifiedName?: string, internalName?: string}) {
+  public constructor(input?: {qualifiedName?: string, internalName?: string, RTTIName?: string}) {
     this.qualifiedName = input?.qualifiedName;
     this.internalName = input?.internalName;
+    this.RTTIName = input?.RTTIName;
     this.clear();
   }
 
@@ -25,6 +27,10 @@ export class ABAPObject  {
 
   public getInternalName() {
     return this.internalName;
+  }
+
+  public getRTTIName() {
+    return this.RTTIName;
   }
 
   public set(value: ABAPObject | any) {

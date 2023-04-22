@@ -189,7 +189,7 @@ CREATE OBJECT foo.`;
   }
 }
 abap.Classes['PROG-ZFOOBAR-ZCL_WORDS'] = zcl_words;
-let foo = new abap.types.ABAPObject({qualifiedName: "ZCL_WORDS"});
+let foo = new abap.types.ABAPObject({qualifiedName: "ZCL_WORDS", RTTIName: "\\\\PROGRAM=ZFOOBAR\\\\CLASS=ZCL_WORDS"});
 foo.set(await (new abap.Classes['PROG-ZFOOBAR-ZCL_WORDS']()).constructor_());`;
 
     expect(await runSingle(abap)).to.equal(expected);
@@ -490,7 +490,7 @@ ENDFORM.`;
 }
 abap.Classes['PROG-ZFOOBAR-LCL_BAR'] = lcl_bar;
 async function bar() {
-  let bar = new abap.types.ABAPObject({qualifiedName: "LCL_BAR"});
+  let bar = new abap.types.ABAPObject({qualifiedName: "LCL_BAR", RTTIName: "\\\\PROGRAM=ZFOOBAR\\\\CLASS=LCL_BAR"});
   bar.set(await (new abap.Classes['PROG-ZFOOBAR-LCL_BAR']()).constructor_({input: new abap.types.Integer().set(42)}));
 }`;
 
@@ -582,7 +582,7 @@ bar.bar$next.set(abap.Classes['PROG-ZFOOBAR-LCL_BAR'].first);`;
     const abap = `
     DATA blah TYPE REF TO OBJECT.
     CREATE OBJECT blah TYPE ('ZCL_BLAH').`;
-    const expected = `let blah = new abap.types.ABAPObject();
+    const expected = `let blah = new abap.types.ABAPObject({qualifiedName: undefined, RTTIName: undefined});
 if (abap.Classes['ZCL_BLAH'] === undefined) { throw new abap.Classes['CX_SY_CREATE_OBJECT_ERROR']; }
 blah.set(await (new abap.Classes['ZCL_BLAH']()).constructor_());`;
     expect(await runSingle(abap)).to.equal(expected);
