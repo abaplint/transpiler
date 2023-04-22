@@ -370,10 +370,15 @@ export class Traversal {
 
     let ret = "";
 
+    if (def.getSuperClass() !== undefined || def.getName().toUpperCase() === "CX_ROOT") {
+      ret += "super();\n";
+    }
+/*
     if (def.getSuperClass() !== undefined
         && def.getMethodDefinitions().getByName("CONSTRUCTOR") === undefined) {
       ret += `await super.constructor_(INPUT);\n`;
     }
+*/
 
     const cName = Traversal.escapeNamespace(def.getName().toLowerCase());
 
