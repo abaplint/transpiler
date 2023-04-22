@@ -3,9 +3,11 @@ import {FieldSymbol} from "./field_symbol";
 export class ABAPObject  {
   private value: any | undefined;
   private readonly qualifiedName: string | undefined;
+  private readonly internalName: string | undefined;
 
-  public constructor(input?: {qualifiedName?: string}) {
+  public constructor(input?: {qualifiedName?: string, internalName?: string}) {
     this.qualifiedName = input?.qualifiedName;
+    this.internalName = input?.internalName;
     this.clear();
   }
 
@@ -19,6 +21,10 @@ export class ABAPObject  {
 
   public getQualifiedName() {
     return this.qualifiedName;
+  }
+
+  public getInternalName() {
+    return this.internalName;
   }
 
   public set(value: ABAPObject | any) {
