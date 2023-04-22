@@ -548,13 +548,8 @@ export class Traversal {
     if (def === undefined) {
       return "";
     }
-    const name = def.getName();
-    if (def.isGlobal() === false) {
-      const prefix = this.buildPrefix();
-      return `abap.Classes['${prefix}-${name.toUpperCase()}'] = ${Traversal.escapeNamespace(name.toLowerCase())};`;
-    } else {
-      return `abap.Classes['${name.toUpperCase()}'] = ${Traversal.escapeNamespace(name.toLowerCase())};`;
-    }
+    const name = this.buildInternalName(def.getName(), def);
+    return `abap.Classes['${name}'] = ${Traversal.escapeNamespace(def.getName().toLowerCase())};`;
   }
 
   public setValues(identifier: abaplint.TypedIdentifier, name: string) {
