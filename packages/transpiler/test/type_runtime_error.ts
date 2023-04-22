@@ -26,7 +26,7 @@ describe("Unknown types, errors at runtime", () => {
     const abap = `DATA foo TYPE REF TO object.
     CREATE OBJECT foo TYPE zcl_abapgit_gui.`;
 
-    const expected = `let foo = new abap.types.ABAPObject();
+    const expected = `let foo = new abap.types.ABAPObject({qualifiedName: undefined, RTTIName: undefined});
 foo.set(await (new abap.Classes['ZCL_ABAPGIT_GUI']()).constructor_());`;
 
     expect(await runSingle(abap, options)).to.equal(expected);
