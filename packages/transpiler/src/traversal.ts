@@ -201,26 +201,15 @@ export class Traversal {
     return undefined;
   }
 
-  public buildAttributes(def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined): string[] {
+  public buildAttributes(def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined,
+                         scope: abaplint.ISpaghettiScopeNode | undefined,
+                         prefix = ""): string[] {
     const attr: string[] = [];
-
-    for (const a of def?.getAttributes()?.getAll() || []) {
-      const type = new TranspileTypes().toType(a.getType());
-      let runtime = "";
-      switch (a.getVisibility()) {
-        case abaplint.Visibility.Private:
-          runtime = "I";
-          break;
-        case abaplint.Visibility.Protected:
-          runtime = "O";
-          break;
-        default:
-          runtime = "U";
-      }
-      attr.push(`"${a.getName().toUpperCase()}": {"type": () => {return ${type};}, "visibility": "${runtime}", "is_constant": " "}`);
+    if (def === undefined) {
+      return attr;
     }
 
-    for (const a of def?.getAttributes()?.getConstants() || []) {
+    for (const a of def.getAttributes()?.getAll() || []) {
       const type = new TranspileTypes().toType(a.getType());
       let runtime = "";
       switch (a.getVisibility()) {
@@ -233,7 +222,30 @@ export class Traversal {
         default:
           runtime = "U";
       }
-      attr.push(`"${a.getName().toUpperCase()}": {"type": () => {return ${type};}, "visibility": "${runtime}", "is_constant": "X"}`);
+      attr.push(`"${prefix + a.getName().toUpperCase()}": {"type": () => {return ${type};}, "visibility": "${
+        runtime}", "is_constant": " "}`);
+    }
+
+    for (const a of def.getAttributes()?.getConstants() || []) {
+      const type = new TranspileTypes().toType(a.getType());
+      let runtime = "";
+      switch (a.getVisibility()) {
+        case abaplint.Visibility.Private:
+          runtime = "I";
+          break;
+        case abaplint.Visibility.Protected:
+          runtime = "O";
+          break;
+        default:
+          runtime = "U";
+      }
+      attr.push(`"${prefix + a.getName().toUpperCase()}": {"type": () => {return ${type};}, "visibility": "${
+        runtime}", "is_constant": "X"}`);
+    }
+
+    for (const impl of def.getImplementing()) {
+      const idef = this.findInterfaceDefinition(impl.name, scope);
+      attr.push(...this.buildAttributes(idef, scope, impl.name.toUpperCase() + "~"));
     }
 
     return attr;

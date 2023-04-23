@@ -788,7 +788,7 @@ let foo = new abap.types.Character(1, {"qualifiedName":"ty","conversionExit":"IS
     expect(await runSingle(abap)).to.equals(expected);
   });
 
-  it.skip("ATTRIBUTES from intf", async () => {
+  it("ATTRIBUTES from intf", async () => {
     const abap = `
 INTERFACE lif_intf.
   DATA field TYPE i.
@@ -800,9 +800,7 @@ CLASS lcl_impl DEFINITION.
 ENDCLASS.
 CLASS lcl_impl IMPLEMENTATION.
 ENDCLASS.`;
-    const expected = `
-sdf`;
-    expect(await runSingle(abap)).to.equals(expected);
+    expect(await runSingle(abap)).to.include(`ATTRIBUTES = {"LIF_INTF~FIELD":`);
   });
 
 });
