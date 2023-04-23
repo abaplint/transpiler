@@ -272,7 +272,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
-  it.only("eq, string and table", async () => {
+  it("eq, string and table", async () => {
     const code = `
 DATA ref1 TYPE REF TO data.
 DATA ref2 TYPE REF TO data.
@@ -280,6 +280,40 @@ DATA str TYPE string.
 DATA tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
 GET REFERENCE OF str INTO ref1.
 GET REFERENCE OF tab INTO ref2.
+IF ref1 = ref2.
+  WRITE 'eq'.
+ELSE.
+  WRITE 'ne'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ne");
+  });
+
+  it("eq, empty", async () => {
+    const code = `
+DATA ref1 TYPE REF TO data.
+DATA ref2 TYPE REF TO data.
+IF ref1 = ref2.
+  WRITE 'eq'.
+ELSE.
+  WRITE 'ne'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("eq");
+  });
+
+  it("ne, different refs", async () => {
+    const code = `
+DATA ref1 TYPE REF TO data.
+DATA ref2 TYPE REF TO data.
+DATA str1 TYPE string.
+DATA str2 TYPE string.
+GET REFERENCE OF str1 INTO ref1.
+GET REFERENCE OF str2 INTO ref2.
 IF ref1 = ref2.
   WRITE 'eq'.
 ELSE.
