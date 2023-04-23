@@ -728,7 +728,7 @@ START-OF-SELECTION.
     expect(abap.console.getTrimmed()).to.equal("0");
   });
 
-  it.only("interfaced field name", async () => {
+  it("interfaced field name", async () => {
     const code = `
 INTERFACE lif_intf.
   DATA field TYPE i.
@@ -754,7 +754,6 @@ START-OF-SELECTION.
   ASSIGN lo_foo->(lv_name) TO <any>.
   ASSERT sy-subrc = 0.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
