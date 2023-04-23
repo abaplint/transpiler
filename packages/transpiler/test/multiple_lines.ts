@@ -788,4 +788,19 @@ let foo = new abap.types.Character(1, {"qualifiedName":"ty","conversionExit":"IS
     expect(await runSingle(abap)).to.equals(expected);
   });
 
+  it("ATTRIBUTES from intf", async () => {
+    const abap = `
+INTERFACE lif_intf.
+  DATA field TYPE i.
+ENDINTERFACE.
+
+CLASS lcl_impl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif_intf.
+ENDCLASS.
+CLASS lcl_impl IMPLEMENTATION.
+ENDCLASS.`;
+    expect(await runSingle(abap)).to.include(`ATTRIBUTES = {"LIF_INTF~FIELD":`);
+  });
+
 });

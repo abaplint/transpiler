@@ -25,8 +25,8 @@ export class ClassImplementationTranspiler implements IStatementTranspiler {
     return new Chunk().append(ret + ` {
 static INTERNAL_TYPE = 'CLAS';
 static INTERNAL_NAME = '${traversal.buildInternalName(token.getStr(), def)}';
-static IMPLEMENTED_INTERFACES = [${this.findImplementedClass(traversal, def, scope).map(e => `"` + e.toUpperCase() + `"`).join(",")}];
-static ATTRIBUTES = {${traversal.buildAttributes(def)}};`, node, traversal);
+static IMPLEMENTED_INTERFACES = [${this.findImplementedByClass(traversal, def, scope).map(e => `"` + e.toUpperCase() + `"`).join(",")}];
+static ATTRIBUTES = {${traversal.buildAttributes(def, scope).join(",\n")}};`, node, traversal);
   }
 
   private findImplementedInterface(traversal: Traversal, def?: abaplint.IInterfaceDefinition, scope?: abaplint.ISpaghettiScopeNode): string[] {
@@ -44,7 +44,7 @@ static ATTRIBUTES = {${traversal.buildAttributes(def)}};`, node, traversal);
     return list;
   }
 
-  private findImplementedClass(traversal: Traversal, def?: abaplint.IClassDefinition, scope?: abaplint.ISpaghettiScopeNode): string[] {
+  private findImplementedByClass(traversal: Traversal, def?: abaplint.IClassDefinition, scope?: abaplint.ISpaghettiScopeNode): string[] {
     if (def === undefined || scope === undefined) {
       return [];
     }
@@ -59,7 +59,7 @@ static ATTRIBUTES = {${traversal.buildAttributes(def)}};`, node, traversal);
     let sup = def.getSuperClass();
     while (sup !== undefined) {
       const sdef = traversal.findClassDefinition(sup, scope);
-      list.push(...this.findImplementedClass(traversal, sdef, scope));
+      list.push(...this.findImplementedByClass(traversal, sdef, scope));
       sup = sdef?.getSuperClass();
     }
 

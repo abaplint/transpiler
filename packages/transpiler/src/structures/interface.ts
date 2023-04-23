@@ -13,11 +13,12 @@ export class InterfaceTranspiler implements IStructureTranspiler {
     const def = traversal.getInterfaceDefinition(node.getFirstToken());
     for (const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.Interface) {
+        const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
         name = c.findDirectExpression(abaplint.Expressions.InterfaceName)?.getFirstToken().getStr().toLowerCase();
         name = Traversal.escapeNamespace(name);
         ret += `class ${name} {\n`;
         ret += `static INTERNAL_TYPE = 'INTF';\n`;
-        ret += `static ATTRIBUTES = {${traversal.buildAttributes(def)}};\n`;
+        ret += `static ATTRIBUTES = {${traversal.buildAttributes(def, scope).join(",\n")}};\n`;
       } else if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.EndInterface) {
         ret += "}\n";
         ret += traversal.registerClassOrInterface(def);
