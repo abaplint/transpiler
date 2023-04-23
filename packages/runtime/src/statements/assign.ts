@@ -26,7 +26,7 @@ export function assign(input: IAssignInput) {
         split.shift();
         for (const s of split) {
           // @ts-ignore
-          input.dynamicSource = input.dynamicSource.get()[s.toLowerCase() as any];
+          input.dynamicSource = input.dynamicSource.get()[s.toLowerCase().replace(/[~\\/]/g, "$") as any];
         }
       } else {
         // @ts-ignore
