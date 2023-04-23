@@ -728,4 +728,35 @@ START-OF-SELECTION.
     expect(abap.console.getTrimmed()).to.equal("0");
   });
 
+  it.only("interfaced field name", async () => {
+    const code = `
+INTERFACE lif_intf.
+  DATA field TYPE i.
+ENDINTERFACE.
+
+CLASS lcl_impl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif_intf.
+ENDCLASS.
+CLASS lcl_impl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo_foo TYPE REF TO lcl_impl.
+  DATA lv_name TYPE string.
+  FIELD-SYMBOLS <any> TYPE any.
+
+  CREATE OBJECT lo_foo.
+  lv_name = 'LIF_INTF~FIELD'.
+
+  ASSIGN lo_foo->('LIF_INTF~FIELD') TO <any>.
+  ASSERT sy-subrc = 0.
+  ASSIGN lo_foo->(lv_name) TO <any>.
+  ASSERT sy-subrc = 0.`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
