@@ -272,4 +272,23 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
+  it.only("eq, string and table", async () => {
+    const code = `
+DATA ref1 TYPE REF TO data.
+DATA ref2 TYPE REF TO data.
+DATA str TYPE string.
+DATA tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+GET REFERENCE OF str INTO ref1.
+GET REFERENCE OF tab INTO ref2.
+IF ref1 = ref2.
+  WRITE 'eq'.
+ELSE.
+  WRITE 'ne'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ne");
+  });
+
 });
