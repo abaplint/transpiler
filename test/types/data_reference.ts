@@ -325,4 +325,22 @@ ENDIF.`;
     expect(abap.console.get()).to.equal("ne");
   });
 
+  it("eq, same refs", async () => {
+    const code = `
+DATA ref1 TYPE REF TO data.
+DATA ref2 TYPE REF TO data.
+DATA str1 TYPE string.
+GET REFERENCE OF str1 INTO ref1.
+GET REFERENCE OF str1 INTO ref2.
+IF ref1 = ref2.
+  WRITE 'eq'.
+ELSE.
+  WRITE 'ne'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("eq");
+  });
+
 });
