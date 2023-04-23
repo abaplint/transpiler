@@ -1,8 +1,12 @@
+import {Character} from "../types";
 import {ICharacter} from "../types/_character";
 import {String} from "../types/string";
 
 export function substring_after(input: {val: ICharacter | string, sub?: ICharacter | string, regex?: ICharacter | string}): ICharacter {
-  const val = typeof input.val === "string" ? input.val : input.val.get();
+  let val = typeof input.val === "string" ? input.val : input.val.get();
+  if (input.val instanceof Character) {
+    val = input.val.getTrimEnd();
+  }
   let reg = "";
   if (typeof input.regex === "string") {
     reg = input.regex;
