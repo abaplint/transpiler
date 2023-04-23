@@ -201,7 +201,7 @@ export class Traversal {
     return undefined;
   }
 
-  public buildAttributes(def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined): string {
+  public buildAttributes(def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined): string[] {
     const attr: string[] = [];
 
     for (const a of def?.getAttributes()?.getAll() || []) {
@@ -219,6 +219,7 @@ export class Traversal {
       }
       attr.push(`"${a.getName().toUpperCase()}": {"type": () => {return ${type};}, "visibility": "${runtime}", "is_constant": " "}`);
     }
+
     for (const a of def?.getAttributes()?.getConstants() || []) {
       const type = new TranspileTypes().toType(a.getType());
       let runtime = "";
@@ -234,7 +235,8 @@ export class Traversal {
       }
       attr.push(`"${a.getName().toUpperCase()}": {"type": () => {return ${type};}, "visibility": "${runtime}", "is_constant": "X"}`);
     }
-    return attr.join(",\n");
+
+    return attr;
   }
 
   public isBuiltinMethod(token: abaplint.Token): boolean {
