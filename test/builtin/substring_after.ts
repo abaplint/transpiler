@@ -26,7 +26,7 @@ describe("Builtin functions - substring_after", () => {
     await f(abap);
   });
 
-  it.only("substring_after 02", async () => {
+  it("substring_after 02", async () => {
     const code = `
 DATA lv_classname TYPE c LENGTH 100.
 DATA result TYPE string.
