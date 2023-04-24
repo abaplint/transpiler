@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import {ABAPObject, Character, Date, FieldSymbol, Float, HashedTable, String, Hex, Integer, Numc, Structure, Table} from "../types";
+import {ABAPObject, Character, Date, FieldSymbol, Float, HashedTable, String, Hex, Integer, Numc, Structure, Table, DataReference} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -55,6 +55,8 @@ export function eq(
     return right.get() === left.get();
   } else if (right instanceof Integer && left instanceof Integer) {
     return right.get() === left.get();
+  } else if (right instanceof DataReference && left instanceof DataReference) {
+    return right.getPointer() === left.getPointer();
   } else if (right instanceof Table
       || right instanceof HashedTable) {
     if (left instanceof Table

@@ -26,4 +26,16 @@ describe("Builtin functions - substring_after", () => {
     await f(abap);
   });
 
+  it("substring_after 02", async () => {
+    const code = `
+DATA lv_classname TYPE c LENGTH 100.
+DATA result TYPE string.
+lv_classname = 'CLASS=FOO'.
+result = substring_after( val = lv_classname sub = 'CLASS=' ).
+ASSERT result = |FOO|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
