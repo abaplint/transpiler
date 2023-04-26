@@ -599,7 +599,7 @@ export class Traversal {
     if (def) {
       if (def.isGlobal() === false) {
         const prefix = this.buildPrefix();
-        return `${prefix}-${def?.getName()?.toUpperCase()}`;
+        return `${prefix}${def?.getName()?.toUpperCase()}`;
       } else {
         return def?.getName()?.toUpperCase();
       }
@@ -628,8 +628,8 @@ export class Traversal {
     return "abap.Classes['" + internalName + "']";
   }
 
-  private buildPrefix(): string {
-    return this.obj.getType() + "-" + this.obj.getName();
+  public buildPrefix(): string {
+    return this.obj.getType() + "-" + this.obj.getName() + "-";
   }
 
 ////////////////////////////

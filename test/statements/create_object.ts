@@ -198,7 +198,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("helloworld");
   });
 
-  it.only("CREATE OBJECT, dynamic local scoped class name, variable", async () => {
+  it("CREATE OBJECT, dynamic local scoped class name, variable", async () => {
     const code = `
 CLASS lcl_foo DEFINITION.
   PUBLIC SECTION.
@@ -217,13 +217,12 @@ START-OF-SELECTION.
   lv_name = 'LCL_FOO'.
   CREATE OBJECT foo TYPE (lv_name).`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("world1");
   });
 
-  it.only("CREATE OBJECT, dynamic local scoped class name, fixed", async () => {
+  it("CREATE OBJECT, dynamic local scoped class name, fixed", async () => {
     const code = `
 CLASS lcl_foo DEFINITION.
   PUBLIC SECTION.
@@ -240,7 +239,6 @@ START-OF-SELECTION.
   DATA foo TYPE REF TO object.
   CREATE OBJECT foo TYPE ('LCL_FOO').`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("world2");
