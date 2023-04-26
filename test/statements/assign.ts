@@ -758,7 +758,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.only("dynamic dereference", async () => {
+  it("dynamic dereference", async () => {
     const code = `
 CLASS lcl_foo DEFINITION.
   PUBLIC SECTION.
@@ -779,11 +779,13 @@ START-OF-SELECTION.
   CREATE OBJECT lo_foo.
   ASSIGN lo_foo->('FOO->*') TO <int>.
   ASSERT sy-subrc = 0.
-  WRITE <int>.`;
+  WRITE / <int>.
+  <int> = 2.
+  WRITE / lo_foo->foo->*.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.getTrimmed()).to.equal("5");
+    expect(abap.console.getTrimmed()).to.equal("5\n2");
   });
 
 });
