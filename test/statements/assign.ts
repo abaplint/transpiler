@@ -758,4 +758,32 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it.only("dynamic dereference", async () => {
+    const code = `
+CLASS lcl_foo DEFINITION.
+  PUBLIC SECTION.
+    DATA foo TYPE REF TO i.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS lcl_foo IMPLEMENTATION.
+  METHOD constructor.
+    CREATE DATA foo.
+    foo->* = 5.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo_foo TYPE REF TO lcl_foo.
+  FIELD-SYMBOLS <int> TYPE i.
+  CREATE OBJECT lo_foo.
+  ASSIGN lo_foo->('FOO->*') TO <int>.
+  ASSERT sy-subrc = 0.
+  WRITE <int>.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("5");
+  });
+
 });
