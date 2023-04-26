@@ -198,4 +198,52 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("helloworld");
   });
 
+  it.only("CREATE OBJECT, dynamic local scoped class name, variable", async () => {
+    const code = `
+CLASS lcl_foo DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS lcl_foo IMPLEMENTATION.
+  METHOD constructor.
+    WRITE 'world1'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA foo TYPE REF TO object.
+  DATA lv_name TYPE string.
+  lv_name = 'LCL_FOO'.
+  CREATE OBJECT foo TYPE (lv_name).`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("world1");
+  });
+
+  it.only("CREATE OBJECT, dynamic local scoped class name, fixed", async () => {
+    const code = `
+CLASS lcl_foo DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS lcl_foo IMPLEMENTATION.
+  METHOD constructor.
+    WRITE 'world2'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA foo TYPE REF TO object.
+  CREATE OBJECT foo TYPE ('LCL_FOO').`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("world2");
+  });
+
 });
