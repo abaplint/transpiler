@@ -25,8 +25,13 @@ export function assign(input: IAssignInput) {
         const split = input.dynamicName.split(/->|-/);
         split.shift();
         for (const s of split) {
-          // @ts-ignore
-          input.dynamicSource = input.dynamicSource.get()[s.toLowerCase().replace(/[~\\/]/g, "$") as any];
+          if (s === "*") {
+            // @ts-ignore
+            input.dynamicSource = input.dynamicSource.dereference();
+          } else {
+            // @ts-ignore
+            input.dynamicSource = input.dynamicSource.get()[s.toLowerCase().replace(/[~\\/]/g, "$") as any];
+          }
         }
       } else {
         // @ts-ignore
