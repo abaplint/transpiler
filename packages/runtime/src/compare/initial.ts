@@ -19,7 +19,7 @@ export function initial(val: ICharacter | INumeric | string | number | Structure
   } else if (val instanceof Character) {
     return val.get().match(/^ *$/) !== null;
   } else if (val instanceof FieldSymbol && val.getPointer() === undefined) {
-    throw "FS not assigned";
+    throw new Error("FS not assigned");
   } else if (val instanceof FieldSymbol) {
     const res: any = initial(val.getPointer());
     return res as boolean;

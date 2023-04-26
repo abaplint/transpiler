@@ -3,6 +3,7 @@ import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {FieldChainTranspiler} from "../expressions";
+import {UniqueIdentifier} from "../unique_identifier";
 
 export class CreateObjectTranspiler implements IStatementTranspiler {
 
@@ -20,7 +21,7 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
     let dynamic = node.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.ConstantString);
     if (dynamic) {
       name = dynamic.getFirstToken().getStr();
-      name = name.substring(1, name.length - 1);
+//      name = name.substring(1, name.length - 1);
     } else {
       dynamic = node.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.FieldChain);
       if (dynamic) {
@@ -34,10 +35,14 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
     }
 
     let ret = "";
-    const clas = traversal.lookupClassOrInterface(name, node.getFirstToken(), directGlobal);
+    let clas = traversal.lookupClassOrInterface(name, node.getFirstToken(), directGlobal);
     const cx = traversal.lookupClassOrInterface("CX_SY_CREATE_OBJECT_ERROR", node.getFirstToken());
     if (dynamic) {
-      ret += `if (${clas} === undefined) { throw new ${cx}; }\n`;
+      const id = UniqueIdentifier.get();
+      ret += `let ${id} = abap.Classes["${traversal.buildPrefix()}"+${name}.trimEnd()];\n`;
+      ret += `if (${id} === undefined) { ${id} = abap.Classes[${name}.trimEnd()]; }\n`;
+      ret += `if (${id} === undefined) { throw new ${cx}; }\n`;
+      clas = id;
     }
     ret += target + ".set(await (new " + clas + "()).constructor_(" + para + "));";
 

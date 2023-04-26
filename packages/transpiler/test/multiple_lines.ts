@@ -620,8 +620,10 @@ bar.bar$next.set(abap.Classes['PROG-ZFOOBAR-LCL_BAR'].first);`;
     DATA blah TYPE REF TO OBJECT.
     CREATE OBJECT blah TYPE ('ZCL_BLAH').`;
     const expected = `let blah = new abap.types.ABAPObject({qualifiedName: undefined, RTTIName: undefined});
-if (abap.Classes['ZCL_BLAH'] === undefined) { throw new abap.Classes['CX_SY_CREATE_OBJECT_ERROR']; }
-blah.set(await (new abap.Classes['ZCL_BLAH']()).constructor_());`;
+let unique1 = abap.Classes["PROG-ZFOOBAR-"+'ZCL_BLAH'.trimEnd()];
+if (unique1 === undefined) { unique1 = abap.Classes['ZCL_BLAH'.trimEnd()]; }
+if (unique1 === undefined) { throw new abap.Classes['CX_SY_CREATE_OBJECT_ERROR']; }
+blah.set(await (new unique1()).constructor_());`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
