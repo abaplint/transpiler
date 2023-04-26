@@ -15,6 +15,7 @@ export class CallFunctionTranspiler implements IStatementTranspiler {
     if (fmchild instanceof abaplint.Nodes.ExpressionNode
         && fmchild.get() instanceof abaplint.Expressions.FieldChain) {
       fmname = new FieldChainTranspiler(true).transpile(fmchild, traversal).getCode();
+      fmname = fmname + ".trimEnd()";
     } else {
       fmname = fmchild.concatTokens().toUpperCase();
     }
