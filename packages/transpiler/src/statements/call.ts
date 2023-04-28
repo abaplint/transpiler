@@ -24,7 +24,7 @@ export class CallTranspiler implements IStatementTranspiler {
 
       const exceptions = node.findFirstExpression(abaplint.Expressions.ParameterListExceptions);
       if (exceptions) {
-        const build = this.buildExceptions(exceptions);
+        const build = CallTranspiler.buildExceptions(exceptions);
         pre = build.pre + pre;
         post += build.post;
       }
@@ -66,7 +66,7 @@ export class CallTranspiler implements IStatementTranspiler {
 
       const exceptions = node.findFirstExpression(abaplint.Expressions.ParameterListExceptions);
       if (exceptions) {
-        const build = this.buildExceptions(exceptions);
+        const build = CallTranspiler.buildExceptions(exceptions);
         pre = build.pre + pre;
         post += build.post;
       }
@@ -85,7 +85,7 @@ export class CallTranspiler implements IStatementTranspiler {
     throw new Error("CallTranspiler, todo");
   }
 
-  private buildExceptions(node: abaplint.Nodes.ExpressionNode) {
+  public static buildExceptions(node: abaplint.Nodes.ExpressionNode) {
     let pre = "";
     let post = "";
 

@@ -3,6 +3,7 @@ import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {FieldChainTranspiler, SourceTranspiler} from "../expressions";
+import {CallTranspiler} from "./call";
 
 export class CallFunctionTranspiler implements IStatementTranspiler {
 
@@ -28,6 +29,11 @@ export class CallFunctionTranspiler implements IStatementTranspiler {
 
     const ret = new Chunk();
 
+    const exceptions = node.findFirstExpression(abaplint.Expressions.ParameterListExceptions);
+    if (exceptions) {
+      ret.appendString("try {\n");
+    }
+
     const dest = node.findDirectExpression(abaplint.Expressions.Destination)?.findDirectExpression(abaplint.Expressions.Source);
     if (dest) {
       const s = new SourceTranspiler(true).transpile(dest, traversal);
@@ -35,6 +41,11 @@ export class CallFunctionTranspiler implements IStatementTranspiler {
       ret.appendString(`await abap.statements.callFunction({name:${fmname},destination:${s.getCode()}${param}});`);
     } else {
       ret.appendString(`await abap.FunctionModules[${fmname}](${param});`);
+    }
+
+    if (exceptions) {
+      const build = CallTranspiler.buildExceptions(exceptions);
+      ret.appendString(build.post);
     }
 
     return ret;
