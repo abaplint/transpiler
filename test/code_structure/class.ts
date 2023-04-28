@@ -1716,6 +1716,24 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it.skip("set static via instance", async () => {
+    const code = `
+CLASS lcl_static DEFINITION.
+  PUBLIC SECTION.
+    CLASS-DATA foo TYPE string.
+ENDCLASS.
+CLASS lcl_static IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl_static.
+  CREATE OBJECT ref.
+  ref->foo = 'hello'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("Class, simple method call", async () => {
     const code = `
     INTERFACE /tst/test PUBLIC.
