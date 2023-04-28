@@ -222,8 +222,9 @@ export class Traversal {
         default:
           runtime = "U";
       }
+      const isClass = a.getMeta().includes(abaplint.IdentifierMeta.Static) ? "X" : " ";
       attr.push(`"${prefix + a.getName().toUpperCase()}": {"type": () => {return ${type};}, "visibility": "${
-        runtime}", "is_constant": " "}`);
+        runtime}", "is_constant": " ", "is_class": "${isClass}"}`);
     }
 
     for (const a of def.getAttributes()?.getConstants() || []) {
@@ -240,7 +241,7 @@ export class Traversal {
           runtime = "U";
       }
       attr.push(`"${prefix + a.getName().toUpperCase()}": {"type": () => {return ${type};}, "visibility": "${
-        runtime}", "is_constant": "X"}`);
+        runtime}", "is_constant": "X", "is_class": "X"}`);
     }
 
     for (const impl of def.getImplementing()) {
