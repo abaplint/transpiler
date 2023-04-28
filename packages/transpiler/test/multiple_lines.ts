@@ -805,4 +805,28 @@ ENDCLASS.`;
     expect(await runSingle(abap)).to.include(`ATTRIBUTES = {"LIF_INTF~FIELD":`);
   });
 
+  it("call fm exceptions", async () => {
+    const abap = `
+CALL FUNCTION 'FUNCTION_EXISTS'
+  EXPORTING
+    funcname           = 'SDFSDFSD'
+  EXCEPTIONS
+    function_not_exist = 1
+    OTHERS             = 2.`;
+    const expected = `try {
+  await abap.FunctionModules['FUNCTION_EXISTS']({exporting: {funcname: new abap.types.Character(8).set('SDFSDFSD')}});
+  abap.builtin.sy.get().subrc.set(0);
+} catch (e) {
+  if (e.classic) {
+      switch (e.classic.toUpperCase()) {
+      case "FUNCTION_NOT_EXIST": abap.builtin.sy.get().subrc.set(1); break;
+      default: abap.builtin.sy.get().subrc.set(2); break;
+        }
+    } else {
+        throw e;
+    }
+  }`;
+    expect(await runSingle(abap)).to.equal(expected);
+  });
+
 });
