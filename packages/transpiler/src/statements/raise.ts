@@ -3,6 +3,7 @@ import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {SourceTranspiler} from "../expressions";
+import {UniqueIdentifier} from "../unique_identifier";
 
 export class RaiseTranspiler implements IStatementTranspiler {
 
@@ -24,10 +25,13 @@ export class RaiseTranspiler implements IStatementTranspiler {
     if (parameters) {
       p = traversal.traverse(parameters).getCode();
     }
+    const extra = `{"INTERNAL_FILENAME": "${traversal.getFilename()}","INTERNAL_LINE": ${node.getStart().getRow()}}`;
+    const lookup = traversal.lookupClassOrInterface(classNameToken?.getStr(), classNameToken);
+    const id = UniqueIdentifier.get();
 
-    const look = traversal.lookupClassOrInterface(classNameToken?.getStr(), classNameToken);
-
-    return new Chunk().append(`throw await (new ${look}()).constructor_(${p});`, node, traversal);
+    return new Chunk().append(`const ${id} = await (new ${lookup}()).constructor_(${p});
+${id}.EXTRA_CX = ${extra};
+throw ${id};`, node, traversal);
   }
 
 }
