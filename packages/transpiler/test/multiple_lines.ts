@@ -664,7 +664,7 @@ ENDTRY.`;
     const expected = `let cx = (() => { throw "Void type: cx_root" })();
 try {
   try {
-    throw await (new abap.Classes['CX_ABAP_MESSAGE_DIGEST']()).constructor_();
+    throw await (new abap.Classes['CX_ABAP_MESSAGE_DIGEST']()).constructor_({"INTERNAL_FILENAME": "zfoobar.prog.abap","INTERNAL_LINE": 5});
   } finally {
     // Transpiler todo: CLEANUP ignored
   }

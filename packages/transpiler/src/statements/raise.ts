@@ -24,6 +24,12 @@ export class RaiseTranspiler implements IStatementTranspiler {
     if (parameters) {
       p = traversal.traverse(parameters).getCode();
     }
+    const extra = `"INTERNAL_FILENAME": "${traversal.getFilename()}","INTERNAL_LINE": ${node.getStart().getRow()}`;
+    if (p === "") {
+      p = "{" + extra + "}";
+    } else {
+      p = p.substring(0, p.length - 1) + "," + extra + "}";
+    }
 
     const look = traversal.lookupClassOrInterface(classNameToken?.getStr(), classNameToken);
 
