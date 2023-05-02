@@ -260,15 +260,15 @@ export async function setup(abap, schemas, insert) {
     // hacks
     output.unitTestScript = output.unitTestScript.replace(
       `import runtime from "@abaplint/runtime";`,
-      `import runtime from "../../packages/runtime/build/src/index.js";`);
+      `import * as runtime from "../../packages/runtime/build/src/index.js";`);
     fs.writeFileSync(outputFolder + path.sep + "index.mjs", output.unitTestScript);
     output.unitTestScriptOpen = output.unitTestScriptOpen.replace(
       `import runtime from "@abaplint/runtime";`,
-      `import runtime from "../../packages/runtime/build/src/index.js";`);
+      `import * as runtime from "../../packages/runtime/build/src/index.js";`);
     fs.writeFileSync(outputFolder + path.sep + "index_open.mjs", output.unitTestScriptOpen);
     output.initializationScript = output.initializationScript.replace(
       `import runtime from "@abaplint/runtime";`,
-      `import runtime from "../../packages/runtime/build/src/index.js";`);
+      `import * as runtime from "../../packages/runtime/build/src/index.js";`);
     fs.writeFileSync(outputFolder + path.sep + "init.mjs", output.initializationScript);
 
     const buf = childProcess.execSync("node unit-test/" + name + "/index.mjs");
