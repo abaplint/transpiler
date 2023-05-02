@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import * as abaplint from "@abaplint/core";
-import {DatabaseSetupResult} from "./db/database_setup_result";
+import {DatabaseSetupResult} from "./db/database_setup_result.js";
 
 export type TestMethodList = {object: string, class: string, method: string}[];
 

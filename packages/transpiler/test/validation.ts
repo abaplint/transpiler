@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {runSingle} from "./_utils";
+import {runSingle} from "./_utils.js";
 
 describe("Validation", () => {
   it("Unknown variable, throws error", async () => {

@@ -1,7 +1,7 @@
 import {expect} from "chai";
 import * as sourceMap from "source-map";
-import {ITranspilerOptions} from "../src/types";
-import {runSingleMapped} from "./_utils";
+import {ITranspilerOptions} from "../src/types.js";
+import {runSingleMapped} from "./_utils.js";
 
 const OPTIONS: ITranspilerOptions = {
   ignoreSyntaxCheck: true,

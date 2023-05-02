@@ -1,7 +1,7 @@
 import * as abaplint from "@abaplint/core";
-import {Chunk} from "../chunk";
-import {TranspileTypes} from "../transpile_types";
-import {IOutputFile} from "../types";
+import {Chunk} from "../chunk.js";
+import {TranspileTypes} from "../transpile_types.js";
+import {IOutputFile} from "../types.js";
 
 // tables or structures
 export class HandleTable {

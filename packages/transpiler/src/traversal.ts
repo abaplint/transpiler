@@ -1,15 +1,15 @@
 import * as abaplint from "@abaplint/core";
-import * as StatementTranspilers from "./statements";
-import * as ExpressionTranspilers from "./expressions";
-import * as StructureTranspilers from "./structures";
-import {IStatementTranspiler} from "./statements/_statement_transpiler";
-import {IExpressionTranspiler} from "./expressions/_expression_transpiler";
-import {IStructureTranspiler} from "./structures/_structure_transpiler";
-import {TranspileTypes} from "./transpile_types";
+import * as StatementTranspilers from "./statements/index.js";
+import * as ExpressionTranspilers from "./expressions/index.js";
+import * as StructureTranspilers from "./structures/index.js";
+import {IStatementTranspiler} from "./statements/_statement_transpiler.js";
+import {IExpressionTranspiler} from "./expressions/_expression_transpiler.js";
+import {IStructureTranspiler} from "./structures/_structure_transpiler.js";
+import {TranspileTypes} from "./transpile_types.js";
 import {ISpaghettiScopeNode} from "@abaplint/core";
-import {Chunk} from "./chunk";
-import {ConstantTranspiler} from "./expressions";
-import {ITranspilerOptions} from "./types";
+import {Chunk} from "./chunk.js";
+import {ConstantTranspiler} from "./expressions/index.js";
+import {ITranspilerOptions} from "./types.js";
 
 export class Traversal {
   private readonly spaghetti: abaplint.ISpaghettiScope;

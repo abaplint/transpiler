@@ -1,8 +1,8 @@
 /* eslint-disable max-len */
 import * as abaplint from "@abaplint/core";
-import {ITranspilerOptions} from "../types";
-import {DatabaseSetupResult} from "./database_setup_result";
-import {SQLiteDatabaseSchema} from "./sqlite_database_schema";
+import {ITranspilerOptions} from "../types.js";
+import {DatabaseSetupResult} from "./database_setup_result.js";
+import {SQLiteDatabaseSchema} from "./sqlite_database_schema.js";
 
 export class DatabaseSetup {
   private readonly reg: abaplint.IRegistry;

@@ -1,8 +1,8 @@
 import * as abaplint from "@abaplint/core";
-import {IStatementTranspiler} from "./_statement_transpiler";
-import {Traversal} from "../traversal";
-import {DataTranspiler} from "./data";
-import {Chunk} from "../chunk";
+import {IStatementTranspiler} from "./_statement_transpiler.js";
+import {Traversal} from "../traversal.js";
+import {DataTranspiler} from "./data.js";
+import {Chunk} from "../chunk.js";
 
 export class ConstantTranspiler implements IStatementTranspiler {
 

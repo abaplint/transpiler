@@ -1,5 +1,5 @@
 import * as abaplint from "@abaplint/core";
-import {IRequire} from "./types";
+import {IRequire} from "./types.js";
 
 export class Requires {
   private readonly reg: abaplint.IRegistry;

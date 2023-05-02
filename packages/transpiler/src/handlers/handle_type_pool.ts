@@ -1,8 +1,8 @@
 import * as abaplint from "@abaplint/core";
-import {IOutputFile} from "../types";
-import {Chunk} from "../chunk";
-import {TranspileTypes} from "../transpile_types";
-import {Traversal} from "../traversal";
+import {IOutputFile} from "../types.js";
+import {Chunk} from "../chunk.js";
+import {TranspileTypes} from "../transpile_types.js";
+import {Traversal} from "../traversal.js";
 
 export class HandleTypePool {
 

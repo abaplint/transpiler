@@ -1,9 +1,9 @@
 import * as abaplint from "@abaplint/core";
-import {IStructureTranspiler} from "./_structure_transpiler";
-import {Traversal} from "../traversal";
-import {UniqueIdentifier} from "../unique_identifier";
-import {WhenTranspiler} from "../statements";
-import {Chunk} from "../chunk";
+import {IStructureTranspiler} from "./_structure_transpiler.js";
+import {Traversal} from "../traversal.js";
+import {UniqueIdentifier} from "../unique_identifier.js";
+import {WhenTranspiler} from "../statements/index.js";
+import {Chunk} from "../chunk.js";
 
 export class CaseTranspiler implements IStructureTranspiler {
 

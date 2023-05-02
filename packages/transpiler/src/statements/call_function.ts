@@ -1,9 +1,9 @@
 import * as abaplint from "@abaplint/core";
-import {IStatementTranspiler} from "./_statement_transpiler";
-import {Traversal} from "../traversal";
-import {Chunk} from "../chunk";
-import {FieldChainTranspiler, SourceTranspiler} from "../expressions";
-import {CallTranspiler} from "./call";
+import {IStatementTranspiler} from "./_statement_transpiler.js";
+import {Traversal} from "../traversal.js";
+import {Chunk} from "../chunk.js";
+import {FieldChainTranspiler, SourceTranspiler} from "../expressions/index.js";
+import {CallTranspiler} from "./call.js";
 
 export class CallFunctionTranspiler implements IStatementTranspiler {
 

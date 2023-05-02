@@ -1,12 +1,12 @@
 import * as abaplint from "@abaplint/core";
-import {IStructureTranspiler} from "./_structure_transpiler";
-import {Traversal} from "../traversal";
-import {Chunk} from "../chunk";
-import {AtFirstTranspiler} from "./at_first";
-import {AtLastTranspiler} from "./at_last";
-import {UniqueIdentifier} from "../unique_identifier";
-import {LoopTranspiler as LoopStatementTranspiler} from "../statements";
-import {AtTranspiler} from "./at";
+import {IStructureTranspiler} from "./_structure_transpiler.js";
+import {Traversal} from "../traversal.js";
+import {Chunk} from "../chunk.js";
+import {AtFirstTranspiler} from "./at_first.js";
+import {AtLastTranspiler} from "./at_last.js";
+import {UniqueIdentifier} from "../unique_identifier.js";
+import {LoopTranspiler as LoopStatementTranspiler} from "../statements/index.js";
+import {AtTranspiler} from "./at.js";
 
 
 export class LoopTranspiler implements IStructureTranspiler {

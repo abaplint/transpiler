@@ -1,6 +1,6 @@
 import * as abaplint from "@abaplint/core";
 import {expect} from "chai";
-import {Rearranger} from "../src/rearranger";
+import {Rearranger} from "../src/rearranger.js";
 
 // returns the Source node
 function run(abap: string): abaplint.Nodes.ExpressionNode {

@@ -1,8 +1,8 @@
 import {Expressions, Nodes} from "@abaplint/core";
-import {IExpressionTranspiler} from "./_expression_transpiler";
-import {Traversal} from "../traversal";
-import {FieldLengthTranspiler, FieldOffsetTranspiler, FieldSymbolTranspiler} from ".";
-import {Chunk} from "../chunk";
+import {IExpressionTranspiler} from "./_expression_transpiler.js";
+import {Traversal} from "../traversal.js";
+import {FieldLengthTranspiler, FieldOffsetTranspiler, FieldSymbolTranspiler} from "./index.js";
+import {Chunk} from "../chunk.js";
 
 export class TargetTranspiler implements IExpressionTranspiler {
 

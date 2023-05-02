@@ -1,7 +1,7 @@
 import {Nodes} from "@abaplint/core";
-import {Chunk} from "../chunk";
-import {Traversal} from "../traversal";
-import {IExpressionTranspiler} from "./_expression_transpiler";
+import {Chunk} from "../chunk.js";
+import {Traversal} from "../traversal.js";
+import {IExpressionTranspiler} from "./_expression_transpiler.js";
 
 export class MessageNumberTranspiler implements IExpressionTranspiler {
 

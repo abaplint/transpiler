@@ -1,9 +1,9 @@
 /* eslint-disable max-len */
 import * as abaplint from "@abaplint/core";
-import {IStatementTranspiler} from "./_statement_transpiler";
-import {FieldChainTranspiler, FieldSymbolTranspiler, SourceTranspiler} from "../expressions";
-import {Traversal} from "../traversal";
-import {Chunk} from "../chunk";
+import {IStatementTranspiler} from "./_statement_transpiler.js";
+import {FieldChainTranspiler, FieldSymbolTranspiler, SourceTranspiler} from "../expressions/index.js";
+import {Traversal} from "../traversal.js";
+import {Chunk} from "../chunk.js";
 
 export class AssignTranspiler implements IStatementTranspiler {
 

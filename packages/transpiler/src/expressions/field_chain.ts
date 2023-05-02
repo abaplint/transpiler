@@ -1,9 +1,9 @@
 import {Expressions, Nodes} from "@abaplint/core";
-import {IExpressionTranspiler} from "./_expression_transpiler";
-import {FieldLengthTranspiler, FieldOffsetTranspiler} from ".";
-import {Traversal} from "../traversal";
-import {FieldSymbolTranspiler} from "./field_symbol";
-import {Chunk} from "../chunk";
+import {IExpressionTranspiler} from "./_expression_transpiler.js";
+import {FieldLengthTranspiler, FieldOffsetTranspiler} from "./index.js";
+import {Traversal} from "../traversal.js";
+import {FieldSymbolTranspiler} from "./field_symbol.js";
+import {Chunk} from "../chunk.js";
 
 export class FieldChainTranspiler implements IExpressionTranspiler {
   private readonly addGet: boolean;

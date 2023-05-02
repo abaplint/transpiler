@@ -1,9 +1,9 @@
 import * as abaplint from "@abaplint/core";
-import {IStatementTranspiler} from "./_statement_transpiler";
-import {FieldSymbolTranspiler as Expr} from "../expressions/field_symbol";
-import {Traversal} from "../traversal";
-import {Chunk} from "../chunk";
-import {TranspileTypes} from "../transpile_types";
+import {IStatementTranspiler} from "./_statement_transpiler.js";
+import {FieldSymbolTranspiler as Expr} from "../expressions/field_symbol.js";
+import {Traversal} from "../traversal.js";
+import {Chunk} from "../chunk.js";
+import {TranspileTypes} from "../transpile_types.js";
 
 export class FieldSymbolTranspiler implements IStatementTranspiler {
 

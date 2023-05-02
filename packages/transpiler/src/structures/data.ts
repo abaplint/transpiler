@@ -1,8 +1,8 @@
 import * as abaplint from "@abaplint/core";
-import {IStructureTranspiler} from "./_structure_transpiler";
-import {Traversal} from "../traversal";
-import {DataTranspiler as DataStatementTranspiler} from "../statements";
-import {Chunk} from "../chunk";
+import {IStructureTranspiler} from "./_structure_transpiler.js";
+import {Traversal} from "../traversal.js";
+import {DataTranspiler as DataStatementTranspiler} from "../statements/index.js";
+import {Chunk} from "../chunk.js";
 
 export class DataTranspiler implements IStructureTranspiler {
 

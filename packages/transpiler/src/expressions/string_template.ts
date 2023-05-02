@@ -1,8 +1,8 @@
 import {Nodes, Tokens} from "@abaplint/core";
-import {IExpressionTranspiler} from "./_expression_transpiler";
-import {StringTemplateSourceTranspiler} from ".";
-import {Traversal} from "../traversal";
-import {Chunk} from "../chunk";
+import {IExpressionTranspiler} from "./_expression_transpiler.js";
+import {StringTemplateSourceTranspiler} from "./index.js";
+import {Traversal} from "../traversal.js";
+import {Chunk} from "../chunk.js";
 
 export class StringTemplateTranspiler implements IExpressionTranspiler {
 

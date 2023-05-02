@@ -1,9 +1,9 @@
 import * as abaplint from "@abaplint/core";
-import {IStructureTranspiler} from "./_structure_transpiler";
-import {Traversal} from "../traversal";
-import {Chunk} from "../chunk";
-import {DoTranspiler as DoStatementTranspiler, EndDoTranspiler} from "../statements";
-import {UniqueIdentifier} from "../unique_identifier";
+import {IStructureTranspiler} from "./_structure_transpiler.js";
+import {Traversal} from "../traversal.js";
+import {Chunk} from "../chunk.js";
+import {DoTranspiler as DoStatementTranspiler, EndDoTranspiler} from "../statements/index.js";
+import {UniqueIdentifier} from "../unique_identifier.js";
 
 export class DoTranspiler implements IStructureTranspiler {
 

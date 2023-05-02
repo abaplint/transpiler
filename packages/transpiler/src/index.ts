@@ -1,18 +1,18 @@
 import * as abaplint from "@abaplint/core";
-import {Validation, config} from "./validation";
-import {UnitTest} from "./unit_test";
-import {Keywords} from "./keywords";
-import {IFile, IOutput, IProgress, ITranspilerOptions, IOutputFile} from "./types";
-import {DatabaseSetup} from "./db";
-import {HandleTable} from "./handlers/handle_table";
-import {HandleABAP} from "./handlers/handle_abap";
-import {HandleDataElement} from "./handlers/handle_data_element";
-import {HandleTableType} from "./handlers/handle_table_type";
-import {HandleView} from "./handlers/handle_view";
-import {HandleEnqu} from "./handlers/handle_enqu";
-import {HandleTypePool} from "./handlers/handle_type_pool";
-import {HandleW3MI} from "./handlers/handle_w3mi";
-import {HandleSMIM} from "./handlers/handle_smim";
+import {Validation, config} from "./validation.js";
+import {UnitTest} from "./unit_test.js";
+import {Keywords} from "./keywords.js";
+import {IFile, IOutput, IProgress, ITranspilerOptions, IOutputFile} from "./types.js";
+import {DatabaseSetup} from "./db/index.js";
+import {HandleTable} from "./handlers/handle_table.js";
+import {HandleABAP} from "./handlers/handle_abap.js";
+import {HandleDataElement} from "./handlers/handle_data_element.js";
+import {HandleTableType} from "./handlers/handle_table_type.js";
+import {HandleView} from "./handlers/handle_view.js";
+import {HandleEnqu} from "./handlers/handle_enqu.js";
+import {HandleTypePool} from "./handlers/handle_type_pool.js";
+import {HandleW3MI} from "./handlers/handle_w3mi.js";
+import {HandleSMIM} from "./handlers/handle_smim.js";
 
 export {config, ITranspilerOptions, IFile, IProgress, IOutputFile};
 

@@ -1,8 +1,8 @@
 import {Nodes} from "@abaplint/core";
 import * as abaplint from "@abaplint/core";
-import {IExpressionTranspiler} from "./_expression_transpiler";
-import {Traversal} from "../traversal";
-import {Chunk} from "../chunk";
+import {IExpressionTranspiler} from "./_expression_transpiler.js";
+import {Traversal} from "../traversal.js";
+import {Chunk} from "../chunk.js";
 
 export class SQLFromSourceTranspiler implements IExpressionTranspiler {
 

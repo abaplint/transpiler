@@ -1,9 +1,9 @@
 import {Expressions, Nodes} from "@abaplint/core";
-import {IExpressionTranspiler} from "./_expression_transpiler";
-import {AttributeChainTranspiler, ComponentChainTranspiler, FieldChainTranspiler} from ".";
-import {Traversal} from "../traversal";
-import {ConstantTranspiler} from "./constant";
-import {Chunk} from "../chunk";
+import {IExpressionTranspiler} from "./_expression_transpiler.js";
+import {AttributeChainTranspiler, ComponentChainTranspiler, FieldChainTranspiler} from "./index.js";
+import {Traversal} from "../traversal.js";
+import {ConstantTranspiler} from "./constant.js";
+import {Chunk} from "../chunk.js";
 
 export class SourceTranspiler implements IExpressionTranspiler {
   private readonly addGet: boolean;

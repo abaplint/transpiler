@@ -1,6 +1,6 @@
 import {MemoryFile, Registry} from "@abaplint/core";
 import {expect} from "chai";
-import {Keywords} from "../src/keywords";
+import {Keywords} from "../src/keywords.js";
 
 describe("Keywords", () => {
 

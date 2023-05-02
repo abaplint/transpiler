@@ -1,6 +1,6 @@
 import {expect} from "chai";
-import {ITranspilerOptions} from "../src/types";
-import {runSingle} from "./_utils";
+import {ITranspilerOptions} from "../src/types.js";
+import {runSingle} from "./_utils.js";
 
 const options: ITranspilerOptions = {unknownTypes: "runtimeError"};
 

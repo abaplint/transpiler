@@ -1,9 +1,9 @@
 import * as abaplint from "@abaplint/core";
-import {IStatementTranspiler} from "./_statement_transpiler";
-import {Traversal} from "../traversal";
-import {UniqueIdentifier} from "../unique_identifier";
-import {FieldChainTranspiler, SourceTranspiler} from "../expressions";
-import {Chunk} from "../chunk";
+import {IStatementTranspiler} from "./_statement_transpiler.js";
+import {Traversal} from "../traversal.js";
+import {UniqueIdentifier} from "../unique_identifier.js";
+import {FieldChainTranspiler, SourceTranspiler} from "../expressions/index.js";
+import {Chunk} from "../chunk.js";
 
 export class LoopTranspiler implements IStatementTranspiler {
   private unique = "";

@@ -1,6 +1,6 @@
-import {Transpiler} from "../src";
-import {IFile, ITranspilerOptions} from "../src/types";
-import {UniqueIdentifier} from "../src/unique_identifier";
+import {Transpiler} from "../src/index.js";
+import {IFile, ITranspilerOptions} from "../src/types.js";
+import {UniqueIdentifier} from "../src/unique_identifier.js";
 import * as abaplint from "@abaplint/core";
 
 async function runFiles(files: IFile[], options?: ITranspilerOptions) {

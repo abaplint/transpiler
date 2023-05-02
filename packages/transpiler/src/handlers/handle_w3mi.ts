@@ -1,6 +1,6 @@
 import * as abaplint from "@abaplint/core";
-import {Chunk} from "../chunk";
-import {IOutputFile} from "../types";
+import {Chunk} from "../chunk.js";
+import {IOutputFile} from "../types.js";
 
 export class HandleW3MI {
   public runObject(obj: abaplint.Objects.WebMIME, _reg: abaplint.IRegistry): IOutputFile[] {

@@ -1,8 +1,8 @@
 import * as abaplint from "@abaplint/core";
-import {IStatementTranspiler} from "./_statement_transpiler";
-import {Traversal} from "../traversal";
-import {Chunk} from "../chunk";
-import {UniqueIdentifier} from "../unique_identifier";
+import {IStatementTranspiler} from "./_statement_transpiler.js";
+import {Traversal} from "../traversal.js";
+import {Chunk} from "../chunk.js";
+import {UniqueIdentifier} from "../unique_identifier.js";
 
 export class ReturnTranspiler implements IStatementTranspiler {
 

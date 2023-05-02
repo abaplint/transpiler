@@ -1,10 +1,10 @@
 import * as abaplint from "@abaplint/core";
-import {IStatementTranspiler} from "./_statement_transpiler";
-import {Traversal} from "../traversal";
-import {Chunk} from "../chunk";
-import {FieldChainTranspiler, SourceTranspiler, SQLFieldTranspiler, SQLSourceTranspiler} from "../expressions";
-import {UniqueIdentifier} from "../unique_identifier";
-import {SQLFromTranspiler} from "../expressions/sql_from";
+import {IStatementTranspiler} from "./_statement_transpiler.js";
+import {Traversal} from "../traversal.js";
+import {Chunk} from "../chunk.js";
+import {FieldChainTranspiler, SourceTranspiler, SQLFieldTranspiler, SQLSourceTranspiler} from "../expressions/index.js";
+import {UniqueIdentifier} from "../unique_identifier.js";
+import {SQLFromTranspiler} from "../expressions/sql_from.js";
 
 function escapeRegExp(string: string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string

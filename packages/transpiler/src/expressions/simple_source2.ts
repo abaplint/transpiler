@@ -1,8 +1,8 @@
 import {Nodes} from "@abaplint/core";
-import {IExpressionTranspiler} from "./_expression_transpiler";
-import {SourceTranspiler} from ".";
-import {Traversal} from "../traversal";
-import {Chunk} from "../chunk";
+import {IExpressionTranspiler} from "./_expression_transpiler.js";
+import {SourceTranspiler} from "./index.js";
+import {Traversal} from "../traversal.js";
+import {Chunk} from "../chunk.js";
 
 export class SimpleSource2Transpiler implements IExpressionTranspiler {
 

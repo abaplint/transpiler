@@ -1,8 +1,8 @@
 /* eslint-disable max-len */
 import {expect} from "chai";
 import * as abaplint from "@abaplint/core";
-import {tabl_t100xml, zag_unit_test_v, zsingletablview} from "./_data";
-import {SQLiteDatabaseSchema} from "../src/db/sqlite_database_schema";
+import {tabl_t100xml, zag_unit_test_v, zsingletablview} from "./_data.js";
+import {SQLiteDatabaseSchema} from "../src/db/sqlite_database_schema.js";
 
 describe("transpiler, database setup", () => {
 

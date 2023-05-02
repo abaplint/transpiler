@@ -1,9 +1,9 @@
 import * as abaplint from "@abaplint/core";
-import {IOutputFile, ITranspilerOptions} from "../types";
-import {Traversal} from "../traversal";
-import {Requires} from "../requires";
-import {Rearranger} from "../rearranger";
-import {Chunk} from "../chunk";
+import {IOutputFile, ITranspilerOptions} from "../types.js";
+import {Traversal} from "../traversal.js";
+import {Requires} from "../requires.js";
+import {Rearranger} from "../rearranger.js";
+import {Chunk} from "../chunk.js";
 
 export class HandleABAP {
   private readonly options: ITranspilerOptions | undefined;

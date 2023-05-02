@@ -1,11 +1,11 @@
 import {Nodes} from "@abaplint/core";
 import * as abaplint from "@abaplint/core";
-import {IExpressionTranspiler} from "./_expression_transpiler";
-import {Traversal} from "../traversal";
-import {Chunk} from "../chunk";
-import {SimpleSource3Transpiler} from "./simple_source3";
-import {FieldChainTranspiler} from "./field_chain";
-import {SQLFieldNameTranspiler} from "./sql_field_name";
+import {IExpressionTranspiler} from "./_expression_transpiler.js";
+import {Traversal} from "../traversal.js";
+import {Chunk} from "../chunk.js";
+import {SimpleSource3Transpiler} from "./simple_source3.js";
+import {FieldChainTranspiler} from "./field_chain.js";
+import {SQLFieldNameTranspiler} from "./sql_field_name.js";
 
 export class SQLCondTranspiler implements IExpressionTranspiler {
 

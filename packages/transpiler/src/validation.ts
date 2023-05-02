@@ -1,6 +1,6 @@
 import {Issue, IRegistry, Config, IConfig, Version} from "@abaplint/core";
-import {defaultKeywords} from "./keywords";
-import {ITranspilerOptions} from "./types";
+import {defaultKeywords} from "./keywords.js";
+import {ITranspilerOptions} from "./types.js";
 
 export const config: IConfig = {
   "global": {

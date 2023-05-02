@@ -1,8 +1,8 @@
 import {Nodes, Expressions} from "@abaplint/core";
-import {IExpressionTranspiler} from "./_expression_transpiler";
-import {Traversal} from "../traversal";
-import {MethodCallParamTranspiler} from "./method_call_param";
-import {Chunk} from "../chunk";
+import {IExpressionTranspiler} from "./_expression_transpiler.js";
+import {Traversal} from "../traversal.js";
+import {MethodCallParamTranspiler} from "./method_call_param.js";
+import {Chunk} from "../chunk.js";
 
 export class MethodCallTranspiler implements IExpressionTranspiler {
 

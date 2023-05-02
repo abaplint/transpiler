@@ -1,8 +1,8 @@
 import * as abaplint from "@abaplint/core";
-import {IStatementTranspiler} from "./_statement_transpiler";
-import {FieldSymbolTranspiler} from "../expressions";
-import {Traversal} from "../traversal";
-import {Chunk} from "../chunk";
+import {IStatementTranspiler} from "./_statement_transpiler.js";
+import {FieldSymbolTranspiler} from "../expressions/index.js";
+import {Traversal} from "../traversal.js";
+import {Chunk} from "../chunk.js";
 
 export class UnassignTranspiler implements IStatementTranspiler {
 

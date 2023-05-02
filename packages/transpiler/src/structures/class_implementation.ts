@@ -1,8 +1,8 @@
 import * as abaplint from "@abaplint/core";
-import {IStructureTranspiler} from "./_structure_transpiler";
-import {Traversal} from "../traversal";
-import {TranspileTypes} from "../transpile_types";
-import {Chunk} from "../chunk";
+import {IStructureTranspiler} from "./_structure_transpiler.js";
+import {Traversal} from "../traversal.js";
+import {TranspileTypes} from "../transpile_types.js";
+import {Chunk} from "../chunk.js";
 
 export class ClassImplementationTranspiler implements IStructureTranspiler {
 

@@ -1,9 +1,9 @@
 /* eslint-disable max-len */
 import {Nodes, Expressions} from "@abaplint/core";
-import {IExpressionTranspiler} from "./_expression_transpiler";
-import {Traversal} from "../traversal";
-import {Chunk} from "../chunk";
-import {FieldChainTranspiler} from ".";
+import {IExpressionTranspiler} from "./_expression_transpiler.js";
+import {Traversal} from "../traversal.js";
+import {Chunk} from "../chunk.js";
+import {FieldChainTranspiler} from "./index.js";
 
 export class MethodSourceTranspiler implements IExpressionTranspiler {
   private prepend: string;

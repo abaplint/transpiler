@@ -1,9 +1,9 @@
 import * as abaplint from "@abaplint/core";
-import {IStatementTranspiler} from "./_statement_transpiler";
-import {Traversal} from "../traversal";
-import {FieldSymbolTranspiler, SourceTranspiler} from "../expressions";
-import {UniqueIdentifier} from "../unique_identifier";
-import {Chunk} from "../chunk";
+import {IStatementTranspiler} from "./_statement_transpiler.js";
+import {Traversal} from "../traversal.js";
+import {FieldSymbolTranspiler, SourceTranspiler} from "../expressions/index.js";
+import {UniqueIdentifier} from "../unique_identifier.js";
+import {Chunk} from "../chunk.js";
 
 export class ReadTableTranspiler implements IStatementTranspiler {
 

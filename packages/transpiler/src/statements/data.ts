@@ -1,10 +1,10 @@
 import * as abaplint from "@abaplint/core";
-import {IStatementTranspiler} from "./_statement_transpiler";
-import {TranspileTypes} from "../transpile_types";
-import {Traversal} from "../traversal";
-import {ConstantTranspiler} from "../expressions/constant";
-import {FieldChainTranspiler} from "../expressions";
-import {Chunk} from "../chunk";
+import {IStatementTranspiler} from "./_statement_transpiler.js";
+import {TranspileTypes} from "../transpile_types.js";
+import {Traversal} from "../traversal.js";
+import {ConstantTranspiler} from "../expressions/constant.js";
+import {FieldChainTranspiler} from "../expressions/index.js";
+import {Chunk} from "../chunk.js";
 
 export class DataTranspiler implements IStatementTranspiler {
 

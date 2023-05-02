@@ -1,9 +1,9 @@
 import * as abaplint from "@abaplint/core";
-import {IStatementTranspiler} from "./_statement_transpiler";
-import {Traversal} from "../traversal";
-import {Chunk} from "../chunk";
-import {FieldChainTranspiler} from "../expressions";
-import {UniqueIdentifier} from "../unique_identifier";
+import {IStatementTranspiler} from "./_statement_transpiler.js";
+import {Traversal} from "../traversal.js";
+import {Chunk} from "../chunk.js";
+import {FieldChainTranspiler} from "../expressions/index.js";
+import {UniqueIdentifier} from "../unique_identifier.js";
 
 export class CreateObjectTranspiler implements IStatementTranspiler {
 

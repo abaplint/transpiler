@@ -1,10 +1,10 @@
 import * as abaplint from "@abaplint/core";
-import {IStructureTranspiler} from "./_structure_transpiler";
-import {Traversal} from "../traversal";
-import {SelectTranspiler as SelectStatementTranspiler} from "../statements/select";
-import {Chunk} from "../chunk";
-import {UniqueIdentifier} from "../unique_identifier";
-import {SQLTargetTranspiler} from "../expressions";
+import {IStructureTranspiler} from "./_structure_transpiler.js";
+import {Traversal} from "../traversal.js";
+import {SelectTranspiler as SelectStatementTranspiler} from "../statements/select.js";
+import {Chunk} from "../chunk.js";
+import {UniqueIdentifier} from "../unique_identifier.js";
+import {SQLTargetTranspiler} from "../expressions/index.js";
 
 export class SelectTranspiler implements IStructureTranspiler {
 

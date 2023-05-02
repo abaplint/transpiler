@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {Position} from "@abaplint/core";
-import {Chunk} from "../src/chunk";
+import {Chunk} from "../src/chunk.js";
 
 class Dummy {
   public getFilename() {

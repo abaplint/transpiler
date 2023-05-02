@@ -1,8 +1,8 @@
 import {Nodes} from "@abaplint/core";
-import {IExpressionTranspiler} from "./_expression_transpiler";
-import {Traversal} from "../traversal";
+import {IExpressionTranspiler} from "./_expression_transpiler.js";
+import {Traversal} from "../traversal.js";
 import * as abaplint from "@abaplint/core";
-import {Chunk} from "../chunk";
+import {Chunk} from "../chunk.js";
 
 export class ComponentCondTranspiler implements IExpressionTranspiler {
 

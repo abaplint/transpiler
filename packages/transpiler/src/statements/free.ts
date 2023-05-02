@@ -1,8 +1,8 @@
 import * as abaplint from "@abaplint/core";
-import {IStatementTranspiler} from "./_statement_transpiler";
-import {Traversal} from "../traversal";
-import {ClearTranspiler} from "./clear";
-import {Chunk} from "../chunk";
+import {IStatementTranspiler} from "./_statement_transpiler.js";
+import {Traversal} from "../traversal.js";
+import {ClearTranspiler} from "./clear.js";
+import {Chunk} from "../chunk.js";
 
 export class FreeTranspiler implements IStatementTranspiler {
 

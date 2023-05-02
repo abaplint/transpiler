@@ -1,6 +1,6 @@
 import * as abaplint from "@abaplint/core";
-import {Chunk} from "../chunk";
-import {IOutputFile} from "../types";
+import {Chunk} from "../chunk.js";
+import {IOutputFile} from "../types.js";
 
 export class HandleSMIM {
   public runObject(obj: abaplint.Objects.MIMEObject, _reg: abaplint.IRegistry): IOutputFile[] {

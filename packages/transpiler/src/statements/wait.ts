@@ -1,8 +1,8 @@
 import * as abaplint from "@abaplint/core";
-import {IStatementTranspiler} from "./_statement_transpiler";
-import {Traversal} from "../traversal";
-import {Chunk} from "../chunk";
-import {SourceTranspiler} from "../expressions";
+import {IStatementTranspiler} from "./_statement_transpiler.js";
+import {Traversal} from "../traversal.js";
+import {Chunk} from "../chunk.js";
+import {SourceTranspiler} from "../expressions/index.js";
 
 export class WaitTranspiler implements IStatementTranspiler {
 

@@ -1,8 +1,8 @@
 import * as abaplint from "@abaplint/core";
-import {Chunk} from "../chunk";
-import {Traversal} from "../traversal";
-import {ReturnTranspiler} from "./return";
-import {IStatementTranspiler} from "./_statement_transpiler";
+import {Chunk} from "../chunk.js";
+import {Traversal} from "../traversal.js";
+import {ReturnTranspiler} from "./return.js";
+import {IStatementTranspiler} from "./_statement_transpiler.js";
 
 export class ExitTranspiler implements IStatementTranspiler {
 

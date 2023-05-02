@@ -25,6 +25,7 @@
     "ABAP",
     "abaplint"
   ],
+  "type": "module",
   "author": "abaplint",
   "license": "MIT",
   "dependencies": {

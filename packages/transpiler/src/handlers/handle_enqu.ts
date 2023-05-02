@@ -1,6 +1,6 @@
 import * as abaplint from "@abaplint/core";
-import {Chunk} from "../chunk";
-import {IOutputFile} from "../types";
+import {Chunk} from "../chunk.js";
+import {IOutputFile} from "../types.js";
 
 // view, much like the tables
 export class HandleEnqu {

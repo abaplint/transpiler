@@ -1,7 +1,7 @@
 import {expect} from "chai";
-import {Transpiler} from "../src";
+import {Transpiler} from "../src/index.js";
 import * as abaplint from "@abaplint/core";
-import {IFile} from "../src/types";
+import {IFile} from "../src/types.js";
 
 async function runFiles(files: IFile[]) {
   const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
