@@ -5,6 +5,9 @@ import {expect} from "chai";
 import {Transpiler} from "../packages/transpiler/src/index.js";
 import {IFile, ITranspilerOptions} from "../packages/transpiler/src/types.js";
 import * as abaplint from "@abaplint/core";
+import * as url from "url";
+
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
 const t000 = `<?xml version="1.0" encoding="utf-8"?>
 <abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
