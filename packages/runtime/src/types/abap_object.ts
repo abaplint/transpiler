@@ -1,4 +1,4 @@
-import {FieldSymbol} from "./field_symbol";
+import {FieldSymbol} from "./field_symbol.js";
 
 export class ABAPObject  {
   private value: any | undefined;

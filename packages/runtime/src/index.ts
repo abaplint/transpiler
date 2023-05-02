@@ -1,18 +1,18 @@
-import {Console} from "./console";
-import {Context} from "./context";
-import {OffsetLength} from "./offset_length";
-import {Statements} from "./statements";
-import {templateFormatting} from "./template_formatting";
-import {UnitTestResult} from "./unit_test";
-import * as builtin from "./builtin";
-import * as compare from "./compare";
-import * as DB from "./db/db";
-import * as operators from "./operators";
-import * as RFC from "./rfc";
-import * as types from "./types";
-import {expandIN} from "./expand_in";
-import {expandDynamic} from "./expand_dynamic";
-import {ClassicError} from "./classic_error";
+import {Console} from "./console.js";
+import {Context} from "./context.js";
+import {OffsetLength} from "./offset_length.js";
+import {Statements} from "./statements/index.js";
+import {templateFormatting} from "./template_formatting.js";
+import {UnitTestResult} from "./unit_test.js";
+import * as builtin from "./builtin/index.js";
+import * as compare from "./compare/index.js";
+import * as DB from "./db/db.js";
+import * as operators from "./operators/index.js";
+import * as RFC from "./rfc.js";
+import * as types from "./types/index.js";
+import {expandIN} from "./expand_in.js";
+import {expandDynamic} from "./expand_dynamic.js";
+import {ClassicError} from "./classic_error.js";
 
 export {UnitTestResult, RFC, types, DB};
 

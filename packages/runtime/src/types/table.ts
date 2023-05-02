@@ -1,14 +1,14 @@
-import {INumeric} from "./_numeric";
-import {ICharacter} from "./_character";
-import {Integer} from "./integer";
-import {ABAPObject} from "./abap_object";
-import {String} from "./string";
-import {clone} from "../clone";
-import {Structure} from "./structure";
-import {FieldSymbol} from "./field_symbol";
-import {DataReference} from "./data_reference";
-import {insertInternal} from "../statements/insert_internal";
-import {sort} from "../statements/sort";
+import {INumeric} from "./_numeric.js";
+import {ICharacter} from "./_character.js";
+import {Integer} from "./integer.js";
+import {ABAPObject} from "./abap_object.js";
+import {String} from "./string.js";
+import {clone} from "../clone.js";
+import {Structure} from "./structure.js";
+import {FieldSymbol} from "./field_symbol.js";
+import {DataReference} from "./data_reference.js";
+import {insertInternal} from "../statements/insert_internal.js";
+import {sort} from "../statements/sort.js";
 
 export enum TableAccessType {
   standard = "STANDARD",

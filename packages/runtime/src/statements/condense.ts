@@ -1,4 +1,4 @@
-import {ICharacter} from "../types/_character";
+import {ICharacter} from "../types/_character.js";
 
 export function condense(input: ICharacter, options: {nogaps: boolean}): void {
   let trimmed = input.get().replace(/ +$/, "");

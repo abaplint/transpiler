@@ -1,4 +1,4 @@
-import {Character, String} from "../types";
+import {Character, String} from "../types/index.js";
 
 export function boolc(input: boolean | undefined | {val: Character | String}) {
   if (input === true) {

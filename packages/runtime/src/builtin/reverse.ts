@@ -1,5 +1,5 @@
-import {String} from "../types";
-import {ICharacter} from "../types/_character";
+import {String} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
 
 export function reverse(input: {val: ICharacter | string}) {
   let val = "";

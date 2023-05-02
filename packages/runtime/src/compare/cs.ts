@@ -1,5 +1,5 @@
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
 
 export function cs(left: number | string | ICharacter | INumeric, right: string | ICharacter): boolean {
   let l = "";

@@ -1,7 +1,7 @@
 /* eslint-disable radix */
-import {DecFloat34, Float} from "../types";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
+import {DecFloat34, Float} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
 
 export function frac(input: {val: number | string | ICharacter | INumeric}) {
   let num_in: number | undefined = undefined;

@@ -1,5 +1,5 @@
-import {String, Table} from "../types";
-import {ICharacter} from "../types/_character";
+import {String, Table} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
 
 interface IReadReportOptions {
   state?: ICharacter,

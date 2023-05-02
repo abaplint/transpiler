@@ -1,4 +1,4 @@
-import {Table} from "./types";
+import {Table} from "./types/table.js";
 
 // note: must always return an expression, never return empty string
 export function expandIN(fieldName: string, table: Table) {

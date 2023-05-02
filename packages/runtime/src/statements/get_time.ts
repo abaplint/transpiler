@@ -1,5 +1,5 @@
-import {Structure} from "../types";
-import {ICharacter} from "../types/_character";
+import {Structure} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
 
 type options = {
   field?: ICharacter,

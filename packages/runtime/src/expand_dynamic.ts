@@ -1,4 +1,4 @@
-import {FieldSymbol} from "./types";
+import {FieldSymbol} from "./types/field_symbol.js";
 
 export function expandDynamic(code: string, ev: (name: string) => FieldSymbol | undefined) {
   if (code === "") {

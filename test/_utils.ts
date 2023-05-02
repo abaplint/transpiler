@@ -1,8 +1,8 @@
-import {Transpiler} from "../packages/transpiler/src/";
-import {ABAP} from "../packages/runtime/src/";
-import {SQLiteDatabaseClient} from "../packages/database-sqlite/src/";
+import {Transpiler} from "../packages/transpiler/src/index.js";
+import {ABAP} from "../packages/runtime/src/index.js";
+import {SQLiteDatabaseClient} from "../packages/database-sqlite/src/index.js";
 import * as abaplint from "@abaplint/core";
-import {IFile, ITranspilerOptions} from "../packages/transpiler/src/types";
+import {IFile, ITranspilerOptions} from "../packages/transpiler/src/types.js";
 
 // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AsyncFunction
 // eslint-disable-next-line @typescript-eslint/no-empty-function

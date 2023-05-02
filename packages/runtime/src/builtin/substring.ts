@@ -1,7 +1,7 @@
-import {ICharacter} from "../types/_character";
-import {String} from "../types/string";
-import {INumeric} from "../types/_numeric";
-import {throwError} from "../throw_error";
+import {ICharacter} from "../types/_character.js";
+import {String} from "../types/string.js";
+import {INumeric} from "../types/_numeric.js";
+import {throwError} from "../throw_error.js";
 
 export interface ISubstringInput {
   val: ICharacter | string;

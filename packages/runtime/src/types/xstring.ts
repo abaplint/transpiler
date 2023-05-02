@@ -1,8 +1,8 @@
-import {parse} from "../operators/_parse";
-import {Float} from "./float";
-import {Hex} from "./hex";
-import {ICharacter} from "./_character";
-import {INumeric} from "./_numeric";
+import {parse} from "../operators/_parse.js";
+import {Float} from "./float.js";
+import {Hex} from "./hex.js";
+import {ICharacter} from "./_character.js";
+import {INumeric} from "./_numeric.js";
 
 export class XString implements ICharacter {
   private value: string;

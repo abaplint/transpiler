@@ -1,7 +1,7 @@
-import {FieldSymbol, HashedTable, Structure, Table} from "../types";
-import {eq} from "../compare";
-import {INumeric} from "../types/_numeric";
-import {loop} from "./loop";
+import {FieldSymbol, HashedTable, Structure, Table} from "../types/index.js";
+import {eq} from "../compare/index.js";
+import {INumeric} from "../types/_numeric.js";
+import {loop} from "./loop.js";
 
 export interface IDeleteInternalOptions {
   where?: (i: any) => boolean,

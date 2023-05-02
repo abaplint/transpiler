@@ -1,8 +1,8 @@
-import {binarySearchFromRow} from "../binary_search";
-import {eq} from "../compare";
-import {DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Structure, Table, TableAccessType} from "../types";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
+import {binarySearchFromRow} from "../binary_search.js";
+import {eq} from "../compare/index.js";
+import {DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Structure, Table, TableAccessType} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
 
 export interface IReadTableOptions {
   index?: INumeric | FieldSymbol | number,

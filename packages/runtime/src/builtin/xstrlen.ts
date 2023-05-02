@@ -1,5 +1,5 @@
-import {Integer} from "../types";
-import {ICharacter} from "../types/_character";
+import {Integer} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
 
 export function xstrlen(input: {val: ICharacter | string}): Integer {
   if (typeof input.val === "string") {

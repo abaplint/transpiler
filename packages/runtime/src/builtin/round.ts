@@ -1,7 +1,7 @@
-import {parse} from "../operators/_parse";
-import {Float} from "../types";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
+import {parse} from "../operators/_parse.js";
+import {Float} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
 
 export function round(input: {val: ICharacter | string, dec: INumeric | number, mode?: INumeric | number}): Float {
 

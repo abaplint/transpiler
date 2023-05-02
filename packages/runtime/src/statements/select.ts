@@ -1,7 +1,7 @@
-import {clone} from "../clone";
-import {Context} from "../context";
-import {SelectDatabaseOptions, SelectRuntimeOptions} from "../db/db";
-import {FieldSymbol, HashedTable, Structure, Table} from "../types";
+import {clone} from "../clone.js";
+import {Context} from "../context.js";
+import {SelectDatabaseOptions, SelectRuntimeOptions} from "../db/db.js";
+import {FieldSymbol, HashedTable, Structure, Table} from "../types/index.js";
 
 export class SelectDatabase {
   private readonly context: Context;

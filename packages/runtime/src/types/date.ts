@@ -1,10 +1,10 @@
-import {Hex} from "./hex";
-import {ICharacter} from "./_character";
-import {INumeric} from "./_numeric";
-import {String} from "./string";
-import {getDateFromNumber, getNumberFromDate} from "./_date_helper";
-import {Float} from "./float";
-import {parse} from "../operators/_parse";
+import {Hex} from "./hex.js";
+import {ICharacter} from "./_character.js";
+import {INumeric} from "./_numeric.js";
+import {String} from "./string.js";
+import {getDateFromNumber, getNumberFromDate} from "./_date_helper.js";
+import {Float} from "./float.js";
+import {parse} from "../operators/_parse.js";
 
 export class Date implements ICharacter {
   private value: string;

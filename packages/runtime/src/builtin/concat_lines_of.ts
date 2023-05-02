@@ -1,6 +1,6 @@
-import {Table} from "../types";
-import {ICharacter} from "../types/_character";
-import {String} from "../types/string";
+import {Table} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {String} from "../types/string.js";
 
 export function concat_lines_of(input: {table: Table, sep: ICharacter | string | undefined}): String {
   let s = input.sep;

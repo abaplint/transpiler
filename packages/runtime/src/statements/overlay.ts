@@ -1,6 +1,6 @@
-import {OffsetLength} from "../offset_length";
-import {Character, Structure} from "../types";
-import {ICharacter} from "../types/_character";
+import {OffsetLength} from "../offset_length.js";
+import {Character, Structure} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
 
 export function overlay(value: Character | Structure, withh: ICharacter, _only?: ICharacter) {
   const set = value instanceof Structure ? value.getCharacter() : value.get();

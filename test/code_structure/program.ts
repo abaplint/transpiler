@@ -1,5 +1,5 @@
 // import {expect} from "chai";
-import {compileFiles} from "../_utils";
+import {compileFiles} from "../_utils.js";
 
 describe("Running code structure - Program", () => {
 

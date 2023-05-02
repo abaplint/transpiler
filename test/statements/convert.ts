@@ -1,6 +1,6 @@
-import {ABAP} from "../../packages/runtime/src";
+import {ABAP} from "../../packages/runtime/src/index.js";
 import {expect} from "chai";
-import {AsyncFunction, runFiles} from "../_utils";
+import {AsyncFunction, runFiles} from "../_utils.js";
 
 let abap: ABAP;
 

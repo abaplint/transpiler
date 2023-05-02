@@ -1,6 +1,6 @@
-import {Structure} from "../types";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
+import {Structure} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
 
 export function co(left: number | string | ICharacter | INumeric, right: string | Structure | ICharacter): boolean {
   let l = "";

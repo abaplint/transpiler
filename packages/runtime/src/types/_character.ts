@@ -1,5 +1,5 @@
-import {Hex} from "./hex";
-import {INumeric} from "./_numeric";
+import {Hex} from "./hex.js";
+import {INumeric} from "./_numeric.js";
 
 export interface ICharacter {
   set(value: ICharacter | string): void;

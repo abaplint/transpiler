@@ -1,5 +1,5 @@
-import {ICharacter} from "../types/_character";
-import {String} from "../types/string";
+import {ICharacter} from "../types/_character.js";
+import {String} from "../types/string.js";
 
 export function match(input: {val: ICharacter | string, regex: ICharacter | string}): ICharacter {
   const val = typeof input.val === "string" ? input.val : input.val.get();

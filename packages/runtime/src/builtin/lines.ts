@@ -1,4 +1,4 @@
-import {Table, Integer, FieldSymbol} from "../types";
+import {Table, Integer, FieldSymbol} from "../types/index.js";
 
 export function lines(input: {val: Table | FieldSymbol}): Integer {
   if (input.val instanceof FieldSymbol) {

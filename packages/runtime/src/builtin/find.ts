@@ -1,7 +1,7 @@
-import {throwError} from "../throw_error";
-import {Integer} from "../types";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
+import {throwError} from "../throw_error.js";
+import {Integer} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
 
 export interface IFindInput {
   val: ICharacter | string;

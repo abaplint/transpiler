@@ -1,8 +1,8 @@
-import {Character, FieldSymbol, Float, Hex, Integer} from "../types";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
-import {String} from "../types/string";
-import {parse} from "./_parse";
+import {Character, FieldSymbol, Float, Hex, Integer} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
+import {String} from "../types/string.js";
+import {parse} from "./_parse.js";
 
 export function add(left: INumeric | ICharacter | string | number | Float | Integer | Hex | FieldSymbol,
                     right: INumeric | ICharacter | string | number  | Float | Integer | Hex | FieldSymbol): Integer | Float {

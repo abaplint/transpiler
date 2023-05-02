@@ -1,5 +1,5 @@
-import {Integer} from "../types";
-import {ICharacter} from "../types/_character";
+import {Integer} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
 
 type countAnyOfInput = {
   val: ICharacter,

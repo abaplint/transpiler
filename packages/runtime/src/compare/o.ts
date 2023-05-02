@@ -1,5 +1,5 @@
-import {Hex, XString} from "../types";
-import {hexToBinary} from "./m";
+import {Hex, XString} from "../types/index.js";
+import {hexToBinary} from "./m.js";
 
 // bitwise compare
 export function o(operand1: Hex | XString, operand2: Hex | XString): boolean {

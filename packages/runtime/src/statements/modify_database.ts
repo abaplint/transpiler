@@ -1,8 +1,8 @@
-import {Context} from "../context";
-import {FieldSymbol, Structure, Table} from "../types";
-import {ICharacter} from "../types/_character";
-import {InsertDatabase} from "./insert_database";
-import {UpdateDatabase} from "./update_database";
+import {Context} from "../context.js";
+import {FieldSymbol, Structure, Table} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {InsertDatabase} from "./insert_database.js";
+import {UpdateDatabase} from "./update_database.js";
 
 export interface IModifyDatabaseOptions {
   values?: Structure | FieldSymbol,

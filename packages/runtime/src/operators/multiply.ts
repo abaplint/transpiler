@@ -1,8 +1,8 @@
-import {Character, Float, Integer} from "../types";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
-import {parse} from "./_parse";
-import {String} from "../types/string";
+import {Character, Float, Integer} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
+import {parse} from "./_parse.js";
+import {String} from "../types/string.js";
 
 export function multiply(left: INumeric | ICharacter | string | number, right: INumeric | ICharacter | string | number) {
   if (left instanceof Integer && right instanceof Integer) {

@@ -1,8 +1,8 @@
-import {Context} from "../context";
-import {Float, Packed, Structure} from "../types";
-import {FieldSymbol} from "../types/field_symbol";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
+import {Context} from "../context.js";
+import {Float, Packed, Structure} from "../types/index.js";
+import {FieldSymbol} from "../types/field_symbol.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
 
 export interface IWriteOptions {
   newLine?: boolean,

@@ -1,6 +1,6 @@
-import {co} from "../compare";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
+import {co} from "../compare/index.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
 
 export interface IShiftOptions {
   deletingLeading?: string | ICharacter,

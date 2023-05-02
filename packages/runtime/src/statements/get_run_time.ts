@@ -1,4 +1,4 @@
-import {INumeric} from "../types/_numeric";
+import {INumeric} from "../types/_numeric.js";
 
 let prev: number | undefined = undefined;
 

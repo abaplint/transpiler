@@ -1,6 +1,6 @@
-import {ABAPObject, Character, DataReference, Date, FieldSymbol, HashedTable, Hex, Numc, Structure, Table, Time} from "../types";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
+import {ABAPObject, Character, DataReference, Date, FieldSymbol, HashedTable, Hex, Numc, Structure, Table, Time} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
 
 export function initial(val: ICharacter | INumeric | string | number | Structure | DataReference | FieldSymbol | Table | ABAPObject) {
   // todo, refactor? add as method in each type instead?

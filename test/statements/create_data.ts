@@ -1,7 +1,7 @@
 import {expect} from "chai";
-import {ABAP} from "../../packages/runtime/src";
-import {AsyncFunction, runFiles} from "../_utils";
-import {tabl_t100xml} from "../_data";
+import {ABAP} from "../../packages/runtime/src/index.js";
+import {AsyncFunction, runFiles} from "../_utils.js";
+import {tabl_t100xml} from "../_data.js";
 
 let abap: ABAP;
 

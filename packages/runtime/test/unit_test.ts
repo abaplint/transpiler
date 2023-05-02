@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {UnitTestResult} from "../src/unit_test";
+import {UnitTestResult} from "../src/unit_test.js";
 
 describe("xUnit XML", () => {
   it("test1", () => {

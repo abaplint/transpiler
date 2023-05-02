@@ -1,5 +1,5 @@
-import {ICharacter} from "../types/_character";
-import {Table, String, Character} from "../types";
+import {ICharacter} from "../types/_character.js";
+import {Table, String, Character} from "../types/index.js";
 
 export interface ISplitOptions {
   source: ICharacter | string,

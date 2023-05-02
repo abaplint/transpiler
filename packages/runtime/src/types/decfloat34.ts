@@ -1,8 +1,8 @@
-import {Float} from ".";
-import {Hex} from "./hex";
-import {XString} from "./xstring";
-import {ICharacter} from "./_character";
-import {INumeric} from "./_numeric";
+import {Float} from "./float.js";
+import {Hex} from "./hex.js";
+import {XString} from "./xstring.js";
+import {ICharacter} from "./_character.js";
+import {INumeric} from "./_numeric.js";
 
 export class DecFloat34 {
   private value: number;

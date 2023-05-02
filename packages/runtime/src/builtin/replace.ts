@@ -1,8 +1,8 @@
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
-import {String} from "../types/string";
-import {ABAPRegExp} from "../abap_regex";
-import {Character} from "../types";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
+import {String} from "../types/string.js";
+import {ABAPRegExp} from "../abap_regex.js";
+import {Character} from "../types/index.js";
 
 export interface IReplaceInput {
   val: string | ICharacter,

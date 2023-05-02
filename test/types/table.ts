@@ -1,7 +1,7 @@
 import {expect} from "chai";
-import {featureHashedTables} from "../../packages/runtime/src/types";
-import {ABAP} from "../../packages/runtime/src/";
-import {AsyncFunction, runFiles} from "../_utils";
+import {featureHashedTables} from "../../packages/runtime/src/types/index.js";
+import {ABAP} from "../../packages/runtime/src/index.js";
+import {AsyncFunction, runFiles} from "../_utils.js";
 
 let abap: ABAP;
 

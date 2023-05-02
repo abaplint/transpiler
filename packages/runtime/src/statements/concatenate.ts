@@ -1,6 +1,6 @@
-import {INumeric} from "../types/_numeric";
-import {ICharacter} from "../types/_character";
-import {Character, Table} from "../types";
+import {INumeric} from "../types/_numeric.js";
+import {ICharacter} from "../types/_character.js";
+import {Character, Table} from "../types/index.js";
 
 export interface IConcatenateInput {
   source: [number | string | INumeric | ICharacter | Table],

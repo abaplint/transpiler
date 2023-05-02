@@ -1,6 +1,6 @@
-import {initial} from "../compare";
-import {throwError} from "../throw_error";
-import {ABAPObject, FieldSymbol} from "../types";
+import {initial} from "../compare/index.js";
+import {throwError} from "../throw_error.js";
+import {ABAPObject, FieldSymbol} from "../types/index.js";
 
 // todo, field symbols as input?
 // todo, local classes?

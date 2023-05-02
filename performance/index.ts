@@ -1,23 +1,23 @@
-import {AsyncFunction, runFiles} from "../test/_utils";
-import {ABAP} from "../packages/runtime/src";
+import {AsyncFunction, runFiles} from "../test/_utils.js";
+import {ABAP} from "../packages/runtime/src/index.js";
 import {performance} from "perf_hooks";
 import * as fs from "fs";
 import * as path from "path";
-import {test1} from "./test1";
-import {test2} from "./test2";
-import {test3} from "./test3";
-import {test4} from "./test4";
-import {test5} from "./test5";
-import {test6} from "./test6";
-import {test7} from "./test7";
-import {test8} from "./test8";
-import {test9} from "./test9";
-import {test10} from "./test10";
-import {test11} from "./test11";
-import {test12} from "./test12";
-import {test13} from "./test13";
-import {test14} from "./test14";
-import {test15} from "./test15";
+import {test1} from "./test1.js";
+import {test2} from "./test2.js";
+import {test3} from "./test3.js";
+import {test4} from "./test4.js";
+import {test5} from "./test5.js";
+import {test6} from "./test6.js";
+import {test7} from "./test7.js";
+import {test8} from "./test8.js";
+import {test9} from "./test9.js";
+import {test10} from "./test10.js";
+import {test11} from "./test11.js";
+import {test12} from "./test12.js";
+import {test13} from "./test13.js";
+import {test14} from "./test14.js";
+import {test15} from "./test15.js";
 
 // NOTE: does not run via Mocha
 

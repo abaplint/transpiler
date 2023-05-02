@@ -1,6 +1,6 @@
-import {Console} from "./console";
-import {DatabaseClient} from "./db/db";
-import * as RFC from "./rfc";
+import {Console} from "./console.js";
+import {DatabaseClient} from "./db/db.js";
+import * as RFC from "./rfc.js";
 
 export class Context {
   public console: Console;

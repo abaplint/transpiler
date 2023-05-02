@@ -1,4 +1,4 @@
-import {Structure, Integer, Character, Numc, Date, Time} from "../types";
+import {Structure, Integer, Character, Numc, Date, Time} from "../types/index.js";
 
 export const sy = new Structure({
   abcde: new Character(26).set("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),

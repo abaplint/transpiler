@@ -1,6 +1,6 @@
-import {Context} from "../context";
-import {Structure, Table} from "../types";
-import {ICharacter} from "../types/_character";
+import {Context} from "../context.js";
+import {Structure, Table} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
 
 export function toValue(value: any) {
   if (typeof value === "string") {

@@ -1,5 +1,5 @@
-import {Character, Integer} from "../types";
-import {ICharacter} from "../types/_character";
+import {Character, Integer} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
 
 export function strlen(input: {val: ICharacter | string}): Integer {
   let str = "";

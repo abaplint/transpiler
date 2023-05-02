@@ -1,6 +1,6 @@
 /*eslint no-bitwise: ["error", { "allow": ["~"] }] */
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Bitwise_NOT
-import {Hex, XString} from "../types";
+import {Hex, XString} from "../types/index.js";
 
 export function bitnot(right: XString | Hex) {
   const right16 = parseInt(right.get(), 16);

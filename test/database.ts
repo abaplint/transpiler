@@ -1,7 +1,7 @@
 import {expect} from "chai";
-import {AsyncFunction, runFiles} from "./_utils";
-import {ABAP} from "../packages/runtime/src/";
-import {msag_escape, msag_zag_unit_test, tabl_t100xml, zt111, zt222} from "./_data";
+import {AsyncFunction, runFiles} from "./_utils.js";
+import {ABAP} from "../packages/runtime/src/index.js";
+import {msag_escape, msag_zag_unit_test, tabl_t100xml, zt111, zt222} from "./_data.js";
 
 describe("Top level tests, Database", () => {
   let abap: ABAP;

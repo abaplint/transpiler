@@ -1,8 +1,8 @@
-import {clone} from "../clone";
-import {throwError} from "../throw_error";
-import {ABAPObject, Character, DataReference, Date, String, FieldSymbol, Float, Integer, Structure, Table, Time, XString, Hex, Packed, Numc} from "../types";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
+import {clone} from "../clone.js";
+import {throwError} from "../throw_error.js";
+import {ABAPObject, Character, DataReference, Date, String, FieldSymbol, Float, Integer, Structure, Table, Time, XString, Hex, Packed, Numc} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
 
 type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Structure | FieldSymbol;
 

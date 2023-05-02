@@ -1,6 +1,6 @@
 /*eslint no-bitwise: ["error", { "allow": ["|"] }] */
-import {XString} from "../types";
-import {get_bit_operation_chunks} from "./_bit_operations";
+import {XString} from "../types/index.js";
+import {get_bit_operation_chunks} from "./_bit_operations.js";
 
 export function bitor(left: XString, right: XString) {
   let or = "";

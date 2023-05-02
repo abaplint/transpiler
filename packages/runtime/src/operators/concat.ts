@@ -1,6 +1,6 @@
-import {Character, String} from "../types";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
+import {Character, String} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
 
 export function concat(left: INumeric | ICharacter | string | number | any[], right: INumeric | ICharacter | string | number): String {
   if (Array.isArray(left)) {

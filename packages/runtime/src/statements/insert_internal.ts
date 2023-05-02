@@ -1,10 +1,10 @@
-import {clone} from "../clone";
-import {ne} from "../compare";
-import {ABAPObject, DataReference, FieldSymbol, HashedTable, Structure, Table, TableAccessType} from "../types";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
-import {readTable} from "./read_table";
-import {sort} from "./sort";
+import {clone} from "../clone.js";
+import {ne} from "../compare/index.js";
+import {ABAPObject, DataReference, FieldSymbol, HashedTable, Structure, Table, TableAccessType} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
+import {readTable} from "./read_table.js";
+import {sort} from "./sort.js";
 
 export interface IInsertInternalOptions {
   index?: INumeric,

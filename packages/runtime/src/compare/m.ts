@@ -1,4 +1,4 @@
-import {Hex, XString} from "../types";
+import {Hex, XString} from "../types/index.js";
 
 export function hexToBinary(input: Hex | XString): string {
   let ret = "";

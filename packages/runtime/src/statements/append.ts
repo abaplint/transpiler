@@ -1,6 +1,6 @@
-import {DataReference, FieldSymbol, Table, TableRowType} from "../types";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
+import {DataReference, FieldSymbol, Table, TableRowType} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
 
 export interface IAppendOptions {
   source: TableRowType | FieldSymbol | Table,

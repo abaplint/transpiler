@@ -1,6 +1,6 @@
-import {Hex} from "./hex";
-import {ICharacter} from "./_character";
-import {INumeric} from "./_numeric";
+import {Hex} from "./hex.js";
+import {ICharacter} from "./_character.js";
+import {INumeric} from "./_numeric.js";
 
 export class UTCLong implements ICharacter {
   private value: string;

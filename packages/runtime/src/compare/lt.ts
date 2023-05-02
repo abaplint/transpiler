@@ -1,7 +1,7 @@
-import {ABAPObject, Structure, Table} from "../types";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
-import {gt} from "./gt";
+import {ABAPObject, Structure, Table} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
+import {gt} from "./gt.js";
 
 export function lt(
   left: number | string | ICharacter | INumeric | ABAPObject | Structure | Table,

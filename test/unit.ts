@@ -2,8 +2,8 @@ import * as path from "path";
 import * as fs from "fs";
 import * as childProcess from "child_process";
 import {expect} from "chai";
-import {Transpiler} from "../packages/transpiler/src/";
-import {IFile, ITranspilerOptions} from "../packages/transpiler/src/types";
+import {Transpiler} from "../packages/transpiler/src/index.js";
+import {IFile, ITranspilerOptions} from "../packages/transpiler/src/types.js";
 import * as abaplint from "@abaplint/core";
 
 const t000 = `<?xml version="1.0" encoding="utf-8"?>

@@ -1,4 +1,4 @@
-import {ABAPObject, DataReference} from "./types";
+import {ABAPObject, DataReference} from "./types/index.js";
 
 export function clone<T>(obj: T): T {
   if (null == obj || "object" != typeof obj) {

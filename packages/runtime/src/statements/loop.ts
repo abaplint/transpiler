@@ -1,7 +1,7 @@
-import {binarySearchFrom, binarySearchTo} from "../binary_search";
-import {FieldSymbol, HashedTable, Integer, ITableKey, Structure, Table} from "../types";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
+import {binarySearchFrom, binarySearchTo} from "../binary_search.js";
+import {FieldSymbol, HashedTable, Integer, ITableKey, Structure, Table} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
 
 type topType = {[name: string]: INumeric | ICharacter};
 

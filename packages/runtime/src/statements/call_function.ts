@@ -1,5 +1,5 @@
-import {Context} from "../context";
-import {RFCClient} from "../rfc";
+import {Context} from "../context.js";
+import {RFCClient} from "../rfc.js";
 
 export interface ICallFunctionOptions {
   name: string,

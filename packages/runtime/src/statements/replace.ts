@@ -1,8 +1,8 @@
-import {ABAPRegExp} from "../abap_regex";
-import {OffsetLength} from "../offset_length";
-import {Character, Table} from "../types";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
+import {ABAPRegExp} from "../abap_regex.js";
+import {OffsetLength} from "../offset_length.js";
+import {Character, Table} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
 
 export type replaceInput = {
   target: ICharacter | Table,

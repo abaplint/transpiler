@@ -1,7 +1,7 @@
-import {Date,Time,Hex, Float, Integer, DecFloat34} from "../types";
-import {XString} from "../types/xstring";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
+import {Date,Time,Hex, Float, Integer, DecFloat34} from "../types/index.js";
+import {XString} from "../types/xstring.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
 
 export function parse(val: INumeric | ICharacter | string | number | Float | Integer): number {
   if (typeof val === "number") {

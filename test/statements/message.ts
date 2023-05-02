@@ -1,7 +1,7 @@
 import {expect} from "chai";
-import {ABAP} from "../../packages/runtime/src";
-import {SQLiteDatabaseClient} from "../../packages/database-sqlite/src/";
-import {AsyncFunction, runFiles} from "../_utils";
+import {ABAP} from "../../packages/runtime/src/index.js";
+import {SQLiteDatabaseClient} from "../../packages/database-sqlite/src/index.js";
+import {AsyncFunction, runFiles} from "../_utils.js";
 
 let abap: ABAP;
 

@@ -1,9 +1,9 @@
-import {parse} from "../operators/_parse";
-import {Float} from "./float";
-import {Integer} from "./integer";
-import {XString} from "./xstring";
-import {ICharacter} from "./_character";
-import {INumeric} from "./_numeric";
+import {parse} from "../operators/_parse.js";
+import {Float} from "./float.js";
+import {Integer} from "./integer.js";
+import {XString} from "./xstring.js";
+import {ICharacter} from "./_character.js";
+import {INumeric} from "./_numeric.js";
 
 export class Hex implements ICharacter {
   private value: string;

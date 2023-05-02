@@ -1,7 +1,7 @@
-import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Hex, Structure, Table, XString} from "../types";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
-import {Integer} from "../types/integer";
+import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Hex, Structure, Table, XString} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
+import {Integer} from "../types/integer.js";
 
 
 export function gt(

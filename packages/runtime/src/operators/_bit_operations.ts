@@ -1,4 +1,4 @@
-import {XString} from "../types";
+import {XString} from "../types/index.js";
 
 export function get_bit_operation_chunks(left: XString, right: XString): {leftChunk: number, rightChunk: number, chunkLen: number }[] {
   const ret = [];

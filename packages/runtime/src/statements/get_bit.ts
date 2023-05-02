@@ -1,6 +1,6 @@
-import {Hex, XString} from "../types";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
+import {Hex, XString} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
 
 export function getBit(number: INumeric, hex: XString | Hex, output: ICharacter) {
 

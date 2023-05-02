@@ -1,5 +1,5 @@
-import {FieldSymbol, HashedTable, Table, TableRowType} from "../types";
-import {eq, lt, gt} from "../compare";
+import {FieldSymbol, HashedTable, Table, TableRowType} from "../types/index.js";
+import {eq, lt, gt} from "../compare/index.js";
 
 export interface ISortOptions {
   descending?: boolean,

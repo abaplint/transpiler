@@ -1,6 +1,6 @@
-import {Character} from "../types";
-import {ICharacter} from "../types/_character";
-import {String} from "../types/string";
+import {Character} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {String} from "../types/string.js";
 
 export function substring_after(input: {val: ICharacter | string, sub?: ICharacter | string, regex?: ICharacter | string}): ICharacter {
   let val = typeof input.val === "string" ? input.val : input.val.get();

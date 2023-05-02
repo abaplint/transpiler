@@ -1,13 +1,13 @@
-import {INumeric} from "./_numeric";
-import {ICharacter} from "./_character";
-import {ABAPObject} from "./abap_object";
-import {Table} from "./table";
-import {String} from "./string";
-import {Structure} from "./structure";
-import {Float} from "./float";
-import {Hex} from "./hex";
-import {parse} from "../operators/_parse";
-import {FieldSymbol} from "./field_symbol";
+import {INumeric} from "./_numeric.js";
+import {ICharacter} from "./_character.js";
+import {ABAPObject} from "./abap_object.js";
+import {Table} from "./table.js";
+import {String} from "./string.js";
+import {Structure} from "./structure.js";
+import {Float} from "./float.js";
+import {Hex} from "./hex.js";
+import {parse} from "../operators/_parse.js";
+import {FieldSymbol} from "./field_symbol.js";
 
 type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Structure | Float;
 

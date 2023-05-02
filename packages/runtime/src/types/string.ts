@@ -1,13 +1,13 @@
-import {parse} from "../operators/_parse";
-import {throwError} from "../throw_error";
-import {Character} from "./character";
-import {FieldSymbol} from "./field_symbol";
-import {Hex} from "./hex";
-import {Integer} from "./integer";
-import {Packed} from "./packed";
-import {Structure} from "./structure";
-import {ICharacter} from "./_character";
-import {INumeric} from "./_numeric";
+import {parse} from "../operators/_parse.js";
+import {throwError} from "../throw_error.js";
+import {Character} from "./character.js";
+import {FieldSymbol} from "./field_symbol.js";
+import {Hex} from "./hex.js";
+import {Integer} from "./integer.js";
+import {Packed} from "./packed.js";
+import {Structure} from "./structure.js";
+import {ICharacter} from "./_character.js";
+import {INumeric} from "./_numeric.js";
 
 export class String implements ICharacter {
   private value: string;

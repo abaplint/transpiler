@@ -1,6 +1,6 @@
-import {ITranspilerConfig} from "../packages/cli/src/types";
-import {FileOperations} from "../packages/cli/src/file_operations";
-import {compileFiles} from "test/_utils";
+import {ITranspilerConfig} from "../packages/cli/src/types.js";
+import {FileOperations} from "../packages/cli/src/file_operations.js";
+import {compileFiles} from "test/_utils.js";
 
 // only does building, does not execute runtime
 

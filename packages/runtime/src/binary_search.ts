@@ -1,8 +1,8 @@
 /* eslint-disable max-len */
-import {ge, le} from "./compare";
-import {Structure} from "./types";
-import {ICharacter} from "./types/_character";
-import {INumeric} from "./types/_numeric";
+import {ge, le} from "./compare/index.js";
+import {Structure} from "./types/structure.js";
+import {ICharacter} from "./types/_character.js";
+import {INumeric} from "./types/_numeric.js";
 
 export function binarySearchFromRow(array: readonly any[], left: number, right: number, keyField: (i: any) => any, keyValue: INumeric | ICharacter, usesTableLine: boolean | undefined) {
   const isStructured = array[0] instanceof Structure;

@@ -1,11 +1,11 @@
-import {parse} from "../operators/_parse";
-import {throwError} from "../throw_error";
-import {FieldSymbol} from "./field_symbol";
-import {Hex} from "./hex";
-import {Structure} from "./structure";
-import {AbstractTypeData} from "./_abstract_type_data";
-import {ICharacter} from "./_character";
-import {INumeric} from "./_numeric";
+import {parse} from "../operators/_parse.js";
+import {throwError} from "../throw_error.js";
+import {FieldSymbol} from "./field_symbol.js";
+import {Hex} from "./hex.js";
+import {Structure} from "./structure.js";
+import {AbstractTypeData} from "./_abstract_type_data.js";
+import {ICharacter} from "./_character.js";
+import {INumeric} from "./_numeric.js";
 
 const TRIMREGEX = / *$/;
 

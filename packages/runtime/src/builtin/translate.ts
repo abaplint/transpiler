@@ -1,5 +1,5 @@
-import {ICharacter} from "../types/_character";
-import {String} from "../types/string";
+import {ICharacter} from "../types/_character.js";
+import {String} from "../types/string.js";
 
 export function translate(input: {val: ICharacter | string, from: ICharacter | string, to: ICharacter | string}): ICharacter {
   let val = typeof input.val === "string" ? input.val : input.val.get();

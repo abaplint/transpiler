@@ -1,5 +1,5 @@
-import {ABAP} from "../../packages/runtime/src";
-import {AsyncFunction, runFiles} from "../_utils";
+import {ABAP} from "../../packages/runtime/src/index.js";
+import {AsyncFunction, runFiles} from "../_utils.js";
 
 let abap: ABAP;
 

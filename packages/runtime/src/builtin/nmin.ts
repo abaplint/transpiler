@@ -1,6 +1,6 @@
-import {parse} from "../operators/_parse";
-import {INumeric} from "../types/_numeric";
-import {Float} from "../types";
+import {parse} from "../operators/_parse.js";
+import {INumeric} from "../types/_numeric.js";
+import {Float} from "../types/index.js";
 
 export interface INminInput {
   val1: number | INumeric,

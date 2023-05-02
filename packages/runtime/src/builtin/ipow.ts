@@ -1,6 +1,6 @@
 /* eslint-disable radix */
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
 
 export function ipow(input: {base: number | string | ICharacter | INumeric, exp: number | string | ICharacter | INumeric}) {
   let base: number | undefined = undefined;

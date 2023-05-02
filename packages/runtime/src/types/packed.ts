@@ -1,5 +1,5 @@
-import {Float} from "./float";
-import {INumeric} from "./_numeric";
+import {Float} from "./float.js";
+import {INumeric} from "./_numeric.js";
 
 export class Packed implements INumeric {
   private value: number;

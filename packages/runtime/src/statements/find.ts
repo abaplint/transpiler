@@ -1,7 +1,7 @@
-import {ABAPRegExp} from "../abap_regex";
-import {ABAPObject, Integer, Structure, Table, TableFactory} from "../types";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
+import {ABAPRegExp} from "../abap_regex.js";
+import {ABAPObject, Integer, Structure, Table, TableFactory} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
 
 export interface IFindOptions {
   find?: ICharacter | string,

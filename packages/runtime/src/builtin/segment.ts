@@ -1,7 +1,7 @@
-import {throwError} from "../throw_error";
-import {String} from "../types";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
+import {throwError} from "../throw_error.js";
+import {String} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
 
 export function segment(input: {val: ICharacter | string, index: INumeric | number, sep: ICharacter | string}) {
   let val = input.val;

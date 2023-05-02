@@ -1,8 +1,8 @@
-import {Integer, Table} from "../types";
-import {INumeric} from "../types/_numeric";
-import {deleteInternal} from "./delete_internal";
-import {insertInternal} from "./insert_internal";
-import {readTable} from "./read_table";
+import {Integer, Table} from "../types/index.js";
+import {INumeric} from "../types/_numeric.js";
+import {deleteInternal} from "./delete_internal.js";
+import {insertInternal} from "./insert_internal.js";
+import {readTable} from "./read_table.js";
 
 export interface IModifyInternalOptions {
   index: INumeric,

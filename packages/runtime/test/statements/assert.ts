@@ -1,4 +1,4 @@
-import {ABAP} from "../../src";
+import {ABAP} from "../../src/index.js";
 
 describe("Statement ASSERT", () => {
 

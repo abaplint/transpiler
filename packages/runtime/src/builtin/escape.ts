@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import {String} from "../types";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
+import {String} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
 
 export function escape(input: {val: ICharacter | string, format: INumeric | number }): String {
 

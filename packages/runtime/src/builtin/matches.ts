@@ -1,5 +1,5 @@
-import {ICharacter} from "../types/_character";
-import {Character} from "../types";
+import {ICharacter} from "../types/_character.js";
+import {Character} from "../types/index.js";
 
 export function matches(input: {val: ICharacter | string, regex?: ICharacter | string, pcre?: ICharacter | string}): ICharacter {
   if (input.pcre !== undefined) {

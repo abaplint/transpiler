@@ -1,9 +1,9 @@
-import {Table} from "../types";
-import {ICharacter} from "../types/_character";
-import {INumeric} from "../types/_numeric";
-import {cp} from "./cp";
-import {eq} from "./eq";
-import {ne} from "./ne";
+import {Table} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
+import {INumeric} from "../types/_numeric.js";
+import {cp} from "./cp.js";
+import {eq} from "./eq.js";
+import {ne} from "./ne.js";
 
 export function compareIn(left: number | string | ICharacter | INumeric, right: Table): boolean {
   if (right.array().length === 0) {

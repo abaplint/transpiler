@@ -1,4 +1,4 @@
-import {Structure} from "../types";
+import {Structure} from "../types/index.js";
 
 export function moveCorresponding(source: Structure, target: Structure): void {
   for (const n in source.get()) {

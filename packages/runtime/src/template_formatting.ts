@@ -1,6 +1,6 @@
-import {Character, DecFloat34, FieldSymbol, Float, HashedTable, Integer, Packed, Table} from "./types";
-import {ICharacter} from "./types/_character";
-import {INumeric} from "./types/_numeric";
+import {Character, DecFloat34, FieldSymbol, Float, HashedTable, Integer, Packed, Table} from "./types/index.js";
+import {ICharacter} from "./types/_character.js";
+import {INumeric} from "./types/_numeric.js";
 
 type options = {
   timestamp?: string,

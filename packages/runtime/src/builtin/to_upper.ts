@@ -1,5 +1,5 @@
-import {Character, String} from "../types";
-import {ICharacter} from "../types/_character";
+import {Character, String} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
 
 export function to_upper(input: {val: ICharacter | string}): ICharacter {
   const val = typeof input.val === "string" ? input.val : input.val.get();

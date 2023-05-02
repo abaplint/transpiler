@@ -1,6 +1,6 @@
-import {Context} from "../context";
-import {ABAPObject} from "../types";
-import {ICharacter} from "../types/_character";
+import {Context} from "../context.js";
+import {ABAPObject} from "../types/index.js";
+import {ICharacter} from "../types/_character.js";
 
 export interface IMessageOptions {
   id?: ICharacter | string,

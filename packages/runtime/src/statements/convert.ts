@@ -1,10 +1,10 @@
 /*
 import {templateFormatting} from "../template_formatting";
-import {Character} from "../types";
+import {Character} from "../types/index.js";
 */
-import {ICharacter} from "../types/_character";
+import {ICharacter} from "../types/_character.js";
 import {Temporal} from "temporal-polyfill";
-import {INumeric} from "../types/_numeric";
+import {INumeric} from "../types/_numeric.js";
 
 export interface IConvertSource {
   date?: ICharacter | string,
