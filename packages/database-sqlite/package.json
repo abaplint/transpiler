@@ -17,12 +17,11 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "sql.js": "^1.8.0"
+    "@sqlite.org/sqlite-wasm": "^3.41.2-build12"
   },
   "devDependencies": {
-    "@types/sql.js": "^1.4.4",
-    "@types/node": "^18.16.3",
     "@abaplint/runtime": "^2.6.40",
+    "@types/node": "^18.16.3",
     "typescript": "^5.0.4"
   }
 }

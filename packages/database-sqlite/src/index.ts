@@ -1,4 +1,4 @@
-import initSqlJs, {Database, QueryExecResult} from "sql.js";
+import sqlite3InitModule, {type Database} from "@sqlite.org/sqlite-wasm";
 import {DB} from "@abaplint/runtime";
 
 export class SQLiteDatabaseClient implements DB.DatabaseClient {
@@ -11,8 +11,14 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
   }
 
   public async connect(data?: ArrayLike<number> | Buffer | null) {
-    const SQL = await initSqlJs();
-    this.sqlite = new SQL.Database(data);
+    if (data !== null) {
+      throw new Error("todo, init");
+    }
+    const sqlite3  = await sqlite3InitModule({
+      print: console.log,
+      printErr: console.error,
+    });
+    this.sqlite = new sqlite3.oo1.DB("hello", "ct") as Database;
   }
 
   public async disconnect() {
@@ -25,7 +31,7 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
       if (sql === "") {
         return;
       }
-      this.sqlite!.run(sql);
+      this.sqlite!.exec(sql);
     } else {
       for (const s of sql) {
         await this.execute(s);
@@ -34,7 +40,8 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
   }
 
   public export() {
-    return this.sqlite?.export();
+    throw new Error("todo");
+//    return this.sqlite?.export();
   }
 
   public async beginTransaction() {
@@ -58,7 +65,7 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
       this.sqlite!.exec(sql);
 
 // https://www.sqlite.org/c3ref/changes.html
-      const chg = this.sqlite!.exec("SELECT changes()");
+      const chg = this.sqlite!.exec("SELECT changes()", {returnValue: "resultRows", rowMode: "array"});
       dbcnt = chg[0]["values"][0][0] as number;
       if (dbcnt === 0) {
         subrc = 4;
@@ -79,7 +86,7 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
       this.sqlite!.exec(sql);
 
       // https://www.sqlite.org/c3ref/changes.html
-      const chg = this.sqlite!.exec("SELECT changes()");
+      const chg = this.sqlite!.exec("SELECT changes()", {returnValue: "resultRows", rowMode: "array"});
       dbcnt = chg[0]["values"][0][0] as number;
       if (dbcnt === 0) {
         subrc = 4;
@@ -97,7 +104,7 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     let subrc = 0;
     let dbcnt = 0;
     try {
-      const res = this.sqlite!.exec(sql);
+      const res = this.sqlite!.exec(sql, {returnValue: "resultRows", rowMode: "array"});
       dbcnt = res.length;
     } catch (error) {
       // eg "UNIQUE constraint failed" errors
@@ -108,7 +115,7 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
 
   // // https://www.sqlite.org/lang_select.html
   public async select(options: DB.SelectDatabaseOptions) {
-    let res: undefined | QueryExecResult[] = undefined;
+    let res: any[];
     try {
       options.select = options.select.replace(/ UP TO (\d+) ROWS(.*)/i, "$2 LIMIT $1");
       // workaround to escape namespaces, this will need more work
@@ -126,7 +133,7 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
         console.log(options.select);
       }
 
-      res = this.sqlite!.exec(options.select);
+      res = this.sqlite!.exec(options.select, {returnValue: "resultRows", rowMode: "array"});
     } catch (error) {
       // @ts-ignore
       if (abap.Classes["CX_SY_DYNAMIC_OSQL_SEMANTICS"] !== undefined) {
@@ -141,7 +148,7 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     return {rows: rows};
   }
 
-  private convert(res: QueryExecResult[]): DB.DatabaseRows {
+  private convert(res: any[]): DB.DatabaseRows {
     if (res === undefined || res.length === 0) {
       return [];
     }

@@ -221,7 +221,7 @@
         "mocha": "^10.2.0",
         "source-map-support": "^0.5.21",
         "@types/sql.js": "^1.4.4",
-        "sql.js": "^1.8.0",
+        "@sqlite.org/sqlite-wasm": "^3.41.2-build12",
         "temporal-polyfill": "^0.1.1",
         "typescript": "^5.0.4"
     }
