@@ -24,7 +24,7 @@ jobs:
 
     - name: Regression
       run: |
-        node .github/regression/regression.js
+        node .github/regression/regression.cjs
 
     - name: Performance
       run: |
@@ -46,7 +46,7 @@ jobs:
       run: |
         cd .. && cd ..
         ls -salh
-        node ./performance.js
+        node ./performance.cjs
 
     - uses: jwalton/gh-find-current-pr@v1
       id: findPr
