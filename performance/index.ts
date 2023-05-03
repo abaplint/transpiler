@@ -3,6 +3,7 @@ import {ABAP} from "../packages/runtime/src/index.js";
 import {performance} from "perf_hooks";
 import * as fs from "fs";
 import * as path from "path";
+import * as url from "url";
 import {test1} from "./test1.js";
 import {test2} from "./test2.js";
 import {test3} from "./test3.js";
@@ -20,6 +21,8 @@ import {test14} from "./test14.js";
 import {test15} from "./test15.js";
 
 // NOTE: does not run via Mocha
+
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
 const abap: ABAP = new ABAP();
 
