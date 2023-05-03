@@ -144,7 +144,7 @@ async function run() {
 
 // new static referenced imports,
   fs.writeFileSync(outputFolder + path.sep + "_init.mjs", output.initializationScript2);
-  fs.writeFileSync(outputFolder + path.sep + "_top.mjs", `import runtime from "@abaplint/runtime";
+  fs.writeFileSync(outputFolder + path.sep + "_top.mjs", `import * as runtime from "@abaplint/runtime";
 globalThis.abap = new runtime.ABAP();`);
 }
 

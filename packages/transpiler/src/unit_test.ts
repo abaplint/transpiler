@@ -14,7 +14,7 @@ export class UnitTest {
 import "./_top.mjs";\n`;
     } else {
       ret = `/* eslint-disable import/newline-after-import */
-import runtime from "@abaplint/runtime";
+import * as runtime from "@abaplint/runtime";
 globalThis.abap = new runtime.ABAP();\n`;
     }
 
@@ -114,7 +114,7 @@ import fs from "fs";
 import path from "path";
 import {fileURLToPath} from "url";
 import {initializeABAP} from "./init.mjs";
-import runtime from "@abaplint/runtime";
+import * as runtime from "@abaplint/runtime";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
