@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as glob from "glob";
 import * as Transpiler from "@abaplint/transpiler";
-import {ITranspilerConfig} from "./types";
+import {ITranspilerConfig} from "./types.js";
 
 export class FileOperations {
 

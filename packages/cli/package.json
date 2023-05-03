@@ -23,6 +23,7 @@
     "webpack": "webpack --progress"
   },
   "author": "abaplint",
+  "type": "module",
   "license": "MIT",
   "devDependencies": {
     "@abaplint/transpiler": "^2.6.40",
