@@ -48,9 +48,14 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
 
     s = new RegExp(s, "g");
   } else if (options.regex) {
-    if (options.regex === "") {
-      throw "FIND, runtime, no input, regex empty";
+    if (typeof options.regex === "string") {
+      if (options.regex === "") {
+        throw new Error("FIND, runtime, no input, regex empty");
+      }
+    } else if (options.regex.get() === "") {
+      throw new Error("FIND, runtime, no input, regex empty");
     }
+
     let r = options.regex;
     if (typeof r !== "string") {
       r = r.get();
