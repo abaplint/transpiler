@@ -579,20 +579,25 @@ export class Traversal {
   public static setValues(identifier: abaplint.TypedIdentifier, name: string) {
     const val = identifier.getValue();
     let ret = "";
-    if (typeof val === "string") {
-      const e = new ConstantTranspiler().escape(val);
-      ret += name + ".set(" + e + ");\n";
-    } else if (typeof val === "object") {
-      const a: any = val;
-      for (const v of Object.keys(val)) {
-        let s = a[v];
-        if (s === undefined) {
-          continue;
+
+    const handle = (val: any, name: string) => {
+      if (typeof val === "string") {
+        const e = new ConstantTranspiler().escape(val);
+        ret += name + ".set(" + e + ");\n";
+      } else if (typeof val === "object") {
+        const a: any = val;
+        for (const v of Object.keys(val)) {
+          const s = a[v];
+          if (s === undefined) {
+            continue;
+          }
+          handle(s, name + ".get()." + v);
         }
-        s = new ConstantTranspiler().escape(s);
-        ret += name + ".get()." + v + ".set(" + s + ");\n";
       }
-    }
+    };
+
+    handle(val, name);
+
     return ret;
   }
 
