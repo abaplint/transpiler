@@ -593,4 +593,18 @@ START-OF-SELECTION.
     expect(abap.console.get().trimEnd()).to.equal("0");
   });
 
+  it("interface, nested constants values", async () => {
+    const code = `
+INTERFACE lif.
+  CONSTANTS: BEGIN OF  http_content_type,
+               BEGIN OF application,
+                 json TYPE c LENGTH 20 VALUE 'application/json',
+                 xml  TYPE c LENGTH 20 VALUE 'application/xml',
+               END OF  application,
+             END OF    http_content_type.
+ENDINTERFACE.`;
+    const js = await run(code);
+    expect(js).to.include("application/json");
+  });
+
 });
