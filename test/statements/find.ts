@@ -654,7 +654,7 @@ WRITE lv_count.`;
     expect(abap.console.get()).to.equal("1");
   });
 
-  it.skip("FIND RESULTS, 6", async () => {
+  it("FIND RESULTS, 6", async () => {
     const code = `
 TYPES: BEGIN OF ty_submatch,
          offset TYPE i,
