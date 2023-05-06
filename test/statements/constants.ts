@@ -8,7 +8,7 @@ async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
 }
 
-describe.only("Running statements - CONSTANTS", () => {
+describe("Running statements - CONSTANTS", () => {
 
   beforeEach(async () => {
     abap = new ABAP();

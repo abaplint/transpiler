@@ -654,4 +654,37 @@ WRITE lv_count.`;
     expect(abap.console.get()).to.equal("1");
   });
 
+  it.skip("FIND RESULTS, 6", async () => {
+    const code = `
+TYPES: BEGIN OF ty_submatch,
+         offset TYPE i,
+         length TYPE i,
+       END OF ty_submatch.
+
+TYPES: BEGIN OF ty_match,
+         line       TYPE i,
+         offset     TYPE i,
+         length     TYPE i,
+         submatches TYPE STANDARD TABLE OF ty_submatch WITH DEFAULT KEY,
+       END OF ty_match.
+
+DATA lt_matches TYPE STANDARD TABLE OF ty_match WITH DEFAULT KEY.
+DATA ls_submatch TYPE ty_submatch.
+DATA ls_match LIKE LINE OF lt_matches.
+
+FIND REGEX 'U\\+(....)' IN |U+0000| RESULTS lt_matches.
+ASSERT lines( lt_matches ) = 1.
+READ TABLE lt_matches INDEX 1 INTO ls_match.
+ASSERT ls_match-offset = 0.
+ASSERT ls_match-length = 6.
+
+ASSERT lines( ls_match-submatches ) = 1.
+READ TABLE ls_match-submatches INDEX 1 INTO ls_submatch.
+ASSERT ls_submatch-offset = 2.
+ASSERT ls_submatch-length = 4.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

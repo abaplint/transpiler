@@ -24,7 +24,12 @@ export class DataTranspiler implements IStatementTranspiler {
       throw new Error("DataTranspiler, var not found, \"" + token.getStr() + "\"");
     }
 
-    const value = DataTranspiler.buildValue(node, found.getName().toLowerCase(), traversal);
+    let value = "";
+    if (found.getValue() !== undefined && node.concatTokens().includes(" & ")) {
+      value = "\n" + traversal.setValues(found, found.getName());
+    } else {
+      value = DataTranspiler.buildValue(node, found.getName().toLowerCase(), traversal);
+    }
 
     const ret = new Chunk()
       .appendString("let ")
@@ -45,7 +50,7 @@ export class DataTranspiler implements IStatementTranspiler {
         int = val.findFirstExpression(abaplint.Expressions.ConstantString);
       }
       if (int) {
-        const escaped = new ConstantTranspiler().escape(int.concatTokens());
+        const escaped = ConstantTranspiler.escape(int.concatTokens());
         value = "\n" + name + ".set(" + escaped + ");";
       } else if (val.getChildren()[1].get() instanceof abaplint.Expressions.SimpleFieldChain) {
         const s = new FieldChainTranspiler().transpile(val.getChildren()[1] as abaplint.Nodes.ExpressionNode, traversal).getCode();

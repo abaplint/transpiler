@@ -31,13 +31,13 @@ export class ConstantTranspiler implements IExpressionTranspiler {
         const code = this.character(res);
         return new Chunk().append(code, node, traversal);
       } else if (res.startsWith("`") && this.addGet === false) {
-        const code = "new abap.types.String().set(" + this.escape(res) + ")";
+        const code = "new abap.types.String().set(" + ConstantTranspiler.escape(res) + ")";
         return new Chunk().append(code, node, traversal);
       } else {
         if (res.startsWith("'")) {
           res = "'" + res.substring(1, res.length - 1).trimEnd() + "'";
         }
-        const code = this.escape(res);
+        const code = ConstantTranspiler.escape(res);
         return new Chunk().append(code, node, traversal);
       }
     }
@@ -57,7 +57,7 @@ export class ConstantTranspiler implements IExpressionTranspiler {
           const code = this.character(res);
           chunk.append(code, node, traversal);
         } else if (res.startsWith("`") && this.addGet === false) {
-          const code = "new abap.types.String().set(" + this.escape(res) + ")";
+          const code = "new abap.types.String().set(" + ConstantTranspiler.escape(res) + ")";
           chunk.append(code, node, traversal);
         }
       }
@@ -75,11 +75,11 @@ export class ConstantTranspiler implements IExpressionTranspiler {
       // note: Characters cannot have length = zero, 1 is minimum
       length = 1;
     }
-    const code = "new abap.types.Character(" + length + ").set(" + this.escape(res) + ")";
+    const code = "new abap.types.Character(" + length + ").set(" + ConstantTranspiler.escape(res) + ")";
     return code;
   }
 
-  public escape(str: string): string {
+  public static escape(str: string): string {
     str = str.replace(/\\/g, "\\\\");
 
     if (str.startsWith("'")) {
