@@ -68,7 +68,7 @@ export class InterfaceTranspiler implements IStructureTranspiler {
       if (valExpression?.getChildren()[1].get() instanceof abaplint.Expressions.SimpleFieldChain) {
         const s = new FieldChainTranspiler().transpile(
           valExpression.getChildren()[1] as abaplint.Nodes.ExpressionNode, traversal, false).getCode();
-        const e = new ConstantTranspiler().escape(s);
+        const e = ConstantTranspiler.escape(s);
         ret += name + ".set(" + e + ");\n";
         continue;
       }
