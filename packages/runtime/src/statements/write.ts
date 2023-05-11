@@ -24,7 +24,7 @@ export class WriteStatement {
     if (options?.skipLine === true) {
       this.context.console.add("\n");
     } else {
-      if (options?.newLine === true && this.context.console.get().length > 0) {
+      if (options?.newLine === true && this.context.console.isEmpty() === false) {
         this.context.console.add("\n");
       }
 

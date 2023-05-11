@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {ABAP} from "../../packages/runtime/src";
+import {ABAP, MemoryConsole} from "../../packages/runtime/src";
 import {AsyncFunction, compileFiles, runFiles} from "../_utils";
 
 let abap: ABAP;
@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Running code structure - Class", () => {
 
   beforeEach(async () => {
-    abap = new ABAP();
+    abap = new ABAP(new MemoryConsole());
   });
 
   it("Class, simple method call", async () => {

@@ -1,13 +1,13 @@
 import {expect} from "chai";
 import {AsyncFunction, runFiles} from "./_utils";
-import {ABAP} from "../packages/runtime/src/";
+import {ABAP, MemoryConsole} from "../packages/runtime/src/";
 import {msag_escape, msag_zag_unit_test, tabl_t100xml, zt111, zt222} from "./_data";
 
 describe("Top level tests, Database", () => {
   let abap: ABAP;
 
   beforeEach(async () => {
-    abap = new ABAP();
+    abap = new ABAP(new MemoryConsole());
   });
 
   it("SELECT", async () => {

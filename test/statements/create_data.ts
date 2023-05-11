@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {ABAP} from "../../packages/runtime/src";
+import {ABAP, MemoryConsole} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 import {tabl_t100xml} from "../_data";
 
@@ -12,7 +12,7 @@ async function run(contents: string) {
 describe("Running statements - CREATE DATA", () => {
 
   beforeEach(async () => {
-    abap = new ABAP();
+    abap = new ABAP(new MemoryConsole());
   });
 
   it("CREATE DATA, check INITIAL", async () => {

@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {featureHashedTables} from "../../packages/runtime/src/types";
-import {ABAP} from "../../packages/runtime/src/";
+import {ABAP, MemoryConsole} from "../../packages/runtime/src/";
 import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
@@ -12,7 +12,7 @@ async function run(contents: string) {
 describe("Running Examples - Internal table type", () => {
 
   beforeEach(async () => {
-    abap = new ABAP();
+    abap = new ABAP(new MemoryConsole());
   });
 
   it("Basic, non sorted", async () => {

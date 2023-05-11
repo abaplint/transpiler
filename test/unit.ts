@@ -584,7 +584,7 @@ ENDCLASS.`;
       {filename: "zcl_client.clas.testclasses.abap", contents: tests},
     ];
     const cons = await dumpNrun(files);
-    expect(cons.split("\n").length).to.equal(4);
+    expect(cons.split("\n").length).to.equal(3);
   });
 
   it("test-10", async () => {
@@ -736,7 +736,8 @@ ENDCLASS.`;
       {filename: "zcx_error.clas.testclasses.abap", contents: tests},
     ];
     const console = await dumpNrun(files);
-    expect(console.split("\n")[2]).to.equal("helloworld");
+    expect(console).to.include("hello");
+    expect(console).to.include("world");
   });
 
   it("test-14", async () => {

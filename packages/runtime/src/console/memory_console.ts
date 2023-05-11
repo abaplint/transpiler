@@ -15,6 +15,10 @@ export class MemoryConsole implements Console {
     return this.data;
   }
 
+  public isEmpty() {
+    return this.data === "";
+  }
+
   public getTrimmed(): string {
     return this.data.split("\n").map(a => a.trimEnd()).join("\n");
   }

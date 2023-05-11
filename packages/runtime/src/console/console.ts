@@ -3,4 +3,5 @@ export interface Console {
   add(data: string): void;
   get(): string;
   getTrimmed(): string;
+  isEmpty(): boolean;
 }

@@ -1,4 +1,3 @@
-import {MemoryConsole} from "./console/memory_console";
 import {Context} from "./context";
 import {OffsetLength} from "./offset_length";
 import {Statements} from "./statements";
@@ -14,8 +13,10 @@ import {expandIN} from "./expand_in";
 import {expandDynamic} from "./expand_dynamic";
 import {ClassicError} from "./classic_error";
 import {Console} from "./console/console";
+import {StandardOutConsole} from "./console/standard_out_console";
+import {MemoryConsole} from "./console/memory_console";
 
-export {UnitTestResult, RFC, types, DB};
+export {UnitTestResult, RFC, types, DB, MemoryConsole};
 
 export class ABAP {
 // global objects
@@ -45,7 +46,7 @@ export class ABAP {
 
   public constructor(console?: Console) {
     this.context = new Context();
-    this.console = console ? console : new MemoryConsole();
+    this.console = console ? console : new StandardOutConsole();
     this.context.console = this.console;
 
     this.statements = new Statements(this.context);

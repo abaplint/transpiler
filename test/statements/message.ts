@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {ABAP} from "../../packages/runtime/src";
+import {ABAP, MemoryConsole} from "../../packages/runtime/src";
 import {SQLiteDatabaseClient} from "../../packages/database-sqlite/src/";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -12,7 +12,7 @@ async function run(contents: string) {
 describe("Running statements - MESSAGE", () => {
 
   beforeEach(async () => {
-    abap = new ABAP();
+    abap = new ABAP(new MemoryConsole());
   });
 
   it("MESSAGE INTO", async () => {

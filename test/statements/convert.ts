@@ -1,4 +1,4 @@
-import {ABAP} from "../../packages/runtime/src";
+import {ABAP, MemoryConsole} from "../../packages/runtime/src";
 import {expect} from "chai";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Running statements - CONVERT", () => {
 
   beforeEach(async () => {
-    abap = new ABAP();
+    abap = new ABAP(new MemoryConsole());
   });
 
   it("test 01", async () => {

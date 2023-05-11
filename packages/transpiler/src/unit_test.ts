@@ -179,13 +179,11 @@ async function run() {
     }
 
     ret += `// -------------------END-------------------
-    console.log(abap.console.get());
     fs.writeFileSync(__dirname + path.sep + "_output.xml", unit.xUnitXML());
   } catch (e) {
     if (meth) {
       meth.fail();
     }
-    console.log(abap.console.get());
     fs.writeFileSync(__dirname + path.sep + "_output.xml", unit.xUnitXML());
     throw e;
   }
