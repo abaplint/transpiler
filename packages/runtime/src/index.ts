@@ -43,9 +43,9 @@ export class ABAP {
 
   public readonly context: Context;
 
-  public constructor() {
+  public constructor(console?: Console) {
     this.context = new Context();
-    this.console = new MemoryConsole();
+    this.console = console ? console : new MemoryConsole();
     this.context.console = this.console;
 
     this.statements = new Statements(this.context);
