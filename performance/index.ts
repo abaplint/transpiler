@@ -1,5 +1,5 @@
 import {AsyncFunction, runFiles} from "../test/_utils";
-import {ABAP} from "../packages/runtime/src";
+import {ABAP, MemoryConsole} from "../packages/runtime/src";
 import {performance} from "perf_hooks";
 import * as fs from "fs";
 import * as path from "path";
@@ -21,7 +21,7 @@ import {test15} from "./test15";
 
 // NOTE: does not run via Mocha
 
-const abap: ABAP = new ABAP();
+const abap: ABAP = new ABAP(new MemoryConsole());
 
 async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
