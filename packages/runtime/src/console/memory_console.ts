@@ -1,4 +1,6 @@
-export class Console {
+import {Console} from "./console";
+
+export class MemoryConsole implements Console {
   private data = "";
 
   public clear(): void {
