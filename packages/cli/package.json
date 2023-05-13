@@ -2,6 +2,7 @@
   "name": "@abaplint/transpiler-cli",
   "version": "2.6.44",
   "description": "Transpiler - Command Line Interface",
+  "funding": "https://github.com/sponsors/larshp",
   "bin": {
     "abap_transpile": "./abap_transpile"
   },
