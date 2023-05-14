@@ -1053,4 +1053,22 @@ WRITE sy-dbcnt.`;
     expect(abap.console.get().trimEnd()).to.equal("0");
   });
 
+  it.skip("SELECT LOOP PACKAGE SIZE", async () => {
+    const code = `
+DATA lt TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+SELECT arbgb msgnr
+    INTO CORRESPONDING FIELDS OF TABLE lt
+    FROM t100
+    PACKAGE SIZE 1000.
+  WRITE / lines( lt ).
+ENDSELECT.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("0");
+  });
+
 });
