@@ -1,9 +1,10 @@
 {
   "name": "@abaplint/runtime",
-  "version": "2.6.44",
+  "version": "2.7.0",
   "description": "Transpiler - Runtime",
   "main": "build/src/index.js",
   "typings": "build/src/index.d.ts",
+  "funding": "https://github.com/sponsors/larshp",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/abaplint/transpiler.git"

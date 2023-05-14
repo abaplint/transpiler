@@ -1,13 +1,13 @@
 import {expect} from "chai";
 import {AsyncFunction, runFiles} from "./_utils";
-import {ABAP} from "../packages/runtime/src/";
+import {ABAP, MemoryConsole} from "../packages/runtime/src/";
 import {msag_escape, msag_zag_unit_test, tabl_t100xml, zt111, zt222} from "./_data";
 
 describe("Top level tests, Database", () => {
   let abap: ABAP;
 
   beforeEach(async () => {
-    abap = new ABAP();
+    abap = new ABAP(new MemoryConsole());
   });
 
   it("SELECT", async () => {
@@ -1051,6 +1051,24 @@ WRITE sy-dbcnt.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get().trimEnd()).to.equal("0");
+  });
+
+  it("SELECT LOOP PACKAGE SIZE", async () => {
+    const code = `
+DATA lt TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+SELECT arbgb msgnr
+    INTO CORRESPONDING FIELDS OF TABLE lt
+    FROM t100
+    PACKAGE SIZE 1000.
+  WRITE / lines( lt ).
+ENDSELECT.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("2");
   });
 
 });

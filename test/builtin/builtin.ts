@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {ABAP} from "../../packages/runtime/src";
+import {ABAP, MemoryConsole} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
@@ -13,7 +13,7 @@ async function run(contents: string) {
 describe("Builtin functions", () => {
 
   beforeEach(async () => {
-    abap = new ABAP();
+    abap = new ABAP(new MemoryConsole());
   });
 
   it("boolc test", async () => {

@@ -1,4 +1,6 @@
-export class Console {
+import {Console} from "./console";
+
+export class MemoryConsole implements Console {
   private data = "";
 
   public clear(): void {
@@ -11,6 +13,10 @@ export class Console {
 
   public get(): string {
     return this.data;
+  }
+
+  public isEmpty() {
+    return this.data === "";
   }
 
   public getTrimmed(): string {

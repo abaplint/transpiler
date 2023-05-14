@@ -1,4 +1,4 @@
-import {ABAP} from "../../packages/runtime/src";
+import {ABAP, MemoryConsole} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
@@ -10,7 +10,7 @@ async function run(contents: string) {
 describe("Running statements - TRY", () => {
 
   beforeEach(async () => {
-    abap = new ABAP();
+    abap = new ABAP(new MemoryConsole());
   });
 
   it("TRY without CATCH", async () => {

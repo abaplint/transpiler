@@ -122,6 +122,11 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
     let staticMethod = "";
 
     methodName = methodName.replace("~", "$").toLowerCase();
+    if (methodName === "then") {
+// todo, this should be a checked in the validation step, but no abaplint rule for it?
+// it messes up promises when "this" is returned
+      throw new Error(`Method name "then" not allowed`);
+    }
 
     const superDef = traversal.findClassDefinition(classDef?.getSuperClass(), scope);
     for (const a of superDef?.getAliases().getAll() || []) {

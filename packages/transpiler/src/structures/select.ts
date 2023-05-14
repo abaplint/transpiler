@@ -1,10 +1,11 @@
+/* eslint-disable max-len */
 import * as abaplint from "@abaplint/core";
 import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
 import {SelectTranspiler as SelectStatementTranspiler} from "../statements/select";
 import {Chunk} from "../chunk";
 import {UniqueIdentifier} from "../unique_identifier";
-import {SQLTargetTranspiler} from "../expressions";
+import {SQLSourceTranspiler, SQLTargetTranspiler} from "../expressions";
 
 export class SelectTranspiler implements IStructureTranspiler {
 
@@ -24,10 +25,18 @@ export class SelectTranspiler implements IStructureTranspiler {
     const loopName = UniqueIdentifier.get();
     ret.appendString(`let ${targetName} = new abap.types.Table(abap.DDIC["${from}"].type);\n`);
     ret.appendChunk(new SelectStatementTranspiler().transpile(selectStatement, traversal, targetName));
-    ret.appendString(`\nfor (const ${loopName} of ${targetName}.array()) {\n`);
-    if (concat.includes(" INTO CORRESPONDING FIELDS OF ")) {
+
+    const packageSize = node.findFirstExpression(abaplint.Expressions.SelectLoop)?.findExpressionAfterToken("SIZE");
+    if (packageSize) {
+      const getSize = new SQLSourceTranspiler().transpile(packageSize, traversal).getCode() + ".get()";
+      ret.appendString(`if (${targetName}.array().length > ${getSize}) { throw new Error("PACKAGE SIZED loop larger than package size not supported"); };\n`);
+      ret.appendString(`abap.statements.append({source: ${targetName}, target: ${intoName}, lines: true});\n`);
+      ret.appendString(`{\n`);
+    } else if (concat.includes(" INTO CORRESPONDING FIELDS OF ")) {
+      ret.appendString(`\nfor (const ${loopName} of ${targetName}.array()) {\n`);
       ret.appendString(`abap.statements.moveCorresponding(${loopName}, ${intoName});\n`);
     } else {
+      ret.appendString(`\nfor (const ${loopName} of ${targetName}.array()) {\n`);
       ret.appendString(`${intoName}.set(${loopName});\n`);
     }
 
