@@ -16,6 +16,7 @@ export class SelectTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal, targetOverride?: string): Chunk {
     let target = "undefined";
     if (targetOverride) {
+      // SelectLoop structure uses override
       target = targetOverride;
     } else if (node.findFirstExpression(abaplint.Expressions.SQLIntoTable)) {
       target = traversal.traverse(node.findFirstExpression(abaplint.Expressions.Target)).getCode();
@@ -80,8 +81,12 @@ export class SelectTranspiler implements IStatementTranspiler {
     }
 
     let runtimeOptions = "";
+    const runtimeOptionsList: string[] = [];
     if (node.concatTokens().toUpperCase().includes(" APPENDING TABLE ")) {
-      runtimeOptions = `, {appending: true}`;
+      runtimeOptionsList.push(`appending: true`);
+    }
+    if (runtimeOptionsList.length > 0) {
+      runtimeOptions = `, {` + runtimeOptionsList.join(", ") + `}`;
     }
 
     let extra = "";

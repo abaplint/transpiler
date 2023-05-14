@@ -1053,7 +1053,7 @@ WRITE sy-dbcnt.`;
     expect(abap.console.get().trimEnd()).to.equal("0");
   });
 
-  it.skip("SELECT LOOP PACKAGE SIZE", async () => {
+  it("SELECT LOOP PACKAGE SIZE", async () => {
     const code = `
 DATA lt TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
 SELECT arbgb msgnr
@@ -1068,7 +1068,7 @@ ENDSELECT.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get().trimEnd()).to.equal("0");
+    expect(abap.console.get().trimEnd()).to.equal("2");
   });
 
 });
