@@ -1767,4 +1767,30 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("working");
   });
 
+  it("Class, static attribute accessed via me", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor IMPORTING foobar TYPE i.
+    CLASS-DATA foobar TYPE i.
+    DATA inst TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD constructor.
+    me->foobar = foobar.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA obj TYPE REF TO lcl.
+  CREATE OBJECT obj EXPORTING foobar = 2.
+  WRITE obj->foobar.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });

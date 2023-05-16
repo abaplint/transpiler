@@ -430,6 +430,7 @@ ENDCLASS.`;
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    this.foo = lcl_bar.foo;
   }
   async constructor_(INPUT) {
     if (super.constructor_) { await super.constructor_(INPUT); }
