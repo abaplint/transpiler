@@ -400,10 +400,12 @@ export class Traversal {
     ret += "this.me = new abap.types.ABAPObject();\n";
     ret += "this.me.set(this);\n";
     for (const a of def.getAttributes()?.getAll() || []) {
+      const escaped = Traversal.escapeNamespace(a.getName().toLowerCase());
       if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
+        ret += "this." + escaped + " = " + cName + "." + escaped + ";\n";
         continue;
       }
-      const name = "this." + Traversal.escapeNamespace(a.getName().toLowerCase());
+      const name = "this." + escaped;
       ret += name + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
       ret += this.setValues(a, name);
     }

@@ -29,9 +29,11 @@ export class SelectTranspiler implements IStructureTranspiler {
     const packageSize = node.findFirstExpression(abaplint.Expressions.SelectLoop)?.findExpressionAfterToken("SIZE");
     if (packageSize) {
       const getSize = new SQLSourceTranspiler().transpile(packageSize, traversal).getCode() + ".get()";
-      ret.appendString(`if (${targetName}.array().length > ${getSize}) { throw new Error("PACKAGE SIZED loop larger than package size not supported"); };\n`);
-      ret.appendString(`abap.statements.append({source: ${targetName}, target: ${intoName}, lines: true});\n`);
-      ret.appendString(`{\n`);
+      ret.appendString(`if (${targetName}.array().length > ${getSize}) {
+  throw new Error("PACKAGE SIZED loop larger than package size not supported");
+};
+abap.statements.append({source: ${targetName}, target: ${intoName}, lines: true});
+{\n`);
     } else if (concat.includes(" INTO CORRESPONDING FIELDS OF ")) {
       ret.appendString(`\nfor (const ${loopName} of ${targetName}.array()) {\n`);
       ret.appendString(`abap.statements.moveCorresponding(${loopName}, ${intoName});\n`);
