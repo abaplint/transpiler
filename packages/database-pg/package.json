@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.1.7",
+    "@types/pg": "8.6.6",
     "@abaplint/runtime": "^2.7.1",
     "typescript": "^5.0.4"
   }

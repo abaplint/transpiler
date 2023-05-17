@@ -1,45 +1,54 @@
 import {DB} from "@abaplint/runtime";
+import * as pg from "pg";
 
 export class PostgresDatabaseClient implements DB.DatabaseClient {
   public readonly name = "postgres";
+  private pool: pg.Pool;
 
-  public connect(): Promise<void> {
+  public async connect() {
+    this.pool = new pg.Pool({
+      user: "username",
+      host: "localhost",
+      database: process.env.PGDATABASE,
+      password: process.env.PGPASSWORD,
+      port: 8080,
+    });
+  }
+
+  public async disconnect(): Promise<void> {
     throw new Error("Method not implemented.");
   }
 
-  public disconnect(): Promise<void> {
+  public async execute(_sql: string | string[]): Promise<void> {
     throw new Error("Method not implemented.");
   }
 
-  public execute(_sql: string | string[]): Promise<void> {
+  public async beginTransaction(): Promise<void> {
     throw new Error("Method not implemented.");
   }
 
-  public beginTransaction(): Promise<void> {
+  public async commit(): Promise<void> {
     throw new Error("Method not implemented.");
   }
 
-  public commit(): Promise<void> {
+  public async rollback(): Promise<void> {
     throw new Error("Method not implemented.");
   }
 
-  public rollback(): Promise<void> {
+  public async delete(_options: DB.DeleteDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
     throw new Error("Method not implemented.");
   }
 
-  public delete(_options: DB.DeleteDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
+  public async update(_options: DB.UpdateDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
     throw new Error("Method not implemented.");
   }
 
-  public update(_options: DB.UpdateDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
+  public async insert(_options: DB.InsertDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
     throw new Error("Method not implemented.");
   }
 
-  public insert(_options: DB.InsertDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
-    throw new Error("Method not implemented.");
-  }
-
-  public select(_options: DB.SelectDatabaseOptions): Promise<DB.SelectDatabaseResult> {
+  public async select(_options: DB.SelectDatabaseOptions): Promise<DB.SelectDatabaseResult> {
+    await this.pool.query("sdfsdf");
     throw new Error("Method not implemented.");
   }
 
