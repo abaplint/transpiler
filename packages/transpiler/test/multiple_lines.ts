@@ -30,6 +30,7 @@ describe("Multiple lines", () => {
     const expected = `class lif_foobar {
   static INTERNAL_TYPE = 'INTF';
   static ATTRIBUTES = {};
+  static METHODS = {};
 }
 abap.Classes['PROG-ZFOOBAR-LIF_FOOBAR'] = lif_foobar;`;
 
@@ -64,6 +65,7 @@ abap.Classes['PROG-ZFOOBAR-LIF_FOOBAR'] = lif_foobar;`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_FOOBAR';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
+  static METHODS = {};
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -99,6 +101,7 @@ abap.Classes['PROG-ZFOOBAR-LCL_FOOBAR'] = lcl_foobar;`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_FOOBAR';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
+  static METHODS = {};
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -136,6 +139,7 @@ abap.Classes['PROG-ZFOOBAR-LCL_FOOBAR'] = lcl_foobar;`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_FOOBAR';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
+  static METHODS = {};
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -191,6 +195,7 @@ CREATE OBJECT foo.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-ZCL_WORDS';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
+  static METHODS = {};
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -248,6 +253,7 @@ DATA moo TYPE foo.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-ZCL_WORDS';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"BAR": {"type": () => {return new abap.types.Integer({qualifiedName: "I"});}, "visibility": "U", "is_constant": " ", "is_class": " "}};
+  static METHODS = {};
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -286,6 +292,7 @@ abap.Classes['PROG-ZFOOBAR-ZCL_WORDS'] = zcl_words;`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-ZCL_WORDS';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"BAR": {"type": () => {return new abap.types.Integer({qualifiedName: "I"});}, "visibility": "U", "is_constant": " ", "is_class": " "}};
+  static METHODS = {};
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -322,6 +329,7 @@ ENDCLASS.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-ZCL_RET';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"BAR": {"type": () => {return new abap.types.Integer({qualifiedName: "I"});}, "visibility": "U", "is_constant": " ", "is_class": " "}};
+  static METHODS = {};
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -396,6 +404,7 @@ ENDCLASS.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-ZCL_RET';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"C_MAXDCODES": {"type": () => {return new abap.types.Integer({qualifiedName: "I"});}, "visibility": "I", "is_constant": "X", "is_class": "X"}};
+  static METHODS = {};
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -427,6 +436,7 @@ ENDCLASS.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_BAR';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"FOO": {"type": () => {return new abap.types.Integer({qualifiedName: "I"});}, "visibility": "U", "is_constant": " ", "is_class": "X"}};
+  static METHODS = {};
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -463,6 +473,7 @@ ENDFORM.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_BAR';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
+  static METHODS = {};
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -509,6 +520,7 @@ ENDFORM.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_BAR';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
+  static METHODS = {};
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -542,6 +554,7 @@ async function bar() {
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_BAR';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"FOO": {"type": () => {return new abap.types.String({qualifiedName: "STRING"});}, "visibility": "U", "is_constant": "X", "is_class": "X"}};
+  static METHODS = {};
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -593,6 +606,7 @@ ENDINTERFACE.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_BAR';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"FIRST": {"type": () => {return new abap.types.Character(1, {});}, "visibility": "U", "is_constant": "X", "is_class": "X"}};
+  static METHODS = {};
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -609,6 +623,7 @@ lcl_bar.first.set('b');
 class bar {
   static INTERNAL_TYPE = 'INTF';
   static ATTRIBUTES = {"NEXT": {"type": () => {return new abap.types.Character(1, {});}, "visibility": "U", "is_constant": "X", "is_class": "X"}};
+  static METHODS = {};
 }
 abap.Classes['PROG-ZFOOBAR-BAR'] = bar;
 bar.bar$next = new abap.types.Character(1, {});
@@ -708,6 +723,7 @@ ENDCLASS.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_CONSTANT_TEST';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"AREA_NAME": {"type": () => {return new abap.types.String({qualifiedName: "STRING"});}, "visibility": "U", "is_constant": "X", "is_class": "X"}};
+  static METHODS = {};
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -742,6 +758,7 @@ ENDCLASS.`;
     const expected = `class lif {
   static INTERNAL_TYPE = 'INTF';
   static ATTRIBUTES = {"DEFAULT_VALUE": {"type": () => {return new abap.types.String({qualifiedName: "STRING"});}, "visibility": "U", "is_constant": "X", "is_class": "X"}};
+  static METHODS = {};
 }
 abap.Classes['PROG-ZFOOBAR-LIF'] = lif;
 lif.lif$default_value = new abap.types.String({qualifiedName: "STRING"});
@@ -751,6 +768,7 @@ class lcl {
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
+  static METHODS = {};
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
