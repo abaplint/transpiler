@@ -60,19 +60,50 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     throw new Error("Method not implemented.");
   }
 
-  public async insert(_options: DB.InsertDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
-    throw new Error("Method not implemented.");
+  public async insert(options: DB.InsertDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
+    const sql = `INSERT INTO "${options.table}" (${options.columns.map(c => "\"" + c + "\"").join(",")}) VALUES (${options.values.join(",")})`;
+
+    let subrc = 0;
+    let dbcnt = 0;
+    try {
+      const res = await this.pool!.query(sql);
+      dbcnt = res.rowCount;
+    } catch (error) {
+      // eg "UNIQUE constraint failed" errors
+      subrc = 4;
+    }
+    return {subrc, dbcnt};
   }
 
   public async select(options: DB.SelectDatabaseOptions): Promise<DB.SelectDatabaseResult> {
+    let res: undefined | pg.QueryResult<any> = undefined;
 
     options.select = options.select.replace(/ UP TO (\d+) ROWS(.*)/i, "$2 LIMIT $1");
+    // workaround to escape namespaces, this will need more work
+    options.select = options.select.replace(/ FROM (\/\w+\/\w+)/i, " FROM '$1' ");
+    if (options.primaryKey) {
+      options.select = options.select.replace(/ ORDER BY PRIMARY KEY/i, " ORDER BY " + options.primaryKey.join(", "));
+    } else {
+      options.select = options.select.replace(/ ORDER BY PRIMARY KEY/i, "");
+    }
+    options.select = options.select.replace(/ ASCENDING/ig, " ASC");
+    options.select = options.select.replace(/ DESCENDING/ig, " DESC");
+    options.select = options.select.replace(/~/g, ".");
 
     if (this.trace === true) {
       console.log(options.select);
     }
 
-    const res = await this.pool!.query(options.select);
+    try {
+      res = await this.pool!.query(options.select);
+    } catch (error) {
+      // @ts-ignore
+      if (abap.Classes["CX_SY_DYNAMIC_OSQL_SEMANTICS"] !== undefined) {
+        // @ts-ignore
+        throw await new abap.Classes["CX_SY_DYNAMIC_OSQL_SEMANTICS"]().constructor_({sqlmsg: error.message || ""});
+      }
+      throw error;
+    }
 
     const rows = this.convert(res);
 

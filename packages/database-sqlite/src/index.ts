@@ -92,7 +92,7 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
   }
 
   public async insert(options: DB.InsertDatabaseOptions) {
-    const sql = `INSERT INTO '${options.table}' (${options.columns.join(",")}) VALUES (${options.values.join(",")})`;
+    const sql = `INSERT INTO '${options.table}' (${options.columns.map(c => "'" + c + "'").join(",")}) VALUES (${options.values.join(",")})`;
 
     let subrc = 0;
     let dbcnt = 0;
@@ -109,23 +109,24 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
   // // https://www.sqlite.org/lang_select.html
   public async select(options: DB.SelectDatabaseOptions) {
     let res: undefined | QueryExecResult[] = undefined;
-    try {
-      options.select = options.select.replace(/ UP TO (\d+) ROWS(.*)/i, "$2 LIMIT $1");
+
+    options.select = options.select.replace(/ UP TO (\d+) ROWS(.*)/i, "$2 LIMIT $1");
       // workaround to escape namespaces, this will need more work
-      options.select = options.select.replace(/ FROM (\/\w+\/\w+)/i, " FROM '$1' ");
-      if (options.primaryKey) {
-        options.select = options.select.replace(/ ORDER BY PRIMARY KEY/i, " ORDER BY " + options.primaryKey.join(", "));
-      } else {
-        options.select = options.select.replace(/ ORDER BY PRIMARY KEY/i, "");
-      }
-      options.select = options.select.replace(/ ASCENDING/ig, " ASC");
-      options.select = options.select.replace(/ DESCENDING/ig, " DESC");
-      options.select = options.select.replace(/~/g, ".");
+    options.select = options.select.replace(/ FROM (\/\w+\/\w+)/i, " FROM '$1' ");
+    if (options.primaryKey) {
+      options.select = options.select.replace(/ ORDER BY PRIMARY KEY/i, " ORDER BY " + options.primaryKey.join(", "));
+    } else {
+      options.select = options.select.replace(/ ORDER BY PRIMARY KEY/i, "");
+    }
+    options.select = options.select.replace(/ ASCENDING/ig, " ASC");
+    options.select = options.select.replace(/ DESCENDING/ig, " DESC");
+    options.select = options.select.replace(/~/g, ".");
 
-      if (this.trace === true) {
-        console.log(options.select);
-      }
+    if (this.trace === true) {
+      console.log(options.select);
+    }
 
+    try {
       res = this.sqlite!.exec(options.select);
     } catch (error) {
       // @ts-ignore
