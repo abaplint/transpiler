@@ -64,7 +64,7 @@ export function describe(input: IDescribeOptions) {
         || input.field instanceof Hex) {
       input.length.set(input.field.getLength());
     } else {
-      throw "DESCRIBE length, unsupported or todo";
+      throw new Error("DESCRIBE length, unsupported or todo");
     }
   }
 
@@ -72,7 +72,7 @@ export function describe(input: IDescribeOptions) {
     if (input.field instanceof Packed) {
       input.decimals.set(input.field.getDecimals());
     } else {
-      throw "DESCRIBE decimals, unsupported or todo";
+      throw new Error("DESCRIBE decimals, unsupported or todo");
     }
   }
 
