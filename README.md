@@ -5,11 +5,11 @@
 [![npm (scoped)](https://img.shields.io/npm/v/@abaplint/transpiler-cli?label=%40abaplint%2Ftranspiler-cli)](https://www.npmjs.com/package/@abaplint/transpiler-cli)
 [![CI](https://github.com/abaplint/transpiler/workflows/CI/badge.svg)](https://github.com/abaplint/transpiler/actions)
 
-Input must be ABAP 7.02 syntax, use [downport](https://rules.abaplint.org/downport/) rule in abaplint to automatically change higher syntax before running transpiler.
+Input must be ABAP 7.02 syntax, use [downport](https://rules.abaplint.org/downport/) to automatically change higher syntax before transpiling.
 
 Target is [ES6](http://es6-features.org)
 
-Planned database support: [SQLite](https://www.sqlite.org) & [HANA Express](https://www.sap.com/cmp/td/sap-hana-express-edition.html)
+Database support: [SQLite](https://www.sqlite.org) & [Postgres](https://www.postgresql.org)(wip)
 
 Playground: https://transpiler.abaplint.org
 

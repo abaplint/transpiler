@@ -3,24 +3,39 @@ import * as pg from "pg";
 
 export class PostgresDatabaseClient implements DB.DatabaseClient {
   public readonly name = "postgres";
-  private pool: pg.Pool;
+  private readonly database;
+  private pool: pg.Pool | undefined;
+
+  public constructor(database: string) {
+    this.database = database;
+  }
 
   public async connect() {
     this.pool = new pg.Pool({
-      user: "username",
+      user: "postgres",
       host: "localhost",
-      database: process.env.PGDATABASE,
-      password: process.env.PGPASSWORD,
-      port: 8080,
+      database: this.database,
+      password: "postgres",
+      port: 5432,
     });
   }
 
   public async disconnect(): Promise<void> {
-    throw new Error("Method not implemented.");
+    await this.pool?.end();
+    this.pool = undefined;
   }
 
-  public async execute(_sql: string | string[]): Promise<void> {
-    throw new Error("Method not implemented.");
+  public async execute(sql: string | string[]): Promise<void> {
+    if (typeof sql === "string") {
+      if (sql === "") {
+        return;
+      }
+      await this.pool!.query(sql);
+    } else {
+      for (const s of sql) {
+        await this.execute(s);
+      }
+    }
   }
 
   public async beginTransaction(): Promise<void> {
@@ -47,8 +62,10 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     throw new Error("Method not implemented.");
   }
 
-  public async select(_options: DB.SelectDatabaseOptions): Promise<DB.SelectDatabaseResult> {
-    await this.pool.query("sdfsdf");
+  public async select(options: DB.SelectDatabaseOptions): Promise<DB.SelectDatabaseResult> {
+    // todo
+    console.dir(options);
+    await this.pool?.query("sdfsdf");
     throw new Error("Method not implemented.");
   }
 

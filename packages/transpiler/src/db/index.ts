@@ -3,6 +3,13 @@ import * as abaplint from "@abaplint/core";
 import {ITranspilerOptions} from "../types";
 import {DatabaseSetupResult} from "./database_setup_result";
 import {SQLiteDatabaseSchema} from "./sqlite_database_schema";
+import {PGDatabaseSchema} from "./pg_database_schema";
+
+/////////////////////////
+// NOTES
+/////////////////////////
+// Postgres is case sensitive, so all column names should be lower case
+// Sqlite escapes field names with single qoute, postgres with double
 
 export class DatabaseSetup {
   private readonly reg: abaplint.IRegistry;
@@ -16,7 +23,7 @@ export class DatabaseSetup {
       schemas: {
         sqlite: new SQLiteDatabaseSchema(this.reg).run(),
         hdb: ["todo"],
-        pg: ["todo"],
+        pg: new PGDatabaseSchema(this.reg).run(),
       },
       insert: this.buildInsert(options),
     };
@@ -65,7 +72,7 @@ export class DatabaseSetup {
     const type = tabl.parseType(this.reg);
     if (type instanceof abaplint.BasicTypes.StructureType && type.getComponents().length >= 3) {
       // todo, this should take the client number from the settings
-      return `INSERT INTO t000 ('MANDT', 'CCCATEGORY', 'CCNOCLIIND') VALUES ('123', '', '');`;
+      return `INSERT INTO t000 ('mandt', 'cccategory', 'ccnocliind') VALUES ('123', '', '');`;
     } else {
       return "";
     }
@@ -79,7 +86,7 @@ export class DatabaseSetup {
     }
     let ret = "";
     for (const m of msag.getMessages()) {
-      ret += `INSERT INTO t100 ('SPRSL', 'ARBGB', 'MSGNR', 'TEXT') VALUES ('E', '${msag.getName().padEnd(20, " ")}', '${m.getNumber()}', '${this.escape(m.getMessage().padEnd(73, " "))}');\n`;
+      ret += `INSERT INTO t100 ("sprsl", "arbgb", "msgnr", "text") VALUES ('E', '${msag.getName().padEnd(20, " ")}', '${m.getNumber()}', '${this.escape(m.getMessage().padEnd(73, " "))}');\n`;
     }
     return ret;
   }
