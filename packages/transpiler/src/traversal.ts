@@ -208,9 +208,31 @@ export class Traversal {
       return methods;
     }
 
-    // todo
+    for (const m of def.getMethodDefinitions().getAll()) {
+      const parameters: string[] = [];
+      for (const p of m.getParameters().getAll()) {
+        const type = new TranspileTypes().toType(p.getType());
+        const optional = m.getParameters().getOptional().includes(p.getName()) ? "X" : " ";
+        parameters.push(`"${p.getName().toUpperCase()}": {"type": () => {return ${type};}, "is_optional": "${optional}"}`);
+      }
+
+      methods.push(`"${m.getName().toUpperCase()}": {"visibility": "${
+        this.mapVisibility(m.getVisibility())}", "parameters": {${
+        parameters.join(", ")}}}`);
+    }
 
     return methods;
+  }
+
+  private mapVisibility(vis: abaplint.Visibility) {
+    switch (vis) {
+      case abaplint.Visibility.Private:
+        return "I";
+      case abaplint.Visibility.Protected:
+        return "O";
+      default:
+        return "U";
+    }
   }
 
   public buildAttributes(def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined,
@@ -223,17 +245,7 @@ export class Traversal {
 
     for (const a of def.getAttributes()?.getAll() || []) {
       const type = new TranspileTypes().toType(a.getType());
-      let runtime = "";
-      switch (a.getVisibility()) {
-        case abaplint.Visibility.Private:
-          runtime = "I";
-          break;
-        case abaplint.Visibility.Protected:
-          runtime = "O";
-          break;
-        default:
-          runtime = "U";
-      }
+      const runtime = this.mapVisibility(a.getVisibility());
       const isClass = a.getMeta().includes(abaplint.IdentifierMeta.Static) ? "X" : " ";
       attr.push(`"${prefix + a.getName().toUpperCase()}": {"type": () => {return ${type};}, "visibility": "${
         runtime}", "is_constant": " ", "is_class": "${isClass}"}`);

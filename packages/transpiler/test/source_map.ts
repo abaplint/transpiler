@@ -69,7 +69,7 @@ ENDCLASS.`;
   static INTERNAL_NAME = 'ZCL_MAPTEST';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
-  static METHODS = {};
+  static METHODS = {"BAR": {"visibility": "U", "parameters": {}}};
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
