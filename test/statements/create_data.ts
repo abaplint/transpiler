@@ -260,4 +260,22 @@ CREATE DATA lo_data TYPE ('ABAP_BOOL').`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
+
+  it("CREATE DATA, STRING", async () => {
+    const code = `
+DATA parameter_value TYPE REF TO data.
+CREATE DATA parameter_value TYPE ('STRING').`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("CREATE DATA, I", async () => {
+    const code = `
+DATA parameter_value TYPE REF TO data.
+CREATE DATA parameter_value TYPE ('I').`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
 });

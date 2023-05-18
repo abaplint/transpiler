@@ -61,6 +61,10 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
     } else if (options.name === "ABAP_BOOL") {
 // ABAP_BOOL is special, its not part of the type pool, its built-into abaplint
       target.assign(new Character(1, {qualifiedName: "ABAP_BOOL", ddicName: "ABAP_BOOL"}));
+    } else if (options.name === "STRING") {
+      target.assign(new String());
+    } else if (options.name === "I") {
+      target.assign(new Integer());
     } else {
       throwError("CX_SY_CREATE_DATA_ERROR");
     }
