@@ -1,12 +1,12 @@
 import {expect} from "chai";
-import {AsyncFunction, runFiles, runFilesPostgres} from "./_utils";
+import {AsyncFunction, runFiles as runRilesSqlite, runFilesPostgres} from "./_utils";
 import {ABAP, MemoryConsole} from "../packages/runtime/src/";
 import {msag_escape, msag_zag_unit_test, tabl_t100xml, zt111, zt222} from "./_data";
 import {IFile} from "../packages/transpiler/src/types";
 
 async function runAllDatabases(abap: ABAP, files: IFile[], check: () => any, settings = {sqlite: true, postgres: true}) {
   if (settings.sqlite === true) {
-    const js = await runFiles(abap, files);
+    const js = await runRilesSqlite(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     check();
@@ -18,6 +18,11 @@ async function runAllDatabases(abap: ABAP, files: IFile[], check: () => any, set
     await f(abap);
     check();
   }
+}
+
+/** @deprecated use runAllDatabases() instead */
+async function runFiles(abap: ABAP, files: IFile[]) {
+  return runRilesSqlite(abap, files);
 }
 
 describe("Top level tests, Database", () => {
@@ -39,7 +44,7 @@ describe("Top level tests, Database", () => {
     ];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("hello world");
-    },  {sqlite: true, postgres: false});
+    });
   });
 
   it("SELECT, no result", async () => {

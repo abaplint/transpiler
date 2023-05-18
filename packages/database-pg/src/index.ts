@@ -4,10 +4,12 @@ import * as pg from "pg";
 export class PostgresDatabaseClient implements DB.DatabaseClient {
   public readonly name = "postgres";
   private readonly database;
+  private readonly trace: boolean | undefined;
   private pool: pg.Pool | undefined;
 
-  public constructor(database: string) {
-    this.database = database;
+  public constructor(input: {database: string, trace?: boolean}) {
+    this.database = input.database;
+    this.trace = input.trace;
   }
 
   public async connect() {
@@ -63,10 +65,34 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async select(options: DB.SelectDatabaseOptions): Promise<DB.SelectDatabaseResult> {
-    // todo
-    console.dir(options);
-    await this.pool?.query("sdfsdf");
-    throw new Error("Method not implemented.");
+
+    options.select = options.select.replace(/ UP TO (\d+) ROWS(.*)/i, "$2 LIMIT $1");
+
+    if (this.trace === true) {
+      console.log(options.select);
+    }
+
+    const res = await this.pool!.query(options.select);
+
+    const rows = this.convert(res);
+
+    return {rows: rows};
+  }
+
+  private convert(res: pg.QueryResult<any>): DB.DatabaseRows {
+    if (res === undefined || res.rows.length === 0) {
+      return [];
+    }
+
+    const rows: DB.DatabaseRows = [];
+    for (const pgRow of res.rows) {
+      const row: DB.DatabaseRow = {};
+      for (const columnName in pgRow) {
+        row[columnName] = pgRow[columnName];
+      }
+      rows.push(row);
+    }
+    return rows;
   }
 
 }
