@@ -1,7 +1,7 @@
 {
-  "name": "@abaplint/database-sqlite",
+  "name": "@abaplint/database-pg",
   "version": "2.7.2",
-  "description": "Transpiler - SQLite driver",
+  "description": "Transpiler - Postgres driver",
   "main": "./build/index.js",
   "scripts": {
     "test": "tsc",
@@ -17,11 +17,11 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "sql.js": "^1.8.0"
+    "pg": "^8.11.0"
   },
   "devDependencies": {
-    "@types/sql.js": "^1.4.4",
     "@types/node": "^20.2.0",
+    "@types/pg": "8.6.6",
     "@abaplint/runtime": "^2.7.2",
     "typescript": "^5.0.4"
   }

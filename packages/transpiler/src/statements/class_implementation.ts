@@ -26,7 +26,8 @@ export class ClassImplementationTranspiler implements IStatementTranspiler {
 static INTERNAL_TYPE = 'CLAS';
 static INTERNAL_NAME = '${traversal.buildInternalName(token.getStr(), def)}';
 static IMPLEMENTED_INTERFACES = [${this.findImplementedByClass(traversal, def, scope).map(e => `"` + e.toUpperCase() + `"`).join(",")}];
-static ATTRIBUTES = {${traversal.buildAttributes(def, scope).join(",\n")}};`, node, traversal);
+static ATTRIBUTES = {${traversal.buildAttributes(def, scope).join(",\n")}};
+static METHODS = {${traversal.buildMethods(def, scope).join(",\n")}};`, node, traversal);
   }
 
   private findImplementedInterface(traversal: Traversal, def?: abaplint.IInterfaceDefinition, scope?: abaplint.ISpaghettiScopeNode): string[] {

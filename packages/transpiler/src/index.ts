@@ -14,7 +14,7 @@ import {HandleTypePool} from "./handlers/handle_type_pool";
 import {HandleW3MI} from "./handlers/handle_w3mi";
 import {HandleSMIM} from "./handlers/handle_smim";
 
-export {config, ITranspilerOptions, IFile, IProgress, IOutputFile};
+export {config, ITranspilerOptions, IFile, IProgress, IOutputFile, IOutput};
 
 export class Transpiler {
   private readonly options: ITranspilerOptions | undefined;

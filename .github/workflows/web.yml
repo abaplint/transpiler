@@ -11,6 +11,7 @@ jobs:
     - uses: actions/setup-node@v3
     - name: npm install
       run: |
+        npm run docker:start
         npm run install
         npm run link-local
         npm test
