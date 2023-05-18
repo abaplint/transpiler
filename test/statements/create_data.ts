@@ -278,4 +278,15 @@ CREATE DATA parameter_value TYPE ('I').`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
+
+  it("CREATE DATA, STRING 2", async () => {
+    const code = `
+DATA parameter_value TYPE REF TO data.
+DATA foo TYPE c LENGTH 60.
+foo = 'STRING'.
+CREATE DATA parameter_value TYPE (foo).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
 });
