@@ -37,7 +37,7 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
       // @ts-ignore
       target.assign(clone(abap.DDIC[options.name.trimEnd()].type));
     } else if (options.name.includes("=>")) {
-      const [className, typeName] = options.name.toUpperCase().split("=>");
+      const [className, typeName] = options.name.trimEnd().toUpperCase().split("=>");
 
       // @ts-ignore
       if (abap.Classes[className] === undefined) {
@@ -57,10 +57,14 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
       if (clas === undefined) {
         throw new Error("CreateData, kernel class missing");
       }
-      clas.anonymous({name: options.name, dref: target});
-    } else if (options.name === "ABAP_BOOL") {
+      clas.anonymous({name: options.name.trimEnd(), dref: target});
+    } else if (options.name.trimEnd() === "ABAP_BOOL") {
 // ABAP_BOOL is special, its not part of the type pool, its built-into abaplint
       target.assign(new Character(1, {qualifiedName: "ABAP_BOOL", ddicName: "ABAP_BOOL"}));
+    } else if (options.name.trimEnd() === "STRING") {
+      target.assign(new String());
+    } else if (options.name.trimEnd() === "I") {
+      target.assign(new Integer());
     } else {
       throwError("CX_SY_CREATE_DATA_ERROR");
     }
