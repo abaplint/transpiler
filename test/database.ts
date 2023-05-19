@@ -61,10 +61,9 @@ describe("Top level tests, Database", () => {
     const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("4");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("4");
+    });
   });
 
   it("MODIFY FROM, inserts row", async () => {
