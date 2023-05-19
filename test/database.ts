@@ -58,9 +58,10 @@ describe("Top level tests, Database", () => {
     DATA ls_result TYPE t100.
     SELECT SINGLE * FROM t100 INTO ls_result.
     WRITE sy-subrc.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
-      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("4");
@@ -76,9 +77,10 @@ describe("Top level tests, Database", () => {
     SELECT SINGLE * FROM t100 INTO row.
     WRITE / sy-subrc.
     WRITE / row-arbgb.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
-      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get().trimEnd()).to.equal("0\nHELLO");
@@ -102,9 +104,10 @@ describe("Top level tests, Database", () => {
 
     SELECT SINGLE * FROM t100 INTO row.
     WRITE / row-text.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
-      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get().trimEnd()).to.equal("WORLD");
@@ -123,9 +126,10 @@ describe("Top level tests, Database", () => {
 
     SELECT SINGLE * FROM t100 INTO row.
     WRITE / sy-subrc.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
-      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     const cons = abap.console.get();
@@ -137,10 +141,11 @@ describe("Top level tests, Database", () => {
     DATA ls_result TYPE t100.
     SELECT SINGLE * FROM t100 INTO ls_result WHERE arbgb = 'ZAG_UNIT_TEST'.
     WRITE sy-subrc.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0");
@@ -151,10 +156,11 @@ describe("Top level tests, Database", () => {
     DATA ls_result TYPE t100.
     SELECT SINGLE * FROM t100 INTO ls_result WHERE arbgb = 'ZAG_UNIT_TEST' AND msgnr = 123.
     WRITE sy-subrc.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0");
@@ -165,10 +171,11 @@ describe("Top level tests, Database", () => {
     DATA ls_result TYPE t100.
     SELECT SINGLE * FROM t100 INTO ls_result WHERE msgnr = 123.
     WRITE sy-subrc.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0");
@@ -179,10 +186,11 @@ describe("Top level tests, Database", () => {
     DATA ls_result TYPE t100.
     SELECT SINGLE * FROM t100 INTO ls_result WHERE arbgb = 'dsffdsfds'.
     WRITE sy-subrc.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("4");
@@ -195,10 +203,11 @@ describe("Top level tests, Database", () => {
     lv_arbgb = 'ZAG_UNIT_TEST'.
     SELECT SINGLE * FROM t100 INTO ls_result WHERE arbgb = lv_arbgb.
     WRITE sy-subrc.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0");
