@@ -761,4 +761,25 @@ ASSERT key_name = |foo|.`;
     await f(abap);
   });
 
+  it("READ TABLE, hashed, first name", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         name TYPE c LENGTH 30,
+         kind TYPE c LENGTH 1,
+       END OF ty_row.
+TYPES ty_tab TYPE HASHED TABLE OF ty_row WITH UNIQUE KEY name.
+DATA tab TYPE ty_tab.
+DATA row LIKE LINE OF tab.
+
+row-name = 'FIRST_NAME'.
+INSERT row INTO TABLE tab.
+
+CLEAR row.
+READ TABLE tab WITH KEY name = 'FIRST_NAME' INTO row.
+ASSERT sy-subrc = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
