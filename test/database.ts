@@ -218,10 +218,11 @@ describe("Top level tests, Database", () => {
     DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
     SELECT * FROM t100 INTO TABLE tab ORDER BY PRIMARY KEY.
     WRITE sy-dbcnt.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -232,10 +233,11 @@ describe("Top level tests, Database", () => {
     DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
     SELECT * FROM ('T100') INTO TABLE tab ORDER BY PRIMARY KEY.
     WRITE sy-dbcnt.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -247,10 +249,11 @@ describe("Top level tests, Database", () => {
     SELECT * FROM t100 INTO bar.
       WRITE / bar-text.
     ENDSELECT.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.getTrimmed()).to.equal("hello world\nblah");
@@ -263,10 +266,11 @@ describe("Top level tests, Database", () => {
     SELECT msgnr text FROM t100 INTO (lv_msgnr, lv_text).
       WRITE / lv_text.
     ENDSELECT.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
 // TODO, for now it only checks that it compiles to valid JS
@@ -282,10 +286,11 @@ DATA: BEGIN OF stru,
 SELECT msgnr text FROM t100 INTO (stru-msgnr, stru-text).
   WRITE / stru-text.
 ENDSELECT.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
 // TODO, for now it only checks that it compiles to valid JS
@@ -296,10 +301,11 @@ ENDSELECT.`;
     const code = `
     SELECT COUNT(*) FROM t100.
     WRITE sy-dbcnt.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -311,10 +317,11 @@ ENDSELECT.`;
     SELECT * FROM t100 APPENDING TABLE tab ORDER BY PRIMARY KEY.
     SELECT * FROM t100 APPENDING TABLE tab ORDER BY PRIMARY KEY.
     WRITE lines( tab ).`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("4");
@@ -333,10 +340,11 @@ ENDSELECT.`;
       FOR ALL ENTRIES IN lt_fae
       WHERE msgnr = lt_fae-msgnr.
     WRITE sy-dbcnt.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
@@ -358,10 +366,11 @@ SELECT * FROM t100 INTO TABLE lt_t100
   AND arbgb = lt_fae-arbgb.
 WRITE sy-dbcnt.
 WRITE lines( lt_t100 ).`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("00");
@@ -376,10 +385,11 @@ SELECT * FROM t100 INTO TABLE lt_t100
   FOR ALL ENTRIES IN lt_msgnr
   WHERE msgnr = lt_msgnr-table_line.
 WRITE sy-dbcnt.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
@@ -395,10 +405,11 @@ select * from t100
          for all entries in lt_msgnr
          where msgnr = lt_msgnr-table_line.
 WRITE sy-dbcnt.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
@@ -409,10 +420,11 @@ WRITE sy-dbcnt.`;
     DATA ls_result TYPE t100.
     SELECT SINGLE * FROM t100 INTO ls_result.
     WRITE ls_result-text.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zescape.msag.xml", contents: msag_escape}]);
+      {filename: "zescape.msag.xml", contents: msag_escape}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get().trimEnd()).to.equal("FOO 'HELLO' bar");
@@ -423,10 +435,11 @@ WRITE sy-dbcnt.`;
     DATA ls_result TYPE t100.
     SELECT SINGLE arbgb msgnr text FROM t100 INTO CORRESPONDING FIELDS OF ls_result.
     WRITE ls_result-arbgb.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get().trimEnd()).to.equal("ZAG_UNIT_TEST");
@@ -441,10 +454,11 @@ foo-arbgb = 'ZAG_UNIT_TEST'.
 DATA ls_result TYPE t100.
 SELECT SINGLE * FROM t100 INTO ls_result WHERE arbgb = foo-arbgb.
 ASSERT sy-subrc = 0.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
@@ -454,10 +468,11 @@ ASSERT sy-subrc = 0.`;
     DATA lt_t100 TYPE STANDARD TABLE OF t100.
     SELECT * FROM t100 INTO TABLE lt_t100 UP TO 5 ROWS ORDER BY PRIMARY KEY.
     WRITE sy-dbcnt.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -470,10 +485,11 @@ ASSERT sy-subrc = 0.`;
     lv_count = 5.
     SELECT * FROM t100 INTO TABLE lt_t100 UP TO lv_count ROWS ORDER BY PRIMARY KEY.
     WRITE sy-dbcnt.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -492,9 +508,10 @@ ASSERT sy-subrc = 0.`;
 
     SELECT SINGLE * FROM t100 INTO ls_t100 WHERE arbgb = 'HELLO'.
     ASSERT sy-subrc = 0.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
-      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
@@ -510,9 +527,10 @@ ASSERT sy-subrc = 0.`;
     SELECT SINGLE * FROM t100 INTO ls_t100.
     ASSERT sy-subrc = 0.
     ASSERT ls_t100-arbgb = '"'.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
-      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
@@ -534,10 +552,11 @@ ASSERT sy-subrc = 0.`;
 
     SELECT * FROM t100 INTO TABLE lt_t100 WHERE arbgb IN lt_range.
     WRITE / sy-dbcnt.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2\n2");
@@ -553,10 +572,11 @@ ASSERT sy-subrc = 0.`;
       WHERE (lv_where)
       ORDER BY PRIMARY KEY.
     WRITE / sy-dbcnt.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -586,9 +606,10 @@ ASSERT sy-subrc = 0.`;
     DELETE FROM t100 WHERE arbgb = 'HELLO'.
     ASSERT sy-subrc = 4.
     ASSERT sy-dbcnt = 0.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
-      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
@@ -598,10 +619,11 @@ ASSERT sy-subrc = 0.`;
     DATA ls_t100 TYPE t100.
     SELECT SINGLE * FROM t100 INTO ls_t100 WHERE arbgb LIKE 'Z%' ESCAPE '#'.
     WRITE sy-dbcnt.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
@@ -612,10 +634,11 @@ ASSERT sy-subrc = 0.`;
     DATA lv_count TYPE i.
     SELECT COUNT(*) FROM t100 INTO lv_count.
     WRITE lv_count.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -630,10 +653,11 @@ ASSERT sy-subrc = 0.`;
     ls_t100-text = '"'.
     MODIFY t100 FROM ls_t100.
     WRITE sy-subrc.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("00");
@@ -649,10 +673,11 @@ ASSERT sy-subrc = 0.`;
 
     SELECT COUNT(*) FROM t100 INTO lv_count.
     WRITE lv_count.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("3");
@@ -663,10 +688,11 @@ ASSERT sy-subrc = 0.`;
     DATA lv_msgnr TYPE t100-msgnr.
     SELECT SINGLE t100~msgnr FROM t100 INTO lv_msgnr.
     WRITE sy-dbcnt.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
@@ -680,10 +706,11 @@ ASSERT sy-subrc = 0.`;
       ON t100~msgnr = foo~msgnr
       INTO lv_msgnr.
     WRITE sy-dbcnt.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
@@ -696,10 +723,11 @@ ASSERT sy-subrc = 0.`;
       INNER JOIN t100 AS foo
       ON t100~msgnr = foo~msgnr
       AND t100~msgnr = lv_msgnr.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
@@ -708,10 +736,11 @@ ASSERT sy-subrc = 0.`;
     const code = `
     DATA foo TYPE zt111.
     SELECT SINGLE * FROM zt111 INTO foo.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "zt111.tabl.xml", contents: zt111},
-      {filename: "zt222.tabl.xml", contents: zt222}]);
+      {filename: "zt222.tabl.xml", contents: zt222}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
@@ -721,10 +750,11 @@ ASSERT sy-subrc = 0.`;
     DATA ls_result TYPE t100.
     SELECT SINGLE * FROM t100 INTO ls_result WHERE text LIKE 'h%'.
     WRITE ls_result-text.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get().trimEnd()).to.equal("hello world");
@@ -745,9 +775,10 @@ APPEND INITIAL LINE TO tab.
 SELECT * FROM t100 INTO TABLE result
   FOR ALL ENTRIES IN <foo>
   WHERE msgnr = <foo>-msgnr.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
-      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
@@ -759,9 +790,10 @@ FIELD-SYMBOLS <fs> TYPE t100.
 ASSIGN row TO <fs>.
 SELECT * INTO CORRESPONDING FIELDS OF <fs> FROM t100.
 ENDSELECT.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
-      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
@@ -770,9 +802,10 @@ ENDSELECT.`;
     const code = `
 TABLES t100.
 CLEAR t100.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
-      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
@@ -782,9 +815,10 @@ CLEAR t100.`;
 DATA ls_t100 TYPE t100.
 SELECT * FROM t100 INTO ls_t100 UP TO 1 ROWS ORDER BY msgnr DESCENDING.
 ENDSELECT.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
-      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
@@ -794,9 +828,10 @@ ENDSELECT.`;
 DATA ls_t100 TYPE t100.
 SELECT * FROM t100 INTO ls_t100 UP TO 1 ROWS ORDER BY msgnr ASCENDING.
 ENDSELECT.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
-      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
@@ -806,11 +841,11 @@ ENDSELECT.`;
 UPDATE t100 SET text = 'sdf' WHERE msgnr = '123'.
 WRITE / sy-dbcnt.
 WRITE / sy-subrc.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test},
-    ]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1\n0");
@@ -822,11 +857,12 @@ DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
 DATA lv TYPE string.
 SELECT * FROM t100 INTO TABLE tab WHERE (lv).
 WRITE sy-dbcnt.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test},
-    ]);
+    ];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -837,10 +873,11 @@ WRITE sy-dbcnt.`;
     DATA ls_result TYPE t100.
     SELECT SINGLE * FROM t100 INTO ls_result WHERE arbgb eq 'ZAG_UNIT_TEST'.
     WRITE sy-subrc.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0");
@@ -851,10 +888,11 @@ WRITE sy-dbcnt.`;
     DATA ls_result TYPE t100.
     SELECT SINGLE * FROM t100 INTO ls_result WHERE arbgb EQ 'ZAG_UNIT_TEST'.
     WRITE sy-subrc.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0");
@@ -882,10 +920,11 @@ ENDCLASS.
 
 START-OF-SELECTION.
   foo=>run( ).`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0");
@@ -904,10 +943,11 @@ SELECT arbgb
 LOOP AT lt_data INTO lv_data.
   WRITE / lv_data.
 ENDLOOP.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("ZAG_UNIT_TEST       \nZAG_UNIT_TEST       ");
@@ -924,10 +964,11 @@ ASSIGN val TO <fs>.
 lv_bar = 'arbgb = <fs>'.
 SELECT SINGLE * FROM t100 INTO ls_t100 WHERE (lv_bar).
 WRITE sy-dbcnt.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
@@ -948,10 +989,11 @@ SELECT *
   FOR ALL ENTRIES IN data_work-it_content
   WHERE arbgb EQ data_work-it_content-arbgb.
 WRITE sy-dbcnt.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -971,10 +1013,11 @@ SELECT * FROM t100
   WHERE sprsl = 'E'
   AND arbgb = input-table_line.
 WRITE sy-dbcnt.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -992,10 +1035,11 @@ SELECT arbgb
   UP TO 1 ROWS.
 ENDSELECT.
 WRITE res-arbgb.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get().trimEnd()).to.equal("ZAG_UNIT_TEST");
@@ -1012,10 +1056,11 @@ SELECT SINGLE arbgb
   FROM t100
   WHERE arbgb = \`ZAG_UNIT_TEST\`.
 WRITE res-arbgb.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get().trimEnd()).to.equal("ZAG_UNIT_TEST");
@@ -1026,10 +1071,11 @@ WRITE res-arbgb.`;
 DATA hashed TYPE HASHED TABLE OF t100 WITH UNIQUE KEY sprsl arbgb msgnr.
 SELECT * FROM t100 INTO TABLE hashed.
 WRITE sy-dbcnt.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -1048,10 +1094,11 @@ WRITE sy-dbcnt.`;
       FOR ALL ENTRIES IN lt_fae
       WHERE msgnr = lt_fae-msgnr.
     WRITE sy-dbcnt.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
@@ -1065,10 +1112,11 @@ WRITE sy-dbcnt.`;
     SELECT SINGLE arbgb text INTO (lv_arbgb, lv_text) FROM t100.
     WRITE / lv_arbgb.
     WRITE / lv_text.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get().trimEnd()).to.equal("ZAG_UNIT_TEST       \nhello world");
@@ -1082,10 +1130,11 @@ WRITE sy-dbcnt.`;
     APPEND INITIAL LINE TO tab.
     INSERT (lv_name) FROM TABLE tab.
     WRITE sy-subrc.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get().trimEnd()).to.equal("0");
@@ -1100,10 +1149,11 @@ SELECT arbgb msgnr
     PACKAGE SIZE 1000.
   WRITE / lines( lt ).
 ENDSELECT.`;
-    const js = await runFiles(abap, [
+    const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}]);
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    const js = await runFiles(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get().trimEnd()).to.equal("2");
