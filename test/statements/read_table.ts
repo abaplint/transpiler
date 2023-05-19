@@ -761,7 +761,7 @@ ASSERT key_name = |foo|.`;
     await f(abap);
   });
 
-  it.only("READ TABLE, hashed, first name", async () => {
+  it("READ TABLE, hashed, first name", async () => {
     const code = `
 TYPES: BEGIN OF ty_row,
          name TYPE c LENGTH 30,
