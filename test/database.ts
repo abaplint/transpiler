@@ -105,10 +105,9 @@ describe("Top level tests, Database", () => {
     const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get().trimEnd()).to.equal("WORLD");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("WORLD");
+    });
   });
 
   it("test, DELETE", async () => {
@@ -127,11 +126,10 @@ describe("Top level tests, Database", () => {
     const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    const cons = abap.console.get();
-    expect(cons).to.equal("4");
+    await runAllDatabases(abap, files, () => {
+      const cons = abap.console.get();
+      expect(cons).to.equal("4");
+    });
   });
 
   it("SELECT SINGLE, WHERE char constant", async () => {

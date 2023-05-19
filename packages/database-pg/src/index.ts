@@ -60,8 +60,26 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     throw new Error("Method not implemented.");
   }
 
-  public async delete(_options: DB.DeleteDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
-    throw new Error("Method not implemented.");
+  public async delete(options: DB.DeleteDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
+    const sql = `DELETE FROM "${options.table}" WHERE ${options.where}`;
+
+    let subrc = 0;
+    let dbcnt = 0;
+    try {
+      if (this.trace === true) {
+        console.log(sql);
+      }
+
+      const res = await this.pool!.query(sql);
+      dbcnt = res.rowCount;
+      if (dbcnt === 0) {
+        subrc = 4;
+      }
+    } catch (error) {
+      subrc = 4;
+    }
+
+    return {subrc, dbcnt};
   }
 
   public async update(options: DB.UpdateDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
