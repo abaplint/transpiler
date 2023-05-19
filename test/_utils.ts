@@ -37,12 +37,24 @@ export async function runFilesPostgres(abap: ABAP, files: IFile[]) {
   abap.console.clear();
   if (res.databaseSetup.schemas.pg.length > 0) {
     const dbName = "transpiler-" + crypto.randomBytes(10).toString("hex");
-    abap.context.databaseConnections["DEFAULT"] = new PostgresDatabaseClient({database: "postgres"});
+    abap.context.databaseConnections["DEFAULT"] = new PostgresDatabaseClient({
+      user: "postgres",
+      host: "localhost",
+      database: "postgres",
+      password: "postgres",
+      port: 5432,
+    });
     await abap.context.databaseConnections["DEFAULT"].connect();
     await abap.context.databaseConnections["DEFAULT"].execute(`CREATE DATABASE "${dbName}";`);
     await abap.context.databaseConnections["DEFAULT"].disconnect();
 
-    abap.context.databaseConnections["DEFAULT"] = new PostgresDatabaseClient({database: dbName});
+    abap.context.databaseConnections["DEFAULT"] = new PostgresDatabaseClient({
+      user: "postgres",
+      host: "localhost",
+      database: dbName,
+      password: "postgres",
+      port: 5432,
+    });
     await abap.context.databaseConnections["DEFAULT"].connect();
     await abap.context.databaseConnections["DEFAULT"].execute(res.databaseSetup.schemas.pg);
     await abap.context.databaseConnections["DEFAULT"].execute(res.databaseSetup.insert);

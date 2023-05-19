@@ -1,23 +1,31 @@
 import {DB} from "@abaplint/runtime";
 import * as pg from "pg";
 
+export type ConnectionSettings = {
+  user: string,
+  host: string,
+  database: string,
+  password: string,
+  port: number,
+};
+
 export class PostgresDatabaseClient implements DB.DatabaseClient {
   public readonly name = "postgres";
-  private readonly database;
+  private readonly config: pg.PoolConfig;
   private readonly trace: boolean | undefined;
   private pool: pg.Pool | undefined;
 
-  public constructor(input: {database: string, trace?: boolean}) {
-    this.database = input.database;
+  public constructor(input: ConnectionSettings & {trace?: boolean}) {
+    this.config = input;
     this.trace = input.trace;
   }
 
   public async connect() {
     this.pool = new pg.Pool({
-      user: "postgres",
-      host: "localhost",
-      database: this.database,
-      password: "postgres",
+      user: this.config.user,
+      host: this.config.host,
+      database: this.config.database,
+      password: this.config.password,
       port: 5432,
     });
   }
