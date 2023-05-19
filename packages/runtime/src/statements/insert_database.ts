@@ -4,7 +4,9 @@ import {ICharacter} from "../types/_character";
 
 export function toValue(value: any) {
   if (typeof value === "string") {
-    return '"' + value.replace(/"/g, "\"\"") + '"';
+    // postgres requires ' for values
+    return "'" + value.replace(/'/g, "''") + "'";
+//    return '"' + value.replace(/"/g, "\"\"") + '"';
   } else {
     return value;
   }

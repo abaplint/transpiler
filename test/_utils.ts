@@ -54,6 +54,7 @@ export async function runFilesPostgres(abap: ABAP, files: IFile[]) {
       database: dbName,
       password: "postgres",
       port: 5432,
+//      trace: true,
     });
     await abap.context.databaseConnections["DEFAULT"].connect();
     await abap.context.databaseConnections["DEFAULT"].execute(res.databaseSetup.schemas.pg);

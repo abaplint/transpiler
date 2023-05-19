@@ -64,8 +64,26 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     throw new Error("Method not implemented.");
   }
 
-  public async update(_options: DB.UpdateDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
-    throw new Error("Method not implemented.");
+  public async update(options: DB.UpdateDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
+    const sql = `UPDATE "${options.table}" SET ${options.set.join(", ")} WHERE ${options.where}`;
+
+    let subrc = 0;
+    let dbcnt = 0;
+    try {
+      if (this.trace === true) {
+        console.log(sql);
+      }
+
+      const res = await this.pool!.query(sql);
+      dbcnt = res.rowCount;
+      if (dbcnt === 0) {
+        subrc = 4;
+      }
+    } catch (error) {
+      subrc = 4;
+    }
+
+    return {subrc, dbcnt};
   }
 
   public async insert(options: DB.InsertDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
@@ -74,6 +92,10 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     let subrc = 0;
     let dbcnt = 0;
     try {
+      if (this.trace === true) {
+        console.log(sql);
+      }
+
       const res = await this.pool!.query(sql);
       dbcnt = res.rowCount;
     } catch (error) {
