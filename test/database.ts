@@ -506,9 +506,9 @@ ASSERT sy-subrc = 0.`;
     const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
+    await runAllDatabases(abap, files, () => {
+      // just check valid js
+    });
   });
 
   it("SELECT, IN", async () => {
@@ -532,10 +532,9 @@ ASSERT sy-subrc = 0.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("2\n2");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2\n2");
+    });
   });
 
   it("SELECT, dynamic WHERE condition, constants", async () => {
@@ -552,10 +551,9 @@ ASSERT sy-subrc = 0.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("2");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2");
+    });
   });
 
   it("DELETE WHERE", async () => {
@@ -585,9 +583,9 @@ ASSERT sy-subrc = 0.`;
     const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
+    await runAllDatabases(abap, files, () => {
+      // just check its valid js
+    });
   });
 
   it("LIKE ESCAPE", async () => {
@@ -599,10 +597,9 @@ ASSERT sy-subrc = 0.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("1");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("1");
+    });
   });
 
   it("INTO simple", async () => {
@@ -614,10 +611,9 @@ ASSERT sy-subrc = 0.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("2");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2");
+    });
   });
 
   it("MODIFY simple", async () => {
