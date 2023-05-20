@@ -291,6 +291,16 @@ export class Traversal {
     return false;
   }
 
+  public isSQLConversion(token: abaplint.Token): string | undefined {
+    const scope = this.findCurrentScopeByToken(token);
+    for (const s of scope?.getData().sqlConversion || []) {
+      if (s.token.getStart().equals(token.getStart())) {
+        return s.fieldName;
+      }
+    }
+    return undefined;
+  }
+
   public findMethodReference(token: abaplint.Token, scope: ISpaghettiScopeNode | undefined):
   undefined | {def: abaplint.Types.MethodDefinition, name: string} {
     let candidate: undefined | {def: abaplint.Types.MethodDefinition, name: string} = undefined;
