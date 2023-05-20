@@ -953,10 +953,9 @@ WRITE sy-dbcnt.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("2");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2");
+    });
   });
 
   it("FOR ALL ENTRIES, duplicate results", async () => {
@@ -977,10 +976,9 @@ WRITE sy-dbcnt.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("2");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2");
+    });
   });
 
   it("SELECT LOOP CORRESPONDING", async () => {
@@ -999,10 +997,9 @@ WRITE res-arbgb.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get().trimEnd()).to.equal("ZAG_UNIT_TEST");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("ZAG_UNIT_TEST");
+    });
   });
 
   it("SINGLE ``", async () => {
@@ -1020,10 +1017,9 @@ WRITE res-arbgb.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get().trimEnd()).to.equal("ZAG_UNIT_TEST");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("ZAG_UNIT_TEST");
+    });
   });
 
   it("SELECT into hashed", async () => {
@@ -1035,10 +1031,9 @@ WRITE sy-dbcnt.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("2");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2");
+    });
   });
 
   it("FOR ALL ENTRIES, into HASHED", async () => {
