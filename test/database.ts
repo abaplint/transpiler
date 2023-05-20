@@ -183,10 +183,9 @@ describe("Top level tests, Database", () => {
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("4");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("4");
+    });
   });
 
   it("SELECT SINGLE, WHERE char variable", async () => {
@@ -200,10 +199,9 @@ describe("Top level tests, Database", () => {
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("0");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("0");
+    });
   });
 
   it("SELECT INTO TABLE, ORDER BY PRIMARY KEY", async () => {
@@ -215,10 +213,9 @@ describe("Top level tests, Database", () => {
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("2");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2");
+    });
   });
 
   it("SELECT INTO TABLE, ORDER BY PRIMARY KEY, dynamic", async () => {
@@ -230,10 +227,9 @@ describe("Top level tests, Database", () => {
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("2");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2");
+    });
   });
 
   it("basic SELECT loop", async () => {
