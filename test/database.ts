@@ -745,9 +745,9 @@ SELECT * FROM t100 INTO TABLE result
     const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
+    await runAllDatabases(abap, files, () => {
+      // just check it compiles and runs
+    });
   });
 
   it("dynamic INTO CORRESPONDING FIELDS OF field symbol", async () => {
@@ -760,9 +760,9 @@ ENDSELECT.`;
     const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
+    await runAllDatabases(abap, files, () => {
+      // just check it compiles and runs
+    });
   });
 
   it("basic TABLES", async () => {
@@ -772,9 +772,9 @@ CLEAR t100.`;
     const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
+    await runAllDatabases(abap, files, () => {
+      // just check it compiles and runs
+    });
   });
 
   it("DESCENDING", async () => {
@@ -785,9 +785,9 @@ ENDSELECT.`;
     const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
+    await runAllDatabases(abap, files, () => {
+      // just check it compiles and runs
+    });
   });
 
   it("ASCENDING", async () => {
