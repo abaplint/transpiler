@@ -695,9 +695,9 @@ ASSERT sy-subrc = 0.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
+    await runAllDatabases(abap, files, () => {
+      // just check it compiles and runs
+    });
   });
 
   it(".INCLUDE with GROUPNAME", async () => {
@@ -708,9 +708,9 @@ ASSERT sy-subrc = 0.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "zt111.tabl.xml", contents: zt111},
       {filename: "zt222.tabl.xml", contents: zt222}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
+    await runAllDatabases(abap, files, () => {
+      // just check it compiles and runs
+    });
   });
 
   it("SELECT LIKE", async () => {
@@ -722,10 +722,9 @@ ASSERT sy-subrc = 0.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get().trimEnd()).to.equal("hello world");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("hello world");
+    });
   });
 
   it("FAE with field symbol", async () => {
