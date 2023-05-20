@@ -6,10 +6,11 @@ import {Chunk} from "../chunk";
 import {SimpleSource3Transpiler} from "./simple_source3";
 import {FieldChainTranspiler} from "./field_chain";
 import {SQLFieldNameTranspiler} from "./sql_field_name";
+import {TranspileTypes} from "../transpile_types";
 
 export class SQLCondTranspiler implements IExpressionTranspiler {
 
-  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal, table?: abaplint.Objects.Table | undefined): Chunk {
     let ret = "";
     for (const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.ExpressionNode
@@ -28,10 +29,10 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
         } else if (c.findDirectExpression(abaplint.Expressions.SQLIn)) {
           ret += this.sqlIn(c, traversal);
         } else {
-          ret += this.basicCondition(c, traversal, traversal.getFilename());
+          ret += this.basicCondition(c, traversal, traversal.getFilename(), table);
         }
       } else if (c instanceof abaplint.Nodes.ExpressionNode) {
-        ret += " " + this.transpile(c, traversal).getCode();
+        ret += " " + this.transpile(c, traversal, table).getCode();
       } else {
         ret += " " + c.concatTokens();
       }
@@ -54,10 +55,11 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
     return ret;
   }
 
-  private basicCondition(c: abaplint.Nodes.ExpressionNode, traversal: Traversal, filename: string): string {
+  private basicCondition(c: abaplint.Nodes.ExpressionNode, traversal: Traversal, filename: string,
+                         table: abaplint.Objects.Table | undefined): string {
     let ret = "";
     if (c.getChildren().length !== 3) {
-      return this.basicConditionNew(c, traversal, filename);
+      return this.basicConditionNew(c, traversal, filename, table);
     }
 
     let fieldName: string | undefined = undefined;
@@ -70,7 +72,7 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
 
     if (fieldName && source && operator === undefined && c.findDirectTokenByText("LIKE")) {
       ret += fieldName + " LIKE ";
-      ret += this.sqlSource(source, traversal, filename);
+      ret += this.sqlSource(source, traversal, filename, table);
       return ret;
     }
 
@@ -85,12 +87,13 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
       op = "<>";
     }
     ret += fieldName + " " + op + " ";
-    ret += this.sqlSource(source, traversal, filename);
+    ret += this.sqlSource(source, traversal, filename, table);
 
     return ret;
   }
 
-  private sqlSource(source: abaplint.Nodes.ExpressionNode, traversal: Traversal, filename: string) {
+  private sqlSource(source: abaplint.Nodes.ExpressionNode, traversal: Traversal, filename: string,
+                    table: abaplint.Objects.Table | undefined) {
     let ret = "";
     const simple = source.findDirectExpression(abaplint.Expressions.SimpleSource3);
     const alias = source.findDirectExpression(abaplint.Expressions.SQLAliasField);
@@ -113,7 +116,11 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
       }
     } else {
       const concat = source.concatTokens();
-      if (concat.startsWith("`")) {
+      const conversionField = traversal.isSQLConversion(source.getFirstToken());
+      if (conversionField) {
+        const field = (table?.parseType(traversal.reg) as abaplint.BasicTypes.StructureType).getComponentByName(conversionField);
+        ret += "'\" + " + new TranspileTypes().toType(field!) + ".set(" + concat + ").get() + \"'";
+      } else if (concat.startsWith("`")) {
         ret += "'" + concat.substring(1, concat.length - 1) + "'";
       } else {
         ret += concat;
@@ -122,7 +129,8 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
     return ret;
   }
 
-  private basicConditionNew(node: abaplint.Nodes.ExpressionNode, traversal: Traversal, filename: string): string {
+  private basicConditionNew(node: abaplint.Nodes.ExpressionNode, traversal: Traversal, filename: string,
+                            table: abaplint.Objects.Table | undefined): string {
     let ret = "";
     for (const child of node.getChildren()) {
       if (ret !== "") {
@@ -133,7 +141,7 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
         ret += new SQLFieldNameTranspiler().transpile(child, traversal).getCode();
       } else if (child.get() instanceof abaplint.Expressions.SQLSource
           && child instanceof abaplint.Nodes.ExpressionNode) {
-        ret += this.sqlSource(child, traversal, filename);
+        ret += this.sqlSource(child, traversal, filename, table);
       } else {
         ret += child.concatTokens();
       }

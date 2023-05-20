@@ -22,11 +22,17 @@ export class SQLFromTranspiler implements IExpressionTranspiler {
         chunk.appendChunk(new SQLFromSourceTranspiler().transpile(c, traversal));
       } else {
         if (c.findFirstExpression(abaplint.Expressions.Dynamic)) {
-          chunk.appendString(c.concatTokens() + " ");
+          let concat = c.concatTokens();
+          if (concat.startsWith("'")) {
+            // no escaping needed, guess its not possible to have table names with single or double quote part of name
+            concat = "\\\"" + concat.substring(1, concat.length - 1) + "\\\"";
+          }
+          chunk.appendString(concat + " ");
         } else if (c.concatTokens().includes("/")) {
-          chunk.appendString("'" + c.concatTokens() + "' ");
+          chunk.appendString("\\\"" + c.concatTokens() + "\\\" ");
         } else {
-          chunk.appendString(c.concatTokens() + " ");
+          const concat = c.concatTokens();
+          chunk.appendString(concat + " ");
         }
       }
     }

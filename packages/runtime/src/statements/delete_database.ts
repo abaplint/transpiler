@@ -1,6 +1,7 @@
 import {Context} from "../context";
 import {FieldSymbol, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
+import {toValue} from "./insert_database";
 
 export interface IDeleteDatabaseOptions {
   from?: Structure | FieldSymbol,
@@ -35,8 +36,7 @@ export class DeleteDatabase {
 
       const structure = options.from.get();
       for (const k of Object.keys(structure)) {
-        // todo, integers should not be surrounded by '"'?
-        const str = k + ' = "' + structure[k].get() + '"';
+        const str = k + " = " + toValue(structure[k].get());
         where.push(str);
       }
       where = where.join(" AND ");

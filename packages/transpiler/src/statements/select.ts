@@ -2,7 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {FieldChainTranspiler, SourceTranspiler, SQLFieldTranspiler, SQLSourceTranspiler} from "../expressions";
+import {FieldChainTranspiler, SourceTranspiler, SQLCondTranspiler, SQLFieldTranspiler, SQLSourceTranspiler} from "../expressions";
 import {UniqueIdentifier} from "../unique_identifier";
 import {SQLFromTranspiler} from "../expressions/sql_from";
 
@@ -43,6 +43,8 @@ export class SelectTranspiler implements IStatementTranspiler {
       select += new SQLFromTranspiler().transpile(from, traversal).getCode();
     }
 
+    const {table, keys} = this.findTable(node, traversal);
+
     let where: abaplint.Nodes.ExpressionNode | undefined = undefined;
     for(const sqlCond of node.findAllExpressions(abaplint.Expressions.SQLCond)){
       if(this.isWhereExpression(node, sqlCond)){
@@ -50,7 +52,7 @@ export class SelectTranspiler implements IStatementTranspiler {
       }
     }
     if (where) {
-      select += "WHERE " + traversal.traverse(where).getCode() + " ";
+      select += "WHERE " + new SQLCondTranspiler().transpile(where, traversal, table).getCode() + " ";
     }
 
     const upTo = node.findFirstExpression(abaplint.Expressions.SQLUpTo);
@@ -90,7 +92,6 @@ export class SelectTranspiler implements IStatementTranspiler {
     }
 
     let extra = "";
-    const keys = this.findKeys(node, traversal);
     if (keys.length > 0) {
       extra = `, primaryKey: ${JSON.stringify(keys)}`;
     }
@@ -127,16 +128,17 @@ export class SelectTranspiler implements IStatementTranspiler {
     }
   }
 
-  private findKeys(node: abaplint.Nodes.StatementNode, traversal: Traversal): string[] {
+  private findTable(node: abaplint.Nodes.StatementNode, traversal: Traversal): {table: abaplint.Objects.Table | undefined, keys: string[]} {
     let keys: string[] = [];
+    let tabl: abaplint.Objects.Table | undefined = undefined;
     const from = node.findAllExpressions(abaplint.Expressions.SQLFromSource).map(e => e.concatTokens());
     if (from.length === 1) {
-      const tabl = traversal.findTable(from[0]);
+      tabl = traversal.findTable(from[0]);
       if (tabl) {
         keys = tabl.listKeys(traversal.reg).map(k => k.toLowerCase());
       }
     }
-    return keys;
+    return {table: tabl, keys};
   }
 
   private isWhereExpression(node: abaplint.Nodes.StatementNode, expression: abaplint.Nodes.ExpressionNode): boolean {

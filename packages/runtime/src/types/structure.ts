@@ -43,7 +43,7 @@ export class Structure {
     if (input instanceof FieldSymbol) {
       this.set(input.getPointer());
     } else if (input instanceof Table) {
-      throw "Structure, input is a table";
+      throw new Error("Structure, input is a table");
     } else if (input instanceof Structure) {
       const obj = input.get();
       const keys1 = Object.keys(obj);

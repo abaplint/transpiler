@@ -4,7 +4,9 @@ import {ICharacter} from "../types/_character";
 
 export function toValue(value: any) {
   if (typeof value === "string") {
-    return '"' + value.replace(/"/g, "\"\"") + '"';
+    // postgres requires ' for values
+    return "'" + value.replace(/'/g, "''") + "'";
+//    return '"' + value.replace(/"/g, "\"\"") + '"';
   } else {
     return value;
   }
@@ -56,7 +58,7 @@ export class InsertDatabase {
     }
 
     if (typeof table !== "string") {
-      table = table.get().trimEnd();
+      table = table.get().trimEnd().toLowerCase();
     }
 
     const {subrc, dbcnt} = await this.context.defaultDB().insert({table, columns, values});

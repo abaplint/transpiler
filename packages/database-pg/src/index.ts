@@ -1,23 +1,31 @@
 import {DB} from "@abaplint/runtime";
 import * as pg from "pg";
 
+export type ConnectionSettings = {
+  user: string,
+  host: string,
+  database: string,
+  password: string,
+  port: number,
+};
+
 export class PostgresDatabaseClient implements DB.DatabaseClient {
   public readonly name = "postgres";
-  private readonly database;
+  private readonly config: pg.PoolConfig;
   private readonly trace: boolean | undefined;
   private pool: pg.Pool | undefined;
 
-  public constructor(input: {database: string, trace?: boolean}) {
-    this.database = input.database;
+  public constructor(input: ConnectionSettings & {trace?: boolean}) {
+    this.config = input;
     this.trace = input.trace;
   }
 
   public async connect() {
     this.pool = new pg.Pool({
-      user: "postgres",
-      host: "localhost",
-      database: this.database,
-      password: "postgres",
+      user: this.config.user,
+      host: this.config.host,
+      database: this.config.database,
+      password: this.config.password,
       port: 5432,
     });
   }
@@ -52,12 +60,48 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     throw new Error("Method not implemented.");
   }
 
-  public async delete(_options: DB.DeleteDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
-    throw new Error("Method not implemented.");
+  public async delete(options: DB.DeleteDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
+    const sql = `DELETE FROM "${options.table}" WHERE ${options.where}`;
+
+    let subrc = 0;
+    let dbcnt = 0;
+    try {
+      if (this.trace === true) {
+        console.log(sql);
+      }
+
+      const res = await this.pool!.query(sql);
+      dbcnt = res.rowCount;
+      if (dbcnt === 0) {
+        subrc = 4;
+      }
+    } catch (error) {
+      subrc = 4;
+    }
+
+    return {subrc, dbcnt};
   }
 
-  public async update(_options: DB.UpdateDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
-    throw new Error("Method not implemented.");
+  public async update(options: DB.UpdateDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
+    const sql = `UPDATE "${options.table}" SET ${options.set.join(", ")} WHERE ${options.where}`;
+
+    let subrc = 0;
+    let dbcnt = 0;
+    try {
+      if (this.trace === true) {
+        console.log(sql);
+      }
+
+      const res = await this.pool!.query(sql);
+      dbcnt = res.rowCount;
+      if (dbcnt === 0) {
+        subrc = 4;
+      }
+    } catch (error) {
+      subrc = 4;
+    }
+
+    return {subrc, dbcnt};
   }
 
   public async insert(options: DB.InsertDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
@@ -66,6 +110,10 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     let subrc = 0;
     let dbcnt = 0;
     try {
+      if (this.trace === true) {
+        console.log(sql);
+      }
+
       const res = await this.pool!.query(sql);
       dbcnt = res.rowCount;
     } catch (error) {

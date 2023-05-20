@@ -22,7 +22,7 @@ export class UpdateDatabaseTranspiler implements IStatementTranspiler {
       for (const set of sets) {
         const name = set.findDirectExpression(abaplint.Expressions.SQLFieldName)?.concatTokens();
         const source = traversal.traverse(set.findDirectExpression(abaplint.Expressions.SQLSource));
-        s.push("\"'" + name + "' = '\" + " + source.getCode() + ".get() + \"'\"");
+        s.push("\"\\\"" + name + "\\\" = '\" + " + source.getCode() + ".get() + \"'\"");
       }
       options.push(`"set": [${s.join(",")}]`);
     }
