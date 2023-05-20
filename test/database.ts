@@ -24,11 +24,6 @@ async function runAllDatabases(abap: ABAP,
   }
 }
 
-/** @deprecated use runAllDatabases() instead */
-async function runFiles(abap: ABAP, files: IFile[]) {
-  return runRilesSqlite(abap, files);
-}
-
 /////////////////////////////////////////////////////
 
 describe("Top level tests, Database", () => {
@@ -1087,10 +1082,9 @@ WRITE sy-dbcnt.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get().trimEnd()).to.equal("0");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("0");
+    });
   });
 
   it("SELECT LOOP PACKAGE SIZE", async () => {
@@ -1106,10 +1100,9 @@ ENDSELECT.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get().trimEnd()).to.equal("2");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("2");
+    });
   });
 
 });

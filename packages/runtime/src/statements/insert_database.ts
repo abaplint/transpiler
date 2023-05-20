@@ -58,7 +58,7 @@ export class InsertDatabase {
     }
 
     if (typeof table !== "string") {
-      table = table.get().trimEnd();
+      table = table.get().trimEnd().toLowerCase();
     }
 
     const {subrc, dbcnt} = await this.context.defaultDB().insert({table, columns, values});

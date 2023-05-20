@@ -28,7 +28,7 @@ export class InsertDatabaseTranspiler implements IStatementTranspiler {
       options.push(`"table": ` + tvalues.getCode());
     }
 
-    return new Chunk(`await abap.statements.insertDatabase(${table.getCode()}, {${options.join(", ")}});`);
+    return new Chunk(`await abap.statements.insertDatabase(${table.getCode().toLowerCase()}, {${options.join(", ")}});`);
   }
 
 }
