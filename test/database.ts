@@ -629,10 +629,9 @@ ASSERT sy-subrc = 0.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("00");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("00");
+    });
   });
 
   it("INSERT FROM TABLE", async () => {
@@ -649,10 +648,9 @@ ASSERT sy-subrc = 0.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("3");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("3");
+    });
   });
 
   it("tilde", async () => {
@@ -664,10 +662,9 @@ ASSERT sy-subrc = 0.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("1");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("1");
+    });
   });
 
   it("inner join", async () => {
@@ -682,10 +679,9 @@ ASSERT sy-subrc = 0.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("1");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("1");
+    });
   });
 
   it("inner join with variable", async () => {
