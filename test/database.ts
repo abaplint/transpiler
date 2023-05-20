@@ -418,10 +418,9 @@ WRITE sy-dbcnt.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get().trimEnd()).to.equal("ZAG_UNIT_TEST");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("ZAG_UNIT_TEST");
+    });
   });
 
   it("SELECT WHERE value from structure", async () => {
@@ -437,9 +436,9 @@ ASSERT sy-subrc = 0.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
+    await runAllDatabases(abap, files, () => {
+      // just check its valid js
+    });
   });
 
   it("INTO TABLE UP TO ORDER BY", async () => {
@@ -451,10 +450,9 @@ ASSERT sy-subrc = 0.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("2");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2");
+    });
   });
 
   it("INTO TABLE UP TO ORDER BY, var", async () => {
@@ -468,10 +466,9 @@ ASSERT sy-subrc = 0.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("2");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2");
+    });
   });
 
   it("INSERT FROM", async () => {
@@ -490,9 +487,9 @@ ASSERT sy-subrc = 0.`;
     const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
+    await runAllDatabases(abap, files, () => {
+      // just check valid js
+    });
   });
 
   it("INSERT FROM, escape ampersand", async () => {
