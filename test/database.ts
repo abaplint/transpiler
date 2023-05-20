@@ -1053,10 +1053,9 @@ WRITE sy-dbcnt.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("1");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("1");
+    });
   });
 
   it("SELECT into list of basic", async () => {
@@ -1071,10 +1070,9 @@ WRITE sy-dbcnt.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    const js = await runFiles(abap, files);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get().trimEnd()).to.equal("ZAG_UNIT_TEST       \nhello world");
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("ZAG_UNIT_TEST       \nhello world");
+    });
   });
 
   it("INSERT dynamic", async () => {
