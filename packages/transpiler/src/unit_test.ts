@@ -47,7 +47,7 @@ export async function initializeABAP() {\n`;
     return filename.replace(/\//g, "%23");
   }
 
-  public unitTestScriptOpen(reg: abaplint.IRegistry, _skip?: TestMethodList, _only?: TestMethodList): string {
+  public unitTestScriptOpen(reg: abaplint.IRegistry, _skip?: TestMethodList): string {
     let ret = `/* eslint-disable curly */
 import fs from "fs";
 import path from "path";
@@ -108,7 +108,7 @@ run().then(() => {
     return ret;
   }
 
-  public unitTestScript(reg: abaplint.IRegistry, skip?: TestMethodList, _only?: TestMethodList): string {
+  public unitTestScript(reg: abaplint.IRegistry, skip?: TestMethodList): string {
     let ret = `/* eslint-disable curly */
 import fs from "fs";
 import path from "path";

@@ -55,8 +55,8 @@ export interface ITranspilerOptions {
   skipConstants?: boolean;
   /** sets behavior for unknown types, either fail at compile- or run-time */
   unknownTypes?: "compileError" | "runtimeError";
+  /** list of unit tests to skip */
   skip?: TestMethodList;
-  only?: TestMethodList;
   /** extra setup script to be executed during initialization */
   extraSetup?: string;
   /** list of keywords to rename, if not supplied default will be used */

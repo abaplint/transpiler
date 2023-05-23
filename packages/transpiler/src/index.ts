@@ -46,8 +46,8 @@ export class Transpiler {
 
     const output: IOutput = {
       objects: [],
-      unitTestScript: new UnitTest().unitTestScript(reg, this.options?.skip, this.options?.only),
-      unitTestScriptOpen: new UnitTest().unitTestScriptOpen(reg, this.options?.skip, this.options?.only),
+      unitTestScript: new UnitTest().unitTestScript(reg, this.options?.skip),
+      unitTestScriptOpen: new UnitTest().unitTestScriptOpen(reg, this.options?.skip),
       initializationScript: new UnitTest().initializationScript(reg, dbSetup, this.options?.extraSetup),
       initializationScript2: new UnitTest().initializationScript(reg, dbSetup, this.options?.extraSetup, true),
       databaseSetup: dbSetup,
