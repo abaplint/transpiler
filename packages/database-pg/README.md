@@ -1,3 +1,5 @@
-# @abaplint/database-sqlite
+# @abaplint/database-pg
 
-@abaplint/database-sqlite
+@abaplint/database-pg
+
+See https://github.com/abaplint/transpiler for additional information
