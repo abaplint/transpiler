@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/database-pg",
-  "version": "2.7.6",
+  "version": "2.7.7",
   "description": "Transpiler - Postgres driver",
   "main": "./build/index.js",
   "scripts": {
@@ -20,9 +20,9 @@
     "pg": "^8.11.0"
   },
   "devDependencies": {
-    "@types/node": "^20.2.1",
-    "@types/pg": "8.6.6",
-    "@abaplint/runtime": "^2.7.6",
+    "@types/node": "^20.2.3",
+    "@types/pg": "^8.10.1",
+    "@abaplint/runtime": "^2.7.7",
     "typescript": "^5.0.4"
   }
 }
