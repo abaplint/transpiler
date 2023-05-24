@@ -108,6 +108,53 @@ run().then(() => {
     return ret;
   }
 
+  private getSortedTests(reg: abaplint.IRegistry) {
+    const tests: {
+      obj: abaplint.IObject,
+      localClass: string,
+      methods: string[],
+    }[] = [];
+
+    for (const obj of reg.getObjects()) {
+      if (reg.isDependency(obj) || !(obj instanceof abaplint.Objects.Class)) {
+        continue;
+      }
+
+      const hasTestFile = obj.getFiles().some(f => { return f.getFilename().includes(".testclasses."); });
+      if (hasTestFile === false) {
+        continue;
+      }
+
+      for (const file of obj.getABAPFiles()) {
+        for (const def of file.getInfo().listClassDefinitions()) {
+          if (def.isForTesting === false
+              || def.isGlobal === true
+              || def.methods.length === 0
+              || def.isAbstract === true) {
+            // todo, fix, there might be global test methods
+            continue;
+          }
+
+          const methods: string[] = [];
+          for (const m of def.methods) {
+            if (m.isForTesting === false) {
+              continue;
+            }
+            methods.push(m.name);
+          }
+
+          tests.push({
+            obj,
+            localClass: def.name,
+            methods: methods,
+          });
+        }
+      }
+    }
+
+    return tests;
+  }
+
   public unitTestScript(reg: abaplint.IRegistry, skip?: TestMethodList): string {
     let ret = `/* eslint-disable curly */
 import fs from "fs";
@@ -126,6 +173,37 @@ async function run() {
   let meth;
   try {\n`;
 
+    for (const st of this.getSortedTests(reg)) {
+      ret += `// --------------------------------------------\n`;
+      ret += `    clas = unit.addObject("${st.obj.getName()}");\n`;
+      ret += `    {
+        const {${st.localClass}} = await import("./${this.escapeNamespace(st.obj.getName().toLowerCase())}.${st.obj.getType().toLowerCase()}.testclasses.mjs");
+        locl = clas.addTestClass("${st.localClass}");
+        if (${st.localClass}.class_setup) await ${st.localClass}.class_setup();\n`;
+
+      for (const m of st.methods) {
+        const skipThis = (skip || []).some(a => a.object === st.obj.getName() && a.class === st.localClass && a.method === m);
+        if (skipThis) {
+          ret += `  console.log('${st.obj.getName()}: running ${st.localClass}->${m}, skipped');\n`;
+          ret += `  meth = locl.addMethod("${m}");\n`;
+          ret += `  meth.skip();\n`;
+          continue;
+        }
+
+        ret += `      {\n        const test = await (new ${st.localClass}()).constructor_();\n`;
+        ret += `        if (test.setup) await test.setup();\n`;
+        ret += `        console.log("${st.obj.getName()}: running ${st.localClass}->${m}");\n`;
+        ret += `        meth = locl.addMethod("${m}");\n`;
+        ret += `        await test.${m}();\n`;
+        ret += `        meth.pass();\n`;
+        ret += `        if (test.teardown) await test.teardown();\n`;
+        ret += `      }\n`;
+      }
+
+      ret += `      if (${st.localClass}.class_teardown) await ${st.localClass}.class_teardown();\n`;
+      ret += `    }\n`;
+    }
+/*
     for (const obj of reg.getObjects()) {
       if (reg.isDependency(obj) || !(obj instanceof abaplint.Objects.Class)) {
         continue;
@@ -177,6 +255,7 @@ async function run() {
         }
       }
     }
+    */
 
     ret += `// -------------------END-------------------
     fs.writeFileSync(__dirname + path.sep + "_output.xml", unit.xUnitXML());
