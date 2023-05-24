@@ -197,11 +197,9 @@ run().then(() => {
         // if risk and duration are equal, then sort by name
         if (a.obj.getName() < b.obj.getName()) {
           ret = -1;
-        }
-        if (a.obj.getName() > b.obj.getName()) {
+        } else if (a.obj.getName() > b.obj.getName()) {
           ret = 1;
         }
-        ret = 0;
       }
 
       return ret;
