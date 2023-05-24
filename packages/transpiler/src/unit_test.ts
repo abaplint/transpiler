@@ -112,6 +112,8 @@ run().then(() => {
     const tests: {
       obj: abaplint.IObject,
       localClass: string,
+      riskLevel: abaplint.Info.RiskLevel | undefined,
+      duration: abaplint.Info.Duration | undefined,
       methods: string[],
     }[] = [];
 
@@ -146,11 +148,64 @@ run().then(() => {
           tests.push({
             obj,
             localClass: def.name,
+            riskLevel: def.riskLevel,
+            duration: def.duration,
             methods: methods,
           });
         }
       }
     }
+
+    const toNumber = (riskLevel: abaplint.Info.RiskLevel | undefined, duration: abaplint.Info.Duration | undefined): number => {
+      let int = 0;
+      switch (riskLevel) {
+        case abaplint.Info.RiskLevel.harmless:
+          int = 10;
+          break;
+        case abaplint.Info.RiskLevel.critical:
+          int = 20;
+          break;
+        case abaplint.Info.RiskLevel.dangerous:
+          int = 30;
+          break;
+        default:
+          break;
+      }
+
+      switch (duration) {
+        case abaplint.Info.Duration.short:
+          int += 1;
+          break;
+        case abaplint.Info.Duration.medium:
+          int += 2;
+          break;
+        case abaplint.Info.Duration.long:
+          int += 3;
+          break;
+        default:
+          break;
+      }
+      return int;
+    };
+
+    tests.sort((a, b) => {
+      const ai = toNumber(a.riskLevel, a.duration);
+      const bi = toNumber(b.riskLevel, b.duration);
+      let ret = ai - bi;
+
+      if (ret === 0) {
+        // if risk and duration are equal, then sort by name
+        if (a.obj.getName() < b.obj.getName()) {
+          ret = -1;
+        }
+        if (a.obj.getName() > b.obj.getName()) {
+          ret = 1;
+        }
+        ret = 0;
+      }
+
+      return ret;
+    });
 
     return tests;
   }
