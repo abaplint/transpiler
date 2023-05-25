@@ -170,4 +170,38 @@ START-OF-SELECTION.
     expect(js).to.include("].lif$method");
   });
 
+  it.skip("call method, simple parameter table", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS foo IMPORTING val TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD foo.
+    WRITE val.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  TYPES: BEGIN OF abap_parmbind,
+           name  TYPE string,
+           kind  TYPE c LENGTH 1,
+           value TYPE REF TO data,
+         END OF abap_parmbind.
+  TYPES abap_parmbind_tab TYPE HASHED TABLE OF abap_parmbind WITH UNIQUE KEY name.
+
+  DATA tab TYPE abap_parmbind_tab.
+  DATA row LIKE LINE OF tab.
+  row-name = 'VAL'.
+  row-kind = 'E'.
+  GET REFERENCE OF 1 INTO row-value.
+  INSERT row INTO TABLE tab.
+  CALL METHOD lcl=>('FOO') PARAMETER-TABLE tab.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });
