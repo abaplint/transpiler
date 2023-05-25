@@ -1105,7 +1105,7 @@ ENDSELECT.`;
     });
   });
 
-  it.skip("SINGLE star into correpsonding fields of", async () => {
+  it("SINGLE star into CORRESPONDING FIELDS OF", async () => {
     const code = `
 DATA: BEGIN OF res,
         arbgb TYPE t100-arbgb,
