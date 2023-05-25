@@ -170,7 +170,7 @@ START-OF-SELECTION.
     expect(js).to.include("].lif$method");
   });
 
-  it.only("call method, simple parameter table", async () => {
+  it("call method, simple parameter table", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
