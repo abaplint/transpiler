@@ -65,8 +65,4 @@ export interface ITranspilerOptions {
   skipReposrc?: boolean;
   /** ignore source map */
   ignoreSourceMap?: boolean;
-  /** prefix all database operations */
-  databaseSchemaPrefix?: string;
-  /** prefix all database table names with */
-  databaseTablePrefix?: string;
 }
