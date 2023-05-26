@@ -92,4 +92,14 @@ describe("Running Examples - Integer type", () => {
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
+
+  it("negative, sign right", async () => {
+    const code = `
+    DATA int TYPE i.
+    int = '100-'.
+    ASSERT int = -100.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
 });
