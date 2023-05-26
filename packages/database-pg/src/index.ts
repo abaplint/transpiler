@@ -31,9 +31,9 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
         password: this.config.password,
         port: 5432,
       });
-      // cleanup after use
-      this.config.password = "";
     }
+    // cleanup after use
+    this.config.password = "";
   }
 
   public async disconnect(): Promise<void> {
