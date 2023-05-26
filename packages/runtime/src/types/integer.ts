@@ -24,6 +24,9 @@ export class Integer implements INumeric {
     if (typeof value === "number") {
       this.value = Math.round(value);
     } else if (typeof value === "string") {
+      if (value.endsWith("-")) {
+        value = "-" + value.substring(0, value.length - 1);
+      }
       if (value.trim().length === 0) {
         value = "0";
       } else if (digits.test(value) === false) {

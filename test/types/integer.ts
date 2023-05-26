@@ -93,7 +93,7 @@ describe("Running Examples - Integer type", () => {
     await f(abap);
   });
 
-  it.only("negative, sign right", async () => {
+  it("negative, sign right", async () => {
     const code = `
     DATA int TYPE i.
     int = '100-'.
