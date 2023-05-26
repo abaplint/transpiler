@@ -20,14 +20,18 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     this.trace = input.trace;
   }
 
-  public async connect() {
-    this.pool = new pg.Pool({
-      user: this.config.user,
-      host: this.config.host,
-      database: this.config.database,
-      password: this.config.password,
-      port: 5432,
-    });
+  public async connect(pool?: pg.Pool) {
+    if (pool) {
+      this.pool = pool;
+    } else {
+      this.pool = new pg.Pool({
+        user: this.config.user,
+        host: this.config.host,
+        database: this.config.database,
+        password: this.config.password,
+        port: 5432,
+      });
+    }
   }
 
   public async disconnect(): Promise<void> {
