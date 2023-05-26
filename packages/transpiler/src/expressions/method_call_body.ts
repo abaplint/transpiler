@@ -27,7 +27,7 @@ export class MethodCallBodyTranspiler implements IExpressionTranspiler {
       } else {
         ret.appendChunk(traversal.traverse(c));
         if (pt === true) {
-          ret.appendString(".array().reduce((a, v) => ({ ...a, [v.get().name.get().toLowerCase()]: v.get().value.dereference()}), {})");
+          ret.appendString(".array().reduce((a, v) => ({ ...a, [v.get().name.get().toLowerCase().trimEnd()]: v.get().value.dereference()}), {})");
         }
       }
     }

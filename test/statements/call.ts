@@ -185,7 +185,7 @@ ENDCLASS.
 
 START-OF-SELECTION.
   TYPES: BEGIN OF abap_parmbind,
-           name  TYPE string,
+           name  TYPE c LENGTH 30,
            kind  TYPE c LENGTH 1,
            value TYPE REF TO data,
          END OF abap_parmbind.
