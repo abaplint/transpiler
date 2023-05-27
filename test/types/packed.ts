@@ -12,7 +12,7 @@ async function run(contents: string) {
 describe("Running Examples - Packed type", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("initial value", async () => {

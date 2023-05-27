@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Running Examples - Structure type", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("Move, non matching columns", async () => {

@@ -10,7 +10,7 @@ async function run(contents: string) {
 describe("Running statements - general", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("ASSERTs, left hand and right hand, none should fail", async () => {

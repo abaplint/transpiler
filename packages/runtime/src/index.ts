@@ -18,6 +18,10 @@ import {MemoryConsole} from "./console/memory_console";
 
 export {UnitTestResult, RFC, types, DB, MemoryConsole};
 
+export type RuntimeOptions = {
+  console?: Console
+};
+
 export class ABAP {
 // global objects
   public FunctionModules: {[name: string]: any} = {};
@@ -44,9 +48,9 @@ export class ABAP {
 
   public readonly context: Context;
 
-  public constructor(console?: Console) {
+  public constructor(input?: RuntimeOptions) {
     this.context = new Context();
-    this.console = console ? console : new StandardOutConsole();
+    this.console = input?.console ? input?.console : new StandardOutConsole();
     this.context.console = this.console;
 
     this.statements = new Statements(this.context);

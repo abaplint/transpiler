@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Running Examples - Data reference", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("set data reference from data reference", async () => {

@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Running code structure - Class", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("Class, simple method call", async () => {

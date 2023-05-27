@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Running statements - DATA", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("DATA, with BEGIN OF", async () => {

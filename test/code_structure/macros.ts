@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Running code structure - Macros", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
 // this is tricky, the foo1 and foo2 method calls will have identical virtual positions

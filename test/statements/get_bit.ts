@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Running statements - GET BIT", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("GET BIT", async () => {

@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Builtin functions - count_any_of", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("test 1", async () => {

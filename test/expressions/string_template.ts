@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Running expressions - String templates", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("Output TIMESTAMP = ISO", async () => {

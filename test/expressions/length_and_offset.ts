@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Running expressions - Length and offset", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("Offset +1", async () => {

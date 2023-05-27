@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Builtin functions - numofchar", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("Builtin numerical: numofchar", async () => {

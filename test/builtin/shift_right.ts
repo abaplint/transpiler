@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Builtin functions - shift_right", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("basic shift_right()", async () => {

@@ -12,7 +12,7 @@ async function run(contents: string) {
 describe("Running Examples - Internal table type", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("Basic, non sorted", async () => {

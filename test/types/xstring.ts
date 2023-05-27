@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Running Examples - xstring type", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("set from float, 1", async () => {

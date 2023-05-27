@@ -10,7 +10,7 @@ async function run(contents: string) {
 describe("Running statements - TRY", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("TRY without CATCH", async () => {
