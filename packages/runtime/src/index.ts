@@ -19,7 +19,16 @@ import {MemoryConsole} from "./console/memory_console";
 export {UnitTestResult, RFC, types, DB, MemoryConsole};
 
 export type RuntimeOptions = {
-  console?: Console
+  console?: Console,
+  database?: {
+    /* prefix all operations with schema*/
+    schemaPrefix?: string,
+    /* prefix all database tables with string */
+    tablePrefix?: string,
+    /* map field names to case sensitive, postgres is case sensitive, and ABAP
+       can have special characters in table names, "field" must be in lower case */
+    fieldNameMap?: {[table: string]: {[field: string]: string}},
+  },
 };
 
 export class ABAP {
