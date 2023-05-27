@@ -63,8 +63,16 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
       target.assign(new Character(1, {qualifiedName: "ABAP_BOOL", ddicName: "ABAP_BOOL"}));
     } else if (options.name.trimEnd() === "STRING") {
       target.assign(new String());
+    } else if (options.name.trimEnd() === "XSTRING") {
+      target.assign(new XString());
     } else if (options.name.trimEnd() === "I") {
       target.assign(new Integer());
+    } else if (options.name.trimEnd() === "T") {
+      target.assign(new Time());
+    } else if (options.name.trimEnd() === "D") {
+      target.assign(new Date());
+    } else if (options.name.trimEnd() === "F") {
+      target.assign(new Float());
     } else {
       throwError("CX_SY_CREATE_DATA_ERROR");
     }
