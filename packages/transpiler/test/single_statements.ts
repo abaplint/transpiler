@@ -180,7 +180,7 @@ describe("Single statements", () => {
     {abap: "SELECT * FROM t100 INTO TABLE lt_result WHERE msgnr = '123'.",
       js: `await abap.statements.select(lt_result, {select: "SELECT * FROM " + abap.dbo.schemaPrefix + "\\"" + abap.dbo.tablePrefix + "t100\\" WHERE msgnr = '123'"});`},
     {abap: "SELECT * FROM (mv_table) INTO TABLE lt_tab.",
-      js: `await abap.statements.select(lt_tab, {select: "SELECT * FROM " + abap.dbo.schemaPrefix + "\\"" + abap.dbo.tablePrefix + "" + mv_table.get() + "\\""});`},
+      js: `await abap.statements.select(lt_tab, {select: "SELECT * FROM " + abap.dbo.schemaPrefix + "\\"" + abap.dbo.tablePrefix + "" + mv_table.get().trimEnd().toLowerCase() + "\\""});`},
     {abap: "SELECT SINGLE * FROM t100 INTO ls_result WHERE arbgb = lv_arbgb.",
       js: `await abap.statements.select(ls_result, {select: "SELECT * FROM " + abap.dbo.schemaPrefix + "\\"" + abap.dbo.tablePrefix + "t100\\" WHERE arbgb = '" + lv_arbgb.get() + "' UP TO 1 ROWS"});`},
     {abap: "select count( * ) from /foo/bar into bar.",
