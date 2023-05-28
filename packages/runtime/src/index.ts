@@ -18,17 +18,19 @@ import {MemoryConsole} from "./console/memory_console";
 
 export {UnitTestResult, RFC, types, DB, MemoryConsole};
 
+export type RuntimeDatabaseOptions = {
+  /* prefix all operations with schema*/
+  schemaPrefix?: string,
+  /* prefix all database tables */
+  tablePrefix?: string,
+  /* map field names to case sensitive, postgres is case sensitive, and ABAP
+     can have special characters in table names, "field" must be in lower case */
+  // fieldNameMap?: {[table: string]: {[field: string]: string}},
+};
+
 export type RuntimeOptions = {
   console?: Console,
-  database?: {
-    /* prefix all operations with schema*/
-    schemaPrefix?: string,
-    /* prefix all database tables */
-    tablePrefix?: string,
-    /* map field names to case sensitive, postgres is case sensitive, and ABAP
-       can have special characters in table names, "field" must be in lower case */
-    fieldNameMap?: {[table: string]: {[field: string]: string}},
-  },
+  database?: RuntimeDatabaseOptions,
 };
 
 export class ABAP {
@@ -56,6 +58,7 @@ export class ABAP {
   public ClassicError = ClassicError;
 
   public readonly context: Context;
+  public readonly databaseOptions: RuntimeDatabaseOptions;
 
   public constructor(input?: RuntimeOptions) {
     this.context = new Context();

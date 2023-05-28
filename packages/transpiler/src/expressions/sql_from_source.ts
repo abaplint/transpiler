@@ -10,16 +10,21 @@ export class SQLFromSourceTranspiler implements IExpressionTranspiler {
     const chunk = new Chunk();
 
     for (const c of node.getChildren()) {
+      const concat = c.concatTokens();
       if (c instanceof abaplint.Nodes.TokenNode) {
         // keywords
-        chunk.appendString(c.concatTokens() + " ");
-      } else if (c.get() instanceof abaplint.Expressions.DatabaseTable && c.concatTokens().includes("/")) {
-        chunk.appendString("\\\"" + c.concatTokens() + "\\\" ");
-      } else if (c.get() instanceof abaplint.Expressions.DatabaseTable && c.concatTokens().startsWith("('")) {
-        const concat = c.concatTokens();
-        chunk.appendString("\\\"" + concat.substring(2, concat.length - 2).toLowerCase() + "\\\" ");
+        chunk.appendString(concat + " ");
+      } else if (c.get() instanceof abaplint.Expressions.DatabaseTable) {
+        let val = "\\\"";
+        if(concat.startsWith("('")) {
+          val += concat.substring(2, concat.length - 2).toLowerCase();
+        } else {
+          val += concat;
+        }
+        val += "\\\" ";
+        chunk.appendString(val);
       } else {
-        chunk.appendString(c.concatTokens() + " ");
+        chunk.appendString(concat + " ");
       }
     }
 
