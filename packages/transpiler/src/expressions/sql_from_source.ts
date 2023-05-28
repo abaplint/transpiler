@@ -3,10 +3,11 @@ import * as abaplint from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
+import {DatabaseTableTranspiler} from "./database_table";
 
 export class SQLFromSourceTranspiler implements IExpressionTranspiler {
 
-  public transpile(node: Nodes.ExpressionNode, _traversal: Traversal): Chunk {
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     const chunk = new Chunk();
 
     for (const c of node.getChildren()) {
@@ -15,14 +16,8 @@ export class SQLFromSourceTranspiler implements IExpressionTranspiler {
         // keywords
         chunk.appendString(concat + " ");
       } else if (c.get() instanceof abaplint.Expressions.DatabaseTable) {
-        let val = `" + abap.dbo.schemaPrefix + "\\"" + abap.dbo.tablePrefix + "`;
-        if(concat.startsWith("('")) {
-          val += concat.substring(2, concat.length - 2).toLowerCase();
-        } else {
-          val += concat;
-        }
-        val += "\\\" ";
-        chunk.appendString(val);
+        chunk.appendChunk(new DatabaseTableTranspiler().transpile(c, traversal));
+        chunk.appendString(" ");
       } else {
         chunk.appendString(concat + " ");
       }
