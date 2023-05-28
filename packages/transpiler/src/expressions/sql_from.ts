@@ -21,19 +21,8 @@ export class SQLFromTranspiler implements IExpressionTranspiler {
       } else if (c.get() instanceof abaplint.Expressions.SQLFromSource) {
         chunk.appendChunk(new SQLFromSourceTranspiler().transpile(c, traversal));
       } else {
-        if (c.findFirstExpression(abaplint.Expressions.Dynamic)) {
-          let concat = c.concatTokens();
-          if (concat.startsWith("'")) {
-            // no escaping needed, guess its not possible to have table names with single or double quote part of name
-            concat = "\\\"" + concat.substring(1, concat.length - 1) + "\\\"";
-          }
-          chunk.appendString(concat + " ");
-        } else if (c.concatTokens().includes("/")) {
-          chunk.appendString("\\\"" + c.concatTokens() + "\\\" ");
-        } else {
-          const concat = c.concatTokens();
-          chunk.appendString(concat + " ");
-        }
+        const concat = c.concatTokens();
+        chunk.appendString(concat + " ");
       }
     }
 

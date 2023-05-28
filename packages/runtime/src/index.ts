@@ -23,7 +23,7 @@ export type RuntimeOptions = {
   database?: {
     /* prefix all operations with schema*/
     schemaPrefix?: string,
-    /* prefix all database tables with string */
+    /* prefix all database tables */
     tablePrefix?: string,
     /* map field names to case sensitive, postgres is case sensitive, and ABAP
        can have special characters in table names, "field" must be in lower case */
