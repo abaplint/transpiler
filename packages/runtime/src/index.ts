@@ -65,6 +65,14 @@ export class ABAP {
     this.console = input?.console ? input?.console : new StandardOutConsole();
     this.context.console = this.console;
 
+    this.databaseOptions = input?.database || {schemaPrefix: "", tablePrefix: ""};
+    if (this.databaseOptions.schemaPrefix === undefined) {
+      this.databaseOptions.schemaPrefix = "";
+    }
+    if (this.databaseOptions.tablePrefix === undefined) {
+      this.databaseOptions.tablePrefix = "";
+    }
+
     this.statements = new Statements(this.context);
 
     // todo, this should not be a singleton, it should be part of this instance

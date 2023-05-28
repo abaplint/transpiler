@@ -15,7 +15,7 @@ export class SQLFromSourceTranspiler implements IExpressionTranspiler {
         // keywords
         chunk.appendString(concat + " ");
       } else if (c.get() instanceof abaplint.Expressions.DatabaseTable) {
-        let val = "\\\"";
+        let val = `\\"`;
         if(concat.startsWith("('")) {
           val += concat.substring(2, concat.length - 2).toLowerCase();
         } else {
