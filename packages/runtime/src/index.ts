@@ -58,19 +58,19 @@ export class ABAP {
   public ClassicError = ClassicError;
 
   public readonly context: Context;
-  public readonly databaseOptions: RuntimeDatabaseOptions;
+  public readonly dbo: RuntimeDatabaseOptions;
 
   public constructor(input?: RuntimeOptions) {
     this.context = new Context();
     this.console = input?.console ? input?.console : new StandardOutConsole();
     this.context.console = this.console;
 
-    this.databaseOptions = input?.database || {schemaPrefix: "", tablePrefix: ""};
-    if (this.databaseOptions.schemaPrefix === undefined) {
-      this.databaseOptions.schemaPrefix = "";
+    this.dbo = input?.database || {schemaPrefix: "", tablePrefix: ""};
+    if (this.dbo.schemaPrefix === undefined) {
+      this.dbo.schemaPrefix = "";
     }
-    if (this.databaseOptions.tablePrefix === undefined) {
-      this.databaseOptions.tablePrefix = "";
+    if (this.dbo.tablePrefix === undefined) {
+      this.dbo.tablePrefix = "";
     }
 
     this.statements = new Statements(this.context);
