@@ -204,4 +204,45 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("call method, simple parameter table, with exceptions tabl", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS foo IMPORTING val TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD foo.
+    WRITE val.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  TYPES: BEGIN OF abap_parmbind,
+           name  TYPE c LENGTH 30,
+           kind  TYPE c LENGTH 1,
+           value TYPE REF TO data,
+         END OF abap_parmbind.
+  TYPES abap_parmbind_tab TYPE HASHED TABLE OF abap_parmbind WITH UNIQUE KEY name.
+
+  TYPES: BEGIN OF abap_excpbind,
+           name  TYPE c LENGTH 30,
+           value TYPE i,
+         END OF abap_excpbind.
+  TYPES abap_excpbind_tab TYPE HASHED TABLE OF abap_excpbind WITH UNIQUE KEY name.
+
+  DATA tab TYPE abap_parmbind_tab.
+  DATA etab TYPE abap_excpbind_tab.
+  DATA row LIKE LINE OF tab.
+  row-name = 'VAL'.
+  row-kind = 'E'.
+  GET REFERENCE OF 1 INTO row-value.
+  INSERT row INTO TABLE tab.
+  CALL METHOD lcl=>('FOO') PARAMETER-TABLE tab EXCEPTION-TABLE etab.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });
