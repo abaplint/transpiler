@@ -31,7 +31,7 @@ export class DatabaseTableTranspiler implements IExpressionTranspiler {
         if (this.prefix === false) {
           return foo;
         }
-        val += "\" + " + foo.getCode() + ".get() + \"";
+        val += "\" + " + foo.getCode() + ".get().trimEnd().toLowerCase() + \"";
       }
     } else {
       val += concat.toLowerCase();

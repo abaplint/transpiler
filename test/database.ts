@@ -1125,4 +1125,20 @@ WRITE res-arbgb.`;
     });
   });
 
+  it("SELECT INTO TABLE, ORDER BY PRIMARY KEY, dynamic variable", async () => {
+    const code = `
+    DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+    DATA name TYPE c LENGTH 30.
+    name = 'T100'.
+    SELECT * FROM (name) INTO TABLE tab ORDER BY PRIMARY KEY.
+    WRITE sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2");
+    });
+  });
+
 });
