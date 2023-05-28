@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Builtin functions - ipow", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("basic", async () => {

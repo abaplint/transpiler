@@ -12,7 +12,7 @@ async function run(contents: string) {
 describe("Running statements - Cast", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("id", async () => {

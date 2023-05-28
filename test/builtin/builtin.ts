@@ -13,7 +13,7 @@ async function run(contents: string) {
 describe("Builtin functions", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("boolc test", async () => {

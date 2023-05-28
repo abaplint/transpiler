@@ -21,7 +21,7 @@ import {test15} from "./test15";
 
 // NOTE: does not run via Mocha
 
-const abap: ABAP = new ABAP(new MemoryConsole());
+const abap: ABAP = new ABAP({console: new MemoryConsole()});
 
 async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);

@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Running Examples - Decfloat34 type", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("basic", async () => {

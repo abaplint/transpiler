@@ -12,7 +12,7 @@ async function run(contents: string) {
 describe("Running statements - FIND", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("FIND FIRST OCCURRENCE, found", async () => {

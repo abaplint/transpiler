@@ -140,4 +140,4 @@ editor1.onDidChangeModelContent(abapChanged);
 editor2.onDidChangeModelContent(jsChanged);
 abapChanged();
 editor1.focus();
-const abap = new ABAP(new MemoryConsole());
+const abap = new ABAP({console: new MemoryConsole()});

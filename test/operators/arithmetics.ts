@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Running operators - Arithmetics", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("integers DIV 1", async () => {

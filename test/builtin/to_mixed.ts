@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Builtin functions - to_mixed", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("test1", async () => {

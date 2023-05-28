@@ -30,7 +30,7 @@ describe("Top level tests, Database", () => {
   let abap: ABAP;
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("SELECT", async () => {

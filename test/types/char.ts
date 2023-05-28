@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Running Examples - Character type", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("compare with new line", async () => {

@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Value conversions", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("hex value conversion", async () => {

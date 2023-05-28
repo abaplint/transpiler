@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Running operators - Arithmetic precedence", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("Arithmetics, precedence 1", async () => {

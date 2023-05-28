@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Running statements - ENHANCEMENT SECTION", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("section", async () => {

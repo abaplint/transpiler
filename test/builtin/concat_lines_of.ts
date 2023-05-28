@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Builtin functions - concat_lines_of", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("concat_lines_of 1", async () => {

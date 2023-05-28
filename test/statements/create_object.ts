@@ -11,7 +11,7 @@ async function run(contents: string) {
 describe("Running statements - CREATE OBJECT", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("CREATE OBJECT, should create new references", async () => {

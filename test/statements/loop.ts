@@ -12,7 +12,7 @@ async function run(contents: string) {
 describe("Running statements - LOOP", () => {
 
   beforeEach(async () => {
-    abap = new ABAP(new MemoryConsole());
+    abap = new ABAP({console: new MemoryConsole()});
   });
 
   it("LOOP AT pass by value", async () => {

@@ -18,6 +18,21 @@ import {MemoryConsole} from "./console/memory_console";
 
 export {UnitTestResult, RFC, types, DB, MemoryConsole};
 
+export type RuntimeDatabaseOptions = {
+  /* prefix all operations with schema*/
+  schemaPrefix?: string,
+  /* prefix all database tables */
+  tablePrefix?: string,
+  /* map field names to case sensitive, postgres is case sensitive, and ABAP
+     can have special characters in table names, "field" must be in lower case */
+  // fieldNameMap?: {[table: string]: {[field: string]: string}},
+};
+
+export type RuntimeOptions = {
+  console?: Console,
+  database?: RuntimeDatabaseOptions,
+};
+
 export class ABAP {
 // global objects
   public FunctionModules: {[name: string]: any} = {};
@@ -43,11 +58,20 @@ export class ABAP {
   public ClassicError = ClassicError;
 
   public readonly context: Context;
+  public readonly dbo: RuntimeDatabaseOptions;
 
-  public constructor(console?: Console) {
+  public constructor(input?: RuntimeOptions) {
     this.context = new Context();
-    this.console = console ? console : new StandardOutConsole();
+    this.console = input?.console ? input?.console : new StandardOutConsole();
     this.context.console = this.console;
+
+    this.dbo = input?.database || {schemaPrefix: "", tablePrefix: ""};
+    if (this.dbo.schemaPrefix === undefined) {
+      this.dbo.schemaPrefix = "";
+    }
+    if (this.dbo.tablePrefix === undefined) {
+      this.dbo.tablePrefix = "";
+    }
 
     this.statements = new Statements(this.context);
 
