@@ -43,6 +43,7 @@ export * from "./sql_cond";
 export * from "./sql_field_and_value";
 export * from "./sql_field";
 export * from "./sql_field_name";
+export * from "./sql_arithmetic_operator";
 export * from "./sql_from_source";
 export * from "./sql_from";
 export * from "./sql_into_structure";
