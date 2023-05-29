@@ -53,6 +53,11 @@ async function findText(context: Context, arbgb: string | undefined, msgnr: stri
   }
 
   if (text === undefined) {
+    // @ts-ignore
+    text = abap.MSAG[arbgb?.trimEnd().toUpperCase()]?.[msgnr];
+  }
+
+  if (text === undefined) {
     // fallback
     text = msgty + ":" + arbgb?.trim() + ":" + msgnr + " &1 &2 &3 &4";
   }

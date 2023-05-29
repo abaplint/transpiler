@@ -350,6 +350,7 @@ run().then(() => {
       if (obj instanceof abaplint.Objects.Table
           || obj instanceof abaplint.Objects.DataElement
           || obj instanceof abaplint.Objects.LockObject
+          || obj instanceof abaplint.Objects.MessageClass
           || obj instanceof abaplint.Objects.MIMEObject
           || obj instanceof abaplint.Objects.WebMIME
           || obj instanceof abaplint.Objects.TypePool

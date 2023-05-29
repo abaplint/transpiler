@@ -12,7 +12,7 @@ export class HandleMSAG {
 
     const chunk = new Chunk().appendString(`abap.MSAG["${obj.getName().toUpperCase()}"] = {\n`);
     for (const m of obj.getMessages()) {
-      chunk.appendString(`"${m.getNumber()}": "${m.getMessage().replace(/"/g, `\\"`)}",\n`);
+      chunk.appendString(`  "${m.getNumber()}": "${m.getMessage().replace(/"/g, `\\"`)}",\n`);
     }
     chunk.appendString(`};`);
 

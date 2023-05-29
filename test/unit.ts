@@ -216,7 +216,7 @@ describe("Testing Unit Testing", () => {
     }
   });
 
-  async function dumpNrun(files: IFile[]): Promise<string> {
+  async function dumpNrun(files: IFile[], database = true): Promise<string> {
     const SETUP_NAME = "mysetup.mjs";
     const config: ITranspilerOptions = {
       addCommonJS: true,
@@ -227,7 +227,7 @@ describe("Testing Unit Testing", () => {
       fs.writeFileSync(outputFolder + path.sep + f.filename, f.contents);
     }
 
-    const setupLogic = `import {SQLiteDatabaseClient} from "../../packages/database-sqlite/build/index.js";
+    let setupLogic = `import {SQLiteDatabaseClient} from "../../packages/database-sqlite/build/index.js";
 
 export async function setup(abap, schemas, insert) {
   abap.context.databaseConnections["DEFAULT"] = new SQLiteDatabaseClient();
@@ -235,6 +235,11 @@ export async function setup(abap, schemas, insert) {
   await abap.context.databaseConnections["DEFAULT"].execute(schemas.sqlite);
   await abap.context.databaseConnections["DEFAULT"].execute(insert);
 }`;
+    if (database === false) {
+      setupLogic = `export async function setup(abap, schemas, insert) {
+  return;
+}`;
+    }
     fs.writeFileSync(outputFolder + path.sep + SETUP_NAME, setupLogic);
 
     const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
@@ -246,6 +251,7 @@ export async function setup(abap, schemas, insert) {
       if (o.object.type.toUpperCase() !== "TABL"
           && o.object.type.toUpperCase() !== "DTEL"
           && o.object.type.toUpperCase() !== "ENQU"
+          && o.object.type.toUpperCase() !== "MSAG"
           && o.object.type.toUpperCase() !== "TTYP") {
         const name = o.filename + ".map";
         contents = contents + `\n//# sourceMappingURL=` + name;
@@ -2234,6 +2240,59 @@ ENDCLASS.`;
       {filename: "zcl_html.clas.abap", contents: clas},
     ];
     await dumpNrun(files);
+  });
+
+  it("test-54", async () => {
+// MESSAGE without database connection
+
+    const msag_zag_unit_test = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_MSAG" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <T100A>
+    <ARBGB>ZAG_UNIT_TEST</ARBGB>
+    <MASTERLANG>E</MASTERLANG>
+    <STEXT>test</STEXT>
+   </T100A>
+   <T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZAG_UNIT_TEST</ARBGB>
+     <MSGNR>000</MSGNR>
+     <TEXT>hello world</TEXT>
+    </T100>
+   </T100>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
+    const clas = `
+CLASS zcl_html DEFINITION PUBLIC.
+  PUBLIC SECTION.
+ENDCLASS.
+CLASS zcl_html IMPLEMENTATION.
+ENDCLASS.`;
+
+    const tests = `
+CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+  PRIVATE SECTION.
+    METHODS test01 FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD test01.
+    DATA lv_str TYPE string.
+    MESSAGE e000(zag_unit_test) INTO lv_str.
+    ASSERT lv_str = 'hello world'.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test},
+      {filename: "zcl_html.clas.testclasses.abap", contents: tests},
+      {filename: "zcl_html.clas.abap", contents: clas},
+    ];
+    await dumpNrun(files, false);
   });
 
 });
