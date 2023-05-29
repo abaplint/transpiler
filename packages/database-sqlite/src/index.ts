@@ -109,8 +109,8 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
         console.log(sql);
       }
 
-      const res = this.sqlite!.exec(sql);
-      dbcnt = res.length;
+      this.sqlite!.exec(sql);
+      dbcnt = 1;
     } catch (error) {
       // eg "UNIQUE constraint failed" errors
       subrc = 4;

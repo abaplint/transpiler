@@ -1,7 +1,7 @@
 import {expect} from "chai";
 import {AsyncFunction, runFiles as runRilesSqlite, runFilesPostgres} from "./_utils";
 import {ABAP, MemoryConsole} from "../packages/runtime/src/";
-import {msag_escape, msag_zag_unit_test, tabl_t100xml, zt111, zt222} from "./_data";
+import {msag_escape, msag_zag_unit_test, tabl_t100xml, zquan, zt111, zt222} from "./_data";
 import {IFile} from "../packages/transpiler/src/types";
 
 async function runAllDatabases(abap: ABAP,
@@ -11,6 +11,7 @@ async function runAllDatabases(abap: ABAP,
 
   if (settings.sqlite === true) {
     const js = await runRilesSqlite(abap, files);
+//    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     check();
@@ -1138,6 +1139,31 @@ WRITE res-arbgb.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("2");
+    });
+  });
+
+  it("INSERT and UPDATE quan field", async () => {
+    const code = `
+    DATA row TYPE zquan.
+    row-keyfield = 'A'.
+    row-valuefield = 2.
+
+    INSERT zquan FROM row.
+    ASSERT sy-subrc = 0.
+    ASSERT sy-dbcnt = 1.
+
+    UPDATE zquan SET valuefield = valuefield + row-valuefield WHERE keyfield = row-keyfield.
+    ASSERT sy-subrc = 0.
+    ASSERT sy-dbcnt = 1.
+
+    CLEAR row.
+    SELECT SINGLE * FROM zquan INTO row.
+    WRITE row-valuefield.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "zquan.tabl.xml", contents: zquan}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("4.00");
     });
   });
 

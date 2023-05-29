@@ -2,7 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {DatabaseTableTranspiler} from "../expressions";
+import {DatabaseTableTranspiler, SQLFieldAndValueTranspiler} from "../expressions";
 
 export class UpdateDatabaseTranspiler implements IStatementTranspiler {
 
@@ -25,9 +25,7 @@ export class UpdateDatabaseTranspiler implements IStatementTranspiler {
     if (sets.length > 0) {
       const s = [];
       for (const set of sets) {
-        const name = set.findDirectExpression(abaplint.Expressions.SQLFieldName)?.concatTokens();
-        const source = traversal.traverse(set.findDirectExpression(abaplint.Expressions.SQLSource));
-        s.push("\"\\\"" + name + "\\\" = '\" + " + source.getCode() + ".get() + \"'\"");
+        s.push(new SQLFieldAndValueTranspiler().transpile(set, traversal).getCode());
       }
       options.push(`"set": [${s.join(",")}]`);
     }
