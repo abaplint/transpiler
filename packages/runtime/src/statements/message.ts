@@ -1,5 +1,5 @@
 import {Context} from "../context";
-import {ABAPObject} from "../types";
+import {ABAPObject, Character} from "../types";
 import {ICharacter} from "../types/_character";
 
 export interface IMessageOptions {
@@ -12,7 +12,7 @@ export interface IMessageOptions {
   into?: ICharacter,
 }
 
-function replace(text: string, w?: (ICharacter | string)[]): string {
+function replace(text: string, w?: (ICharacter | string | Character)[]): string {
   for (let i = 0; i < 6; i++) {
     const search = "&" + (i + 1);
     let replace = "";
@@ -21,7 +21,7 @@ function replace(text: string, w?: (ICharacter | string)[]): string {
       if (typeof j === "string") {
         replace = j;
       } else {
-        replace = j.get();
+        replace = j.get().trimEnd();
       }
     }
 
@@ -50,6 +50,11 @@ async function findText(context: Context, arbgb: string | undefined, msgnr: stri
     } catch {
       // use fallback text
     }
+  }
+
+  if (text === undefined) {
+    // @ts-ignore
+    text = abap.MSAG[arbgb?.trimEnd().toUpperCase()]?.[msgnr];
   }
 
   if (text === undefined) {

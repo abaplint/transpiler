@@ -1,7 +1,7 @@
 import {expect} from "chai";
 import {ABAP, MemoryConsole} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
-import {tabl_t100xml} from "../_data";
+import {tabl_t100xml, zt100_ttyp} from "../_data";
 
 let abap: ABAP;
 
@@ -299,5 +299,25 @@ CREATE DATA val TYPE (foo).`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("CREATE DATA, TYPE LINE OF", async () => {
+    const code = `
+  DATA ref TYPE REF TO data.
+  DATA lv_type TYPE c LENGTH 1.
+  FIELD-SYMBOLS <line> TYPE any.
+
+  CREATE DATA ref TYPE LINE OF ('ZT100_TTYP').
+  ASSIGN ref->* TO <line>.
+  DESCRIBE FIELD <line> TYPE lv_type.
+  WRITE lv_type.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zt100_ttyp.ttyp.xml", contents: zt100_ttyp},
+    ]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("u");
   });
 });

@@ -45,6 +45,10 @@ export class CreateDataTranspiler implements IStatementTranspiler {
       options.push(`"like": ` + so.getCode());
     }
 
+    if (concat.includes(" TYPE LINE OF ")) {
+      options.push(`"typeLineOf": true`);
+    }
+
     const handle = node.findExpressionAfterToken("HANDLE");
     if (handle) {
       const so = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Source));

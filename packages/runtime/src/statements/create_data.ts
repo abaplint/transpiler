@@ -14,6 +14,7 @@ export interface ICreateDataOptions {
   length?: INumeric,
   decimals?: INumeric,
   likeLineOf?: FieldSymbol | Table,
+  typeLineOf?: boolean,
   like?: any,
 }
 
@@ -75,6 +76,10 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
       target.assign(new Float());
     } else {
       throwError("CX_SY_CREATE_DATA_ERROR");
+    }
+    if (options.typeLineOf === true) {
+      // @ts-ignore
+      target.assign(clone(target.getPointer().getRowType()));
     }
   } else if (options?.typeName) {
     switch (options.typeName) {
