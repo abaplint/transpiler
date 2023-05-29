@@ -11,6 +11,7 @@ async function runAllDatabases(abap: ABAP,
 
   if (settings.sqlite === true) {
     const js = await runRilesSqlite(abap, files);
+//    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     check();

@@ -8,14 +8,22 @@ export class SQLFieldAndValueTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     const chunk = new Chunk();
-/*
+
+    chunk.appendString("\"");
     for (const n of node.getChildren()) {
-      const concat =
+      const concat = n.concatTokens();
+      if (concat === "=") {
+        chunk.appendString(" = ");
+      } else if (n.get() instanceof abaplint.Expressions.SQLSource) {
+        const source = traversal.traverse(n);
+        // todo: value conversion? abap vs db, traversal.isSQLConversion
+        // todo: integers?
+        chunk.appendString("'\" + " + source.getCode() + ".get() + \"'");
+      } else {
+        chunk.appendString(traversal.traverse(n).getCode() + " ");
+      }
     }
-*/
-    const name = traversal.traverse(node.findDirectExpression(abaplint.Expressions.SQLFieldName)).getCode();
-    const source = traversal.traverse(node.findDirectExpression(abaplint.Expressions.SQLSource));
-    chunk.appendString("\"\\\"" + name + "\\\" = '\" + " + source.getCode() + ".get() + \"'\"");
+    chunk.appendString("\"");
 
     return chunk;
   }
