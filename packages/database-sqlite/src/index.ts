@@ -55,6 +55,10 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     let subrc = 0;
     let dbcnt = 0;
     try {
+      if (this.trace === true) {
+        console.log(sql);
+      }
+
       this.sqlite!.exec(sql);
 
 // https://www.sqlite.org/c3ref/changes.html
@@ -76,6 +80,10 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     let subrc = 0;
     let dbcnt = 0;
     try {
+      if (this.trace === true) {
+        console.log(sql);
+      }
+
       this.sqlite!.exec(sql);
 
       // https://www.sqlite.org/c3ref/changes.html
@@ -97,6 +105,10 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     let subrc = 0;
     let dbcnt = 0;
     try {
+      if (this.trace === true) {
+        console.log(sql);
+      }
+
       const res = this.sqlite!.exec(sql);
       dbcnt = res.length;
     } catch (error) {
