@@ -23,8 +23,8 @@ export async function runFiles(abap: ABAP, files: IFile[]) {
   }
   let pre = "";
   for (const o of res.objects) {
-    if (o.object.type === "TABL") {
-      pre = o.chunk.getCode() + "\n";
+    if (o.object.type === "TABL" || o.object.type === "TTYP") {
+      pre += o.chunk.getCode() + "\n";
     }
   }
   return "global.abap = abap;\n" + pre + res.objects[0].chunk.getCode();
