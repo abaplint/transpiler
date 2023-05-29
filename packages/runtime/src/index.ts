@@ -35,12 +35,13 @@ export type RuntimeOptions = {
 
 export class ABAP {
 // global objects
-  public FunctionModules: {[name: string]: any} = {};
   public Classes: {[name: string]: any} = {};
-  public Interfaces: {[name: string]: any} = {};
   public DDIC: {[name: string]: any} = {};
-  public TypePools: {[name: string]: any} = {};
+  public FunctionModules: {[name: string]: any} = {};
+  public Interfaces: {[name: string]: any} = {};
+  public MSAG: {[name: string]: any} = {};
   public SMIM: {[name: string]: any} = {};
+  public TypePools: {[name: string]: any} = {};
   public W3MI: {[name: string]: any} = {};
 
 // stuff for runtime

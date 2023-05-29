@@ -13,6 +13,7 @@ import {HandleEnqu} from "./handlers/handle_enqu";
 import {HandleTypePool} from "./handlers/handle_type_pool";
 import {HandleW3MI} from "./handlers/handle_w3mi";
 import {HandleSMIM} from "./handlers/handle_smim";
+import {HandleMSAG} from "./handlers/handle_msag";
 
 export {config, ITranspilerOptions, IFile, IProgress, IOutputFile, IOutput};
 
@@ -75,6 +76,8 @@ export class Transpiler {
         output.objects.push(...new HandleSMIM().runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.WebMIME) {
         output.objects.push(...new HandleW3MI().runObject(obj, reg));
+      } else if (obj instanceof abaplint.Objects.MessageClass) {
+        output.objects.push(...new HandleMSAG().runObject(obj, reg));
       }
     }
 
