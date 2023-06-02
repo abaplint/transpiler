@@ -1,4 +1,4 @@
-import {Character, String, FieldSymbol, Hex, Table, ABAPObject, Structure, DataReference, Integer, Float, Numc, XString, Packed, Time, Date, DecFloat34, HashedTable} from "../types";
+import {Character, String, FieldSymbol, Hex, Table, ABAPObject, Structure, DataReference, Integer, Float, Numc, XString, Packed, Time, Date, DecFloat34, HashedTable, Integer8} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -25,6 +25,8 @@ export function describe(input: IDescribeOptions) {
       input.type.set("C");
     } else if (input.field instanceof Integer) {
       input.type.set("I");
+    } else if (input.field instanceof Integer8) {
+      input.type.set("8");
     } else if (input.field instanceof Date) {
       input.type.set("D");
     } else if (input.field instanceof Time) {
