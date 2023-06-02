@@ -39,6 +39,11 @@ export class TranspileTypes {
       if (type.getQualifiedName() !== undefined) {
         extra = "{qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\"}";
       }
+    } else if (type instanceof abaplint.BasicTypes.Integer8Type) {
+      resolved = "Integer8";
+      if (type.getQualifiedName() !== undefined) {
+        extra = "{qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\"}";
+      }
     } else if (type instanceof abaplint.BasicTypes.StringType) {
       resolved = "String";
       if (type.getQualifiedName() !== undefined) {

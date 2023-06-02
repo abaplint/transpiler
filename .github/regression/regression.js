@@ -4,15 +4,16 @@ const crypto = require("crypto");
 const childProcess = require("child_process");
 
 const repos = [
-  {name: "abap-openapi/abap-openapi",        success: undefined, command: "npm test"},
-  {name: "abapGit/abapGit",                  success: undefined, command: "npm run unit"},
-  {name: "heliconialabs/abap-opentelemetry", success: undefined, command: "npm test"},
-  {name: "larshp/abap-advent-2020",          success: undefined, command: "npm test"},
-  {name: "larshp/abap-wasm",                 success: undefined, command: "npm test"},
-  {name: "larshp/abapNTLM",                  success: undefined, command: "npm test"},
-  {name: "open-abap/open-abap-core",         success: undefined, command: "npm test"},
-  {name: "open-abap/open-table-maintenance", success: undefined, command: "npm test"},
-  {name: "SAP/abap-file-formats-tools",      success: undefined, command: "npm test"},
+  {name: "abap-openapi/abap-openapi",           success: undefined, command: "npm test"},
+  {name: "abapGit/abapGit",                     success: undefined, command: "npm run unit"},
+  {name: "dominikpanzer/cacamber-BDD-for-ABAP", success: undefined, command: "npm test"},
+  {name: "heliconialabs/abap-opentelemetry",    success: undefined, command: "npm test"},
+  {name: "larshp/abap-advent-2020",             success: undefined, command: "npm test"},
+  {name: "larshp/abap-wasm",                    success: undefined, command: "npm test"},
+  {name: "larshp/abapNTLM",                     success: undefined, command: "npm test"},
+  {name: "open-abap/open-abap-core",            success: undefined, command: "npm test"},
+  {name: "open-abap/open-table-maintenance",    success: undefined, command: "npm test"},
+  {name: "SAP/abap-file-formats-tools",         success: undefined, command: "npm test"},
 ];
 
 const CWD = "./.github/regression/";

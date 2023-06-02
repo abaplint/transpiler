@@ -7,6 +7,7 @@ export * from "./field_symbol";
 export * from "./float";
 export * from "./hex";
 export * from "./integer";
+export * from "./integer8";
 export * from "./numc";
 export * from "./packed";
 export * from "./string";
