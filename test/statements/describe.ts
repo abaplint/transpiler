@@ -314,4 +314,16 @@ WRITE / lv_type.`;
     expect(abap.console.get()).to.equal("3\n1");
   });
 
+  it("DESCRIBE FIELD, int8", async () => {
+    const code = `
+  DATA lv_type TYPE c.
+  DATA bar TYPE int8.
+  DESCRIBE FIELD bar TYPE lv_type.
+  WRITE lv_type.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("8");
+  });
+
 });
