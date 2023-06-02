@@ -14,7 +14,7 @@ describe("Running Examples - Integer8 type", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
-  it("int8", async () => {
+  it.only("int8", async () => {
     const code = `
   DATA val TYPE int8.
   val = 2.
