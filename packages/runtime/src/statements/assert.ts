@@ -1,5 +1,5 @@
 export function assert(input: boolean) {
   if (input === false) {
-    throw new Error("ASSERT failed");
+    throw new Error("ASSERTION_FAILED");
   }
 }
