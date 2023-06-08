@@ -297,7 +297,7 @@ WRITE lines( hashed ).`;
     expect(abap.console.get()).to.equal("2");
   });
 
-  it.only("INSERT, basic sorted", async () => {
+  it("INSERT, basic sorted", async () => {
     const code = `
 TYPES ty TYPE c LENGTH 20.
 DATA lt_visited TYPE SORTED TABLE OF ty WITH UNIQUE DEFAULT KEY.
@@ -305,6 +305,19 @@ INSERT '00000000000003353284' INTO TABLE lt_visited.
 ASSERT sy-subrc = 0.
 INSERT '00000000000003353299' INTO TABLE lt_visited.
 ASSERT sy-subrc = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("INSERT, basic sorted, duplicate", async () => {
+    const code = `
+TYPES ty TYPE c LENGTH 20.
+DATA lt_visited TYPE SORTED TABLE OF ty WITH UNIQUE DEFAULT KEY.
+INSERT '00000000000003353284' INTO TABLE lt_visited.
+ASSERT sy-subrc = 0.
+INSERT '00000000000003353284' INTO TABLE lt_visited.
+ASSERT sy-subrc = 4.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
