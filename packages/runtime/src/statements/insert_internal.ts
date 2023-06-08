@@ -1,5 +1,5 @@
 import {clone} from "../clone";
-import {ne} from "../compare";
+import {eq, ne} from "../compare";
 import {ABAPObject, DataReference, FieldSymbol, HashedTable, Structure, Table, TableAccessType} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
@@ -31,6 +31,7 @@ export function insertInternal(options: IInsertInternalOptions): void {
   }
 
   const tableOptions = options.table.getOptions();
+
   let isSorted = tableOptions?.primaryKey?.type === TableAccessType.sorted
     || tableOptions?.primaryKey?.type === TableAccessType.hashed;
 
@@ -39,7 +40,7 @@ export function insertInternal(options: IInsertInternalOptions): void {
   } else if (isSorted) {
     const insert = options.data instanceof Structure ? options.data.get() : {table_line: options.data};
 
-    const compare = (row: any): boolean => {
+    let compare = (row: any): boolean => {
       for (const key of tableOptions?.primaryKey?.keyFields || []) {
         if (key.includes("-")) {
           const [first, second] = key.split("-");
@@ -66,6 +67,11 @@ export function insertInternal(options: IInsertInternalOptions): void {
           withKeyValue.push({key: (i) => {return i[fieldName];}, value: data.get()[fieldName]});
           binary = true;
         }
+      } else {
+        compare = (row: any): boolean => {
+          // @ts-ignore
+          return eq(row.table_line, options.data);
+        };
       }
 
       readTable(options.table, {withKey: compare, withKeyValue: withKeyValue, binarySearch: binary});
