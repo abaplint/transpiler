@@ -121,7 +121,8 @@ export class TranspileTypes {
       if (type.getQualifiedName() !== undefined) {
         extra = "{qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\"}";
       }
-    } else if (type instanceof abaplint.BasicTypes.XSequenceType) {
+    } else if (type instanceof abaplint.BasicTypes.XSequenceType
+        || type instanceof abaplint.BasicTypes.XGenericType) {
       // if not supplied itsa a Hex(1)
       resolved = "Hex";
     } else if (type instanceof abaplint.BasicTypes.HexType) {
