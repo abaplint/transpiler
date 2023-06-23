@@ -34,6 +34,7 @@ export * from "./data";
 export * from "./delete_database";
 export * from "./delete_dataset";
 export * from "./delete_internal";
+export * from "./delete_report";
 export * from "./delete_textpool";
 export * from "./describe";
 export * from "./do";
