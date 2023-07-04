@@ -11,7 +11,7 @@ export class Hex implements ICharacter {
 
   public constructor(input?: {length?: number}) {
     this.length = input?.length ? input?.length : 1;
-    this.value = "0".repeat(this.length * 2);
+    this.clear();
   }
 
   public set(value: ICharacter | INumeric | string | number | Integer | Float) {
@@ -54,7 +54,7 @@ export class Hex implements ICharacter {
   }
 
   public clear(): void {
-    this.value = "";
+    this.value = "0".repeat(this.length * 2);
   }
 
   public get(): string {
