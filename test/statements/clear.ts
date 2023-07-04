@@ -64,4 +64,15 @@ WRITE hex-11.`;
     await f(abap);
   });
 
+  it("clear hex", async () => {
+    const code = `
+    DATA lane TYPE x LENGTH 8.
+    CLEAR lane.
+    lane+4 = '11223344'.
+    ASSERT lane = '0000000011223344'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
