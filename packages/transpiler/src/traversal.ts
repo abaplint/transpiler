@@ -627,7 +627,7 @@ export class Traversal {
           if (s === undefined) {
             continue;
           }
-          handle(s, name + ".get()." + v);
+          handle(s, name + ".get()." + v.toLowerCase());
         }
       }
     };
