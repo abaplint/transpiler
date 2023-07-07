@@ -607,4 +607,18 @@ ENDINTERFACE.`;
     expect(js).to.include("application/json");
   });
 
+  it("interface, upper case nested constant", async () => {
+    const code = `
+INTERFACE lif.
+  CONSTANTS:
+    BEGIN OF gc_type,
+      val1 TYPE string VALUE 'val1',
+      VAL2 TYPE string VALUE 'val2',
+    END OF gc_type.
+ENDINTERFACE.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
