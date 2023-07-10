@@ -63,10 +63,11 @@ export function describe(input: IDescribeOptions) {
   if (input.length) {
     if (input.field instanceof Character
         || input.field instanceof Packed
+        || input.field instanceof Numc
         || input.field instanceof Hex) {
       input.length.set(input.field.getLength());
     } else {
-      throw new Error("DESCRIBE length, unsupported or todo");
+      throw new Error("DESCRIBE length, unsupported or todo, " + input.field.constructor.name);
     }
   }
 
@@ -74,7 +75,7 @@ export function describe(input: IDescribeOptions) {
     if (input.field instanceof Packed) {
       input.decimals.set(input.field.getDecimals());
     } else {
-      throw new Error("DESCRIBE decimals, unsupported or todo");
+      throw new Error("DESCRIBE decimals, unsupported or todo, " + input.field.constructor.name);
     }
   }
 

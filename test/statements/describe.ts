@@ -326,4 +326,16 @@ WRITE / lv_type.`;
     expect(abap.console.get()).to.equal("8");
   });
 
+  it("DESCRIBE LENGTH, numc", async () => {
+    const code = `
+    DATA foo TYPE n LENGTH 10.
+    DATA len TYPE i.
+    DESCRIBE FIELD foo LENGTH len IN CHARACTER MODE.
+    WRITE len.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("10");
+  });
+
 });
