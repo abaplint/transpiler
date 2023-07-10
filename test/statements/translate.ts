@@ -107,7 +107,7 @@ WRITE name.`;
     expect(abap.console.get()).to.equal("s_d_f");
   });
 
-  it.only("empty character", async () => {
+  it("empty character", async () => {
     const code = `
 DATA str TYPE string.
 str = translate(
