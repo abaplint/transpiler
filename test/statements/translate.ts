@@ -107,4 +107,18 @@ WRITE name.`;
     expect(abap.console.get()).to.equal("s_d_f");
   });
 
+  it("empty character", async () => {
+    const code = `
+DATA str TYPE string.
+str = translate(
+  val  = '13:30:00'
+  from = ':'
+  to   = ' ' ).
+WRITE str.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("133000");
+  });
+
 });

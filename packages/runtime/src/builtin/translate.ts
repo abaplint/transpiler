@@ -1,10 +1,15 @@
+import {Character} from "../types";
 import {ICharacter} from "../types/_character";
 import {String} from "../types/string";
 
 export function translate(input: {val: ICharacter | string, from: ICharacter | string, to: ICharacter | string}): ICharacter {
   let val = typeof input.val === "string" ? input.val : input.val.get();
   const from = typeof input.from === "string" ? input.from : input.from.get();
-  const to = typeof input.to === "string" ? input.to : input.to.get();
+
+  let to = typeof input.to === "string" ? input.to : input.to.get();
+  if (input.to instanceof Character) {
+    to = input.to.getTrimEnd();
+  }
 
   const fromSplit = from.split("");
   const toSplit = to.split("");
