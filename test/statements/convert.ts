@@ -116,4 +116,21 @@ WRITE lv_timestamp.`;
     expect(abap.console.get()).to.equal("20220831000000");
   });
 
+  it("CONVERT TIME STAMP", async () => {
+    const code = `
+DATA rv_tracktstmp TYPE p LENGTH 8.
+DATA lv_time_zone TYPE c LENGTH 3.
+DATA lv_date TYPE d.
+DATA lv_time TYPE t.
+rv_tracktstmp = '20211212133030'.
+lv_time_zone = 'CET'.
+CONVERT TIME STAMP rv_tracktstmp TIME ZONE lv_time_zone INTO DATE lv_date TIME lv_time.
+WRITE / |{ lv_date }|.
+WRITE / lv_time.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("20211212\n143030");
+  });
+
 });

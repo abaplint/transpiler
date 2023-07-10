@@ -20,7 +20,10 @@ export interface IConvertTarget {
 }
 
 export function convert(source: IConvertSource, target: IConvertTarget) {
-
+  /*
+  console.dir(source);
+  console.dir(target);
+  */
   let date = "";
   if (source.date) {
     if (typeof source.date === "string") {
@@ -80,6 +83,7 @@ export function convert(source: IConvertSource, target: IConvertTarget) {
     }
     const pt = Temporal.PlainTime.from(stamp.substring(8, 10) + ":" + stamp.substring(10, 12) + ":" + stamp.substring(12, 14));
     zoned = Temporal.PlainDate.from(stamp.substring(0, 8)).toZonedDateTime({timeZone: "UTC", plainTime: pt});
+    zoned = zoned.withTimeZone(zone);
   }
 
   const d = zoned.toPlainDate().toString().replace(/-/g, "");
