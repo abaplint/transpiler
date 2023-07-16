@@ -16,7 +16,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
     if (scope === undefined) {
       throw new Error("MethodTranspiler, scope not found, " + methodName + ", " + traversal.getFilename());
     } else if (scope.getIdentifier().sname !== methodName) {
-      throw new Error("MethodTranspiler, wrong scope found, " + scope.getIdentifier().sname);
+      throw new Error("MethodTranspiler, wrong scope found, " + scope.getIdentifier().sname + ", " + methodName);
     }
 
     let after = "";

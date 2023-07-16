@@ -159,7 +159,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     }
     const cdef = traversal.getClassDefinition(token);
     if (cdef === undefined) {
-      throw "buildConstructorCDEFNotFound";
+      throw "buildConstructorCDEFNotFound, " + token.getStr();
     }
 
     const ret = traversal.buildConstructorContents(scope, cdef);
