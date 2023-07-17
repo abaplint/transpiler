@@ -18,9 +18,12 @@ export class Hex implements ICharacter {
     if (typeof value === "string") {
       this.value = value;
     } else if (typeof value === "number") {
+      const maxVal = Math.pow(2, this.length * 8);
       if (value < 0) {
-        const maxVal = Math.pow(2, this.length * 8);
         this.value = Math.round(value + maxVal).toString(16);
+      } else if (value >= maxVal) {
+        const sub = value % maxVal;
+        this.value = Math.round(sub).toString(16);
       } else {
         this.value = Math.round(value).toString(16);
       }
