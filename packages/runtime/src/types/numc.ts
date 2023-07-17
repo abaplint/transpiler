@@ -1,6 +1,8 @@
 import {Hex} from "./hex";
+import {parse} from "../operators/_parse";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
+import {throwError} from "../throw_error";
 
 export class Numc implements ICharacter {
   private value: string;
@@ -51,7 +53,32 @@ export class Numc implements ICharacter {
     return this.value;
   }
 
-  public getOffset(_input: {offset?: number, length?: number}): Numc {
-    throw "todo, runtime, numc getOffset()";
+  public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}): Numc {
+    let offset = input?.offset;
+    if (offset) {
+      offset = parse(offset);
+    }
+
+    let length = input?.length;
+    if (length) {
+      length = parse(length);
+    }
+
+    if ((offset && offset >= this.length)
+         || (offset && offset < 0)
+         || (length && length < 0)) {
+      throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
+    }
+
+    let ret = this.value;
+    if (offset) {
+      ret = ret.substr(offset);
+    }
+    if (length !== undefined) {
+      ret = ret.substr(0, length);
+    }
+    const r = new Numc({length: ret.length});
+    r.set(ret);
+    return r;
   }
 }
