@@ -160,4 +160,18 @@ describe("Running operators - Bit", () => {
     expect(abap.console.get()).to.equal("10325476");
   });
 
+  it("Bit operators, xor", async () => {
+    const code = `
+DATA val1 TYPE xstring.
+DATA val2 TYPE xstring.
+DATA val3 TYPE xstring.
+val1 = '6BC10E0E0E0E0E0E0E0E0E0E0E0E0E0E'.
+val2 = '000102030405060708090A0B0C0D0E0F'.
+val3 = val1 BIT-XOR val2.
+ASSERT val3 = '6BC00C0D0A0B08090607040502030001'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
