@@ -5,7 +5,6 @@ import {Table} from "./table";
 import {String} from "./string";
 import {Structure} from "./structure";
 import {Hex} from "./hex";
-import {parse} from "../operators/_parse";
 import {Float} from "./float";
 import {DataReference} from "./data_reference";
 
@@ -112,22 +111,6 @@ export class FieldSymbol  {
   }
 
   public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}) {
-    if (input?.offset) {
-      input.offset = parse(input.offset);
-    }
-    if (input?.length) {
-      input.length = parse(input.length);
-    }
-    // Assuming we're interested in Strings here, for now...
-    let ret = this.get();
-    if (input?.offset) {
-      ret = ret.substr(input.offset);
-    }
-    if (input?.length !== undefined) {
-      ret = ret.substr(0, input.length);
-    }
-    const r = new String();
-    r.set(ret);
-    return r;
+    return this.getPointer().getOffset(input);
   }
 }

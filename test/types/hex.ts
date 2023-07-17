@@ -286,4 +286,21 @@ describe("Running Examples - Hex type", () => {
     await f(abap);
     expect(abap.console.get()).to.equal(`00`);
   });
+
+  it("Hex, offset with field symbol", async () => {
+    const code = `
+DATA val1 TYPE x LENGTH 16.
+DATA int TYPE i.
+DATA val2 TYPE xstring.
+FIELD-SYMBOLS <fs> TYPE any.
+val1 = '6BC10000000000000000000000000000'.
+int = 2.
+ASSIGN val1 TO <fs>.
+val2 = <fs>+0(int).
+WRITE val2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`6BC1`);
+  });
 });
