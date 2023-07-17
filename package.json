@@ -219,7 +219,7 @@
         "chai": "^4.3.7",
         "eslint": "^8.45.0",
         "cross-fetch": "^4.0.0",
-        "fast-xml-parser": "^4.2.5",
+        "fast-xml-parser": "^4.2.6",
         "eslint-plugin-import": "^2.27.5",
         "mocha": "^10.2.0",
         "source-map-support": "^0.5.21",
