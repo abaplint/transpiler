@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP, MemoryConsole} from "../../packages/runtime/src/";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -14,7 +14,7 @@ describe("Running Examples - Numeric type", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
-  it("float, initial", async () => {
+  it("Numeric, initial", async () => {
     const code = `
 DATA num TYPE n LENGTH 3.
 ASSERT num IS INITIAL.`;
@@ -23,7 +23,7 @@ ASSERT num IS INITIAL.`;
     await f(abap);
   });
 
-  it("float, not initial", async () => {
+  it("Numeric, not initial", async () => {
     const code = `
 DATA num TYPE n LENGTH 3.
 num = 1.
@@ -31,6 +31,32 @@ ASSERT num IS NOT INITIAL.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("numeric, offset", async () => {
+    const code = `
+DATA: lv_str TYPE string,
+      lv_tmp TYPE n LENGTH 10.
+lv_tmp = '0123456789'.
+CONCATENATE lv_tmp+1 lv_str INTO lv_str.
+WRITE lv_str.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("123456789");
+  });
+
+  it("numeric, offset and length", async () => {
+    const code = `
+DATA: lv_str TYPE string,
+      lv_tmp TYPE n LENGTH 10.
+lv_tmp = '0123456789'.
+CONCATENATE lv_tmp+1(2) lv_str INTO lv_str.
+WRITE lv_str.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("12");
   });
 
 });
