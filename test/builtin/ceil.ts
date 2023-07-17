@@ -36,7 +36,7 @@ describe("Builtin functions - ceil", () => {
     expect(abap.console.get()).to.equal("13\n12\n12\n44");
   });
 
-  it.only("calculation and ceil", async () => {
+  it("calculation and ceil", async () => {
     const code = `
     DATA lv_number_of_blocks TYPE i.
     lv_number_of_blocks = ceil( '1.0' * 18 / 16 ).
