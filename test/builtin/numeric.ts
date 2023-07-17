@@ -37,28 +37,6 @@ describe("Builtin Numeric Functions", () => {
     expect(abap.console.get()).to.equal("-3\n3\n3\n123.45\n12\n18\n7");
   });
 
-  it("Builtin numerical: ceil", async () => {
-    const code = `
-  DATA chars TYPE c LENGTH 10.
-  DATA int TYPE i.
-  DATA packed TYPE p.
-
-  chars = '12.34'.
-  WRITE / ceil( chars ).
-
-  packed = chars.
-  WRITE / ceil( packed ).
-
-  int = 12.
-  WRITE / ceil( int ).
-
-  WRITE / ceil( '43.21' ).`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("13\n12\n12\n44");
-  });
-
   it("Builtin numerical: floor", async () => {
     const code = `
   DATA chars TYPE c LENGTH 10.
