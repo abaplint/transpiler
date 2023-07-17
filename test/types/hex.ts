@@ -259,4 +259,20 @@ describe("Running Examples - Hex type", () => {
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
+
+  it.only("Hex, overflow", async () => {
+    const code = `
+    DATA val1 TYPE x LENGTH 1.
+    DATA val2 TYPE x LENGTH 1.
+    DATA val3 TYPE x LENGTH 1.
+
+    val1 = 'FF'.
+    val2 = '01'.
+    val3 = val1 + val1.
+    WRITE val3.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`FE`);
+  });
 });
