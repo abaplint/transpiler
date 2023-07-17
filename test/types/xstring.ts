@@ -40,4 +40,15 @@ describe("Running Examples - xstring type", () => {
     expect(abap.console.get()).to.equal("3039");
   });
 
+  it("set empty from char", async () => {
+    const code = `
+DATA xstr TYPE xstring.
+xstr = ''.
+WRITE xstrlen( xstr ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
 });

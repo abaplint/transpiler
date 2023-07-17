@@ -3,6 +3,7 @@ import {Float} from "./float";
 import {Hex} from "./hex";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
+import {Character} from "./character";
 
 export class XString implements ICharacter {
   private value: string;
@@ -32,6 +33,8 @@ export class XString implements ICharacter {
       if (value instanceof Float) {
         v = value.getRaw();
         this.set(v);
+      } else if (value instanceof Character) {
+        this.set(value.getTrimEnd());
       } else if (typeof v === "number") {
         this.value = v.toString(16);
         const finalLength = Math.ceil(this.value.length / 2 ) * 2;
