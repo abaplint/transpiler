@@ -265,4 +265,30 @@ REPLACE ALL OCCURRENCES OF 'foo' IN TABLE tab WITH 'bar'.`;
     await f(abap);
   });
 
+  it("REPLACE, SECTION OFFSET, long", async () => {
+    const code = `
+DATA lv_input TYPE string.
+lv_input = '0123456789'.
+REPLACE SECTION OFFSET 2 LENGTH 4 OF lv_input WITH 'a'.
+WRITE lv_input.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("01a6789");
+  });
+
+  it("REPLACE, SECTION OFFSET, long, space", async () => {
+    const code = `
+DATA lv_input TYPE string.
+lv_input = '0123456789'.
+REPLACE SECTION OFFSET 2 LENGTH 4 OF lv_input WITH 'a '.
+WRITE lv_input.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("01a6789");
+  });
+
 });
