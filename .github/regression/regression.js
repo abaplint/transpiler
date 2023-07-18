@@ -15,7 +15,7 @@ const repos = [
   {name: "open-abap/open-table-maintenance",    command: "npm test"},
   {name: "SAP/abap-file-formats-tools",         command: "npm test"},
   {name: "SAP/abap-file-formats-tools",         command: "npm test"},
-  {name: "Sumu-Ning/AES ",                      command: "npm test"},
+  {name: "Sumu-Ning/AES",                       command: "npm test"},
 ];
 
 const CWD = "./.github/regression/";
