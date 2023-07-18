@@ -1,6 +1,6 @@
 import {clone} from "../clone";
 import {throwError} from "../throw_error";
-import {ABAPObject, Character, DataReference, Date, String, FieldSymbol, Float, Integer, Structure, Table, Time, XString, Hex, Packed, Numc} from "../types";
+import {ABAPObject, Character, DataReference, Date, String, FieldSymbol, Float, Integer, Structure, Table, Time, XString, Hex, Packed, Numc, Integer8} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -74,6 +74,8 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
       target.assign(new Date());
     } else if (options.name.trimEnd() === "F") {
       target.assign(new Float());
+    } else if (options.name.trimEnd() === "INT8") {
+      target.assign(new Integer8());
     } else {
       throwError("CX_SY_CREATE_DATA_ERROR");
     }
@@ -137,6 +139,9 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
         break;
       case "STRING":
         target.assign(new String());
+        break;
+      case "INT8":
+        target.assign(new Integer8());
         break;
       case "XSTRING":
         target.assign(new XString());
