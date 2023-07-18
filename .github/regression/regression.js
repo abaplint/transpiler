@@ -11,9 +11,9 @@ const repos = [
   {name: "larshp/abap-advent-2020",             command: "npm test"},
   {name: "larshp/abap-wasm",                    command: "npm test"},
   {name: "larshp/abapNTLM",                     command: "npm test"},
+  {name: "larshp/abapPGP",                      command: "npm test"},
   {name: "open-abap/open-abap-core",            command: "npm test"},
   {name: "open-abap/open-table-maintenance",    command: "npm test"},
-  {name: "SAP/abap-file-formats-tools",         command: "npm test"},
   {name: "SAP/abap-file-formats-tools",         command: "npm test"},
   {name: "Sumu-Ning/AES",                       command: "npm test"},
 ];
