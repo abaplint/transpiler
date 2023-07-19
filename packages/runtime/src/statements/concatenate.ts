@@ -3,7 +3,7 @@ import {ICharacter} from "../types/_character";
 import {Character, Table} from "../types";
 
 export interface IConcatenateInput {
-  source: [number | string | INumeric | ICharacter | Table],
+  source: (number | string | INumeric | ICharacter | Table)[],
   target: ICharacter,
   separatedBy?: number | string | INumeric | ICharacter,
   respectingBlanks?: boolean,

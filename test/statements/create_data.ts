@@ -320,4 +320,28 @@ CREATE DATA val TYPE (foo).`;
     await f(abap);
     expect(abap.console.get()).to.equal("u");
   });
+
+  it("CREATE DATA, INT8, dynamic", async () => {
+    const code = `
+DATA ref_int8 TYPE REF TO data.
+FIELD-SYMBOLS <value> TYPE simple.
+CREATE DATA ref_int8 TYPE ('INT8').
+ASSIGN ref_int8->* TO <value>.
+<value> = 123.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("CREATE DATA, INT8, static", async () => {
+    const code = `
+DATA ref_int8 TYPE REF TO data.
+FIELD-SYMBOLS <value> TYPE simple.
+CREATE DATA ref_int8 TYPE INT8.
+ASSIGN ref_int8->* TO <value>.
+<value> = 123.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
 });

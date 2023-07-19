@@ -1,8 +1,8 @@
 import {ABAPRegExp} from "../abap_regex";
-import {OffsetLength} from "../offset_length";
 import {Character, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {concatenate} from "./concatenate";
 
 export type replaceInput = {
   target: ICharacter | Table,
@@ -47,7 +47,9 @@ export function replace(input: replaceInput): void {
     found = temp.match(regex) !== null;
     search = new RegExp(regex, ignoreCase + allOccurrences);
   } else if (input.sectionLength && input.sectionOffset) {
-    new OffsetLength(input.target, {length: input.sectionLength, offset: input.sectionOffset}).set(input.with);
+    const before = input.target.getOffset({length: input.sectionOffset});
+    const after = input.target.getOffset({offset: input.sectionLength.get() + input.sectionOffset.get()});
+    concatenate({source: [before, input.with, after], target: input.target});
     // @ts-ignore
     abap.builtin.sy.get().subrc.set(0);
     return;
