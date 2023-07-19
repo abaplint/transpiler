@@ -303,4 +303,16 @@ WRITE val2.`;
     await f(abap);
     expect(abap.console.get()).to.equal(`6BC1`);
   });
+
+  it("Hex, conversion", async () => {
+    const code = `
+    DATA lv_hex TYPE x LENGTH 2.
+    lv_hex = 65535.
+    ASSERT lv_hex = 'FFFF'.
+    CONCATENATE lv_hex+1(1) lv_hex(1) INTO lv_hex IN BYTE MODE.
+    ASSERT lv_hex = 'FFFF'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
 });
