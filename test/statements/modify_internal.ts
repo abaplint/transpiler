@@ -66,7 +66,7 @@ ASSERT lines( lt_tab ) = 1.`;
     await f(abap);
   });
 
-  it.skip("MODIFY, TRANSPORTING WHERE", async () => {
+  it.only("MODIFY, TRANSPORTING WHERE", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          foo     TYPE c LENGTH 10,

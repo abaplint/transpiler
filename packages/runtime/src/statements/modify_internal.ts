@@ -7,6 +7,8 @@ import {readTable} from "./read_table";
 export interface IModifyInternalOptions {
   index: INumeric,
   from: any,
+  where?: (i: any) => boolean,
+  transporting?: string[],
 }
 
 export function modifyInternal(table: Table, options: IModifyInternalOptions): void {

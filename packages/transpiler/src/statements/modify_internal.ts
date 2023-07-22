@@ -24,6 +24,21 @@ export class ModifyInternalTranspiler implements IStatementTranspiler {
       extra.push("from: " + s);
     }
 
+    const whereNode = node.findDirectExpression(abaplint.Expressions.ComponentCond);
+    if (whereNode) {
+      // todo, replacing "await" is a hack
+      extra.push("where: " + traversal.traverse(whereNode).getCode().replace("await ", ""));
+    }
+
+    const transporting = node.findDirectExpressions(abaplint.Expressions.ComponentChainSimple);
+    if (transporting) {
+      const list: string[] = [];
+      for (const t of transporting) {
+        list.push("\"" + t.concatTokens().toLowerCase() + "\"");
+      }
+      extra.push("transporting: [" + list.join(",") + "]");
+    }
+
     let concat = "";
     if (extra.length > 0) {
       concat = ",{" + extra.join(",") + "}";
