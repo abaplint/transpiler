@@ -66,7 +66,7 @@ ASSERT lines( lt_tab ) = 1.`;
     await f(abap);
   });
 
-  it.only("MODIFY, TRANSPORTING WHERE", async () => {
+  it("MODIFY, TRANSPORTING WHERE", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          foo     TYPE c LENGTH 10,
@@ -84,12 +84,14 @@ APPEND ls_initial TO lt_fc.
 ls_fc-dynpfld = abap_true.
 MODIFY lt_fc FROM ls_fc TRANSPORTING dynpfld WHERE dynpfld = space.
 
+WRITE / lines( lt_fc ).
 LOOP AT lt_fc INTO ls_fc.
   ASSERT ls_fc-dynpfld = abap_true.
 ENDLOOP.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+    expect(abap.console.get()).to.equal("2");
   });
 
 });

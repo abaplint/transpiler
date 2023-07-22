@@ -31,7 +31,7 @@ export class ModifyInternalTranspiler implements IStatementTranspiler {
     }
 
     const transporting = node.findDirectExpressions(abaplint.Expressions.ComponentChainSimple);
-    if (transporting) {
+    if (transporting.length > 0) {
       const list: string[] = [];
       for (const t of transporting) {
         list.push("\"" + t.concatTokens().toLowerCase() + "\"");
