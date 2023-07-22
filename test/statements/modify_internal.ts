@@ -66,4 +66,30 @@ ASSERT lines( lt_tab ) = 1.`;
     await f(abap);
   });
 
+  it.skip("MODIFY, TRANSPORTING WHERE", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         foo     TYPE c LENGTH 10,
+         dynpfld TYPE abap_bool,
+         bar     TYPE c LENGTH 10,
+       END OF ty.
+
+DATA lt_fc      TYPE STANDARD TABLE OF ty.
+DATA ls_initial TYPE ty.
+DATA ls_fc      LIKE LINE OF lt_fc.
+
+APPEND ls_initial TO lt_fc.
+APPEND ls_initial TO lt_fc.
+
+ls_fc-dynpfld = abap_true.
+MODIFY lt_fc FROM ls_fc TRANSPORTING dynpfld WHERE dynpfld = space.
+
+LOOP AT lt_fc INTO ls_fc.
+  ASSERT ls_fc-dynpfld = abap_true.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
