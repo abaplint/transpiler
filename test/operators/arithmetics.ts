@@ -289,7 +289,7 @@ WRITE result.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.getTrimmed()).to.equal("1001");
+    expect(abap.console.getTrimmed()).to.equal("     1001");
   });
 
   it("character field minus 1", async () => {
@@ -301,7 +301,7 @@ WRITE result.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.getTrimmed()).to.equal("999");
+    expect(abap.console.getTrimmed()).to.equal("      999");
   });
 
 });
