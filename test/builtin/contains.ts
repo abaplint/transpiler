@@ -34,4 +34,27 @@ describe("Builtin functions - contains", () => {
     await f(abap);
   });
 
+  it("sub, start, end", async () => {
+    const code = `
+DATA lv_bool TYPE abap_bool.
+
+lv_bool = boolc( contains( val = 'axaxa' sub = 'x' ) ).
+ASSERT lv_bool = abap_true.
+lv_bool = boolc( contains( val = 'axaxa' sub = 'b' ) ).
+ASSERT lv_bool = abap_false.
+
+lv_bool = boolc( contains( val = 'axaxa' start = 'a' ) ).
+ASSERT lv_bool = abap_true.
+lv_bool = boolc( contains( val = 'axaxa' start = 'b' ) ).
+ASSERT lv_bool = abap_false.
+
+lv_bool = boolc( contains( val = 'axaxa' end = 'a' ) ).
+ASSERT lv_bool = abap_true.
+lv_bool = boolc( contains( val = 'axaxa' end = 'b' ) ).
+ASSERT lv_bool = abap_false.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

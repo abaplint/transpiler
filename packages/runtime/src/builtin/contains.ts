@@ -4,7 +4,10 @@ import {INumeric} from "../types/_numeric";
 
 export type ContainsInput = {
   val: ICharacter
-  regex: ICharacter
+  regex?: ICharacter
+  sub?: ICharacter
+  start?: ICharacter
+  end?: ICharacter
   case?: ICharacter,
   off?: INumeric,
   len?: INumeric,
@@ -19,6 +22,16 @@ export function contains(input: ContainsInput) {
     throw "runtime, contains() todo";
   }
 
-  const ret = input.val.get().match(input.regex.get()) !== null ? "X" : " ";
+  let ret = " ";
+  if (input.regex) {
+    ret = input.val.get().match(input.regex.get()) !== null ? "X" : " ";
+  } else if (input.sub) {
+    ret = input.val.get().includes(input.sub.get()) ? "X" : " ";
+  } else if (input.start) {
+    ret = input.val.get().startsWith(input.start.get()) ? "X" : " ";
+  } else if (input.end) {
+    ret = input.val.get().endsWith(input.end.get()) ? "X" : " ";
+  }
+
   return new String().set(ret);
 }
