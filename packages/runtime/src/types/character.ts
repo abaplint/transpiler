@@ -6,6 +6,7 @@ import {Structure} from "./structure";
 import {AbstractTypeData} from "./_abstract_type_data";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
+import {Integer} from "./integer";
 
 const TRIMREGEX = / *$/;
 
@@ -31,7 +32,7 @@ export class Character implements ICharacter {
     return this;
   }
 
-  public set(value: ICharacter | string | Structure | FieldSymbol) {
+  public set(value: ICharacter | string | Structure | FieldSymbol | Integer) {
     if (this.constant === true) {
       throw new Error("Changing constant");
     }
@@ -47,6 +48,9 @@ export class Character implements ICharacter {
     } else if (value instanceof Structure) {
       this.set(value.getCharacter());
       return this;
+    } else if (value instanceof Integer) {
+      this.value = Math.abs( value.get() ) + ( value.get() < 0 ? "-" : " " );
+      this.value = this.value.padStart(this.length, " ");
     } else {
       this.value = value.get() + "";
     }

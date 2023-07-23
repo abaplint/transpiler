@@ -43,4 +43,28 @@ WRITE target.`;
     expect(abap.console.get()).to.equal("123");
   });
 
+  it("value from int", async () => {
+    const code = `
+DATA char3 TYPE c LENGTH 3.
+DATA str TYPE string.
+char3 = 1.
+ASSERT char3 = ' 1 '.
+CONCATENATE 'hello' char3 INTO str.
+WRITE str.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello 1");
+  });
+
+  it("value from int, 10", async () => {
+    const code = `
+DATA char10 TYPE c LENGTH 10.
+char10 = 1.
+ASSERT char10 = '        1 '.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
