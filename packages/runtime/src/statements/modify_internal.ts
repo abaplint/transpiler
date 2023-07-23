@@ -1,4 +1,4 @@
-import {Integer, Table} from "../types";
+import {FieldSymbol, Integer, Table} from "../types";
 import {INumeric} from "../types/_numeric";
 import {deleteInternal} from "./delete_internal";
 import {insertInternal} from "./insert_internal";
@@ -7,6 +7,8 @@ import {readTable} from "./read_table";
 export interface IModifyInternalOptions {
   index: INumeric,
   from: any,
+  where?: (i: any) => boolean,
+  transporting?: string[],
 }
 
 export function modifyInternal(table: Table, options: IModifyInternalOptions): void {
@@ -19,6 +21,23 @@ export function modifyInternal(table: Table, options: IModifyInternalOptions): v
     if (found) {
       table.deleteIndex(index);
       table.insertIndex(options.from, index);
+    }
+  } else if (options.where && options.transporting && options.from) {
+    let index = 1;
+    const fs = new FieldSymbol();
+    while (index <= table.array().length) {
+      const currentIndex = new Integer().set(index);
+      const readResult = readTable(table, {
+        withKey: options.where,
+        assigning: fs,
+        index: currentIndex});
+      if (readResult.subrc === 0) {
+        found = true;
+        for (const t of options.transporting) {
+          fs.get()[t].set(options.from.get()[t]);
+        }
+      }
+      index++;
     }
   } else if (options.from) {
     const readResult = readTable(table, {from: options.from});
