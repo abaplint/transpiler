@@ -460,6 +460,22 @@ ASSERT sy-subrc = 8.`;
     await f(abap);
   });
 
+  it.skip("simple binary search, not found, middle", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DO 5 TIMES.
+  sy-index = sy-index * 2.
+  APPEND sy-index TO tab.
+ENDDO.
+READ TABLE tab WITH KEY table_line = 5 TRANSPORTING NO FIELDS BINARY SEARCH.
+WRITE / sy-subrc.
+WRITE / sy-tabix.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n3");
+  });
+
   it("binary search, find first occurrence", async () => {
     const code = `
 TYPES: BEGIN OF ty,
