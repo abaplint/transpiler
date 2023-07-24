@@ -460,6 +460,22 @@ ASSERT sy-subrc = 8.`;
     await f(abap);
   });
 
+  it.skip("simple binary search, not found, middle", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DO 5 TIMES.
+  sy-index = sy-index * 2.
+  APPEND sy-index TO tab.
+ENDDO.
+READ TABLE tab WITH KEY table_line = 5 TRANSPORTING NO FIELDS BINARY SEARCH.
+WRITE / sy-subrc.
+WRITE / sy-tabix.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n3");
+  });
+
   it("binary search, find first occurrence", async () => {
     const code = `
 TYPES: BEGIN OF ty,
@@ -781,5 +797,73 @@ ASSERT sy-subrc = 0.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
+
+  it("READ TABLE, key sorted, subrc 8, partial key", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         cell_row    TYPE i,
+         cell_column TYPE i,
+         data        TYPE i,
+       END OF ty.
+
+DATA table TYPE SORTED TABLE OF ty WITH UNIQUE KEY cell_row cell_column.
+DATA row LIKE LINE OF table.
+FIELD-SYMBOLS <sheet_cell> TYPE ty.
+
+READ TABLE table ASSIGNING <sheet_cell> WITH KEY cell_row = 0.
+WRITE / sy-subrc.
+WRITE / sy-tabix.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("8\n1");
+  });
+
+  it("READ TABLE, key sorted, subrc 4, partial key", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         cell_row    TYPE i,
+         cell_column TYPE i,
+         data        TYPE i,
+       END OF ty.
+
+DATA table TYPE SORTED TABLE OF ty WITH UNIQUE KEY cell_row cell_column.
+DATA row LIKE LINE OF table.
+FIELD-SYMBOLS <sheet_cell> TYPE ty.
+
+row-cell_row = 1.
+INSERT row INTO TABLE table.
+
+READ TABLE table ASSIGNING <sheet_cell> WITH KEY cell_row = 0.
+WRITE / sy-subrc.
+WRITE / sy-tabix.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("4\n1");
+  });
+
+  it("READ TABLE, key hashed, subrc 4, partial key", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field1 TYPE i,
+         field2 TYPE i,
+         field3 TYPE i,
+       END OF ty.
+DATA tab TYPE HASHED TABLE OF ty WITH UNIQUE KEY field1 field2.
+DATA row LIKE LINE OF tab.
+
+READ TABLE tab WITH KEY
+  field1 = 1
+  field3 = 3
+  INTO row TRANSPORTING field1.
+
+WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("4");
+  });
+
 
 });
