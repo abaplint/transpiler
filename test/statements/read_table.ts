@@ -782,5 +782,50 @@ ASSERT sy-subrc = 0.`;
     await f(abap);
   });
 
+  it.only("READ TABLE, key sorted, subrc 8", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         cell_row    TYPE i,
+         cell_column TYPE i,
+         data        TYPE i,
+       END OF ty.
+
+DATA table TYPE SORTED TABLE OF ty WITH UNIQUE KEY cell_row cell_column.
+DATA row LIKE LINE OF table.
+FIELD-SYMBOLS <sheet_cell> TYPE ty.
+
+READ TABLE table ASSIGNING <sheet_cell> WITH KEY cell_row = 0.
+WRITE / sy-subrc.
+WRITE / sy-tabix.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("8\n1");
+  });
+
+  it("READ TABLE, key sorted, subrc 4", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         cell_row    TYPE i,
+         cell_column TYPE i,
+         data        TYPE i,
+       END OF ty.
+
+DATA table TYPE SORTED TABLE OF ty WITH UNIQUE KEY cell_row cell_column.
+DATA row LIKE LINE OF table.
+FIELD-SYMBOLS <sheet_cell> TYPE ty.
+
+row-cell_row = 1.
+INSERT row INTO TABLE table.
+
+READ TABLE table ASSIGNING <sheet_cell> WITH KEY cell_row = 0.
+WRITE / sy-subrc.
+WRITE / sy-tabix.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("4\n1");
+  });
+
 
 });
