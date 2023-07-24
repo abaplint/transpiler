@@ -803,7 +803,7 @@ WRITE / sy-tabix.`;
     expect(abap.console.get().trimEnd()).to.equal("8\n1");
   });
 
-  it.skip("READ TABLE, key sorted, subrc 4, partial key", async () => {
+  it("READ TABLE, key sorted, subrc 4, partial key", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          cell_row    TYPE i,

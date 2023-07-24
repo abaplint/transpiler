@@ -1,5 +1,5 @@
 import {binarySearchFromRow} from "../binary_search";
-import {eq} from "../compare";
+import {eq, ge} from "../compare";
 import {DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Structure, Table, TableAccessType} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
@@ -129,11 +129,25 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
     foundIndex = searchResult.foundIndex;
 
     if (found === undefined) {
-      if (arr.length === startIndex + 1) {
+      if (arr.length === 0) {
         binarySubrc = 8;
         foundIndex = 1;
       } else {
         binarySubrc = 4;
+        foundIndex = startIndex + 1;
+
+        // check if going beyond the last row, todo: only checks one field
+        const last = arr[arr.length - 1];
+        const isStructured = last instanceof Structure;
+        let row: any = undefined;
+        if (options.usesTableLine === false && isStructured === true) {
+          row = last.get();
+        } else {
+          row = isStructured ? {table_line: last, ...last.get()} : {table_line: last};
+        }
+        if (ge(first.value, first.key(row))) {
+          binarySubrc = 8;
+        }
       }
     }
   } else if (options?.withKey) {
