@@ -1019,4 +1019,36 @@ WRITE / sy-tabix.`;
     expect(abap.console.get().trimEnd()).to.equal("4\n1");
   });
 
+  it.only("READ TABLE, key sorted non-unique, subrc 4, in the middle of the flock", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field TYPE i,
+       END OF ty.
+DATA tab TYPE SORTED TABLE OF ty WITH NON-UNIQUE KEY field.
+DATA row TYPE ty.
+row-field = 2.
+INSERT row INTO TABLE tab.
+row-field = 3.
+INSERT row INTO TABLE tab.
+row-field = 3.
+INSERT row INTO TABLE tab.
+row-field = 4.
+INSERT row INTO TABLE tab.
+row-field = 6.
+INSERT row INTO TABLE tab.
+row-field = 6.
+INSERT row INTO TABLE tab.
+row-field = 7.
+INSERT row INTO TABLE tab.
+row-field = 7.
+INSERT row INTO TABLE tab.
+READ TABLE tab WITH KEY field = 5 TRANSPORTING NO FIELDS.
+WRITE / sy-subrc.
+WRITE / sy-tabix.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("4\n5");
+  });
+
 });
