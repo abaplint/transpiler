@@ -922,7 +922,7 @@ WRITE / sy-subrc.`;
     expect(abap.console.get().trimEnd()).to.equal("4");
   });
 
-  it.only("READ TABLE, sorted DDIC TTYP", async () => {
+  it("READ TABLE, sorted DDIC TTYP", async () => {
     const code = `DATA table TYPE zttyp.
 DATA row LIKE LINE OF table.
 FIELD-SYMBOLS <sheet_cell> LIKE LINE OF table.
