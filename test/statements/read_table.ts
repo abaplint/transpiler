@@ -491,10 +491,11 @@ DO 5 TIMES.
 ENDDO.
 READ TABLE tab WITH KEY field1 = 5 TRANSPORTING NO FIELDS BINARY SEARCH.
 ASSERT sy-subrc = 0.
-ASSERT sy-tabix = 1.`;
+WRITE / sy-tabix.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+    expect(abap.console.get()).to.equal("1");
   });
 
   it("COMPONENTS subrc 8", async () => {
@@ -1019,7 +1020,7 @@ WRITE / sy-tabix.`;
     expect(abap.console.get().trimEnd()).to.equal("4\n1");
   });
 
-  it.only("READ TABLE, key sorted non-unique, subrc 4, in the middle of the flock", async () => {
+  it("READ TABLE, key sorted non-unique, subrc 4, in the middle of the flock", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          field TYPE i,
