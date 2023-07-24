@@ -28,6 +28,7 @@ export type ReadTableReturn = {
   foundIndex: number;
 };
 
+/** startIndex = javascript index, return ABAP index */
 function searchWithKey(arr: any, withKey: (i: any) => boolean, startIndex = 0, usesTableLine: boolean | undefined) {
   const isStructured = arr[0] instanceof Structure;
   for (let index = startIndex; index < arr.length; index++) {
@@ -135,7 +136,7 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
 // note: it currently only uses the first key field for binary search, todo
     const first = options.withKeyValue[0];
     const arr = table.array();
-    const startIndex = binarySearchFromRow(arr, 0, arr.length, first.key, first.value, options.usesTableLine) - 1;
+    const startIndex = binarySearchFromRow(arr, 0, arr.length - 1, first.key, first.value, options.usesTableLine);
 
     const searchResult = searchWithKey(arr, options.withKey, startIndex, options.usesTableLine);
     found = searchResult.found;
