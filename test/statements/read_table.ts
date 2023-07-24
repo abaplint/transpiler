@@ -843,5 +843,27 @@ WRITE / sy-tabix.`;
     expect(abap.console.get().trimEnd()).to.equal("4\n1");
   });
 
+  it("READ TABLE, key hashed, subrc 4, partial key", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field1 TYPE i,
+         field2 TYPE i,
+         field3 TYPE i,
+       END OF ty.
+DATA tab TYPE HASHED TABLE OF ty WITH UNIQUE KEY field1 field2.
+DATA row LIKE LINE OF tab.
+
+READ TABLE tab WITH KEY
+  field1 = 1
+  field3 = 3
+  INTO row TRANSPORTING field1.
+
+WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("4");
+  });
+
 
 });

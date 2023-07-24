@@ -69,15 +69,28 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
   if (options?.withTableKey === undefined
       && options?.withKeySimple
       && (table.getOptions().primaryKey?.keyFields || []).length > 0) {
-    const firstKeyField = table.getOptions().primaryKey!.keyFields[0];
-    let useKey = false;
-    for (const name in options.withKeySimple) {
-      if (firstKeyField === name.toUpperCase()) {
-        useKey = true;
+
+    if (table instanceof HashedTable) {
+      // hashed tables requires all fields for fast lookup
+      const fields = new Set<string>(table.getOptions().primaryKey!.keyFields);
+      for (const name in options.withKeySimple) {
+        fields.delete(name.toUpperCase());
       }
-    }
-    if (useKey === true) {
-      options.withTableKey = true;
+      if (fields.size === 0) {
+        options.withTableKey = true;
+      }
+    } else {
+      // while sorted just needs the first key field
+      const firstKeyField = table.getOptions().primaryKey!.keyFields[0];
+      let useKey = false;
+      for (const name in options.withKeySimple) {
+        if (firstKeyField === name.toUpperCase()) {
+          useKey = true;
+        }
+      }
+      if (useKey === true) {
+        options.withTableKey = true;
+      }
     }
   }
 
