@@ -843,6 +843,63 @@ WRITE / sy-tabix.`;
     expect(abap.console.get().trimEnd()).to.equal("4\n1");
   });
 
+  it("READ TABLE, key sorted, subrc 4, partial key, two rows", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         cell_row    TYPE i,
+         cell_column TYPE i,
+         data        TYPE i,
+       END OF ty.
+
+DATA table TYPE SORTED TABLE OF ty WITH UNIQUE KEY cell_row cell_column.
+DATA row LIKE LINE OF table.
+FIELD-SYMBOLS <sheet_cell> TYPE ty.
+
+row-cell_row = 1.
+INSERT row INTO TABLE table.
+
+row-cell_row = 2.
+INSERT row INTO TABLE table.
+
+READ TABLE table ASSIGNING <sheet_cell> WITH KEY cell_row = 0.
+WRITE / sy-subrc.
+WRITE / sy-tabix.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("4\n1");
+  });
+
+  it("READ TABLE, key sorted, subrc 4, partial key, three rows", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         cell_row    TYPE i,
+         cell_column TYPE i,
+         data        TYPE i,
+       END OF ty.
+
+DATA table TYPE SORTED TABLE OF ty WITH UNIQUE KEY cell_row cell_column.
+DATA row LIKE LINE OF table.
+FIELD-SYMBOLS <sheet_cell> TYPE ty.
+
+row-cell_row = 1.
+INSERT row INTO TABLE table.
+
+row-cell_row = 2.
+INSERT row INTO TABLE table.
+
+row-cell_row = 3.
+INSERT row INTO TABLE table.
+
+READ TABLE table ASSIGNING <sheet_cell> WITH KEY cell_row = 0.
+WRITE / sy-subrc.
+WRITE / sy-tabix.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("4\n1");
+  });
+
   it("READ TABLE, key hashed, subrc 4, partial key", async () => {
     const code = `
 TYPES: BEGIN OF ty,
@@ -864,6 +921,5 @@ WRITE / sy-subrc.`;
     await f(abap);
     expect(abap.console.get().trimEnd()).to.equal("4");
   });
-
 
 });
