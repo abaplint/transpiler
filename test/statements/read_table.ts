@@ -843,6 +843,63 @@ WRITE / sy-tabix.`;
     expect(abap.console.get().trimEnd()).to.equal("4\n1");
   });
 
+  it("READ TABLE, key sorted, subrc 4, partial key, two rows", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         cell_row    TYPE i,
+         cell_column TYPE i,
+         data        TYPE i,
+       END OF ty.
+
+DATA table TYPE SORTED TABLE OF ty WITH UNIQUE KEY cell_row cell_column.
+DATA row LIKE LINE OF table.
+FIELD-SYMBOLS <sheet_cell> TYPE ty.
+
+row-cell_row = 1.
+INSERT row INTO TABLE table.
+
+row-cell_row = 2.
+INSERT row INTO TABLE table.
+
+READ TABLE table ASSIGNING <sheet_cell> WITH KEY cell_row = 0.
+WRITE / sy-subrc.
+WRITE / sy-tabix.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("4\n1");
+  });
+
+  it("READ TABLE, key sorted, subrc 4, partial key, three rows", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         cell_row    TYPE i,
+         cell_column TYPE i,
+         data        TYPE i,
+       END OF ty.
+
+DATA table TYPE SORTED TABLE OF ty WITH UNIQUE KEY cell_row cell_column.
+DATA row LIKE LINE OF table.
+FIELD-SYMBOLS <sheet_cell> TYPE ty.
+
+row-cell_row = 1.
+INSERT row INTO TABLE table.
+
+row-cell_row = 2.
+INSERT row INTO TABLE table.
+
+row-cell_row = 3.
+INSERT row INTO TABLE table.
+
+READ TABLE table ASSIGNING <sheet_cell> WITH KEY cell_row = 0.
+WRITE / sy-subrc.
+WRITE / sy-tabix.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("4\n1");
+  });
+
   it("READ TABLE, key hashed, subrc 4, partial key", async () => {
     const code = `
 TYPES: BEGIN OF ty,
@@ -865,5 +922,101 @@ WRITE / sy-subrc.`;
     expect(abap.console.get().trimEnd()).to.equal("4");
   });
 
+  it("READ TABLE, sorted DDIC TTYP", async () => {
+    const code = `DATA table TYPE zttyp.
+DATA row LIKE LINE OF table.
+FIELD-SYMBOLS <sheet_cell> LIKE LINE OF table.
+
+row-field1 = 1.
+INSERT row INTO TABLE table.
+
+READ TABLE table ASSIGNING <sheet_cell> WITH KEY field1 = 0.
+WRITE / sy-subrc.
+WRITE / sy-tabix.`;
+    const tabl = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V>
+    <TABNAME>ZROW</TABNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <TABCLASS>INTTAB</TABCLASS>
+    <DDTEXT>row</DDTEXT>
+    <EXCLASS>1</EXCLASS>
+   </DD02V>
+   <DD03P_TABLE>
+    <DD03P>
+     <FIELDNAME>FIELD1</FIELDNAME>
+     <ADMINFIELD>0</ADMINFIELD>
+     <INTTYPE>X</INTTYPE>
+     <INTLEN>000004</INTLEN>
+     <DATATYPE>INT4</DATATYPE>
+     <LENG>000010</LENG>
+     <MASK>  INT4</MASK>
+    </DD03P>
+    <DD03P>
+     <FIELDNAME>FIELD2</FIELDNAME>
+     <ADMINFIELD>0</ADMINFIELD>
+     <INTTYPE>X</INTTYPE>
+     <INTLEN>000004</INTLEN>
+     <DATATYPE>INT4</DATATYPE>
+     <LENG>000010</LENG>
+     <MASK>  INT4</MASK>
+    </DD03P>
+    <DD03P>
+     <FIELDNAME>FIELD3</FIELDNAME>
+     <ADMINFIELD>0</ADMINFIELD>
+     <INTTYPE>X</INTTYPE>
+     <INTLEN>000004</INTLEN>
+     <DATATYPE>INT4</DATATYPE>
+     <LENG>000010</LENG>
+     <MASK>  INT4</MASK>
+    </DD03P>
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+    const ttyp = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TTYP" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD40V>
+    <TYPENAME>ZTTYP</TYPENAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <ROWTYPE>ZROW</ROWTYPE>
+    <ROWKIND>S</ROWKIND>
+    <DATATYPE>STRU</DATATYPE>
+    <ACCESSMODE>S</ACCESSMODE>
+    <KEYDEF>K</KEYDEF>
+    <KEYKIND>U</KEYKIND>
+    <KEYFDCOUNT>0002</KEYFDCOUNT>
+    <DDTEXT>ttyp</DDTEXT>
+   </DD40V>
+   <DD42V>
+    <DD42V>
+     <TYPENAME>ZTTYP</TYPENAME>
+     <KEYFDPOS>0001</KEYFDPOS>
+     <ROWTYPEPOS>0001</ROWTYPEPOS>
+     <KEYFIELD>FIELD1</KEYFIELD>
+    </DD42V>
+    <DD42V>
+     <TYPENAME>ZTTYP</TYPENAME>
+     <KEYFDPOS>0002</KEYFDPOS>
+     <ROWTYPEPOS>0002</ROWTYPEPOS>
+     <KEYFIELD>FIELD2</KEYFIELD>
+    </DD42V>
+   </DD42V>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "zrow.tabl.xml", contents: tabl},
+      {filename: "zttyp.ttyp.xml", contents: ttyp},
+    ]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("4\n1");
+  });
 
 });
