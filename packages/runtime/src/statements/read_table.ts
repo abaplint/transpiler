@@ -56,6 +56,7 @@ function searchWithKey(arr: any, withKey: (i: any) => boolean, startIndex = 0, u
 export function readTable(table: Table | HashedTable | FieldSymbol, options?: IReadTableOptions): ReadTableReturn {
   let found: any = undefined;
   let foundIndex = 0;
+  let binarySubrc: number | undefined = undefined;
 
   if (table instanceof FieldSymbol) {
     if (table.getPointer() === undefined) {
@@ -68,11 +69,14 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
   if (options?.withTableKey === undefined
       && options?.withKeySimple
       && (table.getOptions().primaryKey?.keyFields || []).length > 0) {
-    const fields = new Set<string>(table.getOptions().primaryKey!.keyFields);
+    const firstKeyField = table.getOptions().primaryKey!.keyFields[0];
+    let useKey = false;
     for (const name in options.withKeySimple) {
-      fields.delete(name.toUpperCase());
+      if (firstKeyField === name.toUpperCase()) {
+        useKey = true;
+      }
     }
-    if (fields.size === 0) {
+    if (useKey === true) {
       options.withTableKey = true;
     }
   }
@@ -123,6 +127,15 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
     const searchResult = searchWithKey(arr, options.withKey, startIndex, options.usesTableLine);
     found = searchResult.found;
     foundIndex = searchResult.foundIndex;
+
+    if (found === undefined) {
+      if (arr.length === startIndex + 1) {
+        binarySubrc = 8;
+        foundIndex = 1;
+      } else {
+        binarySubrc = 4;
+      }
+    }
   } else if (options?.withKey) {
     const arr = table.array();
     const searchResult = searchWithKey(arr, options.withKey, 0, options.usesTableLine);
@@ -166,7 +179,9 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
   }
 
   let subrc = found ? 0 : 4;
-  if ((options?.from || options?.binarySearch === true || options?.keyName !== undefined)
+  if (binarySubrc) {
+    subrc = binarySubrc;
+  } else if ((options?.from || options?.binarySearch === true || options?.keyName !== undefined)
       && subrc === 4) {
     subrc = 8;
   }
