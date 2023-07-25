@@ -226,4 +226,13 @@ ASSERT foo = '12345'.`;
     expect(abap.console.get()).to.equal("1.00 seconds");
   });
 
+  it("initial", async () => {
+    const code = `
+DATA foo TYPE p LENGTH 5.
+ASSERT foo IS INITIAL.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

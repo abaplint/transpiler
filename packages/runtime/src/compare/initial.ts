@@ -1,4 +1,4 @@
-import {ABAPObject, Character, DataReference, Date, FieldSymbol, HashedTable, Hex, Numc, Structure, Table, Time} from "../types";
+import {ABAPObject, Character, DataReference, Date, FieldSymbol, Float, HashedTable, Hex, Numc, Structure, Table, Time} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -16,6 +16,8 @@ export function initial(val: ICharacter | INumeric | string | number | Structure
     return val.get().match(/^0+$/) !== null;
   } else if (val instanceof Time) {
     return val.get() === "000000";
+  } else if (val instanceof Float) {
+    return val.getRaw() === 0;
   } else if (val instanceof Character) {
     return val.get().match(/^ *$/) !== null;
   } else if (val instanceof FieldSymbol && val.getPointer() === undefined) {
