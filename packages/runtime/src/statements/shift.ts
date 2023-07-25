@@ -1,4 +1,5 @@
 import {co} from "../compare";
+import {Numc} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -71,7 +72,11 @@ function shift_character_mode(target: ICharacter, options?: IShiftOptions) {
     value = value.substr(1);
   }
 
-  target.set(value);
+  if (target instanceof Numc) {
+    target.set(value, true);
+  } else {
+    target.set(value);
+  }
 }
 
 

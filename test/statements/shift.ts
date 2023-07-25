@@ -217,4 +217,19 @@ describe("Running statements - SHIFT", () => {
     expect(abap.console.get()).to.equal("-2343.342454332245");
   });
 
+  it("SHIFT numc", async () => {
+    const code = `
+    DATA numc TYPE n LENGTH 3.
+    DATA foo TYPE string.
+    numc = 1.
+    SHIFT numc LEFT DELETING LEADING '0'.
+    foo = 'hello#world'.
+    REPLACE ALL OCCURRENCES OF '#' IN foo WITH numc.
+    WRITE foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello1world");
+  });
+
 });

@@ -19,7 +19,7 @@ export class Numc implements ICharacter {
     return this.qualifiedName;
   }
 
-  public set(value: INumeric | ICharacter | Hex | string | number) {
+  public set(value: INumeric | ICharacter | Hex | string | number, raw = false) {
     if (typeof value === "number") {
       this.value = value.toString();
     } else if (typeof value === "string") {
@@ -33,7 +33,7 @@ export class Numc implements ICharacter {
       this.value = this.value.substr(this.value.length - this.length, this.length);
     } else {
       const pad = this.length - this.value.length;
-      if (pad > 0) {
+      if (pad > 0 && raw === false) {
         this.value = "0".repeat(pad) + this.value;
       }
     }

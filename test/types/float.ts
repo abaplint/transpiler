@@ -149,4 +149,13 @@ describe("Running Examples - Float type", () => {
     await f(abap);
   });
 
+  it("Float, initial", async () => {
+    const code = `
+  DATA float TYPE f.
+  ASSERT float IS INITIAL.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
