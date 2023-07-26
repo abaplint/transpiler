@@ -56,7 +56,7 @@ describe("Running Examples - Float type", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("2,0000000000000000E+00");
+    expect(abap.console.get()).to.equal("2.0000000000000000E+00");
   });
 
   it("float, 12345", async () => {
