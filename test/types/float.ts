@@ -56,7 +56,7 @@ describe("Running Examples - Float type", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("2,0000000000000000E+00");
+    expect(abap.console.get()).to.equal("2.0000000000000000E+00");
   });
 
   it("float, 12345", async () => {
@@ -153,6 +153,18 @@ describe("Running Examples - Float type", () => {
     const code = `
   DATA float TYPE f.
   ASSERT float IS INITIAL.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("Float to String", async () => {
+    const code = `
+    DATA float TYPE f.
+    DATA str TYPE string.
+    float = '100'.
+    str = float.
+    ASSERT str = '1.0000000000000000E+02'.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);

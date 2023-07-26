@@ -170,13 +170,14 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
     found = searchResult.found;
     foundIndex = searchResult.foundIndex;
   } else if (options?.from) {
-    if (options.from instanceof FieldSymbol) {
-      options.from = options.from.getPointer();
-    }
     if (table instanceof HashedTable) {
       throw new Error("runtime, todo readTable Hashed FROM");
     }
+    if (options.from instanceof FieldSymbol) {
+      options.from = options.from.getPointer();
+    }
     if (table instanceof Table && options.from instanceof Structure) {
+      // todo: optimize if the primary key is sorted
       const arr = table.array();
       const keys = table.getOptions()?.primaryKey?.keyFields;
       const isStructured = arr[0] instanceof Structure;
@@ -202,6 +203,9 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
     if (found === undefined) {
       foundIndex = 0;
     }
+    if (found === undefined && table.getOptions().primaryKey?.type === TableAccessType.sorted) {
+      binarySubrc = 8;
+    }
   } else {
     throw new Error("runtime, readTable, unexpected input");
   }
@@ -209,7 +213,7 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
   let subrc = found ? 0 : 4;
   if (binarySubrc) {
     subrc = binarySubrc;
-  } else if ((options?.from || options?.binarySearch === true || options?.keyName !== undefined)
+  } else if ((options?.binarySearch === true || options?.keyName !== undefined)
       && subrc === 4) {
     subrc = 8;
   }

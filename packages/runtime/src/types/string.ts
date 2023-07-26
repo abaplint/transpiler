@@ -8,6 +8,7 @@ import {Packed} from "./packed";
 import {Structure} from "./structure";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
+import {Float} from "./float";
 
 export class String implements ICharacter {
   private value: string;
@@ -45,6 +46,9 @@ export class String implements ICharacter {
       const lv_sign = (value as Integer).get() >= 0 ? " " : "-";
       this.value = Math.abs((value as Integer).get()) + "";
       this.value += lv_sign;
+    } else if (value instanceof Float) {
+      this.value = value.get() + "";
+      this.value = this.value.replace(",", ".");
     } else {
       this.value = value.get() + "";
     }
