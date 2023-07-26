@@ -158,4 +158,16 @@ describe("Running Examples - Float type", () => {
     await f(abap);
   });
 
+  it("Float to String", async () => {
+    const code = `
+    DATA float TYPE f.
+    DATA str TYPE string.
+    float = '100'.
+    str = float.
+    ASSERT str = '1.0000000000000000E+02'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

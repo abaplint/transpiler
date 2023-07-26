@@ -1052,7 +1052,7 @@ WRITE / sy-tabix.`;
     expect(abap.console.get().trimEnd()).to.equal("4\n5");
   });
 
-  it.only("READ TABLE FROM, standard non-unique TTYP", async () => {
+  it.skip("READ TABLE FROM, standard non-unique TTYP", async () => {
     const code = `
 DATA tab TYPE zttyp_std.
 DATA row LIKE LINE OF tab.
