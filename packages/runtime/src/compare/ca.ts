@@ -1,10 +1,19 @@
+import {FieldSymbol, Structure} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
-export function ca(left: number | string | ICharacter | INumeric, right: string | ICharacter): boolean {
+export function ca(left: number | string | ICharacter | INumeric | Structure, right: string | ICharacter): boolean {
+  if (left instanceof FieldSymbol) {
+    return ca(left.getPointer(), right);
+  } else if (right instanceof FieldSymbol) {
+    return ca(left, right.getPointer());
+  }
+
   let l = "";
   if (typeof left === "number" || typeof left === "string") {
     l = left.toString();
+  } else if (left instanceof Structure) {
+    l = left.getCharacter();
   } else {
     l = left.get().toString();
   }
