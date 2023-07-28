@@ -448,6 +448,7 @@ export class Table implements ITable {
     return val;
   }
 
+  /** index = javascript indexed */
   public deleteIndex(index: number) {
     this.secondaryIndexes = {};
     if (index > this.value.length) {
