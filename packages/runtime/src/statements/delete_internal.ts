@@ -99,13 +99,15 @@ export async function deleteInternal(target: Table | HashedTable | FieldSymbol, 
       }
     } else if (options?.index && options.index.get() === index) {
       target.deleteIndex(options.index.get() - 1);
+      break;
     } else if (options?.fromValue && eq(options.fromValue, i)) {
       target.deleteIndex(index);
     } else if (options?.from && options.from.get() <= index + 1) {
       target.deleteIndex(index);
-    } else if (options === undefined && originalTabix === index) {
+    } else if (options === undefined && originalTabix === index + 1) {
       // short form, "DELETE tab"
-      target.deleteIndex(index - 1);
+      target.deleteIndex(index);
+      break;
     }
   }
 }
