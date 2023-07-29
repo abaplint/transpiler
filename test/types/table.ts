@@ -414,4 +414,39 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("CC\nAA\nBB");
   });
 
+  it("hashed table, nested structured key", async () => {
+    if (featureHashedTables === false) {
+      return;
+    }
+    const code = `
+TYPES: BEGIN OF ty,
+         bar TYPE c LENGTH 1,
+         BEGIN OF sub,
+           foo TYPE c LENGTH 1,
+           BEGIN OF subsub,
+             foo TYPE c LENGTH 1,
+           END OF subsub,
+         END OF sub,
+       END OF ty.
+DATA tab TYPE HASHED TABLE OF ty WITH UNIQUE KEY sub.
+DATA data1 TYPE ty.
+DATA data2 TYPE ty.
+
+data1-sub-subsub-foo = 'A'.
+data2-sub-subsub-foo = 'B'.
+ASSERT data1 <> data2.
+
+INSERT data1 INTO TABLE tab.
+ASSERT sy-subrc = 0.
+
+INSERT data2 INTO TABLE tab.
+ASSERT sy-subrc = 0.
+
+WRITE / lines( tab ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
