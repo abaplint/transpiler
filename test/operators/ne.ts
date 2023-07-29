@@ -38,4 +38,41 @@ ASSERT |FOO | <> 'FOO'.`;
     expect(abap.console.get()).to.equal("");
   });
 
+  it("sub", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         BEGIN OF sub,
+           foo TYPE c LENGTH 1,
+         END OF sub,
+       END OF ty.
+DATA data1 TYPE ty.
+DATA data2 TYPE ty.
+
+data1-sub-foo = 'A'.
+data2-sub-foo = 'B'.
+ASSERT data1 <> data2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("sub2", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         bar TYPE c LENGTH 1,
+         BEGIN OF sub,
+           foo TYPE c LENGTH 1,
+         END OF sub,
+       END OF ty.
+DATA data1 TYPE ty.
+DATA data2 TYPE ty.
+
+data1-sub-foo = 'A'.
+data2-sub-foo = 'B'.
+ASSERT data1 <> data2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

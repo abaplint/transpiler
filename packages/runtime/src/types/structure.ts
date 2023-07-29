@@ -92,7 +92,11 @@ export class Structure {
   public getCharacter(): string {
     let val = "";
     for (const v in this.value) {
-      val += this.value[v].get();
+      if (this.value[v] instanceof Structure) {
+        val += this.value[v].getCharacter();
+      } else {
+        val += this.value[v].get();
+      }
     }
     return val;
   }
