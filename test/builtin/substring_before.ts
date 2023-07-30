@@ -67,4 +67,15 @@ describe("Builtin functions - substring_before", () => {
     expect(abap.console.get()).to.equal( `HELLO` );
   });
 
+  it("substring_before, escape regex", async () => {
+    const code = `
+DATA val TYPE string.
+val = substring_before( val = 'foo?bar' sub = '?' ).
+WRITE val.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("foo");
+  });
+
 });

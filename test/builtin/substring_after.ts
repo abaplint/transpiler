@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP, MemoryConsole} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -36,6 +36,17 @@ ASSERT result = |FOO|.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("substring_after, escape regex", async () => {
+    const code = `
+DATA val TYPE string.
+val = substring_after( val = 'foo?bar' sub = '?' ).
+WRITE val.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("bar");
   });
 
 });
