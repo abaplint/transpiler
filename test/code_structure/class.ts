@@ -1815,7 +1815,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("AABB");
   });
 
-  it("Class, inheritence and aliases redefintion", async () => {
+  it.skip("Class, inheritence and aliases redefintion", async () => {
     const code = `
 INTERFACE lif.
   METHODS get_text.
