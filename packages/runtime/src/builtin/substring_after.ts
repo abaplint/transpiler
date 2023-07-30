@@ -1,3 +1,4 @@
+import {ABAPRegExp} from "../abap_regex";
 import {Character} from "../types";
 import {ICharacter} from "../types/_character";
 import {String} from "../types/string";
@@ -13,9 +14,9 @@ export function substring_after(input: {val: ICharacter | string, sub?: ICharact
   } else if (input?.regex) {
     reg = input.regex.get();
   } else if (typeof input.sub === "string") {
-    reg = input.sub;
+    reg = ABAPRegExp.escapeRegExp(input.sub);
   } else if (input?.sub) {
-    reg = input.sub.get();
+    reg = ABAPRegExp.escapeRegExp(input.sub.get());
   }
 
   const r = new RegExp(reg + "(.*)");
