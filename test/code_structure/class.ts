@@ -1815,4 +1815,47 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("AABB");
   });
 
+  it.skip("Class, inheritence and aliases redefintion", async () => {
+    const code = `
+INTERFACE lif.
+  METHODS get_text.
+ENDINTERFACE.
+
+CLASS top DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+    ALIASES get_text FOR lif~get_text.
+ENDCLASS.
+CLASS top IMPLEMENTATION.
+  METHOD lif~get_text.
+    WRITE 'top'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS middle DEFINITION INHERITING FROM top.
+ENDCLASS.
+CLASS middle IMPLEMENTATION.
+ENDCLASS.
+
+CLASS sub DEFINITION INHERITING FROM middle.
+  PUBLIC SECTION.
+    METHODS get_text REDEFINITION.
+ENDCLASS.
+CLASS sub IMPLEMENTATION.
+  METHOD get_text.
+    WRITE 'sub'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO sub.
+  CREATE OBJECT lo.
+  lo->get_text( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("sub");
+  });
+
 });
