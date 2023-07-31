@@ -76,4 +76,18 @@ describe("Running statements - MESSAGE", () => {
     expect(abap.console.get()).to.equal("I:ZFOO:100 moo");
   });
 
+  it("MESSAGE fallback, WITH integer", async () => {
+    const code = `
+    DATA lv_text TYPE string.
+    DATA lv_int TYPE i.
+    lv_int = 444.
+    MESSAGE e123(abc) WITH lv_int INTO lv_text.
+    WRITE / lv_text.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.include("444");
+  });
+
 });
