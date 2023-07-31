@@ -21,7 +21,8 @@ function replace(text: string, w?: (ICharacter | string | Character)[]): string 
       if (typeof j === "string") {
         replace = j;
       } else {
-        replace = j.get().trimEnd();
+// todo: some formatting missing here,
+        replace = (j.get() + "").trimEnd();
       }
     }
 
