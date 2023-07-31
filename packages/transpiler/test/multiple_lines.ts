@@ -835,6 +835,8 @@ CALL FUNCTION 'FUNCTION_EXISTS'
     function_not_exist = 1
     OTHERS             = 2.`;
     const expected = `try {
+  if (abap.FunctionModules['FUNCTION_EXISTS'] === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FUNC'.trimEnd()] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_FUNC not found"; }
+  if (abap.FunctionModules['FUNCTION_EXISTS'] === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FUNC'.trimEnd()](); }
   await abap.FunctionModules['FUNCTION_EXISTS']({exporting: {funcname: new abap.types.Character(8).set('SDFSDFSD')}});
   abap.builtin.sy.get().subrc.set(0);
 } catch (e) {
