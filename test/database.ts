@@ -1167,4 +1167,25 @@ WRITE res-arbgb.`;
     });
   });
 
+  it("star into CORRESPONDING FIELDS OF TABLE", async () => {
+    const code = `
+TYPES: BEGIN OF res,
+        arbgb     TYPE t100-arbgb,
+        something TYPE i,
+      END OF RES.
+DATA res TYPE STANDARD TABLE OF res WITH DEFAULT KEY.
+SELECT *
+  INTO CORRESPONDING FIELDS OF TABLE res
+  FROM t100
+  WHERE arbgb = \`ZAG_UNIT_TEST\`.
+WRITE lines( res ).`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("2");
+    });
+  });
+
 });
