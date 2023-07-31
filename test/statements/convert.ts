@@ -133,4 +133,17 @@ WRITE / lv_time.`;
     expect(abap.console.get()).to.equal("20211212\n143030");
   });
 
+  it("date = space", async () => {
+    const code = `
+DATA lv_date TYPE d.
+DATA lv_timestamp TYPE p LENGTH 8.
+lv_date = space.
+CONVERT DATE lv_date TIME '000000' INTO TIME STAMP lv_timestamp TIME ZONE 'UTC'.
+WRITE lv_timestamp.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
 });

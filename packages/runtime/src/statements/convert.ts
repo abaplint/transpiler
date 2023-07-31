@@ -31,6 +31,9 @@ export function convert(source: IConvertSource, target: IConvertTarget) {
     } else {
       date = source.date.get();
     }
+    if (date.trimEnd() === "") {
+      date = "00000000";
+    }
   }
 
   let time = "";
