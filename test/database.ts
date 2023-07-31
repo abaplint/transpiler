@@ -1209,7 +1209,7 @@ WRITE lines( res ).`;
     });
   });
 
-  it.only("star into APPENDING CORRESPONDING FIELDS OF TABLE, APPENDING after FROM", async () => {
+  it("star into APPENDING CORRESPONDING FIELDS OF TABLE, APPENDING after FROM", async () => {
     const code = `
 TYPES: BEGIN OF res,
         arbgb     TYPE t100-arbgb,

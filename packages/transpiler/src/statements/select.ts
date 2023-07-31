@@ -78,13 +78,14 @@ export class SelectTranspiler implements IStatementTranspiler {
       }
     }
 
-    if (node.concatTokens().toUpperCase().startsWith("SELECT SINGLE ")) {
+    const concat = node.concatTokens().toUpperCase();
+    if (concat.startsWith("SELECT SINGLE ")) {
       select += "UP TO 1 ROWS";
     }
 
     let runtimeOptions = "";
     const runtimeOptionsList: string[] = [];
-    if (node.concatTokens().toUpperCase().includes(" APPENDING TABLE ")) {
+    if (concat.includes(" APPENDING TABLE ") || concat.includes(" APPENDING CORRESPONDING FIELDS OF TABLE ")) {
       runtimeOptionsList.push(`appending: true`);
     }
     if (runtimeOptionsList.length > 0) {
