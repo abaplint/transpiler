@@ -3,7 +3,8 @@ import {RFCClient} from "../rfc";
 
 export interface ICallFunctionOptions {
   name: string,
-  destination: string,
+  destination?: string,
+  calling?: () => any,
   exporting?: any,
   importing?: any,
   tables?: any,
@@ -20,30 +21,36 @@ export class CallFunction {
 
 // note: this is only called if DESTINIATION is supplied
   public async callFunction(options: ICallFunctionOptions) {
-    if (options.destination.trim() === "") {
-      const param = {
+    if (options.destination) {
+      if (options.destination.trim() === "") {
+        const param = {
+          exporting: options.exporting,
+          importing: options.importing,
+          tables: options.tables,
+          changing: options.changing,
+          exceptions: options.exceptions,
+        };
+      // @ts-ignore
+        await abap.FunctionModules[options.name](param);
+        return;
+      }
+
+      const dest = this.context.RFCDestinations[options.destination] as undefined | RFCClient;
+      if (dest === undefined) {
+        throw new Error(`RFC destination ${options.destination} does not exist`);
+      }
+
+      await dest.call(options.name, {
         exporting: options.exporting,
         importing: options.importing,
         tables: options.tables,
         changing: options.changing,
         exceptions: options.exceptions,
-      };
-      // @ts-ignore
-      await abap.FunctionModules[options.name](param);
-      return;
+      });
+    } else if (options.calling) {
+      throw new Error("runtime: callFunction, todo calling");
+    } else {
+      throw new Error("runtime: callFunction, unexpected input");
     }
-
-    const dest = this.context.RFCDestinations[options.destination] as undefined | RFCClient;
-    if (dest === undefined) {
-      throw new Error(`RFC destination ${options.destination} does not exist`);
-    }
-
-    await dest.call(options.name, {
-      exporting: options.exporting,
-      importing: options.importing,
-      tables: options.tables,
-      changing: options.changing,
-      exceptions: options.exceptions,
-    });
   }
 }

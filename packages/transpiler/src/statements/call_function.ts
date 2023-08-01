@@ -34,11 +34,16 @@ export class CallFunctionTranspiler implements IStatementTranspiler {
       ret.appendString("try {\n");
     }
 
+    const calling = node.findExpressionAfterToken("CALLING");
     const dest = node.findDirectExpression(abaplint.Expressions.Destination)?.findDirectExpression(abaplint.Expressions.Source);
     if (dest) {
       const s = new SourceTranspiler(true).transpile(dest, traversal);
       param = param.replace("{", ",").replace(/}$/, "");
       ret.appendString(`await abap.statements.callFunction({name:${fmname},destination:${s.getCode()}${param}});`);
+    } else if (calling) {
+      param = param.replace("{", ",").replace(/}$/, "");
+      ret.appendString(`await abap.statements.callFunction({name:${fmname},calling:this->${
+        calling.concatTokens().toLowerCase()}${param}});`);
     } else {
       const illegalFunc = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_FUNC'", node.getFirstToken(), true);
       const call = `abap.FunctionModules[${fmname}]`;

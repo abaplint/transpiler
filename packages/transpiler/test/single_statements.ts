@@ -160,10 +160,14 @@ describe("Single statements", () => {
     {abap: "IF if_bar~field IS NOT INITIAL. ENDIF.", js: `if (abap.compare.initial(if_bar$field) === false) {\n}`, skip: false},
     {abap: "FUNCTION-POOL zopenabap.", js: ``, skip: false},
     {abap: "INCLUDE lzopenabaptop.", js: ``, skip: false},
+
     {abap: "CALL FUNCTION 'BAR' DESTINATION 'MOO'.",
       js: `await abap.statements.callFunction({name:'BAR',destination:'MOO'});`, skip: false},
     {abap: `CALL FUNCTION 'BAR' DESTINATION 'MOO' EXPORTING foo = boo.`,
       js: `await abap.statements.callFunction({name:'BAR',destination:'MOO',exporting: {foo: boo}});`, skip: false},
+    {abap: `CALL FUNCTION 'BAR' STARTING NEW TASK 'foo' CALLING return_info ON END OF TASK EXPORTING foo = boo.`,
+      js: `await abap.statements.callFunction({name:'BAR',calling:this->return_info,exporting: {foo: boo}});`, skip: false},
+
     {abap: "super->method( ).",      js: `await super.method();`, skip: false},
     {abap: "super->constructor( ).", js: `await super.constructor_();`, skip: false},
 
