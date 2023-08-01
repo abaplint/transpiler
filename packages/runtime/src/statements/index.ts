@@ -36,6 +36,7 @@ import {SelectDatabase} from "./select";
 import {setBit} from "./set_bit";
 import {shift} from "./shift";
 import {sort} from "./sort";
+import {wait} from "./wait";
 import {setHandler} from "./set_handler";
 import {split} from "./split";
 import {translate} from "./translate";
@@ -88,6 +89,7 @@ export class Statements {
   public sort = sort;
   public split = split;
   public translate = translate;
+  public wait = wait;
 
   private readonly context: Context;
   private readonly traceTotals: {[name: string]: number};

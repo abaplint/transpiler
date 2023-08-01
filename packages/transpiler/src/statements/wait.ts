@@ -20,17 +20,19 @@ export class WaitTranspiler implements IStatementTranspiler {
       return new Chunk().appendString(`await new Promise(r => setTimeout(r, ${sec} * 1000));`);
     }
 
-    const lookup = traversal.lookupClassOrInterface("KERNEL_PUSH_CHANNELS", node.getFirstToken());
-
     const cond = node.findFirstExpression(abaplint.Expressions.Cond);
     if (cond) {
-      options.push("cond: " + traversal.traverse(cond).getCode());
+      options.push("cond: () => {return " + traversal.traverse(cond).getCode() + ";}");
     }
 
-    const call = `await ${lookup}.wait({${options.join(",")}});`;
-
-    return new Chunk().append(
-      `if (${lookup} === undefined) throw new Error("Wait, kernel class missing");\n${call}`, node, traversal);
+    if (concat.startsWith("WAIT FOR ")) {
+      const lookup = traversal.lookupClassOrInterface("KERNEL_PUSH_CHANNELS", node.getFirstToken());
+      const call = `await ${lookup}.wait({${options.join(",")}});`;
+      return new Chunk().append(
+        `if (${lookup} === undefined) throw new Error("Wait, kernel class missing");\n${call}`, node, traversal);
+    } else {
+      return new Chunk().append("await abap.statements.wait({" + options.join(",") + "});", node, traversal);
+    }
   }
 
 }

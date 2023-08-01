@@ -253,7 +253,7 @@ await abap.Classes['KERNEL_SCAN_ABAP_SOURCE'].call({scan_abap_source: source, to
       js: `fs_table_.appendInitial();`},
     {abap: `WAIT FOR PUSH CHANNELS UNTIL lo_handler->message IS NOT INITIAL UP TO 10 SECONDS.`,
       js: `if (abap.Classes['KERNEL_PUSH_CHANNELS'] === undefined) throw new Error("Wait, kernel class missing");
-await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({seconds: new abap.types.Integer().set(10),cond: abap.compare.initial(lo_handler.get().message) === false});`},
+await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({seconds: new abap.types.Integer().set(10),cond: () => {return abap.compare.initial(lo_handler.get().message) === false;}});`},
     {abap: `ADD 2 to foo.`,
       js: `foo.set(abap.operators.add(foo,new abap.types.Integer().set(2)));`},
     {abap: `ASSIGN lv_test_ref->* TO <lv_test>.`,
@@ -358,6 +358,9 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({});`}, // todo
 
     {abap: "READ REPORT name INTO text STATE 'A'.",
       js: `abap.statements.readReport(name, {into: text,state: new abap.types.Character(1).set('A')});`, skip: false},
+
+    {abap: "WAIT UNTIL gv_semaphore = 'X'.",
+      js: `await abap.statements.wait({cond: () => {return abap.compare.eq(gv_semaphore, new abap.types.Character(1).set('X'));}});`, skip: false},
 
     {abap: "MESSAGE lx_exception TYPE 'S' DISPLAY LIKE 'E'.",
       js: `await abap.statements.message({exception: lx_exception, type: new abap.types.Character(1).set('S'), displayLike: new abap.types.Character(1).set('E')});`, skip: false},
