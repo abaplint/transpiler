@@ -65,11 +65,22 @@ ASSERT c_package_file = str.`;
     await f(abap);
   });
 
-  it.only("yea, empty char is zero, yea", async () => {
+  it("yea, empty char is zero, yea", async () => {
     const code = `
 DATA lv_val TYPE c LENGTH 10.
 ASSERT lv_val = 0.
 ASSERT 0 = lv_val.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("yea, one", async () => {
+    const code = `
+DATA lv_val TYPE c LENGTH 10.
+lv_val = 1.
+ASSERT lv_val = 1.
+ASSERT 1 = lv_val.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);

@@ -42,6 +42,8 @@ export function eq(
       } else {
         return right.getTrimEnd() === left.getTrimEnd();
       }
+    } else if (left instanceof Integer) {
+      return (parseInt(right.get(), 10) || 0) === left.get();
     } else if (left instanceof String) {
       return right.getTrimEnd() === left.get();
     }
@@ -53,8 +55,12 @@ export function eq(
     }
   } else if (right instanceof Numc && left instanceof Numc && right.getLength() === left.getLength()) {
     return right.get() === left.get();
-  } else if (right instanceof Integer && left instanceof Integer) {
-    return right.get() === left.get();
+  } else if (right instanceof Integer) {
+    if (left instanceof Integer) {
+      return right.get() === left.get();
+    } else if (left instanceof Character) {
+      return (parseInt(left.get(), 10) || 0) === right.get();
+    }
   } else if (right instanceof DataReference && left instanceof DataReference) {
     return right.getPointer() === left.getPointer();
   } else if (right instanceof Table
