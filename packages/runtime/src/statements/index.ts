@@ -16,6 +16,7 @@ import {cast} from "./cast";
 import {getBit} from "./get_bit";
 import {readReport} from "./read_report";
 import {raiseEvent} from "./raise_event";
+import {receive} from "./receive";
 import {getLocale} from "./get_locale";
 import {getParameter} from "./get_parameter";
 import {setLocale} from "./set_locale";
@@ -36,6 +37,7 @@ import {SelectDatabase} from "./select";
 import {setBit} from "./set_bit";
 import {shift} from "./shift";
 import {sort} from "./sort";
+import {wait} from "./wait";
 import {setHandler} from "./set_handler";
 import {split} from "./split";
 import {translate} from "./translate";
@@ -88,6 +90,8 @@ export class Statements {
   public sort = sort;
   public split = split;
   public translate = translate;
+  public wait = wait;
+  public receive = receive;
 
   private readonly context: Context;
   private readonly traceTotals: {[name: string]: number};

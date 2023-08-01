@@ -160,10 +160,27 @@ describe("Single statements", () => {
     {abap: "IF if_bar~field IS NOT INITIAL. ENDIF.", js: `if (abap.compare.initial(if_bar$field) === false) {\n}`, skip: false},
     {abap: "FUNCTION-POOL zopenabap.", js: ``, skip: false},
     {abap: "INCLUDE lzopenabaptop.", js: ``, skip: false},
+
     {abap: "CALL FUNCTION 'BAR' DESTINATION 'MOO'.",
       js: `await abap.statements.callFunction({name:'BAR',destination:'MOO'});`, skip: false},
     {abap: `CALL FUNCTION 'BAR' DESTINATION 'MOO' EXPORTING foo = boo.`,
       js: `await abap.statements.callFunction({name:'BAR',destination:'MOO',exporting: {foo: boo}});`, skip: false},
+    {abap: `CALL FUNCTION 'BAR' STARTING NEW TASK 'foo' CALLING return_info ON END OF TASK EXPORTING foo = boo.`,
+      js: `abap.statements.callFunction({name:'BAR',calling:this->return_info,exporting: {foo: boo}});`, skip: false},
+
+    {abap: `RECEIVE RESULTS FROM FUNCTION 'BAR' IMPORTING param = val.`,
+      js: `abap.statements.receive({name:'BAR',{importing: {param: val}}});`, skip: false},
+    {abap: `RECEIVE RESULTS FROM FUNCTION 'Z_ABAPGIT_SERIALIZE_PARALLEL'
+      IMPORTING
+        ev_result             = lv_result
+        ev_path               = lv_path
+      EXCEPTIONS
+        error                 = 1
+        system_failure        = 2 MESSAGE lv_mess
+        communication_failure = 3 MESSAGE lv_mess
+        OTHERS = 4.`,
+    js: `abap.statements.receive({name:'Z_ABAPGIT_SERIALIZE_PARALLEL',{importing: {ev_result: lv_result, ev_path: lv_path}}});`},
+
     {abap: "super->method( ).",      js: `await super.method();`, skip: false},
     {abap: "super->constructor( ).", js: `await super.constructor_();`, skip: false},
 
@@ -253,7 +270,7 @@ await abap.Classes['KERNEL_SCAN_ABAP_SOURCE'].call({scan_abap_source: source, to
       js: `fs_table_.appendInitial();`},
     {abap: `WAIT FOR PUSH CHANNELS UNTIL lo_handler->message IS NOT INITIAL UP TO 10 SECONDS.`,
       js: `if (abap.Classes['KERNEL_PUSH_CHANNELS'] === undefined) throw new Error("Wait, kernel class missing");
-await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({seconds: new abap.types.Integer().set(10),cond: abap.compare.initial(lo_handler.get().message) === false});`},
+await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({seconds: new abap.types.Integer().set(10),cond: () => {return abap.compare.initial(lo_handler.get().message) === false;}});`},
     {abap: `ADD 2 to foo.`,
       js: `foo.set(abap.operators.add(foo,new abap.types.Integer().set(2)));`},
     {abap: `ASSIGN lv_test_ref->* TO <lv_test>.`,
@@ -324,17 +341,6 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({});`}, // todo
     }
   }`},
 
-    {abap: `RECEIVE RESULTS FROM FUNCTION 'Z_ABAPGIT_SERIALIZE_PARALLEL'
-      IMPORTING
-        ev_result             = lv_result
-        ev_path               = lv_path
-      EXCEPTIONS
-        error                 = 1
-        system_failure        = 2 MESSAGE lv_mess
-        communication_failure = 3 MESSAGE lv_mess
-        OTHERS = 4.`,
-    js: `throw new Error("Receive, transpiler todo");`},
-
     {abap: `MODIFY ztab FROM TABLE tab.`,
       js: `await abap.statements.modifyDatabase("ztab", {"table": tab});`},
     {abap: `MODIFY (mv_table) FROM TABLE <fs>.`,
@@ -358,6 +364,9 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({});`}, // todo
 
     {abap: "READ REPORT name INTO text STATE 'A'.",
       js: `abap.statements.readReport(name, {into: text,state: new abap.types.Character(1).set('A')});`, skip: false},
+
+    {abap: "WAIT UNTIL gv_semaphore = 'X'.",
+      js: `await abap.statements.wait({cond: () => {return abap.compare.eq(gv_semaphore, new abap.types.Character(1).set('X'));}});`, skip: false},
 
     {abap: "MESSAGE lx_exception TYPE 'S' DISPLAY LIKE 'E'.",
       js: `await abap.statements.message({exception: lx_exception, type: new abap.types.Character(1).set('S'), displayLike: new abap.types.Character(1).set('E')});`, skip: false},
