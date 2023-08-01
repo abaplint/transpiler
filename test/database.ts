@@ -1237,4 +1237,21 @@ WRITE lines( res ).`;
     });
   });
 
+  it.only("expand in", async () => {
+    const code = `
+DATA res TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+SELECT *
+  INTO TABLE res
+  FROM t100
+  WHERE arbgb IN ('ZAG_UNIT_TEST', 'BAR').
+WRITE lines( res ).`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("2");
+    });
+  });
+
 });
