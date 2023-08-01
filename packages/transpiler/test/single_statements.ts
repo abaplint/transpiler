@@ -168,6 +168,19 @@ describe("Single statements", () => {
     {abap: `CALL FUNCTION 'BAR' STARTING NEW TASK 'foo' CALLING return_info ON END OF TASK EXPORTING foo = boo.`,
       js: `abap.statements.callFunction({name:'BAR',calling:this->return_info,exporting: {foo: boo}});`, skip: false},
 
+    {abap: `RECEIVE RESULTS FROM FUNCTION 'BAR' IMPORTING param = val.`,
+      js: `await abap.statements.receive({name:'BAR',{importing: {param: val}}});`, skip: false},
+    {abap: `RECEIVE RESULTS FROM FUNCTION 'Z_ABAPGIT_SERIALIZE_PARALLEL'
+      IMPORTING
+        ev_result             = lv_result
+        ev_path               = lv_path
+      EXCEPTIONS
+        error                 = 1
+        system_failure        = 2 MESSAGE lv_mess
+        communication_failure = 3 MESSAGE lv_mess
+        OTHERS = 4.`,
+    js: `await abap.statements.receive({name:'Z_ABAPGIT_SERIALIZE_PARALLEL',{importing: {ev_result: lv_result, ev_path: lv_path}}});`},
+
     {abap: "super->method( ).",      js: `await super.method();`, skip: false},
     {abap: "super->constructor( ).", js: `await super.constructor_();`, skip: false},
 
@@ -327,17 +340,6 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({});`}, // todo
         throw e;
     }
   }`},
-
-    {abap: `RECEIVE RESULTS FROM FUNCTION 'Z_ABAPGIT_SERIALIZE_PARALLEL'
-      IMPORTING
-        ev_result             = lv_result
-        ev_path               = lv_path
-      EXCEPTIONS
-        error                 = 1
-        system_failure        = 2 MESSAGE lv_mess
-        communication_failure = 3 MESSAGE lv_mess
-        OTHERS = 4.`,
-    js: `throw new Error("Receive, transpiler todo");`},
 
     {abap: `MODIFY ztab FROM TABLE tab.`,
       js: `await abap.statements.modifyDatabase("ztab", {"table": tab});`},

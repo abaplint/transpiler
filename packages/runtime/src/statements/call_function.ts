@@ -1,10 +1,11 @@
 import {Context} from "../context";
 import {RFCClient} from "../rfc";
+import {Character} from "../types";
 
 export interface ICallFunctionOptions {
   name: string,
   destination?: string,
-  calling?: () => any,
+  calling?: (INPUT: any) => any,
   exporting?: any,
   importing?: any,
   tables?: any,
@@ -56,8 +57,8 @@ export class CallFunction {
       // save importing + tables + changing + exception for RECEIVE RESULTS
       // todo
 
-      // call the callback
-      options.calling();
+      // call the callback, async
+      options.calling({p_task: new Character(8).set("OPENABAP")});
     } else {
       throw new Error("runtime: callFunction, unexpected input");
     }
