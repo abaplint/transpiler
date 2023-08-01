@@ -19,7 +19,7 @@ export class ReceiveTranspiler implements IStatementTranspiler {
     }
 
     const ret = new Chunk();
-    ret.appendString(`await abap.statements.receive({name:${fmname},${param}});`);
+    ret.appendString(`abap.statements.receive({name:${fmname},${param}});`);
     return ret;
   }
 

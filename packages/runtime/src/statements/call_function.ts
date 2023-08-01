@@ -1,6 +1,7 @@
 import {Context} from "../context";
 import {RFCClient} from "../rfc";
 import {Character} from "../types";
+import {_receiveSetResult} from "./receive";
 
 export interface ICallFunctionOptions {
   name: string,
@@ -55,7 +56,7 @@ export class CallFunction {
       await abap.FunctionModules[options.name](param);
 
       // save importing + tables + changing + exception for RECEIVE RESULTS
-      // todo
+      _receiveSetResult(param);
 
       // call the callback, async
       options.calling({p_task: new Character(8).set("OPENABAP")});
