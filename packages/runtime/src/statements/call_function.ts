@@ -1,5 +1,6 @@
 import {Context} from "../context";
 import {RFCClient} from "../rfc";
+import {throwError} from "../throw_error";
 import {Character} from "../types";
 import {_receiveSetResult} from "./receive";
 
@@ -31,11 +32,15 @@ export class CallFunction {
       exceptions: options.exceptions,
     };
     options.name = options.name.trimEnd();
+    // @ts-ignore
+    const fm = abap.FunctionModules[options.name];
 
     if (options.destination) {
       if (options.destination.trim() === "") {
-        // @ts-ignore
-        await abap.FunctionModules[options.name](param);
+        if (fm === undefined) {
+          throwError("CX_SY_DYN_CALL_ILLEGAL_FUNC");
+        }
+        await fm(param);
         return;
       }
 
@@ -52,8 +57,10 @@ export class CallFunction {
         exceptions: options.exceptions,
       });
     } else if (options.calling) {
-      // @ts-ignore
-      await abap.FunctionModules[options.name](param);
+      if (fm === undefined) {
+        throwError("CX_SY_DYN_CALL_ILLEGAL_FUNC");
+      }
+      await fm(param);
 
       // save importing + tables + changing + exception for RECEIVE RESULTS
       _receiveSetResult(param);
