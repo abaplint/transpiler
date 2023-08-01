@@ -27,7 +27,7 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
             throw new Error("SQL Condition, transpiler todo, dyn cond, " + c.concatTokens());
           }
         } else if (c.findDirectExpression(abaplint.Expressions.SQLIn)) {
-          ret += this.sqlIn(c, traversal);
+          ret += this.sqlIn(c, traversal, traversal.getFilename(), table);
         } else {
           ret += this.basicCondition(c, traversal, traversal.getFilename(), table);
         }
@@ -42,17 +42,28 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
     return c.appendString(ret.trim());
   }
 
-  private sqlIn(c: abaplint.Nodes.ExpressionNode, _traversal: Traversal): string {
+  private sqlIn(c: abaplint.Nodes.ExpressionNode, traversal: Traversal,
+                filename: string, table: abaplint.Objects.Table | undefined): string {
     const fieldName = c.findDirectExpression(abaplint.Expressions.SQLFieldName);
-    const slqin = c.findDirectExpression(abaplint.Expressions.SQLIn);
+    const sqlin = c.findDirectExpression(abaplint.Expressions.SQLIn);
     const source = c.findFirstExpression(abaplint.Expressions.SimpleSource3);
-    if (fieldName === undefined || slqin === undefined || source === undefined) {
+
+    if (fieldName === undefined || sqlin === undefined || source === undefined) {
       throw new Error("SQL Condition, transpiler todo, " + c.concatTokens());
     }
 
-    const ret = `" + abap.expandIN("${fieldName.concatTokens()}", ${source.concatTokens()}) + "`;
-
-    return ret;
+    if (sqlin.getChildren().length === 2) {
+      return `" + abap.expandIN("${fieldName.concatTokens()}", ${source.concatTokens()}) + "`;
+    } else {
+      const cond: string[] = [];
+      for (const s of sqlin.findDirectExpressions(abaplint.Expressions.SQLSource)) {
+        const field = new SQLFieldNameTranspiler().transpile(fieldName, traversal).getCode();
+        const sourc = this.sqlSource(s, traversal, filename, table);
+        cond.push(field + " = " + sourc);
+      }
+      const ret = "( " + cond.join(" OR ") + " )";
+      return ret;
+    }
   }
 
   private basicCondition(c: abaplint.Nodes.ExpressionNode, traversal: Traversal, filename: string,

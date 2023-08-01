@@ -1237,7 +1237,7 @@ WRITE lines( res ).`;
     });
   });
 
-  it.only("expand in", async () => {
+  it("expand in", async () => {
     const code = `
 DATA res TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
 SELECT *
