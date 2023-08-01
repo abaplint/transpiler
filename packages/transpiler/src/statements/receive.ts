@@ -16,10 +16,11 @@ export class ReceiveTranspiler implements IStatementTranspiler {
     const fmp = node.findDirectExpression(abaplint.Expressions.ReceiveParameters);
     if (fmp) {
       param = traversal.traverse(fmp).getCode();
+      param = param.replace("{", ",").replace(/}$/, "");
     }
 
     const ret = new Chunk();
-    ret.appendString(`abap.statements.receive({name:${fmname},${param}});`);
+    ret.appendString(`abap.statements.receive({name:${fmname}${param}});`);
     return ret;
   }
 
