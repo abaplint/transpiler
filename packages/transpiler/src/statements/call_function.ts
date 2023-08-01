@@ -42,7 +42,8 @@ export class CallFunctionTranspiler implements IStatementTranspiler {
       ret.appendString(`await abap.statements.callFunction({name:${fmname},destination:${s.getCode()}${param}});`);
     } else if (calling) {
       param = param.replace("{", ",").replace(/}$/, "");
-      ret.appendString(`await abap.statements.callFunction({name:${fmname},calling:this->${
+      // typically used in combination with STARTING NEW TASK so dont await,
+      ret.appendString(`abap.statements.callFunction({name:${fmname},calling:this->${
         calling.concatTokens().toLowerCase()}${param}});`);
     } else {
       const illegalFunc = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_FUNC'", node.getFirstToken(), true);

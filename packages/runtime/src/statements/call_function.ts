@@ -21,16 +21,18 @@ export class CallFunction {
 
 // note: this is only called if DESTINIATION is supplied
   public async callFunction(options: ICallFunctionOptions) {
+    const param = {
+      exporting: options.exporting,
+      importing: options.importing,
+      tables: options.tables,
+      changing: options.changing,
+      exceptions: options.exceptions,
+    };
+    options.name = options.name.trimEnd();
+
     if (options.destination) {
       if (options.destination.trim() === "") {
-        const param = {
-          exporting: options.exporting,
-          importing: options.importing,
-          tables: options.tables,
-          changing: options.changing,
-          exceptions: options.exceptions,
-        };
-      // @ts-ignore
+        // @ts-ignore
         await abap.FunctionModules[options.name](param);
         return;
       }
@@ -48,6 +50,12 @@ export class CallFunction {
         exceptions: options.exceptions,
       });
     } else if (options.calling) {
+      // @ts-ignore
+      await abap.FunctionModules[options.name](param);
+
+      // save importing + tables + changing + exception for RECEIVE RESULTS
+      // todo
+
       throw new Error("runtime: callFunction, todo calling");
     } else {
       throw new Error("runtime: callFunction, unexpected input");

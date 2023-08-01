@@ -166,7 +166,7 @@ describe("Single statements", () => {
     {abap: `CALL FUNCTION 'BAR' DESTINATION 'MOO' EXPORTING foo = boo.`,
       js: `await abap.statements.callFunction({name:'BAR',destination:'MOO',exporting: {foo: boo}});`, skip: false},
     {abap: `CALL FUNCTION 'BAR' STARTING NEW TASK 'foo' CALLING return_info ON END OF TASK EXPORTING foo = boo.`,
-      js: `await abap.statements.callFunction({name:'BAR',calling:this->return_info,exporting: {foo: boo}});`, skip: false},
+      js: `abap.statements.callFunction({name:'BAR',calling:this->return_info,exporting: {foo: boo}});`, skip: false},
 
     {abap: "super->method( ).",      js: `await super.method();`, skip: false},
     {abap: "super->constructor( ).", js: `await super.constructor_();`, skip: false},
