@@ -56,7 +56,8 @@ export class CallFunction {
       // save importing + tables + changing + exception for RECEIVE RESULTS
       // todo
 
-      throw new Error("runtime: callFunction, todo calling");
+      // call the callback
+      options.calling();
     } else {
       throw new Error("runtime: callFunction, unexpected input");
     }
