@@ -5,8 +5,10 @@ import {Chunk} from "../chunk";
 
 export class CallTransactionTranspiler implements IStatementTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    return new Chunk(`throw new Error("CallTransaction, not supported, transpiler");`);
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
+    const ret = new Chunk();
+    ret.append("abap.statements.callTransaction();", node, traversal);
+    return ret;
   }
 
 }

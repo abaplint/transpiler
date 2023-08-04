@@ -41,6 +41,7 @@ import {wait} from "./wait";
 import {setHandler} from "./set_handler";
 import {split} from "./split";
 import {translate} from "./translate";
+import {callTransaction} from "./call_transaction";
 import {IUpdateDatabaseOptions, UpdateDatabase} from "./update_database";
 import {IWriteOptions, WriteStatement} from "./write";
 import {Context} from "../context";
@@ -92,6 +93,7 @@ export class Statements {
   public translate = translate;
   public wait = wait;
   public receive = receive;
+  public callTransaction = callTransaction;
 
   private readonly context: Context;
   private readonly traceTotals: {[name: string]: number};
