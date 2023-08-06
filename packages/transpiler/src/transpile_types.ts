@@ -70,11 +70,11 @@ export class TranspileTypes {
     } else if (type instanceof abaplint.BasicTypes.StructureType) {
       resolved = "Structure";
       const list: string[] = [];
-      const renamingSuffix: string[] = [];
+      const renamingSuffix: any = {};
       for (const c of type.getComponents()) {
         list.push(`"` + c.name.toLowerCase() + `": ` + this.toType(c.type));
         if (c.renamingSuffix) {
-          renamingSuffix.push(c.renamingSuffix);
+          renamingSuffix[c.name.toLowerCase()] = c.renamingSuffix;
         }
       }
       extra = "{" + list.join(", ") + "}";

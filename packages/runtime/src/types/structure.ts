@@ -12,9 +12,9 @@ export class Structure {
   private readonly value: any;
   private readonly qualifiedName: string | undefined;
   private readonly ddicName: string | undefined;
-  private readonly renamingSuffix: string[] | undefined;
+  private readonly renamingSuffix: any;
 
-  public constructor(fields: any, qualifiedName?: string, ddicName?: string, renamingSuffix?: string[]) {
+  public constructor(fields: any, qualifiedName?: string, ddicName?: string, renamingSuffix?: any) {
     this.value = fields;
     this.qualifiedName = qualifiedName?.toUpperCase();
     this.ddicName = ddicName?.toUpperCase();
