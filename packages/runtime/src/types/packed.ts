@@ -1,5 +1,8 @@
 import {Float} from "./float";
 import {INumeric} from "./_numeric";
+import {throwError} from "../throw_error";
+
+const digits = new RegExp(/^\s*-?\+?\d+\.?\d* *$/i);
 
 export class Packed implements INumeric {
   private value: number;
@@ -36,6 +39,10 @@ export class Packed implements INumeric {
     if (typeof value === "number") {
       this.value = value;
     } else if (typeof value === "string") {
+      if (digits.test(value) === false) {
+        throwError("CX_SY_CONVERSION_NO_NUMBER");
+      }
+
       this.value = this.round(parseFloat(value), this.decimals);
     } else if (value instanceof Float) {
       this.value = this.round(value.getRaw(), this.decimals);
