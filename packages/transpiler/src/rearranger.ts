@@ -50,11 +50,12 @@ export class Rearranger {
     // multiplication/division and left to right
     for (let i = arith.length - 1; i >= 0; i--) {
       const a = arith[i];
-      if (a.concatTokens() === "*"
-          || a.concatTokens() === "/"
-          || a.concatTokens() === "**"
-          || a.concatTokens() === "MOD"
-          || a.concatTokens() === "DIV") {
+      const concat = a.concatTokens().toUpperCase();
+      if (concat === "*"
+          || concat === "/"
+          || concat === "**"
+          || concat === "MOD"
+          || concat === "DIV") {
         continue;
       }
       splitAt = a;
