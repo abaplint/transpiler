@@ -70,8 +70,12 @@ export class TranspileTypes {
     } else if (type instanceof abaplint.BasicTypes.StructureType) {
       resolved = "Structure";
       const list: string[] = [];
+      const renamingSuffix: any = {};
       for (const c of type.getComponents()) {
         list.push(`"` + c.name.toLowerCase() + `": ` + this.toType(c.type));
+        if (c.renamingSuffix) {
+          renamingSuffix[c.name.toLowerCase()] = c.renamingSuffix;
+        }
       }
       extra = "{" + list.join(", ") + "}";
       if (type.getQualifiedName() !== undefined) {
@@ -81,7 +85,10 @@ export class TranspileTypes {
       }
       if (type.getDDICName() !== undefined) {
         extra += ", \"" + type.getQualifiedName() + "\"";
+      } else {
+        extra += ", undefined";
       }
+      extra += ", " + JSON.stringify(renamingSuffix);
     } else if (type instanceof abaplint.BasicTypes.CLikeType
         || type instanceof abaplint.BasicTypes.CGenericType
         || type instanceof abaplint.BasicTypes.CSequenceType) {
