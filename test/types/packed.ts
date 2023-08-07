@@ -259,4 +259,15 @@ ASSERT foo IS INITIAL.`;
     await f(abap);
   });
 
+  it("set empty", async () => {
+    const code = `
+    DATA tdecimal TYPE p LENGTH 13 DECIMALS 2.
+    tdecimal = ||.
+    tdecimal = |  |.
+    ASSERT tdecimal = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

@@ -39,7 +39,10 @@ export class Packed implements INumeric {
     if (typeof value === "number") {
       this.value = value;
     } else if (typeof value === "string") {
-      if (digits.test(value) === false) {
+      if (value.trim().length === 0) {
+        this.value = 0;
+        return this;
+      } else if (digits.test(value) === false) {
         throwError("CX_SY_CONVERSION_NO_NUMBER");
       }
 
