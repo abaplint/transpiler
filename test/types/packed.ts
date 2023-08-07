@@ -235,4 +235,28 @@ ASSERT foo IS INITIAL.`;
     await f(abap);
   });
 
+  it("throw, bad format", async () => {
+    const code = `
+    DATA tdecimal TYPE p LENGTH 13 DECIMALS 2.
+    tdecimal = '1 234.12'.`;
+
+    try {
+      const js = await run(code);
+      const f = new AsyncFunction("abap", js);
+      await f(abap);
+      expect.fail();
+    } catch (e) {
+      return;
+    }
+  });
+
+  it("ok format", async () => {
+    const code = `
+    DATA tdecimal TYPE p LENGTH 13 DECIMALS 2.
+    tdecimal = | 2 |.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
