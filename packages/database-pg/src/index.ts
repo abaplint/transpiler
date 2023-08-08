@@ -38,7 +38,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     // @ts-ignore
     if (abap?.context?.databaseConnections && abap.context.databaseConnections["DEFAULT"] === this) {
       // @ts-ignore
-      abap.builtin.sy.get().dbsys.set(this.name);
+      abap.builtin.sy.get().dbsys?.set(this.name);
     }
   }
 
