@@ -34,4 +34,45 @@ describe("Running statements - CONSTANTS", () => {
     expect(abap.console.get()).to.equal("ab");
   });
 
+  it("newline constant", async () => {
+    const code = `
+constants new type c length 1 value %_NEWLINE.
+write / new.
+write / %_NEWLINE.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("newline constant double", async () => {
+    const code = `
+CONSTANTS bar TYPE c LENGTH 1 VALUE %_newline.
+CONSTANTS foo TYPE c LENGTH 1 VALUE bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("newline classes", async () => {
+    const code = `
+CLASS lcl_char DEFINITION.
+  PUBLIC SECTION.
+    CONSTANTS blah TYPE c LENGTH 1 VALUE %_newline.
+ENDCLASS.
+
+CLASS lcl_char IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lcl_more DEFINITION.
+  PUBLIC SECTION.
+    CONSTANTS blah TYPE c LENGTH 1 VALUE lcl_char=>blah.
+ENDCLASS.
+
+CLASS lcl_more IMPLEMENTATION.
+ENDCLASS.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

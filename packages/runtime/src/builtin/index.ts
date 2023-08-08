@@ -47,3 +47,12 @@ export const abap_true = new Character(1, {qualifiedName: "ABAP_BOOL", ddicName:
 export const abap_false = new Character(1, {qualifiedName: "ABAP_BOOL", ddicName: "ABAP_BOOL"}).set("").setConstant();
 export const abap_undefined = new Character(1, {qualifiedName: "ABAP_BOOL", ddicName: "ABAP_BOOL"}).set("-").setConstant();
 export const space = new Character(1, {qualifiedName: "ABAP_BOOL", ddicName: "ABAP_BOOL"}).set(" ").setConstant();
+
+export const $_backspace = new Character(1).set("\b").setConstant();
+export const $_cr_lf = new Character(2).set("\r\n").setConstant();
+export const $_formfeed = new Character(1).set("\f").setConstant();
+export const $_horizontal_tab = new Character(1).set("\t").setConstant();
+export const $_maxchar = new Character(1).set(Buffer.from("FDFF", "hex").toString()).setConstant();
+export const $_minchar = new Character(1).set(Buffer.from("0000", "hex").toString()).setConstant();
+export const $_newline = new Character(1).set("\n").setConstant();
+export const $_vertical_tab = new Character(1).set("\v").setConstant();

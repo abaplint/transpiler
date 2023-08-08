@@ -174,7 +174,7 @@ export class Traversal {
     } else if (this.isClassAttribute(t)) {
       name = "this." + Traversal.escapeNamespace(name);
     } else if (this.isBuiltinVariable(t)) {
-      name = "abap.builtin." + name;
+      name = "abap.builtin." + name.toLowerCase().replace("%", "$");
     } else if (this.isTypePool(t)) {
       const tp = this.isTypePool(t);
       name = `abap.TypePools["${tp}"].` + name.toLowerCase();
