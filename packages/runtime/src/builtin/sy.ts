@@ -25,4 +25,5 @@ export const sy = new Structure({
   tzone: new Integer(), // 0 = UTC
   uname: new Character(12).set("USERNAME"),
   uzeit: new Time(),
+  dbsys: new Character(10),
 });

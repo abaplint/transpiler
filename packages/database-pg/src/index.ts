@@ -34,6 +34,12 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     }
     // cleanup after use
     this.config.password = "";
+
+    // @ts-ignore
+    if (abap.context.databaseConnections["DEFAULT"] === this) {
+      // @ts-ignore
+      abap.builtin.sy.get().dbsys.set(this.name);
+    }
   }
 
   public async disconnect(): Promise<void> {
