@@ -15,7 +15,7 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     this.sqlite = new SQL.Database(data);
 
     // @ts-ignore
-    if (abap.context.databaseConnections["DEFAULT"] === this) {
+    if (abap?.context?.databaseConnections && abap.context.databaseConnections["DEFAULT"] === this) {
       // @ts-ignore
       abap.builtin.sy.get().dbsys.set(this.name);
     }
