@@ -73,8 +73,8 @@ export class TranspileTypes {
       const renamingSuffix: any = {};
       for (const c of type.getComponents()) {
         list.push(`"` + c.name.toLowerCase() + `": ` + this.toType(c.type));
-        if (c.renamingSuffix) {
-          renamingSuffix[c.name.toLowerCase()] = c.renamingSuffix;
+        if (c.suffix) {
+          renamingSuffix[c.name.toLowerCase()] = c.suffix;
         }
       }
       extra = "{" + list.join(", ") + "}";
