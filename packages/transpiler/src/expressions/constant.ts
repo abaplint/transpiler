@@ -87,14 +87,20 @@ export class ConstantTranspiler implements IExpressionTranspiler {
       while (reg.test(str)) {
         str = str.replace(reg, "$1\\'$2");
       }
-    }
-
-    if (str.startsWith("`")) {
+    } else if (str.startsWith("`")) {
       const reg = new RegExp(/(.+)``(.+)/g);
       while (reg.test(str)) {
         str = str.replace(reg, "$1\\`$2");
       }
       str = str.replace(/\$\{/g, "\\${");
+    } else if (str.includes("\n")
+        || str.includes("\r")
+        || str.includes("\r")
+        || str.includes("\t")
+        || str.includes("\f")
+        || str.includes("\v")
+        || str.includes("\b")) {
+      str = JSON.stringify(str);
     }
 
     return str;
