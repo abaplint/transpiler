@@ -97,6 +97,7 @@ export class ConstantTranspiler implements IExpressionTranspiler {
         || str.includes("\r")
         || str.includes("\r")
         || str.includes("\t")
+        || str.includes("\f")
         || str.includes("\v")
         || str.includes("\b")) {
       str = JSON.stringify(str);
