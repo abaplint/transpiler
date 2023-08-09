@@ -1,6 +1,7 @@
 import * as path from "path";
 import * as fs from "fs";
 import {ITranspilerConfig} from "./types";
+import {UnknownTypesEnum} from "@abaplint/transpiler";
 
 export class TranspilerConfig {
 
@@ -40,7 +41,7 @@ export class TranspilerConfig {
         addFilenames: true,
         addCommonJS: true,
         skipConstants: false,
-        unknownTypes: "compileError",
+        unknownTypes: UnknownTypesEnum.compileError,
       },
     };
   }
