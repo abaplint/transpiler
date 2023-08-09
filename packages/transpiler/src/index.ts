@@ -15,7 +15,7 @@ import {HandleW3MI} from "./handlers/handle_w3mi";
 import {HandleSMIM} from "./handlers/handle_smim";
 import {HandleMSAG} from "./handlers/handle_msag";
 
-export {config, ITranspilerOptions, IFile, IProgress, IOutputFile, IOutput};
+export {config, ITranspilerOptions, IFile, IProgress, IOutputFile, IOutput, UnknownTypesEnum};
 
 export class Transpiler {
   private readonly options: ITranspilerOptions | undefined;
