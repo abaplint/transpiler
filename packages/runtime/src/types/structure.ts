@@ -12,13 +12,15 @@ export class Structure {
   private readonly value: any;
   private readonly qualifiedName: string | undefined;
   private readonly ddicName: string | undefined;
-  private readonly renamingSuffix: any;
+  private readonly suffix: { [key: string]: string };
+  private readonly asInclude: { [key: string]: boolean };
 
-  public constructor(fields: any, qualifiedName?: string, ddicName?: string, renamingSuffix?: any) {
+  public constructor(fields: any, qualifiedName?: string, ddicName?: string, suffix?: any, asInclude?: any) {
     this.value = fields;
     this.qualifiedName = qualifiedName?.toUpperCase();
     this.ddicName = ddicName?.toUpperCase();
-    this.renamingSuffix = renamingSuffix;
+    this.suffix = suffix;
+    this.asInclude = asInclude;
   }
 
   public clear() {
@@ -34,7 +36,11 @@ export class Structure {
   }
 
   public getRenamingSuffix() {
-    return this.renamingSuffix;
+    return this.suffix;
+  }
+
+  public getAsInclude() {
+    return this.asInclude;
   }
 
   public getQualifiedName() {
