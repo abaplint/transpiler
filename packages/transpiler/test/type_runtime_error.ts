@@ -1,8 +1,8 @@
 import {expect} from "chai";
-import {ITranspilerOptions} from "../src/types";
+import {ITranspilerOptions, UnknownTypesEnum} from "../src/types";
 import {runSingle} from "./_utils";
 
-const options: ITranspilerOptions = {unknownTypes: "runtimeError"};
+const options: ITranspilerOptions = {unknownTypes: UnknownTypesEnum.runtimeError};
 
 describe("Unknown types, errors at runtime", () => {
 

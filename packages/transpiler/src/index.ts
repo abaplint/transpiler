@@ -2,7 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {Validation, config} from "./validation";
 import {UnitTest} from "./unit_test";
 import {Keywords} from "./keywords";
-import {IFile, IOutput, IProgress, ITranspilerOptions, IOutputFile} from "./types";
+import {IFile, IOutput, IProgress, ITranspilerOptions, IOutputFile, UnknownTypesEnum} from "./types";
 import {DatabaseSetup} from "./db";
 import {HandleTable} from "./handlers/handle_table";
 import {HandleABAP} from "./handlers/handle_abap";
@@ -15,7 +15,7 @@ import {HandleW3MI} from "./handlers/handle_w3mi";
 import {HandleSMIM} from "./handlers/handle_smim";
 import {HandleMSAG} from "./handlers/handle_msag";
 
-export {config, ITranspilerOptions, IFile, IProgress, IOutputFile, IOutput};
+export {config, ITranspilerOptions, IFile, IProgress, IOutputFile, IOutput, UnknownTypesEnum};
 
 export class Transpiler {
   private readonly options: ITranspilerOptions | undefined;
@@ -26,7 +26,7 @@ export class Transpiler {
       this.options = {};
     }
     if (this.options.unknownTypes === undefined) {
-      this.options.unknownTypes = "compileError";
+      this.options.unknownTypes = UnknownTypesEnum.compileError;
     }
   }
 

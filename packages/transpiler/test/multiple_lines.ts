@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 import {expect} from "chai";
 import {runSingle} from "./_utils";
+import {UnknownTypesEnum} from "../src/types";
 
 describe("Multiple lines", () => {
 
@@ -362,9 +363,9 @@ ENDTRY.`;
 
     const expected = `try {
 } catch (e) {
-  if (e instanceof abap.Classes['CX_BAR'] || e instanceof abap.Classes['CX_FOO']) {
+  if ((abap.Classes['CX_BAR'] && e instanceof abap.Classes['CX_BAR']) || (abap.Classes['CX_FOO'] && e instanceof abap.Classes['CX_FOO'])) {
     bar.set(e);
-  } else if (e instanceof abap.Classes['CX_MOO']) {
+  } else if ((abap.Classes['CX_MOO'] && e instanceof abap.Classes['CX_MOO'])) {
   } else {
     throw e;
   }
@@ -687,7 +688,7 @@ try {
     // Transpiler todo: CLEANUP ignored
   }
 } catch (e) {
-  if (e instanceof abap.Classes['CX_ROOT']) {
+  if ((abap.Classes['CX_ROOT'] && e instanceof abap.Classes['CX_ROOT'])) {
     abap.statements.write(new abap.types.Character(3).set('bar'),{newLine: true});
   } else {
     throw e;
@@ -695,7 +696,7 @@ try {
 }`;
     expect(await runSingle(abap, {
       ignoreSyntaxCheck: true,
-      unknownTypes: "runtimeError"})).to.equals(expected);
+      unknownTypes: UnknownTypesEnum.runtimeError})).to.equals(expected);
   });
 
   it("Upper case method impl name, should transpile to lower", async () => {

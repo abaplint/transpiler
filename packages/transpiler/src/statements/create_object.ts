@@ -4,6 +4,7 @@ import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {FieldChainTranspiler} from "../expressions";
 import {UniqueIdentifier} from "../unique_identifier";
+import {UnknownTypesEnum} from "../types";
 
 export class CreateObjectTranspiler implements IStatementTranspiler {
 
@@ -71,7 +72,7 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
     } else if (type instanceof abaplint.BasicTypes.GenericObjectReferenceType) {
       return "object";
     } else if (!(type instanceof abaplint.BasicTypes.ObjectReferenceType)) {
-      if (traversal.options?.unknownTypes !== "runtimeError") {
+      if (traversal.options?.unknownTypes !== UnknownTypesEnum.runtimeError) {
         throw new Error(`CreateObjectTranspiler, target variable "${target?.concatTokens()}" not a object reference`);
       } else {
         return "RUNTIME_ERROR";

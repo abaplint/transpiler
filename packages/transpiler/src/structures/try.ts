@@ -54,7 +54,7 @@ export class TryTranspiler implements IStructureTranspiler {
         e => traversal.lookupClassOrInterface(e.concatTokens(), e.getFirstToken()));
       ret += first ? "" : " else ";
       first = false;
-      ret += "if (" + catchNames?.map(n => "e instanceof " + n).join(" || ") + ") {\n";
+      ret += "if (" + catchNames?.map(n => "(" + n + " && e instanceof " + n + ")").join(" || ") + ") {\n";
 
       const intoNode = catchStatement.findExpressionAfterToken("INTO");
       if (intoNode) {

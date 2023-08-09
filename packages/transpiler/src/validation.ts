@@ -1,6 +1,6 @@
 import {Issue, IRegistry, Config, IConfig, Version} from "@abaplint/core";
 import {defaultKeywords} from "./keywords";
-import {ITranspilerOptions} from "./types";
+import {ITranspilerOptions, UnknownTypesEnum} from "./types";
 
 export const config: IConfig = {
   "global": {
@@ -108,7 +108,7 @@ export class Validation {
       }
     }
 
-    if (this.options?.unknownTypes === "runtimeError") {
+    if (this.options?.unknownTypes === UnknownTypesEnum.runtimeError) {
       // this is not a constant, just a regex that happens to not match anything
       config.syntax.errorNamespace = "VOID_EVERYTHING";
     }

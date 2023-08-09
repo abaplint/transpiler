@@ -1,4 +1,5 @@
 import {Context} from "../context";
+import {prefixDbTable} from "../prefix";
 import {Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 
@@ -61,7 +62,11 @@ export class InsertDatabase {
       table = table.get().trimEnd().toLowerCase();
     }
 
-    const {subrc, dbcnt} = await this.context.defaultDB().insert({table, columns, values});
+    const {subrc, dbcnt} = await this.context.defaultDB().insert({
+      table: prefixDbTable(table),
+      columns,
+      values,
+    });
 
     // @ts-ignore
     abap.builtin.sy.get().subrc.set(subrc);
