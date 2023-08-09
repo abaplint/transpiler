@@ -45,8 +45,8 @@ export interface IOutputFile {
 }
 
 export enum UnknownTypesEnum {
-  "compileError",
-  "runtimeError",
+  compileError = "compileError",
+  runtimeError = "runtimeError",
 }
 
 export interface ITranspilerOptions {

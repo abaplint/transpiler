@@ -16,7 +16,6 @@ export type replaceInput = {
 };
 
 export function replace(input: replaceInput): void {
-
   if (input.target instanceof Table) {
     for (const row of input.target.array()) {
       replace({...input, target: row});
@@ -33,6 +32,10 @@ export function replace(input: replaceInput): void {
   let found = false;
   if (input.of) {
     let inp = input.of.get();
+    if (input.of instanceof Character) {
+      inp = input.of.getTrimEnd();
+    }
+
     if (inp.length === 0 && input.all === true) {
       throw "REPLACE, zero length input";
     }
