@@ -291,4 +291,20 @@ WRITE lv_input.`;
     expect(abap.console.get()).to.equal("01a6789");
   });
 
+  it("REPLACE, OF char with spaces", async () => {
+    const code = `
+DATA foo TYPE c LENGTH 10.
+DATA str TYPE string.
+foo = 'abc'.
+str = 'abcde'.
+REPLACE FIRST OCCURRENCE OF foo IN str WITH |hello|.
+ASSERT sy-subrc = 0.
+WRITE str.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hellode");
+  });
+
 });
