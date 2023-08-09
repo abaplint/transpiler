@@ -2,7 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {Validation, config} from "./validation";
 import {UnitTest} from "./unit_test";
 import {Keywords} from "./keywords";
-import {IFile, IOutput, IProgress, ITranspilerOptions, IOutputFile} from "./types";
+import {IFile, IOutput, IProgress, ITranspilerOptions, IOutputFile, UnknownTypesEnum} from "./types";
 import {DatabaseSetup} from "./db";
 import {HandleTable} from "./handlers/handle_table";
 import {HandleABAP} from "./handlers/handle_abap";
@@ -26,7 +26,7 @@ export class Transpiler {
       this.options = {};
     }
     if (this.options.unknownTypes === undefined) {
-      this.options.unknownTypes = "compileError";
+      this.options.unknownTypes = UnknownTypesEnum.compileError;
     }
   }
 

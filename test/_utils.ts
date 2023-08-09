@@ -10,10 +10,10 @@ import {IFile, ITranspilerOptions} from "../packages/transpiler/src/types";
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 export const AsyncFunction = Object.getPrototypeOf(async ()=> {}).constructor;
 
-export async function runFiles(abap: ABAP, files: IFile[]) {
+export async function runFiles(abap: ABAP, files: IFile[], options?: ITranspilerOptions) {
   const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
   const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
-  const res = await new Transpiler().run(reg);
+  const res = await new Transpiler(options).run(reg);
   abap.console.clear();
   if (res.databaseSetup.schemas.sqlite.length > 0) {
     abap.context.databaseConnections["DEFAULT"] = new SQLiteDatabaseClient();

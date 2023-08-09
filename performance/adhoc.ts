@@ -28,7 +28,7 @@ async function run() {
 
   console.log("\nBuilding");
 //  const t = new Transpiler.Transpiler(config.options);
-  const output = await compileFiles(files, config.options);
+  const output = await compileFiles(files, config.options as any);
   console.log(output.reg.getObjectCount() + " objects processed");
 }
 

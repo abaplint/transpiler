@@ -44,6 +44,11 @@ export interface IOutputFile {
   exports: readonly string[];
 }
 
+export enum UnknownTypesEnum {
+  "compileError",
+  "runtimeError",
+}
+
 export interface ITranspilerOptions {
   /** ignore syntax check, used for internal testing */
   ignoreSyntaxCheck?: boolean;
@@ -54,7 +59,7 @@ export interface ITranspilerOptions {
   /** skip outputing constants, used for internal testing */
   skipConstants?: boolean;
   /** sets behavior for unknown types, either fail at compile- or run-time */
-  unknownTypes?: "compileError" | "runtimeError";
+  unknownTypes?: UnknownTypesEnum;
   /** list of unit tests to skip */
   skip?: TestMethodList;
   /** extra setup script to be executed during initialization */
