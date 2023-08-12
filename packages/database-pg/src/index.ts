@@ -140,7 +140,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
 
     options.select = options.select.replace(/ UP TO (\d+) ROWS(.*)/i, "$2 LIMIT $1");
     // workaround to escape namespaces, this will need more work
-    options.select = options.select.replace(/ FROM (\/\w+\/\w+)/i, " FROM '$1' ");
+    // options.select = options.select.replace(/ FROM (\/\w+\/\w+)/i, " FROM '$1' ");
     if (options.primaryKey) {
       options.select = options.select.replace(/ ORDER BY PRIMARY KEY/i, " ORDER BY " + options.primaryKey.join(", "));
     } else {

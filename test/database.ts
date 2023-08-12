@@ -9,6 +9,9 @@ async function runAllDatabases(abap: ABAP,
                                check: () => any,
                                settings = {sqlite: true, postgres: true}) {
 
+  // @ts-ignore
+  global.abap = abap;
+
   if (settings.sqlite === true) {
     const js = await runRilesSqlite(abap, files);
 //    console.dir(js);
