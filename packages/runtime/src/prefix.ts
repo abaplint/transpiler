@@ -1,6 +1,11 @@
 export function buildDbTableName(table: string) {
   // @ts-ignore
-  const prefix = abap.dbo.schemaPrefix + abap.dbo.tablePrefix;
+  let ret = `"${ abap.dbo.tablePrefix + table}"`;
 
-  return prefix + table;
+  // @ts-ignore
+  if (abap.dbo.schemaPrefix !== "") {
+    // @ts-ignore
+    ret = `"${abap.dbo.schemaPrefix}".` + ret;
+  }
+  return ret;
 }
