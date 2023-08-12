@@ -17,30 +17,23 @@ export class DatabaseTableTranspiler implements IExpressionTranspiler {
 
     let val = "";
     if (this.prefix === true) {
-      val = `" + abap.dbo.schemaPrefix + "\\"" + abap.dbo.tablePrefix + "`;
-    } else {
-      val = "\"";
+      val = `abap.buildDbTableName(`;
     }
 
     const dyn = node.findDirectExpression(abaplint.Expressions.Dynamic);
     if (dyn) {
       if (concat.startsWith("('")) {
-        val += concat.substring(2, concat.length - 2).toLowerCase();
+        val += `"` + concat.substring(2, concat.length - 2).toLowerCase() + `"`;
       } else {
         const foo = traversal.traverse(dyn.findDirectExpression(abaplint.Expressions.FieldChain));
-        if (this.prefix === false) {
-          return foo;
-        }
-        val += "\" + " + foo.getCode() + ".get().trimEnd().toLowerCase() + \"";
+        val += foo.getCode() + ".get().trimEnd().toLowerCase()";
       }
     } else {
-      val += concat.toLowerCase();
+      val += `"` + concat.toLowerCase() + `"`;
     }
 
     if (this.prefix === true) {
-      val += "\\\"";
-    } else {
-      val += "\"";
+      val += `)`;
     }
 
     return chunk.appendString(val);

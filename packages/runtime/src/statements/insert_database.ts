@@ -1,5 +1,5 @@
 import {Context} from "../context";
-import {prefixDbTable} from "../prefix";
+import {buildDbTableName} from "../prefix";
 import {Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 
@@ -63,7 +63,7 @@ export class InsertDatabase {
     }
 
     const {subrc, dbcnt} = await this.context.defaultDB().insert({
-      table: prefixDbTable(table),
+      table: buildDbTableName(table),
       columns,
       values,
     });

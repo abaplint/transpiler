@@ -73,7 +73,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async delete(options: DB.DeleteDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
-    const sql = `DELETE FROM "${options.table}" WHERE ${options.where}`;
+    const sql = `DELETE FROM ${options.table} WHERE ${options.where}`;
 
     let subrc = 0;
     let dbcnt = 0;
@@ -95,7 +95,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async update(options: DB.UpdateDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
-    const sql = `UPDATE "${options.table}" SET ${options.set.join(", ")} WHERE ${options.where}`;
+    const sql = `UPDATE ${options.table} SET ${options.set.join(", ")} WHERE ${options.where}`;
 
     let subrc = 0;
     let dbcnt = 0;
@@ -117,7 +117,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async insert(options: DB.InsertDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
-    const sql = `INSERT INTO "${options.table}" (${options.columns.map(c => "\"" + c + "\"").join(",")}) VALUES (${options.values.join(",")})`;
+    const sql = `INSERT INTO ${options.table} (${options.columns.map(c => "\"" + c + "\"").join(",")}) VALUES (${options.values.join(",")})`;
 
     let subrc = 0;
     let dbcnt = 0;
@@ -139,8 +139,6 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     let res: undefined | pg.QueryResult<any> = undefined;
 
     options.select = options.select.replace(/ UP TO (\d+) ROWS(.*)/i, "$2 LIMIT $1");
-    // workaround to escape namespaces, this will need more work
-    options.select = options.select.replace(/ FROM (\/\w+\/\w+)/i, " FROM '$1' ");
     if (options.primaryKey) {
       options.select = options.select.replace(/ ORDER BY PRIMARY KEY/i, " ORDER BY " + options.primaryKey.join(", "));
     } else {

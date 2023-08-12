@@ -15,6 +15,7 @@ import {ClassicError} from "./classic_error";
 import {Console} from "./console/console";
 import {StandardOutConsole} from "./console/standard_out_console";
 import {MemoryConsole} from "./console/memory_console";
+import {buildDbTableName} from "./prefix";
 
 export {UnitTestResult, RFC, types, DB, MemoryConsole};
 
@@ -56,6 +57,7 @@ export class ABAP {
   public templateFormatting = templateFormatting;
   public expandIN = expandIN;
   public expandDynamic = expandDynamic;
+  public buildDbTableName = buildDbTableName;
   public ClassicError = ClassicError;
 
   public readonly context: Context;

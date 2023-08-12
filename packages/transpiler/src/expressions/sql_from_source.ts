@@ -16,7 +16,7 @@ export class SQLFromSourceTranspiler implements IExpressionTranspiler {
         // keywords
         chunk.appendString(concat + " ");
       } else if (c.get() instanceof abaplint.Expressions.DatabaseTable) {
-        chunk.appendChunk(new DatabaseTableTranspiler().transpile(c, traversal));
+        chunk.appendString(`" + ` + new DatabaseTableTranspiler().transpile(c, traversal).getCode() + ` + "`);
         chunk.appendString(" ");
       } else {
         chunk.appendString(concat + " ");
