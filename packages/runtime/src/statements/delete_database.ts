@@ -1,5 +1,5 @@
 import {Context} from "../context";
-import {prefixDbTable} from "../prefix";
+import {buildDbTableName} from "../prefix";
 import {FieldSymbol, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {toValue} from "./insert_database";
@@ -43,7 +43,7 @@ export class DeleteDatabase {
       where = where.join(" AND ");
 
       const {subrc, dbcnt} = await this.context.defaultDB().delete({
-        table: prefixDbTable(table),
+        table: buildDbTableName(table),
         where,
       });
 
@@ -53,7 +53,7 @@ export class DeleteDatabase {
       abap.builtin.sy.get().dbcnt.set(dbcnt);
     } else if (options.where) {
       const {subrc, dbcnt} = await this.context.defaultDB().delete({
-        table: prefixDbTable(table),
+        table: buildDbTableName(table),
         where: options.where,
       });
 
