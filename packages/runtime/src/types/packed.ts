@@ -2,7 +2,7 @@ import {Float} from "./float";
 import {INumeric} from "./_numeric";
 import {throwError} from "../throw_error";
 
-const digits = new RegExp(/^\s*-?\+?\d+\.?\d* *$/i);
+const digits = new RegExp(/^\s*-?\+?\d*\.?\d* *$/i);
 
 export class Packed implements INumeric {
   private value: number;
