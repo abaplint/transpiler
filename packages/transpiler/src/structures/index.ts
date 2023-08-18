@@ -1,4 +1,5 @@
 export * from "./case";
+export * from "./case_type";
 export * from "./class_definition";
 export * from "./class_implementation";
 export * from "./constants";

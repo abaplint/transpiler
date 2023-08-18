@@ -270,4 +270,15 @@ ASSERT foo IS INITIAL.`;
     await f(abap);
   });
 
+  it("ok, set from char", async () => {
+    const code = `
+    DATA foo TYPE p LENGTH 10 DECIMALS 2.
+    foo = '.25'.
+    WRITE foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.include("25");
+  });
+
 });
