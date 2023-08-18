@@ -210,7 +210,7 @@
     },
     "homepage": "https://github.com/abaplint/transpiler_poc#readme",
     "devDependencies": {
-        "@abaplint/core": "^2.102.22",
+        "@abaplint/core": "^2.102.23",
         "@types/chai": "^4.3.5",
         "@types/mocha": "^10.0.1",
         "@types/node": "^20.5.0",
@@ -224,7 +224,7 @@
         "mocha": "^10.2.0",
         "source-map-support": "^0.5.21",
         "@types/sql.js": "^1.4.4",
-        "pg": "^8.11.2",
+        "pg": "^8.11.3",
         "sql.js": "^1.8.0",
         "temporal-polyfill": "^0.1.1",
         "typescript": "^5.1.6"
