@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP, MemoryConsole} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -14,7 +14,7 @@ describe("Running statements - CASE TYPE", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
-  it.only("CASE TYPE, basic", async () => {
+  it("CASE TYPE, basic", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
@@ -30,12 +30,14 @@ START-OF-SELECTION.
   CASE TYPE OF lo_artefact.
     WHEN TYPE lcl INTO lo_lcl.
       WRITE lo_lcl->foo.
+      WRITE 'world'.
     WHEN OTHERS.
       WRITE 'hello'.
   ENDCASE.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+    expect(abap.console.get()).to.equal("world");
   });
 
 });
