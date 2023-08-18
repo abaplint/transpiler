@@ -8,6 +8,7 @@ const repos = [
   {name: "abapGit/abapGit",                     command: "npm run unit"},
   {name: "dominikpanzer/cacamber-BDD-for-ABAP", command: "npm test"},
   {name: "heliconialabs/abap-opentelemetry",    command: "npm test"},
+  {name: "heliconialabs/abap-protobuf",         command: "npm test"},
   {name: "larshp/abap-advent-2020",             command: "npm test"},
   {name: "larshp/abap-wasm",                    command: "npm test"},
   {name: "larshp/abapNTLM",                     command: "npm test"},
