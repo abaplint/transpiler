@@ -67,7 +67,6 @@ export const config: IConfig = {
     "form_no_dash": true,
     "omit_preceding_zeros": true,
     "obsolete_statement": {
-      "compute": true,
       "setExtended": true,
     },
     "forbidden_identifier": {

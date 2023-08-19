@@ -15,6 +15,7 @@ export * from "./call_transformation";
 export * from "./call";
 export * from "./case";
 export * from "./check";
+export * from "./compute";
 export * from "./class_deferred";
 export * from "./class_definition_load";
 export * from "./class_implementation";
