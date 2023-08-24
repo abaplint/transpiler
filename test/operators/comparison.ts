@@ -393,6 +393,42 @@ START-OF-SELECTION.
 CLASS lcl_bar DEFINITION.
   PUBLIC SECTION.
     CLASS-METHODS moo
+      EXPORTING
+        opt TYPE i
+        sdfsdf TYPE i.
+ENDCLASS.
+
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD moo.
+    IF opt IS REQUESTED.
+      WRITE / 'yes'.
+    ELSE.
+      WRITE / 'no'.
+    ENDIF.
+    IF sdfsdf IS REQUESTED.
+    ENDIF.
+  ENDMETHOD.
+ENDCLASS.
+
+FORM run.
+  DATA foo TYPE i.
+  lcl_bar=>moo( ).
+  lcl_bar=>moo( IMPORTING opt = foo ).
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("no\nyes");
+  });
+
+  it("IS REQUESTED", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS moo
       EXPORTING opt TYPE i.
 ENDCLASS.
 
