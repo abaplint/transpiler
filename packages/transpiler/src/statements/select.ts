@@ -116,7 +116,7 @@ export class SelectTranspiler implements IStatementTranspiler {
   for await (const ${unique} of abap.statements.loop(${faeTranspiled})) {
     await abap.statements.select(${target}, {select: "${select.trim()}"${extra}}, {appending: true});
   }
-  if (!(${target} instanceof abap.types.HashedTable)) {
+  if (!(${target} instanceof abap.types.HashedTable) && ${target}.getOptions()?.primaryKey?.type !== "SORTED") {
     abap.statements.sort(${target}, {by: ${by}.map(k => { return {component: k}; })});
     await abap.statements.deleteInternal(${target}, {adjacent: true, by: ${by}});
   }

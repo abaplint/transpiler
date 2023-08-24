@@ -236,4 +236,42 @@ WRITE result.`;
     await f(abap);
   });
 
+  it("sub = star", async () => {
+    const code = `
+DATA val TYPE string.
+DATA result TYPE string.
+val = 'h*e*l*l*o'.
+result = replace( val = val    sub = '*' with = '_' occ = 0 ).
+ASSERT result = 'h_e_l_l_o'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("replace newline with space", async () => {
+    const code = `
+DATA out TYPE string.
+out = replace(
+  val = |foo\\nbar|
+  sub = |\\n|
+  with = \` \` ).
+ASSERT out = |foo bar|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("replace newline with space char", async () => {
+    const code = `
+DATA out TYPE string.
+out = replace(
+  val = |foo\\nbar|
+  sub = |\\n|
+  with = ' ' ).
+ASSERT out = |foobar|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

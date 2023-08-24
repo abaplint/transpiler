@@ -1257,4 +1257,33 @@ WRITE lines( res ).`;
     });
   });
 
+  it("FOR ALL ENTRIES, corresponding custom structure", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         text  TYPE t100-text,
+         msgnr TYPE t100-msgnr,
+       END OF ty.
+DATA lt_t100 TYPE SORTED TABLE OF ty WITH UNIQUE KEY text.
+
+DATA lt_fae TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+DATA ls_fae LIKE LINE OF lt_fae.
+
+ls_fae-msgnr = 'ZAG_UNIT_TEST'.
+INSERT ls_fae INTO TABLE lt_fae.
+
+SELECT * FROM t100
+  INTO CORRESPONDING FIELDS OF TABLE lt_t100
+  FOR ALL ENTRIES IN lt_fae
+  WHERE arbgb = lt_fae-arbgb.
+WRITE sy-dbcnt.
+WRITE lines( lt_t100 ).`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("00");
+    });
+  });
+
 });
