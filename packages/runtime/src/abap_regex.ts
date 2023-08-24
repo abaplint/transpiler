@@ -15,6 +15,6 @@ export class ABAPRegExp {
   }
 
   public static escapeRegExp(text: string) {
-    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+    return text.replace(/[-[\]{}()*+?.,\\^$|#]/g, "\\$&");
   }
 }

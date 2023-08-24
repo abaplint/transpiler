@@ -57,7 +57,7 @@ export function replace(input: IReplaceInput) {
     val = input.val.getOffset({offset: 0, length: offset}).get() +
           wi +
           input.val.getOffset({offset: offset + length}).get();
-  } else if (input.occ === undefined && sub && wi) {
+  } else if (input.occ === undefined && sub && wi !== undefined) {
     val = val.replace(sub, wi);
   } else if (input.occ && input.occ.get() === 0 && sub && wi !== undefined) {
     if (typeof sub === "string") {
