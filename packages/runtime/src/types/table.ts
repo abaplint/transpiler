@@ -88,9 +88,11 @@ export class TableFactory {
   }
 }
 
+/*
 export class SortedTable {
   // todo
 }
+*/
 
 export class HashedTable implements ITable {
   // @ts-ignore
@@ -350,7 +352,7 @@ export class Table implements ITable {
       throw `Table, secondary key "${name}" not found`;
     }
     const copy = [...this.value];
-    sort(copy as any, {by: secondary.keyFields.map(k => {return {component: k.toLowerCase()};})});
+    sort(copy as any, {by: secondary.keyFields.map(k => {return {component: k.toLowerCase()};}), skipSortedCheck: true});
 
     this.secondaryIndexes[name.toUpperCase()] = copy;
     return copy;

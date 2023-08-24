@@ -1,8 +1,9 @@
-import {FieldSymbol, HashedTable, Table, TableRowType} from "../types";
+import {FieldSymbol, HashedTable, Table, TableAccessType, TableRowType} from "../types";
 import {eq, lt, gt} from "../compare";
 
 export interface ISortOptions {
   descending?: boolean,
+  skipSortedCheck?: boolean,
   by?: {component: string, descending?: boolean}[],
 }
 
@@ -43,8 +44,8 @@ function compare(a: any, b: any, input: {component: string, descending?: boolean
   }
 }
 
-export function sort(input: Table | FieldSymbol, options?: ISortOptions) {
-//  console.dir(options);
+export function sort(input: Table | FieldSymbol | any[], options?: ISortOptions) {
+//  console.dir(input);
 
   if (input instanceof FieldSymbol) {
     const pnt = input.getPointer();
@@ -53,6 +54,10 @@ export function sort(input: Table | FieldSymbol, options?: ISortOptions) {
     }
     sort(pnt, options);
     return;
+  } else if (options?.skipSortedCheck !== true
+      && input instanceof Table
+      && input.getOptions()?.primaryKey?.type === TableAccessType.sorted) {
+    throw new Error("SORT called on sorted table");
   }
 
   if (input instanceof HashedTable) {

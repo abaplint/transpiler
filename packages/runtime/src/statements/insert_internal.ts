@@ -158,9 +158,9 @@ export function insertInternal(options: IInsertInternalOptions): void {
       by = [];
     }
     if (by && by.length > 0) {
-      sort(options.table, {by: by});
+      sort(options.table, {by: by, skipSortedCheck: true});
     } else {
-      sort(options.table);
+      sort(options.table, {skipSortedCheck: true});
     }
   }
 
