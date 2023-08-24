@@ -38,8 +38,7 @@ export function replace(input: IReplaceInput) {
     sub = input.sub.get();
   }
   if (sub !== undefined) {
-    sub = sub.replace(/\\/g, "\\\\");
-    sub = sub.replace(/\[/g, "\\[");
+    sub = ABAPRegExp.escapeRegExp(sub);
   }
 
   if (typeof input.regex === "string") {

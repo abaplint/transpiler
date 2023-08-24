@@ -236,4 +236,16 @@ WRITE result.`;
     await f(abap);
   });
 
+  it("sub = star", async () => {
+    const code = `
+DATA val TYPE string.
+DATA result TYPE string.
+val = 'h*e*l*l*o'.
+result = replace( val = val    sub = '*' with = '_' occ = 0 ).
+ASSERT result = 'h_e_l_l_o'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
