@@ -1257,7 +1257,7 @@ WRITE lines( res ).`;
     });
   });
 
-  it.skip("FOR ALL ENTRIES, corresponding custom structure", async () => {
+  it("FOR ALL ENTRIES, corresponding custom structure", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          text  TYPE t100-text,
