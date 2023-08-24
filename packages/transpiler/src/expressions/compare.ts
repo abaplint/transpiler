@@ -47,10 +47,10 @@ export class CompareTranspiler implements IExpressionTranspiler {
       if (concat.endsWith(" IS REQUESTED")) {
         const field = concat.replace(" IS REQUESTED", "").toLowerCase();
         // yea, for function modules the naming is revereed, using "importing"
-        return new Chunk().appendString(pre + "INPUT && (INPUT." + field + " || INPUT.importing." + field + ")");
+        return new Chunk().appendString(pre + "INPUT && (INPUT." + field + " || INPUT.importing?." + field + ")");
       } else if (concat.endsWith(" IS NOT REQUESTED")) {
         const field = concat.replace(" IS NOT REQUESTED", "").toLowerCase();
-        return new Chunk().appendString(pre + "INPUT && INPUT." + field + " === undefined && INPUT.importing." + field + " === undefined");
+        return new Chunk().appendString(pre + "INPUT && INPUT." + field + " === undefined && INPUT.importing?." + field + " === undefined");
       }
 
       if (concat.startsWith("NOT ") || concat.includes(" IS NOT INSTANCE OF ")) {
