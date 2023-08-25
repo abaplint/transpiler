@@ -550,6 +550,12 @@ export class Traversal {
             context = id.getAttributes().findByName(concat)?.getType();
           }
         }
+      } else if (c.get() instanceof abaplint.Expressions.AttributeName
+          && context instanceof abaplint.BasicTypes.DataReference) {
+        const type = context.getType();
+        if (type instanceof abaplint.BasicTypes.StructureType) {
+          context = type.getComponentByName(c.concatTokens());
+        }
       }
     }
 

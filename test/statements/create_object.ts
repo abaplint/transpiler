@@ -244,7 +244,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("world2");
   });
 
-  it.only("CREATE OBJECT, in data object", async () => {
+  it("CREATE OBJECT, in data object", async () => {
     const code = `
 CLASS lcl DEFINITION.
 ENDCLASS.
