@@ -1286,4 +1286,56 @@ WRITE lines( lt_t100 ).`;
     });
   });
 
+  it("SELECT, IN, negative", async () => {
+    const code = `
+    TYPES ty_range TYPE RANGE OF t100-arbgb.
+    DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+    DATA lt_range TYPE ty_range.
+    DATA ls_range LIKE LINE OF lt_range.
+
+    SELECT * FROM t100 INTO TABLE lt_t100 WHERE arbgb IN lt_range.
+    WRITE / sy-dbcnt.
+
+    ls_range-low = 'NONONONONO'.
+    ls_range-sign = 'I'.
+    ls_range-option = 'EQ'.
+    APPEND ls_range TO lt_range.
+
+    SELECT * FROM t100 INTO TABLE lt_t100 WHERE arbgb IN lt_range.
+    WRITE / sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2\n0");
+    });
+  });
+
+  it("SELECT, NOT IN", async () => {
+    const code = `
+    TYPES ty_range TYPE RANGE OF t100-arbgb.
+    DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+    DATA lt_range TYPE ty_range.
+    DATA ls_range LIKE LINE OF lt_range.
+
+    SELECT * FROM t100 INTO TABLE lt_t100 WHERE arbgb IN lt_range.
+    WRITE / sy-dbcnt.
+
+    ls_range-low = 'NONONONONO'.
+    ls_range-sign = 'I'.
+    ls_range-option = 'EQ'.
+    APPEND ls_range TO lt_range.
+
+    SELECT * FROM t100 INTO TABLE lt_t100 WHERE arbgb NOT IN lt_range.
+    WRITE / sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2\n2");
+    });
+  });
+
 });

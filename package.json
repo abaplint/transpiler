@@ -213,10 +213,10 @@
         "@abaplint/core": "^2.102.28",
         "@types/chai": "^4.3.5",
         "@types/mocha": "^10.0.1",
-        "@types/node": "^20.5.4",
+        "@types/node": "^20.5.6",
         "@typescript-eslint/eslint-plugin": "^6.4.1",
         "@typescript-eslint/parser": "^6.4.1",
-        "chai": "^4.3.7",
+        "chai": "^4.3.8",
         "eslint": "^8.47.0",
         "cross-fetch": "^4.0.0",
         "fast-xml-parser": "^4.2.7",
@@ -227,6 +227,6 @@
         "pg": "^8.11.3",
         "sql.js": "^1.8.0",
         "temporal-polyfill": "^0.1.1",
-        "typescript": "^5.1.6"
+        "typescript": "^5.2.2"
     }
 }

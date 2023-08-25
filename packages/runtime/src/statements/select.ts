@@ -33,6 +33,8 @@ export class SelectDatabase {
 
     if (rows.length === 0) {
       // @ts-ignore
+      abap.builtin.sy.get().dbcnt.set(0);
+      // @ts-ignore
       abap.builtin.sy.get().subrc.set(4);
       return;
     }

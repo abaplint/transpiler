@@ -52,8 +52,13 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
       throw new Error("SQL Condition, transpiler todo, " + c.concatTokens());
     }
 
+    let pre = "";
+    if (c.concatTokens().toUpperCase().includes(" NOT IN ")) {
+      pre = "NOT ";
+    }
+
     if (sqlin.getChildren().length === 2) {
-      return `" + abap.expandIN("${fieldName.concatTokens()}", ${source.concatTokens()}) + "`;
+      return `${pre}" + abap.expandIN("${fieldName.concatTokens()}", ${source.concatTokens()}) + "`;
     } else {
       const cond: string[] = [];
       for (const s of sqlin.findDirectExpressions(abaplint.Expressions.SQLSource)) {
@@ -61,7 +66,7 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
         const sourc = this.sqlSource(s, traversal, filename, table);
         cond.push(field + " = " + sourc);
       }
-      const ret = "( " + cond.join(" OR ") + " )";
+      const ret = pre + "( " + cond.join(" OR ") + " )";
       return ret;
     }
   }
