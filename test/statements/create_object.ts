@@ -244,4 +244,23 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("world2");
   });
 
+  it("CREATE OBJECT, in data object", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  TYPES: BEGIN OF ty,
+           instance TYPE REF TO lcl,
+         END OF ty.
+  DATA ld_instance TYPE REF TO ty.
+  CREATE DATA ld_instance.
+  CREATE OBJECT ld_instance->instance.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
