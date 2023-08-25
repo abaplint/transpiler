@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/transpiler",
-  "version": "2.7.80",
+  "version": "2.7.81",
   "description": "Transpiler",
   "main": "build/src/index.js",
   "typings": "build/src/index.d.ts",
