@@ -27,7 +27,7 @@ export class PerformTranspiler implements IStatementTranspiler {
 
 // todo: pass by VALUE()
 
-    const params: {[key: string]: string;} = {};
+    const params: string[] = [];
 
     let index = 0;
     for (const t of node.findDirectExpression(abaplint.Expressions.PerformTables)?.findDirectExpressions(abaplint.Expressions.Source) || []) {
@@ -36,7 +36,7 @@ export class PerformTranspiler implements IStatementTranspiler {
       if (name === undefined) {
         continue;
       }
-      params[name] = traversal.traverse(t).getCode();
+      params.push(`"${name}": ` + traversal.traverse(t).getCode());
       index++;
     }
 
@@ -47,7 +47,7 @@ export class PerformTranspiler implements IStatementTranspiler {
       if (name === undefined) {
         continue;
       }
-      params[name] = traversal.traverse(u).getCode();
+      params.push(`"${name}": ` + traversal.traverse(u).getCode());
       index++;
     }
 
@@ -58,11 +58,11 @@ export class PerformTranspiler implements IStatementTranspiler {
       if (name === undefined) {
         continue;
       }
-      params[name] = traversal.traverse(c).getCode();
+      params.push(`"${name}": ` + traversal.traverse(c).getCode());
       index++;
     }
 
-    return new Chunk("await " + formName.concatTokens() + `(${JSON.stringify(params)});`);
+    return new Chunk("await " + formName.concatTokens() + `({${params.join(",")}});`);
   }
 
 }

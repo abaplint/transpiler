@@ -28,7 +28,7 @@ describe("Running code structure - FORM / PERFORM", () => {
     expect(abap.console.get()).to.equal("hello");
   });
 
-  it.only("with input", async () => {
+  it("with input", async () => {
     const code = `
     FORM hello USING bar TYPE string.
       WRITE / bar.
@@ -37,7 +37,6 @@ describe("Running code structure - FORM / PERFORM", () => {
     START-OF-SELECTION.
       PERFORM hello USING 'hello'.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("hello");
