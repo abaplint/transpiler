@@ -14,15 +14,19 @@ export class FormTranspiler implements IStatementTranspiler {
     const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
     const def = scope?.findFormDefinition(name);
 
-    const ret = new Chunk("async function " + name + "(INPUT) {\n");
+    const ret = new Chunk("async function " + name + "(INPUT) {");
+    const params: string[] = [];
     for (const p of def?.getChangingParameters() || []) {
-      ret.appendString(`let ${p.getName()} = INPUT.${p.getName()};\n`);
+      params.push(`let ${p.getName()} = INPUT.${p.getName()};`);
     }
     for (const p of def?.getTablesParameters() || []) {
-      ret.appendString(`let ${p.getName()} = INPUT.${p.getName()};\n`);
+      params.push(`let ${p.getName()} = INPUT.${p.getName()};`);
     }
     for (const p of def?.getUsingParameters() || []) {
-      ret.appendString(`let ${p.getName()} = INPUT.${p.getName()};\n`);
+      params.push(`let ${p.getName()} = INPUT.${p.getName()};`);
+    }
+    if (params.length > 0) {
+      ret.appendString("\n" + params.join("\n"));
     }
     return ret;
   }
