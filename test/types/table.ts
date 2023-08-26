@@ -1,5 +1,4 @@
 import {expect} from "chai";
-import {featureHashedTables} from "../../packages/runtime/src/types";
 import {ABAP, MemoryConsole} from "../../packages/runtime/src/";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -383,9 +382,6 @@ WRITE / ls_instance-instance.`;
   });
 
   it("hashed table, sequence", async () => {
-    if (featureHashedTables === false) {
-      return;
-    }
     const code = `
 TYPES: BEGIN OF ty,
          field1 TYPE c LENGTH 2,
@@ -415,9 +411,6 @@ ENDLOOP.`;
   });
 
   it("hashed table, nested structured key", async () => {
-    if (featureHashedTables === false) {
-      return;
-    }
     const code = `
 TYPES: BEGIN OF ty,
          bar TYPE c LENGTH 1,
