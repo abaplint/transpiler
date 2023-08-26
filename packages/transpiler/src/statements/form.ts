@@ -8,7 +8,7 @@ export class FormTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode): Chunk {
     UniqueIdentifier.resetIndexBackup();
     const name = node.findFirstExpression(abaplint.Expressions.FormName)!.getFirstToken().getStr();
-    return new Chunk("async function " + name + "() {");
+    return new Chunk("async function " + name + "(INPUT) {");
   }
 
 }
