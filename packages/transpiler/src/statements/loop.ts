@@ -97,7 +97,11 @@ export class LoopTranspiler implements IStatementTranspiler {
       } else if (compare.findDirectTokenByText("NOT")) {
         continue;
       }
-      const tchain = traversal.traverse(compare.findDirectExpression(abaplint.Expressions.ComponentChainSimple));
+      const simple = compare.findDirectExpression(abaplint.Expressions.ComponentChainSimple);
+      if (simple?.getChildren().length !== 1) {
+        continue;
+      }
+      const tchain = traversal.traverse(simple);
       const tsource = traversal.traverse(compare.findDirectExpression(abaplint.Expressions.Source));
       topEquals[tchain.getCode()] = tsource.getCode();
     }

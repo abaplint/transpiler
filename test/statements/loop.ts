@@ -874,7 +874,7 @@ WRITE / lines( tab ).`;
     expect(abap.console.get()).to.equal("foo\nbar\n2");
   });
 
-  it.only("LOOP, char sub", async () => {
+  it("LOOP, char sub", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          field TYPE c LENGTH 10,
@@ -891,10 +891,9 @@ LOOP AT tab INTO row WHERE field(1) = 'W'.
   WRITE / row-field.
 ENDLOOP.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("World");
+    expect(abap.console.getTrimmed()).to.equal("World");
   });
 
 });
