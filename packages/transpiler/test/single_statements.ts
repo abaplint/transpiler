@@ -58,8 +58,8 @@ describe("Single statements", () => {
     {abap: "foo->method( 1 ).",                       js: "await foo.get().method(new abap.types.Integer().set(1));",             skip: true}, // todo, hmm, need to know the default parameter name?
     {abap: "foo->method( bar = 2 moo = 1 ).",         js: "await foo.get().method({bar: new abap.types.Integer().set(2), moo: new abap.types.Integer().set(1)});",       skip: false},
     {abap: "moo = foo->method( ).",                   js: "moo.set((await foo.get().method()));",              skip: false},
-    {abap: "FORM foo. ENDFORM.",                      js: "async function foo() {\n}",                       skip: false},
-    {abap: "PERFORM foo.",                            js: "await foo();",                       skip: false},
+    {abap: "FORM foo. ENDFORM.",                      js: "async function foo(INPUT) {\n}",                       skip: false},
+    {abap: "PERFORM foo.",                            js: "await foo({});",                       skip: false},
     {abap: "PERFORM foo IN PROGRAM zsdfsd.",                            js: `throw new Error("PerformTranspiler IN PROGRAM, transpiler todo");`,                       skip: false},
     {abap: "PERFORM foo in program zsdfsd.",                            js: `throw new Error("PerformTranspiler IN PROGRAM, transpiler todo");`,                       skip: false},
     {abap: "PERFORM ('ASDF') IN PROGRAM ('ASDF') TABLES bar.",      js: `throw new Error("PerformTranspiler FormName not found");`,                       skip: false},
