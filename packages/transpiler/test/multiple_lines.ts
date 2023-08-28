@@ -492,7 +492,7 @@ ENDFORM.`;
   }
 }
 abap.Classes['PROG-ZFOOBAR-LCL_BAR'] = lcl_bar;
-async function bar() {
+async function bar(INPUT) {
   await abap.Classes['PROG-ZFOOBAR-LCL_BAR'].bar({imp: new abap.types.Integer().set(2)});
 }`;
 
@@ -534,7 +534,7 @@ ENDFORM.`;
   }
 }
 abap.Classes['PROG-ZFOOBAR-LCL_BAR'] = lcl_bar;
-async function bar() {
+async function bar(INPUT) {
   let bar = new abap.types.ABAPObject({qualifiedName: "LCL_BAR", RTTIName: "\\\\PROGRAM=ZFOOBAR\\\\CLASS=LCL_BAR"});
   bar.set(await (new abap.Classes['PROG-ZFOOBAR-LCL_BAR']()).constructor_({input: new abap.types.Integer().set(42)}));
 }`;

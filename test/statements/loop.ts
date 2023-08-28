@@ -1,5 +1,4 @@
 import {expect} from "chai";
-import {featureHashedTables} from "../../packages/runtime/src/types";
 import {ABAP, MemoryConsole} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -853,9 +852,6 @@ WRITE / lines( tab ).`;
   });
 
   it("insert into hashed table during loop", async () => {
-    if (featureHashedTables === false) {
-      return;
-    }
     const code = `
 DATA tab TYPE HASHED TABLE OF string WITH UNIQUE KEY table_line.
 DATA row LIKE LINE OF tab.
@@ -876,6 +872,28 @@ WRITE / lines( tab ).`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("foo\nbar\n2");
+  });
+
+  it("LOOP, char sub", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field TYPE c LENGTH 10,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row LIKE LINE OF tab.
+
+row-field = |World|.
+INSERT row INTO TABLE tab.
+row-field = |Hello|.
+INSERT row INTO TABLE tab.
+
+LOOP AT tab INTO row WHERE field(1) = 'W'.
+  WRITE / row-field.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("World");
   });
 
 });

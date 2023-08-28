@@ -62,9 +62,6 @@ interface ITable {
   getHeader(): TableRowType;
 }
 
-// eslint-disable-next-line prefer-const
-export let featureHashedTables = true;
-
 export class TableFactory {
   public static construct(rowType: TableRowType, options?: ITableOptions, qualifiedName?: string) {
     if (options === undefined) {
@@ -80,7 +77,7 @@ export class TableFactory {
       };
     }
 
-    if (featureHashedTables === true && options.primaryKey?.type === TableAccessType.hashed) {
+    if (options.primaryKey?.type === TableAccessType.hashed) {
       return new HashedTable(rowType, options, qualifiedName);
     } else {
       return new Table(rowType, options, qualifiedName);

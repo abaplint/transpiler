@@ -8,7 +8,7 @@ export class TargetTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     const offset: string[] = [];
-    const ret = new Chunk();
+    let ret = new Chunk();
 
     const children = node.getChildren();
     for (let i = 0; i < children.length; i++) {
@@ -59,17 +59,13 @@ export class TargetTranspiler implements IExpressionTranspiler {
       }
     }
 
-    let pre = "";
-    let post = "";
     if (offset.length > 0) {
-      pre = "new abap.OffsetLength(";
-      post = ", {" + offset.join(", ") + "})";
+      const pre = "new abap.OffsetLength(";
+      const post = ", {" + offset.join(", ") + "})";
+      ret = new Chunk().appendString(pre).appendChunk(ret).appendString(post);
     }
 
-    return new Chunk()
-      .appendString(pre)
-      .appendChunk(ret)
-      .appendString(post);
+    return ret;
   }
 
 }
