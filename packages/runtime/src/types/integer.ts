@@ -50,6 +50,7 @@ export class Integer implements INumeric {
     }
 
     if (this.value > 2147483647 || this.value < -2147483648) {
+      console.dir(this.value);
       throwError("CX_SY_ARITHMETIC_OVERFLOW");
     }
 
