@@ -31,7 +31,6 @@ export class PerformTranspiler implements IStatementTranspiler {
 
     let index = 0;
     for (const t of node.findDirectExpression(abaplint.Expressions.PerformTables)?.findDirectExpressions(abaplint.Expressions.Source) || []) {
-      console.dir(t);
       const name = def?.getTablesParameters()[index].getName().toLowerCase();
       if (name === undefined) {
         continue;
@@ -42,7 +41,6 @@ export class PerformTranspiler implements IStatementTranspiler {
 
     index = 0;
     for (const u of node.findDirectExpression(abaplint.Expressions.PerformUsing)?.findDirectExpressions(abaplint.Expressions.Source) || []) {
-      console.dir(u);
       const name = def?.getUsingParameters()[index].getName().toLowerCase();
       if (name === undefined) {
         continue;
@@ -53,7 +51,6 @@ export class PerformTranspiler implements IStatementTranspiler {
 
     index = 0;
     for (const c of node.findDirectExpression(abaplint.Expressions.PerformChanging)?.findDirectExpressions(abaplint.Expressions.Source) || []) {
-      console.dir(c);
       const name = def?.getChangingParameters()[index].getName().toLowerCase();
       if (name === undefined) {
         continue;
