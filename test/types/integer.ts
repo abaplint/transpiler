@@ -102,4 +102,18 @@ describe("Running Examples - Integer type", () => {
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
+
+  it("overflow", async () => {
+    const code = `
+    DATA lv_int TYPE i.
+    lv_int = 2 ** 33.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch(e) {
+      expect(e.toString()).to.contain("CX_SY_ARITHMETIC_OVERFLOW");
+    }
+  });
 });
