@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/transpiler",
-  "version": "2.7.83",
+  "version": "2.7.84",
   "description": "Transpiler",
   "main": "build/src/index.js",
   "typings": "build/src/index.d.ts",
@@ -29,7 +29,7 @@
   "author": "abaplint",
   "license": "MIT",
   "dependencies": {
-    "@abaplint/core": "^2.102.29",
+    "@abaplint/core": "^2.102.32",
     "source-map": "^0.7.4"
   },
   "devDependencies": {
