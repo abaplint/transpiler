@@ -324,4 +324,39 @@ WRITE result.`;
     await f(abap);
   });
 
+  it("integers, power", async () => {
+    const code = `
+    DATA lv_maxint TYPE i.
+    lv_maxint = 2 ** 31 - 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("integers, max", async () => {
+    const code = `
+    DATA lv_maxint TYPE i.
+    DATA lv_f      TYPE f.
+    DATA lv_a      TYPE f.
+    lv_f = 1000.
+    lv_maxint = 2 ** 31 - 1.
+    lv_a = lv_f + lv_maxint + 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it.skip("integers, max", async () => {
+    const code = `
+    DATA lv_maxint TYPE i.
+    DATA lv_b      TYPE f.
+    DATA lv_a      TYPE f.
+
+    lv_maxint = 2 ** 31 - 1.
+    lv_b = 2 * ( lv_maxint + 1 ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

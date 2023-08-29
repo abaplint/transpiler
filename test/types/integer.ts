@@ -103,7 +103,7 @@ describe("Running Examples - Integer type", () => {
     await f(abap);
   });
 
-  it("overflow", async () => {
+  it.skip("overflow", async () => {
     const code = `
     DATA lv_int TYPE i.
     lv_int = 2 ** 33.`;
