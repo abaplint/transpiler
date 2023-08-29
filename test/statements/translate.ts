@@ -121,4 +121,16 @@ WRITE str.`;
     expect(abap.console.get()).to.equal("133000");
   });
 
+  it("only replace once", async () => {
+    const code = `
+DATA s TYPE string.
+s = 'A'.
+TRANSLATE s USING 'ABBC'.
+WRITE s.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("B");
+  });
+
 });
