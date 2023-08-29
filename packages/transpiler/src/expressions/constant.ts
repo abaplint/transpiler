@@ -14,7 +14,13 @@ export class ConstantTranspiler implements IExpressionTranspiler {
     const int = node.findFirstExpression(Expressions.Integer);
     if (int) {
       const concat = int.concatTokens().trim();
-      let code = `new abap.types.Integer().set(${concat})`;
+      const parsed = Number.parseInt(concat, 10);
+      let code = "";
+      if (parsed > 2147483647 || parsed < -2147483648) {
+        code = `new abap.types.Integer8().set(${concat})`;
+      } else {
+        code = `new abap.types.Integer().set(${concat})`;
+      }
       if (this.addGet === true) {
         code += ".get()";
       }
