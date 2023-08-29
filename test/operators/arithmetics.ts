@@ -304,4 +304,24 @@ WRITE result.`;
     expect(abap.console.getTrimmed()).to.equal("      999");
   });
 
+  it("integers, int8 div", async () => {
+    const code = `
+    DATA val TYPE int8.
+    val = 198620152477517.
+    val = val DIV 8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("integers, int8 add", async () => {
+    const code = `
+    DATA val TYPE int8.
+    val = 198620152477517.
+    val = val + val.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
