@@ -99,6 +99,7 @@ export class SelectTranspiler implements IStatementTranspiler {
 
     if (node.findFirstExpression(abaplint.Expressions.SQLForAllEntries)) {
       const unique = UniqueIdentifier.get();
+      const unique2 = UniqueIdentifier.get();
       const fn = node.findFirstExpression(abaplint.Expressions.SQLForAllEntries)?.findDirectExpression(abaplint.Expressions.SQLSource);
       const faeTranspiled = new SQLSourceTranspiler().transpile(fn!, traversal).getCode();
       select = select.replace(new RegExp(" " + escapeRegExp(faeTranspiled!), "g"), " " + unique);
@@ -112,8 +113,9 @@ export class SelectTranspiler implements IStatementTranspiler {
       const code = `if (${faeTranspiled}.array().length === 0) {
   throw "FAE, todo, empty table";
 } else {
+  const ${unique2} = ${faeTranspiled}.array();
   abap.statements.clear(${target});
-  for await (const ${unique} of abap.statements.loop(${faeTranspiled})) {
+  for await (const ${unique} of ${unique2}) {
     await abap.statements.select(${target}, {select: "${select.trim()}"${extra}}, {appending: true});
   }
   if (!(${target} instanceof abap.types.HashedTable) && ${target}.getOptions()?.primaryKey?.type !== "SORTED") {
