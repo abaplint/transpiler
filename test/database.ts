@@ -14,7 +14,6 @@ async function runAllDatabases(abap: ABAP,
 
   if (settings.sqlite === true) {
     const js = await runRilesSqlite(abap, files);
-//    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     check();
@@ -1338,7 +1337,7 @@ WRITE lines( lt_t100 ).`;
     });
   });
 
-  it.only("FOR ALL ENTRIES, same source and target", async () => {
+  it("FOR ALL ENTRIES, same source and target", async () => {
     const code = `
     DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
     DATA lt_fae  TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
