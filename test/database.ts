@@ -1338,4 +1338,27 @@ WRITE lines( lt_t100 ).`;
     });
   });
 
+  it.only("FOR ALL ENTRIES, same source and target", async () => {
+    const code = `
+    DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+    DATA lt_fae  TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+    DATA ls_fae  LIKE LINE OF lt_fae.
+
+    ls_fae-msgnr = '123'.
+    INSERT ls_fae INTO TABLE lt_fae.
+
+    SELECT * FROM t100
+      INTO TABLE lt_fae
+      FOR ALL ENTRIES IN lt_fae
+      WHERE msgnr = lt_fae-msgnr.
+    WRITE sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("1");
+    });
+  });
+
 });
