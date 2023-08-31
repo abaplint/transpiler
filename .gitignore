@@ -6,3 +6,4 @@ unit-test/
 .idea
 output
 comment-*
+.env

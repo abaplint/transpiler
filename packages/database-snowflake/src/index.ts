@@ -4,30 +4,41 @@ import * as snowflake from "snowflake-sdk";
 export class SnowflakeDatabaseClient implements DB.DatabaseClient {
   public readonly name = "snowflake";
   private connection: snowflake.Connection;
+  private readonly config: snowflake.ConnectionOptions;
+//  private readonly trace: boolean | undefined;
 
-  public constructor(_input?: {trace?: boolean}) {
-    // todo
+  public constructor(input: snowflake.ConnectionOptions & {trace?: boolean}) {
+    this.config = input;
+//    this.trace = input.trace;
   }
 
-  public async connect(input?: snowflake.ConnectionOptions): Promise<void> {
-    if (input === undefined) {
-      throw "supply connection details";
-    }
+  public async connect(): Promise<void> {
 
     this.connection = snowflake.createConnection({
-      ...input,
+      ...this.config,
       clientSessionKeepAlive: true,
     });
 
+    await new Promise((resolve, reject) =>
+      this.connection.connectAsync((err, conn) => {
+        err ? reject(err) : resolve(conn);
+      })
+    );
+    /*
     await new Promise((resolve, reject) =>
       this.connection.connect((err, conn) => {
         err ? reject(err) : resolve(conn);
       })
     );
+    */
   }
 
   public async disconnect() {
-    throw "todo";
+    await new Promise((resolve, reject) =>
+      this.connection.destroy((err, conn) => {
+        err ? reject(err) : resolve(conn);
+      })
+    );
   }
 
   public async execute(sql: string | string[]): Promise<void> {
@@ -66,18 +77,18 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
   }
 
   public async delete(_options: DB.DeleteDatabaseOptions): Promise<{subrc: number, dbcnt: number}> {
-    throw "todo";
+    throw "todo_delete";
   }
 
   public async update(_options: DB.UpdateDatabaseOptions): Promise<{subrc: number, dbcnt: number}> {
-    throw "todo";
+    throw "todo_update";
   }
 
   public async insert(_options: DB.InsertDatabaseOptions): Promise<{subrc: number, dbcnt: number}> {
-    throw "todo";
+    throw "todo_insert";
   }
 
   public async select(_options: DB.SelectDatabaseOptions): Promise<DB.SelectDatabaseResult> {
-    throw "todo";
+    throw "todo_select";
   }
 }

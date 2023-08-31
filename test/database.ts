@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {AsyncFunction, runFiles as runRilesSqlite, runFilesPostgres} from "./_utils";
+import {AsyncFunction, runFiles as runRilesSqlite, runFilesPostgres, runFilesSnowflake} from "./_utils";
 import {ABAP, MemoryConsole} from "../packages/runtime/src/";
 import {msag_escape, msag_zag_unit_test, tabl_t100xml, zquan, zt111, zt222} from "./_data";
 import {IFile} from "../packages/transpiler/src/types";
@@ -7,20 +7,27 @@ import {IFile} from "../packages/transpiler/src/types";
 async function runAllDatabases(abap: ABAP,
                                files: IFile[],
                                check: () => any,
-                               settings = {sqlite: true, postgres: true}) {
+                               settings?: {sqlite?: boolean, postgres?: boolean, snowflake?: boolean}) {
 
   // @ts-ignore
   global.abap = abap;
 
-  if (settings.sqlite === true) {
+  if (settings === undefined || settings.sqlite === true) {
     const js = await runRilesSqlite(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     check();
   }
 
-  if (settings.postgres === true) {
+  if (settings === undefined || settings.postgres === true) {
     const js = await runFilesPostgres(abap, files);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    check();
+  }
+
+  if (settings !== undefined && settings.snowflake === true) {
+    const js = await runFilesSnowflake(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     check();
@@ -1358,6 +1365,20 @@ WRITE lines( lt_t100 ).`;
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("1");
     });
+  });
+
+  it.skip("SELECT SINGLE, WHERE integer constant", async () => {
+    const code = `
+    DATA ls_result TYPE t100.
+    SELECT SINGLE * FROM t100 INTO ls_result WHERE msgnr = 123.
+    WRITE sy-subrc.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("0");
+    }, {snowflake: true});
   });
 
 });
