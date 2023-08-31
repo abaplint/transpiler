@@ -12,18 +12,20 @@ async function runAllDatabases(abap: ABAP,
   // @ts-ignore
   global.abap = abap;
 
-  if (settings === undefined || settings.sqlite === true) {
+  if (settings === undefined || settings.sqlite === undefined || settings.sqlite === true) {
     const js = await runRilesSqlite(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     check();
+    await abap.context.databaseConnections["DEFAULT"].disconnect();
   }
 
-  if (settings === undefined || settings.postgres === true) {
+  if (settings === undefined || settings.postgres === undefined || settings.postgres === true) {
     const js = await runFilesPostgres(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     check();
+    await abap.context.databaseConnections["DEFAULT"].disconnect();
   }
 
   if (settings !== undefined && settings.snowflake === true) {
@@ -31,6 +33,7 @@ async function runAllDatabases(abap: ABAP,
     const f = new AsyncFunction("abap", js);
     await f(abap);
     check();
+    await abap.context.databaseConnections["DEFAULT"].disconnect();
   }
 }
 
@@ -55,7 +58,7 @@ describe("Top level tests, Database", () => {
     ];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("hello world");
-    });
+    }, {snowflake: true});
   });
 
   it("SELECT, no result", async () => {
@@ -1365,20 +1368,6 @@ WRITE lines( lt_t100 ).`;
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("1");
     });
-  });
-
-  it.skip("SELECT SINGLE, WHERE integer constant", async () => {
-    const code = `
-    DATA ls_result TYPE t100.
-    SELECT SINGLE * FROM t100 INTO ls_result WHERE msgnr = 123.
-    WRITE sy-subrc.`;
-    const files = [
-      {filename: "zfoobar.prog.abap", contents: code},
-      {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    await runAllDatabases(abap, files, () => {
-      expect(abap.console.get()).to.equal("0");
-    }, {snowflake: true});
   });
 
 });

@@ -106,15 +106,13 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
       console.log(options.select);
     }
 
-    await new Promise((resolve, reject) =>
+    const rows = await new Promise((resolve, reject) =>
       this.connection.execute({
         sqlText: options.select,
         complete: function (err, _stmt, rows) {
-          console.dir(err);
-          console.dir(rows);
           err ? reject(err) : resolve(rows);
         }}));
 
-    throw "todo_select";
+    return {rows: rows as any};
   }
 }
