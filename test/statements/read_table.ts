@@ -1126,5 +1126,17 @@ WRITE / sy-subrc.`;
     expect(abap.console.get().trimEnd()).to.equal("4\n0");
   });
 
+  it("READ TABLE, sub", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field TYPE c LENGTH 10,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row LIKE LINE OF tab.
+READ TABLE tab INTO row WITH KEY field(3) = 'foo'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
 
 });

@@ -1,7 +1,7 @@
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
-import {FieldSymbolTranspiler, SourceTranspiler} from "../expressions";
+import {ComponentChainSimpleTranspiler, FieldSymbolTranspiler, SourceTranspiler} from "../expressions";
 import {UniqueIdentifier} from "../unique_identifier";
 import {Chunk} from "../chunk";
 
@@ -72,24 +72,27 @@ export class ReadTableTranspiler implements IStatementTranspiler {
         if (left.get() instanceof abaplint.Expressions.Dynamic
             && left instanceof abaplint.Nodes.ExpressionNode) {
           const concat = left.concatTokens().toLowerCase();
-          field = concat.substring(2, concat.length - 2);
+          field = "i." + concat.substring(2, concat.length - 2);
+        } else if (left.get() instanceof abaplint.Expressions.ComponentChainSimple
+            && left instanceof abaplint.Nodes.ExpressionNode) {
+          field = new ComponentChainSimpleTranspiler("i.").transpile(left, traversal).getCode();
         } else {
-          field = traversal.traverse(left).getCode();
+          throw new Error("transpiler: READ TABLE, unexpected node");
         }
-        if (field === "table_line") {
+        if (field === "i.table_line") {
           usesTableLine = true;
         }
 
         if (s.includes("await")) {
           const id = UniqueIdentifier.get();
           prefix += "const " + id + " = " + s + ";\n";
-          withKey.push("abap.compare.eq(i." + field + ", " + id + ")");
-          withKeyValue.push(`{key: (i) => {return i.${field}}, value: ${id}}`);
-          withKeySimple.push(`"${field}": ${id}`);
+          withKey.push("abap.compare.eq(" + field + ", " + id + ")");
+          withKeyValue.push(`{key: (i) => {return ${field}}, value: ${id}}`);
+          withKeySimple.push(`"${field.replace("i.", "")}": ${id}`);
         } else {
-          withKey.push("abap.compare.eq(i." + field + ", " + s + ")");
-          withKeyValue.push(`{key: (i) => {return i.${field}}, value: ${s}}`);
-          withKeySimple.push(`"${field}": ${s}`);
+          withKey.push("abap.compare.eq(" + field + ", " + s + ")");
+          withKeyValue.push(`{key: (i) => {return ${field}}, value: ${s}}`);
+          withKeySimple.push(`"${field.replace("i.", "")}": ${s}`);
         }
       }
       extra.push("withKey: (i) => {return " + withKey.join(" && ") + ";}");
