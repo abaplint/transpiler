@@ -3,6 +3,7 @@ import {AsyncFunction, runFiles as runRilesSqlite, runFilesPostgres, runFilesSno
 import {ABAP, MemoryConsole} from "../packages/runtime/src/";
 import {msag_escape, msag_zag_unit_test, tabl_t100xml, zquan, zt111, zt222} from "./_data";
 import {IFile} from "../packages/transpiler/src/types";
+import "dotenv/config";
 
 async function runAllDatabases(abap: ABAP,
                                files: IFile[],
@@ -28,7 +29,7 @@ async function runAllDatabases(abap: ABAP,
     await abap.context.databaseConnections["DEFAULT"].disconnect();
   }
 
-  if (settings !== undefined && settings.snowflake === true) {
+  if (settings !== undefined && settings.snowflake === true && process.env.SNOWFLAKE_ACCOUNT) {
     const js = await runFilesSnowflake(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
