@@ -5,11 +5,11 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
   public readonly name = "snowflake";
   private connection: snowflake.Connection;
   private readonly config: snowflake.ConnectionOptions;
-//  private readonly trace: boolean | undefined;
+  private readonly trace: boolean | undefined;
 
   public constructor(input: snowflake.ConnectionOptions & {trace?: boolean}) {
     this.config = input;
-//    this.trace = input.trace;
+    this.trace = input.trace;
   }
 
   public async connect(): Promise<void> {
@@ -54,6 +54,9 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
           }}));
     } else {
       for (const s of sql) {
+        if (s.trim() === "") {
+          continue;
+        }
         await new Promise((resolve, reject) =>
           this.connection.execute({
             sqlText: s,
@@ -88,7 +91,30 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
     throw "todo_insert";
   }
 
-  public async select(_options: DB.SelectDatabaseOptions): Promise<DB.SelectDatabaseResult> {
+  public async select(options: DB.SelectDatabaseOptions): Promise<DB.SelectDatabaseResult> {
+    options.select = options.select.replace(/ UP TO (\d+) ROWS(.*)/i, "$2 LIMIT $1");
+    if (options.primaryKey) {
+      options.select = options.select.replace(/ ORDER BY PRIMARY KEY/i, " ORDER BY " + options.primaryKey.join(", "));
+    } else {
+      options.select = options.select.replace(/ ORDER BY PRIMARY KEY/i, "");
+    }
+    options.select = options.select.replace(/ ASCENDING/ig, " ASC");
+    options.select = options.select.replace(/ DESCENDING/ig, " DESC");
+    options.select = options.select.replace(/~/g, ".");
+
+    if (this.trace === true) {
+      console.log(options.select);
+    }
+
+    await new Promise((resolve, reject) =>
+      this.connection.execute({
+        sqlText: options.select,
+        complete: function (err, _stmt, rows) {
+          console.dir(err);
+          console.dir(rows);
+          err ? reject(err) : resolve(rows);
+        }}));
+
     throw "todo_select";
   }
 }
