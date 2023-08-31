@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "proof of concept",
     "scripts": {
-        "install": "npm install && cd web/transpiler && npm install && cd ../../ && cd packages/runtime && npm install && cd ../cli && npm install && cd ../transpiler && npm install && cd ../database-pg && npm install && cd ../database-sqlite && npm install && cd ../rfc-client-soap-xml && npm install && cd ../..",
+        "install": "npm install && cd web/transpiler && npm install && cd ../../ && cd packages/runtime && npm install && cd ../cli && npm install && cd ../transpiler && npm install && cd ../database-snowflake && npm install && cd ../database-pg && npm install && cd ../database-sqlite && npm install && cd ../rfc-client-soap-xml && npm install && cd ../..",
         "compile": "cd packages/runtime && npm run compile && cd ../../ && cd packages/transpiler && npm run compile && cd ../../ && cd packages/cli && npm run compile && cd ../../ && cd packages/database-pg && npm run compile && cd ../../ && cd packages/database-sqlite && npm run compile && cd ../../ && tsc",
         "performance": "npm run compile && node --expose-gc build/performance/index.js",
         "test": "npm run compile && mocha --timeout 10000 && npm run lint",
