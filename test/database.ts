@@ -72,7 +72,7 @@ describe("Top level tests, Database", () => {
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("4");
-    });
+    }, {snowflake: true});
   });
 
   it("MODIFY FROM, inserts row", async () => {
@@ -90,7 +90,7 @@ describe("Top level tests, Database", () => {
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("0\nHELLO");
-    });
+    }, {snowflake: false});
   });
 
   it("MODIFY FROM, inserts and update", async () => {
@@ -116,7 +116,7 @@ describe("Top level tests, Database", () => {
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("WORLD");
-    });
+    }, {snowflake: false});
   });
 
   it("test, DELETE", async () => {
@@ -138,7 +138,7 @@ describe("Top level tests, Database", () => {
     await runAllDatabases(abap, files, () => {
       const cons = abap.console.get();
       expect(cons).to.equal("4");
-    });
+    }, {snowflake: false});
   });
 
   it("SELECT SINGLE, WHERE char constant", async () => {
@@ -152,7 +152,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("0");
-    });
+    }, {snowflake: false}); // todo, https://docs.snowflake.com/en/sql-reference/collation
   });
 
   it("SELECT SINGLE, WHERE AND", async () => {
