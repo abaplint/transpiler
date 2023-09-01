@@ -1139,4 +1139,26 @@ READ TABLE tab INTO row WITH KEY field(3) = 'foo'.`;
     await f(abap);
   });
 
+  it("READ TABLE hashed, FROM", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field1 TYPE i,
+         field2 TYPE i,
+       END OF ty.
+DATA tab TYPE HASHED TABLE OF ty WITH UNIQUE KEY field1.
+DATA row LIKE LINE OF tab.
+row-field1 = 1.
+row-field2 = 2.
+INSERT row INTO TABLE tab.
+ASSERT sy-subrc = 0.
+READ TABLE tab FROM row TRANSPORTING NO FIELDS.
+ASSERT sy-subrc = 0.
+CLEAR row-field2.
+READ TABLE tab FROM row TRANSPORTING NO FIELDS.
+ASSERT sy-subrc = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

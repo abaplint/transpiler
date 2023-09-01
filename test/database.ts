@@ -17,24 +17,24 @@ async function runAllDatabases(abap: ABAP,
     const js = await runRilesSqlite(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    check();
     await abap.context.databaseConnections["DEFAULT"].disconnect();
+    check();
   }
 
   if (settings === undefined || settings.postgres === undefined || settings.postgres === true) {
     const js = await runFilesPostgres(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    check();
     await abap.context.databaseConnections["DEFAULT"].disconnect();
+    check();
   }
 
   if (settings !== undefined && settings.snowflake === true && process.env.SNOWFLAKE_ACCOUNT) {
     const js = await runFilesSnowflake(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    check();
     await abap.context.databaseConnections["DEFAULT"].disconnect();
+    check();
   }
 }
 
@@ -152,7 +152,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("0");
-    }, {snowflake: false}); // todo, https://docs.snowflake.com/en/sql-reference/collation
+    }, {snowflake: true});
   });
 
   it("SELECT SINGLE, WHERE AND", async () => {
@@ -166,7 +166,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("0");
-    });
+    }, {snowflake: true});
   });
 
   it("SELECT SINGLE, WHERE integer constant", async () => {
@@ -180,7 +180,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("0");
-    });
+    }, {snowflake: true});
   });
 
   it("SELECT SINGLE, WHERE constant, not found", async () => {
@@ -194,7 +194,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("4");
-    });
+    }, {snowflake: true});
   });
 
   it("SELECT SINGLE, WHERE char variable", async () => {
@@ -210,7 +210,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("0");
-    });
+    }, {snowflake: true});
   });
 
   it("SELECT INTO TABLE, ORDER BY PRIMARY KEY", async () => {
@@ -224,7 +224,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("2");
-    });
+    }, {snowflake: true});
   });
 
   it("SELECT INTO TABLE, ORDER BY PRIMARY KEY, dynamic", async () => {
@@ -238,7 +238,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("2");
-    });
+    }, {snowflake: true});
   });
 
   it("basic SELECT loop", async () => {
@@ -253,7 +253,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.getTrimmed()).to.equal("hello world\nblah");
-    });
+    }, {snowflake: true});
   });
 
   it("SELECT loop, field list", async () => {
@@ -270,7 +270,7 @@ describe("Top level tests, Database", () => {
     await runAllDatabases(abap, files, () => {
 // TODO, for now it only checks that it compiles to valid JS
     // expect(abap.console.get()).to.equal("hello world\nblah");
-    });
+    }, {snowflake: false});
   });
 
   it("SELECT loop, field list", async () => {

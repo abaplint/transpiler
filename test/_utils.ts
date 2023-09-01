@@ -75,7 +75,7 @@ export async function runFilesSnowflake(abap: ABAP, files: IFile[]) {
   const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
   const res = await new Transpiler().run(reg);
   abap.console.clear();
-  if (res.databaseSetup.schemas.pg.length > 0) {
+  if (res.databaseSetup.schemas.snowflake.length > 0) {
     const dbName = "transpiler-" + crypto.randomBytes(10).toString("hex");
     abap.context.databaseConnections["DEFAULT"] = new SnowflakeDatabaseClient({
       account: process.env.SNOWFLAKE_ACCOUNT!,
@@ -86,7 +86,7 @@ export async function runFilesSnowflake(abap: ABAP, files: IFile[]) {
     await abap.context.databaseConnections["DEFAULT"].connect();
     await abap.context.databaseConnections["DEFAULT"].execute(`CREATE SCHEMA "${dbName}";`);
     await abap.context.databaseConnections["DEFAULT"].execute(`USE SCHEMA "${dbName}";`);
-    await abap.context.databaseConnections["DEFAULT"].execute(res.databaseSetup.schemas.pg);
+    await abap.context.databaseConnections["DEFAULT"].execute(res.databaseSetup.schemas.snowflake);
     await abap.context.databaseConnections["DEFAULT"].execute(res.databaseSetup.insert);
   }
   let pre = "";

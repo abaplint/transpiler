@@ -94,7 +94,7 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
   public async select(options: DB.SelectDatabaseOptions): Promise<DB.SelectDatabaseResult> {
     options.select = options.select.replace(/ UP TO (\d+) ROWS(.*)/i, "$2 LIMIT $1");
     if (options.primaryKey) {
-      options.select = options.select.replace(/ ORDER BY PRIMARY KEY/i, " ORDER BY " + options.primaryKey.join(", "));
+      options.select = options.select.replace(/ ORDER BY PRIMARY KEY/i, " ORDER BY " + options.primaryKey.map(e => `"${e}"`).join(", "));
     } else {
       options.select = options.select.replace(/ ORDER BY PRIMARY KEY/i, "");
     }
@@ -106,11 +106,18 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
       console.log(options.select);
     }
 
-    const rows = await new Promise((resolve, reject) =>
+    const rows = await new Promise((resolve, _reject) =>
       this.connection.execute({
         sqlText: options.select,
-        complete: function (err, _stmt, rows) {
-          err ? reject(err) : resolve(rows);
+        complete: function (err, stmt, rows) {
+          if (err) {
+            // for now, show the error and return zero results,
+            console.dir(stmt.getSqlText());
+            console.dir(err.message);
+            resolve([]);
+          } else {
+            resolve(rows);
+          }
         }}));
 
     return {rows: rows as any};

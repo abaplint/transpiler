@@ -2,8 +2,10 @@
 import * as abaplint from "@abaplint/core";
 import {ITranspilerOptions} from "../types";
 import {DatabaseSetupResult} from "./database_setup_result";
-import {SQLiteDatabaseSchema} from "./sqlite_database_schema";
-import {PGDatabaseSchema} from "./pg_database_schema";
+import {SQLiteDatabaseSchema} from "./schema_generation/sqlite_database_schema";
+import {PGDatabaseSchema} from "./schema_generation/pg_database_schema";
+import {DatabaseSchemaGenerator} from "./schema_generation/database_schema_generator";
+import {SnowflakeDatabaseSchema} from "./schema_generation/snowflake_database_schema";
 
 /////////////////////////
 // NOTES
@@ -21,15 +23,35 @@ export class DatabaseSetup {
   public run(options?: ITranspilerOptions | undefined): DatabaseSetupResult {
     return {
       schemas: {
-        sqlite: new SQLiteDatabaseSchema(this.reg).run(),
+        sqlite: this.driver(new SQLiteDatabaseSchema(this.reg)),
         hdb: ["todo"],
-        pg: new PGDatabaseSchema(this.reg).run(),
+        pg: this.driver(new PGDatabaseSchema(this.reg)),
+        snowflake: this.driver(new SnowflakeDatabaseSchema(this.reg)),
       },
       insert: this.buildInsert(options),
     };
   }
 
 ////////////////////
+
+  private driver(schemaGenerator: DatabaseSchemaGenerator): string[] {
+    const statements: string[] = [];
+    // CREATE TABLEs
+    for (const obj of this.reg.getObjects()) {
+      if (obj instanceof abaplint.Objects.Table
+          && obj.getTableCategory() === abaplint.Objects.TableCategory.Transparent) {
+        statements.push(schemaGenerator.buildTABL(obj).trim());
+      }
+    }
+    // CREATE VIEWs after TABLEs
+    // todo: what if the view is based on another view?
+    for (const obj of this.reg.getObjects()) {
+      if (obj instanceof abaplint.Objects.View) {
+        statements.push(schemaGenerator.buildVIEW(obj).trim());
+      }
+    }
+    return statements;
+  }
 
   private buildInsert(options?: ITranspilerOptions | undefined): string[] {
     // note: avoid hitting maximum statement size by splitting into multiple statements

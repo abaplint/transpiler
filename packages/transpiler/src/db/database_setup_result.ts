@@ -3,6 +3,7 @@ export type DatabaseSetupResult = {
     sqlite: string[],
     pg: string[],
     hdb: string[],
+    snowflake: string[],
   },
   insert: string[],
 };

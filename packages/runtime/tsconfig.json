@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "declaration": true, // needed for database defitions
     "outDir": "build",
   },
   "exclude": [
