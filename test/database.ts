@@ -17,24 +17,24 @@ async function runAllDatabases(abap: ABAP,
     const js = await runRilesSqlite(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    check();
     await abap.context.databaseConnections["DEFAULT"].disconnect();
+    check();
   }
 
   if (settings === undefined || settings.postgres === undefined || settings.postgres === true) {
     const js = await runFilesPostgres(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    check();
     await abap.context.databaseConnections["DEFAULT"].disconnect();
+    check();
   }
 
   if (settings !== undefined && settings.snowflake === true && process.env.SNOWFLAKE_ACCOUNT) {
     const js = await runFilesSnowflake(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    check();
     await abap.context.databaseConnections["DEFAULT"].disconnect();
+    check();
   }
 }
 
@@ -224,7 +224,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("2");
-    }, {snowflake: false});
+    }, {snowflake: true});
   });
 
   it("SELECT INTO TABLE, ORDER BY PRIMARY KEY, dynamic", async () => {
