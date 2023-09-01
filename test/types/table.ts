@@ -442,4 +442,36 @@ WRITE / lines( tab ).`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("set hashed table", async () => {
+    const code = `
+DATA tab1 TYPE HASHED TABLE OF i WITH UNIQUE KEY table_line.
+DATA tab2 TYPE HASHED TABLE OF i WITH UNIQUE KEY table_line.
+INSERT 1 INTO TABLE tab1.
+INSERT 2 INTO TABLE tab1.
+INSERT 3 INTO TABLE tab2.
+tab2 = tab1.
+ASSERT lines( tab2 ) = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it.only("set hashed table, with field symbols", async () => {
+    const code = `
+DATA tab1 TYPE HASHED TABLE OF i WITH UNIQUE KEY table_line.
+DATA tab2 TYPE HASHED TABLE OF i WITH UNIQUE KEY table_line.
+FIELD-SYMBOLS <fs1> TYPE ANY TABLE.
+FIELD-SYMBOLS <fs2> TYPE ANY TABLE.
+INSERT 1 INTO TABLE tab1.
+INSERT 2 INTO TABLE tab1.
+INSERT 3 INTO TABLE tab2.
+ASSIGN tab1 TO <fs1>.
+ASSIGN tab2 TO <fs2>.
+<fs2> = <fs1>.
+ASSERT lines( <fs2> ) = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
