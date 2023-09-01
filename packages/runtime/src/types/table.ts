@@ -262,6 +262,13 @@ export class HashedTable implements ITable {
   }
 
   public set(tab: TableRowType): ITable {
+    if (tab instanceof FieldSymbol) {
+      if (tab.getPointer() === undefined) {
+        throw new Error("GETWA_NOT_ASSIGNED");
+      }
+      return this.set(tab.getPointer());
+    }
+
     this.clear();
     if (tab instanceof Table || tab instanceof HashedTable) {
       for (const a of tab.array()) {

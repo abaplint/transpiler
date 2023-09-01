@@ -10,9 +10,15 @@ export class SQLFieldNameTranspiler implements IExpressionTranspiler {
     const chunk = new Chunk();
 
     let concat = node.concatTokens();
+    /*
     if (concat.includes("~") && concat.split("~")[0].includes("/")) {
       concat = "'" + concat.replace("~", "'~");
-    }
+    } else {
+      */
+    concat = concat.replace(/~/, `\\".\\"`);
+    concat = `\\"` + concat + `\\"`;
+//    }
+
     chunk.appendString(concat);
 
     return chunk;

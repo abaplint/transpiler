@@ -1,29 +1,40 @@
 import {expect} from "chai";
-import {AsyncFunction, runFiles as runRilesSqlite, runFilesPostgres} from "./_utils";
+import {AsyncFunction, runFiles as runRilesSqlite, runFilesPostgres, runFilesSnowflake} from "./_utils";
 import {ABAP, MemoryConsole} from "../packages/runtime/src/";
 import {msag_escape, msag_zag_unit_test, tabl_t100xml, zquan, zt111, zt222} from "./_data";
 import {IFile} from "../packages/transpiler/src/types";
+import "dotenv/config";
 
 async function runAllDatabases(abap: ABAP,
                                files: IFile[],
                                check: () => any,
-                               settings = {sqlite: true, postgres: true}) {
+                               settings?: {sqlite?: boolean, postgres?: boolean, snowflake?: boolean}) {
 
   // @ts-ignore
   global.abap = abap;
 
-  if (settings.sqlite === true) {
+  if (settings === undefined || settings.sqlite === undefined || settings.sqlite === true) {
     const js = await runRilesSqlite(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     check();
+    await abap.context.databaseConnections["DEFAULT"].disconnect();
   }
 
-  if (settings.postgres === true) {
+  if (settings === undefined || settings.postgres === undefined || settings.postgres === true) {
     const js = await runFilesPostgres(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     check();
+    await abap.context.databaseConnections["DEFAULT"].disconnect();
+  }
+
+  if (settings !== undefined && settings.snowflake === true && process.env.SNOWFLAKE_ACCOUNT) {
+    const js = await runFilesSnowflake(abap, files);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    check();
+    await abap.context.databaseConnections["DEFAULT"].disconnect();
   }
 }
 
@@ -48,7 +59,7 @@ describe("Top level tests, Database", () => {
     ];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("hello world");
-    });
+    }, {snowflake: true});
   });
 
   it("SELECT, no result", async () => {
@@ -61,7 +72,7 @@ describe("Top level tests, Database", () => {
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("4");
-    });
+    }, {snowflake: true});
   });
 
   it("MODIFY FROM, inserts row", async () => {
@@ -79,7 +90,7 @@ describe("Top level tests, Database", () => {
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("0\nHELLO");
-    });
+    }, {snowflake: false});
   });
 
   it("MODIFY FROM, inserts and update", async () => {
@@ -105,7 +116,7 @@ describe("Top level tests, Database", () => {
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("WORLD");
-    });
+    }, {snowflake: false});
   });
 
   it("test, DELETE", async () => {
@@ -127,7 +138,7 @@ describe("Top level tests, Database", () => {
     await runAllDatabases(abap, files, () => {
       const cons = abap.console.get();
       expect(cons).to.equal("4");
-    });
+    }, {snowflake: false});
   });
 
   it("SELECT SINGLE, WHERE char constant", async () => {
@@ -141,7 +152,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("0");
-    });
+    }, {snowflake: false}); // todo, https://docs.snowflake.com/en/sql-reference/collation
   });
 
   it("SELECT SINGLE, WHERE AND", async () => {

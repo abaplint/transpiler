@@ -37,7 +37,7 @@ export class DatabaseSetup {
     // INSERT data
     for (const obj of this.reg.getObjects()) {
       if (obj instanceof abaplint.Objects.MessageClass) {
-        insert.push(this.insertT100(obj));
+        insert.push(...this.insertT100(obj));
       } else if (obj instanceof abaplint.Objects.Class
           || obj instanceof abaplint.Objects.Interface) {
         if (options?.skipReposrc !== true) {
@@ -78,15 +78,15 @@ export class DatabaseSetup {
     }
   }
 
-  private insertT100(msag: abaplint.Objects.MessageClass): string {
+  private insertT100(msag: abaplint.Objects.MessageClass): string[] {
     // ignore if T100 is unknown
     const obj = this.reg.getObject("TABL", "T100") as abaplint.Objects.Table | undefined;
     if (obj === undefined) {
-      return "";
+      return [];
     }
-    let ret = "";
+    const ret = [];
     for (const m of msag.getMessages()) {
-      ret += `INSERT INTO t100 ("sprsl", "arbgb", "msgnr", "text") VALUES ('E', '${msag.getName().padEnd(20, " ")}', '${m.getNumber()}', '${this.escape(m.getMessage().padEnd(73, " "))}');\n`;
+      ret.push(`INSERT INTO "t100" ("sprsl", "arbgb", "msgnr", "text") VALUES ('E', '${msag.getName().padEnd(20, " ")}', '${m.getNumber()}', '${this.escape(m.getMessage().padEnd(73, " "))}');`);
     }
     return ret;
   }
