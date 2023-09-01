@@ -170,12 +170,10 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
     found = searchResult.found;
     foundIndex = searchResult.foundIndex;
   } else if (options?.from) {
-    if (table instanceof HashedTable) {
-      throw new Error("runtime, todo readTable Hashed FROM");
-    }
     if (options.from instanceof FieldSymbol) {
       options.from = options.from.getPointer();
     }
+
     if (table instanceof Table && options.from instanceof Structure) {
       // todo: optimize if the primary key is sorted
       const arr = table.array();
@@ -199,7 +197,11 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
           }
         }
       }
+    } else if (table instanceof HashedTable && options.from instanceof Structure) {
+      const key = table.buildHashFromData(options.from);
+      found = table.read(key);
     }
+
     if (found === undefined) {
       foundIndex = 0;
     }

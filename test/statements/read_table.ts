@@ -1139,7 +1139,7 @@ READ TABLE tab INTO row WITH KEY field(3) = 'foo'.`;
     await f(abap);
   });
 
-  it.only("READ TABLE hashed, FROM", async () => {
+  it("READ TABLE hashed, FROM", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          field1 TYPE i,
