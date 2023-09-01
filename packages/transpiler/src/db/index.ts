@@ -2,9 +2,9 @@
 import * as abaplint from "@abaplint/core";
 import {ITranspilerOptions} from "../types";
 import {DatabaseSetupResult} from "./database_setup_result";
-import {SQLiteDatabaseSchema} from "./schemas/sqlite_database_schema";
-import {PGDatabaseSchema} from "./schemas/pg_database_schema";
-import {DatabaseSchemaGenerator} from "./schemas/database_schema_generator";
+import {SQLiteDatabaseSchema} from "./schema_generation/sqlite_database_schema";
+import {PGDatabaseSchema} from "./schema_generation/pg_database_schema";
+import {DatabaseSchemaGenerator} from "./schema_generation/database_schema_generator";
 
 /////////////////////////
 // NOTES
@@ -25,6 +25,7 @@ export class DatabaseSetup {
         sqlite: this.driver(new SQLiteDatabaseSchema(this.reg)),
         hdb: ["todo"],
         pg: this.driver(new PGDatabaseSchema(this.reg)),
+        snowflake: this.driver(new PGDatabaseSchema(this.reg)),
       },
       insert: this.buildInsert(options),
     };
