@@ -238,7 +238,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("2");
-    }, {snowflake: false});
+    }, {snowflake: true});
   });
 
   it("basic SELECT loop", async () => {
@@ -253,7 +253,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.getTrimmed()).to.equal("hello world\nblah");
-    }, {snowflake: false});
+    }, {snowflake: true});
   });
 
   it("SELECT loop, field list", async () => {
@@ -270,7 +270,7 @@ describe("Top level tests, Database", () => {
     await runAllDatabases(abap, files, () => {
 // TODO, for now it only checks that it compiles to valid JS
     // expect(abap.console.get()).to.equal("hello world\nblah");
-    });
+    }, {snowflake: false});
   });
 
   it("SELECT loop, field list", async () => {
