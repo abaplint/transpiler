@@ -1,35 +1,15 @@
 import * as abaplint from "@abaplint/core";
+import {DatabaseSchemaGenerator} from "./database_schema_generator";
 
-export class PGDatabaseSchema {
+export class SQLiteDatabaseSchema implements DatabaseSchemaGenerator {
   private readonly reg: abaplint.IRegistry;
 
   public constructor(reg: abaplint.IRegistry) {
     this.reg = reg;
   }
 
-  public run(): string[] {
-    const statements: string[] = [];
-    // CREATE TABLEs
-    for (const obj of this.reg.getObjects()) {
-      if (obj instanceof abaplint.Objects.Table
-          && obj.getTableCategory() === abaplint.Objects.TableCategory.Transparent) {
-        statements.push(this.buildTABL(obj).trim());
-      }
-    }
-    // CREATE VIEWs after TABLEs
-    // todo: what if the view is based on another view?
-    for (const obj of this.reg.getObjects()) {
-      if (obj instanceof abaplint.Objects.View) {
-        statements.push(this.buildVIEW(obj).trim());
-      }
-    }
-    return statements;
-  }
-
-//////////////////
-
   // https://www.sqlite.org/lang_createview.html
-  private buildVIEW(view: abaplint.Objects.View): string {
+  public buildVIEW(view: abaplint.Objects.View): string {
     const fields = view.getFields();
     let firstTabname = "";
     const columns = fields?.map((f) => {
@@ -57,7 +37,7 @@ export class PGDatabaseSchema {
     return `CREATE VIEW '${view.getName().toLowerCase()}' AS SELECT ${columns} FROM ${from};\n`;
   }
 
-  private buildTABL(tabl: abaplint.Objects.Table): string {
+  public buildTABL(tabl: abaplint.Objects.Table): string {
     const type = tabl.parseType(this.reg);
     if (!(type instanceof abaplint.BasicTypes.StructureType)) {
       return "";
@@ -71,21 +51,21 @@ export class PGDatabaseSchema {
         continue;
       }
       fieldsRaw.push(field.name.toLowerCase());
-      fields.push("\"" + field.name.toLowerCase() + "\" " + this.toType(field.type, field.name, tabl.getName()));
+      fields.push("'" + field.name.toLowerCase() + "' " + this.toType(field.type, field.name, tabl.getName()));
     }
 
     // assumption: all transparent tables have primary keys
     // add single quotes to field names to allow for keywords as field names
     const key = ", PRIMARY KEY(" + tabl.listKeys(this.reg)
       .filter(e => fieldsRaw.includes(e.toLowerCase()))
-      .map(e => "\"" + e.toLowerCase() + "\"").join(",") + ")";
+      .map(e => "'" + e.toLowerCase() + "'").join(",") + ")";
 
-    return `CREATE TABLE "${tabl.getName().toLowerCase()}" (${fields.join(", ")}${key});\n`;
+    return `CREATE TABLE '${tabl.getName().toLowerCase()}' (${fields.join(", ")}${key});\n`;
   }
 
   private toType(type: abaplint.AbstractType, fieldname: string, errorInfo: string): string {
     if (type instanceof abaplint.BasicTypes.CharacterType) {
-      return `NCHAR(${type.getLength()})`;
+      return `NCHAR(${type.getLength()}) COLLATE RTRIM`;
     } else if (type instanceof abaplint.BasicTypes.TimeType) {
       return `NCHAR(6)`;
     } else if (type instanceof abaplint.BasicTypes.DateType) {
@@ -94,7 +74,7 @@ export class PGDatabaseSchema {
       // it will be fine, the runtime representation of numc is also text
       return `NCHAR(${type.getLength()})`;
     } else if (type instanceof abaplint.BasicTypes.StringType) {
-      return `TEXT`;
+      return `TEXT COLLATE RTRIM`;
     } else if (type instanceof abaplint.BasicTypes.XStringType) {
       // it will be fine, the runtime representation of xstring is also text
       return `TEXT`;
