@@ -166,7 +166,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("0");
-    });
+    }, {snowflake: true});
   });
 
   it("SELECT SINGLE, WHERE integer constant", async () => {
@@ -180,7 +180,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("0");
-    });
+    }, {snowflake: true});
   });
 
   it("SELECT SINGLE, WHERE constant, not found", async () => {
@@ -194,7 +194,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("4");
-    });
+    }, {snowflake: true});
   });
 
   it("SELECT SINGLE, WHERE char variable", async () => {
@@ -210,7 +210,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("0");
-    });
+    }, {snowflake: true});
   });
 
   it("SELECT INTO TABLE, ORDER BY PRIMARY KEY", async () => {
@@ -224,7 +224,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("2");
-    });
+    }, {snowflake: false});
   });
 
   it("SELECT INTO TABLE, ORDER BY PRIMARY KEY, dynamic", async () => {
@@ -238,7 +238,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("2");
-    });
+    }, {snowflake: false});
   });
 
   it("basic SELECT loop", async () => {
@@ -253,7 +253,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.getTrimmed()).to.equal("hello world\nblah");
-    });
+    }, {snowflake: false});
   });
 
   it("SELECT loop, field list", async () => {
