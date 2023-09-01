@@ -65,7 +65,7 @@ export class SnowflakeDatabaseSchema implements DatabaseSchemaGenerator {
   // https://docs.snowflake.com/en/sql-reference/collation
   private toType(type: abaplint.AbstractType, fieldname: string, errorInfo: string): string {
     if (type instanceof abaplint.BasicTypes.CharacterType) {
-      return `NCHAR(${type.getLength()})`;
+      return `NCHAR(${type.getLength()}) COLLATE 'rtrim'`;
     } else if (type instanceof abaplint.BasicTypes.TimeType) {
       return `NCHAR(6)`;
     } else if (type instanceof abaplint.BasicTypes.DateType) {
