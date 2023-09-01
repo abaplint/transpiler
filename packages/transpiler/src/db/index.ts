@@ -5,6 +5,7 @@ import {DatabaseSetupResult} from "./database_setup_result";
 import {SQLiteDatabaseSchema} from "./schema_generation/sqlite_database_schema";
 import {PGDatabaseSchema} from "./schema_generation/pg_database_schema";
 import {DatabaseSchemaGenerator} from "./schema_generation/database_schema_generator";
+import {SnowflakeDatabaseSchema} from "./schema_generation/snowflake_database_schema";
 
 /////////////////////////
 // NOTES
@@ -25,7 +26,7 @@ export class DatabaseSetup {
         sqlite: this.driver(new SQLiteDatabaseSchema(this.reg)),
         hdb: ["todo"],
         pg: this.driver(new PGDatabaseSchema(this.reg)),
-        snowflake: this.driver(new PGDatabaseSchema(this.reg)),
+        snowflake: this.driver(new SnowflakeDatabaseSchema(this.reg)),
       },
       insert: this.buildInsert(options),
     };
