@@ -152,7 +152,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("0");
-    }, {snowflake: false}); // todo, https://docs.snowflake.com/en/sql-reference/collation
+    }, {snowflake: true});
   });
 
   it("SELECT SINGLE, WHERE AND", async () => {
