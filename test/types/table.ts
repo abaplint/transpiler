@@ -456,7 +456,7 @@ ASSERT lines( tab2 ) = 2.`;
     await f(abap);
   });
 
-  it.only("set hashed table, with field symbols", async () => {
+  it("set hashed table, with field symbols", async () => {
     const code = `
 DATA tab1 TYPE HASHED TABLE OF i WITH UNIQUE KEY table_line.
 DATA tab2 TYPE HASHED TABLE OF i WITH UNIQUE KEY table_line.
