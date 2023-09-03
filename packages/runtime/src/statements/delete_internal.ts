@@ -81,6 +81,11 @@ export async function deleteInternal(target: Table | HashedTable | FieldSymbol, 
     return;
   }
 
+  if (target instanceof HashedTable && options?.fromValue) {
+    target.deleteFrom(options.fromValue);
+    return;
+  }
+
   // @ts-ignore
   const originalTabix = abap.builtin.sy.get().tabix.get();
 
