@@ -474,4 +474,17 @@ ASSERT lines( <fs2> ) = 2.`;
     await f(abap);
   });
 
+  it.only("hashed table, DELETE TABLE FROM", async () => {
+    const code = `
+DATA tab1 TYPE HASHED TABLE OF i WITH UNIQUE KEY table_line.
+DATA row LIKE LINE OF tab1.
+row = 2.
+INSERT row INTO TABLE tab1.
+DELETE TABLE tab1 FROM row.
+WRITE lines( tab1 )..`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
