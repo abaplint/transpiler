@@ -7,3 +7,4 @@ See https://github.com/abaplint/transpiler for additional information
 ## Notes
 
 * PRIMARY KEY not enforced
+* Function LIKE does not support collation: rtrim
