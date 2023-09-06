@@ -29,13 +29,15 @@ async function runAllDatabases(abap: ABAP,
     check();
   }
 
-  if (settings !== undefined && settings.snowflake === true && process.env.SNOWFLAKE_ACCOUNT) {
+  if ((settings === undefined || settings.snowflake === undefined || settings.snowflake === true)
+      && process.env.SNOWFLAKE_ACCOUNT) {
     const js = await runFilesSnowflake(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     await abap.context.databaseConnections["DEFAULT"].disconnect();
     check();
   }
+
 }
 
 /////////////////////////////////////////////////////
@@ -59,7 +61,7 @@ describe("Top level tests, Database", () => {
     ];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("hello world");
-    }, {snowflake: true});
+    });
   });
 
   it("SELECT, no result", async () => {
@@ -72,7 +74,7 @@ describe("Top level tests, Database", () => {
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("4");
-    }, {snowflake: true});
+    });
   });
 
   it("MODIFY FROM, inserts row", async () => {
@@ -90,7 +92,7 @@ describe("Top level tests, Database", () => {
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("0\nHELLO");
-    }, {snowflake: false});
+    });
   });
 
   it("MODIFY FROM, inserts and update", async () => {
@@ -114,6 +116,7 @@ describe("Top level tests, Database", () => {
     const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+// note: snowflake does not enforce PRIMARY KEY
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("WORLD");
     }, {snowflake: false});
@@ -138,7 +141,7 @@ describe("Top level tests, Database", () => {
     await runAllDatabases(abap, files, () => {
       const cons = abap.console.get();
       expect(cons).to.equal("4");
-    }, {snowflake: false});
+    });
   });
 
   it("SELECT SINGLE, WHERE char constant", async () => {
@@ -152,7 +155,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("0");
-    }, {snowflake: true});
+    });
   });
 
   it("SELECT SINGLE, WHERE AND", async () => {
@@ -166,7 +169,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("0");
-    }, {snowflake: true});
+    });
   });
 
   it("SELECT SINGLE, WHERE integer constant", async () => {
@@ -180,7 +183,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("0");
-    }, {snowflake: true});
+    });
   });
 
   it("SELECT SINGLE, WHERE constant, not found", async () => {
@@ -194,7 +197,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("4");
-    }, {snowflake: true});
+    });
   });
 
   it("SELECT SINGLE, WHERE char variable", async () => {
@@ -210,7 +213,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("0");
-    }, {snowflake: true});
+    });
   });
 
   it("SELECT INTO TABLE, ORDER BY PRIMARY KEY", async () => {
@@ -224,7 +227,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("2");
-    }, {snowflake: true});
+    });
   });
 
   it("SELECT INTO TABLE, ORDER BY PRIMARY KEY, dynamic", async () => {
@@ -238,7 +241,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("2");
-    }, {snowflake: true});
+    });
   });
 
   it("basic SELECT loop", async () => {
@@ -253,7 +256,7 @@ describe("Top level tests, Database", () => {
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.getTrimmed()).to.equal("hello world\nblah");
-    }, {snowflake: true});
+    });
   });
 
   it("SELECT loop, field list", async () => {
@@ -270,7 +273,7 @@ describe("Top level tests, Database", () => {
     await runAllDatabases(abap, files, () => {
 // TODO, for now it only checks that it compiles to valid JS
     // expect(abap.console.get()).to.equal("hello world\nblah");
-    }, {snowflake: false});
+    });
   });
 
   it("SELECT loop, field list", async () => {
@@ -562,7 +565,7 @@ ASSERT sy-subrc = 0.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("2");
-    });
+    }, {snowflake: false});
   });
 
   it("DELETE WHERE", async () => {
@@ -608,7 +611,7 @@ ASSERT sy-subrc = 0.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("1");
-    });
+    }, {snowflake: false});
   });
 
   it("INTO simple", async () => {
@@ -640,7 +643,7 @@ ASSERT sy-subrc = 0.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("00");
-    });
+    }, {snowflake: false});
   });
 
   it("INSERT FROM TABLE", async () => {
@@ -690,7 +693,7 @@ ASSERT sy-subrc = 0.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("1");
-    });
+    }, {snowflake: false});
   });
 
   it("inner join with variable", async () => {
@@ -706,7 +709,7 @@ ASSERT sy-subrc = 0.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       // just check it compiles and runs
-    });
+    }, {snowflake: false});
   });
 
   it(".INCLUDE with GROUPNAME", async () => {
@@ -733,7 +736,7 @@ ASSERT sy-subrc = 0.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("hello world");
-    });
+    }, {snowflake: false});
   });
 
   it("FAE with field symbol", async () => {
@@ -839,7 +842,7 @@ WRITE sy-dbcnt.`;
     ];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("2");
-    });
+    }, {snowflake: false});
   });
 
   it("SELECT SINGLE, WHERE eq", async () => {
@@ -940,7 +943,7 @@ WRITE sy-dbcnt.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("1");
-    });
+    }, {snowflake: false});
   });
 
   it("FOR ALL ENTRIES, two level", async () => {
@@ -1098,7 +1101,7 @@ WRITE sy-dbcnt.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("0");
-    });
+    }, {snowflake: false});
   });
 
   it("SELECT LOOP PACKAGE SIZE", async () => {
@@ -1152,7 +1155,7 @@ WRITE res-arbgb.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("2");
-    });
+    }, {snowflake: false});
   });
 
   it("INSERT and UPDATE quan field", async () => {

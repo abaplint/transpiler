@@ -24,13 +24,6 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
         err ? reject(err) : resolve(conn);
       })
     );
-    /*
-    await new Promise((resolve, reject) =>
-      this.connection.connect((err, conn) => {
-        err ? reject(err) : resolve(conn);
-      })
-    );
-    */
   }
 
   public async disconnect() {
@@ -79,16 +72,108 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
     return; // todo
   }
 
-  public async delete(_options: DB.DeleteDatabaseOptions): Promise<{subrc: number, dbcnt: number}> {
-    throw "todo_delete";
+  public async delete(options: DB.DeleteDatabaseOptions): Promise<{subrc: number, dbcnt: number}> {
+    const sql = `DELETE FROM ${options.table} WHERE ${options.where}`;
+
+    let subrc = 0;
+    let dbcnt = 0;
+    try {
+      if (this.trace === true) {
+        console.log(sql);
+      }
+
+      const res: any = await new Promise((resolve, _reject) =>
+        this.connection.execute({
+          sqlText: sql,
+          complete: function (err, stmt, rows) {
+            if (err) {
+            // for now, show the error and return zero results,
+              console.dir(stmt.getSqlText());
+              console.dir(err.message);
+              subrc = 4;
+              resolve([]);
+            } else {
+              resolve(rows);
+            }
+          }}));
+      dbcnt = res[0]["number of rows deleted"];
+      if (dbcnt === 0) {
+        subrc = 4;
+      }
+    } catch (error) {
+      subrc = 4;
+    }
+
+    return {subrc, dbcnt};
   }
 
-  public async update(_options: DB.UpdateDatabaseOptions): Promise<{subrc: number, dbcnt: number}> {
-    throw "todo_update";
+  public async update(options: DB.UpdateDatabaseOptions): Promise<{subrc: number, dbcnt: number}> {
+    const sql = `UPDATE ${options.table} SET ${options.set.join(", ")} WHERE ${options.where}`;
+
+    let subrc = 0;
+    let dbcnt = 0;
+    try {
+      if (this.trace === true) {
+        console.log(sql);
+      }
+
+      const res: any = await new Promise((resolve, _reject) =>
+        this.connection.execute({
+          sqlText: sql,
+          complete: function (err, stmt, rows) {
+            if (err) {
+            // for now, show the error and return zero results,
+              console.dir(stmt.getSqlText());
+              console.dir(err.message);
+              subrc = 4;
+              resolve([]);
+            } else {
+              resolve(rows);
+            }
+          }}));
+
+      dbcnt = res[0]["number of rows updated"];
+      if (dbcnt === 0) {
+        subrc = 4;
+      }
+    } catch (error) {
+      subrc = 4;
+    }
+
+    return {subrc, dbcnt};
   }
 
-  public async insert(_options: DB.InsertDatabaseOptions): Promise<{subrc: number, dbcnt: number}> {
-    throw "todo_insert";
+  public async insert(options: DB.InsertDatabaseOptions): Promise<{subrc: number, dbcnt: number}> {
+    const sql = `INSERT INTO ${options.table} (${options.columns.map(c => "\"" + c + "\"").join(",")}) VALUES (${options.values.join(",")})`;
+
+    let subrc = 0;
+    let dbcnt = 0;
+    try {
+      if (this.trace === true) {
+        console.log(sql);
+      }
+
+      await new Promise((resolve, _reject) =>
+        this.connection.execute({
+          sqlText: sql,
+          complete: function (err, stmt, rows) {
+            if (err) {
+            // for now, show the error and return zero results,
+              console.dir(stmt.getSqlText());
+              console.dir(err.message);
+              subrc = 4;
+              resolve([]);
+            } else {
+              resolve(rows);
+            }
+          }}));
+
+      dbcnt = 1;
+    } catch (error) {
+// note: snowflake does not enforce PRIMARY KEY
+      subrc = 4;
+    }
+    return {subrc, dbcnt};
   }
 
   public async select(options: DB.SelectDatabaseOptions): Promise<DB.SelectDatabaseResult> {

@@ -30,14 +30,14 @@ export class DeleteDatabase {
 
     if (options.table) {
       for (const row of options.table.array()) {
-        this.deleteDatabase(table, {from: row});
+        await this.deleteDatabase(table, {from: row});
       }
     } else if (options.from) {
       let where: string[] | string = [];
 
       const structure = options.from.get();
       for (const k of Object.keys(structure)) {
-        const str = k + " = " + toValue(structure[k].get());
+        const str = `"${k.toLowerCase()}"` + " = " + toValue(structure[k].get());
         where.push(str);
       }
       where = where.join(" AND ");

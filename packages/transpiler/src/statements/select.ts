@@ -2,7 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {FieldChainTranspiler, SourceTranspiler, SQLCondTranspiler, SQLFieldTranspiler, SQLSourceTranspiler} from "../expressions";
+import {FieldChainTranspiler, SQLOrderByTranspiler, SourceTranspiler, SQLCondTranspiler, SQLFieldNameTranspiler, SQLFieldTranspiler, SQLSourceTranspiler} from "../expressions";
 import {UniqueIdentifier} from "../unique_identifier";
 import {SQLFromTranspiler} from "../expressions/sql_from";
 
@@ -31,6 +31,9 @@ export class SelectTranspiler implements IStatementTranspiler {
     for (const f of fieldList?.getChildren() || []) {
       if (f instanceof abaplint.Nodes.ExpressionNode && f.get() instanceof abaplint.Expressions.SQLField) {
         const code = new SQLFieldTranspiler().transpile(f, traversal).getCode();
+        fields.push(code);
+      } else if (f instanceof abaplint.Nodes.ExpressionNode && f.get() instanceof abaplint.Expressions.SQLFieldName) {
+        const code = new SQLFieldNameTranspiler().transpile(f, traversal).getCode();
         fields.push(code);
       } else {
         fields.push(f.concatTokens());
@@ -66,7 +69,7 @@ export class SelectTranspiler implements IStatementTranspiler {
     }
     const orderBy = node.findFirstExpression(abaplint.Expressions.SQLOrderBy);
     if (orderBy) {
-      select += orderBy.concatTokens() + " ";
+      select += new SQLOrderByTranspiler().transpile(orderBy, traversal).getCode();
     }
 
     for (const d of node.findAllExpressionsRecursive(abaplint.Expressions.Dynamic)) {

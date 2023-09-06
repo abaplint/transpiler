@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/transpiler",
-  "version": "2.7.92",
+  "version": "2.7.93",
   "description": "Transpiler",
   "main": "build/src/index.js",
   "typings": "build/src/index.d.ts",
@@ -33,7 +33,7 @@
     "source-map": "^0.7.4"
   },
   "devDependencies": {
-    "@types/chai": "^4.3.5",
+    "@types/chai": "^4.3.6",
     "@types/mocha": "^10.0.1",
     "chai": "^4.3.8",
     "mocha": "^10.2.0",
