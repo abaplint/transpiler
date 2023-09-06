@@ -114,6 +114,7 @@ describe("Top level tests, Database", () => {
     const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+// note: snowflake does not enforce PRIMARY KEY
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("WORLD");
     }, {snowflake: false});

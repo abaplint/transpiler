@@ -84,6 +84,7 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
   }
 
   public async update(_options: DB.UpdateDatabaseOptions): Promise<{subrc: number, dbcnt: number}> {
+    console.dir("UPDATE");
     throw "todo_update";
   }
 
@@ -105,6 +106,7 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
             // for now, show the error and return zero results,
               console.dir(stmt.getSqlText());
               console.dir(err.message);
+              subrc = 4;
               resolve([]);
             } else {
               resolve(rows);
@@ -113,7 +115,7 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
 
       dbcnt = 1;
     } catch (error) {
-      // eg "UNIQUE constraint failed" errors
+// note: snowflake does not enforce PRIMARY KEY
       subrc = 4;
     }
     return {subrc, dbcnt};
