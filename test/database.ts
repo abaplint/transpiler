@@ -36,6 +36,7 @@ async function runAllDatabases(abap: ABAP,
     await abap.context.databaseConnections["DEFAULT"].disconnect();
     check();
   }
+
 }
 
 /////////////////////////////////////////////////////
@@ -609,7 +610,7 @@ ASSERT sy-subrc = 0.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("1");
-    });
+    }, {snowflake: false});
   });
 
   it("INTO simple", async () => {
@@ -623,7 +624,7 @@ ASSERT sy-subrc = 0.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("2");
-    });
+    }, {snowflake: true});
   });
 
   it("MODIFY simple", async () => {
@@ -641,7 +642,7 @@ ASSERT sy-subrc = 0.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("00");
-    });
+    }, {snowflake: false});
   });
 
   it("INSERT FROM TABLE", async () => {
@@ -660,7 +661,7 @@ ASSERT sy-subrc = 0.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("3");
-    });
+    }, {snowflake: true});
   });
 
   it("tilde", async () => {
@@ -674,7 +675,7 @@ ASSERT sy-subrc = 0.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("1");
-    });
+    }, {snowflake: true});
   });
 
   it("inner join", async () => {
