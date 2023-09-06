@@ -16,15 +16,9 @@ Connecting to a database is optional, currently the following databases have dri
 * [PostgreSQL](https://www.postgresql.org) via [@abaplint/database-pg](https://www.npmjs.com/package/@abaplint/database-pg)
 * [Snowflake](https://www.snowflake.com/) via [@abaplint/database-snowflake](https://www.npmjs.com/package/@abaplint/database-snowflake)
 
-## Getting started
-
-todo
-
 ## Reuse library
 
 https://open-abap.org
-
-https://github.com/open-abap/open-abap-core
 
 ## Examples
 * [abapGit](https://github.com/abapGit/abapGit) runs unit tests on every push
