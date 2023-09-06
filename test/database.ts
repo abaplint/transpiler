@@ -1200,7 +1200,7 @@ WRITE lines( res ).`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("2");
-    });
+    }, {snowflake: true});
   });
 
   it("star into APPENDING CORRESPONDING FIELDS OF TABLE", async () => {
@@ -1221,7 +1221,7 @@ WRITE lines( res ).`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("2");
-    });
+    }, {snowflake: true});
   });
 
   it("star into APPENDING CORRESPONDING FIELDS OF TABLE, APPENDING after FROM", async () => {
@@ -1249,7 +1249,7 @@ WRITE lines( res ).`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("2");
-    });
+    }, {snowflake: true});
   });
 
   it("expand in", async () => {
@@ -1266,7 +1266,7 @@ WRITE lines( res ).`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("2");
-    });
+    }, {snowflake: true});
   });
 
   it("FOR ALL ENTRIES, corresponding custom structure", async () => {
@@ -1295,7 +1295,7 @@ WRITE lines( lt_t100 ).`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("00");
-    });
+    }, {snowflake: true});
   });
 
   it("SELECT, IN, negative", async () => {
@@ -1321,7 +1321,7 @@ WRITE lines( lt_t100 ).`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("2\n0");
-    });
+    }, {snowflake: true});
   });
 
   it("SELECT, NOT IN", async () => {
@@ -1347,7 +1347,7 @@ WRITE lines( lt_t100 ).`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("2\n2");
-    });
+    }, {snowflake: true});
   });
 
   it("FOR ALL ENTRIES, same source and target", async () => {
@@ -1370,7 +1370,7 @@ WRITE lines( lt_t100 ).`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("1");
-    });
+    }, {snowflake: true});
   });
 
 });
