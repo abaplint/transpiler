@@ -798,7 +798,7 @@ ENDSELECT.`;
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
     await runAllDatabases(abap, files, () => {
       // just check it compiles and runs
-    });
+    }, {snowflake: true});
   });
 
   it("ASCENDING", async () => {
