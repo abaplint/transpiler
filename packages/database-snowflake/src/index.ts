@@ -24,13 +24,6 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
         err ? reject(err) : resolve(conn);
       })
     );
-    /*
-    await new Promise((resolve, reject) =>
-      this.connection.connect((err, conn) => {
-        err ? reject(err) : resolve(conn);
-      })
-    );
-    */
   }
 
   public async disconnect() {
@@ -107,7 +100,6 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
       if (dbcnt === 0) {
         subrc = 4;
       }
-
     } catch (error) {
       subrc = 4;
     }

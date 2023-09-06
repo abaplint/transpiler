@@ -2,7 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {FieldChainTranspiler, SourceTranspiler, SQLCondTranspiler, SQLFieldTranspiler, SQLSourceTranspiler} from "../expressions";
+import {FieldChainTranspiler, SourceTranspiler, SQLCondTranspiler, SQLFieldNameTranspiler, SQLFieldTranspiler, SQLSourceTranspiler} from "../expressions";
 import {UniqueIdentifier} from "../unique_identifier";
 import {SQLFromTranspiler} from "../expressions/sql_from";
 
@@ -31,6 +31,9 @@ export class SelectTranspiler implements IStatementTranspiler {
     for (const f of fieldList?.getChildren() || []) {
       if (f instanceof abaplint.Nodes.ExpressionNode && f.get() instanceof abaplint.Expressions.SQLField) {
         const code = new SQLFieldTranspiler().transpile(f, traversal).getCode();
+        fields.push(code);
+      } else if (f instanceof abaplint.Nodes.ExpressionNode && f.get() instanceof abaplint.Expressions.SQLFieldName) {
+        const code = new SQLFieldNameTranspiler().transpile(f, traversal).getCode();
         fields.push(code);
       } else {
         fields.push(f.concatTokens());
