@@ -107,9 +107,40 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
     return {subrc, dbcnt};
   }
 
-  public async update(_options: DB.UpdateDatabaseOptions): Promise<{subrc: number, dbcnt: number}> {
-    console.dir("UPDATE");
-    throw "todo_update";
+  public async update(options: DB.UpdateDatabaseOptions): Promise<{subrc: number, dbcnt: number}> {
+    const sql = `UPDATE ${options.table} SET ${options.set.join(", ")} WHERE ${options.where}`;
+
+    let subrc = 0;
+    let dbcnt = 0;
+    try {
+      if (this.trace === true) {
+        console.log(sql);
+      }
+
+      const res: any = await new Promise((resolve, _reject) =>
+        this.connection.execute({
+          sqlText: sql,
+          complete: function (err, stmt, rows) {
+            if (err) {
+            // for now, show the error and return zero results,
+              console.dir(stmt.getSqlText());
+              console.dir(err.message);
+              subrc = 4;
+              resolve([]);
+            } else {
+              resolve(rows);
+            }
+          }}));
+
+      dbcnt = res[0]["number of rows updated"];
+      if (dbcnt === 0) {
+        subrc = 4;
+      }
+    } catch (error) {
+      subrc = 4;
+    }
+
+    return {subrc, dbcnt};
   }
 
   public async insert(options: DB.InsertDatabaseOptions): Promise<{subrc: number, dbcnt: number}> {

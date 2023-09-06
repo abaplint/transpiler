@@ -811,7 +811,7 @@ ENDSELECT.`;
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
     await runAllDatabases(abap, files, () => {
       // just check it compiles and runs
-    });
+    }, {snowflake: true});
   });
 
   it("UPDATE, success", async () => {
@@ -825,7 +825,7 @@ WRITE / sy-subrc.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("1\n0");
-    });
+    }, {snowflake: true});
   });
 
   it("WHERE, empty dynamic condition", async () => {
@@ -841,7 +841,7 @@ WRITE sy-dbcnt.`;
     ];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("2");
-    });
+    }, {snowflake: false});
   });
 
   it("SELECT SINGLE, WHERE eq", async () => {
