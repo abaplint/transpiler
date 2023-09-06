@@ -139,7 +139,7 @@ describe("Top level tests, Database", () => {
     await runAllDatabases(abap, files, () => {
       const cons = abap.console.get();
       expect(cons).to.equal("4");
-    }, {snowflake: false});
+    }, {snowflake: true});
   });
 
   it("SELECT SINGLE, WHERE char constant", async () => {

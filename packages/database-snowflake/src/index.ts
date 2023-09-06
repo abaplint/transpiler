@@ -79,8 +79,40 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
     return; // todo
   }
 
-  public async delete(_options: DB.DeleteDatabaseOptions): Promise<{subrc: number, dbcnt: number}> {
-    throw "todo_delete";
+  public async delete(options: DB.DeleteDatabaseOptions): Promise<{subrc: number, dbcnt: number}> {
+    const sql = `DELETE FROM ${options.table} WHERE ${options.where}`;
+
+    let subrc = 0;
+    let dbcnt = 0;
+    try {
+      if (this.trace === true) {
+        console.log(sql);
+      }
+
+      const res: any = await new Promise((resolve, _reject) =>
+        this.connection.execute({
+          sqlText: sql,
+          complete: function (err, stmt, rows) {
+            if (err) {
+            // for now, show the error and return zero results,
+              console.dir(stmt.getSqlText());
+              console.dir(err.message);
+              subrc = 4;
+              resolve([]);
+            } else {
+              resolve(rows);
+            }
+          }}));
+      dbcnt = res[0]["number of rows deleted"];
+      if (dbcnt === 0) {
+        subrc = 4;
+      }
+
+    } catch (error) {
+      subrc = 4;
+    }
+
+    return {subrc, dbcnt};
   }
 
   public async update(_options: DB.UpdateDatabaseOptions): Promise<{subrc: number, dbcnt: number}> {
