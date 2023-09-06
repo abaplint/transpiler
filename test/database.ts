@@ -90,7 +90,7 @@ describe("Top level tests, Database", () => {
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("0\nHELLO");
-    }, {snowflake: false});
+    }, {snowflake: true});
   });
 
   it("MODIFY FROM, inserts and update", async () => {

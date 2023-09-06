@@ -87,8 +87,36 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
     throw "todo_update";
   }
 
-  public async insert(_options: DB.InsertDatabaseOptions): Promise<{subrc: number, dbcnt: number}> {
-    throw "todo_insert";
+  public async insert(options: DB.InsertDatabaseOptions): Promise<{subrc: number, dbcnt: number}> {
+    const sql = `INSERT INTO ${options.table} (${options.columns.map(c => "\"" + c + "\"").join(",")}) VALUES (${options.values.join(",")})`;
+
+    let subrc = 0;
+    let dbcnt = 0;
+    try {
+      if (this.trace === true) {
+        console.log(sql);
+      }
+
+      await new Promise((resolve, _reject) =>
+        this.connection.execute({
+          sqlText: sql,
+          complete: function (err, stmt, rows) {
+            if (err) {
+            // for now, show the error and return zero results,
+              console.dir(stmt.getSqlText());
+              console.dir(err.message);
+              resolve([]);
+            } else {
+              resolve(rows);
+            }
+          }}));
+
+      dbcnt = 1;
+    } catch (error) {
+      // eg "UNIQUE constraint failed" errors
+      subrc = 4;
+    }
+    return {subrc, dbcnt};
   }
 
   public async select(options: DB.SelectDatabaseOptions): Promise<DB.SelectDatabaseResult> {
