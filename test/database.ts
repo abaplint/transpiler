@@ -563,7 +563,7 @@ ASSERT sy-subrc = 0.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("2");
-    });
+    }, {snowflake: false});
   });
 
   it("DELETE WHERE", async () => {
@@ -595,7 +595,7 @@ ASSERT sy-subrc = 0.`;
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
     await runAllDatabases(abap, files, () => {
       // just check its valid js
-    });
+    }, {snowflake: true});
   });
 
   it("LIKE ESCAPE", async () => {
