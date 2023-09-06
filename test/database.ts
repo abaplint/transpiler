@@ -692,7 +692,7 @@ ASSERT sy-subrc = 0.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("1");
-    });
+    }, {snowflake: false});
   });
 
   it("inner join with variable", async () => {
@@ -708,7 +708,7 @@ ASSERT sy-subrc = 0.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       // just check it compiles and runs
-    });
+    }, {snowflake: false});
   });
 
   it(".INCLUDE with GROUPNAME", async () => {
@@ -721,7 +721,7 @@ ASSERT sy-subrc = 0.`;
       {filename: "zt222.tabl.xml", contents: zt222}];
     await runAllDatabases(abap, files, () => {
       // just check it compiles and runs
-    });
+    }, {snowflake: true});
   });
 
   it("SELECT LIKE", async () => {
@@ -735,7 +735,7 @@ ASSERT sy-subrc = 0.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("hello world");
-    });
+    }, {snowflake: false});
   });
 
   it("FAE with field symbol", async () => {
@@ -758,7 +758,7 @@ SELECT * FROM t100 INTO TABLE result
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
     await runAllDatabases(abap, files, () => {
       // just check it compiles and runs
-    });
+    }, {snowflake: true});
   });
 
   it("dynamic INTO CORRESPONDING FIELDS OF field symbol", async () => {
@@ -773,7 +773,7 @@ ENDSELECT.`;
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
     await runAllDatabases(abap, files, () => {
       // just check it compiles and runs
-    });
+    }, {snowflake: true});
   });
 
   it("basic TABLES", async () => {
@@ -785,7 +785,7 @@ CLEAR t100.`;
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
     await runAllDatabases(abap, files, () => {
       // just check it compiles and runs
-    });
+    }, {snowflake: true});
   });
 
   it("DESCENDING", async () => {
