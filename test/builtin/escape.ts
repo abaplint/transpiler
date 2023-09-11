@@ -111,4 +111,26 @@ describe("Builtin functions - escape", () => {
     expect(abap.console.get()).to.equal(`abc123&amp;&lt;>&quot;&apos;`);
   });
 
+  it("escape(), js, quote", async () => {
+    const code = `
+    DATA escaped TYPE string.
+    escaped = escape( val = |"| format = 8 ).
+    ASSERT escaped = '\\"'.
+    `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("escape(), js, ping", async () => {
+    const code = `
+    DATA escaped TYPE string.
+    escaped = escape( val = |'| format = 8 ).
+    ASSERT escaped = |\\\\'|.
+    `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
