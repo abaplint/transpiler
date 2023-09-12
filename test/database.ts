@@ -1374,4 +1374,23 @@ WRITE lines( lt_t100 ).`;
     });
   });
 
+  it.only("OPEN CURSOR", async () => {
+    const code = `
+DATA dbcur TYPE cursor.
+DATA wa TYPE t100.
+OPEN CURSOR dbcur FOR SELECT * FROM t100.
+DO.
+  FETCH NEXT CURSOR dbcur INTO wa.
+  IF sy-subrc = 0.
+  ENDIF.
+ENDDO.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("1");
+    });
+  });
+
 });
