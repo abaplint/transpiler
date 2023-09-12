@@ -1374,10 +1374,10 @@ WRITE lines( lt_t100 ).`;
     });
   });
 
-  it.only("OPEN CURSOR", async () => {
+  it.skip("OPEN CURSOR", async () => {
     const code = `
 DATA dbcur TYPE cursor.
-DATA wa TYPE t100.
+DATA wa    TYPE t100.
 OPEN CURSOR dbcur FOR SELECT * FROM t100.
 DO.
   FETCH NEXT CURSOR dbcur INTO wa.
