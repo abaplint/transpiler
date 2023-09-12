@@ -1374,7 +1374,7 @@ WRITE lines( lt_t100 ).`;
     });
   });
 
-  it.skip("OPEN CURSOR", async () => {
+  it.only("OPEN CURSOR", async () => {
     const code = `
 DATA dbcur TYPE cursor.
 DATA wa    TYPE t100.
