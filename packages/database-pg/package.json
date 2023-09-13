@@ -18,11 +18,13 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "pg": "^8.11.3"
+    "pg": "^8.11.3",
+    "pg-cursor": "^2.10.3"
   },
   "devDependencies": {
     "@types/node": "^20.6.0",
     "@types/pg": "^8.10.2",
+    "@types/pg-cursor": "^2.7.0",
     "@abaplint/runtime": "^2.7.95",
     "typescript": "^5.2.2"
   }

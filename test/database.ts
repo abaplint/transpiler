@@ -1393,7 +1393,7 @@ CLOSE CURSOR dbcur.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("000\n123");
-    }, {sqlite: true, postgres: false, snowflake: false});
+    }, {sqlite: true, postgres: true, snowflake: false});
   });
 
 });
