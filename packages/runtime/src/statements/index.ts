@@ -33,7 +33,7 @@ import {moveCorresponding} from "./move_corresponding";
 import {readTable} from "./read_table";
 import {replace} from "./replace";
 import {rollback} from "./rollback";
-import {SelectDatabase} from "./select";
+import {select as selectDB} from "./select";
 import {setBit} from "./set_bit";
 import {shift} from "./shift";
 import {sort} from "./sort";
@@ -192,7 +192,7 @@ export class Statements {
   }
 
   public async select(target: Structure | Table | FieldSymbol, select: SelectDatabaseOptions, runtimeOptions?: SelectRuntimeOptions) {
-    return new SelectDatabase(this.context).select(target, select, runtimeOptions);
+    return selectDB(target, select, runtimeOptions || {}, this.context);
   }
 
   public async updateDatabase(table: string | ICharacter, options: IUpdateDatabaseOptions) {
