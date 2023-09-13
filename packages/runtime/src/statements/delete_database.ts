@@ -10,59 +10,51 @@ export interface IDeleteDatabaseOptions {
   table?: Table | FieldSymbol,
 }
 
-export class DeleteDatabase {
-  private readonly context: Context;
-
-  public constructor(context: Context) {
-    this.context = context;
+export async function deleteDatabase(table: string | ICharacter, options: IDeleteDatabaseOptions, context: Context) {
+  if (options.table instanceof FieldSymbol) {
+    options.table = options.table.getPointer() as Table;
+  }
+  if (options.from instanceof FieldSymbol) {
+    options.from = options.from.getPointer() as Structure;
+  }
+  if (typeof table !== "string") {
+    table = table.get().trimEnd();
   }
 
-  public async deleteDatabase(table: string | ICharacter, options: IDeleteDatabaseOptions) {
-    if (options.table instanceof FieldSymbol) {
-      options.table = options.table.getPointer() as Table;
+  if (options.table) {
+    for (const row of options.table.array()) {
+      await deleteDatabase(table, {from: row}, context);
     }
-    if (options.from instanceof FieldSymbol) {
-      options.from = options.from.getPointer() as Structure;
+  } else if (options.from) {
+    let where: string[] | string = [];
+
+    const structure = options.from.get();
+    for (const k of Object.keys(structure)) {
+      const str = `"${k.toLowerCase()}"` + " = " + toValue(structure[k].get());
+      where.push(str);
     }
-    if (typeof table !== "string") {
-      table = table.get().trimEnd();
-    }
+    where = where.join(" AND ");
 
-    if (options.table) {
-      for (const row of options.table.array()) {
-        await this.deleteDatabase(table, {from: row});
-      }
-    } else if (options.from) {
-      let where: string[] | string = [];
-
-      const structure = options.from.get();
-      for (const k of Object.keys(structure)) {
-        const str = `"${k.toLowerCase()}"` + " = " + toValue(structure[k].get());
-        where.push(str);
-      }
-      where = where.join(" AND ");
-
-      const {subrc, dbcnt} = await this.context.defaultDB().delete({
-        table: buildDbTableName(table),
-        where,
-      });
+    const {subrc, dbcnt} = await context.defaultDB().delete({
+      table: buildDbTableName(table),
+      where,
+    });
 
       // @ts-ignore
-      abap.builtin.sy.get().subrc.set(subrc);
+    abap.builtin.sy.get().subrc.set(subrc);
       // @ts-ignore
-      abap.builtin.sy.get().dbcnt.set(dbcnt);
-    } else if (options.where) {
-      const {subrc, dbcnt} = await this.context.defaultDB().delete({
-        table: buildDbTableName(table),
-        where: options.where,
-      });
+    abap.builtin.sy.get().dbcnt.set(dbcnt);
+  } else if (options.where) {
+    const {subrc, dbcnt} = await context.defaultDB().delete({
+      table: buildDbTableName(table),
+      where: options.where,
+    });
 
       // @ts-ignore
-      abap.builtin.sy.get().subrc.set(subrc);
+    abap.builtin.sy.get().subrc.set(subrc);
       // @ts-ignore
-      abap.builtin.sy.get().dbcnt.set(dbcnt);
-    } else {
-      throw "deleteDatabase todo";
-    }
+    abap.builtin.sy.get().dbcnt.set(dbcnt);
+  } else {
+    throw "deleteDatabase todo";
   }
 }

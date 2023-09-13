@@ -24,7 +24,7 @@ import {getRunTime} from "./get_run_time";
 import {getTime} from "./get_time";
 import {IInsertDatabaseOptions, InsertDatabase} from "./insert_database";
 import {insertInternal} from "./insert_internal";
-import {DeleteDatabase, IDeleteDatabaseOptions} from "./delete_database";
+import {deleteDatabase, IDeleteDatabaseOptions} from "./delete_database";
 import {loop} from "./loop";
 import {IMessageOptions, MessageStatement} from "./message";
 import {IModifyDatabaseOptions, ModifyDatabase} from "./modify_database";
@@ -180,7 +180,7 @@ export class Statements {
   }
 
   public async deleteDatabase(table: string | ICharacter, options: IDeleteDatabaseOptions) {
-    return new DeleteDatabase(this.context).deleteDatabase(table, options);
+    await deleteDatabase(table, options, this.context);
   }
 
   public async insertDatabase(table: string | ICharacter, options: IInsertDatabaseOptions) {
