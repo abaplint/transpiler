@@ -207,4 +207,16 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
 
     return {rows: rows as any};
   }
+
+  public openCursor(): Promise<{ cursor: number; }> {
+    throw new Error("snowflake-openCursor not implemented.");
+  }
+
+  public fetchCursor(_cursor: number): Promise<{ subrc: number; dbcnt: number; }> {
+    throw new Error("snowflake-fetchCursor not implemented.");
+  }
+
+  public closeCursor(_cursor: number): Promise<void> {
+    throw new Error("snowflake-closeCursor not implemented.");
+  }
 }

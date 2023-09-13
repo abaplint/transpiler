@@ -175,4 +175,16 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     }
     return rows;
   }
+
+  public openCursor(): Promise<{ cursor: number; }> {
+    throw new Error("sqlite-openCursor not implemented.");
+  }
+
+  public fetchCursor(_cursor: number): Promise<{ subrc: number; dbcnt: number; }> {
+    throw new Error("sqlite-fetchCursor not implemented.");
+  }
+
+  public closeCursor(_cursor: number): Promise<void> {
+    throw new Error("sqlite-closeCursor not implemented.");
+  }
 }

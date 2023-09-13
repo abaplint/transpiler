@@ -21,9 +21,9 @@
     "snowflake-sdk": "^1.8.0"
   },
   "devDependencies": {
-    "@abaplint/runtime": "^2.7.93",
+    "@abaplint/runtime": "^2.7.95",
     "@types/snowflake-sdk": "^1.6.13",
-    "@types/node": "^20.5.9",
+    "@types/node": "^20.6.0",
     "typescript": "^5.2.2"
   }
 }

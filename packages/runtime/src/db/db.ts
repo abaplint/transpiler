@@ -54,4 +54,9 @@ export interface DatabaseClient {
   update(options: UpdateDatabaseOptions): Promise<{subrc: number, dbcnt: number}>;
   insert(options: InsertDatabaseOptions): Promise<{subrc: number, dbcnt: number}>;
   select(options: SelectDatabaseOptions): Promise<SelectDatabaseResult>;
+
+  // cursors
+  openCursor(): Promise<{cursor: number}>;
+  fetchCursor(cursor: number): Promise<{subrc: number, dbcnt: number}>;
+  closeCursor(cursor: number): Promise<void>;
 }
