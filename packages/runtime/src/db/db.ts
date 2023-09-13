@@ -34,6 +34,11 @@ export interface SelectDatabaseResult {
   rows: DatabaseRows;
 }
 
+export type DatabaseCursorCallbacks = {
+  fetchNextCursor: (packageSize: number) => Promise<SelectDatabaseResult>,
+  closeCursor: () => Promise<void>,
+};
+
 export interface DatabaseClient {
   /*** the type/name/identifier of the database */
   name: string;
@@ -56,7 +61,5 @@ export interface DatabaseClient {
   select(options: SelectDatabaseOptions): Promise<SelectDatabaseResult>;
 
   // cursors
-  openCursor(options: SelectDatabaseOptions): Promise<{cursor: number}>;
-  fetchNextCursor(cursor: number, packageSize: number): Promise<SelectDatabaseResult>;
-  closeCursor(cursor: number): Promise<void>;
+  openCursor(options: SelectDatabaseOptions): Promise<DatabaseCursorCallbacks>;
 }

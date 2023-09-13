@@ -208,15 +208,8 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
     return {rows: rows as any};
   }
 
-  public openCursor(): Promise<{ cursor: number; }> {
+  public async openCursor(_options: DB.SelectDatabaseOptions): Promise<DB.DatabaseCursorCallbacks> {
     throw new Error("snowflake-openCursor not implemented.");
   }
 
-  public fetchNextCursor(_cursor: number, _packageSize: number): Promise<DB.SelectDatabaseResult> {
-    throw new Error("snowflake-fetchCursor not implemented.");
-  }
-
-  public closeCursor(_cursor: number): Promise<void> {
-    throw new Error("snowflake-closeCursor not implemented.");
-  }
 }

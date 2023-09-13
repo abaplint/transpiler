@@ -1,4 +1,4 @@
-import initSqlJs, {Database, QueryExecResult} from "sql.js/dist/sql-wasm-debug";
+import initSqlJs, {Database, QueryExecResult, Statement} from "sql.js/dist/sql-wasm-debug";
 import {DB} from "@abaplint/runtime";
 
 export class SQLiteDatabaseClient implements DB.DatabaseClient {
@@ -176,15 +176,24 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     return rows;
   }
 
-  public openCursor(): Promise<{ cursor: number; }> {
-    throw new Error("sqlite-openCursor not implemented.");
+  public async openCursor(options: DB.SelectDatabaseOptions): Promise<DB.DatabaseCursorCallbacks> {
+    const statement = this.sqlite!.prepare(options.select);
+    return {
+      fetchNextCursor: (packageSize: number) => this.fetchNextCursor.bind(this)(packageSize, statement),
+      closeCursor: () => this.closeCursor.bind(this)(statement),
+    };
   }
 
-  public fetchNextCursor(_cursor: number, _packageSize: number): Promise<DB.SelectDatabaseResult> {
+  public async fetchNextCursor(_packageSize: number, statement: Statement): Promise<DB.SelectDatabaseResult> {
+    while (statement.step()) {
+      statement.get();
+      return {rows: []};
+    }
+
     throw new Error("sqlite-fetchCursor not implemented.");
   }
 
-  public closeCursor(_cursor: number): Promise<void> {
-    throw new Error("sqlite-closeCursor not implemented.");
+  public async closeCursor(statement: Statement): Promise<void> {
+    statement.free();
   }
 }

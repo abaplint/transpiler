@@ -167,8 +167,8 @@ export class Statements {
     }
   }
 
-  public async openCursor() {
-    await openCursor(this.context.defaultDB());
+  public async openCursor(select: string) {
+    await openCursor(this.context, select);
   }
 
   public async fetchNextCursor() {

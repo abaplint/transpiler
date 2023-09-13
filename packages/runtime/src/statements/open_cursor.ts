@@ -1,5 +1,6 @@
-import {DatabaseClient} from "../db/db";
+import {Context} from "../context";
 
-export async function openCursor(_client: DatabaseClient) {
+export async function openCursor(_context: Context, _select: string) {
   throw new Error("fetchNextCursor, runtime todo");
+  // .defaultDB()
 }

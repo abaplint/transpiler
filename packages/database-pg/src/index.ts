@@ -184,16 +184,8 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     return rows;
   }
 
-  public openCursor(): Promise<{ cursor: number; }> {
+  public async openCursor(_options: DB.SelectDatabaseOptions): Promise<DB.DatabaseCursorCallbacks> {
     throw new Error("pg-openCursor not implemented.");
-  }
-
-  public fetchNextCursor(_cursor: number, _packageSize: number): Promise<DB.SelectDatabaseResult> {
-    throw new Error("pg-fetchCursor not implemented.");
-  }
-
-  public closeCursor(_cursor: number): Promise<void> {
-    throw new Error("pg-closeCursor not implemented.");
   }
 
 }

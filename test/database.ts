@@ -15,7 +15,7 @@ async function runAllDatabases(abap: ABAP,
 
   if (settings === undefined || settings.sqlite === undefined || settings.sqlite === true) {
     const js = await runRilesSqlite(abap, files);
-//    console.dir(js);
+    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     await abap.context.databaseConnections["DEFAULT"].disconnect();
@@ -1375,7 +1375,7 @@ WRITE lines( lt_t100 ).`;
     });
   });
 
-  it.skip("OPEN CURSOR", async () => {
+  it.only("OPEN CURSOR", async () => {
     const code = `
 DATA dbcur TYPE cursor.
 DATA wa    TYPE t100.
