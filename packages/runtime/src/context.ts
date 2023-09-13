@@ -5,7 +5,8 @@ import * as RFC from "./rfc";
 export class Context {
   public console: Console;
 
-  public cursors: {[key: number]: DatabaseCursorCallbacks};
+  public cursorCounter = 0;
+  public cursors: {[key: number]: DatabaseCursorCallbacks} = {};
 
   // DEFAULT and secondary database connections
   public databaseConnections: {[name: string]: DatabaseClient} = {};

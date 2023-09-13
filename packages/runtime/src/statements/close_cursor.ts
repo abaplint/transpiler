@@ -1,5 +1,6 @@
-import {DatabaseClient} from "../db/db";
+import {Context} from "../context";
 
-export async function closeCursor(_client: DatabaseClient) {
-  throw new Error("fetchNextCursor, runtime todo");
+export async function closeCursor(context: Context, cursor: number) {
+  await context.cursors[cursor].closeCursor();
+  delete context.cursors[cursor];
 }

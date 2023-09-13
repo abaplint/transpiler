@@ -177,23 +177,24 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
   }
 
   public async openCursor(options: DB.SelectDatabaseOptions): Promise<DB.DatabaseCursorCallbacks> {
-    const statement = this.sqlite!.prepare(options.select);
+    const statement = this.sqlite!.prepare(options.select, null);
     return {
       fetchNextCursor: (packageSize: number) => this.fetchNextCursor.bind(this)(packageSize, statement),
       closeCursor: () => this.closeCursor.bind(this)(statement),
     };
   }
 
-  public async fetchNextCursor(_packageSize: number, statement: Statement): Promise<DB.SelectDatabaseResult> {
+  private async fetchNextCursor(_packageSize: number, statement: Statement): Promise<DB.SelectDatabaseResult> {
     while (statement.step()) {
-      statement.get();
+      const values = statement.get();
+      console.dir(values);
       return {rows: []};
     }
 
     throw new Error("sqlite-fetchCursor not implemented.");
   }
 
-  public async closeCursor(statement: Statement): Promise<void> {
+  private async closeCursor(statement: Statement): Promise<void> {
     statement.free();
   }
 }

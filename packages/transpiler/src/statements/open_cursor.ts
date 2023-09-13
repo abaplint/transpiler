@@ -11,7 +11,7 @@ export class OpenCursorTranspiler implements IStatementTranspiler {
     const selectExpression = node.findDirectExpression(abaplint.Expressions.Select);
 
     let select = "SELECT ";
-    select += traversal.traverse(selectExpression?.findDirectExpression(abaplint.Expressions.SQLFieldList)).getCode() + " FROM ";
+    select += traversal.traverse(selectExpression?.findDirectExpression(abaplint.Expressions.SQLFieldList)).getCode() + " ";
     select += traversal.traverse(selectExpression?.findDirectExpression(abaplint.Expressions.SQLFrom)).getCode();
 
     const cond = selectExpression?.findDirectExpression(abaplint.Expressions.SQLCond);

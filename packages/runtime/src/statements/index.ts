@@ -167,16 +167,17 @@ export class Statements {
     }
   }
 
-  public async openCursor(select: string) {
-    await openCursor(this.context, select);
+  public async openCursor(target: INumeric, select: string) {
+    const num = await openCursor(this.context, select);
+    target.set(num);
   }
 
-  public async fetchNextCursor() {
-    await fetchNextCursor(this.context.defaultDB());
+  public async fetchNextCursor(cursor: INumeric, target: any) {
+    await fetchNextCursor(this.context, cursor.get(), target);
   }
 
-  public async closeCursor() {
-    await closeCursor(this.context.defaultDB());
+  public async closeCursor(cursor: INumeric) {
+    await closeCursor(this.context, cursor.get());
   }
 
   public async deleteDatabase(table: string | ICharacter, options: IDeleteDatabaseOptions) {
