@@ -38,6 +38,9 @@ import {setBit} from "./set_bit";
 import {shift} from "./shift";
 import {sort} from "./sort";
 import {wait} from "./wait";
+import {fetchNextCursor} from "./fetch_next_cursor";
+import {openCursor} from "./open_cursor";
+import {closeCursor} from "./close_cursor";
 import {setHandler} from "./set_handler";
 import {split} from "./split";
 import {translate} from "./translate";
@@ -164,16 +167,24 @@ export class Statements {
     }
   }
 
+  public async openCursor() {
+    await openCursor(this.context.defaultDB());
+  }
+
+  public async fetchNextCursor() {
+    await fetchNextCursor(this.context.defaultDB());
+  }
+
+  public async closeCursor() {
+    await closeCursor(this.context.defaultDB());
+  }
+
   public async deleteDatabase(table: string | ICharacter, options: IDeleteDatabaseOptions) {
     return new DeleteDatabase(this.context).deleteDatabase(table, options);
   }
 
   public async insertDatabase(table: string | ICharacter, options: IInsertDatabaseOptions) {
     return new InsertDatabase(this.context).insertDatabase(table, options);
-  }
-
-  public async message(options: IMessageOptions) {
-    return new MessageStatement(this.context).message(options);
   }
 
   public async modifyDatabase(table: string | ICharacter, options: IModifyDatabaseOptions) {
@@ -190,6 +201,10 @@ export class Statements {
 
   public async callFunction(options: ICallFunctionOptions) {
     return new CallFunction(this.context).callFunction(options);
+  }
+
+  public async message(options: IMessageOptions) {
+    return new MessageStatement(this.context).message(options);
   }
 
   public write(source: INumeric | ICharacter | FieldSymbol | string | number, options?: IWriteOptions) {

@@ -5,10 +5,8 @@ import {Chunk} from "../chunk";
 
 export class CloseCursorTranspiler implements IStatementTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    const ret = new Chunk();
-    ret.appendString("closecursortodo");
-    return ret;
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
+    return new Chunk().append(`await abap.statements.closeCursor();`, node, traversal);
   }
 
 }

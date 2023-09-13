@@ -151,15 +151,15 @@ export class SelectTranspiler implements IStatementTranspiler {
     // check if previous token before sqlCond is "WHERE". It could also be "ON" in case of join condition
     let prevToken;
     const sqlCondToken = expression.getFirstToken();
-    for(const token of node.getTokens()){
-      if(token.getStart() === sqlCondToken.getStart()){
+    for (const token of node.getTokens()) {
+      if (token.getStart() === sqlCondToken.getStart()) {
         break;
       }
       prevToken = token;
     }
-    if(prevToken && prevToken.getStr().toUpperCase() === "WHERE"){
+    if (prevToken && prevToken.getStr().toUpperCase() === "WHERE") {
       return true;
-    }else{
+    } else {
       return false;
     }
   }
