@@ -56,7 +56,7 @@ export interface DatabaseClient {
   select(options: SelectDatabaseOptions): Promise<SelectDatabaseResult>;
 
   // cursors
-  openCursor(): Promise<{cursor: number}>;
-  fetchNextCursor(cursor: number): Promise<{subrc: number, dbcnt: number}>;
+  openCursor(options: SelectDatabaseOptions): Promise<{cursor: number}>;
+  fetchNextCursor(cursor: number, packageSize: number): Promise<SelectDatabaseResult>;
   closeCursor(cursor: number): Promise<void>;
 }

@@ -188,7 +188,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     throw new Error("pg-openCursor not implemented.");
   }
 
-  public fetchNextCursor(_cursor: number): Promise<{ subrc: number; dbcnt: number; }> {
+  public fetchNextCursor(_cursor: number, _packageSize: number): Promise<DB.SelectDatabaseResult> {
     throw new Error("pg-fetchCursor not implemented.");
   }
 

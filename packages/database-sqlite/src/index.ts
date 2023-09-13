@@ -180,7 +180,7 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     throw new Error("sqlite-openCursor not implemented.");
   }
 
-  public fetchNextCursor(_cursor: number): Promise<{ subrc: number; dbcnt: number; }> {
+  public fetchNextCursor(_cursor: number, _packageSize: number): Promise<DB.SelectDatabaseResult> {
     throw new Error("sqlite-fetchCursor not implemented.");
   }
 
