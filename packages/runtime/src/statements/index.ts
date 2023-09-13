@@ -172,8 +172,8 @@ export class Statements {
     target.set(num);
   }
 
-  public async fetchNextCursor(cursor: INumeric, target: any) {
-    await fetchNextCursor(this.context, cursor.get(), target);
+  public async fetchNextCursor(cursor: INumeric, target: any, packageSize?: INumeric) {
+    await fetchNextCursor(this.context, cursor.get(), target, packageSize?.get() || 0);
   }
 
   public async closeCursor(cursor: INumeric) {

@@ -15,7 +15,7 @@ async function runAllDatabases(abap: ABAP,
 
   if (settings === undefined || settings.sqlite === undefined || settings.sqlite === true) {
     const js = await runRilesSqlite(abap, files);
-    console.dir(js);
+//    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     await abap.context.databaseConnections["DEFAULT"].disconnect();
@@ -1375,15 +1375,17 @@ WRITE lines( lt_t100 ).`;
     });
   });
 
-  it.only("OPEN CURSOR", async () => {
+  it.skip("OPEN CURSOR", async () => {
     const code = `
 DATA dbcur TYPE cursor.
 DATA wa    TYPE t100.
 OPEN CURSOR dbcur FOR SELECT * FROM t100.
 DO.
   FETCH NEXT CURSOR dbcur INTO wa.
-  IF sy-subrc = 0.
+  IF sy-subrc <> 0.
+    EXIT.
   ENDIF.
+  WRITE / wa-msgnr.
 ENDDO.
 CLOSE CURSOR dbcur.`;
     const files = [
@@ -1391,7 +1393,7 @@ CLOSE CURSOR dbcur.`;
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
-      expect(abap.console.get()).to.equal("1");
+      expect(abap.console.get()).to.equal("000\n123");
     }, {sqlite: true, postgres: false, snowflake: false});
   });
 

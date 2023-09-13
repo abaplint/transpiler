@@ -1,6 +1,6 @@
 import {clone} from "../clone";
 import {Context} from "../context";
-import {SelectDatabaseOptions, SelectRuntimeOptions} from "../db/db";
+import {DatabaseRows, SelectDatabaseOptions, SelectRuntimeOptions} from "../db/db";
 import {FieldSymbol, HashedTable, Structure, Table} from "../types";
 
 export async function select(target: Structure | Table | HashedTable | FieldSymbol,
@@ -33,6 +33,20 @@ export async function select(target: Structure | Table | HashedTable | FieldSymb
     return;
   }
 
+  rowsToTarget(target, rows);
+
+  if (target === undefined && rows.length === 1) {
+      // @ts-ignore
+    abap.builtin.sy.get().dbcnt.set(Object.values(rows[0])[0]);
+  } else {
+      // @ts-ignore
+    abap.builtin.sy.get().dbcnt.set(rows.length);
+  }
+    // @ts-ignore
+  abap.builtin.sy.get().subrc.set(0);
+}
+
+export function rowsToTarget(target: Structure | Table | HashedTable | FieldSymbol, rows: DatabaseRows) {
   if (target instanceof Structure) {
     const result: any = {};
     for (const column in rows[0]) {
@@ -73,14 +87,4 @@ export async function select(target: Structure | Table | HashedTable | FieldSymb
       // its a simple type
     target.set(rows[0][Object.keys(rows[0])[0]]);
   }
-
-  if (target === undefined && rows.length === 1) {
-      // @ts-ignore
-    abap.builtin.sy.get().dbcnt.set(Object.values(rows[0])[0]);
-  } else {
-      // @ts-ignore
-    abap.builtin.sy.get().dbcnt.set(rows.length);
-  }
-    // @ts-ignore
-  abap.builtin.sy.get().subrc.set(0);
 }
