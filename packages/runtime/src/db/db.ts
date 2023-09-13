@@ -57,6 +57,6 @@ export interface DatabaseClient {
 
   // cursors
   openCursor(): Promise<{cursor: number}>;
-  fetchCursor(cursor: number): Promise<{subrc: number, dbcnt: number}>;
+  fetchNextCursor(cursor: number): Promise<{subrc: number, dbcnt: number}>;
   closeCursor(cursor: number): Promise<void>;
 }
