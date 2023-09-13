@@ -2,7 +2,7 @@ import {Context} from "../context";
 import {FieldSymbol, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {insertDatabase} from "./insert_database";
-import {UpdateDatabase} from "./update_database";
+import {updateDatabase} from "./update_database";
 
 export interface IModifyDatabaseOptions {
   values?: Structure | FieldSymbol,
@@ -17,18 +17,17 @@ export async function modifyDatabase(table: string | ICharacter, options: IModif
     options.values = options.values.getPointer() as Structure;
   }
 
-  const update = new UpdateDatabase(context);
   if (options.table) {
     for (const row of options.table.array()) {
       const subrc = await insertDatabase(table, {values: row}, context);
       if (subrc !== 0) {
-        await update.updateDatabase(table, {from: row});
+        await updateDatabase(table, {from: row}, context);
       }
     }
   } else if (options.values) {
     const subrc = await insertDatabase(table, {values: options.values}, context);
     if (subrc !== 0) {
-      await update.updateDatabase(table, {from: options.values});
+      await updateDatabase(table, {from: options.values}, context);
     }
   } else {
     throw "modifyDatabase todo";

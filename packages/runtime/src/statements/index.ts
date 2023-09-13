@@ -45,7 +45,7 @@ import {setHandler} from "./set_handler";
 import {split} from "./split";
 import {translate} from "./translate";
 import {callTransaction} from "./call_transaction";
-import {IUpdateDatabaseOptions, UpdateDatabase} from "./update_database";
+import {IUpdateDatabaseOptions, updateDatabase} from "./update_database";
 import {IWriteOptions, WriteStatement} from "./write";
 import {Context} from "../context";
 import {ICharacter} from "../types/_character";
@@ -196,7 +196,7 @@ export class Statements {
   }
 
   public async updateDatabase(table: string | ICharacter, options: IUpdateDatabaseOptions) {
-    return new UpdateDatabase(this.context).updateDatabase(table, options);
+    return updateDatabase(table, options, this.context);
   }
 
   public async callFunction(options: ICallFunctionOptions) {
