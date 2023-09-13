@@ -22,12 +22,12 @@ import {getParameter} from "./get_parameter";
 import {setLocale} from "./set_locale";
 import {getRunTime} from "./get_run_time";
 import {getTime} from "./get_time";
-import {IInsertDatabaseOptions, InsertDatabase} from "./insert_database";
+import {IInsertDatabaseOptions, insertDatabase} from "./insert_database";
 import {insertInternal} from "./insert_internal";
 import {deleteDatabase, IDeleteDatabaseOptions} from "./delete_database";
 import {loop} from "./loop";
 import {IMessageOptions, MessageStatement} from "./message";
-import {IModifyDatabaseOptions, ModifyDatabase} from "./modify_database";
+import {IModifyDatabaseOptions, modifyDatabase} from "./modify_database";
 import {modifyInternal} from "./modify_internal";
 import {moveCorresponding} from "./move_corresponding";
 import {readTable} from "./read_table";
@@ -184,11 +184,11 @@ export class Statements {
   }
 
   public async insertDatabase(table: string | ICharacter, options: IInsertDatabaseOptions) {
-    return new InsertDatabase(this.context).insertDatabase(table, options);
+    return insertDatabase(table, options, this.context);
   }
 
   public async modifyDatabase(table: string | ICharacter, options: IModifyDatabaseOptions) {
-    return new ModifyDatabase(this.context).modifyDatabase(table, options);
+    return modifyDatabase(table, options, this.context);
   }
 
   public async select(target: Structure | Table | FieldSymbol, select: SelectDatabaseOptions, runtimeOptions?: SelectRuntimeOptions) {
