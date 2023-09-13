@@ -7,9 +7,12 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
   private readonly config: snowflake.ConnectionOptions;
   private readonly trace: boolean | undefined;
 
-  public constructor(input: snowflake.ConnectionOptions & {trace?: boolean}) {
+  public constructor(input: snowflake.ConnectionOptions & {trace?: boolean, checkAtInsert?: boolean}) {
     this.config = input;
     this.trace = input.trace;
+    if (input.checkAtInsert === true) {
+      throw new Error("SnowflakeDatabaseClient, todo checkAtInsert");
+    }
   }
 
   public async connect(): Promise<void> {
