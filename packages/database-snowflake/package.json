@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/database-snowflake",
-  "version": "2.7.93",
+  "version": "2.7.96",
   "description": "Transpiler - Snowflake driver",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
@@ -21,7 +21,7 @@
     "snowflake-sdk": "^1.8.0"
   },
   "devDependencies": {
-    "@abaplint/runtime": "^2.7.95",
+    "@abaplint/runtime": "^2.7.96",
     "@types/snowflake-sdk": "^1.6.13",
     "@types/node": "^20.6.0",
     "typescript": "^5.2.2"
