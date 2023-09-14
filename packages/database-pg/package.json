@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/database-pg",
-  "version": "2.7.93",
+  "version": "2.7.96",
   "description": "Transpiler - Postgres driver",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
@@ -18,12 +18,14 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "pg": "^8.11.3"
+    "pg": "^8.11.3",
+    "pg-cursor": "^2.10.3"
   },
   "devDependencies": {
-    "@types/node": "^20.5.9",
+    "@types/node": "^20.6.0",
     "@types/pg": "^8.10.2",
-    "@abaplint/runtime": "^2.7.93",
+    "@types/pg-cursor": "^2.7.0",
+    "@abaplint/runtime": "^2.7.96",
     "typescript": "^5.2.2"
   }
 }

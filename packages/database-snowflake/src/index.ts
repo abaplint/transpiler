@@ -7,9 +7,12 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
   private readonly config: snowflake.ConnectionOptions;
   private readonly trace: boolean | undefined;
 
-  public constructor(input: snowflake.ConnectionOptions & {trace?: boolean}) {
+  public constructor(input: snowflake.ConnectionOptions & {trace?: boolean, checkAtInsert?: boolean}) {
     this.config = input;
     this.trace = input.trace;
+    if (input.checkAtInsert === true) {
+      throw new Error("SnowflakeDatabaseClient, todo checkAtInsert");
+    }
   }
 
   public async connect(): Promise<void> {
@@ -207,4 +210,52 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
 
     return {rows: rows as any};
   }
+
+  public async openCursor(options: DB.SelectDatabaseOptions): Promise<DB.DatabaseCursorCallbacks> {
+    const outer = this;
+    const counter = {counter: 0};
+
+    return new Promise((resolve, reject) => {
+      this.connection.execute({
+        sqlText: options.select,
+        streamResult: true,
+        complete: function (err, stmt) {
+          if (err) {
+            reject(err);
+          }
+          resolve({
+            fetchNextCursor: (packageSize: number) => outer.fetchNextCursor(packageSize, stmt, counter),
+            closeCursor: () => outer.closeCursor(),
+          });
+        },
+      });
+    });
+
+  }
+
+  private async fetchNextCursor(
+    packageSize: number,
+    stmt: snowflake.Statement,
+    counter: {counter: number}): Promise<DB.SelectDatabaseResult> {
+
+    return new Promise((resolve, reject) => {
+      const rows: any[] = [];
+      stmt.streamRows({
+        start: counter.counter,
+        end: counter.counter + packageSize - 1,
+      }).on("error", (err) => {
+        reject(err);
+      }).on("data", (row) => {
+        rows.push(row);
+      }).on("end", () => {
+        counter.counter = counter.counter + packageSize;
+        resolve({rows: rows});
+      });
+    });
+  }
+
+  private async closeCursor(): Promise<void> {
+    return;
+  }
+
 }

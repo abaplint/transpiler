@@ -2,7 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {FieldChainTranspiler, SQLOrderByTranspiler, SourceTranspiler, SQLCondTranspiler, SQLFieldNameTranspiler, SQLFieldTranspiler, SQLSourceTranspiler} from "../expressions";
+import {FieldChainTranspiler, SQLOrderByTranspiler, SourceTranspiler, SQLCondTranspiler, SQLSourceTranspiler, SQLFieldListTranspiler} from "../expressions";
 import {UniqueIdentifier} from "../unique_identifier";
 import {SQLFromTranspiler} from "../expressions/sql_from";
 
@@ -27,19 +27,10 @@ export class SelectTranspiler implements IStatementTranspiler {
     let select = "SELECT ";
     const fieldList = node.findFirstExpression(abaplint.Expressions.SQLFieldList)
       || node.findFirstExpression(abaplint.Expressions.SQLFieldListLoop);
-    const fields: string[] = [];
-    for (const f of fieldList?.getChildren() || []) {
-      if (f instanceof abaplint.Nodes.ExpressionNode && f.get() instanceof abaplint.Expressions.SQLField) {
-        const code = new SQLFieldTranspiler().transpile(f, traversal).getCode();
-        fields.push(code);
-      } else if (f instanceof abaplint.Nodes.ExpressionNode && f.get() instanceof abaplint.Expressions.SQLFieldName) {
-        const code = new SQLFieldNameTranspiler().transpile(f, traversal).getCode();
-        fields.push(code);
-      } else {
-        fields.push(f.concatTokens());
-      }
+    if (fieldList === undefined) {
+      throw new Error("SelectTranspiler, field list not found");
     }
-    select += fields.join(", ") + " ";
+    select += new SQLFieldListTranspiler().transpile(fieldList, traversal).getCode() + " ";
 
     const from = node.findFirstExpression(abaplint.Expressions.SQLFrom);
     if (from) {
@@ -151,15 +142,15 @@ export class SelectTranspiler implements IStatementTranspiler {
     // check if previous token before sqlCond is "WHERE". It could also be "ON" in case of join condition
     let prevToken;
     const sqlCondToken = expression.getFirstToken();
-    for(const token of node.getTokens()){
-      if(token.getStart() === sqlCondToken.getStart()){
+    for (const token of node.getTokens()) {
+      if (token.getStart() === sqlCondToken.getStart()) {
         break;
       }
       prevToken = token;
     }
-    if(prevToken && prevToken.getStr().toUpperCase() === "WHERE"){
+    if (prevToken && prevToken.getStr().toUpperCase() === "WHERE") {
       return true;
-    }else{
+    } else {
       return false;
     }
   }

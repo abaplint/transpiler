@@ -1,5 +1,6 @@
 import {DB} from "@abaplint/runtime";
 import * as pg from "pg";
+import * as Cursor from "pg-cursor";
 
 export type ConnectionSettings = {
   user: string,
@@ -168,7 +169,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     return {rows: rows};
   }
 
-  private convert(res: pg.QueryResult<any>): DB.DatabaseRows {
+  private convert(res: {rows: any[]}): DB.DatabaseRows {
     if (res === undefined || res.rows.length === 0) {
       return [];
     }
@@ -182,6 +183,26 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
       rows.push(row);
     }
     return rows;
+  }
+
+  public async openCursor(options: DB.SelectDatabaseOptions): Promise<DB.DatabaseCursorCallbacks> {
+    const client = await this.pool!.connect();
+    const cursor = client.query(new Cursor(options.select));
+    return {
+      fetchNextCursor: (packageSize: number) => this.fetchNextCursor.bind(this)(packageSize, cursor),
+      closeCursor: () => this.closeCursor.bind(this)(cursor, client),
+    };
+  }
+
+  private async fetchNextCursor(packageSize: number, cursor: Cursor): Promise<DB.SelectDatabaseResult> {
+    const res = await cursor.read(packageSize);
+    return {rows: this.convert({rows: res})};
+  }
+
+  private async closeCursor(cursor: any, client: any): Promise<void> {
+    cursor.close(() => {
+      client.release();
+    });
   }
 
 }

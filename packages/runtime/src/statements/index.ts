@@ -22,27 +22,30 @@ import {getParameter} from "./get_parameter";
 import {setLocale} from "./set_locale";
 import {getRunTime} from "./get_run_time";
 import {getTime} from "./get_time";
-import {IInsertDatabaseOptions, InsertDatabase} from "./insert_database";
+import {IInsertDatabaseOptions, insertDatabase} from "./insert_database";
 import {insertInternal} from "./insert_internal";
-import {DeleteDatabase, IDeleteDatabaseOptions} from "./delete_database";
+import {deleteDatabase, IDeleteDatabaseOptions} from "./delete_database";
 import {loop} from "./loop";
 import {IMessageOptions, MessageStatement} from "./message";
-import {IModifyDatabaseOptions, ModifyDatabase} from "./modify_database";
+import {IModifyDatabaseOptions, modifyDatabase} from "./modify_database";
 import {modifyInternal} from "./modify_internal";
 import {moveCorresponding} from "./move_corresponding";
 import {readTable} from "./read_table";
 import {replace} from "./replace";
 import {rollback} from "./rollback";
-import {SelectDatabase} from "./select";
+import {select as selectDB} from "./select";
 import {setBit} from "./set_bit";
 import {shift} from "./shift";
 import {sort} from "./sort";
 import {wait} from "./wait";
+import {fetchNextCursor} from "./fetch_next_cursor";
+import {openCursor} from "./open_cursor";
+import {closeCursor} from "./close_cursor";
 import {setHandler} from "./set_handler";
 import {split} from "./split";
 import {translate} from "./translate";
 import {callTransaction} from "./call_transaction";
-import {IUpdateDatabaseOptions, UpdateDatabase} from "./update_database";
+import {IUpdateDatabaseOptions, updateDatabase} from "./update_database";
 import {IWriteOptions, WriteStatement} from "./write";
 import {Context} from "../context";
 import {ICharacter} from "../types/_character";
@@ -164,32 +167,45 @@ export class Statements {
     }
   }
 
+  public async openCursor(target: INumeric, select: string) {
+    const num = await openCursor(this.context, select);
+    target.set(num);
+  }
+
+  public async fetchNextCursor(cursor: INumeric, target: any, packageSize?: INumeric) {
+    await fetchNextCursor(this.context, cursor.get(), target, packageSize?.get() || 0);
+  }
+
+  public async closeCursor(cursor: INumeric) {
+    await closeCursor(this.context, cursor.get());
+  }
+
   public async deleteDatabase(table: string | ICharacter, options: IDeleteDatabaseOptions) {
-    return new DeleteDatabase(this.context).deleteDatabase(table, options);
+    await deleteDatabase(table, options, this.context);
   }
 
   public async insertDatabase(table: string | ICharacter, options: IInsertDatabaseOptions) {
-    return new InsertDatabase(this.context).insertDatabase(table, options);
-  }
-
-  public async message(options: IMessageOptions) {
-    return new MessageStatement(this.context).message(options);
+    return insertDatabase(table, options, this.context);
   }
 
   public async modifyDatabase(table: string | ICharacter, options: IModifyDatabaseOptions) {
-    return new ModifyDatabase(this.context).modifyDatabase(table, options);
+    return modifyDatabase(table, options, this.context);
   }
 
   public async select(target: Structure | Table | FieldSymbol, select: SelectDatabaseOptions, runtimeOptions?: SelectRuntimeOptions) {
-    return new SelectDatabase(this.context).select(target, select, runtimeOptions);
+    return selectDB(target, select, runtimeOptions || {}, this.context);
   }
 
   public async updateDatabase(table: string | ICharacter, options: IUpdateDatabaseOptions) {
-    return new UpdateDatabase(this.context).updateDatabase(table, options);
+    return updateDatabase(table, options, this.context);
   }
 
   public async callFunction(options: ICallFunctionOptions) {
     return new CallFunction(this.context).callFunction(options);
+  }
+
+  public async message(options: IMessageOptions) {
+    return new MessageStatement(this.context).message(options);
   }
 
   public write(source: INumeric | ICharacter | FieldSymbol | string | number, options?: IWriteOptions) {

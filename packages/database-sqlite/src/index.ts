@@ -1,4 +1,4 @@
-import initSqlJs, {Database, QueryExecResult} from "sql.js/dist/sql-wasm-debug";
+import initSqlJs, {Database, QueryExecResult, Statement, SqlValue} from "sql.js/dist/sql-wasm-debug";
 import {DB} from "@abaplint/runtime";
 
 export class SQLiteDatabaseClient implements DB.DatabaseClient {
@@ -174,5 +174,30 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
       rows.push(row);
     }
     return rows;
+  }
+
+  public async openCursor(options: DB.SelectDatabaseOptions): Promise<DB.DatabaseCursorCallbacks> {
+    const statement = this.sqlite!.prepare(options.select, null);
+    return {
+      fetchNextCursor: (packageSize: number) => this.fetchNextCursor.bind(this)(packageSize, statement),
+      closeCursor: () => this.closeCursor.bind(this)(statement),
+    };
+  }
+
+  private async fetchNextCursor(packageSize: number, statement: Statement): Promise<DB.SelectDatabaseResult> {
+    const values: SqlValue[][] = [];
+
+    while (statement.step()) {
+      values.push(statement.get());
+      if (values.length === packageSize) {
+        return {rows: this.convert([{columns: statement.getColumnNames(), values}])};
+      }
+    }
+
+    return {rows: []};
+  }
+
+  private async closeCursor(statement: Statement): Promise<void> {
+    statement.free();
   }
 }

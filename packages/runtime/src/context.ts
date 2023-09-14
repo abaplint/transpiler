@@ -1,9 +1,12 @@
 import {Console} from "./console/console";
-import {DatabaseClient} from "./db/db";
+import {DatabaseClient, DatabaseCursorCallbacks} from "./db/db";
 import * as RFC from "./rfc";
 
 export class Context {
   public console: Console;
+
+  public cursorCounter = 0;
+  public cursors: {[key: number]: DatabaseCursorCallbacks} = {};
 
   // DEFAULT and secondary database connections
   public databaseConnections: {[name: string]: DatabaseClient} = {};
