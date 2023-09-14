@@ -23,15 +23,26 @@ globalThis.abap = new runtime.ABAP();\n`;
 export async function initializeABAP() {\n`;
     ret += `  const sqlite = [];\n`;
     for (const i of dbSetup.schemas.sqlite) {
-      ret += `sqlite.push(\`${i}\`);\n`;
+      ret += `  sqlite.push(\`${i}\`);\n`;
     }
     ret += `  const hdb = \`${dbSetup.schemas.hdb}\`;\n`;
-    ret += `  const pg = \`${dbSetup.schemas.pg}\`;\n`;
-    ret += `  const schemas = {sqlite, hdb, pg};\n`;
+    ret += `  const pg = [];\n`;
+    for (const i of dbSetup.schemas.pg) {
+      ret += `  pg.push(\`${i}\`);\n`;
+    }
+    ret += `  const snowflake = [];\n`;
+    for (const i of dbSetup.schemas.snowflake) {
+      ret += `  snowflake.push(\`${i}\`);\n`;
+    }
+    ret += `  const schemas = {sqlite, hdb, pg, snowflake};\n`;
+    ret += `\n`;
+
     ret += `  const insert = [];\n`;
     for (const i of dbSetup.insert) {
       ret += `  insert.push(\`${i}\`);\n`;
     }
+    ret += `\n`;
+
     if (extraSetup === undefined) {
       ret += `// no setup logic specified in config\n`;
     } else {
