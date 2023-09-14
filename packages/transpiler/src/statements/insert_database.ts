@@ -33,6 +33,16 @@ export class InsertDatabaseTranspiler implements IStatementTranspiler {
       options.push(`"table": ` + tvalues.getCode());
     }
 
+    const connection = node.findDirectExpression(abaplint.Expressions.DatabaseConnection);
+    if (connection) {
+      let con = connection.getLastToken().getStr().toUpperCase();
+      if (con === "DEFAULT_") {
+        // todo, workaround for replacing of keywords,
+        con = "DEFAULT";
+      }
+      options.push(`"connection": "${con}"`);
+    }
+
     return new Chunk(`await abap.statements.insertDatabase(${table.getCode()}, {${options.join(", ")}});`);
   }
 

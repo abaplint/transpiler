@@ -1396,4 +1396,20 @@ CLOSE CURSOR dbcur.`;
     });
   });
 
+  it("INSERT CONNECTION default", async () => {
+    const code = `
+DATA result TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+DATA row LIKE LINE OF result.
+INSERT row INTO TABLE result.
+INSERT t100 CONNECTION default FROM TABLE result.
+WRITE sy-subrc.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("0");
+    });
+  });
+
 });
