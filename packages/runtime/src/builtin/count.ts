@@ -7,6 +7,7 @@ export type countInput = {
   val: ICharacter,
   sub: ICharacter,
   regex?: ICharacter,
+  pcre?: ICharacter,
   case?: ICharacter,
   len?: INumeric,
   off?: INumeric,
@@ -32,6 +33,8 @@ export function count(input: countInput) {
     reg = reg.replace(/\*/g, "\\*");
   } else if (input.regex) {
     reg = input.regex.get();
+  } else if (input.pcre) {
+    reg = input.pcre.get();
   }
 
   let options = "g";

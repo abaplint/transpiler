@@ -77,4 +77,14 @@ describe("Builtin functions - count", () => {
     expect(abap.console.get()).to.equal("0");
   });
 
+  it("pcre", async () => {
+    const code = `
+    DATA val TYPE i.
+    val = count( val = 'hello' pcre = 'l' ).
+    ASSERT val = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
