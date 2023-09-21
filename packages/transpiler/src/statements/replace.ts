@@ -39,9 +39,11 @@ export class ReplaceTranspiler implements IStatementTranspiler {
     const type = r?.concatTokens().toUpperCase();
     if (type === "REGEX") {
       extra.push("regex: " + new SourceTranspiler().transpile(sources[0], traversal).getCode());
+    } else if (type === "PCRE") {
+      extra.push("pcre: " + new SourceTranspiler().transpile(sources[0], traversal).getCode());
     }
 
-    if (o === undefined && o === undefined && type !== "REGEX") {
+    if (o === undefined && o === undefined && type !== "REGEX" && type !== "PCRE") {
       extra.push("of: " + new SourceTranspiler().transpile(sources[0], traversal).getCode());
     }
 

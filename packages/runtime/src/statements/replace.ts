@@ -9,6 +9,7 @@ export type replaceInput = {
   sectionLength?: INumeric,
   sectionOffset?: INumeric,
   regex?: ICharacter,
+  pcre?: ICharacter,
   all: boolean,
   with: ICharacter,
   of: ICharacter,
@@ -43,7 +44,15 @@ export function replace(input: replaceInput): void {
     inp = ABAPRegExp.escapeRegExp(inp);
     search = new RegExp(inp, ignoreCase + allOccurrences);
   } else if (input.regex) {
+    // TODO: this is a bit wrong, ABAP regex is not like JS regex
     const regex = ABAPRegExp.convert(input.regex.get());
+    if (regex.length === 0 && input.all === true) {
+      throw "REPLACE, zero length input";
+    }
+    found = temp.match(regex) !== null;
+    search = new RegExp(regex, ignoreCase + allOccurrences);
+  } else if (input.pcre) {
+    const regex = ABAPRegExp.convert(input.pcre.get());
     if (regex.length === 0 && input.all === true) {
       throw "REPLACE, zero length input";
     }
