@@ -307,4 +307,16 @@ WRITE str.`;
     expect(abap.console.get()).to.equal("hellode");
   });
 
+  it("REPLACE, pcre", async () => {
+    const code = `
+    DATA default TYPE string.
+    default = 'footbar'.
+    REPLACE PCRE \`T|t\` IN default WITH \` \`.
+    ASSERT default = 'foo bar'.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

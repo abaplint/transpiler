@@ -2295,4 +2295,40 @@ ENDCLASS.`;
     await dumpNrun(files, false);
   });
 
+  it("test-55", async () => {
+    // CREATE DATA dynamic global interface
+
+    const intf = `
+    INTERFACE if_bar PUBLIC.
+      CONSTANTS value TYPE i VALUE 2.
+    ENDINTERFACE.`;
+
+    const clas = `
+    CLASS zcl_html DEFINITION PUBLIC.
+      PUBLIC SECTION.
+    ENDCLASS.
+    CLASS zcl_html IMPLEMENTATION.
+    ENDCLASS.`;
+
+    const tests = `
+CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+  PRIVATE SECTION.
+    METHODS test01 FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD test01.
+    DATA lr_data TYPE REF TO data.
+    CREATE DATA lr_data TYPE REF TO ('IF_BAR').
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "zcl_html.clas.testclasses.abap", contents: tests},
+      {filename: "if_bar.intf.abap", contents: intf},
+      {filename: "zcl_html.clas.abap", contents: clas},
+    ];
+    await dumpNrun(files);
+  });
+
 });

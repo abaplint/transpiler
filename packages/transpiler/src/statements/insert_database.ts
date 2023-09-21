@@ -35,15 +35,19 @@ export class InsertDatabaseTranspiler implements IStatementTranspiler {
 
     const connection = node.findDirectExpression(abaplint.Expressions.DatabaseConnection);
     if (connection) {
-      let con = connection.getLastToken().getStr().toUpperCase();
-      if (con === "DEFAULT_") {
-        // todo, workaround for replacing of keywords,
-        con = "DEFAULT";
-      }
+      const con = findConnection(connection);
       options.push(`"connection": "${con}"`);
     }
 
     return new Chunk(`await abap.statements.insertDatabase(${table.getCode()}, {${options.join(", ")}});`);
   }
+}
 
+export function findConnection(connection: abaplint.Nodes.ExpressionNode): string {
+  let con = connection.getLastToken().getStr().toUpperCase();
+  if (con === "DEFAULT_") {
+    // todo, workaround for replacing of keywords,
+    con = "DEFAULT";
+  }
+  return con;
 }

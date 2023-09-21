@@ -2,6 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
+import {findConnection} from "./insert_database";
 
 export class OpenCursorTranspiler implements IStatementTranspiler {
 
@@ -24,7 +25,14 @@ export class OpenCursorTranspiler implements IStatementTranspiler {
       select += "ORDER BY " + traversal.traverse(node).getCode();
     }
 
-    return new Chunk().append(`await abap.statements.openCursor(${target}, "${select}");`, node, traversal);
+    const options: string[] = [];
+    const connection = node.findDirectExpression(abaplint.Expressions.DatabaseConnection);
+    if (connection) {
+      const con = findConnection(connection);
+      options.push(`"connection": "${con}"`);
+    }
+
+    return new Chunk().append(`await abap.statements.openCursor(${target}, "${select}", {${options.join(", ")}});`, node, traversal);
   }
 
 }

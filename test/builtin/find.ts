@@ -200,4 +200,14 @@ WRITE lv_offset.`;
     expect(abap.console.get()).to.equal("5");
   });
 
+  it("pcre", async () => {
+    const code = `
+    DATA val TYPE i.
+    val = find( val = 'hello' pcre = 'l' ).
+    ASSERT val = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

@@ -7,6 +7,7 @@ export interface IFindOptions {
   find?: ICharacter | string,
   first?: boolean,
   regex?: string | ICharacter | ABAPObject,
+  pcre?: string | ICharacter,
   offset?: INumeric,
   sectionOffset?: INumeric,
   byteMode?: boolean,
@@ -47,16 +48,21 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
     s = s.replace(/\+/g, "\\+");
 
     s = new RegExp(s, "g");
-  } else if (options.regex) {
-    if (typeof options.regex === "string") {
-      if (options.regex === "") {
+  } else if (options.regex || options.pcre) {
+    if (options.regex) {
+      if (typeof options.regex === "string") {
+        if (options.regex === "") {
+          throw new Error("FIND, runtime, no input, regex empty");
+        }
+      } else if (options.regex.get() === "") {
         throw new Error("FIND, runtime, no input, regex empty");
       }
-    } else if (options.regex.get() === "") {
-      throw new Error("FIND, runtime, no input, regex empty");
     }
 
-    let r = options.regex;
+    let r = options.regex!;
+    if (r === undefined) {
+      r = options.pcre!;
+    }
     if (typeof r !== "string") {
       r = r.get();
     }

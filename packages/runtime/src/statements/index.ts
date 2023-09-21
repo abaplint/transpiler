@@ -39,7 +39,7 @@ import {shift} from "./shift";
 import {sort} from "./sort";
 import {wait} from "./wait";
 import {fetchNextCursor} from "./fetch_next_cursor";
-import {openCursor} from "./open_cursor";
+import {IOpenCursorDatabaseOptions, openCursor} from "./open_cursor";
 import {closeCursor} from "./close_cursor";
 import {setHandler} from "./set_handler";
 import {split} from "./split";
@@ -167,8 +167,8 @@ export class Statements {
     }
   }
 
-  public async openCursor(target: INumeric, select: string) {
-    const num = await openCursor(this.context, select);
+  public async openCursor(target: INumeric, select: string, options: IOpenCursorDatabaseOptions) {
+    const num = await openCursor(this.context, select, options);
     target.set(num);
   }
 

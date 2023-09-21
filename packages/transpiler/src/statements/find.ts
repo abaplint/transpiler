@@ -13,6 +13,8 @@ export class FindTranspiler implements IStatementTranspiler {
     const source0 = traversal.traverse(sources[0]).getCode();
     if (node.findFirstExpression(abaplint.Expressions.FindType)?.findDirectTokenByText("REGEX")) {
       options.push("regex: " + source0);
+    } else if (node.findFirstExpression(abaplint.Expressions.FindType)?.findDirectTokenByText("PCRE")) {
+      options.push("pcre: " + source0);
     } else {
       options.push("find: " + source0);
     }

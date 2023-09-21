@@ -34,4 +34,14 @@ describe("Builtin functions - matches", () => {
     await f(abap);
   });
 
+  it("matches pcre", async () => {
+    const code = `
+    DATA val TYPE abap_bool.
+    val = boolc( matches( val = 'hello' pcre = 'hello' ) ).
+    ASSERT val = abap_true.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

@@ -49,4 +49,14 @@ WRITE val.`;
     expect(abap.console.get()).to.equal("bar");
   });
 
+  it("substring_after, pcre", async () => {
+    const code = `
+    DATA val TYPE string.
+    val = substring_after( val = 'hello' pcre = 'hell' ).
+    ASSERT val = 'o'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
