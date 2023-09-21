@@ -3,7 +3,14 @@ import {Character} from "../types";
 import {ICharacter} from "../types/_character";
 import {String} from "../types/string";
 
-export function substring_after(input: {val: ICharacter | string, sub?: ICharacter | string, regex?: ICharacter | string}): ICharacter {
+interface ISubstringAfterInput {
+  val: ICharacter | string,
+  sub?: ICharacter | string,
+  regex?: ICharacter | string,
+  pcre?: ICharacter | string,
+}
+
+export function substring_after(input: ISubstringAfterInput): ICharacter {
   let val = typeof input.val === "string" ? input.val : input.val.get();
   if (input.val instanceof Character) {
     val = input.val.getTrimEnd();
@@ -11,8 +18,12 @@ export function substring_after(input: {val: ICharacter | string, sub?: ICharact
   let reg = "";
   if (typeof input.regex === "string") {
     reg = input.regex;
+  } else if (typeof input.pcre === "string") {
+    reg = input.pcre;
   } else if (input?.regex) {
     reg = input.regex.get();
+  } else if (input?.pcre) {
+    reg = input.pcre.get();
   } else if (typeof input.sub === "string") {
     reg = ABAPRegExp.escapeRegExp(input.sub);
   } else if (input?.sub) {
