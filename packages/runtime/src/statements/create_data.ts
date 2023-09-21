@@ -15,6 +15,7 @@ export interface ICreateDataOptions {
   decimals?: INumeric,
   likeLineOf?: FieldSymbol | Table,
   typeLineOf?: boolean,
+  refTo?: boolean,
   like?: any,
 }
 
@@ -76,6 +77,14 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
       target.assign(new Float());
     } else if (options.name.trimEnd() === "INT8") {
       target.assign(new Integer8());
+    } else if (options.refTo === true) {
+      // @ts-ignore
+      if (abap.Classes[options.name.toUpperCase()] === undefined) {
+        throwError("CX_SY_CREATE_DATA_ERROR");
+      }
+
+      // @ts-ignore
+      target.assign(new abap.types.ABAPObject({qualifiedName: options.name, RTTIName: options.name}));
     } else {
       throwError("CX_SY_CREATE_DATA_ERROR");
     }

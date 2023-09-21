@@ -48,6 +48,9 @@ export class CreateDataTranspiler implements IStatementTranspiler {
     if (concat.includes(" TYPE LINE OF ")) {
       options.push(`"typeLineOf": true`);
     }
+    if (concat.includes(" REF TO ")) {
+      options.push(`"refTo": true`);
+    }
 
     const handle = node.findExpressionAfterToken("HANDLE");
     if (handle) {
