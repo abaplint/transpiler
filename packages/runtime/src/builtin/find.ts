@@ -10,6 +10,7 @@ export interface IFindInput {
   occ?: INumeric | number;
   len?: INumeric | number;
   regex?: ICharacter | string;
+  pcre?: ICharacter | string;
   case?: ICharacter | string;
 }
 
@@ -20,13 +21,18 @@ export function find(input: IFindInput) {
     throw "transpiler find(), todo len";
   }
 
-  if (input.regex) {
+  if (input.regex || input.pcre) {
     if (input.off !== undefined) {
       throw "transpiler find(), todo off regex";
     }
 
     const caseInput = typeof input.case === "string" ? input.case : input.case?.get();
-    const regex = typeof input.regex === "string" ? input.regex : input.regex.get();
+    let regex = "";
+    if (input.regex) {
+      regex = typeof input.regex === "string" ? input.regex : input.regex.get();
+    } else if (input.pcre) {
+      regex = typeof input.pcre === "string" ? input.pcre : input.pcre.get();
+    }
 
     const flags = caseInput !== "X" ? "i" : "";
     const reg = new RegExp(regex, flags);
