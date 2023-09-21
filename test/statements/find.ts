@@ -687,4 +687,14 @@ ASSERT ls_submatch-length = 4.`;
     await f(abap);
   });
 
+  it("find pcre", async () => {
+    const code = `
+    DATA offset TYPE i.
+    FIND FIRST OCCURRENCE OF PCRE 'l+' IN 'hello' MATCH OFFSET offset.
+    ASSERT offset = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
