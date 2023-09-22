@@ -422,12 +422,6 @@ export class Traversal {
     if (def.getSuperClass() !== undefined || def.getName().toUpperCase() === "CX_ROOT") {
       ret += "super();\n";
     }
-/*
-    if (def.getSuperClass() !== undefined
-        && def.getMethodDefinitions().getByName("CONSTRUCTOR") === undefined) {
-      ret += `await super.constructor_(INPUT);\n`;
-    }
-*/
 
     const cName = Traversal.escapeNamespace(def.getName().toLowerCase());
 
@@ -447,6 +441,7 @@ export class Traversal {
     // attributes from directly implemented interfaces(not interfaces implemented in super classes)
     for (const i of def.getImplementing()) {
       ret += this.dataFromInterfaces(i.name, scope, cName!);
+      ret += this.aliasesFromInterfaces(i.name, scope, cName!);
     }
 
     // handle aliases after initialization of carrier variables
@@ -514,6 +509,25 @@ export class Traversal {
 
     for (const i of intf?.getImplementing() || []) {
       ret += this.dataFromInterfaces(i.name, scope, cname);
+    }
+
+    return ret;
+  }
+
+  private aliasesFromInterfaces(name: string, scope: abaplint.ISpaghettiScopeNode | undefined, cname: string): string {
+    let ret = "";
+
+    const intf = this.findInterfaceDefinition(name, scope);
+
+    for (const a of intf?.getAliases().getAll() || []) {
+      const iname = Traversal.escapeNamespace(intf?.getName().toLowerCase());
+      const aname = Traversal.escapeNamespace(a.getName().toLowerCase());
+      const cname = Traversal.escapeNamespace(a.getComponent().toLowerCase().replace("~", "$"));
+      ret += "this." + iname + "$" + aname + " = this." + cname + ";\n";
+    }
+
+    for (const i of intf?.getImplementing() || []) {
+      ret += this.aliasesFromInterfaces(i.name, scope, cname);
     }
 
     return ret;

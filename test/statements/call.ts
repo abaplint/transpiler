@@ -245,7 +245,40 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1");
   });
 
-  it.only("dynamic call, interfaced aliased method", async () => {
+  it("static call, interfaced aliased method", async () => {
+    const code = `
+INTERFACE lif1.
+  METHODS foo.
+ENDINTERFACE.
+
+INTERFACE lif2.
+  INTERFACES lif1.
+
+  ALIASES foo FOR lif1~foo.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif2.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD lif1~foo.
+    WRITE 'hello'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl.
+  CREATE OBJECT ref.
+  CALL METHOD ref->lif2~foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello");
+  });
+
+  it("dynamic call, interfaced aliased method", async () => {
     const code = `
 INTERFACE lif1.
   METHODS foo.
