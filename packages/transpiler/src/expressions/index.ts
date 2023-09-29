@@ -49,6 +49,7 @@ export * from "./sql_field";
 export * from "./sql_from_source";
 export * from "./sql_from";
 export * from "./sql_into_structure";
+export * from "./sql_into_list";
 export * from "./sql_join";
 export * from "./sql_order_by";
 export * from "./sql_source_simple";

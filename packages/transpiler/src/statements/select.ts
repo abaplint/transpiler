@@ -20,6 +20,8 @@ export class SelectTranspiler implements IStatementTranspiler {
       target = targetOverride;
     } else if (node.findFirstExpression(abaplint.Expressions.SQLIntoTable)) {
       target = traversal.traverse(node.findFirstExpression(abaplint.Expressions.Target)).getCode();
+    } else if (node.findFirstExpression(abaplint.Expressions.SQLIntoList)) {
+      target = traversal.traverse(node.findFirstExpression(abaplint.Expressions.SQLIntoList)).getCode();
     } else if (node.findFirstExpression(abaplint.Expressions.SQLIntoStructure)) {
       target = traversal.traverse(node.findFirstExpression(abaplint.Expressions.SQLIntoStructure)).getCode();
     }
