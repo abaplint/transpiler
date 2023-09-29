@@ -37,9 +37,12 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     this.config.password = "";
 
     // @ts-ignore
-    if (abap?.context?.databaseConnections && abap.context.databaseConnections["DEFAULT"] === this) {
+    if (global["abap"]) {
       // @ts-ignore
-      abap.builtin.sy.get().dbsys?.set(this.name);
+      if (abap?.context?.databaseConnections !== undefined && abap?.context.databaseConnections["DEFAULT"] === this) {
+        // @ts-ignore
+        abap.builtin.sy.get().dbsys?.set(this.name);
+      }
     }
   }
 
