@@ -1,4 +1,4 @@
-export function throwError(name: string) {
+export function throwError(name: string): never {
   // @ts-ignore
   if (abap.Classes[name] !== undefined) {
     // @ts-ignore
