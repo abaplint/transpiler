@@ -1,4 +1,4 @@
-import {Character, DecFloat34, FieldSymbol, Float, HashedTable, Integer, Packed, Table} from "./types";
+import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Integer, Packed, Structure, Table} from "./types";
 import {ICharacter} from "./types/_character";
 import {INumeric} from "./types/_numeric";
 
@@ -20,7 +20,10 @@ export function templateFormatting(source: ICharacter | INumeric, options?: opti
       throw new Error("GETWA_NOT_ASSIGNED");
     }
     return templateFormatting(source.getPointer(), options);
-  } else if (source instanceof Table || source instanceof HashedTable) {
+  } else if (source instanceof Table
+      || source instanceof HashedTable
+      || source instanceof ABAPObject
+      || source instanceof Structure) {
     throw new Error("STRG_ILLEGAL_DATA_TYPE");
   } else if (source instanceof Character) {
     text = source.getTrimEnd();

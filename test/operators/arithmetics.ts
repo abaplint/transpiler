@@ -359,4 +359,28 @@ WRITE result.`;
     await f(abap);
   });
 
+  it("zero DIV zero", async () => {
+    const code = `
+    DATA lv_length     TYPE i.
+    DATA lv_iterations TYPE i.
+    DATA ev_size       TYPE i.
+    lv_iterations = ev_size DIV lv_length.
+    ASSERT lv_iterations = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("zero / zero", async () => {
+    const code = `
+    DATA lv_length     TYPE i.
+    DATA lv_iterations TYPE i.
+    DATA ev_size       TYPE i.
+    lv_iterations = ev_size / lv_length.
+    ASSERT lv_iterations = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
