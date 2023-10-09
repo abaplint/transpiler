@@ -42,7 +42,7 @@ WRITE / sy-index.`;
     expect(abap.console.get()).to.equal("1\n2\n3\n4\n5\n10");
   });
 
-  it.skip("numc thing", async () => {
+  it("numc while", async () => {
     const code = `
 CONSTANTS lc_size TYPE i VALUE 100.
 DATA lv_offset TYPE n LENGTH 5.

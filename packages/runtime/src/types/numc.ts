@@ -3,6 +3,7 @@ import {parse} from "../operators/_parse";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {throwError} from "../throw_error";
+import {Float} from "./float";
 
 export class Numc implements ICharacter {
   private value: string;
@@ -21,9 +22,11 @@ export class Numc implements ICharacter {
 
   public set(value: INumeric | ICharacter | Hex | string | number, raw = false) {
     if (typeof value === "number") {
-      this.value = value.toString();
+      this.value = Math.trunc(value) + "";
     } else if (typeof value === "string") {
       this.value = parseInt(value, 10) + "";
+    } else if (value instanceof Float) {
+      this.value = Math.trunc(value.getRaw()) + "";
     } else {
       this.set(value.get());
       return;
