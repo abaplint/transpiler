@@ -59,4 +59,17 @@ WRITE lv_str.`;
     expect(abap.console.get()).to.equal("12");
   });
 
+  it("numeric, from float", async () => {
+    const code = `
+DATA lv_offset TYPE n LENGTH 5.
+DATA lv_float TYPE f.
+lv_float = 100.
+lv_offset = lv_float.
+WRITE lv_offset.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("00100");
+  });
+
 });

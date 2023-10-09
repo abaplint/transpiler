@@ -42,4 +42,23 @@ WRITE / sy-index.`;
     expect(abap.console.get()).to.equal("1\n2\n3\n4\n5\n10");
   });
 
+  it("numc while", async () => {
+    const code = `
+CONSTANTS lc_size TYPE i VALUE 100.
+DATA lv_offset TYPE n LENGTH 5.
+
+WHILE lv_offset < 500.
+  lv_offset = lv_offset + lc_size.
+  WRITE / lv_offset.
+ENDWHILE.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`00100
+00200
+00300
+00400
+00500`);
+  });
+
 });
