@@ -107,8 +107,10 @@ export class Character implements ICharacter {
     }
 
     if ((offset && offset >= this.length)
-         || (offset && offset < 0)
-         || (length && length < 0)) {
+        || (length && length > this.length)
+        || (offset && length && offset + length > this.length)
+        || (offset && offset < 0)
+        || (length && length < 0)) {
       throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
     }
 

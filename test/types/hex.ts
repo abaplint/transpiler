@@ -315,4 +315,43 @@ WRITE val2.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
+
+  it("Hex, offset, ok1", async () => {
+    const code = `
+DATA lv_hex TYPE x LENGTH 10.
+DATA len TYPE i.
+len = 5.
+WRITE lv_hex+5(len).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("Hex, offset, ok2", async () => {
+    const code = `
+DATA lv_hex TYPE x LENGTH 10.
+DATA len TYPE i.
+len = 10.
+WRITE lv_hex(len).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("throw CX_SY_RANGE_OUT_OF_BOUNDS", async () => {
+    const code = `
+DATA lv_hex TYPE x LENGTH 10.
+DATA len TYPE i.
+len = 10.
+WRITE lv_hex+5(len).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch (e) {
+      expect(e.toString()).to.contain("CX_SY_RANGE_OUT_OF_BOUNDS");
+    }
+  });
 });
