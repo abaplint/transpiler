@@ -51,4 +51,19 @@ WRITE xstrlen( xstr ).`;
     expect(abap.console.get()).to.equal("0");
   });
 
+  it("throw CX_SY_RANGE_OUT_OF_BOUNDS", async () => {
+    const code = `
+DATA xstr TYPE xstring.
+WRITE xstr+100(1).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch (e) {
+      expect(e.toString()).to.contain("CX_SY_RANGE_OUT_OF_BOUNDS");
+    }
+  });
+
 });
