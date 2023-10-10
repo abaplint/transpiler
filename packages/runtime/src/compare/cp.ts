@@ -1,4 +1,4 @@
-import {FieldSymbol, Structure} from "../types";
+import {Character, FieldSymbol, Structure} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -13,6 +13,8 @@ export function cp(left: number | string | ICharacter | INumeric | Structure, ri
       throw new Error("GETWA_NOT_ASSIGNED");
     }
     return cp(left.getPointer(), right);
+  } else if (left instanceof Character) {
+    l = left.getTrimEnd();
   } else {
     l = left.get().toString();
   }
@@ -20,6 +22,8 @@ export function cp(left: number | string | ICharacter | INumeric | Structure, ri
   let r = "";
   if (typeof right === "string") {
     r = right.toString();
+  } else if (right instanceof Character) {
+    r = right.getTrimEnd();
   } else {
     r = right.get().toString().trimEnd();
   }
