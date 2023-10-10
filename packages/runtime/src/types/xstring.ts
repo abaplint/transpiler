@@ -4,6 +4,7 @@ import {Hex} from "./hex";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {Character} from "./character";
+import {throwError} from "../throw_error";
 
 export class XString implements ICharacter {
   private value: string;
@@ -55,20 +56,32 @@ export class XString implements ICharacter {
   }
 
   public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}) {
-    if (input?.offset) {
-      input.offset = parse(input.offset);
+    let offset = input?.offset;
+    if (offset) {
+      offset = parse(offset);
     }
-    if (input?.length) {
-      input.length = parse(input.length);
+
+    let length = input?.length;
+    if (length) {
+      length = parse(length);
     }
+
+    if ((offset && offset * 2 > this.value.length)
+        || (length && length * 2 > this.value.length)
+        || (offset && length && offset * 2 + length * 2 > this.value.length)
+        || (offset && offset < 0)
+        || (length && length < 0)) {
+      throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
+    }
+
     let ret = this.value;
-    if (input?.offset) {
+    if (offset) {
       // @ts-ignore
-      ret = ret.substr(input.offset * 2);
+      ret = ret.substr(offset * 2);
     }
-    if (input?.length !== undefined) {
+    if (length !== undefined) {
       // @ts-ignore
-      ret = ret.substr(0, input.length * 2);
+      ret = ret.substr(0, length * 2);
     }
     const r = new XString();
     r.set(ret);

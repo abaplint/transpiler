@@ -75,6 +75,8 @@ export class String implements ICharacter {
     }
 
     if ((offset && offset > this.value.length)
+        || (length && length > this.value.length)
+        || (offset && length && offset + length > this.value.length)
         || (offset && offset < 0)
         || (length && length < 0)) {
       throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
