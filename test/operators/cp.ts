@@ -197,4 +197,14 @@ ENDLOOP.`;
     await f(abap);
   });
 
+  it("CP, more spaces 2", async () => {
+    const code = `
+    DATA foo TYPE c LENGTH 200.
+    foo = 'CLASS=LIF_TEST_TYPESTYPE=FOO'.
+    ASSERT foo CP '*TYPE=FOO'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
