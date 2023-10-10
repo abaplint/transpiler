@@ -354,4 +354,22 @@ WRITE lv_hex+5(len).`;
       expect(e.toString()).to.contain("CX_SY_RANGE_OUT_OF_BOUNDS");
     }
   });
+
+  it("throw CX_SY_RANGE_OUT_OF_BOUNDS, len 4", async () => {
+    const code = `
+DATA xstr TYPE x LENGTH 4.
+DATA len TYPE i.
+len = 3.
+xstr = '00001111'.
+WRITE xstr+2(len).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch (e) {
+      expect(e.toString()).to.contain("CX_SY_RANGE_OUT_OF_BOUNDS");
+    }
+  });
 });
