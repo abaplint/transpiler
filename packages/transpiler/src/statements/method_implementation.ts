@@ -46,21 +46,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
         }
 
         const parameterDefault = methodDef?.getParameterDefault(varName);
-        const isOptional = methodDef?.getOptional().includes(varName.toUpperCase());
 
-        if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodExporting)) {
-          after += "let " + varName + " = " + unique + "?." + varName + " || " + new TranspileTypes().toType(identifier.getType()) + ";\n";
-        } else if ((identifier.getMeta().includes(abaplint.IdentifierMeta.PassByValue) || isOptional)
-            && identifier.getType().isGeneric() === false) {
-          after += "let " + varName + " = " + new TranspileTypes().toType(identifier.getType()) + ";\n";
-          after += "if (" + unique + " && " + unique + "." + varName + ") {" + varName + ".set(" + unique + "." + varName + ");}\n";
-        } else if (identifier.getType().isGeneric()) {
-          after += "let " + varName + " = " + unique + "?." + varName + " || " + new TranspileTypes().toType(identifier.getType()) + ";\n";
-        } else {
-          after += "let " + varName + " = " + unique + "?." + varName + ";\n";
-        }
-
-/*
         after = after + new TranspileTypes().declare(identifier) + "\n";
         const type = identifier.getType();
         if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
@@ -69,7 +55,6 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
         } else {
           after += "if (" + unique + " && " + unique + "." + varName + ") {" + varName + " = " + unique + "." + varName + ";}\n";
         }
-*/
 
         if (parameterDefault) {
           let val = "";
