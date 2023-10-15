@@ -1,5 +1,6 @@
 import * as abaplint from "@abaplint/core";
 
+// todo: change this class to static for performance?
 export class TranspileTypes {
 
   public declare(t: abaplint.TypedIdentifier): string {

@@ -44,6 +44,18 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
         if (unique === "") {
           unique = "INPUT";
         }
+
+        const parameterDefault = methodDef?.getParameterDefault(varName);
+
+        if (identifier.getMeta().includes(abaplint.IdentifierMeta.PassByValue)
+            && identifier.getType().isGeneric() === false) {
+          after += "let " + varName + " = " + new TranspileTypes().toType(identifier.getType()) + ";\n";
+          after += "if (" + unique + " && " + unique + "." + varName + ") {" + varName + ".set(" + unique + "." + varName + ");}\n";
+        } else {
+          after += "let " + varName + " = " + unique + "?." + varName + ";\n";
+        }
+
+/*
         after = after + new TranspileTypes().declare(identifier) + "\n";
         const type = identifier.getType();
         if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
@@ -52,7 +64,8 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
         } else {
           after += "if (" + unique + " && " + unique + "." + varName + ") {" + varName + " = " + unique + "." + varName + ";}\n";
         }
-        const parameterDefault = methodDef?.getParameterDefault(varName);
+*/
+
         if (parameterDefault) {
           let val = "";
           if (parameterDefault.get() instanceof abaplint.Expressions.Constant) {

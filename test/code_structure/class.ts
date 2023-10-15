@@ -506,7 +506,7 @@ START-OF-SELECTION.
     const code = `
       CLASS lcl_bar DEFINITION.
         PUBLIC SECTION.
-          CLASS-METHODS: moo IMPORTING bar LIKE sy-msgid DEFAULT sy-msgid.
+          CLASS-METHODS moo IMPORTING bar LIKE sy-msgid DEFAULT sy-msgid.
       ENDCLASS.
       CLASS lcl_bar IMPLEMENTATION.
         METHOD moo.

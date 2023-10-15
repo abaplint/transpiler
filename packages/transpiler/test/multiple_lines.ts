@@ -112,8 +112,7 @@ abap.Classes['PROG-ZFOOBAR-LCL_FOOBAR'] = lcl_foobar;`;
     return this;
   }
   async moo(INPUT) {
-    let iv_foo = new abap.types.String({qualifiedName: "STRING"});
-    if (INPUT && INPUT.iv_foo) {iv_foo.set(INPUT.iv_foo);}
+    let iv_foo = INPUT?.iv_foo;
   }
 }
 abap.Classes['PROG-ZFOOBAR-LCL_FOOBAR'] = lcl_foobar;`;
@@ -487,8 +486,7 @@ ENDFORM.`;
     return lcl_bar.bar(INPUT);
   }
   static async bar(INPUT) {
-    let imp = new abap.types.Integer({qualifiedName: "I"});
-    if (INPUT && INPUT.imp) {imp.set(INPUT.imp);}
+    let imp = INPUT?.imp;
   }
 }
 abap.Classes['PROG-ZFOOBAR-LCL_BAR'] = lcl_bar;
@@ -527,8 +525,7 @@ ENDFORM.`;
     this.me.set(this);
   }
   async constructor_(INPUT) {
-    let input = new abap.types.Integer({qualifiedName: "I"});
-    if (INPUT && INPUT.input) {input.set(INPUT.input);}
+    let input = INPUT?.input;
     abap.statements.write(input);
     return this;
   }
@@ -782,8 +779,7 @@ class lcl {
     return lcl.foo(INPUT);
   }
   static async foo(INPUT) {
-    let bar = new abap.types.String({qualifiedName: "STRING"});
-    if (INPUT && INPUT.bar) {bar.set(INPUT.bar);}
+    let bar = INPUT?.bar;
     if (INPUT === undefined || INPUT.bar === undefined) {bar = abap.Classes['PROG-ZFOOBAR-LIF'].lif$default_value;}
   }
 }
