@@ -1815,6 +1815,27 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("AABB");
   });
 
+  it("Class, exporting", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS foo EXPORTING bar TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD foo.
+    bar = 2.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>foo( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("Class, optional", async () => {
     const code = `
 CLASS lcl DEFINITION.
