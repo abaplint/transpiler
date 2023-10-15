@@ -29,7 +29,7 @@
   "author": "abaplint",
   "license": "MIT",
   "devDependencies": {
-    "@types/chai": "^4.3.7",
+    "@types/chai": "^4.3.8",
     "@types/mocha": "^10.0.2",
     "chai": "^4.3.10",
     "mocha": "^10.2.0",
