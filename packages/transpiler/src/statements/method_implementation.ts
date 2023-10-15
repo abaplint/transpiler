@@ -50,8 +50,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
 
         if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodExporting)) {
           after += "let " + varName + " = " + unique + "?." + varName + " || " + new TranspileTypes().toType(identifier.getType()) + ";\n";
-        } else if ((identifier.getMeta().includes(abaplint.IdentifierMeta.PassByValue) || isOptional)
-            && identifier.getType().isGeneric() === false) {
+        } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.PassByValue) || isOptional) {
           after += "let " + varName + " = " + new TranspileTypes().toType(identifier.getType()) + ";\n";
           after += "if (" + unique + " && " + unique + "." + varName + ") {" + varName + ".set(" + unique + "." + varName + ");}\n";
         } else {

@@ -1836,6 +1836,28 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("Class, generic importing", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS foo IMPORTING bar TYPE csequence OPTIONAL.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD foo.
+    ASSERT bar IS INITIAL.
+    ASSERT bar = ''.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>foo( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("Class, optional", async () => {
     const code = `
 CLASS lcl DEFINITION.
