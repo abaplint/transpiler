@@ -1858,6 +1858,29 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("Class, ref to obj", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS foo IMPORTING bar TYPE REF TO object.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD foo.
+
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lcl.
+  CREATE OBJECT lo.
+  lo->foo( lo ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("Class, optional", async () => {
     const code = `
 CLASS lcl DEFINITION.
