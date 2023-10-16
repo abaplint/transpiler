@@ -9,7 +9,7 @@ FORM run.
   ENDDO.
   ASSERT lines( table ) = c_max.
 
-  DO 500 TIMES. " make sure READ TABLE takes the most time
+  DO 5000 TIMES. " make sure READ TABLE takes the most time
     READ TABLE table WITH KEY table_line = str TRANSPORTING NO FIELDS BINARY SEARCH.
     ASSERT sy-tabix = c_max.
   ENDDO.
