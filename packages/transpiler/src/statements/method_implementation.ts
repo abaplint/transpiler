@@ -50,12 +50,11 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
         const passByValue = identifier.getMeta().includes(abaplint.IdentifierMeta.PassByValue);
 
         const type = identifier.getType();
-        if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting) && passByValue === false) {
-          after += `let ${varName} = ${unique}?.${varName} || ${new TranspileTypes().toType(identifier.getType())};\n`;
-        } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodExporting)) {
+        if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodExporting)) {
           after += `let ${varName} = ${unique}?.${varName} || ${new TranspileTypes().toType(identifier.getType())};\n`;
         } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting) && type.isGeneric() === false) {
           after += new TranspileTypes().declare(identifier) + "\n";
+          // note: it might be nessesary to do a type conversion, eg char is passed to xstring parameter
           after += "if (" + unique + " && " + unique + "." + varName + ") {" + varName + ".set(" + unique + "." + varName + ");}\n";
         } else {
           after += new TranspileTypes().declare(identifier) + "\n";
