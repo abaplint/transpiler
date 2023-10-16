@@ -172,8 +172,8 @@ ENDCASE.`;
     const expected =
 `let unique1 = bar;
 if (abap.compare.eq(unique1, new abap.types.Character(3).set('foo'))) {
-  abap.statements.write(new abap.types.Integer().set(2));
-} else if (abap.compare.eq(unique1, new abap.types.Integer().set(1)) || abap.compare.eq(unique1, new abap.types.Integer().set(2))) {
+  abap.statements.write(abap.IntegerFactory.get(2));
+} else if (abap.compare.eq(unique1, abap.IntegerFactory.get(1)) || abap.compare.eq(unique1, abap.IntegerFactory.get(2))) {
 } else if (abap.compare.eq(unique1, foo)) {
 } else {
 }`;
@@ -300,7 +300,7 @@ abap.Classes['PROG-ZFOOBAR-ZCL_WORDS'] = zcl_words;`;
     this.bar = new abap.types.Integer({qualifiedName: "I"});
   }
   async constructor_(INPUT) {
-    this.bar.set(new abap.types.Integer().set(2));
+    this.bar.set(abap.IntegerFactory.get(2));
     abap.statements.write(this.bar);
     return this;
   }
@@ -493,7 +493,7 @@ ENDFORM.`;
 }
 abap.Classes['PROG-ZFOOBAR-LCL_BAR'] = lcl_bar;
 async function bar(INPUT) {
-  await abap.Classes['PROG-ZFOOBAR-LCL_BAR'].bar({imp: new abap.types.Integer().set(2)});
+  await abap.Classes['PROG-ZFOOBAR-LCL_BAR'].bar({imp: abap.IntegerFactory.get(2)});
 }`;
 
     expect(await runSingle(abap)).to.equal(expected);
@@ -536,7 +536,7 @@ ENDFORM.`;
 abap.Classes['PROG-ZFOOBAR-LCL_BAR'] = lcl_bar;
 async function bar(INPUT) {
   let bar = new abap.types.ABAPObject({qualifiedName: "LCL_BAR", RTTIName: "\\\\PROGRAM=ZFOOBAR\\\\CLASS=LCL_BAR"});
-  bar.set(await (new abap.Classes['PROG-ZFOOBAR-LCL_BAR']()).constructor_({input: new abap.types.Integer().set(42)}));
+  bar.set(await (new abap.Classes['PROG-ZFOOBAR-LCL_BAR']()).constructor_({input: abap.IntegerFactory.get(42)}));
 }`;
 
     expect(await runSingle(abap)).to.equal(expected);
