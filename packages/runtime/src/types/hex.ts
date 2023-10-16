@@ -86,11 +86,9 @@ export class Hex implements ICharacter {
 
     let ret = this.value;
     if (offset) {
-      // @ts-ignore
       ret = ret.substr(offset * 2);
     }
     if (length !== undefined) {
-      // @ts-ignore
       ret = ret.substr(0, length * 2);
     }
     const r = new XString();
