@@ -46,13 +46,17 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
         }
 
         const parameterDefault = methodDef?.getParameterDefault(varName);
+        const isOptional = methodDef?.getOptional().includes(varName.toUpperCase());
+        const passByValue = identifier.getMeta().includes(abaplint.IdentifierMeta.PassByValue);
 
-        after = after + new TranspileTypes().declare(identifier) + "\n";
         const type = identifier.getType();
-        if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
-            && type.isGeneric() === false) {
+        if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting) && isOptional === false && passByValue === false) {
+          after += `let ${varName} = ${unique}?.${varName} || ${new TranspileTypes().toType(identifier.getType())};\n`;
+        } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting) && type.isGeneric() === false) {
+          after += new TranspileTypes().declare(identifier) + "\n";
           after += "if (" + unique + " && " + unique + "." + varName + ") {" + varName + ".set(" + unique + "." + varName + ");}\n";
         } else {
+          after += new TranspileTypes().declare(identifier) + "\n";
           after += "if (" + unique + " && " + unique + "." + varName + ") {" + varName + " = " + unique + "." + varName + ";}\n";
         }
 
@@ -99,7 +103,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
           } else {
             throw new Error("MethodImplementationTranspiler, unknown default param type");
           }
-          if (identifier.getMeta().includes(abaplint.IdentifierMeta.PassByValue)) {
+          if (passByValue === true) {
             after += "if (" + unique + " === undefined || " + unique + "." + varName + " === undefined) {" + varName + ".set(" + val + ");}\n";
           } else {
             after += "if (" + unique + " === undefined || " + unique + "." + varName + " === undefined) {" + varName + " = " + val + ";}\n";
