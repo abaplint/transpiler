@@ -1,6 +1,6 @@
 export const test1 = `
 FORM run.
-  CONSTANTS c_max TYPE i VALUE 4000000.
+  CONSTANTS c_max TYPE i VALUE 2000000.
   DATA lv_index TYPE i.
   DATA table TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
   DO c_max TIMES.

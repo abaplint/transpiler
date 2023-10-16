@@ -22,7 +22,7 @@ function compareTables(left: Table | HashedTable, right: Table | HashedTable): b
 }
 
 export function eq(
-  left: number | string | ICharacter | INumeric | Float | String |ABAPObject | Structure | Hex | HashedTable | Table | FieldSymbol,
+  left: number | string | ICharacter | INumeric | Float | String | ABAPObject | Structure | Hex | HashedTable | Table | FieldSymbol,
   right: number | string | ICharacter | INumeric | Float | String | ABAPObject | Structure | Hex | HashedTable | Table | FieldSymbol): boolean {
 /*
   console.dir(left);

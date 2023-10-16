@@ -288,7 +288,7 @@ describe("Running operators - Comparison", () => {
     await f(abap);
   });
 
-  it.skip("internal table equals", async () => {
+  it("internal table equals", async () => {
     const code = `
       DATA data1 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
       DATA data2 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.

@@ -1,0 +1,18 @@
+export const test16 = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS mambo RETURNING VALUE(rv) TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD mambo.
+    rv = 1 + 1 + 1 + 1 + 1.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lcl.
+  CREATE OBJECT lo.
+  DO 3000000 TIMES.
+    lo->mambo( ).
+  ENDDO.`;

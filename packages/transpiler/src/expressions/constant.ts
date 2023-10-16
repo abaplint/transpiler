@@ -18,6 +18,8 @@ export class ConstantTranspiler implements IExpressionTranspiler {
       let code = "";
       if (parsed > 2147483647 || parsed < -2147483648) {
         code = `new abap.types.Integer8().set(${concat})`;
+      } else if (parsed >= -10 && parsed <= 200) {
+        code = `abap.IntegerFactory.get(${concat})`;
       } else {
         code = `new abap.types.Integer().set(${concat})`;
       }

@@ -5,7 +5,7 @@ TYPES: BEGIN OF ty,
        END OF ty.
 DATA tab TYPE HASHED TABLE OF ty WITH UNIQUE KEY field.
 DATA row LIKE LINE OF tab.
-CONSTANTS lc_count TYPE i VALUE 2000.
+CONSTANTS lc_count TYPE i VALUE 4000.
 DO lc_count TIMES.
   row-field = |foo{ sy-index }|.
   INSERT row INTO TABLE tab.

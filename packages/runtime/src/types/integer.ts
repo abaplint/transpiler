@@ -9,6 +9,7 @@ const digits = new RegExp(/^\s*-?\+?\d+\.?\d* *$/i);
 
 export class Integer implements INumeric {
   private value: number;
+  private constant: boolean = false;
   private readonly qualifiedName: string | undefined;
 
   public constructor(input?: {qualifiedName?: string}) {
@@ -20,7 +21,16 @@ export class Integer implements INumeric {
     return this.qualifiedName;
   }
 
+  public setConstant() {
+    this.constant = true;
+    return this;
+  }
+
   public set(value: INumeric | ICharacter | Hex | string | number | Integer | Float) {
+    if (this.constant === true) {
+      throw new Error("Changing constant");
+    }
+
     if (typeof value === "number") {
       this.value = Math.round(value);
     } else if (typeof value === "string") {

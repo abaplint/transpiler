@@ -7,3 +7,4 @@ unit-test/
 output
 comment-*
 .env
+perf*.mjs
