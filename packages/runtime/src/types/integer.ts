@@ -1,3 +1,4 @@
+/* eslint-disable default-case */
 import {throwError} from "../throw_error";
 import {Float} from "./float";
 import {Hex} from "./hex";
@@ -31,38 +32,44 @@ export class Integer implements INumeric {
       throw new Error("Changing constant");
     }
 
-    if (typeof value === "number") {
-      this.value = Math.round(value);
-    } else if (typeof value === "string") {
-      if (value.endsWith("-")) {
-        value = "-" + value.substring(0, value.length - 1);
-      }
-      if (value.trim().length === 0) {
-        value = "0";
-      } else if (digits.test(value) === false) {
-        throwError("CX_SY_CONVERSION_NO_NUMBER");
-      }
-      this.value = parseInt(value, 10);
-    } else if (value instanceof Float) {
-      this.set(Math.round(value.getRaw()));
-    } else if (value instanceof Hex || value instanceof XString) {
-      let num = parseInt(value.get(), 16);
-// handle two complement,
-      if (value instanceof Hex && value.getLength() >= 4) {
-        const maxVal = Math.pow(2, value.get().length / 2 * 8);
-        if (num > maxVal / 2 - 1) {
-          num = num - maxVal;
+    switch (typeof value) {
+      case "number":
+        this.value = Math.round(value);
+        return this;
+      case "string":
+        if (value.endsWith("-")) {
+          value = "-" + value.substring(0, value.length - 1);
         }
-      }
-      this.set(num);
-    } else {
-      this.set(value.get());
+        if (value.trim().length === 0) {
+          value = "0";
+        } else if (digits.test(value) === false) {
+          throwError("CX_SY_CONVERSION_NO_NUMBER");
+        }
+        this.value = parseInt(value, 10);
+        return this;
+      case "object":
+        switch (value.constructor) {
+          case Float:
+            this.set(Math.round((value as Float).getRaw()));
+            return this;
+          case Hex:
+          case XString:
+            {
+              let num = parseInt((value as Hex | XString).get(), 16);
+              // handle two complement,
+              if (value instanceof Hex && value.getLength() >= 4) {
+                const maxVal = Math.pow(2, value.get().length / 2 * 8);
+                if (num > maxVal / 2 - 1) {
+                  num = num - maxVal;
+                }
+              }
+              this.set(num);
+            }
+            return this;
+        }
     }
-/*
-    if (this.value > 2147483647 || this.value < -2147483648) {
-      throwError("CX_SY_ARITHMETIC_OVERFLOW");
-    }
-*/
+
+    this.set(value.get());
     return this;
   }
 
