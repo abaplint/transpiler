@@ -44,21 +44,18 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
         if (unique === "") {
           unique = "INPUT";
         }
+
+        const parameterDefault = methodDef?.getParameterDefault(varName);
+
         after = after + new TranspileTypes().declare(identifier) + "\n";
         const type = identifier.getType();
-// todo, type X is also generic in method definitions, the real fix will be in abaplint
-        const charGeneric = type instanceof abaplint.BasicTypes.CharacterType
-          && type.getLength() === 1
-          && type.getDDICName() === undefined
-          && type.getQualifiedName() === undefined;
         if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
-            && type.isGeneric() === false
-            && charGeneric === false) {
+            && type.isGeneric() === false) {
           after += "if (" + unique + " && " + unique + "." + varName + ") {" + varName + ".set(" + unique + "." + varName + ");}\n";
         } else {
           after += "if (" + unique + " && " + unique + "." + varName + ") {" + varName + " = " + unique + "." + varName + ";}\n";
         }
-        const parameterDefault = methodDef?.getParameterDefault(varName);
+
         if (parameterDefault) {
           let val = "";
           if (parameterDefault.get() instanceof abaplint.Expressions.Constant) {
