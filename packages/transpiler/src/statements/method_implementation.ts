@@ -46,11 +46,13 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
         }
 
         const parameterDefault = methodDef?.getParameterDefault(varName);
-        const isOptional = methodDef?.getOptional().includes(varName.toUpperCase());
+//        const isOptional = methodDef?.getOptional().includes(varName.toUpperCase());
         const passByValue = identifier.getMeta().includes(abaplint.IdentifierMeta.PassByValue);
 
         const type = identifier.getType();
-        if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting) && isOptional === false && passByValue === false) {
+        if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting) && passByValue === false) {
+          after += `let ${varName} = ${unique}?.${varName} || ${new TranspileTypes().toType(identifier.getType())};\n`;
+        } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodExporting)) {
           after += `let ${varName} = ${unique}?.${varName} || ${new TranspileTypes().toType(identifier.getType())};\n`;
         } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting) && type.isGeneric() === false) {
           after += new TranspileTypes().declare(identifier) + "\n";

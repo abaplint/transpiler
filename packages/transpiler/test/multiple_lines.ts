@@ -779,8 +779,7 @@ class lcl {
     return lcl.foo(INPUT);
   }
   static async foo(INPUT) {
-    let bar = new abap.types.String({qualifiedName: "STRING"});
-    if (INPUT && INPUT.bar) {bar.set(INPUT.bar);}
+    let bar = INPUT?.bar || new abap.types.String({qualifiedName: "STRING"});
     if (INPUT === undefined || INPUT.bar === undefined) {bar = abap.Classes['PROG-ZFOOBAR-LIF'].lif$default_value;}
   }
 }
