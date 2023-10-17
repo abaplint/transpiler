@@ -1927,6 +1927,30 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("Class, default abap_undefined", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS use_lxe
+      IMPORTING iv_yes TYPE abap_bool DEFAULT abap_undefined.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD use_lxe.
+    ASSERT iv_yes = abap_undefined.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lcl.
+  CREATE OBJECT lo.
+  lo->use_lxe( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it.skip("Class, inheritence and aliases redefintion", async () => {
     const code = `
 INTERFACE lif.

@@ -70,6 +70,8 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
               val = "abap.builtin.abap_true";
             } else if (parameterDefault.getFirstToken().getStr().toLowerCase() === "abap_false") {
               val = "abap.builtin.abap_false";
+            } else if (parameterDefault.getFirstToken().getStr().toLowerCase() === "abap_undefined") {
+              val = "abap.builtin.abap_undefined";
             } else if (parameterDefault.getFirstToken().getStr().toLowerCase() === "space") {
               val = "abap.builtin.space";
             } else if (parameterDefault.concatTokens().toLowerCase() === "sy-langu") {
