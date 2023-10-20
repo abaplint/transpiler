@@ -1951,6 +1951,27 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("Class, changing with default integer", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS moo CHANGING def TYPE i DEFAULT 1.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD moo.
+    def = 2.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>moo( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it.skip("Class, inheritence and aliases redefintion", async () => {
     const code = `
 INTERFACE lif.
