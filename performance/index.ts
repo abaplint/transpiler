@@ -21,6 +21,8 @@ import {test15} from "./test15";
 import {test16} from "./test16";
 import {test17} from "./test17";
 import {test18} from "./test18";
+import {test19} from "./test19";
+import {test20} from "./test20";
 
 // NOTE: does not run via Mocha
 
@@ -53,7 +55,9 @@ const tests: Tests = [
   {name: "15: Compare characters", abap: test15},
   {name: "16: Method number 5 :notes:", abap: test16},
   {name: "17: Substring and find negative", abap: test17},
-  {name: "17: CO compare", abap: test18},
+  {name: "18: CO compare", abap: test18},
+  {name: "19: Call method, compatible structure", abap: test19},
+  {name: "20: Call method, identical structure", abap: test20},
 ];
 
 async function execute(t: Test) {
