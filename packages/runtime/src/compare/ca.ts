@@ -28,11 +28,9 @@ export function ca(left: number | string | ICharacter | INumeric | Structure, ri
     r = right.get().toString();
   }
 
-  const characters = r.split("");
-
   let fdpos = 0;
-  for (const c of l.split("")) {
-    if (characters.includes(c) === true) {
+  for (const c of l) {
+    if (r.includes(c) === true) {
       // @ts-ignore
       abap.builtin.sy.get().fdpos.set(fdpos);
       return true;
