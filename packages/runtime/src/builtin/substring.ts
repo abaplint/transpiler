@@ -13,8 +13,7 @@ export function substring(input: ISubstringInput): ICharacter {
   let off = input?.off?.get();
   if (off === undefined) {
     off = 0;
-  }
-  if (off < 0) {
+  } else if (off < 0) {
     throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
   }
 
@@ -23,11 +22,9 @@ export function substring(input: ISubstringInput): ICharacter {
     throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
   }
 
-  let sub = "";
   if (typeof input.val === "string") {
-    sub = input.val.substr(off, len);
+    return new String().set(input.val.substr(off, len));
   } else {
-    sub = input.val.getOffset({offset: off, length: len}).get();
+    return input.val.getOffset({offset: off, length: len});
   }
-  return new String().set(sub);
 }
