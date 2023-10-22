@@ -19,11 +19,9 @@ export function co(left: number | string | ICharacter | INumeric, right: string 
     r = right.get().toString();
   }
 
-  const characters = r.split("");
-
   let fdpos = 0;
-  for (const c of l.split("")) {
-    if (characters.includes(c) === false) {
+  for (const c of l) {
+    if (r.includes(c) === false) {
       // @ts-ignore
       abap.builtin.sy.get().fdpos.set(fdpos);
       return false;
