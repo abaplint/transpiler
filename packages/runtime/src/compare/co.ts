@@ -14,7 +14,7 @@ export function co(left: number | string | ICharacter | INumeric, right: string 
   if (typeof right === "string") {
     r = right.toString();
   } else if (right instanceof Structure) {
-    r = Object.values(right.get()).map((a: any) => a.get()).join("");
+    r = right.getCharacter();
   } else {
     r = right.get().toString();
   }
