@@ -133,6 +133,9 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
       const res = await this.pool!.query(sql);
       dbcnt = res.rowCount;
     } catch (error) {
+      if (this.trace === true) {
+        console.dir(error);
+      }
       // eg "UNIQUE constraint failed" errors
       subrc = 4;
     }
