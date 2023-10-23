@@ -49,6 +49,10 @@ export async function insertDatabase(table: string | ICharacter, options: IInser
     columns.push(k);
 
     const value = structure[k].get();
+    if (value instanceof Structure) {
+      // then its a group, ignore
+      continue;
+    }
     values.push(toValue(value));
   }
 
