@@ -57,7 +57,14 @@ export function find(input: IFindInput) {
     let negative = false;
     if (occ < 0) {
       negative = true;
-      val = val.split("").reverse().join("");
+
+      let reversed = "";
+      // this is faster than doing val.split("").reverse().join("")
+      for (const character of val) {
+        reversed = character + reversed;
+      }
+      val = reversed;
+
       occ = Math.abs(occ);
     }
 

@@ -14,16 +14,14 @@ export function co(left: number | string | ICharacter | INumeric, right: string 
   if (typeof right === "string") {
     r = right.toString();
   } else if (right instanceof Structure) {
-    r = Object.values(right.get()).map((a: any) => a.get()).join("");
+    r = right.getCharacter();
   } else {
     r = right.get().toString();
   }
 
-  const characters = r.split("");
-
   let fdpos = 0;
-  for (const c of l.split("")) {
-    if (characters.includes(c) === false) {
+  for (const c of l) {
+    if (r.includes(c) === false) {
       // @ts-ignore
       abap.builtin.sy.get().fdpos.set(fdpos);
       return false;
