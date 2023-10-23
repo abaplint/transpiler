@@ -46,14 +46,14 @@ export async function insertDatabase(table: string | ICharacter, options: IInser
 
   const structure = options.values!.get();
   for (const k of Object.keys(structure)) {
-    columns.push(k);
-
-    const value = structure[k].get();
-    if (value instanceof Structure) {
+    const field = structure[k];
+    if (field instanceof Structure) {
       // then its a group, ignore
       continue;
     }
-    values.push(toValue(value));
+
+    columns.push(k);
+    values.push(toValue(field.get()));
   }
 
   if (typeof table !== "string") {
