@@ -62,14 +62,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
         }
 
         if (parameterDefault) {
-          let val = "";
-          if (parameterDefault.get() instanceof abaplint.Expressions.Constant) {
-            val = new ConstantTranspiler().transpile(parameterDefault, traversal).getCode();
-          } else if (parameterDefault.get() instanceof abaplint.Expressions.FieldChain) {
-            val = this.buildDefault(parameterDefault, traversal, methodDef?.getFilename());
-          } else {
-            throw new Error("MethodImplementationTranspiler, unknown default param type");
-          }
+          const val = this.buildDefault(parameterDefault, traversal, methodDef?.getFilename());
           if (passByValue === true || identifier.getMeta().includes(abaplint.IdentifierMeta.MethodChanging)) {
             after += "if (" + unique + " === undefined || " + unique + "." + varName + " === undefined) {" + varName + ".set(" + val + ");}\n";
           } else {
@@ -120,6 +113,18 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
 /////////////////////////////
 
   private buildDefault(parameterDefault: abaplint.Nodes.ExpressionNode, traversal: Traversal, filename: string | undefined) {
+    let val = "";
+    if (parameterDefault.get() instanceof abaplint.Expressions.Constant) {
+      val = new ConstantTranspiler().transpile(parameterDefault, traversal).getCode();
+    } else if (parameterDefault.get() instanceof abaplint.Expressions.FieldChain) {
+      val = this.buildDefaultFallback(parameterDefault, traversal, filename);
+    } else {
+      throw new Error("MethodImplementationTranspiler, unknown default param type");
+    }
+    return val;
+  }
+
+  private buildDefaultFallback(parameterDefault: abaplint.Nodes.ExpressionNode, traversal: Traversal, filename: string | undefined) {
     let val = "";
     const firstTokenLower = parameterDefault.getFirstToken().getStr().toLowerCase();
     const concat = parameterDefault.concatTokens().toLowerCase();
