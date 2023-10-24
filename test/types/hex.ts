@@ -372,4 +372,30 @@ WRITE xstr+2(len).`;
       expect(e.toString()).to.contain("CX_SY_RANGE_OUT_OF_BOUNDS");
     }
   });
+
+  it("fs to method", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    TYPES hex10 TYPE x LENGTH 10.
+    CLASS-METHODS foo IMPORTING bar TYPE hex10.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD foo.
+    WRITE bar.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  FIELD-SYMBOLS <fs> TYPE lcl=>hex10.
+  DATA foo TYPE lcl=>hex10.
+  ASSIGN foo TO <fs>.
+  lcl=>foo( <fs> ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`00000000000000000000`);
+  });
 });

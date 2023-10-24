@@ -9,10 +9,16 @@ import {throwError} from "../throw_error";
 export class Hex implements ICharacter {
   private value: string;
   private readonly length: number;
+  private readonly qualifiedName: string | undefined;
 
-  public constructor(input?: {length?: number}) {
+  public constructor(input?: {length?: number, qualifiedName?: string}) {
     this.length = input?.length ? input?.length : 1;
+    this.qualifiedName = input?.qualifiedName;
     this.clear();
+  }
+
+  public getQualifiedName() {
+    return this.qualifiedName;
   }
 
   public set(value: ICharacter | INumeric | string | number | Integer | Float) {
