@@ -2006,6 +2006,38 @@ START-OF-SELECTION.
     expect(abap.console.getTrimmed()).to.equal("2\n2\n0\n0");
   });
 
+  it.only("Class, tables in+out", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    TYPES ty TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+    CLASS-METHODS foo IMPORTING bar TYPE ty
+                      EXPORTING moo TYPE ty.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD foo.
+    WRITE / lines( bar ).
+    WRITE / lines( moo ).
+    moo = bar.
+    WRITE / lines( bar ).
+    WRITE / lines( moo ).
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA dat TYPE lcl=>ty.
+  APPEND 'sdfsdfsdf' TO dat.
+  lcl=>foo(
+    EXPORTING bar = dat
+    IMPORTING moo = dat ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("1\n1\n1\n1");
+  });
+
   it.skip("Class, inheritence and aliases redefintion", async () => {
     const code = `
 INTERFACE lif.
