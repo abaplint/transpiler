@@ -72,4 +72,26 @@ WRITE lv_offset.`;
     expect(abap.console.get()).to.equal("00100");
   });
 
+  it("numeric, set from method", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    TYPES ty TYPE n LENGTH 3.
+    CLASS-METHODS foo IMPORTING bar TYPE ty.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD foo.
+    WRITE bar.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>foo( '111' ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("111");
+  });
+
 });
