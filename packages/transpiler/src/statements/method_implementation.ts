@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {TranspileTypes} from "../transpile_types";
@@ -46,13 +47,27 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
         }
 
         const parameterDefault = methodDef?.getParameterDefault(varName);
-//        const isOptional = methodDef?.getOptional().includes(varName.toUpperCase());
+        const isOptional = methodDef?.getOptional().includes(varName.toUpperCase());
         const passByValue = identifier.getMeta().includes(abaplint.IdentifierMeta.PassByValue);
 
         const type = identifier.getType();
         if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodExporting)) {
           after += `let ${varName} = ${unique}?.${varName} || ${new TranspileTypes().toType(identifier.getType())};\n`;
-        } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting) && type.isGeneric() === false) {
+// begin new
+        } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
+            && parameterDefault === undefined
+            && passByValue === false
+            && isOptional === false
+            && type.isGeneric() === false) {
+
+          after += `let ${varName} = ${unique}?.${varName};\n`;
+          if (identifier.getType().getQualifiedName() !== undefined && identifier.getType().getQualifiedName() !== "") {
+            after += `if (${varName}?.getQualifiedName() !== "${identifier.getType().getQualifiedName()}") { ${varName} = undefined; }\n`;
+          }
+          after += `if (${varName} === undefined) { ${varName} = ${new TranspileTypes().toType(identifier.getType())}.set(${unique}.${varName}); }\n`;
+// end new
+        } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
+            && type.isGeneric() === false) {
           after += new TranspileTypes().declare(identifier) + "\n";
           // note: it might be nessesary to do a type conversion, eg char is passed to xstring parameter
           after += "if (" + unique + " && " + unique + "." + varName + ") {" + varName + ".set(" + unique + "." + varName + ");}\n";
