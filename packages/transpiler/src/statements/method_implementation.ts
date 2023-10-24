@@ -66,43 +66,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
           if (parameterDefault.get() instanceof abaplint.Expressions.Constant) {
             val = new ConstantTranspiler().transpile(parameterDefault, traversal).getCode();
           } else if (parameterDefault.get() instanceof abaplint.Expressions.FieldChain) {
-            if (parameterDefault.getFirstToken().getStr().toLowerCase() === "abap_true") {
-              val = "abap.builtin.abap_true";
-            } else if (parameterDefault.getFirstToken().getStr().toLowerCase() === "abap_false") {
-              val = "abap.builtin.abap_false";
-            } else if (parameterDefault.getFirstToken().getStr().toLowerCase() === "abap_undefined") {
-              val = "abap.builtin.abap_undefined";
-            } else if (parameterDefault.getFirstToken().getStr().toLowerCase() === "space") {
-              val = "abap.builtin.space";
-            } else if (parameterDefault.concatTokens().toLowerCase() === "sy-langu") {
-              val = "abap.builtin.sy.get().langu";
-            } else if (parameterDefault.concatTokens().toLowerCase() === "sy-mandt") {
-              val = "abap.builtin.sy.get().mandt";
-            } else if (parameterDefault.concatTokens().toLowerCase() === "sy-uname") {
-              val = "abap.builtin.sy.get().uname";
-            } else if (parameterDefault.concatTokens().toLowerCase() === "sy-sysid") {
-              val = "abap.builtin.sy.get().sysid";
-            } else if (parameterDefault.concatTokens().toLowerCase() === "sy-msgid") {
-              val = "abap.builtin.sy.get().msgid";
-            } else if (parameterDefault.concatTokens().toLowerCase() === "sy-msgty") {
-              val = "abap.builtin.sy.get().msgty";
-            } else if (parameterDefault.concatTokens().toLowerCase() === "sy-msgno") {
-              val = "abap.builtin.sy.get().msgno";
-            } else if (parameterDefault.concatTokens().toLowerCase() === "sy-msgv1") {
-              val = "abap.builtin.sy.get().msgv1";
-            } else if (parameterDefault.concatTokens().toLowerCase() === "sy-msgv2") {
-              val = "abap.builtin.sy.get().msgv2";
-            } else if (parameterDefault.concatTokens().toLowerCase() === "sy-msgv3") {
-              val = "abap.builtin.sy.get().msgv3";
-            } else if (parameterDefault.concatTokens().toLowerCase() === "sy-msgv4") {
-              val = "abap.builtin.sy.get().msgv4";
-            } else {
-              // note: this can be difficult, the "def" might be from an interface, ie. a different scope than the method
-              val = new FieldChainTranspiler().transpile(parameterDefault, traversal, true, methodDef?.getFilename(), true).getCode();
-              if (val.startsWith(parameterDefault.getFirstToken().getStr().toLowerCase()) === true) {
-                val = "this." + val;
-              }
-            }
+            val = this.buildDefault(parameterDefault, traversal, methodDef?.getFilename());
           } else {
             throw new Error("MethodImplementationTranspiler, unknown default param type");
           }
@@ -154,6 +118,50 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
   }
 
 /////////////////////////////
+
+  private buildDefault(parameterDefault: abaplint.Nodes.ExpressionNode, traversal: Traversal, filename: string | undefined) {
+    let val = "";
+    const firstTokenLower = parameterDefault.getFirstToken().getStr().toLowerCase();
+    const concat = parameterDefault.concatTokens().toLowerCase();
+    if (firstTokenLower === "abap_true") {
+      val = "abap.builtin.abap_true";
+    } else if (firstTokenLower === "abap_false") {
+      val = "abap.builtin.abap_false";
+    } else if (firstTokenLower === "abap_undefined") {
+      val = "abap.builtin.abap_undefined";
+    } else if (firstTokenLower === "space") {
+      val = "abap.builtin.space";
+    } else if (concat === "sy-langu") {
+      val = "abap.builtin.sy.get().langu";
+    } else if (concat === "sy-mandt") {
+      val = "abap.builtin.sy.get().mandt";
+    } else if (concat === "sy-uname") {
+      val = "abap.builtin.sy.get().uname";
+    } else if (concat === "sy-sysid") {
+      val = "abap.builtin.sy.get().sysid";
+    } else if (concat === "sy-msgid") {
+      val = "abap.builtin.sy.get().msgid";
+    } else if (concat === "sy-msgty") {
+      val = "abap.builtin.sy.get().msgty";
+    } else if (concat === "sy-msgno") {
+      val = "abap.builtin.sy.get().msgno";
+    } else if (concat === "sy-msgv1") {
+      val = "abap.builtin.sy.get().msgv1";
+    } else if (concat === "sy-msgv2") {
+      val = "abap.builtin.sy.get().msgv2";
+    } else if (concat === "sy-msgv3") {
+      val = "abap.builtin.sy.get().msgv3";
+    } else if (concat === "sy-msgv4") {
+      val = "abap.builtin.sy.get().msgv4";
+    } else {
+      // note: this can be difficult, the "def" might be from an interface, ie. a different scope than the method
+      val = new FieldChainTranspiler().transpile(parameterDefault, traversal, true, filename, true).getCode();
+      if (val.startsWith(parameterDefault.getFirstToken().getStr().toLowerCase()) === true) {
+        val = "this." + val;
+      }
+    }
+    return val;
+  }
 
   private findMethod(name: string, cdef: abaplint.IClassDefinition | undefined, traversal: Traversal) {
     if (cdef === undefined) {
