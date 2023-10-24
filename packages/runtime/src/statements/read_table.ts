@@ -225,18 +225,22 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
   // @ts-ignore
   abap.builtin.sy.get().tabix.set(foundIndex);
 
-  if (options.into && found) {
-    if (options.into instanceof DataReference && found instanceof DataReference) {
-      options.into.assign(found.getPointer());
-    } else if (options.into instanceof DataReference) {
-      options.into.assign(found);
-    } else {
-      options.into.set(found);
+  if (found) {
+    if (options.into) {
+      if (options.into instanceof DataReference) {
+        if (found instanceof DataReference) {
+          options.into.assign(found.getPointer());
+        } else {
+          options.into.assign(found);
+        }
+      } else {
+        options.into.set(found);
+      }
+    } else if (options.referenceInto) {
+      options.referenceInto.assign(found);
+    } else if (options.assigning) {
+      options.assigning.assign(found);
     }
-  } else if (options.referenceInto && found) {
-    options.referenceInto.assign(found);
-  } else if (options.assigning && found) {
-    options.assigning.assign(found);
   }
 
   return {subrc, foundIndex};
