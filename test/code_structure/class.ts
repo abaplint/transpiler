@@ -1972,6 +1972,40 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("Class, same field input to importing and exporting", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    TYPES: BEGIN OF ty,
+             field TYPE i,
+           END OF ty.
+    CLASS-METHODS foo IMPORTING bar TYPE ty
+                      EXPORTING moo TYPE ty.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD foo.
+    WRITE / bar-field.
+    WRITE / moo-field.
+    CLEAR moo.
+    WRITE / bar-field.
+    WRITE / moo-field.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA dat TYPE lcl=>ty.
+  dat-field = 2.
+  lcl=>foo(
+    EXPORTING bar = dat
+    IMPORTING moo = dat ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("2\n2\n0\n0");
+  });
+
   it.skip("Class, inheritence and aliases redefintion", async () => {
     const code = `
 INTERFACE lif.
