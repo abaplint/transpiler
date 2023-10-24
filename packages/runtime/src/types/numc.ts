@@ -29,7 +29,7 @@ export class Numc implements ICharacter {
       this.value = Math.trunc(value.getRaw()) + "";
     } else {
       this.set(value.get());
-      return;
+      return this;
     }
 
     if (this.value.length > this.length) {

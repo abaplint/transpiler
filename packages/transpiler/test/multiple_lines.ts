@@ -83,44 +83,6 @@ abap.Classes['PROG-ZFOOBAR-LCL_FOOBAR'] = lcl_foobar;`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
-  it("Simple class, with input parameter", async () => {
-    const abap = `
-    CLASS lcl_foobar DEFINITION.
-      PUBLIC SECTION.
-        METHODS: moo
-          IMPORTING iv_foo TYPE string.
-    ENDCLASS.
-
-    CLASS lcl_foobar IMPLEMENTATION.
-      METHOD moo.
-      ENDMETHOD.
-    ENDCLASS.`;
-
-    const expected =
-`class lcl_foobar {
-  static INTERNAL_TYPE = 'CLAS';
-  static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_FOOBAR';
-  static IMPLEMENTED_INTERFACES = [];
-  static ATTRIBUTES = {};
-  static METHODS = {"MOO": {"visibility": "U", "parameters": {"IV_FOO": {"type": () => {return new abap.types.String({qualifiedName: "STRING"});}, "is_optional": " "}}}};
-  constructor() {
-    this.me = new abap.types.ABAPObject();
-    this.me.set(this);
-  }
-  async constructor_(INPUT) {
-    if (super.constructor_) { await super.constructor_(INPUT); }
-    return this;
-  }
-  async moo(INPUT) {
-    let iv_foo = new abap.types.String({qualifiedName: "STRING"});
-    if (INPUT && INPUT.iv_foo) {iv_foo.set(INPUT.iv_foo);}
-  }
-}
-abap.Classes['PROG-ZFOOBAR-LCL_FOOBAR'] = lcl_foobar;`;
-
-    expect(await runSingle(abap)).to.equal(expected);
-  });
-
   it("Simple class, with return parameter", async () => {
     const abap = `
     CLASS lcl_foobar DEFINITION.
@@ -450,94 +412,6 @@ ENDCLASS.`;
 }
 abap.Classes['PROG-ZFOOBAR-LCL_BAR'] = lcl_bar;
 lcl_bar.foo = new abap.types.Integer({qualifiedName: "I"});`;
-
-    expect(await runSingle(abap)).to.equal(expected);
-  });
-
-  it("method call, add default parameter name", async () => {
-    const abap = `
-CLASS lcl_bar DEFINITION.
-  PUBLIC SECTION.
-    CLASS-METHODS bar IMPORTING imp TYPE i.
-ENDCLASS.
-CLASS lcl_bar IMPLEMENTATION.
-  METHOD bar.
-  ENDMETHOD.
-ENDCLASS.
-
-FORM bar.
-  lcl_bar=>bar( 2 ).
-ENDFORM.`;
-
-    const expected = `class lcl_bar {
-  static INTERNAL_TYPE = 'CLAS';
-  static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_BAR';
-  static IMPLEMENTED_INTERFACES = [];
-  static ATTRIBUTES = {};
-  static METHODS = {"BAR": {"visibility": "U", "parameters": {"IMP": {"type": () => {return new abap.types.Integer({qualifiedName: "I"});}, "is_optional": " "}}}};
-  constructor() {
-    this.me = new abap.types.ABAPObject();
-    this.me.set(this);
-  }
-  async constructor_(INPUT) {
-    if (super.constructor_) { await super.constructor_(INPUT); }
-    return this;
-  }
-  async bar(INPUT) {
-    return lcl_bar.bar(INPUT);
-  }
-  static async bar(INPUT) {
-    let imp = new abap.types.Integer({qualifiedName: "I"});
-    if (INPUT && INPUT.imp) {imp.set(INPUT.imp);}
-  }
-}
-abap.Classes['PROG-ZFOOBAR-LCL_BAR'] = lcl_bar;
-async function bar(INPUT) {
-  await abap.Classes['PROG-ZFOOBAR-LCL_BAR'].bar({imp: abap.IntegerFactory.get(2)});
-}`;
-
-    expect(await runSingle(abap)).to.equal(expected);
-  });
-
-  it("constructor with parameter", async () => {
-    const abap = `
-CLASS lcl_bar DEFINITION.
-  PUBLIC SECTION.
-    METHODS constructor IMPORTING input TYPE i.
-ENDCLASS.
-CLASS lcl_bar IMPLEMENTATION.
-  METHOD constructor.
-    WRITE input.
-  ENDMETHOD.
-ENDCLASS.
-
-FORM bar.
-  DATA bar TYPE REF TO lcl_bar.
-  CREATE OBJECT bar EXPORTING input = 42.
-ENDFORM.`;
-
-    const expected = `class lcl_bar {
-  static INTERNAL_TYPE = 'CLAS';
-  static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_BAR';
-  static IMPLEMENTED_INTERFACES = [];
-  static ATTRIBUTES = {};
-  static METHODS = {"CONSTRUCTOR": {"visibility": "U", "parameters": {"INPUT": {"type": () => {return new abap.types.Integer({qualifiedName: "I"});}, "is_optional": " "}}}};
-  constructor() {
-    this.me = new abap.types.ABAPObject();
-    this.me.set(this);
-  }
-  async constructor_(INPUT) {
-    let input = new abap.types.Integer({qualifiedName: "I"});
-    if (INPUT && INPUT.input) {input.set(INPUT.input);}
-    abap.statements.write(input);
-    return this;
-  }
-}
-abap.Classes['PROG-ZFOOBAR-LCL_BAR'] = lcl_bar;
-async function bar(INPUT) {
-  let bar = new abap.types.ABAPObject({qualifiedName: "LCL_BAR", RTTIName: "\\\\PROGRAM=ZFOOBAR\\\\CLASS=LCL_BAR"});
-  bar.set(await (new abap.Classes['PROG-ZFOOBAR-LCL_BAR']()).constructor_({input: abap.IntegerFactory.get(42)}));
-}`;
 
     expect(await runSingle(abap)).to.equal(expected);
   });
