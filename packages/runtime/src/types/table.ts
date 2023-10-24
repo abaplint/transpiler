@@ -261,12 +261,16 @@ export class HashedTable implements ITable {
     this.secondaryIndexes = {};
   }
 
-  public set(tab: TableRowType): ITable {
+  public set(tab: HashedTable | TableRowType): ITable {
     if (tab instanceof FieldSymbol) {
       if (tab.getPointer() === undefined) {
         throw new Error("GETWA_NOT_ASSIGNED");
       }
       return this.set(tab.getPointer());
+    }
+
+    if (tab === this) {
+      return this;
     }
 
     this.clear();
@@ -402,10 +406,17 @@ export class Table implements ITable {
       if (!(tab instanceof Table) && !(tab instanceof FieldSymbol)) {
         throw "Table, set error";
       }
-      this.clear();
+
       if (tab instanceof FieldSymbol) {
         tab = tab.getPointer();
       }
+
+      if (tab === this) {
+        return this;
+      }
+
+      this.clear();
+
       // this clones the values, and add sorting if required
       insertInternal({table: this, data: tab, lines: true});
     }

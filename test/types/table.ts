@@ -487,4 +487,16 @@ WRITE lines( tab1 ).`;
     await f(abap);
   });
 
+  it("self move", async () => {
+    const code = `
+TYPES ty TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+DATA dat TYPE ty.
+APPEND 'sdfsdfsdf' TO dat.
+dat = dat.
+ASSERT lines( dat ) = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
