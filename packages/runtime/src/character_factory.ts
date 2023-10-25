@@ -9,7 +9,7 @@ export class CharacterFactory {
   }
   */
 
-  /*
+
   private static readonly map = new Map<string, Character>();
 
   public static get(num: number, value: string): Character {
@@ -23,7 +23,7 @@ export class CharacterFactory {
       return lookup;
     }
   }
-  */
+  /*
 
   private static readonly map: {[key: string]: Character} = {};
 
@@ -37,5 +37,5 @@ export class CharacterFactory {
       return lookup;
     }
   }
-
+*/
 }
