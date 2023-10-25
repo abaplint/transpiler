@@ -65,6 +65,14 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
             after += `if (${varName}.getQualifiedName === undefined || ${varName}.getQualifiedName() !== "${identifier.getType().getQualifiedName()?.toUpperCase()}") { ${varName} = undefined; }\n`;
           }
           after += `if (${varName} === undefined) { ${varName} = ${new TranspileTypes().toType(identifier.getType())}.set(${unique}.${varName}); }\n`;
+
+        } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
+            && type.isGeneric() === true) {
+          if (isOptional === true) {
+            after += `let ${varName} = ${unique}?.${varName} || ${new TranspileTypes().toType(identifier.getType())};\n`;
+          } else {
+            after += `let ${varName} = ${unique}?.${varName};\n`;
+          }
 // end new
         } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
             && type.isGeneric() === false) {
