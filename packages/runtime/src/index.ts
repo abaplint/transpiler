@@ -17,6 +17,7 @@ import {StandardOutConsole} from "./console/standard_out_console";
 import {MemoryConsole} from "./console/memory_console";
 import {buildDbTableName} from "./prefix";
 import {IntegerFactory} from "./integer_factory";
+import {CharacterFactory} from "./character_factory";
 
 export {UnitTestResult, RFC, types, DB, MemoryConsole};
 
@@ -61,6 +62,7 @@ export class ABAP {
   public buildDbTableName = buildDbTableName;
   public ClassicError = ClassicError;
   public IntegerFactory = IntegerFactory;
+  public CharacterFactory = CharacterFactory;
 
   public readonly context: Context;
   public readonly dbo: RuntimeDatabaseOptions;
