@@ -1,14 +1,11 @@
 import {Character} from "./types";
 
-// TEST Map()
-
 export class CharacterFactory {
   /*
   public static get(num: number, value: string): Character {
     return new Character(num).set(value);
   }
   */
-
 
   private static readonly map = new Map<string, Character>();
 
@@ -23,8 +20,7 @@ export class CharacterFactory {
       return lookup;
     }
   }
-  /*
-
+/*
   private static readonly map: {[key: string]: Character} = {};
 
   public static get(num: number, value: string): Character {
