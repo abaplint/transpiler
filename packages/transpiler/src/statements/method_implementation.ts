@@ -62,7 +62,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
 
           after += `let ${varName} = ${unique}?.${varName};\n`;
           if (identifier.getType().getQualifiedName() !== undefined && identifier.getType().getQualifiedName() !== "") {
-            after += `if (${varName}.getQualifiedName === undefined || ${varName}.getQualifiedName() !== "${identifier.getType().getQualifiedName()?.toUpperCase()}") { ${varName} = undefined; }\n`;
+            after += `if (${varName}?.getQualifiedName === undefined || ${varName}.getQualifiedName() !== "${identifier.getType().getQualifiedName()?.toUpperCase()}") { ${varName} = undefined; }\n`;
           }
           after += `if (${varName} === undefined) { ${varName} = ${new TranspileTypes().toType(identifier.getType())}.set(${unique}.${varName}); }\n`;
 
