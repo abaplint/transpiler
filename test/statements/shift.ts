@@ -232,4 +232,16 @@ describe("Running statements - SHIFT", () => {
     expect(abap.console.get()).to.equal("hello1world");
   });
 
+  it("SHIFT RIGHT", async () => {
+    const code = `
+DATA my_variable TYPE c LENGTH 5.
+my_variable = 'hello'.
+SHIFT my_variable RIGHT BY 3 PLACES.
+WRITE / my_variable.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("   he");
+  });
+
 });

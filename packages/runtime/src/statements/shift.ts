@@ -48,7 +48,11 @@ function shift_character_mode(target: ICharacter, options?: IShiftOptions) {
     if (options.circular) {
       value = value.substr(p) + value.substr(0, p);
     } else {
-      value = value.substr(p);
+      if (options.direction === "RIGHT") {
+        value = " ".repeat(options.places.get()) + value.substring(0, options.places.get());
+      } else {
+        value = value.substr(p);
+      }
     }
   } else if (options?.to) {
     let to = "";
