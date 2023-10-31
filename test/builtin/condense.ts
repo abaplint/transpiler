@@ -60,4 +60,14 @@ describe("Builtin functions - condense", () => {
     await f(abap);
   });
 
+  it("condense(), abc", async () => {
+    const code = `
+    DATA str TYPE string.
+    str = condense( val = |abccaab| del = |ab| ).
+    ASSERT str = 'cc'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

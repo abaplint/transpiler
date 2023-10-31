@@ -17,15 +17,15 @@ export function condense(input: {
   if (input.to) {
     to = typeof input.to === "string" ? input.to : input.to.get().toString();
   }
-  /*
   let del = " ";
   if (input.del) {
     del = typeof input.del === "string" ? input.del : input.del.get().toString();
   }
-  */
 
-  str = str.replace(/ +$/, "");
-  str = str.replace(/^ +/, "");
+  const beginning = new RegExp(`[${del}]+$`);
+  const end = new RegExp(`^[${del}]+`);
+  str = str.replace(beginning, "");
+  str = str.replace(end, "");
 
   for (const f of from.split("")) {
     str = str.replace(new RegExp(f.replace(".", "\\."), "g"), to);
