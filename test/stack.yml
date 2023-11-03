@@ -1,8 +1,6 @@
 # Use postgres/example user/password credentials
 version: '3.1'
 
-name: transpiler-postgresql
-
 services:
   postgresql:
     image: postgres:alpine

@@ -12,7 +12,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-node@v3
-    - run: docker-compose --version
     - run: npm run docker:start
     - run: npm run install
     - run: npm run link-local
