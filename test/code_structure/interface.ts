@@ -621,7 +621,7 @@ ENDINTERFACE.`;
     await f(abap);
   });
 
-  it.skip("interface, aliases from other interface constant", async () => {
+  it.only("interface, aliases from other interface constant", async () => {
     const code = `
 INTERFACE if1.
   CONSTANTS world TYPE string VALUE 'moo'.
