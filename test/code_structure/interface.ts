@@ -621,7 +621,7 @@ ENDINTERFACE.`;
     await f(abap);
   });
 
-  it.only("interface, aliases from other interface constant", async () => {
+  it("interface, aliases from other interface constant", async () => {
     const code = `
 INTERFACE if1.
   CONSTANTS world TYPE string VALUE 'moo'.
@@ -635,7 +635,6 @@ ENDINTERFACE.
 START-OF-SELECTION.
   WRITE / if2=>hello.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });

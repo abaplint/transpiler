@@ -25,7 +25,7 @@ export class InterfaceTranspiler implements IStructureTranspiler {
         ret += traversal.registerClassOrInterface(def);
       }
     }
-    ret += this.buildConstants(node.findFirstExpression(abaplint.Expressions.InterfaceName), traversal);
+    ret += this.buildConstants(node.findFirstExpression(abaplint.Expressions.InterfaceName), traversal, def);
     ret += this.buildTypes(def);
 
     return new Chunk(ret);
@@ -44,7 +44,8 @@ export class InterfaceTranspiler implements IStructureTranspiler {
     return ret;
   }
 
-  private buildConstants(node: abaplint.Nodes.ExpressionNode | undefined, traversal: Traversal): string {
+  private buildConstants(node: abaplint.Nodes.ExpressionNode | undefined,
+                         traversal: Traversal, idef: abaplint.IInterfaceDefinition | undefined): string {
     if (node === undefined) {
       return "";
     }
@@ -63,6 +64,12 @@ export class InterfaceTranspiler implements IStructureTranspiler {
       const interfaceName = Traversal.escapeNamespace(node.getFirstToken().getStr().toLowerCase());
       const name = interfaceName + "." + interfaceName + "$" + n.toLowerCase();
       ret += name + " = " + new TranspileTypes().toType(identifier.getType()) + ";\n";
+
+      const alias = idef?.getAliases().getAll().find(a => a.getName().toUpperCase() === n.toUpperCase());
+      if (alias) {
+        // todo: this is an evil workaround, should be fixed in abaplint instead
+        ret += interfaceName + "." + alias.getComponent().split("~")[0].toLowerCase() + "$" + n.toLowerCase() + " = " + name + ";\n";
+      }
 
       const constantStatement = traversal.findStatementInFile(identifier.getStart());
       const valExpression = constantStatement?.findFirstExpression(abaplint.Expressions.Value);
