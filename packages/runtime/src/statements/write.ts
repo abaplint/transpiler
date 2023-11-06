@@ -55,7 +55,7 @@ export class WriteStatement {
       } else if (source instanceof Packed) {
         let num = source.get();
         let decimals = source.getDecimals();
-        if (NO_DEICMAL_CURRENCIES.includes(options?.currency?.get() || "")) {
+        if (NO_DEICMAL_CURRENCIES.includes(options?.currency?.get().trimEnd() || "")) {
 // todo, more work needed here,
           num = num * 100;
           decimals = 0;
