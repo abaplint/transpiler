@@ -2038,6 +2038,33 @@ START-OF-SELECTION.
     expect(abap.console.getTrimmed()).to.equal("1\n1\n1\n1");
   });
 
+  it("Class, numeric generic, passed char", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS moo IMPORTING foo TYPE numeric.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD moo.
+    DATA lv_type TYPE c LENGTH 1.
+    DATA lv_decimals TYPE i.
+    DESCRIBE FIELD foo TYPE lv_type.
+    WRITE / lv_type.
+    DESCRIBE FIELD foo DECIMALS lv_decimals.
+    WRITE / lv_decimals.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>moo( '11.11' ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("P\n2");
+  });
+
   it("Class, tables in+out, clear", async () => {
     const code = `
 CLASS lcl DEFINITION.

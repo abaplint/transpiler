@@ -128,7 +128,7 @@ export class TranspileTypes {
       }
     } else if (type instanceof abaplint.BasicTypes.NumericGenericType) {
       resolved = "Packed";
-      extra = "{length: 8, decimals: 0}";
+      extra = "{length: 8, decimals: 2}";
     } else if (type instanceof abaplint.BasicTypes.XStringType) {
       resolved = "XString";
       if (type.getQualifiedName() !== undefined) {
