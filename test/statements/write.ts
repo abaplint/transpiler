@@ -201,7 +201,7 @@ ASSERT ch = '1,0000000000000000E-03'.`;
     await f(abap);
   });
 
-  it.skip("currency, EUR", async () => {
+  it("currency, EUR", async () => {
     const code = `
 DATA lv_value_c TYPE c LENGTH 10.
 DATA val TYPE p LENGTH 10 DECIMALS 2.

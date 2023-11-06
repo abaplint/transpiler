@@ -9,6 +9,7 @@ export interface IWriteOptions {
   skipLine?: boolean,
   target?: ICharacter,
   exponent?: ICharacter | INumeric,
+  // suppresses the thousands separators
   noGrouping?: boolean,
   noSign?: boolean,
 }
@@ -21,6 +22,8 @@ export class WriteStatement {
   }
 
   public write(source: INumeric | ICharacter | FieldSymbol | string | number, options?: IWriteOptions) {
+    let right = false;
+
     if (options?.skipLine === true) {
       this.context.console.add("\n");
     } else {
@@ -47,13 +50,24 @@ export class WriteStatement {
           result = source.get().toString();
         }
       } else if (source instanceof Packed) {
-        result = source.get().toFixed(source.getDecimals());
+        const num = source.get();
+        result = num.toFixed(source.getDecimals()).replace(".", ",");
+        right = true;
       } else {
         result = source.get().toString();
       }
 
+      if (options?.noSign === true) {
+        result = result.replace("-", "");
+      }
+
       if (options?.target) {
-        options.target.set(result);
+        if (right === true) {
+          const len = options.target.get().length;
+          options.target.set(" ".repeat(len - result.length) + result);
+        } else {
+          options.target.set(result);
+        }
       } else {
         this.context.console.add(result);
       }

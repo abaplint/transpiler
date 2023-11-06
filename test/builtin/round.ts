@@ -78,7 +78,7 @@ describe("Builtin functions - round", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal( `7.00\n8.00`);
+    expect(abap.console.get()).to.equal( `7,00\n8,00`);
   });
 
 });
