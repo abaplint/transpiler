@@ -8,10 +8,14 @@ export interface IWriteOptions {
   newLine?: boolean,
   skipLine?: boolean,
   target?: ICharacter,
+  currency?: ICharacter,
   exponent?: ICharacter | INumeric,
+  // suppresses the thousands separators
   noGrouping?: boolean,
   noSign?: boolean,
 }
+
+const NO_DEICMAL_CURRENCIES = ["HUF", "KRW", "JPY"];
 
 export class WriteStatement {
   private readonly context: Context;
@@ -21,6 +25,8 @@ export class WriteStatement {
   }
 
   public write(source: INumeric | ICharacter | FieldSymbol | string | number, options?: IWriteOptions) {
+    let right = false;
+
     if (options?.skipLine === true) {
       this.context.console.add("\n");
     } else {
@@ -47,13 +53,30 @@ export class WriteStatement {
           result = source.get().toString();
         }
       } else if (source instanceof Packed) {
-        result = source.get().toFixed(source.getDecimals());
+        let num = source.get();
+        let decimals = source.getDecimals();
+        if (NO_DEICMAL_CURRENCIES.includes(options?.currency?.get().trimEnd() || "")) {
+// todo, more work needed here,
+          num = num * 100;
+          decimals = 0;
+        }
+        result = num.toFixed(decimals).replace(".", ",");
+        right = true;
       } else {
         result = source.get().toString();
       }
 
+      if (options?.noSign === true) {
+        result = result.replace("-", "");
+      }
+
       if (options?.target) {
-        options.target.set(result);
+        if (right === true) {
+          const len = options.target.get().length;
+          options.target.set(" ".repeat(len - result.length) + result);
+        } else {
+          options.target.set(result);
+        }
       } else {
         this.context.console.add(result);
       }

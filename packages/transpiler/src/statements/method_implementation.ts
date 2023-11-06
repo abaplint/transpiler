@@ -53,7 +53,6 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
         const type = identifier.getType();
         if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodExporting)) {
           after += `let ${varName} = ${unique}?.${varName} || ${new TranspileTypes().toType(identifier.getType())};\n`;
-// begin new
         } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
             && parameterDefault === undefined
             && passByValue === false
@@ -73,7 +72,14 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
           } else {
             after += `let ${varName} = ${unique}?.${varName};\n`;
           }
-// end new
+
+          if (type instanceof abaplint.BasicTypes.NumericGenericType) {
+            after += `if (${varName}.constructor.name === "Character") {
+  ${varName} = ${new TranspileTypes().toType(identifier.getType())};
+  ${varName}.set(${unique}?.${varName});
+}\n`;
+          }
+
         } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
             && type.isGeneric() === false) {
           after += new TranspileTypes().declare(identifier) + "\n";

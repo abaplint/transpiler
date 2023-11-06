@@ -58,7 +58,7 @@ describe("Builtin functions - nmin", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("15.20");
+    expect(abap.console.get()).to.equal("15,20");
   });
 
 });

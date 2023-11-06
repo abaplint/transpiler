@@ -1179,7 +1179,7 @@ WRITE res-arbgb.`;
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "zquan.tabl.xml", contents: zquan}];
     await runAllDatabases(abap, files, () => {
-      expect(abap.console.get()).to.equal("4.00");
+      expect(abap.console.get()).to.equal("4,00");
     });
   });
 

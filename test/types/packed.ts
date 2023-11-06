@@ -85,7 +85,7 @@ ASSERT foo = '12345'.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("1212.12");
+    expect(abap.console.get()).to.equal("1212,12");
   });
 
   it("length 5, decimals 2, rounding", async () => {
@@ -96,7 +96,7 @@ ASSERT foo = '12345'.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("1212.13");
+    expect(abap.console.get()).to.equal("1212,13");
   });
 
   it("parse from char", async () => {
@@ -131,7 +131,7 @@ ASSERT foo = '12345'.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("100.01");
+    expect(abap.console.get()).to.equal("100,01");
   });
 
   it("two thirds", async () => {
@@ -144,7 +144,7 @@ ASSERT foo = '12345'.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("100.67");
+    expect(abap.console.get()).to.equal("100,67");
   });
 
   it("changed over iteration", async () => {
@@ -161,16 +161,16 @@ ASSERT foo = '12345'.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal(`100.999
-101.998
-102.997
-103.996
-104.995
-105.994
-106.993
-107.992
-108.991
-109.990`);
+    expect(abap.console.get()).to.equal(`100,999
+101,998
+102,997
+103,996
+104,995
+105,994
+106,993
+107,992
+108,991
+109,990`);
   });
 
   it("max value", async () => {

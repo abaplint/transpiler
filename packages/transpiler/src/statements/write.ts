@@ -22,6 +22,11 @@ export class WriteTranspiler implements IStatementTranspiler {
       extra.push("exponent: " + traversal.traverse(exponent).getCode());
     }
 
+    const currency = node.findExpressionAfterToken("CURRENCY");
+    if (currency) {
+      extra.push("currency: " + traversal.traverse(currency).getCode());
+    }
+
     if (concat.includes("NO-GROUPING")) {
       extra.push("noGrouping: true");
     }

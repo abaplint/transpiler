@@ -201,4 +201,43 @@ ASSERT ch = '1,0000000000000000E-03'.`;
     await f(abap);
   });
 
+  it("currency, EUR", async () => {
+    const code = `
+DATA lv_value_c TYPE c LENGTH 10.
+DATA val TYPE p LENGTH 10 DECIMALS 2.
+val = '-1003.99'.
+WRITE val TO lv_value_c EXPONENT 0 NO-GROUPING NO-SIGN CURRENCY 'EUR'.
+WRITE lv_value_c.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("   1003,99");
+  });
+
+  it("currency, HUF", async () => {
+    const code = `
+DATA lv_value_c TYPE c LENGTH 10.
+DATA val TYPE p LENGTH 10 DECIMALS 2.
+val = '-1003.99'.
+WRITE val TO lv_value_c EXPONENT 0 NO-GROUPING NO-SIGN CURRENCY 'HUF'.
+WRITE lv_value_c.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("    100399");
+  });
+
+  it("currency, HUF, spaces", async () => {
+    const code = `
+DATA lv_value_c TYPE c LENGTH 10.
+DATA val TYPE p LENGTH 10 DECIMALS 2.
+val = '-1003.99'.
+WRITE val TO lv_value_c EXPONENT 0 NO-GROUPING NO-SIGN CURRENCY 'HUF '.
+WRITE lv_value_c.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("    100399");
+  });
+
 });
