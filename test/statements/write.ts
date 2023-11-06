@@ -214,7 +214,7 @@ WRITE lv_value_c.`;
     expect(abap.console.get().trimEnd()).to.equal("   1003,99");
   });
 
-  it.skip("currency, HUF", async () => {
+  it("currency, HUF", async () => {
     const code = `
 DATA lv_value_c TYPE c LENGTH 10.
 DATA val TYPE p LENGTH 10 DECIMALS 2.

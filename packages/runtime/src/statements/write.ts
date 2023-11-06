@@ -8,11 +8,14 @@ export interface IWriteOptions {
   newLine?: boolean,
   skipLine?: boolean,
   target?: ICharacter,
+  currency?: ICharacter,
   exponent?: ICharacter | INumeric,
   // suppresses the thousands separators
   noGrouping?: boolean,
   noSign?: boolean,
 }
+
+const NO_DEICMAL_CURRENCIES = ["HUF", "KRW", "JPY"];
 
 export class WriteStatement {
   private readonly context: Context;
@@ -50,8 +53,14 @@ export class WriteStatement {
           result = source.get().toString();
         }
       } else if (source instanceof Packed) {
-        const num = source.get();
-        result = num.toFixed(source.getDecimals()).replace(".", ",");
+        let num = source.get();
+        let decimals = source.getDecimals();
+        if (NO_DEICMAL_CURRENCIES.includes(options?.currency?.get() || "")) {
+// todo, more work needed here,
+          num = num * 100;
+          decimals = 0;
+        }
+        result = num.toFixed(decimals).replace(".", ",");
         right = true;
       } else {
         result = source.get().toString();
