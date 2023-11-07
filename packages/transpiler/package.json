@@ -29,12 +29,12 @@
   "author": "abaplint",
   "license": "MIT",
   "dependencies": {
-    "@abaplint/core": "^2.103.1",
+    "@abaplint/core": "^2.103.4",
     "source-map": "^0.7.4"
   },
   "devDependencies": {
     "@types/chai": "^4.3.9",
-    "@types/mocha": "^10.0.3",
+    "@types/mocha": "^10.0.4",
     "chai": "^4.3.10",
     "mocha": "^10.2.0",
     "source-map-support": "^0.5.21",
