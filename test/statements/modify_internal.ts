@@ -94,4 +94,26 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("MODIFY, loop index", async () => {
+    const code = `
+DATA: BEGIN OF request,
+        tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY,
+        wa  TYPE string,
+      END OF request.
+DATA val TYPE string.
+
+val = |foo|.
+INSERT val INTO TABLE request-tab.
+
+LOOP AT request-tab INTO request-wa.
+  TRANSLATE request-wa TO UPPER CASE.
+  MODIFY request-tab FROM request-wa INDEX sy-tabix.
+  WRITE / request-wa.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("FOO");
+  });
+
 });
