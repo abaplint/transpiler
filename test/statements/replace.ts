@@ -319,4 +319,36 @@ WRITE str.`;
     await f(abap);
   });
 
+  it("REPLACE, check subrc, REPLACEMENT LENGTH", async () => {
+    const code = `
+DATA sdummy TYPE string.
+DATA match TYPE i.
+sdummy = '0894ef45'.
+REPLACE FIRST OCCURRENCE OF REGEX '^0894ef45$' IN sdummy WITH 'abc' REPLACEMENT LENGTH match IGNORING CASE.
+ASSERT sy-subrc = 0.
+WRITE / match.
+WRITE / sdummy.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("3\nabc");
+  });
+
+  it("REPLACE, check subrc, REPLACEMENT LENGTH", async () => {
+    const code = `
+DATA sdummy TYPE string.
+DATA match TYPE i.
+sdummy = '0894ef45aa'.
+REPLACE FIRST OCCURRENCE OF REGEX '^0894ef45' IN sdummy WITH 'abc' REPLACEMENT LENGTH match IGNORING CASE.
+ASSERT sy-subrc = 0.
+WRITE / match.
+WRITE / sdummy.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("3\nabcaa");
+  });
+
 });

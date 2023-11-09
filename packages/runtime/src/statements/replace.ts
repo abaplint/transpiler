@@ -8,6 +8,7 @@ export type replaceInput = {
   target: ICharacter | Table,
   sectionLength?: INumeric,
   sectionOffset?: INumeric,
+  replacementLength?: INumeric,
   regex?: ICharacter,
   pcre?: ICharacter,
   all: boolean,
@@ -84,6 +85,10 @@ export function replace(input: replaceInput): void {
   }
 
   temp = temp.replace(search, rr);
+
+  if (input.replacementLength) {
+    input.replacementLength.set(rr.length);
+  }
 
   const subrc = found ? 0 : 4;
   // @ts-ignore
