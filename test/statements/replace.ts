@@ -351,4 +351,35 @@ WRITE / sdummy.`;
     expect(abap.console.getTrimmed()).to.equal("3\nabcaa");
   });
 
+  it("REPLACE, regex case?", async () => {
+    const code = `
+DATA sdummy TYPE string.
+DATA match TYPE i.
+sdummy = 'aabb'.
+REPLACE FIRST OCCURRENCE OF REGEX '^([0-9A-F]{4})$'
+  IN sdummy WITH 'foo' REPLACEMENT LENGTH match IGNORING CASE.
+ASSERT sy-subrc = 0.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it.skip("REPLACE, check subrc, REPLACEMENT LENGTH, another test", async () => {
+    const code = `
+DATA sdummy TYPE string.
+DATA match TYPE i.
+sdummy = '0894ef45-77a9-1ed8-a495-bd69397619c0'.
+REPLACE FIRST OCCURRENCE OF REGEX '^([0-9A-F]{8})-([0-9A-F]{4})-([0-9A-F]{4})-([0-9A-F]{4})-([0-9A-F]{12})$'
+  IN sdummy WITH '$1$2$3$4$5' REPLACEMENT LENGTH match IGNORING CASE.
+ASSERT sy-subrc = 0.
+WRITE / match.
+WRITE / sdummy.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("32\n0894ef4577a91ed8a495bd69397619c0");
+  });
+
 });
