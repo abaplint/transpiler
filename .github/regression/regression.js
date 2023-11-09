@@ -14,6 +14,8 @@ const repos = [
   {name: "larshp/abapNTLM",                     command: "npm test"},
   {name: "larshp/abapPGP",                      command: "npm test"},
   {name: "open-abap/open-abap-core",            command: "npm test"},
+  {name: "open-abap/open-abap-gui",             command: "npm test"},
+  {name: "open-abap/open-abap-odata",           command: "npm test"},
   {name: "open-abap/open-table-maintenance",    command: "npm test"},
   {name: "SAP/abap-file-formats-tools",         command: "npm test"},
   {name: "Sumu-Ning/AES",                       command: "npm test"},

@@ -15,12 +15,18 @@ export function modifyInternal(table: Table, options: IModifyInternalOptions): v
 
   let found = false;
 
+//  console.dir(options);
+
   if (options.index) {
     const index = options.index.get() - 1;
-    found = table.array()[index] !== undefined;
+    const element = table.array()[index];
+    found = element !== undefined;
     if (found) {
+      element.set(options.from);
+      /*
       table.deleteIndex(index);
       table.insertIndex(options.from, index);
+      */
     }
   } else if (options.where && options.transporting && options.from) {
     let index = 1;
