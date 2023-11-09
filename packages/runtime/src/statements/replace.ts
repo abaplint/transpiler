@@ -84,11 +84,19 @@ export function replace(input: replaceInput): void {
     rr = rr.replace(/\\\}/g, "}");
   }
 
-  temp = temp.replace(search, rr);
-
   if (input.replacementLength) {
-    input.replacementLength.set(rr.length);
+    const match = temp.match(search);
+    let replacement = rr;
+    for (let counter = 1; counter < 10; counter++) {
+      const dollar = "$" + counter;
+      if (replacement.includes(dollar) && match && match[counter] !== undefined) {
+        replacement = replacement.replace(dollar, match[counter]);
+      }
+    }
+    input.replacementLength.set(replacement.length);
   }
+
+  temp = temp.replace(search, rr);
 
   const subrc = found ? 0 : 4;
   // @ts-ignore

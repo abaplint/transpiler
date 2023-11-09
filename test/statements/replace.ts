@@ -365,7 +365,7 @@ ASSERT sy-subrc = 0.`;
     await f(abap);
   });
 
-  it.skip("REPLACE, check subrc, REPLACEMENT LENGTH, another test", async () => {
+  it("REPLACE, check subrc, REPLACEMENT LENGTH, another test", async () => {
     const code = `
 DATA sdummy TYPE string.
 DATA match TYPE i.
