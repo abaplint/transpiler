@@ -1,6 +1,6 @@
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
-import {SourceTranspiler} from "../expressions";
+import {SourceTranspiler, TargetTranspiler} from "../expressions";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 
@@ -27,8 +27,12 @@ export class ReplaceTranspiler implements IStatementTranspiler {
     }
 
     const length = node.findExpressionAfterToken("LENGTH");
-    if (length && length.get() instanceof abaplint.Expressions.Source) {
-      extra.push("sectionLength: " + new SourceTranspiler().transpile(length, traversal).getCode());
+    if (length) {
+      if (length.get() instanceof abaplint.Expressions.Source) {
+        extra.push("sectionLength: " + new SourceTranspiler().transpile(length, traversal).getCode());
+      } else if (length.get() instanceof abaplint.Expressions.Target) {
+        extra.push("replacementLength: " + new TargetTranspiler().transpile(length, traversal).getCode());
+      }
     }
     const offset = node.findExpressionAfterToken("OFFSET");
     if (offset && offset.get() instanceof abaplint.Expressions.Source) {

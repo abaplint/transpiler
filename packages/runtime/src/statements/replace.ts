@@ -8,6 +8,7 @@ export type replaceInput = {
   target: ICharacter | Table,
   sectionLength?: INumeric,
   sectionOffset?: INumeric,
+  replacementLength?: INumeric,
   regex?: ICharacter,
   pcre?: ICharacter,
   all: boolean,
@@ -49,15 +50,15 @@ export function replace(input: replaceInput): void {
     if (regex.length === 0 && input.all === true) {
       throw "REPLACE, zero length input";
     }
-    found = temp.match(regex) !== null;
     search = new RegExp(regex, ignoreCase + allOccurrences);
+    found = temp.match(search) !== null;
   } else if (input.pcre) {
     const regex = ABAPRegExp.convert(input.pcre.get());
     if (regex.length === 0 && input.all === true) {
       throw "REPLACE, zero length input";
     }
-    found = temp.match(regex) !== null;
     search = new RegExp(regex, ignoreCase + allOccurrences);
+    found = temp.match(search) !== null;
   } else if (input.sectionLength && input.sectionOffset) {
     const before = input.target.getOffset({length: input.sectionOffset});
     const after = input.target.getOffset({offset: input.sectionLength.get() + input.sectionOffset.get()});
@@ -81,6 +82,18 @@ export function replace(input: replaceInput): void {
     rr = rr.replace(/\\\$/g, "$");
     rr = rr.replace(/\\\{/g, "{");
     rr = rr.replace(/\\\}/g, "}");
+  }
+
+  if (input.replacementLength) {
+    const match = temp.match(search);
+    let replacement = rr;
+    for (let counter = 1; counter < 10; counter++) {
+      const dollar = "$" + counter;
+      if (replacement.includes(dollar) && match && match[counter] !== undefined) {
+        replacement = replacement.replace(dollar, match[counter]);
+      }
+    }
+    input.replacementLength.set(replacement.length);
   }
 
   temp = temp.replace(search, rr);
