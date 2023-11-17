@@ -107,7 +107,7 @@ export class SelectTranspiler implements IStatementTranspiler {
       }
 
       const code = `if (${faeTranspiled}.array().length === 0) {
-  throw "FAE, todo, empty table";
+  throw new Error("FAE, todo, empty table");
 } else {
   const ${unique2} = ${faeTranspiled}.array();
   abap.statements.clear(${target});
