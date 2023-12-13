@@ -211,7 +211,7 @@ export class Traversal {
     const methodDefinitions = def.getMethodDefinitions();
     if (methodDefinitions === undefined) {
       // this can occur if the dependencies is not 702?
-      throw new Error("buildMethods, unexpected undefined, " + def.getName());
+      throw new Error("buildMethods: unexpected undefined, " + def.getName());
     }
 
     for (const m of methodDefinitions.getAll()) {
