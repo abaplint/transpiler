@@ -10,7 +10,7 @@ export class AssignTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const assignSource = node.findDirectExpression(abaplint.Expressions.AssignSource);
 
-    const sources = assignSource?.findDirectExpressions(abaplint.Expressions.Source).map(
+    const sources = assignSource?.findDirectExpressionsMulti([abaplint.Expressions.Source,abaplint.Expressions.SimpleSource3]).map(
       e => new SourceTranspiler(false).transpile(e, traversal).getCode()) || [];
     const fs = new FieldSymbolTranspiler().transpile(node.findDirectExpression(abaplint.Expressions.FSTarget)!, traversal).getCode();
 
