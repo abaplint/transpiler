@@ -208,7 +208,13 @@ export class Traversal {
       return methods;
     }
 
-    for (const m of def.getMethodDefinitions().getAll()) {
+    const methodDefinitions = def.getMethodDefinitions();
+    if (methodDefinitions === undefined) {
+      // this can occur if the dependencies is not 702?
+      throw new Error("buildMethods, unexpected undefined, " + def.getName());
+    }
+
+    for (const m of methodDefinitions.getAll()) {
       const parameters: string[] = [];
       for (const p of m.getParameters().getAll()) {
         const type = new TranspileTypes().toType(p.getType());
