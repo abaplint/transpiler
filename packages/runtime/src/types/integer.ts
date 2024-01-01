@@ -7,6 +7,9 @@ import {INumeric} from "./_numeric";
 
 export const DIGITS = new RegExp(/^\s*-?\+?\d+\.?\d* *$/i);
 
+export const MAX_INTEGER = 2147483647;
+export const MIN_INTEGER = -2147483648;
+
 export function toInteger(value: string, exception = true): number {
   if (value.endsWith("-")) {
     value = "-" + value.substring(0, value.length - 1);

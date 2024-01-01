@@ -383,4 +383,38 @@ WRITE result.`;
     await f(abap);
   });
 
+  it("hitting int max value", async () => {
+    const code = `
+    DATA lv_int1 TYPE i.
+    DATA lv_int2 TYPE i.
+    lv_int1 = 2000000.
+    lv_int2 = 2000000.
+    lv_int1 = lv_int1 * lv_int2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch(e) {
+      expect(e.toString()).to.contain("COMPUTE_INT_TIMES_OVERFLOW");
+    }
+  });
+
+  it("hitting int MIN value", async () => {
+    const code = `
+    DATA lv_int1 TYPE i.
+    DATA lv_int2 TYPE i.
+    lv_int1 = -2000000.
+    lv_int2 = -2000000.
+    lv_int1 = lv_int1 * lv_int2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch(e) {
+      expect(e.toString()).to.contain("COMPUTE_INT_TIMES_OVERFLOW");
+    }
+  });
+
 });
