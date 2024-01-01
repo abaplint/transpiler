@@ -5,7 +5,23 @@ import {XString} from "./xstring";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 
-const digits = new RegExp(/^\s*-?\+?\d+\.?\d* *$/i);
+export const DIGITS = new RegExp(/^\s*-?\+?\d+\.?\d* *$/i);
+
+export function toInteger(value: string, exception = true): number {
+  if (value.endsWith("-")) {
+    value = "-" + value.substring(0, value.length - 1);
+  }
+  if (value.trim().length === 0) {
+    value = "0";
+  } else if (DIGITS.test(value) === false) {
+    if (exception === true) {
+      throwError("CX_SY_CONVERSION_NO_NUMBER");
+    } else {
+      throw new Error("CONVT_NO_NUMBER");
+    }
+  }
+  return parseInt(value, 10);
+}
 
 export class Integer implements INumeric {
   private value: number;
@@ -34,15 +50,7 @@ export class Integer implements INumeric {
     if (typeof value === "number") {
       this.value = Math.round(value);
     } else if (typeof value === "string") {
-      if (value.endsWith("-")) {
-        value = "-" + value.substring(0, value.length - 1);
-      }
-      if (value.trim().length === 0) {
-        value = "0";
-      } else if (digits.test(value) === false) {
-        throwError("CX_SY_CONVERSION_NO_NUMBER");
-      }
-      this.value = parseInt(value, 10);
+      this.value = toInteger(value);
     } else if (value instanceof Float) {
       this.set(Math.round(value.getRaw()));
     } else if (value instanceof Hex || value instanceof XString) {

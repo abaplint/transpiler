@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import {ABAPObject, Character, Date, FieldSymbol, Float, HashedTable, String, Hex, Integer, Numc, Structure, Table, DataReference} from "../types";
+import {ABAPObject, Character, Date, FieldSymbol, Float, HashedTable, String, Hex, Integer, Numc, Structure, Table, DataReference, toInteger} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -43,7 +43,7 @@ export function eq(
         return right.getTrimEnd() === left.getTrimEnd();
       }
     } else if (left instanceof Integer) {
-      return (parseInt(right.get(), 10) || 0) === left.get();
+      return toInteger(right.get(), false) === left.get();
     } else if (left instanceof String) {
       return right.getTrimEnd() === left.get();
     }

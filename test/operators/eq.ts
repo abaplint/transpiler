@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP, MemoryConsole} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -84,6 +84,18 @@ ASSERT 1 = lv_val.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("throw CONVT_NO_NUMBER", async () => {
+    const code = `ASSERT 0 = 'todo'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch(e) {
+      expect(e.toString()).to.contain("CONVT_NO_NUMBER");
+    }
   });
 
 });
