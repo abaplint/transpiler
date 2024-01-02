@@ -426,7 +426,6 @@ WRITE result.`;
     lv_int2 = 2000000.
     lv_f = lv_int1 * lv_int2.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
