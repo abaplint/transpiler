@@ -6,20 +6,24 @@ import {String} from "../types/string";
 
 export function multiply(left: INumeric | ICharacter | string | number, right: INumeric | ICharacter | string | number) {
   if (left instanceof Integer && right instanceof Integer) {
-    return new Integer().set(left.get() * right.get());
+    const val = left.get() * right.get();
+    return new Integer().set(val);
   } else if (typeof left === "number" && typeof right === "number"
       && Number.isInteger(left) && Number.isInteger(right)) {
-    return new Integer().set(left * right);
-
+    const val = left * right;
+    return new Integer().set(val);
   } else if (typeof left === "number" && Number.isInteger(left) && right instanceof Integer) {
-    return new Integer().set(left * right.get());
+    const val = left * right.get();
+    return new Integer().set(val);
   } else if (typeof right === "number" && Number.isInteger(right) && left instanceof Integer) {
-    return new Integer().set(left.get() * right);
-
+    const val = left.get() * right;
+    return new Integer().set(val);
   } else if ((left instanceof String || left instanceof Character) && Number.isInteger(Number(left.get())) && right instanceof Integer) {
-    return new Integer().set(Number.parseInt(left.get(), 10) * right.get());
+    const val = Number.parseInt(left.get(), 10) * right.get();
+    return new Integer().set(val);
   } else if ((right instanceof String || right instanceof Character) && Number.isInteger(Number(right)) && left instanceof Integer) {
-    return new Integer().set(left.get() * Number.parseInt(right.get(), 10));
+    const val = left.get() * Number.parseInt(right.get(), 10);
+    return new Integer().set(val);
   }
 
   return new Float().set(parse(left) * parse(right));
