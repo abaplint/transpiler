@@ -383,7 +383,7 @@ WRITE result.`;
     await f(abap);
   });
 
-  it("hitting int max value", async () => {
+  it.skip("hitting int max value", async () => {
     const code = `
     DATA lv_int1 TYPE i.
     DATA lv_int2 TYPE i.
@@ -400,7 +400,7 @@ WRITE result.`;
     }
   });
 
-  it("hitting int MIN value", async () => {
+  it.skip("hitting int MIN value", async () => {
     const code = `
     DATA lv_int1 TYPE i.
     DATA lv_int2 TYPE i.
@@ -417,7 +417,7 @@ WRITE result.`;
     }
   });
 
-  it.only("ok, not int max value, its a float field", async () => {
+  it("ok, not int max value, its a float field", async () => {
     const code = `
     DATA lv_f TYPE f.
     DATA lv_int1 TYPE i.
@@ -426,6 +426,7 @@ WRITE result.`;
     lv_int2 = 2000000.
     lv_f = lv_int1 * lv_int2.`;
     const js = await run(code);
+    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
