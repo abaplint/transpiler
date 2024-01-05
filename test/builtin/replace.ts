@@ -274,4 +274,19 @@ ASSERT out = |foobar|.`;
     await f(abap);
   });
 
+  it.only("replace, string vs char", async () => {
+    const code = `
+DATA lv_string TYPE string.
+DATA lv_char TYPE c LENGTH 20.
+lv_char = 'lars'.
+lv_string = |'{ replace( val  = lv_char
+                         sub  = |a|
+                         with = |bb|
+                         occ  = 0 ) }'|.
+ASSERT lv_string = |'lbbrs'|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
