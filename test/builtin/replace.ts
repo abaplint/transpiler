@@ -274,4 +274,66 @@ ASSERT out = |foobar|.`;
     await f(abap);
   });
 
+  it("char overflow", async () => {
+    const code = `
+DATA lv_string TYPE string.
+DATA lv_char TYPE c LENGTH 5.
+lv_char = 'aaaaa'.
+lv_char = replace( val  = lv_char
+                   sub  = |a|
+                   with = |bb|
+                   occ  = 0 ).
+ASSERT lv_char = 'bbbbb'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("char overflow, into str", async () => {
+    const code = `
+DATA lv_string TYPE string.
+DATA lv_char TYPE c LENGTH 5.
+lv_char = 'aaaaa'.
+lv_string = replace( val  = lv_char
+                     sub  = |a|
+                     with = |bb|
+                     occ  = 0 ).
+ASSERT lv_string = 'bbbbbbbbbb'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("char overflow, sub as char", async () => {
+    const code = `
+DATA lv_string TYPE string.
+DATA lv_char TYPE c LENGTH 5.
+DATA lv_sub TYPE c LENGTH 2.
+lv_char = 'aaaaa'.
+lv_sub = |a|.
+lv_string = replace( val  = lv_char
+                     sub  = lv_sub
+                     with = |bb|
+                     occ  = 0 ).
+ASSERT lv_string = 'bbbbbbbbbb'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("replace, string vs char", async () => {
+    const code = `
+DATA lv_string TYPE string.
+DATA lv_char TYPE c LENGTH 20.
+lv_char = 'lars'.
+lv_string = |'{ replace( val  = lv_char
+                         sub  = |a|
+                         with = |bb|
+                         occ  = 0 ) }'|.
+ASSERT lv_string = |'lbbrs'|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

@@ -18,6 +18,8 @@ export function replace(input: IReplaceInput) {
   let val: string | undefined = undefined;
   if (typeof input.val === "string") {
     val = input.val;
+  } else if (input.val instanceof Character) {
+    val = input.val.getTrimEnd();
   } else {
     val = input.val.get();
   }
@@ -34,6 +36,8 @@ export function replace(input: IReplaceInput) {
   let sub: string | RegExp | undefined = undefined;
   if (typeof input.sub === "string") {
     sub = input.sub;
+  } else if (input.sub instanceof Character) {
+    sub = input.sub.getTrimEnd();
   } else if (input.sub) {
     sub = input.sub.get();
   }

@@ -8,6 +8,7 @@ export function escape(input: {val: ICharacter | string, format: INumeric | numb
   let val = typeof input.val === "string" ? input.val : input.val.get();
   const format = typeof input.format === "number" ? input.format : input.format.get();
 
+// todo, optimize/cache regexes
   switch (format) {
     case 1: // e_xml_attr
       val = val.replace(/&/g, "&amp;");
