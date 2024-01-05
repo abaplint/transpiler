@@ -24,6 +24,7 @@ import {test18} from "./test18";
 import {test19} from "./test19";
 import {test20} from "./test20";
 import {test21} from "./test21";
+import {test22} from "./test22";
 
 // NOTE: does not run via Mocha
 
@@ -60,6 +61,7 @@ const tests: Tests = [
   {name: "19: Call method, compatible structure", abap: test19},
   {name: "20: Call method, identical structure", abap: test20},
   {name: "21: CASE many char constants", abap: test21},
+  {name: "22: READ TABLE WITH KEY secondary", abap: test22},
 ];
 
 async function execute(t: Test) {
