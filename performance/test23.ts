@@ -23,7 +23,7 @@ FORM search.
   val = 'b9999'.
   DO 400 TIMES.
 *    READ TABLE lt_data INTO ls_data WITH KEY full_name = |b9999|.
-    READ TABLE lt_data INTO ls_data WITH KEY key_full_name COMPONENTS full_name = val.
+    READ TABLE lt_data WITH KEY key_full_name COMPONENTS full_name = val INTO ls_data.
     ASSERT sy-subrc = 0.
   ENDDO.
 ENDFORM.
