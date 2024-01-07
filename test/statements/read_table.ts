@@ -1190,4 +1190,57 @@ ENDDO.`;
     await f(abap);
   });
 
+  it("READ TABLE, secondary sorted key, another testcase", async () => {
+    const code = `
+TYPES:
+  BEGIN OF ty_result,
+    obj_type TYPE string,
+    obj_name TYPE string,
+  END OF ty_result .
+TYPES ty_results_tt TYPE STANDARD TABLE OF ty_result WITH DEFAULT KEY
+  WITH NON-UNIQUE SORTED KEY sec_key
+  COMPONENTS obj_type obj_name.
+
+DATA it_results TYPE ty_results_tt.
+DATA ls_row LIKE LINE OF it_results.
+DATA ls_item LIKE LINE OF it_results.
+DATA ls_result LIKE LINE OF it_results.
+
+ls_row-obj_type = 'INTF'.
+ls_row-obj_name = '0'.
+INSERT ls_row INTO TABLE it_results.
+ls_row-obj_type = 'CLAS'.
+ls_row-obj_name = '1'.
+INSERT ls_row INTO TABLE it_results.
+ls_row-obj_type = 'XSLT'.
+ls_row-obj_name = '2'.
+INSERT ls_row INTO TABLE it_results.
+ls_row-obj_type = 'INTF'.
+ls_row-obj_name = '3'.
+INSERT ls_row INTO TABLE it_results.
+ls_row-obj_type = 'CLAS'.
+ls_row-obj_name = '4'.
+INSERT ls_row INTO TABLE it_results.
+ls_row-obj_type = 'XSLT'.
+ls_row-obj_name = '5'.
+INSERT ls_row INTO TABLE it_results.
+
+LOOP AT it_results INTO ls_item.
+  READ TABLE it_results INTO ls_result WITH KEY sec_key COMPONENTS
+    obj_name = ls_item-obj_name
+    obj_type = ls_item-obj_type.
+  ASSERT sy-subrc = 0.
+  WRITE: / ls_result-obj_name, ls_result-obj_type.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal(`0INTF
+1CLAS
+2XSLT
+3INTF
+4CLAS
+5XSLT`);
+  });
+
 });
