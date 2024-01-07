@@ -35,34 +35,43 @@ export function eq(
   }
 
 // for performance, do the typicaly/easy cases first
-  if (right instanceof Character) {
-    if (left instanceof Character) {
-      if (right.getLength() === left.getLength()) {
-        return right.get() === left.get();
-      } else {
-        return right.getTrimEnd() === left.getTrimEnd();
+  // eslint-disable-next-line default-case
+  switch (right.constructor.name) {
+    case "Character":
+      if (left instanceof Character) {
+        if ((right as Character).getLength() === left.getLength()) {
+          return (right as Character).get() === left.get();
+        } else {
+          return (right as Character).getTrimEnd() === left.getTrimEnd();
+        }
+      } else if (left instanceof Integer) {
+        return toInteger((right as Character).get(), false) === left.get();
+      } else if (left instanceof String) {
+        return (right as Character).getTrimEnd() === left.get();
       }
-    } else if (left instanceof Integer) {
-      return toInteger(right.get(), false) === left.get();
-    } else if (left instanceof String) {
-      return right.getTrimEnd() === left.get();
-    }
+      break;
+    case "Integer":
+      if (left instanceof Integer) {
+        return (right as Integer).get() === left.get();
+      } else if (left instanceof Character) {
+        return (parseInt(left.get(), 10) || 0) === (right as Integer).get();
+      }
+      break;
+    case "DataReference":
+      if (left instanceof DataReference) {
+        return (right as DataReference).getPointer() === left.getPointer();
+      }
+      break;
+  }
+
+  if (right instanceof Numc && left instanceof Numc && right.getLength() === left.getLength()) {
+    return right.get() === left.get();
   } else if (right instanceof String) {
     if (left instanceof Character) {
-      return right.get() === left.getTrimEnd();
+      return (right as String).get() === left.getTrimEnd();
     } else if (left instanceof String) {
-      return right.get() === left.get();
+      return (right as String).get() === left.get();
     }
-  } else if (right instanceof Numc && left instanceof Numc && right.getLength() === left.getLength()) {
-    return right.get() === left.get();
-  } else if (right instanceof Integer) {
-    if (left instanceof Integer) {
-      return right.get() === left.get();
-    } else if (left instanceof Character) {
-      return (parseInt(left.get(), 10) || 0) === right.get();
-    }
-  } else if (right instanceof DataReference && left instanceof DataReference) {
-    return right.getPointer() === left.getPointer();
   } else if (right instanceof Table
       || right instanceof HashedTable) {
     if (left instanceof Table
