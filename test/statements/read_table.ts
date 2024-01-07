@@ -1190,7 +1190,7 @@ ENDDO.`;
     await f(abap);
   });
 
-  it.only("READ TABLE, secondary sorted key, another testcase", async () => {
+  it("READ TABLE, secondary sorted key, another testcase", async () => {
     const code = `
 TYPES:
   BEGIN OF ty_result,
