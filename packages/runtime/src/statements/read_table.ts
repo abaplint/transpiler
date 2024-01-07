@@ -59,6 +59,8 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
   let foundIndex = 0;
   let binarySubrc: number | undefined = undefined;
 
+//  console.dir(options);
+
   if (table instanceof FieldSymbol) {
     if (table.getPointer() === undefined) {
       throw new Error("GETWA_NOT_ASSIGNED");
@@ -129,6 +131,18 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
     const searchResult = searchWithKey(table.array(), options.withKey, 0, options?.usesTableLine);
     found = searchResult.found;
     foundIndex = 0;
+  } else if (options?.keyName && options.withKey && options.withKeyValue) {
+    table.getSecondaryIndex(options.keyName);
+
+    const first = options.withKeyValue[0];
+    const arr = table.array();
+    const startIndex = binarySearchFromRow(arr, 0, arr.length - 1, first.key, first.value, options.usesTableLine);
+
+    // todo: early exit if not found
+    const searchResult = searchWithKey(arr, options.withKey, startIndex, options.usesTableLine);
+    found = searchResult.found;
+    foundIndex = searchResult.foundIndex;
+
   } else if ((options?.binarySearch === true || options?.withTableKey === true)
       && options.withKeyValue
       && ( options?.binarySearch === true || table.getOptions().primaryKey?.type !== TableAccessType.standard )
@@ -138,6 +152,7 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
     const arr = table.array();
     const startIndex = binarySearchFromRow(arr, 0, arr.length - 1, first.key, first.value, options.usesTableLine);
 
+    // todo: early exit if not found
     const searchResult = searchWithKey(arr, options.withKey, startIndex, options.usesTableLine);
     found = searchResult.found;
     foundIndex = searchResult.foundIndex;

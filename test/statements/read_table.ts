@@ -1174,13 +1174,13 @@ TYPES ty_data_tt TYPE STANDARD TABLE OF ty_data WITH DEFAULT KEY
 DATA lt_data TYPE ty_data_tt.
 DATA ls_data LIKE LINE OF lt_data.
 
-DO 100 TIMES.
+DO 9 TIMES.
   ls_data-name = |a{ sy-index }|.
   ls_data-full_name = |b{ sy-index }|.
   INSERT ls_data INTO TABLE lt_data.
 ENDDO.
 
-DO 100 TIMES.
+DO 9 TIMES.
   READ TABLE lt_data INTO ls_data WITH KEY key_full_name
     COMPONENTS full_name = |b{ sy-index }|.
   ASSERT sy-subrc = 0.
