@@ -1190,7 +1190,7 @@ ENDDO.`;
     await f(abap);
   });
 
-  it("READ TABLE, secondary sorted key, another testcase", async () => {
+  it.only("READ TABLE, secondary sorted key, another testcase", async () => {
     const code = `
 TYPES:
   BEGIN OF ty_result,
@@ -1202,9 +1202,9 @@ TYPES ty_results_tt TYPE STANDARD TABLE OF ty_result WITH DEFAULT KEY
   COMPONENTS obj_type obj_name.
 
 DATA it_results TYPE ty_results_tt.
-DATA ls_row LIKE LINE OF it_results.
-DATA ls_item LIKE LINE OF it_results.
-DATA ls_result LIKE LINE OF it_results.
+DATA ls_row     LIKE LINE OF it_results.
+DATA ls_item    LIKE LINE OF it_results.
+DATA ls_result  LIKE LINE OF it_results.
 
 ls_row-obj_type = 'INTF'.
 ls_row-obj_name = '0'.
@@ -1278,6 +1278,73 @@ READ TABLE mt_edges WITH KEY sec_key COMPONENTS
   to-obj_name = 'world'
   TRANSPORTING NO FIELDS.
 ASSERT sy-subrc <> 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("READ TABLE, secondary sorted key, wrong sort", async () => {
+    const code = `
+TYPES: BEGIN OF ty_edge,
+         value TYPE string,
+       END OF ty_edge.
+
+DATA mt_edges TYPE STANDARD TABLE OF ty_edge WITH DEFAULT KEY
+                   WITH UNIQUE SORTED KEY sec_key
+                   COMPONENTS value.
+
+DATA ls_row LIKE LINE OF mt_edges.
+
+ls_row-value = 'zzz'.
+INSERT ls_row INTO TABLE mt_edges.
+
+ls_row-value = 'aaa'.
+INSERT ls_row INTO TABLE mt_edges.
+
+READ TABLE mt_edges WITH KEY sec_key COMPONENTS
+  value = 'zzz'
+  TRANSPORTING NO FIELDS.
+ASSERT sy-subrc = 0.
+
+READ TABLE mt_edges WITH KEY sec_key COMPONENTS
+  value = 'aaa'
+  TRANSPORTING NO FIELDS.
+ASSERT sy-subrc = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("READ TABLE, secondary sorted key, wrong sort2", async () => {
+    const code = `
+TYPES: BEGIN OF ty_edge,
+         value TYPE string,
+       END OF ty_edge.
+
+DATA mt_edges TYPE STANDARD TABLE OF ty_edge WITH DEFAULT KEY
+                   WITH UNIQUE SORTED KEY sec_key
+                   COMPONENTS value.
+
+DATA ls_row LIKE LINE OF mt_edges.
+
+ls_row-value = 'zzz'.
+INSERT ls_row INTO TABLE mt_edges.
+
+ls_row-value = 'bbb'.
+INSERT ls_row INTO TABLE mt_edges.
+
+ls_row-value = 'aaa'.
+INSERT ls_row INTO TABLE mt_edges.
+
+READ TABLE mt_edges WITH KEY sec_key COMPONENTS
+  value = 'zzz'
+  TRANSPORTING NO FIELDS.
+ASSERT sy-subrc = 0.
+
+READ TABLE mt_edges WITH KEY sec_key COMPONENTS
+  value = 'aaa'
+  TRANSPORTING NO FIELDS.
+ASSERT sy-subrc = 0.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);

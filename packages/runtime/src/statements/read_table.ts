@@ -132,10 +132,8 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
     found = searchResult.found;
     foundIndex = 0;
   } else if (options?.keyName && options.withKey && options.withKeyValue) {
-    table.getSecondaryIndex(options.keyName);
-
     const first = options.withKeyValue[0];
-    const arr = table.array();
+    const arr = table.getSecondaryIndex(options.keyName);
     const startIndex = binarySearchFromRow(arr, 0, arr.length - 1, first.key, first.value, options.usesTableLine);
 
     // todo: early exit if not found
