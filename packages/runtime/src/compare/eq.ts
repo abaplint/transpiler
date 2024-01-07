@@ -62,6 +62,15 @@ export function eq(
         return (right as DataReference).getPointer() === left.getPointer();
       }
       break;
+    case "Table":
+    case "HashedTable":
+      if (left instanceof Table
+        || left instanceof HashedTable) {
+        return compareTables(left, right as Table | HashedTable);
+      } else {
+// this happens in dynamic/ANY typed scenarios?
+        return false;
+      }
   }
 
   if (right instanceof Numc && left instanceof Numc && right.getLength() === left.getLength()) {
@@ -71,15 +80,6 @@ export function eq(
       return (right as String).get() === left.getTrimEnd();
     } else if (left instanceof String) {
       return (right as String).get() === left.get();
-    }
-  } else if (right instanceof Table
-      || right instanceof HashedTable) {
-    if (left instanceof Table
-        || left instanceof HashedTable) {
-      return compareTables(left, right);
-    } else {
-// this happens in dynamic/ANY typed scenarios?
-      return false;
     }
   }
 
@@ -124,6 +124,7 @@ export function eq(
   } else if (right instanceof Date) {
     r = right.get().trimEnd();
   } else if (typeof right === "object") {
+    // @ts-ignore
     r = right.get();
   } else {
     r = right;
