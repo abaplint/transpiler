@@ -28,15 +28,15 @@ export function eq(
   console.dir(left);
   console.dir(right);
 */
-  if (right instanceof FieldSymbol) {
-    return eq(left, right.getPointer()!);
-  } else if (left instanceof FieldSymbol) {
+  if (left instanceof FieldSymbol) {
     return eq(left.getPointer()!, right);
   }
 
 // for performance, do the typicaly/easy cases first
   // eslint-disable-next-line default-case
   switch (right.constructor.name) {
+    case "FieldSymbol":
+      return eq(left, (right as FieldSymbol).getPointer()!);
     case "Character":
       if (left instanceof Character) {
         if ((right as Character).getLength() === left.getLength()) {
@@ -80,14 +80,16 @@ export function eq(
         return left.get() === parseInt((right as Numc).get(), 10);
       }
       break;
-  }
-
-  if (right instanceof String) {
-    if (left instanceof Character) {
-      return right.get() === left.getTrimEnd();
-    } else if (left instanceof String) {
-      return right.get() === left.get();
-    }
+    case "String":
+// String might also refer to the JS builtin
+      if (right instanceof String) {
+        if (left instanceof Character) {
+          return right.get() === left.getTrimEnd();
+        } else if (left instanceof String) {
+          return right.get() === left.get();
+        }
+      }
+      break;
   }
 
   if (left instanceof Structure || right instanceof Structure) {
