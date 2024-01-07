@@ -55,6 +55,8 @@ export function eq(
         return (right as Integer).get() === left.get();
       } else if (left instanceof Character) {
         return (parseInt(left.get(), 10) || 0) === (right as Integer).get();
+      } else if (left instanceof Numc) {
+        return (right as Integer).get() === parseInt(left.get(), 10);
       }
       break;
     case "DataReference":
@@ -74,15 +76,17 @@ export function eq(
     case "Numc":
       if (left instanceof Numc && (right as Numc).getLength() === left.getLength()) {
         return (right as Numc).get() === left.get();
+      } else if (left instanceof Integer) {
+        return left.get() === parseInt((right as Numc).get(), 10);
       }
       break;
   }
 
   if (right instanceof String) {
     if (left instanceof Character) {
-      return (right as String).get() === left.getTrimEnd();
+      return right.get() === left.getTrimEnd();
     } else if (left instanceof String) {
-      return (right as String).get() === left.get();
+      return right.get() === left.get();
     }
   }
 
@@ -151,14 +155,6 @@ export function eq(
       l = left.getRaw();
       r = Number(r);
     }
-  }
-
-  if (right instanceof Numc && left instanceof Integer) {
-    l = left.get();
-    r = parseInt(right.get(), 10);
-  } else if (right instanceof Integer && left instanceof Numc) {
-    r = right.get();
-    l = parseInt(left.get(), 10);
   }
 
   // assumption: typically no casts are required, so start checking if the types doesnt match
