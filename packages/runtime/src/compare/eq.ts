@@ -71,11 +71,14 @@ export function eq(
 // this happens in dynamic/ANY typed scenarios?
         return false;
       }
+    case "Numc":
+      if (left instanceof Numc && (right as Numc).getLength() === left.getLength()) {
+        return (right as Numc).get() === left.get();
+      }
+      break;
   }
 
-  if (right instanceof Numc && left instanceof Numc && right.getLength() === left.getLength()) {
-    return right.get() === left.get();
-  } else if (right instanceof String) {
+  if (right instanceof String) {
     if (left instanceof Character) {
       return (right as String).get() === left.getTrimEnd();
     } else if (left instanceof String) {
