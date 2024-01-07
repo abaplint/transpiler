@@ -1161,4 +1161,33 @@ ASSERT sy-subrc = 0.`;
     await f(abap);
   });
 
+  it("READ TABLE, secondary sorted key", async () => {
+    const code = `
+TYPES: BEGIN OF ty_data,
+         name      TYPE string,
+         full_name TYPE string,
+       END OF ty_data.
+
+TYPES ty_data_tt TYPE STANDARD TABLE OF ty_data WITH DEFAULT KEY
+  WITH UNIQUE SORTED KEY key_full_name COMPONENTS full_name.
+
+DATA lt_data TYPE ty_data_tt.
+DATA ls_data LIKE LINE OF lt_data.
+
+DO 100 TIMES.
+  ls_data-name = |a{ sy-index }|.
+  ls_data-full_name = |b{ sy-index }|.
+  INSERT ls_data INTO TABLE lt_data.
+ENDDO.
+
+DO 100 TIMES.
+  READ TABLE lt_data INTO ls_data WITH KEY key_full_name
+    COMPONENTS full_name = |b{ sy-index }|.
+  ASSERT sy-subrc = 0.
+ENDDO.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
