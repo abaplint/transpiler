@@ -133,7 +133,7 @@ export class HashedTable implements ITable {
     if (secondary === undefined) {
       throw `Table, secondary key "${name}" not found`;
     }
-    // note, array() already is a copy, so it acn be used,
+    // note, array() already is a copy, so it can be used,
     const copy = this.array();
     sort(copy as any, {by: secondary.keyFields.map(k => {return {component: k.toLowerCase()};})});
 

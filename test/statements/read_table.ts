@@ -1161,4 +1161,193 @@ ASSERT sy-subrc = 0.`;
     await f(abap);
   });
 
+  it("READ TABLE, secondary sorted key", async () => {
+    const code = `
+TYPES: BEGIN OF ty_data,
+         name      TYPE string,
+         full_name TYPE string,
+       END OF ty_data.
+
+TYPES ty_data_tt TYPE STANDARD TABLE OF ty_data WITH DEFAULT KEY
+  WITH UNIQUE SORTED KEY key_full_name COMPONENTS full_name.
+
+DATA lt_data TYPE ty_data_tt.
+DATA ls_data LIKE LINE OF lt_data.
+
+DO 9 TIMES.
+  ls_data-name = |a{ sy-index }|.
+  ls_data-full_name = |b{ sy-index }|.
+  INSERT ls_data INTO TABLE lt_data.
+ENDDO.
+
+DO 9 TIMES.
+  READ TABLE lt_data INTO ls_data WITH KEY key_full_name
+    COMPONENTS full_name = |b{ sy-index }|.
+  ASSERT sy-subrc = 0.
+ENDDO.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("READ TABLE, secondary sorted key, another testcase", async () => {
+    const code = `
+TYPES:
+  BEGIN OF ty_result,
+    obj_type TYPE string,
+    obj_name TYPE string,
+  END OF ty_result .
+TYPES ty_results_tt TYPE STANDARD TABLE OF ty_result WITH DEFAULT KEY
+  WITH NON-UNIQUE SORTED KEY sec_key
+  COMPONENTS obj_type obj_name.
+
+DATA it_results TYPE ty_results_tt.
+DATA ls_row     LIKE LINE OF it_results.
+DATA ls_item    LIKE LINE OF it_results.
+DATA ls_result  LIKE LINE OF it_results.
+
+ls_row-obj_type = 'INTF'.
+ls_row-obj_name = '0'.
+INSERT ls_row INTO TABLE it_results.
+ls_row-obj_type = 'CLAS'.
+ls_row-obj_name = '1'.
+INSERT ls_row INTO TABLE it_results.
+ls_row-obj_type = 'XSLT'.
+ls_row-obj_name = '2'.
+INSERT ls_row INTO TABLE it_results.
+ls_row-obj_type = 'INTF'.
+ls_row-obj_name = '3'.
+INSERT ls_row INTO TABLE it_results.
+ls_row-obj_type = 'CLAS'.
+ls_row-obj_name = '4'.
+INSERT ls_row INTO TABLE it_results.
+ls_row-obj_type = 'XSLT'.
+ls_row-obj_name = '5'.
+INSERT ls_row INTO TABLE it_results.
+
+LOOP AT it_results INTO ls_item.
+  READ TABLE it_results INTO ls_result WITH KEY sec_key COMPONENTS
+    obj_name = ls_item-obj_name
+    obj_type = ls_item-obj_type.
+  ASSERT sy-subrc = 0.
+  WRITE: / ls_result-obj_name, ls_result-obj_type.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal(`0INTF
+1CLAS
+2XSLT
+3INTF
+4CLAS
+5XSLT`);
+  });
+
+  it("READ TABLE, secondary sorted key, structured", async () => {
+    const code = `
+TYPES: BEGIN OF ty_item,
+         obj_type TYPE string,
+         obj_name TYPE string,
+       END OF ty_item.
+
+TYPES: BEGIN OF ty_edge,
+         from TYPE ty_item,
+         to   TYPE ty_item,
+       END OF ty_edge.
+
+DATA mt_edges TYPE STANDARD TABLE OF ty_edge WITH DEFAULT KEY
+                   WITH NON-UNIQUE SORTED KEY sec_key
+                   COMPONENTS to.
+
+DATA ls_row LIKE LINE OF mt_edges.
+
+ls_row-to-obj_type = 'a1'.
+ls_row-to-obj_name = 'a1'.
+INSERT ls_row INTO TABLE mt_edges.
+
+LOOP AT mt_edges INTO ls_row.
+  READ TABLE mt_edges WITH KEY sec_key COMPONENTS
+    to-obj_type = ls_row-to-obj_type
+    to-obj_name = ls_row-to-obj_name
+    TRANSPORTING NO FIELDS.
+  ASSERT sy-subrc = 0.
+ENDLOOP.
+
+READ TABLE mt_edges WITH KEY sec_key COMPONENTS
+  to-obj_type = 'hello'
+  to-obj_name = 'world'
+  TRANSPORTING NO FIELDS.
+ASSERT sy-subrc <> 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("READ TABLE, secondary sorted key, wrong sort", async () => {
+    const code = `
+TYPES: BEGIN OF ty_edge,
+         value TYPE string,
+       END OF ty_edge.
+
+DATA mt_edges TYPE STANDARD TABLE OF ty_edge WITH DEFAULT KEY
+                   WITH UNIQUE SORTED KEY sec_key
+                   COMPONENTS value.
+
+DATA ls_row LIKE LINE OF mt_edges.
+
+ls_row-value = 'zzz'.
+INSERT ls_row INTO TABLE mt_edges.
+
+ls_row-value = 'aaa'.
+INSERT ls_row INTO TABLE mt_edges.
+
+READ TABLE mt_edges WITH KEY sec_key COMPONENTS
+  value = 'zzz'
+  TRANSPORTING NO FIELDS.
+ASSERT sy-subrc = 0.
+
+READ TABLE mt_edges WITH KEY sec_key COMPONENTS
+  value = 'aaa'
+  TRANSPORTING NO FIELDS.
+ASSERT sy-subrc = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("READ TABLE, secondary sorted key, wrong sort2", async () => {
+    const code = `
+TYPES: BEGIN OF ty_edge,
+         value TYPE string,
+       END OF ty_edge.
+
+DATA mt_edges TYPE STANDARD TABLE OF ty_edge WITH DEFAULT KEY
+                   WITH UNIQUE SORTED KEY sec_key
+                   COMPONENTS value.
+
+DATA ls_row LIKE LINE OF mt_edges.
+
+ls_row-value = 'zzz'.
+INSERT ls_row INTO TABLE mt_edges.
+
+ls_row-value = 'bbb'.
+INSERT ls_row INTO TABLE mt_edges.
+
+ls_row-value = 'aaa'.
+INSERT ls_row INTO TABLE mt_edges.
+
+READ TABLE mt_edges WITH KEY sec_key COMPONENTS
+  value = 'zzz'
+  TRANSPORTING NO FIELDS.
+ASSERT sy-subrc = 0.
+
+READ TABLE mt_edges WITH KEY sec_key COMPONENTS
+  value = 'aaa'
+  TRANSPORTING NO FIELDS.
+ASSERT sy-subrc = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

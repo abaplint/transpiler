@@ -1,4 +1,4 @@
-import {binarySearchFromRow} from "../binary_search";
+import {binarySearchFrom, binarySearchFromRow} from "../binary_search";
 import {eq, ge} from "../compare";
 import {DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Structure, Table, TableAccessType} from "../types";
 import {ICharacter} from "../types/_character";
@@ -58,6 +58,8 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
   let found: any = undefined;
   let foundIndex = 0;
   let binarySubrc: number | undefined = undefined;
+
+//  console.dir(options);
 
   if (table instanceof FieldSymbol) {
     if (table.getPointer() === undefined) {
@@ -129,6 +131,33 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
     const searchResult = searchWithKey(table.array(), options.withKey, 0, options?.usesTableLine);
     found = searchResult.found;
     foundIndex = 0;
+  } else if (options?.keyName && options.withKey && options.withKeySimple) {
+    const arr = table.getSecondaryIndex(options.keyName);
+    const keyInformation = table.getKeyByName(options.keyName);
+    const firstKeyName = keyInformation?.keyFields[0];
+    if (firstKeyName === undefined) {
+      throw new Error("readTable, first key name not found");
+    }
+
+//    console.dir("SEC:");
+    const firstValue = options.withKeySimple[firstKeyName.toLowerCase()];
+    if (firstValue === undefined) {
+      // fallback
+      return readTable(table, {...options, withKeySimple: undefined});
+    }
+
+    const startIndex = binarySearchFrom(arr, 0, arr.length, firstKeyName.toLowerCase(), firstValue) - 1;
+//    console.dir("startindex: " + startIndex);
+
+    if (startIndex >= 0) {
+    // todo: early exit if not found
+      const searchResult = searchWithKey(arr, options.withKey, startIndex, options.usesTableLine);
+//      console.dir(searchResult);
+
+      found = searchResult.found;
+      foundIndex = searchResult.foundIndex;
+    }
+
   } else if ((options?.binarySearch === true || options?.withTableKey === true)
       && options.withKeyValue
       && ( options?.binarySearch === true || table.getOptions().primaryKey?.type !== TableAccessType.standard )
@@ -138,6 +167,7 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
     const arr = table.array();
     const startIndex = binarySearchFromRow(arr, 0, arr.length - 1, first.key, first.value, options.usesTableLine);
 
+    // todo: early exit if not found
     const searchResult = searchWithKey(arr, options.withKey, startIndex, options.usesTableLine);
     found = searchResult.found;
     foundIndex = searchResult.foundIndex;
