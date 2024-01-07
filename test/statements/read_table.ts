@@ -1243,4 +1243,44 @@ ENDLOOP.`;
 5XSLT`);
   });
 
+  it("READ TABLE, secondary sorted key, structured", async () => {
+    const code = `
+TYPES: BEGIN OF ty_item,
+         obj_type TYPE string,
+         obj_name TYPE string,
+       END OF ty_item.
+
+TYPES: BEGIN OF ty_edge,
+         from TYPE ty_item,
+         to   TYPE ty_item,
+       END OF ty_edge.
+
+DATA mt_edges TYPE STANDARD TABLE OF ty_edge WITH DEFAULT KEY
+                   WITH NON-UNIQUE SORTED KEY sec_key
+                   COMPONENTS to.
+
+DATA ls_row LIKE LINE OF mt_edges.
+
+ls_row-to-obj_type = 'a1'.
+ls_row-to-obj_name = 'a1'.
+INSERT ls_row INTO TABLE mt_edges.
+
+LOOP AT mt_edges INTO ls_row.
+  READ TABLE mt_edges WITH KEY sec_key COMPONENTS
+    to-obj_type = ls_row-to-obj_type
+    to-obj_name = ls_row-to-obj_name
+    TRANSPORTING NO FIELDS.
+  ASSERT sy-subrc = 0.
+ENDLOOP.
+
+READ TABLE mt_edges WITH KEY sec_key COMPONENTS
+  to-obj_type = 'hello'
+  to-obj_name = 'world'
+  TRANSPORTING NO FIELDS.
+ASSERT sy-subrc <> 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
