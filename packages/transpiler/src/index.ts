@@ -14,6 +14,7 @@ import {HandleTypePool} from "./handlers/handle_type_pool";
 import {HandleW3MI} from "./handlers/handle_w3mi";
 import {HandleSMIM} from "./handlers/handle_smim";
 import {HandleMSAG} from "./handlers/handle_msag";
+import {HandleOA2P} from "./handlers/handle_oa2p";
 
 export {config, ITranspilerOptions, IFile, IProgress, IOutputFile, IOutput, UnknownTypesEnum};
 
@@ -62,6 +63,8 @@ export class Transpiler {
         output.objects.push(...new HandleABAP(this.options).runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.TypePool) {
         output.objects.push(...new HandleTypePool().runObject(obj, reg));
+      } else if (obj instanceof abaplint.Objects.Oauth2Profile) {
+        output.objects.push(...new HandleOA2P().runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.Table) {
         output.objects.push(...new HandleTable().runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.View) {

@@ -45,6 +45,7 @@ export const config: IConfig = {
         "MSAG",
         "NROB",
         "NSPC",
+        "OA2P",
         "PARA",
         "PROG",
         "SHLP",
