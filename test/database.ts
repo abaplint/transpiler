@@ -1325,7 +1325,7 @@ WRITE lines( lt_t100 ).`;
     });
   });
 
-  it.only("SELECT, IN, structured", async () => {
+  it("SELECT, IN, structured", async () => {
     const code = `
     TYPES ty_range TYPE RANGE OF t100-arbgb.
     DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
@@ -1334,6 +1334,25 @@ WRITE lines( lt_t100 ).`;
           END OF foo.
 
     SELECT * FROM t100 INTO TABLE lt_t100 WHERE arbgb IN foo-range.
+    WRITE / sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2");
+    });
+  });
+
+  it("SELECT, IN, structured + field upper case", async () => {
+    const code = `
+    TYPES ty_range TYPE RANGE OF t100-arbgb.
+    DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+    DATA: BEGIN OF foo,
+            range TYPE ty_range,
+          END OF foo.
+
+    SELECT * FROM t100 INTO TABLE lt_t100 WHERE ARBGB IN foo-range.
     WRITE / sy-dbcnt.`;
     const files = [
       {filename: "zfoobar.prog.abap", contents: code},

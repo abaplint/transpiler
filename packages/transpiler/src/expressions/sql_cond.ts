@@ -7,6 +7,7 @@ import {SimpleSource3Transpiler} from "./simple_source3";
 import {FieldChainTranspiler} from "./field_chain";
 import {SQLFieldNameTranspiler} from "./sql_field_name";
 import {TranspileTypes} from "../transpile_types";
+import {SourceTranspiler} from "./source";
 
 export class SQLCondTranspiler implements IExpressionTranspiler {
 
@@ -58,7 +59,8 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
     }
 
     if (sqlin.getChildren().length === 2) {
-      return `${pre}" + abap.expandIN("${fieldName.concatTokens()}", ${source.concatTokens()}) + "`;
+      const s = new SourceTranspiler().transpile(source, traversal).getCode();
+      return `${pre}" + abap.expandIN("${fieldName.concatTokens()}", ${s}) + "`;
     } else {
       const cond: string[] = [];
       for (const s of sqlin.findDirectExpressions(abaplint.Expressions.SQLSource)) {
