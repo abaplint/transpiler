@@ -1,4 +1,4 @@
-import initSqlJs, {Database, QueryExecResult, Statement, SqlValue} from "sql.js/dist/sql-wasm-debug";
+import initSqlJs, {Database, QueryExecResult, Statement, SqlValue} from "sql.js";
 import {DB} from "@abaplint/runtime";
 
 export class SQLiteDatabaseClient implements DB.DatabaseClient {
