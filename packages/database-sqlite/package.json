@@ -18,12 +18,12 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "sql.js": "^1.8.0"
+    "sql.js": "^1.10.1"
   },
   "devDependencies": {
-    "@types/sql.js": "^1.4.7",
-    "@types/node": "^20.8.7",
-    "@abaplint/runtime": "^2.7.119",
-    "typescript": "^5.2.2"
+    "@types/sql.js": "^1.4.9",
+    "@types/node": "^20.11.5",
+    "@abaplint/runtime": "^2.7.143",
+    "typescript": "^5.3.3"
   }
 }
