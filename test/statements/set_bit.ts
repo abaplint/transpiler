@@ -56,15 +56,13 @@ describe("Running statements - SET BIT", () => {
     expect(abap.console.get()).to.equal("0000000000000000");
   });
 
-  it.skip("SET BIT, source offset", async () => {
+  it("SET BIT, source offset", async () => {
     const code = `
 DATA hex TYPE x LENGTH 16.
 hex = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'.
-WRITE / hex.
 SET BIT 1 OF hex+8(1) TO 0.
 WRITE / hex.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("AAAAAAAAAAAAAAAA2AAAAAAAAAAAAAAA");
