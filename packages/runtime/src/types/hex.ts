@@ -82,9 +82,9 @@ export class Hex implements ICharacter {
       length = parse(length);
     }
 
-    if ((offset && offset * 2 > this.value.length)
-        || (length && length * 2 > this.value.length)
-        || (offset && length && offset * 2 + length * 2 > this.value.length)
+    if ((offset && offset > this.value.length)
+        || (length && length > this.value.length)
+        || (offset && length && offset + length > this.value.length)
         || (offset && offset < 0)
         || (length && length < 0)) {
       throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
