@@ -42,7 +42,19 @@ export class OffsetLength {
   }
 
   public get() {
-    return this.obj.getOffset({offset: this.offset, length: this.length}).get();
+    if (this.isHex) {
+      let offset = this.offset;
+      if (offset) {
+        offset = offset / 2;
+      }
+      let length = this.length;
+      if (length) {
+        length = length / 2;
+      }
+      return this.obj.getOffset({offset: offset, length: length}).get();
+    } else {
+      return this.obj.getOffset({offset: this.offset, length: this.length}).get();
+    }
   }
 
   public set(value: ICharacter | string) {
