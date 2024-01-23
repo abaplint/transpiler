@@ -36,6 +36,17 @@ ASSERT lv_char6 = '000300'.`;
     await f(abap);
   });
 
+  it("char to char, empty", async () => {
+    const code = `DATA lv_char4 TYPE c LENGTH 4.
+DATA lv_char6 TYPE c LENGTH 6.
+lv_char4 = ''.
+UNPACK lv_char4 TO lv_char6.
+ASSERT lv_char6 = '000000'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("throw CX_SY_CONVERSION_NO_NUMBER", async () => {
     const code = `
 DATA lv_char4 TYPE c LENGTH 4.
