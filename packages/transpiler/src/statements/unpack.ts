@@ -5,8 +5,10 @@ import {Chunk} from "../chunk";
 
 export class UnpackTranspiler implements IStatementTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    return new Chunk(`throw new Error("Unpack, transpiler todo");`);
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
+    const s = traversal.traverse(node.findFirstExpression(abaplint.Expressions.Source));
+    const t = traversal.traverse(node.findFirstExpression(abaplint.Expressions.Target));
+    return new Chunk(`await abap.statements.unpack(${s.getCode()},${t.getCode()});`);
   }
 
 }

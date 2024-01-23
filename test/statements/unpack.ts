@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP, MemoryConsole} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -23,6 +23,23 @@ ASSERT lv_char6 = '000300'.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("throw CX_SY_CONVERSION_NO_NUMBER", async () => {
+    const code = `
+DATA lv_char4 TYPE c LENGTH 4.
+DATA lv_char6 TYPE c LENGTH 6.
+lv_char4 = 'A'.
+UNPACK lv_char4 TO lv_char6.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch (e) {
+      expect(e.toString()).to.contain("CX_SY_CONVERSION_NO_NUMBER");
+    }
   });
 
 });

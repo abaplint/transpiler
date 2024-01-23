@@ -18,6 +18,7 @@ import {readReport} from "./read_report";
 import {raiseEvent} from "./raise_event";
 import {receive} from "./receive";
 import {getLocale} from "./get_locale";
+import {unpack} from "./unpack";
 import {getParameter} from "./get_parameter";
 import {setLocale} from "./set_locale";
 import {getRunTime} from "./get_run_time";
@@ -72,6 +73,7 @@ export class Statements {
   public deleteInternal = deleteInternal;
   public describe = describe;
   public find = find;
+  public unpack = unpack;
   public getBit = getBit;
   public readReport = readReport;
   public getLocale = getLocale;
