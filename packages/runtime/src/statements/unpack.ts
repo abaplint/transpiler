@@ -20,7 +20,7 @@ export async function unpack(source: ICharacter | FieldSymbol, target: ICharacte
   }
 
   if (source instanceof Character && target instanceof Character) {
-    const sourceValue = source.getTrimEnd();
+    const sourceValue = source.getTrimEnd().trimStart();
 
     if (/^\d+$/.test(sourceValue) === false) {
       throwError("CX_SY_CONVERSION_NO_NUMBER");
