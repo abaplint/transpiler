@@ -43,6 +43,9 @@ export function convert(source: IConvertSource, target: IConvertTarget) {
     } else {
       time = source.time.get();
     }
+    if (time.trimEnd() === "") {
+      time = "000000";
+    }
   }
 
   let stamp = "";
