@@ -146,7 +146,7 @@ WRITE lv_timestamp.`;
     expect(abap.console.get()).to.equal("0");
   });
 
-  it.skip("more empty fields", async () => {
+  it("more empty fields", async () => {
     const code = `
 DATA lv_date TYPE d.
 DATA lv_time TYPE t.
