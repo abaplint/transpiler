@@ -146,4 +146,19 @@ WRITE lv_timestamp.`;
     expect(abap.console.get()).to.equal("0");
   });
 
+  it.skip("more empty fields", async () => {
+    const code = `
+DATA lv_date TYPE d.
+DATA lv_time TYPE t.
+DATA lv_timestamp TYPE p LENGTH 8.
+lv_date = ''.
+lv_time = ''.
+CONVERT DATE lv_date TIME lv_time INTO TIME STAMP lv_timestamp TIME ZONE 'CET'.
+WRITE / lv_timestamp.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
 });
