@@ -178,7 +178,7 @@ export class HashedTable implements ITable {
 
   public buildHashFromSimple(data: {[key: string]: any}): string {
     let hash = "";
-    const rowType = clone(this.getRowType()) as any;
+    const ttyp = this.getRowType();
     for (const k of this.options.primaryKey!.keyFields) {
       let val = data[k.toLowerCase()];
       if (val instanceof Structure) {
@@ -186,11 +186,15 @@ export class HashedTable implements ITable {
       } else {
         // convert to correct type, eg Chars have specific length, or rounding,
         if (k === "TABLE_LINE") {
+          const rowType = clone(ttyp) as any;
+          rowType.set(val.get());
+          val = rowType.get();
+        } else if (ttyp instanceof Structure) {
+          const rowType = clone(ttyp.get()[k.toLowerCase()]) as any;
           rowType.set(val.get());
           val = rowType.get();
         } else {
-          rowType.get()[k.toLowerCase()].set(val.get());
-          val = rowType.get()[k.toLowerCase()].get();
+          throw new Error("HashedTable, buildHashFromSimple, unexpected type");
         }
       }
       hash += k + ":" + val + "|";
