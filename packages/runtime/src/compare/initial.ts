@@ -2,6 +2,9 @@ import {ABAPObject, Character, DataReference, Date, FieldSymbol, Float, HashedTa
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
+const REGEX_ZEROS = /^0+$/;
+const REGEX_SPACES = /^ *$/;
+
 export function initial(val: ICharacter | INumeric | string | number | Structure | DataReference | FieldSymbol | Table | ABAPObject) {
   // todo, refactor? add as method in each type instead?
   if (val instanceof Table || val instanceof HashedTable) {
@@ -11,15 +14,15 @@ export function initial(val: ICharacter | INumeric | string | number | Structure
   } else if (val instanceof Date) {
     return val.get() === "00000000";
   } else if (val instanceof Numc) {
-    return val.get().match(/^0+$/) !== null;
+    return val.get().match(REGEX_ZEROS) !== null;
   } else if (val instanceof Hex) {
-    return val.get().match(/^0+$/) !== null;
+    return val.get().match(REGEX_ZEROS) !== null;
   } else if (val instanceof Time) {
     return val.get() === "000000";
   } else if (val instanceof Float) {
     return val.getRaw() === 0;
   } else if (val instanceof Character) {
-    return val.get().match(/^ *$/) !== null;
+    return val.get().match(REGEX_SPACES) !== null;
   } else if (val instanceof FieldSymbol && val.getPointer() === undefined) {
     throw new Error("FS not assigned");
   } else if (val instanceof FieldSymbol) {

@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import {ABAPObject, Character, Date, FieldSymbol, Float, HashedTable, String, Hex, Integer, Numc, Structure, Table, DataReference, toInteger} from "../types";
+import {ABAPObject, Character, Date, FieldSymbol, Float, HashedTable, String, Hex, Integer, Numc, Structure, Table, DataReference, toInteger, XString} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -71,6 +71,14 @@ export function eq(
     } else {
 // this happens in dynamic/ANY typed scenarios?
       return false;
+    }
+  } else if (right instanceof Hex) {
+    if (left instanceof Hex || left instanceof XString) {
+      return right.get() === left.get();
+    }
+  } else if (right instanceof XString) {
+    if (left instanceof Hex || left instanceof XString) {
+      return right.get() === left.get();
     }
   }
 

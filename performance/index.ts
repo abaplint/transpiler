@@ -28,6 +28,8 @@ import {test22} from "./test22";
 import {test23} from "./test23";
 import {test24} from "./test24";
 import {test25} from "./test25";
+import {test26} from "./test26";
+import {test27} from "./test27";
 
 // NOTE: does not run via Mocha
 
@@ -68,6 +70,8 @@ const tests: Tests = [
   {name: "23: CASE many int constants", abap: test23},
   {name: "24: Copy table contents", abap: test24},
   {name: "25: READ TABLE, not found", abap: test25},
+  {name: "26: REPLACE OCCURRENCES, simple", abap: test26},
+  {name: "27: READ TABLE, building hash", abap: test27},
 ];
 
 async function execute(t: Test) {
