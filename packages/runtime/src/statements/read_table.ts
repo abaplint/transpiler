@@ -1,5 +1,5 @@
 import {binarySearchFrom, binarySearchFromRow} from "../binary_search";
-import {eq, ge} from "../compare";
+import {eq, ge, gt} from "../compare";
 import {DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Structure, Table, TableAccessType} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
@@ -27,6 +27,46 @@ export type ReadTableReturn = {
   subrc: number;
   foundIndex: number;
 };
+
+/** startIndex = javascript index, return ABAP index */
+function searchWithKeyEarlyExit(arr: any,
+                                withKey: (i: any) => boolean,
+                                startIndex = 0,
+                                usesTableLine: boolean | undefined,
+                                firstKeyName: string,
+                                firstValue: any) {
+  const isStructured = arr[0] instanceof Structure;
+  for (let index = startIndex; index < arr.length; index++) {
+    const a = arr[index];
+    let row: any = undefined;
+    if (usesTableLine === false && isStructured === true) {
+      row = a.get();
+    } else {
+      row = isStructured ? {table_line: a, ...a.get()} : {table_line: a};
+    }
+    if (withKey(row) === true) {
+      return {
+        found: a,
+        foundIndex: index + 1,
+      };
+    }
+    /*
+    console.dir(row);
+    console.dir(row[firstKeyName.toLowerCase()]);
+    console.dir(firstValue);
+    */
+    if (gt(row[firstKeyName.toLowerCase()], firstValue)) {
+      return {
+        found: undefined,
+        foundIndex: 0,
+      };
+    }
+  }
+  return {
+    found: undefined,
+    foundIndex: 0,
+  };
+}
 
 /** startIndex = javascript index, return ABAP index */
 function searchWithKey(arr: any, withKey: (i: any) => boolean, startIndex = 0, usesTableLine: boolean | undefined) {
@@ -150,8 +190,7 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
 //    console.dir("startindex: " + startIndex);
 
     if (startIndex >= 0) {
-    // todo: early exit if not found
-      const searchResult = searchWithKey(arr, options.withKey, startIndex, options.usesTableLine);
+      const searchResult = searchWithKeyEarlyExit(arr, options.withKey, startIndex, options.usesTableLine, firstKeyName, firstValue);
 //      console.dir(searchResult);
 
       found = searchResult.found;
