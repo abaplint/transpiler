@@ -444,7 +444,7 @@ export class Table implements ITable {
 
     let val: TableRowType;
     if (noClone === false) {
-      val = this.getValue(item);
+      val = this.cloneRow(item);
     } else {
       val = item;
     }
@@ -500,7 +500,7 @@ export class Table implements ITable {
       this.value.push(ref);
       return ref;
     } else {
-      const val = this.getValue(item);
+      const val = this.cloneRow(item);
       this.value.push(val);
       return val;
     }
@@ -521,7 +521,7 @@ export class Table implements ITable {
 
 ///////////////////////////
 
-  private getValue(item: TableRowType) {
+  private cloneRow(item: TableRowType) {
     // make sure to do conversion if needed
     if (typeof item === "number") {
       const tmp = clone(this.getRowType());
