@@ -1,4 +1,3 @@
-import {initial} from "../compare";
 import {throwError} from "../throw_error";
 import {ABAPObject, FieldSymbol} from "../types";
 
@@ -7,7 +6,7 @@ import {ABAPObject, FieldSymbol} from "../types";
 // check with javascript instanceof?
 // handling interfaces?
 export async function cast(target: ABAPObject | FieldSymbol, source: ABAPObject) {
-  if (initial(source)) {
+  if (source instanceof ABAPObject && source.get() === undefined) {
     target.clear();
     return;
   }
