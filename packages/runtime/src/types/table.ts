@@ -10,6 +10,8 @@ import {DataReference} from "./data_reference";
 import {insertInternal} from "../statements/insert_internal";
 import {sort} from "../statements/sort";
 
+// const FEATURE_SHARED_TABLES = true;
+
 export enum TableAccessType {
   standard = "STANDARD",
   sorted = "SORTED",
@@ -206,7 +208,7 @@ export class HashedTable implements ITable {
     if (this.value[hash] !== undefined) {
       return {value: undefined, subrc: 4};
     } else {
-      const val = this.getValue(data);
+      const val = this.cloneRow(data);
 
       for (const loopController of this.loops.values()) {
         loopController.array.push(val);
@@ -293,7 +295,7 @@ export class HashedTable implements ITable {
 
   ///////////////////////////
 
-  private getValue(item: TableRowType) {
+  private cloneRow(item: TableRowType) {
     // make sure to do conversion if needed
     if (typeof item === "number") {
       const tmp = clone(this.getRowType());
