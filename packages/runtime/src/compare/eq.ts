@@ -46,6 +46,7 @@ export function eq(
       return toInteger(right.get(), false) === left.get();
     } else if (left instanceof String
         || left instanceof XString
+        || left instanceof Numc
         || left instanceof Hex) {
       return right.getTrimEnd() === left.get();
     }
@@ -80,6 +81,14 @@ export function eq(
     }
   } else if (right instanceof XString) {
     if (left instanceof Hex || left instanceof XString) {
+      return right.get() === left.get();
+    }
+  } else if (right instanceof ABAPObject) {
+    if (left instanceof ABAPObject) {
+      return right.get() === left.get();
+    }
+  } else if (right instanceof Date) {
+    if (left instanceof Date) {
       return right.get() === left.get();
     }
   }
