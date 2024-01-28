@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import {ABAPObject, Character, Date, FieldSymbol, Float, HashedTable, String, Hex, Integer, Numc, Structure, Table, DataReference, toInteger, XString} from "../types";
+import {ABAPObject, Character, Date, FieldSymbol, Float, HashedTable, String, Hex, Integer, Numc, Structure, Table, DataReference, toInteger, XString, Integer8, Packed} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -44,7 +44,10 @@ export function eq(
       }
     } else if (left instanceof Integer) {
       return toInteger(right.get(), false) === left.get();
-    } else if (left instanceof String) {
+    } else if (left instanceof String
+        || left instanceof XString
+        || left instanceof Numc
+        || left instanceof Hex) {
       return right.getTrimEnd() === left.get();
     }
   } else if (right instanceof String) {
@@ -53,13 +56,19 @@ export function eq(
     } else if (left instanceof String) {
       return right.get() === left.get();
     }
-  } else if (right instanceof Numc && left instanceof Numc && right.getLength() === left.getLength()) {
-    return right.get() === left.get();
+  } else if (right instanceof Numc) {
+    if (left instanceof Numc && right.getLength() === left.getLength()) {
+      return right.get() === left.get();
+    } else if (left instanceof Integer) {
+      return left.get() === parseInt(right.get(), 10);
+    }
   } else if (right instanceof Integer) {
-    if (left instanceof Integer) {
+    if (left instanceof Integer || left instanceof Integer8) {
       return right.get() === left.get();
     } else if (left instanceof Character) {
       return (parseInt(left.get(), 10) || 0) === right.get();
+    } else if (left instanceof Numc) {
+      return right.get() === parseInt(left.get(), 10);
     }
   } else if (right instanceof DataReference && left instanceof DataReference) {
     return right.getPointer() === left.getPointer();
@@ -78,6 +87,18 @@ export function eq(
     }
   } else if (right instanceof XString) {
     if (left instanceof Hex || left instanceof XString) {
+      return right.get() === left.get();
+    }
+  } else if (right instanceof ABAPObject) {
+    if (left instanceof ABAPObject) {
+      return right.get() === left.get();
+    }
+  } else if (right instanceof Date) {
+    if (left instanceof Date) {
+      return right.get() === left.get();
+    }
+  } else if (right instanceof Packed) {
+    if (left instanceof Packed) {
       return right.get() === left.get();
     }
   }
