@@ -101,6 +101,18 @@ export function eq(
     if (left instanceof Packed) {
       return right.get() === left.get();
     }
+  } else if (right instanceof Integer8) {
+    if (left instanceof Integer
+        || left instanceof Integer8
+        || left instanceof Packed) {
+      return right.get() === left.get();
+    }
+  } else if (right instanceof Float) {
+    if (left instanceof Float) {
+      return right.getRaw() === left.getRaw();
+    } else if (left instanceof Integer) {
+      return right.getRaw() === left.get();
+    }
   }
 
   if (left instanceof Structure || right instanceof Structure) {
