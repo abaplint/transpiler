@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/transpiler-cli",
-  "version": "2.7.152",
+  "version": "2.7.153",
   "description": "Transpiler - Command Line Interface",
   "funding": "https://github.com/sponsors/larshp",
   "bin": {
@@ -26,12 +26,12 @@
   "author": "abaplint",
   "license": "MIT",
   "devDependencies": {
-    "@abaplint/transpiler": "^2.7.152",
+    "@abaplint/transpiler": "^2.7.153",
     "@types/glob": "^8.1.0",
     "glob": "=7.2.0",
     "@types/progress": "^2.0.7",
-    "@types/node": "^20.11.9",
-    "@abaplint/core": "^2.105.13",
+    "@types/node": "^20.11.10",
+    "@abaplint/core": "^2.105.14",
     "progress": "^2.0.3",
     "webpack": "^5.90.0",
     "webpack-cli": "^5.1.4",
