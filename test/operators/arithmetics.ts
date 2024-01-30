@@ -450,4 +450,14 @@ WRITE result.`;
     await f(abap);
   });
 
+  it("MOD, negative, another", async () => {
+    const code = `
+    DATA int TYPE i.
+    int = -7 MOD 3.
+    ASSERT int = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
