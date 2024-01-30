@@ -8,7 +8,8 @@ export function mod(left: INumeric | ICharacter | string | number, right: INumer
   const r = parse(right);
 
   let val = ( ( l % r ) + r ) % r;
-  if (l < 0 && r < 0 ) {
+
+  if (val < 0) {
     val = val * -1;
   }
 
