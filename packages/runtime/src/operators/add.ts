@@ -1,14 +1,14 @@
-import {Character, FieldSymbol, Float, Hex, Integer} from "../types";
+import {Character, FieldSymbol, Float, Hex, Integer, Integer8} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {String} from "../types/string";
 import {parse} from "./_parse";
 
 export function add(left: INumeric | ICharacter | string | number | Float | Integer | Hex | FieldSymbol,
-                    right: INumeric | ICharacter | string | number  | Float | Integer | Hex | FieldSymbol): Integer | Float {
+                    right: INumeric | ICharacter | string | number  | Float | Integer | Hex | FieldSymbol): Integer | Float | Integer8 {
 
   if (left instanceof Integer && right instanceof Integer) {
-    return new Integer().set(left.get() + right.get());
+    return new Integer8().set(left.get() + right.get());
   } else if (typeof left === "number" && typeof right === "number"
       && Number.isInteger(left) && Number.isInteger(right)) {
     return new Integer().set(left + right);

@@ -417,7 +417,7 @@ WRITE result.`;
     }
   });
 
-  it("ok, not int max value, its a float field", async () => {
+  it("ok, not int max value, its a float field, overflow", async () => {
     const code = `
     DATA lv_f TYPE f.
     DATA lv_int1 TYPE i.
@@ -425,6 +425,19 @@ WRITE result.`;
     lv_int1 = 2000000.
     lv_int2 = 2000000.
     lv_f = lv_int1 * lv_int2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("ok, not int max value, its a float field, overflow, plus", async () => {
+    const code = `
+    DATA lv_f TYPE f.
+    DATA lv_int1 TYPE i.
+    DATA lv_int2 TYPE i.
+    lv_int1 = 2000000000.
+    lv_int2 = 2000000000.
+    lv_f = lv_int1 + lv_int2.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
