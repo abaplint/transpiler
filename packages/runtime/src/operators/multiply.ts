@@ -1,13 +1,14 @@
-import {Character, Float, Integer} from "../types";
+import {Character, Float, Integer, Integer8} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
 import {String} from "../types/string";
 
 export function multiply(left: INumeric | ICharacter | string | number, right: INumeric | ICharacter | string | number) {
+// todo: the types returned are not correct
   if (left instanceof Integer && right instanceof Integer) {
     const val = left.get() * right.get();
-    return new Integer().set(val);
+    return new Integer8().set(val);
   } else if (typeof left === "number" && typeof right === "number"
       && Number.isInteger(left) && Number.isInteger(right)) {
     const val = left * right;

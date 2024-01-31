@@ -460,4 +460,21 @@ WRITE result.`;
     await f(abap);
   });
 
+  it("multiply, overfolow int", async () => {
+    const code = `
+DATA int1 TYPE i.
+DATA int2 TYPE i.
+int1 = 268435456.
+int2 = 4096.
+int1 = int1 * int2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch (e) {
+      expect(e.toString()).to.contain("CX_SY_ARITHMETIC_OVERFLOW");
+    }
+  });
+
 });
