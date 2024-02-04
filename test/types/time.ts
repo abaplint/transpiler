@@ -87,16 +87,45 @@ describe("Running Examples - Time type", () => {
     expect(abap.console.get()).to.equal("080000\n08");
   });
 
-  it.only("time, empty from string", async () => {
+  it("time, empty from string", async () => {
     const code = `
     DATA iv_value TYPE string.
     DATA rv_result TYPE t.
+    rv_result = '112233'.
     rv_result = iv_value.
-    write / rv_result.`;
+    WRITE / rv_result.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("000000");
+  });
+
+  it("time, from string, A", async () => {
+    const code = `
+    DATA iv_value TYPE string.
+    DATA rv_result TYPE t.
+    rv_result = '112233'.
+    iv_value = |A|.
+    rv_result = iv_value.
+    WRITE / rv_result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("A00000");
+  });
+
+  it("time, from string, ABC", async () => {
+    const code = `
+    DATA iv_value TYPE string.
+    DATA rv_result TYPE t.
+    rv_result = '112233'.
+    iv_value = |ABCABCABC|.
+    rv_result = iv_value.
+    WRITE / rv_result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ABCABC");
   });
 
 });

@@ -27,6 +27,11 @@ export class Time implements ICharacter {
                    date.getUTCSeconds().toString().padStart(2,"0");
     } else if (typeof value === "string") {
       this.value = value;
+      if (this.value.length > 6) {
+        this.value = this.value.substring(0, 6);
+      }
+    } else if (value instanceof String) {
+      this.set(value.get().padEnd(6, "0"));
     } else if (value instanceof Float) {
       this.set(Math.round(value.getRaw()));
     } else {
