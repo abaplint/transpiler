@@ -87,4 +87,16 @@ describe("Running Examples - Time type", () => {
     expect(abap.console.get()).to.equal("080000\n08");
   });
 
+  it.only("time, empty from string", async () => {
+    const code = `
+    DATA iv_value TYPE string.
+    DATA rv_result TYPE t.
+    rv_result = iv_value.
+    write / rv_result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("000000");
+  });
+
 });
