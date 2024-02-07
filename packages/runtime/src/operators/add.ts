@@ -8,7 +8,7 @@ export function add(left: INumeric | ICharacter | string | number | Float | Inte
                     right: INumeric | ICharacter | string | number  | Float | Integer | Hex | FieldSymbol): Integer | Float | Integer8 {
 
   if (left instanceof Integer && right instanceof Integer) {
-    return new Integer8().set(left.get() + right.get());
+    return new Integer().set(left.get() + right.get());
   } else if (typeof left === "number" && typeof right === "number"
       && Number.isInteger(left) && Number.isInteger(right)) {
     return new Integer().set(left + right);
