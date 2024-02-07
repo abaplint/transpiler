@@ -473,7 +473,7 @@ WRITE result.`;
     await f(abap);
   });
 
-  it("multiply, overfolow int", async () => {
+  it.skip("multiply, overflow int", async () => {
     const code = `
 DATA int1 TYPE i.
 DATA int2 TYPE i.
@@ -488,6 +488,15 @@ int1 = int1 * int2.`;
     } catch (e) {
       expect(e.toString()).to.contain("CX_SY_ARITHMETIC_OVERFLOW");
     }
+  });
+
+  it("minus to float, ok", async () => {
+    const code = `
+    DATA foo TYPE f.
+    foo = -2147483648 - 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
 });

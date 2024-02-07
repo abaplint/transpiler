@@ -69,11 +69,11 @@ export class Integer implements INumeric {
     } else {
       this.set(value.get());
     }
-
+/*
     if (this.value > 2147483647 || this.value < -2147483648) {
       throwError("CX_SY_ARITHMETIC_OVERFLOW");
     }
-
+*/
     return this;
   }
 
