@@ -29,7 +29,7 @@
   "author": "abaplint",
   "license": "MIT",
   "dependencies": {
-    "@abaplint/core": "^2.105.17",
+    "@abaplint/core": "^2.105.18",
     "source-map": "^0.7.4"
   },
   "devDependencies": {
