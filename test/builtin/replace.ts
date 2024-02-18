@@ -336,4 +336,16 @@ ASSERT lv_string = |'lbbrs'|.`;
     await f(abap);
   });
 
+  it("replace, slash dash", async () => {
+    const code = `
+DATA res TYPE string.
+DATA input TYPE string.
+input = 'foo-bar-moo'.
+res = replace( val = input sub = '-' with = '/' ).
+ASSERT res = 'foo/bar-moo'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
