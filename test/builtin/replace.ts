@@ -336,7 +336,7 @@ ASSERT lv_string = |'lbbrs'|.`;
     await f(abap);
   });
 
-  it.only("replace, slash dash", async () => {
+  it("replace, slash dash", async () => {
     const code = `
 DATA res TYPE string.
 DATA input TYPE string.

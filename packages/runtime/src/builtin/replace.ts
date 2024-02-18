@@ -62,6 +62,9 @@ export function replace(input: IReplaceInput) {
           wi +
           input.val.getOffset({offset: offset + length}).get();
   } else if (input.occ === undefined && sub && wi !== undefined) {
+    if (typeof sub === "string") {
+      sub = new RegExp(sub);
+    }
     val = val.replace(sub, wi);
   } else if (input.occ && input.occ.get() === 0 && sub && wi !== undefined) {
     if (typeof sub === "string") {
