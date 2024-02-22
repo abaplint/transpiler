@@ -30,6 +30,7 @@ import {test24} from "./test24";
 import {test25} from "./test25";
 import {test26} from "./test26";
 import {test27} from "./test27";
+import {test28} from "./test28";
 
 // NOTE: does not run via Mocha
 
@@ -72,6 +73,7 @@ const tests: Tests = [
   {name: "25: READ TABLE, not found", abap: test25},
   {name: "26: REPLACE OCCURRENCES, simple", abap: test26},
   {name: "27: READ TABLE, building hash", abap: test27},
+  {name: "28: CONCATENATE", abap: test28},
 ];
 
 async function execute(t: Test) {

@@ -100,7 +100,8 @@ export class TranspileTypes {
         || type instanceof abaplint.BasicTypes.CSequenceType) {
       // if not supplied its a Character(1)
       resolved = "Character";
-    } else if (type instanceof abaplint.BasicTypes.AnyType) {
+    } else if (type instanceof abaplint.BasicTypes.AnyType
+        || type instanceof abaplint.BasicTypes.DataType) {
       // if not supplied its a Character(4)
       resolved = "Character";
       extra = "4";
