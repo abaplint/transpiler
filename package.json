@@ -211,16 +211,16 @@
     },
     "homepage": "https://github.com/abaplint/transpiler_poc#readme",
     "devDependencies": {
-        "@abaplint/core": "^2.105.18",
+        "@abaplint/core": "^2.105.20",
         "@types/chai": "^4.3.11",
         "@types/mocha": "^10.0.6",
         "@types/node": "^20.11.19",
         "@types/sql.js": "^1.4.9",
-        "@typescript-eslint/eslint-plugin": "^7.0.1",
-        "@typescript-eslint/parser": "^7.0.1",
+        "@typescript-eslint/eslint-plugin": "^7.0.2",
+        "@typescript-eslint/parser": "^7.0.2",
         "chai": "^4.4.1",
         "cross-fetch": "^4.0.0",
-        "dotenv": "^16.4.4",
+        "dotenv": "^16.4.5",
         "eslint-plugin-import": "^2.29.1",
         "eslint": "^8.56.0",
         "fast-xml-parser": "^4.3.4",
@@ -230,7 +230,7 @@
         "snowflake-sdk": "^1.9.3",
         "source-map-support": "^0.5.21",
         "sql.js": "^1.10.2",
-        "temporal-polyfill": "^0.2.1",
+        "temporal-polyfill": "^0.2.2",
         "typescript": "^5.3.3"
     }
 }
