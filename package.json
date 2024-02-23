@@ -211,10 +211,10 @@
     },
     "homepage": "https://github.com/abaplint/transpiler_poc#readme",
     "devDependencies": {
-        "@abaplint/core": "^2.105.20",
+        "@abaplint/core": "^2.105.21",
         "@types/chai": "^4.3.11",
         "@types/mocha": "^10.0.6",
-        "@types/node": "^20.11.19",
+        "@types/node": "^20.11.20",
         "@types/sql.js": "^1.4.9",
         "@typescript-eslint/eslint-plugin": "^7.0.2",
         "@typescript-eslint/parser": "^7.0.2",
