@@ -417,7 +417,7 @@ WRITE result.`;
     }
   });
 
-  it("ok, not int max value, its a float field", async () => {
+  it("ok, not int max value, its a float field, overflow", async () => {
     const code = `
     DATA lv_f TYPE f.
     DATA lv_int1 TYPE i.
@@ -425,6 +425,19 @@ WRITE result.`;
     lv_int1 = 2000000.
     lv_int2 = 2000000.
     lv_f = lv_int1 * lv_int2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("ok, not int max value, its a float field, overflow, plus", async () => {
+    const code = `
+    DATA lv_f TYPE f.
+    DATA lv_int1 TYPE i.
+    DATA lv_int2 TYPE i.
+    lv_int1 = 2000000000.
+    lv_int2 = 2000000000.
+    lv_f = lv_int1 + lv_int2.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
@@ -445,6 +458,42 @@ WRITE result.`;
     DATA int TYPE i.
     int = 5 MOD -2.
     ASSERT int = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("MOD, negative, another", async () => {
+    const code = `
+    DATA int TYPE i.
+    int = -7 MOD 3.
+    ASSERT int = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it.skip("multiply, overflow int", async () => {
+    const code = `
+DATA int1 TYPE i.
+DATA int2 TYPE i.
+int1 = 268435456.
+int2 = 4096.
+int1 = int1 * int2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch (e) {
+      expect(e.toString()).to.contain("CX_SY_ARITHMETIC_OVERFLOW");
+    }
+  });
+
+  it("minus to float, ok", async () => {
+    const code = `
+    DATA foo TYPE f.
+    foo = -2147483648 - 1.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);

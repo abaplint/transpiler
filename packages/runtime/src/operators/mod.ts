@@ -1,4 +1,4 @@
-import {Integer, Integer8} from "../types";
+import {Float, Integer, Integer8} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
@@ -15,6 +15,8 @@ export function mod(left: INumeric | ICharacter | string | number, right: INumer
 
   if (left instanceof Integer8 || right instanceof Integer8) {
     return new Integer8().set(val);
+  } else if (left instanceof Float || right instanceof Float) {
+    return new Float().set(val);
   } else {
     return new Integer().set(val);
   }

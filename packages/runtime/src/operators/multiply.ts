@@ -5,6 +5,7 @@ import {parse} from "./_parse";
 import {String} from "../types/string";
 
 export function multiply(left: INumeric | ICharacter | string | number, right: INumeric | ICharacter | string | number) {
+// todo: the types returned are not correct
   if (left instanceof Integer && right instanceof Integer) {
     const val = left.get() * right.get();
     return new Integer().set(val);
