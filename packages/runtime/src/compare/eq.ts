@@ -67,8 +67,12 @@ export function eq(
       return right.get() === left.get();
     } else if (left instanceof Character) {
       return (parseInt(left.get(), 10) || 0) === right.get();
+    } else if (left instanceof Float) {
+      return right.get() === left.getRaw();
     } else if (left instanceof Numc) {
       return right.get() === parseInt(left.get(), 10);
+    } else if (left instanceof Packed) {
+      return right.get() === left.get();
     }
   } else if (right instanceof DataReference && left instanceof DataReference) {
     return right.getPointer() === left.getPointer();
@@ -100,17 +104,22 @@ export function eq(
   } else if (right instanceof Packed) {
     if (left instanceof Packed) {
       return right.get() === left.get();
+    } else if (left instanceof Integer) {
+      return right.get() === left.get();
     }
   } else if (right instanceof Integer8) {
     if (left instanceof Integer
         || left instanceof Integer8
         || left instanceof Packed) {
       return right.get() === left.get();
+    } else if (left instanceof Float) {
+      return right.get() === left.getRaw();
     }
   } else if (right instanceof Float) {
     if (left instanceof Float) {
       return right.getRaw() === left.getRaw();
-    } else if (left instanceof Integer) {
+    } else if (left instanceof Integer
+        || left instanceof Integer8) {
       return right.getRaw() === left.get();
     }
   }
