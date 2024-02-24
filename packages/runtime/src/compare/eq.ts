@@ -67,6 +67,8 @@ export function eq(
       return right.get() === left.get();
     } else if (left instanceof Character) {
       return (parseInt(left.get(), 10) || 0) === right.get();
+    } else if (left instanceof Float) {
+      return right.get() === left.getRaw();
     } else if (left instanceof Numc) {
       return right.get() === parseInt(left.get(), 10);
     }
