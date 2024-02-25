@@ -9,6 +9,8 @@ import {FieldSymbol} from "./field_symbol";
 import {DataReference} from "./data_reference";
 import {insertInternal} from "../statements/insert_internal";
 import {sort} from "../statements/sort";
+import {Character} from "./character";
+import {Hex} from "./hex";
 
 // const FEATURE_SHARED_TABLES = true;
 
@@ -194,7 +196,12 @@ export class HashedTable implements ITable {
           // if types match, there is no need to clone
           if (field instanceof String && val instanceof String) {
             val = val.get();
+          } else if (field instanceof Character && val instanceof Character && field.getLength() === val.getLength()) {
+            val = val.get();
+          } else if (field instanceof Hex && val instanceof Hex && field.getLength() === val.getLength()) {
+            val = val.get();
           } else {
+            // convert
             const rowType = clone(field) as any;
             rowType.set(val.get());
             val = rowType.get();
