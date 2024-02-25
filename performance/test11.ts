@@ -15,7 +15,7 @@ DO 1000 TIMES.
 ENDDO.
 
 DO 15 TIMES.
-  DO 1000 TIMES.
+  DO 4000 TIMES.
     READ TABLE tab WITH TABLE KEY
       field1 = |foo{ sy-index }|
       field2 = sy-index
