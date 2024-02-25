@@ -190,9 +190,15 @@ export class HashedTable implements ITable {
           rowType.set(val.get());
           val = rowType.get();
         } else if (ttyp instanceof Structure) {
-          const rowType = clone(ttyp.get()[k.toLowerCase()]) as any;
-          rowType.set(val.get());
-          val = rowType.get();
+          const field = ttyp.get()[k.toLowerCase()];
+          // if types match, there is no need to clone
+          if (field instanceof String && val instanceof String) {
+            val = val.get();
+          } else {
+            const rowType = clone(field) as any;
+            rowType.set(val.get());
+            val = rowType.get();
+          }
         } else {
           throw new Error("HashedTable, buildHashFromSimple, unexpected type");
         }
