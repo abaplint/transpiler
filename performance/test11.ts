@@ -14,7 +14,7 @@ DO 1000 TIMES.
   INSERT row INTO TABLE tab.
 ENDDO.
 
-DO 50 TIMES.
+DO 100 TIMES.
   DO 1000 TIMES.
     READ TABLE tab WITH TABLE KEY
       field1 = |foo{ sy-index }|
