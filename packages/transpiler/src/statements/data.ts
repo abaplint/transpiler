@@ -21,7 +21,7 @@ export class DataTranspiler implements IStatementTranspiler {
 
     const found = scope.findVariable(token.getStr());
     if (found === undefined) {
-      throw new Error("DataTranspiler, var not found, \"" + token.getStr() + "\"");
+      throw new Error("DataTranspiler, var not found, \"" + token.getStr() + "\", " + traversal.getFilename());
     }
 
     let value = "";
