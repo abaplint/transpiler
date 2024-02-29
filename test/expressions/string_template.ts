@@ -331,4 +331,15 @@ WRITE |{ lv_value STYLE = SCIENTIFIC }|.`;
     expect(abap.console.get()).to.equal("5E+01");
   });
 
+  it("Output STYLE = SCIENTIFIC, five", async () => {
+    const code = `
+DATA lv_value TYPE f.
+lv_value = 5.
+WRITE |{ lv_value STYLE = SCIENTIFIC }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("5E+00");
+  });
+
 });

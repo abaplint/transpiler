@@ -40,6 +40,7 @@ export function templateFormatting(source: ICharacter | INumeric, options?: opti
     const raw = source.getRaw();
     if (options?.style === "scientific") {
       text = raw.toExponential().toUpperCase();
+      text = text.replace(/([+-])(\d)$/, "$10$2");
     } else if (Number.isInteger(raw)) {
       text = raw.toFixed(0);
     } else {
