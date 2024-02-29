@@ -10,6 +10,7 @@ type options = {
   width?: number,
   decimals?: number,
   currency?: any,
+  style?: any,
   align?: "left" | "right",
 };
 
@@ -37,7 +38,9 @@ export function templateFormatting(source: ICharacter | INumeric, options?: opti
     }
   } else if (source instanceof Float) {
     const raw = source.getRaw();
-    if (Number.isInteger(raw)) {
+    if (options?.style === "scientific") {
+      text = raw.toExponential().toUpperCase();
+    } else if (Number.isInteger(raw)) {
       text = raw.toFixed(0);
     } else {
       text = raw.toFixed(16);

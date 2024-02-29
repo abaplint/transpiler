@@ -292,4 +292,18 @@ WRITE |{ <fs> }|.`;
     expect(abap.console.get()).to.equal("1970-01-01T00:00:00,0000000");
   });
 
+  it("Output STYLE = SCIENTIFIC", async () => {
+    const code = `
+DATA lv_value TYPE f.
+lv_value = 1.
+DO 25 TIMES.
+  lv_value = lv_value / 10.
+ENDDO.
+WRITE |{ lv_value STYLE = SCIENTIFIC }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1.0000000000000002E-25");
+  });
+
 });
