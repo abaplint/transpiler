@@ -306,4 +306,18 @@ WRITE |{ lv_value STYLE = SCIENTIFIC }|.`;
     expect(abap.console.get()).to.equal("1.0000000000000002E-25");
   });
 
+  it("Output STYLE = SCIENTIFIC, negative", async () => {
+    const code = `
+DATA lv_value TYPE f.
+lv_value = -1.
+DO 25 TIMES.
+  lv_value = lv_value / 10.
+ENDDO.
+WRITE |{ lv_value STYLE = SCIENTIFIC }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("-1.0000000000000002E-25");
+  });
+
 });
