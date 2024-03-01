@@ -36,12 +36,25 @@ describe("Builtin functions - trunc", () => {
     expect(abap.console.get()).to.equal("12\n12\n12\n-43");
   });
 
-  it.only("test", async () => {
+  it("test with abs", async () => {
     const code = `
   DATA float TYPE f.
   DATA lv_integer TYPE i.
   float = '12.375'.
   lv_integer = trunc( abs( float ) ).
+  WRITE lv_integer.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("12");
+  });
+
+  it("test direct", async () => {
+    const code = `
+  DATA float TYPE f.
+  DATA lv_integer TYPE i.
+  float = '12.375'.
+  lv_integer = trunc( float ).
   WRITE lv_integer.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
