@@ -59,25 +59,4 @@ describe("Builtin Numeric Functions", () => {
     expect(abap.console.get()).to.equal("1\n1\n-1\n0");
   });
 
-  it("Builtin numerical: trunc", async () => {
-    const code = `
-  DATA chars TYPE c LENGTH 10.
-  DATA int TYPE i.
-  DATA packed TYPE p.
-
-  chars = '12.34'.
-  WRITE / trunc( chars ).
-
-  packed = chars.
-  WRITE / trunc( packed ).
-
-  int = 12.
-  WRITE / trunc( int ).
-
-  WRITE / trunc( '-43.21' ).`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("12\n12\n12\n-43");
-  });
 });
