@@ -8,7 +8,7 @@ async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
 }
 
-describe("Builtin Numeric Functions", () => {
+describe("Builtin functions - abs", () => {
 
   beforeEach(async () => {
     abap = new ABAP({console: new MemoryConsole()});
@@ -37,47 +37,17 @@ describe("Builtin Numeric Functions", () => {
     expect(abap.console.get()).to.equal("-3\n3\n3\n123.45\n12\n18\n7");
   });
 
-  it("Builtin numerical: sign", async () => {
+  it("999", async () => {
     const code = `
-  DATA chars TYPE c LENGTH 10.
-  DATA int TYPE i.
-  DATA packed TYPE p.
-
-  chars = '12.34'.
-  WRITE / sign( chars ).
-
-  packed = chars.
-  WRITE / sign( packed ).
-
-  int = -12.
-  WRITE / sign( int ).
-
-  WRITE / frac( '0' ).`;
+DATA iv_int TYPE int8.
+DATA lv_int TYPE i.
+iv_int = -1000.
+lv_int = abs( iv_int + 1 ).
+WRITE / lv_int.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("1\n1\n-1\n0");
+    expect(abap.console.get()).to.equal("999");
   });
 
-  it("Builtin numerical: trunc", async () => {
-    const code = `
-  DATA chars TYPE c LENGTH 10.
-  DATA int TYPE i.
-  DATA packed TYPE p.
-
-  chars = '12.34'.
-  WRITE / trunc( chars ).
-
-  packed = chars.
-  WRITE / trunc( packed ).
-
-  int = 12.
-  WRITE / trunc( int ).
-
-  WRITE / trunc( '-43.21' ).`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("12\n12\n12\n-43");
-  });
 });
