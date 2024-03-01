@@ -70,6 +70,7 @@ export class FieldSymbol  {
         const pt = this.pointer;
         if (pt instanceof Float) {
           const buf = Buffer.allocUnsafe(8);
+// CASTING is platform specific, so perhaps add a setting? But anyhow its not something developers should use
           buf.writeDoubleLE(pt.getRaw());
           return buf.toString("hex").toUpperCase();
         } else {
