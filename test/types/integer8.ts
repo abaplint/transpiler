@@ -108,6 +108,66 @@ describe("Running Examples - Integer8 type", () => {
     expect(abap.console.get()).to.equal("1\n0\n0");
   });
 
-// minus + mod + multiply + div + power
+  it("int8 from int, MOD", async () => {
+    const code = `
+    DATA int TYPE i.
+    DATA int8 TYPE int8.
+    int8 = 2.
+    int = 2.
+    int8 = int8 MOD int.
+    WRITE / int8.
+    int8 = 2.
+    int8 = int MOD int8.
+    WRITE / int8.
+    int8 = 2.
+    int8 = int8 MOD int8.
+    WRITE / int8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n0\n0");
+  });
+
+  it("int8 from int, mul", async () => {
+    const code = `
+    DATA int TYPE i.
+    DATA int8 TYPE int8.
+    int8 = 2.
+    int = 2.
+    int8 = int8 * int.
+    WRITE / int8.
+    int8 = 2.
+    int8 = int * int8.
+    WRITE / int8.
+    int8 = 2.
+    int8 = int8 * int8.
+    WRITE / int8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n4\n4");
+  });
+
+  it.skip("int8 from int, div", async () => {
+    const code = `
+    DATA int TYPE i.
+    DATA int8 TYPE int8.
+    int8 = 2.
+    int = 2.
+    int8 = int8 / int.
+    WRITE / int8.
+    int8 = 2.
+    int8 = int / int8.
+    WRITE / int8.
+    int8 = 2.
+    int8 = int8 / int8.
+    WRITE / int8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n1\n1");
+  });
+
+// power
 
 });
