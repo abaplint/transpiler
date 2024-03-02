@@ -1,11 +1,11 @@
 import {binarySearchFrom, binarySearchFromRow} from "../binary_search";
 import {eq, ge, gt} from "../compare";
-import {DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Structure, Table, TableAccessType} from "../types";
+import {DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Integer8, Structure, Table, TableAccessType} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
 export interface IReadTableOptions {
-  index?: INumeric | FieldSymbol | number,
+  index?: INumeric | Integer8 | FieldSymbol | number,
   into?: INumeric | ICharacter | Structure | Table | DataReference,
   from?: INumeric | ICharacter | Structure | Table | DataReference,
   referenceInto?: DataReference,
@@ -153,6 +153,8 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
 
       if (index instanceof Float || index instanceof DecFloat34) {
         index = index.getRaw();
+      } else if (index instanceof Integer8) {
+        index = Number(index.get());
       } else {
         index = index.get();
       }
