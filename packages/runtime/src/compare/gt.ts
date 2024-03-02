@@ -1,4 +1,5 @@
-import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Hex, Structure, Table, XString} from "../types";
+import {parse} from "../operators/_parse";
+import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Hex, Integer8, Structure, Table, XString} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {Integer} from "../types/integer";
@@ -28,6 +29,11 @@ export function gt(
     return gt_with_hex(left, right);
   }
 
+  if (left instanceof Integer8 || right instanceof Integer8) {
+    const l = left instanceof Integer8 ? left.get() : BigInt(parse(left));
+    const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));
+    return l > r;
+  }
 
   let l: number | string | undefined = undefined;
   if (typeof left === "number" || typeof left === "string") {

@@ -168,4 +168,76 @@ describe("Running Examples - Integer8 type", () => {
     expect(abap.console.get()).to.equal("1\n1\n1");
   });
 
+  it("compare, eq ints", async () => {
+    const code = `
+    DATA int TYPE i.
+    DATA int8 TYPE int8.
+
+    IF int = int8.
+      WRITE / 'yes1'.
+    ENDIF.
+
+    IF int8 = int.
+      WRITE / 'yes2'.
+    ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("yes1\nyes2");
+  });
+
+  it("compare, eq floats", async () => {
+    const code = `
+    DATA int TYPE f.
+    DATA int8 TYPE int8.
+
+    IF int = int8.
+      WRITE / 'yes1'.
+    ENDIF.
+
+    IF int8 = int.
+      WRITE / 'yes2'.
+    ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("yes1\nyes2");
+  });
+
+  it("compare, lt floats", async () => {
+    const code = `
+    DATA int TYPE i.
+    DATA int8 TYPE int8.
+
+    IF int < int8.
+      WRITE / 'yes1'.
+    ENDIF.
+
+    IF int8 < int.
+      WRITE / 'yes2'.
+    ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("");
+  });
+
+  it("compare, le floats", async () => {
+    const code = `
+    DATA int TYPE i.
+    DATA int8 TYPE int8.
+
+    IF int <= int8.
+      WRITE / 'yes1'.
+    ENDIF.
+
+    IF int8 <= int.
+      WRITE / 'yes2'.
+    ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("yes1\nyes2");
+  });
+
 });
