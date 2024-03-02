@@ -9,7 +9,6 @@ import {Integer} from "./integer";
 const digits = new RegExp(/^\s*-?\+?\d+\.?\d* *$/i);
 
 export class Integer8 implements INumeric {
-  // todo, somehow use bigint?
   private value: number;
   private readonly qualifiedName: string | undefined;
 

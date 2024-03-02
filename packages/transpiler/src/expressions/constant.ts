@@ -16,7 +16,11 @@ export class ConstantTranspiler implements IExpressionTranspiler {
       const concat = int.concatTokens().trim();
       const parsed = Number.parseInt(concat, 10);
       let code = "";
-      if (parsed > 2147483647 || parsed < -2147483648) {
+      if (concat.length > 18) {
+        // its potentially larger than Number.MAX_SAFE_INTEGER
+        // https://stackoverflow.com/questions/1379934/large-numbers-erroneously-rounded-in-javascript
+        code = `new abap.types.Integer8().set("${concat}")`;
+      } else if (parsed > 2147483647 || parsed < -2147483648) {
         code = `new abap.types.Integer8().set(${concat})`;
       } else if (parsed >= -10 && parsed <= 200) {
         code = `abap.IntegerFactory.get(${concat})`;

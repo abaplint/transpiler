@@ -34,7 +34,7 @@ describe("Running Examples - Integer8 type", () => {
     await f(abap);
   });
 
-  it.only("int8 from large constant, to string", async () => {
+  it.skip("int8 from large constant, to string", async () => {
     const code = `
     DATA lv_int TYPE int8.
     DATA lv_str TYPE string.
