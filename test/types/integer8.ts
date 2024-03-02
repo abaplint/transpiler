@@ -240,6 +240,32 @@ describe("Running Examples - Integer8 type", () => {
     expect(abap.console.get()).to.equal("yes1\nyes2");
   });
 
+  it("into int from int8", async () => {
+    const code = `
+    DATA int TYPE i.
+    DATA int8 TYPE int8.
+    int8 = 2.
+    int = int8.
+    WRITE int.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+  it("into float from int8", async () => {
+    const code = `
+    DATA float TYPE f.
+    DATA int8 TYPE int8.
+    int8 = 2.
+    float = int8.
+    WRITE float.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2,0000000000000000E+00");
+  });
+
   it("initial", async () => {
     const code = `
     DATA int8 TYPE int8.

@@ -4,6 +4,7 @@ import {Hex} from "./hex";
 import {XString} from "./xstring";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
+import {Integer8} from "./integer8";
 
 export const DIGITS = new RegExp(/^\s*-?\+?\d+\.?\d* *$/i);
 
@@ -54,6 +55,8 @@ export class Integer implements INumeric {
       this.value = Math.round(value);
     } else if (typeof value === "string") {
       this.value = toInteger(value);
+    } else if (value instanceof Integer8) {
+      this.set(Number(value.get()));
     } else if (value instanceof Float) {
       this.set(Math.round(value.getRaw()));
     } else if (value instanceof Hex || value instanceof XString) {

@@ -2,6 +2,7 @@ import {Hex} from "./hex";
 import {XString} from "./xstring";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
+import {Integer8} from "./integer8";
 
 /*
 function getNumberParts(x: number) {
@@ -39,6 +40,8 @@ export class Float {
       this.value = 0;
     } else if (typeof value === "string") {
       this.value = parseFloat(value);
+    } else if (value instanceof Integer8) {
+      this.value = Number(value.get());
     } else if (value instanceof Float) {
       this.value = value.getRaw();
     } else if (value instanceof Hex || value instanceof XString) {
