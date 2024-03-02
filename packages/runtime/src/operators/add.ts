@@ -1,11 +1,11 @@
-import {Character, FieldSymbol, Float, Hex, Integer} from "../types";
+import {Character, FieldSymbol, Float, Hex, Integer, Integer8} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {String} from "../types/string";
 import {parse} from "./_parse";
 
 export function add(left: INumeric | ICharacter | string | number | Float | Integer | Hex | FieldSymbol,
-                    right: INumeric | ICharacter | string | number  | Float | Integer | Hex | FieldSymbol): Integer | Float {
+                    right: INumeric | ICharacter | string | number  | Float | Integer | Hex | FieldSymbol): Integer | Integer8 | Float {
 
   if (left instanceof Integer && right instanceof Integer) {
     return new Integer().set(left.get() + right.get());
@@ -22,6 +22,14 @@ export function add(left: INumeric | ICharacter | string | number | Float | Inte
     return new Integer().set(Number.parseInt(left.get(), 10) + right.get());
   } else if ((right instanceof String || right instanceof Character) && Number.isInteger(Number(right)) && left instanceof Integer) {
     return new Integer().set(left.get() + Number.parseInt(right.get(), 10));
+  } else if (left instanceof Integer8) {
+    if (right instanceof Integer8) {
+      return new Integer8().set(left.get() + right.get());
+    } else {
+      return new Integer8().set(left.get() + BigInt(parse(right)));
+    }
+  } else if (right instanceof Integer8) {
+    return new Integer8().set(BigInt(parse(left)) + right.get());
   }
 
   if (left instanceof FieldSymbol) {

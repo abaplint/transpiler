@@ -47,4 +47,47 @@ describe("Running Examples - Integer8 type", () => {
     expect(abap.console.get()).to.equal("9219994337134247936");
   });
 
+  it("int8 from float", async () => {
+    const code = `
+    DATA float TYPE f.
+    DATA int8 TYPE int8.
+    float = 1.
+    int8 = float.
+    WRITE / int8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
+  it("int8 from int", async () => {
+    const code = `
+    DATA int TYPE i.
+    DATA int8 TYPE int8.
+    int = 1.
+    int8 = int.
+    WRITE / int8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
+  it("int8 from int, plus", async () => {
+    const code = `
+    DATA int TYPE i.
+    DATA int8 TYPE int8.
+    int = 1.
+    int8 = int8 + int.
+    WRITE / int8.
+    int8 = int + int8.
+    WRITE / int8.
+    int8 = int8 + int8.
+    WRITE / int8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n4");
+  });
+
 });
