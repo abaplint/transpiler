@@ -8,8 +8,9 @@ import {Float} from "./float";
 import {Hex} from "./hex";
 import {parse} from "../operators/_parse";
 import {FieldSymbol} from "./field_symbol";
+import {Integer8} from "./integer8";
 
-type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Structure | Float;
+type PointerType = INumeric | Table | ICharacter | ABAPObject | Integer8 | undefined | Structure | Float;
 
 export class DataReference  {
   private pointer: PointerType;

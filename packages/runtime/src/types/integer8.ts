@@ -8,12 +8,12 @@ import {Integer} from "./integer";
 
 const digits = new RegExp(/^\s*-?\+?\d+\.?\d* *$/i);
 
-export class Integer8 implements INumeric {
-  private value: number;
+export class Integer8 {
+  private value: bigint;
   private readonly qualifiedName: string | undefined;
 
   public constructor(input?: {qualifiedName?: string}) {
-    this.value = 0;
+    this.value = 0n;
     this.qualifiedName = input?.qualifiedName;
   }
 
@@ -21,9 +21,11 @@ export class Integer8 implements INumeric {
     return this.qualifiedName;
   }
 
-  public set(value: INumeric | ICharacter | Hex | string | number | Integer8 | Integer | Float) {
+  public set(value: INumeric | ICharacter | Hex | string | number | bigint | Integer8 | Integer | Float) {
     if (typeof value === "number") {
-      this.value = Math.round(value);
+      this.value = BigInt(value);
+    } else if (typeof value === "bigint") {
+      this.value = value;
     } else if (typeof value === "string") {
       if (value.endsWith("-")) {
         value = "-" + value.substring(0, value.length - 1);
@@ -33,7 +35,7 @@ export class Integer8 implements INumeric {
       } else if (digits.test(value) === false) {
         throwError("CX_SY_CONVERSION_NO_NUMBER");
       }
-      this.value = parseInt(value, 10);
+      this.value = BigInt(value);
     } else if (value instanceof Float) {
       this.set(Math.round(value.getRaw()));
     } else if (value instanceof Hex || value instanceof XString) {
@@ -53,10 +55,10 @@ export class Integer8 implements INumeric {
   }
 
   public clear(): void {
-    this.value = 0;
+    this.value = 0n;
   }
 
-  public get(): number {
+  public get(): bigint {
     return this.value;
   }
 }
