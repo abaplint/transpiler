@@ -240,4 +240,13 @@ describe("Running Examples - Integer8 type", () => {
     expect(abap.console.get()).to.equal("yes1\nyes2");
   });
 
+  it("initial", async () => {
+    const code = `
+    DATA int8 TYPE int8.
+    ASSERT int8 IS INITIAL.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
