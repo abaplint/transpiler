@@ -288,4 +288,18 @@ describe("Running Examples - Integer8 type", () => {
     expect(abap.console.get()).to.equal("4D");
   });
 
+  it("xstr offsets", async () => {
+    const code = `
+    DATA lv_tmp TYPE int8.
+    DATA lv_hex TYPE xstring.
+    lv_tmp = 1.
+    lv_hex = '00112233445566778899'.
+    WRITE / lv_hex(lv_tmp).
+    WRITE / lv_hex+lv_tmp(1).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("00\n11");
+  });
+
 });

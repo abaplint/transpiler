@@ -74,15 +74,23 @@ export class Hex implements ICharacter {
     return this.value;
   }
 
-  public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}) {
+  public getOffset(input: {offset?: number | INumeric | Hex | Integer8, length?: number | INumeric | Hex | Integer8}) {
     let offset = input?.offset;
     if (offset) {
-      offset = parse(offset);
+      if (offset instanceof Integer8) {
+        offset = Number(offset.get());
+      } else {
+        offset = parse(offset);
+      }
     }
 
     let length = input?.length;
     if (length) {
-      length = parse(length);
+      if (length instanceof Integer8) {
+        length = Number(length.get());
+      } else {
+        length = parse(length);
+      }
     }
 
     if ((offset && offset * 2 > this.value.length)
