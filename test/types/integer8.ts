@@ -275,4 +275,17 @@ describe("Running Examples - Integer8 type", () => {
     await f(abap);
   });
 
+  it("int8 into hex", async () => {
+    const code = `
+    DATA lv_tmp TYPE int8.
+    DATA lv_hex TYPE x LENGTH 1.
+    lv_tmp = 45645.
+    lv_hex = lv_tmp MOD 256.
+    WRITE / lv_hex.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4D");
+  });
+
 });
