@@ -87,7 +87,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
       }
 
       const res = await this.pool!.query(sql);
-      dbcnt = res.rowCount;
+      dbcnt = res?.rowCount || 0;
       if (dbcnt === 0) {
         subrc = 4;
       }
@@ -109,7 +109,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
       }
 
       const res = await this.pool!.query(sql);
-      dbcnt = res.rowCount;
+      dbcnt = res?.rowCount || 0;
       if (dbcnt === 0) {
         subrc = 4;
       }
@@ -131,7 +131,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
       }
 
       const res = await this.pool!.query(sql);
-      dbcnt = res.rowCount;
+      dbcnt = res?.rowCount || 0;
     } catch (error) {
       if (this.trace === true) {
         console.dir(error);
