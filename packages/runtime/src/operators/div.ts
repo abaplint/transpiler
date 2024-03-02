@@ -8,6 +8,13 @@ export function div(left: INumeric | ICharacter | Integer8 | string | number, ri
   if (left instanceof Integer8 || right instanceof Integer8) {
     const l = left instanceof Integer8 ? left.get() : BigInt(parse(left));
     const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));
+    if (r === 0n) {
+      if (l === 0n) {
+        return new Integer8().set(0n);
+      } else {
+        throwError("CX_SY_ZERODIVIDE");
+      }
+    }
     return new Integer8().set(l / r);
   }
 

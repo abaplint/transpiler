@@ -148,7 +148,7 @@ describe("Running Examples - Integer8 type", () => {
     expect(abap.console.get()).to.equal("4\n4\n4");
   });
 
-  it.skip("int8 from int, div", async () => {
+  it("int8 from int, divide", async () => {
     const code = `
     DATA int TYPE i.
     DATA int8 TYPE int8.
@@ -167,7 +167,5 @@ describe("Running Examples - Integer8 type", () => {
     await f(abap);
     expect(abap.console.get()).to.equal("1\n1\n1");
   });
-
-// power
 
 });
