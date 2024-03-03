@@ -15,6 +15,5 @@ export function abs(input: {val: number | string | ICharacter | INumeric}) {
     num_in = parseFloat(input.val.get().toString());
   }
   const ret = Math.abs(num_in);
-  console.dir(ret);
   return ret;
 }
