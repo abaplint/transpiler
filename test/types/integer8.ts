@@ -454,4 +454,16 @@ describe("Running Examples - Integer8 type", () => {
     await f(abap);
   });
 
+  it("MOD, negative", async () => {
+    const code = `
+    DATA lv_int8 TYPE int8.
+    lv_int8 = -1.
+    lv_int8 = lv_int8 MOD 64.
+    WRITE / lv_int8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("63");
+  });
+
 });
