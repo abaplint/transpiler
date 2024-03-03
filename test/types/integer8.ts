@@ -454,7 +454,7 @@ describe("Running Examples - Integer8 type", () => {
     await f(abap);
   });
 
-  it.only("MOD, negative", async () => {
+  it("MOD, negative", async () => {
     const code = `
     DATA lv_int8 TYPE int8.
     lv_int8 = -1.

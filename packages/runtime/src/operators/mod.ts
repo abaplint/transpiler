@@ -7,8 +7,11 @@ export function mod(left: INumeric | ICharacter | string | Integer8 | number, ri
   if (left instanceof Integer8 || right instanceof Integer8) {
     const l = left instanceof Integer8 ? left.get() : BigInt(parse(left));
     const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));
-// todo, is this correct?
-    return new Integer8().set(l % r);
+    let val = ( ( l % r ) + r ) % r;
+    if (val < 0) {
+      val = val * -1n;
+    }
+    return new Integer8().set(val);
   }
 
   const l = parse(left);
