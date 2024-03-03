@@ -39,6 +39,7 @@ export class Integer8 {
     } else if (value instanceof Float) {
       this.set(Math.round(value.getRaw()));
     } else if (value instanceof Hex || value instanceof XString) {
+// todo, can BigInt("0x" + value.get()); be used?
       let num = parseInt(value.get(), 16);
 // handle two complement,
       if (value instanceof Hex && value.getLength() >= 4) {
