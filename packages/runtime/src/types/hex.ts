@@ -37,7 +37,17 @@ export class Hex implements ICharacter {
       }
       this.value = this.value.padStart(this.length * 2, "0");
     } else if (value instanceof Integer8) {
-      return this.set(Number(value.get()));
+      let hex = "";
+      if (value.get() < 0) {
+        hex = (value.get() + 0x10000000000000000n).toString(16).toUpperCase();
+        if (hex.length > this.length * 2) {
+          hex = hex.substring(hex.length - this.length * 2);
+        }
+      } else {
+        hex = value.get().toString(16).toUpperCase();
+        hex = hex.padStart(this.length * 2, "0");
+      }
+      this.set(hex);
     } else {
       let v = value.get();
       if (value instanceof Float) {
