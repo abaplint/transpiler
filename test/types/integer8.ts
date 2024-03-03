@@ -302,4 +302,56 @@ describe("Running Examples - Integer8 type", () => {
     expect(abap.console.get()).to.equal("00\n11");
   });
 
+  it("hex to int8", async () => {
+    const code = `
+    DATA lv_int8 TYPE int8.
+    DATA lv_hex8 TYPE x LENGTH 8.
+    lv_int8 = 4179443068345003452.
+    lv_hex8 = lv_int8.
+    WRITE / lv_hex8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3A005D53B7AC2DBC");
+  });
+
+  it("hex to int8, minus one", async () => {
+    const code = `
+    DATA lv_int8 TYPE int8.
+    DATA lv_hex8 TYPE x LENGTH 8.
+    lv_int8 = -1.
+    lv_hex8 = lv_int8.
+    WRITE / lv_hex8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("FFFFFFFFFFFFFFFF");
+  });
+
+  it("hex to int8, one", async () => {
+    const code = `
+    DATA lv_int8 TYPE int8.
+    DATA lv_hex8 TYPE x LENGTH 8.
+    lv_int8 = -1.
+    lv_hex8 = lv_int8.
+    WRITE / lv_hex8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0000000000000001");
+  });
+
+  it.only("hex to int8, zero", async () => {
+    const code = `
+    DATA lv_int8 TYPE int8.
+    DATA lv_hex8 TYPE x LENGTH 8.
+    lv_int8 = 0.
+    lv_hex8 = lv_int8.
+    WRITE / lv_hex8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0000000000000000");
+  });
+
 });
