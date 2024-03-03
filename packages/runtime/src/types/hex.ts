@@ -28,7 +28,11 @@ export class Hex implements ICharacter {
     } else if (typeof value === "number") {
       const maxVal = Math.pow(2, this.length * 8);
       if (value < 0) {
-        this.value = Math.round(value + maxVal).toString(16);
+        let hex = Math.round(value + 0x100000000).toString(16).toUpperCase();
+        if (hex.length > this.length * 2) {
+          hex = hex.substring(hex.length - this.length * 2);
+        }
+        this.value = hex;
       } else if (value >= maxVal) {
         const sub = value % maxVal;
         this.value = Math.round(sub).toString(16);

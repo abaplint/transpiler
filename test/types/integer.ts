@@ -117,7 +117,7 @@ describe("Running Examples - Integer type", () => {
     }
   });
 
-  it.only("negative to hex1", async () => {
+  it("negative to hex1", async () => {
     const code = `
     DATA int TYPE i VALUE -4242.
     DATA hex TYPE x LENGTH 1.
@@ -128,7 +128,7 @@ describe("Running Examples - Integer type", () => {
     await f(abap);
   });
 
-  it.only("negative to hex2", async () => {
+  it("negative to hex2", async () => {
     const code = `
     DATA int TYPE i VALUE -4242.
     DATA hex TYPE x LENGTH 2.
@@ -139,7 +139,7 @@ describe("Running Examples - Integer type", () => {
     await f(abap);
   });
 
-  it.only("negative to hex3", async () => {
+  it("negative to hex3", async () => {
     const code = `
     DATA int TYPE i VALUE -4242.
     DATA hex TYPE x LENGTH 3.
