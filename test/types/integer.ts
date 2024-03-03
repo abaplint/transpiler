@@ -127,4 +127,26 @@ describe("Running Examples - Integer type", () => {
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
+
+  it.only("negative to hex2", async () => {
+    const code = `
+    DATA int TYPE i VALUE -4242.
+    DATA hex TYPE x LENGTH 2.
+    hex = int.
+    ASSERT hex = 'EF6E'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it.only("negative to hex3", async () => {
+    const code = `
+    DATA int TYPE i VALUE -4242.
+    DATA hex TYPE x LENGTH 3.
+    hex = int.
+    ASSERT hex = 'FFEF6E'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
 });
