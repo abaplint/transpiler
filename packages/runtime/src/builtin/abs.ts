@@ -14,5 +14,6 @@ export function abs(input: {val: number | string | ICharacter | INumeric}) {
   } else {
     num_in = parseFloat(input.val.get().toString());
   }
-  return Math.abs(num_in);
+  const ret = Math.abs(num_in);
+  return ret;
 }

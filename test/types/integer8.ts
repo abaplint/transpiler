@@ -466,4 +466,52 @@ describe("Running Examples - Integer8 type", () => {
     expect(abap.console.get()).to.equal("63");
   });
 
+  it("abs", async () => {
+    const code = `
+    DATA lv_int8 TYPE int8.
+    lv_int8 = -1.
+    lv_int8 = abs( lv_int8 ) + lv_int8.
+    WRITE / lv_int8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
+  it("abs, large", async () => {
+    const code = `
+    DATA lv_int8 TYPE int8.
+    lv_int8 = -68451041408.
+    lv_int8 = abs( lv_int8 ).
+    WRITE / lv_int8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("68451041408");
+  });
+
+  it("abs, larger than max safe", async () => {
+    const code = `
+    DATA lv_int8 TYPE int8.
+    lv_int8 = -9007199254740992.
+    lv_int8 = abs( lv_int8 ).
+    WRITE / lv_int8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("9007199254740992");
+  });
+
+  it("abs, larger than max safe, positive", async () => {
+    const code = `
+    DATA lv_int8 TYPE int8.
+    lv_int8 = 9007199254740992.
+    lv_int8 = abs( lv_int8 ).
+    WRITE / lv_int8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("9007199254740992");
+  });
+
 });
