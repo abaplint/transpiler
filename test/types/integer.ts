@@ -116,4 +116,15 @@ describe("Running Examples - Integer type", () => {
       expect(e.toString()).to.contain("CX_SY_ARITHMETIC_OVERFLOW");
     }
   });
+
+  it.only("negative to hex1", async () => {
+    const code = `
+    DATA int TYPE i VALUE -4242.
+    DATA hex TYPE x LENGTH 1.
+    hex = int.
+    ASSERT hex = '6E'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
 });
