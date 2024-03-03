@@ -2,6 +2,7 @@
 import {ABAPObject, Character, Date, FieldSymbol, Float, HashedTable, String, Hex, Integer, Numc, Structure, Table, DataReference, toInteger, XString, Integer8, Packed} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {parse} from "../operators/_parse";
 
 function compareTables(left: Table | HashedTable, right: Table | HashedTable): boolean {
   const leftArray = left.array();
@@ -22,8 +23,8 @@ function compareTables(left: Table | HashedTable, right: Table | HashedTable): b
 }
 
 export function eq(
-  left: number | string | ICharacter | INumeric | Float | String | ABAPObject | Structure | Hex | HashedTable | Table | FieldSymbol,
-  right: number | string | ICharacter | INumeric | Float | String | ABAPObject | Structure | Hex | HashedTable | Table | FieldSymbol): boolean {
+  left: number | string | ICharacter | Integer8 | INumeric | Float | String | ABAPObject | Structure | Hex | HashedTable | Table | FieldSymbol,
+  right: number | string | ICharacter | Integer8 | INumeric | Float | String | ABAPObject | Structure | Hex | HashedTable | Table | FieldSymbol): boolean {
 /*
   console.dir(left);
   console.dir(right);
@@ -32,6 +33,16 @@ export function eq(
     return eq(left, right.getPointer()!);
   } else if (left instanceof FieldSymbol) {
     return eq(left.getPointer()!, right);
+  }
+
+  if (left instanceof Integer8 || right instanceof Integer8) {
+    if (left instanceof Table || left instanceof HashedTable || right instanceof Table || right instanceof HashedTable) {
+      // exception?
+      return false;
+    }
+    const l = left instanceof Integer8 ? left.get() : BigInt(parse(left));
+    const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));
+    return l === r;
   }
 
 // for performance, do the typicaly/easy cases first

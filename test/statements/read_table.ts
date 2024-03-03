@@ -1350,4 +1350,15 @@ ASSERT sy-subrc = 0.`;
     await f(abap);
   });
 
+  it("READ TABLE, index int8", async () => {
+    const code = `
+DATA lv_tmp TYPE int8.
+DATA tabl TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA row LIKE LINE OF tabl.
+READ TABLE tabl INDEX lv_tmp + 1 INTO row.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

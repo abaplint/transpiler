@@ -5,6 +5,7 @@ import {XString} from "./xstring";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {throwError} from "../throw_error";
+import {Integer8} from "./integer8";
 
 export class Hex implements ICharacter {
   private value: string;
@@ -21,7 +22,7 @@ export class Hex implements ICharacter {
     return this.qualifiedName;
   }
 
-  public set(value: ICharacter | INumeric | string | number | Integer | Float) {
+  public set(value: ICharacter | INumeric | string | number | Integer | Integer8 | Float): Hex {
     if (typeof value === "string") {
       this.value = value;
     } else if (typeof value === "number") {
@@ -35,6 +36,8 @@ export class Hex implements ICharacter {
         this.value = Math.round(value).toString(16);
       }
       this.value = this.value.padStart(this.length * 2, "0");
+    } else if (value instanceof Integer8) {
+      return this.set(Number(value.get()));
     } else {
       let v = value.get();
       if (value instanceof Float) {
@@ -71,15 +74,23 @@ export class Hex implements ICharacter {
     return this.value;
   }
 
-  public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}) {
+  public getOffset(input: {offset?: number | INumeric | Hex | Integer8, length?: number | INumeric | Hex | Integer8}) {
     let offset = input?.offset;
     if (offset) {
-      offset = parse(offset);
+      if (offset instanceof Integer8) {
+        offset = Number(offset.get());
+      } else {
+        offset = parse(offset);
+      }
     }
 
     let length = input?.length;
     if (length) {
-      length = parse(length);
+      if (length instanceof Integer8) {
+        length = Number(length.get());
+      } else {
+        length = parse(length);
+      }
     }
 
     if ((offset && offset * 2 > this.value.length)

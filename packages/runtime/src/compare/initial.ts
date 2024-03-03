@@ -1,14 +1,18 @@
-import {ABAPObject, Character, DataReference, Date, FieldSymbol, Float, HashedTable, Hex, Numc, Structure, Table, Time} from "../types";
+import {ABAPObject, Character, DataReference, Date, FieldSymbol, Float, HashedTable, Hex, Integer8, Numc, Structure, Table, Time} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
 const REGEX_ZEROS = /^0+$/;
 const REGEX_SPACES = /^ *$/;
 
-export function initial(val: ICharacter | INumeric | string | number | Structure | DataReference | FieldSymbol | Table | ABAPObject) {
+export function initial(val: ICharacter | INumeric | string | number |
+Integer8 | Structure | DataReference | FieldSymbol | Table | ABAPObject) {
+
   // todo, refactor? add as method in each type instead?
   if (val instanceof Table || val instanceof HashedTable) {
     return val.array().length === 0;
+  } else if (val instanceof Integer8) {
+    return val.get() === 0n;
   } else if (val instanceof DataReference) {
     return val.getPointer() === undefined;
   } else if (val instanceof Date) {

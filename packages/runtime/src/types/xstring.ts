@@ -5,6 +5,7 @@ import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {Character} from "./character";
 import {throwError} from "../throw_error";
+import {Integer8} from "./integer8";
 
 export class XString implements ICharacter {
   private value: string;
@@ -55,15 +56,23 @@ export class XString implements ICharacter {
     return this.value;
   }
 
-  public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}) {
+  public getOffset(input: {offset?: number | INumeric | Hex | Integer8, length?: number | INumeric | Hex | Integer8}) {
     let offset = input?.offset;
     if (offset) {
-      offset = parse(offset);
+      if (offset instanceof Integer8) {
+        offset = Number(offset.get());
+      } else {
+        offset = parse(offset);
+      }
     }
 
     let length = input?.length;
     if (length) {
-      length = parse(length);
+      if (length instanceof Integer8) {
+        length = Number(length.get());
+      } else {
+        length = parse(length);
+      }
     }
 
     if ((offset && offset * 2 > this.value.length)
