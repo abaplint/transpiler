@@ -332,7 +332,7 @@ describe("Running Examples - Integer8 type", () => {
     const code = `
     DATA lv_int8 TYPE int8.
     DATA lv_hex8 TYPE x LENGTH 8.
-    lv_int8 = -1.
+    lv_int8 = 1.
     lv_hex8 = lv_int8.
     WRITE / lv_hex8.`;
     const js = await run(code);
@@ -341,7 +341,7 @@ describe("Running Examples - Integer8 type", () => {
     expect(abap.console.get()).to.equal("0000000000000001");
   });
 
-  it.only("hex to int8, zero", async () => {
+  it("hex to int8, zero", async () => {
     const code = `
     DATA lv_int8 TYPE int8.
     DATA lv_hex8 TYPE x LENGTH 8.
