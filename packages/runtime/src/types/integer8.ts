@@ -51,6 +51,7 @@ export class Integer8 {
           this.value = BigInt("0x" + value.get());
         }
       } else {
+// todo, what if the input is longer than 16 bytes?
         this.value = BigInt("0x" + value.get());
       }
     } else {
