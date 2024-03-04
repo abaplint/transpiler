@@ -514,4 +514,18 @@ describe("Running Examples - Integer8 type", () => {
     expect(abap.console.get()).to.equal("9007199254740992");
   });
 
+  it("from packed", async () => {
+    const code = `
+    TYPES ty_uint64 TYPE p LENGTH 11 DECIMALS 0.
+    DATA foo TYPE ty_uint64.
+    DATA int TYPE int8.
+    foo = 1000.
+    int = foo.
+    WRITE / foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1000");
+  });
+
 });
