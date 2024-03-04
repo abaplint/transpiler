@@ -545,4 +545,21 @@ describe("Running Examples - Integer8 type", () => {
     expect(abap.console.get()).to.equal("4611686014132420609\n4611686018427387904");
   });
 
+  it("min and max int4, as int8", async () => {
+    const code = `
+    DATA lv_int8 TYPE int8.
+    DATA lv_max TYPE int8.
+    DATA lv_min TYPE int8.
+    lv_max = 2147483647.
+    lv_min = -2147483648.
+    lv_int8 = lv_max * lv_max.
+    WRITE / lv_int8.
+    lv_int8 = lv_min * lv_min.
+    WRITE / lv_int8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4611686014132420609\n4611686018427387904");
+  });
+
 });
