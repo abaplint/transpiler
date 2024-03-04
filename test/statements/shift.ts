@@ -244,4 +244,65 @@ WRITE / my_variable.`;
     expect(abap.console.get()).to.equal("   he");
   });
 
+  it("SHIFT RIGHT BYTE CIRCULAR", async () => {
+    const code = `
+DATA lv_hex TYPE x LENGTH 4.
+lv_hex = '80000000'.
+SHIFT lv_hex RIGHT BY 3 PLACES IN BYTE MODE CIRCULAR.
+WRITE / lv_hex.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("00000080");
+  });
+
+  it("SHIFT RIGHT BYTE CIRCULAR, another", async () => {
+    const code = `
+DATA lv_hex TYPE x LENGTH 4.
+lv_hex = '80000011'.
+SHIFT lv_hex RIGHT BY 3 PLACES IN BYTE MODE CIRCULAR.
+WRITE / lv_hex.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("00001180");
+  });
+
+  it("SHIFT LEFT BYTE CIRCULAR", async () => {
+    const code = `
+DATA lv_hex TYPE x LENGTH 4.
+lv_hex = '80000000'.
+SHIFT lv_hex LEFT BY 3 PLACES IN BYTE MODE CIRCULAR.
+WRITE / lv_hex.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("00800000");
+  });
+
+  it("SHIFT LEFT BYTE CIRCULAR, another", async () => {
+    const code = `
+DATA lv_hex TYPE x LENGTH 4.
+lv_hex = '80000011'.
+SHIFT lv_hex LEFT BY 3 PLACES IN BYTE MODE CIRCULAR.
+WRITE / lv_hex.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("11800000");
+  });
+
+  it("SHIFT BYTE CIRCULAR, another", async () => {
+// LEFT is default?
+    const code = `
+DATA lv_hex TYPE x LENGTH 4.
+lv_hex = '80000011'.
+SHIFT lv_hex BY 3 PLACES IN BYTE MODE CIRCULAR.
+WRITE / lv_hex.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("11800000");
+  });
+
 });

@@ -97,10 +97,18 @@ function shift_byte_mode(target: ICharacter, options?: IShiftOptions) {
       value = value.substr(2);
     }
   } else if (options?.places) {
-    const p = options.places.get() * 2;
     if (options.circular) {
-      value = value.substr(p) + value.substr(0, p);
+      if (options.direction === "RIGHT") {
+        for (let i = 0; i < options.places.get(); i++) {
+          value = value.substr(value.length - 2) + value.substr(0, value.length - 2);
+        }
+      } else {
+        for (let i = 0; i < options.places.get(); i++) {
+          value = value.substr(2) + value.substr(0, 2);
+        }
+      }
     } else {
+      const p = options.places.get() * 2;
       value = value.substr(p);
     }
   } else if (options?.to) {
