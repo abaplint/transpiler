@@ -109,7 +109,11 @@ function shift_byte_mode(target: ICharacter, options?: IShiftOptions) {
       }
     } else {
       const p = options.places.get() * 2;
-      value = value.substr(p);
+      if (options.direction === "RIGHT") {
+        value = "0".repeat(p) + value.substring(0, p);
+      } else {
+        value = value.substr(p);
+      }
     }
   } else if (options?.to) {
     let to = "";
