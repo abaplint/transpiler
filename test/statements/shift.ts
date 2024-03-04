@@ -305,4 +305,17 @@ WRITE / lv_hex.`;
     expect(abap.console.get()).to.equal("11800000");
   });
 
+  it("SHIFT RIGHT 7 bytes", async () => {
+    const code = `
+DATA lv_hex8 TYPE x LENGTH 8.
+lv_hex8 = '0000000000000001'.
+WRITE / lv_hex8.
+SHIFT lv_hex8 RIGHT BY 7 PLACES IN BYTE MODE.
+WRITE / lv_hex8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0000000000000001\n0000000000000000");
+  });
+
 });
