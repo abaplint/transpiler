@@ -281,4 +281,18 @@ ASSERT foo IS INITIAL.`;
     expect(abap.console.get()).to.include("25");
   });
 
+  it.only("int8 into packed", async () => {
+    const code = `
+    TYPES ty_uint64 TYPE p LENGTH 11 DECIMALS 0.
+    DATA foo TYPE ty_uint64.
+    DATA int TYPE int8.
+    int = 1000.
+    foo = int.
+    WRITE / foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.include("25");
+  });
+
 });
