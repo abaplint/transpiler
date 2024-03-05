@@ -4,6 +4,10 @@ import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
 export function setBit(number: INumeric, hex: XString | Hex, val?: INumeric | ICharacter) {
+  if (number.get() <= 0) {
+    throw new Error("BIT_OFFSET_NOT_POSITIVE");
+  }
+
   let hexFull = hex.get();
   if (hexFull === "") {
     hexFull = "00";

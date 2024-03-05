@@ -12,6 +12,9 @@ export function parse(val: INumeric | ICharacter | string | number | Float | Int
     } else {
       return parseInt(val, 10);
     }
+  } else if (val instanceof Integer) {
+    // optimize, as this is the most common case
+    return val.get();
   } else if (val instanceof Float) {
     return val.getRaw();
   } else if (val instanceof XString || val instanceof Hex) {

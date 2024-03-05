@@ -64,6 +64,10 @@ export class XString implements ICharacter {
       } else {
         offset = parse(offset);
       }
+      if (offset * 2 > this.value.length
+          || offset < 0) {
+        throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
+      }
     }
 
     let length = input?.length;
@@ -73,27 +77,24 @@ export class XString implements ICharacter {
       } else {
         length = parse(length);
       }
+      if (length * 2 > this.value.length
+          || length < 0) {
+        throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
+      }
     }
 
-    if ((offset && offset * 2 > this.value.length)
-        || (length && length * 2 > this.value.length)
-        || (offset && length && offset * 2 + length * 2 > this.value.length)
-        || (offset && offset < 0)
-        || (length && length < 0)) {
-      throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
+    // NOTE: this only copies the minimal length of the string,
+    if (offset !== undefined && length !== undefined) {
+      if (offset * 2 + length * 2 > this.value.length) {
+        throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
+      }
+      return new XString().set(this.value.substr(offset * 2, length * 2));
+    } else if (offset !== undefined) {
+      return new XString().set(this.value.substr(offset * 2));
+    } else if (length !== undefined) {
+      return new XString().set(this.value.substr(0, length * 2));
+    } else {
+      throw new Error("xstring: getOffset, unexpected");
     }
-
-    let ret = this.value;
-    if (offset) {
-      // @ts-ignore
-      ret = ret.substr(offset * 2);
-    }
-    if (length !== undefined) {
-      // @ts-ignore
-      ret = ret.substr(0, length * 2);
-    }
-    const r = new XString();
-    r.set(ret);
-    return r;
   }
 }
