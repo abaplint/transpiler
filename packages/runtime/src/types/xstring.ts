@@ -83,12 +83,11 @@ export class XString implements ICharacter {
       }
     }
 
-    if (offset && length && offset * 2 + length * 2 > this.value.length) {
-      throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
-    }
-
     // NOTE: this only copies the minimal length of the string,
     if (offset !== undefined && length !== undefined) {
+      if (offset && length && offset * 2 + length * 2 > this.value.length) {
+        throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
+      }
       return new XString().set(this.value.substr(offset * 2, length * 2));
     } else if (offset !== undefined) {
       return new XString().set(this.value.substr(offset * 2));
