@@ -51,6 +51,33 @@ WRITE xstrlen( xstr ).`;
     expect(abap.console.get()).to.equal("0");
   });
 
+  it("offset zero", async () => {
+    const code = `
+    DATA xstr TYPE xstring.
+    WRITE xstr+0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("length zero", async () => {
+    const code = `
+    DATA xstr TYPE xstring.
+    WRITE xstr(0).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("length zero + offset zero", async () => {
+    const code = `
+    DATA xstr TYPE xstring.
+    WRITE xstr+0(0).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("ok, offset", async () => {
     const code = `
 DATA xstr TYPE xstring.

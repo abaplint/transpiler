@@ -88,11 +88,11 @@ export class XString implements ICharacter {
     }
 
     // NOTE: this only copies the minimal length of the string,
-    if (offset && length) {
+    if (offset !== undefined && length !== undefined) {
       return new XString().set(this.value.substr(offset * 2, length * 2));
-    } else if (offset) {
+    } else if (offset !== undefined) {
       return new XString().set(this.value.substr(offset * 2));
-    } else if (length) {
+    } else if (length !== undefined) {
       return new XString().set(this.value.substr(0, length * 2));
     } else {
       throw new Error("xstring: getOffset, unexpected");
