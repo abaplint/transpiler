@@ -135,7 +135,7 @@ WRITE count.`;
     expect(abap.console.get()).to.equal("5");
   });
 
-  it.only("Separated by INTF constant", async () => {
+  it("Separated by INTF constant", async () => {
     const code = `
 INTERFACE lif.
   CONSTANTS sep TYPE string VALUE '-'.
