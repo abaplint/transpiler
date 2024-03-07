@@ -9,7 +9,9 @@ export class ConcatenateTranspiler implements IStatementTranspiler {
     const concat = node.concatTokens().toUpperCase();
 
     const slist: Chunk[] = [];
-    for (const s of node.findDirectExpressions(abaplint.Expressions.Source)) {
+    for (const s of node.findDirectExpressions(abaplint.Expressions.Source).concat(
+      node.findDirectExpressions(abaplint.Expressions.SimpleSource3))) {
+
       slist.push(traversal.traverse(s));
     }
 
