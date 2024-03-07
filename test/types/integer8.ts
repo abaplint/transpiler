@@ -563,4 +563,76 @@ describe("Running Examples - Integer8 type", () => {
     expect(abap.console.get()).to.equal("4611686014132420609\n4611686018427387904");
   });
 
+  it("DIV rounding1", async () => {
+    const code = `
+    DATA int1 TYPE int8.
+    int1 = -1.
+    int1 = int1 DIV 2.
+    WRITE int1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("-1");
+  });
+
+  it("DIV rounding2", async () => {
+    const code = `
+    DATA int1 TYPE int8.
+    int1 = -2.
+    int1 = int1 DIV 2.
+    WRITE int1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("-1");
+  });
+
+  it("DIV rounding3", async () => {
+    const code = `
+    DATA int1 TYPE int8.
+    int1 = -3.
+    int1 = int1 DIV 2.
+    WRITE int1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("-2");
+  });
+
+  it("DIV rounding1 plus", async () => {
+    const code = `
+    DATA int1 TYPE int8.
+    int1 = 1.
+    int1 = int1 DIV 2.
+    WRITE int1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
+  it("DIV rounding2 plus", async () => {
+    const code = `
+    DATA int1 TYPE int8.
+    int1 = 2.
+    int1 = int1 DIV 2.
+    WRITE int1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
+  it("DIV rounding3 plus", async () => {
+    const code = `
+    DATA int1 TYPE int8.
+    int1 = 3.
+    int1 = int1 DIV 2.
+    WRITE int1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });
