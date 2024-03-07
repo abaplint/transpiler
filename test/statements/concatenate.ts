@@ -135,4 +135,24 @@ WRITE count.`;
     expect(abap.console.get()).to.equal("5");
   });
 
+  it.only("Separated by INTF constant", async () => {
+    const code = `
+INTERFACE lif.
+  CONSTANTS sep TYPE string VALUE '-'.
+ENDINTERFACE.
+
+DATA lt_version_parts TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+DATA res TYPE string.
+FIELD-SYMBOLS <l_version_part> LIKE LINE OF lt_version_parts.
+
+INSERT \`foo\` INTO TABLE lt_version_parts.
+INSERT \`bar\` INTO TABLE lt_version_parts.
+CONCATENATE LINES OF lt_version_parts INTO res SEPARATED BY lif=>sep.
+WRITE / res.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("foo-bar");
+  });
+
 });
