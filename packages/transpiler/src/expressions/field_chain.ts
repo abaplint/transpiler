@@ -17,7 +17,7 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
     const ret = new Chunk();
     const extra: string[] = [];
     let interfaceNameAdded = false;
-    console.dir("field chain");
+
     for (const c of node.getChildren()) {
       if (c.get() instanceof Expressions.SourceField
           || c.get() instanceof Expressions.Field) {
