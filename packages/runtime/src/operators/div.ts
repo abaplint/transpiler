@@ -22,10 +22,6 @@ export function div(left: INumeric | ICharacter | Integer8 | string | number, ri
       const sign2 = r < 0n;
       if (sign1 !== sign2) {
         div = div - 1n;
-        /*
-      } else {
-        div = div + 1n;
-        */
       }
     }
     return new Integer8().set(div);
