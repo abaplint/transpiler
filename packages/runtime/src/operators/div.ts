@@ -15,7 +15,16 @@ export function div(left: INumeric | ICharacter | Integer8 | string | number, ri
         throwError("CX_SY_ZERODIVIDE");
       }
     }
-    return new Integer8().set(l / r);
+    const remainder = l % r;
+    let div = l / r;
+    if (remainder !== 0n) {
+      const sign1 = l < 0n;
+      const sign2 = r < 0n;
+      if (sign1 !== sign2) {
+        div = div - 1n;
+      }
+    }
+    return new Integer8().set(div);
   }
 
   const l = parse(left);

@@ -25,7 +25,7 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
             const code = new FieldChainTranspiler(true).transpile(chain, traversal).getCode();
             ret += `" + abap.expandDynamic(${code}, (name) => {try { return eval(name);} catch {}}) + "`;
           } else {
-            throw new Error("SQL Condition, transpiler todo, dyn cond, " + c.concatTokens());
+            throw new Error("SQL Condition, transpiler todo, dyn cond, " + c.concatTokens() + ", " + traversal.getFilename());
           }
         } else if (c.findDirectExpression(abaplint.Expressions.SQLIn)) {
           ret += this.sqlIn(c, traversal, traversal.getFilename(), table);
