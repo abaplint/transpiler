@@ -635,4 +635,17 @@ describe("Running Examples - Integer8 type", () => {
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("large DIV from hex", async () => {
+    const code = `
+    DATA int TYPE int8.
+    DATA hex8 TYPE x LENGTH 8.
+    hex8 = '8000000000000001'.
+    int = hex8.
+    int = int DIV 1000.
+    ASSERT int = -9223372036854776.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
