@@ -8,7 +8,7 @@ export function setBit(number: INumeric, hex: XString | Hex, val?: INumeric | IC
     throw new Error("BIT_OFFSET_NOT_POSITIVE");
   }
 
-  let hexFull = hex.get();
+  const hexFull = hex.get();
   /*
   if (hexFull === "") {
     hexFull = "00";
@@ -16,7 +16,7 @@ export function setBit(number: INumeric, hex: XString | Hex, val?: INumeric | IC
   */
 
   const fullByteLength = Math.ceil(hexFull.length / 2);
-  hexFull = hexFull.padEnd(fullByteLength * 2, "0");
+  // hexFull = hexFull.padEnd(fullByteLength * 2, "0");
 
   const byteNum = Math.ceil(number.get() / 8);
 
