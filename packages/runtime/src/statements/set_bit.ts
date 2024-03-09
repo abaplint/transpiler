@@ -9,9 +9,11 @@ export function setBit(number: INumeric, hex: XString | Hex, val?: INumeric | IC
   }
 
   let hexFull = hex.get();
+  /*
   if (hexFull === "") {
     hexFull = "00";
   }
+  */
 
   const fullByteLength = Math.ceil(hexFull.length / 2);
   hexFull = hexFull.padEnd(fullByteLength * 2, "0");
