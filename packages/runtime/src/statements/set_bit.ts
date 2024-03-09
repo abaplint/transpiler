@@ -9,15 +9,7 @@ export function setBit(number: INumeric, hex: XString | Hex, val?: INumeric | IC
   }
 
   const hexFull = hex.get();
-  /*
-  if (hexFull === "") {
-    hexFull = "00";
-  }
-  */
-
   const fullByteLength = Math.ceil(hexFull.length / 2);
-  // hexFull = hexFull.padEnd(fullByteLength * 2, "0");
-
   const byteNum = Math.ceil(number.get() / 8);
 
   if (byteNum > fullByteLength) {
@@ -31,9 +23,9 @@ export function setBit(number: INumeric, hex: XString | Hex, val?: INumeric | IC
     if (byteNum > 1) {
       pre = hexFull.substr(0,(byteNum - 1) * 2);
     }
-    byte = hexFull.substr((byteNum - 1) * 2,2);
+    byte = hexFull.substr((byteNum - 1) * 2, 2);
     if (fullByteLength > byteNum) {
-      post = hexFull.substr(byteNum * 2,(fullByteLength - byteNum) * 2);
+      post = hexFull.substr(byteNum * 2, (fullByteLength - byteNum) * 2);
     }
   } else {
     byte = hexFull;
@@ -46,6 +38,7 @@ export function setBit(number: INumeric, hex: XString | Hex, val?: INumeric | IC
   } else {
     bits = bits |= bitMask;
   }
-  const reconstructed = pre + bits.toString(16).toUpperCase().padStart(2,"0") + post;
+
+  const reconstructed = pre + bits.toString(16).toUpperCase().padStart(2, "0") + post;
   hex.set(reconstructed);
 }
