@@ -23,14 +23,15 @@ export class Hex implements ICharacter {
   }
 
   public set(value: ICharacter | INumeric | string | number | Integer | Integer8 | Float): Hex {
+    const doubleLength = this.length * 2;
     if (typeof value === "string") {
       this.value = value;
     } else if (typeof value === "number") {
       const maxVal = Math.pow(2, this.length * 8);
       if (value < 0) {
         let hex = Math.round(value + 0x100000000).toString(16).toUpperCase();
-        if (hex.length > this.length * 2) {
-          hex = hex.substring(hex.length - this.length * 2);
+        if (hex.length > doubleLength) {
+          hex = hex.substring(hex.length - doubleLength);
         }
         this.value = hex;
       } else if (value >= maxVal) {
@@ -39,17 +40,17 @@ export class Hex implements ICharacter {
       } else {
         this.value = Math.round(value).toString(16);
       }
-      this.value = this.value.padStart(this.length * 2, "0");
+      this.value = this.value.padStart(doubleLength, "0");
     } else if (value instanceof Integer8) {
       let hex = "";
       if (value.get() < 0) {
         hex = (value.get() + 0x10000000000000000n).toString(16).toUpperCase();
-        if (hex.length > this.length * 2) {
-          hex = hex.substring(hex.length - this.length * 2);
+        if (hex.length > doubleLength) {
+          hex = hex.substring(hex.length - doubleLength);
         }
       } else {
         hex = value.get().toString(16).toUpperCase();
-        hex = hex.padStart(this.length * 2, "0");
+        hex = hex.padStart(doubleLength, "0");
       }
       this.set(hex);
     } else {
@@ -66,10 +67,11 @@ export class Hex implements ICharacter {
         }
       }
     }
-    if (this.value.length > this.length * 2) {
-      this.value = this.value.substr(0, this.length * 2);
-    } else if (this.value.length < this.length * 2) {
-      this.value = this.value.padEnd(this.length * 2, "0");
+
+    if (this.value.length > doubleLength) {
+      this.value = this.value.substr(0, doubleLength);
+    } else if (this.value.length < doubleLength) {
+      this.value = this.value.padEnd(doubleLength, "0");
     }
     this.value = this.value.toUpperCase();
     return this;

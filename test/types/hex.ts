@@ -412,4 +412,16 @@ WRITE / <foo>.`;
     await f(abap);
     expect(abap.console.get()).to.equal(`0000AA00000000000000`);
   });
+
+  it("test, lower case input", async () => {
+    const code = `
+DATA hex TYPE x LENGTH 2.
+hex = 'aAAA'.
+write / hex.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`0000`);
+  });
 });
