@@ -97,7 +97,6 @@ export class OffsetLength {
     } else if (this.offset) {
       old = old.substr(0, this.offset) + val;
     }
-    old = old.trimEnd();
 
     this.obj.set(old);
   }
