@@ -74,6 +74,7 @@ export class Hex implements ICharacter {
     } else if (this.value.length < doubleLength) {
       this.value = this.value.padEnd(doubleLength, "0");
     }
+    this.value = this.value.toUpperCase(); // todo, for some reason abapNTLM needs this? investigate
     return this;
   }
 

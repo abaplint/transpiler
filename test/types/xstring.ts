@@ -102,6 +102,19 @@ WRITE / xstr.`;
     expect(abap.console.get()).to.equal("0A");
   });
 
+  it("from integer added", async () => {
+    const code = `
+DATA hex TYPE x LENGTH 2.
+DATA xstr type xstring.
+xstr = '00'.
+xstr = 10 + 2.
+WRITE / xstr.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0C");
+  });
+
   it("throw CX_SY_RANGE_OUT_OF_BOUNDS", async () => {
     const code = `
 DATA xstr TYPE xstring.
