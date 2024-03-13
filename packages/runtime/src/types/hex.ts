@@ -54,13 +54,13 @@ export class Hex implements ICharacter {
         hex = value.get().toString(16).toUpperCase();
         hex = hex.padStart(doubleLength, "0");
       }
-      this.set(hex);
+      return this.set(hex);
     } else {
       const v = value.get();
       if (value instanceof Float) {
-        this.set(value.getRaw());
+        return this.set(value.getRaw());
       } else if (typeof v === "number") {
-        this.set(v);
+        return this.set(v);
       } else {
         this.value = v;
         if (this.value.match(REGEXP)) {
