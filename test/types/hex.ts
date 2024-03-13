@@ -398,4 +398,18 @@ START-OF-SELECTION.
     await f(abap);
     expect(abap.console.get()).to.equal(`00000000000000000000`);
   });
+
+  it("offset write with fs", async () => {
+    const code = `
+DATA hex TYPE x LENGTH 10.
+FIELD-SYMBOLS <foo> TYPE x.
+ASSIGN hex TO <foo>.
+<foo>+2(1) = 'AA'.
+WRITE / <foo>.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`0000AA00000000000000`);
+  });
 });
