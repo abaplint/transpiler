@@ -7,6 +7,8 @@ import {INumeric} from "./_numeric";
 import {throwError} from "../throw_error";
 import {Integer8} from "./integer8";
 
+const REGEXP = /^(?![A-F0-9])/;
+
 export class Hex implements ICharacter {
   private value: string;
   private readonly length: number;
@@ -62,7 +64,7 @@ export class Hex implements ICharacter {
         this.set(v);
       } else {
         this.value = v;
-        if (this.value.match(/^(?![A-F0-9])/)) {
+        if (this.value.match(REGEXP)) {
           this.value = "";
         }
       }
