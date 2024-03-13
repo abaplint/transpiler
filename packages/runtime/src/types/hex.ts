@@ -36,9 +36,9 @@ export class Hex implements ICharacter {
         this.value = hex;
       } else if (value >= maxVal) {
         const sub = value % maxVal;
-        this.value = Math.round(sub).toString(16);
+        this.value = Math.round(sub).toString(16).toUpperCase();
       } else {
-        this.value = Math.round(value).toString(16);
+        this.value = Math.round(value).toString(16).toUpperCase();
       }
       this.value = this.value.padStart(doubleLength, "0");
     } else if (value instanceof Integer8) {
@@ -73,7 +73,6 @@ export class Hex implements ICharacter {
     } else if (this.value.length < doubleLength) {
       this.value = this.value.padEnd(doubleLength, "0");
     }
-    this.value = this.value.toUpperCase();
     return this;
   }
 
