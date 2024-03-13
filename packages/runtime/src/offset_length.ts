@@ -73,7 +73,7 @@ export class OffsetLength {
     } else if (value instanceof Integer) {
       val = value.get() + "";
       if (this.isHex) {
-        val = Number(val).toString(16);
+        val = Number(val).toString(16).toUpperCase();
       }
     } else {
       val = value.get() + "";
