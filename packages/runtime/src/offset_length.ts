@@ -1,4 +1,4 @@
-import {Character, Hex, Integer, Structure, Time, XString} from "./types";
+import {Character, FieldSymbol, Hex, Integer, Structure, Time, XString} from "./types";
 import {ICharacter} from "./types/_character";
 import {INumeric} from "./types/_numeric";
 
@@ -13,10 +13,17 @@ export class OffsetLength {
   private readonly length?: number;
   private readonly isHex: boolean;
 
-  public constructor(obj: ICharacter | Character | Hex | XString | Structure, options: IOffsetLengthOptions) {
+  public constructor(obj: ICharacter | Character | Hex | XString | Structure | FieldSymbol, options: IOffsetLengthOptions) {
     this.obj = obj;
 
-    this.isHex = obj instanceof Hex || obj instanceof XString;
+    if (this.obj instanceof FieldSymbol) {
+      this.obj = this.obj.getPointer();
+      if (this.obj === undefined) {
+        throw new Error("GETWA_NOT_ASSIGNED");
+      }
+    }
+
+    this.isHex = this.obj instanceof Hex || this.obj instanceof XString;
 
     if (options.offset) {
       if (typeof options.offset === "number") {

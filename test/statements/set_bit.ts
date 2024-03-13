@@ -68,4 +68,26 @@ WRITE / hex.`;
     expect(abap.console.get()).to.equal("AAAAAAAAAAAAAAAA2AAAAAAAAAAAAAAA");
   });
 
+  it("SET BIT, short", async () => {
+    const code = `
+DATA xstr TYPE xstring.
+SET BIT 1 OF xstr.
+WRITE xstr.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("");
+  });
+
+  it("SET BIT, after", async () => {
+    const code = `
+DATA val TYPE x LENGTH 1.
+SET BIT 100 OF val.
+WRITE val.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("00");
+  });
+
 });
