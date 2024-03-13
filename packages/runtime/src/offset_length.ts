@@ -79,8 +79,6 @@ export class OffsetLength {
       val = value.get() + "";
     }
 
-    let old = this.obj instanceof Structure ? this.obj.getCharacter() : this.obj.get();
-
     if (this.length) {
       val = val.substr(0, this.length);
       if (this.isHex || this.obj instanceof Time) {
@@ -90,6 +88,7 @@ export class OffsetLength {
       }
     }
 
+    let old = this.obj instanceof Structure ? this.obj.getCharacter() : this.obj.get();
     if (this.length && this.offset) {
       old = old.substr(0, this.offset) + val + old.substr(this.offset + this.length);
     } else if (this.length) {

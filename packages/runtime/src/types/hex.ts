@@ -68,8 +68,7 @@ export class Hex implements ICharacter {
     }
     if (this.value.length > this.length * 2) {
       this.value = this.value.substr(0, this.length * 2);
-    }
-    if (this.value.length < this.length * 2) {
+    } else if (this.value.length < this.length * 2) {
       this.value = this.value.padEnd(this.length * 2, "0");
     }
     this.value = this.value.toUpperCase();
