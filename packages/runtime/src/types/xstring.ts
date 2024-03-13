@@ -38,7 +38,7 @@ export class XString implements ICharacter {
       } else if (value instanceof Character) {
         this.set(value.getTrimEnd());
       } else if (typeof v === "number") {
-        this.value = v.toString(16);
+        this.value = v.toString(16).toUpperCase();
         const finalLength = Math.ceil(this.value.length / 2 ) * 2;
         this.value = this.value.padStart(finalLength, "0");
       } else {
