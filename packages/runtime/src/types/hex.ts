@@ -56,10 +56,9 @@ export class Hex implements ICharacter {
       }
       this.set(hex);
     } else {
-      let v = value.get();
+      const v = value.get();
       if (value instanceof Float) {
-        v = value.getRaw();
-        this.set(v);
+        this.set(value.getRaw());
       } else if (typeof v === "number") {
         this.set(v);
       } else {
