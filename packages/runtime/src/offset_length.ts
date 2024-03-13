@@ -23,7 +23,6 @@ export class OffsetLength {
       }
     }
 
-
     this.isHex = this.obj instanceof Hex || this.obj instanceof XString;
 
     if (options.offset) {
@@ -103,10 +102,6 @@ export class OffsetLength {
       old = old.substr(0, this.offset) + val;
     }
     old = old.trimEnd();
-
-    if (this.obj instanceof Character) {
-      old = old.padEnd(this.obj.getLength(), " ");
-    }
 
     this.obj.set(old);
   }
