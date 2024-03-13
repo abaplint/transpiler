@@ -23,6 +23,7 @@ export class OffsetLength {
       }
     }
 
+
     this.isHex = this.obj instanceof Hex || this.obj instanceof XString;
 
     if (options.offset) {
