@@ -24,7 +24,7 @@ export class Hex implements ICharacter {
     return this.qualifiedName;
   }
 
-  public set(value: ICharacter | INumeric | string | number | Integer | Integer8 | Float): Hex {
+  public set(value: ICharacter | INumeric | string | number | Integer | Integer8 | Float | Hex | XString): Hex {
     const doubleLength = this.length * 2;
     if (typeof value === "string") {
       this.value = value;

@@ -64,7 +64,7 @@ export class OffsetLength {
     }
   }
 
-  public set(value: ICharacter | string) {
+  public set(value: ICharacter | string | Hex | XString) {
     let val = "";
     if (typeof value === "string") {
       val = value;
