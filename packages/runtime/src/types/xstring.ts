@@ -26,7 +26,7 @@ export class XString implements ICharacter {
       const finalLength = Math.ceil(this.value.length / 2 ) * 2;
       this.value = this.value.padEnd(finalLength, "0");
     } else if (typeof value === "number") {
-      this.value = Math.round(value).toString(16);
+      this.value = Math.round(value).toString(16).toUpperCase();
       if (this.value.length % 2 === 1) {
         this.value = "0" + this.value;
       }
@@ -38,7 +38,7 @@ export class XString implements ICharacter {
       } else if (value instanceof Character) {
         this.set(value.getTrimEnd());
       } else if (typeof v === "number") {
-        this.value = v.toString(16);
+        this.value = v.toString(16).toUpperCase();
         const finalLength = Math.ceil(this.value.length / 2 ) * 2;
         this.value = this.value.padStart(finalLength, "0");
       } else {

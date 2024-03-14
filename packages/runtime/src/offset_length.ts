@@ -64,7 +64,7 @@ export class OffsetLength {
     }
   }
 
-  public set(value: ICharacter | string) {
+  public set(value: ICharacter | string | Hex | XString) {
     let val = "";
     if (typeof value === "string") {
       val = value;
@@ -73,16 +73,10 @@ export class OffsetLength {
     } else if (value instanceof Integer) {
       val = value.get() + "";
       if (this.isHex) {
-        val = Number(val).toString(16);
+        val = Number(val).toString(16).toUpperCase();
       }
     } else {
       val = value.get() + "";
-    }
-
-    let old = this.obj instanceof Structure ? this.obj.getCharacter() : this.obj.get();
-
-    if (this.obj instanceof Character) {
-      old = old.padEnd(this.obj.getLength(), " ");
     }
 
     if (this.length) {
@@ -94,17 +88,13 @@ export class OffsetLength {
       }
     }
 
+    let old = this.obj instanceof Structure ? this.obj.getCharacter() : this.obj.get();
     if (this.length && this.offset) {
       old = old.substr(0, this.offset) + val + old.substr(this.offset + this.length);
     } else if (this.length) {
       old = val + old.substr(this.length);
     } else if (this.offset) {
       old = old.substr(0, this.offset) + val;
-    }
-    old = old.trimEnd();
-
-    if (this.obj instanceof Character) {
-      old = old.padEnd(this.obj.getLength(), " ");
     }
 
     this.obj.set(old);
