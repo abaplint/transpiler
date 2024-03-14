@@ -1,4 +1,4 @@
-
+// https://github.com/TooTallNate/pcre-to-regexp/blob/master/src/index.ts
 export class ABAPRegExp {
   // converts from ABAP specific regex to javascript regex
   public static convert(input: string): string {
