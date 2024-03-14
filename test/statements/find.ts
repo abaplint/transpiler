@@ -697,4 +697,16 @@ ASSERT ls_submatch-length = 4.`;
     await f(abap);
   });
 
+  it.only("FIND some REGEX", async () => {
+    const code = `
+DATA iv_path TYPE string.
+DATA foo TYPE string.
+iv_path = |s[?(@.name=='METH1')].d|.
+FIND FIRST OCCURRENCE OF REGEX '(\[[^]]*\])' IN iv_path SUBMATCHES foo.
+ASSERT foo = |[?(@.name=='METH1')]|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
