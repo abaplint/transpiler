@@ -10,8 +10,7 @@ export function getBit(number: INumeric, hex: XString | Hex | HexUInt8, output: 
     let int = hex.getOffsetRaw(byteIndex);
     int >>= (8 - bitIndex - 1);
     int &= 1;
-    // @ts-ignore
-    output.set(int);
+    output.set(int + "");
   } else {
     if (bitIndex < 0) {
       throw new Error("BIT_OFFSET_NOT_POSITIVE");
