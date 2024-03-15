@@ -1,6 +1,6 @@
 import * as abaplint from "@abaplint/core";
 
-const featureHexUInt8 = false;
+const featureHexUInt8 = true;
 
 // todo: change this class to static for performance?
 export class TranspileTypes {
