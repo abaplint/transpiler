@@ -64,6 +64,7 @@ export function describe(input: IDescribeOptions) {
     if (input.field instanceof Character
         || input.field instanceof Packed
         || input.field instanceof Numc
+        || input.field instanceof HexUInt8
         || input.field instanceof Hex) {
       input.length.set(input.field.getLength());
     } else {

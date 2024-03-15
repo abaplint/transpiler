@@ -667,11 +667,11 @@ abap.Classes['PROG-ZFOOBAR-LCL'] = lcl;`;
 
   it("kernel call", async () => {
     const abap = `
-DATA hex16 TYPE x LENGTH 16.
+DATA hex16 TYPE c LENGTH 16.
 CALL 'RFCControl'
   ID 'CODE' FIELD 'U'
   ID 'UUID' FIELD hex16.`;
-    const expected = `let hex16 = new abap.types.Hex({length: 16});
+    const expected = `let hex16 = new abap.types.Character(16, {});
 if (abap.Classes['KERNEL_CALL'] === undefined) throw new Error("Call kernel class missing");
 await abap.Classes['KERNEL_CALL'].call({name: new abap.types.Character(10).set('RFCControl'),code: new abap.types.Character(1).set('U'),uuid: hex16});`;
     expect(await runSingle(abap)).to.equals(expected);
