@@ -7,7 +7,7 @@ export function setBit(number: INumeric, hex: XString | Hex | HexUInt8, val?: IN
   if (number.get() <= 0) {
     throw new Error("BIT_OFFSET_NOT_POSITIVE");
   }
-
+// todo: optimize for HexUInt8
   const hexFull = hex.get();
   const fullByteLength = Math.ceil(hexFull.length / 2);
   const byteNum = Math.ceil(number.get() / 8);
