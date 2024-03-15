@@ -464,6 +464,34 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal(`AB`);
   });
 
+  it("test, copy internal table with hex", async () => {
+    const code = `
+TYPES:
+  BEGIN OF ty_global,
+    type TYPE x LENGTH 1,
+    mut  TYPE x LENGTH 1,
+  END OF ty_global.
+TYPES: ty_globals TYPE STANDARD TABLE OF ty_global WITH DEFAULT KEY.
+DATA mt_globals TYPE ty_globals.
+DATA bar TYPE ty_globals.
+DATA ls_global LIKE LINE OF mt_globals.
+
+ls_global-type = 'AB'.
+INSERT ls_global INTO TABLE mt_globals.
+
+bar = mt_globals.
+
+CLEAR ls_global.
+LOOP AT bar INTO ls_global.
+  WRITE ls_global-type.
+ENDLOOP.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`AB`);
+  });
+
   // todo,
   it.skip("hex offset write from int", async () => {
     const code = `
