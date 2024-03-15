@@ -144,9 +144,10 @@ describe("Running Examples - Integer type", () => {
     DATA int TYPE i VALUE -4242.
     DATA hex TYPE x LENGTH 3.
     hex = int.
-    ASSERT hex = 'FFEF6E'.`;
+    WRITE / hex.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+    expect(abap.console.get()).to.equal("FFEF6E");
   });
 });

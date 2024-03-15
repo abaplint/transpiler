@@ -26,7 +26,6 @@ export class HexUInt8 implements ICharacter {
   }
 
   public set(value: ICharacter | INumeric | string | number | Integer | Integer8 | Float | Hex | XString): HexUInt8 {
-
     let hexString = "";
     if (typeof value === "string") {
       hexString = value;
@@ -37,14 +36,15 @@ export class HexUInt8 implements ICharacter {
       const maxVal = Math.pow(2, this.length * 8);
       if (value < 0) {
         hexString = Math.round(value + 0x100000000).toString(16).toUpperCase();
-
       } else if (value >= maxVal) {
         const sub = value % maxVal;
         hexString = Math.round(sub).toString(16).toUpperCase();
       } else {
         hexString = Math.round(value).toString(16).toUpperCase();
       }
-      if (hexString.length < this.length * 2) {
+      if (hexString.length > this.length * 2) {
+        hexString = hexString.substring(hexString.length - this.length * 2);
+      } else if (hexString.length < this.length * 2) {
         hexString = hexString.padStart(this.length * 2, "0");
       }
     } else if (value instanceof Integer8) {
@@ -55,8 +55,7 @@ export class HexUInt8 implements ICharacter {
       }
       if (hexString.length > this.length * 2) {
         hexString = hexString.substring(hexString.length - this.length * 2);
-      }
-      if (hexString.length < this.length * 2) {
+      } else if (hexString.length < this.length * 2) {
         hexString = hexString.padStart(this.length * 2, "0");
       }
     } else {

@@ -222,10 +222,11 @@ describe("Running Examples - Hex type", () => {
     DATA crc TYPE x LENGTH 4.
     crc = '8F001100'.
     crc = crc DIV 256.
-    ASSERT crc = 'FF8F0011'.`;
+    WRITE crc.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+    expect(abap.console.get()).to.equal(`FF8F0011`);
   });
 
   it("Hex, DIV6", async () => {
