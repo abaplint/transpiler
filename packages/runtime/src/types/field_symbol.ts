@@ -7,6 +7,7 @@ import {Structure} from "./structure";
 import {Hex} from "./hex";
 import {Float} from "./float";
 import {DataReference} from "./data_reference";
+import {HexUInt8} from "./hex_uint8";
 
 type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Structure | Float;
 
@@ -66,7 +67,7 @@ export class FieldSymbol  {
 
   public get() {
     if (this.casting) {
-      if (this.type instanceof Hex) {
+      if (this.type instanceof Hex || this.type instanceof HexUInt8) {
         const pt = this.pointer;
         if (pt instanceof Float) {
           const buf = Buffer.allocUnsafe(8);

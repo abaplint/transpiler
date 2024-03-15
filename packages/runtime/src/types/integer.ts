@@ -5,6 +5,7 @@ import {XString} from "./xstring";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {Integer8} from "./integer8";
+import {HexUInt8} from "./hex_uint8";
 
 export const DIGITS = new RegExp(/^\s*-?\+?\d+\.?\d* *$/i);
 
@@ -59,10 +60,11 @@ export class Integer implements INumeric {
       this.set(Number(value.get()));
     } else if (value instanceof Float) {
       this.set(Math.round(value.getRaw()));
-    } else if (value instanceof Hex || value instanceof XString) {
+    } else if (value instanceof Hex || value instanceof XString || value instanceof HexUInt8) {
       let num = parseInt(value.get(), 16);
 // handle two complement,
-      if (value instanceof Hex && value.getLength() >= 4) {
+      if ((value instanceof Hex || value instanceof HexUInt8)
+          && value.getLength() >= 4) {
         const maxVal = Math.pow(2, value.get().length / 2 * 8);
         if (num > maxVal / 2 - 1) {
           num = num - maxVal;

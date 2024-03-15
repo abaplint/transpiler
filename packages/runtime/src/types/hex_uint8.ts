@@ -30,6 +30,9 @@ export class HexUInt8 implements ICharacter {
     let hexString = "";
     if (typeof value === "string") {
       hexString = value;
+      if (hexString.length < this.length * 2) {
+        hexString = hexString.padEnd(this.length * 2, "0");
+      }
     } else if (typeof value === "number") {
       const maxVal = Math.pow(2, this.length * 8);
       if (value < 0) {
@@ -41,11 +44,20 @@ export class HexUInt8 implements ICharacter {
       } else {
         hexString = Math.round(value).toString(16).toUpperCase();
       }
+      if (hexString.length < this.length * 2) {
+        hexString = hexString.padStart(this.length * 2, "0");
+      }
     } else if (value instanceof Integer8) {
       if (value.get() < 0) {
         hexString = (value.get() + 0x10000000000000000n).toString(16).toUpperCase();
       } else {
         hexString = value.get().toString(16).toUpperCase();
+      }
+      if (hexString.length > this.length * 2) {
+        hexString = hexString.substring(hexString.length - this.length * 2);
+      }
+      if (hexString.length < this.length * 2) {
+        hexString = hexString.padStart(this.length * 2, "0");
       }
     } else {
       const v = value.get();
@@ -58,13 +70,14 @@ export class HexUInt8 implements ICharacter {
         if (hexString.match(REGEXP)) {
           hexString = "";
         }
+        if (hexString.length < this.length * 2) {
+          hexString = hexString.padEnd(this.length * 2, "0");
+        }
       }
     }
 
-    if (hexString.length * 2 > this.length) {
+    if (hexString.length > this.length * 2) {
       hexString = hexString.substring(0, this.length * 2);
-    } else if (hexString.length * 2 < this.length) {
-      hexString = hexString.padStart(this.length * 2, "0");
     }
     this.value = Uint8Array.from(Buffer.from(hexString, "hex"));
 
@@ -96,7 +109,7 @@ export class HexUInt8 implements ICharacter {
       } else {
         offset = parse(offset);
       }
-      if (offset * 2 > this.value.length
+      if (offset > this.length
           || offset < 0) {
         throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
       }
@@ -109,19 +122,23 @@ export class HexUInt8 implements ICharacter {
       } else {
         length = parse(length);
       }
-      if (length * 2 > this.value.length
+      if (length > this.length
           || length < 0) {
         throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
       }
     }
 
     if (offset !== undefined && length !== undefined) {
-      if (offset * 2 + length * 2 > this.value.length) {
+      if (offset + length > this.length) {
         throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
       }
     }
 
-    const str = Buffer.from(this.value, offset, length).toString("hex").toUpperCase();
+// without copying, https://nodejs.org/api/buffer.html#static-method-bufferfromarraybuffer-byteoffset-length
+    const str = Buffer.from(this.value, offset, length)
+      .toString("hex")
+      .substring(0, length ? length * 2 : undefined )
+      .toUpperCase();
     return new XString().set(str);
   }
 }

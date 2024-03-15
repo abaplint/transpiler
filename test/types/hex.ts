@@ -287,7 +287,7 @@ describe("Running Examples - Hex type", () => {
     expect(abap.console.get()).to.equal(`00`);
   });
 
-  it("Hex, offset with field symbol", async () => {
+  it("Hex, offset get with field symbol", async () => {
     const code = `
 DATA val1 TYPE x LENGTH 16.
 DATA int TYPE i.
