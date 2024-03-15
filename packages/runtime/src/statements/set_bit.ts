@@ -11,7 +11,7 @@ export function setBit(number: INumeric, hex: XString | Hex | HexUInt8, val?: IN
     const bitIndex = (number.get() - 1) % 8;
 
     let bits = hex.getOffsetRaw(byteIndex);
-    const bitMask = 1 << 8 - bitIndex;
+    const bitMask = 1 << ( 8 - bitIndex - 1 );
     if (val?.get() === 0 || val?.get() === "0") {
       bits = bits &= ~bitMask;
     } else {

@@ -14,6 +14,17 @@ describe("Running statements - SET BIT", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
+  it("SET BIT simple", async () => {
+    const code = `
+    DATA hex TYPE x LENGTH 1.
+    SET BIT 1 OF hex.
+    WRITE / hex.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("80");
+  });
+
   it("SET BIT", async () => {
     const code = `
     DATA hex TYPE x LENGTH 1.
