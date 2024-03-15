@@ -88,15 +88,24 @@ export class OffsetLength {
       }
     }
 
-    let old = this.obj instanceof Structure ? this.obj.getCharacter() : this.obj.get();
-    if (this.length && this.offset) {
-      old = old.substr(0, this.offset) + val + old.substr(this.offset + this.length);
-    } else if (this.length) {
-      old = val + old.substr(this.length);
-    } else if (this.offset) {
-      old = old.substr(0, this.offset) + val;
-    }
+    if (this.isHex === true && this.obj instanceof HexUInt8) {
+      let base = this.offset ? this.offset / 2 : 0;
+      for (let current = 0; current < val.length; current += 2) {
+        const v = Number.parseInt(val.substr(current, 2), 16);
+        this.obj.setOffset(base, v);
+        base++;
+      }
+    } else {
+      let old = this.obj instanceof Structure ? this.obj.getCharacter() : this.obj.get();
+      if (this.length && this.offset) {
+        old = old.substr(0, this.offset) + val + old.substr(this.offset + this.length);
+      } else if (this.length) {
+        old = val + old.substr(this.length);
+      } else if (this.offset) {
+        old = old.substr(0, this.offset) + val;
+      }
 
-    this.obj.set(old);
+      this.obj.set(old);
+    }
   }
 }
