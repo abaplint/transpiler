@@ -37,8 +37,10 @@ export class Character implements ICharacter {
       throw new Error("Changing constant");
     }
 
-    if (typeof value === "string" || typeof value === "number") {
+    if (typeof value === "string") {
       this.value = value;
+    } else if (typeof value === "number") {
+      this.value = value + "";
     } else if (value instanceof FieldSymbol) {
       if (value.getPointer() === undefined) {
         throw new Error("GETWA_NOT_ASSIGNED");

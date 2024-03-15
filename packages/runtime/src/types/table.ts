@@ -11,6 +11,7 @@ import {insertInternal} from "../statements/insert_internal";
 import {sort} from "../statements/sort";
 import {Character} from "./character";
 import {Hex} from "./hex";
+import {HexUInt8} from "./hex_uint8";
 
 // const FEATURE_SHARED_TABLES = true;
 
@@ -199,6 +200,8 @@ export class HashedTable implements ITable {
           } else if (field instanceof Character && val instanceof Character && field.getLength() === val.getLength()) {
             val = val.get();
           } else if (field instanceof Hex && val instanceof Hex && field.getLength() === val.getLength()) {
+            val = val.get();
+          } else if (field instanceof HexUInt8 && val instanceof HexUInt8 && field.getLength() === val.getLength()) {
             val = val.get();
           } else {
             // convert

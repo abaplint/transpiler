@@ -14,6 +14,17 @@ describe("Running statements - SET BIT", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
+  it("SET BIT simple", async () => {
+    const code = `
+    DATA hex TYPE x LENGTH 1.
+    SET BIT 1 OF hex.
+    WRITE / hex.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("80");
+  });
+
   it("SET BIT", async () => {
     const code = `
     DATA hex TYPE x LENGTH 1.
@@ -23,22 +34,37 @@ describe("Running statements - SET BIT", () => {
       ENDIF.
       SET BIT sy-index OF hex.
       WRITE / hex.
-    ENDDO.
+    ENDDO.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("80\nC0\nE0\nF0\n08\n04\n02\n01");
+  });
 
+  it("SET BIT 2", async () => {
+    const code = `
     DATA xstr TYPE xstring.
     xstr = 'F2420FA000'.
     SET BIT 30 OF xstr.
     SET BIT 25 OF xstr TO 0.
     SET BIT 35 OF xstr TO 1.
-    WRITE / xstr.
+    WRITE / xstr.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("F2420F2420");
+  });
 
+  it("SET BIT 3", async () => {
+    const code = `
+    DATA xstr TYPE xstring.
     xstr = '03FF'.
     SET BIT 9 OF xstr TO 0.
     WRITE / xstr.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("80\nC0\nE0\nF0\n08\n04\n02\n01\nF2420F2420\n037F");
+    expect(abap.console.get()).to.equal("037F");
   });
 
   it("SET BIT, from offset, char", async () => {
