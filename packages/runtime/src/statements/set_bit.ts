@@ -13,9 +13,9 @@ export function setBit(number: INumeric, hex: XString | Hex | HexUInt8, val?: IN
     let bits = hex.getOffsetRaw(byteIndex);
     const bitMask = 1 << ( 8 - bitIndex - 1 );
     if (val?.get() === 0 || val?.get() === "0") {
-      bits = bits &= ~bitMask;
+      bits &= ~bitMask;
     } else {
-      bits = bits |= bitMask;
+      bits |= bitMask;
     }
     hex.setOffset(byteIndex, bits);
   } else {
@@ -45,9 +45,9 @@ export function setBit(number: INumeric, hex: XString | Hex | HexUInt8, val?: IN
     let bits = parseInt(byte,16);
     const bitMask = 1 << 8 - ( number.get() - ( byteNum - 1 ) * 8 );
     if (val?.get() === 0 || val?.get() === "0") {
-      bits = bits &= ~bitMask;
+      bits &= ~bitMask;
     } else {
-      bits = bits |= bitMask;
+      bits |= bitMask;
     }
 
     const reconstructed = pre + bits.toString(16).toUpperCase().padStart(2, "0") + post;
