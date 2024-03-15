@@ -1,4 +1,4 @@
-import {ABAPObject, Character, DataReference, Date, FieldSymbol, Float, HashedTable, Hex, Integer8, Numc, Structure, Table, Time} from "../types";
+import {ABAPObject, Character, DataReference, Date, FieldSymbol, Float, HashedTable, Hex, HexUInt8, Integer8, Numc, Structure, Table, Time} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -19,7 +19,7 @@ Integer8 | Structure | DataReference | FieldSymbol | Table | ABAPObject) {
     return val.get() === "00000000";
   } else if (val instanceof Numc) {
     return val.get().match(REGEX_ZEROS) !== null;
-  } else if (val instanceof Hex) {
+  } else if (val instanceof Hex || val instanceof HexUInt8) {
     return val.get().match(REGEX_ZEROS) !== null;
   } else if (val instanceof Time) {
     return val.get() === "000000";

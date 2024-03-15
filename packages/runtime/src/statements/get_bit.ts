@@ -1,9 +1,9 @@
-import {Hex, XString} from "../types";
+import {Hex, HexUInt8, XString} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
-export function getBit(number: INumeric, hex: XString | Hex, output: ICharacter) {
-
+export function getBit(number: INumeric, hex: XString | Hex | HexUInt8, output: ICharacter) {
+// todo: optimize for HexUInt8
   const charIndex = Math.floor((number.get() - 1) / 8);
   const bitIndex = (number.get() - 1) % 8;
   if (bitIndex < 0) {
