@@ -113,6 +113,8 @@ export class HexUInt8 implements ICharacter {
           || offset < 0) {
         throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
       }
+    } else {
+      offset = 0;
     }
 
     let length = input?.length;
@@ -134,10 +136,14 @@ export class HexUInt8 implements ICharacter {
       }
     }
 
-// without copying, https://nodejs.org/api/buffer.html#static-method-bufferfromarraybuffer-byteoffset-length
-    const str = Buffer.from(this.value, offset, length)
-      .toString("hex")
-      .substring(0, length ? length * 2 : undefined )
+    // not sure how this works: without copying, https://nodejs.org/api/buffer.html#static-method-bufferfromarraybuffer-byteoffset-length
+/*
+    console.dir(offset);
+    console.dir(length);
+    console.dir(this.value.subarray(offset, length ? offset + length : undefined));
+    console.dir(Buffer.from(this.value.subarray(offset, length ? offset + length : undefined)));
+*/
+    const str = Buffer.from(this.value.subarray(offset, length ? offset + length : undefined)).toString("hex")
       .toUpperCase();
     return new XString().set(str);
   }

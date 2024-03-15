@@ -406,10 +406,11 @@ describe("Running expressions - Length and offset", () => {
     hex100 = xstr.
     hex100+10(1) = '22'.
     hex = '0A'.
-    ASSERT hex100+hex(1) = '22'.`;
+    WRITE / hex100+hex(1).`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+    expect(abap.console.get()).to.equal("22");
   });
 
   it("structure based offset and length", async () => {

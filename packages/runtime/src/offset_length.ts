@@ -1,4 +1,4 @@
-import {Character, FieldSymbol, Hex, Integer, Structure, Time, XString} from "./types";
+import {Character, FieldSymbol, Hex, HexUInt8, Integer, Structure, Time, XString} from "./types";
 import {ICharacter} from "./types/_character";
 import {INumeric} from "./types/_numeric";
 
@@ -23,7 +23,7 @@ export class OffsetLength {
       }
     }
 
-    this.isHex = this.obj instanceof Hex || this.obj instanceof XString;
+    this.isHex = this.obj instanceof Hex || this.obj instanceof XString || this.obj instanceof HexUInt8;
 
     if (options.offset) {
       if (typeof options.offset === "number") {
