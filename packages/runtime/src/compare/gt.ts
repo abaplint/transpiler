@@ -1,5 +1,5 @@
 import {parse} from "../operators/_parse";
-import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Hex, Integer8, Structure, Table, XString} from "../types";
+import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Hex, HexUInt8, Integer8, Structure, Table, XString} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {Integer} from "../types/integer";
@@ -25,7 +25,7 @@ export function gt(
   if (left instanceof Table || right instanceof Table || left instanceof HashedTable || right instanceof HashedTable) {
     throw new Error("runtime_todo, gt TABLE");
   }
-  if (left instanceof Hex || right instanceof Hex) {
+  if (left instanceof Hex || right instanceof Hex || left instanceof HexUInt8 || right instanceof HexUInt8) {
     return gt_with_hex(left, right);
   }
 
@@ -87,6 +87,7 @@ function gt_with_hex(
 }
 
 function get_hex_from_parameter(comparison_part: number | string | ICharacter | INumeric | ABAPObject | Structure | Table): string {
+// todo: optimize?
   let hex_from_parameter = "";
 
   switch (typeof comparison_part) {
@@ -99,17 +100,16 @@ function get_hex_from_parameter(comparison_part: number | string | ICharacter | 
         .join("");
       break;
     case "object":
-      if (comparison_part instanceof Hex) {
+      if (comparison_part instanceof Hex
+          || comparison_part instanceof XString
+          || comparison_part instanceof HexUInt8
+          || comparison_part instanceof Character) {
         hex_from_parameter = comparison_part.get();
       } else if (comparison_part instanceof Integer) {
         hex_from_parameter = comparison_part.get().toString(16).toUpperCase();
         if (hex_from_parameter.length % 2 === 1) {
           hex_from_parameter = "0" + hex_from_parameter;
         }
-      } else if (comparison_part instanceof Character) {
-        hex_from_parameter = comparison_part.get();
-      } else if (comparison_part instanceof XString) {
-        hex_from_parameter = comparison_part.get();
       } else {
         throw new Error("runtime_todo, gt hex1");
       }

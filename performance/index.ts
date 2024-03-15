@@ -32,6 +32,7 @@ import {test26} from "./test26";
 import {test27} from "./test27";
 import {test28} from "./test28";
 import {test29} from "./test29";
+import {test30} from "./test30";
 
 // NOTE: does not run via Mocha
 
@@ -76,6 +77,7 @@ const tests: Tests = [
   {name: "27: READ TABLE, building hash", abap: test27},
   {name: "28: CONCATENATE", abap: test28},
   {name: "29: Write Hex to Hex via offset", abap: test29},
+  {name: "30: Get Hex from Hex via offset", abap: test30},
 ];
 
 async function execute(t: Test) {

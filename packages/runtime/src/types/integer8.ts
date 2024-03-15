@@ -7,6 +7,7 @@ import {INumeric} from "./_numeric";
 import {Integer} from "./integer";
 import {getBit} from "../statements/get_bit";
 import {Character} from "./character";
+import {HexUInt8} from "./hex_uint8";
 
 const digits = new RegExp(/^\s*-?\+?\d+\.?\d* *$/i);
 
@@ -40,7 +41,7 @@ export class Integer8 {
       this.value = BigInt(value);
     } else if (value instanceof Float) {
       this.set(Math.round(value.getRaw()));
-    } else if (value instanceof Hex || value instanceof XString) {
+    } else if (value instanceof Hex || value instanceof XString || value instanceof HexUInt8) {
       if (value.get().length === 16) {
         const lv_bit = new Character();
         getBit(new Integer().set(1), value, lv_bit);

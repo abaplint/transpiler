@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import {ABAPObject, Character, Date, FieldSymbol, Float, HashedTable, String, Hex, Integer, Numc, Structure, Table, DataReference, toInteger, XString, Integer8, Packed} from "../types";
+import {ABAPObject, Character, Date, FieldSymbol, Float, HashedTable, String, Hex, Integer, Numc, Structure, Table, DataReference, toInteger, XString, Integer8, Packed, HexUInt8} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "../operators/_parse";
@@ -58,6 +58,7 @@ export function eq(
     } else if (left instanceof String
         || left instanceof XString
         || left instanceof Numc
+        || left instanceof HexUInt8
         || left instanceof Hex) {
       return right.getTrimEnd() === left.get();
     }
@@ -96,12 +97,8 @@ export function eq(
 // this happens in dynamic/ANY typed scenarios?
       return false;
     }
-  } else if (right instanceof Hex) {
-    if (left instanceof Hex || left instanceof XString) {
-      return right.get() === left.get();
-    }
-  } else if (right instanceof XString) {
-    if (left instanceof Hex || left instanceof XString) {
+  } else if (right instanceof Hex || right instanceof HexUInt8 || right instanceof XString) {
+    if (left instanceof Hex || left instanceof XString || left instanceof HexUInt8) {
       return right.get() === left.get();
     }
   } else if (right instanceof ABAPObject) {
@@ -181,9 +178,11 @@ export function eq(
     r = right;
   }
 
-  if (right instanceof Hex && typeof l === "number") {
+  if ((right instanceof Hex || right instanceof HexUInt8) && typeof l === "number") {
+    // todo, handle this case earlier
     r = parseInt(right.get(), 16);
-  } else if (left instanceof Hex && typeof r === "number") {
+  } else if ((left instanceof Hex || left instanceof HexUInt8) && typeof r === "number") {
+    // todo, handle this case earlier
     l = parseInt(left.get(), 16);
   }
 

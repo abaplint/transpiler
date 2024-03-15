@@ -1,3 +1,4 @@
+import {expect} from "chai";
 import {ABAP, MemoryConsole} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -69,10 +70,11 @@ WRITE hex-11.`;
     DATA lane TYPE x LENGTH 8.
     CLEAR lane.
     lane+4 = '11223344'.
-    ASSERT lane = '0000000011223344'.`;
+    WRITE lane.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+    expect(abap.console.get()).to.equal("0000000011223344");
   });
 
 });

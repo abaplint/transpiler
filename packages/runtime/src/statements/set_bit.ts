@@ -1,13 +1,13 @@
 /* eslint-disable no-bitwise */
-import {Hex, XString} from "../types";
+import {Hex, HexUInt8, XString} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
-export function setBit(number: INumeric, hex: XString | Hex, val?: INumeric | ICharacter) {
+export function setBit(number: INumeric, hex: XString | Hex | HexUInt8, val?: INumeric | ICharacter) {
   if (number.get() <= 0) {
     throw new Error("BIT_OFFSET_NOT_POSITIVE");
   }
-
+// todo: optimize for HexUInt8
   const hexFull = hex.get();
   const fullByteLength = Math.ceil(hexFull.length / 2);
   const byteNum = Math.ceil(number.get() / 8);

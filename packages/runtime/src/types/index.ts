@@ -6,6 +6,7 @@ export * from "./decfloat34";
 export * from "./field_symbol";
 export * from "./float";
 export * from "./hex";
+export * from "./hex_uint8";
 export * from "./integer";
 export * from "./integer8";
 export * from "./numc";

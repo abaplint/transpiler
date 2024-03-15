@@ -1,5 +1,7 @@
 import * as abaplint from "@abaplint/core";
 
+const featureHexUInt8 = false;
+
 // todo: change this class to static for performance?
 export class TranspileTypes {
 
@@ -140,7 +142,7 @@ export class TranspileTypes {
       // if not supplied itsa a Hex(1)
       resolved = "Hex";
     } else if (type instanceof abaplint.BasicTypes.HexType) {
-      resolved = "Hex";
+      resolved = featureHexUInt8 ? "HexUInt8" : "Hex";
       if (type.getLength() !== 1) {
         extra = "{length: " + type.getLength() + "}";
       }

@@ -222,10 +222,11 @@ describe("Running Examples - Hex type", () => {
     DATA crc TYPE x LENGTH 4.
     crc = '8F001100'.
     crc = crc DIV 256.
-    ASSERT crc = 'FF8F0011'.`;
+    WRITE crc.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+    expect(abap.console.get()).to.equal(`FF8F0011`);
   });
 
   it("Hex, DIV6", async () => {
@@ -287,7 +288,7 @@ describe("Running Examples - Hex type", () => {
     expect(abap.console.get()).to.equal(`00`);
   });
 
-  it("Hex, offset with field symbol", async () => {
+  it("Hex, offset get with field symbol", async () => {
     const code = `
 DATA val1 TYPE x LENGTH 16.
 DATA int TYPE i.
@@ -423,6 +424,19 @@ write / hex.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal(`0000`);
+  });
+
+  it("test, long hex", async () => {
+    const code = `
+DATA hex TYPE x LENGTH 1000.
+DATA str TYPE string.
+str = hex.
+WRITE / strlen( str ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`2000`);
   });
 
   // todo,
