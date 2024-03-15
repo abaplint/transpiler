@@ -30,6 +30,11 @@ export class HexUInt8 implements ICharacter {
     this.value[offset] = value;
   }
 
+  public getOffsetRaw(offset: number) {
+// caller must validate offset
+    return this.value[offset];
+  }
+
   public set(value: ICharacter | INumeric | string | number | Integer | Integer8 | Float | Hex | XString): HexUInt8 {
     let hexString = "";
     if (typeof value === "string") {
