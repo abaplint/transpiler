@@ -426,6 +426,19 @@ write / hex.`;
     expect(abap.console.get()).to.equal(`0000`);
   });
 
+  it("test, long hex", async () => {
+    const code = `
+DATA hex TYPE x LENGTH 1000.
+DATA str TYPE string.
+str = hex.
+WRITE / strlen( str ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`2000`);
+  });
+
   // todo,
   it.skip("hex offset write from int", async () => {
     const code = `

@@ -100,8 +100,6 @@ export class HexUInt8 implements ICharacter {
   }
 
   public get(): string {
-// https://stackoverflow.com/questions/39225161/convert-uint8array-into-hex-string-equivalent-in-node-js
-// todo: this truncates the value if more than 255?
     return Buffer.from(this.value).toString("hex").toUpperCase();
   }
 
