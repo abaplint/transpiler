@@ -3,6 +3,7 @@ import {ABAPObject, Character, Date, FieldSymbol, Float, HashedTable, String, He
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "../operators/_parse";
+// import {initial} from "./initial";
 
 function compareTables(left: Table | HashedTable, right: Table | HashedTable): boolean {
   const leftArray = left.array();
@@ -97,10 +98,30 @@ export function eq(
 // this happens in dynamic/ANY typed scenarios?
       return false;
     }
-  } else if (right instanceof Hex || right instanceof HexUInt8 || right instanceof XString) {
+  } else if (right instanceof Hex || right instanceof XString || right instanceof HexUInt8) {
     if (left instanceof Hex || left instanceof XString || left instanceof HexUInt8) {
       return right.get() === left.get();
     }
+    /*
+  } else if (right instanceof HexUInt8) {
+// https://stackoverflow.com/questions/21553528/how-to-test-for-equality-in-arraybuffer-dataview-and-typedarray
+// new DataView(this.value.buffer).setInt32(0, 0, true);
+    if (left instanceof Hex || left instanceof XString) {
+      return right.get() === left.get();
+    } else if (left instanceof HexUInt8) {
+      const llen = left.getLength();
+      if (llen === right.getLength()) {
+// todo: this can be optimized by creating multi byte views?
+        for (let i = 0; i < llen; i++) {
+          if (right.getOffsetRaw(i) !== left.getOffsetRaw(i)) {
+            return false;
+          }
+        }
+      } else {
+        return initial(left) && initial(right);
+      }
+    }
+    */
   } else if (right instanceof ABAPObject) {
     if (left instanceof ABAPObject) {
       return right.get() === left.get();
