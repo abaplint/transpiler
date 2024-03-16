@@ -339,6 +339,16 @@ WRITE lv_hex(len).`;
     await f(abap);
   });
 
+  it("set hex from hex", async () => {
+    const code = `
+DATA hex1 TYPE x LENGTH 10.
+DATA hex2 TYPE x LENGTH 10.
+hex1 = hex2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("throw CX_SY_RANGE_OUT_OF_BOUNDS", async () => {
     const code = `
 DATA lv_hex TYPE x LENGTH 10.
@@ -437,6 +447,52 @@ WRITE / strlen( str ).`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal(`2000`);
+  });
+
+  it("comparing, different lengths, initial", async () => {
+    const code = `
+DATA hex1 TYPE x LENGTH 1.
+DATA hex2 TYPE x LENGTH 2.
+IF hex1 = hex2.
+  WRITE 'yes'.
+ELSE.
+  WRITE 'no'.
+ENDIF.
+
+IF hex2 = hex1.
+  WRITE 'yes'.
+ELSE.
+  WRITE 'no'.
+ENDIF.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`yesyes`);
+  });
+
+  it("comparing, different lengths, no", async () => {
+    const code = `
+DATA hex1 TYPE x LENGTH 1.
+DATA hex2 TYPE x LENGTH 2.
+hex1 = '11'.
+hex2 = '1111'.
+IF hex1 = hex2.
+  WRITE 'yes'.
+ELSE.
+  WRITE 'no'.
+ENDIF.
+
+IF hex2 = hex1.
+  WRITE 'yes'.
+ELSE.
+  WRITE 'no'.
+ENDIF.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`nono`);
   });
 
   it("test, loop", async () => {
