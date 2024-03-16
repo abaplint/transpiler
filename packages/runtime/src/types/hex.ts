@@ -55,6 +55,8 @@ export class Hex implements ICharacter {
         hex = hex.padStart(doubleLength, "0");
       }
       return this.set(hex);
+    } else if (value instanceof Hex) {
+      this.value = value.get();
     } else {
       const v = value.get();
       if (value instanceof Float) {

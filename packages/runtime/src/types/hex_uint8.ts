@@ -68,6 +68,11 @@ export class HexUInt8 implements ICharacter {
       } else if (hexString.length < this.length * 2) {
         hexString = hexString.padStart(this.length * 2, "0");
       }
+    } else if (value instanceof HexUInt8) {
+      hexString = value.get();
+      if (hexString.length < this.length * 2) {
+        hexString = hexString.padEnd(this.length * 2, "0");
+      }
     } else {
       const v = value.get();
       if (value instanceof Float) {
