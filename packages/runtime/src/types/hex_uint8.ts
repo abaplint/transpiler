@@ -119,7 +119,8 @@ export class HexUInt8 implements ICharacter {
   public get(): string {
 //    return Buffer.from(this.value).toString("hex").toUpperCase();
     let out = "";
-    for (let idx = 0, edx = this.value.length; idx < edx; idx++) {
+    // eslint-disable-next-line @typescript-eslint/prefer-for-of
+    for (let idx = 0; idx < this.value.length; idx++) {
       out += LUT_HEX_8b[this.value[idx]];
     }
     return out;
