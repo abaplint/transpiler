@@ -112,7 +112,7 @@ export function eq(
   } else if (right instanceof HexUInt8) {
 // https://stackoverflow.com/questions/21553528/how-to-test-for-equality-in-arraybuffer-dataview-and-typedarray
 // new DataView(this.value.buffer).setInt32(0, 0, true);
-    if (left instanceof Hex || left instanceof XString) {
+    if (left instanceof XString) {
       return right.get() === left.get();
     } else if (left instanceof HexUInt8) {
       const llen = left.getLength();
