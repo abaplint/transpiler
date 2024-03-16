@@ -3,7 +3,7 @@ import {ABAPObject, Character, Date, FieldSymbol, Float, HashedTable, String, He
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "../operators/_parse";
-// import {initial} from "./initial";
+import {initial} from "./initial";
 
 function compareTables(left: Table | HashedTable, right: Table | HashedTable): boolean {
   const leftArray = left.array();
@@ -99,7 +99,13 @@ export function eq(
       return false;
     }
   } else if (right instanceof Hex || right instanceof XString || right instanceof HexUInt8) {
-    if (left instanceof Hex || left instanceof XString || left instanceof HexUInt8) {
+    if (left instanceof Hex || left instanceof HexUInt8) {
+      // @ts-ignore
+      if (right.getLength && right.getLength() !== left.getLength()) {
+        return initial(left) && initial(right);
+      }
+      return right.get() === left.get();
+    } else if (left instanceof XString ) {
       return right.get() === left.get();
     }
     /*
