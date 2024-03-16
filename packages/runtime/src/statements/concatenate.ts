@@ -56,7 +56,7 @@ export function concatenate(input: IConcatenateInput) {
       result += val + sep;
     }
 
-    if (result.length > 0) {
+    if (sep.length > 0 && result.length > 0) {
       result = result.slice(0, result.length - sep.length);
     }
 
