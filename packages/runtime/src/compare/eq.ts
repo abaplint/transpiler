@@ -110,14 +110,14 @@ export function eq(
     }
     /*
   } else if (right instanceof HexUInt8) {
-// https://stackoverflow.com/questions/21553528/how-to-test-for-equality-in-arraybuffer-dataview-and-typedarray
-// new DataView(this.value.buffer).setInt32(0, 0, true);
     if (left instanceof XString) {
       return right.get() === left.get();
     } else if (left instanceof HexUInt8) {
+// https://stackoverflow.com/questions/21553528/how-to-test-for-equality-in-arraybuffer-dataview-and-typedarray
       const llen = left.getLength();
       if (llen === right.getLength()) {
 // todo: this can be optimized by creating multi byte views?
+//       new DataView(this.value.buffer).setInt32(0, 0, true);
         for (let i = 0; i < llen; i++) {
           if (right.getOffsetRaw(i) !== left.getOffsetRaw(i)) {
             return false;
