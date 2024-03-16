@@ -68,7 +68,7 @@ export class HexUInt8 implements ICharacter {
       } else if (hexString.length < this.length * 2) {
         hexString = hexString.padStart(this.length * 2, "0");
       }
-    } else if (value instanceof HexUInt8) {
+    } else if (value instanceof HexUInt8 || value instanceof XString) {
       hexString = value.get();
       if (hexString.length < this.length * 2) {
         hexString = hexString.padEnd(this.length * 2, "0");
