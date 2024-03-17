@@ -370,6 +370,11 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({});`}, // todo
 
     {abap: "MESSAGE lx_exception TYPE 'S' DISPLAY LIKE 'E'.",
       js: `await abap.statements.message({exception: lx_exception, type: new abap.types.Character(1).set('S'), displayLike: new abap.types.Character(1).set('E')});`, skip: false},
+
+    {abap: "select count( * ) from tab into res where enable_sqlite = abap_true.",
+      js: `await abap.statements.select(res, {select: "SELECT count( * )  from " + abap.buildDbTableName("tab") + " WHERE \\"enable_sqlite\\" = '" + abap.builtin.abap_true.get() + "'"});`, skip: false},
+    {abap: "select count( * ) from tab into res where ('enable_sqlite = abap_true').",
+      js: `await abap.statements.select(res, {select: "SELECT count( * )  from " + abap.buildDbTableName("tab") + " WHERE \\"enable_sqlite\\" = 'X'"});`, skip: false},
   ];
 
   for (const test of tests) {

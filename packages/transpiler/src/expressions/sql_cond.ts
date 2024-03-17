@@ -25,7 +25,13 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
             const code = new FieldChainTranspiler(true).transpile(chain, traversal).getCode();
             ret += `" + abap.expandDynamic(${code}, (name) => {try { return eval(name);} catch {}}) + "`;
           } else {
-            throw new Error("SQL Condition, transpiler todo, dyn cond, " + c.concatTokens() + ", " + traversal.getFilename());
+            const concat = c.concatTokens();
+            if (concat.toUpperCase() === "('ENABLE_SQLITE = ABAP_TRUE')") {
+              // yea, this is a workaround
+              ret += ` \\"enable_sqlite\\" = 'X'`;
+            } else {
+              throw new Error("SQL Condition, transpiler todo, dyn cond, " + concat + ", " + traversal.getFilename());
+            }
           }
         } else if (c.findDirectExpression(abaplint.Expressions.SQLIn)) {
           ret += this.sqlIn(c, traversal, traversal.getFilename(), table);
