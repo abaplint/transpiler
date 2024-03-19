@@ -43,7 +43,8 @@ export class Traversal {
     } else if (node instanceof abaplint.Nodes.ExpressionNode) {
       return this.traverseExpression(node);
     } else if (node === undefined) {
-      throw new Error("Traverse, node undefined");
+      // perhaps the file contains syntax errors? these are not reported for dependencies
+      throw new Error("Traverse, node undefined, " + this.getFilename());
     } else {
       throw new Error("Traverse, unexpected node type");
     }

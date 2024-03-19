@@ -31,12 +31,10 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
           const t = new FieldChainTranspiler(true).transpile(second, traversal).getCode();
 
           call = traversal.lookupClassOrInterface(t, child.getFirstToken(), true);
-          ret.appendString(`if (${call} === undefined && ${illegalClass} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }\n`);
-          ret.appendString(`if (${call} === undefined) { throw new ${illegalClass}(); }\n`);
+          ret.appendString(`if (${call} === undefined) { if (${illegalClass} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; } else {throw new ${illegalClass}(); } }\n`);
         } else if (second.get() instanceof Expressions.Constant) {
           call = traversal.lookupClassOrInterface(second.getFirstToken().getStr(), child.getFirstToken(), true);
-          ret.appendString(`if (${call} === undefined && ${illegalClass} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; }\n`);
-          ret.appendString(`if (${call} === undefined) { throw new ${illegalClass}(); }\n`);
+          ret.appendString(`if (${call} === undefined) { if (${illegalClass} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; } else {throw new ${illegalClass}(); } }\n`);
 
           const name = children[i + 2];
           if (name.get() instanceof Expressions.AttributeName) {
