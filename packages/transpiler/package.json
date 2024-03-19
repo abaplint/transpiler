@@ -33,7 +33,7 @@
     "source-map": "^0.7.4"
   },
   "devDependencies": {
-    "@types/chai": "^4.3.12",
+    "@types/chai": "^4.3.13",
     "@types/mocha": "^10.0.6",
     "chai": "^4.4.1",
     "mocha": "^10.3.0",
