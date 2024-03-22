@@ -349,7 +349,7 @@ WRITE lv.`;
     expect(abap.console.get()).to.equal("0000000000000040");
   });
 
-  it.skip("ASSIGN float CASTING TYPE x, assign", async () => {
+  it("ASSIGN float CASTING TYPE x, assign", async () => {
 // javascript / open-abap is little endian
     const code = `
     DATA lv_f TYPE f.
