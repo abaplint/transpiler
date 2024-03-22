@@ -108,6 +108,17 @@ export class FieldSymbol  {
   }
 
   public set(value: any) {
+    if (this.casting) {
+      if (this.type instanceof Hex || this.type instanceof HexUInt8) {
+        const pt = this.pointer;
+        if (pt instanceof Float) {
+          const buf = Buffer.from(value.get(), "hex");
+          pt.set(buf.readDoubleLE());
+          return;
+        }
+      }
+    }
+
     this.pointer?.set(value);
     return this;
   }

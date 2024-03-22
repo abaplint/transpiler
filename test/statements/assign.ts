@@ -336,6 +336,7 @@ WRITE lv.`;
   });
 
   it("ASSIGN float CASTING TYPE x", async () => {
+// javascript / open-abap is little endian
     const code = `
     DATA lv_f TYPE f.
     FIELD-SYMBOLS <lv_hex> TYPE x.
@@ -346,6 +347,19 @@ WRITE lv.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0000000000000040");
+  });
+
+  it("ASSIGN float CASTING TYPE x, assign", async () => {
+// javascript / open-abap is little endian
+    const code = `
+    DATA lv_f TYPE f.
+    FIELD-SYMBOLS <lv_hex> TYPE x.
+    ASSIGN lv_f TO <lv_hex> CASTING TYPE x.
+    <lv_hex> = '0000000000000040'.
+    ASSERT lv_f = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it("recursion and field symbols", async () => {
