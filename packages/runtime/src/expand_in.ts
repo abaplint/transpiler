@@ -15,6 +15,8 @@ export function expandIN(fieldName: string, table: Table) {
     for (const row of table.array()) {
       if (row.get().sign?.get() === "I" && row.get().option?.get() === "EQ") {
         values.push(`"${fieldName}" = '` + row.get().low?.get().replace(/'/g, "''") + "'");
+      } else if (row.get().sign?.get() === "I" && row.get().option?.get() === "CP") {
+        values.push(`"${fieldName}" LIKE '` + row.get().low?.get().trimEnd().replace(/'/g, "''").replace(/\*/g, "%") + "'");
       } else {
         throw new Error(`IN, ${row.get().sign?.get()} ${row.get().option?.get()} not supported`);
       }

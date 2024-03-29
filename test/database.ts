@@ -549,7 +549,7 @@ ASSERT sy-subrc = 0.`;
     });
   });
 
-  it.only("SELECT, IN CP", async () => {
+  it("SELECT, IN CP", async () => {
     const code = `
     TYPES ty_range TYPE RANGE OF t100-arbgb.
     DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
