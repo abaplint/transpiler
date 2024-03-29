@@ -648,4 +648,15 @@ describe("Running Examples - Integer8 type", () => {
     await f(abap);
   });
 
+  it("write value", async () => {
+    const code = `
+    DATA lv_exp TYPE int8.
+    lv_exp = 430656791676715017.
+    WRITE / lv_exp.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("430656791676715017");
+  });
+
 });

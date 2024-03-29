@@ -87,23 +87,6 @@
             "@typescript-eslint/no-non-null-assertion": "off",
             "@typescript-eslint/explicit-member-accessibility": "error",
             "@typescript-eslint/consistent-type-assertions": "error",
-            "@typescript-eslint/indent": [
-                "error",
-                2,
-                {
-                    "SwitchCase": 1,
-                    "ignoreComments": true,
-                    "CallExpression": {
-                        "arguments": "first"
-                    },
-                    "FunctionDeclaration": {
-                        "parameters": "first"
-                    },
-                    "FunctionExpression": {
-                        "parameters": "first"
-                    }
-                }
-            ],
             "@typescript-eslint/interface-name-prefix": "off",
             "@typescript-eslint/member-delimiter-style": "off",
             "@typescript-eslint/member-ordering": "off",
@@ -116,14 +99,6 @@
             "@typescript-eslint/no-var-requires": "error",
             "@typescript-eslint/prefer-for-of": "error",
             "@typescript-eslint/prefer-namespace-keyword": "error",
-            "@typescript-eslint/quotes": [
-                "error",
-                "double",
-                {
-                    "avoidEscape": true,
-                    "allowTemplateLiterals": true
-                }
-            ],
             "@typescript-eslint/restrict-plus-operands": "off",
             "@typescript-eslint/semi": [
                 "error",
@@ -216,15 +191,15 @@
         "@types/mocha": "^10.0.6",
         "@types/node": "^20.11.30",
         "@types/sql.js": "^1.4.9",
-        "@typescript-eslint/eslint-plugin": "^7.3.1",
-        "@typescript-eslint/parser": "^7.3.1",
+        "@typescript-eslint/eslint-plugin": "^7.4.0",
+        "@typescript-eslint/parser": "^7.4.0",
         "chai": "^4.4.1",
         "cross-fetch": "^4.0.0",
         "dotenv": "^16.4.5",
         "eslint-plugin-import": "^2.29.1",
         "eslint": "^8.57.0",
         "fast-xml-parser": "^4.3.6",
-        "mocha": "^10.3.0",
+        "mocha": "^10.4.0",
         "pg": "^8.11.3",
         "pg-cursor": "^2.10.3",
         "snowflake-sdk": "^1.10.0",
