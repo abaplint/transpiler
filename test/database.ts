@@ -549,6 +549,29 @@ ASSERT sy-subrc = 0.`;
     });
   });
 
+  it("SELECT, IN CP", async () => {
+    const code = `
+    TYPES ty_range TYPE RANGE OF t100-arbgb.
+    DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+    DATA lt_range TYPE ty_range.
+    DATA ls_range LIKE LINE OF lt_range.
+
+    ls_range-low = 'ZAG_UNIT*'.
+    ls_range-sign = 'I'.
+    ls_range-option = 'CP'.
+    APPEND ls_range TO lt_range.
+
+    SELECT * FROM t100 INTO TABLE lt_t100 WHERE arbgb IN lt_range.
+    WRITE / sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2");
+    });
+  });
+
   it("SELECT, dynamic WHERE condition, constants", async () => {
     const code = `
     DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
