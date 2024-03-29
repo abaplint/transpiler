@@ -21,7 +21,7 @@ export class ConstantTranspiler implements IExpressionTranspiler {
         // https://stackoverflow.com/questions/1379934/large-numbers-erroneously-rounded-in-javascript
         code = `new abap.types.Integer8().set("${concat}")`;
       } else if (parsed > 2147483647 || parsed < -2147483648) {
-        code = `new abap.types.Integer8().set(${concat})`;
+        code = `new abap.types.Integer8().set("${concat}")`;
       } else if (parsed >= -10 && parsed <= 200) {
         code = `abap.IntegerFactory.get(${concat})`;
       } else {
