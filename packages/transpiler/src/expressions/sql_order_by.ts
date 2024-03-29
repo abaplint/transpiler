@@ -8,15 +8,19 @@ import {SQLFieldNameTranspiler} from "./sql_field_name";
 export class SQLOrderByTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
-    const ret = new Chunk();
+    let text = "";
     for (const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.ExpressionNode && c.get() instanceof abaplint.Expressions.SQLFieldName) {
-        ret.appendString(new SQLFieldNameTranspiler().transpile(c, traversal).getCode() + " ");
+        if (text !== "" && text.endsWith(`" `)) {
+          text += ", ";
+        }
+        text += new SQLFieldNameTranspiler().transpile(c, traversal).getCode().toLowerCase() + " ";
       } else {
-        ret.appendString(c.concatTokens() + " ");
+        text += c.concatTokens() + " ";
       }
     }
-    return ret;
+
+    return new Chunk().appendString(text);
   }
 
 }

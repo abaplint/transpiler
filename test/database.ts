@@ -230,6 +230,20 @@ describe("Top level tests, Database", () => {
     });
   });
 
+  it("SELECT INTO TABLE, ORDER BY two fields", async () => {
+    const code = `
+    DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+    SELECT * FROM t100 INTO TABLE tab ORDER BY ARBGB MSGNR.
+    WRITE sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2");
+    });
+  });
+
   it("SELECT INTO TABLE, ORDER BY PRIMARY KEY, dynamic", async () => {
     const code = `
     DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
