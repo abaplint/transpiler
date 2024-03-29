@@ -145,7 +145,8 @@ WRITE / ref2->*.`;
   it("INSERT string", async () => {
     const code = `
   DATA result TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
-  INSERT '' INTO TABLE result.
+  DATA str TYPE string.
+  INSERT str INTO TABLE result.
   ASSERT lines( result ) = 1.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
