@@ -16,7 +16,7 @@ export function expandIN(fieldName: string, table: Table) {
       if (row.get().sign?.get() === "I" && row.get().option?.get() === "EQ") {
         values.push(`"${fieldName}" = '` + row.get().low?.get().replace(/'/g, "''") + "'");
       } else {
-        throw new Error("Error: IN, only I EQ supported for now");
+        throw new Error(`IN, ${row.get().sign?.get()} ${row.get().option?.get()} not supported`);
       }
     }
     ret += values.join(" OR ") + ")";
