@@ -10,16 +10,16 @@ export function expandIN(fieldName: string, table: Table) {
     // LIKE '%' does not work in snowflake with RTRIM collation
     ret = `true`;
   } else {
-    ret = `"${fieldName}" IN (`;
+    ret = `(`;
     const values: string[] = [];
     for (const row of table.array()) {
       if (row.get().sign?.get() === "I" && row.get().option?.get() === "EQ") {
-        values.push("'" + row.get().low?.get().replace(/'/g, "''") + "'");
+        values.push(`"${fieldName}" = '` + row.get().low?.get().replace(/'/g, "''") + "'");
       } else {
         throw new Error("Error: IN, only I EQ supported for now");
       }
     }
-    ret += values.join(",") + ")";
+    ret += values.join(" OR ") + ")";
   }
 
   return ret;
