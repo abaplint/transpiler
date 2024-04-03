@@ -363,6 +363,7 @@ run().then(() => {
           || obj instanceof abaplint.Objects.LockObject
           || obj instanceof abaplint.Objects.MessageClass
           || obj instanceof abaplint.Objects.MIMEObject
+          || obj instanceof abaplint.Objects.Oauth2Profile
           || obj instanceof abaplint.Objects.WebMIME
           || obj instanceof abaplint.Objects.TypePool
           || obj instanceof abaplint.Objects.TableType) {
