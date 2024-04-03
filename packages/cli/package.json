@@ -30,7 +30,7 @@
     "@types/glob": "^8.1.0",
     "glob": "=7.2.0",
     "@types/progress": "^2.0.7",
-    "@types/node": "^20.11.30",
+    "@types/node": "^20.12.3",
     "@abaplint/core": "^2.106.5",
     "progress": "^2.0.3",
     "webpack": "^5.91.0",
