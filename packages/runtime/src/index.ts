@@ -42,6 +42,7 @@ export class ABAP {
   public FunctionModules: {[name: string]: any} = {};
   public Interfaces: {[name: string]: any} = {};
   public MSAG: {[name: string]: any} = {};
+  public OA2P: {[name: string]: any} = {};
   public SMIM: {[name: string]: any} = {};
   public TypePools: {[name: string]: any} = {};
   public W3MI: {[name: string]: any} = {};
