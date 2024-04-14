@@ -25,7 +25,7 @@ export function toInteger(value: string, exception = true): number {
       throw new Error("CONVT_NO_NUMBER");
     }
   }
-  return parseInt(value, 10);
+  return Math.round(parseFloat(value));
 }
 
 export class Integer implements INumeric {
