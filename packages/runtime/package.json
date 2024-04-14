@@ -34,9 +34,9 @@
     "chai": "^4.4.1",
     "mocha": "^10.4.0",
     "source-map-support": "^0.5.21",
-    "typescript": "^5.4.3"
+    "typescript": "^5.4.5"
   },
   "dependencies": {
-    "temporal-polyfill": "^0.2.3"
+    "temporal-polyfill": "^0.2.4"
   }
 }
