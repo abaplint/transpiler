@@ -151,7 +151,7 @@ describe("Running Examples - Integer type", () => {
     expect(abap.console.get()).to.equal("FFEF6E");
   });
 
-  it.only("rounding from char", async () => {
+  it.only("rounding from char, up", async () => {
     const code = `
     DATA lv_date_int TYPE i.
     lv_date_int = '45141.58832'.
@@ -160,5 +160,16 @@ describe("Running Examples - Integer type", () => {
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("45142");
+  });
+
+  it.only("rounding from char, down", async () => {
+    const code = `
+    DATA lv_date_int TYPE i.
+    lv_date_int = '45141.58832'.
+    WRITE / lv_date_int.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("45141");
   });
 });
