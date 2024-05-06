@@ -29,11 +29,11 @@
   "author": "abaplint",
   "license": "MIT",
   "dependencies": {
-    "@abaplint/core": "^2.107.1",
+    "@abaplint/core": "^2.107.3",
     "source-map": "^0.7.4"
   },
   "devDependencies": {
-    "@types/chai": "^4.3.14",
+    "@types/chai": "^4.3.16",
     "@types/mocha": "^10.0.6",
     "chai": "^4.4.1",
     "mocha": "^10.4.0",
