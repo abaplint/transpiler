@@ -31,7 +31,7 @@
     "glob": "=7.2.0",
     "@types/progress": "^2.0.7",
     "@types/node": "^20.12.10",
-    "@abaplint/core": "^2.107.5",
+    "@abaplint/core": "^2.108.0",
     "progress": "^2.0.3",
     "webpack": "^5.91.0",
     "webpack-cli": "^5.1.4",
