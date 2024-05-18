@@ -30,7 +30,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
         host: this.config.host,
         database: this.config.database,
         password: this.config.password,
-        port: 5432,
+        port: this.config.port,
       });
     }
     // cleanup after use
