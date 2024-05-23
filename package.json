@@ -186,7 +186,7 @@
     },
     "homepage": "https://github.com/abaplint/transpiler_poc#readme",
     "devDependencies": {
-        "@abaplint/core": "^2.108.8",
+        "@abaplint/core": "^2.108.10",
         "@types/chai": "^4.3.16",
         "@types/mocha": "^10.0.6",
         "@types/node": "^20.12.12",
@@ -198,7 +198,7 @@
         "dotenv": "^16.4.5",
         "eslint-plugin-import": "^2.29.1",
         "eslint": "^8.57.0",
-        "fast-xml-parser": "^4.3.6",
+        "fast-xml-parser": "^4.4.0",
         "mocha": "^10.4.0",
         "pg": "^8.11.5",
         "pg-cursor": "^2.10.5",
