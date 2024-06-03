@@ -59,10 +59,10 @@ export class Transpiler {
     progress?.set(reg.getObjectCount(false), "Building");
     for (const obj of reg.getObjects()) {
       await progress?.tick("Building, " + obj.getName());
-      if (obj instanceof abaplint.ABAPObject && !(obj instanceof abaplint.Objects.TypePool)) {
-        output.objects.push(...new HandleABAP(this.options).runObject(obj, reg));
-      } else if (obj instanceof abaplint.Objects.TypePool) {
+      if (obj instanceof abaplint.Objects.TypePool) {
         output.objects.push(...new HandleTypePool().runObject(obj, reg));
+      } else if (obj instanceof abaplint.ABAPObject) {
+        output.objects.push(...new HandleABAP(this.options).runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.Oauth2Profile) {
         output.objects.push(...new HandleOA2P().runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.Table) {

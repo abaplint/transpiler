@@ -2328,7 +2328,196 @@ ENDCLASS.`;
       {filename: "if_bar.intf.abap", contents: intf},
       {filename: "zcl_html.clas.abap", contents: clas},
     ];
-    await dumpNrun(files);
+    await dumpNrun(files, false);
+  });
+
+  it.skip("test-56", async () => {
+    // State via top variable in function group
+
+    const file1 = `class ZCL_FUGR_TEST definition public final create public .
+  public section.
+  protected section.
+  private section.
+ENDCLASS.
+
+CLASS ZCL_FUGR_TEST IMPLEMENTATION.
+ENDCLASS.`;
+
+    const file2 = `CLASS ltcl_Test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS FINAL.
+  PRIVATE SECTION.
+    METHODS test FOR TESTING.
+ENDCLASS.
+
+
+CLASS ltcl_Test IMPLEMENTATION.
+
+  METHOD test.
+
+    DATA lc_value TYPE i VALUE 34.
+    DATA lv_value TYPE i.
+
+    CALL FUNCTION 'ZFUGR_SET'
+      EXPORTING
+        value = lc_value.
+
+    CALL FUNCTION 'ZFUGR_GET'
+      IMPORTING
+        value = lv_value.
+
+    ASSERT lv_value = lc_value.
+
+  ENDMETHOD.
+
+ENDCLASS.`;
+
+    const file3 = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_CLAS" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <VSEOCLASS>
+    <CLSNAME>ZCL_FUGR_TEST</CLSNAME>
+    <LANGU>E</LANGU>
+    <DESCRIPT>test</DESCRIPT>
+    <STATE>1</STATE>
+    <CLSCCINCL>X</CLSCCINCL>
+    <FIXPT>X</FIXPT>
+    <UNICODE>X</UNICODE>
+    <WITH_UNIT_TESTS>X</WITH_UNIT_TESTS>
+   </VSEOCLASS>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
+    const file4 = `FUNCTION-POOL zfugr.                        "MESSAGE-ID ..
+
+* INCLUDE LZFUGRD...                         " Local class definition
+
+DATA int TYPE i.`;
+
+    const file5 = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <PROGDIR>
+    <NAME>LZFUGRTOP</NAME>
+    <DBAPL>S</DBAPL>
+    <DBNA>D$</DBNA>
+    <SUBC>I</SUBC>
+    <APPL>S</APPL>
+    <FIXPT>X</FIXPT>
+    <LDBNAME>D$S</LDBNAME>
+    <UCCHECK>X</UCCHECK>
+   </PROGDIR>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
+    const file6 = `
+  INCLUDE LZFUGRTOP.                         " Global Declarations
+  INCLUDE LZFUGRUXX.                         " Function Modules`;
+
+    const file7 = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <PROGDIR>
+    <NAME>SAPLZFUGR</NAME>
+    <DBAPL>S</DBAPL>
+    <DBNA>D$</DBNA>
+    <SUBC>F</SUBC>
+    <APPL>S</APPL>
+    <RLOAD>E</RLOAD>
+    <FIXPT>X</FIXPT>
+    <LDBNAME>D$S</LDBNAME>
+    <UCCHECK>X</UCCHECK>
+   </PROGDIR>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
+    const file8 = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_FUGR" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <AREAT>test</AREAT>
+   <INCLUDES>
+    <SOBJ_NAME>LZFUGRTOP</SOBJ_NAME>
+    <SOBJ_NAME>SAPLZFUGR</SOBJ_NAME>
+   </INCLUDES>
+   <FUNCTIONS>
+    <item>
+     <FUNCNAME>ZFUGR_GET</FUNCNAME>
+     <SHORT_TEXT>get</SHORT_TEXT>
+     <EXPORT>
+      <RSEXP>
+       <PARAMETER>VALUE</PARAMETER>
+       <TYP>I</TYP>
+      </RSEXP>
+     </EXPORT>
+     <DOCUMENTATION>
+      <RSFDO>
+       <PARAMETER>VALUE</PARAMETER>
+       <KIND>P</KIND>
+      </RSFDO>
+     </DOCUMENTATION>
+    </item>
+    <item>
+     <FUNCNAME>ZFUGR_SET</FUNCNAME>
+     <SHORT_TEXT>set</SHORT_TEXT>
+     <IMPORT>
+      <RSIMP>
+       <PARAMETER>VALUE</PARAMETER>
+       <REFERENCE>X</REFERENCE>
+       <TYP>I</TYP>
+      </RSIMP>
+     </IMPORT>
+     <DOCUMENTATION>
+      <RSFDO>
+       <PARAMETER>VALUE</PARAMETER>
+       <KIND>P</KIND>
+      </RSFDO>
+     </DOCUMENTATION>
+    </item>
+   </FUNCTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
+    const file9 = `FUNCTION zfugr_get.
+*"----------------------------------------------------------------------
+*"*"Local Interface:
+*"  EXPORTING
+*"     VALUE(VALUE) TYPE  I
+*"----------------------------------------------------------------------
+
+  value = int.
+
+ENDFUNCTION.`;
+
+    const file10 = `FUNCTION zfugr_set.
+*"----------------------------------------------------------------------
+*"*"Local Interface:
+*"  IMPORTING
+*"     REFERENCE(VALUE) TYPE  I
+*"----------------------------------------------------------------------
+
+  int = value.
+
+ENDFUNCTION.`;
+
+    const files = [
+      {filename: "zcl_fugr_test.clas.abap", contents: file1},
+      {filename: "zcl_fugr_test.clas.testclasses.abap", contents: file2},
+      {filename: "zcl_fugr_test.clas.xml", contents: file3},
+      {filename: "zfugr.fugr.lzfugrtop.abap", contents: file4},
+      {filename: "zfugr.fugr.lzfugrtop.xml", contents: file5},
+      {filename: "zfugr.fugr.saplzfugr.abap", contents: file6},
+      {filename: "zfugr.fugr.saplzfugr.xml", contents: file7},
+      {filename: "zfugr.fugr.xml", contents: file8},
+      {filename: "zfugr.fugr.zfugr_get.abap", contents: file9},
+      {filename: "zfugr.fugr.zfugr_set.abap", contents: file10},
+    ];
+    await dumpNrun(files, false);
   });
 
 });

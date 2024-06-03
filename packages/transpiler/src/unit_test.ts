@@ -240,23 +240,24 @@ async function run() {
     for (const st of this.getSortedTests(reg)) {
       ret += `// --------------------------------------------\n`;
       ret += `    clas = unit.addObject("${st.obj.getName()}");\n`;
+      const lc = st.localClass.toLowerCase();
       ret += `    {
-        const {${st.localClass}} = await import("./${this.escapeNamespace(st.obj.getName().toLowerCase())}.${st.obj.getType().toLowerCase()}.testclasses.mjs");
-        locl = clas.addTestClass("${st.localClass}");
-        if (${st.localClass}.class_setup) await ${st.localClass}.class_setup();\n`;
+        const {${lc}} = await import("./${this.escapeNamespace(st.obj.getName().toLowerCase())}.${st.obj.getType().toLowerCase()}.testclasses.mjs");
+        locl = clas.addTestClass("${lc}");
+        if (${lc}.class_setup) await ${lc}.class_setup();\n`;
 
       for (const m of st.methods) {
-        const skipThis = (skip || []).some(a => a.object === st.obj.getName() && a.class === st.localClass && a.method === m);
+        const skipThis = (skip || []).some(a => a.object === st.obj.getName() && a.class === lc && a.method === m);
         if (skipThis) {
-          ret += `  console.log('${st.obj.getName()}: running ${st.localClass}->${m}, skipped');\n`;
+          ret += `  console.log('${st.obj.getName()}: running ${lc}->${m}, skipped');\n`;
           ret += `  meth = locl.addMethod("${m}");\n`;
           ret += `  meth.skip();\n`;
           continue;
         }
 
-        ret += `      {\n        const test = await (new ${st.localClass}()).constructor_();\n`;
+        ret += `      {\n        const test = await (new ${lc}()).constructor_();\n`;
         ret += `        if (test.setup) await test.setup();\n`;
-        ret += `        console.log("${st.obj.getName()}: running ${st.localClass}->${m}");\n`;
+        ret += `        console.log("${st.obj.getName()}: running ${lc}->${m}");\n`;
         ret += `        meth = locl.addMethod("${m}");\n`;
         ret += `        await test.${m}();\n`;
         ret += `        meth.pass();\n`;
@@ -264,7 +265,7 @@ async function run() {
         ret += `      }\n`;
       }
 
-      ret += `      if (${st.localClass}.class_teardown) await ${st.localClass}.class_teardown();\n`;
+      ret += `      if (${lc}.class_teardown) await ${lc}.class_teardown();\n`;
       ret += `    }\n`;
     }
 /*

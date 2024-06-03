@@ -6,8 +6,39 @@ import {Integer} from "../types/integer";
 
 
 export function gt(
-  left: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | HashedTable,
-  right: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | HashedTable): boolean {
+  left: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | HashedTable | Integer8,
+  right: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | HashedTable | Integer8): boolean {
+
+  if (right instanceof Integer) {
+    if (left instanceof Integer) {
+      return left.get() > right.get();
+    } else if (left instanceof Float) {
+      return left.getRaw() > right.get();
+    } else if (left instanceof Character) {
+      return parse(left) > right.get();
+    } else if (left instanceof Integer8) {
+      const l = left.get();
+      const r = BigInt(right.get());
+      return l > r;
+    }
+  } else if (right instanceof Float) {
+    if (left instanceof Float) {
+      return left.getRaw() > right.getRaw();
+    } else if (left instanceof Integer) {
+      return left.get() > right.getRaw();
+    } else if (left instanceof Integer8) {
+      const l = left.get();
+      const r = BigInt(right.getRaw());
+      return l > r;
+    }
+  } else if (right instanceof Integer8) {
+    if (left instanceof Table || left instanceof HashedTable) {
+      throw new Error("runtime_todo, gt TABLE");
+    }
+    const l = left instanceof Integer8 ? left.get() : BigInt(parse(left));
+    const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));
+    return l > r;
+  }
 
   if (left instanceof FieldSymbol) {
     if (left.getPointer() === undefined) {
@@ -21,17 +52,15 @@ export function gt(
     return gt(left, right.getPointer());
   }
 
-
   if (left instanceof Table || right instanceof Table || left instanceof HashedTable || right instanceof HashedTable) {
     throw new Error("runtime_todo, gt TABLE");
-  }
-  if (left instanceof Hex || right instanceof Hex || left instanceof HexUInt8 || right instanceof HexUInt8) {
+  } else if (left instanceof Hex || right instanceof Hex || left instanceof HexUInt8 || right instanceof HexUInt8) {
     return gt_with_hex(left, right);
   }
 
-  if (left instanceof Integer8 || right instanceof Integer8) {
-    const l = left instanceof Integer8 ? left.get() : BigInt(parse(left));
-    const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));
+  if (left instanceof Integer8) {
+    const l = left.get();
+    const r = BigInt(parse(right));
     return l > r;
   }
 
@@ -69,24 +98,26 @@ export function gt(
 
   if (l === undefined) {
     return true; // todo, not sure this is correct
-  }
-  if (r === undefined) {
+  } else if (r === undefined) {
     return true; // todo, not sure this is correct
   }
 
   return l > r;
 }
 
+///////////////////////////////////////////////////////////////////
+
 function gt_with_hex(
-  left: number | string | ICharacter | INumeric | ABAPObject | Structure | Table,
-  right: number | string | ICharacter | INumeric | ABAPObject | Structure | Table): boolean {
+  left: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | Integer8,
+  right: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | Integer8): boolean {
 
   const left_hex = get_hex_from_parameter(left);
   const right_hex = get_hex_from_parameter(right);
   return left_hex > right_hex;
 }
 
-function get_hex_from_parameter(comparison_part: number | string | ICharacter | INumeric | ABAPObject | Structure | Table): string {
+function get_hex_from_parameter(
+  comparison_part: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | Integer8): string {
 // todo: optimize?
   let hex_from_parameter = "";
 
