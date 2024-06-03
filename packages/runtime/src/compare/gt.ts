@@ -18,7 +18,7 @@ export function gt(
       return parse(left) > right.get();
     } else if (left instanceof Integer8) {
       const l = left.get();
-      const r = BigInt(parse(right));
+      const r = BigInt(right.get());
       return l > r;
     }
   } else if (right instanceof Float) {
@@ -26,7 +26,18 @@ export function gt(
       return left.getRaw() > right.getRaw();
     } else if (left instanceof Integer) {
       return left.get() > right.getRaw();
+    } else if (left instanceof Integer8) {
+      const l = left.get();
+      const r = BigInt(right.getRaw());
+      return l > r;
     }
+  } else if (right instanceof Integer8) {
+    if (left instanceof Table || left instanceof HashedTable) {
+      throw new Error("runtime_todo, gt TABLE");
+    }
+    const l = left instanceof Integer8 ? left.get() : BigInt(parse(left));
+    const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));
+    return l > r;
   }
 
   if (left instanceof FieldSymbol) {
@@ -47,9 +58,9 @@ export function gt(
     return gt_with_hex(left, right);
   }
 
-  if (left instanceof Integer8 || right instanceof Integer8) {
-    const l = left instanceof Integer8 ? left.get() : BigInt(parse(left));
-    const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));
+  if (left instanceof Integer8) {
+    const l = left.get();
+    const r = BigInt(parse(right));
     return l > r;
   }
 
