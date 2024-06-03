@@ -24,8 +24,7 @@ export function gt(
 
   if (left instanceof Table || right instanceof Table || left instanceof HashedTable || right instanceof HashedTable) {
     throw new Error("runtime_todo, gt TABLE");
-  }
-  if (left instanceof Hex || right instanceof Hex || left instanceof HexUInt8 || right instanceof HexUInt8) {
+  } else if (left instanceof Hex || right instanceof Hex || left instanceof HexUInt8 || right instanceof HexUInt8) {
     return gt_with_hex(left, right);
   }
 
@@ -69,13 +68,14 @@ export function gt(
 
   if (l === undefined) {
     return true; // todo, not sure this is correct
-  }
-  if (r === undefined) {
+  } else if (r === undefined) {
     return true; // todo, not sure this is correct
   }
 
   return l > r;
 }
+
+///////////////////////////////////////////////////////////////////
 
 function gt_with_hex(
   left: number | string | ICharacter | INumeric | ABAPObject | Structure | Table,
