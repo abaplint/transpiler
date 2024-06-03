@@ -181,38 +181,38 @@ export class HashedTable implements ITable {
 
   public buildHashFromSimple(data: {[key: string]: any}): string {
     let hash = "";
-    const ttyp = this.getRowType();
+    const tableRowType = this.getRowType();
     for (const k of this.options.primaryKey!.keyFields) {
       let val = data[k.toLowerCase()];
-      if (val instanceof Structure) {
-        val = val.getCharacter();
-      } else {
-        // convert to correct type, eg Chars have specific length, or rounding,
-        if (k === "TABLE_LINE") {
-          const rowType = clone(ttyp) as any;
-          rowType.set(val.get());
-          val = rowType.get();
-        } else if (ttyp instanceof Structure) {
-          const field = ttyp.get()[k.toLowerCase()];
-          // if types match, there is no need to clone
-          if (field instanceof String && val instanceof String) {
-            val = val.get();
-          } else if (field instanceof Character && val instanceof Character && field.getLength() === val.getLength()) {
-            val = val.get();
-          } else if (field instanceof Hex && val instanceof Hex && field.getLength() === val.getLength()) {
-            val = val.get();
-          } else if (field instanceof HexUInt8 && val instanceof HexUInt8 && field.getLength() === val.getLength()) {
-            val = val.get();
-          } else {
-            // convert
-            const rowType = clone(field) as any;
-            rowType.set(val.get());
-            val = rowType.get();
-          }
+
+      // convert to correct type, eg Chars have specific length, or rounding,
+      if (k === "TABLE_LINE") {
+        const row = clone(tableRowType) as any;
+        row.set(val.get());
+        val = row.get();
+      } else if (tableRowType instanceof Structure) {
+        const field = tableRowType.get()[k.toLowerCase()];
+        // if types match, there is no need to clone
+        if (field instanceof String && val instanceof String) {
+          val = val.get();
+        } else if (field instanceof Character && val instanceof Character && field.getLength() === val.getLength()) {
+          val = val.get();
+        } else if (field instanceof Hex && val instanceof Hex && field.getLength() === val.getLength()) {
+          val = val.get();
+        } else if (field instanceof HexUInt8 && val instanceof HexUInt8 && field.getLength() === val.getLength()) {
+          val = val.get();
+        } else if (val instanceof Structure) {
+          val = val.getCharacter();
         } else {
-          throw new Error("HashedTable, buildHashFromSimple, unexpected type");
+          // convert
+          const row = clone(field) as any;
+          row.set(val.get());
+          val = row.get();
         }
+      } else {
+        throw new Error("HashedTable, buildHashFromSimple, unexpected type");
       }
+
       hash += k + ":" + val + "|";
     }
     return hash;
