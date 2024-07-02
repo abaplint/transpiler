@@ -31,10 +31,10 @@
     "glob": "=7.2.0",
     "@types/progress": "^2.0.7",
     "@types/node": "^20.14.9",
-    "@abaplint/core": "^2.110.2",
+    "@abaplint/core": "^2.110.3",
     "progress": "^2.0.3",
     "webpack": "^5.92.1",
     "webpack-cli": "^5.1.4",
-    "typescript": "^5.5.2"
+    "typescript": "^5.5.3"
   }
 }
