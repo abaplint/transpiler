@@ -67,6 +67,7 @@ export class Keywords {
     for (const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.TokenNodeRegex) {
         const token = c.getFirstToken();
+
         const start = token.getStart();
         if (start instanceof abaplint.VirtualPosition) {
           continue;
