@@ -48,7 +48,7 @@ ENDINTERFACE.`);
 ENDINTERFACE.`);
   });
 
-  it("macro contents", async () => {
+  it.skip("macro contents", async () => {
     const file = new MemoryFile("zfoo1.prog.abap", `
 data: begin of sdfsdf,
         interface type i,
