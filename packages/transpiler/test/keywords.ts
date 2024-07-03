@@ -48,4 +48,32 @@ ENDINTERFACE.`);
 ENDINTERFACE.`);
   });
 
+  it("macro contents", async () => {
+    const file = new MemoryFile("zfoo1.prog.abap", `
+data: begin of sdfsdf,
+        interface type i,
+      end of sdfsdf.
+
+define _foo.
+  clear sdfsdf-&1.
+end-of-definition.
+
+_foo interface.`);
+    const reg = new Registry().addFile(file);
+
+    new Keywords().handle(reg);
+
+    const after = reg.getFirstObject()?.getFiles()[0].getRaw();
+    expect(after).to.equal(`
+data: begin of sdfsdf,
+        interface_ type i,
+      end of sdfsdf.
+
+define _foo.
+  clear sdfsdf-&1.
+end-of-definition.
+
+_foo interface_.`);
+  });
+
 });

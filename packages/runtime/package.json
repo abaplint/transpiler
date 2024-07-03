@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/runtime",
-  "version": "2.8.27",
+  "version": "2.8.28",
   "description": "Transpiler - Runtime",
   "main": "build/src/index.js",
   "typings": "build/src/index.d.ts",
@@ -30,11 +30,11 @@
   "license": "MIT",
   "devDependencies": {
     "@types/chai": "^4.3.16",
-    "@types/mocha": "^10.0.6",
+    "@types/mocha": "^10.0.7",
     "chai": "^4.4.1",
-    "mocha": "^10.4.0",
+    "mocha": "^10.6.0",
     "source-map-support": "^0.5.21",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.3"
   },
   "dependencies": {
     "temporal-polyfill": "^0.2.5"

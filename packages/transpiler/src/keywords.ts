@@ -43,7 +43,11 @@ export class Keywords {
       for (const f of o.getABAPFiles()) {
         const tokens: abaplint.Token[] = [];
         for (const s of f.getStatements()) {
-          tokens.push(...this.traverse(s, f));
+          if (s.get() instanceof abaplint.MacroCall) {
+            tokens.push(...this.handleMacro(s));
+          } else {
+            tokens.push(...this.traverse(s, f));
+          }
         }
         if (tokens.length === 0) {
           continue;
@@ -61,12 +65,30 @@ export class Keywords {
     reg.parse();
   }
 
+  private handleMacro(node: abaplint.Nodes.StatementNode): abaplint.Token[] {
+    const tokens: abaplint.Token[] = [];
+
+    for (const token of node.getTokens()) {
+      for (const k of this.keywords) {
+        const lower = token.getStr().toLowerCase();
+        if (k === lower
+            || "!" + k === lower
+            || lower.endsWith("~" + k)) {
+          tokens.push(token);
+        }
+      }
+    }
+
+    return tokens;
+  }
+
   private traverse(node: abaplint.INode, file: abaplint.ABAPFile): abaplint.Token[] {
 
     const ret: abaplint.Token[] = [];
     for (const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.TokenNodeRegex) {
         const token = c.getFirstToken();
+
         const start = token.getStart();
         if (start instanceof abaplint.VirtualPosition) {
           continue;
