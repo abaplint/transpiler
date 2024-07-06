@@ -2331,7 +2331,7 @@ ENDCLASS.`;
     await dumpNrun(files, false);
   });
 
-  it.skip("test-56", async () => {
+  it.only("test-56", async () => {
     // State via top variable in function group
 
     const file1 = `class ZCL_FUGR_TEST definition public final create public .
