@@ -311,4 +311,30 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello");
   });
 
+  it("dynamic call, string", async () => {
+    const code = `
+INTERFACE lif.
+  METHODS bar.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD lif~bar.
+    WRITE / 'foo'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lcl.
+  CREATE OBJECT lo.
+  CALL METHOD lo->(\`LIF~BAR\`).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("foo");
+  });
+
 });

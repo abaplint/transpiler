@@ -64,7 +64,7 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
           } else if (call.endsWith(".") === false) {
             call += ".";
           }
-          call += second.getFirstToken().getStr().replace(/\'/g, "").toLowerCase().replace("~", "$").trimEnd();
+          call += second.getFirstToken().getStr().replace(/[\'\`]/g, "").toLowerCase().replace("~", "$").trimEnd();
         } else {
           ret.appendString("MethodSourceTranspiler-Unexpected");
         }
