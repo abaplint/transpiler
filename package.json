@@ -189,7 +189,7 @@
         "@abaplint/core": "^2.110.6",
         "@types/chai": "^4.3.16",
         "@types/mocha": "^10.0.7",
-        "@types/node": "^20.14.9",
+        "@types/node": "^20.14.10",
         "@types/sql.js": "^1.4.9",
         "@typescript-eslint/eslint-plugin": "^7.15.0",
         "@typescript-eslint/parser": "^7.15.0",
