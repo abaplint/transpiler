@@ -15,6 +15,7 @@ import {HandleW3MI} from "./handlers/handle_w3mi";
 import {HandleSMIM} from "./handlers/handle_smim";
 import {HandleMSAG} from "./handlers/handle_msag";
 import {HandleOA2P} from "./handlers/handle_oa2p";
+import {HandleFUGR} from "./handlers/handle_fugr";
 
 export {config, ITranspilerOptions, IFile, IProgress, IOutputFile, IOutput, UnknownTypesEnum};
 
@@ -61,6 +62,8 @@ export class Transpiler {
       await progress?.tick("Building, " + obj.getName());
       if (obj instanceof abaplint.Objects.TypePool) {
         output.objects.push(...new HandleTypePool().runObject(obj, reg));
+      } else if (obj instanceof abaplint.Objects.FunctionGroup) {
+        output.objects.push(...new HandleFUGR(this.options).runObject(obj, reg));
       } else if (obj instanceof abaplint.ABAPObject) {
         output.objects.push(...new HandleABAP(this.options).runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.Oauth2Profile) {

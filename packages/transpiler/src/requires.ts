@@ -64,6 +64,20 @@ export class Requires {
         });
       }
     }
+    /*
+    else if (obj.getType() === "FUGR") {
+      const fugr = obj as abaplint.Objects.FunctionGroup;
+      const functionModules = fugr.getModules();
+      const isFunctionModule = functionModules.find((f) => filename.includes("." + f.getName().toLowerCase() + ".")) !== undefined;
+      if (isFunctionModule) {
+        const name = Traversal.escapeNamespace(fugr.getName())?.toLowerCase();
+        add({
+          filename: name + ".fugr.sapl" + name + ".abap",
+          name: undefined,
+        });
+      }
+    }
+    */
 
     // always add CX_ROOT, it is used for CATCH, no catches in global interfaces
     // todo, it might be possible to remove this, as CATCH uses instanceof with dynamic registered classes

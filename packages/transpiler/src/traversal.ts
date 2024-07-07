@@ -82,8 +82,8 @@ export class Traversal {
     const filename = this.file.getFilename();
 
     if (this.scopeCache
-      && this.scopeCache.filename === filename
-      && token.getEnd().isBetween(this.scopeCache.cov.start, this.scopeCache.cov.end)) {
+        && this.scopeCache.filename === filename
+        && token.getEnd().isBetween(this.scopeCache.cov.start, this.scopeCache.cov.end)) {
       return this.scopeCache.node;
     }
 
@@ -100,7 +100,26 @@ export class Traversal {
       this.scopeCache = undefined;
     }
 
+    if (node === undefined
+        && this.obj instanceof abaplint.Objects.FunctionGroup
+        && this.obj.getInclude(filename.split(".")[2])) {
+      // workaround for INCLUDEs in function groups
+      return this.fuctionGroupWorkaround(token);
+    }
+
     return node;
+  }
+
+  private fuctionGroupWorkaround(token: abaplint.Token): abaplint.ISpaghettiScopeNode | undefined {
+    // check the function group level, it might be an INCLUDE defining the DATA
+    const functionGroupLevel = this.spaghetti.getFirstChild()?.getFirstChild();
+
+    const variable = functionGroupLevel?.getData().vars[token.getStr().toUpperCase()];
+    if (variable?.getStart().equals(token.getStart())) {
+      return functionGroupLevel;
+    }
+
+    return undefined;
   }
 
   public getInterfaceDefinition(token: abaplint.Token): abaplint.IInterfaceDefinition | undefined {
