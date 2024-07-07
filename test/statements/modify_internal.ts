@@ -116,4 +116,35 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("FOO");
   });
 
+  it("MODIFY, transporting where from", async () => {
+    const code = `
+TYPES: BEGIN OF ty_attribute,
+         value      TYPE string,
+         annotation TYPE string,
+       END OF ty_attribute.
+TYPES ty_attributes TYPE STANDARD TABLE OF ty_attribute WITH DEFAULT KEY.
+
+DATA exp_attributes TYPE ty_attributes.
+DATA attribute TYPE ty_attribute.
+FIELD-SYMBOLS <attribute> TYPE ty_attribute.
+
+APPEND INITIAL LINE TO exp_attributes ASSIGNING <attribute>.
+<attribute>-value      = 'value1'.
+
+APPEND INITIAL LINE TO exp_attributes ASSIGNING <attribute>.
+<attribute>-value      = 'value2'.
+<attribute>-annotation = 'BAR'.
+
+attribute-annotation = 'MOO'.
+MODIFY exp_attributes FROM attribute TRANSPORTING annotation WHERE annotation IS INITIAL.
+
+LOOP AT exp_attributes INTO attribute.
+  WRITE / attribute-annotation.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("MOO\nBAR");
+  });
+
 });
