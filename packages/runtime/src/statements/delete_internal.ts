@@ -86,8 +86,11 @@ export async function deleteInternal(target: Table | HashedTable | FieldSymbol, 
     return;
   }
 
-  // @ts-ignore
-  const originalTabix = abap.builtin.sy.get().tabix.get();
+  // short form, "DELETE tab"
+  if (options === undefined) {
+    target.deleteIndex((target as Table).getCurrentLoopIndex());
+    return;
+  }
 
   for await (const i of loop(target)) {
     // @ts-ignore
@@ -109,10 +112,6 @@ export async function deleteInternal(target: Table | HashedTable | FieldSymbol, 
       target.deleteIndex(index);
     } else if (options?.from && options.from.get() <= index + 1) {
       target.deleteIndex(index);
-    } else if (options === undefined && originalTabix === index + 1) {
-      // short form, "DELETE tab"
-      target.deleteIndex(index);
-      break;
     }
   }
 }

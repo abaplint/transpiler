@@ -402,6 +402,14 @@ export class Table implements ITable {
     return l;
   }
 
+  public getCurrentLoopIndex() {
+    if (this.loops.size !== 1) {
+      throw new Error("More than one LOOP");
+    }
+
+    return Array.from(this.loops)[0].index;
+  }
+
   public unregisterLoop(loop: LoopController) {
     this.loops.delete(loop);
   }
