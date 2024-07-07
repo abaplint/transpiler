@@ -116,7 +116,7 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("FOO");
   });
 
-  it.only("MODIFY, transporting where from", async () => {
+  it("MODIFY, transporting where from", async () => {
     const code = `
 TYPES: BEGIN OF ty_attribute,
          value      TYPE string,

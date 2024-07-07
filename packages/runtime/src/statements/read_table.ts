@@ -161,6 +161,13 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
     }
 
     found = arr[index - 1];
+
+    if (found
+        && options?.withKey
+        && options?.withKey(found.get()) === false) {
+      found = undefined;
+    }
+
     if (found) {
       foundIndex = index;
     }
