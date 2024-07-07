@@ -25,16 +25,12 @@ export class FunctionParametersTranspiler implements IExpressionTranspiler {
       params.changing = traversal.traverse(ch).getCode();
     }
 
-    let ret = "";
+    const ret = [];
     for (const p of Object.keys(params)) {
-      if (ret === "") {
-        ret += p + ": " + params[p];
-      } else {
-        ret += ", " + p + ": " + params[p];
-      }
+      ret.push(p + ": " + params[p]);
     }
 
-    return new Chunk(`{${ret}}`);
+    return new Chunk(`{${ret.join(", ")}}`);
   }
 
 }
