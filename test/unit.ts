@@ -2392,7 +2392,10 @@ ENDCLASS.`;
 
 * INCLUDE LZFUGRD...                         " Local class definition
 
-DATA int TYPE i.`;
+DATA int TYPE i.
+
+CONSTANTS moo TYPE i VALUE 3.
+`;
 
     const file5 = `<?xml version="1.0" encoding="utf-8"?>
 <abapGit version="v1.0.0">
