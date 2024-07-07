@@ -7,7 +7,7 @@ export class ParameterNameTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     const nameToken = node.getFirstToken();
-    const name = nameToken.getStr().toLowerCase();
+    const name = Traversal.escapeNamespace(nameToken.getStr().toLowerCase())!;
 
     return new Chunk().append(name, nameToken, traversal);
   }

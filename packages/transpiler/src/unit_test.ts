@@ -374,9 +374,7 @@ run().then(() => {
 
     for (const obj of reg.getObjects()) {
       if (obj instanceof abaplint.Objects.FunctionGroup) {
-        for (const m of obj.getModules()) {
-          list.push(imp(`${this.escapeNamespace(obj.getName().toLowerCase())}.fugr.${this.escapeNamespace(m.getName().toLowerCase())}`));
-        }
+        list.push(imp(`${this.escapeNamespace(obj.getName().toLowerCase())}.fugr`));
       } else if (obj instanceof abaplint.Objects.Class) {
         if (obj.getName().toUpperCase() !== "CL_ABAP_CHAR_UTILITIES"
             && this.hasClassConstructor(reg, obj)) {

@@ -2331,7 +2331,7 @@ ENDCLASS.`;
     await dumpNrun(files, false);
   });
 
-  it.skip("test-56", async () => {
+  it("test-56", async () => {
     // State via top variable in function group
 
     const file1 = `class ZCL_FUGR_TEST definition public final create public .
@@ -2392,7 +2392,10 @@ ENDCLASS.`;
 
 * INCLUDE LZFUGRD...                         " Local class definition
 
-DATA int TYPE i.`;
+DATA int TYPE i.
+
+CONSTANTS moo TYPE i VALUE 3.
+`;
 
     const file5 = `<?xml version="1.0" encoding="utf-8"?>
 <abapGit version="v1.0.0">

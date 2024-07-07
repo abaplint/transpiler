@@ -118,6 +118,7 @@ export class HandleABAP {
 
   protected addImportsAndExports(output: IOutputFile): Chunk {
     const contents = new Chunk();
+
     for (const r of output.requires) {
       const name = r.name?.toLowerCase();
       const filename = r.filename.replace(".abap", ".mjs");
@@ -134,6 +135,7 @@ export class HandleABAP {
     if (output.exports.length > 0) {
       contents.appendString("\nexport {" + output.exports.map(Traversal.escapeNamespace).join(", ") + "};");
     }
+
     return contents;
   }
 
