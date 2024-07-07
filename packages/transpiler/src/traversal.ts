@@ -102,7 +102,7 @@ export class Traversal {
 
     if (node === undefined
         && this.obj instanceof abaplint.Objects.FunctionGroup
-        && this.obj.getInclude(filename.split(".")[2])) {
+        && this.obj.getInclude(filename.split(".")[2].replace(/#/g, "/"))) {
       // workaround for INCLUDEs in function groups
       return this.fuctionGroupWorkaround(token);
     }
