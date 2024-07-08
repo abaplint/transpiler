@@ -470,4 +470,30 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("6\n3\n10");
   });
 
+  it.only("DELETE, with table key", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         foobar TYPE i,
+       END OF ty.
+TYPES ty_tt TYPE HASHED TABLE OF ty WITH UNIQUE KEY foobar.
+
+DATA itab TYPE ty_tt.
+DATA row LIKE LINE OF itab.
+
+row-foobar = 1.
+INSERT row INTO TABLE itab.
+row-foobar = 2.
+INSERT row INTO TABLE itab.
+row-foobar = 3.
+INSERT row INTO TABLE itab.
+
+DELETE TABLE itab WITH TABLE KEY foobar = 2.
+
+WRITE / lines( itab ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
