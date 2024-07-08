@@ -470,7 +470,7 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("6\n3\n10");
   });
 
-  it.only("DELETE, with table key", async () => {
+  it("DELETE, with table key", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          foobar TYPE i,
