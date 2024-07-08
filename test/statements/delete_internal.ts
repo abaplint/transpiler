@@ -489,11 +489,13 @@ INSERT row INTO TABLE itab.
 
 DELETE TABLE itab WITH TABLE KEY foobar = 2.
 
-WRITE / lines( itab ).`;
+LOOP AT itab INTO row.
+  WRITE / row-foobar.
+ENDLOOP.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("2");
+    expect(abap.console.get()).to.equal("1\n3");
   });
 
 });
