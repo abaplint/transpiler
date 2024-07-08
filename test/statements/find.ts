@@ -709,4 +709,37 @@ ASSERT foo = |[?(@.name=='METH1')]|.`;
     await f(abap);
   });
 
+  it("FIND, REGEX slash C", async () => {
+    const code = `
+DATA iv_line TYPE string.
+iv_line = 'a'.
+FIND FIRST OCCURRENCE OF REGEX '\\C' IN iv_line.
+WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
+  it("FIND, another REGEX", async () => {
+    const code = `
+DATA iv_line TYPE string.
+DATA str1 TYPE string.
+DATA str2 TYPE string.
+DATA str3 TYPE string.
+
+iv_line = '#FOOO,30: Greetings'.
+
+FIND FIRST OCCURRENCE OF REGEX '^#(\\C{4})(?:,(\\d+))?(?::(.*))'
+  IN iv_line SUBMATCHES str1 str2 str3.
+
+WRITE / str1.
+WRITE / str2.
+WRITE / str3.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("FOOO\n30\n Greetings");
+  });
+
 });
