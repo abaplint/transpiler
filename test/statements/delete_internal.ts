@@ -438,4 +438,36 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("6\n3\n10");
   });
 
+  it("DELETE, messing with sy-tabix", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field TYPE i,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row LIKE LINE OF tab.
+
+row-field = 6.
+INSERT row INTO TABLE tab.
+row-field = 3.
+INSERT row INTO TABLE tab.
+row-field = 3.
+INSERT row INTO TABLE tab.
+row-field = 10.
+INSERT row INTO TABLE tab.
+
+LOOP AT tab TRANSPORTING NO FIELDS WHERE field <= 5.
+  sy-tabix = 1.
+  DELETE tab.
+  EXIT.
+ENDLOOP.
+
+LOOP AT tab INTO row.
+  WRITE / row-field.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("6\n3\n10");
+  });
+
 });
