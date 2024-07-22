@@ -471,7 +471,7 @@ export class Traversal {
     }
 
     // handle aliases after initialization of carrier variables
-    for (const a of def.getAliases()?.getAll() || []) {
+    for (const a of def.getAliases() || []) {
       ret += "this." + a.getName().toLowerCase() + " = this." + Traversal.escapeNamespace(a.getComponent().replace("~", "$").toLowerCase()) + ";\n";
     }
     // constants can be accessed both statically and via reference
@@ -545,7 +545,7 @@ export class Traversal {
 
     const intf = this.findInterfaceDefinition(name, scope);
 
-    for (const a of intf?.getAliases().getAll() || []) {
+    for (const a of intf?.getAliases() || []) {
       const iname = Traversal.escapeNamespace(intf?.getName().toLowerCase());
       const aname = Traversal.escapeNamespace(a.getName().toLowerCase());
       const cname = Traversal.escapeNamespace(a.getComponent().toLowerCase().replace("~", "$"));

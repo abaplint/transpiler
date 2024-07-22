@@ -112,7 +112,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
       ret += traversal.setValues(attr.identifier, name);
     }
 
-    for (const alias of cdef.getAliases().getAll()) {
+    for (const alias of cdef.getAliases()) {
       const isStatic = staticAttributes.some(s => s.prefix.replace("$", "~") + s.identifier.getName() === alias.getComponent());
       if (isStatic === false) {
         continue;
