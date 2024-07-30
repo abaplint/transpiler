@@ -60,6 +60,9 @@ export class InterfaceTranspiler implements IStructureTranspiler {
       if (identifier.getMeta().includes(abaplint.IdentifierMeta.Static) === false
           || identifier.getMeta().includes(abaplint.IdentifierMeta.ReadOnly) === false) {
         continue;
+      } else if (n.includes("~")) {
+        // from implemented interface
+        continue;
       }
       const interfaceName = Traversal.escapeNamespace(node.getFirstToken().getStr().toLowerCase());
       const name = interfaceName + "." + interfaceName + "$" + n.toLowerCase();
