@@ -17,8 +17,8 @@
         "link:database-pg": "cd packages/database-pg && npm link @abaplint/runtime",
         "link:database-snowflake": "cd packages/database-snowflake && npm link @abaplint/runtime",
         "link:cli": "cd packages/cli && npm link --force && npm link @abaplint/transpiler",
-        "docker:start": "docker-compose -f test/stack.yml up -d",
-        "docker:stop": "docker-compose -f test/stack.yml down",
+        "docker:start": "docker compose -f test/stack.yml up -d",
+        "docker:stop": "docker compose -f test/stack.yml down",
         "lint": "eslint packages/**/*.ts --format unix"
     },
     "repository": {
