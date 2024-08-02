@@ -60,12 +60,15 @@ export class InterfaceTranspiler implements IStructureTranspiler {
       if (identifier.getMeta().includes(abaplint.IdentifierMeta.Static) === false
           || identifier.getMeta().includes(abaplint.IdentifierMeta.ReadOnly) === false) {
         continue;
+      } else if (n.includes("~")) {
+        // from implemented interface
+        continue;
       }
       const interfaceName = Traversal.escapeNamespace(node.getFirstToken().getStr().toLowerCase());
       const name = interfaceName + "." + interfaceName + "$" + n.toLowerCase();
       ret += name + " = " + new TranspileTypes().toType(identifier.getType()) + ";\n";
 
-      const alias = idef?.getAliases().getAll().find(a => a.getName().toUpperCase() === n.toUpperCase());
+      const alias = idef?.getAliases().find(a => a.getName().toUpperCase() === n.toUpperCase());
       if (alias) {
         // todo: this is an evil workaround, should be fixed in abaplint instead
         ret += interfaceName + "." + alias.getComponent().split("~")[0].toLowerCase() + "$" + n.toLowerCase() + " = " + name + ";\n";

@@ -97,7 +97,8 @@ if (e.classic) {
   switch (e.classic.toUpperCase()) {\n`;
     for (const e of node.findAllExpressions(abaplint.Expressions.ParameterException)) {
       const name = e.getFirstToken().getStr().toUpperCase();
-      const value = e.findFirstExpression(abaplint.Expressions.SimpleName)?.getFirstToken().getStr().toUpperCase();
+      // todo, also handle SimpleChain,
+      const value = e.findFirstExpression(abaplint.Expressions.Integer)?.getFirstToken().getStr().toUpperCase();
       if (value === undefined) {
         continue;
       }

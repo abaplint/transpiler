@@ -637,6 +637,7 @@ START-OF-SELECTION.
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+    expect(abap.console.get()).to.equal("moo");
   });
 
 });

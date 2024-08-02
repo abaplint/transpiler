@@ -119,7 +119,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
     }
 
     const superDef = traversal.findClassDefinition(classDef?.getSuperClass(), scope);
-    for (const a of superDef?.getAliases().getAll() || []) {
+    for (const a of superDef?.getAliases() || []) {
       if (a.getName().toLowerCase() === methodName) {
         methodName = a.getComponent().replace("~", "$").toLowerCase();
       }

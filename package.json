@@ -17,8 +17,8 @@
         "link:database-pg": "cd packages/database-pg && npm link @abaplint/runtime",
         "link:database-snowflake": "cd packages/database-snowflake && npm link @abaplint/runtime",
         "link:cli": "cd packages/cli && npm link --force && npm link @abaplint/transpiler",
-        "docker:start": "docker-compose -f test/stack.yml up -d",
-        "docker:stop": "docker-compose -f test/stack.yml down",
+        "docker:start": "docker compose -f test/stack.yml up -d",
+        "docker:stop": "docker compose -f test/stack.yml down",
         "lint": "eslint packages/**/*.ts --format unix"
     },
     "repository": {
@@ -186,26 +186,26 @@
     },
     "homepage": "https://github.com/abaplint/transpiler_poc#readme",
     "devDependencies": {
-        "@abaplint/core": "^2.110.6",
-        "@types/chai": "^4.3.16",
+        "@abaplint/core": "^2.112.9",
+        "@types/chai": "^4.3.17",
         "@types/mocha": "^10.0.7",
-        "@types/node": "^20.14.10",
+        "@types/node": "^22.0.2",
         "@types/sql.js": "^1.4.9",
-        "@typescript-eslint/eslint-plugin": "^7.15.0",
-        "@typescript-eslint/parser": "^7.15.0",
-        "chai": "^4.4.1",
+        "@typescript-eslint/eslint-plugin": "^7.18.0",
+        "@typescript-eslint/parser": "^7.18.0",
+        "chai": "^4.5.0",
         "cross-fetch": "^4.0.0",
         "dotenv": "^16.4.5",
         "eslint-plugin-import": "^2.29.1",
         "eslint": "^8.57.0",
-        "fast-xml-parser": "^4.4.0",
-        "mocha": "^10.6.0",
+        "fast-xml-parser": "^4.4.1",
+        "mocha": "^10.7.0",
         "pg": "^8.12.0",
         "pg-cursor": "^2.11.0",
         "snowflake-sdk": "^1.11.0",
         "source-map-support": "^0.5.21",
-        "sql.js": "^1.10.3",
+        "sql.js": "^1.11.0",
         "temporal-polyfill": "^0.2.5",
-        "typescript": "^5.5.3"
+        "typescript": "^5.5.4"
     }
 }
