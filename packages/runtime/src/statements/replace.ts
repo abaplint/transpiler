@@ -53,7 +53,9 @@ export function replace(input: replaceInput): void {
     search = new RegExp(regex, ignoreCase + allOccurrences);
     found = temp.match(search) !== null;
   } else if (input.pcre) {
-    const regex = ABAPRegExp.convert(input.pcre.get());
+    // hmm, hmm,
+    const str = input.pcre.get().replace(/\\/g, "\\\\");
+    const regex = ABAPRegExp.convert(str);
     if (regex.length === 0 && input.all === true) {
       throw "REPLACE, zero length input";
     }

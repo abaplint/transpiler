@@ -382,4 +382,21 @@ WRITE / sdummy.`;
     expect(abap.console.getTrimmed()).to.equal("32\n0894ef4577a91ed8a495bd69397619c0");
   });
 
+  it("REPLACE, PCRE and escaping", async () => {
+    const code =
+'DATA rcnt TYPE i.' + "\n" +
+'DATA string_to_parse TYPE string.' + "\n" +
+'string_to_parse = `\\"`.' + "\n" +
+'REPLACE ALL OCCURRENCES OF PCRE `\\\\` IN string_to_parse WITH `\\\\` REPLACEMENT COUNT rcnt.' + "\n" +
+'WRITE: / rcnt, string_to_parse.' + "\n" +
+'ASSERT string_to_parse = \'\\"\'.' + "\n" +
+'REPLACE ALL OCCURRENCES OF PCRE `\\"` IN string_to_parse WITH `\\\\"` REPLACEMENT COUNT rcnt.' + "\n" +
+'WRITE: / rcnt, string_to_parse.' + "\n" +
+'ASSERT string_to_parse = \'\\\\"\'.';
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
