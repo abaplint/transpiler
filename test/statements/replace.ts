@@ -396,7 +396,8 @@ WRITE / rcnt.`;
     expect(abap.console.getTrimmed()).to.equal("1");
   });
 
-  it.skip("REPLACE, PCRE and escaping, more", async () => {
+  /*
+  it.only("REPLACE, PCRE and escaping, more", async () => {
     const code = `
 DATA rcnt TYPE i.
 DATA string_to_parse TYPE string.
@@ -406,10 +407,12 @@ ASSERT rcnt = 1.
 WRITE / string_to_parse.`;
 
     const js = await run(code);
+    console.log(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.getTrimmed()).to.equal("\\\"");
+    expect(abap.console.getTrimmed()).to.equal(`\\\\"`);
   });
+  */
 
   it("REPLACE, PCRE and escaping, a", async () => {
     const code = `
