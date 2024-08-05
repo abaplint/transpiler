@@ -68,7 +68,7 @@ describe("Single statements", () => {
     {abap: "SPLIT foo AT bar INTO TABLE moo.",            js: "abap.statements.split({source: foo, at: bar, table: moo});",    skip: false},
     {abap: "SPLIT |blah| AT '.' INTO lv_major lv_minor.", js: "abap.statements.split({source: new abap.types.String().set(`blah`), at: new abap.types.Character(1).set('.'), targets: [lv_major,lv_minor]});",    skip: false},
     {abap: "WRITE |moo|.",                            js: "abap.statements.write(new abap.types.String().set(`moo`));",                                  skip: false},
-    {abap: "DELETE foo WHERE bar = 2.",               js: "await abap.statements.deleteInternal(foo,{where: (I) => {return abap.compare.eq(I.bar, abap.IntegerFactory.get(2));}});", skip: false},
+    {abap: "DELETE foo WHERE bar = 2.",               js: "await abap.statements.deleteInternal(foo,{where: async (I) => {return abap.compare.eq(I.bar, abap.IntegerFactory.get(2));}});", skip: false},
     {abap: "DELETE ADJACENT DUPLICATES FROM foo.",    js: "await abap.statements.deleteInternal(foo,{adjacent: true});",          skip: false},
     {abap: "DELETE foo INDEX 2.",                     js: "await abap.statements.deleteInternal(foo,{index: abap.IntegerFactory.get(2)});",       skip: false},
     {abap: "DELETE TABLE tab FROM <bar>.",            js: "await abap.statements.deleteInternal(tab,{fromValue: fs_bar_});",           skip: false},
@@ -220,7 +220,7 @@ describe("Single statements", () => {
     {abap: "MOVE-CORRESPONDING foo TO bar.", js: `abap.statements.moveCorresponding(foo, bar);`, skip: false},
     {abap: "ASSERT 5 IN bar.", js: `abap.statements.assert(abap.compare.in(abap.IntegerFactory.get(5), bar));`, skip: false},
     {abap: "INSERT INITIAL LINE INTO tab ASSIGNING <row> INDEX 1.", js: `abap.statements.insertInternal({initial: true, index: abap.IntegerFactory.get(1), assigning: fs_row_, table: tab});`, skip: false},
-    {abap: "DELETE lt_log_temp WHERE msg-level < iv_min_level.", js: `await abap.statements.deleteInternal(lt_log_temp,{where: (I) => {return abap.compare.lt(I.msg.get().level, iv_min_level);}});`, skip: false},
+    {abap: "DELETE lt_log_temp WHERE msg-level < iv_min_level.", js: `await abap.statements.deleteInternal(lt_log_temp,{where: async (I) => {return abap.compare.lt(I.msg.get().level, iv_min_level);}});`, skip: false},
     {abap: "ASSIGN lv_x TO <lv_y> CASTING.", js: `abap.statements.assign({target: fs_lv_y_, source: lv_x, casting: true});`, skip: false},
 
     {abap: `CALL TRANSFORMATION id
@@ -353,14 +353,14 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({});`}, // todo
       WHERE item IS INITIAL
       AND NOT ( file-path = zif=>c_dir
       AND file-filename = zif=>c_dot ).`,
-    js: `await abap.statements.deleteInternal(ct_files,{where: (I) => {return abap.compare.initial(I.item) && !(abap.compare.eq(I.file.get().path, abap.Classes['ZIF'].c_dir) && abap.compare.eq(I.file.get().filename, abap.Classes['ZIF'].c_dot));}});`},
+    js: `await abap.statements.deleteInternal(ct_files,{where: async (I) => {return abap.compare.initial(I.item) && !(abap.compare.eq(I.file.get().path, abap.Classes['ZIF'].c_dir) && abap.compare.eq(I.file.get().filename, abap.Classes['ZIF'].c_dot));}});`},
 
     {abap: "lo_foo ?= lo_bar.", js: "await abap.statements.cast(lo_foo, lo_bar);", skip: false},
 
     {abap: "RETRY.", js: `throw new Error("Retry, not supported, transpiler");`, skip: false},
 
     {abap: "delete foo where instance->field_type not in types.",
-      js: `await abap.statements.deleteInternal(foo,{where: (I) => {return !abap.compare.in(I.instance.get().field_type, types);}});`, skip: false},
+      js: `await abap.statements.deleteInternal(foo,{where: async (I) => {return !abap.compare.in(I.instance.get().field_type, types);}});`, skip: false},
 
     {abap: "READ REPORT name INTO text STATE 'A'.",
       js: `abap.statements.readReport(name, {into: text,state: new abap.types.Character(1).set('A')});`, skip: false},
