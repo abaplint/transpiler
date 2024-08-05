@@ -1,6 +1,6 @@
 import {clone} from "../clone";
 import {throwError} from "../throw_error";
-import {ABAPObject, Character, DataReference, Date, String, FieldSymbol, Float, Integer, Structure, Table, Time, XString, Hex, Packed, Numc, Integer8} from "../types";
+import {ABAPObject, Character, DataReference, Date, String, FieldSymbol, Float, Integer, Structure, Table, Time, XString, Hex, Packed, Numc, Integer8, UTCLong} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -67,6 +67,8 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
       target.assign(new String());
     } else if (options.name.trimEnd() === "XSTRING") {
       target.assign(new XString());
+    } else if (options.name.trimEnd() === "UTCLONG") {
+      target.assign(new UTCLong());
     } else if (options.name.trimEnd() === "I") {
       target.assign(new Integer());
     } else if (options.name.trimEnd() === "T") {
