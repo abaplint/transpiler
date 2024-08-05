@@ -157,6 +157,9 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
       case "XSTRING":
         target.assign(new XString());
         break;
+      case "UTCLONG":
+        target.assign(new UTCLong());
+        break;
       default:
           // @ts-ignore
         if (abap.DDIC[options.typeName.trimEnd()]) {
