@@ -396,6 +396,36 @@ WRITE / rcnt.`;
     expect(abap.console.getTrimmed()).to.equal("1");
   });
 
+  it.skip("REPLACE, PCRE and escaping, more", async () => {
+    const code = `
+DATA rcnt TYPE i.
+DATA string_to_parse TYPE string.
+string_to_parse = \`\\"\`.
+REPLACE ALL OCCURRENCES OF PCRE \`\\"\` IN string_to_parse WITH \`\\\\"\` REPLACEMENT COUNT rcnt.
+ASSERT rcnt = 1.
+WRITE / string_to_parse.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("\\\"");
+  });
+
+  it("REPLACE, PCRE and escaping, a", async () => {
+    const code = `
+DATA rcnt TYPE i.
+DATA string_to_parse TYPE string.
+string_to_parse = \`"\`.
+REPLACE ALL OCCURRENCES OF PCRE \`"\` IN string_to_parse WITH \`a\` REPLACEMENT COUNT rcnt.
+ASSERT rcnt = 1.
+WRITE / string_to_parse.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("a");
+  });
+
   it("REPLACE, basic PCRE", async () => {
     const code =
 `DATA link_for_testing TYPE string.
