@@ -498,4 +498,35 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("1\n3");
   });
 
+  it("DELETE, with awaited statement", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS get_column_index RETURNING VALUE(index) TYPE i.
+    METHODS foo.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD get_column_index.
+  ENDMETHOD.
+
+  METHOD foo.
+    TYPES:
+      BEGIN OF mty_s_hashed_column,
+        column_index TYPE i,
+        column       TYPE REF TO object,
+      END OF mty_s_hashed_column,
+      mty_ts_hashed_column TYPE HASHED TABLE OF mty_s_hashed_column WITH UNIQUE KEY column_index.
+
+    DATA columns_hashed TYPE mty_ts_hashed_column.
+
+    DELETE TABLE columns_hashed WITH TABLE KEY column_index = get_column_index( ).
+  ENDMETHOD.
+ENDCLASS.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    // just test its valid syntax
+  });
+
 });

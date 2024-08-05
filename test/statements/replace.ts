@@ -382,4 +382,64 @@ WRITE / sdummy.`;
     expect(abap.console.getTrimmed()).to.equal("32\n0894ef4577a91ed8a495bd69397619c0");
   });
 
+  it("REPLACE, PCRE and escaping", async () => {
+    const code = `
+DATA rcnt TYPE i.
+DATA string_to_parse TYPE string.
+string_to_parse = \`\\"\`.
+REPLACE ALL OCCURRENCES OF PCRE \`\\\\\` IN string_to_parse WITH \`\\\\\` REPLACEMENT COUNT rcnt.
+WRITE / rcnt.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("1");
+  });
+
+  /*
+  it.only("REPLACE, PCRE and escaping, more", async () => {
+    const code = `
+DATA rcnt TYPE i.
+DATA string_to_parse TYPE string.
+string_to_parse = \`\\"\`.
+REPLACE ALL OCCURRENCES OF PCRE \`\\"\` IN string_to_parse WITH \`\\\\"\` REPLACEMENT COUNT rcnt.
+ASSERT rcnt = 1.
+WRITE / string_to_parse.`;
+
+    const js = await run(code);
+    console.log(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal(`\\\\"`);
+  });
+  */
+
+  it("REPLACE, PCRE and escaping, a", async () => {
+    const code = `
+DATA rcnt TYPE i.
+DATA string_to_parse TYPE string.
+string_to_parse = \`"\`.
+REPLACE ALL OCCURRENCES OF PCRE \`"\` IN string_to_parse WITH \`a\` REPLACEMENT COUNT rcnt.
+ASSERT rcnt = 1.
+WRITE / string_to_parse.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("a");
+  });
+
+  it("REPLACE, basic PCRE", async () => {
+    const code =
+`DATA link_for_testing TYPE string.
+link_for_testing = 'foo bar'.
+REPLACE ALL OCCURRENCES OF PCRE \`\\s\` IN link_for_testing WITH \`\`.
+WRITE / link_for_testing.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("foobar");
+  });
+
 });

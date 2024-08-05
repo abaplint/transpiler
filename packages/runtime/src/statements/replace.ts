@@ -9,6 +9,7 @@ export type replaceInput = {
   sectionLength?: INumeric,
   sectionOffset?: INumeric,
   replacementLength?: INumeric,
+  replacementCount?: INumeric,
   regex?: ICharacter,
   pcre?: ICharacter,
   all: boolean,
@@ -53,7 +54,8 @@ export function replace(input: replaceInput): void {
     search = new RegExp(regex, ignoreCase + allOccurrences);
     found = temp.match(search) !== null;
   } else if (input.pcre) {
-    const regex = ABAPRegExp.convert(input.pcre.get());
+    const str = input.pcre.get();
+    const regex = ABAPRegExp.convert(str);
     if (regex.length === 0 && input.all === true) {
       throw "REPLACE, zero length input";
     }
@@ -94,6 +96,11 @@ export function replace(input: replaceInput): void {
       }
     }
     input.replacementLength.set(replacement.length);
+  }
+
+  if (input.replacementCount) {
+    const match = temp.match(search);
+    input.replacementCount.set(match?.length || 0);
   }
 
   temp = temp.replace(search, rr);

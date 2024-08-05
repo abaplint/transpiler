@@ -4,7 +4,7 @@ import {INumeric} from "../types/_numeric";
 import {loop} from "./loop";
 
 export interface IDeleteInternalOptions {
-  where?: (i: any) => boolean,
+  where?: (i: any) => Promise<boolean>,
   index?: INumeric,
   adjacent?: boolean,
   comparing?: string[],
@@ -98,7 +98,7 @@ export async function deleteInternal(target: Table | HashedTable | FieldSymbol, 
 
     if (options?.where) {
       const row = i instanceof Structure ? i.get() : {table_line: i};
-      if (options.where(row) === true) {
+      if (await options.where(row) === true) {
         if (target instanceof HashedTable) {
           target.deleteFrom(i);
         } else {

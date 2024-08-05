@@ -26,6 +26,11 @@ export class ReplaceTranspiler implements IStatementTranspiler {
       extra.push("of: " + new SourceTranspiler().transpile(o, traversal).getCode());
     }
 
+    const cnt = node.findExpressionAfterToken("COUNT");
+    if (cnt) {
+      extra.push("replacementCount: " + new TargetTranspiler().transpile(cnt, traversal).getCode());
+    }
+
     const length = node.findExpressionAfterToken("LENGTH");
     if (length) {
       if (length.get() instanceof abaplint.Expressions.Source) {

@@ -13,14 +13,13 @@ export class DeleteInternalTranspiler implements IStatementTranspiler {
 
     const componentCond = node.findDirectExpression(abaplint.Expressions.ComponentCond);
     if (componentCond) {
-      // todo, replacing "await" is a hack
-      extra.push("where: " + traversal.traverse(componentCond).getCode().replace("await ", ""));
+      extra.push("where: async " + traversal.traverse(componentCond).getCode());
     }
 
     const componentCompare = node.findDirectExpression(abaplint.Expressions.ComponentCompare);
     if (componentCompare) {
       // todo: this can be optimized, WITH TABLE KEY
-      extra.push("where: " + traversal.traverse(componentCompare).getCode());
+      extra.push("where: async " + traversal.traverse(componentCompare).getCode());
     }
 
 // todo, this is not completely correct, fields might have the name ADJACENT
