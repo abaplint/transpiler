@@ -98,4 +98,17 @@ ASSERT 1 = lv_val.`;
     }
   });
 
+  it("integer = string = integer", async () => {
+    const code = `
+DATA num TYPE i.
+DATA txt TYPE string.
+num = 123.
+txt = num.
+ASSERT num = txt.
+ASSERT txt = num.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
