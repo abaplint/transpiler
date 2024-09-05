@@ -30,6 +30,29 @@ WRITE class.`;
     expect(abap.console.get()).to.equal("AA");
   });
 
+  it("class, case", async () => {
+    const code = `
+DATA CLASS TYPE x.
+class = 'AA'.
+WRITE class.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("AA");
+  });
+
+  it("class, INITIAL", async () => {
+    const code = `
+DATA CLASS TYPE x.
+IF class IS INITIAL.
+ENDIF.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("method parameter", async () => {
     const code = `
 CLASS lcl DEFINITION.

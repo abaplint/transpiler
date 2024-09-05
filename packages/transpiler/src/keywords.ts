@@ -18,9 +18,9 @@ export const DEFAULT_KEYWORDS: string[] = [
   "switch", "synchronized", "this",
   "throw",	"throws", "transient", "true",
   "try",	"typeof", "var", "void",
+  "delete",
   "volatile",	"while", "yield"];
 // "with"
-// "delete"
 
 /** Replaces javascript keywords in ABAP source code, in-memory only */
 export class Keywords {
