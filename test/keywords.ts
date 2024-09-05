@@ -52,7 +52,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
-  it.skip("form parameter", async () => {
+  it("form parameter", async () => {
     const code = `
 FORM foo USING class TYPE i.
   WRITE class.
@@ -66,5 +66,7 @@ START-OF-SELECTION.
     await f(abap);
     expect(abap.console.get()).to.equal("2");
   });
+
+// TODO: class attribute
 
 });
