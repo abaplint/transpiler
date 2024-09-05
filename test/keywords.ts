@@ -30,4 +30,41 @@ WRITE class.`;
     expect(abap.console.get()).to.equal("AA");
   });
 
+  it("method parameter", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS foo IMPORTING class TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD foo.
+    WRITE / class.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>foo( 2 ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+  it.skip("form parameter", async () => {
+    const code = `
+FORM foo USING class TYPE i.
+  WRITE class.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo USING 2.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
