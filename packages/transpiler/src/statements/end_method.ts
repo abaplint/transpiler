@@ -20,7 +20,7 @@ export class EndMethodTranspiler implements IStatementTranspiler {
     for (const n in vars) {
       const identifier = vars[n];
       if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodReturning)) {
-        returning += "return " + n.toLowerCase() + ";\n";
+        returning += "return " + Traversal.prefixVariable(n.toLowerCase()) + ";\n";
       }
     }
 

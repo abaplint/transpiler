@@ -13,7 +13,7 @@ export class ReturnTranspiler implements IStatementTranspiler {
     for (const n in vars) {
       const identifier = vars[n];
       if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodReturning)) {
-        extra = " " + n.toLowerCase();
+        extra = " " + Traversal.prefixVariable(n.toLowerCase());
       }
     }
 

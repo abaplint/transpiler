@@ -1,4 +1,5 @@
 import * as abaplint from "@abaplint/core";
+import {Traversal} from "./traversal";
 
 const featureHexUInt8 = false;
 
@@ -7,7 +8,7 @@ export class TranspileTypes {
 
   public declare(t: abaplint.TypedIdentifier): string {
     const type = t.getType();
-    return "let " + t.getName().toLowerCase() + " = " + this.toType(type) + ";";
+    return "let " + Traversal.prefixVariable(t.getName().toLowerCase()) + " = " + this.toType(type) + ";";
   }
 
   public declareStaticSkipVoid(pre: string, t: abaplint.TypedIdentifier): string {

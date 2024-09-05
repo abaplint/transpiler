@@ -1,10 +1,11 @@
 import * as abaplint from "@abaplint/core";
 
 // https://www.w3schools.com/js/js_reserved.asp
-export const defaultKeywords: string[] = [
+export const DEFAULT_KEYWORDS: string[] = [
   "abstract",	"arguments", "await",
   "break",	"byte", "catch",
-  "char",	"class", "const", "continue",
+//  "char",
+  "class", "const", "continue",
   "debugger",	"default", "do",
   "double",	"else", "enum", "eval",
   "export",	"extends", "false", "final",
@@ -17,9 +18,9 @@ export const defaultKeywords: string[] = [
   "switch", "synchronized", "this",
   "throw",	"throws", "transient", "true",
   "try",	"typeof", "var", "void",
+  "delete",
   "volatile",	"while", "yield"];
 // "with"
-// "delete"
 
 /** Replaces javascript keywords in ABAP source code, in-memory only */
 export class Keywords {
@@ -29,11 +30,14 @@ export class Keywords {
     if (keywords !== undefined) {
       this.keywords = keywords;
     } else {
-      this.keywords = defaultKeywords;
+      this.keywords = DEFAULT_KEYWORDS;
     }
   }
 
   public handle(reg: abaplint.IRegistry) {
+    if (this.keywords.length === 0) {
+      return;
+    }
     reg.parse();
 
     for (const o of reg.getObjects()) {

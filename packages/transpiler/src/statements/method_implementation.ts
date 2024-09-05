@@ -38,6 +38,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
     for (const n in vars) {
       const identifier = vars[n];
       const varName = n.toLowerCase();
+      const varPrefixed = Traversal.prefixVariable(varName);
       if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
           || identifier.getMeta().includes(abaplint.IdentifierMeta.MethodChanging)
           || identifier.getMeta().includes(abaplint.IdentifierMeta.EventParameter)
@@ -52,31 +53,31 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
 
         const type = identifier.getType();
         if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodExporting)) {
-          after += `let ${varName} = ${unique}?.${varName} || ${new TranspileTypes().toType(identifier.getType())};\n`;
+          after += `let ${varPrefixed} = ${unique}?.${varName} || ${new TranspileTypes().toType(identifier.getType())};\n`;
         } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
             && parameterDefault === undefined
             && passByValue === false
             && isOptional === false
             && type.isGeneric() === false) {
 
-          after += `let ${varName} = ${unique}?.${varName};\n`;
+          after += `let ${varPrefixed} = ${unique}?.${varName};\n`;
           if (identifier.getType().getQualifiedName() !== undefined && identifier.getType().getQualifiedName() !== "") {
-            after += `if (${varName}?.getQualifiedName === undefined || ${varName}.getQualifiedName() !== "${identifier.getType().getQualifiedName()?.toUpperCase()}") { ${varName} = undefined; }\n`;
+            after += `if (${varPrefixed}?.getQualifiedName === undefined || ${varPrefixed}.getQualifiedName() !== "${identifier.getType().getQualifiedName()?.toUpperCase()}") { ${varPrefixed} = undefined; }\n`;
           }
-          after += `if (${varName} === undefined) { ${varName} = ${new TranspileTypes().toType(identifier.getType())}.set(${unique}.${varName}); }\n`;
+          after += `if (${varPrefixed} === undefined) { ${varPrefixed} = ${new TranspileTypes().toType(identifier.getType())}.set(${unique}.${varName}); }\n`;
 
         } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
             && type.isGeneric() === true) {
           if (isOptional === true) {
-            after += `let ${varName} = ${unique}?.${varName} || ${new TranspileTypes().toType(identifier.getType())};\n`;
+            after += `let ${varPrefixed} = ${unique}?.${varName} || ${new TranspileTypes().toType(identifier.getType())};\n`;
           } else {
-            after += `let ${varName} = ${unique}?.${varName};\n`;
+            after += `let ${varPrefixed} = ${unique}?.${varName};\n`;
           }
 
           if (type instanceof abaplint.BasicTypes.NumericGenericType) {
-            after += `if (${varName}.constructor.name === "Character") {
-  ${varName} = ${new TranspileTypes().toType(identifier.getType())};
-  ${varName}.set(${unique}?.${varName});
+            after += `if (${varPrefixed}.constructor.name === "Character") {
+  ${varPrefixed} = ${new TranspileTypes().toType(identifier.getType())};
+  ${varPrefixed}.set(${unique}?.${varName});
 }\n`;
           }
 
@@ -84,18 +85,18 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
             && type.isGeneric() === false) {
           after += new TranspileTypes().declare(identifier) + "\n";
           // note: it might be nessesary to do a type conversion, eg char is passed to xstring parameter
-          after += "if (" + unique + " && " + unique + "." + varName + ") {" + varName + ".set(" + unique + "." + varName + ");}\n";
+          after += "if (" + unique + " && " + unique + "." + varName + ") {" + varPrefixed + ".set(" + unique + "." + varName + ");}\n";
         } else {
           after += new TranspileTypes().declare(identifier) + "\n";
-          after += "if (" + unique + " && " + unique + "." + varName + ") {" + varName + " = " + unique + "." + varName + ";}\n";
+          after += "if (" + unique + " && " + unique + "." + varName + ") {" + varPrefixed + " = " + unique + "." + varName + ";}\n";
         }
 
         if (parameterDefault) {
           const val = this.buildDefault(parameterDefault, traversal, methodDef?.getFilename());
           if (passByValue === true || identifier.getMeta().includes(abaplint.IdentifierMeta.MethodChanging)) {
-            after += "if (" + unique + " === undefined || " + unique + "." + varName + " === undefined) {" + varName + ".set(" + val + ");}\n";
+            after += "if (" + unique + " === undefined || " + unique + "." + varName + " === undefined) {" + varPrefixed + ".set(" + val + ");}\n";
           } else {
-            after += "if (" + unique + " === undefined || " + unique + "." + varName + " === undefined) {" + varName + " = " + val + ";}\n";
+            after += "if (" + unique + " === undefined || " + unique + "." + varName + " === undefined) {" + varPrefixed + " = " + val + ";}\n";
           }
         }
       } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodReturning)) {

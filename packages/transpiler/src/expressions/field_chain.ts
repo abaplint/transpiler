@@ -22,7 +22,7 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
       if (c.get() instanceof Expressions.SourceField
           || c.get() instanceof Expressions.Field) {
         const name = traversal.prefixAndName(c.getFirstToken(), filename).replace("~", "$");
-        ret.append(Traversal.escapeNamespace(name)!, c, traversal);
+        ret.append(Traversal.prefixVariable(Traversal.escapeNamespace(name)!), c, traversal);
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.SourceFieldSymbol) {
         ret.appendChunk(new FieldSymbolTranspiler().transpile(c, traversal));
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.ClassName) {

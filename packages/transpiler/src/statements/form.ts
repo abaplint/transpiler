@@ -17,13 +17,13 @@ export class FormTranspiler implements IStatementTranspiler {
     const ret = new Chunk("async function " + name + "(INPUT) {");
     const params: string[] = [];
     for (const p of def?.getChangingParameters() || []) {
-      params.push(`let ${p.getName()} = INPUT.${p.getName()};`);
+      params.push(`let ${Traversal.prefixVariable(p.getName())} = INPUT.${p.getName()};`);
     }
     for (const p of def?.getTablesParameters() || []) {
-      params.push(`let ${p.getName()} = INPUT.${p.getName()};`);
+      params.push(`let ${Traversal.prefixVariable(p.getName())} = INPUT.${p.getName()};`);
     }
     for (const p of def?.getUsingParameters() || []) {
-      params.push(`let ${p.getName()} = INPUT.${p.getName()};`);
+      params.push(`let ${Traversal.prefixVariable(p.getName())} = INPUT.${p.getName()};`);
     }
     if (params.length > 0) {
       ret.appendString("\n" + params.join("\n"));
