@@ -67,6 +67,29 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
-// TODO: class attribute
+  it("class attribute", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor.
+  PRIVATE SECTION.
+    DATA class TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD constructor.
+    WRITE class.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lcl.
+  CREATE OBJECT lo.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
 
 });

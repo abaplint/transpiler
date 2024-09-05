@@ -34,6 +34,9 @@ export class Keywords {
   }
 
   public handle(reg: abaplint.IRegistry) {
+    if (this.keywords.length === 0) {
+      return;
+    }
     reg.parse();
 
     for (const o of reg.getObjects()) {
