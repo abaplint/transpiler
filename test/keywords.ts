@@ -52,6 +52,27 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("method parameter, returning", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS foo RETURNING VALUE(class) TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD foo.
+    class = 2.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>foo( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("form parameter", async () => {
     const code = `
 FORM foo USING class TYPE i.

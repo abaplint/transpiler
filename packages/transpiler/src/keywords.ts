@@ -4,7 +4,8 @@ import * as abaplint from "@abaplint/core";
 export const DEFAULT_KEYWORDS: string[] = [
   "abstract",	"arguments", "await",
   "break",	"byte", "catch",
-  "char",	"class", "const", "continue",
+//  "char",
+  "class", "const", "continue",
   "debugger",	"default", "do",
   "double",	"else", "enum", "eval",
   "export",	"extends", "false", "final",
