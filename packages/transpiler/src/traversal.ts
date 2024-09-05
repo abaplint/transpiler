@@ -33,6 +33,7 @@ export class Traversal {
   }
 
   public static prefixVariable(name: string | undefined) {
+    // TODO: performace, make this a hash lookup?,
     if (DEFAULT_KEYWORDS.some(k => k === name)) {
       return "$" + name;
     }
