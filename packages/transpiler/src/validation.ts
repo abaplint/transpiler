@@ -1,5 +1,5 @@
 import {Issue, IRegistry, Config, IConfig, Version} from "@abaplint/core";
-import {defaultKeywords} from "./keywords";
+import {DEFAULT_KEYWORDS} from "./keywords";
 import {ITranspilerOptions, UnknownTypesEnum} from "./types";
 
 export const config: IConfig = {
@@ -125,7 +125,7 @@ export class Validation {
 
     config.rules["forbidden_identifier"]["check"] = ["^unique\\d+$"];
     if (this.options?.keywords === undefined) {
-      for (const d of defaultKeywords) {
+      for (const d of DEFAULT_KEYWORDS) {
         const add = "^" + d + "$";
         config.rules["forbidden_identifier"]["check"].push(add);
       }

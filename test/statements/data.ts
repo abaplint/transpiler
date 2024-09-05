@@ -62,4 +62,12 @@ WRITE ls_struc-c.`;
     expect(abap.console.get()).to.equal("10");
   });
 
+  it("DATA, namespaced", async () => {
+    const code = `
+DATA /foo/bar TYPE i.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

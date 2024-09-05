@@ -1,7 +1,7 @@
 import * as abaplint from "@abaplint/core";
 
 // https://www.w3schools.com/js/js_reserved.asp
-export const defaultKeywords: string[] = [
+export const DEFAULT_KEYWORDS: string[] = [
   "abstract",	"arguments", "await",
   "break",	"byte", "catch",
   "char",	"class", "const", "continue",
@@ -29,7 +29,7 @@ export class Keywords {
     if (keywords !== undefined) {
       this.keywords = keywords;
     } else {
-      this.keywords = defaultKeywords;
+      this.keywords = DEFAULT_KEYWORDS;
     }
   }
 

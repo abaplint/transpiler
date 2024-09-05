@@ -10,6 +10,7 @@ import {ISpaghettiScopeNode} from "@abaplint/core";
 import {Chunk} from "./chunk";
 import {ConstantTranspiler} from "./expressions";
 import {ITranspilerOptions} from "./types";
+import {DEFAULT_KEYWORDS} from "./keywords";
 
 export class Traversal {
   private readonly spaghetti: abaplint.ISpaghettiScope;
@@ -29,6 +30,13 @@ export class Traversal {
 
   public static escapeNamespace(name: string | undefined) {
     return name?.replace(/\//g, "$");
+  }
+
+  public static prefixVariable(name: string | undefined) {
+    if (DEFAULT_KEYWORDS.some(k => k === name)) {
+      return "$" + name;
+    }
+    return name + "";
   }
 
   public getCurrentObject(): abaplint.ABAPObject {

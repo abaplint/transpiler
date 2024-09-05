@@ -17,7 +17,7 @@ export class TargetTranspiler implements IExpressionTranspiler {
 
       if (c.get() instanceof Expressions.TargetField) {
         const prefix = traversal.prefixAndName(c.getFirstToken()).replace("~", "$");
-        ret.append(Traversal.escapeNamespace(prefix)!, c, traversal);
+        ret.append(Traversal.prefixVariable(Traversal.escapeNamespace(prefix)!), c, traversal);
       } else if (c.get() instanceof Expressions.ClassName) {
         const name = traversal.lookupClassOrInterface(c.getFirstToken().getStr(), c.getFirstToken());
         ret.append(name, c, traversal);
