@@ -687,7 +687,7 @@ export class Traversal {
       }
     };
 
-    handle(val, name);
+    handle(val, Traversal.prefixVariable(name));
 
     return ret;
   }
