@@ -1,7 +1,6 @@
 import * as abaplint from "@abaplint/core";
 import {Validation, config} from "./validation";
 import {UnitTest} from "./unit_test";
-import {Keywords} from "./keywords";
 import {IFile, IOutput, IProgress, ITranspilerOptions, IOutputFile, UnknownTypesEnum} from "./types";
 import {DatabaseSetup} from "./db";
 import {HandleTable} from "./handlers/handle_table";
@@ -42,7 +41,6 @@ export class Transpiler {
   public async run(reg: abaplint.IRegistry, progress?: IProgress): Promise<IOutput> {
 
     reg.parse();
-    new Keywords(this.options?.keywords).handle(reg);
     this.validate(reg);
 
     const dbSetup = new DatabaseSetup(reg).run(this.options);

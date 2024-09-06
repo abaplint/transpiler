@@ -1,13 +1,9 @@
 import {Issue, IRegistry, Config, IConfig, Version} from "@abaplint/core";
-import {DEFAULT_KEYWORDS} from "./keywords";
 import {ITranspilerOptions, UnknownTypesEnum} from "./types";
 
 export const config: IConfig = {
   "global": {
     "files": "/**/*.*",
-    "skipGeneratedGatewayClasses": true,
-    "skipGeneratedPersistentClasses": true,
-    "skipGeneratedFunctionGroups": true,
   },
   "syntax": {
     "version": Version.OpenABAP,
@@ -124,17 +120,6 @@ export class Validation {
     }
 
     config.rules["forbidden_identifier"]["check"] = ["^unique\\d+$"];
-    if (this.options?.keywords === undefined) {
-      for (const d of DEFAULT_KEYWORDS) {
-        const add = "^" + d + "$";
-        config.rules["forbidden_identifier"]["check"].push(add);
-      }
-    } else {
-      for (const d of this.options.keywords) {
-        const add = "^" + d + "$";
-        config.rules["forbidden_identifier"]["check"].push(add);
-      }
-    }
 
     if (this.options?.unknownTypes === UnknownTypesEnum.runtimeError) {
       // this is not a constant, just a regex that happens to not match anything
