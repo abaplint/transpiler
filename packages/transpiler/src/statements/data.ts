@@ -28,7 +28,7 @@ export class DataTranspiler implements IStatementTranspiler {
     if (found.getValue() !== undefined && node.concatTokens().includes(" & ")) {
       value = "\n" + traversal.setValues(found, found.getName());
     } else {
-      value = DataTranspiler.buildValue(node, found.getName().toLowerCase(), traversal);
+      value = DataTranspiler.buildValue(node, Traversal.prefixVariable(found.getName().toLowerCase()), traversal);
     }
 
     const ret = new Chunk()
