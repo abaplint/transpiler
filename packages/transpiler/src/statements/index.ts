@@ -54,6 +54,7 @@ export * from "./end_loop";
 export * from "./end_method";
 export * from "./end_try";
 export * from "./end_while";
+export * from "./enhancement_point";
 export * from "./enhancement_section";
 export * from "./exit";
 export * from "./export";
