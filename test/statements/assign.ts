@@ -802,7 +802,7 @@ START-OF-SELECTION.
     expect(abap.console.getTrimmed()).to.equal("5\n2");
   });
 
-  it.only("assign arrow obj", async () => {
+  it("assign arrow obj", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.

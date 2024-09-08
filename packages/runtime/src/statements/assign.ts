@@ -30,7 +30,13 @@ export function assign(input: IAssignInput) {
             input.dynamicSource = input.dynamicSource.dereference();
           } else {
             // @ts-ignore
-            input.dynamicSource = input.dynamicSource.get()[s.toLowerCase().replace(/[~\\/]/g, "$") as any];
+            const source = input.dynamicSource.get();
+            if (source === undefined) {
+              // @ts-ignore
+              abap.builtin.sy.get().subrc.set(4);
+              return;
+            }
+            input.dynamicSource = source[s.toLowerCase().replace(/[~\\/]/g, "$") as any];
           }
         }
       } else {
