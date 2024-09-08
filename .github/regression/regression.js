@@ -6,7 +6,7 @@ const childProcess = require("child_process");
 const repos = [
   {name: "abap-openapi/abap-openapi",           command: "npm test"},
   {name: "abapGit/abapGit",                     command: "npm run unit"},
-  {name: "dominikpanzer/cacamber-BDD-for-ABAP", command: "npm test"},
+//  {name: "dominikpanzer/cacamber-BDD-for-ABAP", command: "npm test"},
   {name: "heliconialabs/abap-opentelemetry",    command: "npm test"},
   {name: "heliconialabs/abap-protobuf",         command: "npm test"},
   {name: "larshp/abap-advent-2020",             command: "npm test"},

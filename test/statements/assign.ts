@@ -802,4 +802,31 @@ START-OF-SELECTION.
     expect(abap.console.getTrimmed()).to.equal("5\n2");
   });
 
+  it("assign arrow obj", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS bar IMPORTING i_source TYPE any.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD bar.
+    FIELD-SYMBOLS <attribute> TYPE any.
+    DATA attribute_name TYPE string.
+    attribute_name = 'i_source->DFSDF'.
+    ASSIGN (attribute_name) TO <attribute>.
+    WRITE / sy-subrc.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  FIELD-SYMBOLS <fs> TYPE REF TO lcl.
+  DATA obj TYPE REF TO lcl.
+  ASSIGN obj TO <fs>.
+  lcl=>bar( <fs> ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("4");
+  });
+
 });
