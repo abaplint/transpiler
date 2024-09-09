@@ -186,7 +186,7 @@
     },
     "homepage": "https://github.com/abaplint/transpiler_poc#readme",
     "devDependencies": {
-        "@abaplint/core": "^2.113.6",
+        "@abaplint/core": "^2.113.7",
         "@types/chai": "^4.3.19",
         "@types/mocha": "^10.0.7",
         "@types/node": "^22.5.4",
