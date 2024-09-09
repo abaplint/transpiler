@@ -344,4 +344,33 @@ ASSIGN ref_int8->* TO <value>.
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
+
+  it("CREATE DATA, like and inputs and field symbols", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS set_cell IMPORTING ip_value TYPE simple OPTIONAL.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD set_cell.
+    DATA lo_value TYPE REF TO data.
+    FIELD-SYMBOLS <fs_value> TYPE simple.
+
+    CREATE DATA lo_value LIKE ip_value.
+    ASSIGN lo_value->* TO <fs_value>.
+    <fs_value> = ip_value.
+    WRITE / <fs_value>.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lcl.
+  CREATE OBJECT lo.
+  lo->set_cell( 2 ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
 });
