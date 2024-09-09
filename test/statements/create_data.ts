@@ -345,7 +345,7 @@ ASSIGN ref_int8->* TO <value>.
     await f(abap);
   });
 
-  it.only("CREATE DATA, like and inputs and field symbols", async () => {
+  it("CREATE DATA, like and inputs and field symbols", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
