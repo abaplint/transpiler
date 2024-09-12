@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/runtime",
-  "version": "2.10.18",
+  "version": "2.10.19",
   "description": "Transpiler - Runtime",
   "main": "build/src/index.js",
   "typings": "build/src/index.d.ts",
@@ -34,7 +34,7 @@
     "chai": "^4.5.0",
     "mocha": "^10.7.3",
     "source-map-support": "^0.5.21",
-    "typescript": "^5.5.4"
+    "typescript": "^5.6.2"
   },
   "dependencies": {
     "temporal-polyfill": "^0.2.5"

@@ -17,8 +17,8 @@
         "link:database-pg": "cd packages/database-pg && npm link @abaplint/runtime",
         "link:database-snowflake": "cd packages/database-snowflake && npm link @abaplint/runtime",
         "link:cli": "cd packages/cli && npm link --force && npm link @abaplint/transpiler",
-        "docker:start": "docker compose -f test/stack.yml up -d",
-        "docker:stop": "docker compose -f test/stack.yml down",
+        "docker:start": "docker compose -p transpiler -f test/stack.yml up -d",
+        "docker:stop": "docker compose -p transpiler -f test/stack.yml down -v",
         "lint": "eslint packages/**/*.ts --format unix"
     },
     "repository": {
@@ -186,7 +186,7 @@
     },
     "homepage": "https://github.com/abaplint/transpiler_poc#readme",
     "devDependencies": {
-        "@abaplint/core": "^2.113.7",
+        "@abaplint/core": "^2.113.8",
         "@types/chai": "^4.3.19",
         "@types/mocha": "^10.0.7",
         "@types/node": "^22.5.4",
@@ -206,6 +206,6 @@
         "source-map-support": "^0.5.21",
         "sql.js": "^1.11.0",
         "temporal-polyfill": "^0.2.5",
-        "typescript": "^5.5.4"
+        "typescript": "^5.6.2"
     }
 }
