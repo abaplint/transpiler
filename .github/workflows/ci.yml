@@ -16,3 +16,23 @@ jobs:
     - run: npm run install
     - run: npm run link-local
     - run: npm test
+    - run: npm run schema
+      working-directory: packages/cli
+    - name: prepare schema.abaplint.org
+      run: |
+        cd ..
+        cd ..
+        git clone https://github.com/abaplint/schema.abaplint.org.git
+        ls
+        cp transpiler/transpiler/packages/cli/schema.json schema.abaplint.org/transpiler.json
+    - name: deploy schema.abaplint.org
+      uses: peaceiris/actions-gh-pages@v3
+      if: github.ref == 'refs/heads/main' && github.repository == 'abaplint/abaplint'
+      with:
+        deploy_key: ${{ secrets.SCHEMA_DEPLOY_KEY }}
+        external_repository: abaplint/schema.abaplint.org
+        user_name: 'github-actions[bot]'
+        user_email: 'github-actions[bot]@users.noreply.github.com'
+        publish_branch: main
+        cname: schema.abaplint.org
+        publish_dir: ../../schema.abaplint.org
