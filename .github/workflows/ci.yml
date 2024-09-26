@@ -27,7 +27,7 @@ jobs:
         cp transpiler/transpiler/packages/cli/schema.json schema.abaplint.org/transpiler.json
     - name: deploy schema.abaplint.org
       uses: peaceiris/actions-gh-pages@v3
-      if: github.ref == 'refs/heads/main' && github.repository == 'abaplint/abaplint'
+      if: github.ref == 'refs/heads/main' && github.repository == 'abaplint/transpiler'
       with:
         deploy_key: ${{ secrets.SCHEMA_DEPLOY_KEY }}
         external_repository: abaplint/schema.abaplint.org
