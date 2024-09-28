@@ -12,7 +12,7 @@ export interface ITranspilerConfig {
     folder?: string,
     files?: string | string[],
   }[],
-  write_unit_tests: boolean;
-  write_source_map: boolean;
+  write_unit_tests?: boolean;
+  write_source_map?: boolean;
   options: ITranspilerOptions;
 }

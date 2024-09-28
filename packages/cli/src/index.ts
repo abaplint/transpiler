@@ -131,7 +131,7 @@ async function run() {
     fs.mkdirSync(outputFolder);
   }
 
-  writeObjects(output.objects, config.write_source_map, outputFolder, files);
+  writeObjects(output.objects, config.write_source_map || false, outputFolder, files);
   console.log(output.objects.length + " objects written to disk");
 
   if (config.write_unit_tests === true) {
