@@ -77,7 +77,10 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async delete(options: DB.DeleteDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
-    const sql = `DELETE FROM ${options.table} WHERE ${options.where}`;
+    let sql = `DELETE FROM ${options.table}`;
+    if (options.where !== "") {
+      sql += ` WHERE ${options.where}`;
+    }
 
     let subrc = 0;
     let dbcnt = 0;

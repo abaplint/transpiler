@@ -20,18 +20,22 @@ export class FileOperations {
     let skipped = 0;
     let added = 0;
 
-    for (const filename of glob.sync(config.input_folder + "/**", {nosort: true, nodir: true})) {
-      if (filter.length > 0 && filter.some(a => a.test(filename)) === false) {
-        skipped++;
-        continue;
+    const folders = Array.isArray(config.input_folder) ? config.input_folder : [config.input_folder];
+    for (const folder of folders) {
+      for (const filename of glob.sync(folder + "/**", {nosort: true, nodir: true})) {
+        if (filter.length > 0 && filter.some(a => a.test(filename)) === false) {
+          skipped++;
+          continue;
+        }
+        files.push({
+          filename: path.basename(filename),
+          relative: path.relative(config.output_folder, path.dirname(filename)),
+          contents: fs.readFileSync(filename, "utf8"),
+        });
+        added++;
       }
-      files.push({
-        filename: path.basename(filename),
-        relative: path.relative(config.output_folder, path.dirname(filename)),
-        contents: fs.readFileSync(filename, "utf8"),
-      });
-      added++;
     }
+
     console.log(added + " files added from source");
     console.log(skipped + " files skipped in source");
     return files;

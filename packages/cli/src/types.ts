@@ -1,7 +1,7 @@
 import {ITranspilerOptions} from "@abaplint/transpiler";
 
 export interface ITranspilerConfig {
-  input_folder: string;
+  input_folder: string | string[];
   /** list of regex, case insensitive, empty gives all files, positive list */
   input_filter?: string[];
   output_folder: string;
@@ -12,7 +12,7 @@ export interface ITranspilerConfig {
     folder?: string,
     files?: string | string[],
   }[],
-  write_unit_tests: boolean;
-  write_source_map: boolean;
+  write_unit_tests?: boolean;
+  write_source_map?: boolean;
   options: ITranspilerOptions;
 }

@@ -9,7 +9,7 @@ export class DeleteDatabaseTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const dbtab = node.findFirstExpression(abaplint.Expressions.DatabaseTable);
     if (dbtab === undefined) {
-      throw new Error("internal error, InsertDatabaseTranspiler");
+      throw new Error("internal error, DeleteDatabaseTranspiler");
     }
     const table = new DatabaseTableTranspiler(false).transpile(dbtab, traversal);
 

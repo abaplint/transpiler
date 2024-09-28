@@ -144,6 +144,28 @@ describe("Top level tests, Database", () => {
     });
   });
 
+  it.skip("test, DELETE no conditions", async () => {
+    const code = `
+    DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+    DATA row LIKE LINE OF tab.
+
+    row-arbgb = 'SDFDEL'.
+    APPEND row TO tab.
+    MODIFY t100 FROM TABLE tab.
+
+    DELETE FROM t100.
+
+    SELECT SINGLE * FROM t100 INTO row.
+    WRITE / sy-subrc.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    await runAllDatabases(abap, files, () => {
+      const cons = abap.console.get();
+      expect(cons).to.equal("4");
+    });
+  });
+
   it("SELECT SINGLE, WHERE char constant", async () => {
     const code = `
     DATA ls_result TYPE t100.

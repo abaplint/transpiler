@@ -44,17 +44,15 @@ export async function deleteDatabase(table: string | ICharacter, options: IDelet
     abap.builtin.sy.get().subrc.set(subrc);
       // @ts-ignore
     abap.builtin.sy.get().dbcnt.set(dbcnt);
-  } else if (options.where) {
+  } else {
     const {subrc, dbcnt} = await context.defaultDB().delete({
       table: buildDbTableName(table),
-      where: options.where,
+      where: options.where || "",
     });
 
       // @ts-ignore
     abap.builtin.sy.get().subrc.set(subrc);
       // @ts-ignore
     abap.builtin.sy.get().dbcnt.set(dbcnt);
-  } else {
-    throw "deleteDatabase todo";
   }
 }
