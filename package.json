@@ -186,7 +186,7 @@
     },
     "homepage": "https://github.com/abaplint/transpiler_poc#readme",
     "devDependencies": {
-        "@abaplint/core": "^2.113.16",
+        "@abaplint/core": "^2.113.18",
         "@types/chai": "^4.3.20",
         "@types/mocha": "^10.0.8",
         "@types/node": "^22.7.4",
@@ -202,7 +202,7 @@
         "mocha": "^10.7.3",
         "pg": "^8.13.0",
         "pg-cursor": "^2.12.0",
-        "snowflake-sdk": "^1.13.1",
+        "snowflake-sdk": "^1.14.0",
         "source-map-support": "^0.5.21",
         "sql.js": "^1.11.0",
         "temporal-polyfill": "^0.2.5",
