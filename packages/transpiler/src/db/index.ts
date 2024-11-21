@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import * as abaplint from "@abaplint/core";
 import {ITranspilerOptions} from "../types";
 import {DatabaseSetupResult} from "./database_setup_result";

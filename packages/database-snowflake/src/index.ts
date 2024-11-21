@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import {DB} from "@abaplint/runtime";
 import * as snowflake from "snowflake-sdk";
 
