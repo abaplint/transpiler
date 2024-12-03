@@ -30,7 +30,6 @@ export class AtTranspiler implements IStructureTranspiler {
     }
 
     if (concat?.startsWith("AT NEW ")) {
-      // eslint-disable-next-line max-len
       ret.appendString(`if (${previous} === undefined || abap.compare.eq(${previous}${suffix}, ${loopTarget}${suffix}) === false) {\n`);
       const body = node.findDirectStructure(abaplint.Structures.Body);
       if (body) {
@@ -45,7 +44,6 @@ export class AtTranspiler implements IStructureTranspiler {
       ret.appendString(`${next} = ${loop.getTarget()};\n`);
       ret.appendString(`break;\n`);
       ret.appendString(`}\n`);
-      // eslint-disable-next-line max-len
       ret.appendString(`if (${next} === undefined || abap.compare.eq(${next}${suffix}, ${loopTarget}${suffix}) === false) {\n`);
       const body = node.findDirectStructure(abaplint.Structures.Body);
       if (body) {

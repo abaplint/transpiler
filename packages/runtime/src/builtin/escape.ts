@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-types */
 import {String} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";

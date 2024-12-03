@@ -11,8 +11,8 @@ export class CompareTranspiler implements IExpressionTranspiler {
     const concat = node.concatTokens().toUpperCase();
 
     let pre = concat.startsWith("NOT ") ? "!" : "";
-
-    const sources = node.findDirectExpressions(Expressions.Source).concat(node.findDirectExpressions(Expressions.SourceFieldSymbol));
+    const sources = node.findDirectExpressionsMulti(
+      [Expressions.Source, Expressions.SourceFieldSymbolChain, Expressions.SourceFieldSymbol]);
     if (sources.length === 1) {
       const s0 = traversal.traverse(sources[0]);
 

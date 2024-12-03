@@ -1,4 +1,4 @@
-/* eslint-disable radix */
+
 import {Float} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
