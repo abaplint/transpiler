@@ -5,7 +5,9 @@ export interface ITranspilerConfig {
   /** list of regex, case insensitive, empty gives all files, positive list */
   input_filter?: string[];
   output_folder: string;
-  /** to be deprecated, "lib" */
+  /** to be deprecated, "lib", use "libs" instead
+   * @deprecated
+   */
   lib?: string;
   libs?: {
     url?: string,
