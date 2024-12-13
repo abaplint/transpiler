@@ -9,6 +9,7 @@ export class FieldSymbolTranspiler implements IExpressionTranspiler {
     let name = node.concatTokens();
     name = name.replace("<", "fs_");
     name = name.replace(">", "_");
+    name = name.replace("[]", "");
     return new Chunk().append(name, node, traversal);
   }
 
