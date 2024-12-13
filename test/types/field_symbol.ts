@@ -76,7 +76,7 @@ WRITE min_str.`;
     expect(abap.console.get()).to.equal("10-");
   });
 
-  it.only("fs body tests", async () => {
+  it("fs body tests", async () => {
     const code = `
 DATA foo TYPE STANDARD TABLE OF string.
 DATA bar LIKE foo.
