@@ -76,4 +76,28 @@ WRITE min_str.`;
     expect(abap.console.get()).to.equal("10-");
   });
 
+  it.only("fs body tests", async () => {
+    const code = `
+DATA foo TYPE STANDARD TABLE OF string.
+DATA bar LIKE foo.
+DATA baz LIKE foo.
+FIELD-SYMBOLS <baz> LIKE baz.
+
+ASSIGN baz TO <baz>.
+
+APPEND 'arf' TO foo.
+APPEND 'meh' TO foo.
+APPEND 'woo' TO foo.
+
+bar = foo.
+bar[] = foo[].
+<baz> = foo.
+<baz>[] = foo[].`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    // just test it runs
+  });
+
 });
