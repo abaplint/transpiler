@@ -94,7 +94,6 @@ bar[] = foo[].
 <baz> = foo.
 <baz>[] = foo[].`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     // just test it runs
