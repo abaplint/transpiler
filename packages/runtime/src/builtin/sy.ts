@@ -26,4 +26,5 @@ export const sy = new Structure({
   uname: new Character(12).set("USERNAME"),
   uzeit: new Time(),
   dbsys: new Character(10),
+  batch: new Character(1),
 });
