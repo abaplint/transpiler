@@ -14,11 +14,18 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   public readonly name = "postgres";
   private readonly config: pg.PoolConfig;
   private readonly trace: boolean | undefined;
+  private readonly lazy: boolean | undefined;
   private pool: pg.Pool | undefined;
 
-  public constructor(input: ConnectionSettings & {trace?: boolean}) {
+  /**
+   * @param input Connection settings
+   * @param input.trace If true, all SQL queries are printed to the console
+   * @param input.lazy If true, the connection is not established until the first query
+   */
+  public constructor(input: ConnectionSettings & {trace?: boolean, lazy?: boolean}) {
     this.config = input;
     this.trace = input.trace;
+    this.lazy = input.lazy;
   }
 
   public async connect(pool?: pg.Pool) {
@@ -52,6 +59,10 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async execute(sql: string | string[]): Promise<void> {
+    if (this.lazy === true && this.pool === undefined) {
+      await this.connect();
+    }
+
     if (typeof sql === "string") {
       if (sql === "") {
         return;
@@ -77,6 +88,10 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async delete(options: DB.DeleteDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
+    if (this.lazy === true && this.pool === undefined) {
+      await this.connect();
+    }
+
     let sql = `DELETE FROM ${options.table}`;
     if (options.where !== "") {
       sql += ` WHERE ${options.where}`;
@@ -102,6 +117,10 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async update(options: DB.UpdateDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
+    if (this.lazy === true && this.pool === undefined) {
+      await this.connect();
+    }
+
     const sql = `UPDATE ${options.table} SET ${options.set.join(", ")} WHERE ${options.where}`;
 
     let subrc = 0;
@@ -124,6 +143,10 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async insert(options: DB.InsertDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
+    if (this.lazy === true && this.pool === undefined) {
+      await this.connect();
+    }
+
     const sql = `INSERT INTO ${options.table} (${options.columns.map(c => "\"" + c + "\"").join(",")}) VALUES (${options.values.join(",")})`;
 
     let subrc = 0;
@@ -146,6 +169,10 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async select(options: DB.SelectDatabaseOptions): Promise<DB.SelectDatabaseResult> {
+    if (this.lazy === true && this.pool === undefined) {
+      await this.connect();
+    }
+
     let res: undefined | pg.QueryResult<any> = undefined;
 
     options.select = options.select.replace(/ UP TO (\d+) ROWS(.*)/i, "$2 LIMIT $1");
@@ -195,6 +222,10 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async openCursor(options: DB.SelectDatabaseOptions): Promise<DB.DatabaseCursorCallbacks> {
+    if (this.lazy === true && this.pool === undefined) {
+      await this.connect();
+    }
+
     const client = await this.pool!.connect();
     const cursor = client.query(new Cursor(options.select));
     return {
