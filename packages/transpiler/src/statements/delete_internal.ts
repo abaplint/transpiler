@@ -27,7 +27,7 @@ export class DeleteInternalTranspiler implements IStatementTranspiler {
     if (node.findDirectTokenByText("ADJACENT")) {
       extra.push("adjacent: true");
       if (node.findDirectTokenByText("COMPARING") && !concat.includes("COMPARING ALL FIELDS")) {
-        const comparing = node.findAllExpressions(abaplint.Expressions.FieldSub);
+        const comparing = node.findAllExpressions(abaplint.Expressions.SimpleFieldChain2);
         if (comparing) {
           const compareFields = comparing.map(i => "'" + i.getFirstToken().getStr() + "'").join(",");
           extra.push("comparing: [" + compareFields + "]");
