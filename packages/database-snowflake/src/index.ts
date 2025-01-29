@@ -236,7 +236,7 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
 
   private async fetchNextCursor(
     packageSize: number,
-    stmt: snowflake.Statement,
+    stmt: snowflake.RowStatement,
     counter: {counter: number}): Promise<DB.SelectDatabaseResult> {
 
     return new Promise((resolve, reject) => {
