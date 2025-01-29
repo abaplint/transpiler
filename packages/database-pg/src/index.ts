@@ -189,8 +189,12 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
       console.log(options.select);
     }
 
+    if (this.pool === undefined) {
+      throw new Error("PG: Database connection not established");
+    }
+
     try {
-      res = await this.pool!.query(options.select);
+      res = await this.pool.query(options.select);
     } catch (error) {
       // @ts-ignore
       if (abap.Classes["CX_SY_DYNAMIC_OSQL_SEMANTICS"] !== undefined) {
