@@ -70,6 +70,7 @@ abap.Classes['PROG-ZFOOBAR-LIF_FOOBAR'] = lif_foobar;`;
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    this.INTERNAL_ID = abap.internalIdCounter++;
   }
   async constructor_(INPUT) {
     if (super.constructor_) { await super.constructor_(INPUT); }
@@ -106,6 +107,7 @@ abap.Classes['PROG-ZFOOBAR-LCL_FOOBAR'] = lcl_foobar;`;
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    this.INTERNAL_ID = abap.internalIdCounter++;
   }
   async constructor_(INPUT) {
     if (super.constructor_) { await super.constructor_(INPUT); }
@@ -162,6 +164,7 @@ CREATE OBJECT foo.`;
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    this.INTERNAL_ID = abap.internalIdCounter++;
   }
   async constructor_(INPUT) {
     if (super.constructor_) { await super.constructor_(INPUT); }
@@ -220,6 +223,7 @@ DATA moo TYPE foo.`;
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    this.INTERNAL_ID = abap.internalIdCounter++;
     this.bar = new abap.types.Integer({qualifiedName: "I"});
   }
   async constructor_(INPUT) {
@@ -259,6 +263,7 @@ abap.Classes['PROG-ZFOOBAR-ZCL_WORDS'] = zcl_words;`;
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    this.INTERNAL_ID = abap.internalIdCounter++;
     this.bar = new abap.types.Integer({qualifiedName: "I"});
   }
   async constructor_(INPUT) {
@@ -296,6 +301,7 @@ ENDCLASS.`;
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    this.INTERNAL_ID = abap.internalIdCounter++;
     this.bar = new abap.types.Integer({qualifiedName: "I"});
   }
   async constructor_(INPUT) {
@@ -371,6 +377,7 @@ ENDCLASS.`;
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    this.INTERNAL_ID = abap.internalIdCounter++;
     this.c_maxdcodes = zcl_ret.c_maxdcodes;
   }
   async constructor_(INPUT) {
@@ -403,6 +410,7 @@ ENDCLASS.`;
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    this.INTERNAL_ID = abap.internalIdCounter++;
     this.foo = lcl_bar.foo;
   }
   async constructor_(INPUT) {
@@ -433,6 +441,7 @@ lcl_bar.foo = new abap.types.Integer({qualifiedName: "I"});`;
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    this.INTERNAL_ID = abap.internalIdCounter++;
     this.foo = lcl_bar.foo;
   }
   async constructor_(INPUT) {
@@ -485,6 +494,7 @@ ENDINTERFACE.`;
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    this.INTERNAL_ID = abap.internalIdCounter++;
     this.first = lcl_bar.first;
   }
   async constructor_(INPUT) {
@@ -602,6 +612,7 @@ ENDCLASS.`;
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    this.INTERNAL_ID = abap.internalIdCounter++;
     this.area_name = lcl_constant_test.area_name;
   }
   async constructor_(INPUT) {
@@ -647,6 +658,7 @@ class lcl {
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
+    this.INTERNAL_ID = abap.internalIdCounter++;
   }
   async constructor_(INPUT) {
     if (super.constructor_) { await super.constructor_(INPUT); }

@@ -1361,4 +1361,39 @@ READ TABLE tabl INDEX lv_tmp + 1 INTO row.`;
     await f(abap);
   });
 
+  it.skip("READ TABLE HASHED WITH instance reference", async () => {
+    const code = `
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    DATA counter TYPE i.
+ENDCLASS.
+
+CLASS lcl_bar IMPLEMENTATION.
+ENDCLASS.
+
+TYPES: BEGIN OF ty_instance,
+        inst type ref to lcl_bar,
+       END OF ty_instance.
+DATA tabl TYPE HASHED TABLE OF ty_instance WITH UNIQUE KEY inst.
+DATA wa LIKE LINE OF tabl.
+DATA lo_bar1 TYPE REF TO lcl_bar.
+DATA lo_bar2 TYPE REF TO lcl_bar.
+
+CREATE OBJECT lo_bar1.
+lo_bar1->counter = 1.
+
+wa-inst = lo_bar1.
+INSERT wa INTO TABLE tabl.
+
+CREATE OBJECT lo_bar2.
+lo_bar1->counter = 2.
+
+READ TABLE tabl WITH TABLE KEY inst = lo_bar2 TRANSPORTING NO FIELDS.
+ASSERT sy-subrc <> 0.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

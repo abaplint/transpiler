@@ -460,8 +460,9 @@ export class Traversal {
 
     const cName = Traversal.escapeNamespace(def.getName().toLowerCase());
 
-    ret += "this.me = new abap.types.ABAPObject();\n";
-    ret += "this.me.set(this);\n";
+    ret += `this.me = new abap.types.ABAPObject();
+this.me.set(this);
+this.INTERNAL_ID = abap.internalIdCounter++;\n`;
     for (const a of def.getAttributes()?.getAll() || []) {
       const escaped = Traversal.escapeNamespace(a.getName().toLowerCase());
       if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
