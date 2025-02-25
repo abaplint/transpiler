@@ -1361,7 +1361,7 @@ READ TABLE tabl INDEX lv_tmp + 1 INTO row.`;
     await f(abap);
   });
 
-  it.skip("READ TABLE HASHED WITH instance reference", async () => {
+  it("READ TABLE HASHED WITH instance reference", async () => {
     const code = `
 CLASS lcl_bar DEFINITION.
   PUBLIC SECTION.

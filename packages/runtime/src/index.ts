@@ -47,7 +47,7 @@ export class ABAP {
   public TypePools: {[name: string]: any} = {};
   public W3MI: {[name: string]: any} = {};
 
-  public internalIdCounter = 0;
+  public internalIdCounter = 1;
 
 // stuff for runtime
   public statements;
