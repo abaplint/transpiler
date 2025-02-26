@@ -152,6 +152,9 @@ export class HashedTable implements ITable {
       if (k === "TABLE_LINE") {
         if (data instanceof Structure) {
           hash += k + ":" + data.getCharacter() + "|";
+        } else if (data instanceof ABAPObject) {
+          const moo = "OpenABAPInternalObjectId=" + data.get().INTERNAL_ID;
+          hash += k + ":" + moo + "|";
         } else {
           // @ts-ignore
           hash += k + ":" + data.get() + "|";
@@ -161,6 +164,8 @@ export class HashedTable implements ITable {
         let val = data.get()[k.toLowerCase()];
         if (val instanceof Structure) {
           val = val.getCharacter();
+        } else if (val instanceof ABAPObject) {
+          val = "OpenABAPInternalObjectId=" + val.get().INTERNAL_ID;
         } else {
           val = val.get();
         }
@@ -201,6 +206,8 @@ export class HashedTable implements ITable {
           val = val.get();
         } else if (field instanceof HexUInt8 && val instanceof HexUInt8 && field.getLength() === val.getLength()) {
           val = val.get();
+        } else if (val instanceof ABAPObject) {
+          val = "OpenABAPInternalObjectId=" + val.get().INTERNAL_ID;
         } else if (val instanceof Structure) {
           val = val.getCharacter();
         } else {
