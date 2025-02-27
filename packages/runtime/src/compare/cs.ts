@@ -1,3 +1,4 @@
+import {Character} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -13,6 +14,8 @@ export function cs(left: number | string | ICharacter | INumeric, right: string 
   let r = "";
   if (typeof right === "string") {
     r = right.toString();
+  } else if (right instanceof Character) {
+    r = right.getTrimEnd();
   } else {
     r = right.get().toString();
   }

@@ -50,7 +50,7 @@ describe("Running operators - CS", () => {
     await f(abap);
   });
 
-  it.only("CS whitespace, character type", async () => {
+  it("CS whitespace, character type", async () => {
     const code = `
 DATA bool    TYPE abap_bool.
 DATA absolute_name type c length 200.
