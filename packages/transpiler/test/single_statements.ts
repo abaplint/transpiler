@@ -159,7 +159,7 @@ describe("Single statements", () => {
     {abap: "if_bar~field = 2.",                      js: `if_bar$field.set(abap.IntegerFactory.get(2));`, skip: false},
     {abap: "IF if_bar~field IS NOT INITIAL. ENDIF.", js: `if (abap.compare.initial(if_bar$field) === false) {\n}`, skip: false},
     {abap: "FUNCTION-POOL zopenabap.", js: ``, skip: false},
-    {abap: "INCLUDE lzopenabaptop.", js: ``, skip: false},
+    {abap: "INCLUDE lzopenabaptop.", js: `// transpiler TODO: INCLUDE lzopenabaptop\n`, skip: false},
 
     {abap: "CALL FUNCTION 'BAR' DESTINATION 'MOO'.",
       js: `await abap.statements.callFunction({name:'BAR',destination:'MOO'});`, skip: false},

@@ -30,7 +30,7 @@ export class IncludeTranspiler implements IStatementTranspiler {
     }
 
     // todo, this will not work
-    return new Chunk("");
+    return new Chunk("// transpiler TODO: INCLUDE " + includeName + "\n");
   }
 
 }
