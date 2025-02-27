@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP, MemoryConsole} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -48,6 +48,24 @@ describe("Running operators - CS", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it.only("CS whitespace, character type", async () => {
+    const code = `
+DATA bool    TYPE abap_bool.
+DATA absolute_name type c length 200.
+
+absolute_name = \`TYPE-POOL=ABAPTYPE=ABAP_BOOL  \`.
+
+IF \`TYPE-POOL=ABAPTYPE=ABAP_BOOLTYPE=BOOLEANTYPE=BOOLE_DTYPE=XFELD\` CS absolute_name.
+  write 'yes'.
+else.
+  write 'no'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`yes`);
   });
 
 });
