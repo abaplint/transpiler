@@ -15,7 +15,7 @@ export class IncludeTranspiler implements IStatementTranspiler {
 
     const obj = traversal.getCurrentObject();
     if (obj instanceof abaplint.Objects.FunctionGroup) {
-      if (includeName.toUpperCase().endsWith("XX") === false) {
+      if (includeName.toUpperCase().endsWith("XX") === true) {
         const include = obj.getInclude(includeName);
         if (include === undefined) {
           throw new Error(`Include ${includeName} not found`);
@@ -26,11 +26,25 @@ export class IncludeTranspiler implements IStatementTranspiler {
         const chunk = sub.traverse(rearranged);
 //        console.dir(chunk.getCode());
         return chunk;
+      } else {
+        return new Chunk("");
       }
     }
 
-    // todo, this will not work
-    return new Chunk("// transpiler TODO: INCLUDE " + includeName + "\n");
+    const include = traversal.reg.getObject("PROG", includeName) as abaplint.Objects.Program | undefined;
+    if (include === undefined) {
+      throw new Error(`Include ${includeName} not found`);
+    }
+    const abapFile = include.getMainABAPFile();
+    if (abapFile === undefined) {
+      throw new Error(`Include ${includeName}, no main abap file found`);
+    }
+
+    const sub = new Traversal(traversal.getSpaghetti(), abapFile, traversal.getCurrentObject(), traversal.reg, traversal.options);
+    const rearranged = new Rearranger().run(obj.getType(), abapFile.getStructure());
+    const chunk = sub.traverse(rearranged);
+//        console.dir(chunk.getCode());
+    return chunk;
   }
 
 }
