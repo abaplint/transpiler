@@ -56,9 +56,15 @@ export class ABAPRegExp {
         options.ignoringCase = true;
       }
     } else {
-      throw "find(), unexpected input";
+      throw "getRegex(), unexpected input";
     }
 
-    return new RegExp(r as string, "m" + ignoreCase + allOccurrences);
+    r = r as string;
+
+    if (r.length === 0 && options.all === true) {
+      throw "getRegex(), zero length input";
+    }
+
+    return new RegExp(r, "m" + ignoreCase + allOccurrences);
   }
 }
