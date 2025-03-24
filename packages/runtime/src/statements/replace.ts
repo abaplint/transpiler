@@ -42,23 +42,8 @@ export function replace(input: replaceInput): void {
     found = temp.indexOf(inp) >= 0;
     inp = ABAPRegExp.escapeRegExp(inp);
     search = new RegExp(inp, ignoreCase + allOccurrences);
-  } else if (input.regex) {
-    // TODO: this is a bit wrong, ABAP regex is not like JS regex
-    // @ts-ignore
-    const regex = ABAPRegExp.convert(input.regex.get());
-    if (regex.length === 0 && input.all === true) {
-      throw "REPLACE, zero length input";
-    }
-    search = new RegExp(regex, ignoreCase + allOccurrences);
-    found = temp.match(search) !== null;
-  } else if (input.pcre) {
-    // @ts-ignore
-    const str = input.pcre.get();
-    const regex = ABAPRegExp.convert(str);
-    if (regex.length === 0 && input.all === true) {
-      throw "REPLACE, zero length input";
-    }
-    search = new RegExp(regex, ignoreCase + allOccurrences);
+  } else if (input.regex || input.pcre) {
+    search = ABAPRegExp.getRegex(input);
     found = temp.match(search) !== null;
   } else if (input.sectionLength && input.sectionOffset) {
     const before = input.target.getOffset({length: input.sectionOffset});
