@@ -1,5 +1,5 @@
 import {ABAPRegExp} from "../abap_regex";
-import {Character, Table} from "../types";
+import {ABAPObject, Character, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {concatenate} from "./concatenate";
@@ -10,7 +10,7 @@ export type replaceInput = {
   sectionOffset?: INumeric,
   replacementLength?: INumeric,
   replacementCount?: INumeric,
-  regex?: ICharacter,
+  regex?: ICharacter | ABAPObject,
   pcre?: ICharacter,
   all: boolean,
   with: ICharacter,
