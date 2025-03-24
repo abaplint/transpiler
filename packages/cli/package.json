@@ -27,15 +27,15 @@
   "author": "abaplint",
   "license": "MIT",
   "devDependencies": {
-    "@abaplint/core": "^2.113.104",
+    "@abaplint/core": "^2.113.107",
     "@abaplint/transpiler": "^2.10.26",
     "@types/glob": "^8.1.0",
-    "@types/node": "^22.13.5",
+    "@types/node": "^22.13.13",
     "@types/progress": "^2.0.7",
     "glob": "=7.2.0",
     "progress": "^2.0.3",
     "ts-json-schema-generator": "^2.3.0",
-    "typescript": "^5.7.3",
+    "typescript": "^5.8.2",
     "webpack-cli": "^6.0.1",
     "webpack": "^5.98.0"
   }
