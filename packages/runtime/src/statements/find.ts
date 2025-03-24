@@ -3,18 +3,22 @@ import {ABAPObject, Integer, Structure, Table, TableFactory} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
-export interface IFindOptions {
-  find?: ICharacter | string,
-  first?: boolean,
+export type IRegexOptions = {
   regex?: string | ICharacter | ABAPObject,
   pcre?: string | ICharacter,
+  all?: boolean,
+  ignoringCase?: boolean,
+}
+
+export type IFindOptions = IRegexOptions & {
+  find?: ICharacter | string,
+  first?: boolean,
   offset?: INumeric,
   sectionOffset?: INumeric,
   byteMode?: boolean,
   length?: INumeric,
   count?: INumeric,
   results?: Table | Structure,
-  ignoringCase?: boolean,
   submatches?: ICharacter[],
 }
 
@@ -49,39 +53,7 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
 
     s = new RegExp(s, "g");
   } else if (options.regex || options.pcre) {
-    if (options.regex) {
-      if (typeof options.regex === "string") {
-        if (options.regex === "") {
-          throw new Error("FIND, runtime, no input, regex empty");
-        }
-      } else if (options.regex.get() === "") {
-        throw new Error("FIND, runtime, no input, regex empty");
-      }
-    }
-
-    let r = options.regex!;
-    if (r === undefined) {
-      r = options.pcre!;
-    }
-    if (typeof r !== "string") {
-      r = r.get();
-    }
-
-    if (typeof r === "string") {
-      r = ABAPRegExp.convert(r);
-    } else if (r.constructor.name === "cl_abap_regex") {
-      const obj = r;
-      // @ts-ignore
-      r = obj.mv_pattern.get();
-      // @ts-ignore
-      if (obj.mv_ignore_case.get() === "X") {
-        options.ignoringCase = true;
-      }
-    } else {
-      throw "find(), unexpected input";
-    }
-
-    s = new RegExp(r as string, "gm" + (options.ignoringCase === true ? "i" : ""));
+    s = ABAPRegExp.getRegex(options);
   } else {
     throw "FIND, runtime, no input";
   }

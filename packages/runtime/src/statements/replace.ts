@@ -1,21 +1,18 @@
 import {ABAPRegExp} from "../abap_regex";
-import {ABAPObject, Character, Table} from "../types";
+import {Character, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {concatenate} from "./concatenate";
+import {IRegexOptions} from "./find";
 
-export type replaceInput = {
+export type replaceInput = IRegexOptions & {
   target: ICharacter | Table,
   sectionLength?: INumeric,
   sectionOffset?: INumeric,
   replacementLength?: INumeric,
   replacementCount?: INumeric,
-  regex?: ICharacter | ABAPObject,
-  pcre?: ICharacter,
-  all: boolean,
   with: ICharacter,
   of: ICharacter,
-  ignoringCase?: boolean,
 };
 
 export function replace(input: replaceInput): void {
@@ -47,6 +44,7 @@ export function replace(input: replaceInput): void {
     search = new RegExp(inp, ignoreCase + allOccurrences);
   } else if (input.regex) {
     // TODO: this is a bit wrong, ABAP regex is not like JS regex
+    // @ts-ignore
     const regex = ABAPRegExp.convert(input.regex.get());
     if (regex.length === 0 && input.all === true) {
       throw "REPLACE, zero length input";
@@ -54,6 +52,7 @@ export function replace(input: replaceInput): void {
     search = new RegExp(regex, ignoreCase + allOccurrences);
     found = temp.match(search) !== null;
   } else if (input.pcre) {
+    // @ts-ignore
     const str = input.pcre.get();
     const regex = ABAPRegExp.convert(str);
     if (regex.length === 0 && input.all === true) {
