@@ -34,6 +34,9 @@ export class ABAPRegExp {
       }
     }
 
+    const ignoreCase = options.ignoringCase === true ? "i" : "";
+    const allOccurrences = options.all === true ? "g" : "";
+
     let r = options.regex!;
     if (r === undefined) {
       r = options.pcre!;
@@ -56,6 +59,6 @@ export class ABAPRegExp {
       throw "find(), unexpected input";
     }
 
-    return new RegExp(r as string, "gm" + (options.ignoringCase === true ? "i" : ""));
+    return new RegExp(r as string, "m" + ignoreCase + allOccurrences);
   }
 }

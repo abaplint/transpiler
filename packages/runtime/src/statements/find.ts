@@ -53,7 +53,7 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
 
     s = new RegExp(s, "g");
   } else if (options.regex || options.pcre) {
-    s = ABAPRegExp.getRegex(options);
+    s = ABAPRegExp.getRegex({all: true, ...options});
   } else {
     throw "FIND, runtime, no input";
   }
