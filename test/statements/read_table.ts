@@ -1396,4 +1396,50 @@ ASSERT sy-subrc <> 0.`;
     await f(abap);
   });
 
+  it.only("READ TABLE, secondary sorted key, funny", async () => {
+    const code = `TYPES:
+  BEGIN OF ty_file_signature,
+    path     TYPE string,
+    filename TYPE string,
+  END OF ty_file_signature .
+
+TYPES:
+  BEGIN OF ty_file.
+    INCLUDE TYPE ty_file_signature.
+TYPES: data TYPE xstring,
+  END OF ty_file .
+
+TYPES:
+  ty_files_tt TYPE STANDARD TABLE OF ty_file WITH DEFAULT KEY
+                   WITH UNIQUE SORTED KEY file_path COMPONENTS path filename
+                   WITH NON-UNIQUE SORTED KEY file COMPONENTS filename.
+
+CONSTANTS:
+  BEGIN OF c_package_file,
+    obj_name  TYPE c LENGTH 7 VALUE 'package',
+    sep1      TYPE c LENGTH 1 VALUE '.',
+    obj_type  TYPE c LENGTH 4 VALUE 'devc',
+    sep2      TYPE c LENGTH 1 VALUE '.',
+    extension TYPE c LENGTH 3 VALUE 'xml',
+  END OF c_package_file.
+
+DATA it_remote TYPE ty_files_tt.
+DATA row LIKE LINE OF it_remote.
+
+row-filename = 'foobar'.
+INSERT row INTO TABLE it_remote.
+
+row-filename = 'package.devc.xml'.
+INSERT row INTO TABLE it_remote.
+
+READ TABLE it_remote TRANSPORTING NO FIELDS
+  WITH KEY file
+  COMPONENTS filename = c_package_file.
+WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal(`0`);
+  });
+
 });
