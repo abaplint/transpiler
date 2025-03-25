@@ -64,6 +64,14 @@ export function gt(
     return l > r;
   }
 
+  if (left instanceof Structure || right instanceof Structure) {
+    if (!(right instanceof Structure)) {
+      return gt((left as Structure).getCharacter(), right);
+    } else if (!(left instanceof Structure)) {
+      return gt(left, (right as Structure).getCharacter());
+    }
+  }
+
   let l: number | string | undefined = undefined;
   if (typeof left === "number" || typeof left === "string") {
     l = left;

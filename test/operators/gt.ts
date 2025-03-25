@@ -29,7 +29,7 @@ endif.`;
     expect(abap.console.get()).to.equal(`no`);
   });
 
-  it.only("GT char structured", async () => {
+  it("GT char structured", async () => {
     const code = `
 CONSTANTS:
   BEGIN OF c_package_file,
