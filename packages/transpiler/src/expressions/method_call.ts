@@ -1,4 +1,4 @@
-import {Nodes, Expressions} from "@abaplint/core";
+import {Nodes, Expressions, Visibility} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {MethodCallParamTranspiler} from "./method_call_param";
@@ -23,6 +23,9 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
     const m = traversal.findMethodReference(nameToken, traversal.findCurrentScopeByToken(nameToken));
     if (m?.name && traversal.isBuiltinMethod(nameToken) === false) {
       name = m.name.toLowerCase() + "(";
+    }
+    if (m?.def.getVisibility() === Visibility.Private) {
+      name = "#" + name;
     }
 
     const step = node.findDirectExpression(Expressions.MethodCallParam);
