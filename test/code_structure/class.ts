@@ -2142,7 +2142,6 @@ START-OF-SELECTION.
 
   it.only("Class, private method in inheritance", async () => {
     const code = `
-
 CLASS top DEFINITION.
   PUBLIC SECTION.
     METHODS call_a_private_method RETURNING VALUE(result) TYPE string.
