@@ -449,6 +449,21 @@ export class Traversal {
     return undefined;
   }
 
+  private buildThisAttributes(def: abaplint.IClassDefinition, cName: string | undefined): string {
+    let ret = "";
+    for (const a of def.getAttributes()?.getAll() || []) {
+      const escaped = Traversal.escapeNamespace(a.getName().toLowerCase());
+      if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
+        ret += "this." + escaped + " = " + cName + "." + escaped + ";\n";
+        continue;
+      }
+      const name = "this." + escaped;
+      ret += name + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
+      ret += this.setValues(a, name);
+    }
+    return ret;
+  }
+
   public buildConstructorContents(scope: abaplint.ISpaghettiScopeNode | undefined,
                                   def: abaplint.IClassDefinition): string {
 
@@ -463,16 +478,7 @@ export class Traversal {
     ret += `this.me = new abap.types.ABAPObject();
 this.me.set(this);
 this.INTERNAL_ID = abap.internalIdCounter++;\n`;
-    for (const a of def.getAttributes()?.getAll() || []) {
-      const escaped = Traversal.escapeNamespace(a.getName().toLowerCase());
-      if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
-        ret += "this." + escaped + " = " + cName + "." + escaped + ";\n";
-        continue;
-      }
-      const name = "this." + escaped;
-      ret += name + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
-      ret += this.setValues(a, name);
-    }
+    ret += this.buildThisAttributes(def, cName);
 
     // attributes from directly implemented interfaces(not interfaces implemented in super classes)
     for (const i of def.getImplementing()) {
