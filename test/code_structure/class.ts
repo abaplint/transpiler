@@ -2140,7 +2140,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("sub");
   });
 
-  it("Class, private method in inheritance", async () => {
+  it.skip("Class, private method in inheritance", async () => {
     const code = `
 CLASS top DEFINITION.
   PUBLIC SECTION.

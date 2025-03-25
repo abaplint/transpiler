@@ -464,6 +464,20 @@ export class Traversal {
     return ret;
   }
 
+  private buildFriendsAccess(def: abaplint.IClassDefinition): string {
+    let ret = "this.FRIENDS_ACCESS = {\n";
+    for (const a of def.getMethodDefinitions()?.getAll() || []) {
+      const name = a.getName().toLowerCase();
+      if (name === "constructor") {
+        continue;
+      }
+
+      ret += `"${name.replace("~", "$")}": this.${Traversal.escapeNamespace(name.replace("~", "$"))},\n`
+    }
+    ret += "};\n";
+    return ret;
+  }
+
   public buildConstructorContents(scope: abaplint.ISpaghettiScopeNode | undefined,
                                   def: abaplint.IClassDefinition): string {
 
@@ -478,6 +492,7 @@ export class Traversal {
     ret += `this.me = new abap.types.ABAPObject();
 this.me.set(this);
 this.INTERNAL_ID = abap.internalIdCounter++;\n`;
+    ret += this.buildFriendsAccess(def);
     ret += this.buildThisAttributes(def, cName);
 
     // attributes from directly implemented interfaces(not interfaces implemented in super classes)
