@@ -2139,5 +2139,99 @@ START-OF-SELECTION.
     await f(abap);
     expect(abap.console.get()).to.equal("sub");
   });
+  it("Class, private method in inheritance", async () => {
+    const code = `
+
+CLASS top DEFINITION.
+  PUBLIC SECTION.
+    METHODS call_a_private_method RETURNING VALUE(result) TYPE string.
+  PRIVATE SECTION.
+    METHODS my_private_method RETURNING VALUE(result) TYPE string.
+
+ENDCLASS.
+CLASS top IMPLEMENTATION.
+  METHOD call_a_private_method.
+    result = my_private_method( ).
+  ENDMETHOD.
+
+  METHOD my_private_method.
+    result = 'TOP'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS sub DEFINITION INHERITING FROM top.
+  PUBLIC SECTION.
+  PRIVATE SECTION.
+    METHODS my_private_method RETURNING VALUE(result) TYPE string.
+
+ENDCLASS.
+CLASS sub IMPLEMENTATION.
+  METHOD my_private_method.
+    result = 'SUB'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO sub.
+  DATA result TYPE string.
+  CREATE OBJECT lo.
+  result = lo->call_a_private_method( ).
+  WRITE result.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("TOP");
+  });
+
+  it("Class, private method in inheritance redefined", async () => {
+    const code = `
+
+CLASS top DEFINITION.
+  PUBLIC SECTION.
+    METHODS call_a_private_method RETURNING VALUE(result) TYPE string.
+  PRIVATE SECTION.
+    METHODS my_private_method RETURNING VALUE(result) TYPE string.
+
+ENDCLASS.
+CLASS top IMPLEMENTATION.
+  METHOD call_a_private_method.
+    result = my_private_method( ).
+  ENDMETHOD.
+
+  METHOD my_private_method.
+    result = 'TOP'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS sub DEFINITION INHERITING FROM top.
+  PUBLIC SECTION.
+    METHODS call_a_private_method REDEFINITION.
+  PRIVATE SECTION.
+    METHODS my_private_method RETURNING VALUE(result) TYPE string.
+
+ENDCLASS.
+CLASS sub IMPLEMENTATION.
+  METHOD call_a_private_method.
+    result = my_private_method( ).
+  ENDMETHOD.
+
+  METHOD my_private_method.
+    result = 'SUB'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO sub.
+  DATA result TYPE string.
+  CREATE OBJECT lo.
+  result = lo->call_a_private_method( ).
+  WRITE result.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("SUB");
+  });
 
 });
