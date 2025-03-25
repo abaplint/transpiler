@@ -74,6 +74,9 @@ ENDCLASS.`;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.INTERNAL_ID = abap.internalIdCounter++;
+    this.FRIENDS_ACCESS = {
+      "bar": this.bar,
+    };
   }
   async constructor_(INPUT) {
     if (super.constructor_) { await super.constructor_(INPUT); }
@@ -90,7 +93,7 @@ export {zcl_maptest};`;
     expect(result?.js).to.equal(js);
 
     const perLine = await countMappingsPerGeneratedLine(result?.map);
-    expect(perLine[17]).to.equal(3); // the WRITE statement
+    expect(perLine[20]).to.equal(3); // the WRITE statement
   });
 
 });
