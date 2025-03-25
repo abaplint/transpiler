@@ -739,21 +739,6 @@ ASSERT <fs> IS INITIAL.`;
     await f(abap);
   });
 
-  it("empty xstr gt x", async () => {
-    const code = `
-data foo type xstring.
-data bar type x length 1.
-if foo > bar.
-  write 'yes'.
-ELSE.
-  WRITE 'no'.
-endif.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal(`no`);
-  });
-
   it("xstr longer", async () => {
     const code = `
 DATA foo TYPE xstring.

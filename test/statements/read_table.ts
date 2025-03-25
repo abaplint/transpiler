@@ -1396,7 +1396,7 @@ ASSERT sy-subrc <> 0.`;
     await f(abap);
   });
 
-  it.only("READ TABLE, secondary sorted key, funny", async () => {
+  it("READ TABLE, secondary sorted key, funny", async () => {
     const code = `TYPES:
   BEGIN OF ty_file_signature,
     path     TYPE string,
