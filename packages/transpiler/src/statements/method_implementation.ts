@@ -6,6 +6,7 @@ import {Traversal} from "../traversal";
 import {ConstantTranspiler, FieldChainTranspiler} from "../expressions";
 import {Chunk} from "../chunk";
 import {UniqueIdentifier} from "../unique_identifier";
+import {FEATURE_FLAGS} from "../feature_flags";
 
 export class MethodImplementationTranspiler implements IStatementTranspiler {
 
@@ -127,7 +128,11 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
     }
 
     // https://github.com/tc39/proposal-class-fields
-    const isPrivate = method?.getVisibility() === abaplint.Visibility.Private ? "#" : "";
+    let isPrivate = "";
+    if (FEATURE_FLAGS.private === true
+        && method?.getVisibility() === abaplint.Visibility.Private) {
+      isPrivate = "#";
+    }
 
     if (method && method.isStatic()) {
       // in ABAP static methods can be called with instance arrows, "->"

@@ -3,6 +3,7 @@ import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {MethodCallParamTranspiler} from "./method_call_param";
 import {Chunk} from "../chunk";
+import {FEATURE_FLAGS} from "../feature_flags";
 
 export class MethodCallTranspiler implements IExpressionTranspiler {
 
@@ -24,7 +25,8 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
     if (m?.name && traversal.isBuiltinMethod(nameToken) === false) {
       name = m.name.toLowerCase() + "(";
     }
-    if (m?.def.getVisibility() === Visibility.Private) {
+    if (FEATURE_FLAGS.private === true
+        && m?.def.getVisibility() === Visibility.Private) {
       name = "#" + name;
     }
 
