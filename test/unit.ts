@@ -2558,4 +2558,84 @@ ENDCLASS.`;
     await dumpNrun(files, false);
   });
 
+  it("test-58", async () => {
+    // call private method instance
+
+    const tests = `
+CLASS ltcl_test DEFINITION DEFERRED.
+CLASS zcl_friends_test DEFINITION LOCAL FRIENDS ltcl_test.
+
+CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS priv FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+
+  METHOD priv.
+    DATA lo TYPE REF TO zcl_friends_test.
+    CREATE OBJECT lo.
+    lo->priv( ).
+  ENDMETHOD.
+
+ENDCLASS.`;
+
+const clas = `
+CLASS zcl_friends_test DEFINITION PUBLIC FINAL CREATE PUBLIC.
+  PRIVATE SECTION.
+    METHODS priv.
+ENDCLASS.
+
+CLASS ZCL_FRIENDS_TEST IMPLEMENTATION.
+  METHOD priv.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "zcl_friends_test.clas.testclasses.abap", contents: tests},
+      {filename: "zcl_friends_test.clas.abap", contents: clas},
+    ];
+    await dumpNrun(files, false);
+  });
+
+  it("test-59", async () => {
+    // call private method static
+
+    const tests = `
+CLASS ltcl_test DEFINITION DEFERRED.
+CLASS zcl_friends_test DEFINITION LOCAL FRIENDS ltcl_test.
+
+CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS priv FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+
+  METHOD priv.
+    DATA lo TYPE REF TO zcl_friends_test.
+    CREATE OBJECT lo.
+    lo->priv( ).
+  ENDMETHOD.
+
+ENDCLASS.`;
+
+const clas = `
+CLASS zcl_friends_test DEFINITION PUBLIC FINAL CREATE PUBLIC.
+  PRIVATE SECTION.
+    CLASS-METHODS priv.
+ENDCLASS.
+
+CLASS ZCL_FRIENDS_TEST IMPLEMENTATION.
+  METHOD priv.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "zcl_friends_test.clas.testclasses.abap", contents: tests},
+      {filename: "zcl_friends_test.clas.abap", contents: clas},
+    ];
+    await dumpNrun(files, false);
+  });
+
 });
