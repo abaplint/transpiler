@@ -337,4 +337,35 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("foo");
   });
 
+  it.only("dynamic call, private method", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS run.
+  PRIVATE SECTION.
+    METHODS priv.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    DATA name TYPE string.
+    DATA lo_obj TYPE REF TO lcl.
+    CREATE OBJECT lo_obj.
+    name = 'PRIV'.
+    CALL METHOD lo_obj->(name).
+  ENDMETHOD.
+
+  METHOD priv.
+    WRITE 'hello'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>run( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello");
+  });
+
 });
