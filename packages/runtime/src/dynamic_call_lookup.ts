@@ -15,7 +15,7 @@ export function dynamicCallLookup(obj: any, methodName: ICharacter): any {
     // @ts-ignore
     if (abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_METHOD not found"; }
     // @ts-ignore
-    throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'.trimEnd()]();
+    throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD']();
   }
 
   return ret;

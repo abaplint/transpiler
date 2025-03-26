@@ -49,8 +49,6 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
         const second = child.getChildren()[1];
         const lookupException = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_METHOD'", child.getFirstToken(), true);
         if (second.get() instanceof Expressions.FieldChain && second instanceof Nodes.ExpressionNode) {
-          console.dir(call);
-          console.dir(second.concatTokens());
           if (call.endsWith(".")) {
             call = call.substring(0, call.length - 1);
           }
