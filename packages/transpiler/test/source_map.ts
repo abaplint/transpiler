@@ -69,7 +69,6 @@ ENDCLASS.`;
   static INTERNAL_NAME = 'ZCL_MAPTEST';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
-  static FRIENDS_ACCESS_STATIC = {}; // todo
   static METHODS = {"BAR": {"visibility": "U", "parameters": {}}};
   constructor() {
     this.me = new abap.types.ABAPObject();
@@ -94,7 +93,7 @@ export {zcl_maptest};`;
     expect(result?.js).to.equal(js);
 
     const perLine = await countMappingsPerGeneratedLine(result?.map);
-    expect(perLine[21]).to.equal(3); // the WRITE statement
+    expect(perLine[20]).to.equal(3); // the WRITE statement
   });
 
 });
