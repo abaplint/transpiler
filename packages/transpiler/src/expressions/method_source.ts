@@ -48,16 +48,17 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
       } else if (child.get() instanceof Expressions.Dynamic) {
         const second = child.getChildren()[1];
         const lookupException = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_METHOD'", child.getFirstToken(), true);
-        if (second.get() instanceof Expressions.FieldChain) {
+        if (second.get() instanceof Expressions.FieldChain && second instanceof Nodes.ExpressionNode) {
+          console.dir(call);
+          console.dir(second.concatTokens());
           if (call.endsWith(".")) {
             call = call.substring(0, call.length - 1);
           }
           if (call === "") {
             call = "this";
           }
-          call += "[";
-          call += traversal.traverse(second).getCode();
-          call += ".get().toLowerCase().trimEnd()]";
+
+          call = `abap.dynamicCallLookup(${call}, ${traversal.traverse(second).getCode()})`;
         } else if (second.get() instanceof Expressions.Constant) {
           if (call === "") {
             call = "this.";
