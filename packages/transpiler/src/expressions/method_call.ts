@@ -25,6 +25,7 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
     if (m?.name && traversal.isBuiltinMethod(nameToken) === false) {
       name = m.name.toLowerCase() + "(";
     }
+
     if (FEATURE_FLAGS.private === true
         && m?.def.getVisibility() === Visibility.Private
         && m?.def.isStatic() === false) {
