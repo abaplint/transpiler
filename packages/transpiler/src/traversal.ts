@@ -469,7 +469,7 @@ export class Traversal {
     let ret = "this.FRIENDS_ACCESS_INSTANCE = {\n";
     for (const a of def.getMethodDefinitions()?.getAll() || []) {
       const name = a.getName().toLowerCase();
-      if (name === "constructor") {
+      if (name === "constructor" || a.isStatic() === true) {
         continue;
       }
 
