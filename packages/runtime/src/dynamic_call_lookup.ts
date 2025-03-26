@@ -1,13 +1,14 @@
 import {ICharacter} from "./types/_character";
 
 export function dynamicCallLookup(obj: any, methodName: ICharacter): any {
-  const name = methodName.get().toLowerCase().trimEnd();
   // todo: escape interface and namespace characters in name?
+  const name = methodName.get().toLowerCase().trimEnd();
+
   let ret = obj[name];
 
   if (ret === undefined) {
-    // it might be local
-    ret = obj["#" + name];
+    // it might be private, note this currently does not respect encapsulation properly
+    ret = obj.FRIENDS_ACCESS_INSTANCE[name];
   }
 
   if (ret === undefined) {

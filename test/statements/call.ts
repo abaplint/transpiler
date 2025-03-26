@@ -337,7 +337,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("foo");
   });
 
-  it.only("dynamic call, private method", async () => {
+  it("dynamic call, private method", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
@@ -363,7 +363,6 @@ ENDCLASS.
 START-OF-SELECTION.
   lcl=>run( ).`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("hello");
