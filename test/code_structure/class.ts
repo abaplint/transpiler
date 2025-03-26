@@ -550,7 +550,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello\nhello");
   });
 
-  it.skip("CALL METHOD with EXPORTING", async () => {
+  it("CALL METHOD with EXPORTING", async () => {
     const code = `
       CLASS lcl_bar DEFINITION.
         PUBLIC SECTION.
