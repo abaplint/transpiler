@@ -256,7 +256,10 @@ async function run() {
         }
 
         ret += `      {\n        const test = await (new ${lc}()).constructor_();\n`;
+        // todo, some refactoring here,
         ret += `        if (test.setup) await test.setup();\n`;
+        ret += `        if (test.FRIENDS_ACCESS_INSTANCE.setup) await test.FRIENDS_ACCESS_INSTANCE.setup();\n`;
+        ret += `        if (test.FRIENDS_ACCESS_INSTANCE.SUPER.setup) await test.FRIENDS_ACCESS_INSTANCE.SUPER.setup();\n`;
         ret += `        console.log("${st.obj.getName()}: running ${lc}->${m}");\n`;
         ret += `        meth = locl.addMethod("${m}");\n`;
         ret += `        await test.FRIENDS_ACCESS_INSTANCE.${m}();\n`;
@@ -268,59 +271,6 @@ async function run() {
       ret += `      if (${lc}.class_teardown) await ${lc}.class_teardown();\n`;
       ret += `    }\n`;
     }
-/*
-    for (const obj of reg.getObjects()) {
-      if (reg.isDependency(obj) || !(obj instanceof abaplint.Objects.Class)) {
-        continue;
-      }
-      ret += `// --------------------------------------------\n`;
-      ret += `    clas = unit.addObject("${obj.getName()}");\n`;
-      for (const file of obj.getABAPFiles()) {
-        for (const def of file.getInfo().listClassDefinitions()) {
-          if (def.isForTesting === false
-              || def.isGlobal === true
-              || def.methods.length === 0
-              || def.isAbstract === true) {
-            // todo, fix, there might be global test methods
-            continue;
-          }
-          const hasTestFile = obj.getFiles().some(f => { return f.getFilename().includes(".testclasses."); });
-          if (hasTestFile === false) {
-            break;
-          }
-          ret += `    {
-      const {${def.name}} = await import("./${this.escapeNamespace(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}.testclasses.mjs");
-      locl = clas.addTestClass("${def.name}");
-      if (${def.name}.class_setup) await ${def.name}.class_setup();\n`;
-
-          for (const m of def.methods) {
-            if (m.isForTesting === false) {
-              continue;
-            }
-            const skipThis = (skip || []).some(a => a.object === obj.getName() && a.class === def.name && a.method === m.name);
-            if (skipThis) {
-              ret += `  console.log('${obj.getName()}: running ${def.name}->${m.name}, skipped');\n`;
-              ret += `  meth = locl.addMethod("${m.name}");\n`;
-              ret += `  meth.skip();\n`;
-              continue;
-            }
-
-            ret += `      {\n        const test = await (new ${def.name}()).constructor_();\n`;
-            ret += `        if (test.setup) await test.setup();\n`;
-            ret += `        console.log("${obj.getName()}: running ${def.name}->${m.name}");\n`;
-            ret += `        meth = locl.addMethod("${m.name}");\n`;
-            ret += `        await test.${m.name}();\n`;
-            ret += `        meth.pass();\n`;
-            ret += `        if (test.teardown) await test.teardown();\n`;
-            ret += `      }\n`;
-          }
-
-          ret += `      if (${def.name}.class_teardown) await ${def.name}.class_teardown();\n`;
-          ret += `    }\n`;
-        }
-      }
-    }
-    */
 
     ret += `// -------------------END-------------------
     fs.writeFileSync(__dirname + path.sep + "_output.xml", unit.xUnitXML());
