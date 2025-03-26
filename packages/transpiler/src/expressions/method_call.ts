@@ -19,8 +19,9 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
       name = "abap.builtin." + name;
     }
 
+    const scope = traversal.findCurrentScopeByToken(nameToken);
     // it might be aliased?
-    const m = traversal.findMethodReference(nameToken, traversal.findCurrentScopeByToken(nameToken));
+    const m = traversal.findMethodReference(nameToken, scope);
     if (m?.name && traversal.isBuiltinMethod(nameToken) === false) {
       name = m.name.toLowerCase();
     }
