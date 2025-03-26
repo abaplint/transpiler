@@ -74,8 +74,8 @@ ENDCLASS.`;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.INTERNAL_ID = abap.internalIdCounter++;
-    this.FRIENDS_ACCESS = {
-      "bar": this.bar,
+    this.FRIENDS_ACCESS_INSTANCE = {
+      "bar": this.bar.bind(this),
     };
   }
   async constructor_(INPUT) {

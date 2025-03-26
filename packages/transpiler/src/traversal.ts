@@ -478,7 +478,7 @@ export class Traversal {
         privateHash = "#";
       }
       const methodName = privateHash + Traversal.escapeNamespace(name.replace("~", "$"));
-      ret += `"${name.replace("~", "$")}": this.${methodName},\n`
+      ret += `"${name.replace("~", "$")}": this.${methodName}.bind(this),\n`
     }
     ret += "};\n";
     return ret;
