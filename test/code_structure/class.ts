@@ -550,7 +550,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello\nhello");
   });
 
-  it.skip("CALL METHOD with EXPORTING", async () => {
+  it("CALL METHOD with EXPORTING", async () => {
     const code = `
       CLASS lcl_bar DEFINITION.
         PUBLIC SECTION.
@@ -2139,16 +2139,16 @@ START-OF-SELECTION.
     await f(abap);
     expect(abap.console.get()).to.equal("sub");
   });
-  it.skip("Class, private method in inheritance", async () => {
-    const code = `
 
+  it("Class, private method in inheritance", async () => {
+    const code = `
 CLASS top DEFINITION.
   PUBLIC SECTION.
     METHODS call_a_private_method RETURNING VALUE(result) TYPE string.
   PRIVATE SECTION.
     METHODS my_private_method RETURNING VALUE(result) TYPE string.
-
 ENDCLASS.
+
 CLASS top IMPLEMENTATION.
   METHOD call_a_private_method.
     result = my_private_method( ).
@@ -2163,8 +2163,8 @@ CLASS sub DEFINITION INHERITING FROM top.
   PUBLIC SECTION.
   PRIVATE SECTION.
     METHODS my_private_method RETURNING VALUE(result) TYPE string.
-
 ENDCLASS.
+
 CLASS sub IMPLEMENTATION.
   METHOD my_private_method.
     result = 'SUB'.

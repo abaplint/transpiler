@@ -6,6 +6,7 @@ import {Traversal} from "../traversal";
 import {ConstantTranspiler, FieldChainTranspiler} from "../expressions";
 import {Chunk} from "../chunk";
 import {UniqueIdentifier} from "../unique_identifier";
+import {FEATURE_FLAGS} from "../feature_flags";
 
 export class MethodImplementationTranspiler implements IStatementTranspiler {
 
@@ -126,17 +127,24 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
       }
     }
 
+    // https://github.com/tc39/proposal-class-fields
+    let isPrivate = "";
+    if (FEATURE_FLAGS.private === true
+        && method?.getVisibility() === abaplint.Visibility.Private) {
+      isPrivate = "#";
+    }
+
     if (method && method.isStatic()) {
       // in ABAP static methods can be called with instance arrows, "->"
       const className = scope.getParent()?.getIdentifier().sname?.toLowerCase();
-      staticMethod = "async " + Traversal.escapeNamespace(methodName) + "(" + unique + ") {\n" +
+      staticMethod = "async " + isPrivate + Traversal.escapeNamespace(methodName) + "(" + unique + ") {\n" +
         "return " + Traversal.escapeNamespace(className) + "." + Traversal.escapeNamespace(methodName) + "(" + unique + ");\n" +
         "}\n" + "static ";
     }
 
     UniqueIdentifier.resetIndexBackup();
 
-    const str = staticMethod + "async " + Traversal.escapeNamespace(methodName) + "(" + unique + ") {" + after;
+    const str = staticMethod + "async " + isPrivate + Traversal.escapeNamespace(methodName) + "(" + unique + ") {" + after;
     return new Chunk().append(str, node, traversal);
   }
 

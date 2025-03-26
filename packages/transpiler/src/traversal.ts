@@ -11,6 +11,7 @@ import {Chunk} from "./chunk";
 import {ConstantTranspiler} from "./expressions";
 import {ITranspilerOptions} from "./types";
 import {DEFAULT_KEYWORDS} from "./keywords";
+import {FEATURE_FLAGS} from "./feature_flags";
 
 export class Traversal {
   private readonly spaghetti: abaplint.ISpaghettiScope;
@@ -449,20 +450,8 @@ export class Traversal {
     return undefined;
   }
 
-  public buildConstructorContents(scope: abaplint.ISpaghettiScopeNode | undefined,
-                                  def: abaplint.IClassDefinition): string {
-
+  private buildThisAttributes(def: abaplint.IClassDefinition, cName: string | undefined): string {
     let ret = "";
-
-    if (def.getSuperClass() !== undefined || def.getName().toUpperCase() === "CX_ROOT") {
-      ret += "super();\n";
-    }
-
-    const cName = Traversal.escapeNamespace(def.getName().toLowerCase());
-
-    ret += `this.me = new abap.types.ABAPObject();
-this.me.set(this);
-this.INTERNAL_ID = abap.internalIdCounter++;\n`;
     for (const a of def.getAttributes()?.getAll() || []) {
       const escaped = Traversal.escapeNamespace(a.getName().toLowerCase());
       if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
@@ -473,6 +462,47 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
       ret += name + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
       ret += this.setValues(a, name);
     }
+    return ret;
+  }
+
+  private buildFriendsAccess(def: abaplint.IClassDefinition, hasSuperClass: boolean): string {
+    let ret = "this.FRIENDS_ACCESS_INSTANCE = {\n";
+    if (hasSuperClass === true) {
+      ret += `"SUPER": sup.FRIENDS_ACCESS_INSTANCE,\n`;
+    }
+    for (const a of def.getMethodDefinitions()?.getAll() || []) {
+      const name = a.getName().toLowerCase();
+      if (name === "constructor" || a.isStatic() === true) {
+        continue;
+      }
+
+      let privateHash = "";
+      if (FEATURE_FLAGS.private === true && a.getVisibility() === abaplint.Visibility.Private) {
+        privateHash = "#";
+      }
+      const methodName = privateHash + Traversal.escapeNamespace(name.replace("~", "$"));
+      ret += `"${name.replace("~", "$")}": this.${methodName}.bind(this),\n`
+    }
+    ret += "};\n";
+    return ret;
+  }
+
+  public buildConstructorContents(scope: abaplint.ISpaghettiScopeNode | undefined,
+                                  def: abaplint.IClassDefinition): string {
+
+    let ret = "";
+
+    if (def.getSuperClass() !== undefined || def.getName().toUpperCase() === "CX_ROOT") {
+      ret += "const sup = super();\n";
+    }
+
+    const cName = Traversal.escapeNamespace(def.getName().toLowerCase());
+
+    ret += `this.me = new abap.types.ABAPObject();
+this.me.set(this);
+this.INTERNAL_ID = abap.internalIdCounter++;\n`;
+    ret += this.buildFriendsAccess(def, def.getSuperClass() !== undefined);
+    ret += this.buildThisAttributes(def, cName);
 
     // attributes from directly implemented interfaces(not interfaces implemented in super classes)
     for (const i of def.getImplementing()) {

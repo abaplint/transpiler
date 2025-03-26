@@ -2523,4 +2523,39 @@ ENDFUNCTION.`;
     await dumpNrun(files, false);
   });
 
+  it("test-57", async () => {
+    // check private SETUP method is called
+
+    const tests = `
+CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    DATA val TYPE i.
+    METHODS setup.
+    METHODS sdfsd FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD setup.
+    val = 2.
+  ENDMETHOD.
+
+  METHOD sdfsd.
+    ASSERT val = 2.
+  ENDMETHOD.
+ENDCLASS.`;
+
+const clas = `
+CLASS zcl_html DEFINITION PUBLIC.
+  PUBLIC SECTION.
+ENDCLASS.
+CLASS zcl_html IMPLEMENTATION.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "zcl_html.clas.testclasses.abap", contents: tests},
+      {filename: "zcl_html.clas.abap", contents: clas},
+    ];
+    await dumpNrun(files, false);
+  });
+
 });

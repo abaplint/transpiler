@@ -27,6 +27,7 @@ class ${className?.toLowerCase()} {
   static IMPLEMENTED_INTERFACES = [];
   static INTERNAL_NAME = 'ABSTRACT_CLASS_INTERNAL_NAME';
   static ATTRIBUTES = {};
+  static FRIENDS_ACCESS_STATIC = {};
   async constructor_() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);

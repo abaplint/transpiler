@@ -69,11 +69,15 @@ ENDCLASS.`;
   static INTERNAL_NAME = 'ZCL_MAPTEST';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
+  static FRIENDS_ACCESS_STATIC = {}; // todo
   static METHODS = {"BAR": {"visibility": "U", "parameters": {}}};
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.INTERNAL_ID = abap.internalIdCounter++;
+    this.FRIENDS_ACCESS_INSTANCE = {
+      "bar": this.bar.bind(this),
+    };
   }
   async constructor_(INPUT) {
     if (super.constructor_) { await super.constructor_(INPUT); }
@@ -90,7 +94,7 @@ export {zcl_maptest};`;
     expect(result?.js).to.equal(js);
 
     const perLine = await countMappingsPerGeneratedLine(result?.map);
-    expect(perLine[17]).to.equal(3); // the WRITE statement
+    expect(perLine[21]).to.equal(3); // the WRITE statement
   });
 
 });
