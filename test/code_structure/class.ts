@@ -2139,7 +2139,8 @@ START-OF-SELECTION.
     await f(abap);
     expect(abap.console.get()).to.equal("sub");
   });
-  it.skip("Class, private method in inheritance", async () => {
+
+  it.only("Class, private method in inheritance", async () => {
     const code = `
 
 CLASS top DEFINITION.
