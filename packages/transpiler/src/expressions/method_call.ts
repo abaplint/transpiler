@@ -16,14 +16,13 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
 
     let name = nameToken.getStr().toLowerCase();
     if (traversal.isBuiltinMethod(nameToken)) {
-      name = "abap.builtin." + name + "(";
-    } else {
-      name = name + "(";
+      name = "abap.builtin." + name;
     }
 
+    // it might be aliased?
     const m = traversal.findMethodReference(nameToken, traversal.findCurrentScopeByToken(nameToken));
     if (m?.name && traversal.isBuiltinMethod(nameToken) === false) {
-      name = m.name.toLowerCase() + "(";
+      name = m.name.toLowerCase();
     }
 
     name = Traversal.escapeNamespace(name.replace("~", "$"))!;
@@ -31,8 +30,11 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
     if (FEATURE_FLAGS.private === true
         && m?.def.getVisibility() === Visibility.Private
         && m?.def.isStatic() === false) {
+//      name = `FRIENDS_ACCESS_INSTANCE["${name}"]`;
       name = "#" + name;
     }
+
+    name = name + "(";
 
     const step = node.findDirectExpression(Expressions.MethodCallParam);
     if (step === undefined) {
