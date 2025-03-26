@@ -255,16 +255,21 @@ async function run() {
           continue;
         }
 
+        const callSpecial = (name: string) => {
+          let ret = "";
+          ret += `        if (test.${name}) await test.${name}();\n`;
+          ret += `        if (test.FRIENDS_ACCESS_INSTANCE.${name}) await test.FRIENDS_ACCESS_INSTANCE.${name}();\n`;
+          ret += `        if (test.FRIENDS_ACCESS_INSTANCE.SUPER && test.FRIENDS_ACCESS_INSTANCE.SUPER.${name}) await test.FRIENDS_ACCESS_INSTANCE.SUPER.${name}();\n`;
+          return ret;
+        };
+
         ret += `      {\n        const test = await (new ${lc}()).constructor_();\n`;
-        // todo, some refactoring here,
-        ret += `        if (test.setup) await test.setup();\n`;
-        ret += `        if (test.FRIENDS_ACCESS_INSTANCE.setup) await test.FRIENDS_ACCESS_INSTANCE.setup();\n`;
-        ret += `        if (test.FRIENDS_ACCESS_INSTANCE.SUPER && test.FRIENDS_ACCESS_INSTANCE.SUPER.setup) await test.FRIENDS_ACCESS_INSTANCE.SUPER.setup();\n`;
+        ret += callSpecial("setup");
         ret += `        console.log("${st.obj.getName()}: running ${lc}->${m}");\n`;
         ret += `        meth = locl.addMethod("${m}");\n`;
         ret += `        await test.FRIENDS_ACCESS_INSTANCE.${m}();\n`;
         ret += `        meth.pass();\n`;
-        ret += `        if (test.teardown) await test.teardown();\n`;
+        ret += callSpecial("teardown");
         ret += `      }\n`;
       }
 
