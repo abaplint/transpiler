@@ -11,6 +11,7 @@ import {Chunk} from "./chunk";
 import {ConstantTranspiler} from "./expressions";
 import {ITranspilerOptions} from "./types";
 import {DEFAULT_KEYWORDS} from "./keywords";
+import { FEATURE_FLAGS } from "./feature_flags";
 
 export class Traversal {
   private readonly spaghetti: abaplint.ISpaghettiScope;
@@ -465,14 +466,19 @@ export class Traversal {
   }
 
   private buildFriendsAccess(def: abaplint.IClassDefinition): string {
-    let ret = "this.FRIENDS_ACCESS = {\n";
+    let ret = "this.FRIENDS_ACCESS_INSTANCE = {\n";
     for (const a of def.getMethodDefinitions()?.getAll() || []) {
       const name = a.getName().toLowerCase();
       if (name === "constructor") {
         continue;
       }
 
-      ret += `"${name.replace("~", "$")}": this.${Traversal.escapeNamespace(name.replace("~", "$"))},\n`
+      let privateHash = "";
+      if (FEATURE_FLAGS.private === true && a.getVisibility() === abaplint.Visibility.Private) {
+        privateHash = "#";
+      }
+      const methodName = privateHash + Traversal.escapeNamespace(name.replace("~", "$"));
+      ret += `"${name.replace("~", "$")}": this.${methodName},\n`
     }
     ret += "};\n";
     return ret;

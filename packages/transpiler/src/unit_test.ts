@@ -259,7 +259,7 @@ async function run() {
         ret += `        if (test.setup) await test.setup();\n`;
         ret += `        console.log("${st.obj.getName()}: running ${lc}->${m}");\n`;
         ret += `        meth = locl.addMethod("${m}");\n`;
-        ret += `        await test.${m}();\n`;
+        ret += `        await test.FRIENDS_ACCESS_INSTANCE.${m}();\n`;
         ret += `        meth.pass();\n`;
         ret += `        if (test.teardown) await test.teardown();\n`;
         ret += `      }\n`;
