@@ -26,6 +26,8 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
       name = m.name.toLowerCase() + "(";
     }
 
+    name = Traversal.escapeNamespace(name.replace("~", "$"))!;
+
     if (FEATURE_FLAGS.private === true
         && m?.def.getVisibility() === Visibility.Private
         && m?.def.isStatic() === false) {
@@ -38,7 +40,7 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
     }
 
     const ret = new Chunk();
-    ret.append(Traversal.escapeNamespace(name.replace("~", "$"))!, nameToken, traversal);
+    ret.append(name, nameToken, traversal);
     ret.appendChunk(new MethodCallParamTranspiler(m?.def).transpile(step, traversal));
     ret.appendString(")");
 
