@@ -1,4 +1,4 @@
-import {Nodes, Expressions, Visibility} from "@abaplint/core";
+import {Nodes, Expressions, Visibility, ScopeType} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {MethodCallParamTranspiler} from "./method_call_param";
@@ -30,9 +30,14 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
 
     if (FEATURE_FLAGS.private === true
         && m?.def.getVisibility() === Visibility.Private
-        && m?.def.isStatic() === false) {
-//      name = `FRIENDS_ACCESS_INSTANCE["${name}"]`;
-      name = "#" + name;
+        && m.def.isStatic() === false) {
+      const id = scope?.getParent()?.getParent()?.getIdentifier();
+      if (id?.stype === ScopeType.ClassImplementation
+          && m.def.getClassName().toUpperCase() === id.sname.toUpperCase()) {
+        name = "#" + name;
+      } else {
+        name = `FRIENDS_ACCESS_INSTANCE["${name}"]`;
+      }
     }
 
     name = name + "(";
