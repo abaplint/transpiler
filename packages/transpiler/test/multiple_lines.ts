@@ -66,7 +66,6 @@ abap.Classes['PROG-ZFOOBAR-LIF_FOOBAR'] = lif_foobar;`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_FOOBAR';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
-  static FRIENDS_ACCESS_STATIC = {}; // todo
   static METHODS = {"MOO": {"visibility": "U", "parameters": {}}};
   constructor() {
     this.me = new abap.types.ABAPObject();
@@ -107,7 +106,6 @@ abap.Classes['PROG-ZFOOBAR-LCL_FOOBAR'] = lcl_foobar;`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_FOOBAR';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
-  static FRIENDS_ACCESS_STATIC = {}; // todo
   static METHODS = {"MOO": {"visibility": "U", "parameters": {"RV_FOO": {"type": () => {return new abap.types.String({qualifiedName: "STRING"});}, "is_optional": " "}}}};
   constructor() {
     this.me = new abap.types.ABAPObject();
@@ -168,7 +166,6 @@ CREATE OBJECT foo.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-ZCL_WORDS';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
-  static FRIENDS_ACCESS_STATIC = {}; // todo
   static METHODS = {};
   constructor() {
     this.me = new abap.types.ABAPObject();
@@ -230,7 +227,6 @@ DATA moo TYPE foo.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-ZCL_WORDS';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"BAR": {"type": () => {return new abap.types.Integer({qualifiedName: "I"});}, "visibility": "U", "is_constant": " ", "is_class": " "}};
-  static FRIENDS_ACCESS_STATIC = {}; // todo
   static METHODS = {"RUN": {"visibility": "U", "parameters": {}}};
   constructor() {
     this.me = new abap.types.ABAPObject();
@@ -274,7 +270,6 @@ abap.Classes['PROG-ZFOOBAR-ZCL_WORDS'] = zcl_words;`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-ZCL_WORDS';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"BAR": {"type": () => {return new abap.types.Integer({qualifiedName: "I"});}, "visibility": "U", "is_constant": " ", "is_class": " "}};
-  static FRIENDS_ACCESS_STATIC = {}; // todo
   static METHODS = {"CONSTRUCTOR": {"visibility": "U", "parameters": {}}};
   constructor() {
     this.me = new abap.types.ABAPObject();
@@ -315,7 +310,6 @@ ENDCLASS.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-ZCL_RET';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"BAR": {"type": () => {return new abap.types.Integer({qualifiedName: "I"});}, "visibility": "U", "is_constant": " ", "is_class": " "}};
-  static FRIENDS_ACCESS_STATIC = {}; // todo
   static METHODS = {"RUN": {"visibility": "U", "parameters": {"RV_RET": {"type": () => {return new abap.types.String({qualifiedName: "STRING"});}, "is_optional": " "}}}};
   constructor() {
     this.me = new abap.types.ABAPObject();
@@ -394,7 +388,6 @@ ENDCLASS.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-ZCL_RET';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"C_MAXDCODES": {"type": () => {return new abap.types.Integer({qualifiedName: "I"});}, "visibility": "I", "is_constant": "X", "is_class": "X"}};
-  static FRIENDS_ACCESS_STATIC = {}; // todo
   static METHODS = {};
   constructor() {
     this.me = new abap.types.ABAPObject();
@@ -430,7 +423,6 @@ ENDCLASS.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_BAR';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"FOO": {"type": () => {return new abap.types.Integer({qualifiedName: "I"});}, "visibility": "U", "is_constant": " ", "is_class": "X"}};
-  static FRIENDS_ACCESS_STATIC = {}; // todo
   static METHODS = {};
   constructor() {
     this.me = new abap.types.ABAPObject();
@@ -464,7 +456,6 @@ lcl_bar.foo = new abap.types.Integer({qualifiedName: "I"});`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_BAR';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"FOO": {"type": () => {return new abap.types.String({qualifiedName: "STRING"});}, "visibility": "U", "is_constant": "X", "is_class": "X"}};
-  static FRIENDS_ACCESS_STATIC = {}; // todo
   static METHODS = {};
   constructor() {
     this.me = new abap.types.ABAPObject();
@@ -520,7 +511,6 @@ ENDINTERFACE.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_BAR';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"FIRST": {"type": () => {return new abap.types.Character(1, {});}, "visibility": "U", "is_constant": "X", "is_class": "X"}};
-  static FRIENDS_ACCESS_STATIC = {}; // todo
   static METHODS = {};
   constructor() {
     this.me = new abap.types.ABAPObject();
@@ -641,7 +631,6 @@ ENDCLASS.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_CONSTANT_TEST';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"AREA_NAME": {"type": () => {return new abap.types.String({qualifiedName: "STRING"});}, "visibility": "U", "is_constant": "X", "is_class": "X"}};
-  static FRIENDS_ACCESS_STATIC = {}; // todo
   static METHODS = {};
   constructor() {
     this.me = new abap.types.ABAPObject();
@@ -690,7 +679,6 @@ class lcl {
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
-  static FRIENDS_ACCESS_STATIC = {}; // todo
   static METHODS = {"FOO": {"visibility": "U", "parameters": {"BAR": {"type": () => {return new abap.types.String({qualifiedName: "STRING"});}, "is_optional": " "}}}};
   constructor() {
     this.me = new abap.types.ABAPObject();
