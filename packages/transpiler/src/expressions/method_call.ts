@@ -26,7 +26,8 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
       name = m.name.toLowerCase() + "(";
     }
     if (FEATURE_FLAGS.private === true
-        && m?.def.getVisibility() === Visibility.Private) {
+        && m?.def.getVisibility() === Visibility.Private
+        && m?.def.isStatic() === false) {
       name = "#" + name;
     }
 

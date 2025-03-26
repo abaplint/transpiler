@@ -130,7 +130,8 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
     // https://github.com/tc39/proposal-class-fields
     let isPrivate = "";
     if (FEATURE_FLAGS.private === true
-        && method?.getVisibility() === abaplint.Visibility.Private) {
+        && method?.getVisibility() === abaplint.Visibility.Private
+        && method.isStatic() === false) {
       isPrivate = "#";
     }
 

@@ -2234,4 +2234,32 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("SUB");
   });
 
+  it("static public calling static private", async () => {
+    const code = `
+CLASS ltcl_test DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS pub.
+  PRIVATE SECTION.
+    CLASS-METHODS pri.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD pub.
+    pri( ).
+  ENDMETHOD.
+
+  METHOD pri.
+    WRITE 2.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  ltcl_test=>pub( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
