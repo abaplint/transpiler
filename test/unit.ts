@@ -2558,7 +2558,7 @@ ENDCLASS.`;
     await dumpNrun(files, false);
   });
 
-  it("test-58", async () => {
+  it.only("test-58", async () => {
     // call private method instance
 
     const tests = `
