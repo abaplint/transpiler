@@ -10,7 +10,7 @@ export function dynamicCallLookup(obj: any, methodName: string | ICharacter): an
     ret = ret.bind(obj);
   } else if (obj.FRIENDS_ACCESS_INSTANCE !== undefined) {
     // it might be private, note this currently does not respect encapsulation properly
-    // FIENDS_ACCESS_INSTANCE is already .bind()'ed
+    // FRIENDS_ACCESS_INSTANCE is already .bind()'ed
     ret = obj.FRIENDS_ACCESS_INSTANCE[name];
   }
 
