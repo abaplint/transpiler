@@ -368,7 +368,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello");
   });
 
-  it.only("dynamic call, public method fixed name accessing instance attribute", async () => {
+  it("dynamic call, public method fixed name accessing instance attribute", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
