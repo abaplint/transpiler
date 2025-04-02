@@ -6,7 +6,7 @@ export function dynamicCallLookup(obj: any, methodName: string | ICharacter): an
 
   let ret = obj[name];
 
-  if (ret === undefined) {
+  if (ret === undefined && obj.FRIENDS_ACCESS_INSTANCE !== undefined) {
     // it might be private, note this currently does not respect encapsulation properly
     ret = obj.FRIENDS_ACCESS_INSTANCE[name];
   }
