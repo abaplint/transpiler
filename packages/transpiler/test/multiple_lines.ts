@@ -766,12 +766,21 @@ CALL FUNCTION 'FUNCTION_EXISTS'
     expect(await runSingle(abap)).to.equal(expected);
   });
 
-  it.only("dynamic call lookup", async () => {
+  it("dynamic call lookup", async () => {
     const abap = `
 data lo_obj type ref to object.
 CALL METHOD lo_obj->('SETUP').`;
-    const expected = `sdfds`;
-    expect(await runSingle(abap)).to.equal(expected);
+    const js = await runSingle(abap);
+    expect(js).to.include("dynamicCallLookup");
+  });
+
+  it("dynamic call lookup, another", async () => {
+    const abap = `
+data lo_obj type ref to object.
+data nam type string.
+CALL METHOD lo_obj->(nam).`;
+    const js = await runSingle(abap);
+    expect(js).to.include("dynamicCallLookup");
   });
 
 });
