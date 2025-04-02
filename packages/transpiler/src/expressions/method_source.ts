@@ -47,7 +47,7 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
         }
       } else if (child.get() instanceof Expressions.Dynamic) {
         const second = child.getChildren()[1];
-        const lookupException = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_METHOD'", child.getFirstToken(), true);
+//        const lookupException = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_METHOD'", child.getFirstToken(), true);
         if (second.get() instanceof Expressions.FieldChain && second instanceof Nodes.ExpressionNode) {
           if (call.endsWith(".")) {
             call = call.substring(0, call.length - 1);
@@ -58,17 +58,21 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
 
           call = `abap.dynamicCallLookup(${call}, ${traversal.traverse(second).getCode()})`;
         } else if (second.get() instanceof Expressions.Constant) {
-          if (call === "") {
-            call = "this.";
-          } else if (call.endsWith(".") === false) {
-            call += ".";
+          if (call.endsWith(".")) {
+            call = call.substring(0, call.length - 1);
           }
-          call += second.getFirstToken().getStr().replace(/[\'\`]/g, "").toLowerCase().replace("~", "$").trimEnd();
+          if (call === "") {
+            call = "this";
+          }
+          const methodName = second.getFirstToken().getStr().replace(/[\'\`]/g, "").toLowerCase().replace("~", "$").trimEnd();
+          call = `abap.dynamicCallLookup(${call}, "${methodName}")`;
         } else {
           ret.appendString("MethodSourceTranspiler-Unexpected");
         }
+        /*
         ret.appendString(`if (${call} === undefined && ${lookupException} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_METHOD not found"; }\n`);
         ret.appendString(`if (${call} === undefined) { throw new ${lookupException}(); }\n`);
+        */
       } else if (child.get() instanceof Expressions.MethodName
           || child.get() instanceof Expressions.AttributeName) {
         if (i === 0) {

@@ -27,7 +27,6 @@ static INTERNAL_TYPE = 'CLAS';
 static INTERNAL_NAME = '${traversal.buildInternalName(token.getStr(), def)}';
 static IMPLEMENTED_INTERFACES = [${this.findImplementedByClass(traversal, def, scope).map(e => `"` + e.toUpperCase() + `"`).join(",")}];
 static ATTRIBUTES = {${traversal.buildAttributes(def, scope).join(",\n")}};
-static FRIENDS_ACCESS_STATIC = {}; // todo
 static METHODS = {${traversal.buildMethods(def, scope).join(",\n")}};`, node, traversal);
   }
 
