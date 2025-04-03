@@ -18,6 +18,7 @@ export class ConstantsTranspiler implements IStructureTranspiler {
 
     let ret = new DataTranspiler().transpile(begin, traversal).getCode() + "\n";
 
+    console.dir("sdfsd");
     // todo: CONSTANTS BEGIN inside CONSTANTS BEGIN
     for (const c of node.findDirectStatements(abaplint.Statements.Constant)) {
       const field = c.findDirectExpression(abaplint.Expressions.DefinitionName)?.getFirstToken().getStr();

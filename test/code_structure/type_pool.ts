@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import {expect} from "chai";
 import {compileFiles} from "../_utils";
 
@@ -23,6 +24,7 @@ abap.TypePools['SEOO'] = pool;`);
     const code = `TYPE-POOL seoo.
 CONSTANTS: BEGIN OF seoo_moo,
              foo TYPE n LENGTH 1 VALUE '5',
+             bar TYPE n LENGTH 1 VALUE '6',
            END OF seoo_moo.`;
     const output = await compileFiles([
       {filename: "seoo.type.abap", contents: code},
@@ -30,9 +32,8 @@ CONSTANTS: BEGIN OF seoo_moo,
     expect(output.objects.length).to.equal(1);
 
     expect(output.objects[0].chunk.getCode()).to.equal(`const pool = {};
-pool['seoo_cmptype_attribute'] = new abap.types.Numc();
-pool['seoo_cmptype_attribute'].set('5');
-pool['seoo_sdf'] = new abap.types.Character(1, {"qualifiedName":"seoo_sdf"});
+pool['seoo_moo'] = new abap.types.Structure({"foo": new abap.types.Numc(), "bar": new abap.types.Numc()}, undefined, undefined, {}, {});
+todo
 abap.TypePools['SEOO'] = pool;`);
   });
 
