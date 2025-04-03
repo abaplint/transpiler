@@ -499,4 +499,27 @@ ASSERT lines( dat ) = 1.`;
     await f(abap);
   });
 
+  it.only("header line, data ref, field symbols", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         foo TYPE i,
+       END OF ty.
+
+DATA tab TYPE STANDARD TABLE OF ty WITH HEADER LINE.
+DATA row LIKE LINE OF tab.
+DATA ref TYPE REF TO data.
+
+FIELD-SYMBOLS <fs> TYPE ty.
+
+GET REFERENCE OF tab INTO ref.
+ASSIGN ref->* TO <fs>.
+
+<fs>-foo = 2.
+
+ASSERT tab-foo = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
