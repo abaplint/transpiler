@@ -43,7 +43,7 @@ export async function initializeABAP() {\n`;
     }
     ret += `\n`;
 
-    if (extraSetup === undefined) {
+    if (extraSetup === undefined || extraSetup === "") {
       ret += `// no setup logic specified in config\n`;
     } else {
       ret += `  const {setup} = await import("${extraSetup}");\n` +
