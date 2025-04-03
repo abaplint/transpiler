@@ -142,10 +142,14 @@ export function assign(input: IAssignInput) {
       // @ts-ignore
       abap.builtin.sy.get().subrc.set(4);
     } else {
-      if (input.casting) {
-        input.target.setCasting();
+      if (input.source instanceof Table && input.source.getOptions()?.withHeader === true) {
+        input.target.assign(input.source.getHeader());
+      } else {
+        if (input.casting) {
+          input.target.setCasting();
+        }
+        input.target.assign(input.source);
       }
-      input.target.assign(input.source);
       // @ts-ignore
       abap.builtin.sy.get().subrc.set(0);
     }
