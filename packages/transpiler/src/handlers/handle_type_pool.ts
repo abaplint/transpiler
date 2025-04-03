@@ -16,6 +16,7 @@ export class HandleTypePool {
       const abs = spaghetti!.getData().vars[v];
       const name = `pool['${v.toLowerCase()}']`;
       chunk.appendString(`${name} = ${new TranspileTypes().toType(abs.getType())};\n`);
+      console.dir(abs);
       chunk.appendString(Traversal.setValues(abs, name));
     }
     for (const t in spaghetti?.getData().types) {

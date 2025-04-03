@@ -17,8 +17,14 @@ export class ConstantsTranspiler implements IStructureTranspiler {
     }
 
     let ret = new DataTranspiler().transpile(begin, traversal).getCode() + "\n";
+    ret += ConstantsTranspiler.handleValues(name, node, traversal);
 
-    console.dir("sdfsd");
+    return new Chunk(ret);
+  }
+
+  public static handleValues(name: string, node: abaplint.Nodes.StructureNode, traversal: Traversal): string {
+    let ret = "";
+
     // todo: CONSTANTS BEGIN inside CONSTANTS BEGIN
     for (const c of node.findDirectStatements(abaplint.Statements.Constant)) {
       const field = c.findDirectExpression(abaplint.Expressions.DefinitionName)?.getFirstToken().getStr();
@@ -31,7 +37,7 @@ export class ConstantsTranspiler implements IStructureTranspiler {
       }
     }
 
-    return new Chunk(ret);
+    return ret;
   }
 
 }
