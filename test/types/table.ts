@@ -515,7 +515,7 @@ WRITE / tab-foo.
     expect(abap.console.get()).to.equal("0");
   });
 
-  it.skip("header line, data ref, field symbols", async () => {
+  it("header line, data ref, field symbols", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          foo TYPE i,
@@ -535,10 +535,9 @@ WRITE / <fs>-foo.
 WRITE / tab-foo.
 `;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("222222222222222");
+    expect(abap.console.get()).to.equal("2\n2");
   });
 
   it("data ref, field symbols, zero lines", async () => {
