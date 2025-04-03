@@ -522,4 +522,25 @@ ASSERT tab-foo = 2.`;
     await f(abap);
   });
 
+  it.only("data ref, field symbols, zero lines", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         foo TYPE i,
+       END OF ty.
+
+DATA tab TYPE STANDARD TABLE OF ty.
+DATA row LIKE LINE OF tab.
+DATA ref TYPE REF TO data.
+
+FIELD-SYMBOLS <fs> TYPE table.
+
+GET REFERENCE OF tab INTO ref.
+ASSIGN ref->* TO <fs>.
+WRITE / lines( <fs> ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
 });
