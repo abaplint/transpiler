@@ -22,7 +22,7 @@ export class ConstantsTranspiler implements IStructureTranspiler {
     return new Chunk(ret);
   }
 
-  public static handleValues(name: string, node: abaplint.Nodes.StructureNode, traversal: Traversal): string {
+  public static handleValues(prefix: string, node: abaplint.Nodes.StructureNode, traversal: Traversal): string {
     let ret = "";
 
     // todo: CONSTANTS BEGIN inside CONSTANTS BEGIN
@@ -33,7 +33,7 @@ export class ConstantsTranspiler implements IStructureTranspiler {
       }
       const value = c.findFirstExpression(abaplint.Expressions.Constant);
       if (value) {
-        ret += `${name}.get().${field}.set(${traversal.traverse(value).getCode()});\n`;
+        ret += `${prefix}.get().${field}.set(${traversal.traverse(value).getCode()});\n`;
       }
     }
 
