@@ -462,14 +462,14 @@ export class Table implements ITable {
 
   public getHeader(): TableRowType {
     if (this.header === undefined) {
-      throw "table, getHeader";
+      throw new Error("table, getHeader");
     }
     return this.header;
   }
 
   public get(): TableRowType {
     if (this.header === undefined) {
-      throw "table, no header line";
+      throw new Error("table, no header line");
     }
     return this.header.get();
   }
