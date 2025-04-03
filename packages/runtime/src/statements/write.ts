@@ -24,8 +24,12 @@ export class WriteStatement {
     this.context = context;
   }
 
-  public write(source: INumeric | ICharacter | FieldSymbol | string | number, options?: IWriteOptions) {
+  public write(source: INumeric | ICharacter | FieldSymbol | string | number | undefined, options?: IWriteOptions) {
     let right = false;
+
+    if (source === undefined) {
+      throw new Error("WriteStatement: source is undefined");
+    }
 
     if (options?.skipLine === true) {
       this.context.console.add("\n");

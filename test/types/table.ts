@@ -499,7 +499,23 @@ ASSERT lines( dat ) = 1.`;
     await f(abap);
   });
 
-  it.only("header line, data ref, field symbols", async () => {
+  it("basic header line", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         foo TYPE i,
+       END OF ty.
+
+DATA tab TYPE STANDARD TABLE OF ty WITH HEADER LINE.
+
+WRITE / tab-foo.
+`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
+  it.skip("header line, data ref, field symbols", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          foo TYPE i,
@@ -515,14 +531,17 @@ GET REFERENCE OF tab INTO ref.
 ASSIGN ref->* TO <fs>.
 
 <fs>-foo = 2.
-
-ASSERT tab-foo = 2.`;
+WRITE / <fs>-foo.
+WRITE / tab-foo.
+`;
     const js = await run(code);
+    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+    expect(abap.console.get()).to.equal("222222222222222");
   });
 
-  it.only("data ref, field symbols, zero lines", async () => {
+  it("data ref, field symbols, zero lines", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          foo TYPE i,

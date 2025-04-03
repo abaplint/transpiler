@@ -460,11 +460,18 @@ export class Table implements ITable {
     return this;
   }
 
-  public getHeader() {
+  public getHeader(): TableRowType {
     if (this.header === undefined) {
       throw "table, getHeader";
     }
     return this.header;
+  }
+
+  public get(): TableRowType {
+    if (this.header === undefined) {
+      throw "table, no header line";
+    }
+    return this.header.get();
   }
 
   public insertIndex(item: TableRowType, index: number, noClone = false) {
