@@ -17,7 +17,7 @@ describe("Unknown types, errors at runtime", () => {
   it("test 2, error", async () => {
     const abap = `DATA foo TYPE REF TO zcl_bar.`;
 
-    const expected = `let foo = (() => { throw "Void type: zcl_bar" })();`;
+    const expected = `let foo = (() => { throw new Error("Void type: zcl_bar") })();`;
 
     expect(await runSingle(abap, options)).to.equal(expected);
   });
@@ -36,7 +36,7 @@ foo.set(await (new abap.Classes['ZCL_ABAPGIT_GUI']()).constructor_());`;
     const abap = `DATA foo TYPE REF TO something.
     CREATE OBJECT foo.`;
 
-    const expected = `let foo = (() => { throw "Void type: something" })();
+    const expected = `let foo = (() => { throw new Error("Void type: something") })();
 foo.set(await (new abap.Classes['RUNTIME_ERROR']()).constructor_());`;
 
     expect(await runSingle(abap, options)).to.equal(expected);

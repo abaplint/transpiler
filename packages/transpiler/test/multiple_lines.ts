@@ -585,7 +585,7 @@ TRY.
     WRITE / 'bar'.
 ENDTRY.`;
 
-    const expected = `let cx = (() => { throw "Void type: cx_root" })();
+    const expected = `let cx = (() => { throw new Error("Void type: cx_root") })();
 try {
   try {
     const unique1 = await (new abap.Classes['CX_ABAP_MESSAGE_DIGEST']()).constructor_();
