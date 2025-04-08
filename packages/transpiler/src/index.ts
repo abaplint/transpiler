@@ -15,6 +15,7 @@ import {HandleSMIM} from "./handlers/handle_smim";
 import {HandleMSAG} from "./handlers/handle_msag";
 import {HandleOA2P} from "./handlers/handle_oa2p";
 import {HandleFUGR} from "./handlers/handle_fugr";
+import {Initialization} from "./initialization";
 
 export {config, ITranspilerOptions, IFile, IProgress, IOutputFile, IOutput, UnknownTypesEnum};
 
@@ -49,8 +50,8 @@ export class Transpiler {
       objects: [],
       unitTestScript: new UnitTest().unitTestScript(reg, this.options?.skip),
       unitTestScriptOpen: new UnitTest().unitTestScriptOpen(reg, this.options?.skip),
-      initializationScript: new UnitTest().initializationScript(reg, dbSetup, this.options?.extraSetup),
-      initializationScript2: new UnitTest().initializationScript(reg, dbSetup, this.options?.extraSetup, true),
+      initializationScript: new Initialization().script(reg, dbSetup, this.options?.extraSetup),
+      initializationScript2: new Initialization().script(reg, dbSetup, this.options?.extraSetup, true),
       databaseSetup: dbSetup,
       reg: reg,
     };

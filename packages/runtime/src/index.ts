@@ -2,7 +2,6 @@ import {Context} from "./context";
 import {OffsetLength} from "./offset_length";
 import {Statements} from "./statements";
 import {templateFormatting} from "./template_formatting";
-import {UnitTestResult} from "./unit_test";
 import * as builtin from "./builtin";
 import * as compare from "./compare";
 import * as DB from "./db/db";
@@ -19,7 +18,7 @@ import {buildDbTableName} from "./prefix";
 import {IntegerFactory} from "./integer_factory";
 import {dynamicCallLookup} from "./dynamic_call_lookup";
 
-export {UnitTestResult, RFC, types, DB, MemoryConsole};
+export {RFC, types, DB, MemoryConsole};
 
 export type RuntimeDatabaseOptions = {
   /* prefix all operations with schema*/
