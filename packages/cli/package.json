@@ -34,9 +34,9 @@
     "@types/progress": "^2.0.7",
     "glob": "=7.2.0",
     "progress": "^2.0.3",
-    "ts-json-schema-generator": "^2.3.0",
-    "typescript": "^5.8.2",
+    "ts-json-schema-generator": "^2.4.0",
+    "typescript": "^5.8.3",
     "webpack-cli": "^6.0.1",
-    "webpack": "^5.98.0"
+    "webpack": "^5.99.2"
   }
 }
