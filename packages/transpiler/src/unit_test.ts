@@ -221,19 +221,11 @@ run().then(() => {
 
   public unitTestScript(reg: abaplint.IRegistry, skip?: TestMethodList): string {
     let ret = `/* eslint-disable curly */
-import fs from "fs";
 import path from "path";
-import {fileURLToPath} from "url";
 import {initializeABAP} from "./init.mjs";
-import runtime from "@abaplint/runtime";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function run() {
-  await initializeABAP();
-  let clas;
-  let locl;
-  let meth;\n`;
+  await initializeABAP();\n`;
 
     for (const st of this.getSortedTests(reg)) {
       ret += `// --------------------------------------------\n`;
