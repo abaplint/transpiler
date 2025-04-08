@@ -221,7 +221,6 @@ run().then(() => {
 
   public unitTestScript(reg: abaplint.IRegistry, skip?: TestMethodList): string {
     let ret = `/* eslint-disable curly */
-import path from "path";
 import {initializeABAP} from "./init.mjs";
 
 async function run() {
