@@ -249,9 +249,9 @@ async function run() {
       for (const m of st.methods) {
         const skipThis = (skip || []).some(a => a.object === st.obj.getName() && a.class === lc && a.method === m);
         if (skipThis) {
-          ret += `  console.log('${st.obj.getName()}: running ${lc}->${m}, skipped');\n`;
-          ret += `  meth = locl.addMethod("${m}");\n`;
-          ret += `  meth.skip();\n`;
+          ret += `        console.log('${st.obj.getName()}: running ${lc}->${m}, skipped');\n`;
+          ret += `        meth = locl.addMethod("${m}");\n`;
+          ret += `        meth.skip();\n`;
           continue;
         }
 
@@ -273,7 +273,7 @@ async function run() {
         ret += `      }\n`;
       }
 
-      ret += `      if (${lc}.class_teardown) await ${lc}.class_teardown();\n`;
+      ret += `        if (${lc}.class_teardown) await ${lc}.class_teardown();\n`;
       ret += `    }\n`;
     }
 
