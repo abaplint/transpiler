@@ -160,9 +160,9 @@ export class TranspileTypes {
     } else if (type instanceof abaplint.BasicTypes.DecFloat34Type) {
       resolved = "DecFloat34";
     } else if (type instanceof abaplint.BasicTypes.UnknownType) {
-      return `(() => { throw "Unknown type: ${type.getError()}" })()`;
+      return `(() => { throw new Error("Unknown type: ${type.getError()}") })()`;
     } else if (type instanceof abaplint.BasicTypes.VoidType) {
-      return `(() => { throw "Void type: ${type.getVoided()}" })()`;
+      return `(() => { throw new Error("Void type: ${type.getVoided()}") })()`;
     } else {
       resolved = "typeTodo" + type.constructor.name;
     }
