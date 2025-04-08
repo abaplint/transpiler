@@ -231,27 +231,21 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function run() {
   await initializeABAP();
-  const unit = new runtime.UnitTestResult();
   let clas;
   let locl;
-  let meth;
-  try {\n`;
+  let meth;\n`;
 
     for (const st of this.getSortedTests(reg)) {
       ret += `// --------------------------------------------\n`;
-      ret += `    clas = unit.addObject("${st.obj.getName()}");\n`;
       const lc = st.localClass.toLowerCase();
       ret += `    {
         const {${lc}} = await import("./${this.escapeNamespace(st.obj.getName().toLowerCase())}.${st.obj.getType().toLowerCase()}.testclasses.mjs");
-        locl = clas.addTestClass("${lc}");
         if (${lc}.class_setup) await ${lc}.class_setup();\n`;
 
       for (const m of st.methods) {
         const skipThis = (skip || []).some(a => a.object === st.obj.getName() && a.class === lc && a.method === m);
         if (skipThis) {
           ret += `        console.log('${st.obj.getName()}: running ${lc}->${m}, skipped');\n`;
-          ret += `        meth = locl.addMethod("${m}");\n`;
-          ret += `        meth.skip();\n`;
           continue;
         }
 
@@ -266,9 +260,7 @@ async function run() {
         ret += `      {\n        const test = await (new ${lc}()).constructor_();\n`;
         ret += callSpecial("setup");
         ret += `        console.log("${st.obj.getName()}: running ${lc}->${m}");\n`;
-        ret += `        meth = locl.addMethod("${m}");\n`;
         ret += `        await test.FRIENDS_ACCESS_INSTANCE.${m}();\n`;
-        ret += `        meth.pass();\n`;
         ret += callSpecial("teardown");
         ret += `      }\n`;
       }
@@ -278,14 +270,6 @@ async function run() {
     }
 
     ret += `// -------------------END-------------------
-    fs.writeFileSync(__dirname + path.sep + "_output.xml", unit.xUnitXML());
-  } catch (e) {
-    if (meth) {
-      meth.fail();
-    }
-    fs.writeFileSync(__dirname + path.sep + "_output.xml", unit.xUnitXML());
-    throw e;
-  }
 }
 
 run().then(() => {
