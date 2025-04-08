@@ -171,6 +171,7 @@ run().then(() => {
     let ret = `/* eslint-disable curly */
 import {initializeABAP} from "./init.mjs";
 
+
 async function run() {
   await initializeABAP();\n`;
 
