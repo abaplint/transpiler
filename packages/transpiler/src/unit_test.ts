@@ -71,6 +71,7 @@ run().then(() => {
     const tests: {
       obj: abaplint.IObject,
       localClass: string,
+      filename: string,
       riskLevel: abaplint.Info.RiskLevel | undefined,
       duration: abaplint.Info.Duration | undefined,
       methods: string[],
@@ -106,6 +107,7 @@ run().then(() => {
 
           tests.push({
             obj,
+            filename: `./${escapeNamespaceFilename(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}.testclasses.mjs`,
             localClass: def.name,
             riskLevel: def.riskLevel,
             duration: def.duration,
@@ -171,6 +173,14 @@ run().then(() => {
     let ret = `/* eslint-disable curly */
 import {initializeABAP} from "./init.mjs";
 
+function getData() {
+  const ret = [];\n`;
+  for (const st of this.getSortedTests(reg)) {
+    const methods = st.methods.map(m => `"${m}"`).join(",");
+    ret += `  ret.push({objectName: "${st.obj.getName()}", localClass: "${st.localClass}", methods: [${methods}], filename: "${st.filename}"});\n`;
+  }
+ret += `  return ret;
+}
 
 async function run() {
   await initializeABAP();\n`;
@@ -179,7 +189,7 @@ async function run() {
       ret += `// --------------------------------------------\n`;
       const lc = st.localClass.toLowerCase();
       ret += `    {
-        const {${lc}} = await import("./${escapeNamespaceFilename(st.obj.getName().toLowerCase())}.${st.obj.getType().toLowerCase()}.testclasses.mjs");
+        const {${lc}} = await import("${st.filename}");
         if (${lc}.class_setup) await ${lc}.class_setup();\n`;
 
       for (const m of st.methods) {
