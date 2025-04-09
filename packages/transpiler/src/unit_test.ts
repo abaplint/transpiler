@@ -108,7 +108,7 @@ run().then(() => {
           tests.push({
             obj,
             filename: `./${escapeNamespaceFilename(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}.testclasses.mjs`,
-            localClass: def.name,
+            localClass: def.name.toLowerCase(),
             riskLevel: def.riskLevel,
             duration: def.duration,
             methods: methods,
@@ -170,56 +170,54 @@ run().then(() => {
   }
 
   public unitTestScript(reg: abaplint.IRegistry, skip?: TestMethodList): string {
+    const callSpecial = (name: string) => {
+      let ret = "";
+      ret += `if (test.${name}) await test.${name}();\n`;
+      ret += `        if (test.FRIENDS_ACCESS_INSTANCE.${name}) await test.FRIENDS_ACCESS_INSTANCE.${name}();\n`;
+      ret += `        if (test.FRIENDS_ACCESS_INSTANCE.SUPER && test.FRIENDS_ACCESS_INSTANCE.SUPER.${name}) await test.FRIENDS_ACCESS_INSTANCE.SUPER.${name}();`;
+      return ret;
+    };
+
     let ret = `/* eslint-disable curly */
+/* eslint-disable max-len */
 import {initializeABAP} from "./init.mjs";
 
 function getData() {
   const ret = [];\n`;
   for (const st of this.getSortedTests(reg)) {
-    const methods = st.methods.map(m => `"${m}"`).join(",");
-    ret += `  ret.push({objectName: "${st.obj.getName()}", localClass: "${st.localClass}", methods: [${methods}], filename: "${st.filename}"});\n`;
+    const methods = [];
+    for (const m of st.methods) {
+      const skipThis = (skip || []).some(a => a.object === st.obj.getName() && a.class === st.localClass && a.method === m);
+      methods.push({
+        name: m,
+        skip: skipThis,
+      });
+    }
+
+    ret += `  ret.push({objectName: "${st.obj.getName()}", localClass: "${st.localClass}", methods: ${JSON.stringify(methods)}, filename: "${st.filename}"});\n`;
   }
 ret += `  return ret;
 }
 
 async function run() {
-  await initializeABAP();\n`;
-
-    for (const st of this.getSortedTests(reg)) {
-      ret += `// --------------------------------------------\n`;
-      const lc = st.localClass.toLowerCase();
-      ret += `    {
-        const {${lc}} = await import("${st.filename}");
-        if (${lc}.class_setup) await ${lc}.class_setup();\n`;
-
-      for (const m of st.methods) {
-        const skipThis = (skip || []).some(a => a.object === st.obj.getName() && a.class === lc && a.method === m);
-        if (skipThis) {
-          ret += `        console.log('${st.obj.getName()}: running ${lc}->${m}, skipped');\n`;
-          continue;
-        }
-
-        const callSpecial = (name: string) => {
-          let ret = "";
-          ret += `        if (test.${name}) await test.${name}();\n`;
-          ret += `        if (test.FRIENDS_ACCESS_INSTANCE.${name}) await test.FRIENDS_ACCESS_INSTANCE.${name}();\n`;
-          ret += `        if (test.FRIENDS_ACCESS_INSTANCE.SUPER && test.FRIENDS_ACCESS_INSTANCE.SUPER.${name}) await test.FRIENDS_ACCESS_INSTANCE.SUPER.${name}();\n`;
-          return ret;
-        };
-
-        ret += `      {\n        const test = await (new ${lc}()).constructor_();\n`;
-        ret += callSpecial("setup");
-        ret += `        console.log("${st.obj.getName()}: running ${lc}->${m}");\n`;
-        ret += `        await test.FRIENDS_ACCESS_INSTANCE.${m}();\n`;
-        ret += callSpecial("teardown");
-        ret += `      }\n`;
+  await initializeABAP();
+  for (const st of getData()) {
+    const imported = await import(st.filename);
+    const localClass = imported[st.localClass];
+    if (localClass.class_setup) await localClass.class_setup();
+    for (const m of st.methods) {
+      if (m.skip) {
+        console.log('skipped');
+      } else {
+        const test = await (new localClass()).constructor_();
+        ${callSpecial("setup")}
+        console.log("running");
+        await test.FRIENDS_ACCESS_INSTANCE[m.name]();
+        ${callSpecial("teardown")}
       }
-
-      ret += `        if (${lc}.class_teardown) await ${lc}.class_teardown();\n`;
-      ret += `    }\n`;
     }
-
-    ret += `// -------------------END-------------------
+    if (localClass.class_teardown) await localClass.class_teardown();
+  }
 }
 
 run().then(() => {
