@@ -187,7 +187,9 @@ function getData() {
   for (const st of this.getSortedTests(reg)) {
     const methods = [];
     for (const m of st.methods) {
-      const skipThis = (skip || []).some(a => a.object === st.obj.getName() && a.class === st.localClass && a.method === m);
+      const skipThis = (skip || []).some(a => a.object.toUpperCase() === st.obj.getName().toUpperCase()
+        && a.class.toUpperCase() === st.localClass.toUpperCase()
+        && a.method.toUpperCase() === m.toUpperCase());
       methods.push({
         name: m,
         skip: skipThis,
