@@ -209,11 +209,11 @@ async function run() {
     if (localClass.class_setup) await localClass.class_setup();
     for (const m of st.methods) {
       if (m.skip) {
-        console.log('skipped');
+        console.log(st.objectName + ": running " + st.localClass + "->" + m.name + ", skipped");
       } else {
         const test = await (new localClass()).constructor_();
         ${callSpecial("setup")}
-        console.log("running");
+        console.log(st.objectName + ": running " + st.localClass + "->" + m.name);
         await test.FRIENDS_ACCESS_INSTANCE[m.name]();
         ${callSpecial("teardown")}
       }
