@@ -71,6 +71,7 @@ run().then(() => {
     const tests: {
       obj: abaplint.IObject,
       localClass: string,
+      filename: string,
       riskLevel: abaplint.Info.RiskLevel | undefined,
       duration: abaplint.Info.Duration | undefined,
       methods: string[],
@@ -106,7 +107,8 @@ run().then(() => {
 
           tests.push({
             obj,
-            localClass: def.name,
+            filename: `./${escapeNamespaceFilename(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}.testclasses.mjs`,
+            localClass: def.name.toLowerCase(),
             riskLevel: def.riskLevel,
             duration: def.duration,
             methods: methods,
@@ -168,47 +170,56 @@ run().then(() => {
   }
 
   public unitTestScript(reg: abaplint.IRegistry, skip?: TestMethodList): string {
+    const callSpecial = (name: string) => {
+      let ret = "";
+      ret += `if (test.${name}) await test.${name}();\n`;
+      ret += `        if (test.FRIENDS_ACCESS_INSTANCE.${name}) await test.FRIENDS_ACCESS_INSTANCE.${name}();\n`;
+      ret += `        if (test.FRIENDS_ACCESS_INSTANCE.SUPER && test.FRIENDS_ACCESS_INSTANCE.SUPER.${name}) await test.FRIENDS_ACCESS_INSTANCE.SUPER.${name}();`;
+      return ret;
+    };
+
     let ret = `/* eslint-disable curly */
+/* eslint-disable max-len */
 import {initializeABAP} from "./init.mjs";
 
-async function run() {
-  await initializeABAP();\n`;
-
-    for (const st of this.getSortedTests(reg)) {
-      ret += `// --------------------------------------------\n`;
-      const lc = st.localClass.toLowerCase();
-      ret += `    {
-        const {${lc}} = await import("./${escapeNamespaceFilename(st.obj.getName().toLowerCase())}.${st.obj.getType().toLowerCase()}.testclasses.mjs");
-        if (${lc}.class_setup) await ${lc}.class_setup();\n`;
-
-      for (const m of st.methods) {
-        const skipThis = (skip || []).some(a => a.object === st.obj.getName() && a.class === lc && a.method === m);
-        if (skipThis) {
-          ret += `        console.log('${st.obj.getName()}: running ${lc}->${m}, skipped');\n`;
-          continue;
-        }
-
-        const callSpecial = (name: string) => {
-          let ret = "";
-          ret += `        if (test.${name}) await test.${name}();\n`;
-          ret += `        if (test.FRIENDS_ACCESS_INSTANCE.${name}) await test.FRIENDS_ACCESS_INSTANCE.${name}();\n`;
-          ret += `        if (test.FRIENDS_ACCESS_INSTANCE.SUPER && test.FRIENDS_ACCESS_INSTANCE.SUPER.${name}) await test.FRIENDS_ACCESS_INSTANCE.SUPER.${name}();\n`;
-          return ret;
-        };
-
-        ret += `      {\n        const test = await (new ${lc}()).constructor_();\n`;
-        ret += callSpecial("setup");
-        ret += `        console.log("${st.obj.getName()}: running ${lc}->${m}");\n`;
-        ret += `        await test.FRIENDS_ACCESS_INSTANCE.${m}();\n`;
-        ret += callSpecial("teardown");
-        ret += `      }\n`;
-      }
-
-      ret += `        if (${lc}.class_teardown) await ${lc}.class_teardown();\n`;
-      ret += `    }\n`;
+function getData() {
+  const ret = [];\n`;
+  for (const st of this.getSortedTests(reg)) {
+    const methods = [];
+    for (const m of st.methods) {
+      const skipThis = (skip || []).some(a => a.object.toUpperCase() === st.obj.getName().toUpperCase()
+        && a.class.toUpperCase() === st.localClass.toUpperCase()
+        && a.method.toUpperCase() === m.toUpperCase());
+      methods.push({
+        name: m,
+        skip: skipThis,
+      });
     }
 
-    ret += `// -------------------END-------------------
+    ret += `  ret.push({objectName: "${st.obj.getName()}", localClass: "${st.localClass}", methods: ${JSON.stringify(methods)}, filename: "${st.filename}"});\n`;
+  }
+ret += `  return ret;
+}
+
+async function run() {
+  await initializeABAP();
+  for (const st of getData()) {
+    const imported = await import(st.filename);
+    const localClass = imported[st.localClass];
+    if (localClass.class_setup) await localClass.class_setup();
+    for (const m of st.methods) {
+      if (m.skip) {
+        console.log(st.objectName + ": running " + st.localClass + "->" + m.name + ", skipped");
+      } else {
+        const test = await (new localClass()).constructor_();
+        ${callSpecial("setup")}
+        console.log(st.objectName + ": running " + st.localClass + "->" + m.name);
+        await test.FRIENDS_ACCESS_INSTANCE[m.name]();
+        ${callSpecial("teardown")}
+      }
+    }
+    if (localClass.class_teardown) await localClass.class_teardown();
+  }
 }
 
 run().then(() => {
