@@ -214,16 +214,17 @@ async function run() {
     const localClass = imported[st.localClass];
     if (localClass.class_setup) await localClass.class_setup();
     for (const m of st.methods) {
+      const prefix = st.objectName + ": running " + st.localClass + "->" + m.name;
       if (m.skip) {
-        console.log(st.objectName + ": running " + st.localClass + "->" + m.name + ", skipped due to configuration");
+        console.log(prefix + ", skipped due to configuration");
       } else if (skipCritical && st.riskLevel === "CRITICAL") {
-        console.log(st.objectName + ": running " + st.localClass + "->" + m.name + ", skipped due to risk level " + st.riskLevel);
+        console.log(prefix + ", skipped due to risk level " + st.riskLevel);
       } else if (onlyCritical && st.riskLevel !== "CRITICAL") {
-        console.log(st.objectName + ": running " + st.localClass + "->" + m.name + ", skipped due to risk level " + st.riskLevel);
+        console.log(prefix + ", skipped due to risk level " + st.riskLevel);
       } else {
         const test = await (new localClass()).constructor_();
         ${callSpecial("setup")}
-        console.log(st.objectName + ": running " + st.localClass + "->" + m.name);
+        console.log(prefix);
         await test.FRIENDS_ACCESS_INSTANCE[m.name]();
         ${callSpecial("teardown")}
       }
