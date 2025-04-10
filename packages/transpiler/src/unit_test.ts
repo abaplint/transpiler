@@ -196,7 +196,10 @@ function getData() {
       });
     }
 
-    ret += `  ret.push({objectName: "${st.obj.getName()}", localClass: "${st.localClass}", methods: ${JSON.stringify(methods)}, filename: "${st.filename}"});\n`;
+    ret += `  ret.push({objectName: "${st.obj.getName()}",
+            localClass: "${st.localClass}",
+            methods: ${JSON.stringify(methods)},
+            filename: "${st.filename}"});\n`;
   }
 ret += `  return ret;
 }
