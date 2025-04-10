@@ -199,12 +199,15 @@ function getData() {
     ret += `  ret.push({objectName: "${st.obj.getName()}",
             localClass: "${st.localClass}",
             methods: ${JSON.stringify(methods)},
+            riskLevel: "${st.riskLevel}",
             filename: "${st.filename}"});\n`;
   }
 ret += `  return ret;
 }
 
 async function run() {
+  const skipCritical = process.argv[2] === "--skip-critical";
+  const onlyCritical = process.argv[2] === "--only-critical";
   await initializeABAP();
   for (const st of getData()) {
     const imported = await import(st.filename);
@@ -212,7 +215,11 @@ async function run() {
     if (localClass.class_setup) await localClass.class_setup();
     for (const m of st.methods) {
       if (m.skip) {
-        console.log(st.objectName + ": running " + st.localClass + "->" + m.name + ", skipped");
+        console.log(st.objectName + ": running " + st.localClass + "->" + m.name + ", skipped due to configuration");
+      } else if (skipCritical && st.riskLevel === "CRITICAL") {}
+        console.log(st.objectName + ": running " + st.localClass + "->" + m.name + ", skipped due to risk level " + st.riskLevel);
+      } else if (onlyCritical && st.riskLevel !== "CRITICAL") {
+        console.log(st.objectName + ": running " + st.localClass + "->" + m.name + ", skipped due to risk level " + st.riskLevel);
       } else {
         const test = await (new localClass()).constructor_();
         ${callSpecial("setup")}
