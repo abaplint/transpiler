@@ -216,7 +216,7 @@ async function run() {
     for (const m of st.methods) {
       if (m.skip) {
         console.log(st.objectName + ": running " + st.localClass + "->" + m.name + ", skipped due to configuration");
-      } else if (skipCritical && st.riskLevel === "CRITICAL") {}
+      } else if (skipCritical && st.riskLevel === "CRITICAL") {
         console.log(st.objectName + ": running " + st.localClass + "->" + m.name + ", skipped due to risk level " + st.riskLevel);
       } else if (onlyCritical && st.riskLevel !== "CRITICAL") {
         console.log(st.objectName + ": running " + st.localClass + "->" + m.name + ", skipped due to risk level " + st.riskLevel);
