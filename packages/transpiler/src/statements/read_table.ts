@@ -88,11 +88,11 @@ export class ReadTableTranspiler implements IStatementTranspiler {
           prefix += "const " + id + " = " + s + ";\n";
           withKey.push("abap.compare.eq(" + field + ", " + id + ")");
           withKeyValue.push(`{key: (i) => {return ${field}}, value: ${id}}`);
-          withKeySimple.push(`"${field.replace("i.", "")}": ${id}`);
+          withKeySimple.push(`"${field.replace("i.", "").replace(/\$/g, "/")}": ${id}`);
         } else {
           withKey.push("abap.compare.eq(" + field + ", " + s + ")");
           withKeyValue.push(`{key: (i) => {return ${field}}, value: ${s}}`);
-          withKeySimple.push(`"${field.replace("i.", "")}": ${s}`);
+          withKeySimple.push(`"${field.replace("i.", "").replace(/\$/g, "/")}": ${s}`);
         }
       }
       extra.push("withKey: (i) => {return " + withKey.join(" && ") + ";}");

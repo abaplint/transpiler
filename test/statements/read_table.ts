@@ -1442,4 +1442,29 @@ WRITE / sy-subrc.`;
     expect(abap.console.get().trimEnd()).to.equal(`0`);
   });
 
+  it("hashed read, namespaced field", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field1      TYPE c LENGTH 1,
+         /foo/field2 TYPE c LENGTH 1,
+       END OF ty.
+
+TYPES tty TYPE HASHED TABLE OF ty WITH UNIQUE KEY field1 /foo/field2.
+DATA tab TYPE tty.
+DATA row LIKE LINE OF tab.
+
+FIELD-SYMBOLS <row> LIKE LINE OF tab.
+FIELD-SYMBOLS <tab> LIKE tab.
+
+READ TABLE tab WITH TABLE KEY
+  field1 = '1'
+  /foo/field2 = '2'
+  ASSIGNING <row>.
+WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal(`4`);
+  });
+
 });
