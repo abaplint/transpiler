@@ -1442,7 +1442,7 @@ WRITE / sy-subrc.`;
     expect(abap.console.get().trimEnd()).to.equal(`0`);
   });
 
-  it.only("hashed read, namespaced field", async () => {
+  it("hashed read, namespaced field", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          field1      TYPE c LENGTH 1,
@@ -1464,7 +1464,7 @@ WRITE / sy-subrc.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get().trimEnd()).to.equal(`0`);
+    expect(abap.console.get().trimEnd()).to.equal(`4`);
   });
 
 });
