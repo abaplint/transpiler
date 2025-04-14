@@ -94,4 +94,15 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("111");
   });
 
+  it("numeric, set from empty string", async () => {
+    const code = `
+DATA foo TYPE string.
+DATA numc TYPE n LENGTH 10.
+numc = foo.
+ASSERT numc = '0000000000'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

@@ -24,7 +24,11 @@ export class Numc implements ICharacter {
     if (typeof value === "number") {
       this.value = Math.trunc(value) + "";
     } else if (typeof value === "string") {
-      this.value = parseInt(value, 10) + "";
+      if (value === "") {
+        this.clear();
+      } else {
+        this.value = parseInt(value, 10) + "";
+      }
     } else if (value instanceof Float) {
       this.value = Math.trunc(value.getRaw()) + "";
     } else {
