@@ -24,6 +24,7 @@ export class Numc implements ICharacter {
     if (typeof value === "number") {
       this.value = Math.trunc(value) + "";
     } else if (typeof value === "string") {
+      value = value.trim().replace(/[a-zA-Z]/g, "");
       if (value === "") {
         this.clear();
       } else {

@@ -105,4 +105,24 @@ ASSERT numc = '0000000000'.`;
     await f(abap);
   });
 
+  it("numeric, set from N", async () => {
+    const code = `
+DATA foo TYPE n LENGTH 1.
+foo = 'N'.
+ASSERT foo = '0'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("numeric, set from N1", async () => {
+    const code = `
+DATA foo TYPE n LENGTH 2.
+foo = 'N1'.
+ASSERT foo = '01'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
