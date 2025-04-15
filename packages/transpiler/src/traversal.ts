@@ -273,8 +273,9 @@ export class Traversal {
 
   public buildAttributes(def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined,
                          scope: abaplint.ISpaghettiScopeNode | undefined,
-                         prefix = ""): string[] {
-    const attr: string[] = [];
+                         prefix = ""): Set<string> {
+    // using a Set to avoid duplicates from nested identical interfaces
+    const attr: Set<string> = new Set<string>();
     if (def === undefined) {
       return attr;
     }
@@ -283,7 +284,7 @@ export class Traversal {
       const type = new TranspileTypes().toType(a.getType());
       const runtime = this.mapVisibility(a.getVisibility());
       const isClass = a.getMeta().includes(abaplint.IdentifierMeta.Static) ? "X" : " ";
-      attr.push(`"${prefix + a.getName().toUpperCase()}": {"type": () => {return ${type};}, "visibility": "${
+      attr.add(`"${prefix + a.getName().toUpperCase()}": {"type": () => {return ${type};}, "visibility": "${
         runtime}", "is_constant": " ", "is_class": "${isClass}"}`);
     }
 
@@ -300,13 +301,13 @@ export class Traversal {
         default:
           runtime = "U";
       }
-      attr.push(`"${prefix + a.getName().toUpperCase()}": {"type": () => {return ${type};}, "visibility": "${
+      attr.add(`"${prefix + a.getName().toUpperCase()}": {"type": () => {return ${type};}, "visibility": "${
         runtime}", "is_constant": "X", "is_class": "X"}`);
     }
 
     for (const impl of def.getImplementing()) {
       const idef = this.findInterfaceDefinition(impl.name, scope);
-      attr.push(...this.buildAttributes(idef, scope, impl.name.toUpperCase() + "~"));
+      this.buildAttributes(idef, scope, impl.name.toUpperCase() + "~").forEach(a => attr.add(a));
     }
 
     return attr;
