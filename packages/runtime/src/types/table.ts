@@ -441,7 +441,7 @@ export class Table implements ITable {
       this.header?.set(tab);
     } else {
       if (!(tab instanceof Table) && !(tab instanceof FieldSymbol)) {
-        throw "Table, set error";
+        throw new Error("Table, set error");
       }
 
       if (tab instanceof FieldSymbol) {
