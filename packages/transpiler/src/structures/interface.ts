@@ -18,7 +18,7 @@ export class InterfaceTranspiler implements IStructureTranspiler {
         name = Traversal.escapeNamespace(name);
         ret += `class ${name} {\n`;
         ret += `static INTERNAL_TYPE = 'INTF';\n`;
-        ret += `static ATTRIBUTES = {${traversal.buildAttributes(def, scope).join(",\n")}};\n`;
+        ret += `static ATTRIBUTES = {${Array.from(traversal.buildAttributes(def, scope)).join(",\n")}};\n`;
         ret += `static METHODS = {${traversal.buildMethods(def, scope).join(",\n")}};\n`;
       } else if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.EndInterface) {
         ret += "}\n";
