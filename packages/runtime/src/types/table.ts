@@ -112,7 +112,6 @@ export class HashedTable implements ITable {
     this.loops = new Set();
     this.rowType = rowType;
     this.options = options;
-    this.options = options;
     this.isStructured = rowType instanceof Structure;
 
     if (options?.withHeader === true) {
