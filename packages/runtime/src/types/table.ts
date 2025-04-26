@@ -97,13 +97,13 @@ export class SortedTable {
 */
 
 export class HashedTable implements ITable {
-  // @ts-ignore
   private value: {[hash: string]: TableRowType};
   private readonly header: TableRowType | undefined;
   private readonly rowType: TableRowType;
   private readonly loops: Set<LoopController>;
   private readonly options: ITableOptions;
   private readonly qualifiedName: string | undefined;
+  private readonly isStructured: boolean;
   private secondaryIndexes: {[name: string]: TableRowType[]};
 
   public constructor(rowType: TableRowType, options: ITableOptions, qualifiedName?: string) {
@@ -112,7 +112,7 @@ export class HashedTable implements ITable {
     this.loops = new Set();
     this.rowType = rowType;
     this.options = options;
-    this.options = options;
+    this.isStructured = rowType instanceof Structure;
 
     if (options?.withHeader === true) {
       this.header = clone(this.rowType);

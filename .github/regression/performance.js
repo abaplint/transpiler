@@ -28,7 +28,7 @@ comment += "| Performance | Before | After | Delta |\n";
 comment += "| :--- | ---: | ---: | ---: |\n";
 for (const key of Object.keys(result)) {
   let delta = result[key].after - result[key].before;
-  if (Math.abs(delta) > 1000) {
+  if (Math.abs(delta) > 200) {
     delta += " :red_circle:";
   } else {
     delta += " :green_circle:";
