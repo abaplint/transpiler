@@ -26,6 +26,9 @@ export class Structure {
   public clone(): Structure {
     const newValues: {[key: string]: any} = {};
     for (const key in this.value) {
+      if (this.value[key] === undefined) {
+        throw new Error("Structure, clone, value is undefined, field " + key);
+      }
       newValues[key] = cloneAny(this.value[key]);
     }
 
