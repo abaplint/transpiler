@@ -1,14 +1,14 @@
 import {ABAPObject, DataReference, HexUInt8} from "./types";
 
 export function clone<T>(obj: T): T {
-  if (obj instanceof ABAPObject) {
+  // @ts-ignore
+  if (obj.clone) {
+    // @ts-ignore
+    return obj.clone() as T;
+  } else if (obj instanceof ABAPObject) {
     const n = new ABAPObject();
     n.set(obj.get());
     return n as T;
-    // @ts-ignore
-  } else if (obj.clone) {
-    // @ts-ignore
-    return obj.clone() as T;
   } else if (obj instanceof DataReference) {
     const n = new DataReference(obj.getType());
     n.assign(obj.getPointer());
