@@ -378,7 +378,8 @@ export class Table implements ITable {
   public clone() {
     const copy = new Table(this.rowType, this.options, this.qualifiedName);
     for (const val of this.value) {
-      copy.value.push(this.cloneRow(val));
+      // @ts-ignore
+      copy.value.push(val.clone());
     }
     return copy;
   }

@@ -29,7 +29,7 @@ export class Structure {
       if (this.value[key] === undefined) {
         throw new Error("Structure, clone: value is undefined, field " + key);
       }
-      newValues[key] = cloneAny(this.value[key]);
+      newValues[key] = this.value[key].clone();
     }
 
     const n = new Structure(newValues, this.qualifiedName, this.ddicName, this.suffix, this.asInclude);
