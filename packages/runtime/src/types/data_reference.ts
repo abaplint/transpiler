@@ -21,6 +21,12 @@ export class DataReference  {
     this.type = type;
   }
 
+  public clone(): DataReference {
+    const n = new DataReference(this.type);
+    n.pointer = this.pointer;
+    return n;
+  }
+
   public getType(): PointerType {
     return this.type;
   }
