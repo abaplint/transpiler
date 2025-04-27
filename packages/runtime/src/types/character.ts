@@ -27,6 +27,13 @@ export class Character implements ICharacter {
     this.clear();
   }
 
+  public clone(obj: Character): Character {
+    const n = new Character(obj.getLength(), obj.extra);
+    // set without trigger checks and padding
+    n.value = obj.value;
+    return n;
+  }
+
   public setConstant() {
     this.constant = true;
     return this;
