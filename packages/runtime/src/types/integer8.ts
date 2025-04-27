@@ -20,6 +20,13 @@ export class Integer8 {
     this.qualifiedName = input?.qualifiedName;
   }
 
+  public clone(): Integer8 {
+    const n = new Integer8({qualifiedName: this.qualifiedName});
+    // set without trigger checks and padding
+    n.value = this.value;
+    return n;
+  }
+
   public getQualifiedName() {
     return this.qualifiedName;
   }

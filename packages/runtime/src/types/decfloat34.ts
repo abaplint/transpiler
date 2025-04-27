@@ -11,6 +11,12 @@ export class DecFloat34 {
     this.value = 0;
   }
 
+  public clone(): DecFloat34 {
+    const n = new DecFloat34();
+    n.value = this.value;
+    return n;
+  }
+
   public set(value: INumeric | ICharacter | Hex | string | number) {
     if (typeof value === "number") {
       this.value = value;

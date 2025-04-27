@@ -14,6 +14,12 @@ export class Time implements ICharacter {
     this.qualifiedName = input?.qualifiedName;
   }
 
+  public clone(): Time {
+    const n = new Time({qualifiedName: this.qualifiedName});
+    n.value = this.value;
+    return n;
+  }
+
   public getQualifiedName() {
     return this.qualifiedName;
   }
