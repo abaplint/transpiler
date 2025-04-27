@@ -20,17 +20,18 @@ export function clone<T>(obj: T): T {
 
   // @ts-ignore
   const copy = new obj.constructor();
-  for (const attr in obj) {
+  // @ts-ignore
+  for (const attr of Object.getOwnPropertyNames(obj)) {
     // @ts-ignore
-    // eslint-disable-next-line no-prototype-builtins
-    if (obj.hasOwnProperty(attr)) {
-      if (typeof obj[attr] !== "object") {
-        copy[attr] = obj[attr];
-      } else if (obj[attr] === null) {
-        copy[attr] = null;
-      } else {
-        copy[attr] = clone(obj[attr]);
-      }
+    if (typeof obj[attr] !== "object") {
+      // @ts-ignore
+      copy[attr] = obj[attr];
+      // @ts-ignore
+    } else if (obj[attr] === null) {
+      copy[attr] = null;
+    } else {
+      // @ts-ignore
+      copy[attr] = clone(obj[attr]);
     }
   }
   if (copy["constant"]) {
