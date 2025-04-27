@@ -19,6 +19,12 @@ export class String implements ICharacter {
     this.qualifiedName = input?.qualifiedName;
   }
 
+  public clone(): String {
+    const n = new String({qualifiedName: this.qualifiedName});
+    n.value = this.value;
+    return n;
+  }
+
   public getQualifiedName() {
     return this.qualifiedName;
   }
