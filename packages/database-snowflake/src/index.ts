@@ -17,6 +17,9 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
   }
 
   public async connect(): Promise<void> {
+    snowflake.configure({
+      logLevel: "ERROR",
+    });
 
     this.connection = snowflake.createConnection({
       ...this.config,
