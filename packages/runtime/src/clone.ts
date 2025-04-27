@@ -4,21 +4,18 @@ export function clone<T>(obj: T): T {
   if (obj instanceof ABAPObject) {
     const n = new ABAPObject();
     n.set(obj.get());
-    // @ts-ignore
-    return n;
+    return n as T;
   } else if (obj instanceof Character
       || obj instanceof Integer) {
     return obj.clone() as T;
   } else if (obj instanceof DataReference) {
     const n = new DataReference(obj.getType());
     n.assign(obj.getPointer());
-    // @ts-ignore
-    return n;
+    return n as T;
   } else if (obj instanceof HexUInt8) {
     const n = new HexUInt8({length: obj.getLength(), qualifiedName: obj.getQualifiedName()});
     n.set(obj.get());
-    // @ts-ignore
-    return n;
+    return n as T;
   }
 
   // @ts-ignore
