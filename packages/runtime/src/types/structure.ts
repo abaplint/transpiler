@@ -24,7 +24,12 @@ export class Structure {
   }
 
   public clone(): Structure {
-    const n = new Structure(cloneAny(this.value), this.qualifiedName, this.ddicName, this.suffix, this.asInclude);
+    const newValues: {[key: string]: any} = {};
+    for (const key in this.value) {
+      newValues[key] = cloneAny(this.value[key]);
+    }
+
+    const n = new Structure(newValues, this.qualifiedName, this.ddicName, this.suffix, this.asInclude);
     return n;
   }
 
