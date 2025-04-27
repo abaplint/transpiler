@@ -26,9 +26,6 @@ export function clone<T>(obj: T): T {
     if (typeof obj[attr] !== "object") {
       // @ts-ignore
       copy[attr] = obj[attr];
-      // @ts-ignore
-    } else if (obj[attr] === null) {
-      copy[attr] = null;
     } else {
       // @ts-ignore
       copy[attr] = clone(obj[attr]);
