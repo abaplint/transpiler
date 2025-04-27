@@ -1,4 +1,4 @@
-import {clone} from "../clone";
+import {clone as cloneAny} from "../clone";
 import {FieldSymbol} from "./field_symbol";
 import {Table} from "./table";
 import {ICharacter} from "./_character";
@@ -23,9 +23,13 @@ export class Structure {
     this.asInclude = asInclude;
   }
 
+  public clone(): Structure {
+    const n = new Structure(cloneAny(this.value), this.qualifiedName, this.ddicName, this.suffix, this.asInclude);
+    return n;
+  }
+
   public clear() {
     for (const f in this.value) {
-      // @ts-ignore
       this.value[f].clear();
     }
     return this;
@@ -60,21 +64,11 @@ export class Structure {
       const obj = input.get();
       const keys1 = Object.keys(obj);
       const keys2 = Object.keys(this.value);
-      /*
-      console.dir(keys1);
-      console.dir(keys2);
-*/
       for (let i = 0; i < keys1.length; i++) {
         const key1 = keys1[i];
         const key2 = keys2[i];
-        this.value[key2].set(clone(obj[key1]));
+        this.value[key2].set(cloneAny(obj[key1]));
       }
-/*
-      for (const f in obj) {
-        // @ts-ignore
-        this.value[f].set(clone(obj[f]));
-      }
-      */
     } else {
       this.setCharacter(input);
     }

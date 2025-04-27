@@ -11,6 +11,12 @@ export class ABAPObject  {
     this.clear();
   }
 
+  public clone(): ABAPObject {
+    const n = new ABAPObject({qualifiedName: this.qualifiedName, RTTIName: this.RTTIName});
+    n.value = this.value;
+    return n;
+  }
+
   public get() {
     return this.value;
   }

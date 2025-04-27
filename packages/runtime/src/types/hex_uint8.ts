@@ -32,6 +32,12 @@ export class HexUInt8 implements ICharacter {
     return this.qualifiedName;
   }
 
+  public clone(): HexUInt8 {
+    const n = new HexUInt8({length: this.length, qualifiedName: this.qualifiedName});
+    n.value = this.value.slice(0);
+    return n;
+  }
+
   public setOffset(offset: number, value: number) {
 // caller must validate offset
     this.value[offset] = value;
