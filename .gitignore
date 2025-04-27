@@ -8,3 +8,4 @@ output
 comment-*
 .env
 perf*.mjs
+snowflake.log
