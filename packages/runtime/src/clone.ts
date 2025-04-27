@@ -1,7 +1,7 @@
 import {ABAPObject, DataReference, HexUInt8} from "./types";
 
 export function clone<T>(obj: T): T {
-  if (null == obj || "object" != typeof obj) {
+  if (obj === null || typeof obj !== "object") {
     return obj;
   }
 
