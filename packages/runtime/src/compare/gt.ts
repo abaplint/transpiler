@@ -35,7 +35,7 @@ export function gt(
     if (left instanceof Table || left instanceof HashedTable) {
       throw new Error("runtime_todo, gt TABLE");
     }
-    const l = left instanceof Integer8 ? left.get() : BigInt(parse(left));
+    const l = left instanceof Integer8 ? left.get() : BigInt(parse(left as any));
     const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));
     return l > r;
   }
@@ -60,7 +60,7 @@ export function gt(
 
   if (left instanceof Integer8) {
     const l = left.get();
-    const r = BigInt(parse(right));
+    const r = BigInt(parse(right as any));
     return l > r;
   }
 
