@@ -1,10 +1,6 @@
 import {ABAPObject, DataReference, HexUInt8} from "./types";
 
 export function clone<T>(obj: T): T {
-  if (obj === null || typeof obj !== "object") {
-    return obj;
-  }
-
   if (obj instanceof ABAPObject) {
     const n = new ABAPObject();
     n.set(obj.get());
@@ -28,8 +24,10 @@ export function clone<T>(obj: T): T {
     // @ts-ignore
     // eslint-disable-next-line no-prototype-builtins
     if (obj.hasOwnProperty(attr)) {
-      if ("object" !== typeof obj[attr]) {
+      if (typeof obj[attr] !== "object") {
         copy[attr] = obj[attr];
+      } else if (obj[attr] === null) {
+        copy[attr] = null;
       } else {
         copy[attr] = clone(obj[attr]);
       }
