@@ -42,6 +42,13 @@ export class Integer implements INumeric {
     return this.qualifiedName;
   }
 
+  public clone(): Integer {
+    const n = new Integer({qualifiedName: this.qualifiedName});
+    // set without trigger checks and padding
+    n.value = this.value;
+    return n;
+  }
+
   public setConstant() {
     this.constant = true;
     return this;
