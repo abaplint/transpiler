@@ -185,7 +185,7 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
         }
     }
   } else if (options?.type) {
-    target.assign(clone(options.type));
+    target.assign(clone(options.type as any));
   } else if (options?.likeLineOf) {
     if (options.likeLineOf instanceof FieldSymbol) {
       options.likeLineOf = options.likeLineOf.getPointer() as Table;

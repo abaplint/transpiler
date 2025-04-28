@@ -14,7 +14,7 @@ export class OffsetLength {
   private readonly isHex: boolean;
 
   public constructor(obj: ICharacter | Character | Hex | XString | Structure | FieldSymbol, options: IOffsetLengthOptions) {
-    this.obj = obj;
+    this.obj = obj as any;
 
     if (this.obj instanceof FieldSymbol) {
       this.obj = this.obj.getPointer();

@@ -93,7 +93,7 @@ export function insertInternal(options: IInsertInternalOptions): void {
 
   if (data && options.index) {
     const index = options.index.get() - 1;
-    const val = options.table.insertIndex(data, index);
+    const val = options.table.insertIndex(data as any, index);
     if (options.assigning) {
       options.assigning.assign(val);
     }
@@ -125,7 +125,7 @@ export function insertInternal(options: IInsertInternalOptions): void {
       options.referenceInto.assign(val);
     }
   } else if (options.table instanceof HashedTable && data) {
-    const {value: val, subrc: subrc} = options.table.insert(data);
+    const {value: val, subrc: subrc} = options.table.insert(data as any);
     if (options.assigning) {
       options.assigning.assign(val);
     }
@@ -137,7 +137,7 @@ export function insertInternal(options: IInsertInternalOptions): void {
     return;
   } else if (data) {
     // todo, for now it just appends, this is not correct, but currently the table type is not known
-    const val = options.table.insertIndex(data, options.table.getArrayLength(), options.noClone);
+    const val = options.table.insertIndex(data as any, options.table.getArrayLength(), options.noClone);
     if (options.assigning) {
       options.assigning.assign(val);
     }
