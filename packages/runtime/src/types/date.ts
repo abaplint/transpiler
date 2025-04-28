@@ -15,6 +15,12 @@ export class Date implements ICharacter {
     this.qualifiedName = input?.qualifiedName;
   }
 
+  public clone(): Date {
+    const n = new Date({qualifiedName: this.qualifiedName});
+    n.value = this.value;
+    return n;
+  }
+
   public getQualifiedName() {
     return this.qualifiedName;
   }

@@ -29,6 +29,12 @@ export class Float {
     this.qualifiedName = input?.qualifiedName;
   }
 
+  public clone(): Float {
+    const n = new Float({qualifiedName: this.qualifiedName});
+    n.value = this.value;
+    return n;
+  }
+
   public getQualifiedName() {
     return this.qualifiedName;
   }

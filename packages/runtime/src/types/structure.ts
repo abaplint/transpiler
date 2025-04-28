@@ -9,13 +9,13 @@ import {Character} from "./character";
 import {throwError} from "../throw_error";
 
 export class Structure {
-  private readonly value: any;
+  private readonly value: {[key: string]: any};
   private readonly qualifiedName: string | undefined;
   private readonly ddicName: string | undefined;
   private readonly suffix: { [key: string]: string };
   private readonly asInclude: { [key: string]: boolean };
 
-  public constructor(fields: any, qualifiedName?: string, ddicName?: string, suffix?: any, asInclude?: any) {
+  public constructor(fields: {[key: string]: any}, qualifiedName?: string, ddicName?: string, suffix?: any, asInclude?: any) {
     this.value = fields;
     this.qualifiedName = qualifiedName?.toUpperCase();
     this.ddicName = ddicName?.toUpperCase();
@@ -24,7 +24,15 @@ export class Structure {
   }
 
   public clone(): Structure {
-    const n = new Structure(cloneAny(this.value), this.qualifiedName, this.ddicName, this.suffix, this.asInclude);
+    const newValues: {[key: string]: any} = {};
+    for (const key in this.value) {
+      if (this.value[key] === undefined) {
+        throw new Error("Structure, clone: value is undefined, field " + key);
+      }
+      newValues[key] = this.value[key].clone();
+    }
+
+    const n = new Structure(newValues, this.qualifiedName, this.ddicName, this.suffix, this.asInclude);
     return n;
   }
 

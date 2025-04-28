@@ -20,6 +20,12 @@ export class Hex implements ICharacter {
     this.clear();
   }
 
+  public clone(): Hex {
+    const n = new Hex({length: this.length, qualifiedName: this.qualifiedName});
+    n.value = this.value;
+    return n;
+  }
+
   public getQualifiedName() {
     return this.qualifiedName;
   }

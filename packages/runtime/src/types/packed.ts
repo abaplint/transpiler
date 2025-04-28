@@ -28,6 +28,12 @@ export class Packed implements INumeric {
     this.qualifiedName = input?.qualifiedName;
   }
 
+  public clone(): Packed {
+    const n = new Packed({length: this.length, decimals: this.decimals, qualifiedName: this.qualifiedName});
+    n.value = this.value;
+    return n;
+  }
+
   public getQualifiedName() {
     return this.qualifiedName;
   }

@@ -41,8 +41,8 @@ export function eq(
       // exception?
       return false;
     }
-    const l = left instanceof Integer8 ? left.get() : BigInt(parse(left));
-    const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));
+    const l = left instanceof Integer8 ? left.get() : BigInt(parse(left as any));
+    const r = right instanceof Integer8 ? right.get() : BigInt(parse(right as any));
     return l === r;
   }
 

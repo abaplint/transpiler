@@ -1,5 +1,8 @@
 export function clone<T>(obj: T): T {
   // @ts-ignore
+  return obj.clone() as T;
+
+  // @ts-ignore
   if (obj.clone) {
     // @ts-ignore
     return obj.clone() as T;

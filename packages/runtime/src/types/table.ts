@@ -121,6 +121,10 @@ export class HashedTable implements ITable {
     this.qualifiedName = qualifiedName?.toUpperCase();
   }
 
+  public clone() {
+    throw new Error("HashedTable, clone not implemented");
+  }
+
   public getArrayLength() {
     return Object.keys(this.value).length;
   }
@@ -369,6 +373,15 @@ export class Table implements ITable {
     }
 
     this.qualifiedName = qualifiedName?.toUpperCase();
+  }
+
+  public clone() {
+    const copy = new Table(this.rowType, this.options, this.qualifiedName);
+    for (const val of this.value) {
+      // @ts-ignore
+      copy.value.push(val.clone());
+    }
+    return copy;
   }
 
   public getArrayLength() {

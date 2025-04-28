@@ -16,6 +16,12 @@ export class XString implements ICharacter {
     this.qualifiedName = input?.qualifiedName;
   }
 
+  public clone(): XString {
+    const n = new XString({qualifiedName: this.qualifiedName});
+    n.value = this.value;
+    return n;
+  }
+
   public getQualifiedName() {
     return this.qualifiedName;
   }

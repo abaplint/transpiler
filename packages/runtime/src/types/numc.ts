@@ -16,6 +16,13 @@ export class Numc implements ICharacter {
     this.clear();
   }
 
+  public clone(): Numc {
+    const n = new Numc({length: this.length, qualifiedName: this.qualifiedName});
+    // set without trigger checks and padding
+    n.value = this.value;
+    return n;
+  }
+
   public getQualifiedName() {
     return this.qualifiedName;
   }

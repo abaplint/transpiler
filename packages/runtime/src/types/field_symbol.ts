@@ -22,6 +22,10 @@ export class FieldSymbol  {
     this.type = type;
   }
 
+  public clone() {
+    throw new Error("FieldSymbol cannot be cloned");
+  }
+
   public getQualifiedName() {
     // @ts-ignore
     return this.type.getQualifiedName();
