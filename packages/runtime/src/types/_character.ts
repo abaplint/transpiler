@@ -6,4 +6,5 @@ export interface ICharacter {
   get(): string;
   clear(): void;
   getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}): ICharacter;
+  clone(): ICharacter;
 }

@@ -26,10 +26,10 @@ export function add(left: INumeric | ICharacter | string | number | Float | Inte
     if (right instanceof Integer8) {
       return new Integer8().set(left.get() + right.get());
     } else {
-      return new Integer8().set(left.get() + BigInt(parse(right)));
+      return new Integer8().set(left.get() + BigInt(parse(right as any)));
     }
   } else if (right instanceof Integer8) {
-    return new Integer8().set(BigInt(parse(left)) + right.get());
+    return new Integer8().set(BigInt(parse(left as any)) + right.get());
   }
 
   if (left instanceof FieldSymbol) {

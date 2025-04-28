@@ -85,10 +85,8 @@ export class DataReference  {
       } else {
         throw new Error("OBJECTS_MOVE_NOT_SUPPORTED");
       }
-    } else {
-      return this.pointer?.set(value);
     }
-    return this;
+    return this.pointer?.set(value);
   }
 
   public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}) {

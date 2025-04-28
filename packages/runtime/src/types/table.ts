@@ -122,7 +122,11 @@ export class HashedTable implements ITable {
   }
 
   public clone() {
-    throw new Error("HashedTable, clone not implemented");
+    const copy = new HashedTable(this.rowType, this.options, this.qualifiedName);
+    for (const hash in this.value) {
+      copy.value[hash] = this.value[hash].clone();
+    }
+    return copy;
   }
 
   public getArrayLength() {
