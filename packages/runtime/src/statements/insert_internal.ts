@@ -23,7 +23,8 @@ export function insertInternal(options: IInsertInternalOptions): void {
       throw new Error("GETWA_NOT_ASSIGNED");
     }
     options.table = options.table.getPointer() as Table;
-  } else if (options.data instanceof FieldSymbol) {
+  }
+  if (options.data instanceof FieldSymbol) {
     if (options.data.getPointer() === undefined) {
       throw new Error("GETWA_NOT_ASSIGNED");
     }
