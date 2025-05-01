@@ -61,7 +61,9 @@ export class Integer implements INumeric {
       throw new Error("Changing constant");
     }
 
-    if (value instanceof Integer) {
+    if (typeof value === "number") {
+      this.value = Math.round(value);
+    } else if (value instanceof Integer) {
       this.set(value.get());
     } else if (value instanceof Character) {
       this.value = toInteger(value.get());
@@ -82,8 +84,6 @@ export class Integer implements INumeric {
         }
       }
       this.set(num);
-    } else if (typeof value === "number") {
-      this.value = Math.round(value);
     } else if (typeof value === "string") {
       this.value = toInteger(value);
     } else {
