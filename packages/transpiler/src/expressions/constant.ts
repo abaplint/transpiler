@@ -91,7 +91,8 @@ export class ConstantTranspiler implements IExpressionTranspiler {
       // note: Characters cannot have length = zero, 1 is minimum
       length = 1;
     }
-    const code = "new abap.types.Character(" + length + ").set(" + ConstantTranspiler.escape(res) + ")";
+    const code = "abap.CharacterFactory.get(" + length + ", " + ConstantTranspiler.escape(res) + ")";
+//    const code = "new abap.types.Character(" + length + ").set(" + ConstantTranspiler.escape(res) + ")";
     return code;
   }
 
