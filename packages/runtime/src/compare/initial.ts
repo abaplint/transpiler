@@ -5,6 +5,7 @@ import {INumeric} from "../types/_numeric";
 const REGEX_ZEROS = /^0+$/;
 const REGEX_SPACES = /^ *$/;
 
+
 export function initial(val: ICharacter | INumeric | string | number |
 Integer8 | Structure | DataReference | FieldSymbol | Table | ABAPObject) {
 
