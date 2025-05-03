@@ -1,3 +1,4 @@
+import {IntegerFactory} from "../integer_factory";
 import {Character, Integer} from "../types";
 import {ICharacter} from "../types/_character";
 
@@ -10,5 +11,9 @@ export function strlen(input: {val: ICharacter | string}): Integer {
   } else {
     str = input.val.get();
   }
-  return new Integer().set(str.length);
+  if (str.length <= 200) {
+    return IntegerFactory.get(str.length);
+  } else {
+    return new Integer().set(str.length);
+  }
 }
