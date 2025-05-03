@@ -1,7 +1,6 @@
 import {append} from "./append";
 import {assert} from "./assert";
 import {assign} from "./assign";
-import {clear} from "./clear";
 import {commit} from "./commit";
 import {concatenate} from "./concatenate";
 import {condense} from "./condense";
@@ -63,7 +62,6 @@ export class Statements {
   public assert = assert;
   public assign = assign;
   public cast = cast;
-  public clear = clear;
   public collect = collect;
   public commit = commit;
   public concatenate = concatenate;

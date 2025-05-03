@@ -141,7 +141,7 @@ ENDCASE.`;
 
     const expected =
 `let unique1 = bar;
-if (abap.compare.eq(unique1, new abap.types.Character(3).set('foo'))) {
+if (abap.compare.eq(unique1, abap.CharacterFactory.get(3, 'foo'))) {
   abap.statements.write(abap.IntegerFactory.get(2));
 } else if (abap.compare.eq(unique1, abap.IntegerFactory.get(1)) || abap.compare.eq(unique1, abap.IntegerFactory.get(2))) {
 } else if (abap.compare.eq(unique1, foo)) {
@@ -328,7 +328,7 @@ ENDCLASS.`;
   }
   static async run() {
     let rv_ret = new abap.types.String({qualifiedName: "STRING"});
-    rv_ret.set(new abap.types.Character(1).set('X'));
+    rv_ret.set(abap.CharacterFactory.get(1, 'X'));
     return rv_ret;
   }
 }
@@ -596,7 +596,7 @@ try {
   }
 } catch (e) {
   if ((abap.Classes['CX_ROOT'] && e instanceof abap.Classes['CX_ROOT'])) {
-    abap.statements.write(new abap.types.Character(3).set('bar'),{newLine: true});
+    abap.statements.write(abap.CharacterFactory.get(3, 'bar'),{newLine: true});
   } else {
     throw e;
   }
@@ -712,7 +712,7 @@ CALL 'RFCControl'
   ID 'UUID' FIELD hex16.`;
     const expected = `let hex16 = new abap.types.Character(16, {});
 if (abap.Classes['KERNEL_CALL'] === undefined) throw new Error("Call kernel class missing");
-await abap.Classes['KERNEL_CALL'].call({name: new abap.types.Character(10).set('RFCControl'),code: new abap.types.Character(1).set('U'),uuid: hex16});`;
+await abap.Classes['KERNEL_CALL'].call({name: abap.CharacterFactory.get(10, 'RFCControl'),code: abap.CharacterFactory.get(1, 'U'),uuid: hex16});`;
     expect(await runSingle(abap)).to.equals(expected);
   });
 
@@ -751,7 +751,7 @@ CALL FUNCTION 'FUNCTION_EXISTS'
     const expected = `try {
   if (abap.FunctionModules['FUNCTION_EXISTS'] === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FUNC'.trimEnd()] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_FUNC not found"; }
   if (abap.FunctionModules['FUNCTION_EXISTS'] === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FUNC'.trimEnd()](); }
-  await abap.FunctionModules['FUNCTION_EXISTS']({exporting: {funcname: new abap.types.Character(8).set('SDFSDFSD')}});
+  await abap.FunctionModules['FUNCTION_EXISTS']({exporting: {funcname: abap.CharacterFactory.get(8, 'SDFSDFSD')}});
   abap.builtin.sy.get().subrc.set(0);
 } catch (e) {
   if (e.classic) {

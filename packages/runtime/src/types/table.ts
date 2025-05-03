@@ -195,6 +195,7 @@ export class HashedTable implements ITable {
   public buildHashFromSimple(data: {[key: string]: any}): string {
     let hash = "";
     const tableRowType = this.getRowType();
+    const isStructured = tableRowType instanceof Structure;
     for (const k of this.options.primaryKey!.keyFields) {
       let val = data[k.toLowerCase()];
 
@@ -203,7 +204,7 @@ export class HashedTable implements ITable {
         const row = clone(tableRowType) as any;
         row.set(val.get());
         val = row.get();
-      } else if (tableRowType instanceof Structure) {
+      } else if (isStructured === true) {
         const field = tableRowType.get()[k.toLowerCase()];
         // if types match, there is no need to clone
         if (field instanceof String && val instanceof String) {

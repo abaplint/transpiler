@@ -10,27 +10,31 @@ export class ConstantTranspiler implements IExpressionTranspiler {
     this.addGet = addGet;
   }
 
+  private handleInteger(int: Nodes.ExpressionNode, traversal: Traversal): Chunk {
+    const concat = int.concatTokens().trim();
+    const parsed = Number.parseInt(concat, 10);
+    let code = "";
+    if (concat.length > 18) {
+      // its potentially larger than Number.MAX_SAFE_INTEGER
+      // https://stackoverflow.com/questions/1379934/large-numbers-erroneously-rounded-in-javascript
+      code = `new abap.types.Integer8().set("${concat}")`;
+    } else if (parsed > 2147483647 || parsed < -2147483648) {
+      code = `new abap.types.Integer8().set("${concat}")`;
+    } else if (parsed >= -10 && parsed <= 200) {
+      code = `abap.IntegerFactory.get(${concat})`;
+    } else {
+      code = `new abap.types.Integer().set(${concat})`;
+    }
+    if (this.addGet === true) {
+      code += ".get()";
+    }
+    return new Chunk().append(code, int, traversal);
+  }
+
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     const int = node.findFirstExpression(Expressions.Integer);
     if (int) {
-      const concat = int.concatTokens().trim();
-      const parsed = Number.parseInt(concat, 10);
-      let code = "";
-      if (concat.length > 18) {
-        // its potentially larger than Number.MAX_SAFE_INTEGER
-        // https://stackoverflow.com/questions/1379934/large-numbers-erroneously-rounded-in-javascript
-        code = `new abap.types.Integer8().set("${concat}")`;
-      } else if (parsed > 2147483647 || parsed < -2147483648) {
-        code = `new abap.types.Integer8().set("${concat}")`;
-      } else if (parsed >= -10 && parsed <= 200) {
-        code = `abap.IntegerFactory.get(${concat})`;
-      } else {
-        code = `new abap.types.Integer().set(${concat})`;
-      }
-      if (this.addGet === true) {
-        code += ".get()";
-      }
-      return new Chunk().append(code, node, traversal);
+      return this.handleInteger(int, traversal);
     }
 
     let str = node.findDirectExpression(Expressions.ConstantString);
@@ -40,7 +44,7 @@ export class ConstantTranspiler implements IExpressionTranspiler {
     if (str) {
       let res = str.getFirstToken().getStr();
       if (res.startsWith("'") && this.addGet === false) {
-        const code = this.character(res);
+        const code = this.handleCharacter(res);
         return new Chunk().append(code, node, traversal);
       } else if (res.startsWith("`") && this.addGet === false) {
         const code = "new abap.types.String().set(" + ConstantTranspiler.escape(res) + ")";
@@ -66,7 +70,7 @@ export class ConstantTranspiler implements IExpressionTranspiler {
           chunk.appendString(",");
         }
         if (res.startsWith("'") && this.addGet === false) {
-          const code = this.character(res);
+          const code = this.handleCharacter(res);
           chunk.append(code, node, traversal);
         } else if (res.startsWith("`") && this.addGet === false) {
           const code = "new abap.types.String().set(" + ConstantTranspiler.escape(res) + ")";
@@ -80,14 +84,15 @@ export class ConstantTranspiler implements IExpressionTranspiler {
     return new Chunk(`todo, Constant`);
   }
 
-  private character(res: string): string {
+  private handleCharacter(res: string): string {
     const foo = res.replace(/''/g, "'");
     let length = foo.length - 2;
     if (length <= 0) {
       // note: Characters cannot have length = zero, 1 is minimum
       length = 1;
     }
-    const code = "new abap.types.Character(" + length + ").set(" + ConstantTranspiler.escape(res) + ")";
+    const code = "abap.CharacterFactory.get(" + length + ", " + ConstantTranspiler.escape(res) + ")";
+//    const code = "new abap.types.Character(" + length + ").set(" + ConstantTranspiler.escape(res) + ")";
     return code;
   }
 

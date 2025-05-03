@@ -19,7 +19,7 @@ describe("Single statements", () => {
     {abap: "DATA foo TYPE i VALUE 2.",             js: `let foo = new abap.types.Integer({qualifiedName: "I"});\nfoo.set(2);`, skip: false},
     {abap: "IF foo = bar. ENDIF.",                 js: "if (abap.compare.eq(foo, bar)) {\n}",       skip: false},
     {abap: "IF foo EQ bar. ENDIF.",                js: "if (abap.compare.eq(foo, bar)) {\n}",       skip: false},
-    {abap: "IF foo CP 'bar*'. ENDIF.",             js: "if (abap.compare.cp(foo, new abap.types.Character(4).set('bar*'))) {\n}",    skip: false},
+    {abap: "IF foo CP 'bar*'. ENDIF.",             js: "if (abap.compare.cp(foo, abap.CharacterFactory.get(4, 'bar*'))) {\n}",    skip: false},
     {abap: "IF item IS INITIAL AND NOT ( foo = bar AND bar = moo ). ENDIF.",             js: "if (abap.compare.initial(item) && !(abap.compare.eq(foo, bar) && abap.compare.eq(bar, moo))) {\n}",    skip: false},
     {abap: "CONTINUE.",                            js: "continue;",                                 skip: false},
     {abap: "IMPORT variscreens = lt_variscreens FROM MEMORY ID '%_SCRNR_%'.",                       js: `throw new Error("Import, transpiler todo");`,                                 skip: false},
@@ -29,8 +29,8 @@ describe("Single statements", () => {
     {abap: "DATA foo TYPE c LENGTH 2.",            js: "let foo = new abap.types.Character(2});",                 skip: true},
     {abap: "DATA foo TYPE c LENGTH 2 VALUE 'fo'.", js: "let foo = new abap.types.Character(2);\nfoo.set('fo');", skip: true},
     {abap: "DATA bar TYPE p LENGTH 4.",            js: "let bar = new abap.types.Packed({length: 4, decimals: 0});",       skip: false},
-    {abap: "foo = 'fo'.",                          js: "foo.set(new abap.types.Character(2).set('fo'));",                         skip: false},
-    {abap: "foo = 'moo'(005).",                    js: "foo.set(new abap.types.Character(3).set('moo'));",                        skip: false},
+    {abap: "foo = 'fo'.",                          js: "foo.set(abap.CharacterFactory.get(2, 'fo'));",                         skip: false},
+    {abap: "foo = 'moo'(005).",                    js: "foo.set(abap.CharacterFactory.get(3, 'moo'));",                        skip: false},
     {abap: "foo = |fo|.",                          js: "foo.set(new abap.types.String().set(`fo`));",                                       skip: false},
     {abap: "foo = |fo{ 2 }|.",                     js: "foo.set(new abap.types.String().set(`fo${abap.templateFormatting(abap.IntegerFactory.get(2))}`));", skip: false},
     {abap: "foo = `fo`.",                          js: "foo.set(new abap.types.String().set(`fo`));",     skip: false},
@@ -42,8 +42,6 @@ describe("Single statements", () => {
     {abap: "IF NOT foo IS INITIAL. ENDIF.",        js: "if (abap.compare.initial(foo) === false) {\n}",   skip: false},
     {abap: "DO. ENDDO.",                           js: "for (;;) {\n}",                                   skip: true},
     {abap: "foo-bar = 2.",                         js: "foo.bar.set(2);",                           skip: true}, // hmm, will this kind of member access work?
-    {abap: "CLEAR foo.",                           js: "abap.statements.clear(foo);",               skip: false},
-    {abap: "FREE foo.",                            js: "abap.statements.clear(foo);",               skip: false},
     {abap: "SORT foo.",                            js: "abap.statements.sort(foo,{});",                  skip: false},
     {abap: "SORT foo DESCENDING.",                 js: "abap.statements.sort(foo,{descending: true});",  skip: false},
     {abap: "SORT foo BY field.",                   js: `abap.statements.sort(foo,{by: [{component: "field"}]});`,  skip: false},
@@ -66,7 +64,7 @@ describe("Single statements", () => {
     {abap: "DATA foo TYPE STANDARD TABLE OF string.",
       js: `let foo = abap.types.TableFactory.construct(new abap.types.String({qualifiedName: "STRING"}), {"withHeader":false,"keyType":"USER","primaryKey":{"name":"primary_key","type":"STANDARD","isUnique":false,"keyFields":[]},"secondary":[]}, "");`,         skip: false},
     {abap: "SPLIT foo AT bar INTO TABLE moo.",            js: "abap.statements.split({source: foo, at: bar, table: moo});",    skip: false},
-    {abap: "SPLIT |blah| AT '.' INTO lv_major lv_minor.", js: "abap.statements.split({source: new abap.types.String().set(`blah`), at: new abap.types.Character(1).set('.'), targets: [lv_major,lv_minor]});",    skip: false},
+    {abap: "SPLIT |blah| AT '.' INTO lv_major lv_minor.", js: "abap.statements.split({source: new abap.types.String().set(`blah`), at: abap.CharacterFactory.get(1, '.'), targets: [lv_major,lv_minor]});",    skip: false},
     {abap: "WRITE |moo|.",                            js: "abap.statements.write(new abap.types.String().set(`moo`));",                                  skip: false},
     {abap: "DELETE foo WHERE bar = 2.",               js: "await abap.statements.deleteInternal(foo,{where: async (I) => {return abap.compare.eq(I.bar, abap.IntegerFactory.get(2));}});", skip: false},
     {abap: "DELETE ADJACENT DUPLICATES FROM foo.",    js: "await abap.statements.deleteInternal(foo,{adjacent: true});",          skip: false},
@@ -78,11 +76,11 @@ describe("Single statements", () => {
     {abap: "ASSERT 0 = 1.",                           js: "abap.statements.assert(abap.compare.eq(abap.IntegerFactory.get(0), abap.IntegerFactory.get(1)));",                         skip: false},
     {abap: "APPEND lv_word TO lt_letters.",           js: "abap.statements.append({source: lv_word, target: lt_letters});",         skip: false},
     {abap: "WRITE |foo{ lines( lt_words ) }bar|.",    js: "abap.statements.write(new abap.types.String().set(`foo${abap.templateFormatting(abap.builtin.lines({val: lt_words}))}bar`));",  skip: false},
-    {abap: "ASSERT 'a' < 'b'.",                       js: "abap.statements.assert(abap.compare.lt(new abap.types.Character(1).set('a'), new abap.types.Character(1).set('b')));",    skip: false},
-    {abap: "rs_response-body = 'hello'.",             js: "rs_response.get().body.set(new abap.types.Character(5).set('hello'));",                  skip: false},
+    {abap: "ASSERT 'a' < 'b'.",                       js: "abap.statements.assert(abap.compare.lt(abap.CharacterFactory.get(1, 'a'), abap.CharacterFactory.get(1, 'b')));",    skip: false},
+    {abap: "rs_response-body = 'hello'.",             js: "rs_response.get().body.set(abap.CharacterFactory.get(5, 'hello'));",                  skip: false},
     {abap: "TYPES foo TYPE c.",                       js: "",                                                      skip: false}, // yes, skip TYPES
-    {abap: "IF ls_request-body = ''.\nENDIF.",        js: "if (abap.compare.eq(ls_request.get().body, new abap.types.Character(1).set(''))) {\n}",  skip: false},
-    {abap: "CONCATENATE 'foo' 'bar' INTO target.",    js: "abap.statements.concatenate({source: [new abap.types.Character(3).set('foo'), new abap.types.Character(3).set('bar')], target: target});", skip: false},
+    {abap: "IF ls_request-body = ''.\nENDIF.",        js: "if (abap.compare.eq(ls_request.get().body, abap.CharacterFactory.get(1, ''))) {\n}",  skip: false},
+    {abap: "CONCATENATE 'foo' 'bar' INTO target.",    js: "abap.statements.concatenate({source: [abap.CharacterFactory.get(3, 'foo'), abap.CharacterFactory.get(3, 'bar')], target: target});", skip: false},
     {abap: "CONCATENATE foo bar INTO tg SEPARATED BY space.",    js: "abap.statements.concatenate({source: [foo, bar], target: tg, separatedBy: abap.builtin.space});", skip: false},
     {abap: "zcl_bar=>do_something( ).",               js: "await abap.Classes['ZCL_BAR'].do_something();",                               skip: false},
     {abap: "SET BIT foo OF bar.",                     js: "abap.statements.setBit(foo, bar);",                     skip: false},
@@ -128,12 +126,12 @@ describe("Single statements", () => {
     {abap: "FIND FIRST OCCURRENCE OF cl_abap_char_utilities=>cr_lf IN iv_string.",
       js: `abap.statements.find(iv_string, {find: abap.Classes['CL_ABAP_CHAR_UTILITIES'].cr_lf, first: true});`, skip: false},
     {abap: "FIND FIRST OCCURRENCE OF REGEX 'b+c' IN 'abcd' MATCH COUNT lv_cnt MATCH LENGTH lv_len.",
-      js: "abap.statements.find(new abap.types.Character(4).set('abcd'), {regex: new abap.types.Character(3).set('b+c'), first: true, count: lv_cnt, length: lv_len});", skip: false},
+      js: "abap.statements.find(abap.CharacterFactory.get(4, 'abcd'), {regex: abap.CharacterFactory.get(3, 'b+c'), first: true, count: lv_cnt, length: lv_len});", skip: false},
     {abap: "FIND REGEX '11(\\w+)22' IN '11abc22' SUBMATCHES lv_host.",
-      js: "abap.statements.find(new abap.types.Character(7).set('11abc22'), {regex: new abap.types.Character(9).set('11(\\\\w+)22'), submatches: [lv_host]});", skip: false},
-    {abap: "SHIFT lv_bitbyte LEFT DELETING LEADING '0 '.", js: `abap.statements.shift(lv_bitbyte, {direction: 'LEFT',deletingLeading: new abap.types.Character(2).set('0 ')});`, skip: false},
+      js: "abap.statements.find(abap.CharacterFactory.get(7, '11abc22'), {regex: abap.CharacterFactory.get(9, '11(\\\\w+)22'), submatches: [lv_host]});", skip: false},
+    {abap: "SHIFT lv_bitbyte LEFT DELETING LEADING '0 '.", js: `abap.statements.shift(lv_bitbyte, {direction: 'LEFT',deletingLeading: abap.CharacterFactory.get(2, '0 ')});`, skip: false},
     {abap: "SHIFT lv_temp BY 1 PLACES LEFT.", js: `abap.statements.shift(lv_temp, {direction: 'LEFT',places: abap.IntegerFactory.get(1)});`, skip: false},
-    {abap: "SHIFT lv_temp UP TO '/' LEFT.", js: `abap.statements.shift(lv_temp, {direction: 'LEFT',to: new abap.types.Character(1).set('/')});`, skip: false},
+    {abap: "SHIFT lv_temp UP TO '/' LEFT.", js: `abap.statements.shift(lv_temp, {direction: 'LEFT',to: abap.CharacterFactory.get(1, '/')});`, skip: false},
     {abap: "TRANSLATE rv_spras TO UPPER CASE.", js: `abap.statements.translate(rv_spras, "UPPER");`, skip: false},
     {abap: "TRANSLATE rv_spras TO LOWER CASE.", js: `abap.statements.translate(rv_spras, "LOWER");`, skip: false},
     {abap: "DESCRIBE FIELD <lg_line> LENGTH lv_length IN CHARACTER MODE.", js: `abap.statements.describe({field: fs_lg_line_, length: lv_length, mode: 'CHARACTER'});`, skip: false},
@@ -141,17 +139,17 @@ describe("Single statements", () => {
     {abap: "DESCRIBE FIELD tab TYPE type.", js: `abap.statements.describe({field: tab, type: type});`,    skip: false},
     {abap: "foo = 2 ** 2.",   js: `foo.set(abap.operators.power(abap.IntegerFactory.get(2),abap.IntegerFactory.get(2)));`,                skip: false},
     {abap: "foo = 5 DIV 2.",  js: `foo.set(abap.operators.div(abap.IntegerFactory.get(5),abap.IntegerFactory.get(2)));`,                  skip: false},
-    {abap: "foo+5(1) = 'A'.", js: `new abap.OffsetLength(foo, {offset: 5, length: 1}).set(new abap.types.Character(1).set('A'));`, skip: false},
-    {abap: "foo(1) = 'a'.",   js: "new abap.OffsetLength(foo, {length: 1}).set(new abap.types.Character(1).set('a'));",            skip: false},
-    {abap: "foo+1 = 'a'.",    js: "new abap.OffsetLength(foo, {offset: 1}).set(new abap.types.Character(1).set('a'));",            skip: false},
-    {abap: "foo+1(1) = 'a'.", js: "new abap.OffsetLength(foo, {offset: 1, length: 1}).set(new abap.types.Character(1).set('a'));", skip: false},
-    {abap: "foo(bar) = 'a'.", js: "new abap.OffsetLength(foo, {length: bar}).set(new abap.types.Character(1).set('a'));",    skip: false},
-    {abap: "IF iv_cd = '' OR iv_cd = '.'.\nENDIF.", js: "if (abap.compare.eq(iv_cd, new abap.types.Character(1).set('')) || abap.compare.eq(iv_cd, new abap.types.Character(1).set('.'))) {\n}", skip: false},
+    {abap: "foo+5(1) = 'A'.", js: `new abap.OffsetLength(foo, {offset: 5, length: 1}).set(abap.CharacterFactory.get(1, 'A'));`, skip: false},
+    {abap: "foo(1) = 'a'.",   js: "new abap.OffsetLength(foo, {length: 1}).set(abap.CharacterFactory.get(1, 'a'));",            skip: false},
+    {abap: "foo+1 = 'a'.",    js: "new abap.OffsetLength(foo, {offset: 1}).set(abap.CharacterFactory.get(1, 'a'));",            skip: false},
+    {abap: "foo+1(1) = 'a'.", js: "new abap.OffsetLength(foo, {offset: 1, length: 1}).set(abap.CharacterFactory.get(1, 'a'));", skip: false},
+    {abap: "foo(bar) = 'a'.", js: "new abap.OffsetLength(foo, {length: bar}).set(abap.CharacterFactory.get(1, 'a'));",    skip: false},
+    {abap: "IF iv_cd = '' OR iv_cd = '.'.\nENDIF.", js: "if (abap.compare.eq(iv_cd, abap.CharacterFactory.get(1, '')) || abap.compare.eq(iv_cd, abap.CharacterFactory.get(1, '.'))) {\n}", skip: false},
     {abap: "TRY. ENDTRY.", js: ``,    skip: false, only: false},
     {abap: "MESSAGE e058(00) WITH 'Value_1' 'Value_2' 'Value_3' 'Value_4' INTO lv_dummy.",
-      js: `await abap.statements.message({into: lv_dummy, id: "00", number: "058", type: "E", with: [new abap.types.Character(7).set('Value_1'),new abap.types.Character(7).set('Value_2'),new abap.types.Character(7).set('Value_3'),new abap.types.Character(7).set('Value_4')]});`, skip: false},
+      js: `await abap.statements.message({into: lv_dummy, id: "00", number: "058", type: "E", with: [abap.CharacterFactory.get(7, 'Value_1'),abap.CharacterFactory.get(7, 'Value_2'),abap.CharacterFactory.get(7, 'Value_3'),abap.CharacterFactory.get(7, 'Value_4')]});`, skip: false},
     {abap: "MESSAGE ID sy-msgid TYPE 'S' NUMBER sy-msgno WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4 INTO rv_text.",
-      js: `await abap.statements.message({into: rv_text, id: abap.builtin.sy.get().msgid, type: new abap.types.Character(1).set('S'), number: abap.builtin.sy.get().msgno, with: [abap.builtin.sy.get().msgv1,abap.builtin.sy.get().msgv2,abap.builtin.sy.get().msgv3,abap.builtin.sy.get().msgv4]});`, skip: false},
+      js: `await abap.statements.message({into: rv_text, id: abap.builtin.sy.get().msgid, type: abap.CharacterFactory.get(1, 'S'), number: abap.builtin.sy.get().msgno, with: [abap.builtin.sy.get().msgv1,abap.builtin.sy.get().msgv2,abap.builtin.sy.get().msgv3,abap.builtin.sy.get().msgv4]});`, skip: false},
     {abap: "RAISE EXCEPTION instance.", js: `throw instance.get();`, skip: false},
     {abap: "CLASS ltcl_test DEFINITION DEFERRED.", js: ``, skip: false},
     {abap: "CLASS sdfsdf DEFINITION LOCAL FRIENDS ltcl_test ltcl_split_text.", js: ``, skip: false},
@@ -227,22 +225,22 @@ describe("Single statements", () => {
     OPTIONS value_handling = 'accept_data_loss'
     SOURCE XML iv_string
     RESULT data = rs_xml.`, js: `if (abap.Classes['KERNEL_CALL_TRANSFORMATION'] === undefined) throw new Error("CallTransformation, kernel class missing");
-await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",sourceXML: iv_string,options: {value_handling:new abap.types.Character(16).set('accept_data_loss')},result: {data:rs_xml}});`},
+await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",sourceXML: iv_string,options: {value_handling:abap.CharacterFactory.get(16, 'accept_data_loss')},result: {data:rs_xml}});`},
     {abap: `CALL TRANSFORMATION id
       OPTIONS initial_components = 'suppress'
       SOURCE data = is_data
       RESULT XML rv_xml.`, js: `if (abap.Classes['KERNEL_CALL_TRANSFORMATION'] === undefined) throw new Error("CallTransformation, kernel class missing");
-await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",resultXML: rv_xml,options: {initial_components:new abap.types.Character(8).set('suppress')},source: {data:is_data}});`},
+await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",resultXML: rv_xml,options: {initial_components:abap.CharacterFactory.get(8, 'suppress')},source: {data:is_data}});`},
     {abap: `CALL TRANSFORMATION id
       OPTIONS value_handling = 'accept_data_loss'
       SOURCE XML mi_xml_doc
       RESULT (lt_rtab).`, js: `if (abap.Classes['KERNEL_CALL_TRANSFORMATION'] === undefined) throw new Error("CallTransformation, kernel class missing");
-await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",sourceXML: mi_xml_doc,options: {value_handling:new abap.types.Character(16).set('accept_data_loss')},result: (lt_rtab)});`},
+await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",sourceXML: mi_xml_doc,options: {value_handling:abap.CharacterFactory.get(16, 'accept_data_loss')},result: (lt_rtab)});`},
     {abap: `CALL TRANSFORMATION id
       OPTIONS initial_components = 'suppress'
       SOURCE (lt_stab)
       RESULT XML li_doc.`, js: `if (abap.Classes['KERNEL_CALL_TRANSFORMATION'] === undefined) throw new Error("CallTransformation, kernel class missing");
-await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",resultXML: li_doc,options: {initial_components:new abap.types.Character(8).set('suppress')},source: (lt_stab)});`},
+await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",resultXML: li_doc,options: {initial_components:abap.CharacterFactory.get(8, 'suppress')},source: (lt_stab)});`},
     {abap: `CALL TRANSFORMATION id
 SOURCE
   data   = <fs>
@@ -258,7 +256,7 @@ await abap.Classes['KERNEL_SCAN_ABAP_SOURCE'].call({scan_abap_source: src, token
   WITH ANALYSIS
   WITH COMMENTS
   WITH PRAGMAS '*'.`, js: `if (abap.Classes['KERNEL_SCAN_ABAP_SOURCE'] === undefined) throw new Error("ScanAbapSource, kernel class missing");
-await abap.Classes['KERNEL_SCAN_ABAP_SOURCE'].call({scan_abap_source: source, tokens_into: tokens, statements_into: statements, with_analysis: true, with_comments: true, with_pragmas: new abap.types.Character(1).set('*')});`},
+await abap.Classes['KERNEL_SCAN_ABAP_SOURCE'].call({scan_abap_source: source, tokens_into: tokens, statements_into: statements, with_analysis: true, with_comments: true, with_pragmas: abap.CharacterFactory.get(1, '*')});`},
 
     {abap: `DATA tab TYPE SORTED TABLE OF i WITH UNIQUE KEY table_line.`,
       js: `let tab = abap.types.TableFactory.construct(new abap.types.Integer({qualifiedName: "I"}), {"withHeader":false,"keyType":"USER","primaryKey":{"name":"primary_key","type":"SORTED","isUnique":true,"keyFields":["TABLE_LINE"]},"secondary":[]}, "");`},
@@ -284,7 +282,7 @@ await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({seconds: abap.IntegerFactory.ge
   fs_fs_.assign(unique1);
 }`},
     {abap: `LOOP AT table ASSIGNING <n> USING KEY array_index WHERE path = 'hello1'. ENDLOOP.`,
-      js: `for await (const unique1 of abap.statements.loop(table,{usingKey: "array_index",where: async (I) => {return abap.compare.eq(I.path, new abap.types.Character(6).set('hello1'));},topEquals: {"path": new abap.types.Character(6).set('hello1')}})) {
+      js: `for await (const unique1 of abap.statements.loop(table,{usingKey: "array_index",where: async (I) => {return abap.compare.eq(I.path, abap.CharacterFactory.get(6, 'hello1'));},topEquals: {"path": abap.CharacterFactory.get(6, 'hello1')}})) {
   fs_n_.assign(unique1);
 }`},
     {abap: `LOOP AT mt_json_tree ASSIGNING <n> USING KEY (lv_tab_key) WHERE path = iv_parent_path. ENDLOOP.`,
@@ -363,13 +361,13 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({});`}, // todo
       js: `await abap.statements.deleteInternal(foo,{where: async (I) => {return !abap.compare.in(I.instance.get().field_type, types);}});`, skip: false},
 
     {abap: "READ REPORT name INTO text STATE 'A'.",
-      js: `abap.statements.readReport(name, {into: text,state: new abap.types.Character(1).set('A')});`, skip: false},
+      js: `abap.statements.readReport(name, {into: text,state: abap.CharacterFactory.get(1, 'A')});`, skip: false},
 
     {abap: "WAIT UNTIL gv_semaphore = 'X'.",
-      js: `await abap.statements.wait({cond: () => {return abap.compare.eq(gv_semaphore, new abap.types.Character(1).set('X'));}});`, skip: false},
+      js: `await abap.statements.wait({cond: () => {return abap.compare.eq(gv_semaphore, abap.CharacterFactory.get(1, 'X'));}});`, skip: false},
 
     {abap: "MESSAGE lx_exception TYPE 'S' DISPLAY LIKE 'E'.",
-      js: `await abap.statements.message({exception: lx_exception, type: new abap.types.Character(1).set('S'), displayLike: new abap.types.Character(1).set('E')});`, skip: false},
+      js: `await abap.statements.message({exception: lx_exception, type: abap.CharacterFactory.get(1, 'S'), displayLike: abap.CharacterFactory.get(1, 'E')});`, skip: false},
 
     {abap: "select count( * ) from tab into res where enable_sqlite = abap_true.",
       js: `await abap.statements.select(res, {select: "SELECT count( * )  from " + abap.buildDbTableName("tab") + " WHERE \\"enable_sqlite\\" = '" + abap.builtin.abap_true.get() + "'"});`, skip: false},

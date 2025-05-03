@@ -6,6 +6,8 @@ import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {Integer8} from "./integer8";
 import {HexUInt8} from "./hex_uint8";
+import {Character} from "./character";
+import {String} from "./string";
 
 export const DIGITS = new RegExp(/^\s*-?\+?\d+\.?\d* *$/i);
 
@@ -61,8 +63,12 @@ export class Integer implements INumeric {
 
     if (typeof value === "number") {
       this.value = Math.round(value);
-    } else if (typeof value === "string") {
-      this.value = toInteger(value);
+    } else if (value instanceof Integer) {
+      this.set(value.get());
+    } else if (value instanceof Character) {
+      this.value = toInteger(value.get());
+    } else if (value instanceof String) {
+      this.value = toInteger(value.get());
     } else if (value instanceof Integer8) {
       this.set(Number(value.get()));
     } else if (value instanceof Float) {
@@ -78,6 +84,8 @@ export class Integer implements INumeric {
         }
       }
       this.set(num);
+    } else if (typeof value === "string") {
+      this.value = toInteger(value);
     } else {
       this.set(value.get());
     }
