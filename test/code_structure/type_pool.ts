@@ -32,8 +32,8 @@ CONSTANTS: BEGIN OF seoo_moo,
 
     expect(output.objects[0].chunk.getCode()).to.equal(`const pool = {};
 pool['seoo_moo'] = new abap.types.Structure({"foo": new abap.types.Numc(), "bar": new abap.types.Numc()}, undefined, undefined, {}, {});
-pool['seoo_moo'].get().foo.set(new abap.types.Character(1).set('5'));
-pool['seoo_moo'].get().bar.set(new abap.types.Character(1).set('6'));
+pool['seoo_moo'].get().foo.set(abap.CharacterFactory.get(1, '5'));
+pool['seoo_moo'].get().bar.set(abap.CharacterFactory.get(1, '6'));
 abap.TypePools['SEOO'] = pool;`);
   });
 

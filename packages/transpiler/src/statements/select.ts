@@ -110,7 +110,7 @@ export class SelectTranspiler implements IStatementTranspiler {
   throw new Error("FAE, todo, empty table");
 } else {
   const ${unique2} = ${faeTranspiled}.array();
-  abap.statements.clear(${target});
+  ${target}.clear();
   for await (const ${unique} of ${unique2}) {
     await abap.statements.select(${target}, {select: "${select.trim()}"${extra}}, {appending: true});
   }

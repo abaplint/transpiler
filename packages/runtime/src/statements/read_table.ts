@@ -105,7 +105,8 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
     if (table.getPointer() === undefined) {
       throw new Error("GETWA_NOT_ASSIGNED");
     }
-    return readTable(table.getPointer(), options);
+    // return readTable(table.getPointer(), options);
+    table = table.getPointer() as Table | HashedTable;
   }
 
   // check if it is a primary index read specified with WITH KEY instead of WITH TABLE KEY
@@ -293,8 +294,8 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
   let subrc = found ? 0 : 4;
   if (binarySubrc) {
     subrc = binarySubrc;
-  } else if ((options?.binarySearch === true || options?.keyName !== undefined)
-      && subrc === 4) {
+  } else if (subrc === 4
+      && (options?.binarySearch === true || options?.keyName !== undefined)) {
     subrc = 8;
   }
 

@@ -17,6 +17,7 @@ import {MemoryConsole} from "./console/memory_console";
 import {buildDbTableName} from "./prefix";
 import {IntegerFactory} from "./integer_factory";
 import {dynamicCallLookup} from "./dynamic_call_lookup";
+import {CharacterFactory} from "./character_factory";
 
 export {RFC, types, DB, MemoryConsole};
 
@@ -63,8 +64,10 @@ export class ABAP {
   public expandDynamic = expandDynamic;
   public buildDbTableName = buildDbTableName;
   public ClassicError = ClassicError;
-  public IntegerFactory = IntegerFactory;
   public dynamicCallLookup = dynamicCallLookup;
+
+  public IntegerFactory = IntegerFactory;
+  public CharacterFactory = CharacterFactory;
 
   public readonly context: Context;
   public readonly dbo: RuntimeDatabaseOptions;
