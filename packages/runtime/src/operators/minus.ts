@@ -22,12 +22,12 @@ export function minus(left: INumeric | ICharacter | string | Integer8 | number |
     return minus(left, right.getPointer());
   }
 
-  if (left instanceof Integer8 || right instanceof Integer8) {
+  if (left instanceof Integer && right instanceof Integer) {
+    return new Integer().set(left.get() - right.get());
+  } else if (left instanceof Integer8 || right instanceof Integer8) {
     const l = left instanceof Integer8 ? left.get() : BigInt(parse(left));
     const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));
     return new Integer8().set(l - r);
-  } else if (left instanceof Integer && right instanceof Integer) {
-    return new Integer().set(left.get() - right.get());
   } else if (typeof left === "number" && typeof right === "number"
       && Number.isInteger(left) && Number.isInteger(right)) {
     return new Integer().set(left - right);
