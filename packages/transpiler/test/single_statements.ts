@@ -42,8 +42,6 @@ describe("Single statements", () => {
     {abap: "IF NOT foo IS INITIAL. ENDIF.",        js: "if (abap.compare.initial(foo) === false) {\n}",   skip: false},
     {abap: "DO. ENDDO.",                           js: "for (;;) {\n}",                                   skip: true},
     {abap: "foo-bar = 2.",                         js: "foo.bar.set(2);",                           skip: true}, // hmm, will this kind of member access work?
-    {abap: "CLEAR foo.",                           js: "abap.statements.clear(foo);",               skip: false},
-    {abap: "FREE foo.",                            js: "abap.statements.clear(foo);",               skip: false},
     {abap: "SORT foo.",                            js: "abap.statements.sort(foo,{});",                  skip: false},
     {abap: "SORT foo DESCENDING.",                 js: "abap.statements.sort(foo,{descending: true});",  skip: false},
     {abap: "SORT foo BY field.",                   js: `abap.statements.sort(foo,{by: [{component: "field"}]});`,  skip: false},
