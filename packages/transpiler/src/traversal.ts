@@ -6,7 +6,6 @@ import {IStatementTranspiler} from "./statements/_statement_transpiler";
 import {IExpressionTranspiler} from "./expressions/_expression_transpiler";
 import {IStructureTranspiler} from "./structures/_structure_transpiler";
 import {TranspileTypes} from "./transpile_types";
-import {ISpaghettiScopeNode} from "@abaplint/core";
 import {Chunk} from "./chunk";
 import {ConstantTranspiler} from "./expressions";
 import {ITranspilerOptions} from "./types";
@@ -338,7 +337,7 @@ export class Traversal {
     return undefined;
   }
 
-  public findMethodReference(token: abaplint.Token, scope: ISpaghettiScopeNode | undefined):
+  public findMethodReference(token: abaplint.Token, scope: abaplint.ISpaghettiScopeNode | undefined):
   undefined | {def: abaplint.Types.MethodDefinition, name: string} {
     let candidate: undefined | {def: abaplint.Types.MethodDefinition, name: string} = undefined;
 
