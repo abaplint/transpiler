@@ -751,8 +751,7 @@ CALL FUNCTION 'FUNCTION_EXISTS'
     function_not_exist = 1
     OTHERS             = 2.`;
     const expected = `try {
-  if (abap.FunctionModules['FUNCTION_EXISTS'] === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FUNC'.trimEnd()] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_FUNC not found"; }
-  if (abap.FunctionModules['FUNCTION_EXISTS'] === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FUNC'.trimEnd()](); }
+  if (abap.FunctionModules['FUNCTION_EXISTS'] === undefined) { if (abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FUNC'.trimEnd()] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_FUNC not found"; } else { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FUNC'.trimEnd()]();} }
   await abap.FunctionModules['FUNCTION_EXISTS']({exporting: {funcname: abap.CharacterFactory.get(8, 'SDFSDFSD')}});
   abap.builtin.sy.get().subrc.set(0);
 } catch (e) {
@@ -792,7 +791,6 @@ FIELD-SYMBOLS <l_record_all> TYPE ANY.
 ASSIGN (l_fieldname) TO <l_record_all>.
 WRITE 'sdf'.`;
     const js = await runSingle(abap);
-    console.dir(js);
     expect(js).to.include("\nabap.statements.write(abap.CharacterFactory.get(3, 'sdf'));");
   });
 

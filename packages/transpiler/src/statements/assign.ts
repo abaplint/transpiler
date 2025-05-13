@@ -91,7 +91,6 @@ export class AssignTranspiler implements IStatementTranspiler {
     const ret = new Chunk().append("abap.statements.assign({", node, traversal)
       .appendString(options.join(", "))
       .append("});", node.getLastToken(), traversal);
-    console.dir(ret.getCode());
     return ret;
   }
 
