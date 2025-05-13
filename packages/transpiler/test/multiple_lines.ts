@@ -785,4 +785,15 @@ CALL METHOD lo_obj->(nam).`;
     expect(js).to.include("dynamicCallLookup");
   });
 
+  it("testing indentation of JS", async () => {
+    const abap = `
+DATA l_fieldname TYPE string.
+FIELD-SYMBOLS <l_record_all> TYPE ANY.
+ASSIGN (l_fieldname) TO <l_record_all>.
+WRITE 'sdf'.`;
+    const js = await runSingle(abap);
+    console.dir(js);
+    expect(js).to.include("\nabap.statements.write(abap.CharacterFactory.get(3, 'sdf'));");
+  });
+
 });

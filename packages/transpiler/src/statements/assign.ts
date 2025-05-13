@@ -63,24 +63,24 @@ export class AssignTranspiler implements IStatementTranspiler {
         if (firstFirst?.get() instanceof abaplint.Expressions.Constant) {
           const s = firstFirst.getFirstToken().getStr().toLowerCase().match(/\w+/)?.toString();
           options.push(`dynamicSource: (() => {
-            try { return ${s}; } catch {}
-            try { return this.${s}; } catch {}
-          })()`);
+  try { return ${s}; } catch {}
+  try { return this.${s}; } catch {}
+})()`);
         } else if (firstFirst?.get() instanceof abaplint.Expressions.FieldChain && firstFirst instanceof abaplint.Nodes.ExpressionNode) {
           const code = new FieldChainTranspiler(true).transpile(firstFirst, traversal).getCode();
           options.push(`dynamicSource: (() => {
-            const name = ${code}.toLowerCase().replace(/[~\\/]/g, "$").match(/[\\w\\$\\/]+/)[0];
-            try { return eval(name); } catch {}
-            try { return eval("this." + name); } catch {}
-          })()`);
+  const name = ${code}.toLowerCase().replace(/[~\\/]/g, "$").match(/[\\w\\$\\/]+/)[0];
+  try { return eval(name); } catch {}
+  try { return eval("this." + name); } catch {}
+})()`);
         }
       } else if (first?.get() instanceof abaplint.Expressions.Source && first instanceof abaplint.Nodes.ExpressionNode) {
 //        const name = first.concatTokens().toLowerCase();
         const name = new SourceTranspiler().transpile(first, traversal).getCode();
         options.push(`dynamicSource: (() => {
-          try { return ${name}; } catch {}
-          try { return this.${name}; } catch {}
-        })()`);
+  try { return ${name}; } catch {}
+  try { return this.${name}; } catch {}
+})()`);
       }
     }
 
@@ -88,9 +88,11 @@ export class AssignTranspiler implements IStatementTranspiler {
       options.push("casting: true");
     }
 
-    return new Chunk().append("abap.statements.assign({", node, traversal)
+    const ret = new Chunk().append("abap.statements.assign({", node, traversal)
       .appendString(options.join(", "))
       .append("});", node.getLastToken(), traversal);
+    console.dir(ret.getCode());
+    return ret;
   }
 
 }
