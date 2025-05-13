@@ -85,7 +85,7 @@ export class TranspileTypes {
           asInclude[c.name.toLowerCase()] = true;
         }
       }
-      extra = "{" + list.join(", ") + "}";
+      extra = "{\n" + list.join(",\n") + "}";
       if (type.getQualifiedName() !== undefined) {
         extra += ", \"" + type.getQualifiedName() + "\"";
       } else {

@@ -193,7 +193,8 @@ foo.set(await (new abap.Classes['PROG-ZFOOBAR-ZCL_WORDS']()).constructor_());`;
 END OF foo.
 DATA moo TYPE foo.`;
 
-    const expected = `let moo = new abap.types.Structure({"bar": new abap.types.Character(1, {"qualifiedName":"foo-bar"})}, "foo", undefined, {}, {});`;
+    const expected = `let moo = new abap.types.Structure({
+"bar": new abap.types.Character(1, {"qualifiedName":"foo-bar"})}, "foo", undefined, {}, {});`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
@@ -205,7 +206,8 @@ END OF foo.
 DATA moo TYPE foo.`;
 
 // hmm, the qualified name is wrong?
-    const expected = `let moo = new abap.types.Structure({"bar": new abap.types.Character(1, {"qualifiedName":"ABAP_BOOL","ddicName":"ABAP_BOOL"})}, "foo", undefined, {}, {});`;
+    const expected = `let moo = new abap.types.Structure({
+"bar": new abap.types.Character(1, {"qualifiedName":"ABAP_BOOL","ddicName":"ABAP_BOOL"})}, "foo", undefined, {}, {});`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
