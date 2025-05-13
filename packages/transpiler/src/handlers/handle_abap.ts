@@ -140,18 +140,21 @@ export class HandleABAP {
   }
 
   protected findExports(node: abaplint.Nodes.StructureNode | undefined): string[] {
-    if (node === undefined) {
-      return [];
-    }
     const res: string[] = [];
-    for (const c of node.findAllStatements(abaplint.Statements.ClassDefinition)) {
+    for (const c of node?.findAllStatements(abaplint.Statements.ClassDefinition) || []) {
       const e = c.findFirstExpression(abaplint.Expressions.ClassName)?.getFirstToken().getStr();
       if (e) {
         res.push(e.toLowerCase());
       }
     }
-    for (const c of node.findAllStatements(abaplint.Statements.Interface)) {
+    for (const c of node?.findAllStatements(abaplint.Statements.Interface) || []) {
       const e = c.findFirstExpression(abaplint.Expressions.InterfaceName)?.getFirstToken().getStr();
+      if (e) {
+        res.push(e.toLowerCase());
+      }
+    }
+    for (const c of node?.findAllStatements(abaplint.Statements.Form) || []) {
+      const e = c.findFirstExpression(abaplint.Expressions.FormName)?.getFirstToken().getStr();
       if (e) {
         res.push(e.toLowerCase());
       }

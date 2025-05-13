@@ -25,6 +25,7 @@ export * from "./close_dataset";
 export * from "./collect";
 export * from "./commit";
 export * from "./compute";
+export * from "./program";
 export * from "./concatenate";
 export * from "./condense";
 export * from "./constant";
