@@ -13,16 +13,16 @@ export class Initialization {
       let ret = "";
       if (useImport === true) {
         ret = `/* eslint-disable import/newline-after-import */
-  import "./_top.mjs";\n`;
+import "./_top.mjs";\n`;
       } else {
         ret = `/* eslint-disable import/newline-after-import */
-  import runtime from "@abaplint/runtime";
-  globalThis.abap = new runtime.ABAP();\n`;
+import runtime from "@abaplint/runtime";
+globalThis.abap = new runtime.ABAP();\n`;
       }
 
       ret += `${this.buildImports(reg, useImport)}
 
-  export async function initializeABAP() {\n`;
+export async function initializeABAP() {\n`;
       ret += `  const sqlite = [];\n`;
       for (const i of dbSetup.schemas.sqlite) {
         ret += `  sqlite.push(\`${i}\`);\n`;
