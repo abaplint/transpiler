@@ -85,18 +85,16 @@ export async function initializeABAP() {\n`;
     }
 
     for (const obj of reg.getObjects()) {
-      if (obj instanceof abaplint.Objects.FunctionGroup) {
-        list.push(imp(`${escapeNamespaceFilename(obj.getName().toLowerCase())}.fugr`));
-      } else if (obj instanceof abaplint.Objects.Class) {
-        if (obj.getName().toUpperCase() !== "CL_ABAP_CHAR_UTILITIES"
-            && this.hasClassConstructor(reg, obj)) {
-          // this will not solve all problems with class constors 100%, but probably good enough
-          late.push(imp(`${escapeNamespaceFilename(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}`));
-        } else {
-          list.push(imp(`${escapeNamespaceFilename(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}`));
-        }
-      } else if (obj instanceof abaplint.Objects.Interface) {
-        list.push(imp(`${escapeNamespaceFilename(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}`));
+      const name = imp(`${escapeNamespaceFilename(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}`);
+      if (obj instanceof abaplint.Objects.Class
+          && obj.getName().toUpperCase() !== "CL_ABAP_CHAR_UTILITIES"
+          && this.hasClassConstructor(reg, obj)) {
+        // this will not solve all problems with class constructors 100%, but probably good enough
+        late.push(name);
+      } else if (obj instanceof abaplint.Objects.Interface
+          || obj instanceof abaplint.Objects.FunctionGroup
+          || obj instanceof abaplint.Objects.Class) {
+        list.push(name);
       }
     }
 
