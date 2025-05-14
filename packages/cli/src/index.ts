@@ -69,7 +69,8 @@ function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
   return files;
 }
 
-function writeObjects(objects: Transpiler.IOutputFile[], writeSourceMaps: boolean, outputFolder: string, files: Transpiler.IFile[]) {
+function writeObjects(objects: Transpiler.IOutputFile[], config: ITranspilerConfig, outputFolder: string, files: Transpiler.IFile[]) {
+  const writeSourceMaps = config.write_source_map || false
   for (const o of objects) {
     let contents = o.chunk.getCode();
     if (writeSourceMaps === true
@@ -96,7 +97,7 @@ function writeObjects(objects: Transpiler.IOutputFile[], writeSourceMaps: boolea
       fs.writeFileSync(outputFolder + path.sep + name, map);
     }
 
-    if (o.object.type.toUpperCase() === "PROG") {
+    if (o.object.type.toUpperCase() === "PROG" && config.no_top_level_prog !== true) {
       // hmm, will this work for INCLUDEs ?
       contents = `await import("./_init.mjs");\n` + contents;
     }
@@ -131,7 +132,7 @@ async function run() {
     fs.mkdirSync(outputFolder);
   }
 
-  writeObjects(output.objects, config.write_source_map || false, outputFolder, files);
+  writeObjects(output.objects, config, outputFolder, files);
   console.log(output.objects.length + " objects written to disk");
 
   if (config.write_unit_tests === true) {

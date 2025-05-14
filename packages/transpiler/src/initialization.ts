@@ -91,6 +91,8 @@ export async function initializeABAP() {\n`;
           && this.hasClassConstructor(reg, obj)) {
         // this will not solve all problems with class constructors 100%, but probably good enough
         late.push(name);
+      } else if (obj instanceof abaplint.Objects.Program && obj.isInclude() === true) {
+        continue;
       } else if (obj instanceof abaplint.Objects.Interface
           || obj instanceof abaplint.Objects.FunctionGroup
           || obj instanceof abaplint.Objects.Program
