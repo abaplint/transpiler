@@ -193,7 +193,8 @@ foo.set(await (new abap.Classes['PROG-ZFOOBAR-ZCL_WORDS']()).constructor_());`;
 END OF foo.
 DATA moo TYPE foo.`;
 
-    const expected = `let moo = new abap.types.Structure({"bar": new abap.types.Character(1, {"qualifiedName":"foo-bar"})}, "foo", undefined, {}, {});`;
+    const expected = `let moo = new abap.types.Structure({
+"bar": new abap.types.Character(1, {"qualifiedName":"foo-bar"})}, "foo", undefined, {}, {});`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
@@ -205,7 +206,8 @@ END OF foo.
 DATA moo TYPE foo.`;
 
 // hmm, the qualified name is wrong?
-    const expected = `let moo = new abap.types.Structure({"bar": new abap.types.Character(1, {"qualifiedName":"ABAP_BOOL","ddicName":"ABAP_BOOL"})}, "foo", undefined, {}, {});`;
+    const expected = `let moo = new abap.types.Structure({
+"bar": new abap.types.Character(1, {"qualifiedName":"ABAP_BOOL","ddicName":"ABAP_BOOL"})}, "foo", undefined, {}, {});`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
@@ -749,8 +751,7 @@ CALL FUNCTION 'FUNCTION_EXISTS'
     function_not_exist = 1
     OTHERS             = 2.`;
     const expected = `try {
-  if (abap.FunctionModules['FUNCTION_EXISTS'] === undefined && abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FUNC'.trimEnd()] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_FUNC not found"; }
-  if (abap.FunctionModules['FUNCTION_EXISTS'] === undefined) { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FUNC'.trimEnd()](); }
+  if (abap.FunctionModules['FUNCTION_EXISTS'] === undefined) { if (abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FUNC'.trimEnd()] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_FUNC not found"; } else { throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FUNC'.trimEnd()]();} }
   await abap.FunctionModules['FUNCTION_EXISTS']({exporting: {funcname: abap.CharacterFactory.get(8, 'SDFSDFSD')}});
   abap.builtin.sy.get().subrc.set(0);
 } catch (e) {
@@ -781,6 +782,16 @@ data nam type string.
 CALL METHOD lo_obj->(nam).`;
     const js = await runSingle(abap);
     expect(js).to.include("dynamicCallLookup");
+  });
+
+  it("testing indentation of JS", async () => {
+    const abap = `
+DATA l_fieldname TYPE string.
+FIELD-SYMBOLS <l_record_all> TYPE ANY.
+ASSIGN (l_fieldname) TO <l_record_all>.
+WRITE 'sdf'.`;
+    const js = await runSingle(abap);
+    expect(js).to.include("\nabap.statements.write(abap.CharacterFactory.get(3, 'sdf'));");
   });
 
 });

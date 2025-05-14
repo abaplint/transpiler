@@ -48,8 +48,8 @@ export class CallFunctionTranspiler implements IStatementTranspiler {
     } else {
       const illegalFunc = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_FUNC'", node.getFirstToken(), true);
       const call = `abap.FunctionModules[${fmname}]`;
-      ret.appendString(`if (${call} === undefined && ${illegalFunc} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_FUNC not found"; }\n`);
-      ret.appendString(`if (${call} === undefined) { throw new ${illegalFunc}(); }\n`);
+      // eslint-disable-next-line max-len
+      ret.appendString(`if (${call} === undefined) { if (${illegalFunc} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_FUNC not found"; } else { throw new ${illegalFunc}();} }\n`);
       ret.appendString(`await ${call}(${param});`);
     }
 
