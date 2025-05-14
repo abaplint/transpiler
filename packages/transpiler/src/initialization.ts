@@ -13,16 +13,16 @@ export class Initialization {
       let ret = "";
       if (useImport === true) {
         ret = `/* eslint-disable import/newline-after-import */
-  import "./_top.mjs";\n`;
+import "./_top.mjs";\n`;
       } else {
         ret = `/* eslint-disable import/newline-after-import */
-  import runtime from "@abaplint/runtime";
-  globalThis.abap = new runtime.ABAP();\n`;
+import runtime from "@abaplint/runtime";
+globalThis.abap = new runtime.ABAP();\n`;
       }
 
       ret += `${this.buildImports(reg, useImport)}
 
-  export async function initializeABAP() {\n`;
+export async function initializeABAP() {\n`;
       ret += `  const sqlite = [];\n`;
       for (const i of dbSetup.schemas.sqlite) {
         ret += `  sqlite.push(\`${i}\`);\n`;
@@ -85,18 +85,17 @@ export class Initialization {
     }
 
     for (const obj of reg.getObjects()) {
-      if (obj instanceof abaplint.Objects.FunctionGroup) {
-        list.push(imp(`${escapeNamespaceFilename(obj.getName().toLowerCase())}.fugr`));
-      } else if (obj instanceof abaplint.Objects.Class) {
-        if (obj.getName().toUpperCase() !== "CL_ABAP_CHAR_UTILITIES"
-            && this.hasClassConstructor(reg, obj)) {
-          // this will not solve all problems with class constors 100%, but probably good enough
-          late.push(imp(`${escapeNamespaceFilename(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}`));
-        } else {
-          list.push(imp(`${escapeNamespaceFilename(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}`));
-        }
-      } else if (obj instanceof abaplint.Objects.Interface) {
-        list.push(imp(`${escapeNamespaceFilename(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}`));
+      const name = imp(`${escapeNamespaceFilename(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}`);
+      if (obj instanceof abaplint.Objects.Class
+          && obj.getName().toUpperCase() !== "CL_ABAP_CHAR_UTILITIES"
+          && this.hasClassConstructor(reg, obj)) {
+        // this will not solve all problems with class constructors 100%, but probably good enough
+        late.push(name);
+      } else if (obj instanceof abaplint.Objects.Interface
+          || obj instanceof abaplint.Objects.FunctionGroup
+          || obj instanceof abaplint.Objects.Program
+          || obj instanceof abaplint.Objects.Class) {
+        list.push(name);
       }
     }
 
