@@ -88,9 +88,16 @@ export class CallTranspiler implements IStatementTranspiler {
           const id = scope?.getParent()?.getParent()?.getIdentifier();
           if (id?.stype === abaplint.ScopeType.ClassImplementation
               && m.def.getClassName().toUpperCase() === id.sname.toUpperCase()) {
+            ms = ms.replace("await this.me.get().", "await this.");
             ms = ms.replace("await this.", "await this.#");
           } else {
-            throw new Error("CallTranspiler, todo, refactor CALL");
+            if (ms.includes(".get().")) {
+              let last: string[] | string = ms.split(".");
+              last = last[last.length - 1];
+              ms = ms.replace(".get()." + last, ".get().FRIENDS_ACCESS['" + last + "']");
+            } else {
+              throw new Error("CallTranspiler, todo, refactor CALL");
+            }
           }
         }
       }
