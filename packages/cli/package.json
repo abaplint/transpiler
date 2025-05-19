@@ -27,10 +27,10 @@
   "author": "abaplint",
   "license": "MIT",
   "devDependencies": {
-    "@abaplint/core": "^2.113.114",
+    "@abaplint/core": "^2.113.115",
     "@abaplint/transpiler": "^2.10.53",
     "@types/glob": "^8.1.0",
-    "@types/node": "^22.15.18",
+    "@types/node": "^22.15.19",
     "@types/progress": "^2.0.7",
     "glob": "=7.2.0",
     "progress": "^2.0.3",
