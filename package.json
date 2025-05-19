@@ -41,7 +41,7 @@
     },
     "homepage": "https://github.com/abaplint/transpiler_poc#readme",
     "devDependencies": {
-        "@abaplint/core": "^2.113.115",
+        "@abaplint/core": "^2.113.117",
         "@eslint/compat": "^1.2.9",
         "@eslint/eslintrc": "^3.3.1",
         "@eslint/js": "^9.27.0",
@@ -58,7 +58,7 @@
         "eslint-plugin-import": "^2.31.0",
         "fast-xml-parser": "^5.2.3",
         "globals": "^16.1.0",
-        "mocha": "^11.2.2",
+        "mocha": "^11.3.0",
         "pg": "^8.16.0",
         "pg-cursor": "^2.15.0",
         "snowflake-sdk": "^2.1.0",
