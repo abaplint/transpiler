@@ -3,6 +3,7 @@ import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {MethodCallBodyTranspiler, MethodSourceTranspiler} from "../expressions";
+import {FEATURE_FLAGS} from "../feature_flags";
 
 export class CallTranspiler implements IStatementTranspiler {
 
@@ -77,6 +78,28 @@ export class CallTranspiler implements IStatementTranspiler {
         ms = "await super.constructor_";
       } else if (ms.startsWith("await super.get()")) {
         ms = ms.replace("await super.get()", "await super");
+      }
+
+      if (nameToken) {
+        const scope = traversal.findCurrentScopeByToken(nameToken);
+        if (FEATURE_FLAGS.private === true
+            && m?.def.getVisibility() === abaplint.Visibility.Private
+            && m.def.isStatic() === false) {
+          const id = scope?.getParent()?.getParent()?.getIdentifier();
+          if (id?.stype === abaplint.ScopeType.ClassImplementation
+              && m.def.getClassName().toUpperCase() === id.sname.toUpperCase()) {
+            ms = ms.replace("await this.me.get().", "await this.");
+            ms = ms.replace("await this.", "await this.#");
+          } else {
+            if (ms.includes(".get().")) {
+              let last: string[] | string = ms.split(".");
+              last = last[last.length - 1];
+              ms = ms.replace(".get()." + last, ".get().FRIENDS_ACCESS['" + last + "']");
+            } else {
+              throw new Error("CallTranspiler, todo, refactor CALL");
+            }
+          }
+        }
       }
 
       return new Chunk().appendString(ms).appendString("(" + body + ")" + post + ";");
