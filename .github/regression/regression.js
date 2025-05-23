@@ -10,7 +10,7 @@ const repos = [
   {name: "heliconialabs/abap-opentelemetry",    command: "npm test"},
   {name: "heliconialabs/abap-protobuf",         command: "npm test"},
   {name: "larshp/abap-advent-2020",             command: "npm test"},
-  {name: "larshp/abap-wasm",                    command: "npm test"},
+  {name: "larshp/abap-wasm",                    command: "npm run lint && npm run downport && npm run unit"},
   {name: "larshp/abapNTLM",                     command: "npm test"},
   {name: "larshp/abapPGP",                      command: "npm test"},
   {name: "open-abap/open-abap-core",            command: "npm test"},
@@ -29,7 +29,11 @@ for (const repo of repos) {
   childProcess.execSync("git clone --depth=1 --recurse-submodules https://github.com/" + repo.name + ".git " + repo.folderName, {stdio: "inherit", cwd: CWD});
   childProcess.execSync("npm install", {stdio: "inherit", cwd: CWD + repo.folderName}); // install the transpiler version from NPM or fixed in the repo
   try {
+    const start = new Date();
     childProcess.execSync(repo.command, {stdio: "inherit", cwd: CWD + repo.folderName});
+    const end = new Date();
+    const diff = (end - start) / 1000;
+    repo.runtime = Math.round(diff);
   } catch (e) {
     console.log("ERROR ERROR ERROR");
     console.dir(e);
@@ -63,14 +67,14 @@ for (let index = 0; index < repos.length; index++) {
 
 let comment = "Regression test results:\n";
 
-comment += "| Repository | Result |\n";
-comment += "| :--- | :---: |\n";
+comment += "| Repository | Result | Runtime |\n";
+comment += "| :--- | :---: | ---: |\n";
 for (const repo of repos) {
   const link = "[" + repo.name + "](https://github.com/" + repo.name + ")"
   if (repo.success === true) {
-    comment += "| " + link + " | :green_circle: |\n";
+    comment += "| " + link + " | :green_circle: | " + repo.runtime + "s |\n";
   } else {
-    comment += "| " + link + " | :red_circle: |\n";
+    comment += "| " + link + " | :red_circle: | " + repo.runtime + "s |\n";
   }
 }
 comment += "\n";
