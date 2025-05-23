@@ -97,9 +97,9 @@ function writeObjects(objects: Transpiler.IOutputFile[], config: ITranspilerConf
       fs.writeFileSync(outputFolder + path.sep + name, map);
     }
 
-    if (o.object.type.toUpperCase() === "PROG" && config.no_top_level_prog !== true) {
+    if (o.object.type.toUpperCase() === "PROG") {
       // hmm, will this work for INCLUDEs ?
-      contents = `await import("./_init.mjs");\n` + contents;
+      contents = `if (!globalThis.abap) await import("./_init.mjs");\n` + contents;
     }
     fs.writeFileSync(outputFolder + path.sep + o.filename, contents);
   }

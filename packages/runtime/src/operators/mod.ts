@@ -23,6 +23,7 @@ export function mod(left: INumeric | ICharacter | string | Integer8 | number, ri
     val = val * -1;
   }
 
+  // hmm, to handle field symbols?
   if (left instanceof Integer8 || right instanceof Integer8) {
     return new Integer8().set(val);
   } else {
