@@ -95,7 +95,7 @@ export async function initializeABAP() {\n`;
         continue;
       } else if (obj instanceof abaplint.Objects.Interface
           || obj instanceof abaplint.Objects.FunctionGroup
-          || obj instanceof abaplint.Objects.Program
+// hmm          || obj instanceof abaplint.Objects.Program
           || obj instanceof abaplint.Objects.Class) {
         list.push(name);
       }

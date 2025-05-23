@@ -16,6 +16,5 @@ export interface ITranspilerConfig {
   }[],
   write_unit_tests?: boolean;
   write_source_map?: boolean;
-  no_top_level_prog?: boolean;
   options: ITranspilerOptions;
 }
