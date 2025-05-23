@@ -2638,4 +2638,21 @@ ENDCLASS.`;
     await dumpNrun(files, false);
   });
 
+  it.only("test-60", async () => {
+    // PROG with exit in start of selection
+
+const prog = `
+START-OF-SELECTION.
+  IF 1 = 2.
+    EXIT.
+  ENDIF.
+  WRITE 'ok'.
+`;
+
+    const files = [
+      {filename: "zexittop.prog.abap", contents: prog},
+    ];
+    await dumpNrun(files, false);
+  });
+
 });
