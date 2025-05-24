@@ -94,7 +94,6 @@ describe("Running statements - MESSAGE", () => {
     const code = `MESSAGE 'hello' TYPE 'S'.`;
 
     const js = await run(code);
-    console.dir(js);
     new AsyncFunction("abap", js);
 // hmm, this currently writes to console
   });
