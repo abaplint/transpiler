@@ -10,6 +10,7 @@ export interface IMessageOptions {
   exception?: ABAPObject,
   with?: (ICharacter | string)[],
   into?: ICharacter,
+  text?: ICharacter,
 }
 
 function replace(text: string, w?: (ICharacter | string | Character)[]): string {
@@ -98,7 +99,9 @@ export class MessageStatement {
     abap.builtin.sy.get().msgty.set(msgty);
 
     let replaced = "";
-    if (options.exception) {
+    if (options.text) {
+      replaced = options.text.get();
+    } else if (options.exception) {
       replaced = await options.exception.get().if_message$get_text();
     } else {
       const text = await findText(this.context, arbgb, msgnr, msgty);
