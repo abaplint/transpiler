@@ -90,4 +90,12 @@ describe("Running statements - MESSAGE", () => {
     expect(abap.console.get()).to.include("444");
   });
 
+  it("MESSAGE constant", async () => {
+    const code = `MESSAGE 'hello' TYPE 'S'.`;
+
+    const js = await run(code);
+    new AsyncFunction("abap", js);
+// hmm, this currently writes to console
+  });
+
 });
