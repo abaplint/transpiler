@@ -23,14 +23,7 @@ export class Chunk {
       this.appendString(str);
     }
   }
-/*
-  public copy(): Chunk {
-    const ret = new Chunk();
-    ret.raw = this.raw;
-    ret.mappings = [...this.mappings];
-    return ret;
-  }
-*/
+
   public join(chunks: Chunk[], str = ", "): Chunk {
     for (let i = 0; i < chunks.length; i++) {
       this.appendChunk(chunks[i]);
