@@ -54,15 +54,6 @@ const editor1 = monaco.editor.create(document.getElementById("container1"), {
     enabled: false,
   },
 });
-editor1.addCommand(
-	monaco.KeyCode.F9,
-  () => {
-    const hover = new HoverProvider();
-    monaco.languages.registerHoverProvider(editor1.getModel().getLanguageId(), hover);
-    monaco.languages.registerHoverProvider(editor2.getModel().getLanguageId(), hover);
-    console.log('Hover enabled');
-	},
-);
 
 const editor2 = monaco.editor.create(document.getElementById("container2"), {
   value: "js",
@@ -72,6 +63,20 @@ const editor2 = monaco.editor.create(document.getElementById("container2"), {
   },
   language: "javascript",
 });
+
+const hover = new HoverProvider(editor1, editor2);
+monaco.languages.registerHoverProvider(editor1.getModel().getLanguageId(), hover);
+monaco.languages.registerHoverProvider(editor2.getModel().getLanguageId(), hover);
+    /*
+editor1.addCommand(
+	monaco.KeyCode.F9,
+  () => {
+    monaco.languages.registerHoverProvider(editor1.getModel().getLanguageId(), hover);
+    monaco.languages.registerHoverProvider(editor2.getModel().getLanguageId(), hover);
+    console.log('Hover enabled');
+	},
+);
+*/
 
 const editor3 = monaco.editor.create(document.getElementById("container3"), {
   value: "output",
@@ -140,7 +145,7 @@ async function abapChanged() {
     const res = await new Transpiler().runRaw([{filename, contents}]);
     const obj = res.objects[0];
     const chunk = obj.chunk;
-    console.dir(chunk.getMap(obj.filename));
+    hover.setMap(chunk.getMap(obj.filename));
     editor2.setValue(obj.chunk.getCode() || "");
   } catch (error) {
     editor2.setValue("");
