@@ -36,3 +36,10 @@ body, html, .inner, .outer {
 select {
   width: 100%;
 }
+
+.myGreenDecoration {
+  background: rgba(0, 255, 0, 0.2);
+}
+.myRedDecoration {
+  background: rgba(255, 0, 0, 0.2);
+}

@@ -21,6 +21,7 @@ import {ABAP, MemoryConsole} from "@abaplint/runtime";
 import * as abaplint from "@abaplint/core";
 import * as abapMonaco from "@abaplint/monaco";
 import Split from "split-grid";
+import {HoverProvider} from "./hover";
 
 const reg = new abaplint.Registry(new abaplint.Config(JSON.stringify(config)));
 abapMonaco.registerABAP(reg);
@@ -62,6 +63,20 @@ const editor2 = monaco.editor.create(document.getElementById("container2"), {
   },
   language: "javascript",
 });
+
+const hover = new HoverProvider(editor1, editor2);
+monaco.languages.registerHoverProvider(editor1.getModel().getLanguageId(), hover);
+monaco.languages.registerHoverProvider(editor2.getModel().getLanguageId(), hover);
+    /*
+editor1.addCommand(
+	monaco.KeyCode.F9,
+  () => {
+    monaco.languages.registerHoverProvider(editor1.getModel().getLanguageId(), hover);
+    monaco.languages.registerHoverProvider(editor2.getModel().getLanguageId(), hover);
+    console.log('Hover enabled');
+	},
+);
+*/
 
 const editor3 = monaco.editor.create(document.getElementById("container3"), {
   value: "output",
@@ -128,7 +143,10 @@ async function abapChanged() {
     abapMonaco.updateMarkers(reg, model1);
 
     const res = await new Transpiler().runRaw([{filename, contents}]);
-    editor2.setValue(res.objects[0].chunk.getCode() || "");
+    const obj = res.objects[0];
+    const chunk = obj.chunk;
+    hover.setMap(chunk.getMap(obj.filename));
+    editor2.setValue(obj.chunk.getCode() || "");
   } catch (error) {
     editor2.setValue("");
     editor3.setValue(error.message);

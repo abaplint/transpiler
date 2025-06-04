@@ -9,8 +9,20 @@ export class ClearTranspiler implements IStatementTranspiler {
     const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
 
     const ret = new Chunk();
+
+    /*
     ret.appendChunk(target);
-    ret.append(".clear();", node.getLastToken(), traversal);
+    ret.append(".clear();", node.getLastToken().getEnd(), traversal);
+    */
+
+    ret.append(target.getCode() + ".clear();", node.getLastToken().getEnd(), traversal);
+
+//    ret.append(target.getCode() + ".clear();", node, traversal);
+
+/*
+    ret.append(target.getCode(), node.getFirstToken().getStart(), traversal);
+    ret.append(".clear();", node.getLastToken().getEnd(), traversal);
+    */
     return ret;
   }
 
