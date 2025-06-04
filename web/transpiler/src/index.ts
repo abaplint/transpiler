@@ -21,7 +21,7 @@ import {ABAP, MemoryConsole} from "@abaplint/runtime";
 import * as abaplint from "@abaplint/core";
 import * as abapMonaco from "@abaplint/monaco";
 import Split from "split-grid";
-import {registerDummyHoverProvider} from '../hover';
+import {HoverProvider} from "./hover";
 
 const reg = new abaplint.Registry(new abaplint.Config(JSON.stringify(config)));
 abapMonaco.registerABAP(reg);
@@ -57,9 +57,9 @@ const editor1 = monaco.editor.create(document.getElementById("container1"), {
 editor1.addCommand(
 	monaco.KeyCode.F9,
   () => {
-    // Register dummy hover provider for both editors' languages
-    registerDummyHoverProvider(editor1.getModel().getLanguageId());
-    registerDummyHoverProvider(editor2.getModel().getLanguageId());
+    const hover = new HoverProvider();
+    monaco.languages.registerHoverProvider(editor1.getModel().getLanguageId(), hover);
+    monaco.languages.registerHoverProvider(editor2.getModel().getLanguageId(), hover);
     console.log('Hover enabled');
 	},
 );
