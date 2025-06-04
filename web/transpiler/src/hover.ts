@@ -43,10 +43,10 @@ export class HoverProvider implements monaco.languages.HoverProvider {
       console.log("found: " + found?.length + " positions");
 
       for (const f of found || []) {
+        console.log(JSON.stringify(f));
         if (f.line === null || f.column === null || f.lastColumn === null) {
           continue;
         }
-        console.log(JSON.stringify(f));
         decorations.push({
           range: new monaco.Range(f.line, f.column + 1, f.line, f.lastColumn + 2),
           options: {
