@@ -10,8 +10,12 @@ export class ClearTranspiler implements IStatementTranspiler {
 
     const ret = new Chunk();
 
+    /*
     ret.appendChunk(target);
     ret.append(".clear();", node.getLastToken().getEnd(), traversal);
+    */
+
+    ret.append(target.getCode() + ".clear();", node.getLastToken().getEnd(), traversal);
 
 //    ret.append(target.getCode() + ".clear();", node, traversal);
 
