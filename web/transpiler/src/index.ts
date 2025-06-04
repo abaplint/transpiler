@@ -53,6 +53,12 @@ const editor1 = monaco.editor.create(document.getElementById("container1"), {
     enabled: false,
   },
 });
+editor1.addCommand(
+	monaco.KeyCode.F9,
+  () => {
+		console.log("my command is executing!");
+	},
+);
 
 const editor2 = monaco.editor.create(document.getElementById("container2"), {
   value: "js",
@@ -128,7 +134,10 @@ async function abapChanged() {
     abapMonaco.updateMarkers(reg, model1);
 
     const res = await new Transpiler().runRaw([{filename, contents}]);
-    editor2.setValue(res.objects[0].chunk.getCode() || "");
+    const obj = res.objects[0];
+    const chunk = obj.chunk;
+    console.dir(chunk.getMap(obj.filename));
+    editor2.setValue(obj.chunk.getCode() || "");
   } catch (error) {
     editor2.setValue("");
     editor3.setValue(error.message);
