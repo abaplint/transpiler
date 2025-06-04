@@ -44,13 +44,22 @@ export class HoverProvider implements monaco.languages.HoverProvider {
 
       for (const f of found || []) {
         console.log(JSON.stringify(f));
-        if (f.line === null || f.column === null || f.lastColumn === null) {
+        if (f.line === null || f.column === null) {
           continue;
         }
+
+        let className = "myGreenDecoration";
+        if (f.lastColumn === null) {
+          const lineContent = this.editor2.getModel().getLineContent(f.line);
+          f.lastColumn = lineContent.length - 1; // Monaco is 1-based, so we need to adjust
+          console.log(f.lastColumn);
+          className = "myRedDecoration";
+        }
+
         decorations.push({
           range: new monaco.Range(f.line, f.column + 1, f.line, f.lastColumn + 2),
           options: {
-            inlineClassName: "myInlineDecoration",
+            inlineClassName: className,
           },
         }
         );
