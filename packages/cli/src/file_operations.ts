@@ -42,7 +42,6 @@ export class FileOperations {
   }
 
   public static async loadFiles(config: ITranspilerConfig): Promise<Transpiler.IFile[]> {
-//    const files: Transpiler.IFile[] = [];
     const filter = (config.input_filter ?? []).map(pattern => new RegExp(pattern, "i"));
     let skipped = 0;
     let added = 0;

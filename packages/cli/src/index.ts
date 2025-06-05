@@ -110,7 +110,7 @@ async function run() {
 
   const config = TranspilerConfig.find(process.argv[2]);
   const libFiles = loadLib(config);
-  const files = FileOperations.loadFiles(config);
+  const files = await FileOperations.loadFiles(config);
 
   console.log("\nBuilding");
   const t = new Transpiler.Transpiler(config.options);
