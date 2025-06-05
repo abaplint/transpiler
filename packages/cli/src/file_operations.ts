@@ -27,6 +27,7 @@ export class FileOperations {
           skipped++;
           continue;
         }
+        sdf
         files.push({
           filename: path.basename(filename),
           relative: path.relative(config.output_folder, path.dirname(filename)),
