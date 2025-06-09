@@ -24,7 +24,7 @@ async function run() {
     },
   };
 
-  const files = FileOperations.loadFiles(config);
+  const files = await FileOperations.loadFiles(config);
 
   console.log("\nBuilding");
 //  const t = new Transpiler.Transpiler(config.options);
