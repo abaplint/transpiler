@@ -29,6 +29,10 @@ export async function deleteInternal(target: Table | HashedTable | FieldSymbol, 
       && options?.fromValue === undefined
       && options?.from === undefined
       && options?.to === undefined) {
+    if (options.index.get() === 0) {
+      throw new Error("TABLE_INVALID_INDEX");
+    }
+
     if (target.array()[options.index.get() - 1] === undefined) {
       // @ts-ignore
       abap.builtin.sy.get().subrc.set(4);

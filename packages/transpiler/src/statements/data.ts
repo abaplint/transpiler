@@ -33,10 +33,10 @@ export class DataTranspiler implements IStatementTranspiler {
 
     const ret = new Chunk()
       .appendString("let ")
-      .append(Traversal.prefixVariable(Traversal.escapeNamespace(found.getName().toLowerCase())), token, traversal)
+      .appendString(Traversal.prefixVariable(Traversal.escapeNamespace(found.getName().toLowerCase())))
       .appendString(" = " + new TranspileTypes().toType(found.getType()))
-      .append(";", node.getLastToken(), traversal)
-      .append(value, node.getLastToken(), traversal);
+      .appendString(";")
+      .appendString(value);
 
     return ret;
   }
