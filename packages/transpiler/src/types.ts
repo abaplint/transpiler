@@ -70,4 +70,6 @@ export interface ITranspilerOptions {
   skipReposrc?: boolean;
   /** ignore source map */
   ignoreSourceMap?: boolean;
+  /** import programs */
+  importProg?: boolean;
 }
