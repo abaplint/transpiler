@@ -27,9 +27,9 @@ export class FieldSymbolTranspiler implements IStatementTranspiler {
 
     if (name) {
       return new Chunk()
-        .append("let ", node, traversal)
-        .appendChunk(new Expr().transpile(name, traversal))
-        .append(" = new abap.types.FieldSymbol(" + new TranspileTypes().toType(found.getType()) + ");", node.getLastToken(), traversal);
+        .appendString("let ")
+        .appendString(new Expr().transpile(name, traversal).getCode())
+        .appendString(" = new abap.types.FieldSymbol(" + new TranspileTypes().toType(found.getType()) + ");");
     }
     throw new Error("FieldSymbolTranspiler, name not found");
   }

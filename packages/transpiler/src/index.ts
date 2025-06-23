@@ -50,8 +50,8 @@ export class Transpiler {
       objects: [],
       unitTestScript: new UnitTest().unitTestScript(reg, this.options?.skip),
       unitTestScriptOpen: new UnitTest().unitTestScriptOpen(reg, this.options?.skip),
-      initializationScript: new Initialization().script(reg, dbSetup, this.options?.extraSetup),
-      initializationScript2: new Initialization().script(reg, dbSetup, this.options?.extraSetup, true),
+      initializationScript: new Initialization().script(reg, dbSetup, this.options),
+      initializationScript2: new Initialization().script(reg, dbSetup, this.options, true),
       databaseSetup: dbSetup,
       reg: reg,
     };

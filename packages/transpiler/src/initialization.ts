@@ -1,5 +1,6 @@
 import {DatabaseSetupResult} from "./db/database_setup_result";
 import * as abaplint from "@abaplint/core";
+import {ITranspilerOptions} from "./types";
 
 export function escapeNamespaceFilename(filename: string): string {
 // ES modules are resolved and cached as URLs. This means that special characters must be
@@ -9,7 +10,7 @@ export function escapeNamespaceFilename(filename: string): string {
 
 export class Initialization {
 
-  public script(reg: abaplint.IRegistry, dbSetup: DatabaseSetupResult, extraSetup?: string, useImport?: boolean) {
+  public script(reg: abaplint.IRegistry, dbSetup: DatabaseSetupResult, options: ITranspilerOptions | undefined, useImport?: boolean) {
       let ret = "";
       if (useImport === true) {
         ret = `/* eslint-disable import/newline-after-import */
@@ -20,7 +21,7 @@ import runtime from "@abaplint/runtime";
 globalThis.abap = new runtime.ABAP();\n`;
       }
 
-      ret += `${this.buildImports(reg, useImport)}
+      ret += `${this.buildImports(reg, useImport, options)}
 
 export async function initializeABAP() {\n`;
       ret += `  const sqlite = [];\n`;
@@ -45,17 +46,17 @@ export async function initializeABAP() {\n`;
       }
       ret += `\n`;
 
-      if (extraSetup === undefined || extraSetup === "") {
+      if (options?.extraSetup === undefined || options?.extraSetup === "") {
         ret += `// no setup logic specified in config\n`;
       } else {
-        ret += `  const {setup} = await import("${extraSetup}");\n` +
+        ret += `  const {setup} = await import("${options?.extraSetup}");\n` +
                `  await setup(globalThis.abap, schemas, insert);\n`;
       }
       ret += `}`;
       return ret;
     }
 
-  private buildImports(reg: abaplint.IRegistry, useImport?: boolean): string {
+  private buildImports(reg: abaplint.IRegistry, useImport?: boolean, options?: ITranspilerOptions): string {
 // note: ES modules are hoised, so use the dynamic import(), due to setting of globalThis.abap
 // some sorting required: eg. a class constructor using constant from interface
 
@@ -95,7 +96,7 @@ export async function initializeABAP() {\n`;
         continue;
       } else if (obj instanceof abaplint.Objects.Interface
           || obj instanceof abaplint.Objects.FunctionGroup
-// hmm          || obj instanceof abaplint.Objects.Program
+          || (options?.importProg === true && obj instanceof abaplint.Objects.Program)
           || obj instanceof abaplint.Objects.Class) {
         list.push(name);
       }
