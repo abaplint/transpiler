@@ -12,6 +12,7 @@ import "dotenv/config";
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 export const AsyncFunction = Object.getPrototypeOf(async ()=> {}).constructor;
 
+/** the object from the first file is returned */
 export async function runFiles(abap: ABAP, files: IFile[], options?: ITranspilerOptions) {
   const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
   const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
