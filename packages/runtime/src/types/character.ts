@@ -10,6 +10,8 @@ import {Integer} from "./integer";
 
 const TRIMREGEX = / *$/;
 
+const initialValues: {[length: number]: string} = {};
+
 export class Character implements ICharacter {
   private value: string;
   private constant: boolean = false;
@@ -89,7 +91,10 @@ export class Character implements ICharacter {
   }
 
   public clear(): void {
-    this.value = " ".repeat(this.length);
+    if (initialValues[this.length] === undefined) {
+      initialValues[this.length] = " ".repeat(this.length);
+    }
+    this.value = initialValues[this.length];
   }
 
   public get(): string {
