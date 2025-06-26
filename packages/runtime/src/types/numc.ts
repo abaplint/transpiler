@@ -31,7 +31,10 @@ export class Numc implements ICharacter {
   }
 
   public set(value: INumeric | ICharacter | Hex | string | number, raw = false) {
-    if (typeof value === "number") {
+    if (value instanceof Numc && value.getLength() === this.length) {
+      this.value = value.get();
+      return this;
+    } else if (typeof value === "number") {
       this.value = Math.trunc(value) + "";
     } else if (typeof value === "string") {
       value = value.trim().replace(regexCharacters, "");
