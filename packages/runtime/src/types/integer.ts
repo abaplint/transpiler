@@ -18,10 +18,11 @@ export function toInteger(value: string, exception = true): number {
   if (value.endsWith("-")) {
     value = "-" + value.substring(0, value.length - 1);
   }
-  if (value.trim().length === 0) {
-    value = "0";
-  } else if (DIGITS.test(value) === false) {
-    if (exception === true) {
+
+  if (DIGITS.test(value) === false) {
+    if (value.trim().length === 0) {
+      value = "0";
+    } else if (exception === true) {
       throwError("CX_SY_CONVERSION_NO_NUMBER");
     } else {
       throw new Error("CONVT_NO_NUMBER");
