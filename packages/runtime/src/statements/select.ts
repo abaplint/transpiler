@@ -1,4 +1,3 @@
-import {clone} from "../clone";
 import {Context} from "../context";
 import {DatabaseRows, SelectDatabaseOptions, SelectRuntimeOptions} from "../db/db";
 import {FieldSymbol, HashedTable, Structure, Table} from "../types";
@@ -53,13 +52,13 @@ export function rowsToTarget(target: Structure | Table | HashedTable | FieldSymb
       if (rows[0][column] === null || target.get()[column] === undefined) {
         continue;
       }
-      result[column] = clone(target.get()[column]).set(rows[0][column]);
+      result[column] = target.get()[column].clone().set(rows[0][column]);
     }
       // @ts-ignore
     abap.statements.moveCorresponding(new Structure(result), target);
   } else if (target instanceof Table || target instanceof HashedTable) {
     for (const row of rows) {
-      const targetRow = clone(target.getRowType());
+      const targetRow = target.getRowType().clone();
       if (targetRow instanceof Structure) {
         for (let columnName in row) {
           columnName = columnName.toLowerCase();

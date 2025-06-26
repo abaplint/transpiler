@@ -1,4 +1,3 @@
-import {clone} from "../clone";
 import {eq, ne} from "../compare";
 import {ABAPObject, DataReference, FieldSymbol, HashedTable, Structure, Table, TableAccessType} from "../types";
 import {ICharacter} from "../types/_character";
@@ -87,7 +86,7 @@ export function insertInternal(options: IInsertInternalOptions): void {
 
   let data = options.data;
   if (typeof data === "string") {
-    const tmp = clone(options.table.getRowType()) as ICharacter;
+    const tmp = options.table.getRowType().clone() as ICharacter;
     tmp.set(data);
     data = tmp;
   }

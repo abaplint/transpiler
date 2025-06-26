@@ -3,7 +3,6 @@ import {ICharacter} from "./_character";
 import {Integer} from "./integer";
 import {ABAPObject} from "./abap_object";
 import {String} from "./string";
-import {clone} from "../clone";
 import {Structure} from "./structure";
 import {FieldSymbol} from "./field_symbol";
 import {DataReference} from "./data_reference";
@@ -115,7 +114,7 @@ export class HashedTable implements ITable {
     this.isStructured = rowType instanceof Structure;
 
     if (options?.withHeader === true) {
-      this.header = clone(this.rowType);
+      this.header = this.rowType.clone();
     }
 
     this.qualifiedName = qualifiedName?.toUpperCase();
@@ -201,7 +200,7 @@ export class HashedTable implements ITable {
 
       // convert to correct type, eg Chars have specific length, or rounding,
       if (k === "TABLE_LINE") {
-        const row = clone(tableRowType) as any;
+        const row = tableRowType.clone() as any;
         row.set(val.get());
         val = row.get();
       } else if (isStructured === true) {
@@ -221,7 +220,7 @@ export class HashedTable implements ITable {
           val = val.getCharacter();
         } else {
           // convert
-          const row = clone(field) as any;
+          const row = field.clone() as any;
           row.set(val.get());
           val = row.get();
         }
@@ -334,21 +333,21 @@ export class HashedTable implements ITable {
   private cloneRow(item: TableRowType) {
     // make sure to do conversion if needed
     if (typeof item === "number") {
-      const tmp = clone(this.getRowType());
+      const tmp = this.getRowType().clone();
       tmp.set(new Integer().set(item));
       return tmp;
     } else if (typeof item === "string") {
-      const tmp = clone(this.getRowType());
+      const tmp = this.getRowType().clone();
       tmp.set(new String().set(item));
       return tmp;
     // @ts-ignore
 
     } else if (this.isStructured === true && item.getQualifiedName && this.rowType.getQualifiedName && item.getQualifiedName() !== "" && item.getQualifiedName() === this.rowType.getQualifiedName()) {
     // types match, so no need to do conversions, just clone the item
-      const val = clone(item);
+      const val = item.clone();
       return val;
     } else {
-      const tmp = clone(this.getRowType());
+      const tmp = this.getRowType().clone();
       tmp.set(item);
       return tmp;
     }
@@ -374,7 +373,7 @@ export class Table implements ITable {
     this.isStructured = rowType instanceof Structure;
 
     if (options?.withHeader === true) {
-      this.header = clone(this.rowType);
+      this.header = this.rowType.clone();
     }
 
     this.qualifiedName = qualifiedName?.toUpperCase();
@@ -586,21 +585,21 @@ export class Table implements ITable {
   private cloneRow(item: TableRowType) {
     // make sure to do conversion if needed
     if (typeof item === "number") {
-      const tmp = clone(this.getRowType());
+      const tmp = this.getRowType().clone();
       tmp.set(new Integer().set(item));
       return tmp;
     } else if (typeof item === "string") {
-      const tmp = clone(this.getRowType());
+      const tmp = this.getRowType().clone();
       tmp.set(new String().set(item));
       return tmp;
     // @ts-ignore
 
     } else if (this.isStructured === true && item.getQualifiedName && this.rowType.getQualifiedName && item.getQualifiedName() !== "" && item.getQualifiedName() === this.rowType.getQualifiedName()) {
     // types match, so no need to do conversions, just clone the item
-      const val = clone(item);
+      const val = item.clone();
       return val;
     } else {
-      const tmp = clone(this.getRowType());
+      const tmp = this.getRowType().clone();
       tmp.set(item);
       return tmp;
     }
