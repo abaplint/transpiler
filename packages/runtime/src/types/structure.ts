@@ -1,4 +1,3 @@
-import {clone as cloneAny} from "../clone";
 import {FieldSymbol} from "./field_symbol";
 import {Table} from "./table";
 import {ICharacter} from "./_character";
@@ -26,9 +25,6 @@ export class Structure {
   public clone(): Structure {
     const newValues: {[key: string]: any} = {};
     for (const key in this.value) {
-      if (this.value[key] === undefined) {
-        throw new Error("Structure, clone: value is undefined, field " + key);
-      }
       newValues[key] = this.value[key].clone();
     }
 
@@ -75,7 +71,7 @@ export class Structure {
       for (let i = 0; i < keys1.length; i++) {
         const key1 = keys1[i];
         const key2 = keys2[i];
-        this.value[key2].set(cloneAny(obj[key1]));
+        this.value[key2].set(obj[key1].clone());
       }
     } else {
       this.setCharacter(input);

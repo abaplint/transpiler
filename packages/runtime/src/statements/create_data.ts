@@ -1,4 +1,3 @@
-import {clone} from "../clone";
 import {throwError} from "../throw_error";
 import {ABAPObject, Character, DataReference, Date, String, FieldSymbol, Float, Integer, Structure, Table, Time, XString, Hex, Packed, Numc, Integer8, UTCLong} from "../types";
 import {ICharacter} from "../types/_character";
@@ -37,7 +36,7 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
     // @ts-ignore
     if (abap.DDIC[options.name.trimEnd()]) {
       // @ts-ignore
-      target.assign(clone(abap.DDIC[options.name.trimEnd()].type));
+      target.assign(abap.DDIC[options.name.trimEnd()].type.clone());
     } else if (options.name.includes("=>")) {
       const [className, typeName] = options.name.trimEnd().toUpperCase().split("=>");
 
@@ -51,7 +50,7 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
       }
 
       // @ts-ignore
-      target.assign(clone(abap.Classes[className][typeName.toLowerCase()]));
+      target.assign(abap.Classes[className][typeName.toLowerCase()].clone());
     } else if (options.name.startsWith("\\TYPE=%")) {
       // currently, only the runtime knows the references to the anonymous types
       // @ts-ignore
@@ -92,7 +91,7 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
     }
     if (options.typeLineOf === true) {
       // @ts-ignore
-      target.assign(clone(target.getPointer().getRowType()));
+      target.assign(target.getPointer().getRowType().clone());
     }
   } else if (options?.typeName) {
     switch (options.typeName) {
@@ -164,7 +163,7 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
           // @ts-ignore
         if (abap.DDIC[options.typeName.trimEnd()]) {
           // @ts-ignore
-          target.assign(clone(abap.DDIC[options.typeName.trimEnd()].type));
+          target.assign(abap.DDIC[options.typeName.trimEnd()].type.clone());
         }
         else if (options.typeName.includes("=>")) {
           const [className, typeName] = options.typeName.toUpperCase().split("=>");
@@ -179,24 +178,24 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
           }
 
           // @ts-ignore
-          target.assign(clone(abap.Classes[className][typeName.toLowerCase().trimEnd()]));
+          target.assign(abap.Classes[className][typeName.toLowerCase().trimEnd()].clone());
         } else {
           throw "CREATE DATA, unknown type " + options.typeName;
         }
     }
   } else if (options?.type) {
-    target.assign(clone(options.type as any));
+    target.assign(options.type.clone() as any);
   } else if (options?.likeLineOf) {
     if (options.likeLineOf instanceof FieldSymbol) {
       options.likeLineOf = options.likeLineOf.getPointer() as Table;
     }
-    target.assign(clone(options.likeLineOf.getRowType()));
+    target.assign(options.likeLineOf.getRowType().clone());
   } else if (options?.like) {
     if (options.like instanceof FieldSymbol) {
       options.like = options.like.getPointer();
     }
-    target.assign(clone(options.like));
+    target.assign(options.like.clone());
   } else {
-    target.assign(clone(target.getType()));
+    target.assign(target.getType()?.clone());
   }
 }

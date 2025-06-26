@@ -38,6 +38,8 @@ import {test32} from "./test32";
 import {test33} from "./test33";
 import {test34} from "./test34";
 import {test35} from "./test35";
+import {test36} from "./test36";
+import {test37} from "./test37";
 
 // NOTE: does not run via Mocha
 
@@ -88,6 +90,8 @@ const tests: Tests = [
   {name: "33: Compare Hex", abap: test33},
   {name: "34: Basic CONCATENATE", abap: test34},
   {name: "35: gt", abap: test35},
+  {name: "36: CLEAR char", abap: test36},
+  {name: "37: CLEAR numc", abap: test37},
 ];
 
 async function execute(t: Test) {
