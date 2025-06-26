@@ -5,6 +5,9 @@ import {INumeric} from "./_numeric";
 import {throwError} from "../throw_error";
 import {Float} from "./float";
 
+const initialValues: {[length: number]: string} = {};
+const regexCharacters = /[a-zA-Z]/g;
+
 export class Numc implements ICharacter {
   private value: string;
   private readonly length: number;
@@ -28,10 +31,13 @@ export class Numc implements ICharacter {
   }
 
   public set(value: INumeric | ICharacter | Hex | string | number, raw = false) {
-    if (typeof value === "number") {
+    if (value instanceof Numc && value.getLength() === this.length) {
+      this.value = value.get();
+      return this;
+    } else if (typeof value === "number") {
       this.value = Math.trunc(value) + "";
     } else if (typeof value === "string") {
-      value = value.trim().replace(/[a-zA-Z]/g, "");
+      value = value.trim().replace(regexCharacters, "");
       if (value === "") {
         this.clear();
       } else {
@@ -61,7 +67,10 @@ export class Numc implements ICharacter {
   }
 
   public clear(): void {
-    this.value = "0".repeat(this.length);
+    if (initialValues[this.length] === undefined) {
+      initialValues[this.length] = "0".repeat(this.length);
+    }
+    this.value = initialValues[this.length];
   }
 
   public get(): string {
