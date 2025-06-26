@@ -6,6 +6,7 @@ import {throwError} from "../throw_error";
 import {Float} from "./float";
 
 const initialValues: {[length: number]: string} = {};
+const regexCharacters = /[a-zA-Z]/g;
 
 export class Numc implements ICharacter {
   private value: string;
@@ -33,7 +34,7 @@ export class Numc implements ICharacter {
     if (typeof value === "number") {
       this.value = Math.trunc(value) + "";
     } else if (typeof value === "string") {
-      value = value.trim().replace(/[a-zA-Z]/g, "");
+      value = value.trim().replace(regexCharacters, "");
       if (value === "") {
         this.clear();
       } else {
