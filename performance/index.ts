@@ -38,8 +38,8 @@ import {test32} from "./test32";
 import {test33} from "./test33";
 import {test34} from "./test34";
 import {test35} from "./test35";
-import {test36} from "./test35";
-import {test37} from "./test35";
+import {test36} from "./test36";
+import {test37} from "./test37";
 
 // NOTE: does not run via Mocha
 
