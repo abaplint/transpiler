@@ -5,6 +5,8 @@ import {INumeric} from "./_numeric";
 import {throwError} from "../throw_error";
 import {Float} from "./float";
 
+const initialValues: {[length: number]: string} = {};
+
 export class Numc implements ICharacter {
   private value: string;
   private readonly length: number;
@@ -61,7 +63,10 @@ export class Numc implements ICharacter {
   }
 
   public clear(): void {
-    this.value = "0".repeat(this.length);
+    if (initialValues[this.length] === undefined) {
+      initialValues[this.length] = "0".repeat(this.length);
+    }
+    this.value = initialValues[this.length];
   }
 
   public get(): string {
