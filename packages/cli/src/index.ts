@@ -56,12 +56,6 @@ async function loadLib(config: ITranspilerConfig): Promise<Transpiler.IFile[]> {
           continue;
         }
         filesToRead.push(filename);
-        /*
-        const contents = fs.readFileSync(filename, "utf8");
-        filename = path.basename(filename);
-        files.push({filename, contents});
-        count++;
-        */
       }
     }
     files = await FileOperations.readAllFiles(filesToRead, "");
