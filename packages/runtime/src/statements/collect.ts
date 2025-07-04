@@ -11,7 +11,7 @@ export function collect(source: ICharacter | Table, target?: Table) {
     if (read.subrc === 4) {
       insertInternal({table: source, data: source.getHeader()});
     }
-  } else if (target) {
+  } else if (target !== undefined) {
     const read = readTable(target, {withKey: (i) => {return eq(i.table_line, source);}});
     if (read.subrc === 4) {
       insertInternal({table: target, data: source});

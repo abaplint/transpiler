@@ -25,9 +25,9 @@ export class CollectTranspiler implements IStatementTranspiler {
 
     return new Chunk()
       .appendString("abap.statements.collect(")
-      .appendChunk(target)
-      .appendString(",")
       .appendChunk(source)
+      .appendString(",")
+      .appendChunk(target)
       .appendString(");");
   }
 
