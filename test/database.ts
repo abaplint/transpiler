@@ -848,6 +848,19 @@ CLEAR t100.`;
     });
   });
 
+  it("basic TABLES with SELECT loop", async () => {
+    const code = `
+TABLES t100.
+SELECT * FROM t100.
+ENDSELECT.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    await runAllDatabases(abap, files, () => {
+      // just check it compiles and runs
+    });
+  });
+
   it("DESCENDING", async () => {
     const code = `
 DATA ls_t100 TYPE t100.
