@@ -10,7 +10,6 @@ import {Chunk} from "./chunk";
 import {ConstantTranspiler} from "./expressions";
 import {ITranspilerOptions} from "./types";
 import {DEFAULT_KEYWORDS} from "./keywords";
-import {FEATURE_FLAGS} from "./feature_flags";
 
 export class Traversal {
   private readonly spaghetti: abaplint.ISpaghettiScope;
@@ -477,7 +476,7 @@ export class Traversal {
       }
 
       let privateHash = "";
-      if (FEATURE_FLAGS.private === true && a.getVisibility() === abaplint.Visibility.Private) {
+      if (a.getVisibility() === abaplint.Visibility.Private) {
         privateHash = "#";
       }
       const methodName = privateHash + Traversal.escapeNamespace(name.replace("~", "$"));

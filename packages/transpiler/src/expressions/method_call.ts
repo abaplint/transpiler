@@ -3,7 +3,6 @@ import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {MethodCallParamTranspiler} from "./method_call_param";
 import {Chunk} from "../chunk";
-import {FEATURE_FLAGS} from "../feature_flags";
 
 export class MethodCallTranspiler implements IExpressionTranspiler {
 
@@ -28,8 +27,7 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
 
     name = Traversal.escapeNamespace(name.replace("~", "$"))!;
 
-    if (FEATURE_FLAGS.private === true
-        && m?.def.getVisibility() === Visibility.Private
+    if (m?.def.getVisibility() === Visibility.Private
         && m.def.isStatic() === false) {
       const id = scope?.getParent()?.getParent()?.getIdentifier();
       if (id?.stype === ScopeType.ClassImplementation
