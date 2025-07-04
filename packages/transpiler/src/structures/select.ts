@@ -16,8 +16,12 @@ export class SelectTranspiler implements IStructureTranspiler {
     }
     const concat = selectStatement.concatTokens().toUpperCase();
     const from = selectStatement.findFirstExpression(abaplint.Expressions.SQLFromSource)?.concatTokens().toUpperCase();
-    const intoName = new SQLTargetTranspiler().transpile(
-      selectStatement.findFirstExpression(abaplint.Expressions.SQLTarget)!, traversal).getCode();
+    const sTarget = selectStatement.findFirstExpression(abaplint.Expressions.SQLTarget);
+    if (sTarget === undefined) {
+      console.log(node.concatTokens());
+      throw "Structure, select loop target not found";
+    }
+    const intoName = new SQLTargetTranspiler().transpile(sTarget, traversal).getCode();
 
     // note: this implementation SELECTs everything into memory, which might be bad, and sometimes not correct
     const targetName = UniqueIdentifier.get();
