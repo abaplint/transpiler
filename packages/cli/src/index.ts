@@ -23,8 +23,8 @@ class Progress implements Transpiler.IProgress {
   }
 }
 
-function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
-  const files: Transpiler.IFile[] = [];
+async function loadLib(config: ITranspilerConfig): Promise<Transpiler.IFile[]> {
+  let files: Transpiler.IFile[] = [];
   if (config.lib && config.lib !== "" && config.libs === undefined) {
     config.libs = [{url: config.lib}];
   }
@@ -42,7 +42,6 @@ function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
       cleanupFolder = true;
     }
 
-    let count = 0;
     let patterns = ["/src/**"];
     if (l.files !== undefined && typeof l.files === "string" && l.files !== "") {
       patterns = [l.files];
@@ -50,18 +49,24 @@ function loadLib(config: ITranspilerConfig): Transpiler.IFile[] {
       patterns = l.files;
     }
 
+    const filesToRead: string[] = [];
     for (const pattern of patterns) {
-      for (let filename of glob.sync(dir + pattern, {nosort: true, nodir: true})) {
+      for (const filename of glob.sync(dir + pattern, {nosort: true, nodir: true})) {
         if (filename.endsWith(".clas.testclasses.abap")) {
           continue;
         }
+        filesToRead.push(filename);
+        /*
         const contents = fs.readFileSync(filename, "utf8");
         filename = path.basename(filename);
         files.push({filename, contents});
         count++;
+        */
       }
     }
-    console.log("\t" + count + " files added from lib");
+    files = await FileOperations.readAllFiles(filesToRead, "");
+
+    console.log("\t" + filesToRead.length + " files added from lib");
     if (cleanupFolder === true) {
       FileOperations.deleteFolderRecursive(dir);
     }
@@ -109,7 +114,7 @@ async function run() {
   console.log("Transpiler CLI");
 
   const config = TranspilerConfig.find(process.argv[2]);
-  const libFiles = loadLib(config);
+  const libFiles = await loadLib(config);
   const files = await FileOperations.loadFiles(config);
 
   console.log("\nBuilding");

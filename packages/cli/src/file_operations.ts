@@ -27,7 +27,7 @@ export class FileOperations {
     return pLimit(concurrency);
   }
 
-  private static async readAllFiles(filesToRead: string[], outputFolder: string) {
+  public static async readAllFiles(filesToRead: string[], outputFolder: string) {
     const limit = this.setupPLimit();
     const promises = filesToRead.map((filename) => {
       return limit(async () => {
