@@ -92,6 +92,7 @@ export class Transpiler {
 // ///////////////////////////////
 
   protected validate(reg: abaplint.IRegistry): void {
+    console.dir(reg.getObject("TYPE", "CNTB"));
     const issues = new Validation(this.options).run(reg);
     if (issues.length > 0) {
       const messages = issues.map(i => i.getKey() + ", " +

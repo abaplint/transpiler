@@ -24,7 +24,7 @@ class Progress implements Transpiler.IProgress {
 }
 
 async function loadLib(config: ITranspilerConfig): Promise<Transpiler.IFile[]> {
-  let files: Transpiler.IFile[] = [];
+  const files: Transpiler.IFile[] = [];
   if (config.lib && config.lib !== "" && config.libs === undefined) {
     config.libs = [{url: config.lib}];
   }
@@ -58,7 +58,7 @@ async function loadLib(config: ITranspilerConfig): Promise<Transpiler.IFile[]> {
         filesToRead.push(filename);
       }
     }
-    files = await FileOperations.readAllFiles(filesToRead, "");
+    files.push(...await FileOperations.readAllFiles(filesToRead, ""));
 
     console.log("\t" + filesToRead.length + " files added from lib");
     if (cleanupFolder === true) {
