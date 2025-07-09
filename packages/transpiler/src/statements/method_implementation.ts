@@ -6,7 +6,6 @@ import {Traversal} from "../traversal";
 import {ConstantTranspiler, FieldChainTranspiler} from "../expressions";
 import {Chunk} from "../chunk";
 import {UniqueIdentifier} from "../unique_identifier";
-import {FEATURE_FLAGS} from "../feature_flags";
 
 export class MethodImplementationTranspiler implements IStatementTranspiler {
 
@@ -129,8 +128,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
 
     // https://github.com/tc39/proposal-class-fields
     let isPrivate = "";
-    if (FEATURE_FLAGS.private === true
-        && method?.getVisibility() === abaplint.Visibility.Private
+    if (method?.getVisibility() === abaplint.Visibility.Private
         && method.isStatic() === false) {
       isPrivate = "#";
     }
