@@ -7,7 +7,7 @@ import {TranspileTypes} from "../transpile_types";
 export class RangesTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    const token = node.findFirstExpression(abaplint.Expressions.SimpleName)?.getFirstToken();
+    const token = node.findFirstExpression(abaplint.Expressions.DefinitionName)?.getFirstToken();
     if (token === undefined) {
       throw new Error("RangesTranspiler, token not found");
     }

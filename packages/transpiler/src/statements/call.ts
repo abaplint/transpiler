@@ -3,7 +3,6 @@ import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {MethodCallBodyTranspiler, MethodSourceTranspiler} from "../expressions";
-import {FEATURE_FLAGS} from "../feature_flags";
 
 export class CallTranspiler implements IStatementTranspiler {
 
@@ -82,8 +81,7 @@ export class CallTranspiler implements IStatementTranspiler {
 
       if (nameToken) {
         const scope = traversal.findCurrentScopeByToken(nameToken);
-        if (FEATURE_FLAGS.private === true
-            && m?.def.getVisibility() === abaplint.Visibility.Private
+        if (m?.def.getVisibility() === abaplint.Visibility.Private
             && m.def.isStatic() === false) {
           const id = scope?.getParent()?.getParent()?.getIdentifier();
           if (id?.stype === abaplint.ScopeType.ClassImplementation
