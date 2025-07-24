@@ -457,14 +457,13 @@ export class Table implements ITable {
     if (this.options?.withHeader === true) {
       this.header?.set(tab);
     } else {
-      if (!(tab instanceof Table)
-          && !(tab instanceof FieldSymbol)
-          && !(tab instanceof HashedTable)) {
-        throw new Error("Table, set error");
-      }
-
       if (tab instanceof FieldSymbol) {
         tab = tab.getPointer();
+      }
+
+      if (!(tab instanceof Table)
+          && !(tab instanceof HashedTable)) {
+        throw new Error("Table, set error");
       }
 
       if (tab === this) {
