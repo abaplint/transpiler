@@ -452,12 +452,14 @@ export class Table implements ITable {
     this.secondaryIndexes = {};
   }
 
-  public set(tab: Table | TableRowType) {
+  public set(tab: Table | HashedTable | TableRowType) {
     this.secondaryIndexes = {};
     if (this.options?.withHeader === true) {
       this.header?.set(tab);
     } else {
-      if (!(tab instanceof Table) && !(tab instanceof FieldSymbol)) {
+      if (!(tab instanceof Table)
+          && !(tab instanceof FieldSymbol)
+          && !(tab instanceof HashedTable)) {
         throw new Error("Table, set error");
       }
 
