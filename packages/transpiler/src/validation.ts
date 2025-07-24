@@ -24,6 +24,7 @@ export const config: IConfig = {
     "parser_error": true,
     "allowed_object_types": {
       "allowed": [
+        "APIS",
         "AUTH",
         "CLAS",
         "DEVC",
