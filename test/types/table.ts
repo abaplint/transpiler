@@ -561,4 +561,17 @@ WRITE / lines( <fs> ).`;
     expect(abap.console.get()).to.equal("0");
   });
 
+  it.only("set standard from hashed", async () => {
+    const code = `
+DATA stab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA htab TYPE HASHED TABLE OF i WITH UNIQUE KEY table_line.
+INSERT 1 INTO TABLE htab.
+stab = htab.
+WRITE / lines( stab ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });
