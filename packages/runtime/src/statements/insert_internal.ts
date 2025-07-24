@@ -8,7 +8,7 @@ import {sort} from "./sort";
 export interface IInsertInternalOptions {
   index?: INumeric,
   initial?: boolean,
-  data?: INumeric | ICharacter | Structure | ABAPObject | Table | FieldSymbol | string,
+  data?: INumeric | ICharacter | Structure | ABAPObject | Table | HashedTable | FieldSymbol | string,
   table: Table | HashedTable | FieldSymbol,
   referenceInto?: DataReference,
   assigning?: FieldSymbol,
