@@ -1,6 +1,7 @@
 import {expect} from "chai";
 import {ABAP, MemoryConsole} from "../../packages/runtime/src";
 import {AsyncFunction, compileFiles, runFiles} from "../_utils";
+import {FEATURE_FLAGS} from "../../packages/transpiler/src/feature_flags";
 
 let abap: ABAP;
 
@@ -2293,6 +2294,10 @@ START-OF-SELECTION.
   });
 
   it("multiple private attributes inherited with same name", async () => {
+    if (FEATURE_FLAGS.PRIVATE_ATTRIBUTES === false) {
+      return;
+    }
+
     const code = `
 CLASS top DEFINITION.
   PUBLIC SECTION.
