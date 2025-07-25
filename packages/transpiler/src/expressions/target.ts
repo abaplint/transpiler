@@ -1,14 +1,19 @@
 import {Expressions, Nodes} from "@abaplint/core";
+import * as abaplint from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {FieldLengthTranspiler, FieldOffsetTranspiler, FieldSymbolTranspiler} from ".";
 import {Chunk} from "../chunk";
+import {FEATURE_FLAGS} from "../feature_flags";
 
 export class TargetTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     const offset: string[] = [];
     let ret = new Chunk();
+    let context: abaplint.AbstractType | undefined = undefined;
+
+    const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
 
     const children = node.getChildren();
     for (let i = 0; i < children.length; i++) {
@@ -18,6 +23,8 @@ export class TargetTranspiler implements IExpressionTranspiler {
       if (c.get() instanceof Expressions.TargetField) {
         const prefix = traversal.prefixAndName(c.getFirstToken()).replace("~", "$");
         ret.append(Traversal.prefixVariable(Traversal.escapeNamespace(prefix)!), c, traversal);
+
+        context = scope?.findVariable(c.getFirstToken().getStr())?.getType();
       } else if (c.get() instanceof Expressions.ClassName) {
         const name = traversal.lookupClassOrInterface(c.getFirstToken().getStr(), c.getFirstToken());
         ret.append(name, c, traversal);
@@ -29,8 +36,17 @@ export class TargetTranspiler implements IExpressionTranspiler {
           ret.append(`.` + name, c, traversal);
         }
       } else if (c.get() instanceof Expressions.AttributeName) {
+        let prefix = "";
+        if (context instanceof abaplint.BasicTypes.ObjectReferenceType) {
+          const cdef = traversal.findClassDefinition(context.getIdentifierName(), scope);
+          const attr = cdef?.getAttributes().findByName(c.getFirstToken().getStr());
+          if (FEATURE_FLAGS.PRIVATE_ATTRIBUTES === true
+              && attr?.getVisibility() === abaplint.Visibility.Private) {
+            prefix = "#";
+          }
+        }
         const intf = Traversal.escapeNamespace(traversal.isInterfaceAttribute(c.getFirstToken()));
-        let name = Traversal.escapeNamespace(c.getFirstToken().getStr())!.replace("~", "$").toLowerCase();
+        let name = prefix + Traversal.escapeNamespace(c.getFirstToken().getStr())!.replace("~", "$").toLowerCase();
         if (intf && name.startsWith(intf) === false) {
           name = intf + "$" + name;
         }

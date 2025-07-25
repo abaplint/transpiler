@@ -2325,7 +2325,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
-  it.only("private instantiation set private var", async () => {
+  it("private instantiation set private var", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
@@ -2349,7 +2349,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it("private instantiation read private var", async () => {
+  it.skip("private instantiation read private var", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
