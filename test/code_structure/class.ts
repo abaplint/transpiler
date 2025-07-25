@@ -2349,4 +2349,28 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("private instantiation read private var", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS create RETURNING VALUE(ref) TYPE REF TO lcl.
+  PRIVATE SECTION.
+    DATA mv TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD create.
+    CREATE OBJECT ref.
+    WRITE ref->mv.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>create( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
