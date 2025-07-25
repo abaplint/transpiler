@@ -3,6 +3,7 @@ import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
 import {TranspileTypes} from "../transpile_types";
 import {Chunk} from "../chunk";
+import {FEATURE_FLAGS} from "../feature_flags";
 
 export class ClassImplementationTranspiler implements IStructureTranspiler {
 
@@ -88,6 +89,25 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     return ret;
   }
 
+  private buildPrivate(node: abaplint.Nodes.ExpressionNode | undefined, traversal: Traversal): string {
+    if (node === undefined || FEATURE_FLAGS.PRIVATE_ATTRIBUTES === false) {
+      return "";
+    }
+
+    const cdef = traversal.getClassDefinition(node.getFirstToken());
+    if (cdef === undefined) {
+      return "ERROR_CDEF_NOT_FOUND";
+    }
+
+    let ret = "";
+    for (const attr of cdef.getAttributes().getAll()) {
+      if (attr.getVisibility() === abaplint.Visibility.Private) {
+        ret += "#" + Traversal.escapeNamespace(attr.getName().toLowerCase()) + ";\n";
+      }
+    }
+    return ret;
+  }
+
   /** this builds the part after the class, containing the static variables/constants */
   private buildStatic(node: abaplint.Nodes.ExpressionNode | undefined, traversal: Traversal): string {
     if (node === undefined) {
@@ -166,8 +186,11 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     if (ret === "") {
       return ret;
     }
+
+    const privates = this.buildPrivate(node.findFirstExpression(abaplint.Expressions.ClassName), traversal);
+
 // note: for CALL TRANSFORMATION, its nice that the values are initialized by the JS constructor,
-    return "constructor() {\n" + ret + "}\n";
+    return privates + "constructor() {\n" + ret + "}\n";
   }
 
 }
