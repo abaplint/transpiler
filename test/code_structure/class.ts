@@ -2373,4 +2373,29 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it.only("read private via me", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS run.
+  PRIVATE SECTION.
+    DATA var TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    WRITE me->var.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl.
+  CREATE OBJECT ref.
+  ref->run( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
