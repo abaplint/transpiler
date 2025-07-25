@@ -2292,7 +2292,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
-  it.only("multiple private attributes inherited with same name", async () => {
+  it("multiple private attributes inherited with same name", async () => {
     const code = `
 CLASS top DEFINITION.
   PUBLIC SECTION.
@@ -2320,7 +2320,6 @@ START-OF-SELECTION.
   WRITE lo->call( ).`;
 
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");

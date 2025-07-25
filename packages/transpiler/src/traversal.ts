@@ -10,7 +10,7 @@ import {Chunk} from "./chunk";
 import {ConstantTranspiler} from "./expressions";
 import {ITranspilerOptions} from "./types";
 import {DEFAULT_KEYWORDS} from "./keywords";
-import { FEATURE_FLAGS } from "./feature_flags";
+import {FEATURE_FLAGS} from "./feature_flags";
 
 export class Traversal {
   private readonly spaghetti: abaplint.ISpaghettiScope;
@@ -159,6 +159,25 @@ export class Traversal {
     return undefined;
   }
 
+  private isPrivateAttribute(token: abaplint.Token): boolean {
+    const scope = this.findCurrentScopeByToken(token);
+    if (scope === undefined) {
+      throw new Error("isPrivateAttribute, unable to lookup position");
+    }
+
+    const name = token.getStr();
+    if (name.toLowerCase() === "me") {
+      return false;
+    }
+    const found = scope.findVariable(name);
+    console.dir(found);
+    if (found instanceof abaplint.Types.ClassAttribute
+        && found.getVisibility() === abaplint.Visibility.Private) {
+      return true;
+    }
+    return false;
+  }
+
   private isClassAttribute(token: abaplint.Token): boolean {
     const scope = this.findCurrentScopeByToken(token);
     if (scope === undefined) {
@@ -201,7 +220,11 @@ export class Traversal {
     } else if (name === "super") {
       return name;
     } else if (this.isClassAttribute(t)) {
-      name = "this." + Traversal.escapeNamespace(name);
+      let escaped = Traversal.escapeNamespace(name);
+      if (FEATURE_FLAGS.PRIVATE_ATTRIBUTES === true && this.isPrivateAttribute(t)) {
+        escaped = "#" + escaped;
+      }
+      name = "this." + escaped;
     } else if (this.isBuiltinVariable(t)) {
       name = "abap.builtin." + name.toLowerCase().replace("%", "$");
     } else if (this.isTypePool(t)) {
