@@ -170,7 +170,6 @@ export class Traversal {
       return false;
     }
     const found = scope.findVariable(name);
-    console.dir(found);
     if (found instanceof abaplint.Types.ClassAttribute
         && found.getVisibility() === abaplint.Visibility.Private) {
       return true;
