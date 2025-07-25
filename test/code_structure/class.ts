@@ -2325,4 +2325,52 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("private instantiation set private var", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS create RETURNING VALUE(ref) TYPE REF TO lcl.
+  PRIVATE SECTION.
+    DATA mv TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD create.
+    CREATE OBJECT ref.
+    ref->mv = 2.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>create( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it.skip("private instantiation read private var", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS create RETURNING VALUE(ref) TYPE REF TO lcl.
+  PRIVATE SECTION.
+    DATA mv TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD create.
+    CREATE OBJECT ref.
+    WRITE ref->mv.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>create( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
