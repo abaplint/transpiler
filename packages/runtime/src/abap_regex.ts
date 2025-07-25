@@ -49,6 +49,7 @@ export class ABAPRegExp {
       r = ABAPRegExp.convert(r);
     } else if (r.constructor.name === "cl_abap_regex") {
       const obj = r;
+      // TODO: tackle the "mv_" variables properly, this is a workaround
       // @ts-ignore
       r = obj.mv_pattern.get();
       // @ts-ignore
