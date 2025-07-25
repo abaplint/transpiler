@@ -1,9 +1,11 @@
 import {Expressions, Nodes} from "@abaplint/core";
+import * as abaplint from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {FieldLengthTranspiler, FieldOffsetTranspiler} from ".";
 import {Traversal} from "../traversal";
 import {FieldSymbolTranspiler} from "./field_symbol";
 import {Chunk} from "../chunk";
+import {FEATURE_FLAGS} from "../feature_flags";
 
 export class FieldChainTranspiler implements IExpressionTranspiler {
   private readonly addGet: boolean;
@@ -17,12 +19,16 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
     const ret = new Chunk();
     const extra: string[] = [];
     let interfaceNameAdded = false;
+    let context: abaplint.AbstractType | undefined = undefined;
+    const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
 
     for (const c of node.getChildren()) {
       if (c.get() instanceof Expressions.SourceField
           || c.get() instanceof Expressions.Field) {
         const name = traversal.prefixAndName(c.getFirstToken(), filename).replace("~", "$");
         ret.append(Traversal.prefixVariable(Traversal.escapeNamespace(name)!), c, traversal);
+
+        context = scope?.findVariable(c.getFirstToken().getStr())?.getType();
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.SourceFieldSymbol) {
         ret.appendChunk(new FieldSymbolTranspiler().transpile(c, traversal));
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.ClassName) {
@@ -33,8 +39,18 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
           interfaceNameAdded = true;
         }
       } else if (c.get() instanceof Expressions.AttributeName) {
+        let pprefix = "";
+        if (context instanceof abaplint.BasicTypes.ObjectReferenceType) {
+          const cdef = traversal.findClassDefinition(context.getIdentifierName(), scope);
+          const attr = cdef?.getAttributes().findByName(c.getFirstToken().getStr());
+          if (FEATURE_FLAGS.PRIVATE_ATTRIBUTES === true
+              && attr?.getVisibility() === abaplint.Visibility.Private) {
+            pprefix = "#";
+          }
+        }
+
         const interfaceName = traversal.isInterfaceAttribute(c.getFirstToken());
-        let name = c.getFirstToken().getStr()!.toLowerCase();
+        let name = pprefix + c.getFirstToken().getStr()!.toLowerCase();
         if (prefix && interfaceName && name.startsWith(interfaceName) === false && interfaceNameAdded === false) {
           name = Traversal.escapeNamespace(name)!.replace("~", "$");
           name = Traversal.escapeNamespace(interfaceName) + "$" + name;

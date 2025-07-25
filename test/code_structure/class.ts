@@ -2349,7 +2349,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.skip("private instantiation read private var", async () => {
+  it("private instantiation read private var", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
@@ -2367,6 +2367,31 @@ ENDCLASS.
 
 START-OF-SELECTION.
   lcl=>create( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("read private via me", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS run.
+  PRIVATE SECTION.
+    DATA var TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    WRITE me->var.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl.
+  CREATE OBJECT ref.
+  ref->run( ).`;
 
     const js = await run(code);
     const f = new AsyncFunction("abap", js);

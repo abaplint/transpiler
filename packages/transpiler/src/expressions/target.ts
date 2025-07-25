@@ -12,7 +12,6 @@ export class TargetTranspiler implements IExpressionTranspiler {
     const offset: string[] = [];
     let ret = new Chunk();
     let context: abaplint.AbstractType | undefined = undefined;
-
     const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
 
     const children = node.getChildren();
