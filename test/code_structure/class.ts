@@ -2292,4 +2292,37 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
+  it.only("multiple private attributes inherited with same name", async () => {
+    const code = `
+CLASS top DEFINITION.
+  PUBLIC SECTION.
+    METHODS call RETURNING VALUE(result) TYPE i.
+  PRIVATE SECTION.
+    DATA foo TYPE i VALUE 2.
+ENDCLASS.
+CLASS top IMPLEMENTATION.
+  METHOD call.
+    result = foo.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS sub DEFINITION INHERITING FROM top.
+  PUBLIC SECTION.
+  PRIVATE SECTION.
+    DATA foo TYPE i VALUE 1.
+ENDCLASS.
+CLASS sub IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO sub.
+  CREATE OBJECT lo.
+  WRITE lo->call( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
