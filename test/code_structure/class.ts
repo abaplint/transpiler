@@ -2349,7 +2349,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.skip("private instantiation read private var", async () => {
+  it("private instantiation read private var", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
@@ -2373,7 +2373,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.only("read private via me", async () => {
+  it("read private via me", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
