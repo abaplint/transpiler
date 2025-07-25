@@ -10,6 +10,7 @@ import {Chunk} from "./chunk";
 import {ConstantTranspiler} from "./expressions";
 import {ITranspilerOptions} from "./types";
 import {DEFAULT_KEYWORDS} from "./keywords";
+import { FEATURE_FLAGS } from "./feature_flags";
 
 export class Traversal {
   private readonly spaghetti: abaplint.ISpaghettiScope;
@@ -452,14 +453,18 @@ export class Traversal {
   private buildThisAttributes(def: abaplint.IClassDefinition, cName: string | undefined): string {
     let ret = "";
     for (const a of def.getAttributes()?.getAll() || []) {
-      const escaped = Traversal.escapeNamespace(a.getName().toLowerCase());
+      let escaped = Traversal.escapeNamespace(a.getName().toLowerCase());
       if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
         ret += "this." + escaped + " = " + cName + "." + escaped + ";\n";
-        continue;
+      } else {
+        if (FEATURE_FLAGS.PRIVATE_ATTRIBUTES === true
+            && a.getVisibility() === abaplint.Visibility.Private) {
+          escaped = "#" + escaped;
+        }
+        const name = "this." + escaped;
+        ret += name + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
+        ret += this.setValues(a, name);
       }
-      const name = "this." + escaped;
-      ret += name + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
-      ret += this.setValues(a, name);
     }
     return ret;
   }
