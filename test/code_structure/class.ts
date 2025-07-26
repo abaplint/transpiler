@@ -2437,4 +2437,38 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("attribute friends access, target", async () => {
+    const code = `
+CLASS fri DEFINITION DEFERRED.
+
+CLASS lcl DEFINITION FRIENDS fri.
+  PRIVATE SECTION.
+    DATA var TYPE i.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+CLASS fri DEFINITION .
+  PUBLIC SECTION.
+    METHODS run.
+ENDCLASS.
+
+CLASS fri IMPLEMENTATION.
+  METHOD run.
+    DATA ref TYPE REF TO lcl.
+    CREATE OBJECT ref.
+    ref->var = 2.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA f TYPE REF TO fri.
+  CREATE OBJECT f.
+  f->run( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

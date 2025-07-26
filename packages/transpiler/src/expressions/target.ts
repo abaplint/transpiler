@@ -36,16 +36,24 @@ export class TargetTranspiler implements IExpressionTranspiler {
         }
       } else if (c.get() instanceof Expressions.AttributeName) {
         let prefix = "";
+        let postfix = ""
         if (context instanceof abaplint.BasicTypes.ObjectReferenceType) {
           const cdef = traversal.findClassDefinition(context.getIdentifierName(), scope);
           const attr = cdef?.getAttributes().findByName(c.getFirstToken().getStr());
           if (FEATURE_FLAGS.PRIVATE_ATTRIBUTES === true
               && attr?.getVisibility() === abaplint.Visibility.Private) {
-            prefix = "#";
+            const id = scope?.getParent()?.getParent()?.getIdentifier();
+            if (id?.stype === abaplint.ScopeType.ClassImplementation
+                && cdef?.getName().toUpperCase() === id.sname.toUpperCase()) {
+              prefix = "#";
+            } else {
+              prefix = `FRIENDS_ACCESS_INSTANCE["`;
+              postfix = `"]`;
+            }
           }
         }
         const intf = Traversal.escapeNamespace(traversal.isInterfaceAttribute(c.getFirstToken()));
-        let name = prefix + Traversal.escapeNamespace(c.getFirstToken().getStr())!.replace("~", "$").toLowerCase();
+        let name = prefix + Traversal.escapeNamespace(c.getFirstToken().getStr())!.replace("~", "$").toLowerCase() + postfix;
         if (intf && name.startsWith(intf) === false) {
           name = intf + "$" + name;
         }
