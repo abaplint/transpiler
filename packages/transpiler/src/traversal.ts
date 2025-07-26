@@ -486,6 +486,9 @@ export class Traversal {
         const name = "this." + escaped;
         ret += name + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
         ret += this.setValues(a, name);
+        if (escaped?.startsWith("#")) {
+          ret += `this.FRIENDS_ACCESS_INSTANCE["${escaped.replace("#", "")}"] = ${name};\n`;
+        }
       }
     }
     return ret;
@@ -511,7 +514,7 @@ export class Traversal {
       const methodName = privateHash + Traversal.escapeNamespace(name.replace("~", "$"));
       ret += `"${name.replace("~", "$")}": this.${methodName}.bind(this),\n`
     }
-
+/*
     for (const attribute of def.getAttributes()?.getAll() || []) {
       if (attribute.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
         // hmm, is this correct?
@@ -526,6 +529,7 @@ export class Traversal {
       const attributeName = privateHash + Traversal.escapeNamespace(attribute.getName().toLowerCase());
       ret += `"${attribute.getName().toLowerCase()}": this.${attributeName},\n`;
     }
+      */
     ret += "};\n";
     return ret;
   }

@@ -39,18 +39,25 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
           interfaceNameAdded = true;
         }
       } else if (c.get() instanceof Expressions.AttributeName) {
-        let pprefix = "";
+
+        const interfaceName = traversal.isInterfaceAttribute(c.getFirstToken());
+        let name = c.getFirstToken().getStr()!.toLowerCase();
+
         if (context instanceof abaplint.BasicTypes.ObjectReferenceType) {
           const cdef = traversal.findClassDefinition(context.getIdentifierName(), scope);
           const attr = cdef?.getAttributes().findByName(c.getFirstToken().getStr());
           if (FEATURE_FLAGS.PRIVATE_ATTRIBUTES === true
               && attr?.getVisibility() === abaplint.Visibility.Private) {
-            pprefix = "#";
+            const id = scope?.getParent()?.getParent()?.getIdentifier();
+            if (id?.stype === abaplint.ScopeType.ClassImplementation
+                && cdef?.getName().toUpperCase() === id.sname.toUpperCase()) {
+              name = "#" + name;
+            } else {
+              name = `FRIENDS_ACCESS_INSTANCE["${name}"]`;
+            }
           }
         }
 
-        const interfaceName = traversal.isInterfaceAttribute(c.getFirstToken());
-        let name = pprefix + c.getFirstToken().getStr()!.toLowerCase();
         if (prefix && interfaceName && name.startsWith(interfaceName) === false && interfaceNameAdded === false) {
           name = Traversal.escapeNamespace(name)!.replace("~", "$");
           name = Traversal.escapeNamespace(interfaceName) + "$" + name;
