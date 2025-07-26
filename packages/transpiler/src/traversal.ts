@@ -486,6 +486,9 @@ export class Traversal {
         const name = "this." + escaped;
         ret += name + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
         ret += this.setValues(a, name);
+        if (escaped?.startsWith("#")) {
+          ret += `this.FRIENDS_ACCESS_INSTANCE["${escaped.replace("#", "")}"] = ${name};\n`;
+        }
       }
     }
     return ret;
@@ -496,19 +499,36 @@ export class Traversal {
     if (hasSuperClass === true) {
       ret += `"SUPER": sup.FRIENDS_ACCESS_INSTANCE,\n`;
     }
-    for (const a of def.getMethodDefinitions()?.getAll() || []) {
-      const name = a.getName().toLowerCase();
-      if (name === "constructor" || a.isStatic() === true) {
+    for (const method of def.getMethodDefinitions()?.getAll() || []) {
+      const name = method.getName().toLowerCase();
+      if (name === "constructor" || method.isStatic() === true) {
         continue;
       }
 
       let privateHash = "";
-      if (a.getVisibility() === abaplint.Visibility.Private) {
+      if (method.getVisibility() === abaplint.Visibility.Private) {
         privateHash = "#";
       }
       const methodName = privateHash + Traversal.escapeNamespace(name.replace("~", "$"));
+      // NOTE: currently all are needed in the unit test setup
       ret += `"${name.replace("~", "$")}": this.${methodName}.bind(this),\n`
     }
+/*
+    for (const attribute of def.getAttributes()?.getAll() || []) {
+      if (attribute.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
+        // hmm, is this correct?
+        continue;
+      }
+      let privateHash = "";
+      if (attribute.getVisibility() === abaplint.Visibility.Private) {
+        privateHash = "#";
+      } else {
+        continue;
+      }
+      const attributeName = privateHash + Traversal.escapeNamespace(attribute.getName().toLowerCase());
+      ret += `"${attribute.getName().toLowerCase()}": this.${attributeName},\n`;
+    }
+      */
     ret += "};\n";
     return ret;
   }
