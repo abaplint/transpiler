@@ -1,3 +1,3 @@
 export const FEATURE_FLAGS = {
-  PRIVATE_ATTRIBUTES: false,
+  PRIVATE_ATTRIBUTES: true,
 }
