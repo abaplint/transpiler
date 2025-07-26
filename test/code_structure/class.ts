@@ -2403,7 +2403,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.skip("attribute friends access", async () => {
+  it.only("attribute friends access", async () => {
     const code = `
 CLASS fri DEFINITION DEFERRED.
 
