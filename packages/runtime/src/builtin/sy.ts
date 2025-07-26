@@ -27,4 +27,5 @@ export const sy = new Structure({
   uzeit: new Time(),
   dbsys: new Character(10),
   batch: new Character(1),
+  saprl: new Character(4).set("OPEN"),
 });
