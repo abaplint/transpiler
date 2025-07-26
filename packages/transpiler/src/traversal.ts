@@ -508,10 +508,9 @@ export class Traversal {
       let privateHash = "";
       if (method.getVisibility() === abaplint.Visibility.Private) {
         privateHash = "#";
-      } else {
-        continue;
       }
       const methodName = privateHash + Traversal.escapeNamespace(name.replace("~", "$"));
+      // NOTE: currently all are needed in the unit test setup
       ret += `"${name.replace("~", "$")}": this.${methodName}.bind(this),\n`
     }
 /*
