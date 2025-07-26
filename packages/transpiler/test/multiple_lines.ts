@@ -72,7 +72,6 @@ abap.Classes['PROG-ZFOOBAR-LIF_FOOBAR'] = lif_foobar;`;
     this.me.set(this);
     this.INTERNAL_ID = abap.internalIdCounter++;
     this.FRIENDS_ACCESS_INSTANCE = {
-      "moo": this.moo.bind(this),
     };
   }
   async constructor_(INPUT) {
@@ -112,7 +111,6 @@ abap.Classes['PROG-ZFOOBAR-LCL_FOOBAR'] = lcl_foobar;`;
     this.me.set(this);
     this.INTERNAL_ID = abap.internalIdCounter++;
     this.FRIENDS_ACCESS_INSTANCE = {
-      "moo": this.moo.bind(this),
     };
   }
   async constructor_(INPUT) {
@@ -235,7 +233,6 @@ DATA moo TYPE foo.`;
     this.me.set(this);
     this.INTERNAL_ID = abap.internalIdCounter++;
     this.FRIENDS_ACCESS_INSTANCE = {
-      "run": this.run.bind(this),
     };
     this.bar = new abap.types.Integer({qualifiedName: "I"});
   }
