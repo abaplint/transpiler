@@ -30,4 +30,31 @@ WRITE foo-field.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it.only("sub structures with more fields", async () => {
+    const code = `
+TYPES: BEGIN OF ty1,
+         BEGIN OF sub,
+           field TYPE i,
+           more  TYPE i,
+         END OF sub,
+       END OF ty1.
+
+TYPES: BEGIN OF ty2,
+         BEGIN OF sub,
+           field TYPE i,
+         END OF sub,
+       END OF ty2.
+
+DATA data1 TYPE ty1.
+DATA data2 TYPE ty2.
+
+data1-sub-field = 2.
+MOVE-CORRESPONDING data1 TO data2.
+WRITE / data2-sub-field.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
