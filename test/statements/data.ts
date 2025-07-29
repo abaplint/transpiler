@@ -70,7 +70,7 @@ DATA /foo/bar TYPE i.`;
     await f(abap);
   });
 
-  it.only("DATA: GROUPNAME / INCLUDE TYPE AS", async () => {
+  it("DATA: GROUPNAME / INCLUDE TYPE AS", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          foo TYPE i,
