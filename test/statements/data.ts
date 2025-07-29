@@ -70,4 +70,27 @@ DATA /foo/bar TYPE i.`;
     await f(abap);
   });
 
+  it.only("DATA: GROUPNAME / INCLUDE TYPE AS", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         foo TYPE i,
+       END OF ty.
+TYPES: BEGIN OF groupname.
+         INCLUDE TYPE ty AS gg.
+       TYPES END OF groupname.
+DATA data TYPE groupname.
+
+data-foo = 1.
+WRITE / data-foo.
+WRITE / data-gg-foo.
+
+data-gg-foo = 2.
+WRITE / data-foo.
+WRITE / data-gg-foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n1\n2\n2");
+  });
+
 });
