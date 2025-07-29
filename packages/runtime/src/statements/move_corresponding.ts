@@ -5,13 +5,15 @@ export function moveCorresponding(source: Structure | FieldSymbol, target: Struc
     if (source.isAssigned() === false) {
       throw new Error("GETWA_NOT_ASSIGNED");
     }
-    return moveCorresponding(source.get(), target);
+    moveCorresponding(source.get(), target);
+    return;
   }
   if (target instanceof FieldSymbol) {
     if (target.isAssigned() === false) {
       throw new Error("GETWA_NOT_ASSIGNED");
     }
-    return moveCorresponding(source, target.get());
+    moveCorresponding(source, target.get());
+    return;
   }
 
   for (const n in source.get()) {
