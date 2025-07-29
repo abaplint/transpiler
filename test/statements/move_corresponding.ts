@@ -30,7 +30,7 @@ WRITE foo-field.`;
     expect(abap.console.get()).to.equal("2");
   });
 
-  it.skip("sub structures with more fields", async () => {
+  it("sub structures with more fields", async () => {
     const code = `
 TYPES: BEGIN OF ty1,
          BEGIN OF sub,
