@@ -21,10 +21,10 @@ export class Structure {
     this.suffix = suffix;
     this.asInclude = asInclude;
 
-    this.addExtraGroupFields();
+    this.linkGroupFields();
   }
 
-  private addExtraGroupFields() {
+  private linkGroupFields() {
     for (const as of Object.keys(this.asInclude || {})) {
       for (const field of Object.keys(this.value[as].get())) {
         this.value[field] = this.value[as].get()[field];
