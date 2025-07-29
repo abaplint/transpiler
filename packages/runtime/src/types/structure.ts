@@ -26,8 +26,8 @@ export class Structure {
 
   private linkGroupFields() {
     for (const as of Object.keys(this.asInclude || {})) {
+      const suffix = this.suffix?.[as] || "";
       for (const fieldName of Object.keys(this.value[as].get())) {
-        const suffix = this.suffix?.[as] || "";
         this.value[fieldName + suffix] = this.value[as].get()[fieldName];
       }
     }
