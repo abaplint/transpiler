@@ -1,7 +1,24 @@
-import {Structure} from "../types";
+import {FieldSymbol, Structure} from "../types";
 
-export function moveCorresponding(source: Structure, target: Structure): void {
+export function moveCorresponding(source: Structure | FieldSymbol, target: Structure | FieldSymbol): void {
+  if (source instanceof FieldSymbol) {
+    if (source.isAssigned() === false) {
+      throw new Error("GETWA_NOT_ASSIGNED");
+    }
+    return moveCorresponding(source.get(), target);
+  }
+  if (target instanceof FieldSymbol) {
+    if (target.isAssigned() === false) {
+      throw new Error("GETWA_NOT_ASSIGNED");
+    }
+    return moveCorresponding(source, target.get());
+  }
+
   for (const n in source.get()) {
-    target.get()[n]?.set(source.get()[n]);
+    if (target.get()[n] instanceof Structure) {
+      moveCorresponding(source.get()[n], target.get()[n]);
+    } else {
+      target.get()[n]?.set(source.get()[n]);
+    }
   }
 }
