@@ -1562,7 +1562,7 @@ WRITE sy-dbcnt.`;
     }, {snowflake: false});
   });
 
-  it.only("SELECT dynamic field symbol, IN", async () => {
+  it("SELECT dynamic field symbol, IN", async () => {
     const code = `
 DATA: BEGIN OF val,
         arbgb TYPE RANGE OF t100-arbgb,
