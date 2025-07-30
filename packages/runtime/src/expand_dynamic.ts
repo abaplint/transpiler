@@ -4,15 +4,37 @@ export function expandDynamic(code: string, ev: (name: string) => FieldSymbol | 
   if (code === "") {
     return "1 = 1";
   } else {
+    // yea, this is also wrong,
+    code = code.replace(/ EQ /g, " = ");
+
 // todo more here, this is just one simple case,
-    const match = code.match(/ <(\w+)>/);
-    if (match && match[1]) {
-      const name = "fs_" + match[1] + "_";
-      const found = ev(name);
+    let regex = / <(\w+)>-(\w+)/;
+    let match = code.match(regex);
+    if (match && match[1] && match[2]) {
+      let name = "fs_" + match[1] + "_";
+      name = name.toLowerCase();
+      let found = ev(name);
       if (found instanceof FieldSymbol) {
-        code = code.replace(/ <(\w+)>/, "'" + found.get() + "'");
+        found = found.get()[match[2].toLowerCase()];
+        if (found === undefined) {
+          throw new Error(`expandDynamic: Field symbol ${name} does not have field ${match[2]}`);
+        }
+        code = code.replace(regex, " '" + found.get() + "'");
       }
     }
+
+// todo more here, this is just one simple case,
+    regex = / <(\w+)>/;
+    match = code.match(regex);
+    if (match && match[1]) {
+      let name = "fs_" + match[1] + "_";
+      name = name.toLowerCase();
+      const found = ev(name);
+      if (found instanceof FieldSymbol) {
+        code = code.replace(regex, " '" + found.get() + "'");
+      }
+    }
+
     return code;
   }
 }
