@@ -3,7 +3,15 @@ import * as abaplint from "@abaplint/core";
 import {escapeNamespaceFilename} from "./initialization";
 
 /** @uniqueItems true */
-export type TestMethodList = {object: string, class: string, method: string, note?: string}[];
+export type TestMethodList = {
+  /** @pattern ^[a-zA-Z0-9_]+$ */
+  object: string,
+  /** @pattern ^[a-zA-Z0-9_]+$ */
+  class: string,
+  /** @pattern ^[a-zA-Z0-9_]+$ */
+  method: string,
+  note?: string,
+}[];
 
 export class UnitTest {
 
