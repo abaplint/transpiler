@@ -35,7 +35,6 @@ export function expandDynamic(code: string, ev: (name: string) => FieldSymbol | 
       }
     }
 
-    console.dir(code);
     return code;
   }
 }
