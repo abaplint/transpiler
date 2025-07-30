@@ -34,7 +34,7 @@ export class ABAPRegExp {
       }
     }
 
-    const ignoreCase = options.ignoringCase === true ? "i" : "";
+    let ignoreCase = options.ignoringCase === true ? "i" : "";
     const allOccurrences = options.all === true ? "g" : "";
 
     let r = options.regex!;
@@ -54,7 +54,7 @@ export class ABAPRegExp {
       r = obj.mv_pattern.get();
       // @ts-ignore
       if (obj.mv_ignore_case.get() === "X") {
-        options.ignoringCase = true;
+        ignoreCase = 'i';
       }
     } else {
       throw "getRegex(), unexpected input";
