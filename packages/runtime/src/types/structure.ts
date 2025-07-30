@@ -20,6 +20,17 @@ export class Structure {
     this.ddicName = ddicName?.toUpperCase();
     this.suffix = suffix;
     this.asInclude = asInclude;
+
+    this.linkGroupFields();
+  }
+
+  private linkGroupFields() {
+    for (const as of Object.keys(this.asInclude || {})) {
+      const suffix = this.suffix?.[as] || "";
+      for (const fieldName of Object.keys(this.value[as].get())) {
+        this.value[fieldName + suffix] = this.value[as].get()[fieldName];
+      }
+    }
   }
 
   public clone(): Structure {
