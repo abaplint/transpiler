@@ -1,3 +1,4 @@
+import {expandIN} from "./expand_in";
 import {FieldSymbol} from "./types";
 
 export function expandDynamic(code: string, ev: (name: string) => FieldSymbol | undefined) {
@@ -8,8 +9,24 @@ export function expandDynamic(code: string, ev: (name: string) => FieldSymbol | 
     code = code.replace(/ EQ /g, " = ");
 
 // todo more here, this is just one simple case,
-    let regex = / <(\w+)>-(\w+)/;
+    let regex = /(\w+) IN <(\w+)>-(\w+)/;
     let match = code.match(regex);
+    if (match && match[1] && match[2] && match[3]) {
+      let name = "fs_" + match[2] + "_";
+      name = name.toLowerCase();
+      let found = ev(name);
+      if (found instanceof FieldSymbol) {
+        found = found.get()[match[3].toLowerCase()];
+        if (found === undefined) {
+          throw new Error(`expandDynamic: Field symbol ${name} does not have field ${match[2]}`);
+        }
+        code = code.replace(regex, expandIN(match[1].toLowerCase(), found as any));
+      }
+    }
+
+// todo more here, this is just one simple case,
+    regex = / <(\w+)>-(\w+)/;
+    match = code.match(regex);
     if (match && match[1] && match[2]) {
       let name = "fs_" + match[1] + "_";
       name = name.toLowerCase();

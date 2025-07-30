@@ -1562,4 +1562,30 @@ WRITE sy-dbcnt.`;
     }, {snowflake: false});
   });
 
+  it("SELECT dynamic field symbol, IN", async () => {
+    const code = `
+DATA: BEGIN OF val,
+        arbgb TYPE RANGE OF t100-arbgb,
+      END OF val.
+DATA ls_t100 TYPE t100.
+DATA ls_row LIKE LINE OF val-arbgb.
+FIELD-SYMBOLS <foo_bar> LIKE val.
+DATA lv_bar TYPE string.
+ls_row-low = 'ZAG_UNIT_TEST'.
+ls_row-sign = 'I'.
+ls_row-option = 'EQ'.
+INSERT ls_row INTO TABLE val-arbgb.
+ASSIGN val TO <foo_bar>.
+lv_bar = 'ARBGB IN <FOO_BAR>-ARBGB'.
+SELECT SINGLE * FROM t100 INTO ls_t100 WHERE (lv_bar).
+WRITE sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("1");
+    }, {snowflake: false});
+  });
+
 });
