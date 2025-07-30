@@ -11,10 +11,11 @@ export function expandDynamic(code: string, ev: (name: string) => FieldSymbol | 
     let regex = / <(\w+)>-(\w+)/;
     let match = code.match(regex);
     if (match && match[1] && match[2]) {
-      const name = "fs_" + match[1] + "_";
+      let name = "fs_" + match[1] + "_";
+      name = name.toLowerCase();
       let found = ev(name);
       if (found instanceof FieldSymbol) {
-        found = found.get()[match[2]];
+        found = found.get()[match[2].toLowerCase()];
         if (found === undefined) {
           throw new Error(`expandDynamic: Field symbol ${name} does not have field ${match[2]}`);
         }
@@ -26,13 +27,15 @@ export function expandDynamic(code: string, ev: (name: string) => FieldSymbol | 
     regex = / <(\w+)>/;
     match = code.match(regex);
     if (match && match[1]) {
-      const name = "fs_" + match[1] + "_";
+      let name = "fs_" + match[1] + "_";
+      name = name.toLowerCase();
       const found = ev(name);
       if (found instanceof FieldSymbol) {
         code = code.replace(regex, " '" + found.get() + "'");
       }
     }
 
+    console.dir(code);
     return code;
   }
 }
