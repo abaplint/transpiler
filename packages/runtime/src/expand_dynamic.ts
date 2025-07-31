@@ -1,7 +1,7 @@
 import {expandIN} from "./expand_in";
 import {FieldSymbol} from "./types";
 
-export function expandDynamic(code: string, ev: (name: string) => FieldSymbol | undefined) {
+export function expandDynamic(code: string, evaluate: (name: string) => FieldSymbol | undefined) {
 //  console.dir(code);
   if (code === "") {
     return "1 = 1";
@@ -16,7 +16,7 @@ export function expandDynamic(code: string, ev: (name: string) => FieldSymbol | 
       if (match && match[1] && match[2] && match[3]) {
         let name = "fs_" + match[2] + "_";
         name = name.toLowerCase();
-        let found = ev(name);
+        let found = evaluate(name);
         if (found instanceof FieldSymbol) {
           found = found.get()[match[3].toLowerCase()];
           if (found === undefined) {
@@ -36,7 +36,7 @@ export function expandDynamic(code: string, ev: (name: string) => FieldSymbol | 
       if (match && match[1] && match[2]) {
         let name = "fs_" + match[1] + "_";
         name = name.toLowerCase();
-        let found = ev(name);
+        let found = evaluate(name);
         if (found instanceof FieldSymbol) {
           found = found.get()[match[2].toLowerCase()];
           if (found === undefined) {
@@ -56,7 +56,7 @@ export function expandDynamic(code: string, ev: (name: string) => FieldSymbol | 
       if (match && match[1]) {
         let name = "fs_" + match[1] + "_";
         name = name.toLowerCase();
-        const found = ev(name);
+        const found = evaluate(name);
         if (found instanceof FieldSymbol) {
           code = code.replace(regex, " '" + found.get() + "'");
         }

@@ -89,6 +89,17 @@ export class LoopTranspiler implements IStatementTranspiler {
       extra.push("where: async " + where);
     }
 
+    const afterWhere = node.findExpressionAfterToken("WHERE");
+    if (afterWhere && afterWhere.get() instanceof abaplint.Expressions.Dynamic) {
+      const condition = afterWhere.findFirstExpression(abaplint.Expressions.FieldChain);
+      if (condition) {
+        const code = new FieldChainTranspiler(true).transpile(condition, traversal).getCode();
+        extra.push(`dynamicWhere: {condition: ${code}, evaluate: (name) => {try { return eval(name);} catch {}}}`);
+      } else {
+        throw new Error("LoopTranspiler, dynamic where not implemented");
+      }
+    }
+
     const topEquals: {[key: string]: string} = {};
     for (const compare of whereNode?.findDirectExpressions(abaplint.Expressions.ComponentCompare) || []) {
       const op = compare.findDirectExpression(abaplint.Expressions.CompareOperator)?.concatTokens().toUpperCase();

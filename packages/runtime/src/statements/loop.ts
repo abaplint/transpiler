@@ -11,6 +11,7 @@ export interface ILoopOptions {
   from?: Integer,
   to?: Integer,
   topEquals?: topType,
+  dynamicWhere?: {condition: string, evaluate: (name: string) => FieldSymbol | undefined},
 }
 
 function determineFromTo(array: readonly any[], topEquals: topType | undefined, key: ITableKey): { from: any; to: any; } {
@@ -37,6 +38,44 @@ function determineFromTo(array: readonly any[], topEquals: topType | undefined, 
   };
 }
 
+// todo: rewrite, this is a mess & hack & slow
+function dynamicToWhere(condition: string, evaluate: (name: string) => FieldSymbol | undefined): (placeholder: any) => Promise<boolean> {
+//  console.dir(condition);
+  let text = condition.replace(/ AND /gi, " && ").replace(/ OR /gi, " || ").replace(/ = /gi, " EQ ").replace(/ <> /gi, " NE ")
+//  console.dir(text);
+
+  let regex = /([\w-]+)\s+(\w+)\s+([<>\w-]+)/gi;
+  let matches = text.matchAll(regex);
+  for (const match of matches) {
+    const left = match[1];
+    const comparator = match[2].toLowerCase();
+    const right = match[3];
+//    console.dir({left, right});
+
+    const cleft = "i." + left.toLowerCase().replace(/-/g, ".get().");
+    const cright = right;
+    const cnew = `abap.compare.${comparator}(${cleft}, ${cright})`;
+    text = text.replace(match[0], cnew);
+  }
+
+  regex = / <(\w+)>-(\w+)/gi;
+  matches = text.matchAll(regex);
+  for (const match of matches) {
+    const name = "fs_" + match[1].toLowerCase() + "_";
+    const value = evaluate(name)?.get()?.[match[2].toLowerCase()]?.get();
+    text = text.replace(match[0], " '" + value + "'");
+  }
+
+//  console.dir(text);
+
+  // @ts-ignore
+  return async (i: any) => {
+//    console.dir(i);
+    // eslint-disable-next-line no-eval
+    return eval(text);
+  };
+}
+
 export async function* loop(table: Table | HashedTable | FieldSymbol | undefined,
                             options?: ILoopOptions): AsyncGenerator<any, void, unknown> {
 
@@ -48,6 +87,15 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
       throw new Error("GETWA_NOT_ASSIGNED");
     }
     yield* loop(pnt, options);
+    return;
+  }
+
+  if (options?.dynamicWhere) {
+    const dynamicWhere = options.dynamicWhere;
+    const newOptions = {...options};
+    delete newOptions.dynamicWhere;
+    newOptions.where = dynamicToWhere(dynamicWhere.condition, dynamicWhere.evaluate);
+    yield* loop(table, newOptions);
     return;
   }
 

@@ -896,4 +896,33 @@ ENDLOOP.`;
     expect(abap.console.getTrimmed()).to.equal("World");
   });
 
+  it("LOOP, dynamic where", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         BEGIN OF admin,
+           id    TYPE i,
+           state TYPE i,
+         END OF admin,
+       END OF ty.
+DATA lt_data TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA ls_where TYPE ty-admin.
+DATA lv_where TYPE string.
+FIELD-SYMBOLS <ls_data> LIKE LINE OF lt_data.
+FIELD-SYMBOLS <ls_where> LIKE ls_where.
+
+lv_where = 'ADMIN-ID EQ <LS_WHERE>-ID AND ADMIN-STATE EQ <LS_WHERE>-STATE'.
+ls_where-id = 123.
+ASSIGN ls_where TO <ls_where>.
+INSERT INITIAL LINE INTO TABLE lt_data.
+
+LOOP AT lt_data ASSIGNING <ls_data> WHERE (lv_where).
+  WRITE / 'found'.
+ENDLOOP.
+WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("4");
+  });
+
 });
