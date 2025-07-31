@@ -38,6 +38,12 @@ function determineFromTo(array: readonly any[], topEquals: topType | undefined, 
   };
 }
 
+function dynamicToWhere(_condition: string, _evaluate: (name: string) => FieldSymbol | undefined): (i: any) => Promise<boolean> {
+  // todo
+  return async () => { return false;};
+}
+
+
 export async function* loop(table: Table | HashedTable | FieldSymbol | undefined,
                             options?: ILoopOptions): AsyncGenerator<any, void, unknown> {
 
@@ -49,6 +55,15 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
       throw new Error("GETWA_NOT_ASSIGNED");
     }
     yield* loop(pnt, options);
+    return;
+  }
+
+  if (options?.dynamicWhere) {
+    const dynamicWhere = options.dynamicWhere;
+    const newOptions = {...options};
+    delete newOptions.dynamicWhere;
+    newOptions.where = dynamicToWhere(dynamicWhere.condition, dynamicWhere.evaluate);
+    yield* loop(table, newOptions);
     return;
   }
 
