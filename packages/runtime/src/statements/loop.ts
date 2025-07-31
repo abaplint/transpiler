@@ -41,19 +41,20 @@ function determineFromTo(array: readonly any[], topEquals: topType | undefined, 
 // todo: rewrite, this is a mess & hack & slow
 function dynamicToWhere(condition: string, evaluate: (name: string) => FieldSymbol | undefined): (placeholder: any) => Promise<boolean> {
 //  console.dir(condition);
-  let text = condition.replace(/ AND /gi, " && ").replace(/ OR /gi, " || ").replace(/ EQ /gi, " = ").replace(/ NE /gi, " <> ")
+  let text = condition.replace(/ AND /gi, " && ").replace(/ OR /gi, " || ").replace(/ = /gi, " EQ ").replace(/ <> /gi, " NE ")
 //  console.dir(text);
 
-  let regex = /([\w-]+)\s+=\s+([<>\w-]+)/gi;
+  let regex = /([\w-]+)\s+(\w+)\s+([<>\w-]+)/gi;
   let matches = text.matchAll(regex);
   for (const match of matches) {
     const left = match[1];
-    const right = match[2];
+    const comparator = match[2].toLowerCase();
+    const right = match[3];
 //    console.dir({left, right});
 
     const cleft = "i." + left.toLowerCase().replace(/-/g, ".get().");
     const cright = right;
-    const cnew = `abap.compare.eq(${cleft}, ${cright})`;
+    const cnew = `abap.compare.${comparator}(${cleft}, ${cright})`;
     text = text.replace(match[0], cnew);
   }
 
