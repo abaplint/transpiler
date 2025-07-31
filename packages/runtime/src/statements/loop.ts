@@ -38,27 +38,38 @@ function determineFromTo(array: readonly any[], topEquals: topType | undefined, 
   };
 }
 
-function dynamicToWhere(condition: string, _evaluate: (name: string) => FieldSymbol | undefined): (i: any) => Promise<boolean> {
-  console.dir(condition);
+// todo: rewrite, this is a mess & hack & slow
+function dynamicToWhere(condition: string, evaluate: (name: string) => FieldSymbol | undefined): (placeholder: any) => Promise<boolean> {
+//  console.dir(condition);
   let text = condition.replace(/ AND /gi, " && ").replace(/ OR /gi, " || ").replace(/ EQ /gi, " = ").replace(/ NE /gi, " <> ")
-  console.dir(text);
+//  console.dir(text);
 
-  const regex = /([\w-]+)\s+=\s+([<>\w-]+)/gi;
-  const matches = text.matchAll(regex);
+  let regex = /([\w-]+)\s+=\s+([<>\w-]+)/gi;
+  let matches = text.matchAll(regex);
   for (const match of matches) {
     const left = match[1];
     const right = match[2];
 //    console.dir({left, right});
 
-    const cleft = "i.get()." + left.toLowerCase().replace(/-/g, ".get().");
+    const cleft = "i." + left.toLowerCase().replace(/-/g, ".get().");
     const cright = right;
     const cnew = `abap.compare.eq(${cleft}, ${cright})`;
     text = text.replace(match[0], cnew);
   }
-  console.dir(text);
+
+  regex = / <(\w+)>-(\w+)/gi;
+  matches = text.matchAll(regex);
+  for (const match of matches) {
+    const name = "fs_" + match[1].toLowerCase() + "_";
+    const value = evaluate(name)?.get()?.[match[2].toLowerCase()]?.get();
+    text = text.replace(match[0], " '" + value + "'");
+  }
+
+//  console.dir(text);
 
   // @ts-ignore
   return async (i: any) => {
+//    console.dir(i);
     // eslint-disable-next-line no-eval
     return eval(text);
   };
