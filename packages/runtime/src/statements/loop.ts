@@ -38,11 +38,31 @@ function determineFromTo(array: readonly any[], topEquals: topType | undefined, 
   };
 }
 
-function dynamicToWhere(_condition: string, _evaluate: (name: string) => FieldSymbol | undefined): (i: any) => Promise<boolean> {
-  // todo
-  return async () => { return false;};
-}
+function dynamicToWhere(condition: string, _evaluate: (name: string) => FieldSymbol | undefined): (i: any) => Promise<boolean> {
+  console.dir(condition);
+  let text = condition.replace(/ AND /gi, " && ").replace(/ OR /gi, " || ").replace(/ EQ /gi, " = ").replace(/ NE /gi, " <> ")
+  console.dir(text);
 
+  const regex = /([\w-]+)\s+=\s+([<>\w-]+)/gi;
+  const matches = text.matchAll(regex);
+  for (const match of matches) {
+    const left = match[1];
+    const right = match[2];
+//    console.dir({left, right});
+
+    const cleft = "i.get()." + left.toLowerCase().replace(/-/g, ".get().");
+    const cright = right;
+    const cnew = `abap.compare.eq(${cleft}, ${cright})`;
+    text = text.replace(match[0], cnew);
+  }
+  console.dir(text);
+
+  // @ts-ignore
+  return async (i: any) => {
+    // eslint-disable-next-line no-eval
+    return eval(text);
+  };
+}
 
 export async function* loop(table: Table | HashedTable | FieldSymbol | undefined,
                             options?: ILoopOptions): AsyncGenerator<any, void, unknown> {
