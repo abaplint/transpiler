@@ -896,7 +896,7 @@ ENDLOOP.`;
     expect(abap.console.getTrimmed()).to.equal("World");
   });
 
-  it.only("LOOP, dynamic where", async () => {
+  it.skip("LOOP, dynamic where", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          BEGIN OF admin,

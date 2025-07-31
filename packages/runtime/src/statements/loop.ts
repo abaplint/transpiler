@@ -11,6 +11,7 @@ export interface ILoopOptions {
   from?: Integer,
   to?: Integer,
   topEquals?: topType,
+  dynamicWhere?: {condition: string, evaluate: (name: string) => FieldSymbol | undefined},
 }
 
 function determineFromTo(array: readonly any[], topEquals: topType | undefined, key: ITableKey): { from: any; to: any; } {
