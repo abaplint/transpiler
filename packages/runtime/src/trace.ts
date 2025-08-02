@@ -30,7 +30,6 @@ export class Trace {
   private _trace(func: any, name: string, min: number, totals: boolean) {
     const tt = this.traceTotals;
     const exec1 = (...options: any[]) => {
-      console.dir("exec1");
       const start = Date.now();
       const result = func.bind(this)(...options);
       const runtime = Date.now() - start;
@@ -39,6 +38,7 @@ export class Trace {
           tt[name] = {calls: 0, totalRuntime: 0};
         }
         tt[name].totalRuntime += runtime;
+        tt[name].calls++;
       }
       if (min > 0 && runtime >= min) {
         console.log(`STATEMENT: ${name}, ${runtime} ms`);
@@ -62,6 +62,7 @@ export class Trace {
           tt[name] = {calls: 0, totalRuntime: 0};
         }
         tt[name].totalRuntime += runtime;
+        tt[name].calls++;
       }
       if (min > 0 && runtime >= min) {
         console.log(`STATEMENT: ${name}, ${runtime} ms`);
