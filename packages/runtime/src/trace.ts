@@ -19,6 +19,8 @@ export class Trace {
     }
   }
 
+//////////////////////////////////////////
+
   private _trace(func: any, name: string, min: number, totals: boolean) {
     const tt = this.traceTotals;
     const exec = (...options: any[]) => {
