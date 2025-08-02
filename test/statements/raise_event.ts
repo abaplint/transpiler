@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP, MemoryConsole} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -14,7 +14,7 @@ describe("Running statements - RAISE EVENT", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
-  it("basic, no receivers", async () => {
+  it("basic, no handlers", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
@@ -35,6 +35,36 @@ START-OF-SELECTION.
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("basic handler", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    EVENTS foo.
+    METHODS method1.
+    METHODS handler FOR EVENT foo OF lcl.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD method1.
+    SET HANDLER handler FOR me.
+    RAISE EVENT foo.
+  ENDMETHOD.
+
+  METHOD handler.
+    WRITE / 'handled'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl.
+  CREATE OBJECT ref.
+  ref->method1( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("handled");
   });
 
 });
