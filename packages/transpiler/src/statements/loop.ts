@@ -96,7 +96,7 @@ export class LoopTranspiler implements IStatementTranspiler {
       if (condition) {
         code = new FieldChainTranspiler(true).transpile(condition, traversal).getCode();
       } else {
-        code = "transpiler, const dynamic loop where todo";
+        code = `"transpiler, const dynamic loop where todo"`;
       }
       extra.push(`dynamicWhere: {condition: ${code}, evaluate: (name) => {try { return eval(name);} catch {}}}`);
     }
