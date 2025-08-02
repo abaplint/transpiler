@@ -564,6 +564,11 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
     for (const c of def.getAttributes()?.getConstants() || []) {
       ret += "this." + Traversal.escapeNamespace(c.getName().toLowerCase()) + " = " + cName + "." + Traversal.escapeNamespace(c.getName().toLowerCase()) + ";\n";
     }
+    for (const e of def.getEvents() || []) {
+      // todo: skip static events
+      // todo: events from interfaces
+      ret += "this." + Traversal.escapeNamespace(e.getName().toLowerCase()) + " = new class extends EventTarget {};\n";
+    }
 
     return ret;
   }

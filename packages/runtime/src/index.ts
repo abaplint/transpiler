@@ -18,6 +18,7 @@ import {buildDbTableName} from "./prefix";
 import {IntegerFactory} from "./integer_factory";
 import {dynamicCallLookup} from "./dynamic_call_lookup";
 import {CharacterFactory} from "./character_factory";
+import {ABAPEvent} from "./abap_event";
 
 export {RFC, types, DB, MemoryConsole};
 
@@ -66,6 +67,7 @@ export class ABAP {
   public buildDbTableName = buildDbTableName;
   public ClassicError = ClassicError;
   public dynamicCallLookup = dynamicCallLookup;
+  public ABAPEvent = ABAPEvent;
 
   public IntegerFactory = IntegerFactory;
   public CharacterFactory = CharacterFactory;
