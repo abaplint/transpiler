@@ -9,7 +9,7 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const methods: string[] = [];
     for (const m of node.findDirectExpressions(abaplint.Expressions.MethodSource)) {
-      methods.push(new MethodSourceTranspiler().transpile(m, traversal).getCode());
+      methods.push(new MethodSourceTranspiler().transpile(m, traversal).getCode().replace(" await", ""));
     }
 
     let f: string | undefined = undefined;
