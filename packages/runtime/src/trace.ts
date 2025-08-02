@@ -2,7 +2,7 @@ import {isAsyncFunction} from "util/types";
 import {Statements} from "./statements";
 
 export class Trace {
-  private readonly traceTotals: {[name: string]: number} = {};
+  private readonly traceTotals: {[name: string]: {calls: number, totalRuntime: number}} = {};
 
   public setTrace(min: number, totals: boolean) {
     const candidates = [...Object.keys(this),...Object.getOwnPropertyNames(Statements.prototype)];
@@ -19,6 +19,10 @@ export class Trace {
     }
   }
 
+  public getTotals() {
+    return this.traceTotals;
+  }
+
 //////////////////////////////////////////
 
   private _trace(func: any, name: string, min: number, totals: boolean) {
@@ -29,11 +33,11 @@ export class Trace {
       const runtime = Date.now() - start;
       if (totals === true) {
         if (tt[name] === undefined) {
-          tt[name] = 0;
+          tt[name] = {calls: 0, totalRuntime: 0};
         }
-        tt[name] += runtime;
+        tt[name].totalRuntime += runtime;
       }
-      if (runtime >= min) {
+      if (min > 0 && runtime >= min) {
         console.log(`STATEMENT: ${name}, ${runtime} ms`);
         if (totals === true) {
           console.log(JSON.stringify(tt));
@@ -52,11 +56,11 @@ export class Trace {
       const runtime = Date.now() - start;
       if (totals === true) {
         if (tt[name] === undefined) {
-          tt[name] = 0;
+          tt[name] = {calls: 0, totalRuntime: 0};
         }
-        tt[name] += runtime;
+        tt[name].totalRuntime += runtime;
       }
-      if (runtime >= min) {
+      if (min > 0 && runtime >= min) {
         console.log(`STATEMENT: ${name}, ${runtime} ms`);
         if (totals === true) {
           console.log(JSON.stringify(tt));
