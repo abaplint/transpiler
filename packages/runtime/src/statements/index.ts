@@ -105,7 +105,7 @@ export class Statements {
   }
 
   public _setTrace(min = 10, totals = false) {
-    return new Trace().setTrace(min, totals);
+    return new Trace().setTrace(min, totals, this);
   }
 
   public async openCursor(target: INumeric, select: string, options: IOpenCursorDatabaseOptions) {

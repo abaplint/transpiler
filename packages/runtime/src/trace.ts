@@ -4,19 +4,21 @@ import {Statements} from "./statements";
 export class Trace {
   private readonly traceTotals: {[name: string]: {calls: number, totalRuntime: number}} = {};
 
-  public setTrace(min: number, totals: boolean) {
-    const candidates = [...Object.keys(this),...Object.getOwnPropertyNames(Statements.prototype)];
+  public setTrace(min: number, totals: boolean, statements: any) {
+    const candidates = [...Object.keys(statements),...Object.getOwnPropertyNames(Statements.prototype)];
     for (const c of candidates) {
       if (c === "context" || c === "constructor" || c.startsWith("_") || c === "loop") {
         continue;
       }
-      const func = (this as any)[c];
+      const func = statements[c];
       if (isAsyncFunction(func)) {
-        (this as any)[c] = this._traceAsync(func, c, min, totals);
+        statements[c] = this._traceAsync(func, c, min, totals);
       } else {
-        (this as any)[c] = this._trace(func, c, min, totals);
+        statements[c] = this._trace(func, c, min, totals);
       }
     }
+
+    return this;
   }
 
   public getTotals() {
@@ -27,7 +29,8 @@ export class Trace {
 
   private _trace(func: any, name: string, min: number, totals: boolean) {
     const tt = this.traceTotals;
-    const exec = (...options: any[]) => {
+    const exec1 = (...options: any[]) => {
+      console.dir("exec1");
       const start = Date.now();
       const result = func.bind(this)(...options);
       const runtime = Date.now() - start;
@@ -45,12 +48,12 @@ export class Trace {
       }
       return result;
     };
-    return exec;
+    return exec1;
   }
 
   private _traceAsync(func: any, name: string, min: number, totals: boolean) {
     const tt = this.traceTotals;
-    const exec = async (...options: any[]) => {
+    const exec2 = async (...options: any[]) => {
       const start = Date.now();
       const result = await func.bind(this)(...options);
       const runtime = Date.now() - start;
@@ -68,7 +71,7 @@ export class Trace {
       }
       return result;
     };
-    return exec;
+    return exec2;
   }
 
 }

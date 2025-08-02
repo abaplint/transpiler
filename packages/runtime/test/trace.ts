@@ -2,11 +2,13 @@
 import {ABAP} from "../src";
 
 describe("Trace", () => {
-  it("test", () => {
+  it.only("test", () => {
     const abap = new ABAP();
-    abap.statements._setTrace(10, true);
+    const trace = abap.statements._setTrace(0, true);
 
     // call some dummy statement
     abap.statements.assert(true);
+
+    console.dir(trace.getTotals());
   });
 });
