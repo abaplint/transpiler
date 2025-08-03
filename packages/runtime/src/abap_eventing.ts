@@ -38,6 +38,7 @@ export class ABAPEventing {
     });
   }
 
+  // todo: cleanup of dead WeakRefs
   public async raiseEvent(event: ABAPEventReference, me: ABAPObject, _parameters?: object): Promise<void> {
     const handlers = this.registrations[event.EVENT_CLASS]?.[event.EVENT_NAME];
     if (handlers === undefined) {
