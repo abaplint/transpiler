@@ -42,5 +42,12 @@ export class ABAPEventing {
     // todo
     console.dir("raiseEvent called");
     console.dir(event);
+
+    const handlers = this.registrations[event.EVENT_CLASS]?.[event.EVENT_NAME];
+    if (handlers === undefined) {
+      return;
+    }
+
+    console.dir(handlers);
   }
 }

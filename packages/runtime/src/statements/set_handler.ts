@@ -18,5 +18,6 @@ export function setHandler(methods: any[], forObject: ABAPObject | FieldSymbol, 
 
   const act = activation === undefined ? true : activation.get() === "X";
 
-  abap.eventing.setHandler({EVENT_NAME: "TODO", EVENT_CLASS: "TODO"}, methods, forObject, act);
+  // todo
+  abap.eventing.setHandler({EVENT_NAME: "FOO", EVENT_CLASS: "PROG-ZFOOBAR-LCL"}, methods, forObject, act);
 }
