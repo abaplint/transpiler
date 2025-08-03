@@ -14,8 +14,10 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
 
     let f: string | undefined = undefined;
     const forExpression = node.findExpressionAfterToken("FOR");
-    if (forExpression) {
+    if (forExpression instanceof abaplint.Expressions.Source) {
       f = new SourceTranspiler().transpile(forExpression, traversal).getCode();
+    } else {
+      f = `"ALL"`;
     }
 
     let activation: string = "";
@@ -24,7 +26,8 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
       activation = ", " + new SourceTranspiler().transpile(activationExpression, traversal).getCode();
     }
 
-    return new Chunk().append(`abap.statements.setHandler([${methods.join(",")}], ${f}${activation});`, node, traversal);
+    // todo
+    return new Chunk().append(`abap.statements.setHandler({EVENT_NAME: "FOO", EVENT_CLASS: "PROG-ZFOOBAR-LCL"}, [${methods.join(",")}], ${f}${activation});`, node, traversal);
   }
 
 }
