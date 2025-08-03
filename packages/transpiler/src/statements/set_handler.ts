@@ -8,12 +8,27 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const methods: string[] = [];
+    let className: string | undefined = undefined;
+
     for (const m of node.findDirectExpressions(abaplint.Expressions.MethodSource)) {
       methods.push(new MethodSourceTranspiler().transpile(m, traversal).getCode().replace("await ", ""));
 
-      const nameToken = m.getFirstToken();
-      const method = traversal.findMethodReference(nameToken, traversal.findCurrentScopeByToken(nameToken));
-      console.dir(method?.def.isEventHandler());
+      if (className === undefined) {
+        const nameToken = m.getFirstToken();
+        const scope = traversal.findCurrentScopeByToken(nameToken);
+        const method = traversal.findMethodReference(nameToken, scope);
+        if (method?.def.isEventHandler() !== true) {
+          throw new Error(`Transpiler: Method "${nameToken.getStr()}" is not an event handler`);
+        }
+        console.dir(method?.def.getEventClass());
+
+        const def = traversal.findClassDefinition(method.def.getEventClass(), scope);
+        if (def === undefined) {
+          throw new Error(`Transpiler: Method "${nameToken.getStr()}" is not an event handler`);
+        }
+        const name = traversal.buildInternalName(def.getName(), def);
+        className = name;
+      }
     }
 
     let f: string | undefined = undefined;
