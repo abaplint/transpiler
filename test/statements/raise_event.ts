@@ -8,7 +8,7 @@ async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
 }
 
-describe.only("Running statements - RAISE EVENT", () => {
+describe("Running statements - RAISE EVENT", () => {
 
   beforeEach(async () => {
     abap = new ABAP({console: new MemoryConsole()});

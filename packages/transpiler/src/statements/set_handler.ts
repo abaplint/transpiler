@@ -9,6 +9,7 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const methods: string[] = [];
     let className: string | undefined = undefined;
+    let eventName: string | undefined = undefined;
 
     for (const m of node.findDirectExpressions(abaplint.Expressions.MethodSource)) {
       methods.push(new MethodSourceTranspiler().transpile(m, traversal).getCode().replace("await ", ""));
@@ -20,14 +21,13 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
         if (method?.def.isEventHandler() !== true) {
           throw new Error(`Transpiler: Method "${nameToken.getStr()}" is not an event handler`);
         }
-        console.dir(method?.def.getEventClass());
 
         const def = traversal.findClassDefinition(method.def.getEventClass(), scope);
         if (def === undefined) {
           throw new Error(`Transpiler: Method "${nameToken.getStr()}" is not an event handler`);
         }
-        const name = traversal.buildInternalName(def.getName(), def);
-        className = name;
+        className = traversal.buildInternalName(def.getName(), def);
+        eventName = method.def.getEventName();
       }
     }
 
@@ -45,8 +45,7 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
       activation = ", " + new SourceTranspiler().transpile(activationExpression, traversal).getCode();
     }
 
-    // todo
-    return new Chunk().append(`abap.statements.setHandler({EVENT_NAME: "FOO", EVENT_CLASS: "PROG-ZFOOBAR-LCL"}, [${methods.join(",")}], ${f}${activation});`, node, traversal);
+    return new Chunk().append(`abap.statements.setHandler({EVENT_NAME: "${eventName}", EVENT_CLASS: "${className}"}, [${methods.join(",")}], ${f}${activation});`, node, traversal);
   }
 
 }
