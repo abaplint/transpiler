@@ -39,7 +39,9 @@ export class ABAPEventing {
     });
   }
 
-  public raiseEvent(event: ABAPEventReference, parameters?: object): any {
-// todo
+  public raiseEvent(event: ABAPEventReference, _parameters?: object): any {
+    // todo
+    console.dir("raiseEvent called");
+    console.dir(event);
   }
 }
