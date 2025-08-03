@@ -24,6 +24,8 @@ export class ABAPEventing {
       throw new Error("ABAPEventing.setHandler: no methods provided");
     }
 
+
+    const ref = new WeakRef(forObject);
   }
 
   public raiseEvent(event: ABAPEventReference, parameters?: object): any {
