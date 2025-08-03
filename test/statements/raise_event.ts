@@ -160,4 +160,42 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
+  it.only("event defined in super class", async () => {
+    const code = `
+CLASS dup DEFINITION.
+  PUBLIC SECTION.
+    EVENTS foo.
+ENDCLASS.
+
+CLASS dup IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lcl DEFINITION INHERITING FROM dup.
+  PUBLIC SECTION.
+    METHODS method1.
+    METHODS handler FOR EVENT foo OF lcl.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD method1.
+    SET HANDLER handler FOR ALL INSTANCES.
+    RAISE EVENT foo.
+  ENDMETHOD.
+
+  METHOD handler.
+    WRITE / 'handled'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl.
+  CREATE OBJECT ref.
+  ref->method1( ).`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("handled");
+  });
+
 });
