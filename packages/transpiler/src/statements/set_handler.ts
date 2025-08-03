@@ -9,7 +9,7 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const methods: string[] = [];
     for (const m of node.findDirectExpressions(abaplint.Expressions.MethodSource)) {
-      methods.push(new MethodSourceTranspiler().transpile(m, traversal).getCode().replace(" await", ""));
+      methods.push(new MethodSourceTranspiler().transpile(m, traversal).getCode().replace("await ", ""));
     }
 
     let f: string | undefined = undefined;
@@ -18,13 +18,13 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
       f = new SourceTranspiler().transpile(forExpression, traversal).getCode();
     }
 
-    let activation: string | undefined = undefined;
+    let activation: string = "";
     const activationExpression = node.findExpressionAfterToken("ACTIVATION");
     if (activationExpression) {
-      activation = new SourceTranspiler().transpile(activationExpression, traversal).getCode();
+      activation = ", " + new SourceTranspiler().transpile(activationExpression, traversal).getCode();
     }
 
-    return new Chunk().append(`abap.statements.setHandler([${methods.join(",")}], ${f}, ${activation});`, node, traversal);
+    return new Chunk().append(`abap.statements.setHandler([${methods.join(",")}], ${f}${activation});`, node, traversal);
   }
 
 }

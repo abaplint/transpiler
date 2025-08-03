@@ -1,4 +1,5 @@
-export function raiseEvent(eventReference: any, parameters?: object) {
-  // @ts-ignore
-  eventReference.dispatchEvent(new abap.ABAPEvent('ABAP_EVENT', parameters));
+import {ABAPEventReference} from "../abap_eventing";
+
+export function raiseEvent(eventReference: ABAPEventReference, parameters?: object) {
+// todo
 }
