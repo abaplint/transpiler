@@ -99,4 +99,35 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("handled");
   });
 
+  it("basic handler, static event", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-EVENTS foo.
+    METHODS method1.
+    METHODS handler FOR EVENT foo OF lcl.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD method1.
+    SET HANDLER handler.
+    RAISE EVENT foo.
+  ENDMETHOD.
+
+  METHOD handler.
+    WRITE / 'handled'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl.
+  CREATE OBJECT ref.
+  ref->method1( ).`;
+    const js = await run(code);
+//    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("handled");
+  });
+
 });
