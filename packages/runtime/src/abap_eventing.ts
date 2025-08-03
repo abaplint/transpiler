@@ -17,8 +17,7 @@ export class ABAPEventing {
 
   public setHandler(event: ABAPEventReference, methods: HandlerMethod[], forObject: ABAPObject | "ALL", activation: boolean): any {
     if (activation === false) {
-      // todo
-      throw new Error("ABAPEventing.setHandler: deactivation not supported");
+      throw new Error("ABAPEventing.setHandler: deactivation not supported, todo");
     } else if (methods.length === 0) {
       throw new Error("ABAPEventing.setHandler: no methods provided");
     }

@@ -567,7 +567,9 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
     for (const e of def.getEvents() || []) {
       // todo: skip static events?
       // todo: events from interfaces?
-      ret += "this." + Traversal.escapeNamespace(e.getName().toLowerCase()) + " = {\"EVENT_NAME\": \"" + e.getName().toUpperCase() + "\", \"EVENT_CLASS\": " + Traversal.escapeNamespace(def.getName().toUpperCase()) + " };\n";
+      // todo: events from super classes?
+      const name = this.buildInternalName(def.getName(), def);
+      ret += "this." + Traversal.escapeNamespace(e.getName().toLowerCase()) + " = {\"EVENT_NAME\": \"" + e.getName().toUpperCase() + "\", \"EVENT_CLASS\": \"" + name + "\"};\n";
     }
 
     return ret;
