@@ -15,7 +15,7 @@ export class RaiseEventTranspiler implements IStatementTranspiler {
       extra = "," + new ParameterListSTranspiler().transpile(parameters, traversal).getCode();
     }
 
-    return new Chunk().append(`abap.statements.raiseEvent(this.${eventName}${extra});`, node, traversal);
+    return new Chunk().append(`await abap.statements.raiseEvent(this.${eventName}, this.me, ${extra});`, node, traversal);
   }
 
 }

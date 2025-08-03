@@ -38,16 +38,22 @@ export class ABAPEventing {
     });
   }
 
-  public raiseEvent(event: ABAPEventReference, _parameters?: object): any {
-    // todo
-    console.dir("raiseEvent called");
-    console.dir(event);
-
+  public async raiseEvent(event: ABAPEventReference, me: ABAPObject, _parameters?: object): Promise<void> {
     const handlers = this.registrations[event.EVENT_CLASS]?.[event.EVENT_NAME];
     if (handlers === undefined) {
       return;
     }
 
-    console.dir(handlers);
+    for (const handler of handlers) {
+      if (handler.forObject === "ALL") {
+        for (const method of handler.handlers) {
+          await method(_parameters);
+        }
+      } else if (handler.forObject.deref() === me) {
+        for (const method of handler.handlers) {
+          await method(_parameters);
+        }
+      }
+    }
   }
 }

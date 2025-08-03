@@ -37,7 +37,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.only("basic handler", async () => {
+  it("basic handler", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
@@ -62,7 +62,7 @@ START-OF-SELECTION.
   CREATE OBJECT ref.
   ref->method1( ).`;
     const js = await run(code);
-    console.dir(js);
+//    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("handled");
