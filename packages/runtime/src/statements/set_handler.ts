@@ -1,19 +1,22 @@
+import {ABAP} from "..";
 import {ABAPObject, FieldSymbol} from "../types";
 import {ICharacter} from "../types/_character";
 
-export function setHandler(_methods: any[], forObject: ABAPObject | FieldSymbol, _activation?: ICharacter) {
+declare const abap: ABAP;
+
+export function setHandler(methods: any[], forObject: ABAPObject | FieldSymbol, activation?: ICharacter) {
 
   if (forObject instanceof FieldSymbol) {
-    // Handle FieldSymbol case
-    if (forObject.getPointer() === undefined) {
-      throw new Error("SET HANDLER: Field symbol is not assigned");
+    const pointer = forObject.getPointer();
+    if (pointer === undefined) {
+      throw new Error("CX_SY_ SOMETHING TODO");
     }
-  }
-
-  if (forObject instanceof ABAPObject && forObject.get() === undefined) {
+    return setHandler(methods, pointer, activation);
+  } else if (forObject instanceof ABAPObject && forObject.get() === undefined) {
     throw new Error("SET_HANDLER_FOR_NULL");
   }
 
-  // todo
-  return;
+  const act = activation === undefined ? true : activation.get() === "X";
+
+  abap.eventing.setHandler({EVENT_NAME: "TODO", EVENT_CLASS: "TODO"}, methods, forObject, act);
 }

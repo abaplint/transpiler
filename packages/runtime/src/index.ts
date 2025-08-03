@@ -67,7 +67,7 @@ export class ABAP {
   public buildDbTableName = buildDbTableName;
   public ClassicError = ClassicError;
   public dynamicCallLookup = dynamicCallLookup;
-  public ABAPEventing = new ABAPEventing();
+  public eventing = new ABAPEventing();
 
   public IntegerFactory = IntegerFactory;
   public CharacterFactory = CharacterFactory;
