@@ -231,4 +231,52 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("handled");
   });
 
+  it.only("decoupled raiser and handler", async () => {
+    const code = `
+INTERFACE lif.
+  EVENTS bar.
+ENDINTERFACE.
+
+CLASS handler DEFINITION.
+  PUBLIC SECTION.
+    METHODS register.
+    METHODS handler FOR EVENT bar OF lif.
+ENDCLASS.
+
+CLASS handler IMPLEMENTATION.
+  METHOD handler.
+    WRITE / 'handled'.
+  ENDMETHOD.
+
+  METHOD register.
+    SET HANDLER handler FOR ALL INSTANCES.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS raiser DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+    METHODS raise.
+ENDCLASS.
+
+CLASS raiser IMPLEMENTATION.
+  METHOD raise.
+    RAISE EVENT lif~bar.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA handler TYPE REF TO handler.
+  CREATE OBJECT handler.
+  handler->register( ).
+
+  DATA ref TYPE REF TO raiser.
+  CREATE OBJECT ref.
+  ref->raise( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("handled");
+  });
+
 });

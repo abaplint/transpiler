@@ -74,7 +74,7 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
 
       current = traversal.findClassDefinition(current.getSuperClass(), scope);
     }
-    throw new Error(`Transpiler: Event "${eventName}" not found in class "${def.getName()}"`);
+    throw new Error(`SetHandlerTranspiler: Event "${eventName}" not found in class "${def.getName()}"`);
   }
 
 }
