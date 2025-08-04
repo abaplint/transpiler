@@ -308,4 +308,37 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("handled");
   });
 
+  it("all static, via interface", async () => {
+    const code = `
+INTERFACE lif.
+  CLASS-EVENTS foobar.
+ENDINTERFACE.
+
+CLASS stat DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+    CLASS-METHODS raise.
+    CLASS-METHODS handler FOR EVENT foobar OF lif.
+ENDCLASS.
+
+CLASS stat IMPLEMENTATION.
+  METHOD raise.
+    SET HANDLER handler.
+    RAISE EVENT lif~foobar.
+  ENDMETHOD.
+
+  METHOD handler.
+    WRITE / 'handled'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  stat=>raise( ).`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("handled");
+  });
+
 });
