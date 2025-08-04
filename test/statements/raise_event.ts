@@ -231,7 +231,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("handled");
   });
 
-  it.only("decoupled raiser and handler", async () => {
+  it("decoupled raiser and handler", async () => {
     const code = `
 INTERFACE lif.
   EVENTS bar.

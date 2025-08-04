@@ -8,13 +8,13 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const methods: string[] = [];
-    let className: string | undefined = undefined;
+    let eventClass: string | undefined = undefined;
     let eventName: string | undefined = undefined;
 
     for (const m of node.findDirectExpressions(abaplint.Expressions.MethodSource)) {
       methods.push(new MethodSourceTranspiler().transpile(m, traversal).getCode().replace("await ", ""));
 
-      if (className === undefined) {
+      if (eventClass === undefined) {
         const nameToken = m.getFirstToken();
         const scope = traversal.findCurrentScopeByToken(nameToken);
         const method = traversal.findMethodReference(nameToken, scope);
@@ -22,12 +22,21 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
           throw new Error(`SetHandlerTranspiler: Method "${nameToken.getStr()}" is not an event handler`);
         }
 
-        const def = traversal.findClassDefinition(method.def.getClassName(), scope);
-        if (def === undefined) {
-          throw new Error(`SetHandlerTranspiler: Class "${method.def.getClassName()}" not found`);
-        }
+
         eventName = method.def.getEventName();
-        className = method.def.getEventClass(); //this.findEventClass(def, eventName, traversal, scope);
+
+        let def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined
+          = traversal.findClassDefinition(method.def.getEventClass(), scope);
+        if (def === undefined) {
+          def = traversal.findInterfaceDefinition(method.def.getEventClass()!, scope);
+        }
+        if (def === undefined) {
+          throw new Error(`SetHandlerTranspiler: Class "${method.def.getEventClass()}" not found`);
+        }
+        console.dir(method.def.getEventClass());
+        eventClass = traversal.buildInternalName(def.getName(), def);
+        // className = method.def.getEventClass();
+        // this.findEventClass(def, eventName, traversal, scope);
       }
     }
 
@@ -45,7 +54,7 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
       activation = ", " + new SourceTranspiler().transpile(activationExpression, traversal).getCode();
     }
 
-    return new Chunk().append(`abap.statements.setHandler({EVENT_NAME: "${eventName}", EVENT_CLASS: "${className}"}, [${methods.join(",")}], ${f}${activation});`, node, traversal);
+    return new Chunk().append(`abap.statements.setHandler({EVENT_NAME: "${eventName}", EVENT_CLASS: "${eventClass}"}, [${methods.join(",")}], ${f}${activation});`, node, traversal);
   }
 
   /*  private findEventClass(def: abaplint.IClassDefinition,
