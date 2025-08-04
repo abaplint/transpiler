@@ -27,7 +27,7 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
           throw new Error(`SetHandlerTranspiler: Class "${method.def.getClassName()}" not found`);
         }
         eventName = method.def.getEventName();
-        className = this.findEventClass(def, eventName, traversal, scope);
+        className = method.def.getEventClass(); //this.findEventClass(def, eventName, traversal, scope);
       }
     }
 
@@ -48,7 +48,7 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
     return new Chunk().append(`abap.statements.setHandler({EVENT_NAME: "${eventName}", EVENT_CLASS: "${className}"}, [${methods.join(",")}], ${f}${activation});`, node, traversal);
   }
 
-  private findEventClass(def: abaplint.IClassDefinition,
+  /*  private findEventClass(def: abaplint.IClassDefinition,
                          eventName: string | undefined,
                          traversal: Traversal,
                          scope: abaplint.ISpaghettiScopeNode | undefined): string {
@@ -76,5 +76,5 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
     }
     throw new Error(`SetHandlerTranspiler: Event "${eventName}" not found in class "${def.getName()}"`);
   }
-
+  */
 }

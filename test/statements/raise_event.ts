@@ -266,9 +266,9 @@ CLASS raiser IMPLEMENTATION.
 ENDCLASS.
 
 START-OF-SELECTION.
-  DATA handler TYPE REF TO handler.
-  CREATE OBJECT handler.
-  handler->register( ).
+  DATA foo TYPE REF TO handler.
+  CREATE OBJECT foo.
+  foo->register( ).
 
   DATA ref TYPE REF TO raiser.
   CREATE OBJECT ref.
