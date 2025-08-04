@@ -302,6 +302,7 @@ ENDCLASS.
 START-OF-SELECTION.
   stat=>raise( ).`;
     const js = await run(code);
+    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("handled");
