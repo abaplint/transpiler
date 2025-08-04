@@ -59,6 +59,19 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
           return traversal.buildInternalName(current.getName(), current);
         }
       }
+
+      for (const implementing of current.getImplementing()) {
+        const idef = traversal.findInterfaceDefinition(implementing.name, scope);
+        if (idef === undefined) {
+          continue;
+        }
+        for (const event of idef.getEvents()) {
+          if (event.getName().toUpperCase() === eventName?.toUpperCase()) {
+            return traversal.buildInternalName(idef.getName(), idef);
+          }
+        }
+      }
+
       current = traversal.findClassDefinition(current.getSuperClass(), scope);
     }
     throw new Error(`Transpiler: Event "${eventName}" not found in class "${def.getName()}"`);

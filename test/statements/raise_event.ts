@@ -197,7 +197,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("handled");
   });
 
-  it.skip("event defined in interface", async () => {
+  it.only("event defined in interface", async () => {
     const code = `
 INTERFACE lif.
   EVENTS foo.
