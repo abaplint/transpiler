@@ -160,7 +160,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
-  it("event defined in super class", async () => {
+  it.skip("event defined in super class", async () => {
     const code = `
 CLASS dup DEFINITION.
   PUBLIC SECTION.

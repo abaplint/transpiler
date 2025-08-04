@@ -22,19 +22,8 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
           throw new Error(`SetHandlerTranspiler: Method "${nameToken.getStr()}" is not an event handler`);
         }
 
-
         eventName = method.def.getEventName();
-
-        let def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined
-          = traversal.findClassDefinition(method.def.getEventClass(), scope);
-        if (def === undefined) {
-          def = traversal.findInterfaceDefinition(method.def.getEventClass()!, scope);
-        }
-        if (def === undefined) {
-          throw new Error(`SetHandlerTranspiler: Class "${method.def.getEventClass()}" not found`);
-        }
-        console.dir(method.def.getEventClass());
-        eventClass = traversal.buildInternalName(def.getName(), def);
+        eventClass = this.findEventClass(method.def, traversal, scope);
         // className = method.def.getEventClass();
         // this.findEventClass(def, eventName, traversal, scope);
       }
@@ -55,6 +44,21 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
     }
 
     return new Chunk().append(`abap.statements.setHandler({EVENT_NAME: "${eventName}", EVENT_CLASS: "${eventClass}"}, [${methods.join(",")}], ${f}${activation});`, node, traversal);
+  }
+
+  private findEventClass(mdef: abaplint.Types.MethodDefinition,
+                         traversal: Traversal,
+                         scope: abaplint.ISpaghettiScopeNode | undefined): string {
+
+    let def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined
+      = traversal.findClassDefinition(mdef.getEventClass(), scope);
+    if (def === undefined) {
+      def = traversal.findInterfaceDefinition(mdef.getEventClass()!, scope);
+    }
+    if (def === undefined) {
+      throw new Error(`SetHandlerTranspiler: Class "${mdef.getEventClass()}" not found`);
+    }
+    return traversal.buildInternalName(def.getName(), def);
   }
 
   /*  private findEventClass(def: abaplint.IClassDefinition,
