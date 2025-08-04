@@ -65,7 +65,7 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
     }
 
     if (def === undefined) {
-      throw new Error(`SetHandlerTranspiler: findEventClass "${mdef.getEventClass()}" not found`);
+      throw new Error(`SetHandlerTranspiler: findEventClass, class or interface "${mdef.getEventClass()}" not found`);
     }
     return traversal.buildInternalName(def.getName(), def);
   }
