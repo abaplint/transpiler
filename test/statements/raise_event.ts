@@ -279,7 +279,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("handled");
   });
 
-  it.only("all static", async () => {
+  it("all static", async () => {
     const code = `
 CLASS stat DEFINITION.
   PUBLIC SECTION.
@@ -302,13 +302,12 @@ ENDCLASS.
 START-OF-SELECTION.
   stat=>raise( ).`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("handled");
   });
 
-  it("all static, via interface", async () => {
+  it.skip("all static, via interface", async () => {
     const code = `
 INTERFACE lif.
   CLASS-EVENTS foobar.

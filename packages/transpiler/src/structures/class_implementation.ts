@@ -140,6 +140,15 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
       ret += Traversal.escapeNamespace(clasName) + "." + alias.getName().toLowerCase() + " = " + Traversal.escapeNamespace(clasName) + "." + Traversal.escapeNamespace(alias.getComponent().replace("~", "$")) + ";\n";
     }
 
+    for (const e of cdef.getEvents()) {
+      if (e.isStatic() === false) {
+        continue;
+      }
+      const fname = Traversal.escapeNamespace(e.getName().toLowerCase());
+      const name = traversal.buildInternalName(clasName, cdef);
+      ret += Traversal.escapeNamespace(clasName) + "." + fname + " = {\"EVENT_NAME\": \"" + e.getName().toUpperCase() + "\", \"EVENT_CLASS\": \"" + name + "\"};\n";
+    }
+
     // this is not correct, ABAP does not invocate the class constructor at require time,
     // but this will probably work
     if (traversal.getCurrentObject().getType() === "CLAS") {
