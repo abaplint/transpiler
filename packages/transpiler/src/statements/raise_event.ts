@@ -7,7 +7,7 @@ import {ParameterListSTranspiler} from "../expressions";
 export class RaiseEventTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    const eventName = node.findFirstExpression(abaplint.Expressions.EventName)?.concatTokens().toLowerCase();
+    const eventName = Traversal.escapeNamespace(node.findFirstExpression(abaplint.Expressions.EventName)?.concatTokens())?.toLowerCase().replace("~", "$");
 
     const parameters = node.findFirstExpression(abaplint.Expressions.ParameterListS);
     let extra = "";

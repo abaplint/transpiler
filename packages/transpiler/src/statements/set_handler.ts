@@ -19,12 +19,12 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
         const scope = traversal.findCurrentScopeByToken(nameToken);
         const method = traversal.findMethodReference(nameToken, scope);
         if (method?.def.isEventHandler() !== true) {
-          throw new Error(`Transpiler: Method "${nameToken.getStr()}" is not an event handler`);
+          throw new Error(`SetHandlerTranspiler: Method "${nameToken.getStr()}" is not an event handler`);
         }
 
-        const def = traversal.findClassDefinition(method.def.getEventClass(), scope);
+        const def = traversal.findClassDefinition(method.def.getClassName(), scope);
         if (def === undefined) {
-          throw new Error(`Transpiler: Method "${nameToken.getStr()}" is not an event handler`);
+          throw new Error(`SetHandlerTranspiler: Class "${method.def.getClassName()}" not found`);
         }
         eventName = method.def.getEventName();
         className = this.findEventClass(def, eventName, traversal, scope);
