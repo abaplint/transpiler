@@ -27,23 +27,7 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
           throw new Error(`Transpiler: Method "${nameToken.getStr()}" is not an event handler`);
         }
         eventName = method.def.getEventName();
-
-        let current: abaplint.IClassDefinition | undefined = def;
-        while (current !== undefined) {
-          for (const event of current.getEvents()) {
-            if (event.getName().toUpperCase() === eventName?.toUpperCase()) {
-              className = traversal.buildInternalName(current.getName(), current);
-              break;
-            }
-          }
-          if (className !== undefined) {
-            break;
-          }
-          current = traversal.findClassDefinition(current.getSuperClass(), scope);
-        }
-        if (className === undefined) {
-          throw new Error(`Transpiler: Event "${eventName}" not found in class "${def.getName()}"`);
-        }
+        className = this.findEventClass(def, eventName, traversal, scope);
       }
     }
 
@@ -62,6 +46,22 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
     }
 
     return new Chunk().append(`abap.statements.setHandler({EVENT_NAME: "${eventName}", EVENT_CLASS: "${className}"}, [${methods.join(",")}], ${f}${activation});`, node, traversal);
+  }
+
+  private findEventClass(def: abaplint.IClassDefinition,
+                         eventName: string | undefined,
+                         traversal: Traversal,
+                         scope: abaplint.ISpaghettiScopeNode | undefined): string {
+    let current: abaplint.IClassDefinition | undefined = def;
+    while (current !== undefined) {
+      for (const event of current.getEvents()) {
+        if (event.getName().toUpperCase() === eventName?.toUpperCase()) {
+          return traversal.buildInternalName(current.getName(), current);
+        }
+      }
+      current = traversal.findClassDefinition(current.getSuperClass(), scope);
+    }
+    throw new Error(`Transpiler: Event "${eventName}" not found in class "${def.getName()}"`);
   }
 
 }
