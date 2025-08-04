@@ -39,7 +39,7 @@ export class ABAPEventing {
   }
 
   // todo: cleanup of dead WeakRefs
-  public async raiseEvent(event: ABAPEventReference, me: ABAPObject, _parameters?: object): Promise<void> {
+  public async raiseEvent(event: ABAPEventReference, me: ABAPObject, parameters: object): Promise<void> {
     const handlers = this.registrations[event.EVENT_CLASS]?.[event.EVENT_NAME];
     if (handlers === undefined) {
       return;
@@ -48,11 +48,11 @@ export class ABAPEventing {
     for (const handler of handlers) {
       if (handler.forObject === "ALL") {
         for (const method of handler.handlers) {
-          await method(_parameters);
+          await method(parameters);
         }
       } else if (handler.forObject.deref() === me) {
         for (const method of handler.handlers) {
-          await method(_parameters);
+          await method(parameters);
         }
       }
     }

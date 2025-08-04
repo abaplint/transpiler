@@ -340,7 +340,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("handled");
   });
 
-  it.only("check sender is set", async () => {
+  it("check sender is set", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
@@ -366,7 +366,6 @@ START-OF-SELECTION.
   CREATE OBJECT ref.
   ref->method1( ).`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
