@@ -197,4 +197,38 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("handled");
   });
 
+  it.skip("event defined in interface", async () => {
+    const code = `
+INTERFACE lif.
+  EVENTS foo.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS method1.
+    INTERFACES lif.
+    METHODS handler FOR EVENT foo OF lif.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD method1.
+    SET HANDLER handler FOR ALL INSTANCES.
+    RAISE EVENT lif~foo.
+  ENDMETHOD.
+
+  METHOD handler.
+    WRITE / 'handled'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl.
+  CREATE OBJECT ref.
+  ref->method1( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("handled");
+  });
+
 });
