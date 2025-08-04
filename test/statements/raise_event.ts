@@ -160,7 +160,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
-  it.only("event defined in super class", async () => {
+  it("event defined in super class", async () => {
     const code = `
 CLASS dup DEFINITION.
   PUBLIC SECTION.
@@ -192,7 +192,6 @@ START-OF-SELECTION.
   CREATE OBJECT ref.
   ref->method1( ).`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("handled");

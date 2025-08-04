@@ -28,11 +28,18 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
         }
         eventName = method.def.getEventName();
 
-        for (const event of def.getEvents()) {
-          if (event.getName() === eventName) {
-            className = traversal.buildInternalName(def.getName(), def);
+        let current: abaplint.IClassDefinition | undefined = def;
+        while (current !== undefined) {
+          for (const event of current.getEvents()) {
+            if (event.getName().toUpperCase() === eventName?.toUpperCase()) {
+              className = traversal.buildInternalName(current.getName(), current);
+              break;
+            }
+          }
+          if (className !== undefined) {
             break;
           }
+          current = traversal.findClassDefinition(current.getSuperClass(), scope);
         }
         if (className === undefined) {
           throw new Error(`Transpiler: Event "${eventName}" not found in class "${def.getName()}"`);
