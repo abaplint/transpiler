@@ -554,6 +554,7 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
     for (const i of def.getImplementing()) {
       ret += this.dataFromInterfaces(i.name, scope, cName!);
       ret += this.aliasesFromInterfaces(i.name, scope, cName!);
+      ret += this.eventsFromInterfaces(i.name, scope);
     }
 
     // handle aliases after initialization of carrier variables
@@ -565,11 +566,30 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
       ret += "this." + Traversal.escapeNamespace(c.getName().toLowerCase()) + " = " + cName + "." + Traversal.escapeNamespace(c.getName().toLowerCase()) + ";\n";
     }
     for (const e of def.getEvents() || []) {
-      // todo: skip static events?
-      // todo: events from interfaces?
-      // todo: events from super classes?
       const name = this.buildInternalName(def.getName(), def);
       ret += "this." + Traversal.escapeNamespace(e.getName().toLowerCase()) + " = {\"EVENT_NAME\": \"" + e.getName().toUpperCase() + "\", \"EVENT_CLASS\": \"" + name + "\"};\n";
+    }
+
+    return ret;
+  }
+
+  private eventsFromInterfaces(name: string, scope: abaplint.ISpaghettiScopeNode | undefined): string {
+    let ret = "";
+
+    const intf = this.findInterfaceDefinition(name, scope);
+    if (intf === undefined) {
+      return ret;
+    }
+
+    for (const e of intf.getEvents() || []) {
+      const fname = Traversal.escapeNamespace(e.getName().toLowerCase());
+      const iname = Traversal.escapeNamespace(intf?.getName().toLowerCase());
+      const name = this.buildInternalName(intf.getName(), intf);
+      ret += "this." + iname + "$" + fname + " = {\"EVENT_NAME\": \"" + e.getName().toUpperCase() + "\", \"EVENT_CLASS\": \"" + name + "\"};\n";
+    }
+
+    for (const i of intf.getImplementing() || []) {
+      ret += this.eventsFromInterfaces(i.name, scope);
     }
 
     return ret;
