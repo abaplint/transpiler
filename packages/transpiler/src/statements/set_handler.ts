@@ -26,8 +26,17 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
         if (def === undefined) {
           throw new Error(`Transpiler: Method "${nameToken.getStr()}" is not an event handler`);
         }
-        className = traversal.buildInternalName(def.getName(), def);
         eventName = method.def.getEventName();
+
+        for (const event of def.getEvents()) {
+          if (event.getName() === eventName) {
+            className = traversal.buildInternalName(def.getName(), def);
+            break;
+          }
+        }
+        if (className === undefined) {
+          throw new Error(`Transpiler: Event "${eventName}" not found in class "${def.getName()}"`);
+        }
       }
     }
 
