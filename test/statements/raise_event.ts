@@ -370,7 +370,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.only("output private variable in handler (this)", async () => {
+  it("output private variable in handler (this)", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
@@ -398,7 +398,6 @@ START-OF-SELECTION.
   CREATE OBJECT ref.
   ref->method1( ).`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
