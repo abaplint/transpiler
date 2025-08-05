@@ -1,4 +1,5 @@
 import {ABAP} from ".";
+import {throwError} from "./throw_error";
 import {ICharacter} from "./types/_character";
 
 declare const abap: ABAP;
@@ -18,8 +19,7 @@ export function dynamicCallLookup(obj: any, methodName: string | ICharacter): an
   }
 
   if (ret === undefined) {
-    if (abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_METHOD not found"; }
-    throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD']();
+    throwError("CX_SY_DYN_CALL_ILLEGAL_METHOD");
   }
 
   return ret;
