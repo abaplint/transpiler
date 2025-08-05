@@ -99,6 +99,7 @@ CLASS lcl IMPLEMENTATION.
     DATA ref TYPE REF TO lcl.
     CREATE OBJECT ref.
     INSERT ref INTO TABLE tab.
+    INSERT ref INTO TABLE tab.
     SORT tab BY table_line->foo.
   ENDMETHOD.
 ENDCLASS.
@@ -127,6 +128,7 @@ CLASS lcl IMPLEMENTATION.
     DATA tab TYPE STANDARD TABLE OF REF TO lif.
     DATA ref TYPE REF TO lcl.
     CREATE OBJECT ref.
+    INSERT ref INTO TABLE tab.
     INSERT ref INTO TABLE tab.
     SORT tab BY table_line->foo.
   ENDMETHOD.
