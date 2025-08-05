@@ -84,4 +84,30 @@ describe("Running statements - SORT", () => {
     expect(abap.console.get()).to.equal("bar\nfoo");
   });
 
+  it("SORT BY private", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS run.
+  PRIVATE SECTION.
+    DATA foo TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    DATA tab TYPE STANDARD TABLE OF REF TO lcl.
+    DATA ref TYPE REF TO lcl.
+    CREATE OBJECT ref.
+    INSERT ref INTO TABLE tab.
+    SORT tab BY table_line->foo.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>run( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
