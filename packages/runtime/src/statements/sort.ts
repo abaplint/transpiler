@@ -26,6 +26,7 @@ function compare(a: any, b: any, input: {component: string, descending?: boolean
         continue;
       }
 
+      console.dir(vala = vala.get());
       if (vala.get()[s] !== undefined) {
         vala = vala.get()[s];
       } else {
