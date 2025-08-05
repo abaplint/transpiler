@@ -3,6 +3,9 @@ import {INumeric} from "../types/_numeric";
 import {deleteInternal} from "./delete_internal";
 import {insertInternal} from "./insert_internal";
 import {readTable} from "./read_table";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 export interface IModifyInternalOptions {
   index: INumeric,
@@ -54,6 +57,5 @@ export function modifyInternal(table: Table, options: IModifyInternalOptions): v
   }
 
   const subrc = found ? 0 : 4;
-  // @ts-ignore
   abap.builtin.sy.get().subrc.set(subrc);
 }

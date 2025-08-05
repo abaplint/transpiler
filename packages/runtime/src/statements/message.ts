@@ -1,6 +1,9 @@
 import {Context} from "../context";
 import {ABAPObject, Character} from "../types";
 import {ICharacter} from "../types/_character";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 export interface IMessageOptions {
   id?: ICharacter | string,
@@ -29,7 +32,6 @@ function replace(text: string, w?: (ICharacter | string | Character)[]): string 
 
     const field = "msgv" + (i + 1);
     if (i <= 3) {
-      // @ts-ignore
       abap.builtin.sy.get()[field].set(replace);
     }
 
@@ -87,15 +89,12 @@ export class MessageStatement {
     }
     msgty = msgty?.toUpperCase();
 
-    // @ts-ignore
     abap.builtin.sy.get().msgid.set(arbgb || "");
     let msgnr = options.number;
     if (msgnr !== undefined && typeof msgnr !== "string") {
       msgnr = msgnr.get();
     }
-    // @ts-ignore
     abap.builtin.sy.get().msgno.set(msgnr || "");
-    // @ts-ignore
     abap.builtin.sy.get().msgty.set(msgty);
 
     let replaced = "";

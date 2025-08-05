@@ -15,7 +15,7 @@ export async function fetchNextCursor(
     if (target.isAssigned() === false) {
       throw new Error("GETWA_NOT_ASSIGNED");
     }
-      // @ts-ignore
+    // @ts-ignore
     target = target.getPointer();
   }
 

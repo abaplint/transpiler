@@ -4,6 +4,9 @@ import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {readTable} from "./read_table";
 import {sort} from "./sort";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 export interface IInsertInternalOptions {
   index?: INumeric,
@@ -75,9 +78,7 @@ export function insertInternal(options: IInsertInternalOptions): void {
       }
 
       readTable(options.table, {withKey: compare, withKeyValue: withKeyValue, binarySearch: binary});
-      // @ts-ignore
       if (abap.builtin.sy.get().subrc.get() === 0) {
-        // @ts-ignore
         abap.builtin.sy.get().subrc.set(4);
         return;
       }
@@ -132,7 +133,6 @@ export function insertInternal(options: IInsertInternalOptions): void {
     if (options.referenceInto) {
       options.referenceInto.assign(val);
     }
-    // @ts-ignore
     abap.builtin.sy.get().subrc.set(subrc);
     return;
   } else if (data) {
@@ -146,7 +146,6 @@ export function insertInternal(options: IInsertInternalOptions): void {
     }
   }
 
-  // @ts-ignore
   abap.builtin.sy.get().subrc.set(0);
 
   if (isSorted && !(options.table instanceof HashedTable)) {

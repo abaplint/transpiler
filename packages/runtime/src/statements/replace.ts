@@ -4,6 +4,9 @@ import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {concatenate} from "./concatenate";
 import {IRegexOptions} from "./find";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 export type replaceInput = IRegexOptions & {
   target: ICharacter | Table,
@@ -49,7 +52,6 @@ export function replace(input: replaceInput): void {
     const before = input.target.getOffset({length: input.sectionOffset});
     const after = input.target.getOffset({offset: input.sectionLength.get() + input.sectionOffset.get()});
     concatenate({source: [before, input.with, after], target: input.target});
-    // @ts-ignore
     abap.builtin.sy.get().subrc.set(0);
     return;
   } else {
@@ -90,7 +92,6 @@ export function replace(input: replaceInput): void {
   temp = temp.replace(search, rr);
 
   const subrc = found ? 0 : 4;
-  // @ts-ignore
   abap.builtin.sy.get().subrc.set(subrc);
 
   input.target.set(temp);

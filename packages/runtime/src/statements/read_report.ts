@@ -1,5 +1,8 @@
 import {String, Table} from "../types";
 import {ICharacter} from "../types/_character";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 interface IReadReportOptions {
   state?: ICharacter,
@@ -15,6 +18,5 @@ export function readReport(name: ICharacter, options: IReadReportOptions) {
 
 // TODO
 
-  // @ts-ignore
   abap.builtin.sy.get().subrc.set(0);
 }

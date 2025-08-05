@@ -2,6 +2,9 @@ import {binarySearchFrom, binarySearchTo} from "../binary_search";
 import {FieldSymbol, HashedTable, Integer, ITableKey, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 type topType = {[name: string]: INumeric | ICharacter};
 
@@ -101,7 +104,6 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
 
   const length = table.getArrayLength();
   if (length === 0) {
-    // @ts-ignore
     abap.builtin.sy.get().subrc.set(4);
     return;
   }
@@ -140,7 +142,6 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
         }
       }
 
-      // @ts-ignore
       abap.builtin.sy.get().tabix.set(loopController.index + 1);
       entered = true;
 
@@ -155,7 +156,6 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
     }
   } finally {
     table.unregisterLoop(loopController);
-    // @ts-ignore
     abap.builtin.sy.get().subrc.set(entered ? 0 : 4);
   }
 }
