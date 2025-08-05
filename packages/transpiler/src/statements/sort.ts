@@ -2,6 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
+import {ComponentChainTranspiler} from "../expressions";
 
 export class SortTranspiler implements IStatementTranspiler {
 
@@ -19,10 +20,11 @@ export class SortTranspiler implements IStatementTranspiler {
       const by: string[] = [];
       for (const c of components) {
         const next = this.findNextText(c, node);
+        const concat = ComponentChainTranspiler.concat(c);
         if (next === "DESCENDING") {
-          by.push(`{component: "${c.concatTokens().toLowerCase()}", descending: true}`);
+          by.push(`{component: "${concat}", descending: true}`);
         } else {
-          by.push(`{component: "${c.concatTokens().toLowerCase()}"}`);
+          by.push(`{component: "${concat}"}`);
         }
       }
       options.push(`by: [${by.join(",")}]`);
