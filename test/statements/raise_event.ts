@@ -340,4 +340,34 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("handled");
   });
 
+  it("check sender is set", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    EVENTS foo.
+    METHODS method1.
+    METHODS handler FOR EVENT foo OF lcl
+      IMPORTING sender.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD method1.
+    SET HANDLER handler FOR me.
+    RAISE EVENT foo.
+  ENDMETHOD.
+
+  METHOD handler.
+    ASSERT sender IS NOT INITIAL.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl.
+  CREATE OBJECT ref.
+  ref->method1( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
