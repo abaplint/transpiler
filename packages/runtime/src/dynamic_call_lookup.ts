@@ -1,8 +1,9 @@
+import {throwError} from "./throw_error";
 import {ICharacter} from "./types/_character";
 
 export function dynamicCallLookup(obj: any, methodName: string | ICharacter): any {
-  // todo: escape interface and namespace characters in name?
-  const name = typeof methodName === "string" ? methodName : methodName.get().toLowerCase().trimEnd();
+  let name = typeof methodName === "string" ? methodName : methodName.get().toLowerCase().trimEnd();
+  name = name.replaceAll("~", "$").replaceAll("/", "$");
 
   let ret = obj[name];
 
@@ -15,10 +16,7 @@ export function dynamicCallLookup(obj: any, methodName: string | ICharacter): an
   }
 
   if (ret === undefined) {
-    // @ts-ignore
-    if (abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD'] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_METHOD not found"; }
-    // @ts-ignore
-    throw new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_METHOD']();
+    throwError("CX_SY_DYN_CALL_ILLEGAL_METHOD");
   }
 
   return ret;
