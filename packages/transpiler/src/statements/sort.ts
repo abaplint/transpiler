@@ -20,7 +20,7 @@ export class SortTranspiler implements IStatementTranspiler {
       const by: string[] = [];
       for (const c of components) {
         const next = this.findNextText(c, node);
-        const concat = ComponentChainTranspiler.concat(c);
+        const concat = ComponentChainTranspiler.concat(c, traversal);
         if (next === "DESCENDING") {
           by.push(`{component: "${concat}", descending: true}`);
         } else {

@@ -111,7 +111,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.skip("SORT BY interfaced var", async () => {
+  it.only("SORT BY interfaced var", async () => {
     const code = `
 INTERFACE lif.
   DATA foo TYPE i.
