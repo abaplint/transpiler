@@ -110,4 +110,33 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("SORT BY interfaced var", async () => {
+    const code = `
+INTERFACE lif.
+  DATA foo TYPE i.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+    CLASS-METHODS run.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    DATA tab TYPE STANDARD TABLE OF REF TO lif.
+    DATA ref TYPE REF TO lcl.
+    CREATE OBJECT ref.
+    INSERT ref INTO TABLE tab.
+    SORT tab BY table_line->foo.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>run( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
