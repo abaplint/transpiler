@@ -68,21 +68,18 @@ async function loadLib(config: ITranspilerConfig): Promise<Transpiler.IFile[]> {
   return files;
 }
 
-function writeObjects(objects: Transpiler.IOutputFile[], config: ITranspilerConfig, outputFolder: string, files: Transpiler.IFile[]) {
+function writeObjects(outputFiles: Transpiler.IOutputFile[], config: ITranspilerConfig, outputFolder: string, files: Transpiler.IFile[]) {
   const writeSourceMaps = config.write_source_map || false
-  for (const o of objects) {
-    let contents = o.chunk.getCode();
+  for (const output of outputFiles) {
+    let contents = output.chunk.getCode();
     if (writeSourceMaps === true
-        && o.object.type.toUpperCase() !== "TABL"
-        && o.object.type.toUpperCase() !== "DTEL"
-        && o.object.type.toUpperCase() !== "W3MI"
-        && o.object.type.toUpperCase() !== "SMIM"
-        && o.object.type.toUpperCase() !== "ENQU"
-        && o.object.type.toUpperCase() !== "TTYP") {
-      const name = o.filename + ".map";
+        && output.object.type.toUpperCase() === "PROG"
+        && output.object.type.toUpperCase() === "FUGR"
+        && output.object.type.toUpperCase() === "CLAS") {
+      const name = output.filename + ".map";
 // SourceMappingUrl needs to be percent-encoded, ref https://github.com/microsoft/TypeScript/issues/40951
       contents = contents + `\n//# sourceMappingURL=` + name.replace(/#/g, "%23");
-      let map = o.chunk.getMap(o.filename);
+      let map = output.chunk.getMap(output.filename);
       for (const f of files) { // hack the paths to the original files
         if (f.relative === undefined) {
           continue;
@@ -96,11 +93,11 @@ function writeObjects(objects: Transpiler.IOutputFile[], config: ITranspilerConf
       fs.writeFileSync(outputFolder + path.sep + name, map);
     }
 
-    if (o.object.type.toUpperCase() === "PROG") {
+    if (output.object.type.toUpperCase() === "PROG") {
       // hmm, will this work for INCLUDEs ?
       contents = `if (!globalThis.abap) await import("./_init.mjs");\n` + contents;
     }
-    fs.writeFileSync(outputFolder + path.sep + o.filename, contents);
+    fs.writeFileSync(outputFolder + path.sep + output.filename, contents);
   }
 }
 
