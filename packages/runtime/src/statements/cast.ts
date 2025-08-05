@@ -1,5 +1,8 @@
 import {throwError} from "../throw_error";
 import {ABAPObject, FieldSymbol} from "../types";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 // todo, field symbols as input?
 // todo, local classes?
@@ -29,11 +32,9 @@ export async function cast(target: ABAPObject | FieldSymbol, source: ABAPObject)
     targetName = target.getQualifiedName()?.toUpperCase();
   }
 
-  // @ts-ignore
-  let targetClass = abap.Classes[targetName];
+  let targetClass = abap.Classes[targetName!];
   if (targetClass === undefined) {
     // todo, for unit testing,
-    // @ts-ignore
     targetClass = abap.Classes["PROG-ZFOOBAR-" + targetName];
   }
 

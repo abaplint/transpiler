@@ -1,6 +1,9 @@
 import {DataReference, FieldSymbol, Table, TableRowType} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 export interface IAppendOptions {
   source: TableRowType | FieldSymbol | Table,
@@ -30,7 +33,6 @@ export function append(input: IAppendOptions) {
       throw "APPEND, header, table";
     }
     input.source.append(input.source.getHeader());
-    // @ts-ignore
     abap.builtin.sy.get().tabix.set(input.source.array().length);
     return;
   } else if (input.lines === true && input.source instanceof Table) {
@@ -69,6 +71,5 @@ export function append(input: IAppendOptions) {
     }
   }
 
-  // @ts-ignore
   abap.builtin.sy.get().tabix.set(input.target.array().length);
 }

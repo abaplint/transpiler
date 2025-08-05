@@ -1,6 +1,9 @@
 import {Character} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 export function cs(left: number | string | ICharacter | INumeric, right: string | ICharacter): boolean {
   let l = "";
@@ -23,11 +26,9 @@ export function cs(left: number | string | ICharacter | INumeric, right: string 
 
   const index = l.indexOf(r);
   if (index < 0) {
-    // @ts-ignore
     abap.builtin.sy.get().fdpos.set(l.length);
     return false;
   } else {
-    // @ts-ignore
     abap.builtin.sy.get().fdpos.set(index);
     return true;
   }

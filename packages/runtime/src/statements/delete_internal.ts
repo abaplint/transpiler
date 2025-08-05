@@ -2,6 +2,9 @@ import {FieldSymbol, HashedTable, Structure, Table} from "../types";
 import {eq} from "../compare";
 import {INumeric} from "../types/_numeric";
 import {loop} from "./loop";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 export interface IDeleteInternalOptions {
   where?: (i: any) => Promise<boolean>,
@@ -34,12 +37,10 @@ export async function deleteInternal(target: Table | HashedTable | FieldSymbol, 
     }
 
     if (target.array()[options.index.get() - 1] === undefined) {
-      // @ts-ignore
       abap.builtin.sy.get().subrc.set(4);
       return;
     } else {
       target.deleteIndex(options.index.get() - 1);
-      // @ts-ignore
       abap.builtin.sy.get().subrc.set(0);
       return;
     }
@@ -97,7 +98,6 @@ export async function deleteInternal(target: Table | HashedTable | FieldSymbol, 
   }
 
   for await (const i of loop(target)) {
-    // @ts-ignore
     index = abap.builtin.sy.get().tabix.get() - 1;
 
     if (options?.where) {
