@@ -111,7 +111,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.only("SORT BY interfaced var", async () => {
+  it("SORT BY interfaced var", async () => {
     const code = `
 INTERFACE lif.
   DATA foo TYPE i.
@@ -137,7 +137,6 @@ ENDCLASS.
 START-OF-SELECTION.
   lcl=>run( ).`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
