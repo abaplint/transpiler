@@ -17,4 +17,22 @@ export class ComponentChainTranspiler implements IExpressionTranspiler {
     return ret;
   }
 
+  public static concat(node: Nodes.ExpressionNode, traversal: Traversal): string {
+    let ret = "";
+    for (const n of node.getChildren()) {
+      if (n.get() instanceof Expressions.ComponentName) {
+        let prefix = traversal.isInterfaceAttribute(n.getFirstToken());
+        if (prefix === undefined) {
+          prefix = "";
+        } else {
+          prefix = Traversal.escapeNamespace(prefix) + "$";
+        }
+        ret += prefix + n.concatTokens().toLowerCase();
+      } else {
+        ret += n.concatTokens();
+      }
+    }
+    return ret;
+  }
+
 }

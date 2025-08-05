@@ -17,6 +17,27 @@ function compare(a: any, b: any, input: {component: string, descending?: boolean
   if (componentName === "table_line") {
     vala = a.get();
     valb = b.get();
+  } else if (componentName.includes("->")) {
+    const sub = componentName.split("->");
+    vala = a;
+    valb = b;
+    for (const s of sub) {
+      if (s === "table_line") {
+        continue;
+      }
+
+      if (vala.get()[s] !== undefined) {
+        vala = vala.get()[s];
+      } else {
+        vala = vala.get().FRIENDS_ACCESS_INSTANCE[s];
+      }
+
+      if (valb.get()[s] !== undefined) {
+        valb = valb.get()[s];
+      } else {
+        valb = valb.get().FRIENDS_ACCESS_INSTANCE[s];
+      }
+    }
   } else if (componentName.includes("-")) {
     const sub = componentName.split("-");
     vala = a;
