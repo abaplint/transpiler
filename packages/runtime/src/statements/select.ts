@@ -1,6 +1,9 @@
 import {Context} from "../context";
 import {DatabaseRows, SelectDatabaseOptions, SelectRuntimeOptions} from "../db/db";
 import {FieldSymbol, HashedTable, Structure, Table} from "../types";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 export async function select(target: Structure | Table | HashedTable | FieldSymbol,
                              input: SelectDatabaseOptions,
@@ -25,9 +28,7 @@ export async function select(target: Structure | Table | HashedTable | FieldSymb
   }
 
   if (rows.length === 0) {
-      // @ts-ignore
     abap.builtin.sy.get().dbcnt.set(0);
-      // @ts-ignore
     abap.builtin.sy.get().subrc.set(4);
     return;
   }
@@ -35,13 +36,10 @@ export async function select(target: Structure | Table | HashedTable | FieldSymb
   rowsToTarget(target, rows);
 
   if (target === undefined && rows.length === 1) {
-      // @ts-ignore
     abap.builtin.sy.get().dbcnt.set(Object.values(rows[0])[0]);
   } else {
-      // @ts-ignore
     abap.builtin.sy.get().dbcnt.set(rows.length);
   }
-    // @ts-ignore
   abap.builtin.sy.get().subrc.set(0);
 }
 
@@ -54,7 +52,6 @@ export function rowsToTarget(target: Structure | Table | HashedTable | FieldSymb
       }
       result[column] = target.get()[column].clone().set(rows[0][column]);
     }
-      // @ts-ignore
     abap.statements.moveCorresponding(new Structure(result), target);
   } else if (target instanceof Table || target instanceof HashedTable) {
     for (const row of rows) {
@@ -74,7 +71,6 @@ export function rowsToTarget(target: Structure | Table | HashedTable | FieldSymb
         targetRow.set(row[columnName]);
       }
 
-        // @ts-ignore
       abap.statements.insertInternal({table: target, data: targetRow, noClone: true});
     }
   } else if (Array.isArray(target)) {

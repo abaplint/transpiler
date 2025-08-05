@@ -3,6 +3,9 @@ import {buildDbTableName} from "../prefix";
 import {FieldSymbol, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {toValue} from "./insert_database";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 export interface IUpdateDatabaseOptions {
   from?: Structure | FieldSymbol,
@@ -23,7 +26,6 @@ export async function updateDatabase(table: string | ICharacter, options: IUpdat
     table = table.get();
   }
 
-    // @ts-ignore
   const keys: string[] = abap.DDIC[table.toUpperCase()].keyFields;
   const where: string[] = [];
   const set: string[] = [];
@@ -53,9 +55,7 @@ export async function updateDatabase(table: string | ICharacter, options: IUpdat
     set,
   });
 
-    // @ts-ignore
   abap.builtin.sy.get().subrc.set(subrc);
-    // @ts-ignore
   abap.builtin.sy.get().dbcnt.set(dbcnt);
   return subrc;
 }
