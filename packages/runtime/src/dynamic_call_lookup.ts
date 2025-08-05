@@ -1,8 +1,5 @@
-import {ABAP} from ".";
 import {throwError} from "./throw_error";
 import {ICharacter} from "./types/_character";
-
-declare const abap: ABAP;
 
 export function dynamicCallLookup(obj: any, methodName: string | ICharacter): any {
   let name = typeof methodName === "string" ? methodName : methodName.get().toLowerCase().trimEnd();
