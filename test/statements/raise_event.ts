@@ -370,4 +370,37 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("output private variable in handler (this)", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    EVENTS foo.
+    METHODS method1.
+    METHODS handler FOR EVENT foo OF lcl.
+  PRIVATE SECTION.
+    DATA priv TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD method1.
+    priv = 2.
+    SET HANDLER handler FOR me.
+    RAISE EVENT foo.
+  ENDMETHOD.
+
+  METHOD handler.
+    WRITE priv.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl.
+  CREATE OBJECT ref.
+  ref->method1( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
