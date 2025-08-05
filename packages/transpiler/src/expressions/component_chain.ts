@@ -18,7 +18,15 @@ export class ComponentChainTranspiler implements IExpressionTranspiler {
   }
 
   public static concat(node: Nodes.ExpressionNode): string {
-    return node.concatTokens().toLowerCase();
+    let ret = "";
+    for (const n of node.getChildren()) {
+      if (n.get() instanceof Expressions.ComponentName) {
+        ret += n.concatTokens().toLowerCase();
+      } else {
+        ret += n.concatTokens();
+      }
+    }
+    return ret;
   }
 
 }
