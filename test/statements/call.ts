@@ -392,7 +392,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.only("dynamic call, interfaced method", async () => {
+  it("dynamic call, interfaced method", async () => {
     const code = `
 INTERFACE lif.
   METHODS foo.
