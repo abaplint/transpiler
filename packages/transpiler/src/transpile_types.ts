@@ -76,25 +76,9 @@ export class TranspileTypes {
       const list: string[] = [];
       const suffix: { [key: string]: string } = {};
       const asInclude: { [key: string]: boolean } = {};
-      /*
-      const skipFields: Set<string> = new Set();
-
-      for (const c of type.getComponents()) {
-        if (c.type instanceof abaplint.BasicTypes.StructureType) {
-          for (const f of c.type.getComponents()) {
-            skipFields.add(f.name.toLowerCase());
-          }
-        }
-      }
-        */
 
       for (const c of type.getComponents()) {
         const lower = c.name.toLowerCase();
-        /*
-        if (skipFields.has(lower)) {
-          continue; // skip fields from nested structures
-        }
-        */
         list.push(`"` + lower + `": ` + this.toType(c.type));
         if (c.suffix) {
           suffix[lower] = c.suffix;

@@ -4,8 +4,8 @@ import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
-async function run(contents: string) {
-  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
+async function run(contents: string, skipVersionCheck = false) {
+  return runFiles(abap, [{filename: "zfoobar_data.prog.abap", contents}], {skipVersionCheck});
 }
 
 describe("Running statements - DATA", () => {
@@ -113,6 +113,16 @@ WRITE / ls_data-a_suf.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("hi\nhi");
+  });
+
+  it("EMPTY KEY", async () => {
+    const code = `
+DATA foo TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+WRITE / lines( foo ).`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
   });
 
 });

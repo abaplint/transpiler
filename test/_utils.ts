@@ -15,6 +15,9 @@ export const AsyncFunction = Object.getPrototypeOf(async ()=> {}).constructor;
 export async function runFiles(abap: ABAP, files: IFile[], options?: ITranspilerOptions) {
   const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
   const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
+  if (options?.skipVersionCheck === true) {
+    console.warn("Skipping version check, " + files[0].filename);
+  }
   const res = await new Transpiler(options).run(reg);
   abap.console.clear();
   if (res.databaseSetup.schemas.sqlite.length > 0) {
