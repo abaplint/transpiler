@@ -19,7 +19,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
     const children = node.getChildren();
     for (let i = 0; i < children.length; i++) {
       const c = children[i];
-      const last = i === children.length - 1;
+      const isLast = i === children.length - 1;
 
       if (c instanceof Nodes.ExpressionNode) {
         if (c.get() instanceof Expressions.FieldChain) {
@@ -42,7 +42,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
           if (code.includes("await")) {
             ret = new Chunk().appendString("(").appendChunk(ret).appendString(")");
           }
-          if (this.addGet && last === true) {
+          if (this.addGet && isLast === true) {
             ret.append(".get()", c, traversal);
           }
         } else if (c.get() instanceof Expressions.Source) {
@@ -54,7 +54,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
         } else if (c.get() instanceof Expressions.ComponentChain) {
           ret = new Chunk().appendString("(").appendChunk(ret).appendString(").get().");
           ret.appendChunk(new ComponentChainTranspiler().transpile(c, traversal));
-          if (this.addGet && last === true) {
+          if (this.addGet && isLast === true) {
             ret.append(".get()", c, traversal);
           }
         } else if (c.get() instanceof Expressions.Dereference) {
