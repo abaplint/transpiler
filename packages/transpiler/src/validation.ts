@@ -130,6 +130,8 @@ export class Validation {
     if (this.options?.skipVersionCheck === true) {
       // todo, set it to abaplint default version
       config.syntax.version = Version.v758;
+    } else {
+      config.syntax.version = Version.OpenABAP;
     }
 
     const conf = new Config(JSON.stringify(config));
