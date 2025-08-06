@@ -25,10 +25,22 @@ WRITE / int.`;
     expect(abap.console.get()).to.equal("123");
   });
 
-  it.skip("inferred", async () => {
+  it.only("inferred", async () => {
     const code = `
 DATA int TYPE i.
 int = CONV #( '123' ).
+WRITE / int.`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("123");
+  });
+
+  it.skip("type reference", async () => {
+    const code = `
+TYPES ty TYPE i.
+DATA int TYPE i.
+int = CONV ty( '123' ).
 WRITE / int.`;
     const js = await run(code, true);
     const f = new AsyncFunction("abap", js);
