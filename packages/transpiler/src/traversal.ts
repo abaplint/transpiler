@@ -488,6 +488,23 @@ export class Traversal {
     return undefined;
   }
 
+  private findTypeReference(token: abaplint.Token) {
+    const scope = this.findCurrentScopeByToken(token);
+    if (scope === undefined) {
+      return undefined;
+    }
+
+    for (const r of scope.getData().references) {
+      if (r.referenceType === abaplint.ReferenceType.TypeReference
+          && r.position.getStart().equals(token.getStart())) {
+        if (r.resolved instanceof abaplint.TypedIdentifier) {
+          return r.resolved.getType();
+        }
+      }
+    }
+    return undefined;
+  }
+
   private buildThisAttributes(def: abaplint.IClassDefinition, cName: string | undefined): string {
     let ret = "";
     for (const a of def.getAttributes()?.getAll() || []) {
@@ -696,13 +713,36 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
       throw new Error("lookupType, node is not a TypeName, " + node.get());
     }
 
-    const name = node.concatTokens();
-    if (name === "i") {
-      return abaplint.BasicTypes.IntegerType.get();
+    const name = node.concatTokens().toLowerCase();
+    switch (name) {
+      case "i":
+        return abaplint.BasicTypes.IntegerType.get();
+      case "f":
+        return new abaplint.BasicTypes.FloatType();
+      case "string":
+        return abaplint.BasicTypes.StringType.get();
+      case "xstring":
+        return abaplint.BasicTypes.XStringType.get();
+      case "d":
+        return new abaplint.BasicTypes.DateType();
+      case "t":
+        return new abaplint.BasicTypes.TimeType();
+      default:
+        break;
     }
-    // todo
 
-    throw new Error("lookupType, todo, " + node.concatTokens());
+    const found = this.findTypeReference(node.getFirstToken());
+    if (found !== undefined) {
+      return found;
+    }
+
+    const dtel = this.reg.getObject("DTEL", name) as abaplint.Objects.DataElement | undefined;
+    if (dtel) {
+      return dtel.parseType(this.reg);
+    }
+
+    // todo: yea, well, yea
+    throw new Error("lookupType, type not found, " + node.concatTokens());
   }
 
   public lookupInferred(node: abaplint.Nodes.ExpressionNode,

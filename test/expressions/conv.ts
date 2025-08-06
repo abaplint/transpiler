@@ -36,7 +36,7 @@ WRITE / int.`;
     expect(abap.console.get()).to.equal("123");
   });
 
-  it.skip("type reference", async () => {
+  it("type reference", async () => {
     const code = `
 TYPES ty TYPE i.
 DATA int TYPE i.
