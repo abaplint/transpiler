@@ -3,6 +3,9 @@ import {buildDbTableName} from "../prefix";
 import {FieldSymbol, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {toValue} from "./insert_database";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 export interface IDeleteDatabaseOptions {
   from?: Structure | FieldSymbol,
@@ -40,9 +43,7 @@ export async function deleteDatabase(table: string | ICharacter, options: IDelet
       where,
     });
 
-      // @ts-ignore
     abap.builtin.sy.get().subrc.set(subrc);
-      // @ts-ignore
     abap.builtin.sy.get().dbcnt.set(dbcnt);
   } else {
     const {subrc, dbcnt} = await context.defaultDB().delete({
@@ -50,9 +51,7 @@ export async function deleteDatabase(table: string | ICharacter, options: IDelet
       where: options.where || "",
     });
 
-      // @ts-ignore
     abap.builtin.sy.get().subrc.set(subrc);
-      // @ts-ignore
     abap.builtin.sy.get().dbcnt.set(dbcnt);
   }
 }

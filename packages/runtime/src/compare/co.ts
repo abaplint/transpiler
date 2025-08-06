@@ -1,6 +1,9 @@
 import {Structure} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 export function co(left: number | string | ICharacter | INumeric, right: string | Structure | ICharacter): boolean {
   let l = "";
@@ -22,13 +25,11 @@ export function co(left: number | string | ICharacter | INumeric, right: string 
   let fdpos = 0;
   for (const c of l) {
     if (r.includes(c) === false) {
-      // @ts-ignore
       abap.builtin.sy.get().fdpos.set(fdpos);
       return false;
     }
     fdpos++;
   }
-  // @ts-ignore
   abap.builtin.sy.get().fdpos.set(fdpos);
 
   return true;

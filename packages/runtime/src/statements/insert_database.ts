@@ -2,6 +2,9 @@ import {Context} from "../context";
 import {buildDbTableName} from "../prefix";
 import {Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 export function toValue(value: any) {
   if (typeof value === "string") {
@@ -32,14 +35,10 @@ export async function insertDatabase(table: string | ICharacter, options: IInser
     let dbcnt = 0;
     for (const row of options.table.array()) {
       await insertDatabase(table, {values: row, connection: options.connection}, context);
-      // @ts-ignore
       subrc = Math.max(subrc, abap.builtin.sy.get().subrc.get());
-      // @ts-ignore
       dbcnt += abap.builtin.sy.get().dbcnt.get();
     }
-    // @ts-ignore
     abap.builtin.sy.get().subrc.set(subrc);
-    // @ts-ignore
     abap.builtin.sy.get().dbcnt.set(dbcnt);
     return;
   }
@@ -70,9 +69,7 @@ export async function insertDatabase(table: string | ICharacter, options: IInser
     values,
   });
 
-    // @ts-ignore
   abap.builtin.sy.get().subrc.set(subrc);
-    // @ts-ignore
   abap.builtin.sy.get().dbcnt.set(dbcnt);
   return subrc;
 }

@@ -151,10 +151,10 @@ export class Chunk {
   }
 
   public getMap(generatedFilename: string): string {
-    const generator = new sourceMap.SourceMapGenerator();
-    this.mappings.forEach(m => generator.addMapping(m));
+    const sourceMapGenerator = new sourceMap.SourceMapGenerator();
+    this.mappings.forEach(m => sourceMapGenerator.addMapping(m));
 
-    const json = generator.toJSON();
+    const json = sourceMapGenerator.toJSON();
     json.file = generatedFilename;
     json.sourceRoot = "";
     return JSON.stringify(json, null, 2);

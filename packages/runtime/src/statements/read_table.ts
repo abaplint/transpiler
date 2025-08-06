@@ -3,6 +3,9 @@ import {eq, ge, gt} from "../compare";
 import {DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Integer8, Structure, Table, TableAccessType} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 export interface IReadTableOptions {
   index?: INumeric | Integer8 | FieldSymbol | number,
@@ -299,9 +302,7 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
     subrc = 8;
   }
 
-  // @ts-ignore
   abap.builtin.sy.get().subrc.set(subrc);
-  // @ts-ignore
   abap.builtin.sy.get().tabix.set(foundIndex);
 
   if (found) {

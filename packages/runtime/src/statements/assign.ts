@@ -1,6 +1,9 @@
 import {ABAPObject, DataReference, FieldSymbol, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 export interface IAssignInput {
   source?: INumeric | ICharacter | Table | Structure | DataReference,
@@ -32,7 +35,6 @@ export function assign(input: IAssignInput) {
             // @ts-ignore
             const source = input.dynamicSource.get();
             if (source === undefined) {
-              // @ts-ignore
               abap.builtin.sy.get().subrc.set(4);
               return;
             }
@@ -40,29 +42,24 @@ export function assign(input: IAssignInput) {
           }
         }
       } else {
-        // @ts-ignore
         abap.builtin.sy.get().subrc.set(4);
         return;
       }
     } else if (input.dynamicName.includes("=>")) {
       const split = input.dynamicName.split("=>");
 
-      // @ts-ignore
       const clas = abap.Classes[split[0].toUpperCase()];
       if (clas === undefined) {
-        // @ts-ignore
         abap.builtin.sy.get().subrc.set(4);
         return;
       }
 
       if (clas[split[1].toLowerCase()] !== undefined) {
         input.target.assign(clas[split[1].toLowerCase()]);
-        // @ts-ignore
         abap.builtin.sy.get().subrc.set(0);
         return;
       } else if(clas[split[0].toLowerCase() + "$" + split[1].toLowerCase()] !== undefined) {
         input.target.assign(clas[split[0].toLowerCase() + "$" + split[1].toLowerCase()]);
-        // @ts-ignore
         abap.builtin.sy.get().subrc.set(0);
         return;
       }
@@ -70,10 +67,8 @@ export function assign(input: IAssignInput) {
 
     if (input.dynamicSource) {
       input.target.assign(input.dynamicSource);
-      // @ts-ignore
       abap.builtin.sy.get().subrc.set(0);
     } else {
-      // @ts-ignore
       abap.builtin.sy.get().subrc.set(4);
     }
   } else if (input.component) {
@@ -83,7 +78,6 @@ export function assign(input: IAssignInput) {
       return;
     } else if (!(input.source instanceof Structure)
         && !(input.source instanceof Table)) {
-      // @ts-ignore
       abap.builtin.sy.get().subrc.set(4);
       return;
     }
@@ -120,11 +114,9 @@ export function assign(input: IAssignInput) {
 
     if (result === undefined) {
       // not a field in the structure
-      // @ts-ignore
       abap.builtin.sy.get().subrc.set(4);
     } else {
       input.target.assign(result);
-      // @ts-ignore
       abap.builtin.sy.get().subrc.set(0);
     }
 
@@ -136,10 +128,8 @@ export function assign(input: IAssignInput) {
         throw new Error("GETWA_NOT_ASSIGNED");
       }
       input.target.assign(pnt);
-      // @ts-ignore
       abap.builtin.sy.get().subrc.set(0);
     } else if (input.source === undefined) {
-      // @ts-ignore
       abap.builtin.sy.get().subrc.set(4);
     } else {
       if (input.source instanceof Table && input.source.getOptions()?.withHeader === true) {
@@ -150,7 +140,6 @@ export function assign(input: IAssignInput) {
         }
         input.target.assign(input.source);
       }
-      // @ts-ignore
       abap.builtin.sy.get().subrc.set(0);
     }
 

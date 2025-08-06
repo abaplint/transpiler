@@ -1,5 +1,5 @@
 // https://www.w3schools.com/js/js_reserved.asp
-export const DEFAULT_KEYWORDS: string[] = [
+export const DEFAULT_KEYWORDS = new Set<string>([
   "abstract",	"arguments", "await",
   "break",	"byte", "catch",
 //  "char",
@@ -17,5 +17,5 @@ export const DEFAULT_KEYWORDS: string[] = [
   "throw",	"throws", "transient", "true",
   "try",	"typeof", "var", "void",
   "delete",
-  "volatile",	"while", "yield"];
+  "volatile",	"while", "yield"]);
 // "with"

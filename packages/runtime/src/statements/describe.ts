@@ -1,6 +1,9 @@
 import {Character, String, FieldSymbol, Hex, Table, ABAPObject, Structure, DataReference, Integer, Float, Numc, XString, Packed, Time, Date, DecFloat34, HashedTable, Integer8, HexUInt8} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 export interface IDescribeOptions {
   field: any,
@@ -81,7 +84,6 @@ export function describe(input: IDescribeOptions) {
   }
 
   if (input.table) {
-    // @ts-ignore
     abap.builtin.sy.get().tfill.set(input.table.getArrayLength());
 
     input.lines?.set(input.table.getArrayLength());

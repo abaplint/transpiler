@@ -3,6 +3,9 @@ import {RFCClient} from "../rfc";
 import {throwError} from "../throw_error";
 import {Character} from "../types";
 import {_receiveSetResult} from "./receive";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 export interface ICallFunctionOptions {
   name: string,
@@ -32,7 +35,6 @@ export class CallFunction {
       exceptions: options.exceptions,
     };
     options.name = options.name.trimEnd();
-    // @ts-ignore
     const fm = abap.FunctionModules[options.name];
 
     if (options.destination) {

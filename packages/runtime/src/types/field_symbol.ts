@@ -79,17 +79,14 @@ export class FieldSymbol  {
           buf.writeDoubleLE(pt.getRaw());
           return buf.toString("hex").toUpperCase();
         } else {
-          // @ts-ignore
           const ret = new String().set(Buffer.from(this.pointer?.get(), "utf16le").toString("hex"));
           return ret.get();
         }
       } else {
-        // @ts-ignore
         const ret = new String().set(Buffer.from(this.pointer?.get(), "hex").toString("utf16le"));
         return ret.get();
       }
     } else {
-      // @ts-ignore
       return this.pointer?.get();
     }
   }

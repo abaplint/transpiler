@@ -2,6 +2,9 @@ import {throwError} from "../throw_error";
 import {ABAPObject, Character, DataReference, Date, String, FieldSymbol, Float, Integer, Structure, Table, Time, XString, Hex, Packed, Numc, Integer8, UTCLong} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Structure | FieldSymbol;
 
@@ -26,34 +29,27 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
     throw new Error("CREATE_DATA_REFERENCE_EXPECTED");
   }
   if (options?.name && options?.table) {
-    // @ts-ignore
     if (abap.DDIC[options.name.trimEnd()] === undefined) {
       throwError("CX_SY_CREATE_DATA_ERROR");
     }
     // @ts-ignore
     target.assign(new abap.types.Table(abap.DDIC[options.name.trimEnd()].type));
   } else if (options?.name) {
-    // @ts-ignore
     if (abap.DDIC[options.name.trimEnd()]) {
-      // @ts-ignore
       target.assign(abap.DDIC[options.name.trimEnd()].type.clone());
     } else if (options.name.includes("=>")) {
       const [className, typeName] = options.name.trimEnd().toUpperCase().split("=>");
 
-      // @ts-ignore
       if (abap.Classes[className] === undefined) {
         throwError("CX_SY_CREATE_DATA_ERROR");
       }
-      // @ts-ignore
       if (abap.Classes[className][typeName.toLowerCase()] === undefined) {
         throwError("CX_SY_CREATE_DATA_ERROR");
       }
 
-      // @ts-ignore
       target.assign(abap.Classes[className][typeName.toLowerCase()].clone());
     } else if (options.name.startsWith("\\TYPE=%")) {
       // currently, only the runtime knows the references to the anonymous types
-      // @ts-ignore
       const clas = abap.Classes["KERNEL_CREATE_DATA_HANDLE"];
       if (clas === undefined) {
         throw new Error("CreateData, kernel class missing");
@@ -79,12 +75,10 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
     } else if (options.name.trimEnd() === "INT8") {
       target.assign(new Integer8());
     } else if (options.refTo === true) {
-      // @ts-ignore
       if (abap.Classes[options.name.toUpperCase()] === undefined) {
         throwError("CX_SY_CREATE_DATA_ERROR");
       }
 
-      // @ts-ignore
       target.assign(new abap.types.ABAPObject({qualifiedName: options.name, RTTIName: options.name}));
     } else {
       throwError("CX_SY_CREATE_DATA_ERROR");
@@ -160,24 +154,19 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
         target.assign(new UTCLong());
         break;
       default:
-          // @ts-ignore
         if (abap.DDIC[options.typeName.trimEnd()]) {
-          // @ts-ignore
           target.assign(abap.DDIC[options.typeName.trimEnd()].type.clone());
         }
         else if (options.typeName.includes("=>")) {
           const [className, typeName] = options.typeName.toUpperCase().split("=>");
 
-          // @ts-ignore
           if (abap.Classes[className] === undefined) {
             throwError("CX_SY_CREATE_DATA_ERROR");
           }
-          // @ts-ignore
           if (abap.Classes[className][typeName.toLowerCase().trimEnd()] === undefined) {
             throwError("CX_SY_CREATE_DATA_ERROR");
           }
 
-          // @ts-ignore
           target.assign(abap.Classes[className][typeName.toLowerCase().trimEnd()].clone());
         } else {
           throw "CREATE DATA, unknown type " + options.typeName;

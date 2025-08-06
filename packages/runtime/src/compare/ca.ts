@@ -1,6 +1,9 @@
+import {ABAP} from "..";
 import {FieldSymbol, Structure} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+
+declare const abap: ABAP;
 
 export function ca(left: number | string | ICharacter | INumeric | Structure, right: string | ICharacter): boolean {
   if (left instanceof FieldSymbol) {
@@ -31,13 +34,11 @@ export function ca(left: number | string | ICharacter | INumeric | Structure, ri
   let fdpos = 0;
   for (const c of l) {
     if (r.includes(c) === true) {
-      // @ts-ignore
       abap.builtin.sy.get().fdpos.set(fdpos);
       return true;
     }
     fdpos++;
   }
-  // @ts-ignore
   abap.builtin.sy.get().fdpos.set(fdpos);
 
   return false;

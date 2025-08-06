@@ -11,8 +11,9 @@ import {sort} from "../statements/sort";
 import {Character} from "./character";
 import {Hex} from "./hex";
 import {HexUInt8} from "./hex_uint8";
+import {ABAP} from "..";
 
-// const FEATURE_SHARED_TABLES = true;
+declare const abap: ABAP;
 
 export enum TableAccessType {
   standard = "STANDARD",
@@ -341,7 +342,6 @@ export class HashedTable implements ITable {
       tmp.set(new String().set(item));
       return tmp;
     // @ts-ignore
-
     } else if (this.isStructured === true && item.getQualifiedName && this.rowType.getQualifiedName && item.getQualifiedName() !== "" && item.getQualifiedName() === this.rowType.getQualifiedName()) {
     // types match, so no need to do conversions, just clone the item
       const val = item.clone();
@@ -572,7 +572,6 @@ export class Table implements ITable {
     this.secondaryIndexes = {};
     // note that this will clone the object
     this.append(this.rowType);
-    // @ts-ignore
     abap.builtin.sy.get().tabix.set(this.value.length);
     return this.value[this.value.length - 1];
   }
@@ -594,7 +593,6 @@ export class Table implements ITable {
       tmp.set(new String().set(item));
       return tmp;
     // @ts-ignore
-
     } else if (this.isStructured === true && item.getQualifiedName && this.rowType.getQualifiedName && item.getQualifiedName() !== "" && item.getQualifiedName() === this.rowType.getQualifiedName()) {
     // types match, so no need to do conversions, just clone the item
       const val = item.clone();

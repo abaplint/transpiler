@@ -1,6 +1,9 @@
 import {Context} from "../context";
 import {HashedTable, Structure, Table, FieldSymbol} from "../types";
 import {rowsToTarget} from "./select";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 export async function fetchNextCursor(
   context: Context,
@@ -12,7 +15,7 @@ export async function fetchNextCursor(
     if (target.isAssigned() === false) {
       throw new Error("GETWA_NOT_ASSIGNED");
     }
-      // @ts-ignore
+    // @ts-ignore
     target = target.getPointer();
   }
 
@@ -22,12 +25,10 @@ export async function fetchNextCursor(
 
   const result = await context.cursors[cursor].fetchNextCursor(packageSize);
   if (result.rows.length === 0) {
-    // @ts-ignore
     abap.builtin.sy.get().subrc.set(4);
     return;
   }
 
-  // @ts-ignore
   abap.builtin.sy.get().subrc.set(0);
 
   rowsToTarget(target, result.rows);

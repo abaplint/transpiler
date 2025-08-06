@@ -2,6 +2,9 @@ import {ABAPRegExp} from "../abap_regex";
 import {ABAPObject, Integer, Structure, Table, TableFactory} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 export type IRegexOptions = {
   regex?: string | ICharacter | ABAPObject,
@@ -36,7 +39,6 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
       s = s.get();
     }
     if (s === "") {
-      // @ts-ignore
       abap.builtin.sy.get().subrc.set(0);
       return;
     }
@@ -142,10 +144,8 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
   }
 
   if (matches.length === 0) {
-    // @ts-ignore
     abap.builtin.sy.get().subrc.set(4);
   } else {
-    // @ts-ignore
     abap.builtin.sy.get().subrc.set(0);
   }
 
