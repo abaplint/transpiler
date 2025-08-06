@@ -471,6 +471,23 @@ export class Traversal {
     return undefined;
   }
 
+  private findInferredTypeReference(token: abaplint.Token) {
+    const scope = this.findCurrentScopeByToken(token);
+    if (scope === undefined) {
+      return undefined;
+    }
+
+    for (const r of scope.getData().references) {
+      if (r.referenceType === abaplint.ReferenceType.InferredType
+          && r.position.getStart().equals(token.getStart())) {
+        if (r.resolved instanceof abaplint.TypedIdentifier) {
+          return r.resolved.getType();
+        }
+      }
+    }
+    return undefined;
+  }
+
   private buildThisAttributes(def: abaplint.IClassDefinition, cName: string | undefined): string {
     let ret = "";
     for (const a of def.getAttributes()?.getAll() || []) {
@@ -686,6 +703,17 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
     // todo
 
     throw new Error("lookupType, todo, " + node.concatTokens());
+  }
+
+  public lookupInferred(node: abaplint.Nodes.ExpressionNode,
+                        scope: abaplint.ISpaghettiScopeNode | undefined): abaplint.AbstractType | undefined {
+    if (scope === undefined) {
+      return undefined;
+    } else if (node.concatTokens() !== "#") {
+      throw new Error("lookupInferred, unexpected, " + node.get());
+    }
+
+    return this.findInferredTypeReference(node.getFirstToken());
   }
 
   public determineType(node: abaplint.Nodes.ExpressionNode | abaplint.Nodes.StatementNode,

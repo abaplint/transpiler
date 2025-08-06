@@ -9,10 +9,10 @@ export class TypeNameOrInfer implements IExpressionTranspiler {
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     let type: AbstractType | undefined;
 
+    const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
     if (node.concatTokens() === "#") {
-      return new Chunk().appendString("inferred,TypeNameOrInfer");
+      type = traversal.lookupInferred(node, scope);
     } else {
-      const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
       type = traversal.lookupType(node.getFirstChild() as Nodes.ExpressionNode, scope);
     }
 
