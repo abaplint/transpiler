@@ -115,6 +115,7 @@ WRITE / ls_data-a_suf.`;
     expect(abap.console.get()).to.equal("hi\nhi");
   });
 
+  // todo: does the runtime need to do something special for EMPTY KEY?
   it("EMPTY KEY", async () => {
     const code = `
 DATA foo TYPE STANDARD TABLE OF i WITH EMPTY KEY.
