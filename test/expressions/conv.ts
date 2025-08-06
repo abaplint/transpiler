@@ -25,7 +25,7 @@ WRITE / int.`;
     expect(abap.console.get()).to.equal("123");
   });
 
-  it.only("inferred", async () => {
+  it("inferred", async () => {
     const code = `
 DATA int TYPE i.
 int = CONV #( '123' ).
