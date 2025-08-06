@@ -14,19 +14,18 @@ describe("Running expressions - CONV", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
-  it.only("basic", async () => {
+  it("basic", async () => {
     const code = `
 DATA int TYPE i.
 int = CONV i( '123' ).
 WRITE / int.`;
     const js = await run(code, true);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("123");
   });
 
-  it("inferred", async () => {
+  it.skip("inferred", async () => {
     const code = `
 DATA int TYPE i.
 int = CONV #( '123' ).

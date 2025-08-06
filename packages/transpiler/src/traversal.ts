@@ -671,6 +671,23 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
     return ret;
   }
 
+  public lookupType(node: abaplint.Nodes.ExpressionNode,
+                    scope: abaplint.ISpaghettiScopeNode | undefined): abaplint.AbstractType | undefined {
+    if (scope === undefined) {
+      return undefined;
+    } else if (!(node.get() instanceof abaplint.Expressions.TypeName)) {
+      throw new Error("lookupType, node is not a TypeName, " + node.get());
+    }
+
+    const name = node.concatTokens();
+    if (name === "i") {
+      return abaplint.BasicTypes.IntegerType.get();
+    }
+    // todo
+
+    throw new Error("lookupType, todo, " + node.concatTokens());
+  }
+
   public determineType(node: abaplint.Nodes.ExpressionNode | abaplint.Nodes.StatementNode,
                        scope: abaplint.ISpaghettiScopeNode | undefined): abaplint.AbstractType | undefined {
     if (scope === undefined) {

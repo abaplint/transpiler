@@ -67,6 +67,10 @@ export class SourceTranspiler implements IExpressionTranspiler {
             throw new Error("TypeNameOrInfer not found in ConvBody");
           }
           ret = new Chunk().appendString(new TypeNameOrInfer().transpile(typ, traversal).getCode());
+          ret.appendString(".set(");
+          // todo: handle LET
+          ret.appendString(traversal.traverse(c.getFirstChild()).getCode());
+          ret.appendString(")");
         } else {
           ret.appendString("SourceUnknown-" + c.get().constructor.name);
         }
