@@ -20,6 +20,7 @@ export * from "./field_offset";
 export * from "./field_symbol";
 export * from "./function_exporting";
 export * from "./source_field_symbol_chain";
+export * from "./type_name_or_infer";
 export * from "./function_parameters";
 export * from "./message_number";
 export * from "./method_call_body";

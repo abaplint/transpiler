@@ -38,5 +38,6 @@ WRITE / int.`;
   });
 
 // todo: LET
+// todo: test concat and arithmetics
 
 });

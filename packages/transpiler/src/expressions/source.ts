@@ -1,6 +1,6 @@
 import {Expressions, Nodes} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
-import {AttributeChainTranspiler, ComponentChainTranspiler, FieldChainTranspiler} from ".";
+import {AttributeChainTranspiler, ComponentChainTranspiler, FieldChainTranspiler, TypeNameOrInfer} from ".";
 import {Traversal} from "../traversal";
 import {ConstantTranspiler} from "./constant";
 import {Chunk} from "../chunk";
@@ -61,6 +61,12 @@ export class SourceTranspiler implements IExpressionTranspiler {
           ret = new Chunk().appendString("(").appendChunk(ret).appendString(").dereference()");
         } else if (c.get() instanceof Expressions.TextElement) {
           ret = new Chunk().appendString(`new abap.types.String().set("${c.concatTokens()}")`);
+        } else if (c.get() instanceof Expressions.ConvBody) {
+          const typ = node.findFirstExpression(Expressions.TypeNameOrInfer)
+          if (typ === undefined) {
+            throw new Error("TypeNameOrInfer not found in ConvBody");
+          }
+          ret = new Chunk().appendString(new TypeNameOrInfer().transpile(typ, traversal).getCode());
         } else {
           ret.appendString("SourceUnknown-" + c.get().constructor.name);
         }
