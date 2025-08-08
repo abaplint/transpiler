@@ -163,7 +163,7 @@ data foo type i.
 foo = 1.
 foo += 2.
 write foo.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("3");
@@ -175,7 +175,7 @@ data foo type i.
 foo = 5.
 foo -= 1.
 write foo.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("4");
@@ -187,7 +187,7 @@ data foo type i.
 foo = 4.
 foo /= 2.
 write foo.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -199,7 +199,7 @@ data foo type i.
 foo = 4.
 foo *= 2.
 write foo.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("8");
@@ -211,7 +211,7 @@ data foo type string.
 foo = 'hello'.
 foo &&= 'world'.
 write foo.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("helloworld");
