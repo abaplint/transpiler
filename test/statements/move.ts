@@ -4,8 +4,8 @@ import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
-async function run(contents: string) {
-  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
+async function run(contents: string, skipVersionCheck = false) {
+  return runFiles(abap, [{filename: "zfoobar_move.prog.abap", contents}], {skipVersionCheck});
 }
 
 describe("Running statements - MOVE", () => {
@@ -155,6 +155,18 @@ WRITE char.`;
     const f = new AsyncFunction("abap", js);
 
     expect(await f(abap)).to.throw();
+  });
+
+  it.skip("move +=", async () => {
+    const code = `
+data foo type i.
+foo = 1.
+foo += 2.
+write foo.`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3");
   });
 
 });
