@@ -157,7 +157,7 @@ WRITE char.`;
     expect(await f(abap)).to.throw();
   });
 
-  it.skip("move +=", async () => {
+  it.only("move +=", async () => {
     const code = `
 data foo type i.
 foo = 1.
