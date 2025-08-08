@@ -6,7 +6,7 @@ import {AsyncFunction, runFiles} from "../_utils";
 let abap: ABAP;
 
 async function run(contents: string, skipVersionCheck = false) {
-  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}], {skipVersionCheck});
+  return runFiles(abap, [{filename: "zfoobar_message.prog.abap", contents}], {skipVersionCheck});
 }
 
 describe("Running statements - MESSAGE", () => {
