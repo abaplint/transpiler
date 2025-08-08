@@ -1,6 +1,6 @@
 import {Expressions, Nodes} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
-import {AttributeChainTranspiler, ComponentChainTranspiler, FieldChainTranspiler} from ".";
+import {AttributeChainTranspiler, ComponentChainTranspiler, FieldChainTranspiler, TypeNameOrInfer} from ".";
 import {Traversal} from "../traversal";
 import {ConstantTranspiler} from "./constant";
 import {Chunk} from "../chunk";
@@ -19,7 +19,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
     const children = node.getChildren();
     for (let i = 0; i < children.length; i++) {
       const c = children[i];
-      const last = i === children.length - 1;
+      const isLast = i === children.length - 1;
 
       if (c instanceof Nodes.ExpressionNode) {
         if (c.get() instanceof Expressions.FieldChain) {
@@ -42,7 +42,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
           if (code.includes("await")) {
             ret = new Chunk().appendString("(").appendChunk(ret).appendString(")");
           }
-          if (this.addGet && last === true) {
+          if (this.addGet && isLast === true) {
             ret.append(".get()", c, traversal);
           }
         } else if (c.get() instanceof Expressions.Source) {
@@ -54,13 +54,23 @@ export class SourceTranspiler implements IExpressionTranspiler {
         } else if (c.get() instanceof Expressions.ComponentChain) {
           ret = new Chunk().appendString("(").appendChunk(ret).appendString(").get().");
           ret.appendChunk(new ComponentChainTranspiler().transpile(c, traversal));
-          if (this.addGet && last === true) {
+          if (this.addGet && isLast === true) {
             ret.append(".get()", c, traversal);
           }
         } else if (c.get() instanceof Expressions.Dereference) {
           ret = new Chunk().appendString("(").appendChunk(ret).appendString(").dereference()");
         } else if (c.get() instanceof Expressions.TextElement) {
           ret = new Chunk().appendString(`new abap.types.String().set("${c.concatTokens()}")`);
+        } else if (c.get() instanceof Expressions.ConvBody) {
+          const typ = node.findFirstExpression(Expressions.TypeNameOrInfer)
+          if (typ === undefined) {
+            throw new Error("TypeNameOrInfer not found in ConvBody");
+          }
+          ret = new Chunk().appendString(new TypeNameOrInfer().transpile(typ, traversal).getCode());
+          ret.appendString(".set(");
+          // todo: handle LET
+          ret.appendString(traversal.traverse(c.getFirstChild()).getCode());
+          ret.appendString(")");
         } else {
           ret.appendString("SourceUnknown-" + c.get().constructor.name);
         }

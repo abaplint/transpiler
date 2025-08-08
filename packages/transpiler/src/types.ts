@@ -72,4 +72,6 @@ export interface ITranspilerOptions {
   ignoreSourceMap?: boolean;
   /** import programs */
   importProg?: boolean;
+  /** skips version check, not recommended */
+  skipVersionCheck?: boolean;
 }

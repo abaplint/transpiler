@@ -48,7 +48,8 @@ export class MessageTranspiler implements IStatementTranspiler {
       }
     } else {
 // exception or constant based
-      const exception = node.findDirectExpression(abaplint.Expressions.SimpleSource3);
+      const exception = node.findDirectExpression(abaplint.Expressions.MessageSourceSource
+        )?.findDirectExpression(abaplint.Expressions.SimpleSource3);
       const str = exception?.findFirstExpression(abaplint.Expressions.Constant);
       if (str) {
         options.push("text: " + traversal.traverse(str).getCode());
@@ -72,10 +73,10 @@ export class MessageTranspiler implements IStatementTranspiler {
     for (const c of node.getChildren()) {
       if (c.getFirstToken().getStr().toUpperCase() === "WITH") {
         withs = true;
-      } else if (withs === true && c.get() instanceof abaplint.Expressions.Source) {
-        w.push(traversal.traverse(c).getCode());
-      } else if (withs === true && c.get() instanceof abaplint.Expressions.SimpleSource3) {
-        w.push(traversal.traverse(c).getCode());
+      } else if (withs === true
+          && c.get() instanceof abaplint.Expressions.MessageSourceSource
+          && c instanceof abaplint.Nodes.ExpressionNode) {
+        w.push(traversal.traverse(c.getFirstChild()).getCode());
       } else if (withs === true) {
         break;
       }

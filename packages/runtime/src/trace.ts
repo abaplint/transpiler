@@ -11,6 +11,9 @@ export class Trace {
         continue;
       }
       const func = statements[c];
+      if (isAsyncFunction === undefined) {
+        throw new Error("setTrace: isAsyncFunction is not defined");
+      }
       if (isAsyncFunction(func)) {
         statements[c] = this._traceAsync(func, c, min, totals);
       } else {

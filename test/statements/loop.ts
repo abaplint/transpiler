@@ -4,8 +4,8 @@ import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
-async function run(contents: string) {
-  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
+async function run(contents: string, skipVersionCheck = false) {
+  return runFiles(abap, [{filename: "zfoobar_loop.prog.abap", contents}], {skipVersionCheck});
 }
 
 describe("Running statements - LOOP", () => {
@@ -923,6 +923,32 @@ WRITE / sy-subrc.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.getTrimmed()).to.equal("4");
+  });
+
+  it("LOOP, method call source", async () => {
+    const code = `
+TYPES ty_list TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS list RETURNING VALUE(list) TYPE ty_list.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD list.
+    INSERT 2 INTO TABLE list.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA val TYPE i.
+  LOOP AT lcl=>list( ) INTO val.
+    WRITE / val.
+  ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("2");
   });
 
 });
