@@ -4,8 +4,8 @@ import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
-async function run(contents: string) {
-  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
+async function run(contents: string, skipVersionCheck = false) {
+  return runFiles(abap, [{filename: "zfoobar_move.prog.abap", contents}], {skipVersionCheck});
 }
 
 describe("Running statements - MOVE", () => {
@@ -155,6 +155,66 @@ WRITE char.`;
     const f = new AsyncFunction("abap", js);
 
     expect(await f(abap)).to.throw();
+  });
+
+  it("move +=", async () => {
+    const code = `
+data foo type i.
+foo = 1.
+foo += 2.
+write foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3");
+  });
+
+  it("move -=", async () => {
+    const code = `
+data foo type i.
+foo = 5.
+foo -= 1.
+write foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4");
+  });
+
+  it("move /=", async () => {
+    const code = `
+data foo type i.
+foo = 4.
+foo /= 2.
+write foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+  it("move *=", async () => {
+    const code = `
+data foo type i.
+foo = 4.
+foo *= 2.
+write foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("8");
+  });
+
+  it("move &&=", async () => {
+    const code = `
+data foo type string.
+foo = 'hello'.
+foo &&= 'world'.
+write foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("helloworld");
   });
 
 });

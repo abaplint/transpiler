@@ -5,8 +5,8 @@ import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
-async function run(contents: string) {
-  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
+async function run(contents: string, skipVersionCheck = false) {
+  return runFiles(abap, [{filename: "zfoobar_message.prog.abap", contents}], {skipVersionCheck});
 }
 
 describe("Running statements - MESSAGE", () => {
@@ -92,6 +92,14 @@ describe("Running statements - MESSAGE", () => {
 
   it("MESSAGE constant", async () => {
     const code = `MESSAGE 'hello' TYPE 'S'.`;
+
+    const js = await run(code);
+    new AsyncFunction("abap", js);
+// hmm, this currently writes to console
+  });
+
+  it("MESSAGE with complex", async () => {
+    const code = `MESSAGE s001(abc) WITH condense( |{ 'hello' }| ).`;
 
     const js = await run(code);
     new AsyncFunction("abap", js);

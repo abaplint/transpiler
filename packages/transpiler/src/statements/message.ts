@@ -49,7 +49,7 @@ export class MessageTranspiler implements IStatementTranspiler {
     } else {
 // exception or constant based
       const exception = node.findDirectExpression(abaplint.Expressions.MessageSourceSource
-        )?.findDirectExpression(abaplint.Expressions.SimpleSource3);
+        )?.findDirectExpression(abaplint.Expressions.Source);
       const str = exception?.findFirstExpression(abaplint.Expressions.Constant);
       if (str) {
         options.push("text: " + traversal.traverse(str).getCode());

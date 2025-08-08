@@ -15,20 +15,63 @@ export class MoveTranspiler implements IStatementTranspiler {
 
     const ret = new Chunk();
     const second = node.getChildren()[1]?.concatTokens();
-    if (second === "?=") {
-      ret.appendString("await abap.statements.cast(")
-        .appendChunk(targets[0])
-        .appendString(", ")
-        .appendChunk(source)
-        .append(");", node.getLastToken(), traversal);
-    } else {
-      for (const target of targets.reverse()) {
-        ret.appendChunk(target)
-          .appendString(".set(")
+    switch (second) {
+      case "?=":
+        ret.appendString("await abap.statements.cast(")
+          .appendChunk(targets[0])
+          .appendString(", ")
           .appendChunk(source)
           .append(");", node.getLastToken(), traversal);
-        source = target;
-      }
+        break;
+      case "+":
+        ret.appendChunk(targets[0])
+          .appendString(".set(abap.operators.add(")
+          .appendChunk(targets[0])
+          .appendString(", ")
+          .appendChunk(source)
+          .append("));", node.getLastToken(), traversal);
+        break;
+      case "-":
+        ret.appendChunk(targets[0])
+          .appendString(".set(abap.operators.minus(")
+          .appendChunk(targets[0])
+          .appendString(", ")
+          .appendChunk(source)
+          .append("));", node.getLastToken(), traversal);
+        break;
+      case "/=":
+        ret.appendChunk(targets[0])
+          .appendString(".set(abap.operators.divide(")
+          .appendChunk(targets[0])
+          .appendString(", ")
+          .appendChunk(source)
+          .append("));", node.getLastToken(), traversal);
+        break;
+      case "*=":
+        ret.appendChunk(targets[0])
+          .appendString(".set(abap.operators.multiply(")
+          .appendChunk(targets[0])
+          .appendString(", ")
+          .appendChunk(source)
+          .append("));", node.getLastToken(), traversal);
+        break;
+      case "&&=":
+        ret.appendChunk(targets[0])
+          .appendString(".set(abap.operators.concat(")
+          .appendChunk(targets[0])
+          .appendString(", ")
+          .appendChunk(source)
+          .append("));", node.getLastToken(), traversal);
+        break;
+      default:
+        for (const target of targets.reverse()) {
+          ret.appendChunk(target)
+            .appendString(".set(")
+            .appendChunk(source)
+            .append(");", node.getLastToken(), traversal);
+          source = target;
+        }
+        break;
     }
 
     return ret;
