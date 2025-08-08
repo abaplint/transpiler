@@ -20,7 +20,7 @@ DATA foo TYPE i.
 DATA ref TYPE REF TO i.
 ref = REF #( foo ).
 WRITE ref->*.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0");
