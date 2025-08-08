@@ -47,6 +47,14 @@ export class MoveTranspiler implements IStatementTranspiler {
           .appendChunk(source)
           .append("));", node.getLastToken(), traversal);
         break;
+      case "*=":
+        ret.appendChunk(targets[0])
+          .appendString(".set(abap.operators.multiply(")
+          .appendChunk(targets[0])
+          .appendString(", ")
+          .appendChunk(source)
+          .append("));", node.getLastToken(), traversal);
+        break;
       default:
         for (const target of targets.reverse()) {
           ret.appendChunk(target)

@@ -193,4 +193,16 @@ write foo.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it.only("move *=", async () => {
+    const code = `
+data foo type i.
+foo = 4.
+foo *= 2.
+write foo.`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("8");
+  });
+
 });
