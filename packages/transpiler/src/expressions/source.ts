@@ -61,6 +61,8 @@ export class SourceTranspiler implements IExpressionTranspiler {
           ret = new Chunk().appendString("(").appendChunk(ret).appendString(").dereference()");
         } else if (c.get() instanceof Expressions.TextElement) {
           ret = new Chunk().appendString(`new abap.types.String().set("${c.concatTokens()}")`);
+        } else if (c.get() instanceof Expressions.TypeNameOrInfer) {
+          continue;
         } else if (c.get() instanceof Expressions.ConvBody) {
           const typ = node.findFirstExpression(Expressions.TypeNameOrInfer)
           if (typ === undefined) {
@@ -82,6 +84,12 @@ export class SourceTranspiler implements IExpressionTranspiler {
         }
       } else if (c instanceof Nodes.TokenNodeRegex && c.getFirstToken().getStr().toUpperCase() === "BOOLC") {
         ret.append("abap.builtin.boolc(", c, traversal);
+        post.append(")", c, traversal);
+      } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "REF") {
+        if (node.findDirectExpression(Expressions.TypeNameOrInfer)?.concatTokens() !== "#") {
+          throw new Error("transpiler: REF # todo")
+        }
+        ret.append("new abap.types.DataReference().assign(", c, traversal);
         post.append(")", c, traversal);
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "BIT") { // todo, this will not work in the general case
         ret.append("abap.operators.bitnot(", c, traversal);
