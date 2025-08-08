@@ -157,7 +157,7 @@ WRITE char.`;
     expect(await f(abap)).to.throw();
   });
 
-  it.only("move +=", async () => {
+  it("move +=", async () => {
     const code = `
 data foo type i.
 foo = 1.
@@ -167,6 +167,30 @@ write foo.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("3");
+  });
+
+  it.only("move -=", async () => {
+    const code = `
+data foo type i.
+foo = 5.
+foo -= 1.
+write foo.`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4");
+  });
+
+  it.only("move /=", async () => {
+    const code = `
+data foo type i.
+foo = 4.
+foo /= 2.
+write foo.`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
   });
 
 });
