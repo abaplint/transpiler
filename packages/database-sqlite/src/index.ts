@@ -1,5 +1,7 @@
 import initSqlJs, {Database, QueryExecResult, Statement, SqlValue} from "sql.js";
-import {DB} from "@abaplint/runtime";
+import {ABAP, DB} from "@abaplint/runtime";
+
+declare const abap: ABAP;
 
 export class SQLiteDatabaseClient implements DB.DatabaseClient {
   public readonly name = "sqlite";
@@ -14,9 +16,8 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     const SQL = await initSqlJs();
     this.sqlite = new SQL.Database(data);
 
-    // @ts-ignore
-    if (abap?.context?.databaseConnections && abap.context.databaseConnections["DEFAULT"] === this) {
-      // @ts-ignore
+    if (abap?.context?.databaseConnections
+        && abap.context.databaseConnections["DEFAULT"] === this) {
       abap.builtin.sy.get().dbsys?.set(this.name);
     }
   }
