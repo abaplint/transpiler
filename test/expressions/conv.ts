@@ -19,7 +19,7 @@ describe("Running expressions - CONV", () => {
 DATA int TYPE i.
 int = CONV i( '123' ).
 WRITE / int.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("123");
@@ -30,7 +30,7 @@ WRITE / int.`;
 DATA int TYPE i.
 int = CONV #( '123' ).
 WRITE / int.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("123");
@@ -42,7 +42,7 @@ TYPES ty TYPE i.
 DATA int TYPE i.
 int = CONV ty( '123' ).
 WRITE / int.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("123");

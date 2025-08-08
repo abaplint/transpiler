@@ -120,7 +120,7 @@ WRITE / ls_data-a_suf.`;
     const code = `
 DATA foo TYPE STANDARD TABLE OF i WITH EMPTY KEY.
 WRITE / lines( foo ).`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0");
