@@ -14,7 +14,7 @@ describe("Running expressions - REF", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
-  it.skip("basic", async () => {
+  it.only("basic", async () => {
     const code = `
 DATA foo TYPE i.
 DATA ref TYPE REF TO i.
