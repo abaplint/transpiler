@@ -102,7 +102,6 @@ describe("Running statements - MESSAGE", () => {
     const code = `MESSAGE s001(abc) WITH condense( |{ 'hello' }| ).`;
 
     const js = await run(code, true);
-    console.dir(js);
     new AsyncFunction("abap", js);
 // hmm, this currently writes to console
   });
