@@ -742,4 +742,21 @@ WRITE / str3.`;
     expect(abap.console.get()).to.equal("FOOO\n30\n Greetings");
   });
 
+  it("FIND, inline DATA", async () => {
+    const code = `
+FORM foo.
+  DATA str TYPE string.
+  FIND ALL OCCURRENCES OF REGEX 'foo' IN str RESULTS DATA(result_table).
+  WRITE / lines( result_table ).
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
 });
