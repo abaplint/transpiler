@@ -267,7 +267,7 @@ export class Traversal {
     for (const m of methodDefinitions.getAll()) {
       const parameters: string[] = [];
       for (const p of m.getParameters().getAll()) {
-        const type = new TranspileTypes().toType(p.getType());
+        const type = TranspileTypes.toType(p.getType());
         const optional = m.getParameters().getOptional().includes(p.getName()) ? "X" : " ";
         parameters.push(`"${p.getName().toUpperCase()}": {"type": () => {return ${type};}, "is_optional": "${optional}"}`);
       }
@@ -301,7 +301,7 @@ export class Traversal {
     }
 
     for (const a of def.getAttributes()?.getAll() || []) {
-      const type = new TranspileTypes().toType(a.getType());
+      const type = TranspileTypes.toType(a.getType());
       const runtime = this.mapVisibility(a.getVisibility());
       const isClass = a.getMeta().includes(abaplint.IdentifierMeta.Static) ? "X" : " ";
       attr.add(`"${prefix + a.getName().toUpperCase()}": {"type": () => {return ${type};}, "visibility": "${
@@ -309,7 +309,7 @@ export class Traversal {
     }
 
     for (const a of def.getAttributes()?.getConstants() || []) {
-      const type = new TranspileTypes().toType(a.getType());
+      const type = TranspileTypes.toType(a.getType());
       let runtime = "";
       switch (a.getVisibility()) {
         case abaplint.Visibility.Private:
@@ -517,7 +517,7 @@ export class Traversal {
           escaped = "#" + escaped;
         }
         const name = "this." + escaped;
-        ret += name + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
+        ret += name + " = " + TranspileTypes.toType(a.getType()) + ";\n";
         ret += this.setValues(a, name);
         if (escaped?.startsWith("#")) {
           ret += `this.FRIENDS_ACCESS_INSTANCE["${escaped.replace("#", "")}"] = ${name};\n`;
@@ -675,7 +675,7 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
       if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
         ret += "if (this." + n + " === undefined) this." + n + " = " + cname + "." + n + ";\n";
       } else {
-        ret += "if (this." + n + " === undefined) this." + n + " = " + new TranspileTypes().toType(a.getType()) + ";\n";
+        ret += "if (this." + n + " === undefined) this." + n + " = " + TranspileTypes.toType(a.getType()) + ";\n";
       }
     }
 

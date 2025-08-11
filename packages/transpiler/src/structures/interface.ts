@@ -39,7 +39,7 @@ export class InterfaceTranspiler implements IStructureTranspiler {
     const prefix = Traversal.escapeNamespace(idef.getName().toLowerCase()) + ".";
     let ret = "";
     for (const ty of idef.getTypeDefinitions().getAll()) {
-      ret += new TranspileTypes().declareStaticSkipVoid(prefix, ty.type);
+      ret += TranspileTypes.declareStaticSkipVoid(prefix, ty.type);
     }
     return ret;
   }
@@ -66,7 +66,7 @@ export class InterfaceTranspiler implements IStructureTranspiler {
       }
       const interfaceName = Traversal.escapeNamespace(node.getFirstToken().getStr().toLowerCase());
       const name = interfaceName + "." + interfaceName + "$" + n.toLowerCase();
-      ret += name + " = " + new TranspileTypes().toType(identifier.getType()) + ";\n";
+      ret += name + " = " + TranspileTypes.toType(identifier.getType()) + ";\n";
 
       const alias = idef?.getAliases().find(a => a.getName().toUpperCase() === n.toUpperCase());
       if (alias) {

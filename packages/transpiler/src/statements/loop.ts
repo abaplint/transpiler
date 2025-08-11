@@ -19,6 +19,15 @@ export class LoopTranspiler implements IStatementTranspiler {
     return this.unique;
   }
 
+  private determineInto(node: abaplint.Nodes.StatementNode): abaplint.Nodes.ExpressionNode | undefined {
+    const loopTarget = node.findDirectExpression(abaplint.Expressions.LoopTarget);
+    let into = loopTarget?.findDirectExpression(abaplint.Expressions.Target);
+    if (into?.getFirstChild()?.get() instanceof abaplint.Expressions.InlineData) {
+      into = into.findFirstExpression(abaplint.Expressions.TargetField);
+    }
+    return into;
+  }
+
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     if (!(node.get() instanceof abaplint.Statements.Loop)) {
       throw new Error("LoopTranspiler, unexpected node");
@@ -29,7 +38,7 @@ export class LoopTranspiler implements IStatementTranspiler {
 
     this.unique = UniqueIdentifier.get();
     let target = "";
-    const into = node.findDirectExpression(abaplint.Expressions.LoopTarget)?.findDirectExpression(abaplint.Expressions.Target);
+    const into = this.determineInto(node);
     if (into && this.skipInto !== true) {
       const concat = node.concatTokens().toUpperCase();
       const t = traversal.traverse(into).getCode();

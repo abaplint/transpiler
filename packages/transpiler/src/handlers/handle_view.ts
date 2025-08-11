@@ -16,7 +16,7 @@ export class HandleView {
 
     const chunk = new Chunk().appendString(`abap.DDIC["${obj.getName().toUpperCase()}"] = {
   "objectType": "VIEW",
-  "type": ${new TranspileTypes().toType(type)},
+  "type": ${TranspileTypes.toType(type)},
 };`);
 // todo, "keyFields": ${JSON.stringify(obj.listKeys())},
 

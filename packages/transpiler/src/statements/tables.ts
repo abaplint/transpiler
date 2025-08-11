@@ -25,7 +25,7 @@ export class TablesTranspiler implements IStatementTranspiler {
     const ret = new Chunk()
       .appendString("let ")
       .append(found.getName().toLowerCase(), token, traversal)
-      .appendString(" = " + new TranspileTypes().toType(found.getType()))
+      .appendString(" = " + TranspileTypes.toType(found.getType()))
       .append(";", node.getLastToken(), traversal);
 
     return ret;

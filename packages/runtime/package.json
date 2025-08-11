@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/runtime",
-  "version": "2.11.12",
+  "version": "2.11.13",
   "description": "Transpiler - Runtime",
   "main": "build/src/index.js",
   "typings": "build/src/index.d.ts",
