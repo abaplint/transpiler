@@ -12,11 +12,13 @@ export class FormTranspiler implements IStructureTranspiler {
 
     const ret = new Chunk();
 
-    const declare = InlineDeclarations.buildDeclarations(node, traversal);
-    ret.appendString(declare);
-
     for (const c of node.getChildren()) {
       ret.appendChunk(traversal.traverse(c));
+
+      if (c.get() instanceof abaplint.Statements.Form) {
+        const declare = InlineDeclarations.buildDeclarations(node, traversal);
+        ret.appendString(declare);
+      }
     }
 
     if (formName && traversal.getCurrentObject().getType() === "PROG") {
