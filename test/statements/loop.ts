@@ -975,7 +975,7 @@ START-OF-SELECTION.
     expect(abap.console.getTrimmed()).to.equal("12");
   });
 
-  it.skip("LOOP in METHOD with inline DATA declarations", async () => {
+  it("LOOP in METHOD with inline DATA declarations", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
