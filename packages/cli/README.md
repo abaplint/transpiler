@@ -2,10 +2,6 @@
 
 Transpiler CLI
 
-Input = `src` directory
-
-Output = `output` directory
-
 ## Examples
 
 Call `abap_transpile` on the command line, see example in
