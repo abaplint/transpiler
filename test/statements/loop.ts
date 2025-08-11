@@ -951,4 +951,29 @@ START-OF-SELECTION.
     expect(abap.console.getTrimmed()).to.equal("2");
   });
 
+  it.only("LOOP, with inline DATA declarations", async () => {
+    const code = `
+FORM foo.
+  DATA tab1 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  DATA tab2 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+
+  INSERT 1 INTO TABLE tab1.
+  INSERT 2 INTO TABLE tab2.
+
+  LOOP AT tab1 INTO DATA(val1).
+    LOOP AT tab2 INTO DATA(val2).
+      WRITE: / val1, val2.
+    ENDLOOP.
+  ENDLOOP.
+
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("1 2");
+  });
+
 });
