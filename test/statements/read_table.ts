@@ -1467,7 +1467,7 @@ WRITE / sy-subrc.`;
     expect(abap.console.get().trimEnd()).to.equal(`4`);
   });
 
-  it.only("read into inline fs", async () => {
+  it("read into inline fs", async () => {
     const code = `
 FORM foo.
   TYPES: BEGIN OF ty_values,

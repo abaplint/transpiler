@@ -42,8 +42,11 @@ export class ReadTableTranspiler implements IStatementTranspiler {
 
     const rt = node.findDirectExpression(abaplint.Expressions.ReadTableTarget);
     const target = rt?.findDirectExpression(abaplint.Expressions.Target);
-    const fs = rt?.findDirectExpression(abaplint.Expressions.FSTarget);
+    let fs = rt?.findDirectExpression(abaplint.Expressions.FSTarget);
     if (rt && fs) {
+      if (fs?.getFirstChild()?.get() instanceof abaplint.Expressions.InlineFS) {
+        fs = fs.findFirstExpression(abaplint.Expressions.TargetFieldSymbol)!;
+      }
       const name = new FieldSymbolTranspiler().transpile(fs, traversal).getCode();
       extra.push("assigning: " + name);
     } else if (target) {
