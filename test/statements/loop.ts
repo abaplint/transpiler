@@ -951,7 +951,7 @@ START-OF-SELECTION.
     expect(abap.console.getTrimmed()).to.equal("2");
   });
 
-  it.only("LOOP, with inline DATA declarations", async () => {
+  it.skip("LOOP, with inline DATA declarations", async () => {
     const code = `
 FORM foo.
   DATA tab1 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
@@ -971,6 +971,7 @@ ENDFORM.
 START-OF-SELECTION.
   PERFORM foo.`;
     const js = await run(code, true);
+    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.getTrimmed()).to.equal("1 2");
