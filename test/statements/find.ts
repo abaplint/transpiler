@@ -759,4 +759,21 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("0");
   });
 
+  it.only("FIND, inline DATA, loop inline FS", async () => {
+    const code = `
+FORM foo.
+  DATA str TYPE string.
+  FIND ALL OCCURRENCES OF REGEX 'foo' IN str RESULTS DATA(result_table).
+  LOOP AT result_table ASSIGNING FIELD-SYMBOLS(<line>).
+  ENDLOOP.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
