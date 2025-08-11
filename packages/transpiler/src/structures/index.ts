@@ -13,6 +13,7 @@ export * from "./interface";
 export * from "./loop";
 export * from "./module";
 export * from "./select";
+export * from "./method";
 export * from "./try";
 export * from "./types";
 export * from "./when";
