@@ -20,7 +20,11 @@ export class LoopTranspiler implements IStatementTranspiler {
   }
 
   private determineInto(node: abaplint.Nodes.StatementNode): abaplint.Nodes.ExpressionNode | undefined {
-    const into = node.findDirectExpression(abaplint.Expressions.LoopTarget)?.findDirectExpression(abaplint.Expressions.Target);
+    const loopTarget = node.findDirectExpression(abaplint.Expressions.LoopTarget);
+    let into = loopTarget?.findDirectExpression(abaplint.Expressions.Target);
+    if (into?.getFirstChild()?.get() instanceof abaplint.Expressions.InlineData) {
+      into = into.findFirstExpression(abaplint.Expressions.TargetField);
+    }
     return into;
   }
 

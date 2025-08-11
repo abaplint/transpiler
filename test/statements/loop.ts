@@ -951,7 +951,7 @@ START-OF-SELECTION.
     expect(abap.console.getTrimmed()).to.equal("2");
   });
 
-  it.skip("LOOP, with inline DATA declarations", async () => {
+  it.only("LOOP, with inline DATA declarations", async () => {
     const code = `
 FORM foo.
   DATA tab1 TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
@@ -965,7 +965,6 @@ FORM foo.
       WRITE: / val1, val2.
     ENDLOOP.
   ENDLOOP.
-
 ENDFORM.
 
 START-OF-SELECTION.
