@@ -969,7 +969,7 @@ ENDFORM.
 
 START-OF-SELECTION.
   PERFORM foo.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.getTrimmed()).to.equal("12");
@@ -1000,7 +1000,7 @@ ENDCLASS.
 
 START-OF-SELECTION.
   lcl=>foo( ).`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.getTrimmed()).to.equal("12");
