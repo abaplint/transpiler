@@ -26,7 +26,7 @@ WRITE ref->*.`;
     expect(abap.console.get()).to.equal("0");
   });
 
-  it.only("generic data", async () => {
+  it("generic data", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
