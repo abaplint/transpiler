@@ -12,7 +12,12 @@ export class AssignTranspiler implements IStatementTranspiler {
 
     const sources = assignSource?.findDirectExpressionsMulti([abaplint.Expressions.Source,abaplint.Expressions.SimpleSource3]).map(
       e => new SourceTranspiler(false).transpile(e, traversal).getCode()) || [];
-    const fs = new FieldSymbolTranspiler().transpile(node.findDirectExpression(abaplint.Expressions.FSTarget)!, traversal).getCode();
+
+    let fsTarget = node.findDirectExpression(abaplint.Expressions.FSTarget);
+    if (fsTarget?.getFirstChild()?.get() instanceof abaplint.Expressions.InlineFS) {
+      fsTarget = fsTarget.findFirstExpression(abaplint.Expressions.TargetFieldSymbol);
+    }
+    const fs = new FieldSymbolTranspiler().transpile(fsTarget!, traversal).getCode();
 
     const options: string[] = [];
 

@@ -829,14 +829,18 @@ START-OF-SELECTION.
     expect(abap.console.getTrimmed()).to.equal("4");
   });
 
-  it.only("assign inline and ref", async () => {
+  it("assign inline and ref", async () => {
     const code = `
-DATA max_val TYPE REF TO i.
-GET REFERENCE OF 1 INTO max_val.
-ASSIGN max_val->* TO FIELD-SYMBOL(<max>).
-WRITE / <max>.`;
+FORM foo.
+  DATA max_val TYPE REF TO i.
+  GET REFERENCE OF 1 INTO max_val.
+  ASSIGN max_val->* TO FIELD-SYMBOL(<max>).
+  WRITE / <max>.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.getTrimmed()).to.equal("1");
