@@ -217,4 +217,19 @@ write foo.`;
     expect(abap.console.get()).to.equal("helloworld");
   });
 
+  it("move with basic inline declaration on target", async () => {
+    const code = `
+FORM foo.
+  DATA(sdf) = 2.
+  WRITE sdf.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
