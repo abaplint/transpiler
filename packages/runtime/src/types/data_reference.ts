@@ -33,6 +33,7 @@ export class DataReference  {
 
   public assign(pointer: PointerType) {
     this.pointer = pointer;
+    return this;
   }
 
   public unassign(): void {

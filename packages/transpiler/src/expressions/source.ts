@@ -4,6 +4,7 @@ import {AttributeChainTranspiler, ComponentChainTranspiler, FieldChainTranspiler
 import {Traversal} from "../traversal";
 import {ConstantTranspiler} from "./constant";
 import {Chunk} from "../chunk";
+import {TranspileTypes} from "../transpile_types";
 
 export class SourceTranspiler implements IExpressionTranspiler {
   private readonly addGet: boolean;
@@ -61,6 +62,8 @@ export class SourceTranspiler implements IExpressionTranspiler {
           ret = new Chunk().appendString("(").appendChunk(ret).appendString(").dereference()");
         } else if (c.get() instanceof Expressions.TextElement) {
           ret = new Chunk().appendString(`new abap.types.String().set("${c.concatTokens()}")`);
+        } else if (c.get() instanceof Expressions.TypeNameOrInfer) {
+          continue;
         } else if (c.get() instanceof Expressions.ConvBody) {
           const typ = node.findFirstExpression(Expressions.TypeNameOrInfer)
           if (typ === undefined) {
@@ -82,6 +85,22 @@ export class SourceTranspiler implements IExpressionTranspiler {
         }
       } else if (c instanceof Nodes.TokenNodeRegex && c.getFirstToken().getStr().toUpperCase() === "BOOLC") {
         ret.append("abap.builtin.boolc(", c, traversal);
+        post.append(")", c, traversal);
+      } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "REF") {
+        const infer = node.findDirectExpression(Expressions.TypeNameOrInfer);
+        if (infer?.concatTokens() !== "#") {
+          throw new Error("transpiler: REF # todo1")
+        }
+        const scope = traversal.findCurrentScopeByToken(infer.getFirstToken());
+        const inferType = traversal.lookupInferred(infer, scope);
+        if (inferType === undefined) {
+          throw new Error("transpiler: REF # todo, lookupInferred")
+        }
+        const typ = new TranspileTypes().toType(inferType);
+        if (typ.startsWith("new abap.types.DataReference(") === false) {
+          throw new Error("transpiler: REF # unexpected type")
+        }
+        ret.append(`${typ}.assign(`, c, traversal);
         post.append(")", c, traversal);
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "BIT") { // todo, this will not work in the general case
         ret.append("abap.operators.bitnot(", c, traversal);
