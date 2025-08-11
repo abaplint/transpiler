@@ -143,7 +143,7 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
       const conversionField = traversal.isSQLConversion(source.getFirstToken());
       if (conversionField) {
         const field = (table?.parseType(traversal.reg) as abaplint.BasicTypes.StructureType).getComponentByName(conversionField);
-        ret += "'\" + " + new TranspileTypes().toType(field!) + ".set(" + concat + ").get() + \"'";
+        ret += "'\" + " + TranspileTypes.toType(field!) + ".set(" + concat + ").get() + \"'";
       } else if (concat.startsWith("`")) {
         ret += "'" + concat.substring(1, concat.length - 1) + "'";
       } else {

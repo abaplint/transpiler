@@ -96,7 +96,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
         if (inferType === undefined) {
           throw new Error("transpiler: REF # todo, lookupInferred, " + node.concatTokens());
         }
-        const typ = new TranspileTypes().toType(inferType);
+        const typ = TranspileTypes.toType(inferType);
         if (typ.startsWith("new abap.types.DataReference(") === false) {
           throw new Error("transpiler: REF # unexpected type")
         }

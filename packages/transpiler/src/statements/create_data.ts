@@ -27,7 +27,7 @@ export class CreateDataTranspiler implements IStatementTranspiler {
     if (typeNameNode) {
       const id = traversal.findCurrentScopeByToken(typeNameNode.getFirstToken())?.findType(typeNameNode.concatTokens());
       if (id) {
-        options.push(`"type": ` + new TranspileTypes().toType(id.getType()));
+        options.push(`"type": ` + TranspileTypes.toType(id.getType()));
       } else {
         options.push(`"typeName": "${typeNameNode.concatTokens().toUpperCase()}"`);
       }

@@ -3,15 +3,14 @@ import {Traversal} from "./traversal";
 
 const featureHexUInt8 = false;
 
-// todo: change this class to static for performance?
 export class TranspileTypes {
 
-  public declare(t: abaplint.TypedIdentifier): string {
+  public static declare(t: abaplint.TypedIdentifier): string {
     const type = t.getType();
     return "let " + Traversal.prefixVariable(t.getName().toLowerCase()) + " = " + this.toType(type) + ";";
   }
 
-  public declareStaticSkipVoid(pre: string, t: abaplint.TypedIdentifier): string {
+  public static declareStaticSkipVoid(pre: string, t: abaplint.TypedIdentifier): string {
     const type = t.getType();
     const code = this.toType(type);
     // todo, this should look at the configuration, for runtime vs compile time errors
@@ -21,7 +20,7 @@ export class TranspileTypes {
     return pre + t.getName().toLowerCase() + " = " + code + ";\n";
   }
 
-  public toType(type: abaplint.AbstractType): string {
+  public static toType(type: abaplint.AbstractType): string {
     let resolved = "";
     let extra = "";
 

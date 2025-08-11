@@ -64,7 +64,7 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
       if (type !== undefined && p.optional === true) {
         // todo, set DEFAULT value
         ret += `if (${name} === undefined) {
-  ${name} = ${new TranspileTypes().toType(type)};
+  ${name} = ${TranspileTypes.toType(type)};
 }\n`;
       }
 

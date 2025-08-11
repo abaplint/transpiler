@@ -25,7 +25,7 @@ export class HandleTypePool {
     for (const v in spaghettiNode?.getData().vars) {
       const abs = spaghettiNode!.getData().vars[v];
       const name = `pool['${v.toLowerCase()}']`;
-      chunk.appendString(`${name} = ${new TranspileTypes().toType(abs.getType())};\n`);
+      chunk.appendString(`${name} = ${TranspileTypes.toType(abs.getType())};\n`);
       chunk.appendString(Traversal.setValues(abs, name));
 
       // yea, this is a mess
@@ -38,7 +38,7 @@ export class HandleTypePool {
     }
     for (const t in spaghettiNode?.getData().types) {
       const abs = spaghettiNode!.getData().types[t];
-      chunk.appendString(`pool['${t.toLowerCase()}'] = ${new TranspileTypes().toType(abs.getType())};\n`);
+      chunk.appendString(`pool['${t.toLowerCase()}'] = ${TranspileTypes.toType(abs.getType())};\n`);
     }
 
     chunk.appendString(`abap.TypePools['${obj.getName()}'] = pool;`);

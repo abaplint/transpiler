@@ -34,7 +34,7 @@ export class DataTranspiler implements IStatementTranspiler {
     const ret = new Chunk()
       .appendString("let ")
       .appendString(Traversal.prefixVariable(Traversal.escapeNamespace(found.getName().toLowerCase())))
-      .appendString(" = " + new TranspileTypes().toType(found.getType()))
+      .appendString(" = " + TranspileTypes.toType(found.getType()))
       .appendString(";")
       .appendString(value);
 

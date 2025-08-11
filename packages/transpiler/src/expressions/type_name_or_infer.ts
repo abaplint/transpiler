@@ -21,7 +21,7 @@ export class TypeNameOrInfer implements IExpressionTranspiler {
     }
 
     const ret = new Chunk();
-    ret.appendString(new TranspileTypes().toType(type));
+    ret.appendString(TranspileTypes.toType(type));
     return ret;
   }
 
