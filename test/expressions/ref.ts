@@ -14,13 +14,14 @@ describe("Running expressions - REF", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
-  it("basic", async () => {
+  it.only("basic", async () => {
     const code = `
 DATA foo TYPE i.
 DATA ref TYPE REF TO i.
 ref = REF #( foo ).
 WRITE ref->*.`;
     const js = await run(code);
+    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0");

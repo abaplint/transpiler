@@ -4,6 +4,7 @@ import {AttributeChainTranspiler, ComponentChainTranspiler, FieldChainTranspiler
 import {Traversal} from "../traversal";
 import {ConstantTranspiler} from "./constant";
 import {Chunk} from "../chunk";
+import { TranspileTypes } from "../transpile_types";
 
 export class SourceTranspiler implements IExpressionTranspiler {
   private readonly addGet: boolean;
@@ -86,10 +87,17 @@ export class SourceTranspiler implements IExpressionTranspiler {
         ret.append("abap.builtin.boolc(", c, traversal);
         post.append(")", c, traversal);
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "REF") {
-        if (node.findDirectExpression(Expressions.TypeNameOrInfer)?.concatTokens() !== "#") {
-          throw new Error("transpiler: REF # todo")
+        const infer = node.findDirectExpression(Expressions.TypeNameOrInfer);
+        if (infer?.concatTokens() !== "#") {
+          throw new Error("transpiler: REF # todo1")
         }
-        ret.append("new abap.types.DataReference().assign(", c, traversal);
+        const scope = traversal.findCurrentScopeByToken(infer.getFirstToken());
+        const inferType = traversal.lookupInferred(infer, scope);
+        if (inferType === undefined) {
+          throw new Error("transpiler: REF # todo, lookupInferred")
+        }
+        const typ = new TranspileTypes().toType(inferType);
+        ret.append(`new abap.types.DataReference(${typ}).assign(`, c, traversal);
         post.append(")", c, traversal);
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "BIT") { // todo, this will not work in the general case
         ret.append("abap.operators.bitnot(", c, traversal);
