@@ -7,7 +7,7 @@ import {TranspileTypes} from "../transpile_types";
 
 export class FieldSymbolTranspiler implements IStatementTranspiler {
 
-  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
+  public transpile(node: abaplint.Nodes.StatementNode | abaplint.Nodes.ExpressionNode, traversal: Traversal): Chunk {
     const name = node.findDirectExpression(abaplint.Expressions.FieldSymbol);
 
     const token = name?.getFirstToken();
@@ -31,6 +31,7 @@ export class FieldSymbolTranspiler implements IStatementTranspiler {
         .appendString(new Expr().transpile(name, traversal).getCode())
         .appendString(" = new abap.types.FieldSymbol(" + TranspileTypes.toType(found.getType()) + ");");
     }
+
     throw new Error("FieldSymbolTranspiler, name not found");
   }
 

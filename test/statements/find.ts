@@ -4,8 +4,8 @@ import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
-async function run(contents: string) {
-  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
+async function run(contents: string, skipVersionCheck = false) {
+  return runFiles(abap, [{filename: "zfoobar_find.prog.abap", contents}], {skipVersionCheck});
 }
 
 
@@ -759,21 +759,23 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("0");
   });
 
-  it.only("FIND, inline DATA, loop inline FS", async () => {
+  it("FIND, inline DATA, loop inline FS", async () => {
     const code = `
 FORM foo.
   DATA str TYPE string.
+  str = 'foo bar baz'.
   FIND ALL OCCURRENCES OF REGEX 'foo' IN str RESULTS DATA(result_table).
-  LOOP AT result_table ASSIGNING FIELD-SYMBOLS(<line>).
+  LOOP AT result_table ASSIGNING FIELD-SYMBOL(<line>).
+    WRITE / 'hello'.
   ENDLOOP.
 ENDFORM.
 
 START-OF-SELECTION.
   PERFORM foo.`;
-    const js = await run(code);
-    console.dir(js);
+    const js = await run(code, true);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+    expect(abap.console.get()).to.equal("hello");
   });
 
 });
