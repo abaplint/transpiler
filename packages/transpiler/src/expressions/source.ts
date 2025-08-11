@@ -94,7 +94,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
         const scope = traversal.findCurrentScopeByToken(infer.getFirstToken());
         const inferType = traversal.lookupInferred(infer, scope);
         if (inferType === undefined) {
-          throw new Error("transpiler: REF # todo, lookupInferred")
+          throw new Error("transpiler: REF # todo, lookupInferred, " + node.concatTokens());
         }
         const typ = new TranspileTypes().toType(inferType);
         if (typ.startsWith("new abap.types.DataReference(") === false) {
