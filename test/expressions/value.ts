@@ -197,7 +197,7 @@ WRITE / val1-bar.`;
     expect(abap.console.get()).to.equal("1\n2");
   });
 
-  it.only("VALUE nested structure", async () => {
+  it("VALUE nested structure", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          BEGIN OF body,
