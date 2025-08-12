@@ -19,8 +19,20 @@ export class ValueBodyTranspiler {
     ret.appendString(")");
     */
     for (const child of body.getChildren()) {
-      if (child.get() instanceof Expressions.FieldAssignment) {
-        ret.appendString(".set()");
+      if (child.get() instanceof Expressions.FieldAssignment && child instanceof Nodes.ExpressionNode) {
+        const field = child.findDirectExpression(Expressions.FieldSub);
+        if (field === undefined) {
+          throw new Error("ValueBodyTranspiler, Expected FieldSub");
+        }
+        const source = child.findDirectExpression(Expressions.Source);
+        if (source === undefined) {
+          throw new Error("ValueBodyTranspiler, Expected Source");
+        }
+        ret.appendString(".setField(");
+        ret.appendString(`"${field.concatTokens().toLowerCase()}"`);
+        ret.appendString(", ");
+        ret.appendChunk(traversal.traverse(source));
+        ret.appendString(")");
       } else {
         throw new Error("ValueBodyTranspiler, unknown " + child.get().constructor.name);
       }

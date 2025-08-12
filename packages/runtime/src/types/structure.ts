@@ -66,6 +66,15 @@ export class Structure {
     return this.qualifiedName;
   }
 
+  public setField(name: string, value: any) {
+    if (this.value[name] === undefined) {
+      throw new Error("Structure, setField, field not found: " + name);
+    }
+
+    this.value[name].set(value);
+    return this;
+  }
+
   public set(input: Structure | string | INumeric | Table | ICharacter | FieldSymbol | undefined) {
     if (input === undefined) {
       return;
