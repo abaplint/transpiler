@@ -3,6 +3,7 @@ import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {TranspileTypes} from "../transpile_types";
 import {FieldAssignmentTranspiler} from "./field_assignment";
+import {SourceTranspiler} from "./source";
 
 export class ValueBodyLineTranspiler {
 
@@ -17,6 +18,9 @@ export class ValueBodyLineTranspiler {
         continue;
       } else if (child.get() instanceof Expressions.FieldAssignment && child instanceof Nodes.ExpressionNode) {
         ret.appendString(new FieldAssignmentTranspiler().transpile(child, traversal).getCode());
+      } else if (child.get() instanceof Expressions.Source && child instanceof Nodes.ExpressionNode) {
+        // then its a non structured/ table line kind of thing
+        ret.appendString(".set(" + new SourceTranspiler().transpile(child, traversal).getCode() + ")");
       } else {
         throw new Error("ValueBodyLineTranspiler, unknown " + child.get().constructor.name + " " + line.concatTokens());
       }

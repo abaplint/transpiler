@@ -137,7 +137,7 @@ ENDFORM.`;
     await f(abap);
   });
 
-  it.only("VALUE referring class type", async () => {
+  it("VALUE referring class type", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
@@ -151,15 +151,13 @@ START-OF-SELECTION.
   DATA sdf TYPE lcl=>tty.
   sdf = VALUE lcl=>tty( ( 1 ) ).`;
     const js = await run(code, true);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
 
   /*
-    data fields type string_table.
-
-    fields = value #( ( `TYPE` )
+    DATA val TYPE i.
+    val = value #( ).
   */
 
   it.skip("VALUE FOR IN", async () => {

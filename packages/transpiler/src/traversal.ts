@@ -741,6 +741,14 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
       return dtel.parseType(this.reg);
     }
 
+    if (name.includes("=>")) {
+      const [className, typeName] = name.split("=>");
+      const cls = this.findClassDefinition(className, scope);
+      if (cls) {
+        return cls.getTypeDefinitions().getByName(typeName)?.getType();
+      }
+    }
+
     // todo: yea, well, yea
     throw new Error("lookupType, type not found, " + node.concatTokens());
   }
