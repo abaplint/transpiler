@@ -123,4 +123,21 @@ WRITE / lines( tab ).`;
     expect(abap.console.get()).to.equal("3");
   });
 
+  it.only("VALUE FOR IN", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         val TYPE string,
+       END OF ty.
+DATA input TYPE STANDARD TABLE OF ty WITH EMPTY KEY.
+DATA vals TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+
+INSERT VALUE #( val = 'hello' ) INTO TABLE input.
+vals = VALUE #( FOR <input> IN input ( <input>-val ) ).
+WRITE / lines( vals ).`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });
