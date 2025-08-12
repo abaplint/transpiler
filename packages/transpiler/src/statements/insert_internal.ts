@@ -8,7 +8,8 @@ export class InsertInternalTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const options: string[] = [];
 
-    let source = node.findDirectExpression(abaplint.Expressions.SimpleSource4);
+    let source = node.findDirectExpression(abaplint.Expressions.SimpleSource4)
+      || node.findDirectExpression(abaplint.Expressions.Source);
     const target = node.findDirectExpression(abaplint.Expressions.Target);
 
     const concat = node.concatTokens().toUpperCase();

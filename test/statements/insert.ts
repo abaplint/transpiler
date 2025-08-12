@@ -4,8 +4,8 @@ import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
-async function run(contents: string) {
-  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
+async function run(contents: string, skipVersionCheck = false) {
+  return runFiles(abap, [{filename: "zfoobar_insert.prog.abap", contents}], {skipVersionCheck});
 }
 
 describe("Running statements - INSERT", () => {
@@ -322,6 +322,21 @@ ASSERT sy-subrc = 4.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("INSERT, inline VALUE", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         foo TYPE i,
+       END OF ty.
+DATA lt_messages TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+INSERT VALUE #( foo = 2 ) INTO TABLE lt_messages.
+READ TABLE lt_messages INDEX 1 TRANSPORTING NO FIELDS.
+WRITE / sy-subrc.`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
   });
 
 });

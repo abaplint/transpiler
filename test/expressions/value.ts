@@ -44,4 +44,6 @@ WRITE val-baz.`;
     expect(abap.console.get()).to.equal("23");
   });
 
+// todo: table rows
+
 });
