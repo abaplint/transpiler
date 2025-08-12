@@ -24,6 +24,13 @@ export class TargetTranspiler implements IExpressionTranspiler {
         ret.append(Traversal.prefixVariable(Traversal.escapeNamespace(prefix)!), c, traversal);
 
         context = scope?.findVariable(c.getFirstToken().getStr())?.getType();
+      } else if (c.get() instanceof Expressions.InlineData && c instanceof Nodes.ExpressionNode) {
+        const targetField = c.findDirectExpression(Expressions.TargetField);
+        if (targetField === undefined) {
+          throw new Error("TargetTranspiler: InlineData Target field not found");
+        }
+        ret.append(Traversal.prefixVariable(Traversal.escapeNamespace(targetField?.concatTokens())!), c, traversal);
+        context = scope?.findVariable(targetField!.getFirstToken().getStr())?.getType();
       } else if (c.get() instanceof Expressions.ClassName) {
         const name = traversal.lookupClassOrInterface(c.getFirstToken().getStr(), c.getFirstToken());
         ret.append(name, c, traversal);

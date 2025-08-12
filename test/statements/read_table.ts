@@ -1467,4 +1467,27 @@ WRITE / sy-subrc.`;
     expect(abap.console.get().trimEnd()).to.equal(`4`);
   });
 
+  it("read into inline fs", async () => {
+    const code = `
+FORM foo.
+  TYPES: BEGIN OF ty_values,
+           value TYPE i,
+         END OF ty_values.
+  DATA values TYPE STANDARD TABLE OF ty_values WITH EMPTY KEY.
+  DATA row LIKE LINE OF values.
+  DATA(default) = 2.
+  row-value = default.
+  INSERT row INTO TABLE values.
+  READ TABLE values WITH KEY value = default ASSIGNING FIELD-SYMBOL(<entry>).
+  WRITE / sy-subrc.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal(`0`);
+  });
+
 });

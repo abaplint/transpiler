@@ -4,8 +4,8 @@ import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
-async function run(contents: string) {
-  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
+async function run(contents: string, skipVersionCheck = false) {
+  return runFiles(abap, [{filename: "zfoobar_find.prog.abap", contents}], {skipVersionCheck});
 }
 
 
@@ -740,6 +740,41 @@ WRITE / str3.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("FOOO\n30\n Greetings");
+  });
+
+  it("FIND, inline DATA", async () => {
+    const code = `
+FORM foo.
+  DATA str TYPE string.
+  FIND ALL OCCURRENCES OF REGEX 'foo' IN str RESULTS DATA(result_table).
+  WRITE / lines( result_table ).
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
+  it("FIND, inline DATA, loop inline FS", async () => {
+    const code = `
+FORM foo.
+  DATA str TYPE string.
+  str = 'foo bar baz'.
+  FIND ALL OCCURRENCES OF REGEX 'foo' IN str RESULTS DATA(result_table).
+  LOOP AT result_table ASSIGNING FIELD-SYMBOL(<line>).
+    WRITE / 'hello'.
+  ENDLOOP.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello");
   });
 
 });
