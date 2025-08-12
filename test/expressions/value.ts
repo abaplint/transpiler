@@ -49,7 +49,8 @@ WRITE val-baz.`;
 TYPES: BEGIN OF ty,
          foo TYPE i,
        END OF ty.
-DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+TYPES tty TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA tab TYPE tty.
 tab = VALUE #( ( foo = 1 ) ( foo = 2 ) ).
 WRITE / lines( tab ).`;
     const js = await run(code, true);

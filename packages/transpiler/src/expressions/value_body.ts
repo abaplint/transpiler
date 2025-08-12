@@ -23,9 +23,7 @@ export class ValueBodyTranspiler {
         if (source === undefined) {
           throw new Error("ValueBodyTranspiler, Expected Source");
         }
-        ret.appendString(`.setField("${field.concatTokens().toLowerCase()}", `);
-        ret.appendChunk(traversal.traverse(source));
-        ret.appendString(")");
+        ret.appendString(`.setField("${field.concatTokens().toLowerCase()}", ${traversal.traverse(source).getCode()})`);
       } else {
         throw new Error("ValueBodyTranspiler, unknown " + child.get().constructor.name);
       }
