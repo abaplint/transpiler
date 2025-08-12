@@ -723,6 +723,14 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
         return abaplint.BasicTypes.StringType.get();
       case "xstring":
         return abaplint.BasicTypes.XStringType.get();
+      case "decfloat16":
+        return new abaplint.BasicTypes.DecFloat16Type();
+      case "decfloat34":
+        return new abaplint.BasicTypes.DecFloat34Type();
+      case "utclong":
+        return new abaplint.BasicTypes.UTCLongType();
+      case "int8":
+        return new abaplint.BasicTypes.Integer8Type();
       case "d":
         return new abaplint.BasicTypes.DateType();
       case "t":
