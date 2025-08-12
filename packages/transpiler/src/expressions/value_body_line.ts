@@ -9,7 +9,7 @@ export class ValueBodyLineTranspiler {
   public transpile(rowType: AbstractType, line: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     const ret = new Chunk();
 
-    ret.appendString(`.append(${TranspileTypes.toType(rowType)}`);
+    ret.appendString(`.appendThis(${TranspileTypes.toType(rowType)}`);
 
     for (const child of line.getChildren()) {
       if (child instanceof Nodes.TokenNode) {
