@@ -108,4 +108,19 @@ WRITE / lines( tab ).`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it.only("row defaults kind of thing", async () => {
+    const code = `
+DATA tab TYPE RANGE OF i.
+tab = VALUE #( sign   = 'I'
+               option = 'EQ'
+               ( low = 1 )
+               ( low = 2 )
+               ( low = 3 ) ).
+WRITE / lines( tab ).`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
