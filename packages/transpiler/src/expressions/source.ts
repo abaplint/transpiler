@@ -76,11 +76,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
           ret.appendString(traversal.traverse(c.getFirstChild()).getCode());
           ret.appendString(")");
         } else if (c.get() instanceof Expressions.ValueBody) {
-          const typ = node.findFirstExpression(Expressions.TypeNameOrInfer)
-          if (typ === undefined) {
-            throw new Error("TypeNameOrInfer not found in ValueBody");
-          }
-          ret.appendChunk(new ValueBodyTranspiler().transpile(typ, c, traversal));
+          continue;
         } else {
           ret.appendString("SourceUnknown-" + c.get().constructor.name);
         }
@@ -93,6 +89,18 @@ export class SourceTranspiler implements IExpressionTranspiler {
       } else if (c instanceof Nodes.TokenNodeRegex && c.getFirstToken().getStr().toUpperCase() === "BOOLC") {
         ret.append("abap.builtin.boolc(", c, traversal);
         post.append(")", c, traversal);
+      } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "VALUE") {
+        const typ = node.findDirectExpression(Expressions.TypeNameOrInfer)
+        if (typ === undefined) {
+          throw new Error("TypeNameOrInfer not found in ValueBody");
+        }
+        const valueBody = node.findDirectExpression(Expressions.ValueBody);
+        if (valueBody) {
+          ret.appendChunk(new ValueBodyTranspiler().transpile(typ, valueBody, traversal));
+        } else {
+          const context = new TypeNameOrInfer().findType(typ, traversal);
+          ret.appendString(TranspileTypes.toType(context));
+        }
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "REF") {
         const infer = node.findDirectExpression(Expressions.TypeNameOrInfer);
         if (infer?.concatTokens() !== "#") {

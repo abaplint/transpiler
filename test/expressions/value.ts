@@ -168,14 +168,12 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-// this must be fixed
-  it.skip("VALUE empty", async () => {
+  it("VALUE empty", async () => {
     const code = `
     DATA val TYPE i.
     val = VALUE #( ).
     WRITE / val.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0");
