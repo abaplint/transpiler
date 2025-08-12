@@ -179,8 +179,23 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("0");
   });
 
-// this must be fixed
-// todo: VALUE BASE
+  it.only("VALUE BASE structure", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         foo TYPE i,
+         bar TYPE i,
+       END OF ty.
+DATA val1 TYPE ty.
+DATA val2 TYPE ty.
+val2-foo = 1.
+val1 = VALUE #( BASE val2 bar = 2 ).
+WRITE / val1-foo.
+WRITE / val1-bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2");
+  });
 
 // still blocked via abaplint,
   it.skip("VALUE FOR IN", async () => {

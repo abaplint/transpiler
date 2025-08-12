@@ -34,7 +34,7 @@ export class ValueBodyTranspiler {
         const rowType = context.getRowType();
         ret.appendString(new ValueBodyLineTranspiler().transpile(rowType, child, traversal, extraFields).getCode());
       } else {
-        throw new Error("ValueBodyTranspiler, unknown " + child.get().constructor.name + " " + child.concatTokens());
+        throw new Error("ValueBodyTranspiler, unknown " + child.get().constructor.name + " \"" + child.concatTokens()) + "\"";
       }
     }
 
