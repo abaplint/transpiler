@@ -6,7 +6,7 @@ import {FieldAssignmentTranspiler} from "./field_assignment";
 
 export class ValueBodyLineTranspiler {
 
-  public transpile(rowType: AbstractType, line: Nodes.ExpressionNode, traversal: Traversal): Chunk {
+  public transpile(rowType: AbstractType, line: Nodes.ExpressionNode, traversal: Traversal, extraFields: string): Chunk {
     const ret = new Chunk();
 
     ret.appendString(`.appendThis(${TranspileTypes.toType(rowType)}`);
@@ -22,7 +22,7 @@ export class ValueBodyLineTranspiler {
       }
     }
 
-    ret.appendString(`)`)
+    ret.appendString(extraFields + `)`)
 
     return ret;
   }
