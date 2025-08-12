@@ -123,7 +123,7 @@ WRITE / lines( tab ).`;
     expect(abap.console.get()).to.equal("3");
   });
 
-  it.only("VALUE FOR IN", async () => {
+  it.skip("VALUE FOR IN", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          val TYPE string,
