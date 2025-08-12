@@ -59,4 +59,22 @@ WRITE / lines( tab ).`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("table rows, sorted", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         foo TYPE i,
+       END OF ty.
+TYPES tty TYPE SORTED TABLE OF ty WITH UNIQUE KEY foo.
+DATA tab TYPE tty.
+DATA row LIKE LINE OF tab.
+tab = VALUE #( ( foo = 2 ) ( foo = 1 ) ).
+LOOP AT tab INTO row.
+  WRITE / row-foo.
+ENDLOOP.`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2");
+  });
+
 });
