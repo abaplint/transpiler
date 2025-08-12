@@ -93,4 +93,19 @@ WRITE / lines( tab ).`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it.skip("table rows, hashed, no named type", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         foo TYPE i,
+       END OF ty.
+DATA tab TYPE HASHED TABLE OF ty WITH UNIQUE KEY foo.
+DATA row LIKE LINE OF tab.
+tab = VALUE #( ( foo = 2 ) ( foo = 1 ) ).
+WRITE / lines( tab ).`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
