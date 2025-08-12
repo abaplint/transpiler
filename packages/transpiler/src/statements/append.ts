@@ -30,7 +30,8 @@ export class AppendTranspiler implements IStatementTranspiler {
     } else {
       const options: Chunk[] = [];
 
-      const s = node.findDirectExpression(abaplint.Expressions.SimpleSource4);
+      const s = node.findDirectExpression(abaplint.Expressions.SimpleSource4)
+        || node.findDirectExpression(abaplint.Expressions.Source);
       if (s) {
         const option = new Chunk().appendString("source: ");
         option.appendChunk(traversal.traverse(s));

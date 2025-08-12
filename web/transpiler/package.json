@@ -10,7 +10,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@abaplint/monaco": "^2.113.162",
+    "@abaplint/monaco": "^2.113.164",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.1",
     "css-loader": "^7.1.2",

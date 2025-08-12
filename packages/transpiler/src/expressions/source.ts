@@ -5,6 +5,7 @@ import {Traversal} from "../traversal";
 import {ConstantTranspiler} from "./constant";
 import {Chunk} from "../chunk";
 import {TranspileTypes} from "../transpile_types";
+import {ValueBodyTranspiler} from "./value_body";
 
 export class SourceTranspiler implements IExpressionTranspiler {
   private readonly addGet: boolean;
@@ -74,6 +75,12 @@ export class SourceTranspiler implements IExpressionTranspiler {
           // todo: handle LET
           ret.appendString(traversal.traverse(c.getFirstChild()).getCode());
           ret.appendString(")");
+        } else if (c.get() instanceof Expressions.ValueBody) {
+          const typ = node.findFirstExpression(Expressions.TypeNameOrInfer)
+          if (typ === undefined) {
+            throw new Error("TypeNameOrInfer not found in ValueBody");
+          }
+          ret.appendChunk(new ValueBodyTranspiler().transpile(typ, c, traversal));
         } else {
           ret.appendString("SourceUnknown-" + c.get().constructor.name);
         }

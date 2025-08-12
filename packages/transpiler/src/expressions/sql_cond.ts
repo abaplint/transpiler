@@ -100,6 +100,11 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
       return ret;
     }
 
+    if (fieldNameExpression && c.getChildren().length === 3 && c.concatTokens().toUpperCase().endsWith(" IS NULL")) {
+      ret += fieldName + " IS NULL";
+      return ret;
+    }
+
     if (fieldName === undefined || operator === undefined || source === undefined) {
       throw new Error("SQL Condition, transpiler todo2, " + c.concatTokens());
     }

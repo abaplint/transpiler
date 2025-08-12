@@ -66,6 +66,15 @@ export class Structure {
     return this.qualifiedName;
   }
 
+  public setField(name: string, value: any) {
+    if (this.value[name] === undefined) {
+      throw new Error("Structure, setField, field not found: " + name);
+    }
+
+    this.value[name].set(value);
+    return this;
+  }
+
   public set(input: Structure | string | INumeric | Table | ICharacter | FieldSymbol | undefined) {
     if (input === undefined) {
       return;
@@ -82,6 +91,7 @@ export class Structure {
       for (let i = 0; i < keys1.length; i++) {
         const key1 = keys1[i];
         const key2 = keys2[i];
+        // todo: can clone() be removed? might be needed for like Structure and Tables?
         this.value[key2].set(obj[key1].clone());
       }
     } else {

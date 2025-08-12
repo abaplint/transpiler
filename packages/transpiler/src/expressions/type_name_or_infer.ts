@@ -6,7 +6,7 @@ import {TranspileTypes} from "../transpile_types";
 
 export class TypeNameOrInfer implements IExpressionTranspiler {
 
-  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
+  public findType(node: Nodes.ExpressionNode, traversal: Traversal): AbstractType {
     let type: AbstractType | undefined;
 
     const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
@@ -19,6 +19,12 @@ export class TypeNameOrInfer implements IExpressionTranspiler {
     if (type === undefined) {
       throw new Error("TypeNameOrInfer, type not found: " + node.concatTokens());
     }
+
+    return type;
+  }
+
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
+    const type = this.findType(node, traversal);
 
     const ret = new Chunk();
     ret.appendString(TranspileTypes.toType(type));

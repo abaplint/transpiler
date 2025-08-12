@@ -1612,4 +1612,18 @@ WRITE sy-dbcnt.`;
     }, {snowflake: false});
   });
 
+  it("SELECT where IS NULL", async () => {
+    const code = `
+    DATA ls_result TYPE t100.
+    SELECT SINGLE * FROM t100 INTO ls_result WHERE arbgb IS NULL.
+    WRITE / sy-subrc.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("4");
+    });
+  });
+
 });
