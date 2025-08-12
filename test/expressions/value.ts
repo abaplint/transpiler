@@ -132,7 +132,6 @@ ENDFORM.`;
     const js = await runFiles(abap, [
       {filename: "zfoobar_value.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml}], {skipDatabaseSetup: true});
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
