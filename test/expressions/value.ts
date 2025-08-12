@@ -22,7 +22,7 @@ TYPES: BEGIN OF ty,
 DATA val TYPE ty.
 val = VALUE #( bar = 2 ).
 WRITE val-bar.`;
-    const js = await run(code);
+    const js = await run(code, true);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
