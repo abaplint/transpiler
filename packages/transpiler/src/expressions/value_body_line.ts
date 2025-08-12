@@ -1,14 +1,28 @@
-import {Nodes} from "@abaplint/core";
+import {Nodes, AbstractType, Expressions} from "@abaplint/core";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
+import {TranspileTypes} from "../transpile_types";
+import {FieldAssignmentTranspiler} from "./field_assignment";
 
 export class ValueBodyLineTranspiler {
 
-  public transpile(rowType: Nodes.ExpressionNode, line: Nodes.ExpressionNode, traversal: Traversal): Chunk {
-
-
+  public transpile(rowType: AbstractType, line: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     const ret = new Chunk();
 
+    ret.appendString(`.append(${TranspileTypes.toType(rowType)}`);
+
+    for (const child of line.getChildren()) {
+      if (child instanceof Nodes.TokenNode) {
+        // last or first parenthesis
+        continue;
+      } else if (child.get() instanceof Expressions.FieldAssignment && child instanceof Nodes.ExpressionNode) {
+        ret.appendString(new FieldAssignmentTranspiler().transpile(child, traversal).getCode());
+      } else {
+        throw new Error("ValueBodyLineTranspiler, unknown " + child.get().constructor.name);
+      }
+    }
+
+    ret.appendString(`)`)
 
     return ret;
   }

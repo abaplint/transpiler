@@ -551,6 +551,7 @@ export class Table implements ITable {
     if (item === undefined) {
       throw new Error("APPEND, item is undefined");
     }
+
     this.secondaryIndexes = {};
     if (item instanceof FieldSymbol) {
       const p = item.getPointer();
