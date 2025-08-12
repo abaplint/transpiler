@@ -149,15 +149,22 @@ ENDCLASS.
 START-OF-SELECTION.
   DATA sdf TYPE lcl=>tty.
   sdf = VALUE lcl=>tty( ( 1 ) ).`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
 
-  /*
+  it.skip("VALUE empty", async () => {
+    const code = `
     DATA val TYPE i.
-    val = value #( ).
-  */
+    val = VALUE #( ).
+    WRITE / val.`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
 
   it.skip("VALUE FOR IN", async () => {
     const code = `
