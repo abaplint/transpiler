@@ -82,6 +82,7 @@ export class Structure {
       for (let i = 0; i < keys1.length; i++) {
         const key1 = keys1[i];
         const key2 = keys2[i];
+        // todo: can clone() be removed?
         this.value[key2].set(obj[key1].clone());
       }
     } else {
