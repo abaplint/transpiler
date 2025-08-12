@@ -468,7 +468,7 @@ export class Table implements ITable {
 
       if (!(tab instanceof Table)
           && !(tab instanceof HashedTable)) {
-        throw new Error("Table, set error, " + tab.constructor.name);
+        throw new Error("Table, set error, " + tab?.constructor.name);
       }
 
       if (tab === this) {

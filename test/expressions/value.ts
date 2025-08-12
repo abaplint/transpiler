@@ -1,6 +1,7 @@
 import {expect} from "chai";
 import {ABAP, MemoryConsole} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
+import {tabl_t100xml} from "../_data";
 
 let abap: ABAP;
 
@@ -123,6 +124,98 @@ WRITE / lines( tab ).`;
     expect(abap.console.get()).to.equal("3");
   });
 
+  it("VALUE DDIC table typed", async () => {
+    const code = `
+FORM foo.
+  DATA(foo) = VALUE t100( ).
+ENDFORM.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar_value.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}], {skipDatabaseSetup: true});
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("VALUE referring class type", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    TYPES tty TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA sdf TYPE lcl=>tty.
+  sdf = VALUE lcl=>tty( ( 1 ) ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("VALUE referring interface type", async () => {
+    const code = `
+INTERFACE lif.
+  TYPES tty TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+ENDINTERFACE.
+
+START-OF-SELECTION.
+  DATA sdf TYPE lif=>tty.
+  sdf = VALUE lif=>tty( ( 1 ) ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("VALUE empty", async () => {
+    const code = `
+    DATA val TYPE i.
+    val = VALUE #( ).
+    WRITE / val.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
+  it("VALUE BASE structure", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         foo TYPE i,
+         bar TYPE i,
+       END OF ty.
+DATA val1 TYPE ty.
+DATA val2 TYPE ty.
+val2-foo = 1.
+val1 = VALUE #( BASE val2 bar = 2 ).
+WRITE / val1-foo.
+WRITE / val1-bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2");
+  });
+
+  it("VALUE nested structure", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         BEGIN OF body,
+           foo TYPE i,
+           bar TYPE i,
+         END OF body,
+       END OF ty.
+DATA foo TYPE ty.
+foo = VALUE #( body-foo = 1 body-bar = 2 ).
+WRITE / foo-body-foo.
+WRITE / foo-body-bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2");
+  });
+
+// still blocked via abaplint,
   it.skip("VALUE FOR IN", async () => {
     const code = `
 TYPES: BEGIN OF ty,

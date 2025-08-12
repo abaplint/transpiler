@@ -723,6 +723,14 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
         return abaplint.BasicTypes.StringType.get();
       case "xstring":
         return abaplint.BasicTypes.XStringType.get();
+      case "decfloat16":
+        return new abaplint.BasicTypes.DecFloat16Type();
+      case "decfloat34":
+        return new abaplint.BasicTypes.DecFloat34Type();
+      case "utclong":
+        return new abaplint.BasicTypes.UTCLongType();
+      case "int8":
+        return new abaplint.BasicTypes.Integer8Type();
       case "d":
         return new abaplint.BasicTypes.DateType();
       case "t":
@@ -739,6 +747,33 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
     const dtel = this.reg.getObject("DTEL", name) as abaplint.Objects.DataElement | undefined;
     if (dtel) {
       return dtel.parseType(this.reg);
+    }
+
+    const tabl = this.reg.getObject("TABL", name) as abaplint.Objects.Table | undefined;
+    if (tabl) {
+      return tabl.parseType(this.reg);
+    }
+
+    const view = this.reg.getObject("VIEW", name) as abaplint.Objects.View | undefined;
+    if (view) {
+      return view.parseType(this.reg);
+    }
+
+    const ttyp = this.reg.getObject("TTYP", name) as abaplint.Objects.TableType | undefined;
+    if (ttyp) {
+      return ttyp.parseType(this.reg);
+    }
+
+    if (name.includes("=>")) {
+      const [className, typeName] = name.split("=>");
+      const cls = this.findClassDefinition(className, scope);
+      if (cls) {
+        return cls.getTypeDefinitions().getByName(typeName)?.getType();
+      }
+      const intf = this.findInterfaceDefinition(className, scope);
+      if (intf) {
+        return intf.getTypeDefinitions().getByName(typeName)?.getType();
+      }
     }
 
     // todo: yea, well, yea

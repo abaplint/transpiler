@@ -13,7 +13,7 @@ export class ValueBodyTranspiler {
       throw new Error("ValueBodyTranspiler, Expected TypeNameOrInfer");
     }
 
-    const ret = new Chunk().appendString(new TypeNameOrInfer().transpile(typ, traversal).getCode());
+    let ret = new Chunk().appendString(new TypeNameOrInfer().transpile(typ, traversal).getCode());
     const context = new TypeNameOrInfer().findType(typ, traversal);
 
     const hasLines = body.findDirectExpression(Expressions.ValueBodyLine) !== undefined;
@@ -27,6 +27,9 @@ export class ValueBodyTranspiler {
         } else {
           extraFields += transpiled;
         }
+      } else if (child.get() instanceof Expressions.ValueBase && child instanceof Nodes.ExpressionNode) {
+        const source = traversal.traverse(child.findDirectExpression(Expressions.Source));
+        ret = new Chunk().appendString(source.getCode() + ".clone()");
       } else if (child.get() instanceof Expressions.ValueBodyLine && child instanceof Nodes.ExpressionNode) {
         if (!(context instanceof BasicTypes.TableType)) {
           throw new Error("ValueBodyTranspiler, Expected BasicTypes");
@@ -34,7 +37,7 @@ export class ValueBodyTranspiler {
         const rowType = context.getRowType();
         ret.appendString(new ValueBodyLineTranspiler().transpile(rowType, child, traversal, extraFields).getCode());
       } else {
-        throw new Error("ValueBodyTranspiler, unknown " + child.get().constructor.name);
+        throw new Error("ValueBodyTranspiler, unknown " + child.get().constructor.name + " \"" + child.concatTokens()) + "\"";
       }
     }
 

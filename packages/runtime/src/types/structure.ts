@@ -67,11 +67,23 @@ export class Structure {
   }
 
   public setField(name: string, value: any) {
-    if (this.value[name] === undefined) {
-      throw new Error("Structure, setField, field not found: " + name);
+    if (name.includes("->") || name.includes("=>")) {
+      throw new Error("transpiler, structure setField todo, " + name);
     }
 
-    this.value[name].set(value);
+    if (name.includes("-")) {
+      // hmm, todo
+      const [base, field] = name.split("-");
+      if (field.includes("-")) {
+        throw new Error("transpiler, structure setField todo");
+      }
+      this.value[base].setField(field, value);
+    } else {
+      if (this.value[name] === undefined) {
+        throw new Error("Structure, setField, field not found: " + name);
+      }
+      this.value[name].set(value);
+    }
     return this;
   }
 

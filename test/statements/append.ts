@@ -355,7 +355,7 @@ DATA lt_messages TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
 APPEND VALUE #( foo = 2 ) TO lt_messages.
 READ TABLE lt_messages INDEX 1 TRANSPORTING NO FIELDS.
 WRITE / sy-subrc.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0");
