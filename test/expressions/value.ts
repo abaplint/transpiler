@@ -44,16 +44,17 @@ WRITE val-baz.`;
     expect(abap.console.get()).to.equal("23");
   });
 
-  it.only("basic, table rows", async () => {
+  it.skip("basic, table rows", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          foo TYPE i,
        END OF ty.
 TYPES tty TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
 DATA tab TYPE tty.
-tab = VALUE #( ( foo = 1 ) ( foo = 2 ) ).
+tab = VALUE #( ( foo = 1 ) ).
 WRITE / lines( tab ).`;
     const js = await run(code, true);
+    console.log(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");

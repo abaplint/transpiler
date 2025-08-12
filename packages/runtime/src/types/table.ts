@@ -463,7 +463,7 @@ export class Table implements ITable {
 
       if (!(tab instanceof Table)
           && !(tab instanceof HashedTable)) {
-        throw new Error("Table, set error");
+        throw new Error("Table, set error, " + tab.constructor.name);
       }
 
       if (tab === this) {
@@ -570,6 +570,12 @@ export class Table implements ITable {
       this.value.push(val);
       return val;
     }
+  }
+
+  /* appends and returns this */
+  public appendThis(item: TableRowType) {
+    this.append(item);
+    return this;
   }
 
   public appendInitial() {
