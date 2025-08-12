@@ -168,6 +168,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+// this must be fixed
   it.skip("VALUE empty", async () => {
     const code = `
     DATA val TYPE i.
@@ -180,6 +181,10 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("0");
   });
 
+// this must be fixed
+// todo: VALUE BASE
+
+// still blocked via abaplint,
   it.skip("VALUE FOR IN", async () => {
     const code = `
 TYPES: BEGIN OF ty,
@@ -196,7 +201,5 @@ WRITE / lines( vals ).`;
     await f(abap);
     expect(abap.console.get()).to.equal("1");
   });
-
-// todo: VALUE BASE
 
 });
