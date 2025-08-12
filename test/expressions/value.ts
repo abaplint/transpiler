@@ -197,6 +197,24 @@ WRITE / val1-bar.`;
     expect(abap.console.get()).to.equal("1\n2");
   });
 
+  it.only("VALUE nested structure", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         BEGIN OF body,
+           foo TYPE i,
+           bar TYPE i,
+         END OF body,
+       END OF ty.
+DATA foo TYPE ty.
+foo = VALUE #( body-foo = 1 body-bar = 2 ).
+WRITE / foo-body-foo.
+WRITE / foo-body-bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2");
+  });
+
 // still blocked via abaplint,
   it.skip("VALUE FOR IN", async () => {
     const code = `
