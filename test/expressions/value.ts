@@ -1,6 +1,7 @@
 import {expect} from "chai";
 import {ABAP, MemoryConsole} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
+import {tabl_t100xml} from "../_data";
 
 let abap: ABAP;
 
@@ -121,6 +122,19 @@ WRITE / lines( tab ).`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("3");
+  });
+
+  it.skip("VALUE DDIC table typed", async () => {
+    const code = `
+FORM foo.
+  DATA(foo) = VALUE t100( ).
+ENDFORM.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar_value.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
   it.skip("VALUE FOR IN", async () => {
