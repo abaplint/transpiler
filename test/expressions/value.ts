@@ -137,6 +137,31 @@ ENDFORM.`;
     await f(abap);
   });
 
+  it.only("VALUE referring class type", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    TYPES tty TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA sdf TYPE lcl=>tty.
+  sdf = VALUE lcl=>tty( ( 1 ) ).`;
+    const js = await run(code, true);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  /*
+    data fields type string_table.
+
+    fields = value #( ( `TYPE` )
+  */
+
   it.skip("VALUE FOR IN", async () => {
     const code = `
 TYPES: BEGIN OF ty,

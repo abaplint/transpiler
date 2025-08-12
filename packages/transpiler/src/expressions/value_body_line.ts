@@ -18,7 +18,7 @@ export class ValueBodyLineTranspiler {
       } else if (child.get() instanceof Expressions.FieldAssignment && child instanceof Nodes.ExpressionNode) {
         ret.appendString(new FieldAssignmentTranspiler().transpile(child, traversal).getCode());
       } else {
-        throw new Error("ValueBodyLineTranspiler, unknown " + child.get().constructor.name);
+        throw new Error("ValueBodyLineTranspiler, unknown " + child.get().constructor.name + " " + line.concatTokens());
       }
     }
 
