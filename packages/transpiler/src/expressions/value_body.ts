@@ -12,12 +12,7 @@ export class ValueBodyTranspiler {
     }
 
     const ret = new Chunk().appendString(new TypeNameOrInfer().transpile(typ, traversal).getCode());
-    /*
-    ret.appendString(".set(");
-    // todo: handle LET
-    ret.appendString(traversal.traverse(body).getCode());
-    ret.appendString(")");
-    */
+
     for (const child of body.getChildren()) {
       if (child.get() instanceof Expressions.FieldAssignment && child instanceof Nodes.ExpressionNode) {
         const field = child.findDirectExpression(Expressions.FieldSub);
@@ -28,9 +23,7 @@ export class ValueBodyTranspiler {
         if (source === undefined) {
           throw new Error("ValueBodyTranspiler, Expected Source");
         }
-        ret.appendString(".setField(");
-        ret.appendString(`"${field.concatTokens().toLowerCase()}"`);
-        ret.appendString(", ");
+        ret.appendString(`.setField("${field.concatTokens().toLowerCase()}", `);
         ret.appendChunk(traversal.traverse(source));
         ret.appendString(")");
       } else {

@@ -44,7 +44,7 @@ WRITE val-baz.`;
     expect(abap.console.get()).to.equal("23");
   });
 
-  it.skip("basic, table rows", async () => {
+  it.only("basic, table rows", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          foo TYPE i,
