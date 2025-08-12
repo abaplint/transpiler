@@ -22,7 +22,7 @@ TYPES: BEGIN OF ty,
 DATA val TYPE ty.
 val = VALUE #( bar = 2 ).
 WRITE val-bar.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -38,7 +38,7 @@ DATA val TYPE ty.
 val = VALUE #( bar = 2 baz = 3 ).
 WRITE val-bar.
 WRITE val-baz.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("23");
@@ -53,7 +53,7 @@ TYPES tty TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
 DATA tab TYPE tty.
 tab = VALUE #( ( foo = 1 ) ( foo = 2) ).
 WRITE / lines( tab ).`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -71,7 +71,7 @@ tab = VALUE #( ( foo = 2 ) ( foo = 1 ) ).
 LOOP AT tab INTO row.
   WRITE / row-foo.
 ENDLOOP.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1\n2");
@@ -87,7 +87,7 @@ DATA tab TYPE tty.
 DATA row LIKE LINE OF tab.
 tab = VALUE #( ( foo = 2 ) ( foo = 1 ) ).
 WRITE / lines( tab ).`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -102,7 +102,7 @@ DATA tab TYPE HASHED TABLE OF ty WITH UNIQUE KEY foo.
 DATA row LIKE LINE OF tab.
 tab = VALUE #( ( foo = 2 ) ( foo = 1 ) ).
 WRITE / lines( tab ).`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -117,7 +117,7 @@ tab = VALUE #( sign   = 'I'
                ( low = 2 )
                ( low = 3 ) ).
 WRITE / lines( tab ).`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("3");
