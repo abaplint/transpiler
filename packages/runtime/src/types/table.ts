@@ -255,6 +255,11 @@ export class HashedTable implements ITable {
     }
   }
 
+  public appendThis(data: TableRowType) {
+    this.insert(data);
+    return this;
+  }
+
   public array(): any[] {
     // used for LOOP
     const ret = [];

@@ -77,4 +77,20 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("1\n2");
   });
 
+  it("table rows, hashed", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         foo TYPE i,
+       END OF ty.
+TYPES tty TYPE HASHED TABLE OF ty WITH UNIQUE KEY foo.
+DATA tab TYPE tty.
+DATA row LIKE LINE OF tab.
+tab = VALUE #( ( foo = 2 ) ( foo = 1 ) ).
+WRITE / lines( tab ).`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
