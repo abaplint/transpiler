@@ -93,7 +93,7 @@ WRITE / lines( tab ).`;
     expect(abap.console.get()).to.equal("2");
   });
 
-  it.skip("table rows, hashed, no named type", async () => {
+  it("table rows, hashed, no named type", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          foo TYPE i,
