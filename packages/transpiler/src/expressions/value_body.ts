@@ -16,15 +16,23 @@ export class ValueBodyTranspiler {
     const ret = new Chunk().appendString(new TypeNameOrInfer().transpile(typ, traversal).getCode());
     const context = new TypeNameOrInfer().findType(typ, traversal);
 
+    const hasLines = body.findDirectExpression(Expressions.ValueBodyLine) !== undefined;
+    let extraFields = "";
+
     for (const child of body.getChildren()) {
       if (child.get() instanceof Expressions.FieldAssignment && child instanceof Nodes.ExpressionNode) {
-        ret.appendString(new FieldAssignmentTranspiler().transpile(child, traversal).getCode());
+        const transpiled = new FieldAssignmentTranspiler().transpile(child, traversal).getCode();
+        if (hasLines === false) {
+          ret.appendString(transpiled);
+        } else {
+          extraFields += transpiled;
+        }
       } else if (child.get() instanceof Expressions.ValueBodyLine && child instanceof Nodes.ExpressionNode) {
         if (!(context instanceof BasicTypes.TableType)) {
           throw new Error("ValueBodyTranspiler, Expected BasicTypes");
         }
         const rowType = context.getRowType();
-        ret.appendString(new ValueBodyLineTranspiler().transpile(rowType, child, traversal).getCode());
+        ret.appendString(new ValueBodyLineTranspiler().transpile(rowType, child, traversal, extraFields).getCode());
       } else {
         throw new Error("ValueBodyTranspiler, unknown " + child.get().constructor.name);
       }
