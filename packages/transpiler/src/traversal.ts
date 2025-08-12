@@ -751,6 +751,11 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
       return view.parseType(this.reg);
     }
 
+    const ttyp = this.reg.getObject("TTYP", name) as abaplint.Objects.TableType | undefined;
+    if (ttyp) {
+      return ttyp.parseType(this.reg);
+    }
+
     if (name.includes("=>")) {
       const [className, typeName] = name.split("=>");
       const cls = this.findClassDefinition(className, scope);
