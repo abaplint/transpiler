@@ -12,7 +12,7 @@ import "dotenv/config";
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 export const AsyncFunction = Object.getPrototypeOf(async ()=> {}).constructor;
 
-export async function runFiles(abap: ABAP, files: IFile[], options?: ITranspilerOptions) {
+export async function runFiles(abap: ABAP, files: IFile[], options?: ITranspilerOptions & {skipDatabaseSetup?: boolean}) {
   const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
   const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
   if (options?.skipVersionCheck === true) {
@@ -20,7 +20,7 @@ export async function runFiles(abap: ABAP, files: IFile[], options?: ITranspiler
   }
   const res = await new Transpiler(options).run(reg);
   abap.console.clear();
-  if (res.databaseSetup.schemas.sqlite.length > 0) {
+  if (res.databaseSetup.schemas.sqlite.length > 0 && options?.skipDatabaseSetup !== true) {
     abap.context.databaseConnections["DEFAULT"] = new SQLiteDatabaseClient();
     await abap.context.databaseConnections["DEFAULT"].connect();
     await abap.context.databaseConnections["DEFAULT"].execute(res.databaseSetup.schemas.sqlite);
