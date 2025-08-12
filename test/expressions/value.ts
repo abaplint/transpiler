@@ -154,6 +154,20 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("VALUE referring interface type", async () => {
+    const code = `
+INTERFACE lif.
+  TYPES tty TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+ENDINTERFACE.
+
+START-OF-SELECTION.
+  DATA sdf TYPE lif=>tty.
+  sdf = VALUE lif=>tty( ( 1 ) ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it.skip("VALUE empty", async () => {
     const code = `
     DATA val TYPE i.

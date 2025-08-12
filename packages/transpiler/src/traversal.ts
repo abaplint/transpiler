@@ -741,11 +741,25 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
       return dtel.parseType(this.reg);
     }
 
+    const tabl = this.reg.getObject("TABL", name) as abaplint.Objects.Table | undefined;
+    if (tabl) {
+      return tabl.parseType(this.reg);
+    }
+
+    const view = this.reg.getObject("VIEW", name) as abaplint.Objects.View | undefined;
+    if (view) {
+      return view.parseType(this.reg);
+    }
+
     if (name.includes("=>")) {
       const [className, typeName] = name.split("=>");
       const cls = this.findClassDefinition(className, scope);
       if (cls) {
         return cls.getTypeDefinitions().getByName(typeName)?.getType();
+      }
+      const intf = this.findInterfaceDefinition(className, scope);
+      if (intf) {
+        return intf.getTypeDefinitions().getByName(typeName)?.getType();
       }
     }
 
