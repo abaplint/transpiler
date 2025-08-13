@@ -1,4 +1,4 @@
-import {Expressions, Nodes} from "@abaplint/core";
+import {Expressions, Nodes, BuiltIn} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
@@ -84,7 +84,13 @@ export class CompareTranspiler implements IExpressionTranspiler {
 
     const chain = node.findDirectExpression(Expressions.MethodCallChain);
     if (chain) {
-      return new Chunk().appendString(pre + `abap.compare.initial(${traversal.traverse(chain).getCode()}) === false`);
+      const name = chain.getFirstToken().getStr();
+      if (new BuiltIn().isPredicate(name)) {
+        // todo, this is not completely correct if there is a method shadowing the name
+        return new Chunk().appendString(`abap.compare.eq(` + traversal.traverse(chain).getCode() + `, abap.builtin.abap_true)`);
+      } else {
+        return new Chunk().appendString(pre + `abap.compare.initial(${traversal.traverse(chain).getCode()}) === false`);
+      }
     }
 
     console.dir(sources.length);

@@ -76,6 +76,30 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("yes");
   });
 
+  it("method conditional, integer", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS conditional RETURNING VALUE(val) TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD conditional.
+    val = 1.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  IF lcl=>conditional( ).
+    WRITE 'yes'.
+  ENDIF.`;
+
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("yes");
+  });
+
   it("method conditional, negated", async () => {
     const code = `
 CLASS lcl DEFINITION.
@@ -100,6 +124,30 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("yes");
   });
 
+  it("method conditional, negated integer", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS conditional RETURNING VALUE(val) TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD conditional.
+    val = 0.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  IF NOT lcl=>conditional( ).
+    WRITE 'yes'.
+  ENDIF.`;
+
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("yes");
+  });
+
   it("builtin matches predicate", async () => {
     const code = `
 IF matches( val = 'hello' regex = 'hello' ).
@@ -110,6 +158,19 @@ ENDIF.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("yes");
+  });
+
+  it("builtin contains predicate negative", async () => {
+    const code = `
+IF contains( val = 'ab' regex = 'aaaa' ).
+ELSE.
+  WRITE 'works'.
+ENDIF.`;
+
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("works");
   });
 
 });
