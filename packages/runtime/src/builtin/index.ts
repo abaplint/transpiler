@@ -22,6 +22,7 @@ export * from "./matches";
 export * from "./nmax";
 export * from "./nmin";
 export * from "./numofchar";
+export * from "./xsdbool";
 export * from "./repeat";
 export * from "./replace";
 export * from "./reverse";
