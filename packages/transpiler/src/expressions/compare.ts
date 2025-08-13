@@ -85,7 +85,7 @@ export class CompareTranspiler implements IExpressionTranspiler {
     const chain = node.findDirectExpression(Expressions.MethodCallChain);
     if (chain) {
       const name = chain.getFirstToken().getStr();
-      if (new BuiltIn().isPredicate(name)) {
+      if (BuiltIn.isPredicate(name)) {
         // todo, this is not completely correct if there is a method shadowing the name
         return new Chunk().appendString(`abap.compare.eq(` + traversal.traverse(chain).getCode() + `, abap.builtin.abap_true)`);
       } else {
