@@ -97,4 +97,20 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
+  it.only("named new", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl.
+  ref = NEW lcl( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
