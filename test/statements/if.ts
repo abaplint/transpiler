@@ -112,8 +112,4 @@ ENDIF.`;
     expect(abap.console.get()).to.equal("yes");
   });
 
-// todo, test builtin LINE_EXISTS(
-// todo, test builtin LINE_INDEX(
-// todo, test builtin MATCHES(
-
 });
