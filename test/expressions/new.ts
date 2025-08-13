@@ -14,7 +14,7 @@ describe("Running expressions - NEW", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
-  it.only("basic", async () => {
+  it("basic", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
@@ -32,7 +32,36 @@ START-OF-SELECTION.
   ref = NEW #( ).
   WRITE / ref->foo( ).`;
     const js = await run(code, true);
-    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+  it("with constructorparameter", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor IMPORTING bar TYPE i.
+    METHODS foo RETURNING VALUE(val) TYPE i.
+  PRIVATE SECTION.
+    DATA mv TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD constructor.
+    mv = bar.
+  ENDMETHOD.
+
+  METHOD foo.
+    val = mv.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl.
+  ref = NEW #( bar = 2 ).
+  WRITE / ref->foo( ).`;
+    const js = await run(code, true);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
