@@ -31,13 +31,13 @@ START-OF-SELECTION.
   DATA ref TYPE REF TO lcl.
   ref = NEW #( ).
   WRITE / ref->foo( ).`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
   });
 
-  it("with constructorparameter", async () => {
+  it("with constructor parameter", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
@@ -61,7 +61,7 @@ START-OF-SELECTION.
   DATA ref TYPE REF TO lcl.
   ref = NEW #( bar = 2 ).
   WRITE / ref->foo( ).`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
