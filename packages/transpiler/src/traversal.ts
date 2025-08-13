@@ -480,6 +480,7 @@ export class Traversal {
     for (const r of scope.getData().references) {
       if (r.referenceType === abaplint.ReferenceType.InferredType
           && r.position.getStart().equals(token.getStart())) {
+        console.dir(r);
         if (r.resolved instanceof abaplint.TypedIdentifier) {
           return r.resolved.getType();
         }
