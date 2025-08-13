@@ -67,4 +67,34 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("with constructor parameter unnamed", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor IMPORTING bar TYPE i.
+    METHODS foo RETURNING VALUE(val) TYPE i.
+  PRIVATE SECTION.
+    DATA mv TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD constructor.
+    mv = bar.
+  ENDMETHOD.
+
+  METHOD foo.
+    val = mv.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl.
+  ref = NEW #( 2 ).
+  WRITE / ref->foo( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });

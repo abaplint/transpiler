@@ -24,6 +24,15 @@ export class NewObjectTranspiler implements IExpressionTranspiler {
 
     const type = new TypeNameOrInfer().findType(typeNameOrInfer, traversal);
     if (type instanceof abaplint.BasicTypes.ObjectReferenceType) {
+      if (node.getChildren()[3].get() instanceof abaplint.Expressions.Source) {
+        // single default parameter
+        const scope = traversal.findCurrentScopeByToken(typeNameOrInfer.getFirstToken());
+        const cdef = traversal.findClassDefinition(type.getIdentifierName(), scope);
+        const constr = this.findConstructor(cdef, scope);
+        const pname = constr?.getParameters().getDefaultImporting()?.toLowerCase();
+        para = `{${pname}: ${traversal.traverse(node.getChildren()[3]).getCode()}}`;
+      }
+
       const clas = traversal.lookupClassOrInterface(type.getIdentifierName(), node.getFirstToken());
       ret.appendString(TranspileTypes.toType(type) + ".set(await (new " + clas + "()).constructor_(" + para + "))");
     } else {
@@ -31,6 +40,22 @@ export class NewObjectTranspiler implements IExpressionTranspiler {
     }
 
     return ret;
+  }
+
+  private findConstructor(cdef: abaplint.IClassDefinition | undefined, spag: abaplint.ISpaghettiScopeNode | undefined): any {
+    let def = cdef;
+    while (def !== undefined) {
+      const method = def?.getMethodDefinitions().getByName("CONSTRUCTOR");
+      if (method) {
+        return method;
+      }
+      const name = def.getSuperClass();
+      if (name) {
+        def = spag?.findClassDefinition(name);
+      } else {
+        return undefined;
+      }
+    }
   }
 
 }
