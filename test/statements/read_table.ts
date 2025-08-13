@@ -1505,7 +1505,7 @@ ENDCLASS.
 
 START-OF-SELECTION.
   READ TABLE lcl=>list( ) INDEX 1 TRANSPORTING NO FIELDS.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });

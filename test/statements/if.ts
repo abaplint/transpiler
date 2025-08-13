@@ -70,7 +70,7 @@ START-OF-SELECTION.
     WRITE 'yes'.
   ENDIF.`;
 
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("yes");
@@ -94,7 +94,7 @@ START-OF-SELECTION.
     WRITE 'yes'.
   ENDIF.`;
 
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("yes");
@@ -118,7 +118,7 @@ START-OF-SELECTION.
     WRITE 'yes'.
   ENDIF.`;
 
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("yes");
@@ -142,7 +142,7 @@ START-OF-SELECTION.
     WRITE 'yes'.
   ENDIF.`;
 
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("yes");
@@ -154,7 +154,7 @@ IF matches( val = 'hello' regex = 'hello' ).
   WRITE 'yes'.
 ENDIF.`;
 
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("yes");
@@ -167,7 +167,7 @@ ELSE.
   WRITE 'works'.
 ENDIF.`;
 
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("works");
