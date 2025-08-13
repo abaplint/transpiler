@@ -52,4 +52,28 @@ ENDIF.`;
     expect(abap.console.get()).to.equal("yup");
   });
 
+  it.only("method conditional", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS conditional RETURNING VALUE(val) TYPE abap_bool.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD conditional.
+    val = abap_true.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  IF lcl=>conditional( ).
+    WRITE 'yes'.
+  ENDIF.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("yes");
+  });
+
 });
