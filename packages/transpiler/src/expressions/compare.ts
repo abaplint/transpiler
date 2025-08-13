@@ -82,6 +82,11 @@ export class CompareTranspiler implements IExpressionTranspiler {
       return new Chunk().appendString(pre + "abap.compare.between(").join([s0, s1, s2]).appendString(")");
     }
 
+    const chain = node.findDirectExpression(Expressions.MethodCallChain);
+    if (chain) {
+      return new Chunk().appendString(pre + `abap.compare.initial(${traversal.traverse(chain).getCode()}) === false`);
+    }
+
     console.dir(sources.length);
     console.dir(concat);
 

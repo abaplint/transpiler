@@ -4,8 +4,8 @@ import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
-async function run(contents: string) {
-  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
+async function run(contents: string, skipVersionCheck = false) {
+  return runFiles(abap, [{filename: "zfoobar_if.prog.abap", contents}], {skipVersionCheck});
 }
 
 describe("Running statements - IF", () => {
@@ -52,7 +52,7 @@ ENDIF.`;
     expect(abap.console.get()).to.equal("yup");
   });
 
-  it.only("method conditional", async () => {
+  it("method conditional", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
@@ -70,10 +70,38 @@ START-OF-SELECTION.
     WRITE 'yes'.
   ENDIF.`;
 
-    const js = await run(code);
+    const js = await run(code, true);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("yes");
   });
+
+  it("method conditional, negated", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS conditional RETURNING VALUE(val) TYPE abap_bool.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD conditional.
+    val = abap_false.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  IF NOT lcl=>conditional( ).
+    WRITE 'yes'.
+  ENDIF.`;
+
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("yes");
+  });
+
+// todo, test builtin LINE_EXISTS(
+// todo, test builtin LINE_INDEX(
+// todo, test builtin MATCHES(
 
 });
