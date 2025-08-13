@@ -10,7 +10,7 @@ export class ReadTableTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
 
     let prefix = "";
-    const s = node.findDirectExpression(abaplint.Expressions.SimpleSource2);
+    const s = node.getChildren()[2];
     const ret = traversal.traverse(s).getCode();
 
     const extra: string[] = [];

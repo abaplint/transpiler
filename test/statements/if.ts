@@ -4,8 +4,8 @@ import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
-async function run(contents: string) {
-  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
+async function run(contents: string, skipVersionCheck = false) {
+  return runFiles(abap, [{filename: "zfoobar_if.prog.abap", contents}], {skipVersionCheck});
 }
 
 describe("Running statements - IF", () => {
@@ -50,6 +50,127 @@ ENDIF.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("yup");
+  });
+
+  it("method conditional", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS conditional RETURNING VALUE(val) TYPE abap_bool.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD conditional.
+    val = abap_true.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  IF lcl=>conditional( ).
+    WRITE 'yes'.
+  ENDIF.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("yes");
+  });
+
+  it("method conditional, integer", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS conditional RETURNING VALUE(val) TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD conditional.
+    val = 1.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  IF lcl=>conditional( ).
+    WRITE 'yes'.
+  ENDIF.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("yes");
+  });
+
+  it("method conditional, negated", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS conditional RETURNING VALUE(val) TYPE abap_bool.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD conditional.
+    val = abap_false.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  IF NOT lcl=>conditional( ).
+    WRITE 'yes'.
+  ENDIF.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("yes");
+  });
+
+  it("method conditional, negated integer", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS conditional RETURNING VALUE(val) TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD conditional.
+    val = 0.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  IF NOT lcl=>conditional( ).
+    WRITE 'yes'.
+  ENDIF.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("yes");
+  });
+
+  it("builtin matches predicate", async () => {
+    const code = `
+IF matches( val = 'hello' regex = 'hello' ).
+  WRITE 'yes'.
+ENDIF.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("yes");
+  });
+
+  it("builtin contains predicate negative", async () => {
+    const code = `
+IF contains( val = 'ab' regex = 'aaaa' ).
+ELSE.
+  WRITE 'works'.
+ENDIF.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("works");
   });
 
 });

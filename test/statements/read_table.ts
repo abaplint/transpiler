@@ -4,8 +4,8 @@ import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
-async function run(contents: string) {
-  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
+async function run(contents: string, skipVersionCheck = false) {
+  return runFiles(abap, [{filename: "zfoobar_read.prog.abap", contents}], {skipVersionCheck});
 }
 
 describe("Running statements - READ TABLE", () => {
@@ -1488,6 +1488,26 @@ START-OF-SELECTION.
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get().trimEnd()).to.equal(`0`);
+  });
+
+  it("read from method call", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    TYPES ty TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+    CLASS-METHODS list RETURNING VALUE(tab) TYPE ty.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD list.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  READ TABLE lcl=>list( ) INDEX 1 TRANSPORTING NO FIELDS.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
 });

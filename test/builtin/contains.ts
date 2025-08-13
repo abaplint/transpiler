@@ -34,6 +34,16 @@ describe("Builtin functions - contains", () => {
     await f(abap);
   });
 
+  it("basic, AND", async () => {
+    const code = `
+DATA val TYPE abap_bool.
+val = boolc( abap_true = abap_true AND contains( val = 'ab' regex = '\\d' ) ).
+ASSERT val = abap_false.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("sub, start, end", async () => {
     const code = `
 DATA lv_bool TYPE abap_bool.
