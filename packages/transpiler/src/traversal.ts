@@ -705,6 +705,7 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
     return ret;
   }
 
+  // todo: delete this method?
   public lookupType(node: abaplint.Nodes.ExpressionNode,
                     scope: abaplint.ISpaghettiScopeNode | undefined): abaplint.AbstractType | undefined {
     if (scope === undefined) {
@@ -784,8 +785,10 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
                         scope: abaplint.ISpaghettiScopeNode | undefined): abaplint.AbstractType | undefined {
     if (scope === undefined) {
       return undefined;
+      /*
     } else if (node.concatTokens() !== "#") {
       throw new Error("lookupInferred, unexpected, " + node.get());
+      */
     }
 
     return this.findInferredTypeReference(node.getFirstToken());

@@ -97,7 +97,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
-  it.only("named new", async () => {
+  it("named new", async () => {
     const code = `
 CLASS lcl DEFINITION.
 ENDCLASS.
