@@ -100,6 +100,18 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("yes");
   });
 
+  it("builtin matches predicate", async () => {
+    const code = `
+IF matches( val = 'hello' regex = 'hello' ).
+  WRITE 'yes'.
+ENDIF.`;
+
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("yes");
+  });
+
 // todo, test builtin LINE_EXISTS(
 // todo, test builtin LINE_INDEX(
 // todo, test builtin MATCHES(
