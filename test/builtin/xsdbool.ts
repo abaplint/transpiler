@@ -16,14 +16,14 @@ describe("Builtin functions - xsdbool", () => {
 
   it("xsdbool true", async () => {
     const code = `ASSERT xsdbool( 1 = 1 ) = abap_true.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
 
   it("xsdbool false", async () => {
     const code = `ASSERT xsdbool( 1 = 2 ) = abap_false.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
