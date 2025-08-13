@@ -89,6 +89,9 @@ export class SourceTranspiler implements IExpressionTranspiler {
       } else if (c instanceof Nodes.TokenNodeRegex && c.getFirstToken().getStr().toUpperCase() === "BOOLC") {
         ret.append("abap.builtin.boolc(", c, traversal);
         post.append(")", c, traversal);
+      } else if (c instanceof Nodes.TokenNodeRegex && c.getFirstToken().getStr().toUpperCase() === "XSDBOOL") {
+        ret.append("abap.builtin.xsdbool(", c, traversal);
+        post.append(")", c, traversal);
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "VALUE") {
         const typ = node.findDirectExpression(Expressions.TypeNameOrInfer)
         if (typ === undefined) {

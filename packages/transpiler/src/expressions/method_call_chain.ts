@@ -24,6 +24,8 @@ export class MethodCallChainTranspiler implements IExpressionTranspiler {
         }
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.FieldChain) {
         ret.appendChunk(traversal.traverse(c));
+      } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.NewObject) {
+        ret.appendChunk(traversal.traverse(c));
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.ClassName) {
         ret = new Chunk().append(traversal.lookupClassOrInterface(c.getFirstToken().getStr(), c.getFirstToken()), c, traversal);
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.MethodName) {
