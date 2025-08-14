@@ -13,7 +13,7 @@ export function tableExpression(source: Table | HashedTable, options: ITableExpr
   if (options.index) {
     found = source.array()[ parse(options.index) - 1 ];
   } else {
-    throw new Error("TableExpression: todo");
+    throw new Error("TableExpression runtime: todo");
   }
 
   if (found === undefined) {
