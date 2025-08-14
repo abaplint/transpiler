@@ -124,7 +124,7 @@ WRITE / tab[ 1 ].`;
     }
   });
 
-  it.skip("target", async () => {
+  it("target", async () => {
     const code = `
 DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
 INSERT 2 INTO TABLE tab.
@@ -134,6 +134,50 @@ WRITE / tab[ 1 ].`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("3");
+  });
+
+  it("target, calculated index", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+INSERT 2 INTO TABLE tab.
+tab[ 0 + 1 ] = 3.
+WRITE / tab[ 1 ].`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3");
+  });
+
+  it("target, structured", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         bar TYPE i,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+INSERT VALUE #( bar = 2 ) INTO TABLE tab.
+tab[ 1 ]-bar = 3.
+WRITE / tab[ 1 ]-bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3");
+  });
+
+  it("with VALUE", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         msgno TYPE i,
+       END OF ty.
+DATA message_table TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA msgno TYPE i.
+DATA row LIKE LINE OF message_table.
+INSERT VALUE #( msgno = msgno ) INTO TABLE message_table.
+row = VALUE #( message_table[ msgno = msgno ] ).
+WRITE / row-msgno.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
   });
 
 });

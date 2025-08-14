@@ -2,7 +2,7 @@ import {Expressions, Nodes} from "@abaplint/core";
 import * as abaplint from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
-import {FieldLengthTranspiler, FieldOffsetTranspiler, FieldSymbolTranspiler} from ".";
+import {FieldLengthTranspiler, FieldOffsetTranspiler, FieldSymbolTranspiler, TableExpressionTranspiler} from ".";
 import {Chunk} from "../chunk";
 import {FEATURE_FLAGS} from "../feature_flags";
 
@@ -24,6 +24,9 @@ export class TargetTranspiler implements IExpressionTranspiler {
         ret.append(Traversal.prefixVariable(Traversal.escapeNamespace(prefix)!), c, traversal);
 
         context = scope?.findVariable(c.getFirstToken().getStr())?.getType();
+      } else if (c.get() instanceof Expressions.TableExpression && c instanceof Nodes.ExpressionNode) {
+        ret = new TableExpressionTranspiler().transpile(c, traversal, ret);
+
       } else if (c.get() instanceof Expressions.InlineData && c instanceof Nodes.ExpressionNode) {
         const targetField = c.findDirectExpression(Expressions.TargetField);
         if (targetField === undefined) {
