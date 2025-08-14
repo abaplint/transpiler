@@ -14,12 +14,13 @@ describe("Running expressions - Table Expression", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
-  it("basic index", async () => {
+  it.only("basic index", async () => {
     const code = `
 DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
 INSERT 2 INTO TABLE tab.
 WRITE / tab[ 1 ].`;
-    const js = await run(code);
+    const js = await run(code, true);
+    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -34,7 +35,7 @@ TYPES: BEGIN OF ty,
 DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
 INSERT VALUE #( foo = 2 bar = 3 ) INTO TABLE tab.
 WRITE / tab[ foo = 2 ]-bar.`;
-    const js = await run(code);
+    const js = await run(code, true);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("3");
@@ -54,7 +55,7 @@ row->name = 'hello'.
 row->bar = 2.
 INSERT row INTO TABLE int.
 WRITE / int[ table_line->name = 'hello' ]->bar.`;
-    const js = await run(code);
+    const js = await run(code, true);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -65,7 +66,7 @@ WRITE / int[ table_line->name = 'hello' ]->bar.`;
 DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
 INSERT 2 INTO TABLE tab.
 WRITE / tab[ 0 + 1 ].`;
-    const js = await run(code);
+    const js = await run(code, true);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -76,7 +77,7 @@ WRITE / tab[ 0 + 1 ].`;
 DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
 INSERT 2 INTO TABLE tab.
 WRITE / tab[ table_line = 2 ].`;
-    const js = await run(code);
+    const js = await run(code, true);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -91,7 +92,7 @@ TYPES: BEGIN OF ty,
 DATA int TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
 INSERT VALUE #( name = 'hello' bar = 2 ) INTO TABLE int.
 WRITE / int[ name = 'hello' bar = 2 ]-bar.`;
-    const js = await run(code);
+    const js = await run(code, true);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -101,7 +102,7 @@ WRITE / int[ name = 'hello' bar = 2 ]-bar.`;
     const code = `
 DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
 WRITE / tab[ 1 ].`;
-    const js = await run(code);
+    const js = await run(code, true);
     const f = new AsyncFunction("abap", js);
 
     try {
@@ -110,6 +111,18 @@ WRITE / tab[ 1 ].`;
     } catch (e) {
       expect(e.toString()).to.contain("CX_SY_ITAB_LINE_NOT_FOUND");
     }
+  });
+
+  it("target", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+INSERT 2 INTO TABLE tab.
+tab[ 1 ] = 3.
+WRITE / tab[ 1 ].`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3");
   });
 
 });
