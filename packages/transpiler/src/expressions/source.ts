@@ -6,6 +6,7 @@ import {ConstantTranspiler} from "./constant";
 import {Chunk} from "../chunk";
 import {TranspileTypes} from "../transpile_types";
 import {ValueBodyTranspiler} from "./value_body";
+import {CorrespondingBodyTranspiler} from "./corresponding_body";
 
 export class SourceTranspiler implements IExpressionTranspiler {
   private readonly addGet: boolean;
@@ -77,8 +78,10 @@ export class SourceTranspiler implements IExpressionTranspiler {
           ret.appendString(")");
         } else if (c.get() instanceof Expressions.ValueBody) {
           continue;
+        } else if (c.get() instanceof Expressions.CorrespondingBody) {
+          continue;
         } else {
-          ret.appendString("SourceUnknown-" + c.get().constructor.name);
+          ret.appendString("SourceUnknown$" + c.get().constructor.name);
         }
       } else if (c instanceof Nodes.TokenNode && (c.getFirstToken().getStr() === "&&" || c.getFirstToken().getStr() === "&")) {
         ret = new Chunk().appendString("abap.operators.concat(").appendChunk(ret).appendString(",");
@@ -104,6 +107,16 @@ export class SourceTranspiler implements IExpressionTranspiler {
           const context = new TypeNameOrInfer().findType(typ, traversal);
           ret.appendString(TranspileTypes.toType(context));
         }
+      } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "CORRESPONDING") {
+        const typ = node.findDirectExpression(Expressions.TypeNameOrInfer)
+        if (typ === undefined) {
+          throw new Error("TypeNameOrInfer not found in CorrespondingBody");
+        }
+        const correspondingBody = node.findDirectExpression(Expressions.CorrespondingBody);
+        if (correspondingBody === undefined) {
+          throw new Error("CorrespondingBody not found");
+        }
+        ret.appendChunk(new CorrespondingBodyTranspiler().transpile(typ, correspondingBody, traversal));
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "REF") {
         const infer = node.findDirectExpression(Expressions.TypeNameOrInfer);
         if (infer?.concatTokens() !== "#") {
