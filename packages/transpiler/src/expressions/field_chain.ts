@@ -90,6 +90,10 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
           && c.concatTokens() !== "(*)") {
         extra.push("length: " + new FieldLengthTranspiler().transpile(c, traversal).getCode());
         this.addGetOffset = true;
+      } else if (c instanceof Nodes.ExpressionNode
+          && c.get() instanceof Expressions.TableExpression) {
+        ret.appendString("TableExpressionTodo");
+        ret = new TableExpressionTranspiler().transpile(source, c, traversal);
       }
     }
 

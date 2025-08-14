@@ -1,11 +1,14 @@
 import {Nodes} from "@abaplint/core";
-import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 
-export class TableExpressionTranspiler implements IExpressionTranspiler {
+export class TableExpressionTranspiler {
 
-  public transpile(_node: Nodes.ExpressionNode, _traversal: Traversal): Chunk {
+  public transpile(_node: Nodes.ExpressionNode, _traversal: Traversal, source: Chunk): Chunk {
+    if (source === undefined) {
+      throw new Error("TableExpressionTranspiler: Source chunk is undefined");
+    }
+
     const ret = new Chunk();
 
     ret.appendString("todo");
