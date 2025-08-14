@@ -14,16 +14,27 @@ describe("Running expressions - Table Expression", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
-  it.only("basic index", async () => {
+  it("basic index", async () => {
     const code = `
 DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
 INSERT 2 INTO TABLE tab.
 WRITE / tab[ 1 ].`;
     const js = await run(code, true);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
+  });
+
+  it("basic index, second", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+INSERT 2 INTO TABLE tab.
+INSERT 3 INTO TABLE tab.
+WRITE / tab[ 2 ].`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3");
   });
 
   it("basic field condition", async () => {
