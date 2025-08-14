@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP, MemoryConsole} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -60,6 +60,30 @@ START-OF-SELECTION.
     const js = await run(code, true);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it.only("combined with NEW", async () => {
+    const code = `
+INTERFACE lif.
+  METHODS stats.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD lif~stats.
+    WRITE / 'yes'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  CAST lif( NEW lcl( ) )->stats( ).`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("yes");
   });
 
 });
