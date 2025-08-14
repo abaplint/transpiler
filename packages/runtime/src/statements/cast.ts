@@ -8,6 +8,7 @@ declare const abap: ABAP;
 // todo, local classes?
 // check with javascript instanceof?
 // handling interfaces?
+// todo: remove the "async"
 export async function cast(target: ABAPObject | FieldSymbol, source: ABAPObject) {
   if (source instanceof ABAPObject && source.get() === undefined) {
     target.clear();
