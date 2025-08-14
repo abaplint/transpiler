@@ -31,6 +31,28 @@ WRITE / data1-foo.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("basic BASE", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         foo TYPE i,
+         bar TYPE i,
+       END OF ty.
+DATA data1 TYPE ty.
+DATA data2 TYPE ty.
+DATA data3 TYPE ty.
+data2-foo = 1.
+data3-foo = 2.
+data2-bar = 3.
+data3-bar = 4.
+data1 = CORRESPONDING #( BASE ( data3 ) data2 ).
+WRITE / data1-foo.
+WRITE / data1-bar.`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n3");
+  });
+
 // next: BASE
 
 });
