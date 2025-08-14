@@ -1,6 +1,7 @@
 import {Nodes, Expressions} from "@abaplint/core";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
+import {ComponentChainSimpleTranspiler} from "./component_chain_simple";
 
 export class TableExpressionTranspiler {
 
@@ -11,6 +12,10 @@ export class TableExpressionTranspiler {
 
     const ret = new Chunk();
     const extra: string[] = [];
+    let field = "";
+    // @ts-ignore
+    let usesTableLine = false;
+    const withKey: string[] = [];
 
     if (node.getChildren().length === 3 && node.findDirectExpression(Expressions.Source)) {
       extra.push(`index: ${traversal.traverse(node.findDirectExpression(Expressions.Source)).getCode()}`);
@@ -24,16 +29,20 @@ export class TableExpressionTranspiler {
       // conditions
       for (const c of node.getChildren()) {
         if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.ComponentChainSimple) {
-          // todo
+          field = new ComponentChainSimpleTranspiler("i.").transpile(c, traversal).getCode();
+          if (field === "i.table_line") {
+            usesTableLine = true;
+          }
         } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.Source) {
-          // todo
-          traversal.traverse(c);
+          withKey.push("abap.compare.eq(" + field + ", " + traversal.traverse(c).getCode() + ")");
         } else if (c.concatTokens() === "=" || c.concatTokens() === "[" || c.concatTokens() === "]") {
           continue;
         } else {
           throw new Error("TableExpressionTranspiler: todo, other, " + c.concatTokens());
         }
       }
+
+      extra.push("withKey: (i) => {return " + withKey.join(" && ") + ";}");
     }
 
     ret.appendString(`abap.operators.tableExpression(${source.getCode()}, {${extra.join(", ")} })`);

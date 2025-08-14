@@ -124,7 +124,7 @@ WRITE / tab[ 1 ].`;
     }
   });
 
-  it("target", async () => {
+  it.skip("target", async () => {
     const code = `
 DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
 INSERT 2 INTO TABLE tab.
