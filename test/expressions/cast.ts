@@ -1,4 +1,4 @@
-import {expect} from "chai";
+// import {expect} from "chai";
 import {ABAP, MemoryConsole} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -16,11 +16,50 @@ describe("Running expressions - CAST", () => {
 
   it("basic", async () => {
     const code = `
-todo`;
-    const js = await run(code);
+INTERFACE lif.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl.
+  DATA int TYPE REF TO lif.
+  CREATE OBJECT int TYPE lcl.
+  ref = CAST #( int ).`;
+    const js = await run(code, true);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("0");
+  });
+
+  it("call the method", async () => {
+    const code = `
+INTERFACE lif.
+  METHODS call.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD lif~call.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl.
+  DATA int TYPE REF TO lif.
+  CREATE OBJECT int TYPE lcl.
+  ref = CAST #( int ).
+  ref->lif~call( ).`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
 });

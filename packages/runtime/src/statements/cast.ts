@@ -53,4 +53,5 @@ export async function cast(target: ABAPObject | FieldSymbol, source: ABAPObject)
   }
   target.set(source);
 
+  return target;
 }
