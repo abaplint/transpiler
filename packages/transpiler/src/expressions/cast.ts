@@ -27,11 +27,11 @@ export class CastTranspiler implements IExpressionTranspiler {
       throw new Error("CastTranspiler, Let todo");
     }
 
-    ret.appendString("await abap.statements.cast(")
+    ret.appendString("(await abap.statements.cast(")
       .appendString(target)
       .appendString(", ")
       .appendChunk(traversal.traverse(source))
-      .append(")", node.getLastToken(), traversal);
+      .append("))", node.getLastToken(), traversal);
 
     return ret;
   }
