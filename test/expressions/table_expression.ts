@@ -136,4 +136,19 @@ WRITE / tab[ 1 ].`;
     expect(abap.console.get()).to.equal("3");
   });
 
+  it.only("with VALUE", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         msgno TYPE i,
+       END OF ty.
+DATA message_table TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA msgno TYPE i.
+DATA row LIKE LINE OF message_table.
+INSERT VALUE #( ) INTO TABLE message_table.
+row = VALUE #( message_table[ msgno = msgno ] ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
