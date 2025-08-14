@@ -13,7 +13,6 @@ export class TableExpressionTranspiler {
     const ret = new Chunk();
     const extra: string[] = [];
     let field = "";
-    // @ts-ignore
     let usesTableLine = false;
     const withKey: string[] = [];
 
@@ -43,6 +42,7 @@ export class TableExpressionTranspiler {
       }
 
       extra.push("withKey: (i) => {return " + withKey.join(" && ") + ";}");
+      extra.push("usesTableLine: " + usesTableLine);
     }
 
     ret.appendString(`abap.operators.tableExpression(${source.getCode()}, {${extra.join(", ")} })`);
