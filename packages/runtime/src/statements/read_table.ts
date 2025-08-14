@@ -72,7 +72,7 @@ function searchWithKeyEarlyExit(arr: any,
 }
 
 /** startIndex = javascript index, return ABAP index */
-function searchWithKey(arr: any, withKey: (i: any) => boolean, startIndex = 0, usesTableLine: boolean | undefined) {
+export function searchWithKey(arr: any, withKey: (i: any) => boolean, startIndex = 0, usesTableLine: boolean | undefined) {
   const isStructured = arr[0] instanceof Structure;
   for (let index = startIndex; index < arr.length; index++) {
     const a = arr[index];

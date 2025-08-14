@@ -1,7 +1,7 @@
 import {Expressions, Nodes} from "@abaplint/core";
 import * as abaplint from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
-import {FieldLengthTranspiler, FieldOffsetTranspiler} from ".";
+import {FieldLengthTranspiler, FieldOffsetTranspiler, TableExpressionTranspiler} from ".";
 import {Traversal} from "../traversal";
 import {FieldSymbolTranspiler} from "./field_symbol";
 import {Chunk} from "../chunk";
@@ -16,7 +16,7 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
   }
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal, prefix = true, filename?: string, wrongScope = false): Chunk {
-    const ret = new Chunk();
+    let ret = new Chunk();
     const extra: string[] = [];
     let interfaceNameAdded = false;
     let context: abaplint.AbstractType | undefined = undefined;
@@ -90,6 +90,9 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
           && c.concatTokens() !== "(*)") {
         extra.push("length: " + new FieldLengthTranspiler().transpile(c, traversal).getCode());
         this.addGetOffset = true;
+      } else if (c instanceof Nodes.ExpressionNode
+          && c.get() instanceof Expressions.TableExpression) {
+        ret = new TableExpressionTranspiler().transpile(c, traversal, ret);
       }
     }
 
