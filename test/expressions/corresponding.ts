@@ -53,6 +53,4 @@ WRITE / data1-bar.`;
     expect(abap.console.get()).to.equal("1\n3");
   });
 
-// next: BASE
-
 });
