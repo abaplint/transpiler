@@ -36,6 +36,9 @@ export class ValueBodyTranspiler {
         }
         const rowType = context.getRowType();
         ret.appendString(new ValueBodyLineTranspiler().transpile(rowType, child, traversal, extraFields).getCode());
+      } else if (child.get() instanceof Expressions.Source && child instanceof Nodes.ExpressionNode) {
+        const source = traversal.traverse(child);
+        ret.appendString(".set(" + source.getCode() + ".clone())");
       } else {
         throw new Error("ValueBodyTranspiler, unknown " + child.get().constructor.name + " \"" + child.concatTokens()) + "\"";
       }
