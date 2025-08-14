@@ -40,4 +40,24 @@ WRITE / tab[ foo = 2 ]-bar.`;
     expect(abap.console.get()).to.equal("3");
   });
 
+  it("basic field condition, table line reference", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         name TYPE string,
+         bar  TYPE i,
+       END OF ty.
+DATA int TYPE STANDARD TABLE OF REF TO ty WITH DEFAULT KEY.
+DATA row TYPE REF TO ty.
+
+CREATE DATA row.
+row->name = 'hello'.
+row->bar = 2.
+INSERT row INTO TABLE int.
+WRITE / int[ table_line->name = 'hello' ]->bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
