@@ -17,6 +17,8 @@ export * from "./from_mixed";
 export * from "./insert";
 export * from "./ipow";
 export * from "./lines";
+export * from "./line_exists";
+export * from "./line_index";
 export * from "./match";
 export * from "./matches";
 export * from "./nmax";
