@@ -1,3 +1,4 @@
+import {throwError} from "../throw_error";
 import {HashedTable, Integer, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
@@ -8,9 +9,16 @@ export interface ITableExpressionOptions {
 }
 
 export function tableExpression(source: Table | HashedTable, options: ITableExpressionOptions) {
+  let found;
   if (options.index) {
-    return source.array()[ parse(options.index) - 1 ];
+    found = source.array()[ parse(options.index) - 1 ];
+  } else {
+    throw new Error("TableExpression: todo");
   }
 
-  throw new Error("TableExpression: todo");
+  if (found === undefined) {
+    throwError("CX_SY_ITAB_LINE_NOT_FOUND");
+  }
+
+  return found;
 }
