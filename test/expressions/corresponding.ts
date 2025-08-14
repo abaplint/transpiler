@@ -25,7 +25,7 @@ DATA data2 TYPE ty.
 data2-foo = 2.
 data1 = CORRESPONDING #( data2 ).
 WRITE / data1-foo.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -47,7 +47,7 @@ data3-bar = 4.
 data1 = CORRESPONDING #( BASE ( data3 ) data2 ).
 WRITE / data1-foo.
 WRITE / data1-bar.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1\n3");

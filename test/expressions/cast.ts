@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP, MemoryConsole} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -31,7 +31,7 @@ START-OF-SELECTION.
   DATA int TYPE REF TO lif.
   CREATE OBJECT int TYPE lcl.
   ref = CAST #( int ).`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
@@ -57,9 +57,33 @@ START-OF-SELECTION.
   CREATE OBJECT int TYPE lcl.
   ref = CAST #( int ).
   ref->lif~call( ).`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("combined with NEW", async () => {
+    const code = `
+INTERFACE lif.
+  METHODS stats.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD lif~stats.
+    WRITE / 'yes'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  CAST lif( NEW lcl( ) )->stats( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("yes");
   });
 
 });
