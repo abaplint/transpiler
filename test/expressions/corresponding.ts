@@ -31,4 +31,6 @@ WRITE / data1-foo.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+// next: BASE
+
 });
