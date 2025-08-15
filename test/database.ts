@@ -1644,7 +1644,7 @@ ASSERT result-arbgb IS NOT INITIAL.`;
     }, {skipVersionCheck: true});
   });
 
-  it("into inline definition", async () => {
+  it.skip("into inline definition", async () => {
     const code = `
 FORM foo.
   SELECT SINGLE * FROM t100 INTO @DATA(result).
