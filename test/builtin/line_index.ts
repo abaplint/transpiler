@@ -8,7 +8,7 @@ async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar_line_index.prog.abap", contents}]);
 }
 
-describe.skip("Builtin functions - line_index", () => {
+describe("Builtin functions - line_index", () => {
 
   beforeEach(async () => {
     abap = new ABAP({console: new MemoryConsole()});
@@ -17,31 +17,26 @@ describe.skip("Builtin functions - line_index", () => {
   it("positive", async () => {
     const code = `
 DATA tab TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+DATA int TYPE i.
 INSERT VALUE #( ) INTO TABLE tab.
-IF line_exists( tab[ 1 ] ).
-  WRITE / 'yes'.
-ELSE.
-  WRITE / 'no'.
-ENDIF.`;
+int = line_index( tab[ table_line = 0 ] ).
+WRITE / int.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal(`yes`);
+    expect(abap.console.get()).to.equal(`1`);
   });
 
   it("negative", async () => {
     const code = `
 DATA tab TYPE STANDARD TABLE OF i WITH EMPTY KEY.
-IF line_exists( tab[ 1 ] ).
-  WRITE / 'yes'.
-ELSE.
-  WRITE / 'no'.
-ENDIF.`;
+DATA int TYPE i.
+int = line_index( tab[ table_line = 0 ] ).
+WRITE / int.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal(`no`);
+    expect(abap.console.get()).to.equal(`0`);
   });
 
 });

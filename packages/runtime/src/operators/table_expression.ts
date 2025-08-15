@@ -12,12 +12,17 @@ export interface ITableExpressionOptions {
   usesTableLine?: boolean
 }
 
+export let foundIndex: number = 0;
+
 export function tableExpression(source: Table | HashedTable, options: ITableExpressionOptions) {
   let found;
   if (options.index) {
-    found = source.array()[ parse(options.index) - 1 ];
+    foundIndex = parse(options.index) - 1;
+    found = source.array()[ foundIndex ];
   } else if (options.withKey) {
-    found = searchWithKey(source.array(), options.withKey, 0, options?.usesTableLine).found;
+    const search = searchWithKey(source.array(), options.withKey, 0, options?.usesTableLine);
+    found = search.found;
+    foundIndex = search.foundIndex;
   } else {
     throw new Error("TableExpression runtime: todo");
   }
