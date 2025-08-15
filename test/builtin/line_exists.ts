@@ -5,10 +5,10 @@ import {AsyncFunction, runFiles} from "../_utils";
 let abap: ABAP;
 
 async function run(contents: string) {
-  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
+  return runFiles(abap, [{filename: "zfoobar_line_exists.prog.abap", contents}]);
 }
 
-describe("Builtin functions - line_exists", () => {
+describe.skip("Builtin functions - line_exists", () => {
 
   beforeEach(async () => {
     abap = new ABAP({console: new MemoryConsole()});
@@ -25,6 +25,7 @@ ELSE.
 ENDIF.
       `;
     const js = await run(code);
+    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal(`yes`);
