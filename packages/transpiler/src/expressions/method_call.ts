@@ -23,8 +23,8 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
       // todo: this is not correct, the method name might be shadowed
       name = "abap.builtin." + name + "(";
       if (name === "abap.builtin.line_exists(" || name === "abap.builtin.line_index(") {
-        name += "(() => {";
-        post = "})()";
+        name += "() => {";
+        post = "}";
       }
     } else if (m?.name) {
       name = m.name.toLowerCase();

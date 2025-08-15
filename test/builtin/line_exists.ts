@@ -8,13 +8,13 @@ async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar_line_exists.prog.abap", contents}]);
 }
 
-describe("Builtin functions - line_exists", () => {
+describe.only("Builtin functions - line_exists", () => {
 
   beforeEach(async () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
-  it.only("positive", async () => {
+  it("positive", async () => {
     const code = `
 DATA tab TYPE STANDARD TABLE OF i WITH EMPTY KEY.
 INSERT VALUE #( ) INTO TABLE tab.
@@ -22,8 +22,7 @@ IF line_exists( tab[ 1 ] ).
   WRITE / 'yes'.
 ELSE.
   WRITE / 'no'.
-ENDIF.
-      `;
+ENDIF.`;
     const js = await run(code);
     console.dir(js);
     const f = new AsyncFunction("abap", js);

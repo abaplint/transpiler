@@ -1,4 +1,7 @@
+import {ABAP} from "..";
 import {Integer} from "../types";
+
+declare const abap: ABAP;
 
 export function line_index(callback: () => void): Integer {
 
