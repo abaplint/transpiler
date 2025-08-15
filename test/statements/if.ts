@@ -173,4 +173,26 @@ ENDIF.`;
     expect(abap.console.get()).to.equal("works");
   });
 
+  it("not custom predicate", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS foo RETURNING VALUE(val) TYPE i.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD foo.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  IF NOT lcl=>foo( ).
+    WRITE / 'yes'.
+  ENDIF.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("yes");
+  });
+
 });

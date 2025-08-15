@@ -84,10 +84,12 @@ export class CompareTranspiler implements IExpressionTranspiler {
 
     const chain = node.findDirectExpression(Expressions.MethodCallChain);
     if (chain) {
+      const negated = concat.startsWith("NOT ");
       const name = chain.getFirstToken().getStr();
       if (BuiltIn.isPredicate(name)) {
         // todo, this is not completely correct if there is a method shadowing the name
-        return new Chunk().appendString(`abap.compare.eq(` + traversal.traverse(chain).getCode() + `, abap.builtin.abap_true)`);
+        const operator = negated ? 'ne' : 'eq';
+        return new Chunk().appendString(`abap.compare.${operator}(` + traversal.traverse(chain).getCode() + `, abap.builtin.abap_true)`);
       } else {
         return new Chunk().appendString(pre + `abap.compare.initial(${traversal.traverse(chain).getCode()}) === false`);
       }
