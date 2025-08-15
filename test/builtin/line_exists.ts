@@ -8,13 +8,13 @@ async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar_line_exists.prog.abap", contents}]);
 }
 
-describe.skip("Builtin functions - line_exists", () => {
+describe("Builtin functions - line_exists", () => {
 
   beforeEach(async () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
-  it("positive", async () => {
+  it.only("positive", async () => {
     const code = `
 DATA tab TYPE STANDARD TABLE OF i WITH EMPTY KEY.
 INSERT VALUE #( ) INTO TABLE tab.

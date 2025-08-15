@@ -8,6 +8,8 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
 
+    let post = "";
+
     const nameToken = node.findDirectExpression(Expressions.MethodName)?.getFirstToken();
     if(nameToken === undefined) {
       throw new Error("MethodCallTranspiler, name not found");
@@ -20,11 +22,10 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
     if (traversal.isBuiltinMethod(nameToken)) {
       // todo: this is not correct, the method name might be shadowed
       name = "abap.builtin." + name + "(";
-      /*
-      if (name === "line_exists" || name == "line_index") {
-        name +
+      if (name === "abap.builtin.line_exists(" || name === "abap.builtin.line_index(") {
+        name += "(() => {";
+        post = "})()";
       }
-        */
     } else if (m?.name) {
       name = m.name.toLowerCase();
       name = Traversal.escapeNamespace(name.replace("~", "$"))!;
@@ -55,7 +56,7 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
     const ret = new Chunk();
     ret.append(name, nameToken, traversal);
     ret.appendChunk(new MethodCallParamTranspiler(m?.def).transpile(step, traversal));
-    ret.appendString(")");
+    ret.appendString(post + ")");
 
     return ret;
   }
