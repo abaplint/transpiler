@@ -1644,11 +1644,29 @@ ASSERT result-arbgb IS NOT INITIAL.`;
     }, {skipVersionCheck: true});
   });
 
-  it.only("into inline definition", async () => {
+  it("into inline definition", async () => {
     const code = `
 FORM foo.
   SELECT SINGLE * FROM t100 INTO @DATA(result).
   ASSERT result-arbgb IS NOT INITIAL.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("");
+    }, {skipVersionCheck: true});
+  });
+
+  it("into inline definition, single field", async () => {
+    const code = `
+FORM foo.
+  SELECT SINGLE arbgb FROM t100 INTO @DATA(result).
+  ASSERT result IS NOT INITIAL.
 ENDFORM.
 
 START-OF-SELECTION.
