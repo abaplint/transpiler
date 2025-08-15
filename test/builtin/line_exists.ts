@@ -43,4 +43,18 @@ ENDIF.`;
     expect(abap.console.get()).to.equal(`no`);
   });
 
+  it("negated negative", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+IF NOT line_exists( tab[ 1 ] ).
+  WRITE / 'yes'.
+ELSE.
+  WRITE / 'no'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`yes`);
+  });
+
 });

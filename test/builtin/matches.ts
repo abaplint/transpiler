@@ -1,4 +1,4 @@
-// import {expect} from "chai";
+import {expect} from "chai";
 import {ABAP, MemoryConsole} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
@@ -42,6 +42,28 @@ describe("Builtin functions - matches", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("matches in IF", async () => {
+    const code = `
+IF matches( val = '123' regex = '123' ).
+  WRITE / 'yes'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`yes`);
+  });
+
+  it("matches in IF, NOT", async () => {
+    const code = `
+IF NOT matches( val = '123' regex = '321' ).
+  WRITE / 'yes'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`yes`);
   });
 
 });
