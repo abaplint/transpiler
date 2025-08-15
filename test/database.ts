@@ -8,17 +8,21 @@ import "dotenv/config";
 async function runAllDatabases(abap: ABAP,
                                files: IFile[],
                                check: () => any,
-                               settings?: {sqlite?: boolean, postgres?: boolean, snowflake?: boolean}) {
+                               settings?: {sqlite?: boolean, postgres?: boolean, snowflake?: boolean, skipVersionCheck?: boolean}) {
 
   // @ts-ignore
   global.abap = abap;
 
   if (settings === undefined || settings.sqlite === undefined || settings.sqlite === true) {
-    const js = await runRilesSqlite(abap, files);
+    const js = await runRilesSqlite(abap, files, {skipVersionCheck: settings?.skipVersionCheck});
     const f = new AsyncFunction("abap", js);
     await f(abap);
     await abap.context.databaseConnections["DEFAULT"].disconnect();
     check();
+  }
+
+  if (settings?.skipVersionCheck === true) {
+    return;
   }
 
   if (settings === undefined || settings.postgres === undefined || settings.postgres === true) {
@@ -1625,5 +1629,57 @@ WRITE sy-dbcnt.`;
       expect(abap.console.get().trimEnd()).to.equal("4");
     });
   });
+
+  it("into ATted", async () => {
+    const code = `
+DATA result TYPE t100.
+SELECT SINGLE * FROM t100 INTO CORRESPONDING FIELDS OF @result.
+ASSERT result-arbgb IS NOT INITIAL.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("");
+    }, {skipVersionCheck: true});
+  });
+
+  it.skip("into inline definition", async () => {
+    const code = `
+FORM foo.
+  SELECT SINGLE * FROM t100 INTO @DATA(result).
+  ASSERT result-arbgb IS NOT INITIAL.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("");
+    }, {skipVersionCheck: true});
+  });
+
+  it.skip("into inline definition, single field", async () => {
+    const code = `
+FORM foo.
+  SELECT SINGLE arbgb FROM t100 INTO @DATA(result).
+  ASSERT result IS NOT INITIAL.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("");
+    }, {skipVersionCheck: true});
+  });
+
+// todo: comma list
 
 });
