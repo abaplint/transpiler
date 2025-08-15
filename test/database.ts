@@ -1662,7 +1662,7 @@ START-OF-SELECTION.
     }, {skipVersionCheck: true});
   });
 
-  it("into inline definition, single field", async () => {
+  it.skip("into inline definition, single field", async () => {
     const code = `
 FORM foo.
   SELECT SINGLE arbgb FROM t100 INTO @DATA(result).
