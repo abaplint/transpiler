@@ -1,6 +1,7 @@
 import {DatabaseSetupResult} from "./db/database_setup_result";
 import * as abaplint from "@abaplint/core";
 import {ITranspilerOptions} from "./types";
+import {HandleFUGR} from "./handlers/handle_fugr";
 
 export function escapeNamespaceFilename(filename: string): string {
 // ES modules are resolved and cached as URLs. This means that special characters must be
@@ -93,6 +94,8 @@ export async function initializeABAP() {\n`;
         // this will not solve all problems with class constructors 100%, but probably good enough
         late.push(name);
       } else if (obj instanceof abaplint.Objects.Program && obj.isInclude() === true) {
+        continue;
+      } else if (obj instanceof abaplint.Objects.FunctionGroup && HandleFUGR.shouldSkip(obj, reg) === true) {
         continue;
       } else if (obj instanceof abaplint.Objects.Interface
           || obj instanceof abaplint.Objects.FunctionGroup

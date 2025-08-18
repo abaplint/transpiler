@@ -11,13 +11,18 @@ export class HandleFUGR {
     this.options = options;
   }
 
+  public static shouldSkip(obj: abaplint.ABAPObject, reg: abaplint.IRegistry) {
+    // @ts-ignore  todo
+    return new abaplint.SkipLogic(reg).isGeneratedFunctionGroup(obj);
+  }
+
   // function groups are compiled into a single file, with one closure for the function groups top variables
   public runObject(obj: abaplint.ABAPObject, reg: abaplint.IRegistry): IOutputFile[] {
     const spaghetti = new abaplint.SyntaxLogic(reg, obj).run().spaghetti;
     const chunk = new Chunk().appendString("{\n");
 
-    // @ts-ignore  todo
-    if (new abaplint.SkipLogic(reg).isGeneratedFunctionGroup(obj)) {
+
+    if (HandleFUGR.shouldSkip(obj, reg)) {
       return [];
     }
 
