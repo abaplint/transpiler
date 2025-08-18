@@ -15,7 +15,7 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
       methods.push(new MethodSourceTranspiler().transpile(m, traversal).getCode().replace("await ", "") + ".bind(this)");
 
       if (eventClass === undefined) {
-        const nameToken = m.getFirstToken();
+        const nameToken = m.getLastToken();
         const scope = traversal.findCurrentScopeByToken(nameToken);
         const method = traversal.findMethodReference(nameToken, scope);
         if (method?.def.isEventHandler() !== true) {
