@@ -14,7 +14,7 @@ describe("Running code structure - Eventing", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
-  it.only("basic", async () => {
+  it("basic", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
