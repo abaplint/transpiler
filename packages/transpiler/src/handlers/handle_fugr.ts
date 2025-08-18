@@ -16,6 +16,11 @@ export class HandleFUGR {
     const spaghetti = new abaplint.SyntaxLogic(reg, obj).run().spaghetti;
     const chunk = new Chunk().appendString("{\n");
 
+    // @ts-ignore  todo
+    if (new abaplint.SkipLogic(reg).isGeneratedFunctionGroup(obj)) {
+      return [];
+    }
+
     for (const file of obj.getSequencedFiles()) {
       if (this.options?.addFilenames === true) {
         chunk.appendString("// " + file.getFilename() + "\n");
