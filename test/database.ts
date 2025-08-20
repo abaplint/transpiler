@@ -1710,7 +1710,7 @@ START-OF-SELECTION.
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("0\n4");
-    }, {skipVersionCheck: true});
+    });
   });
 
   it("basic GROUP BY", async () => {
@@ -1737,7 +1737,7 @@ START-OF-SELECTION.
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("");
-    }, {skipVersionCheck: true});
+    });
   });
 
 });
