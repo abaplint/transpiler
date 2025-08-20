@@ -1740,4 +1740,32 @@ START-OF-SELECTION.
     });
   });
 
+  it("basic GROUP BY with WHERE", async () => {
+    const code = `
+FORM foo.
+
+  TYPES: BEGIN OF ty,
+           arbgb TYPE t100-arbgb,
+           count TYPE i,
+         END OF ty.
+  DATA lt_list TYPE STANDARD TABLE OF ty WITH EMPTY KEY.
+
+  SELECT arbgb, COUNT( * ) AS count
+    FROM t100
+    WHERE arbgb = 'SDF'
+    GROUP BY arbgb
+    INTO TABLE @lt_list.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("");
+    });
+  });
+
 });
