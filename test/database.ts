@@ -1644,7 +1644,7 @@ ASSERT result-arbgb IS NOT INITIAL.`;
     });
   });
 
-  it.skip("into inline definition", async () => {
+  it("into inline definition", async () => {
     const code = `
 FORM foo.
   SELECT SINGLE * FROM t100 INTO @DATA(result).
@@ -1659,10 +1659,10 @@ START-OF-SELECTION.
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("");
-    }, {skipVersionCheck: true});
+    });
   });
 
-  it.skip("into inline definition, single field", async () => {
+  it("into inline definition, single field", async () => {
     const code = `
 FORM foo.
   SELECT SINGLE arbgb FROM t100 INTO @DATA(result).
@@ -1677,7 +1677,7 @@ START-OF-SELECTION.
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("");
-    }, {skipVersionCheck: true});
+    });
   });
 
 // todo: comma list
