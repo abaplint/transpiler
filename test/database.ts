@@ -1641,7 +1641,7 @@ ASSERT result-arbgb IS NOT INITIAL.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("");
-    }, {skipVersionCheck: true});
+    });
   });
 
   it.skip("into inline definition", async () => {
