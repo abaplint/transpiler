@@ -27,7 +27,7 @@
   "author": "abaplint",
   "license": "MIT",
   "devDependencies": {
-    "@abaplint/core": "^2.113.176",
+    "@abaplint/core": "^2.113.177",
     "@abaplint/transpiler": "^2.11.35",
     "@types/glob": "^8.1.0",
     "@types/node": "^24.3.0",
@@ -38,6 +38,6 @@
     "typescript": "^5.9.2",
     "p-limit": "^3.1.0",
     "webpack-cli": "^6.0.1",
-    "webpack": "^5.101.2"
+    "webpack": "^5.101.3"
   }
 }
