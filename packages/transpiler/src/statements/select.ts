@@ -5,6 +5,7 @@ import {Chunk} from "../chunk";
 import {FieldChainTranspiler, SQLOrderByTranspiler, SourceTranspiler, SQLCondTranspiler, SQLSourceTranspiler, SQLFieldListTranspiler} from "../expressions";
 import {UniqueIdentifier} from "../unique_identifier";
 import {SQLFromTranspiler} from "../expressions/sql_from";
+import {SQLGroupByTranspiler} from "../expressions/sql_group_by";
 
 function escapeRegExp(string: string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
@@ -37,6 +38,11 @@ export class SelectTranspiler implements IStatementTranspiler {
     const from = node.findFirstExpression(abaplint.Expressions.SQLFrom);
     if (from) {
       select += new SQLFromTranspiler().transpile(from, traversal).getCode();
+    }
+
+    const groupBy = node.findFirstExpression(abaplint.Expressions.SQLGroupBy);
+    if (groupBy) {
+      select += new SQLGroupByTranspiler().transpile(groupBy, traversal).getCode();
     }
 
     const {table, keys} = this.findTable(node, traversal);

@@ -1680,6 +1680,64 @@ START-OF-SELECTION.
     });
   });
 
-// todo: comma list
+  it("where ATted value", async () => {
+    const code = `
+FORM foo.
+
+  DATA cond TYPE t100-arbgb.
+  cond = 'MOO'.
+
+  DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+  DATA row LIKE LINE OF tab.
+  row-arbgb = cond.
+  APPEND row TO tab.
+  MODIFY t100 FROM TABLE tab.
+  ASSERT sy-subrc = 0.
+
+  SELECT SINGLE * FROM t100 WHERE arbgb = @cond INTO @DATA(sdf).
+  WRITE / sy-subrc.
+
+  cond = 'ASDF'.
+  SELECT SINGLE * FROM t100 WHERE arbgb = @cond INTO @sdf.
+  WRITE / sy-subrc.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("0\n4");
+    });
+  });
+
+  it("basic GROUP BY", async () => {
+    const code = `
+FORM foo.
+
+  TYPES: BEGIN OF ty,
+           arbgb TYPE t100-arbgb,
+           count TYPE i,
+         END OF ty.
+  DATA lt_list TYPE STANDARD TABLE OF ty WITH EMPTY KEY.
+
+  SELECT arbgb, COUNT( * ) AS count
+    FROM t100
+    GROUP BY arbgb
+    INTO TABLE @lt_list.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("");
+    });
+  });
 
 });
