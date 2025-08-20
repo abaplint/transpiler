@@ -1705,7 +1705,7 @@ ENDFORM.
 START-OF-SELECTION.
   PERFORM foo.`;
     const files = [
-      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "zfoobar_database.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
@@ -1713,7 +1713,7 @@ START-OF-SELECTION.
     }, {skipVersionCheck: true});
   });
 
-  it.only("basic GROUP BY", async () => {
+  it("basic GROUP BY", async () => {
     const code = `
 FORM foo.
 
@@ -1732,7 +1732,7 @@ ENDFORM.
 START-OF-SELECTION.
   PERFORM foo.`;
     const files = [
-      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "zfoobar_database.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
