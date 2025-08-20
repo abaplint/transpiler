@@ -1680,6 +1680,25 @@ START-OF-SELECTION.
     });
   });
 
+  it.only("where ATted value", async () => {
+    const code = `
+FORM foo.
+  DATA cond TYPE t100-arbgb.
+  SELECT SINGLE * FROM t100 WHERE arbgb = @cond INTO @DATA(sdf).
+  WRITE / sy-subrc.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("");
+    }, {skipVersionCheck: true});
+  });
+
 // todo: comma list
 
 });
