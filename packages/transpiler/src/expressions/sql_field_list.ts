@@ -19,7 +19,10 @@ export class SQLFieldListTranspiler implements IExpressionTranspiler {
         const code = new SQLFieldNameTranspiler().transpile(f, traversal).getCode();
         fields.push(code);
       } else {
-        fields.push(f.concatTokens());
+        const concat = f.concatTokens();
+        if (concat !== ",") {
+          fields.push(concat);
+        }
       }
     }
 

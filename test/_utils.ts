@@ -21,7 +21,8 @@ export async function runFiles(abap: ABAP, files: IFile[], options?: ITranspiler
   const res = await new Transpiler(options).run(reg);
   abap.console.clear();
   if (res.databaseSetup.schemas.sqlite.length > 0 && options?.skipDatabaseSetup !== true) {
-    abap.context.databaseConnections["DEFAULT"] = new SQLiteDatabaseClient();
+    const trace = true;
+    abap.context.databaseConnections["DEFAULT"] = new SQLiteDatabaseClient({trace: trace});
     await abap.context.databaseConnections["DEFAULT"].connect();
     await abap.context.databaseConnections["DEFAULT"].execute(res.databaseSetup.schemas.sqlite);
     await abap.context.databaseConnections["DEFAULT"].execute(res.databaseSetup.insert);
