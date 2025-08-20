@@ -40,11 +40,6 @@ export class SelectTranspiler implements IStatementTranspiler {
       select += new SQLFromTranspiler().transpile(from, traversal).getCode();
     }
 
-    const groupBy = node.findFirstExpression(abaplint.Expressions.SQLGroupBy);
-    if (groupBy) {
-      select += new SQLGroupByTranspiler().transpile(groupBy, traversal).getCode();
-    }
-
     const {table, keys} = this.findTable(node, traversal);
 
     let where: abaplint.Nodes.ExpressionNode | undefined = undefined;
@@ -55,6 +50,11 @@ export class SelectTranspiler implements IStatementTranspiler {
     }
     if (where) {
       select += "WHERE " + new SQLCondTranspiler().transpile(where, traversal, table).getCode() + " ";
+    }
+
+    const groupBy = node.findFirstExpression(abaplint.Expressions.SQLGroupBy);
+    if (groupBy) {
+      select += new SQLGroupByTranspiler().transpile(groupBy, traversal).getCode() + " ";
     }
 
     const upTo = node.findFirstExpression(abaplint.Expressions.SQLUpTo);
