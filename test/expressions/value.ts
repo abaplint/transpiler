@@ -215,7 +215,7 @@ WRITE / foo-body-bar.`;
     expect(abap.console.get()).to.equal("1\n2");
   });
 
-  it.only("VALUE FOR IN", async () => {
+  it("VALUE FOR IN", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          val TYPE string,
