@@ -7,19 +7,11 @@ import {TranspileTypes} from "../transpile_types";
 export class TypeNameOrInfer implements IExpressionTranspiler {
 
   public findType(node: Nodes.ExpressionNode, traversal: Traversal): AbstractType {
-//    let type: AbstractType | undefined;
-
     const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
-//    if (node.concatTokens() === "#") {
     const type = traversal.lookupInferred(node, scope);
-      /*
-    } else {
-      type = traversal.lookupType(node.getFirstChild() as Nodes.ExpressionNode, scope);
-    }
-      */
 
     if (type === undefined) {
-      throw new Error("TypeNameOrInfer, type not found: " + node.concatTokens());
+      throw new Error("TypeNameOrInfer, type not found: " + node.concatTokens() + ", " + traversal.getCurrentObject().getName() + " line " + node.getFirstToken().getStart().getRow());
     }
 
     return type;
