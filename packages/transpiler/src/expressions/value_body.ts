@@ -6,6 +6,7 @@ import {ValueBodyLineTranspiler} from "./value_body_line";
 import {FieldAssignmentTranspiler} from "./field_assignment";
 import {FieldSymbolTranspiler} from "../statements";
 import {SourceFieldSymbolTranspiler} from "./source_field_symbol";
+import {TranspileTypes} from "../transpile_types";
 
 export class ValueBodyTranspiler {
 
@@ -17,6 +18,11 @@ export class ValueBodyTranspiler {
 
     let ret = new Chunk().appendString(new TypeNameOrInfer().transpile(typ, traversal).getCode());
     const context = new TypeNameOrInfer().findType(typ, traversal);
+    if (context instanceof BasicTypes.VoidType || context instanceof BasicTypes.UnknownType) {
+      // compile option is runtime error, or it failed during the validation step
+      return new Chunk(TranspileTypes.toType(context));
+    }
+
     let post = "";
     let extraFields = "";
     const hasLines = body.findDirectExpression(Expressions.ValueBodyLine) !== undefined;
