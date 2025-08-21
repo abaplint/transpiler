@@ -226,7 +226,7 @@ DATA vals TYPE STANDARD TABLE OF string WITH EMPTY KEY.
 INSERT VALUE #( val = 'hello' ) INTO TABLE input.
 vals = VALUE #( FOR <input> IN input ( <input>-val ) ).
 WRITE / lines( vals ).`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
@@ -243,7 +243,7 @@ DATA vals TYPE STANDARD TABLE OF string WITH EMPTY KEY.
 INSERT VALUE #( val = 'hello' ) INTO TABLE input.
 vals = VALUE #( FOR row IN input ( row-val ) ).
 WRITE / lines( vals ).`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
