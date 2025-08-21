@@ -34,7 +34,7 @@ export class ValueBodyTranspiler {
         ret = new Chunk().appendString(source.getCode() + ".clone()");
       } else if (child.get() instanceof Expressions.ValueBodyLine && child instanceof Nodes.ExpressionNode) {
         if (!(context instanceof BasicTypes.TableType)) {
-          throw new Error("ValueBodyTranspiler, Expected BasicTypes");
+          throw new Error("ValueBodyTranspiler, Expected BasicTypes, " + body.concatTokens());
         }
         const rowType = context.getRowType();
         ret.appendString(new ValueBodyLineTranspiler().transpile(rowType, child, traversal, extraFields).getCode());
@@ -43,13 +43,13 @@ export class ValueBodyTranspiler {
         ret.appendString(".set(" + source.getCode() + ".clone())");
       } else if (child.get() instanceof Expressions.For && child instanceof Nodes.ExpressionNode) {
         if (child.getChildren().length !== 2) {
-          throw new Error("ValueBody FOR todo, num");
+          throw new Error("ValueBody FOR todo, num, " + body.concatTokens());
         }
         const loop = child.findDirectExpression(Expressions.InlineLoopDefinition);
         if (loop === undefined) {
-          throw new Error("ValueBody FOR todo");
+          throw new Error("ValueBody FOR todo, " + body.concatTokens());
         } else if (loop.getChildren().length !== 3) {
-          throw new Error("ValueBody FOR todo, num loop");
+          throw new Error("ValueBody FOR todo, num loop, " + body.concatTokens());
         }
 
         let targetDeclare = "";
@@ -62,7 +62,7 @@ export class ValueBodyTranspiler {
         } else {
           const field = traversal.traverse(loop.findDirectExpression(Expressions.TargetField));
           if (field === undefined) {
-            throw new Error("ValueBody FOR empty field todo");
+            throw new Error("ValueBody FOR empty field todo, " + body.concatTokens());
           }
           targetAction = `const ${field.getCode()} = unique1.clone();`;
         }
