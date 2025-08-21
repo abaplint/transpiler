@@ -32,6 +32,7 @@ export const config: IConfig = {
         "DTEL",
         "ENHS",
         "ENQU",
+        "HTTP",
         "FUGR",
         "INTF",
         "IWMO",

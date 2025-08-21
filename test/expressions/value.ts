@@ -249,4 +249,48 @@ WRITE / lines( vals ).`;
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("VALUE FOR IN, LET", async () => {
+    const code = `
+FORM bar.
+  TYPES tty TYPE RANGE OF i.
+  DATA list TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+  INSERT 1 INTO TABLE list.
+  DATA(foo) = VALUE tty( FOR row IN list
+                                LET s = 'I' o = 'EQ'
+                                IN ( low = row
+                                    sign   = s
+                                    option = o ) ).
+  WRITE / lines( foo ).
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
+  it("VALUE FOR IN, LET IN", async () => {
+    const code = `
+FORM bar.
+  TYPES tty TYPE RANGE OF i.
+  DATA list TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+  INSERT 1 INTO TABLE list.
+  DATA(foo) = VALUE tty( FOR row IN list
+                                LET s = 'I' o = 'EQ'
+                                IN  sign   = s
+                                    option = o
+                                  ( low = row ) ).
+  WRITE / lines( foo ).
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });
