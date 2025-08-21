@@ -51,22 +51,31 @@ export class ValueBodyTranspiler {
         } else if (loop.getChildren().length !== 3) {
           throw new Error("ValueBody FOR todo, num loop");
         }
+
+        let targetDeclare = "";
+        let targetAction = "";
         const fs = loop.findDirectExpression(Expressions.TargetFieldSymbol);
-        if (fs === undefined) {
-          throw new Error("ValueBody FOR target");
+        if (fs) {
+          targetDeclare = new FieldSymbolTranspiler().transpile(fs, traversal).getCode();
+          const targetName = new SourceFieldSymbolTranspiler().transpile(fs, traversal).getCode();
+          targetAction = `${targetName}.assign(unique1);`;
+        } else {
+          const field = traversal.traverse(loop.findDirectExpression(Expressions.TargetField));
+          if (field === undefined) {
+            throw new Error("ValueBody FOR empty field todo");
+          }
+          targetAction = `const ${field.getCode()} = unique1.clone();`;
         }
-        const target = new FieldSymbolTranspiler().transpile(fs, traversal);
-        const targetName = new SourceFieldSymbolTranspiler().transpile(fs, traversal).getCode();
 
         const source = traversal.traverse(loop.findDirectExpression(Expressions.Source)).getCode();
 
         const val = new TypeNameOrInfer().transpile(typ, traversal).getCode();
 
         ret = new Chunk().appendString(`await (async () => {
-${target.getCode()}
+${targetDeclare}
 const VAL = ${val};
 for await (const unique1 of abap.statements.loop(${source})) {
-  ${targetName}.assign(unique1);
+  ${targetAction}
   VAL`);
         post = ";\n}\nreturn VAL;\n})()";
       } else {

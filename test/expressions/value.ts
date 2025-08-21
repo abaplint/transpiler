@@ -232,7 +232,7 @@ WRITE / lines( vals ).`;
     expect(abap.console.get()).to.equal("1");
   });
 
-  it.only("VALUE FOR IN, variable", async () => {
+  it("VALUE FOR IN, variable", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          val TYPE string,
