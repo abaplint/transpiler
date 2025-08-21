@@ -19,7 +19,7 @@ export class TypeNameOrInfer implements IExpressionTranspiler {
       */
 
     if (type === undefined) {
-      throw new Error("TypeNameOrInfer, type not found: " + node.concatTokens());
+      throw new Error("TypeNameOrInfer, type not found: " + node.concatTokens() + ", " + traversal.getCurrentObject().getName() + " line " + node.getFirstToken().getStart().getRow());
     }
 
     return type;
