@@ -15,9 +15,9 @@ export class ValueBodyTranspiler {
 
     let ret = new Chunk().appendString(new TypeNameOrInfer().transpile(typ, traversal).getCode());
     const context = new TypeNameOrInfer().findType(typ, traversal);
-
-    const hasLines = body.findDirectExpression(Expressions.ValueBodyLine) !== undefined;
+    let post = "";
     let extraFields = "";
+    const hasLines = body.findDirectExpression(Expressions.ValueBodyLine) !== undefined;
 
     for (const child of body.getChildren()) {
       if (child.get() instanceof Expressions.FieldAssignment && child instanceof Nodes.ExpressionNode) {
@@ -39,12 +39,15 @@ export class ValueBodyTranspiler {
       } else if (child.get() instanceof Expressions.Source && child instanceof Nodes.ExpressionNode) {
         const source = traversal.traverse(child);
         ret.appendString(".set(" + source.getCode() + ".clone())");
+      } else if (child.get() instanceof Expressions.For && child instanceof Nodes.ExpressionNode) {
+        ret.appendString(`(() => { const VAL = ${new TypeNameOrInfer().transpile(typ, traversal).getCode()}; return VAL`);
+        post = ";})()";
       } else {
         throw new Error("ValueBodyTranspiler, unknown " + child.get().constructor.name + " \"" + child.concatTokens()) + "\"";
       }
     }
 
-    return ret;
+    return ret.appendString(post);
   }
 
 }
