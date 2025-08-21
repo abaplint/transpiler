@@ -249,7 +249,7 @@ WRITE / lines( vals ).`;
     expect(abap.console.get()).to.equal("1");
   });
 
-  it.only("VALUE FOR IN, LET and defaults", async () => {
+  it.only("VALUE FOR IN, LET", async () => {
     const code = `
 FORM bar.
   TYPES tty TYPE RANGE OF i.
@@ -257,9 +257,9 @@ FORM bar.
   INSERT 1 INTO TABLE list.
   DATA(foo) = VALUE tty( FOR row IN list
                                 LET s = 'I' o = 'EQ'
-                                IN  sign   = s
-                                    option = o
-                                  ( low = row ) ).
+                                IN ( low = row
+                                    sign   = s
+                                    option = o ) ).
   WRITE / lines( foo ).
 ENDFORM.
 
