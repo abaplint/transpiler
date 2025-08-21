@@ -45,9 +45,14 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
 
         if (context instanceof abaplint.BasicTypes.ObjectReferenceType) {
           const cdef = traversal.findClassDefinition(context.getIdentifierName(), scope);
-          const attr = cdef?.getAttributes().findByName(c.getFirstToken().getStr());
+          const tokenName = c.getFirstToken().getStr();
+          const attr = cdef?.getAttributes().findByName(tokenName);
+          // Do not mark constants as private JS fields. Constants are exposed on instances via constructor copying.
+          const constants = cdef?.getAttributes().getConstants() || [];
+          const isConstant = constants.some(cons => cons.getName().toUpperCase() === tokenName.toUpperCase());
           if (FEATURE_FLAGS.PRIVATE_ATTRIBUTES === true
-              && attr?.getVisibility() === abaplint.Visibility.Private) {
+              && attr?.getVisibility() === abaplint.Visibility.Private
+              && isConstant === false) {
             const id = scope?.getParent()?.getParent()?.getIdentifier();
             if (id?.stype === abaplint.ScopeType.ClassImplementation
                 && cdef?.getName().toUpperCase() === id.sname.toUpperCase()) {
