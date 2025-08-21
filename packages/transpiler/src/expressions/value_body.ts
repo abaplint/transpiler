@@ -40,7 +40,22 @@ export class ValueBodyTranspiler {
         const source = traversal.traverse(child);
         ret.appendString(".set(" + source.getCode() + ".clone())");
       } else if (child.get() instanceof Expressions.For && child instanceof Nodes.ExpressionNode) {
-        ret.appendString(`(() => { const VAL = ${new TypeNameOrInfer().transpile(typ, traversal).getCode()}; return VAL`);
+        if (child.getChildren().length !== 2) {
+          throw new Error("ValueBody FOR todo, num");
+        }
+        const loop = child.findDirectExpression(Expressions.InlineLoopDefinition);
+        if (loop === undefined) {
+          throw new Error("ValueBody FOR todo");
+        } else if (loop.getChildren().length !== 3) {
+          throw new Error("ValueBody FOR todo, num loop");
+        }
+        const fs = loop.findDirectExpression(Expressions.TargetFieldSymbol);
+        if (fs === undefined) {
+          throw new Error("ValueBody FOR target");
+        }
+
+        const val = new TypeNameOrInfer().transpile(typ, traversal).getCode();
+        ret = new Chunk().appendString(`(() => { const VAL = ${val}; return VAL`);
         post = ";})()";
       } else {
         throw new Error("ValueBodyTranspiler, unknown " + child.get().constructor.name + " \"" + child.concatTokens()) + "\"";
