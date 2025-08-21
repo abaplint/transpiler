@@ -249,7 +249,7 @@ WRITE / lines( vals ).`;
     expect(abap.console.get()).to.equal("1");
   });
 
-  it.only("VALUE FOR IN, LET", async () => {
+  it("VALUE FOR IN, LET", async () => {
     const code = `
 FORM bar.
   TYPES tty TYPE RANGE OF i.

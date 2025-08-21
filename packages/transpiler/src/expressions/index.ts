@@ -22,6 +22,7 @@ export * from "./field_symbol";
 export * from "./function_exporting";
 export * from "./table_expression";
 export * from "./function_parameters";
+export * from "./let";
 export * from "./message_number";
 export * from "./method_call_body";
 export * from "./method_call_chain";

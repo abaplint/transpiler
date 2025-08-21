@@ -7,6 +7,7 @@ import {FieldAssignmentTranspiler} from "./field_assignment";
 import {FieldSymbolTranspiler} from "../statements";
 import {SourceFieldSymbolTranspiler} from "./source_field_symbol";
 import {TranspileTypes} from "../transpile_types";
+import {LetTranspiler} from "./let";
 
 export class ValueBodyTranspiler {
 
@@ -48,14 +49,18 @@ export class ValueBodyTranspiler {
         const source = traversal.traverse(child);
         ret.appendString(".set(" + source.getCode() + ".clone())");
       } else if (child.get() instanceof Expressions.For && child instanceof Nodes.ExpressionNode) {
-        if (child.getChildren().length !== 2) {
-          throw new Error("ValueBody FOR todo, num, " + body.concatTokens());
+        if (["THEN", "UNTIL", "WHILE", "FROM", "TO", "WHERE", "GROUPS"].some(token => child.findDirectTokenByText(token))) {
+          throw new Error("ValueBody FOR todo, " + body.concatTokens());
         }
+
         const loop = child.findDirectExpression(Expressions.InlineLoopDefinition);
         if (loop === undefined) {
           throw new Error("ValueBody FOR todo, " + body.concatTokens());
-        } else if (loop.getChildren().length !== 3) {
-          throw new Error("ValueBody FOR todo, num loop, " + body.concatTokens());
+        }
+
+        const base = loop.findDirectExpression(Expressions.ValueBase);
+        if (base) {
+          throw new Error("ValueBody FOR todo, base, " + body.concatTokens());
         }
 
         let targetDeclare = "";
@@ -73,8 +78,12 @@ export class ValueBodyTranspiler {
           targetAction = `const ${field.getCode()} = unique1.clone();`;
         }
 
-        const source = traversal.traverse(loop.findDirectExpression(Expressions.Source)).getCode();
+        const llet = child.findDirectExpression(Expressions.Let);
+        if (llet) {
+          targetAction += new LetTranspiler().transpile(llet, traversal).getCode();
+        }
 
+        const source = traversal.traverse(loop.findDirectExpression(Expressions.Source)).getCode();
         const val = new TypeNameOrInfer().transpile(typ, traversal).getCode();
 
         ret = new Chunk().appendString(`await (async () => {
