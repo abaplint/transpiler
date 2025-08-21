@@ -4,6 +4,8 @@ import {Chunk} from "../chunk";
 import {TypeNameOrInfer} from "./type_name_or_infer";
 import {ValueBodyLineTranspiler} from "./value_body_line";
 import {FieldAssignmentTranspiler} from "./field_assignment";
+import {FieldSymbolTranspiler} from "../statements";
+import {SourceFieldSymbolTranspiler} from "./source_field_symbol";
 
 export class ValueBodyTranspiler {
 
@@ -15,9 +17,9 @@ export class ValueBodyTranspiler {
 
     let ret = new Chunk().appendString(new TypeNameOrInfer().transpile(typ, traversal).getCode());
     const context = new TypeNameOrInfer().findType(typ, traversal);
-
-    const hasLines = body.findDirectExpression(Expressions.ValueBodyLine) !== undefined;
+    let post = "";
     let extraFields = "";
+    const hasLines = body.findDirectExpression(Expressions.ValueBodyLine) !== undefined;
 
     for (const child of body.getChildren()) {
       if (child.get() instanceof Expressions.FieldAssignment && child instanceof Nodes.ExpressionNode) {
@@ -39,12 +41,49 @@ export class ValueBodyTranspiler {
       } else if (child.get() instanceof Expressions.Source && child instanceof Nodes.ExpressionNode) {
         const source = traversal.traverse(child);
         ret.appendString(".set(" + source.getCode() + ".clone())");
+      } else if (child.get() instanceof Expressions.For && child instanceof Nodes.ExpressionNode) {
+        if (child.getChildren().length !== 2) {
+          throw new Error("ValueBody FOR todo, num");
+        }
+        const loop = child.findDirectExpression(Expressions.InlineLoopDefinition);
+        if (loop === undefined) {
+          throw new Error("ValueBody FOR todo");
+        } else if (loop.getChildren().length !== 3) {
+          throw new Error("ValueBody FOR todo, num loop");
+        }
+
+        let targetDeclare = "";
+        let targetAction = "";
+        const fs = loop.findDirectExpression(Expressions.TargetFieldSymbol);
+        if (fs) {
+          targetDeclare = new FieldSymbolTranspiler().transpile(fs, traversal).getCode();
+          const targetName = new SourceFieldSymbolTranspiler().transpile(fs, traversal).getCode();
+          targetAction = `${targetName}.assign(unique1);`;
+        } else {
+          const field = traversal.traverse(loop.findDirectExpression(Expressions.TargetField));
+          if (field === undefined) {
+            throw new Error("ValueBody FOR empty field todo");
+          }
+          targetAction = `const ${field.getCode()} = unique1.clone();`;
+        }
+
+        const source = traversal.traverse(loop.findDirectExpression(Expressions.Source)).getCode();
+
+        const val = new TypeNameOrInfer().transpile(typ, traversal).getCode();
+
+        ret = new Chunk().appendString(`await (async () => {
+${targetDeclare}
+const VAL = ${val};
+for await (const unique1 of abap.statements.loop(${source})) {
+  ${targetAction}
+  VAL`);
+        post = ";\n}\nreturn VAL;\n})()";
       } else {
         throw new Error("ValueBodyTranspiler, unknown " + child.get().constructor.name + " \"" + child.concatTokens()) + "\"";
       }
     }
 
-    return ret;
+    return ret.appendString(post);
   }
 
 }
