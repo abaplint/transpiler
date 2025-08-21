@@ -227,7 +227,6 @@ INSERT VALUE #( val = 'hello' ) INTO TABLE input.
 vals = VALUE #( FOR <input> IN input ( <input>-val ) ).
 WRITE / lines( vals ).`;
     const js = await run(code, true);
-    console.log(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");

@@ -4,6 +4,7 @@ import {Chunk} from "../chunk";
 import {TypeNameOrInfer} from "./type_name_or_infer";
 import {ValueBodyLineTranspiler} from "./value_body_line";
 import {FieldAssignmentTranspiler} from "./field_assignment";
+import { FieldSymbolTranspiler } from "../statements";
 
 export class ValueBodyTranspiler {
 
@@ -53,10 +54,17 @@ export class ValueBodyTranspiler {
         if (fs === undefined) {
           throw new Error("ValueBody FOR target");
         }
+        const target = new FieldSymbolTranspiler().transpile(fs, traversal);
 
         const val = new TypeNameOrInfer().transpile(typ, traversal).getCode();
-        ret = new Chunk().appendString(`(() => { const VAL = ${val}; return VAL`);
-        post = ";})()";
+
+        ret = new Chunk().appendString(`await (async () => {
+${target.getCode()}
+const VAL = ${val};
+for await (const unique1 of abap.statements.loop(input)) {
+  fs_input_.assign(unique1);
+  VAL`);
+        post = ";\n}\nreturn VAL;\n})()";
       } else {
         throw new Error("ValueBodyTranspiler, unknown " + child.get().constructor.name + " \"" + child.concatTokens()) + "\"";
       }
