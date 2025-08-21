@@ -215,8 +215,7 @@ WRITE / foo-body-bar.`;
     expect(abap.console.get()).to.equal("1\n2");
   });
 
-// still blocked via abaplint,
-  it.skip("VALUE FOR IN", async () => {
+  it.only("VALUE FOR IN", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          val TYPE string,
