@@ -79,4 +79,18 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("0");
   });
 
+  it.skip("RAISE EXCEPTION NEW", async () => {
+    const code = `
+CLASS lcx DEFINITION INHERITING FROM cx_static_check.
+ENDCLASS.
+CLASS lcx IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  RAISE EXCEPTION NEW lcx( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
