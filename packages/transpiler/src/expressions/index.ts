@@ -26,6 +26,7 @@ export * from "./let";
 export * from "./message_number";
 export * from "./method_call_body";
 export * from "./method_call_chain";
+export * from "./cond_body";
 export * from "./method_call_param";
 export * from "./new_object";
 export * from "./method_call";

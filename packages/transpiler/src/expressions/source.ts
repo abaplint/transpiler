@@ -1,6 +1,6 @@
 import {Expressions, Nodes} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
-import {AttributeChainTranspiler, ComponentChainTranspiler, FieldChainTranspiler, TypeNameOrInfer} from ".";
+import {AttributeChainTranspiler, ComponentChainTranspiler, CondBodyTranspiler, FieldChainTranspiler, TypeNameOrInfer} from ".";
 import {Traversal} from "../traversal";
 import {ConstantTranspiler} from "./constant";
 import {Chunk} from "../chunk";
@@ -80,6 +80,8 @@ export class SourceTranspiler implements IExpressionTranspiler {
           continue;
         } else if (c.get() instanceof Expressions.CorrespondingBody) {
           continue;
+        } else if (c.get() instanceof Expressions.CondBody) {
+          continue;
         } else {
           ret.appendString("SourceUnknown$" + c.get().constructor.name);
         }
@@ -117,6 +119,16 @@ export class SourceTranspiler implements IExpressionTranspiler {
           throw new Error("CorrespondingBody not found");
         }
         ret.appendChunk(new CorrespondingBodyTranspiler().transpile(typ, correspondingBody, traversal));
+      } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "COND") {
+        const typ = node.findDirectExpression(Expressions.TypeNameOrInfer)
+        if (typ === undefined) {
+          throw new Error("TypeNameOrInfer not found in CondBody");
+        }
+        const condBody = node.findDirectExpression(Expressions.CondBody);
+        if (condBody === undefined) {
+          throw new Error("CondBody not found");
+        }
+        ret.appendChunk(new CondBodyTranspiler().transpile(typ, condBody, traversal));
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "REF") {
         const infer = node.findDirectExpression(Expressions.TypeNameOrInfer);
         if (infer?.concatTokens() !== "#") {

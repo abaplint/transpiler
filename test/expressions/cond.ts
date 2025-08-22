@@ -16,9 +16,14 @@ describe("Running expressions - COND", () => {
 
   it("basic", async () => {
     const code = `
-DATA(url) = COND string( WHEN 1 = 2 THEN 'foo'
-                         WHEN 1 = 1 THEN 'bar' ).
-WRITE / url.`;
+FORM foo.
+  DATA(url) = COND string( WHEN 1 = 2 THEN 'foo'
+                           WHEN 1 = 1 THEN 'bar' ).
+  WRITE / url.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
     const js = await run(code, true);
     const f = new AsyncFunction("abap", js);
     await f(abap);
@@ -27,9 +32,14 @@ WRITE / url.`;
 
   it("else", async () => {
     const code = `
-DATA(url) = COND string( WHEN 1 = 2 THEN 'foo'
-                         ELSE 'bar' ).
-WRITE / url.`;
+FORM foo.
+  DATA(url) = COND string( WHEN 1 = 2 THEN 'foo'
+                           ELSE 'bar' ).
+  WRITE / url.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
     const js = await run(code, true);
     const f = new AsyncFunction("abap", js);
     await f(abap);
