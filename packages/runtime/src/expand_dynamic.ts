@@ -10,7 +10,7 @@ export function expandDynamic(code: string, evaluate: (name: string) => FieldSym
     code = code.replace(/ EQ /g, " = ");
 
 // todo more here, this is just one simple case,
-    let regex = /(\w+) IN <(\w+)>-(\w+)/;
+    let regex = /(\w+) IN @?<(\w+)>-(\w+)/;
     while(true) {
       const match = code.match(regex);
       if (match && match[1] && match[2] && match[3]) {
@@ -30,7 +30,7 @@ export function expandDynamic(code: string, evaluate: (name: string) => FieldSym
     }
 
 // todo more here, this is just one simple case,
-    regex = / <(\w+)>-(\w+)/;
+    regex = / @?<(\w+)>-(\w+)/;
     while(true) {
       const match = code.match(regex);
       if (match && match[1] && match[2]) {
@@ -50,7 +50,7 @@ export function expandDynamic(code: string, evaluate: (name: string) => FieldSym
     }
 
 // todo more here, this is just one simple case,
-    regex = / <(\w+)>/;
+    regex = / @?<(\w+)>/;
     while(true) {
       const match = code.match(regex);
       if (match && match[1]) {

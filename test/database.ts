@@ -1768,4 +1768,24 @@ START-OF-SELECTION.
     });
   });
 
+  it("dynamic WHERE ATtted", async () => {
+    const code = `
+DATA ls_row TYPE t100.
+DATA lv_where TYPE string.
+DATA value TYPE t100.
+FIELD-SYMBOLS <row> TYPE t100.
+ASSIGN value TO <row>.
+<row>-arbgb = 'ZAG_UNIT_TEST'.
+lv_where = |arbgb = @<row>-arbgb|.
+SELECT SINGLE * FROM t100 INTO @ls_row WHERE (lv_where).
+WRITE / sy-subrc.`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("0");
+    });
+  });
+
 });
