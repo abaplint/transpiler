@@ -101,7 +101,7 @@ function writeObjects(outputFiles: Transpiler.IOutputFile[], config: ITranspiler
   }
 }
 
-async function build(config, files) {
+async function build(config: ITranspilerConfig, files: Transpiler.IFile[]) {
   const libFiles = await loadLib(config);
   const t = new Transpiler.Transpiler(config.options);
 
