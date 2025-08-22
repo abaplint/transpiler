@@ -14,7 +14,7 @@ describe("Running expressions - COND", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
-  it("basic", async () => {
+  it.only("basic", async () => {
     const code = `
 FORM foo.
   DATA(url) = COND string( WHEN 1 = 2 THEN 'foo'
@@ -25,6 +25,7 @@ ENDFORM.
 START-OF-SELECTION.
   PERFORM foo.`;
     const js = await run(code, true);
+    console.log(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("bar");
