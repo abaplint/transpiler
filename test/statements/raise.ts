@@ -8,6 +8,20 @@ async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
 }
 
+const cx_root = `CLASS cx_root DEFINITION ABSTRACT PUBLIC.
+  PUBLIC SECTION.
+ENDCLASS.
+
+CLASS cx_root IMPLEMENTATION.
+ENDCLASS.`;
+
+const cx_static_check = `CLASS cx_static_check DEFINITION PUBLIC INHERITING FROM cx_root ABSTRACT.
+  PUBLIC SECTION.
+ENDCLASS.
+
+CLASS cx_static_check IMPLEMENTATION.
+ENDCLASS.`;
+
 describe("Running statements - RAISE", () => {
 
   beforeEach(async () => {
@@ -77,6 +91,30 @@ START-OF-SELECTION.
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0");
+  });
+
+  it("RAISE EXCEPTION NEW", async () => {
+    const code = `
+${cx_root}
+
+${cx_static_check}
+
+CLASS lcx DEFINITION INHERITING FROM cx_static_check.
+ENDCLASS.
+CLASS lcx IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  RAISE EXCEPTION NEW lcx( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch(e) {
+      expect(e.toString()).to.contain("Error");
+      expect(e.constructor.name).to.contain("lcx");
+    }
   });
 
 });

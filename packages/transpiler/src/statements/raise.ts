@@ -11,7 +11,11 @@ export class RaiseTranspiler implements IStatementTranspiler {
     const classNameToken = node.findFirstExpression(abaplint.Expressions.ClassName)?.getFirstToken();
     const className = classNameToken?.getStr();
     if (className === undefined) {
-      const s = node.findFirstExpression(abaplint.Expressions.SimpleSource2);
+      let s = node.findFirstExpression(abaplint.Expressions.SimpleSource2);
+      if (s === undefined) {
+        s = node.findFirstExpression(abaplint.Expressions.Source);
+      }
+
       if (s === undefined) {
         const name = node.findFirstExpression(abaplint.Expressions.ExceptionName)?.concatTokens().toLowerCase();
         return new Chunk().append(`throw new abap.ClassicError({classic: "${name}"});`, node, traversal);
