@@ -1768,7 +1768,7 @@ START-OF-SELECTION.
     });
   });
 
-  it.only("dynamic WHERE ATtted", async () => {
+  it("dynamic WHERE ATtted", async () => {
     const code = `
 DATA ls_row TYPE t100.
 DATA lv_where TYPE string.
