@@ -1788,4 +1788,18 @@ WRITE / sy-subrc.`;
     });
   });
 
+  it.skip("FIELDS list", async () => {
+    const code = `
+DATA row TYPE t100.
+SELECT SINGLE FROM t100 FIELDS arbgb INTO @row.
+WRITE / sy-subrc.`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("0");
+    }, {skipVersionCheck: true});
+  });
+
 });
