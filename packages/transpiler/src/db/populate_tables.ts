@@ -56,7 +56,7 @@ export class PopulateTables {
     for (const method of def.getMethodDefinitions().getAll()) {
       for (const parameter of method.getParameters().getAll()) {
         ret.push(`INSERT INTO "seosubco" ("clsname", "cmpname", "sconame") VALUES ('${
-          obj.getName()}', '${method.getName()}', '${parameter.getName()}');`);
+          obj.getName()}', '${method.getName().toUpperCase()}', '${parameter.getName().toUpperCase()}');`);
       }
     }
 
@@ -90,9 +90,10 @@ export class PopulateTables {
         }
 
         const paroptionl = optionalParameters.includes(parameter.getName()) ? "X" : " ";
+        const type = parameter.getType().getQualifiedName()?.toUpperCase() || "";
 
         ret.push(`INSERT INTO "seosubcodf" ("clsname", "cmpname", "sconame", "version", "editorder", "pardecltyp", "type", "paroptionl") VALUES ('${
-          obj.getName()}', '${method.getName()}', '${parameter.getName()}', 'A', ${editorder}, '${pardecltyp}', '${parameter.getType().getQualifiedName()}', '${paroptionl}');`);
+          obj.getName()}', '${method.getName().toUpperCase()}', '${parameter.getName().toUpperCase()}', 'A', ${editorder}, '${pardecltyp}', '${type}', '${paroptionl}');`);
       }
     }
 
@@ -108,8 +109,10 @@ export class PopulateTables {
     }
 
     for (const method of def.getMethodDefinitions().getAll()) {
-      ret.push(`INSERT INTO "seosubcotx" ("clsname", "cmpname", "langu", "descript") VALUES ('${
-        obj.getName()}', '${method.getName()}', 'E', 'todo');`);
+      for (const parameter of method.getParameters().getAll()) {
+        ret.push(`INSERT INTO "seosubcotx" ("clsname", "cmpname", "sconame", "langu", "descript") VALUES ('${
+          obj.getName()}', '${method.getName().toUpperCase()}', '${parameter.getName().toUpperCase()}', 'E', 'todo');`);
+      }
     }
 
     return ret;
