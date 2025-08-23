@@ -1799,7 +1799,7 @@ WRITE / sy-subrc.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("0");
-    }, {skipVersionCheck: true});
+    });
   });
 
 });
