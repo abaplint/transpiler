@@ -66,6 +66,15 @@ export class DatabaseSetup {
         if (options?.populateTables?.reposrc !== false) {
           insert.push(populateTables.insertREPOSRC(obj));
         }
+        if (options?.populateTables?.seosubco !== false) {
+          insert.push(...populateTables.insertSEOSUBCO(obj));
+        }
+        if (options?.populateTables?.seosubcodf !== false) {
+          insert.push(...populateTables.insertSEOSUBCODF(obj));
+        }
+        if (options?.populateTables?.seosubcotx !== false) {
+          insert.push(...populateTables.insertSEOSUBCOTX(obj));
+        }
       }
     }
     insert.push(populateTables.insertT000());

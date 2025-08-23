@@ -7,7 +7,7 @@ export class PopulateTables {
     this.reg = reg;
   }
 
-  public insertREPOSRC(obj: abaplint.ABAPObject): string {
+  public insertREPOSRC(obj: abaplint.Objects.Class | abaplint.Objects.Interface): string {
     if (this.reg.getObject("TABL", "REPOSRC") === undefined) {
       return "";
     }
@@ -32,6 +32,21 @@ export class PopulateTables {
       ret.push(`INSERT INTO "t100" ("sprsl", "arbgb", "msgnr", "text") VALUES ('E', '${msag.getName().padEnd(20, " ")}', '${m.getNumber()}', '${this.escape(m.getMessage().padEnd(73, " "))}');`);
     }
     return ret;
+  }
+
+  public insertSEOSUBCO(_obj: abaplint.Objects.Class | abaplint.Objects.Interface): string[] {
+    // todo
+    return [];
+  }
+
+  public insertSEOSUBCODF(_obj: abaplint.Objects.Class | abaplint.Objects.Interface): string[] {
+    // todo
+    return [];
+  }
+
+  public insertSEOSUBCOTX(_obj: abaplint.Objects.Class | abaplint.Objects.Interface): string[] {
+    // todo
+    return [];
   }
 
   public insertT000(): string {
