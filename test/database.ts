@@ -1788,7 +1788,7 @@ WRITE / sy-subrc.`;
     });
   });
 
-  it.skip("FIELDS list", async () => {
+  it("FIELDS list", async () => {
     const code = `
 DATA row TYPE t100.
 SELECT SINGLE FROM t100 FIELDS arbgb INTO @row.
