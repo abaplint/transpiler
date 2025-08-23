@@ -66,8 +66,17 @@ export interface ITranspilerOptions {
   extraSetup?: string;
   /** list of keywords to rename, if not supplied default will be used */
   keywords?: string[];
-  /** dont insert into REPOSRC */
-  skipReposrc?: boolean;
+  /** populate tables, all tables are populated if undefined and they exist */
+  populateTables?: {
+    /** insert into REPOSRC, skips if equals false */
+    reposrc?: boolean;
+    /** insert into SEOSUBCO, skips if equals false */
+    seosubco?: boolean;
+    /** insert into SEOSUBCODF, skips if equals false */
+    seosubcodf?: boolean;
+    /** insert into SEOSUBCOTX, skips if equals false */
+    seosubcotx?: boolean;
+  };
   /** ignore source map */
   ignoreSourceMap?: boolean;
   /** import programs */
