@@ -101,14 +101,8 @@ function writeObjects(outputFiles: Transpiler.IOutputFile[], config: ITranspiler
   }
 }
 
-async function run() {
-  console.log("Transpiler CLI");
-
-  const config = TranspilerConfig.find(process.argv[2]);
+async function build(config: ITranspilerConfig, files: Transpiler.IFile[]) {
   const libFiles = await loadLib(config);
-  const files = await FileOperations.loadFiles(config);
-
-  console.log("\nBuilding");
   const t = new Transpiler.Transpiler(config.options);
 
   const reg: abaplint.IRegistry = new abaplint.Registry();
@@ -121,6 +115,17 @@ async function run() {
   reg.parse();
 
   const output = await t.run(reg, new Progress());
+  return output;
+}
+
+async function run() {
+  console.log("Transpiler CLI");
+
+  const config = TranspilerConfig.find(process.argv[2]);
+  const files = await FileOperations.loadFiles(config);
+
+  console.log("\nBuilding");
+  const output = await build(config, files);
 
   console.log("\nOutput");
   const outputFolder = config.output_folder;
