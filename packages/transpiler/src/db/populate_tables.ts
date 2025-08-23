@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import * as abaplint from "@abaplint/core";
 
 export class PopulateTables {
@@ -71,9 +72,27 @@ export class PopulateTables {
     }
 
     for (const method of def.getMethodDefinitions().getAll()) {
+      let editorder = 0;
+      const optionalParameters = method.getParameters().getOptional();
+
       for (const parameter of method.getParameters().getAll()) {
-        ret.push(`INSERT INTO "seosubcodf" ("clsname", "cmpname", "sconame", "type") VALUES ('${
-          obj.getName()}', '${method.getName()}', '${parameter.getName()}', '${parameter.getType().getQualifiedName()}');`);
+        editorder++;
+
+        let pardecltyp = "";
+        if (parameter.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)) {
+          pardecltyp = "0";
+        } else if (parameter.getMeta().includes(abaplint.IdentifierMeta.MethodChanging)) {
+          pardecltyp = "2";
+        } else if (parameter.getMeta().includes(abaplint.IdentifierMeta.MethodReturning)) {
+          pardecltyp = "3";
+        } else if (parameter.getMeta().includes(abaplint.IdentifierMeta.MethodExporting)) {
+          pardecltyp = "1";
+        }
+
+        const paroptionl = optionalParameters.includes(parameter.getName()) ? "X" : " ";
+
+        ret.push(`INSERT INTO "seosubcodf" ("clsname", "cmpname", "sconame", "version", "editorder", "pardecltyp", "type", "paroptionl") VALUES ('${
+          obj.getName()}', '${method.getName()}', '${parameter.getName()}', 'A', ${editorder}, '${pardecltyp}', '${parameter.getType().getQualifiedName()}', '${paroptionl}');`);
       }
     }
 
