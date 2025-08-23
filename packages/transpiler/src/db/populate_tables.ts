@@ -1,14 +1,24 @@
 import * as abaplint from "@abaplint/core";
 
 export class PopulateTables {
-  private readonly reg: abaplint.IRegistry;
+  private readonly hasREPOSRC: boolean;
+  private readonly hasSEOSUBCO: boolean;
+  private readonly hasSEOSUBCODF: boolean;
+  private readonly hasSEOSUBCOTX: boolean;
+  private readonly hasT000: boolean;
+  private readonly hasT100: boolean;
 
   public constructor(reg: abaplint.IRegistry) {
-    this.reg = reg;
+    this.hasREPOSRC = reg.getObject("TABL", "REPOSRC") !== undefined;
+    this.hasSEOSUBCO = reg.getObject("TABL", "SEOSUBCO") !== undefined;
+    this.hasSEOSUBCODF = reg.getObject("TABL", "SEOSUBCODF") !== undefined;
+    this.hasSEOSUBCOTX = reg.getObject("TABL", "SEOSUBCOTX") !== undefined;
+    this.hasT000 = reg.getObject("TABL", "T000") !== undefined;
+    this.hasT100 = reg.getObject("TABL", "T100") !== undefined;
   }
 
   public insertREPOSRC(obj: abaplint.Objects.Class | abaplint.Objects.Interface): string {
-    if (this.reg.getObject("TABL", "REPOSRC") === undefined) {
+    if (!this.hasREPOSRC) {
       return "";
     }
 
@@ -23,45 +33,78 @@ export class PopulateTables {
 
   public insertT100(msag: abaplint.Objects.MessageClass): string[] {
     // ignore if T100 is unknown
-    const obj = this.reg.getObject("TABL", "T100") as abaplint.Objects.Table | undefined;
-    if (obj === undefined) {
+    if (!this.hasT100) {
       return [];
     }
     const ret = [];
     for (const m of msag.getMessages()) {
-      ret.push(`INSERT INTO "t100" ("sprsl", "arbgb", "msgnr", "text") VALUES ('E', '${msag.getName().padEnd(20, " ")}', '${m.getNumber()}', '${this.escape(m.getMessage().padEnd(73, " "))}');`);
+      ret.push(`INSERT INTO "t100" ("sprsl", "arbgb", "msgnr", "text") VALUES ('E', '${
+        msag.getName().padEnd(20, " ")}', '${m.getNumber()}', '${this.escape(m.getMessage().padEnd(73, " "))}');`);
     }
     return ret;
   }
 
-  public insertSEOSUBCO(_obj: abaplint.Objects.Class | abaplint.Objects.Interface): string[] {
-    // todo
-    return [];
+  public insertSEOSUBCO(obj: abaplint.Objects.Class | abaplint.Objects.Interface): string[] {
+    const def = obj.getDefinition();
+    const ret = [];
+
+    if (def === undefined || !this.hasSEOSUBCO) {
+      return [];
+    }
+
+    for (const method of def.getMethodDefinitions().getAll()) {
+      for (const parameter of method.getParameters().getAll()) {
+        ret.push(`INSERT INTO "seosubco" ("clsname", "cmpname", "sconame") VALUES ('${
+          obj.getName()}', '${method.getName()}', '${parameter.getName()}');`);
+      }
+    }
+
+    return ret;
   }
 
-  public insertSEOSUBCODF(_obj: abaplint.Objects.Class | abaplint.Objects.Interface): string[] {
-    // todo
-    return [];
+  public insertSEOSUBCODF(obj: abaplint.Objects.Class | abaplint.Objects.Interface): string[] {
+    const def = obj.getDefinition();
+    const ret = [];
+
+    if (def === undefined || !this.hasSEOSUBCODF) {
+      return [];
+    }
+
+    for (const method of def.getMethodDefinitions().getAll()) {
+      for (const parameter of method.getParameters().getAll()) {
+        ret.push(`INSERT INTO "seosubcodf" ("clsname", "cmpname", "sconame", "type") VALUES ('${
+          obj.getName()}', '${method.getName()}', '${parameter.getName()}', '${parameter.getType().getQualifiedName()}');`);
+      }
+    }
+
+    return ret;
   }
 
-  public insertSEOSUBCOTX(_obj: abaplint.Objects.Class | abaplint.Objects.Interface): string[] {
-    // todo
-    return [];
+  public insertSEOSUBCOTX(obj: abaplint.Objects.Class | abaplint.Objects.Interface): string[] {
+    const def = obj.getDefinition();
+    const ret = [];
+
+    if (def === undefined || !this.hasSEOSUBCOTX) {
+      return [];
+    }
+
+    for (const method of def.getMethodDefinitions().getAll()) {
+      for (const parameter of method.getParameters().getAll()) {
+        ret.push(`INSERT INTO "SEOSUBCOTX" ("clsname", "cmpname", "langu", "descript") VALUES ('${
+          obj.getName()}', '${method.getName()}', '${parameter.getName()}', 'E', 'todo');`);
+      }
+    }
+
+    return ret;
   }
 
   public insertT000(): string {
-    const tabl = this.reg.getObject("TABL", "T000") as abaplint.Objects.Table | undefined;
-    if (tabl === undefined) {
+    if (!this.hasT000) {
       return "";
     }
 
-    const type = tabl.parseType(this.reg);
-    if (type instanceof abaplint.BasicTypes.StructureType && type.getComponents().length >= 3) {
-      // todo, this should take the client number from the settings
-      return `INSERT INTO t000 ('mandt', 'cccategory', 'ccnocliind') VALUES ('123', '', '');`;
-    } else {
-      return "";
-    }
+    // todo, this should take the client number from the settings
+    return `INSERT INTO t000 ('mandt', 'cccategory', 'ccnocliind') VALUES ('123', '', '');`;
   }
 
   private escape(value: string): string {
