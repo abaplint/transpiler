@@ -108,10 +108,8 @@ export class PopulateTables {
     }
 
     for (const method of def.getMethodDefinitions().getAll()) {
-      for (const parameter of method.getParameters().getAll()) {
-        ret.push(`INSERT INTO "seosubcotx" ("clsname", "cmpname", "langu", "descript") VALUES ('${
-          obj.getName()}', '${method.getName()}', '${parameter.getName()}', 'E', 'todo');`);
-      }
+      ret.push(`INSERT INTO "seosubcotx" ("clsname", "cmpname", "langu", "descript") VALUES ('${
+        obj.getName()}', '${method.getName()}', 'E', 'todo');`);
     }
 
     return ret;
