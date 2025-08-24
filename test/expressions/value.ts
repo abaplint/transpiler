@@ -298,18 +298,19 @@ START-OF-SELECTION.
 DATA tab TYPE STANDARD TABLE OF i WITH EMPTY KEY.
 DATA row LIKE LINE OF tab.
 row = VALUE #( tab[ 1 ] OPTIONAL ).`;
-    const js = await run(code);
+    const js = await run(code, true);
+    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
 
-  it.only("VALUE DEFAULT", async () => {
+  it("VALUE DEFAULT", async () => {
     const code = `
 DATA tab TYPE STANDARD TABLE OF i WITH EMPTY KEY.
 DATA row LIKE LINE OF tab.
 row = VALUE #( tab[ 1 ] DEFAULT 2 ).
 WRITE / row.`;
-    const js = await run(code);
+    const js = await run(code, true);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
