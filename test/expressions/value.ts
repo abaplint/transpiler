@@ -293,4 +293,14 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1");
   });
 
+  it.only("VALUE OPTIONAL, dont crash", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+DATA row LIKE LINE OF tab.
+row = VALUE #( tab[ 1 ] OPTIONAL ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
