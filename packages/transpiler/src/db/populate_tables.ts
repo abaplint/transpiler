@@ -93,7 +93,7 @@ export class PopulateTables {
         const type = parameter.getType().getQualifiedName()?.toUpperCase() || "";
 
         ret.push(`INSERT INTO "seosubcodf" ("clsname", "cmpname", "sconame", "version", "editorder", "pardecltyp", "type", "paroptionl") VALUES ('${
-          obj.getName()}', '${method.getName().toUpperCase()}', '${parameter.getName().toUpperCase()}', 'A', ${editorder}, '${pardecltyp}', '${type}', '${paroptionl}');`);
+          obj.getName()}', '${method.getName().toUpperCase()}', '${parameter.getName().toUpperCase()}', '1', ${editorder}, '${pardecltyp}', '${type}', '${paroptionl}');`);
       }
     }
 
