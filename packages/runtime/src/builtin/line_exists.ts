@@ -10,6 +10,7 @@ export function line_exists(callback: () => void): ICharacter {
   try {
     callback();
   } catch (error) {
+    sdf
     if (abap.Classes[LINE_NOT_FOUND] !== undefined
         && error instanceof abap.Classes[LINE_NOT_FOUND]) {
       return abap.builtin.abap_false;

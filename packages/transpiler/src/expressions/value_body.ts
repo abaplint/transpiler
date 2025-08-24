@@ -96,7 +96,10 @@ for await (const unique1 of abap.statements.loop(${source})) {
       } else if (child instanceof Nodes.TokenNode && child.getFirstToken().getStr().toUpperCase() === "DEFAULT") {
         // todo
       } else if (child instanceof Nodes.TokenNode && child.getFirstToken().getStr().toUpperCase() === "OPTIONAL") {
-        // todo
+        // note: this is last in the body, so its okay to prepend and postpend
+        const pre = `(await (async () => {`;
+        ret = new Chunk().appendString(pre + ret.getCode());
+        post += `})())`;
       } else {
         throw new Error("ValueBodyTranspiler, unknown " + child.get().constructor.name + " \"" + child.concatTokens()) + "\"";
       }

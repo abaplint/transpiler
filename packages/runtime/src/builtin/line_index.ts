@@ -10,6 +10,7 @@ export function line_index(callback: () => void): Integer {
   try {
     callback();
   } catch (error) {
+    sdf
     if (abap.Classes[LINE_NOT_FOUND] !== undefined
         && error instanceof abap.Classes[LINE_NOT_FOUND]) {
       return abap.IntegerFactory.get(0);
