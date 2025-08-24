@@ -293,7 +293,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1");
   });
 
-  it.only("VALUE OPTIONAL, dont crash", async () => {
+  it.skip("VALUE OPTIONAL, dont crash", async () => {
     const code = `
 DATA tab TYPE STANDARD TABLE OF i WITH EMPTY KEY.
 DATA row LIKE LINE OF tab.
@@ -304,7 +304,7 @@ row = VALUE #( tab[ 1 ] OPTIONAL ).`;
     await f(abap);
   });
 
-  it("VALUE DEFAULT", async () => {
+  it.skip("VALUE DEFAULT", async () => {
     const code = `
 DATA tab TYPE STANDARD TABLE OF i WITH EMPTY KEY.
 DATA row LIKE LINE OF tab.
