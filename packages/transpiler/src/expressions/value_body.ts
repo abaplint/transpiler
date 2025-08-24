@@ -94,12 +94,17 @@ for await (const unique1 of abap.statements.loop(${source})) {
   VAL`);
         post = ";\n}\nreturn VAL;\n})()";
       } else if (child instanceof Nodes.TokenNode && child.getFirstToken().getStr().toUpperCase() === "DEFAULT") {
-        // todo
+        // note: this is last in the body, so its okay to prepend and postpend
+        const sources = body.findDirectExpressions(Expressions.Source);
+        const deflt = traversal.traverse(sources[1]).getCode();
+        const pre = `(await (async () => { try { return `;
+        ret = new Chunk().appendString(pre + ret.getCode());
+        post += `; } catch (error) { if (abap.isLineNotFound(error)) { return ${deflt}; } throw error; } })())`;
       } else if (child instanceof Nodes.TokenNode && child.getFirstToken().getStr().toUpperCase() === "OPTIONAL") {
         // note: this is last in the body, so its okay to prepend and postpend
-        const pre = `(await (async () => {`;
+        const pre = `(await (async () => { try { return `;
         ret = new Chunk().appendString(pre + ret.getCode());
-        post += `})())`;
+        post += `; } catch (error) { if (abap.isLineNotFound(error)) { return ${TranspileTypes.toType(context)}; } throw error; } })())`;
       } else {
         throw new Error("ValueBodyTranspiler, unknown " + child.get().constructor.name + " \"" + child.concatTokens()) + "\"";
       }

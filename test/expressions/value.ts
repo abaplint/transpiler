@@ -293,18 +293,17 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1");
   });
 
-  it.skip("VALUE OPTIONAL, dont crash", async () => {
+  it("VALUE OPTIONAL, dont crash", async () => {
     const code = `
 DATA tab TYPE STANDARD TABLE OF i WITH EMPTY KEY.
 DATA row LIKE LINE OF tab.
 row = VALUE #( tab[ 1 ] OPTIONAL ).`;
     const js = await run(code, true);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
 
-  it.skip("VALUE DEFAULT", async () => {
+  it("VALUE DEFAULT", async () => {
     const code = `
 DATA tab TYPE STANDARD TABLE OF i WITH EMPTY KEY.
 DATA row LIKE LINE OF tab.
