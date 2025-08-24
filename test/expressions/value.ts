@@ -298,7 +298,7 @@ START-OF-SELECTION.
 DATA tab TYPE STANDARD TABLE OF i WITH EMPTY KEY.
 DATA row LIKE LINE OF tab.
 row = VALUE #( tab[ 1 ] OPTIONAL ).`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
@@ -309,7 +309,7 @@ DATA tab TYPE STANDARD TABLE OF i WITH EMPTY KEY.
 DATA row LIKE LINE OF tab.
 row = VALUE #( tab[ 1 ] DEFAULT 2 ).
 WRITE / row.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
