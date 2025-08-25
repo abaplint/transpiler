@@ -421,8 +421,6 @@ ENDLOOP.`;
 
   it("append3", async () => {
     const code = `
-REPORT zhvam.
-
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
     CLASS-METHODS ref_of_x_into_y
@@ -478,6 +476,53 @@ START-OF-SELECTION.
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("g\nI");
+  });
+
+  it.only("hmm, GET REFERENCE in method", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS ref_of_x_into_y
+      CHANGING
+        x TYPE any
+        y TYPE any.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD ref_of_x_into_y.
+    GET REFERENCE OF x INTO y.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  TYPES: BEGIN OF dty,
+           field1 TYPE string,
+           field2 TYPE i,
+         END OF dty.
+  DATA data TYPE dty.
+
+  TYPES: BEGIN OF ty,
+           value TYPE REF TO data,
+         END OF ty.
+  DATA row type ty.
+  DATA lv_type TYPE c LENGTH 1.
+  FIELD-SYMBOLS <val> TYPE any.
+  FIELD-SYMBOLS <field> TYPE any.
+
+
+  ASSIGN data-field1 TO <field>.
+  lcl=>ref_of_x_into_y( CHANGING
+    x = <field>
+    y = row-value ).
+
+  ASSIGN data-field2 TO <field>.
+
+  ASSIGN row-value->* TO <val>.
+  DESCRIBE FIELD <val> TYPE lv_type.
+  WRITE / lv_type.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("g");
   });
 
 });
