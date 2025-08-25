@@ -14,6 +14,7 @@ import {overlay} from "./overlay";
 import {cast} from "./cast";
 import {getBit} from "./get_bit";
 import {readReport} from "./read_report";
+import {getReference} from "./get_reference";
 import {raiseEvent} from "./raise_event";
 import {receive} from "./receive";
 import {getLocale} from "./get_locale";
@@ -90,6 +91,7 @@ export class Statements {
   public setBit = setBit;
   public setHandler = setHandler;
   public setLocale = setLocale;
+  public getReference = getReference;
   public shift = shift;
   public sort = sort;
   public split = split;
