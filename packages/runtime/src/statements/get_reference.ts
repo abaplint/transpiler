@@ -5,9 +5,13 @@ import {ABAP} from "..";
 
 declare const abap: ABAP;
 
+/**
+ * note target and source is switched vs the ABAP statement for acommodating expression REF
+ */
 export function getReference(
-    source: INumeric | ICharacter | Table | Structure | DataReference | FieldSymbol,
-    target: FieldSymbol | DataReference) {
+  target: FieldSymbol | DataReference,
+  source: INumeric | ICharacter | Table | Structure | DataReference | FieldSymbol,
+) {
 //  console.dir(input);
 
   if (source instanceof FieldSymbol) {
@@ -26,4 +30,6 @@ export function getReference(
 
   target = target as DataReference;
   target.assign(source as any);
+
+  return target;
 }

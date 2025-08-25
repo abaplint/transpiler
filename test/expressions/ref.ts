@@ -46,7 +46,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.only("methods & field symbols & references", async () => {
+  it("methods & field symbols & references", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
