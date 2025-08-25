@@ -343,4 +343,39 @@ ENDIF.`;
     expect(abap.console.get()).to.equal("eq");
   });
 
+  it("append", async () => {
+    const code = `
+DATA: BEGIN OF data,
+        field1 TYPE string,
+        field2 TYPE i,
+      END OF data.
+
+TYPES: BEGIN OF ty,
+         name  TYPE string,
+         value TYPE REF TO data,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row LIKE LINE OF tab.
+DATA lv_type TYPE c LENGTH 1.
+FIELD-SYMBOLS <val> TYPE any.
+
+row-name = 'FIELD1'.
+GET REFERENCE OF data-field1 INTO row-value.
+APPEND row TO tab.
+
+row-name = 'FIELD2'.
+GET REFERENCE OF data-field2 INTO row-value.
+APPEND row TO tab.
+
+LOOP AT tab INTO row.
+  ASSIGN row-value->* TO <val>.
+  DESCRIBE FIELD <val> TYPE lv_type.
+  WRITE / lv_type.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("g\nI");
+  });
+
 });
