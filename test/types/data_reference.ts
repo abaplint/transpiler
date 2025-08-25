@@ -343,7 +343,7 @@ ENDIF.`;
     expect(abap.console.get()).to.equal("eq");
   });
 
-  it("append", async () => {
+  it("append1", async () => {
     const code = `
 DATA: BEGIN OF data,
         field1 TYPE string,
@@ -365,6 +365,47 @@ APPEND row TO tab.
 
 row-name = 'FIELD2'.
 GET REFERENCE OF data-field2 INTO row-value.
+APPEND row TO tab.
+
+LOOP AT tab INTO row.
+  ASSIGN row-value->* TO <val>.
+  DESCRIBE FIELD <val> TYPE lv_type.
+  WRITE / lv_type.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("g\nI");
+  });
+
+  it("append2", async () => {
+    const code = `
+TYPES: BEGIN OF dty,
+         field1 TYPE string,
+         field2 TYPE i,
+       END OF dty.
+DATA data TYPE REF TO dty.
+
+TYPES: BEGIN OF ty,
+         name  TYPE string,
+         value TYPE REF TO data,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row LIKE LINE OF tab.
+DATA lv_type TYPE c LENGTH 1.
+FIELD-SYMBOLS <val> TYPE any.
+FIELD-SYMBOLS <field> TYPE any.
+
+CREATE DATA data.
+
+row-name = 'FIELD1'.
+ASSIGN data->(row-name) TO <field>.
+GET REFERENCE OF <field> INTO row-value.
+APPEND row TO tab.
+
+row-name = 'FIELD2'.
+ASSIGN data->(row-name) TO <field>.
+GET REFERENCE OF <field> INTO row-value.
 APPEND row TO tab.
 
 LOOP AT tab INTO row.
