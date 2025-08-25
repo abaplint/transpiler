@@ -1,6 +1,9 @@
-import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Integer, Packed, Structure, Table} from "./types";
+import {ABAP} from ".";
+import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Integer, Packed, String, Structure, Table} from "./types";
 import {ICharacter} from "./types/_character";
 import {INumeric} from "./types/_numeric";
+
+declare const abap: ABAP;
 
 type options = {
   timestamp?: string,
@@ -11,10 +14,11 @@ type options = {
   decimals?: number,
   currency?: any,
   style?: any,
+  alpha?: "out" | "in",
   align?: "left" | "right",
 };
 
-export function templateFormatting(source: ICharacter | INumeric, options?: options): string {
+export async function templateFormatting(source: ICharacter | INumeric, options?: options): Promise<string> {
   let text = "";
 
   if (source instanceof FieldSymbol) {
@@ -56,6 +60,12 @@ export function templateFormatting(source: ICharacter | INumeric, options?: opti
     text = source.get() + "";
   }
 
+  if (options?.alpha === "out") {
+    const output = new String();
+    await abap.FunctionModules['CONVERSION_EXIT_ALPHA_INPUT']({exporting: {input: source}, importing: {output: output}});
+    text = output.get();
+  }
+
   if (options) {
     if (options.currency !== undefined) {
       throw "template formatting with currency not supported";
@@ -68,7 +78,7 @@ export function templateFormatting(source: ICharacter | INumeric, options?: opti
     }
     if (options.timestamp === "iso") {
       // make sure to get decimals from packed number,
-      text = templateFormatting(source).replace(".", ",");
+      text = (await templateFormatting(source)).replace(".", ",");
       text = text.substr(0,4) + "-" + text.substr(4,2) + "-" + text.substr(6,2) + "T" + text.substr(8,2) + ":" + text.substr(10,2) + ":" + text.substr(12,2) + text.substr(14);
       if (text === "0--T::") {
         text = "0000-00-00T00:00:00";

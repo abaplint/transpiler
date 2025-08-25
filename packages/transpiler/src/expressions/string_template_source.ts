@@ -9,7 +9,7 @@ export class StringTemplateSourceTranspiler implements IExpressionTranspiler {
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     let ret = "";
 
-    const pre = "abap.templateFormatting(";
+    const pre = "await abap.templateFormatting(";
     let post = ")";
     const formatting = node.findDirectExpression(Expressions.StringTemplateFormatting);
     if (formatting) {

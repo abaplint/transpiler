@@ -32,7 +32,7 @@ describe("Single statements", () => {
     {abap: "foo = 'fo'.",                          js: "foo.set(abap.CharacterFactory.get(2, 'fo'));",                         skip: false},
     {abap: "foo = 'moo'(005).",                    js: "foo.set(abap.CharacterFactory.get(3, 'moo'));",                        skip: false},
     {abap: "foo = |fo|.",                          js: "foo.set(new abap.types.String().set(`fo`));",                                       skip: false},
-    {abap: "foo = |fo{ 2 }|.",                     js: "foo.set(new abap.types.String().set(`fo${abap.templateFormatting(abap.IntegerFactory.get(2))}`));", skip: false},
+    {abap: "foo = |fo{ 2 }|.",                     js: "foo.set(new abap.types.String().set(`fo${await abap.templateFormatting(abap.IntegerFactory.get(2))}`));", skip: false},
     {abap: "foo = `fo`.",                          js: "foo.set(new abap.types.String().set(`fo`));",     skip: false},
     {abap: "foo = bar+1.",                         js: "foo.set(bar.getOffset({offset: 1}));",            skip: false},
     {abap: "foo = bar(1).",                        js: "foo.set(bar.getOffset({length: 1}));",            skip: false},
@@ -76,7 +76,7 @@ describe("Single statements", () => {
     {abap: "ASSERT sy-subrc = 0.",                    js: "abap.statements.assert(abap.compare.eq(abap.builtin.sy.get().subrc, abap.IntegerFactory.get(0)));",            skip: false},
     {abap: "ASSERT 0 = 1.",                           js: "abap.statements.assert(abap.compare.eq(abap.IntegerFactory.get(0), abap.IntegerFactory.get(1)));",                         skip: false},
     {abap: "APPEND lv_word TO lt_letters.",           js: "abap.statements.append({source: lv_word, target: lt_letters});",         skip: false},
-    {abap: "WRITE |foo{ lines( lt_words ) }bar|.",    js: "abap.statements.write(new abap.types.String().set(`foo${abap.templateFormatting(abap.builtin.lines({val: lt_words}))}bar`));",  skip: false},
+    {abap: "WRITE |foo{ lines( lt_words ) }bar|.",    js: "abap.statements.write(new abap.types.String().set(`foo${await abap.templateFormatting(abap.builtin.lines({val: lt_words}))}bar`));",  skip: false},
     {abap: "ASSERT 'a' < 'b'.",                       js: "abap.statements.assert(abap.compare.lt(abap.CharacterFactory.get(1, 'a'), abap.CharacterFactory.get(1, 'b')));",    skip: false},
     {abap: "rs_response-body = 'hello'.",             js: "rs_response.get().body.set(abap.CharacterFactory.get(5, 'hello'));",                  skip: false},
     {abap: "TYPES foo TYPE c.",                       js: "",                                                      skip: false}, // yes, skip TYPES
