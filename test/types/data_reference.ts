@@ -419,4 +419,65 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("g\nI");
   });
 
+  it("append3", async () => {
+    const code = `
+REPORT zhvam.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS ref_of_x_into_y
+      CHANGING
+        x TYPE any
+        y TYPE any.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD ref_of_x_into_y.
+    GET REFERENCE OF x INTO y.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  TYPES: BEGIN OF dty,
+           field1 TYPE string,
+           field2 TYPE i,
+         END OF dty.
+  DATA data TYPE REF TO dty.
+
+  TYPES: BEGIN OF ty,
+           name  TYPE string,
+           value TYPE REF TO data,
+         END OF ty.
+  DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+  DATA row LIKE LINE OF tab.
+  DATA lv_type TYPE c LENGTH 1.
+  FIELD-SYMBOLS <val> TYPE any.
+  FIELD-SYMBOLS <field> TYPE any.
+
+  CREATE DATA data.
+
+  row-name = 'FIELD1'.
+  ASSIGN data->(row-name) TO <field>.
+  lcl=>ref_of_x_into_y( CHANGING
+    x = <field>
+    y = row-value ).
+  APPEND row TO tab.
+
+  row-name = 'FIELD2'.
+  ASSIGN data->(row-name) TO <field>.
+  lcl=>ref_of_x_into_y( CHANGING
+    x = <field>
+    y = row-value ).
+  APPEND row TO tab.
+
+  LOOP AT tab INTO row.
+    ASSIGN row-value->* TO <val>.
+    DESCRIBE FIELD <val> TYPE lv_type.
+    WRITE / lv_type.
+  ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("g\nI");
+  });
+
 });
