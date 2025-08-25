@@ -20,9 +20,9 @@ export class GetReferenceTranspiler implements IStatementTranspiler {
 
     return new Chunk()
       .appendString("abap.statements.getReference(")
-      .appendChunk(source)
-      .appendString(", ")
       .appendChunk(target)
+      .appendString(", ")
+      .appendChunk(source)
       .append(");", node.getLastToken(), traversal);
   }
 

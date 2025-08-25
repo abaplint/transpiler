@@ -143,7 +143,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
         if (typ.startsWith("new abap.types.DataReference(") === false) {
           throw new Error("transpiler: REF # unexpected type")
         }
-        ret.append(`${typ}.assign(`, c, traversal);
+        ret.append(`abap.statements.getReference(${typ}, `, c, traversal);
         post.append(")", c, traversal);
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "BIT") { // todo, this will not work in the general case
         ret.append("abap.operators.bitnot(", c, traversal);
