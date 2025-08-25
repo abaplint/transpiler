@@ -6,7 +6,7 @@ import {ABAP} from "..";
 declare const abap: ABAP;
 
 export interface IAssignInput {
-  source?: INumeric | ICharacter | Table | Structure | DataReference,
+  source?: INumeric | ICharacter | Table | Structure | DataReference | FieldSymbol,
   target: FieldSymbol,
   dynamicName?: string,
   dynamicSource?: ICharacter, // first part only
@@ -16,6 +16,13 @@ export interface IAssignInput {
 
 export function assign(input: IAssignInput) {
 //  console.dir(input);
+
+/*
+  if (input.source instanceof FieldSymbol) {
+    return assign({...input, source: input.source.getPointer()});
+  }
+*/
+
   if (input.dynamicName) {
     if (input.dynamicSource instanceof FieldSymbol) {
       input.dynamicSource = input.dynamicSource.getPointer();

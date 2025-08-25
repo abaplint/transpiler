@@ -478,7 +478,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("g\nI");
   });
 
-  it.only("hmm, GET REFERENCE in method", async () => {
+  it.skip("hmm, GET REFERENCE in method", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.

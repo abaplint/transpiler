@@ -8,6 +8,7 @@ export class GetReferenceTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const s = node.findDirectExpression(abaplint.Expressions.Source);
     const t = node.findDirectExpression(abaplint.Expressions.Target);
+
     if (s === undefined) {
       throw new Error("GetReference, Source not found");
     } else if (t === undefined) {
@@ -17,15 +18,11 @@ export class GetReferenceTranspiler implements IStatementTranspiler {
     const source = traversal.traverse(s);
     const target = traversal.traverse(t);
 
-    if (s.getFirstToken().getStr().startsWith("<")) {
-      // its a field symbol
-      source.appendString(".getPointer()");
-    }
-
     return new Chunk()
-      .appendChunk(target)
-      .appendString(".assign(")
+      .appendString("abap.statements.getReference(")
       .appendChunk(source)
+      .appendString(", ")
+      .appendChunk(target)
       .append(");", node.getLastToken(), traversal);
   }
 
