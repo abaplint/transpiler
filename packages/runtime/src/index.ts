@@ -19,6 +19,7 @@ import {IntegerFactory} from "./integer_factory";
 import {dynamicCallLookup} from "./dynamic_call_lookup";
 import {CharacterFactory} from "./character_factory";
 import {ABAPEventing} from "./abap_eventing";
+import {isLineNotFound} from "./is_line_not_found";
 
 export {RFC, types, DB, MemoryConsole};
 
@@ -64,6 +65,7 @@ export class ABAP {
   public templateFormatting = templateFormatting;
   public expandIN = expandIN;
   public expandDynamic = expandDynamic;
+  public isLineNotFound = isLineNotFound;
   public buildDbTableName = buildDbTableName;
   public ClassicError = ClassicError;
   public dynamicCallLookup = dynamicCallLookup;

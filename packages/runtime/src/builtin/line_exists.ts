@@ -1,4 +1,5 @@
 import {ABAP} from "..";
+import {isLineNotFound} from "../is_line_not_found";
 import {ICharacter} from "../types/_character";
 
 export const LINE_NOT_FOUND = "CX_SY_ITAB_LINE_NOT_FOUND";
@@ -10,10 +11,7 @@ export function line_exists(callback: () => void): ICharacter {
   try {
     callback();
   } catch (error) {
-    if (abap.Classes[LINE_NOT_FOUND] !== undefined
-        && error instanceof abap.Classes[LINE_NOT_FOUND]) {
-      return abap.builtin.abap_false;
-    } else if (error.toString() === `Error: Global class ${LINE_NOT_FOUND} not found`) {
+    if (isLineNotFound(error)) {
       return abap.builtin.abap_false;
     }
     throw error;
