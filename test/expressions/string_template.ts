@@ -4,8 +4,8 @@ import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
-async function run(contents: string) {
-  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
+async function run(contents: string, skipVersionCheck = false) {
+  return runFiles(abap, [{filename: "zfoobar_string_templates.prog.abap", contents}], {skipVersionCheck});
 }
 
 describe("Running expressions - String templates", () => {
@@ -340,6 +340,15 @@ WRITE |{ lv_value STYLE = SCIENTIFIC }|.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("5E+00");
+  });
+
+  it("ALPHA OUT formatting", async () => {
+    const code = `
+DATA lv_value TYPE n LENGTH 5.
+lv_value = 5.
+WRITE |{ lv_value ALPHA = OUT }|.`;
+    await run(code, true);
+    // dont run it, the function module does not exist in the runtime, tho perhaps it should?
   });
 
 });
