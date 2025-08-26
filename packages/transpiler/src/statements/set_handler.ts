@@ -24,8 +24,6 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
 
         eventName = method.def.getEventName();
         eventClass = this.findEventClass(method.def, traversal, scope);
-        // className = method.def.getEventClass();
-        // this.findEventClass(def, eventName, traversal, scope);
       }
     }
 
@@ -45,6 +43,8 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
 
     return new Chunk().append(`abap.statements.setHandler({EVENT_NAME: "${eventName}", EVENT_CLASS: "${eventClass}"}, [${methods.join(",")}], ${f}${activation});`, node, traversal);
   }
+
+///////////////////////////////////////////////////////////////////////
 
   private findEventClass(mdef: abaplint.Types.MethodDefinition,
                          traversal: Traversal,
@@ -70,33 +70,4 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
     return traversal.buildInternalName(def.getName(), def);
   }
 
-  /*  private findEventClass(def: abaplint.IClassDefinition,
-                         eventName: string | undefined,
-                         traversal: Traversal,
-                         scope: abaplint.ISpaghettiScopeNode | undefined): string {
-    let current: abaplint.IClassDefinition | undefined = def;
-    while (current !== undefined) {
-      for (const event of current.getEvents()) {
-        if (event.getName().toUpperCase() === eventName?.toUpperCase()) {
-          return traversal.buildInternalName(current.getName(), current);
-        }
-      }
-
-      for (const implementing of current.getImplementing()) {
-        const idef = traversal.findInterfaceDefinition(implementing.name, scope);
-        if (idef === undefined) {
-          continue;
-        }
-        for (const event of idef.getEvents()) {
-          if (event.getName().toUpperCase() === eventName?.toUpperCase()) {
-            return traversal.buildInternalName(idef.getName(), idef);
-          }
-        }
-      }
-
-      current = traversal.findClassDefinition(current.getSuperClass(), scope);
-    }
-    throw new Error(`SetHandlerTranspiler: Event "${eventName}" not found in class "${def.getName()}"`);
-  }
-  */
 }
