@@ -18,6 +18,7 @@ export class HandleTable {
   "objectType": "TABL",
   "type": ${TranspileTypes.toType(type)},
   "keyFields": ${JSON.stringify(obj.listKeys(reg))},
+  "description": ${JSON.stringify(obj.getDescription())},
 };`);
 
     const output: IOutputFile = {

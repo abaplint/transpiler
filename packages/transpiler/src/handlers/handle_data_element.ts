@@ -26,6 +26,7 @@ export class HandleDataElement {
   "type": ${TranspileTypes.toType(type)},
   "domain": ${JSON.stringify(obj.getDomainName())},
   "fixedValues": ${JSON.stringify(fixedValues)},
+  "description": ${JSON.stringify(obj.getDescription())},
 };`);
 
     const output: IOutputFile = {
