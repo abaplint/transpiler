@@ -47,29 +47,27 @@ function dynamicToWhere(condition: string, evaluate: (name: string) => FieldSymb
   let text = condition.replace(/ AND /gi, " && ").replace(/ OR /gi, " || ").replace(/ = /gi, " EQ ").replace(/ <> /gi, " NE ")
 //  console.dir(text);
 
-  let regex = /([\w-]+)\s+(\w+)\s+([<>\w-]+)/gi;
-  let matches = text.matchAll(regex);
+  let matches = text.matchAll(/([\w-]+)\s+(\w+)\s+([<>\w-]+)/gi);
   for (const match of matches) {
     const left = match[1];
     const comparator = match[2].toLowerCase();
-    const right = match[3];
+    let right = match[3];
 //    console.dir({left, right});
 
     const cleft = "i." + left.toLowerCase().replace(/-/g, ".get().");
-    const cright = right;
-    const cnew = `abap.compare.${comparator}(${cleft}, ${cright})`;
+
+    matches = right.matchAll(/<(\w+)>-(\w+)/gi);
+    for (const match of matches) {
+      const name = "fs_" + match[1].toLowerCase() + "_";
+      const value = evaluate(name)?.get()?.[match[2].toLowerCase()]?.get();
+      right = right.replace(match[0], " '" + value + "'");
+    }
+
+    const cnew = `abap.compare.${comparator}(${cleft}, ${right})`;
     text = text.replace(match[0], cnew);
   }
 
-  regex = / <(\w+)>-(\w+)/gi;
-  matches = text.matchAll(regex);
-  for (const match of matches) {
-    const name = "fs_" + match[1].toLowerCase() + "_";
-    const value = evaluate(name)?.get()?.[match[2].toLowerCase()]?.get();
-    text = text.replace(match[0], " '" + value + "'");
-  }
-
-//  console.dir(text);
+  // console.dir(text);
 
   // @ts-ignore
   return async (i: any) => {
