@@ -896,7 +896,7 @@ ENDLOOP.`;
     expect(abap.console.getTrimmed()).to.equal("World");
   });
 
-  it.only("LOOP, dynamic where", async () => {
+  it("LOOP, dynamic where", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          BEGIN OF admin,
@@ -920,7 +920,6 @@ LOOP AT lt_data ASSIGNING <ls_data> WHERE (lv_where).
 ENDLOOP.
 WRITE / sy-subrc.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.getTrimmed()).to.equal("4");
@@ -1007,7 +1006,7 @@ START-OF-SELECTION.
     expect(abap.console.getTrimmed()).to.equal("12");
   });
 
-  it.skip("LOOP dynamic WHERE IN, no hit", async () => {
+  it("LOOP dynamic WHERE IN, no hit", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          field TYPE i,
@@ -1026,7 +1025,7 @@ ENDLOOP.`;
     await f(abap);
   });
 
-  it.skip("LOOP dynamic WHERE IN, hit two", async () => {
+  it("LOOP dynamic WHERE IN, hit two", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          field TYPE i,
