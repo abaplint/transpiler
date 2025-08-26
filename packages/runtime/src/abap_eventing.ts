@@ -41,7 +41,6 @@ export class ABAPEventing {
       }
       // todo: comparing the functions via toString might give the wrong result
       const index = handlers.findIndex(handler => handler.forObject === ref && handler.handlers[0].toString() === methods[0].toString());
-      console.dir(index);
       if (index !== -1) {
         handlers.splice(index, 1);
       }

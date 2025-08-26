@@ -77,7 +77,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("sdf");
   });
 
-  it.only("basic deregistration", async () => {
+  it("basic deregistration", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
