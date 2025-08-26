@@ -16,6 +16,7 @@ export class HandleTableType {
     const chunk = new Chunk().appendString(`abap.DDIC["${obj.getName().toUpperCase()}"] = {
   "objectType": "TTYP",
   "type": ${TranspileTypes.toType(type)},
+  "description": ${JSON.stringify(obj.getDescription())},
 };`);
 
     const output: IOutputFile = {
