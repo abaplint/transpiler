@@ -13,7 +13,7 @@ export function setHandler(eventReference: ABAPEventReference,
   if (forObject instanceof FieldSymbol) {
     const pointer = forObject.getPointer();
     if (pointer === undefined) {
-      throw new Error("CX_SY_ SOMETHING TODO");
+      throw new Error("CX_SY SOMETHING TODO");
     }
     return setHandler(eventReference, methods, pointer, activation);
   } else if (forObject instanceof ABAPObject && forObject.get() === undefined) {

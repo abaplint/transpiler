@@ -16,9 +16,7 @@ export class ABAPEventing {
   private readonly registrations: {[className: string]: {[eventName: string]: Handlers}} = {};
 
   public setHandler(event: ABAPEventReference, methods: HandlerMethod[], forObject: ABAPObject | "ALL", activation: boolean): any {
-    if (activation === false) {
-      throw new Error("ABAPEventing.setHandler: deactivation not supported, todo");
-    } else if (methods.length === 0) {
+    if (methods.length === 0) {
       throw new Error("ABAPEventing.setHandler: no methods provided");
     }
 
@@ -31,11 +29,22 @@ export class ABAPEventing {
 
     const ref = forObject === "ALL" ? "ALL" : new WeakRef(forObject);
     const handlers = this.registrations[event.EVENT_CLASS][event.EVENT_NAME];
-    // todo: tackle duplicates
-    handlers.push({
-      handlers: methods,
-      forObject: ref,
-    });
+    if (activation === true) {
+      // todo: tackle duplicates
+      handlers.push({
+        handlers: methods,
+        forObject: ref,
+      });
+    } else {
+      if (methods.length > 1) {
+        throw new Error("ABAPEventing.setHandler: deactivation of multiple methods not supported, todo");
+      }
+      // todo: comparing the functions via toString might give the wrong result
+      const index = handlers.findIndex(handler => handler.forObject === ref && handler.handlers[0].toString() === methods[0].toString());
+      if (index !== -1) {
+        handlers.splice(index, 1);
+      }
+    }
   }
 
   // todo: cleanup of dead WeakRefs

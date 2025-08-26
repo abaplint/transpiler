@@ -1006,4 +1006,45 @@ START-OF-SELECTION.
     expect(abap.console.getTrimmed()).to.equal("12");
   });
 
+  it("LOOP dynamic WHERE IN, no hit", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field TYPE i,
+       END OF ty.
+DATA range TYPE RANGE OF i.
+DATA dynamic TYPE string.
+DATA tab TYPE STANDARD TABLE OF ty.
+DATA row LIKE LINE OF tab.
+
+dynamic = 'field in range'.
+LOOP AT tab INTO row WHERE (dynamic).
+  WRITE / row-field.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("LOOP dynamic WHERE IN, hit two", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field TYPE i,
+       END OF ty.
+DATA range TYPE RANGE OF i.
+DATA dynamic TYPE string.
+DATA tab TYPE STANDARD TABLE OF ty.
+DATA row LIKE LINE OF tab.
+
+INSERT VALUE #( field = 2 ) INTO TABLE tab.
+INSERT VALUE #( low = 2 option = 'EQ' sign = 'I' ) INTO TABLE range.
+dynamic = 'field in range'.
+LOOP AT tab INTO row WHERE (dynamic).
+  WRITE / row-field.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("2");
+  });
+
 });
