@@ -30,6 +30,7 @@ describe("Multiple lines", () => {
 
     const expected = `class lif_foobar {
   static INTERNAL_TYPE = 'INTF';
+  static INTERNAL_NAME = 'PROG-ZFOOBAR-LIF_FOOBAR';
   static ATTRIBUTES = {};
   static METHODS = {};
 }
@@ -532,6 +533,7 @@ lcl_bar.first = new abap.types.Character(1, {});
 lcl_bar.first.set('b');
 class bar {
   static INTERNAL_TYPE = 'INTF';
+  static INTERNAL_NAME = 'PROG-ZFOOBAR-BAR';
   static ATTRIBUTES = {"NEXT": {"type": () => {return new abap.types.Character(1, {});}, "visibility": "U", "is_constant": "X", "is_class": "X"}};
   static METHODS = {};
 }
@@ -670,6 +672,7 @@ CLASS lcl IMPLEMENTATION.
 ENDCLASS.`;
     const expected = `class lif {
   static INTERNAL_TYPE = 'INTF';
+  static INTERNAL_NAME = 'PROG-ZFOOBAR-LIF';
   static ATTRIBUTES = {"DEFAULT_VALUE": {"type": () => {return new abap.types.String({qualifiedName: "STRING"});}, "visibility": "U", "is_constant": "X", "is_class": "X"}};
   static METHODS = {};
 }
