@@ -22,6 +22,7 @@ export interface ICreateDataOptions {
 }
 
 export function createData(target: DataReference | FieldSymbol, options?: ICreateDataOptions) {
+  console.dir(options);
   if (target instanceof FieldSymbol) {
     createData(target.getPointer(), options);
     return;
@@ -34,7 +35,7 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
     }
     // @ts-ignore
     target.assign(new abap.types.Table(abap.DDIC[options.name.trimEnd()].type));
-  } else if (options?.name) {
+  } else if (options?.name !== undefined) {
     if (abap.DDIC[options.name.trimEnd()]) {
       target.assign(abap.DDIC[options.name.trimEnd()].type.clone());
     } else if (options.name.includes("=>")) {
@@ -156,8 +157,7 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
       default:
         if (abap.DDIC[options.typeName.trimEnd()]) {
           target.assign(abap.DDIC[options.typeName.trimEnd()].type.clone());
-        }
-        else if (options.typeName.includes("=>")) {
+        } else if (options.typeName.includes("=>")) {
           const [className, typeName] = options.typeName.toUpperCase().split("=>");
 
           if (abap.Classes[className] === undefined) {
