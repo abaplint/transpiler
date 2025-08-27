@@ -373,4 +373,18 @@ START-OF-SELECTION.
     await f(abap);
     expect(abap.console.get()).to.equal("2");
   });
+
+  it("CREATE DATA, empty name", async () => {
+    const code = `
+DATA rdata TYPE REF TO data.
+CREATE DATA rdata TYPE ('').`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch(e) {
+      expect(e.toString()).to.contain("CX_SY_CREATE_DATA_ERROR");
+    }
+  });
 });
