@@ -22,7 +22,7 @@ export interface ICreateDataOptions {
 }
 
 export function createData(target: DataReference | FieldSymbol, options?: ICreateDataOptions) {
-  console.dir(options);
+  // console.dir(options);
   if (target instanceof FieldSymbol) {
     createData(target.getPointer(), options);
     return;
