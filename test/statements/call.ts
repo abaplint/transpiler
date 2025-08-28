@@ -245,7 +245,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1");
   });
 
-  it.only("dynamic method call, returning parameter", async () => {
+  it("dynamic method call, returning parameter", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
@@ -281,7 +281,6 @@ START-OF-SELECTION.
   CREATE OBJECT ref.
   ref->run( ).`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");

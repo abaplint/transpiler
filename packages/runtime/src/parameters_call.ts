@@ -20,9 +20,6 @@ export async function parametersCall(method: (params: any) => Promise<any>, para
 
   const res = await method(input);
   if (res !== undefined) {
-    receiving?.assign(res);
+    receiving?.set(res);
   }
-
-  console.dir(res);
-  console.dir(receiving);
 }
