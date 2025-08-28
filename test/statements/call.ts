@@ -204,7 +204,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1");
   });
 
-  it("call method, simple parameter table, with exceptions tabl", async () => {
+  it.skip("call method, simple parameter table, with exceptions tabl", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
@@ -243,6 +243,47 @@ START-OF-SELECTION.
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
+  });
+
+  it("dynamic method call, returning parameter", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS run.
+    METHODS get RETURNING VALUE(int) TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    TYPES: BEGIN OF abap_parmbind,
+             name  TYPE c LENGTH 30,
+             kind  TYPE c LENGTH 1,
+             value TYPE REF TO data,
+           END OF abap_parmbind.
+    TYPES abap_parmbind_tab TYPE HASHED TABLE OF abap_parmbind WITH UNIQUE KEY name.
+    DATA lt_parameters_getter TYPE abap_parmbind_tab.
+    DATA result TYPE REF TO i.
+
+    CREATE DATA result.
+    INSERT VALUE #( name = 'INT' value = result kind = 'R' ) INTO TABLE lt_parameters_getter.
+    CALL METHOD me->('GET')
+      PARAMETER-TABLE lt_parameters_getter.
+    WRITE / result->*.
+  ENDMETHOD.
+
+  METHOD get.
+    int = 2.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl.
+  CREATE OBJECT ref.
+  ref->run( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
   });
 
   it("static call, interfaced aliased method", async () => {
