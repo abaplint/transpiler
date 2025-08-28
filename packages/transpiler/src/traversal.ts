@@ -269,8 +269,24 @@ export class Traversal {
       for (const p of m.getParameters().getAll()) {
         const type = TranspileTypes.toType(p.getType());
         const optional = m.getParameters().getOptional().includes(p.getName()) ? "X" : " ";
+
+        let pKind = "";
+        if (pKind === "") {
+          pKind = m.getParameters().getImporting().find((t) => {return t.getName() === p.getName();}) ? "I" : "";
+        }
+        if (pKind === "") {
+          pKind = m.getParameters().getChanging().find((t) => {return t.getName() === p.getName();}) ? "C" : "";
+        }
+        if (pKind === "") {
+          pKind = m.getParameters().getExporting().find((t) => {return t.getName() === p.getName();}) ? "E" : "";
+        }
+        if (pKind === "") {
+          pKind = m.getParameters().getReturning()?.getName() === p.getName() ? "R" : "";
+        }
+
         parameters.push(`"${p.getName().toUpperCase()}": {"type": () => {return ${type
           };}, "is_optional": "${optional
+          }", "parm_kind": "${pKind
           }", "type_name": "${p.getType().constructor.name}"}`);
       }
 
