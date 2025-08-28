@@ -13,8 +13,8 @@ export class CallTranspiler implements IStatementTranspiler {
       let pre = "";
       let post = "";
       const receiving = chain.findFirstExpression(abaplint.Expressions.MethodParameters
-      )?.findDirectExpression(abaplint.Expressions.ParameterT
-      )?.findDirectExpression(abaplint.Expressions.Target);
+        )?.findDirectExpression(abaplint.Expressions.ParameterT
+        )?.findDirectExpression(abaplint.Expressions.Target);
       if (receiving) {
         pre = traversal.traverse(receiving).getCode() + ".set(";
         post = ")";
@@ -45,17 +45,26 @@ export class CallTranspiler implements IStatementTranspiler {
     const methodSource = node.findDirectExpression(abaplint.Expressions.MethodSource);
     if (methodSource) {
       let body = "";
+      let pre = "";
+      let post = "";
 
       const nameToken = methodSource.getLastChild()?.getFirstToken();
       const m = nameToken ? traversal.findMethodReference(nameToken, traversal.findCurrentScopeByToken(nameToken)) : undefined;
 
       const methodCallBody = node.findDirectExpression(abaplint.Expressions.MethodCallBody);
       if (methodCallBody) {
-        body = new MethodCallBodyTranspiler(m?.def).transpile(methodCallBody, traversal).getCode();
+        if (methodCallBody.findDirectTokenByText("EXCEPTION")) {
+          throw new Error("EXCEPTION-TABLE not supported, todo");
+        }
+        if (methodCallBody.findDirectTokenByText("PARAMETER")) {
+          const source = traversal.traverse(methodCallBody.findDirectExpression(abaplint.Expressions.Source)).getCode();
+          pre = 'await abap.parametersCall(';
+          body = ", " + source + ")";
+        } else {
+          body = new MethodCallBodyTranspiler(m?.def).transpile(methodCallBody, traversal).getCode();
+          body = "(" + body + ")";
+        }
       }
-
-      let pre = "";
-      let post = "";
 
       const receiving = node.findFirstExpression(abaplint.Expressions.MethodParameters)?.findExpressionAfterToken("RECEIVING");
       if (receiving) {
@@ -100,7 +109,11 @@ export class CallTranspiler implements IStatementTranspiler {
         }
       }
 
-      return new Chunk().appendString(ms).appendString("(" + body + ")" + post + ";");
+      if (body === "") {
+        body = "()";
+      }
+
+      return new Chunk().appendString(ms).appendString(body + post + ";");
     }
 
     throw new Error("CallTranspiler, todo");

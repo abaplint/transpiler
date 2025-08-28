@@ -15,24 +15,29 @@ export class MethodCallBodyTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     const ret = new Chunk();
-    let pt = false;
+    // let pt = false;
 
     for (const c of node.getChildren()) {
       if (c instanceof Nodes.TokenNode) {
-        if(c.concatTokens().toUpperCase() === "PARAMETER") {
+        /*
+        if (c.concatTokens().toUpperCase() === "PARAMETER") {
           // PARAMETER-TABLE
           pt = true;
         } else if(c.concatTokens().toUpperCase() === "EXCEPTION") {
           // todo: handle EXCEPTION-TABLE, for now just produce valid javascript
           return ret;
         }
+          */
       } else if (c.get() instanceof abaplint.Expressions.MethodCallParam) {
         ret.appendChunk(new MethodCallParamTranspiler(this.m).transpile(c, traversal));
       } else {
         ret.appendChunk(traversal.traverse(c));
+        /*
         if (pt === true) {
-          ret.appendString(".array().reduce((a, v) => ({ ...a, [v.get().name.get().toLowerCase().trimEnd()]: v.get().value.dereference()}), {})");
+          ret.appendString(".array().reduce((a, v) => ({ ...a, [v.get().name.get(
+          ).toLowerCase().trimEnd()]: v.get().value.dereference()}), {})");
         }
+        */
       }
     }
 
