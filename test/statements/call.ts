@@ -245,7 +245,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1");
   });
 
-  it.skip("dynamic method call, returning parameter", async () => {
+  it.only("dynamic method call, returning parameter", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
@@ -265,7 +265,7 @@ CLASS lcl IMPLEMENTATION.
     DATA result TYPE REF TO i.
 
     CREATE DATA result.
-    INSERT VALUE #( name = 'INT' value = result ) INTO TABLE lt_parameters_getter.
+    INSERT VALUE #( name = 'INT' value = result kind = 'R' ) INTO TABLE lt_parameters_getter.
     CALL METHOD me->('GET')
       PARAMETER-TABLE lt_parameters_getter.
     WRITE / result->*.
