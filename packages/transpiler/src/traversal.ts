@@ -286,7 +286,7 @@ export class Traversal {
 
         parameters.push(`"${p.getName().toUpperCase()}": {"type": () => {return ${type
           };}, "is_optional": "${optional
-          };}, "parm_kind": "${pKind
+          }", "parm_kind": "${pKind
           }", "type_name": "${p.getType().constructor.name}"}`);
       }
 
