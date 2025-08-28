@@ -269,7 +269,9 @@ export class Traversal {
       for (const p of m.getParameters().getAll()) {
         const type = TranspileTypes.toType(p.getType());
         const optional = m.getParameters().getOptional().includes(p.getName()) ? "X" : " ";
-        parameters.push(`"${p.getName().toUpperCase()}": {"type": () => {return ${type};}, "is_optional": "${optional}"}`);
+        parameters.push(`"${p.getName().toUpperCase()}": {"type": () => {return ${type
+          };}, "is_optional": "${optional
+          }", "type_name": "${p.getType().constructor.name}"}`);
       }
 
       methods.push(`"${m.getName().toUpperCase()}": {"visibility": "${
