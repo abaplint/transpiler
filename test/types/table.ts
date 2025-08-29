@@ -574,4 +574,100 @@ WRITE / lines( stab ).`;
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("hashed, read with object in key", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+FORM run.
+  TYPES:
+    BEGIN OF ts_instance_key,
+      type   TYPE c LENGTH 3,
+      object TYPE REF TO lcl,
+    END OF   ts_instance_key .
+  TYPES:
+    BEGIN OF ts_instance.
+      INCLUDE TYPE ts_instance_key AS key.
+      TYPES: field TYPE i,
+    END OF ts_instance.
+
+  TYPES tt_instances TYPE HASHED TABLE OF ts_instance WITH UNIQUE KEY key.
+  DATA gt_instances TYPE tt_instances.
+  DATA ls_instance LIKE LINE OF gt_instances.
+
+  DATA ref1 TYPE REF TO lcl.
+  DATA ref2 TYPE REF TO lcl.
+  CREATE OBJECT ref1.
+  CREATE OBJECT ref2.
+
+  ls_instance-key-type = 'FOO'.
+  ls_instance-key-object = ref1.
+  INSERT ls_instance INTO TABLE gt_instances.
+
+  READ TABLE gt_instances WITH TABLE KEY key = ls_instance-key TRANSPORTING NO FIELDS.
+  WRITE / sy-subrc.
+
+  ls_instance-key-object = ref2.
+  READ TABLE gt_instances WITH TABLE KEY key = ls_instance-key TRANSPORTING NO FIELDS.
+  WRITE / sy-subrc.
+
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n4");
+  });
+
+  it("hashed, read with initial object references", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+FORM run.
+  TYPES:
+    BEGIN OF ts_instance_key,
+      type   TYPE c LENGTH 3,
+      object TYPE REF TO lcl,
+    END OF   ts_instance_key .
+  TYPES:
+    BEGIN OF ts_instance.
+      INCLUDE TYPE ts_instance_key AS key.
+      TYPES: field TYPE i,
+    END OF ts_instance.
+
+  TYPES tt_instances TYPE HASHED TABLE OF ts_instance WITH UNIQUE KEY key.
+  DATA gt_instances TYPE tt_instances.
+  DATA ls_instance LIKE LINE OF gt_instances.
+
+  DATA ref1 TYPE REF TO lcl.
+  DATA ref2 TYPE REF TO lcl.
+
+  ls_instance-key-type = 'FOO'.
+  ls_instance-key-object = ref1.
+  INSERT ls_instance INTO TABLE gt_instances.
+
+  READ TABLE gt_instances WITH TABLE KEY key = ls_instance-key TRANSPORTING NO FIELDS.
+  WRITE / sy-subrc.
+
+  ls_instance-key-object = ref2.
+  READ TABLE gt_instances WITH TABLE KEY key = ls_instance-key TRANSPORTING NO FIELDS.
+  WRITE / sy-subrc.
+
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n0");
+  });
+
 });
