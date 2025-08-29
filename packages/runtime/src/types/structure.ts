@@ -138,7 +138,7 @@ export class Structure {
     for (const v in this.value) {
       const foo = this.value[v];
       if (foo instanceof Structure) {
-        val += foo.getCharacter();
+        val += foo.getCharacter(allowObject);
       } else if (foo instanceof ABAPObject) {
         if (allowObject === false) {
           throw new Error("Structure getCharacter: unexpected ABAPObject");
