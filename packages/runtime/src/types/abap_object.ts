@@ -21,6 +21,10 @@ export class ABAPObject  {
     return this.value;
   }
 
+  public getInternalID(): string | undefined {
+    return "OpenABAPInternalObjectId=" + this.value?.INTERNAL_ID;
+  }
+
   public clear() {
     this.value = undefined;
   }

@@ -159,9 +159,9 @@ export class HashedTable implements ITable {
     for (const k of this.options.primaryKey!.keyFields) {
       if (k === "TABLE_LINE") {
         if (data instanceof Structure) {
-          hash += k + ":" + data.getCharacter() + "|";
+          hash += k + ":" + data.getCharacter(true) + "|";
         } else if (data instanceof ABAPObject) {
-          const moo = "OpenABAPInternalObjectId=" + data.get().INTERNAL_ID;
+          const moo = data.getInternalID();
           hash += k + ":" + moo + "|";
         } else {
           // @ts-ignore
@@ -171,9 +171,9 @@ export class HashedTable implements ITable {
         // @ts-ignore
         let val = data.get()[k.toLowerCase()];
         if (val instanceof Structure) {
-          val = val.getCharacter();
+          val = val.getCharacter(true);
         } else if (val instanceof ABAPObject) {
-          val = "OpenABAPInternalObjectId=" + val.get().INTERNAL_ID;
+          val = val.getInternalID();
         } else {
           val = val.get();
         }
@@ -216,9 +216,9 @@ export class HashedTable implements ITable {
         } else if (field instanceof HexUInt8 && val instanceof HexUInt8 && field.getLength() === val.getLength()) {
           val = val.get();
         } else if (val instanceof ABAPObject) {
-          val = "OpenABAPInternalObjectId=" + val.get().INTERNAL_ID;
+          val = val.getInternalID();
         } else if (val instanceof Structure) {
-          val = val.getCharacter();
+          val = val.getCharacter(true);
         } else {
           // convert
           const row = field.clone() as any;

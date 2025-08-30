@@ -6,6 +6,7 @@ import {parse} from "../operators/_parse";
 import {Hex} from "./hex";
 import {Character} from "./character";
 import {throwError} from "../throw_error";
+import {ABAPObject} from "./abap_object";
 
 export class Structure {
   private readonly value: {[key: string]: any};
@@ -132,13 +133,19 @@ export class Structure {
     return this.value;
   }
 
-  public getCharacter(): string {
+  public getCharacter(allowObject = false): string {
     let val = "";
     for (const v in this.value) {
-      if (this.value[v] instanceof Structure) {
-        val += this.value[v].getCharacter();
+      const foo = this.value[v];
+      if (foo instanceof Structure) {
+        val += foo.getCharacter(allowObject);
+      } else if (foo instanceof ABAPObject) {
+        if (allowObject === false) {
+          throw new Error("Structure getCharacter: unexpected ABAPObject");
+        }
+        val += foo.getInternalID();
       } else {
-        val += this.value[v].get();
+        val += foo.get();
       }
     }
     return val;
