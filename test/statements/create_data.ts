@@ -387,4 +387,22 @@ CREATE DATA rdata TYPE ('').`;
       expect(e.toString()).to.contain("CX_SY_CREATE_DATA_ERROR");
     }
   });
+
+  it("CREATE DATA, like standard table of", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field TYPE i,
+       END OF ty.
+DATA row TYPE ty.
+DATA dref TYPE REF TO data.
+FIELD-SYMBOLS <fs> TYPE ANY TABLE.
+
+CREATE DATA dref LIKE STANDARD TABLE OF row.
+ASSIGN dref->* TO <fs>.
+WRITE / lines( <fs> ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
 });
