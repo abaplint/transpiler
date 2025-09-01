@@ -111,8 +111,19 @@ export async function initializeABAP() {\n`;
   // class constructors might make early use of eg. constants from interfaces
   // sub classes will import() super classes and trigger a class constructor of the super
   private hasClassConstructor(reg: abaplint.IRegistry, clas: abaplint.Objects.Class): boolean {
+    /*
     if (clas.getDefinition()?.getMethodDefinitions().getByName("CLASS_CONSTRUCTOR") !== undefined) {
       return true;
+    }
+    */
+
+    // also take local class definitions into account
+    for (const file of clas.getABAPFiles()) {
+      for (const cdef of file.getInfo().listClassDefinitions()) {
+        if (cdef.methods.some((m) => m.name.toUpperCase() === "CLASS_CONSTRUCTOR")) {
+          return true;
+        }
+      }
     }
 
     const sup = clas.getDefinition()?.getSuperClass();
