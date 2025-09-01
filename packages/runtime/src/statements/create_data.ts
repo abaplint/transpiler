@@ -1,5 +1,5 @@
 import {throwError} from "../throw_error";
-import {ABAPObject, Character, DataReference, Date, String, FieldSymbol, Float, Integer, Structure, Table, Time, XString, Hex, Packed, Numc, Integer8, UTCLong} from "../types";
+import {ABAPObject, Character, DataReference, Date, String, FieldSymbol, Float, Integer, Structure, Table, Time, XString, Hex, Packed, Numc, Integer8, UTCLong, ITableOptions, TableKeyType} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {ABAP} from "..";
@@ -21,8 +21,11 @@ export interface ICreateDataOptions {
   like?: any,
 }
 
+const tableOptions: ITableOptions = {withHeader: false, keyType: TableKeyType.default};
+
 export function createData(target: DataReference | FieldSymbol, options?: ICreateDataOptions) {
   // console.dir(options);
+
   if (target instanceof FieldSymbol) {
     createData(target.getPointer(), options);
     return;
@@ -33,8 +36,7 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
     if (abap.DDIC[options.name.trimEnd()] === undefined) {
       throwError("CX_SY_CREATE_DATA_ERROR");
     }
-    // @ts-ignore
-    target.assign(new abap.types.Table(abap.DDIC[options.name.trimEnd()].type));
+    target.assign(new abap.types.Table(abap.DDIC[options.name.trimEnd()].type, tableOptions));
   } else if (options?.name !== undefined) {
     if (abap.DDIC[options.name.trimEnd()]) {
       target.assign(abap.DDIC[options.name.trimEnd()].type.clone());
@@ -183,7 +185,11 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
     if (options.like instanceof FieldSymbol) {
       options.like = options.like.getPointer();
     }
-    target.assign(options.like.clone());
+    if (options.table === true) {
+      target.assign(new abap.types.Table(options.like.clone(), tableOptions));
+    } else {
+      target.assign(options.like.clone());
+    }
   } else {
     target.assign(target.getType()?.clone());
   }

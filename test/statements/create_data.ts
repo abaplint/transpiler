@@ -388,7 +388,7 @@ CREATE DATA rdata TYPE ('').`;
     }
   });
 
-  it.only("CREATE DATA, like standard table of", async () => {
+  it("CREATE DATA, like standard table of", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          field TYPE i,
