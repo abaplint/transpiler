@@ -11,6 +11,7 @@ type options = {
   decimals?: number,
   currency?: any,
   style?: any,
+  alpha?: "out" | "in",
   align?: "left" | "right",
 };
 
