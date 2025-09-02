@@ -7,7 +7,6 @@ export class MoveTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const sourceExpression = node.findDirectExpression(abaplint.Expressions.Source);
-    let source = traversal.traverse(sourceExpression);
 
     const targets: Chunk[] = [];
     const targetExpressions = node.findDirectExpressions(abaplint.Expressions.Target);
@@ -24,9 +23,11 @@ export class MoveTranspiler implements IStatementTranspiler {
       const target = targets[0].getCode();
       const tSource = traversal.traverse(sourceExpression.findFirstExpression(abaplint.Expressions.StringTemplateSource
         )?.findDirectExpression(abaplint.Expressions.Source));
-      ret.appendString(target + `.set(abap.alphaIn(${tSource.getCode()}, ${target}));`);
+      ret.appendString(target + `.set(abap.alphaIn(${tSource.getCode()}, ${target}, ${target}));`);
       return ret;
     }
+
+    let source = traversal.traverse(sourceExpression);
 
     const second = node.getChildren()[1]?.concatTokens();
     switch (second) {
