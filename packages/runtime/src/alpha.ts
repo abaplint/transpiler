@@ -1,3 +1,4 @@
+import {Character, String} from "./types";
 import {ICharacter} from "./types/_character";
 import {INumeric} from "./types/_numeric";
 
@@ -6,7 +7,22 @@ export function alphaOut(source: ICharacter | INumeric): string {
   return txt.replace(/^0+/, "");
 }
 
+export function alphaIn(source: ICharacter | INumeric | String, context: Character | String): string {
+  const txt: string = source.get() + "";
 
-export function alphaIn(_source: ICharacter | INumeric, _context: any): string {
-  throw new Error("ALPHA_IN_NOT_SUPPORTED, todo");
+  if (txt.match(/^[0-9 ]+$/) === null) {
+    // contains letters
+    return txt;
+  }
+
+  let length = 0;
+  if (context instanceof String && source instanceof String) {
+    return txt;
+  } else if (context instanceof Character) {
+    length = context.getLength();
+  } else if (source instanceof Character) {
+    length = source.getLength();
+  }
+
+  return txt.padStart(length, "0");
 }

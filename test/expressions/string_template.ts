@@ -353,17 +353,52 @@ WRITE |{ lv_value ALPHA = OUT }|.`;
     expect(abap.console.get()).to.equal("5");
   });
 
-  it.only("ALPHA IN formatting", async () => {
+  it("ALPHA IN formatting", async () => {
     const code = `
 DATA val TYPE c LENGTH 10.
 DATA input TYPE c VALUE 5.
 val = |{ input ALPHA = IN }|.
 WRITE / val.`;
     const js = await run(code, true);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0000000005");
+  });
+
+  it("ALPHA IN formatting, string input", async () => {
+    const code = `
+DATA val TYPE c LENGTH 10.
+DATA input TYPE string VALUE '5'.
+val = |{ input ALPHA = IN }|.
+WRITE / val.`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0000000005");
+  });
+
+  it.only("ALPHA IN formatting, string output", async () => {
+    const code = `
+DATA val TYPE string.
+DATA input TYPE c LENGTH 5 VALUE '5'.
+val = |{ input ALPHA = IN }|.
+WRITE / val.`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("00005");
+  });
+
+  it("ALPHA IN formatting, string input and output", async () => {
+    const code = `
+DATA val TYPE string.
+DATA input TYPE string VALUE '5'.
+val = |{ input ALPHA = IN }|.
+WRITE / val.`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("5");
   });
 
 });
