@@ -61,7 +61,7 @@ export function templateFormatting(source: ICharacter | INumeric, options?: opti
 
   if (options?.alpha === "out") {
     text = alphaOut(source);
-} else if (options?.alpha === "in") {
+  } else if (options?.alpha === "in") {
     text = alphaIn(source, options.alphaInContext);
   }
 

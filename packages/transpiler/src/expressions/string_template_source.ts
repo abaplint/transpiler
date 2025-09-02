@@ -46,6 +46,9 @@ export class StringTemplateSourceTranspiler implements IExpressionTranspiler {
         option += new SourceTranspiler(true).transpile(c, traversal).getCode();
       }
     }
+    if (option.startsWith(`"alpha"`)) {
+      option += `, "alphaInContext": 2`;
+    }
     if (option !== "") {
       return "{" + option + "}";
     }

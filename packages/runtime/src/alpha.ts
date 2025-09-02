@@ -7,8 +7,12 @@ export function alphaOut(source: ICharacter | INumeric): string {
   return txt.replace(/^0+/, "");
 }
 
-export function alphaIn(source: ICharacter | INumeric | String, context: Character | String): string {
+export function alphaIn(source: ICharacter | INumeric | String, context: Character | String | undefined): string {
   let txt: string = source.get() + "";
+
+  if (context === undefined) {
+    throw new Error("alphaIn, context is undefined");
+  }
 
   if (txt.match(/^[0-9 ]+$/) === null) {
     // contains letters
