@@ -347,7 +347,7 @@ WRITE |{ lv_value STYLE = SCIENTIFIC }|.`;
 DATA lv_value TYPE n LENGTH 5.
 lv_value = 5.
 WRITE |{ lv_value ALPHA = OUT }|.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("5");
@@ -359,7 +359,7 @@ DATA val TYPE c LENGTH 10.
 DATA input TYPE c VALUE 5.
 val = |{ input ALPHA = IN }|.
 WRITE / val.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0000000005");
@@ -371,7 +371,7 @@ DATA val TYPE c LENGTH 10.
 DATA input TYPE string VALUE '5'.
 val = |{ input ALPHA = IN }|.
 WRITE / val.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0000000005");
@@ -383,7 +383,7 @@ DATA val TYPE string.
 DATA input TYPE c LENGTH 5 VALUE '5'.
 val = |{ input ALPHA = IN }|.
 WRITE / val.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("00005");
@@ -395,7 +395,7 @@ DATA val TYPE string.
 DATA input TYPE string VALUE '5'.
 val = |{ input ALPHA = IN }|.
 WRITE / val.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("5");
@@ -412,7 +412,7 @@ ENDFORM.
 
 START-OF-SELECTION.
   PERFORM foo.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0000000005");
