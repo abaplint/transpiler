@@ -46,7 +46,7 @@ export class StringTemplateSourceTranspiler {
         option += new SourceTranspiler(true).transpile(c, traversal).getCode();
       }
     }
-    if (option.startsWith(`"alpha"`)) {
+    if (option.startsWith(`"alpha":"in"`)) {
       if (context === undefined) {
         throw new Error("ALPHA = IN, context undefined");
       }
