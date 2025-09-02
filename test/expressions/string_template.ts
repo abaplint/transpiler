@@ -353,4 +353,16 @@ WRITE |{ lv_value ALPHA = OUT }|.`;
     expect(abap.console.get()).to.equal("5");
   });
 
+  it.only("ALPHA IN formatting", async () => {
+    const code = `
+DATA val TYPE c LENGTH 10.
+DATA input TYPE c VALUE 5.
+val = |{ input ALPHA = IN }|.
+WRITE / val.`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0000000005");
+  });
+
 });
