@@ -6,14 +6,29 @@ import {Chunk} from "../chunk";
 export class MoveTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    let source = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Source));
+    const sourceExpression = node.findDirectExpression(abaplint.Expressions.Source);
 
     const targets: Chunk[] = [];
-    for (const t of node.findDirectExpressions(abaplint.Expressions.Target)) {
+    const targetExpressions = node.findDirectExpressions(abaplint.Expressions.Target);
+    for (const t of targetExpressions) {
       targets.push(traversal.traverse(t));
     }
 
     const ret = new Chunk();
+
+    if (targetExpressions.length === 1
+        && sourceExpression?.getChildren().length === 1
+        && sourceExpression.findDirectExpression(abaplint.Expressions.StringTemplate)
+        && sourceExpression.concatTokens().toUpperCase().endsWith(" ALPHA = IN }|")) {
+      const target = targets[0].getCode();
+      const tSource = traversal.traverse(sourceExpression.findFirstExpression(abaplint.Expressions.StringTemplateSource
+        )?.findDirectExpression(abaplint.Expressions.Source));
+      ret.appendString(target + `.set(abap.alphaIn(${tSource.getCode()}, ${target}, ${target}));`);
+      return ret;
+    }
+
+    let source = traversal.traverse(sourceExpression);
+
     const second = node.getChildren()[1]?.concatTokens();
     switch (second) {
       case "?=":

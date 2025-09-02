@@ -1,12 +1,11 @@
-import {Nodes, Tokens} from "@abaplint/core";
-import {IExpressionTranspiler} from "./_expression_transpiler";
+import {Nodes, Tokens, AbstractType} from "@abaplint/core";
 import {StringTemplateSourceTranspiler} from ".";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 
-export class StringTemplateTranspiler implements IExpressionTranspiler {
+export class StringTemplateTranspiler {
 
-  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal, context?: AbstractType): Chunk {
     let ret = "";
     const children = node.getChildren();
     // eslint-disable-next-line @typescript-eslint/prefer-for-of
@@ -27,7 +26,7 @@ export class StringTemplateTranspiler implements IExpressionTranspiler {
           ret = ret + "}" + original + "`";
         }
       } else if (c instanceof Nodes.ExpressionNode) {
-        ret += new StringTemplateSourceTranspiler().transpile(c, traversal).getCode();
+        ret += new StringTemplateSourceTranspiler().transpile(c, traversal, context).getCode();
       }
     }
 

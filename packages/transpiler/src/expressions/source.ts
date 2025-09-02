@@ -1,6 +1,6 @@
-import {Expressions, Nodes} from "@abaplint/core";
+import {AbstractType, Expressions, Nodes} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
-import {AttributeChainTranspiler, ComponentChainTranspiler, CondBodyTranspiler, FieldChainTranspiler, TypeNameOrInfer} from ".";
+import {AttributeChainTranspiler, ComponentChainTranspiler, CondBodyTranspiler, FieldChainTranspiler, StringTemplateTranspiler, TypeNameOrInfer} from ".";
 import {Traversal} from "../traversal";
 import {ConstantTranspiler} from "./constant";
 import {Chunk} from "../chunk";
@@ -15,7 +15,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
     this.addGet = addGet;
   }
 
-  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal, context?: AbstractType): Chunk {
     let ret = new Chunk();
     const post = new Chunk();
 
@@ -30,7 +30,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
         } else if (c.get() instanceof Expressions.Constant) {
           ret.appendChunk(new ConstantTranspiler(this.addGet).transpile(c, traversal));
         } else if (c.get() instanceof Expressions.StringTemplate) {
-          ret.appendChunk(traversal.traverse(c));
+          ret.appendChunk(new StringTemplateTranspiler().transpile(c, traversal, context));
         } else if (c.get() instanceof Expressions.Cond) {
           ret.appendChunk(traversal.traverse(c));
         } else if (c.get() instanceof Expressions.ArithOperator) {
@@ -74,7 +74,8 @@ export class SourceTranspiler implements IExpressionTranspiler {
           ret = new Chunk().appendString(new TypeNameOrInfer().transpile(typ, traversal).getCode());
           ret.appendString(".set(");
           // todo: handle LET
-          ret.appendString(traversal.traverse(c.getFirstChild()).getCode());
+          const context = new TypeNameOrInfer().findType(typ, traversal);
+          ret.appendString(new SourceTranspiler().transpile(c.getFirstChild() as Nodes.ExpressionNode, traversal, context).getCode());
           ret.appendString(")");
         } else if (c.get() instanceof Expressions.ValueBody) {
           continue;

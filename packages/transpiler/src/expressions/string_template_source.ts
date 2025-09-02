@@ -1,19 +1,19 @@
-import {Nodes, Expressions} from "@abaplint/core";
-import {IExpressionTranspiler} from "./_expression_transpiler";
+import {Nodes, Expressions, AbstractType} from "@abaplint/core";
 import {SourceTranspiler} from ".";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
+import {TranspileTypes} from "../transpile_types";
 
-export class StringTemplateSourceTranspiler implements IExpressionTranspiler {
+export class StringTemplateSourceTranspiler {
 
-  public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
+  public transpile(node: Nodes.ExpressionNode, traversal: Traversal, context?: AbstractType): Chunk {
     let ret = "";
 
     const pre = "abap.templateFormatting(";
     let post = ")";
     const formatting = node.findDirectExpression(Expressions.StringTemplateFormatting);
     if (formatting) {
-      const options = this.build(formatting, traversal);
+      const options = this.build(formatting, traversal, context);
       if (options) {
         post = "," + options + ")";
       }
@@ -28,7 +28,7 @@ export class StringTemplateSourceTranspiler implements IExpressionTranspiler {
     return new Chunk(ret);
   }
 
-  private build(node: Nodes.ExpressionNode, traversal: Traversal): undefined | string {
+  private build(node: Nodes.ExpressionNode, traversal: Traversal, context?: AbstractType): undefined | string {
     let option = "";
     let count = 0;
     for (const c of node.getChildren()) {
@@ -45,6 +45,12 @@ export class StringTemplateSourceTranspiler implements IExpressionTranspiler {
       } else if (c.get() instanceof Expressions.Source) {
         option += new SourceTranspiler(true).transpile(c, traversal).getCode();
       }
+    }
+    if (option.startsWith(`"alpha":"in"`)) {
+      if (context === undefined) {
+        throw new Error("ALPHA = IN, context undefined");
+      }
+      option += `, "alphaInContext": ` + TranspileTypes.toType(context);
     }
     if (option !== "") {
       return "{" + option + "}";

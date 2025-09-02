@@ -21,6 +21,7 @@ import {CharacterFactory} from "./character_factory";
 import {ABAPEventing} from "./abap_eventing";
 import {isLineNotFound} from "./is_line_not_found";
 import {parametersCall} from "./parameters_call";
+import {alphaIn, alphaOut} from "./alpha";
 
 export {RFC, types, DB, MemoryConsole};
 
@@ -72,6 +73,8 @@ export class ABAP {
   public dynamicCallLookup = dynamicCallLookup;
   public parametersCall = parametersCall;
   public eventing = new ABAPEventing();
+  public alphaOut = alphaOut;
+  public alphaIn = alphaIn;
 
   public IntegerFactory = IntegerFactory;
   public CharacterFactory = CharacterFactory;
