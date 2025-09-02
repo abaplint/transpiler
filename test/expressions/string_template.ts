@@ -401,7 +401,7 @@ WRITE / val.`;
     expect(abap.console.get()).to.equal("5");
   });
 
-  it.only("ALPHA IN formatting, CONV typed", async () => {
+  it("ALPHA IN formatting, CONV typed", async () => {
     const code = `
 FORM foo.
   TYPES ty TYPE c LENGTH 10.
@@ -413,7 +413,6 @@ ENDFORM.
 START-OF-SELECTION.
   PERFORM foo.`;
     const js = await run(code, true);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0000000005");
