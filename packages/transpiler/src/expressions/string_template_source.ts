@@ -29,7 +29,7 @@ export class StringTemplateSourceTranspiler {
   }
 
   private build(node: Nodes.ExpressionNode, traversal: Traversal,
-      context: AbstractType | undefined, top: Nodes.ExpressionNode): undefined | string {
+      context: AbstractType | undefined, _top: Nodes.ExpressionNode): undefined | string {
     let option = "";
     let count = 0;
     for (const c of node.getChildren()) {
@@ -48,10 +48,9 @@ export class StringTemplateSourceTranspiler {
       }
     }
     if (option.startsWith(`"alpha":"in"`)) {
-      if (context === undefined) {
-        throw new Error("ALPHA = IN, context undefined: " + top.concatTokens());
+      if (context !== undefined) {
+        option += `, "alphaInContext": ` + TranspileTypes.toType(context);
       }
-      option += `, "alphaInContext": ` + TranspileTypes.toType(context);
     }
     if (option !== "") {
       return "{" + option + "}";

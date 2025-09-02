@@ -433,4 +433,17 @@ WRITE / lt_items[ 1 ]-orderid.`;
     expect(abap.console.get()).to.equal("0000000023");
   });
 
+  it("ALPHA IN, partial templated", async () => {
+    const code = `
+DATA mv_objnr TYPE c LENGTH 20.
+DATA no TYPE c LENGTH 10.
+no = '1'.
+mv_objnr = |OR{ no ALPHA = IN }|.
+WRITE / mv_objnr.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("OR0000000001");
+  });
+
 });

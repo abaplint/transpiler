@@ -19,7 +19,8 @@ export class MoveTranspiler implements IStatementTranspiler {
     if (targetExpressions.length === 1
         && sourceExpression?.getChildren().length === 1
         && sourceExpression.findDirectExpression(abaplint.Expressions.StringTemplate)
-        && sourceExpression.concatTokens().toUpperCase().endsWith(" ALPHA = IN }|")) {
+        && sourceExpression.concatTokens().toUpperCase().endsWith(" ALPHA = IN }|")
+        && sourceExpression.concatTokens().toUpperCase().startsWith("|{")) {
       const target = targets[0].getCode();
       const tSource = traversal.traverse(sourceExpression.findFirstExpression(abaplint.Expressions.StringTemplateSource
         )?.findDirectExpression(abaplint.Expressions.Source));
