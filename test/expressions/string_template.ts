@@ -342,12 +342,12 @@ WRITE |{ lv_value STYLE = SCIENTIFIC }|.`;
     expect(abap.console.get()).to.equal("5E+00");
   });
 
-  it.only("ALPHA OUT formatting", async () => {
+  it("ALPHA OUT formatting", async () => {
     const code = `
 DATA lv_value TYPE n LENGTH 5.
 lv_value = 5.
 WRITE |{ lv_value ALPHA = OUT }|.`;
-    const js = await run(code);
+    const js = await run(code, true);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("5");

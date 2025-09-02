@@ -1,3 +1,4 @@
+import {alphaOut} from "./alpha";
 import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Integer, Packed, Structure, Table} from "./types";
 import {ICharacter} from "./types/_character";
 import {INumeric} from "./types/_numeric";
@@ -55,6 +56,10 @@ export function templateFormatting(source: ICharacter | INumeric, options?: opti
     }
   } else {
     text = source.get() + "";
+  }
+
+  if (options?.alpha === "out") {
+    text = alphaOut(source);
   }
 
   if (options) {
