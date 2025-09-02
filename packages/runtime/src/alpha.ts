@@ -8,7 +8,7 @@ export function alphaOut(source: ICharacter | INumeric): string {
 }
 
 export function alphaIn(source: ICharacter | INumeric | String, context: Character | String): string {
-  const txt: string = source.get() + "";
+  let txt: string = source.get() + "";
 
   if (txt.match(/^[0-9 ]+$/) === null) {
     // contains letters
@@ -23,6 +23,7 @@ export function alphaIn(source: ICharacter | INumeric | String, context: Charact
   } else if (source instanceof Character) {
     length = source.getLength();
   }
+  txt = txt.trimEnd();
 
   return txt.padStart(length, "0");
 }

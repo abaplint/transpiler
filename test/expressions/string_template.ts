@@ -377,7 +377,7 @@ WRITE / val.`;
     expect(abap.console.get()).to.equal("0000000005");
   });
 
-  it.only("ALPHA IN formatting, string output", async () => {
+  it("ALPHA IN formatting, string output", async () => {
     const code = `
 DATA val TYPE string.
 DATA input TYPE c LENGTH 5 VALUE '5'.
