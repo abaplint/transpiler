@@ -13,7 +13,7 @@ export class StringTemplateSourceTranspiler {
     let post = ")";
     const formatting = node.findDirectExpression(Expressions.StringTemplateFormatting);
     if (formatting) {
-      const options = this.build(formatting, traversal, context);
+      const options = this.build(formatting, traversal, context, node);
       if (options) {
         post = "," + options + ")";
       }
@@ -28,7 +28,8 @@ export class StringTemplateSourceTranspiler {
     return new Chunk(ret);
   }
 
-  private build(node: Nodes.ExpressionNode, traversal: Traversal, context?: AbstractType): undefined | string {
+  private build(node: Nodes.ExpressionNode, traversal: Traversal,
+      context: AbstractType | undefined, top: Nodes.ExpressionNode): undefined | string {
     let option = "";
     let count = 0;
     for (const c of node.getChildren()) {
@@ -48,7 +49,7 @@ export class StringTemplateSourceTranspiler {
     }
     if (option.startsWith(`"alpha":"in"`)) {
       if (context === undefined) {
-        throw new Error("ALPHA = IN, context undefined");
+        throw new Error("ALPHA = IN, context undefined: " + top.concatTokens());
       }
       option += `, "alphaInContext": ` + TranspileTypes.toType(context);
     }
