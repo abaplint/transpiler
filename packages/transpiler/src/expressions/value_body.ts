@@ -30,7 +30,7 @@ export class ValueBodyTranspiler {
 
     for (const child of body.getChildren()) {
       if (child.get() instanceof Expressions.FieldAssignment && child instanceof Nodes.ExpressionNode) {
-        const transpiled = new FieldAssignmentTranspiler().transpile(child, traversal).getCode();
+        const transpiled = new FieldAssignmentTranspiler().transpile(child, traversal, context).getCode();
         if (hasLines === false) {
           ret.appendString(transpiled);
         } else {

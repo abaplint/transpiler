@@ -418,4 +418,32 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("0000000005");
   });
 
+  it("ALPHA IN in APPEND inferred", async () => {
+    const code = `
+TYPES: BEGIN OF row,
+         orderid TYPE c LENGTH 10,
+       END OF row.
+DATA val TYPE c LENGTH 5 VALUE '23'.
+DATA lt_items TYPE STANDARD TABLE OF row WITH DEFAULT KEY.
+APPEND VALUE #( orderid = |{ val ALPHA = IN }| ) TO lt_items.
+WRITE / lt_items[ 1 ]-orderid.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0000000023");
+  });
+
+  it("ALPHA IN, partial templated", async () => {
+    const code = `
+DATA mv_objnr TYPE c LENGTH 20.
+DATA no TYPE c LENGTH 10.
+no = '1'.
+mv_objnr = |OR{ no ALPHA = IN }|.
+WRITE / mv_objnr.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("OR0000000001");
+  });
+
 });
