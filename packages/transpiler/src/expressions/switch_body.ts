@@ -16,23 +16,29 @@ export class SwitchBodyTranspiler {
       throw new Error("SwitchBodyTranspiler, Let not supported, todo");
     }
 
-    const whenThen: {when: Nodes.ExpressionNode, then: Nodes.ExpressionNode}[] = [];
-    const expressions: Nodes.ExpressionNode[] = [];
+    type whenThenType = {whenOr: Nodes.ExpressionNode[], then: Nodes.ExpressionNode | undefined};
+    const source = body.findDirectExpression(Expressions.Source);
+    const whenThen: whenThenType[] = [];
+    const elseExpression = body.findExpressionAfterToken("ELSE");
 
+    let currentWhenThen: whenThenType = {whenOr: [], then: undefined};
+    let mode: "WHEN" | "THEN" = "WHEN";
     for (const c of body.getChildren()) {
       if (c instanceof Nodes.TokenNode) {
-        if (c.concatTokens() === "ELSE") {
-          break;
+        if (c.concatTokens() === "WHEN") {
+          currentWhenThen = {whenOr: [], then: undefined};
+          mode = "WHEN";
+        } else if (c.concatTokens() === "THEN") {
+          mode = "THEN";
         }
-      } else {
-        expressions.push(c);
+      } else if (mode === "WHEN" && c instanceof Nodes.ExpressionNode) {
+        currentWhenThen.whenOr.push(c);
+      } else if (mode === "THEN" && c instanceof Nodes.ExpressionNode) {
+        currentWhenThen.then = c;
       }
     }
 
-    for (let i = 0; i < expressions.length; i = i + 2) {
-      whenThen.push({when: expressions[i], then: expressions[i + 1]});
-    }
-
+/*
     const type = new TypeNameOrInfer().findType(typ, traversal);
     const target = TranspileTypes.toType(type);
 
@@ -71,6 +77,7 @@ export class SwitchBodyTranspiler {
 
     ret.appendString("})()))");
     return ret;
+    */
   }
 
 }
