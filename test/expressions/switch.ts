@@ -30,4 +30,52 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("foo");
   });
 
+  it("fallthrough", async () => {
+    const code = `
+FORM foo.
+  DATA(lv_name) = SWITCH string(
+    '1' WHEN 'sdf' THEN 'foo' WHEN 'bar' THEN 'bar' ).
+  WRITE / lv_name.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("");
+  });
+
+  it("OR", async () => {
+    const code = `
+FORM foo.
+  DATA(lv_name) = SWITCH string(
+    '1' WHEN 'sdf' OR '1' THEN 'foo' WHEN 'bar' THEN 'bar' ).
+  WRITE / lv_name.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("foo");
+  });
+
+  it("ELSE", async () => {
+    const code = `
+FORM foo.
+  DATA(lv_name) = SWITCH string(
+    '1' WHEN 'sdf' THEN 'foo' WHEN 'bar' THEN 'bar' ELSE 'baz' ).
+  WRITE / lv_name.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("baz");
+  });
+
 });
