@@ -22,10 +22,13 @@ export class SwitchBodyTranspiler {
 
     {
       let currentWhenThen: whenThenType = {whenOr: [], then: undefined};
-      let mode: "WHEN" | "THEN" = "WHEN";
+      let mode: "WHEN" | "THEN" | "" = "";
       for (const c of body.getChildren()) {
         if (c instanceof Nodes.TokenNode) {
           if (c.concatTokens() === "WHEN") {
+            if (currentWhenThen.whenOr.length > 0) {
+              whenThenOr.push(currentWhenThen);
+            }
             currentWhenThen = {whenOr: [], then: undefined};
             mode = "WHEN";
           } else if (c.concatTokens() === "THEN") {
@@ -36,6 +39,9 @@ export class SwitchBodyTranspiler {
         } else if (mode === "THEN" && c instanceof Nodes.ExpressionNode) {
           currentWhenThen.then = c;
         }
+      }
+      if (currentWhenThen.whenOr.length > 0) {
+        whenThenOr.push(currentWhenThen);
       }
     }
 
@@ -51,7 +57,7 @@ export class SwitchBodyTranspiler {
       if (wto.then?.get() instanceof Expressions.Source) {
         thenValue = new SourceTranspiler().transpile(wto.then, traversal).getCode();
       } else {
-        throw new Error("SwitchBodyTranspiler, Expected Source, todo, " + wto.then?.get().constructor.name);
+        throw new Error("SwitchBodyTranspiler, Expected Source1, todo, " + wto.then?.get().constructor.name);
       }
 
       // todo, async await?
@@ -60,7 +66,7 @@ export class SwitchBodyTranspiler {
         if (thenOr.get() instanceof Expressions.Source) {
           condition = new SourceTranspiler().transpile(thenOr, traversal).getCode();
         } else {
-          throw new Error("SwitchBodyTranspiler, Expected Source, todo, " + thenOr.get().constructor.name);
+          throw new Error("SwitchBodyTranspiler, Expected Source2, todo, " + thenOr.get().constructor.name);
         }
 
         ret.appendString(`if (abap.compare.eq(${source.getCode()}, ${condition})) { return ${thenValue}; }\n`);
@@ -69,7 +75,7 @@ export class SwitchBodyTranspiler {
 
     if (elseExpression) {
       if (!(elseExpression.get() instanceof Expressions.Source)) {
-        throw new Error("SwitchBodyTranspiler, Expected Source, todo, " + elseExpression.get().constructor.name);
+        throw new Error("SwitchBodyTranspiler, Expected Source3, todo, " + elseExpression.get().constructor.name);
       }
       const value = new SourceTranspiler().transpile(elseExpression, traversal).getCode();
       ret.appendString(`return ${value};\n`);

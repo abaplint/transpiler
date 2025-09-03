@@ -83,6 +83,8 @@ export class SourceTranspiler implements IExpressionTranspiler {
           continue;
         } else if (c.get() instanceof Expressions.CondBody) {
           continue;
+        } else if (c.get() instanceof Expressions.SwitchBody) {
+          continue;
         } else {
           ret.appendString("SourceUnknown$" + c.get().constructor.name);
         }
