@@ -1,6 +1,6 @@
 import {AbstractType, Expressions, Nodes} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
-import {AttributeChainTranspiler, ComponentChainTranspiler, CondBodyTranspiler, FieldChainTranspiler, StringTemplateTranspiler, TypeNameOrInfer} from ".";
+import {AttributeChainTranspiler, ComponentChainTranspiler, CondBodyTranspiler, FieldChainTranspiler, StringTemplateTranspiler, SwitchBodyTranspiler, TypeNameOrInfer} from ".";
 import {Traversal} from "../traversal";
 import {ConstantTranspiler} from "./constant";
 import {Chunk} from "../chunk";
@@ -130,6 +130,16 @@ export class SourceTranspiler implements IExpressionTranspiler {
           throw new Error("CondBody not found");
         }
         ret.appendChunk(new CondBodyTranspiler().transpile(typ, condBody, traversal));
+      } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "SWITCH") {
+        const typ = node.findDirectExpression(Expressions.TypeNameOrInfer)
+        if (typ === undefined) {
+          throw new Error("TypeNameOrInfer not found in SwitchBody");
+        }
+        const switchBody = node.findDirectExpression(Expressions.SwitchBody);
+        if (switchBody === undefined) {
+          throw new Error("SwitchBody not found");
+        }
+        ret.appendChunk(new SwitchBodyTranspiler().transpile(typ, switchBody, traversal));
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "REF") {
         const infer = node.findDirectExpression(Expressions.TypeNameOrInfer);
         if (infer?.concatTokens() !== "#") {
