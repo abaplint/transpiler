@@ -24,7 +24,7 @@ ENDFORM.
 
 START-OF-SELECTION.
   PERFORM foo.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("foo");
@@ -40,7 +40,7 @@ ENDFORM.
 
 START-OF-SELECTION.
   PERFORM foo.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("");
@@ -56,7 +56,7 @@ ENDFORM.
 
 START-OF-SELECTION.
   PERFORM foo.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("foo");
@@ -72,7 +72,7 @@ ENDFORM.
 
 START-OF-SELECTION.
   PERFORM foo.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("baz");
