@@ -17,7 +17,7 @@ export const config: IConfig = {
       "communication": true,
       "systemCall": true,
       "break": false,
-      "statics": true,
+      "statics": false,
       "endselect": false,
       "defaultKey": false,
     },

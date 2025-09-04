@@ -20,6 +20,7 @@ export * from "./class_definition_load";
 export * from "./class_implementation";
 export * from "./class_local_friends";
 export * from "./clear";
+export * from "./static";
 export * from "./close_cursor";
 export * from "./close_dataset";
 export * from "./collect";

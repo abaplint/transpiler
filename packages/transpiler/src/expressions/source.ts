@@ -7,6 +7,7 @@ import {Chunk} from "../chunk";
 import {TranspileTypes} from "../transpile_types";
 import {ValueBodyTranspiler} from "./value_body";
 import {CorrespondingBodyTranspiler} from "./corresponding_body";
+import {FilterBodyTranspiler} from "./filter_body";
 
 export class SourceTranspiler implements IExpressionTranspiler {
   private readonly addGet: boolean;
@@ -85,6 +86,8 @@ export class SourceTranspiler implements IExpressionTranspiler {
           continue;
         } else if (c.get() instanceof Expressions.SwitchBody) {
           continue;
+        } else if (c.get() instanceof Expressions.FilterBody) {
+          continue;
         } else {
           ret.appendString("SourceUnknown$" + c.get().constructor.name);
         }
@@ -142,6 +145,16 @@ export class SourceTranspiler implements IExpressionTranspiler {
           throw new Error("SwitchBody not found");
         }
         ret.appendChunk(new SwitchBodyTranspiler().transpile(typ, switchBody, traversal));
+      } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "FILTER") {
+        const typ = node.findDirectExpression(Expressions.TypeNameOrInfer)
+        if (typ === undefined) {
+          throw new Error("TypeNameOrInfer not found in FilterBody");
+        }
+        const filterBody = node.findDirectExpression(Expressions.FilterBody);
+        if (filterBody === undefined) {
+          throw new Error("FilterBody not found");
+        }
+        ret.appendChunk(new FilterBodyTranspiler().transpile(typ, filterBody, traversal));
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "REF") {
         const infer = node.findDirectExpression(Expressions.TypeNameOrInfer);
         if (infer?.concatTokens() !== "#") {
