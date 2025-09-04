@@ -12,7 +12,7 @@ export class FilterBodyTranspiler {
     if (!(typ.get() instanceof Expressions.TypeNameOrInfer)) {
       throw new Error("FilterBodyTranspiler, Expected TypeNameOrInfer");
     } else if (body.findDirectTokenByText("EXCEPT")) {
-      return new Chunk(`throw new Error("FilterBodyTranspiler EXCEPT in, not supported, transpiler");`);
+      return new Chunk(`(() => { throw new Error("FilterBodyTranspiler EXCEPT in, not supported, transpiler"); })()`);
     }
 
     const source = traversal.traverse(body.findDirectExpression(Expressions.Source)).getCode();
