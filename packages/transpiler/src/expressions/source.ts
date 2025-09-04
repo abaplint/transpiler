@@ -7,6 +7,7 @@ import {Chunk} from "../chunk";
 import {TranspileTypes} from "../transpile_types";
 import {ValueBodyTranspiler} from "./value_body";
 import {CorrespondingBodyTranspiler} from "./corresponding_body";
+import {FilterBodyTranspiler} from "./filter_body";
 
 export class SourceTranspiler implements IExpressionTranspiler {
   private readonly addGet: boolean;
@@ -84,6 +85,8 @@ export class SourceTranspiler implements IExpressionTranspiler {
         } else if (c.get() instanceof Expressions.CondBody) {
           continue;
         } else if (c.get() instanceof Expressions.SwitchBody) {
+          continue;
+        } else if (c.get() instanceof Expressions.FilterBody) {
           continue;
         } else {
           ret.appendString("SourceUnknown$" + c.get().constructor.name);
