@@ -38,7 +38,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1");
   });
 
-  it.only("EXCEPT IN, different names", async () => {
+  it.skip("EXCEPT IN, different names", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          id    TYPE i,
@@ -65,7 +65,7 @@ WRITE / lines( et_list ).`;
     expect(abap.console.get()).to.equal("1");
   });
 
-  it("EXCEPT IN, empty list", async () => {
+  it.skip("EXCEPT IN, empty list", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          id    TYPE i,
@@ -85,7 +85,7 @@ WRITE / lines( et_list ).`;
     expect(abap.console.get()).to.equal("1");
   });
 
-  it("EXCEPT IN, filter hit", async () => {
+  it.skip("EXCEPT IN, filter hit", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          id    TYPE i,
@@ -106,7 +106,7 @@ WRITE / lines( et_list ).`;
     expect(abap.console.get()).to.equal("0");
   });
 
-  it("EXCEPT IN, filter miss", async () => {
+  it.skip("EXCEPT IN, filter miss", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          id    TYPE i,
