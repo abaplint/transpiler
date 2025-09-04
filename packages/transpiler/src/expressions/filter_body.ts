@@ -25,13 +25,13 @@ export class FilterBodyTranspiler {
     const whereNode = body.findDirectExpression(Expressions.ComponentCond);
     if (whereNode) {
       const where = traversal.traverse(whereNode).getCode();
-      loopWhere = `{"where": async ` + where + `}`;
+      loopWhere = `, {"where": async ` + where + `}`;
     }
 
     const id = UniqueIdentifier.get();
     const loop = UniqueIdentifier.get();
     ret.appendString(`const ${id} = ${target};\n`);
-    ret.appendString(`for await (const ${loop} of abap.statements.loop(${source}, ${loopWhere})) {\n`);
+    ret.appendString(`for await (const ${loop} of abap.statements.loop(${source}${loopWhere})) {\n`);
     ret.appendString(`abap.statements.insertInternal({"table": ${id}, "data": ${loop}});\n`);
     ret.appendString(`}\n`);
     ret.appendString(`return ${id};\n`);
