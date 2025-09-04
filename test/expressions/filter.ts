@@ -38,7 +38,34 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1");
   });
 
-  it.only("EXCEPT IN, empty list", async () => {
+  it.only("EXCEPT IN, different names", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         id    TYPE i,
+         value TYPE c LENGTH 10,
+       END OF ty.
+DATA et_list TYPE SORTED TABLE OF ty WITH UNIQUE KEY id.
+
+TYPES: BEGIN OF ty2,
+         id2   TYPE i,
+         value TYPE c LENGTH 10,
+       END OF ty2.
+DATA lt_list TYPE SORTED TABLE OF ty2 WITH UNIQUE KEY id2.
+
+INSERT VALUE #( id = 1 ) INTO TABLE et_list.
+INSERT VALUE #( id2 = 2 ) INTO TABLE lt_list.
+
+et_list = FILTER #( et_list EXCEPT IN lt_list WHERE id = id2 ).
+
+WRITE / lines( et_list ).`;
+    const js = await run(code, true);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
+  it("EXCEPT IN, empty list", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          id    TYPE i,
@@ -53,7 +80,6 @@ et_list = FILTER #( et_list EXCEPT IN lt_list WHERE id = id ).
 
 WRITE / lines( et_list ).`;
     const js = await run(code, true);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
