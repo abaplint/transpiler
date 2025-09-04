@@ -11,8 +11,6 @@ export class FilterBodyTranspiler {
 
     if (!(typ.get() instanceof Expressions.TypeNameOrInfer)) {
       throw new Error("FilterBodyTranspiler, Expected TypeNameOrInfer");
-    } else if (body.findDirectExpression(Expressions.Let)) {
-      throw new Error("FilterBodyTranspiler, Let not supported, todo");
     }
 
     const source = traversal.traverse(body.findDirectExpression(Expressions.Source)).getCode();
