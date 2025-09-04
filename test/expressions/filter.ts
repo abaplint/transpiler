@@ -14,7 +14,7 @@ describe("Running expressions - FILTER", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
-  it.only("basic", async () => {
+  it("basic", async () => {
     const code = `
 FORM foo.
   TYPES: BEGIN OF ty,
