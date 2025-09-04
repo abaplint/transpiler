@@ -130,7 +130,7 @@ ENDCLASS.
 
 START-OF-SELECTION.
   RAISE EXCEPTION TYPE lcx MESSAGE e123(zzz).`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     try {
       await f(abap);
