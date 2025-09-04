@@ -4,8 +4,8 @@ import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
-async function run(contents: string) {
-  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
+async function run(contents: string, skipVersionCheck = false) {
+  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}], {skipVersionCheck});
 }
 
 const cx_root = `CLASS cx_root DEFINITION ABSTRACT PUBLIC.
@@ -106,6 +106,30 @@ ENDCLASS.
 
 START-OF-SELECTION.
   RAISE EXCEPTION NEW lcx( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch(e) {
+      expect(e.toString()).to.contain("Error");
+      expect(e.constructor.name).to.contain("lcx");
+    }
+  });
+
+  it("RAISE EXCEPTION MESSAGE", async () => {
+    const code = `
+${cx_root}
+
+${cx_static_check}
+
+CLASS lcx DEFINITION INHERITING FROM cx_static_check.
+ENDCLASS.
+CLASS lcx IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  RAISE EXCEPTION TYPE lcx MESSAGE e123(zzz).`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     try {
