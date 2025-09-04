@@ -53,12 +53,13 @@ et_list = FILTER #( et_list EXCEPT IN lt_list WHERE id = id ).
 
 WRITE / lines( et_list ).`;
     const js = await run(code, true);
+    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
   });
 
-  it.only("EXCEPT IN, filter hit", async () => {
+  it("EXCEPT IN, filter hit", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          id    TYPE i,
@@ -79,7 +80,7 @@ WRITE / lines( et_list ).`;
     expect(abap.console.get()).to.equal("0");
   });
 
-  it.only("EXCEPT IN, filter miss", async () => {
+  it("EXCEPT IN, filter miss", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          id    TYPE i,
