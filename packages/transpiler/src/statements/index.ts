@@ -22,6 +22,7 @@ export * from "./class_local_friends";
 export * from "./clear";
 export * from "./close_cursor";
 export * from "./close_dataset";
+export * from "./transfer";
 export * from "./collect";
 export * from "./commit";
 export * from "./compute";
