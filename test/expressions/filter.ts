@@ -32,7 +32,7 @@ ENDFORM.
 
 START-OF-SELECTION.
   PERFORM foo.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
@@ -58,7 +58,7 @@ INSERT VALUE #( id2 = 2 ) INTO TABLE lt_list.
 et_list = FILTER #( et_list EXCEPT IN lt_list WHERE id = id2 ).
 
 WRITE / lines( et_list ).`;
-    const js = await run(code, true);
+    const js = await run(code);
     console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
@@ -79,7 +79,7 @@ INSERT VALUE #( id = 1 ) INTO TABLE et_list.
 et_list = FILTER #( et_list EXCEPT IN lt_list WHERE id = id ).
 
 WRITE / lines( et_list ).`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
@@ -100,7 +100,7 @@ INSERT VALUE #( id = 1 ) INTO TABLE lt_list.
 et_list = FILTER #( et_list EXCEPT IN lt_list WHERE id = id ).
 
 WRITE / lines( et_list ).`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0");
@@ -121,7 +121,7 @@ INSERT VALUE #( id = 2 ) INTO TABLE lt_list.
 et_list = FILTER #( et_list EXCEPT IN lt_list WHERE id = id ).
 
 WRITE / lines( et_list ).`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
