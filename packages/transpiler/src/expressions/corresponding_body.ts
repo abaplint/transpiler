@@ -23,7 +23,7 @@ export class CorrespondingBodyTranspiler {
         source = traversal.traverse(child?.findDirectExpression(Expressions.Source));
         target = `abap.statements.moveCorresponding(${source!.getCode()}, ${target})`;
       } else {
-        throw new Error("CorrespondingBodyTranspiler, todo, " + c.constructor.name);
+        throw new Error("CorrespondingBodyTranspiler, todo, " + c.constructor.name + ", " + body.concatTokens());
       }
     }
 
