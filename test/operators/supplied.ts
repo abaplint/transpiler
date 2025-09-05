@@ -98,7 +98,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.only("NOT IS SUPPLIED", async () => {
+  it("NOT IS SUPPLIED", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.

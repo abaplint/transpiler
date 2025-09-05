@@ -8,7 +8,7 @@ export class CompareTranspiler implements IExpressionTranspiler {
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
 // todo, this is not correct
 
-    const concat = node.concatTokens().toUpperCase();
+    let concat = node.concatTokens().toUpperCase();
 
     let pre = concat.startsWith("NOT ") ? "!" : "";
     const sources = node.findDirectExpressionsMulti(
@@ -40,7 +40,10 @@ export class CompareTranspiler implements IExpressionTranspiler {
       }
 
       if (concat.endsWith(" IS SUPPLIED")) {
-        return new Chunk().appendString(pre + "INPUT && INPUT." + concat.replace(" IS SUPPLIED", "").toLowerCase());
+        if (concat.startsWith("NOT ")) {
+          concat = concat.replace("NOT ", "");
+        }
+        return new Chunk().appendString(pre + "(INPUT && INPUT." + concat.replace(" IS SUPPLIED", "" + ")").toLowerCase());
       } else if (concat.endsWith(" IS NOT SUPPLIED")) {
         return new Chunk().appendString(pre + "INPUT && INPUT." + concat.replace(" IS NOT SUPPLIED", "").toLowerCase() + " === undefined");
       }
