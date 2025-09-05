@@ -98,4 +98,29 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it.only("NOT IS SUPPLIED", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS foo IMPORTING bar TYPE i OPTIONAL.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD foo.
+    IF NOT bar IS SUPPLIED.
+      WRITE / 'moo'.
+    ENDIF.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl.
+  CREATE OBJECT ref.
+  ref->foo( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("moo");
+  });
+
 });
