@@ -53,4 +53,29 @@ WRITE / data1-bar.`;
     expect(abap.console.get()).to.equal("1\n3");
   });
 
+  it.only("basic MAPPING", async () => {
+    const code = `
+TYPES: BEGIN OF ty1,
+         match TYPE i,
+         bar   TYPE i,
+       END OF ty1.
+
+TYPES: BEGIN OF ty2,
+         match TYPE i,
+         foo   TYPE i,
+       END OF ty2.
+
+DATA data1 TYPE ty1.
+DATA data2 TYPE ty2.
+
+data2 = VALUE #( match = 1 foo = 2 ).
+data1 = CORRESPONDING #( data2 MAPPING bar = foo ).
+WRITE / data1-match.
+WRITE / data1-bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2");
+  });
+
 });
