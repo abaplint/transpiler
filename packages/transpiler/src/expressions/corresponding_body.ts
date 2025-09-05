@@ -3,6 +3,8 @@ import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {TypeNameOrInfer} from "./type_name_or_infer";
 import {TranspileTypes} from "../transpile_types";
+import {ComponentChainTranspiler} from "./component_chain";
+import {UniqueIdentifier} from "../unique_identifier";
 
 export class CorrespondingBodyTranspiler {
 
@@ -44,7 +46,20 @@ export class CorrespondingBodyTranspiler {
     }
 
     const ret = new Chunk();
-    ret.appendString(`abap.statements.moveCorresponding(${source!.getCode()}, ${target})`);
+    const id = UniqueIdentifier.get();
+    ret.appendString("(await (async () => {\n");
+    ret.appendString(`const ${id} = ${target};\n`);
+    ret.appendString(`abap.statements.moveCorresponding(${source!.getCode()}, ${id});\n`);
+
+    for (const map of mapping) {
+      const componentName = map.componentName!.concatTokens().toLowerCase();
+      const chain = new ComponentChainTranspiler().transpile(map.componentChain!, traversal).getCode();
+      ret.appendString(`${id}.get().${componentName}.set(${source!.getCode()}.get().${chain});\n`);
+    }
+
+    ret.appendString("return " + id + ";\n");
+    ret.appendString("})())");
+
     return ret;
   }
 

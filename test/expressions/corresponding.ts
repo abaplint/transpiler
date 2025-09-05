@@ -53,7 +53,7 @@ WRITE / data1-bar.`;
     expect(abap.console.get()).to.equal("1\n3");
   });
 
-  it.only("basic MAPPING", async () => {
+  it("basic MAPPING", async () => {
     const code = `
 TYPES: BEGIN OF ty1,
          match TYPE i,
