@@ -15,8 +15,13 @@ export async function select(target: Structure | Table | HashedTable | FieldSymb
     if (target.isAssigned() === false) {
       throw new Error("GETWA_NOT_ASSIGNED");
     }
-      // @ts-ignore
     target = target.getPointer();
+  }
+
+  if (rows.length === 0) {
+    abap.builtin.sy.get().dbcnt.set(0);
+    abap.builtin.sy.get().subrc.set(4);
+    return;
   }
 
   if (runtimeOptions?.appending !== true) {
@@ -25,12 +30,6 @@ export async function select(target: Structure | Table | HashedTable | FieldSymb
     } else {
       target?.clear();
     }
-  }
-
-  if (rows.length === 0) {
-    abap.builtin.sy.get().dbcnt.set(0);
-    abap.builtin.sy.get().subrc.set(4);
-    return;
   }
 
   rowsToTarget(target, rows);
@@ -63,7 +62,6 @@ export function rowsToTarget(target: Structure | Table | HashedTable | FieldSymb
             targetRow.get()[columnName]?.clear();
             continue;
           }
-            // @ts-ignore
           targetRow.get()[columnName]?.set(row[columnName]);
         }
       } else {
