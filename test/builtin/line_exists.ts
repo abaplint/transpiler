@@ -72,7 +72,7 @@ CLASS lcl IMPLEMENTATION.
            END OF ty.
     DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
     INSERT VALUE #( field = 2 ) INTO TABLE tab.
-    IF line_exists( tab[ field = foo( ) ] ).
+    IF line_exists( tab[ field = lcl=>foo( ) ] ).
       WRITE / 'yes'.
     ENDIF.
   ENDMETHOD.
@@ -85,6 +85,7 @@ ENDCLASS.
 START-OF-SELECTION.
   lcl=>run( ).`;
     const js = await run(code);
+    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal(`yes`);
