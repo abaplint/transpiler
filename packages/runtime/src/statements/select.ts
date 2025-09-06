@@ -19,18 +19,18 @@ export async function select(target: Structure | Table | HashedTable | FieldSymb
     target = target.getPointer();
   }
 
+  if (rows.length === 0) {
+    abap.builtin.sy.get().dbcnt.set(0);
+    abap.builtin.sy.get().subrc.set(4);
+    return;
+  }
+
   if (runtimeOptions?.appending !== true) {
     if (Array.isArray(target)) {
       target.forEach(f => f.clear());
     } else {
       target?.clear();
     }
-  }
-
-  if (rows.length === 0) {
-    abap.builtin.sy.get().dbcnt.set(0);
-    abap.builtin.sy.get().subrc.set(4);
-    return;
   }
 
   rowsToTarget(target, rows);

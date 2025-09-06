@@ -1802,7 +1802,7 @@ WRITE / sy-subrc.`;
     });
   });
 
-  it.only("not found, into should not clear", async () => {
+  it("not found, INTO should not clear", async () => {
     const code = `
 DATA ls_t100 TYPE t100.
 ls_t100-arbgb = 'SDFSDF'.
