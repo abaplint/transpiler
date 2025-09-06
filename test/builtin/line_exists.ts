@@ -57,4 +57,38 @@ ENDIF.`;
     expect(abap.console.get()).to.equal(`yes`);
   });
 
+  it.skip("call method", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS run.
+    CLASS-METHODS foo RETURNING VALUE(int) TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    TYPES: BEGIN OF ty,
+             field TYPE i,
+           END OF ty.
+    DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+    INSERT VALUE #( field = 2 ) INTO TABLE tab.
+    IF line_exists( tab[ field = lcl=>foo( ) ] ).
+      WRITE / 'yes'.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD foo.
+    int = 2.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>run( ).`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`yes`);
+  });
+
 });

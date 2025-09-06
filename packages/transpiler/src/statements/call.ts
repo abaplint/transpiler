@@ -132,9 +132,13 @@ if (e.classic) {
     for (const e of node.findAllExpressions(abaplint.Expressions.ParameterException)) {
       const name = e.getFirstToken().getStr().toUpperCase();
       // todo, also handle SimpleChain,
-      const value = e.findFirstExpression(abaplint.Expressions.Integer)?.getFirstToken().getStr().toUpperCase();
+      let value = e.findFirstExpression(abaplint.Expressions.Integer)?.getFirstToken().getStr().toUpperCase();
       if (value === undefined) {
         continue;
+      }
+      while (value.substring(0, 1) === "0" && value.length > 1) {
+        // remove leading zeros
+        value = value.substring(1);
       }
       if (name === "OTHERS") {
         post += `default: abap.builtin.sy.get().subrc.set(${value}); break;\n`;
