@@ -15,7 +15,6 @@ export async function select(target: Structure | Table | HashedTable | FieldSymb
     if (target.isAssigned() === false) {
       throw new Error("GETWA_NOT_ASSIGNED");
     }
-      // @ts-ignore
     target = target.getPointer();
   }
 
@@ -63,7 +62,6 @@ export function rowsToTarget(target: Structure | Table | HashedTable | FieldSymb
             targetRow.get()[columnName]?.clear();
             continue;
           }
-            // @ts-ignore
           targetRow.get()[columnName]?.set(row[columnName]);
         }
       } else {
