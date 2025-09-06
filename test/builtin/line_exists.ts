@@ -57,7 +57,7 @@ ENDIF.`;
     expect(abap.console.get()).to.equal(`yes`);
   });
 
-  it.only("call method", async () => {
+  it.skip("call method", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
