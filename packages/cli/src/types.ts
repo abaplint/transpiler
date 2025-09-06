@@ -4,6 +4,8 @@ export interface ITranspilerConfig {
   input_folder: string | string[];
   /** list of regex, case insensitive, empty gives all files, positive list */
   input_filter?: string[];
+  /** list of regex, case insensitive */
+  exclude_filter?: string[];
   output_folder: string;
   /** to be deprecated, "lib", use "libs" instead
    * @deprecated

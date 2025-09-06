@@ -42,7 +42,8 @@ export class FileOperations {
   }
 
   public static async loadFiles(config: ITranspilerConfig): Promise<Transpiler.IFile[]> {
-    const filter = (config.input_filter ?? []).map(pattern => new RegExp(pattern, "i"));
+    const inputFilters = (config.input_filter ?? []).map(pattern => new RegExp(pattern, "i"));
+    const excludeFilters = (config.exclude_filter ?? []).map(pattern => new RegExp(pattern, "i"));
     let skipped = 0;
     let added = 0;
 
@@ -50,7 +51,10 @@ export class FileOperations {
     const filesToRead: string[] = [];
     for (const folder of folders) {
       for (const filename of glob.sync(folder + "/**", {nosort: true, nodir: true})) {
-        if (filter.length > 0 && filter.some(a => a.test(filename)) === false) {
+        if (inputFilters.length > 0 && inputFilters.some(a => a.test(filename)) === false) {
+          skipped++;
+          continue;
+        } else if (excludeFilters.length > 0 && excludeFilters.some(a => a.test(filename)) === true) {
           skipped++;
           continue;
         }
