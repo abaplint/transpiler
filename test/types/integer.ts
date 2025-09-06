@@ -172,4 +172,16 @@ describe("Running Examples - Integer type", () => {
     await f(abap);
     expect(abap.console.get()).to.equal("45141");
   });
+
+  it("preceding zeros", async () => {
+    const code = `
+    DATA int TYPE i.
+    int = 0001.
+    WRITE / int.`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
 });
