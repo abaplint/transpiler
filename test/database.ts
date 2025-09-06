@@ -1802,4 +1802,18 @@ WRITE / sy-subrc.`;
     });
   });
 
+  it.only("not found, into should not clear", async () => {
+    const code = `
+DATA ls_t100 TYPE t100.
+ls_t100-arbgb = 'SDFSDF'.
+SELECT SINGLE * FROM t100 INTO ls_t100 WHERE arbgb = ls_t100-arbgb.
+ASSERT sy-subrc = 4.
+ASSERT ls_t100-arbgb = 'SDFSDF'.`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => { return; });
+  });
+
 });
