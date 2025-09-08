@@ -1,13 +1,14 @@
 import {AbstractType, Expressions, Nodes} from "@abaplint/core";
-import {IExpressionTranspiler} from "./_expression_transpiler";
 import {AttributeChainTranspiler, ComponentChainTranspiler, CondBodyTranspiler, FieldChainTranspiler, StringTemplateTranspiler, SwitchBodyTranspiler, TypeNameOrInfer} from ".";
-import {Traversal} from "../traversal";
-import {ConstantTranspiler} from "./constant";
 import {Chunk} from "../chunk";
-import {TranspileTypes} from "../transpile_types";
-import {ValueBodyTranspiler} from "./value_body";
+import {ConstantTranspiler} from "./constant";
 import {CorrespondingBodyTranspiler} from "./corresponding_body";
 import {FilterBodyTranspiler} from "./filter_body";
+import {IExpressionTranspiler} from "./_expression_transpiler";
+import {ReduceBodyTranspiler} from "./reduce_body";
+import {TranspileTypes} from "../transpile_types";
+import {Traversal} from "../traversal";
+import {ValueBodyTranspiler} from "./value_body";
 
 export class SourceTranspiler implements IExpressionTranspiler {
   private readonly addGet: boolean;
@@ -84,6 +85,8 @@ export class SourceTranspiler implements IExpressionTranspiler {
           continue;
         } else if (c.get() instanceof Expressions.CondBody) {
           continue;
+        } else if (c.get() instanceof Expressions.ReduceBody) {
+          continue;
         } else if (c.get() instanceof Expressions.SwitchBody) {
           continue;
         } else if (c.get() instanceof Expressions.FilterBody) {
@@ -155,6 +158,16 @@ export class SourceTranspiler implements IExpressionTranspiler {
           throw new Error("FilterBody not found");
         }
         ret.appendChunk(new FilterBodyTranspiler().transpile(typ, filterBody, traversal));
+      } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "REDUCE") {
+        const typ = node.findDirectExpression(Expressions.TypeNameOrInfer)
+        if (typ === undefined) {
+          throw new Error("TypeNameOrInfer not found in ReduceBody");
+        }
+        const reduceBody = node.findDirectExpression(Expressions.ReduceBody);
+        if (reduceBody === undefined) {
+          throw new Error("ReduceBody not found");
+        }
+        ret.appendChunk(new ReduceBodyTranspiler().transpile(typ, reduceBody, traversal));
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "REF") {
         const infer = node.findDirectExpression(Expressions.TypeNameOrInfer);
         if (infer?.concatTokens() !== "#") {
