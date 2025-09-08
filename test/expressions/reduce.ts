@@ -14,17 +14,18 @@ describe("Running expressions - REDUCE", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
-  it.only("basic, nothing found", async () => {
+  it("basic, nothing found", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          type TYPE c LENGTH 1,
          val  TYPE string,
        END OF ty.
 DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA lv_count TYPE i.
 
-DATA(count) = REDUCE i( INIT x = 0 FOR wa IN tab WHERE ( type = 'E' ) NEXT x = x + 1 ).
-WRITE / count.`;
-    const js = await run(code);
+lv_count = REDUCE i( INIT x = 0 FOR wa IN tab WHERE ( type = 'E' ) NEXT x = x + 1 ).
+WRITE / lv_count.`;
+    const js = await run(code, true);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0");
@@ -37,12 +38,13 @@ TYPES: BEGIN OF ty,
          val  TYPE string,
        END OF ty.
 DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA lv_count TYPE i.
 
 INSERT VALUE #( type = 'E' ) INTO TABLE tab.
 
-DATA(count) = REDUCE i( INIT x = 0 FOR wa IN tab WHERE ( type = 'E' ) NEXT x = x + 1 ).
-WRITE / count.`;
-    const js = await run(code);
+lv_count = REDUCE i( INIT x = 0 FOR wa IN tab WHERE ( type = 'E' ) NEXT x = x + 1 ).
+WRITE / lv_count.`;
+    const js = await run(code, true);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
@@ -55,13 +57,14 @@ TYPES: BEGIN OF ty,
          val  TYPE string,
        END OF ty.
 DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA lv_count TYPE i.
 
 INSERT VALUE #( type = 'E' val = 'Test' ) INTO TABLE tab.
 INSERT VALUE #( type = 'E' val = 'Test2' ) INTO TABLE tab.
 
-DATA(count) = REDUCE i( INIT x = 0 FOR wa IN tab WHERE ( type = 'E' ) NEXT x = x + 1 ).
-WRITE / count.`;
-    const js = await run(code);
+lv_count = REDUCE i( INIT x = 0 FOR wa IN tab WHERE ( type = 'E' ) NEXT x = x + 1 ).
+WRITE / lv_count.`;
+    const js = await run(code, true);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -74,13 +77,14 @@ TYPES: BEGIN OF ty,
          val  TYPE string,
        END OF ty.
 DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA lv_count TYPE i.
 
 INSERT VALUE #( type = 'E' val = 'Test' ) INTO TABLE tab.
 INSERT VALUE #( type = 'I' val = 'Test2' ) INTO TABLE tab.
 
-DATA(count) = REDUCE i( INIT x = 0 FOR wa IN tab WHERE ( type = 'E' ) NEXT x = x + 1 ).
-WRITE / count.`;
-    const js = await run(code);
+lv_count = REDUCE i( INIT x = 0 FOR wa IN tab WHERE ( type = 'E' ) NEXT x = x + 1 ).
+WRITE / lv_count.`;
+    const js = await run(code, true);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
