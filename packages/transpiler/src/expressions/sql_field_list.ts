@@ -18,6 +18,9 @@ export class SQLFieldListTranspiler implements IExpressionTranspiler {
       } else if (f instanceof abaplint.Nodes.ExpressionNode && f.get() instanceof abaplint.Expressions.SQLFieldName) {
         const code = new SQLFieldNameTranspiler().transpile(f, traversal).getCode();
         fields.push(code);
+      } else if (f instanceof abaplint.Nodes.ExpressionNode && f.get() instanceof abaplint.Expressions.SQLFieldList) {
+        // todo, I have no idea why its nested like this when there is just one field
+        return new SQLFieldListTranspiler().transpile(f, traversal);
       } else {
         const concat = f.concatTokens();
         if (concat !== ",") {

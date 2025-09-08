@@ -196,7 +196,7 @@ describe("Single statements", () => {
     {abap: "SELECT SINGLE * FROM t100 INTO ls_result WHERE arbgb = lv_arbgb.",
       js: `await abap.statements.select(ls_result, {select: "SELECT * FROM " + abap.buildDbTableName("t100") + " WHERE \\"arbgb\\" = '" + lv_arbgb.get() + "' UP TO 1 ROWS"});`},
     {abap: "select count( * ) from /foo/bar into bar.",
-      js: `await abap.statements.select(bar, {select: "SELECT count( * ) from " + abap.buildDbTableName("/foo/bar") + ""});`},
+      js: `await abap.statements.select(bar, {select: "SELECT count( * )  from " + abap.buildDbTableName("/foo/bar") + ""});`},
     {abap: "SELECT * FROM sflight INTO CORRESPONDING FIELDS OF TABLE mt_sflight UP TO 10 ROWS ORDER BY carrid.",
       js: `await abap.statements.select(mt_sflight, {select: "SELECT * FROM " + abap.buildDbTableName("sflight") + " UP TO " + abap.IntegerFactory.get(10).get() + " ROWS ORDER BY \\"carrid\\""});`},
     {abap: "SELECT * FROM sflight INNER JOIN scarr AS carrier ON carrier~carrid = sflight~carrid INTO CORRESPONDING FIELDS OF TABLE mt_sflight_join WHERE sflight~carrid = 'AA' ORDER BY sflight~fldate.",
@@ -371,9 +371,9 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({});`}, // todo
       js: `await abap.statements.message({exception: lx_exception, type: abap.CharacterFactory.get(1, 'S'), displayLike: abap.CharacterFactory.get(1, 'E')});`, skip: false},
 
     {abap: "select count( * ) from tab into res where enable_sqlite = abap_true.",
-      js: `await abap.statements.select(res, {select: "SELECT count( * ) from " + abap.buildDbTableName("tab") + " WHERE \\"enable_sqlite\\" = '" + abap.builtin.abap_true.get() + "'"});`, skip: false},
+      js: `await abap.statements.select(res, {select: "SELECT count( * )  from " + abap.buildDbTableName("tab") + " WHERE \\"enable_sqlite\\" = '" + abap.builtin.abap_true.get() + "'"});`, skip: false},
     {abap: "select count( * ) from tab into res where ('enable_sqlite = abap_true').",
-      js: `await abap.statements.select(res, {select: "SELECT count( * ) from " + abap.buildDbTableName("tab") + " WHERE \\"enable_sqlite\\" = 'X'"});`, skip: false},
+      js: `await abap.statements.select(res, {select: "SELECT count( * )  from " + abap.buildDbTableName("tab") + " WHERE \\"enable_sqlite\\" = 'X'"});`, skip: false},
   ];
 
   for (const test of tests) {
