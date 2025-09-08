@@ -69,7 +69,8 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
       return `${pre}" + abap.expandIN("${fieldName.concatTokens()}", ${s}) + "`;
     } else {
       const cond: string[] = [];
-      for (const s of sqlin.findDirectExpressions(abaplint.Expressions.SQLSource)) {
+      for (const s of sqlin.findDirectExpressions(abaplint.Expressions.SQLSource).concat(
+          sqlin.findDirectExpressions(abaplint.Expressions.SQLSourceNoSpace))) {
         const field = new SQLFieldNameTranspiler().transpile(fieldName, traversal).getCode();
         const sourc = this.sqlSource(s, traversal, filename, table);
         cond.push(field + " = " + sourc);
