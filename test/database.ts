@@ -1816,4 +1816,18 @@ ASSERT ls_t100-arbgb = 'SDFSDF'.`;
     await runAllDatabases(abap, files, () => { return; });
   });
 
+  it("select abap variable", async () => {
+    const code = `
+DATA lv_exists TYPE abap_bool.
+SELECT SINGLE @abap_true FROM t100 INTO @lv_exists.
+WRITE / lv_exists.`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("X");
+    });
+  });
+
 });
