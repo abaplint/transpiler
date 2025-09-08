@@ -1827,7 +1827,7 @@ WRITE / lv_exists.`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("X");
-    }, {skipVersionCheck: true});
+    });
   });
 
 });
