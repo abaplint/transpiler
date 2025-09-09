@@ -4,8 +4,8 @@ import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
-async function run(contents: string) {
-  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
+async function run(contents: string, skipVersionCheck = false) {
+  return runFiles(abap, [{filename: "zfoobar_assign.prog.abap", contents}], {skipVersionCheck});
 }
 
 describe("Running statements - ASSIGN", () => {
@@ -844,6 +844,20 @@ START-OF-SELECTION.
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.getTrimmed()).to.equal("1");
+  });
+
+  it.only("concatenated component", async () => {
+    const code = `
+DATA: BEGIN OF stru,
+        foobar TYPE i,
+      END OF stru.
+FIELD-SYMBOLS <lv_quantity> TYPE i.
+ASSIGN COMPONENT 'FOO' && 'BAR' OF STRUCTURE stru TO <lv_quantity>.
+WRITE / <lv_quantity>.`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("0");
   });
 
 });
