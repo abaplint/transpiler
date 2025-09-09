@@ -15,6 +15,7 @@ async function runAllDatabases(abap: ABAP,
 
   if (settings === undefined || settings.sqlite === undefined || settings.sqlite === true) {
     const js = await runRilesSqlite(abap, files, {skipVersionCheck: settings?.skipVersionCheck});
+    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     await abap.context.databaseConnections["DEFAULT"].disconnect();
