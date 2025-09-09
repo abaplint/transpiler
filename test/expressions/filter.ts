@@ -127,7 +127,7 @@ WRITE / lines( et_list ).`;
     expect(abap.console.get()).to.equal("1");
   });
 
-  it.only("filter with CONV inference", async () => {
+  it("filter with CONV inference", async () => {
     const code = `
 FORM run.
   TYPES: BEGIN OF ty,
