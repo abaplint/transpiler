@@ -315,4 +315,33 @@ WRITE / row.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it.only("FOR WHERE", async () => {
+    const code = `
+FORM run.
+  TYPES: BEGIN OF ty,
+           number TYPE c LENGTH 10,
+         END OF ty.
+  TYPES tytt TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+
+  DATA gt TYPE tytt.
+
+  INSERT VALUE #( number = 2 ) INTO TABLE gt.
+  INSERT VALUE #( number = 3 ) INTO TABLE gt.
+
+  DATA(result) = VALUE tytt(
+    FOR row IN gt WHERE ( number = 2 )
+    ( CORRESPONDING #( row ) ) ).
+
+  WRITE / lines( result ).
+
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });
