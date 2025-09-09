@@ -6,10 +6,10 @@ export const LINE_NOT_FOUND = "CX_SY_ITAB_LINE_NOT_FOUND";
 
 declare const abap: ABAP;
 
-export function line_exists(callback: () => void): ICharacter {
+export async function line_exists(callback: () => Promise<void>): Promise<ICharacter> {
 
   try {
-    callback();
+    await callback();
   } catch (error) {
     if (isLineNotFound(error)) {
       return abap.builtin.abap_false;

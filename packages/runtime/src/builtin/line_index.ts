@@ -5,10 +5,10 @@ import {Integer} from "../types";
 
 declare const abap: ABAP;
 
-export function line_index(callback: () => void): Integer {
+export async function line_index(callback: () => Promise<void>): Promise<Integer> {
 
   try {
-    callback();
+    await callback();
   } catch (error) {
     if (isLineNotFound(error)) {
       return abap.IntegerFactory.get(0);

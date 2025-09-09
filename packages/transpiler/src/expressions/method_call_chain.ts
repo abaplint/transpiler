@@ -11,7 +11,8 @@ export class MethodCallChainTranspiler implements IExpressionTranspiler {
     for (const c of node.getChildren()) {
       if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.MethodCall) {
         const sub = traversal.traverse(c);
-        if (sub.getCode().startsWith("abap.builtin.")) {
+        if (sub.getCode().startsWith("abap.builtin.")
+            || sub.getCode().startsWith("await abap.builtin.")) {
           ret.appendChunk(sub);
         } else {
           const t = c === node.getFirstChild() ? "this." : "";
