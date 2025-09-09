@@ -361,7 +361,7 @@ WRITE / sy-subrc.`;
     expect(abap.console.get()).to.equal("0");
   });
 
-  it.only("APPEND, extra field in structure", async () => {
+  it("APPEND, extra field in structure", async () => {
     const code = `
 TYPES: BEGIN OF ty1,
          field1 TYPE i,

@@ -12,6 +12,7 @@ import {Character} from "./character";
 import {Hex} from "./hex";
 import {HexUInt8} from "./hex_uint8";
 import {ABAP} from "..";
+import {moveCorresponding} from "../statements/move_corresponding";
 
 declare const abap: ABAP;
 
@@ -571,7 +572,7 @@ export class Table implements ITable {
       this.value.push(ref);
       return ref;
     } else {
-      const val = this.cloneRow(item);
+      const val = this.cloneRow(item, true);
       this.value.push(val);
       return val;
     }
@@ -597,7 +598,7 @@ export class Table implements ITable {
 
 ///////////////////////////
 
-  private cloneRow(item: TableRowType) {
+  private cloneRow(item: TableRowType, corresponding = false) {
     // make sure to do conversion if needed
     if (typeof item === "number") {
       const tmp = this.getRowType().clone();
@@ -612,6 +613,10 @@ export class Table implements ITable {
     // types match, so no need to do conversions, just clone the item
       const val = item.clone();
       return val;
+    } else if (corresponding === true && this.isStructured === true && item instanceof Structure) {
+      const tmp = this.getRowType().clone();
+      moveCorresponding(item, tmp as Structure);
+      return tmp;
     } else {
       const tmp = this.getRowType().clone();
       tmp.set(item);
