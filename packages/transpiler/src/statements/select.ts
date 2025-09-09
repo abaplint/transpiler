@@ -15,6 +15,12 @@ function escapeRegExp(string: string) {
 export class SelectTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal, targetOverride?: string): Chunk {
+    if (node.findDirectTokenByText("ALL") !== undefined) {
+      throw new Error("SelectTranspiler, UNION ALL todo");
+    } else if (node.findDirectTokenByText("DISTINCT") !== undefined) {
+      throw new Error("SelectTranspiler, UNION DISTINCT todo");
+    }
+
     let target = "undefined";
     if (targetOverride) {
       // SelectLoop structure uses override
