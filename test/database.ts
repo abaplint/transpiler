@@ -1859,4 +1859,18 @@ WRITE / sy-dbcnt.`;
     }, {skipVersionCheck: true});
   });
 
+  it("UPDATE FROM", async () => {
+    const code = `
+DATA ls_t100 TYPE t100.
+INSERT t100 FROM ls_t100.
+WRITE / sy-subrc.
+UPDATE t100 FROM ls_t100.
+WRITE / sy-subrc.`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => { return; });
+  });
+
 });
