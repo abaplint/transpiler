@@ -25,7 +25,7 @@ DATA lv_count TYPE i.
 
 lv_count = REDUCE i( INIT x = 0 FOR wa IN tab WHERE ( type = 'E' ) NEXT x = x + 1 ).
 WRITE / lv_count.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0");
@@ -44,7 +44,7 @@ INSERT VALUE #( type = 'E' ) INTO TABLE tab.
 
 lv_count = REDUCE i( INIT x = 0 FOR wa IN tab WHERE ( type = 'E' ) NEXT x = x + 1 ).
 WRITE / lv_count.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
@@ -64,7 +64,7 @@ INSERT VALUE #( type = 'E' val = 'Test2' ) INTO TABLE tab.
 
 lv_count = REDUCE i( INIT x = 0 FOR wa IN tab WHERE ( type = 'E' ) NEXT x = x + 1 ).
 WRITE / lv_count.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
@@ -84,7 +84,7 @@ INSERT VALUE #( type = 'I' val = 'Test2' ) INTO TABLE tab.
 
 lv_count = REDUCE i( INIT x = 0 FOR wa IN tab WHERE ( type = 'E' ) NEXT x = x + 1 ).
 WRITE / lv_count.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
