@@ -854,7 +854,7 @@ DATA: BEGIN OF stru,
 FIELD-SYMBOLS <lv_quantity> TYPE i.
 ASSIGN COMPONENT 'FOO' && 'BAR' OF STRUCTURE stru TO <lv_quantity>.
 WRITE / <lv_quantity>.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.getTrimmed()).to.equal("0");
