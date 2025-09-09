@@ -180,4 +180,51 @@ WRITE / row-msgno.`;
     expect(abap.console.get()).to.equal("0");
   });
 
+  it("with method call, for index", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS get_index RETURNING VALUE(rv_index) TYPE i.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD get_index.
+    rv_index = 1.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+  INSERT VALUE #( ) INTO TABLE tab.
+  WRITE / tab[ lcl=>get_index( ) ].`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
+  it("with method call, where", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS get RETURNING VALUE(int) TYPE i.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD get.
+    int = 0.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  TYPES: BEGIN OF ty,
+           field TYPE i,
+         END OF ty.
+  DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+  INSERT VALUE #( ) INTO TABLE tab.
+  WRITE / tab[ field = lcl=>get( ) ]-field.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
 });

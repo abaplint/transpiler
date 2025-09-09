@@ -1,4 +1,4 @@
-import {searchWithKey} from "../statements/read_table";
+import {searchWithKeyPromise} from "../statements/read_table";
 import {throwError} from "../throw_error";
 import {HashedTable, Integer, Table} from "../types";
 import {ICharacter} from "../types/_character";
@@ -8,19 +8,19 @@ import {parse} from "./_parse";
 export interface ITableExpressionOptions {
   index?: INumeric | ICharacter | string | Integer | number
   // single function, evaluates full condition
-  withKey?: (i: any) => boolean,
+  withKey?: (i: any) => Promise<boolean>,
   usesTableLine?: boolean
 }
 
 export let foundIndex: number = 0;
 
-export function tableExpression(source: Table | HashedTable, options: ITableExpressionOptions) {
+export async function tableExpression(source: Table | HashedTable, options: ITableExpressionOptions) {
   let found;
   if (options.index) {
     foundIndex = parse(options.index) - 1;
     found = source.array()[ foundIndex ];
   } else if (options.withKey) {
-    const search = searchWithKey(source.array(), options.withKey, 0, options?.usesTableLine);
+    const search = await searchWithKeyPromise(source.array(), options.withKey, 0, options?.usesTableLine);
     found = search.found;
     foundIndex = search.foundIndex;
   } else {

@@ -41,11 +41,11 @@ export class TableExpressionTranspiler {
         }
       }
 
-      extra.push("withKey: (i) => {return " + withKey.join(" && ") + ";}");
+      extra.push("withKey: async (i) => {return " + withKey.join(" && ") + ";}");
       extra.push("usesTableLine: " + usesTableLine);
     }
 
-    ret.appendString(`abap.operators.tableExpression(${source.getCode()}, {${extra.join(", ")} })`);
+    ret.appendString(`(await abap.operators.tableExpression(${source.getCode()}, {${extra.join(", ")} }))`);
 
     return ret;
   }

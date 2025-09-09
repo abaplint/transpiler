@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import {binarySearchFrom, binarySearchFromRow} from "../binary_search";
 import {eq, ge, gt} from "../compare";
 import {DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Integer8, Structure, Table, TableAccessType} from "../types";
@@ -83,6 +84,29 @@ export function searchWithKey(arr: any, withKey: (i: any) => boolean, startIndex
       row = isStructured ? {table_line: a, ...a.get()} : {table_line: a};
     }
     if (withKey(row) === true) {
+      return {
+        found: a,
+        foundIndex: index + 1,
+      };
+    }
+  }
+  return {
+    found: undefined,
+    foundIndex: 0,
+  };
+}
+
+export async function searchWithKeyPromise(arr: any, withKey: (i: any) => Promise<boolean>, startIndex = 0, usesTableLine: boolean | undefined) {
+  const isStructured = arr[0] instanceof Structure;
+  for (let index = startIndex; index < arr.length; index++) {
+    const a = arr[index];
+    let row: any = undefined;
+    if (usesTableLine === false && isStructured === true) {
+      row = a.get();
+    } else {
+      row = isStructured ? {table_line: a, ...a.get()} : {table_line: a};
+    }
+    if (await withKey(row) === true) {
       return {
         found: a,
         foundIndex: index + 1,
