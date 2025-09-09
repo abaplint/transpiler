@@ -30,10 +30,10 @@ export class UpdateDatabaseTranspiler implements IStatementTranspiler {
       options.push(`"set": [${s.join(",")}]`);
     }
 
-    const s = node.findDirectExpression(abaplint.Expressions.SQLSource)!.findDirectExpression(abaplint.Expressions.SimpleSource3)!;
-    const sqlSource = new SourceTranspiler(true).transpile(s, traversal).getCode();
-
-    if (sqlSource) {
+    const sourceExpression = node.findDirectExpression(abaplint.Expressions.SQLSource
+      )?.findDirectExpression(abaplint.Expressions.SimpleSource3);
+    if (sourceExpression) {
+      const sqlSource = new SourceTranspiler(true).transpile(sourceExpression, traversal).getCode();
       const tableName = node.findDirectExpression(abaplint.Expressions.DatabaseTable)?.concatTokens();
       const tabl = traversal.findTable(tableName!)!;
       const keys = tabl.listKeys(traversal.reg).map(k => k.toLowerCase());
