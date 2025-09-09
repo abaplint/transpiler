@@ -2,7 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {DatabaseTableTranspiler, SQLFieldAndValueTranspiler} from "../expressions";
+import {DatabaseTableTranspiler, SourceTranspiler, SQLFieldAndValueTranspiler} from "../expressions";
 
 export class UpdateDatabaseTranspiler implements IStatementTranspiler {
 
@@ -30,10 +30,15 @@ export class UpdateDatabaseTranspiler implements IStatementTranspiler {
       options.push(`"set": [${s.join(",")}]`);
     }
 
-    const sqlSource = node.findDirectExpression(abaplint.Expressions.SQLSource)?.concatTokens()?.toLowerCase().replace("@", "");
-    if (sqlSource) {
+    const sourceExpression = node.findDirectExpression(abaplint.Expressions.SQLSource
+      )?.findDirectExpression(abaplint.Expressions.SimpleSource3);
+    if (sourceExpression) {
+      const sqlSource = new SourceTranspiler(true).transpile(sourceExpression, traversal).getCode();
       const tableName = node.findDirectExpression(abaplint.Expressions.DatabaseTable)?.concatTokens();
-      const tabl = traversal.findTable(tableName!)!;
+      const tabl = traversal.findTable(tableName!);
+      if (tabl === undefined) {
+        return new Chunk(`throw new Error("UpdateDatabaseTranspiler: table ${tableName} not found");`);
+      }
       const keys = tabl.listKeys(traversal.reg).map(k => k.toLowerCase());
       const allFields = (tabl.parseType(traversal.reg) as abaplint.BasicTypes.StructureType).getComponents().map(c => {
         return c.name.toLowerCase();
@@ -42,7 +47,7 @@ export class UpdateDatabaseTranspiler implements IStatementTranspiler {
       const where: string[] = [];
       const set: string[] = [];
       for (const fieldName of allFields) {
-        const cond = `\\"${fieldName}\\" = '\" + ${sqlSource}.get().${fieldName}.get() + \"'`;
+        const cond = `\\"${fieldName}\\" = '\" + ${sqlSource}.${fieldName}.get() + \"'`;
         if (keys.includes(fieldName) === true) {
           where.push(cond);
         }  else {
