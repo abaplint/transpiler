@@ -25,7 +25,9 @@ export class ReduceBodyTranspiler {
     }
     const loopExpression = forExpression.findDirectExpression(Expressions.InlineLoopDefinition);
     const loopSource = traversal.traverse(loopExpression?.findDirectExpression(Expressions.Source)).getCode();
-    const loopVariable = traversal.traverse(loopExpression?.findDirectExpression(Expressions.TargetField)).getCode();
+
+    const loopVariable = traversal.traverse(loopExpression?.findDirectExpression(Expressions.TargetField)
+      || loopExpression?.findDirectExpression(Expressions.TargetFieldSymbol)).getCode();
 
 //    const type = new TypeNameOrInfer().findType(typ, traversal);
 //    const target = TranspileTypes.toType(type);

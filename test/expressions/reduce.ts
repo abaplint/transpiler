@@ -111,4 +111,25 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("3");
   });
 
+  it("with FILTER source", async () => {
+    const code = `
+FORM run.
+  TYPES: BEGIN OF ty,
+           count TYPE i,
+         END OF ty.
+  DATA tab TYPE SORTED TABLE OF ty WITH NON-UNIQUE KEY count.
+  INSERT VALUE #( count = 1 ) INTO TABLE tab.
+  INSERT VALUE #( count = 2 ) INTO TABLE tab.
+  DATA(lv_count) = REDUCE #( INIT val = 0 FOR <wa> IN FILTER #( tab WHERE count < 5 ) NEXT val = val + <wa>-count ).
+  WRITE / lv_count.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3");
+  });
+
 });
