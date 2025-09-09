@@ -1859,7 +1859,7 @@ WRITE / sy-dbcnt.`;
     }, {skipVersionCheck: true});
   });
 
-  it.only("UPDATE FROM", async () => {
+  it("UPDATE FROM", async () => {
     const code = `
 DATA ls_t100 TYPE t100.
 INSERT t100 FROM ls_t100.

@@ -30,6 +30,30 @@ export class UpdateDatabaseTranspiler implements IStatementTranspiler {
       options.push(`"set": [${s.join(",")}]`);
     }
 
+    const sqlSource = node.findDirectExpression(abaplint.Expressions.SQLSource)?.concatTokens()?.toLowerCase().replace("@", "");
+    if (sqlSource) {
+      const tableName = node.findDirectExpression(abaplint.Expressions.DatabaseTable)?.concatTokens();
+      const tabl = traversal.findTable(tableName!)!;
+      const keys = tabl.listKeys(traversal.reg).map(k => k.toLowerCase());
+      const allFields = (tabl.parseType(traversal.reg) as abaplint.BasicTypes.StructureType).getComponents().map(c => {
+        return c.name.toLowerCase();
+      });
+
+      const where: string[] = [];
+      const set: string[] = [];
+      for (const fieldName of allFields) {
+        const cond = `\\"${fieldName}\\" = '\" + ${sqlSource}.get().${fieldName}.get() + \"'`;
+        if (keys.includes(fieldName) === true) {
+          where.push(cond);
+        }  else {
+          set.push("\"" + cond + "\"");
+        }
+      }
+
+      options.push(`"where": "` + where.join(" AND ") + `"`);
+      options.push(`"set": [${set.join(",")}]`);
+    }
+
     return new Chunk(`await abap.statements.updateDatabase(${table.getCode()}, {${options.join(", ")}});`);
   }
 
