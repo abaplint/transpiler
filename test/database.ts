@@ -1870,7 +1870,40 @@ WRITE / sy-subrc.`;
       {filename: "zfoobar_database.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    await runAllDatabases(abap, files, () => { return; });
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("0\n0");
+    });
+  });
+
+  it.only("UPDATE FROM, with private variable", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS run.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+    DATA ms_t100 TYPE t100.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    INSERT t100 FROM ms_t100.
+    WRITE / sy-subrc.
+    UPDATE t100 FROM ms_t100.
+    WRITE / sy-subrc.
+  ENDMETHOD.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl.
+  CREATE OBJECT ref.
+  ref->run( ).`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("0\n0");
+    });
   });
 
 });
