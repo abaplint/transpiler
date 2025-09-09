@@ -46,7 +46,9 @@ export async function updateDatabase(table: string | ICharacter, options: IUpdat
     }
     set.push(...options.set);
   } else {
-    throw "updateDatabase, todo";
+    console.dir(table);
+    console.dir(options);
+    throw new Error("updateDatabase, todo");
   }
 
   const {subrc, dbcnt} = await context.defaultDB().update({
