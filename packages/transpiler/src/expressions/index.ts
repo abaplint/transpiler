@@ -64,6 +64,7 @@ export * from "./string_template_source";
 export * from "./string_template";
 export * from "./switch_body";
 export * from "./table_expression";
+export * from "./target_field_symbol";
 export * from "./target_field";
 export * from "./target";
 export * from "./type_name_or_infer";
