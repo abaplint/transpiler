@@ -32,7 +32,7 @@ export class TranspilerConfig {
       input_filter: [],
       output_folder: "output",
       libs: [
-        {"url": "https://github.com/open-abap/open-abap"},
+        {"url": "https://github.com/open-abap/open-abap-core"},
       ],
       write_unit_tests: true,
       write_source_map: true,
