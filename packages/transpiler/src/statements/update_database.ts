@@ -35,7 +35,10 @@ export class UpdateDatabaseTranspiler implements IStatementTranspiler {
     if (sourceExpression) {
       const sqlSource = new SourceTranspiler(true).transpile(sourceExpression, traversal).getCode();
       const tableName = node.findDirectExpression(abaplint.Expressions.DatabaseTable)?.concatTokens();
-      const tabl = traversal.findTable(tableName!)!;
+      const tabl = traversal.findTable(tableName!);
+      if (tabl === undefined) {
+        return new Chunk(`throw new Error("UpdateDatabaseTranspiler: table ${tableName} not found");`);
+      }
       const keys = tabl.listKeys(traversal.reg).map(k => k.toLowerCase());
       const allFields = (tabl.parseType(traversal.reg) as abaplint.BasicTypes.StructureType).getComponents().map(c => {
         return c.name.toLowerCase();
