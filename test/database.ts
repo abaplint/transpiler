@@ -1875,7 +1875,7 @@ WRITE / sy-subrc.`;
     });
   });
 
-  it.only("UPDATE FROM, with private variable", async () => {
+  it("UPDATE FROM, with private variable", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
