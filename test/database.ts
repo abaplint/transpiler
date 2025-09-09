@@ -1830,4 +1830,21 @@ WRITE / lv_exists.`;
     });
   });
 
+  it.only("UNION", async () => {
+    const code = `
+DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH EMPTY KEY.
+SELECT sprsl, arbgb, msgnr, text FROM t100 WHERE arbgb = 'ZAG_UNIT_TEST'
+UNION
+SELECT sprsl, arbgb, msgnr, text FROM t100 WHERE arbgb = 'Z1'
+INTO TABLE @lt_t100.
+WRITE / sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("2");
+    }, {skipVersionCheck: true});
+  });
+
 });
