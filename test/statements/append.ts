@@ -361,4 +361,21 @@ WRITE / sy-subrc.`;
     expect(abap.console.get()).to.equal("0");
   });
 
+  it.only("APPEND, extra field in structure", async () => {
+    const code = `
+TYPES: BEGIN OF ty1,
+         field1 TYPE i,
+       END OF ty1.
+TYPES: BEGIN OF ty2,
+         field1 TYPE i,
+         extra  TYPE i,
+       END OF ty2.
+DATA tab TYPE STANDARD TABLE OF ty1 WITH DEFAULT KEY.
+DATA row TYPE ty2.
+APPEND row TO tab.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
