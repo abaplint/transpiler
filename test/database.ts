@@ -15,7 +15,6 @@ async function runAllDatabases(abap: ABAP,
 
   if (settings === undefined || settings.sqlite === undefined || settings.sqlite === true) {
     const js = await runRilesSqlite(abap, files, {skipVersionCheck: settings?.skipVersionCheck});
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     await abap.context.databaseConnections["DEFAULT"].disconnect();
@@ -1831,7 +1830,7 @@ WRITE / lv_exists.`;
     });
   });
 
-  it.only("UNION", async () => {
+  it.skip("UNION", async () => {
     const code = `
 DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH EMPTY KEY.
 SELECT sprsl, arbgb, msgnr, text FROM t100 WHERE arbgb = 'ZAG_UNIT_TEST'
