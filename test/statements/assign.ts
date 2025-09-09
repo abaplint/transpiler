@@ -846,7 +846,7 @@ START-OF-SELECTION.
     expect(abap.console.getTrimmed()).to.equal("1");
   });
 
-  it.only("concatenated component", async () => {
+  it("concatenated component", async () => {
     const code = `
 DATA: BEGIN OF stru,
         foobar TYPE i,
