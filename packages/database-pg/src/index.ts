@@ -184,6 +184,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     options.select = options.select.replace(/ ASCENDING/ig, " ASC");
     options.select = options.select.replace(/ DESCENDING/ig, " DESC");
     options.select = options.select.replace(/~/g, ".");
+    options.select = options.select.replace(/ LIMIT 0/g, "");
 
     if (this.trace === true) {
       console.log(options.select);
