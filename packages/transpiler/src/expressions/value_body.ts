@@ -49,7 +49,7 @@ export class ValueBodyTranspiler {
         const source = traversal.traverse(child);
         ret.appendString(".set(" + source.getCode() + ".clone())");
       } else if (child.get() instanceof Expressions.For && child instanceof Nodes.ExpressionNode) {
-        if (["THEN", "UNTIL", "WHILE", "FROM", "TO", "WHERE", "GROUPS"].some(token => child.findDirectTokenByText(token))) {
+        if (["THEN", "UNTIL", "WHILE", "FROM", "TO", "GROUPS"].some(token => child.findDirectTokenByText(token))) {
           throw new Error("ValueBody FOR todo, " + body.concatTokens());
         }
 
@@ -57,6 +57,13 @@ export class ValueBodyTranspiler {
         if (loop === undefined) {
           throw new Error("ValueBody FOR todo, " + body.concatTokens());
         }
+
+      let loopWhere = "";
+      const whereNode = child?.findDirectExpression(Expressions.ComponentCond);
+      if (whereNode) {
+        const where = traversal.traverse(whereNode).getCode();
+        loopWhere = `, {"where": async ` + where + `}`;
+      }
 
         const base = loop.findDirectExpression(Expressions.ValueBase);
         if (base) {
@@ -89,7 +96,7 @@ export class ValueBodyTranspiler {
         ret = new Chunk().appendString(`await (async () => {
 ${targetDeclare}
 const VAL = ${val};
-for await (const unique1 of abap.statements.loop(${source})) {
+for await (const unique1 of abap.statements.loop(${source}${loopWhere})) {
   ${targetAction}
   VAL`);
         post = ";\n}\nreturn VAL;\n})()";

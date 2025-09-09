@@ -315,7 +315,7 @@ WRITE / row.`;
     expect(abap.console.get()).to.equal("2");
   });
 
-  it.only("FOR WHERE", async () => {
+  it("FOR WHERE", async () => {
     const code = `
 FORM run.
   TYPES: BEGIN OF ty,
