@@ -127,4 +127,25 @@ WRITE / lines( et_list ).`;
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("filter with CONV inference", async () => {
+    const code = `
+FORM run.
+  TYPES: BEGIN OF ty,
+           field TYPE c LENGTH 10,
+         END OF ty.
+  DATA original TYPE SORTED TABLE OF ty WITH NON-UNIQUE KEY field.
+  INSERT VALUE #( ) INTO TABLE original.
+  INSERT VALUE #( field = '1' ) INTO TABLE original.
+  DATA(filtered) = FILTER #( original WHERE field <> CONV #( space ) ).
+  WRITE / lines( filtered ).
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });
