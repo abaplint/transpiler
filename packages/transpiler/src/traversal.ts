@@ -562,7 +562,7 @@ export class Traversal {
       }
       const methodName = privateHash + Traversal.escapeNamespace(name.replace("~", "$"));
       // NOTE: currently all are needed in the unit test setup
-      ret += `"${name.replace("~", "$")}": this.${methodName}.bind(this),\n`
+      ret += `"${name.replace("~", "$")}": this.${methodName}.bind(this),\n`;
     }
 /*
     for (const attribute of def.getAttributes()?.getAll() || []) {

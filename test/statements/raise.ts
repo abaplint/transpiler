@@ -129,7 +129,8 @@ CLASS lcx IMPLEMENTATION.
 ENDCLASS.
 
 START-OF-SELECTION.
-  RAISE EXCEPTION TYPE lcx MESSAGE e123(zzz).`;
+  DATA bar TYPE i.
+  RAISE EXCEPTION TYPE lcx MESSAGE e123(zzz) WITH bar.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     try {

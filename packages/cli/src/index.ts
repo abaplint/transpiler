@@ -69,7 +69,7 @@ async function loadLib(config: ITranspilerConfig): Promise<Transpiler.IFile[]> {
 }
 
 function writeObjects(outputFiles: Transpiler.IOutputFile[], config: ITranspilerConfig, outputFolder: string, files: Transpiler.IFile[]) {
-  const writeSourceMaps = config.write_source_map || false
+  const writeSourceMaps = config.write_source_map || false;
   for (const output of outputFiles) {
     let contents = output.chunk.getCode();
     if (writeSourceMaps === true

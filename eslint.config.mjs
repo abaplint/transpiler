@@ -44,6 +44,7 @@ export default [{
         "import/namespace": "off",
         "import/named": "off",
         "semi-spacing": "error",
+        "semi": "error",
         "space-infix-ops": "error",
         "prefer-arrow-callback": "error",
         "import/export": "off",

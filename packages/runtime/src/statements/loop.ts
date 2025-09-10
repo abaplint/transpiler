@@ -44,7 +44,7 @@ function determineFromTo(array: readonly any[], topEquals: topType | undefined, 
 // todo: rewrite, this is a mess & hack & slow
 function dynamicToWhere(condition: string, evaluate: (name: string) => FieldSymbol | undefined): (placeholder: any) => Promise<boolean> {
 //  console.dir(condition);
-  let text = condition.replace(/ AND /gi, " && ").replace(/ OR /gi, " || ").replace(/ = /gi, " EQ ").replace(/ <> /gi, " NE ")
+  let text = condition.replace(/ AND /gi, " && ").replace(/ OR /gi, " || ").replace(/ = /gi, " EQ ").replace(/ <> /gi, " NE ");
 //  console.dir(text);
 
   if (evaluate === undefined) {

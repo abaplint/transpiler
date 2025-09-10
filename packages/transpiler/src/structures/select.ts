@@ -18,7 +18,7 @@ export class SelectTranspiler implements IStructureTranspiler {
     const from = selectStatement.findFirstExpression(abaplint.Expressions.SQLFromSource)?.concatTokens().toUpperCase();
     const sTarget = selectStatement.findFirstExpression(abaplint.Expressions.SQLTarget);
 
-    let intoName: string = ""
+    let intoName: string = "";
     if (sTarget === undefined) {
       intoName = from!.toLowerCase();
     } else {
