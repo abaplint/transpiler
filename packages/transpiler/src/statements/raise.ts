@@ -41,19 +41,30 @@ export class RaiseTranspiler implements IStatementTranspiler {
 
     const messageSource = node.findDirectExpression(abaplint.Expressions.MessageSource);
     let pre = "";
+    let post = "";
     if (messageSource) {
-      let msgid = messageSource.findDirectExpression(abaplint.Expressions.MessageClass)?.concatTokens().toUpperCase();
+      let msgid = messageSource.findDirectExpression(abaplint.Expressions.MessageClass
+        )?.concatTokens().toUpperCase();
       if (msgid === undefined) {
         msgid = traversal.traverse(messageSource.findExpressionAfterToken("ID")).getCode();
       } else {
         msgid = `'${msgid}'`;
       }
 
-      let msgno = messageSource.findDirectExpression(abaplint.Expressions.MessageTypeAndNumber)?.concatTokens().substring(1);
+      let msgno = messageSource.findDirectExpression(abaplint.Expressions.MessageTypeAndNumber
+        )?.concatTokens().substring(1);
       if (msgno === undefined) {
         msgno = traversal.traverse(messageSource.findExpressionAfterToken("NUMBER")).getCode();
       } else {
         msgno = `'${msgno}'`;
+      }
+
+      let msgty = messageSource.findDirectExpression(abaplint.Expressions.MessageTypeAndNumber
+        )?.concatTokens().substring(0, 1).toUpperCase();
+      if (msgty === undefined) {
+        msgty = traversal.traverse(messageSource.findExpressionAfterToken("TYPE")).getCode();
+      } else {
+        msgty = `'${msgty}'`;
       }
 
       const textid = UniqueIdentifier.get();
@@ -76,10 +87,18 @@ ${textid}.get().attr4.set('IF_T100_DYN_MSG~MSGV4');
       } else {
         p = `{...${p}, "textid": ${textid}}`;
       }
+
+      post = `\n${id}.if_t100_dyn_msg$msgty?.set(${msgty});`;
+
+      let count = 1;
+      for (const w of node.findDirectExpression(abaplint.Expressions.RaiseWith)?.findDirectExpressions(abaplint.Expressions.Source) || []) {
+        post += `\n${id}.if_t100_dyn_msg$msgv${count}?.set(${traversal.traverse(w).getCode()});`;
+        count++;
+      }
     }
 
     return new Chunk().append(pre + `const ${id} = await (new ${lookup}()).constructor_(${p});
-${id}.EXTRA_CX = ${extra};
+${id}.EXTRA_CX = ${extra};${post}
 throw ${id};`, node, traversal);
   }
 

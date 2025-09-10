@@ -117,7 +117,7 @@ START-OF-SELECTION.
     }
   });
 
-  it.only("RAISE EXCEPTION MESSAGE", async () => {
+  it("RAISE EXCEPTION MESSAGE", async () => {
     const code = `
 ${cx_root}
 
@@ -129,14 +129,15 @@ CLASS lcx IMPLEMENTATION.
 ENDCLASS.
 
 START-OF-SELECTION.
-  RAISE EXCEPTION TYPE lcx MESSAGE e123(zzz).`;
+  DATA bar TYPE i.
+  RAISE EXCEPTION TYPE lcx MESSAGE e123(zzz) WITH bar.`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     try {
       await f(abap);
       expect.fail();
     } catch(e) {
+      console.dir(e);
       expect(e.toString()).to.contain("Error");
       expect(e.constructor.name).to.contain("lcx");
     }
