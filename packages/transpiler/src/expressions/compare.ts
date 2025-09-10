@@ -45,7 +45,7 @@ export class CompareTranspiler implements IExpressionTranspiler {
         }
         return new Chunk().appendString(pre + "(INPUT && INPUT." + concat.replace(" IS SUPPLIED", "" + ")").toLowerCase());
       } else if (concat.endsWith(" IS NOT SUPPLIED")) {
-        return new Chunk().appendString(pre + "INPUT && INPUT." + concat.replace(" IS NOT SUPPLIED", "").toLowerCase() + " === undefined");
+        return new Chunk().appendString(pre + "(INPUT === undefined || INPUT." + concat.replace(" IS NOT SUPPLIED", "").toLowerCase() + " === undefined)");
       }
       if (concat.endsWith(" IS REQUESTED")) {
         const field = concat.replace(" IS REQUESTED", "").toLowerCase();

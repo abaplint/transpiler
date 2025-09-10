@@ -28,4 +28,5 @@ export const sy = new Structure({
   dbsys: new Character(10),
   batch: new Character(1),
   saprl: new Character(4).set("OPEN"),
+  cprog: new Character(40).set("OPEN_ABAP_TODO"),
 });
