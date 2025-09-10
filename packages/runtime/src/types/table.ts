@@ -12,7 +12,6 @@ import {Character} from "./character";
 import {Hex} from "./hex";
 import {HexUInt8} from "./hex_uint8";
 import {ABAP} from "..";
-import {moveCorresponding} from "../statements/move_corresponding";
 
 declare const abap: ABAP;
 
