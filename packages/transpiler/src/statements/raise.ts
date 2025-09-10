@@ -29,13 +29,71 @@ export class RaiseTranspiler implements IStatementTranspiler {
     if (parameters) {
       p = traversal.traverse(parameters).getCode();
     }
+    
+    // Check for MESSAGE clause in RAISE EXCEPTION TYPE <class> MESSAGE <message>
+    const messageOptions: string[] = [];
+    const messageSource = node.findFirstExpression(abaplint.Expressions.MessageSource);
+    if (messageSource) {
+      const id = messageSource.findExpressionAfterToken("ID");
+      if (id) {
+        messageOptions.push("id: " + traversal.traverse(id).getCode());
+      }
+
+      const cla = messageSource.findDirectExpression(abaplint.Expressions.MessageClass);
+      if (cla) {
+        messageOptions.push("id: \"" + cla.concatTokens() + "\"");
+      }
+
+      const type = messageSource.findExpressionAfterToken("TYPE");
+      if (type) {
+        messageOptions.push("type: " + traversal.traverse(type).getCode());
+      }
+
+      const number = messageSource.findExpressionAfterToken("NUMBER");
+      if (number) {
+        messageOptions.push("number: " + traversal.traverse(number).getCode());
+      }
+
+      const typeAndNumber = messageSource.findDirectExpression(abaplint.Expressions.MessageTypeAndNumber);
+      if (typeAndNumber) {
+        const str = typeAndNumber.getFirstToken().getStr();
+        messageOptions.push("number: \"" + str.substr(1, 3) + "\"");
+        messageOptions.push("type: \"" + str.substr(0, 1).toUpperCase() + "\"");
+      }
+
+      // Handle WITH clause for message parameters
+      const w: string[] = [];
+      let withs = false;
+      for (const c of node.getChildren()) {
+        if (c.getFirstToken().getStr().toUpperCase() === "WITH") {
+          withs = true;
+        } else if (withs === true && c instanceof abaplint.Nodes.ExpressionNode) {
+          // For each expression after WITH, traverse it
+          w.push(traversal.traverse(c).getCode());
+        } else if (withs === true && c.getFirstToken().getStr() === ".") {
+          // Stop at the end of statement  
+          break;
+        }
+      }
+      if (w.length > 0) {
+        messageOptions.push("with: [" + w.join(",") + "]");
+      }
+    }
+    
     const extra = `{"INTERNAL_FILENAME": "${traversal.getFilename()}","INTERNAL_LINE": ${node.getStart().getRow()}}`;
     const lookup = traversal.lookupClassOrInterface(classNameToken?.getStr(), classNameToken);
     const id = UniqueIdentifier.get();
 
-    return new Chunk().append(`const ${id} = await (new ${lookup}()).constructor_(${p});
-${id}.EXTRA_CX = ${extra};
-throw ${id};`, node, traversal);
+    let code = `const ${id} = await (new ${lookup}()).constructor_(${p});\n${id}.EXTRA_CX = ${extra};`;
+    
+    // If we have message information, set it on the exception
+    if (messageOptions.length > 0) {
+      code += `\n${id}.MESSAGE_INFO = {${messageOptions.join(", ")}};`;
+    }
+    
+    code += `\nthrow ${id};`;
+
+    return new Chunk().append(code, node, traversal);
   }
 
 }

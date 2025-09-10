@@ -154,7 +154,7 @@ export class Chunk {
     const sourceMapGenerator = new sourceMap.SourceMapGenerator();
     this.mappings.forEach(m => sourceMapGenerator.addMapping(m));
 
-    const json = sourceMapGenerator.toJSON();
+    const json = JSON.parse(sourceMapGenerator.toString());
     json.file = generatedFilename;
     json.sourceRoot = "";
     return JSON.stringify(json, null, 2);
