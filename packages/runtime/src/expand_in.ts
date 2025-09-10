@@ -12,6 +12,7 @@ export function expandIN(fieldName: string, table: Table) {
   } else {
     ret = `(`;
     const values: string[] = [];
+    fieldName = fieldName.replace("~", `"."`);
     for (const row of table.array()) {
       if (row.get().sign?.get() === "I" && row.get().option?.get() === "EQ") {
         values.push(`"${fieldName}" = '` + row.get().low?.get().replace(/'/g, "''") + "'");
