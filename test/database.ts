@@ -1907,4 +1907,30 @@ START-OF-SELECTION.
     });
   });
 
+  it("inner join, expand IN", async () => {
+    const code = `
+DATA lv_msgnr TYPE t100-msgnr.
+DATA lt_arbgb TYPE RANGE OF t100-arbgb.
+DATA ls_range LIKE LINE OF lt_arbgb.
+
+ls_range-low = 'ZAG_UNIT_TEST'.
+ls_range-sign = 'I'.
+ls_range-option = 'EQ'.
+APPEND ls_range TO lt_arbgb.
+
+SELECT SINGLE t100~msgnr FROM t100
+  INNER JOIN t100 AS foo
+  ON t100~msgnr = foo~msgnr
+  WHERE foo~arbgb IN @lt_arbgb
+  INTO @lv_msgnr.
+WRITE sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("1");
+    }, {snowflake: false});
+  });
+
 });
