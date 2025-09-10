@@ -123,4 +123,29 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("moo");
   });
 
+  it("IS NOT SUPPLIED, completely empty", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS run IMPORTING bar TYPE i OPTIONAL.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    IF bar IS NOT SUPPLIED.
+      WRITE / 'moo'.
+    ENDIF.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl.
+  CREATE OBJECT ref.
+  ref->run( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("moo");
+  });
+
 });
