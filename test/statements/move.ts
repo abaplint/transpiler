@@ -232,4 +232,76 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("partial match", async () => {
+    const code = `
+TYPES: BEGIN OF ty1,
+         field1 TYPE i,
+         field2 TYPE i,
+       END OF ty1.
+TYPES: BEGIN OF ty2,
+         field1 TYPE i,
+         extra  TYPE i,
+         field2 TYPE i,
+       END OF ty2.
+DATA out TYPE ty1.
+DATA row TYPE ty2.
+row-field1 = 2.
+row-field2 = 5.
+out = row.
+WRITE / out-field1.
+WRITE / out-field2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2\n0");
+  });
+
+  it("partial match 2", async () => {
+    const code = `
+TYPES: BEGIN OF ty1,
+         foo    TYPE i,
+         field2 TYPE i,
+       END OF ty1.
+TYPES: BEGIN OF ty2,
+         bar    TYPE i,
+         extra  TYPE i,
+         field2 TYPE i,
+       END OF ty2.
+DATA out TYPE ty1.
+DATA row TYPE ty2.
+row-bar = 1.
+row-extra = 2.
+row-field2 = 3.
+out = row.
+WRITE / out-foo.
+WRITE / out-field2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2");
+  });
+
+  it.only("opposite names", async () => {
+    const code = `
+TYPES: BEGIN OF ty1,
+         foo TYPE i,
+         bar TYPE i,
+       END OF ty1.
+TYPES: BEGIN OF ty2,
+         bar TYPE i,
+         foo TYPE i,
+       END OF ty2.
+DATA out TYPE ty1.
+DATA row TYPE ty2.
+row-bar = 1.
+row-foo = 2.
+out = row.
+WRITE / out-foo.
+WRITE / out-bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2");
+  });
+
 });
