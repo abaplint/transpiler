@@ -137,7 +137,6 @@ START-OF-SELECTION.
       await f(abap);
       expect.fail();
     } catch(e) {
-      console.dir(e);
       expect(e.toString()).to.contain("Error");
       expect(e.constructor.name).to.contain("lcx");
     }
