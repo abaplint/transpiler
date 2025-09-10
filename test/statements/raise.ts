@@ -117,7 +117,7 @@ START-OF-SELECTION.
     }
   });
 
-  it("RAISE EXCEPTION MESSAGE", async () => {
+  it.only("RAISE EXCEPTION MESSAGE", async () => {
     const code = `
 ${cx_root}
 
@@ -131,6 +131,7 @@ ENDCLASS.
 START-OF-SELECTION.
   RAISE EXCEPTION TYPE lcx MESSAGE e123(zzz).`;
     const js = await run(code);
+    console.dir(js);
     const f = new AsyncFunction("abap", js);
     try {
       await f(abap);

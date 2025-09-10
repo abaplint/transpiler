@@ -26,7 +26,7 @@ export class ValueBodyLineTranspiler {
       }
     }
 
-    ret.appendString(extraFields + `)`)
+    ret.appendString(extraFields + `)`);
 
     return ret;
   }

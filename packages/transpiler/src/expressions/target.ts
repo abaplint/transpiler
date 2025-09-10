@@ -46,7 +46,7 @@ export class TargetTranspiler implements IExpressionTranspiler {
         }
       } else if (c.get() instanceof Expressions.AttributeName) {
         let prefix = "";
-        let postfix = ""
+        let postfix = "";
         if (context instanceof abaplint.BasicTypes.ObjectReferenceType) {
           const cdef = traversal.findClassDefinition(context.getIdentifierName(), scope);
           const attr = cdef?.getAttributes().findByName(c.getFirstToken().getStr());

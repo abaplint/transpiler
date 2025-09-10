@@ -26,7 +26,7 @@ export class RangesTranspiler implements IStatementTranspiler {
       .appendString("let ")
       .appendString(Traversal.prefixVariable(Traversal.escapeNamespace(found.getName().toLowerCase())))
       .appendString(" = " + TranspileTypes.toType(found.getType()))
-      .appendString(";")
+      .appendString(";");
 
     return ret;
   }

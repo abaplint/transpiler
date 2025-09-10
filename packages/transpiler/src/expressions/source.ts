@@ -69,7 +69,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
         } else if (c.get() instanceof Expressions.TypeNameOrInfer) {
           continue;
         } else if (c.get() instanceof Expressions.ConvBody) {
-          const typ = node.findFirstExpression(Expressions.TypeNameOrInfer)
+          const typ = node.findFirstExpression(Expressions.TypeNameOrInfer);
           if (typ === undefined) {
             throw new Error("TypeNameOrInfer not found in ConvBody");
           }
@@ -107,7 +107,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
         ret.append("abap.builtin.xsdbool(", c, traversal);
         post.append(")", c, traversal);
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "VALUE") {
-        const typ = node.findDirectExpression(Expressions.TypeNameOrInfer)
+        const typ = node.findDirectExpression(Expressions.TypeNameOrInfer);
         if (typ === undefined) {
           throw new Error("TypeNameOrInfer not found in ValueBody");
         }
@@ -119,7 +119,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
           ret.appendString(TranspileTypes.toType(context));
         }
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "CORRESPONDING") {
-        const typ = node.findDirectExpression(Expressions.TypeNameOrInfer)
+        const typ = node.findDirectExpression(Expressions.TypeNameOrInfer);
         if (typ === undefined) {
           throw new Error("TypeNameOrInfer not found in CorrespondingBody");
         }
@@ -129,7 +129,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
         }
         ret.appendChunk(new CorrespondingBodyTranspiler().transpile(typ, correspondingBody, traversal));
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "COND") {
-        const typ = node.findDirectExpression(Expressions.TypeNameOrInfer)
+        const typ = node.findDirectExpression(Expressions.TypeNameOrInfer);
         if (typ === undefined) {
           throw new Error("TypeNameOrInfer not found in CondBody");
         }
@@ -139,7 +139,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
         }
         ret.appendChunk(new CondBodyTranspiler().transpile(typ, condBody, traversal));
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "SWITCH") {
-        const typ = node.findDirectExpression(Expressions.TypeNameOrInfer)
+        const typ = node.findDirectExpression(Expressions.TypeNameOrInfer);
         if (typ === undefined) {
           throw new Error("TypeNameOrInfer not found in SwitchBody");
         }
@@ -149,7 +149,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
         }
         ret.appendChunk(new SwitchBodyTranspiler().transpile(typ, switchBody, traversal));
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "FILTER") {
-        const typ = node.findDirectExpression(Expressions.TypeNameOrInfer)
+        const typ = node.findDirectExpression(Expressions.TypeNameOrInfer);
         if (typ === undefined) {
           throw new Error("TypeNameOrInfer not found in FilterBody");
         }
@@ -159,7 +159,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
         }
         ret.appendChunk(new FilterBodyTranspiler().transpile(typ, filterBody, traversal));
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "REDUCE") {
-        const typ = node.findDirectExpression(Expressions.TypeNameOrInfer)
+        const typ = node.findDirectExpression(Expressions.TypeNameOrInfer);
         if (typ === undefined) {
           throw new Error("TypeNameOrInfer not found in ReduceBody");
         }
@@ -171,7 +171,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "REF") {
         const infer = node.findDirectExpression(Expressions.TypeNameOrInfer);
         if (infer?.concatTokens() !== "#") {
-          throw new Error("transpiler: REF # todo1")
+          throw new Error("transpiler: REF # todo1");
         }
         const scope = traversal.findCurrentScopeByToken(infer.getFirstToken());
         const inferType = traversal.lookupInferred(infer, scope);
@@ -180,7 +180,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
         }
         const typ = TranspileTypes.toType(inferType);
         if (typ.startsWith("new abap.types.DataReference(") === false) {
-          throw new Error("transpiler: REF # unexpected type")
+          throw new Error("transpiler: REF # unexpected type");
         }
         ret.append(`abap.statements.getReference(${typ}, `, c, traversal);
         post.append(")", c, traversal);
