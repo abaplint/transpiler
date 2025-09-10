@@ -281,7 +281,7 @@ WRITE / out-field2.`;
     expect(abap.console.get()).to.equal("1\n2");
   });
 
-  it.only("opposite names", async () => {
+  it("opposite names", async () => {
     const code = `
 TYPES: BEGIN OF ty1,
          foo TYPE i,
