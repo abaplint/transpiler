@@ -10,8 +10,6 @@ export class RaiseTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     if (node.findDirectTokenByText("RESUMABLE")) {
       throw new Error("RaiseTranspiler, RESUMABLE not implemented");
-    } else if (node.findDirectTokenByText("SHORTDUMP")) {
-      throw new Error("RaiseTranspiler, SHORTDUMP not implemented");
     }
 
     const classNameToken = node.findFirstExpression(abaplint.Expressions.ClassName)?.getFirstToken();
@@ -97,9 +95,14 @@ ${textid}.get().attr4.set('IF_T100_DYN_MSG~MSGV4');
       }
     }
 
+    let throwError = `throw ${id};`;
+    if (node.findDirectTokenByText("SHORTDUMP")) {
+      throwError = `throw new Error("short dump");`;
+    }
+
     return new Chunk().append(pre + `const ${id} = await (new ${lookup}()).constructor_(${p});
 ${id}.EXTRA_CX = ${extra};${post}
-throw ${id};`, node, traversal);
+${throwError}`, node, traversal);
   }
 
 }
