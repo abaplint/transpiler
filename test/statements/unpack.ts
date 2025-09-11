@@ -64,7 +64,7 @@ UNPACK lv_char4 TO lv_char6.`;
     }
   });
 
-  it.only("packed to date", async () => {
+  it("packed to date", async () => {
     const code = `
 DATA foo TYPE p LENGTH 14.
 DATA lv_date TYPE d.

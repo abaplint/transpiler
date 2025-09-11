@@ -1,8 +1,10 @@
 import {throwError} from "../throw_error";
-import {Character, FieldSymbol} from "../types";
+import {Character, Date, FieldSymbol, Packed} from "../types";
 import {ICharacter} from "../types/_character";
 
-export async function unpack(source: ICharacter | FieldSymbol, target: ICharacter | FieldSymbol) {
+export async function unpack(source: ICharacter | FieldSymbol | Packed,
+                             target: ICharacter | FieldSymbol | Date) {
+
   if (source instanceof FieldSymbol) {
     const pointer = source.getPointer();
     if (pointer === undefined) {
@@ -27,6 +29,8 @@ export async function unpack(source: ICharacter | FieldSymbol, target: ICharacte
     }
 
     target.set(sourceValue.padStart(target.getLength(), "0"));
+  } else if (source instanceof Packed && target instanceof Date) {
+    target.set(source.get() + "");
   } else {
     throw new Error("unpack, transpiler runtime todo, types");
   }
