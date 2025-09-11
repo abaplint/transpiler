@@ -5,7 +5,7 @@
 [![npm (scoped)](https://img.shields.io/npm/v/@abaplint/transpiler-cli?label=%40abaplint%2Ftranspiler-cli)](https://www.npmjs.com/package/@abaplint/transpiler-cli)
 [![CI](https://github.com/abaplint/transpiler/workflows/CI/badge.svg)](https://github.com/abaplint/transpiler/actions)
 
-Input must be ABAP 7.02 syntax, use abaplint [downport](https://rules.abaplint.org/downport/) rule to automatically change higher syntax before transpiling.
+Input must be ABAP 7.02 syntax, use abaplint [downport](https://rules.abaplint.org/downport/) rule to automatically change higher syntax before transpiling. Support has been added for many 750 statements and expressions, check https://syntax.abaplint.org for compatibility.
 
 Target is [ES6](http://es6-features.org)
 
@@ -24,6 +24,7 @@ https://open-abap.org
 * [abapGit](https://github.com/abapGit/abapGit) runs unit tests on every push
 * [abap2UI5](https://github.com/abap2UI5/abap2UI5) runs unit tests on every push
 * [abap-file-formats-tools](https://github.com/SAP/abap-file-formats-tools) runs unit tests on every push
+* [Exercism ABAP Track](https://exercism.org/tracks/abap)
 
 ## Technical
 * `SY-SYSID` = `ABC`

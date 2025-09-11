@@ -64,4 +64,17 @@ UNPACK lv_char4 TO lv_char6.`;
     }
   });
 
+  it("packed to date", async () => {
+    const code = `
+DATA foo TYPE p LENGTH 14.
+DATA lv_date TYPE d.
+foo = '20050101'.
+UNPACK foo TO lv_date.
+WRITE / lv_date.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("20050101");
+  });
+
 });
