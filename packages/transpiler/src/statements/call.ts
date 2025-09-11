@@ -54,7 +54,7 @@ export class CallTranspiler implements IStatementTranspiler {
       const methodCallBody = node.findDirectExpression(abaplint.Expressions.MethodCallBody);
       if (methodCallBody) {
         if (methodCallBody.findDirectTokenByText("EXCEPTION")) {
-          throw new Error("EXCEPTION-TABLE not supported, todo");
+          return new Chunk(`throw new Error("EXCEPTION-TABLE not supported, todo");`);
         }
         if (methodCallBody.findDirectTokenByText("PARAMETER")) {
           const source = traversal.traverse(methodCallBody.findDirectExpression(abaplint.Expressions.Source)).getCode();
