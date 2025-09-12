@@ -1,9 +1,9 @@
-import {Date,Time,Hex, Float, Integer, DecFloat34, HexUInt8} from "../types";
+import {Date,Time,Hex, Float, Integer, DecFloat34, HexUInt8, Integer8} from "../types";
 import {XString} from "../types/xstring";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
-export function parse(val: INumeric | ICharacter | string | number | Float | Integer): number {
+export function parse(val: INumeric | ICharacter | string | number | Float | Integer |Integer8): number {
   if (typeof val === "number") {
     return val;
   } else if (typeof val === "string") {
@@ -36,6 +36,12 @@ export function parse(val: INumeric | ICharacter | string | number | Float | Int
     return val.getNumeric();
   } else if (val instanceof DecFloat34) {
     return val.getRaw();
+  } else if (val instanceof Integer8) {
+    const bigint = val.get();
+    if (bigint > BigInt(Number.MAX_SAFE_INTEGER) || bigint < BigInt(Number.MIN_SAFE_INTEGER)) {
+      throw new Error("int8 value too large for table expression index");
+    }
+    return Number(bigint);
   } else {
     return parse(val.get());
   }
