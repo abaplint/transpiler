@@ -460,20 +460,11 @@ export class Traversal {
         return obj.getName().toLowerCase();
       }
     }
-    /*
-    const file = this.reg.getFileByName(ref.getFilename());
-    if (file) {
-      const obj = this.reg.findObjectForFile(file);
-      if (obj?.getType() === "INTF") {
-        return obj.getName().toLowerCase();
-      }
-    }
-    */
 
     return undefined;
   }
 
-  private findReadOrWriteReference(token: abaplint.Token) {
+  public findReadOrWriteReference(token: abaplint.Token) {
     const scope = this.findCurrentScopeByToken(token);
     if (scope === undefined) {
       return undefined;
@@ -564,22 +555,7 @@ export class Traversal {
       // NOTE: currently all are needed in the unit test setup
       ret += `"${name.replace("~", "$")}": this.${methodName}.bind(this),\n`;
     }
-/*
-    for (const attribute of def.getAttributes()?.getAll() || []) {
-      if (attribute.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
-        // hmm, is this correct?
-        continue;
-      }
-      let privateHash = "";
-      if (attribute.getVisibility() === abaplint.Visibility.Private) {
-        privateHash = "#";
-      } else {
-        continue;
-      }
-      const attributeName = privateHash + Traversal.escapeNamespace(attribute.getName().toLowerCase());
-      ret += `"${attribute.getName().toLowerCase()}": this.${attributeName},\n`;
-    }
-      */
+
     ret += "};\n";
     return ret;
   }
