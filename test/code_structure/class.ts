@@ -2497,4 +2497,30 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it.only("access private variable via CAST", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS run IMPORTING bar TYPE REF TO object.
+  PRIVATE SECTION.
+    DATA value TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    WRITE / CAST lcl( bar )->value.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ref TYPE REF TO lcl.
+  CREATE OBJECT ref.
+  lcl=>run( ref ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
 });
