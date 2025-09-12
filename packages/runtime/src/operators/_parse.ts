@@ -37,7 +37,11 @@ export function parse(val: INumeric | ICharacter | string | number | Float | Int
   } else if (val instanceof DecFloat34) {
     return val.getRaw();
   } else if (val instanceof Integer8) {
-    return val.get();
+    const bigint = val.get();
+    if (bigint > BigInt(Number.MAX_SAFE_INTEGER) || bigint < BigInt(Number.MIN_SAFE_INTEGER)) {
+      throw new Error("int8 value too large for table expression index");
+    }
+    return Number(bigint);
   } else {
     return parse(val.get());
   }

@@ -227,7 +227,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("0");
   });
 
-  it.only("int8 index", async () => {
+  it("int8 index", async () => {
     const code = `
 DATA foo TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
 INSERT 1 INTO TABLE foo.
