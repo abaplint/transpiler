@@ -2497,7 +2497,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.only("access private variable via CAST", async () => {
+  it("access private variable via CAST", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
