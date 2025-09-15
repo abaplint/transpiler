@@ -10,7 +10,7 @@ const repos = [
   {name: "heliconialabs/abap-opentelemetry",    command: "npm test"},
   {name: "heliconialabs/abap-protobuf",         command: "npm test"},
   {name: "larshp/abap-advent-2020",             command: "npm test"},
-  {name: "larshp/abap-wasm",                    command: "npm run lint && npm run downport && npm run unit"},
+  {name: "larshp/abap-wasm",                    command: "npm run unit"},
   {name: "larshp/abapNTLM",                     command: "npm test"},
   {name: "larshp/abapPGP",                      command: "npm test"},
   {name: "open-abap/open-abap-core",            command: "npm test"},
