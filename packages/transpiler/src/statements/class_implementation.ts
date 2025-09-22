@@ -23,6 +23,7 @@ export class ClassImplementationTranspiler implements IStatementTranspiler {
     const scope = traversal.findCurrentScopeByToken(token);
 
     return new Chunk().append(ret + ` {
+static STATIC_SUPER = ${Traversal.escapeNamespace(def?.getSuperClass()?.toLowerCase())};
 static INTERNAL_TYPE = 'CLAS';
 static INTERNAL_NAME = '${traversal.buildInternalName(token.getStr(), def)}';
 static IMPLEMENTED_INTERFACES = [${this.findImplementedByClass(traversal, def, scope).map(e => `"` + e.toUpperCase() + `"`).join(",")}];

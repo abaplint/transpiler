@@ -65,6 +65,7 @@ ENDCLASS.`;
 
     const js =
 `class zcl_maptest {
+  static STATIC_SUPER = undefined;
   static INTERNAL_TYPE = 'CLAS';
   static INTERNAL_NAME = 'ZCL_MAPTEST';
   static IMPLEMENTED_INTERFACES = [];
@@ -93,7 +94,7 @@ export {zcl_maptest};`;
     expect(result?.js).to.equal(js);
 
     const perLine = await countMappingsPerGeneratedLine(result?.map);
-    expect(perLine[20]).to.equal(3); // the WRITE statement
+    expect(perLine[21]).to.equal(3); // the WRITE statement
   });
 
 });
