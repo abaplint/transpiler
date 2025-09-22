@@ -777,7 +777,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello");
   });
 
-  it.only("FIND, regex digit", async () => {
+  it("FIND, regex digit", async () => {
     const code = `
 DATA name TYPE string.
 DATA l_offset TYPE i.

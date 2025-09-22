@@ -11,6 +11,9 @@ export class ABAPRegExp {
     // https://github.com/micromatch/posix-character-classes#posix-character-classes
     ret = ret.replace(/\[\^\[:print:\]\]/g, "[\\x00-\\x1F\\x7F]");
 
+    // https://github.com/micromatch/posix-character-classes#posix-character-classes
+    ret = ret.replace(/\[\[:digit:\]\]/g, "[0-9]");
+
     // https://help.sap.com/doc/abapdocu_750_index_htm/7.50/en-US/abenregex_syntax_specials.htm
     ret = ret.replace(/\\C/g, "[a-zA-Z]");
 
