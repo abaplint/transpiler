@@ -63,6 +63,7 @@ abap.Classes['PROG-ZFOOBAR-LIF_FOOBAR'] = lif_foobar;`;
 
     const expected =
 `class lcl_foobar {
+  static STATIC_SUPER = undefined;
   static INTERNAL_TYPE = 'CLAS';
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_FOOBAR';
   static IMPLEMENTED_INTERFACES = [];
@@ -103,6 +104,7 @@ abap.Classes['PROG-ZFOOBAR-LCL_FOOBAR'] = lcl_foobar;`;
 
     const expected =
 `class lcl_foobar {
+  static STATIC_SUPER = undefined;
   static INTERNAL_TYPE = 'CLAS';
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_FOOBAR';
   static IMPLEMENTED_INTERFACES = [];
@@ -163,6 +165,7 @@ CREATE OBJECT foo.`;
 
     const expected =
 `class zcl_words {
+  static STATIC_SUPER = undefined;
   static INTERNAL_TYPE = 'CLAS';
   static INTERNAL_NAME = 'PROG-ZFOOBAR-ZCL_WORDS';
   static IMPLEMENTED_INTERFACES = [];
@@ -226,6 +229,7 @@ DATA moo TYPE foo.`;
       ENDCLASS.`;
 
     const expected = `class zcl_words {
+  static STATIC_SUPER = undefined;
   static INTERNAL_TYPE = 'CLAS';
   static INTERNAL_NAME = 'PROG-ZFOOBAR-ZCL_WORDS';
   static IMPLEMENTED_INTERFACES = [];
@@ -269,6 +273,7 @@ abap.Classes['PROG-ZFOOBAR-ZCL_WORDS'] = zcl_words;`;
       ENDCLASS.`;
 
     const expected = `class zcl_words {
+  static STATIC_SUPER = undefined;
   static INTERNAL_TYPE = 'CLAS';
   static INTERNAL_NAME = 'PROG-ZFOOBAR-ZCL_WORDS';
   static IMPLEMENTED_INTERFACES = [];
@@ -309,6 +314,7 @@ CLASS zcl_ret IMPLEMENTATION.
 ENDCLASS.`;
 
     const expected = `class zcl_ret {
+  static STATIC_SUPER = undefined;
   static INTERNAL_TYPE = 'CLAS';
   static INTERNAL_NAME = 'PROG-ZFOOBAR-ZCL_RET';
   static IMPLEMENTED_INTERFACES = [];
@@ -387,6 +393,7 @@ CLASS zcl_ret IMPLEMENTATION.
 ENDCLASS.`;
 
     const expected = `class zcl_ret {
+  static STATIC_SUPER = undefined;
   static INTERNAL_TYPE = 'CLAS';
   static INTERNAL_NAME = 'PROG-ZFOOBAR-ZCL_RET';
   static IMPLEMENTED_INTERFACES = [];
@@ -422,6 +429,7 @@ CLASS lcl_bar IMPLEMENTATION.
 ENDCLASS.`;
 
     const expected = `class lcl_bar {
+  static STATIC_SUPER = undefined;
   static INTERNAL_TYPE = 'CLAS';
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_BAR';
   static IMPLEMENTED_INTERFACES = [];
@@ -455,6 +463,7 @@ lcl_bar.foo = new abap.types.Integer({qualifiedName: "I"});`;
   CLASS lcl_bar IMPLEMENTATION.
   ENDCLASS.`;
     const expected = `class lcl_bar {
+  static STATIC_SUPER = undefined;
   static INTERNAL_TYPE = 'CLAS';
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_BAR';
   static IMPLEMENTED_INTERFACES = [];
@@ -510,6 +519,7 @@ INTERFACE bar.
   CONSTANTS next TYPE c LENGTH 1 VALUE lcl_bar=>first.
 ENDINTERFACE.`;
     const expected = `class lcl_bar {
+  static STATIC_SUPER = undefined;
   static INTERNAL_TYPE = 'CLAS';
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_BAR';
   static IMPLEMENTED_INTERFACES = [];
@@ -631,6 +641,7 @@ ENDCLASS.
 CLASS LCL_CONSTANT_TEST IMPLEMENTATION.
 ENDCLASS.`;
     const expected = `class lcl_constant_test {
+  static STATIC_SUPER = undefined;
   static INTERNAL_TYPE = 'CLAS';
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_CONSTANT_TEST';
   static IMPLEMENTED_INTERFACES = [];
@@ -680,6 +691,7 @@ abap.Classes['PROG-ZFOOBAR-LIF'] = lif;
 lif.lif$default_value = new abap.types.String({qualifiedName: "STRING"});
 lif.lif$default_value.set('sdf');
 class lcl {
+  static STATIC_SUPER = undefined;
   static INTERNAL_TYPE = 'CLAS';
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL';
   static IMPLEMENTED_INTERFACES = [];
