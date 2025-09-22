@@ -777,4 +777,17 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello");
   });
 
+  it.only("FIND, regex digit", async () => {
+    const code = `
+DATA name TYPE string.
+DATA l_offset TYPE i.
+DATA submatch TYPE string.
+name = 'notFound'.
+FIND FIRST OCCURRENCE OF REGEX '([[:digit:]]*)$' IN name SUBMATCHES submatch MATCH OFFSET l_offset.
+ASSERT submatch IS INITIAL.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
