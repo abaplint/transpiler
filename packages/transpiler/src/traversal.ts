@@ -10,7 +10,6 @@ import {Chunk} from "./chunk";
 import {ConstantTranspiler} from "./expressions";
 import {ITranspilerOptions} from "./types";
 import {DEFAULT_KEYWORDS} from "./keywords";
-import {FEATURE_FLAGS} from "./feature_flags";
 
 export class Traversal {
   private readonly spaghetti: abaplint.ISpaghettiScope;
@@ -219,7 +218,7 @@ export class Traversal {
       return name;
     } else if (this.isClassAttribute(t)) {
       let escaped = Traversal.escapeNamespace(name);
-      if (FEATURE_FLAGS.PRIVATE_ATTRIBUTES === true && this.isPrivateAttribute(t)) {
+      if (this.isPrivateAttribute(t)) {
         escaped = "#" + escaped;
       }
       name = "this." + escaped;
@@ -521,8 +520,7 @@ export class Traversal {
       if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
         ret += "this." + escaped + " = " + cName + "." + escaped + ";\n";
       } else {
-        if (FEATURE_FLAGS.PRIVATE_ATTRIBUTES === true
-            && a.getVisibility() === abaplint.Visibility.Private) {
+        if (a.getVisibility() === abaplint.Visibility.Private) {
           escaped = "#" + escaped;
         }
         const name = "this." + escaped;

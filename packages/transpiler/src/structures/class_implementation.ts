@@ -3,7 +3,6 @@ import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
 import {TranspileTypes} from "../transpile_types";
 import {Chunk} from "../chunk";
-import {FEATURE_FLAGS} from "../feature_flags";
 
 export class ClassImplementationTranspiler implements IStructureTranspiler {
 
@@ -90,7 +89,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
   }
 
   private buildPrivate(node: abaplint.Nodes.ExpressionNode | undefined, traversal: Traversal): string {
-    if (node === undefined || FEATURE_FLAGS.PRIVATE_ATTRIBUTES === false) {
+    if (node === undefined) {
       return "";
     }
 
