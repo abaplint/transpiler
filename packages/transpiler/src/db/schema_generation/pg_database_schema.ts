@@ -12,7 +12,7 @@ export class PGDatabaseSchema implements DatabaseSchemaGenerator {
   }
 
   public buildVIEW(view: abaplint.Objects.View): string {
-    return DatabaseSchemaReuse.buildVIEW(view, QUOTE);
+    return new DatabaseSchemaReuse(QUOTE).buildVIEW(view);
   }
 
   public buildTABL(tabl: abaplint.Objects.Table): string {

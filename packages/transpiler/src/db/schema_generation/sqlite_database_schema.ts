@@ -13,7 +13,7 @@ export class SQLiteDatabaseSchema implements DatabaseSchemaGenerator {
 
   // https://www.sqlite.org/lang_createview.html
   public buildVIEW(view: abaplint.Objects.View): string {
-    return DatabaseSchemaReuse.buildVIEW(view, QUOTE);
+    return new DatabaseSchemaReuse(QUOTE).buildVIEW(view);
   }
 
   public buildTABL(tabl: abaplint.Objects.Table): string {
