@@ -4,7 +4,6 @@ import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {FieldLengthTranspiler, FieldOffsetTranspiler, FieldSymbolTranspiler, TableExpressionTranspiler} from ".";
 import {Chunk} from "../chunk";
-import {FEATURE_FLAGS} from "../feature_flags";
 
 export class TargetTranspiler implements IExpressionTranspiler {
 
@@ -50,8 +49,7 @@ export class TargetTranspiler implements IExpressionTranspiler {
         if (context instanceof abaplint.BasicTypes.ObjectReferenceType) {
           const cdef = traversal.findClassDefinition(context.getIdentifierName(), scope);
           const attr = cdef?.getAttributes().findByName(c.getFirstToken().getStr());
-          if (FEATURE_FLAGS.PRIVATE_ATTRIBUTES === true
-              && attr?.getVisibility() === abaplint.Visibility.Private) {
+          if (attr?.getVisibility() === abaplint.Visibility.Private) {
             const id = scope?.getParent()?.getParent()?.getIdentifier();
             if (id?.stype === abaplint.ScopeType.ClassImplementation
                 && cdef?.getName().toUpperCase() === id.sname.toUpperCase()) {

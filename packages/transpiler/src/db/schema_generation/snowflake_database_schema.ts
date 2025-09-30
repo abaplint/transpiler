@@ -8,32 +8,8 @@ export class SnowflakeDatabaseSchema implements DatabaseSchemaGenerator {
     this.reg = reg;
   }
 
-  public buildVIEW(view: abaplint.Objects.View): string {
-    const fields = view.getFields();
-    let firstTabname = "";
-    const columns = fields?.map((f) => {
-      firstTabname = "'" + f.TABNAME.toLowerCase() + "'";
-      return firstTabname + "." + f.FIELDNAME.toLowerCase() + " AS " + f.VIEWFIELD.toLowerCase();
-    }).join(", ");
-
-    let from = "";
-    let previous = "";
-    for (const j of view.getJoin() || []) {
-      if (previous === "") {
-        from += "'" + j.LTAB.toLowerCase() + "' INNER JOIN '" + j.RTAB.toLowerCase() + "' ON '" + j.LTAB.toLowerCase() + "'." + j.LFIELD.toLowerCase() + " = '" + j.RTAB.toLowerCase() + "'." + j.RFIELD.toLowerCase();
-      } else if (previous === j.LTAB + "," + j.RTAB) {
-        from += " AND '" + j.LTAB.toLowerCase() + "'." + j.LFIELD.toLowerCase() + " = '" + j.RTAB.toLowerCase() + "'." + j.RFIELD.toLowerCase();
-      } else {
-        from += " INNER JOIN '" + j.RTAB.toLowerCase() + "' ON '" + j.LTAB.toLowerCase() + "'." + j.LFIELD.toLowerCase() + " = '" + j.RTAB.toLowerCase() + "'." + j.RFIELD.toLowerCase();
-      }
-      previous = j.LTAB + "," + j.RTAB;
-    }
-    from = from.trim();
-    if (from === "") {
-      from = firstTabname;
-    }
-
-    return `CREATE VIEW '${view.getName().toLowerCase()}' AS SELECT ${columns} FROM ${from};\n`;
+  public buildVIEW(_view: abaplint.Objects.View): string {
+    return "Error: buildView, todo snowflake";
   }
 
   public buildTABL(tabl: abaplint.Objects.Table): string {

@@ -5,7 +5,6 @@ import {FieldLengthTranspiler, FieldOffsetTranspiler, TableExpressionTranspiler}
 import {Traversal} from "../traversal";
 import {FieldSymbolTranspiler} from "./field_symbol";
 import {Chunk} from "../chunk";
-import {FEATURE_FLAGS} from "../feature_flags";
 
 export class FieldChainTranspiler implements IExpressionTranspiler {
   private readonly addGet: boolean;
@@ -50,8 +49,7 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
           // Do not mark constants as private JS fields. Constants are exposed on instances via constructor copying.
           const constants = cdef?.getAttributes().getConstants() || [];
           const isConstant = constants.some(cons => cons.getName().toUpperCase() === tokenName.toUpperCase());
-          if (FEATURE_FLAGS.PRIVATE_ATTRIBUTES === true
-              && attr?.getVisibility() === abaplint.Visibility.Private
+          if (attr?.getVisibility() === abaplint.Visibility.Private
               && isConstant === false) {
             const id = scope?.getParent()?.getParent()?.getIdentifier();
             if (id?.stype === abaplint.ScopeType.ClassImplementation
