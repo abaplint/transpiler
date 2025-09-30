@@ -9,7 +9,7 @@ export class SnowflakeDatabaseSchema implements DatabaseSchemaGenerator {
   }
 
   public buildVIEW(_view: abaplint.Objects.View): string {
-    throw new Error("buildView, todo snowflake");
+    return "Error: buildView, todo snowflake";
   }
 
   public buildTABL(tabl: abaplint.Objects.Table): string {
