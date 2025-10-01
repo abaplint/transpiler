@@ -2091,7 +2091,7 @@ WRITE sy-dbcnt.`;
     }, {snowflake: false});
   });
 
-  it.only("T000 populate", async () => {
+  it("T000 populate", async () => {
     const response = await fetch("https://raw.githubusercontent.com/open-abap/open-abap-core/refs/heads/main/src/ddic/transparent/t000.tabl.xml");
     const t000 = await response.text();
     const files = [{filename: "t000.tabl.xml", contents: t000}];
