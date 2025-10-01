@@ -123,8 +123,8 @@ export class PopulateTables {
       return "";
     }
 
-    // todo, this should take the client number from the settings
-    return `INSERT INTO t000 ('mandt', 'cccategory', 'ccnocliind') VALUES ('123', '', '');`;
+    // todo, this should take the client number from the json abap_transpile.json settings
+    return `INSERT INTO t000 ("mandt", "cccategory", "ccnocliind") VALUES ('123', '', '');`;
   }
 
   private escape(value: string): string {
