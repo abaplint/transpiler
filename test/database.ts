@@ -1933,4 +1933,162 @@ WRITE sy-dbcnt.`;
     }, {snowflake: false});
   });
 
+  it.only("basic VIEW", async () => {
+    const zview = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_VIEW" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD25V>
+    <VIEWNAME>ZVIEW</VIEWNAME>
+    <AS4LOCAL>A</AS4LOCAL>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <AGGTYPE>V</AGGTYPE>
+    <ROOTTAB>ZTABL1</ROOTTAB>
+    <DDTEXT>view</DDTEXT>
+    <VIEWCLASS>D</VIEWCLASS>
+    <VIEWGRANT>R</VIEWGRANT>
+   </DD25V>
+   <DD26V_TABLE>
+    <DD26V>
+     <VIEWNAME>ZVIEW</VIEWNAME>
+     <TABNAME>ZTABL1</TABNAME>
+     <TABPOS>0001</TABPOS>
+     <FORTABNAME>ZTABL1</FORTABNAME>
+    </DD26V>
+    <DD26V>
+     <VIEWNAME>ZVIEW</VIEWNAME>
+     <TABNAME>ZTABL2</TABNAME>
+     <TABPOS>0002</TABPOS>
+    </DD26V>
+   </DD26V_TABLE>
+   <DD27P_TABLE>
+    <DD27P>
+     <VIEWFIELD>KEYVALUE</VIEWFIELD>
+     <TABNAME>ZTABL1</TABNAME>
+     <FIELDNAME>KEYVALUE</FIELDNAME>
+     <KEYFLAG>X</KEYFLAG>
+    </DD27P>
+    <DD27P>
+     <VIEWFIELD>VALUE1</VIEWFIELD>
+     <TABNAME>ZTABL1</TABNAME>
+     <FIELDNAME>VALUE1</FIELDNAME>
+    </DD27P>
+    <DD27P>
+     <VIEWFIELD>VALUE2</VIEWFIELD>
+     <TABNAME>ZTABL2</TABNAME>
+     <FIELDNAME>VALUE2</FIELDNAME>
+    </DD27P>
+   </DD27P_TABLE>
+   <DD28J_TABLE>
+    <DD28J>
+     <VIEWNAME>ZVIEW</VIEWNAME>
+     <LTAB>ZTABL1</LTAB>
+     <LFIELD>KEYVALUE</LFIELD>
+     <OPERATOR>EQ</OPERATOR>
+     <RTAB>ZTABL2</RTAB>
+     <RFIELD>KEYVALUE</RFIELD>
+     <SOURCE>S</SOURCE>
+    </DD28J>
+   </DD28J_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+    const ztabl1 = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V>
+    <TABNAME>ZTABL1</TABNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <TABCLASS>TRANSP</TABCLASS>
+    <DDTEXT>table1</DDTEXT>
+    <CONTFLAG>A</CONTFLAG>
+    <EXCLASS>1</EXCLASS>
+   </DD02V>
+   <DD09L>
+    <TABNAME>ZTABL1</TABNAME>
+    <AS4LOCAL>A</AS4LOCAL>
+    <TABKAT>0</TABKAT>
+    <TABART>APPL0</TABART>
+    <BUFALLOW>N</BUFALLOW>
+   </DD09L>
+   <DD03P_TABLE>
+    <DD03P>
+     <FIELDNAME>KEYVALUE</FIELDNAME>
+     <KEYFLAG>X</KEYFLAG>
+     <ADMINFIELD>0</ADMINFIELD>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000020</INTLEN>
+     <NOTNULL>X</NOTNULL>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000010</LENG>
+     <MASK>  CHAR</MASK>
+    </DD03P>
+    <DD03P>
+     <FIELDNAME>VALUE1</FIELDNAME>
+     <ADMINFIELD>0</ADMINFIELD>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000004</INTLEN>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000002</LENG>
+     <MASK>  CHAR</MASK>
+    </DD03P>
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+    const ztabl2 = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V>
+    <TABNAME>ZTABL2</TABNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <TABCLASS>TRANSP</TABCLASS>
+    <DDTEXT>table1</DDTEXT>
+    <CONTFLAG>A</CONTFLAG>
+    <EXCLASS>1</EXCLASS>
+   </DD02V>
+   <DD09L>
+    <TABNAME>ZTABL2</TABNAME>
+    <AS4LOCAL>A</AS4LOCAL>
+    <TABKAT>0</TABKAT>
+    <TABART>APPL0</TABART>
+    <BUFALLOW>N</BUFALLOW>
+   </DD09L>
+   <DD03P_TABLE>
+    <DD03P>
+     <FIELDNAME>KEYVALUE</FIELDNAME>
+     <KEYFLAG>X</KEYFLAG>
+     <ADMINFIELD>0</ADMINFIELD>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000020</INTLEN>
+     <NOTNULL>X</NOTNULL>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000010</LENG>
+     <MASK>  CHAR</MASK>
+    </DD03P>
+    <DD03P>
+     <FIELDNAME>VALUE2</FIELDNAME>
+     <ADMINFIELD>0</ADMINFIELD>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000004</INTLEN>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000002</LENG>
+     <MASK>  CHAR</MASK>
+    </DD03P>
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+    const files = [
+      {filename: "zview.view.xml", contents: zview},
+      {filename: "ztabl1.tabl.xml", contents: ztabl1},
+      {filename: "ztabl2.tabl.xml", contents: ztabl2},
+    ];
+    await runAllDatabases(abap, files, () => {
+// check that the view was created
+    }, {snowflake: false});
+  });
+
 });
