@@ -1933,7 +1933,7 @@ WRITE sy-dbcnt.`;
     }, {snowflake: false});
   });
 
-  it.only("basic VIEW", async () => {
+  it("basic VIEW", async () => {
     const zview = `<?xml version="1.0" encoding="utf-8"?>
 <abapGit version="v1.0.0" serializer="LCL_OBJECT_VIEW" serializer_version="v1.0.0">
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
