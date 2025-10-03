@@ -167,7 +167,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
         ret += "abap.classConstructors.register(" + Traversal.escapeNamespace(node.getFirstToken().getStr().toLowerCase()) + ".class_constructor);\n";
       }
     } else if (cdef.getMethodDefinitions().getByName("class_constructor")) {
-      ret += "abap.classConstructors.register(" + Traversal.escapeNamespace(node.getFirstToken().getStr().toLowerCase()) + ".class_constructor);\n";
+      ret += "abap.classConstructors.execute(" + Traversal.escapeNamespace(node.getFirstToken().getStr().toLowerCase()) + ".class_constructor);\n";
     }
 
     return ret;

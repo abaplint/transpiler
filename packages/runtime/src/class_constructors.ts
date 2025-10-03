@@ -5,7 +5,11 @@ export class ClassConstructors {
     this.registered.push(func);
   }
 
-  public async execute() {
+  public async execute(func: () => Promise<void>) {
+    await func();
+  }
+
+  public async executeRegistered() {
     for (const r of this.registered) {
       await r();
     }
