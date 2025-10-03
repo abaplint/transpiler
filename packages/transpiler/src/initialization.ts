@@ -25,6 +25,8 @@ globalThis.abap = new runtime.ABAP();\n`;
       ret += `${this.buildImports(reg, useImport, options)}
 
 export async function initializeABAP() {\n`;
+      ret += `  await globalThis.abap.classConstructors.executeRegistered();\n`;
+
       ret += `  const sqlite = [];\n`;
       for (const i of dbSetup.schemas.sqlite) {
         ret += `  sqlite.push(\`${i}\`);\n`;

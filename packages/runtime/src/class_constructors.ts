@@ -1,5 +1,5 @@
 export class ClassConstructors {
-  private readonly registered: (() => Promise<void>)[] = [];
+  private registered: (() => Promise<void>)[] = [];
 
   public register(func: () => Promise<void>) {
     this.registered.push(func);
@@ -13,6 +13,7 @@ export class ClassConstructors {
     for (const r of this.registered) {
       await r();
     }
+    this.registered = [];
   }
 
 }
