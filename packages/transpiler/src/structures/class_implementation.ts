@@ -148,8 +148,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
       ret += Traversal.escapeNamespace(clasName) + "." + fname + " = {\"EVENT_NAME\": \"" + e.getName().toUpperCase() + "\", \"EVENT_CLASS\": \"" + name + "\"};\n";
     }
 
-    // this is not correct, ABAP does not invocate the class constructor at require time,
-    // but this will probably work
+    // this is not correct, ABAP does not invocate the class constructor at require time, but this will probably work
     if (traversal.getCurrentObject().getType() === "CLAS") {
 // gather call of all class constructors together for a global class, also local classes
 // as they might use the global class, except for local testclass constructors
@@ -159,16 +158,16 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
             if (def.isForTesting === true) {
               continue;
             } else if (def.methods.some(m => m.name.toLowerCase() === "class_constructor")) {
-              ret += "await " + traversal.lookupClassOrInterface(def.name, node.getFirstToken()) + ".class_constructor();\n";
+              ret += "abap.classConstructors.register(" + traversal.lookupClassOrInterface(def.name, node.getFirstToken()) + ".class_constructor);\n";
             }
           }
         }
       }
       if (cdef.isGlobal() === false && cdef.isForTesting() === true && cdef.getMethodDefinitions().getByName("class_constructor")) {
-        ret += "await " + Traversal.escapeNamespace(node.getFirstToken().getStr().toLowerCase()) + ".class_constructor();\n";
+        ret += "abap.classConstructors.register(" + Traversal.escapeNamespace(node.getFirstToken().getStr().toLowerCase()) + ".class_constructor);\n";
       }
     } else if (cdef.getMethodDefinitions().getByName("class_constructor")) {
-      ret += "await " + Traversal.escapeNamespace(node.getFirstToken().getStr().toLowerCase()) + ".class_constructor();\n";
+      ret += "abap.classConstructors.register(" + Traversal.escapeNamespace(node.getFirstToken().getStr().toLowerCase()) + ".class_constructor);\n";
     }
 
     return ret;

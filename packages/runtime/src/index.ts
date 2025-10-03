@@ -22,6 +22,7 @@ import {ABAPEventing} from "./abap_eventing";
 import {isLineNotFound} from "./is_line_not_found";
 import {parametersCall} from "./parameters_call";
 import {alphaIn, alphaOut} from "./alpha";
+import {ClassConstructors} from "./class_constructors";
 
 export {RFC, types, DB, MemoryConsole};
 
@@ -43,8 +44,8 @@ export type RuntimeOptions = {
 export class ABAP {
 // global objects
   public Classes: {[name: string]: any} = {};
-  public Forms: {[name: string]: any} = {};
   public DDIC: {[name: string]: any} = {};
+  public Forms: {[name: string]: any} = {};
   public FunctionModules: {[name: string]: any} = {};
   public Interfaces: {[name: string]: any} = {};
   public MSAG: {[name: string]: any} = {};
@@ -75,6 +76,7 @@ export class ABAP {
   public eventing = new ABAPEventing();
   public alphaOut = alphaOut;
   public alphaIn = alphaIn;
+  public classConstructors = new ClassConstructors();
 
   public IntegerFactory = IntegerFactory;
   public CharacterFactory = CharacterFactory;
