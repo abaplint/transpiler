@@ -61,7 +61,11 @@ export interface ITranspilerOptions {
   /** list of unit tests to skip */
   skip?: TestMethodList;
   /** extra setup script to be executed during initialization */
-  extraSetup?: string;
+  setup?: {
+    filename: string;
+    preFunction?: string | undefined;
+    postFunction?: string | undefined;
+  };
   /** list of keywords to rename, if not supplied default will be used */
   keywords?: string[];
   /** populate tables, all tables are populated if undefined and they exist */
