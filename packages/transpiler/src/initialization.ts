@@ -22,9 +22,13 @@ import runtime from "@abaplint/runtime";
 globalThis.abap = new runtime.ABAP();\n`;
       }
 
-      ret += `${this.buildImports(reg, useImport, options)}
+      if (options?.setup?.filename === undefined || options?.setup?.filename === "") {
+        ret += `// no setup logic specified in config\n`;
+      } else {
+        ret += `const setup = await import("${options?.setup?.filename}");\n`;
+      }
 
-export async function initializeABAP() {\n`;
+      ret += `export async function initializeABAP() {\n`;
       ret += `  const sqlite = [];\n`;
       for (const i of dbSetup.schemas.sqlite) {
         ret += `  sqlite.push(\`${i}\`);\n`;
@@ -47,13 +51,18 @@ export async function initializeABAP() {\n`;
       }
       ret += `\n`;
 
-      if (options?.extraSetup === undefined || options?.extraSetup === "") {
-        ret += `// no setup logic specified in config\n`;
-      } else {
-        ret += `  const {setup} = await import("${options?.extraSetup}");\n` +
-               `  await setup(globalThis.abap, schemas, insert);\n`;
+      if (options?.setup?.preFunction !== undefined) {
+        ret += `  await setup.${options?.setup?.preFunction}(globalThis.abap, schemas, insert);\n`;
       }
       ret += `}`;
+      ret += `await initializeABAP();\n\n`;
+
+      ret += `${this.buildImports(reg, useImport, options)}`;
+
+      if (options?.setup?.postFunction !== undefined) {
+        ret += `\n\nawait setup.${options?.setup?.postFunction}(globalThis.abap, schemas, insert);\n`;
+      }
+
       return ret;
     }
 

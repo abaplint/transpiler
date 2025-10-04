@@ -20,12 +20,10 @@ export class UnitTest {
 import fs from "fs";
 import path from "path";
 import {fileURLToPath} from "url";
-import {initializeABAP} from "./init.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function run() {
-  await initializeABAP();
   let lt_input = new abap.types.Table(new abap.types.Structure({class_name: new abap.types.Character(30), testclass_name: new abap.types.Character(30), method_name: new abap.types.Character(30)}), {"withHeader":false,"type":"STANDARD","isUnique":false,"keyFields":[]});
   let ls_input = new abap.types.Structure({class_name: new abap.types.Character(30), testclass_name: new abap.types.Character(30), method_name: new abap.types.Character(30)});
   let ls_result = new abap.types.Structure({list: new abap.types.Table(new abap.types.Structure({class_name: new abap.types.Character(30), testclass_name: new abap.types.Character(30), method_name: new abap.types.Character(30), expected: new abap.types.String(), actual: new abap.types.String(), status: new abap.types.String(), runtime: new abap.types.Integer(), message: new abap.types.String(), js_location: new abap.types.String(), console: new abap.types.String()}), {"withHeader":false,"type":"STANDARD","isUnique":false,"keyFields":[]}), json: new abap.types.String()});
@@ -189,7 +187,6 @@ run().then(() => {
 
     let ret = `/* eslint-disable curly */
 /* eslint-disable max-len */
-import {initializeABAP} from "./init.mjs";
 
 function getData() {
   const ret = [];\n`;
@@ -217,7 +214,6 @@ ret += `  return ret;
 async function run() {
   const skipCritical = process.argv[2] === "--skip-critical";
   const onlyCritical = process.argv[2] === "--only-critical";
-  await initializeABAP();
   for (const st of getData()) {
     const imported = await import(st.filename);
     const localClass = imported[st.localClass];
