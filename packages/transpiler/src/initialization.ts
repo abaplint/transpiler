@@ -60,7 +60,7 @@ globalThis.abap = new runtime.ABAP();\n`;
       ret += `${this.buildImports(reg, useImport, options)}`;
 
       if (options?.setup?.postFunction !== undefined) {
-        ret += `\n\nawait setup.${options?.setup?.postFunction}(globalThis.abap, schemas, insert);\n`;
+        ret += `\n\nawait setup.${options?.setup?.postFunction}();\n`;
       }
 
       return ret;
