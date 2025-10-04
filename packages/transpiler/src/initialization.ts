@@ -54,7 +54,7 @@ globalThis.abap = new runtime.ABAP();\n`;
       if (options?.setup?.preFunction !== undefined) {
         ret += `  await setup.${options?.setup?.preFunction}(globalThis.abap, schemas, insert);\n`;
       }
-      ret += `}`;
+      ret += `}\n\n`;
       ret += `await initializeABAP();\n\n`;
 
       ret += `${this.buildImports(reg, useImport, options)}`;

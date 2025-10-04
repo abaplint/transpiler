@@ -20,6 +20,7 @@ export class UnitTest {
 import fs from "fs";
 import path from "path";
 import {fileURLToPath} from "url";
+import "./init.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -187,6 +188,7 @@ run().then(() => {
 
     let ret = `/* eslint-disable curly */
 /* eslint-disable max-len */
+import "./init.mjs";
 
 function getData() {
   const ret = [];\n`;
