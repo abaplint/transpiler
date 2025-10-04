@@ -384,13 +384,13 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({});`}, // todo
     } else if (test.only) {
       it.only(test.abap, async () => {
         UniqueIdentifier.reset();
-        const options: ITranspilerOptions = {ignoreSyntaxCheck: true, skipConstants: true};
+        const options: ITranspilerOptions = {ignoreSyntaxCheck: true};
         expect(await runSingle(test.abap, options)).to.equal(test.js);
       });
     } else {
       it(test.abap, async () => {
         UniqueIdentifier.reset();
-        const options: ITranspilerOptions = {ignoreSyntaxCheck: true, skipConstants: true};
+        const options: ITranspilerOptions = {ignoreSyntaxCheck: true};
         expect(await runSingle(test.abap, options)).to.equal(test.js);
       });
     }

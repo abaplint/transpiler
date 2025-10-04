@@ -220,7 +220,10 @@ describe("Testing Unit Testing", () => {
     const SETUP_NAME = "mysetup.mjs";
     const config: ITranspilerOptions = {
       addCommonJS: true,
-      extraSetup: "./" + SETUP_NAME,
+      setup: {
+        filename: "./" + SETUP_NAME,
+        preFunction: "setup",
+      },
     };
 
     for (const f of files) {

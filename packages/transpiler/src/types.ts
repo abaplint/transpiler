@@ -56,14 +56,16 @@ export interface ITranspilerOptions {
   addCommonJS?: boolean;
   /** adds filenames as comments in the output js */
   addFilenames?: boolean;
-  /** skip outputing constants, used for internal testing */
-  skipConstants?: boolean;
   /** sets behavior for unknown types, either fail at compile- or run-time */
   unknownTypes?: UnknownTypesEnum;
   /** list of unit tests to skip */
   skip?: TestMethodList;
   /** extra setup script to be executed during initialization */
-  extraSetup?: string;
+  setup?: {
+    filename: string;
+    preFunction?: string | undefined;
+    postFunction?: string | undefined;
+  };
   /** list of keywords to rename, if not supplied default will be used */
   keywords?: string[];
   /** populate tables, all tables are populated if undefined and they exist */

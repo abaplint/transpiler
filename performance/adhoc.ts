@@ -14,7 +14,6 @@ async function run() {
     input_folder: "./performance/adhoc",
     input_filter: [],
     output_folder: "",
-    lib: "",
     write_unit_tests: true,
     write_source_map: true,
     options: {
