@@ -56,8 +56,6 @@ export interface ITranspilerOptions {
   addCommonJS?: boolean;
   /** adds filenames as comments in the output js */
   addFilenames?: boolean;
-  /** skip outputing constants, used for internal testing */
-  skipConstants?: boolean;
   /** sets behavior for unknown types, either fail at compile- or run-time */
   unknownTypes?: UnknownTypesEnum;
   /** list of unit tests to skip */
