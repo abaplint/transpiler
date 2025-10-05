@@ -1510,7 +1510,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.only("INCLUDE TYPE key value hashed", async () => {
+  it("INCLUDE TYPE key value hashed", async () => {
     const code = `
 TYPES: BEGIN OF ts_setting_key,
          setting_name TYPE c LENGTH 10,
