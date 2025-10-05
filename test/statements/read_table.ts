@@ -1532,6 +1532,11 @@ FIELD-SYMBOLS <ls_setting> LIKE LINE OF mt_settings.
 READ TABLE mt_settings
   WITH TABLE KEY setting_name = iv_setting_name
   ASSIGNING <ls_setting>.
+ASSERT sy-subrc = 4.
+
+READ TABLE mt_settings
+     WITH TABLE KEY key = iv_setting_name
+     ASSIGNING <ls_setting>.
 ASSERT sy-subrc = 4.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
