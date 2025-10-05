@@ -1510,4 +1510,37 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("INCLUDE TYPE key value hashed", async () => {
+    const code = `
+TYPES: BEGIN OF ts_setting_key,
+         setting_name TYPE c LENGTH 10,
+       END OF ts_setting_key .
+TYPES: BEGIN OF ts_setting_data,
+         foo TYPE i,
+       END OF ts_setting_data.
+TYPES: BEGIN OF ts_setting.
+         INCLUDE TYPE ts_setting_key AS key.
+         INCLUDE TYPE ts_setting_data AS data.
+       TYPES END OF ts_setting.
+TYPES tt_settings TYPE HASHED TABLE OF ts_setting WITH UNIQUE KEY key.
+
+DATA mt_settings TYPE tt_settings.
+
+DATA iv_setting_name TYPE ts_setting_key-setting_name.
+FIELD-SYMBOLS <ls_setting> LIKE LINE OF mt_settings.
+
+READ TABLE mt_settings
+  WITH TABLE KEY setting_name = iv_setting_name
+  ASSIGNING <ls_setting>.
+ASSERT sy-subrc = 4.
+
+READ TABLE mt_settings
+     WITH TABLE KEY key = iv_setting_name
+     ASSIGNING <ls_setting>.
+ASSERT sy-subrc = 4.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

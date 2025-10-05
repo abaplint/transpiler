@@ -199,6 +199,13 @@ export class HashedTable implements ITable {
     for (const k of this.options.primaryKey!.keyFields) {
       let val = data[k.toLowerCase()];
 
+      if (val === undefined
+          && tableRowType.get()[k.toLowerCase()] instanceof Structure
+          && Object.keys(tableRowType.get()[k.toLowerCase()].get()).length === 1) {
+// todo: this might need to be extended and fixed
+        val = data[Object.keys(tableRowType.get()[k.toLowerCase()].get())[0]];
+      }
+
       // convert to correct type, eg Chars have specific length, or rounding,
       if (k === "TABLE_LINE") {
         const row = tableRowType.clone() as any;
