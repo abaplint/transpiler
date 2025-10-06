@@ -1047,4 +1047,38 @@ ENDLOOP.`;
     expect(abap.console.getTrimmed()).to.equal("2");
   });
 
+  it("LOOP GROUP BY", async () => {
+    const code = `
+TYPES:
+  BEGIN OF ty_customer,
+    customer TYPE c length 20,
+    name     TYPE c length 20,
+    city     TYPE c length 20,
+    route    TYPE c length 20,
+  END   OF ty_customer.
+TYPES tt_customers TYPE SORTED TABLE OF ty_customer WITH UNIQUE KEY customer.
+
+DATA(t_customres) = VALUE tt_customers(
+  ( customer = 'C0001' name = 'Test Customer 1' city = 'NY' route = 'R0001' )
+  ( customer = 'C0002' name = 'Customer 2'      city = 'LA' route = 'R0003' )
+  ( customer = 'C0003' name = 'Good Customer 3' city = 'DFW' route = 'R0001' )
+  ( customer = 'C0004' name = 'Best Customer 4' city = 'CH' route = 'R0003' )
+  ( customer = 'C0005' name = 'So So Customer 5' city = 'NY' route = 'R0001' ) ).
+
+LOOP AT t_customres INTO DATA(ls_cust_2)
+    GROUP BY ( route = ls_cust_2-route )
+    ASCENDING
+    WITHOUT MEMBERS
+    REFERENCE INTO DATA(route_group_2).
+  WRITE / route_group_2->route.
+ENDLOOP.`;
+    const js = await run(code);
+    expect(js).to.contain("transpiler todo, GROUP BY");
+    /*
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("2");
+    */
+  });
+
 });

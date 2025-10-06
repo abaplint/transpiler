@@ -29,6 +29,10 @@ export class LoopTranspiler implements IStructureTranspiler {
       }
     }
 
+    if (node.findDirectStatement(abaplint.Statements.Loop)?.findDirectTokenByText("GROUP") !== undefined) {
+      return new Chunk(`throw new Error("transpiler todo, GROUP BY");`);
+    }
+
     for (const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.StructureNode && c.get() instanceof abaplint.Structures.Body) {
         for (const b of c.getChildren()) {

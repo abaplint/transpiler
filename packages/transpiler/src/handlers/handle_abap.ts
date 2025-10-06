@@ -29,6 +29,10 @@ export class HandleABAP {
         chunk.appendString("// " + file.getFilename() + "\n");
       }
 
+      if (file.getStructure() === undefined) {
+        throw new Error("HandleABAP, file has no structure, probably a syntax error: " + file.getFilename());
+      }
+
       const rearranged = new Rearranger().run(obj.getType(), file.getStructure());
 
       const contents = new Traversal(spaghetti, file, obj, reg, this.options).traverse(rearranged);
