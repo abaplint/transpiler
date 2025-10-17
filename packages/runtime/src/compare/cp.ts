@@ -47,6 +47,8 @@ export function cp(left: number | string | ICharacter | INumeric | Structure, ri
   r = r.replace(/\*/g, "[\\s\\S]*");
   r = r.replace(/\+/g, "[\\s\\S]");
 
+  r = r.replace(/##/g, "#");
+
   const reg = new RegExp("^" + r + "$", "iu");
 
   return l.match(reg) !== null;
