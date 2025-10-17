@@ -214,4 +214,11 @@ ENDLOOP.`;
     await f(abap);
   });
 
+  it("CP, octothorpe logic 2", async () => {
+    const code = `ASSERT '/src/#namespace#cl_test.clas.abap' CP '/src/##namespace##*'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
