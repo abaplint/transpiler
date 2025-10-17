@@ -207,4 +207,11 @@ ENDLOOP.`;
     await f(abap);
   });
 
+  it("CP, octothorpe logic", async () => {
+    const code = `ASSERT '#name#' CP '##name##'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
