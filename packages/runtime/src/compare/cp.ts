@@ -2,6 +2,10 @@ import {Character, FieldSymbol, Structure} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
+function escapeRegExpCharacter(input: string): string {
+  return input.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
+}
+
 export function cp(left: number | string | ICharacter | INumeric | Structure, right: string | ICharacter): boolean {
   let l = "";
   if (typeof left === "number" || typeof left === "string") {
@@ -28,28 +32,32 @@ export function cp(left: number | string | ICharacter | INumeric | Structure, ri
     r = right.get().toString().trimEnd();
   }
 
-  r = r.replace(/\\/g, "\\\\");
-  r = r.replace(/\[/g, "\\[");
-  r = r.replace(/\]/g, "\\]");
-  r = r.replace(/\}/g, "\\}");
-  r = r.replace(/\{/g, "\\{");
-  r = r.replace(/\?/g, "\\?");
-  r = r.replace(/\(/g, "\\(");
-  r = r.replace(/\)/g, "\\)");
-  r = r.replace(/\./g, "\\.");
-  r = r.replace(/\|/g, "\\|");
-  r = r.replace(/\$/g, "\\$");
-  r = r.replace(/\^/g, "\\^");
+  let pattern = "";
+  for (let i = 0; i < r.length; i++) {
+    const current = r[i];
+    if (current === "#") {
+      if (i + 1 < r.length) {
+        const next = r[i + 1];
+        if (next === "#") {
+          pattern += "#";
+          i++;
+        } else {
+          pattern += escapeRegExpCharacter(next);
+          i++;
+        }
+      } else {
+        pattern += "#";
+      }
+    } else if (current === "*") {
+      pattern += "[\\s\\S]*";
+    } else if (current === "+") {
+      pattern += "[\\s\\S]";
+    } else {
+      pattern += escapeRegExpCharacter(current);
+    }
+  }
 
-  r = r.replace(/#\*/g, "\\u{002A}");
-  r = r.replace(/#\+/g, "\\u{002B}");
-
-  r = r.replace(/\*/g, "[\\s\\S]*");
-  r = r.replace(/\+/g, "[\\s\\S]");
-
-  r = r.replace(/##/g, "#");
-
-  const reg = new RegExp("^" + r + "$", "iu");
+  const reg = new RegExp("^" + pattern + "$", "iu");
 
   return l.match(reg) !== null;
 }
