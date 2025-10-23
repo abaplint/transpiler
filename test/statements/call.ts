@@ -467,4 +467,32 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("works");
   });
 
+  it.only("dynamic call, field symbol dashed", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS method_name.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD method_name.
+    WRITE / 'hello'.
+  ENDMETHOD.
+ENDCLASS.
+
+TYPES: BEGIN OF ty,
+         obj TYPE REF TO lcl,
+       END OF ty.
+
+START-OF-SELECTION.
+  DATA foo TYPE ty.
+  FIELD-SYMBOLS <fs> LIKE foo.
+  CREATE OBJECT foo-obj.
+  ASSIGN foo TO <fs>.
+  CALL METHOD <fs>-obj->('METHOD_NAME').`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello");
+  });
+
 });
