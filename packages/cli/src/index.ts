@@ -26,32 +26,37 @@ class Progress implements Transpiler.IProgress {
 async function loadLib(config: ITranspilerConfig): Promise<Transpiler.IFile[]> {
   const files: Transpiler.IFile[] = [];
 
-  for (const l of config.libs || []) {
+  for (const lib of config.libs || []) {
     let dir = "";
     let cleanupFolder = false;
-    if (l.folder !== undefined && l.folder !== "" && fs.existsSync(process.cwd() + l.folder)) {
-      console.log("From folder: " + l.folder);
-      dir = process.cwd() + l.folder;
+    if (lib.folder !== undefined && lib.folder !== "" && fs.existsSync(process.cwd() + lib.folder)) {
+      console.log("From folder: " + lib.folder);
+      dir = process.cwd() + lib.folder;
     } else {
-      console.log("Clone: " + l.url);
+      console.log("Clone: " + lib.url);
       dir = fs.mkdtempSync(path.join(os.tmpdir(), "abap_transpile-"));
-      childProcess.execSync("git clone --quiet --depth 1 " + l.url + " .", {cwd: dir, stdio: "inherit"});
+      childProcess.execSync("git clone --quiet --depth 1 " + lib.url + " .", {cwd: dir, stdio: "inherit"});
       cleanupFolder = true;
     }
 
     let patterns = ["/src/**"];
-    if (l.files !== undefined && typeof l.files === "string" && l.files !== "") {
-      patterns = [l.files];
-    } else if (Array.isArray(l.files)) {
-      patterns = l.files;
+    if (lib.files !== undefined && typeof lib.files === "string" && lib.files !== "") {
+      patterns = [lib.files];
+    } else if (Array.isArray(lib.files)) {
+      patterns = lib.files;
     }
+
+    const excludeFilters = (lib.exclude_filter ?? []).map(pattern => new RegExp(pattern, "i"));
 
     const filesToRead: string[] = [];
     for (const pattern of patterns) {
       for (const filename of glob.sync(dir + pattern, {nosort: true, nodir: true})) {
         if (filename.endsWith(".clas.testclasses.abap")) {
           continue;
+        } else if (excludeFilters.length > 0 && excludeFilters.some(a => a.test(filename)) === true) {
+          continue;
         }
+
         filesToRead.push(filename);
       }
     }
