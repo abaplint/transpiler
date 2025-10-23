@@ -467,7 +467,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("works");
   });
 
-  it.only("dynamic call, field symbol dashed", async () => {
+  it("dynamic call, field symbol dashed", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.

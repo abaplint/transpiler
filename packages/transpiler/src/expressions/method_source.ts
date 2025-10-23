@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import {Nodes, Expressions} from "@abaplint/core";
+import {Nodes, Expressions, Tokens} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
@@ -104,6 +104,12 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
         }
 
         call += traversal.traverse(child).getCode();
+      } else if (child.get() instanceof Expressions.SourceFieldSymbol) {
+        call += traversal.traverse(child).getCode();
+      } else if (child.get() instanceof Expressions.ComponentName) {
+        call += `["${child.concatTokens().toLowerCase()}"]`;
+      } else if (child.get() instanceof Tokens.Dash) {
+        call += '.get()';
       } else {
         ret.appendString("MethodSourceTranspiler-" + child.get().constructor.name + "-todo");
       }
