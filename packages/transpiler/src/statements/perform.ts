@@ -27,7 +27,13 @@ export class PerformTranspiler implements IStatementTranspiler {
         const name = t.getFirstToken().getStr();
         params.push(`"${name}": ` + traversal.traverse(t).getCode());
       }
-      return new Chunk("await " + ref + `({${params.join(",")}});`);
+
+      let call = "await " + ref + `({${params.join(",")}});`;
+      if (node.concatTokens().toUpperCase().includes(" IF FOUND")) {
+        call = `if (${ref} !== undefined) { ${call} }`;
+      }
+
+      return new Chunk(call);
     } else {
 // todo: most of this needs rewriting?
       let def: abaplint.Types.FormDefinition | undefined = undefined;
