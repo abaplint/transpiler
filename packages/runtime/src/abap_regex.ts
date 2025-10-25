@@ -48,22 +48,20 @@ export class ABAPRegExp {
       r = r.get();
     }
 
-    if (typeof r === "string") {
-      r = ABAPRegExp.convert(r);
-    } else if (r.constructor.name === "cl_abap_regex") {
+    if (r.constructor.name === "cl_abap_regex") {
       const obj = r;
       // TODO: tackle the "mv_" variables properly, this is a workaround
       // @ts-ignore
-      r = obj.mv_pattern.get();
+      r = obj.mv_pattern.get() as string;
       // @ts-ignore
       if (obj.mv_ignore_case.get() === "X") {
         ignoreCase = 'i';
       }
-    } else {
+    } else if (typeof r !== "string") {
       throw "getRegex(), unexpected input";
     }
 
-    r = r as string;
+    r = ABAPRegExp.convert(r);
 
     if (r.length === 0 && options.all === true) {
       throw "getRegex(), zero length input";
