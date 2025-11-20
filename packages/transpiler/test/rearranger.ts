@@ -17,6 +17,10 @@ function run(abap: string): abaplint.Nodes.ExpressionNode {
 
 function dump(node: abaplint.INode): string {
   const children = node.getChildren();
+  if (children[0].getFirstToken().getStr().toUpperCase() === "CONV") {
+    return "conv";
+  }
+
   if (children.length === 3) {
     let operator = "";
     switch (children[1].getFirstToken().getStr().toUpperCase()) {
@@ -29,8 +33,8 @@ function dump(node: abaplint.INode): string {
       case "*":
         operator = "mult";
         break;
-      case "BIT-AND":
-        operator = "bitand";
+      case "BIT":
+        operator = "bit";
         break;
       default:
         operator = "unknownOperator";
@@ -83,7 +87,7 @@ describe("The Rearranger of Nodes", () => {
     expect(text).to.equal("plus(5, mult(2, 2))");
   });
 
-  it.only("test 4, BIT-AND and CONV", async () => {
+  it("test 4, BIT-AND and CONV", async () => {
     const abap = `
 DATA binary_code TYPE x LENGTH 2.
 DATA binary_zero TYPE x LENGTH 2.
@@ -91,7 +95,7 @@ DATA sdf TYPE x LENGTH 2.
 sdf = binary_code BIT-AND CONV xstring( 16 ).`;
     const source = run(abap);
     const text = dump(source);
-    expect(text).to.equal("bitand(binary_code, conv)");
+    expect(text).to.equal("bit(binary_code, conv)");
   });
 
 });
