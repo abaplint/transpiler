@@ -118,6 +118,11 @@ export class Rearranger {
       return node;
     }
 
+    const nestedArith = last.findDirectExpressions(Expressions.ArithOperator);
+    if (nestedArith.length === 0) {
+      return node;
+    }
+
     const withoutLast = node.getChildren().slice(0, children.length - 1);
     const flat = withoutLast.concat(last.getChildren());
     node.setChildren(flat);

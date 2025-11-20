@@ -344,4 +344,26 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("FOR UNTIL", async () => {
+    const code = `
+TYPES tytab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA new_data TYPE tytab.
+new_data = VALUE tytab( FOR i = 0 UNTIL i = 10 ( i ) ).
+ASSERT lines( new_data ) = 10.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("FOR THEN UNTIL", async () => {
+    const code = `
+TYPES tytab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA new_data TYPE tytab.
+new_data = VALUE tytab( FOR i = 0 THEN i + 2 UNTIL i = 10 ( i ) ).
+ASSERT lines( new_data ) = 5.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
