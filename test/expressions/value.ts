@@ -344,7 +344,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1");
   });
 
-  it.only("FOR UNTIL", async () => {
+  it("FOR UNTIL", async () => {
     const code = `
 TYPES tytab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
 DATA new_data TYPE tytab.
@@ -355,7 +355,7 @@ ASSERT lines( new_data ) = 10.`;
     await f(abap);
   });
 
-  it.only("FOR THEN UNTIL", async () => {
+  it("FOR THEN UNTIL", async () => {
     const code = `
 TYPES tytab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
 DATA new_data TYPE tytab.

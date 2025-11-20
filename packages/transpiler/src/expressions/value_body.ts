@@ -49,57 +49,131 @@ export class ValueBodyTranspiler {
         const source = traversal.traverse(child);
         ret.appendString(".set(" + source.getCode() + ".clone())");
       } else if (child.get() instanceof Expressions.For && child instanceof Nodes.ExpressionNode) {
-        if (["THEN", "UNTIL", "WHILE", "FROM", "TO", "GROUPS"].some(token => child.findDirectTokenByText(token))) {
-          throw new Error("ValueBody FOR todo, " + body.concatTokens());
-        }
-
         const loop = child.findDirectExpression(Expressions.InlineLoopDefinition);
-        if (loop === undefined) {
-          throw new Error("ValueBody FOR todo, " + body.concatTokens());
-        }
-
-        let loopWhere = "";
-        const whereNode = child?.findDirectExpression(Expressions.ComponentCond);
-        if (whereNode) {
-          const where = traversal.traverse(whereNode).getCode();
-          loopWhere = `, {"where": async ` + where + `}`;
-        }
-
-        const base = loop.findDirectExpression(Expressions.ValueBase);
-        if (base) {
-          throw new Error("ValueBody FOR todo, base, " + body.concatTokens());
-        }
-
-        let targetDeclare = "";
-        let targetAction = "";
-        const fs = loop.findDirectExpression(Expressions.TargetFieldSymbol);
-        if (fs) {
-          targetDeclare = new FieldSymbolTranspiler().transpile(fs, traversal).getCode();
-          const targetName = new SourceFieldSymbolTranspiler().transpile(fs, traversal).getCode();
-          targetAction = `${targetName}.assign(unique1);`;
-        } else {
-          const field = traversal.traverse(loop.findDirectExpression(Expressions.TargetField));
-          if (field === undefined) {
-            throw new Error("ValueBody FOR empty field todo, " + body.concatTokens());
+        if (loop) {
+          if (["THEN", "UNTIL", "WHILE", "FROM", "TO", "GROUPS"].some(token => child.findDirectTokenByText(token))) {
+            throw new Error("ValueBody FOR todo, " + body.concatTokens());
           }
-          targetAction = `const ${field.getCode()} = unique1.clone();`;
-        }
 
-        const llet = child.findDirectExpression(Expressions.Let);
-        if (llet) {
-          targetAction += new LetTranspiler().transpile(llet, traversal).getCode();
-        }
+          let loopWhere = "";
+          const whereNode = child?.findDirectExpression(Expressions.ComponentCond);
+          if (whereNode) {
+            const where = traversal.traverse(whereNode).getCode();
+            loopWhere = `, {"where": async ` + where + `}`;
+          }
 
-        const source = traversal.traverse(loop.findDirectExpression(Expressions.Source)).getCode();
-        const val = new TypeNameOrInfer().transpile(typ, traversal).getCode();
+          const base = loop.findDirectExpression(Expressions.ValueBase);
+          if (base) {
+            throw new Error("ValueBody FOR todo, base, " + body.concatTokens());
+          }
 
-        ret = new Chunk().appendString(`await (async () => {
+          let targetDeclare = "";
+          let targetAction = "";
+          const fs = loop.findDirectExpression(Expressions.TargetFieldSymbol);
+          if (fs) {
+            targetDeclare = new FieldSymbolTranspiler().transpile(fs, traversal).getCode();
+            const targetName = new SourceFieldSymbolTranspiler().transpile(fs, traversal).getCode();
+            targetAction = `${targetName}.assign(unique1);`;
+          } else {
+            const field = traversal.traverse(loop.findDirectExpression(Expressions.TargetField));
+            if (field === undefined) {
+              throw new Error("ValueBody FOR empty field todo, " + body.concatTokens());
+            }
+            targetAction = `const ${field.getCode()} = unique1.clone();`;
+          }
+
+          const llet = child.findDirectExpression(Expressions.Let);
+          if (llet) {
+            targetAction += new LetTranspiler().transpile(llet, traversal).getCode();
+          }
+
+          const source = traversal.traverse(loop.findDirectExpression(Expressions.Source)).getCode();
+          const val = new TypeNameOrInfer().transpile(typ, traversal).getCode();
+
+          ret = new Chunk().appendString(`await (async () => {
 ${targetDeclare}
 const VAL = ${val};
 for await (const unique1 of abap.statements.loop(${source}${loopWhere})) {
   ${targetAction}
   VAL`);
-        post = ";\n}\nreturn VAL;\n})()";
+          post = ";\n}\nreturn VAL;\n})()";
+        } else {
+          const counter = child.findDirectExpression(Expressions.InlineFieldDefinition);
+          if (counter === undefined) {
+            throw new Error("ValueBody FOR todo, " + body.concatTokens());
+          }
+
+          if (["GROUPS", "FROM", "TO"].some(token => child.findDirectTokenByText(token))) {
+            throw new Error("ValueBody FOR todo, " + body.concatTokens());
+          }
+
+          if (child.findDirectExpression(Expressions.ComponentCond)) {
+            throw new Error("ValueBody FOR todo, component cond, " + body.concatTokens());
+          }
+
+          const cond = child.findDirectExpression(Expressions.Cond);
+          if (cond === undefined) {
+            throw new Error("ValueBody FOR missing condition, " + body.concatTokens());
+          }
+
+          const hasUntil = child.findDirectTokenByText("UNTIL") !== undefined;
+          const hasWhile = child.findDirectTokenByText("WHILE") !== undefined;
+          if ((hasUntil ? 1 : 0) + (hasWhile ? 1 : 0) !== 1) {
+            throw new Error("ValueBody FOR todo, condition, " + body.concatTokens());
+          }
+
+          const fieldExpr = counter.findDirectExpression(Expressions.Field);
+          const fieldName = fieldExpr?.concatTokens().toLowerCase();
+          if (fieldName === undefined) {
+            throw new Error("ValueBody FOR todo, inline field, " + body.concatTokens());
+          }
+          const scope = traversal.findCurrentScopeByToken(counter.getFirstToken());
+          const variable = scope?.findVariable(fieldName);
+          if (variable === undefined) {
+            throw new Error("ValueBody FOR todo, variable, " + body.concatTokens());
+          }
+          const declare = TranspileTypes.declare(variable);
+          const counterName = Traversal.prefixVariable(fieldName);
+
+          const startSource = counter.findDirectExpression(Expressions.Source);
+          if (startSource === undefined) {
+            throw new Error("ValueBody FOR missing initial value, " + body.concatTokens());
+          }
+          const start = traversal.traverse(startSource).getCode();
+
+          const thenExpr = child.findExpressionAfterToken("THEN");
+          let incrementExpression = "";
+          if (thenExpr && thenExpr instanceof Nodes.ExpressionNode) {
+            incrementExpression = traversal.traverse(thenExpr).getCode();
+          } else {
+            incrementExpression = `abap.operators.add(${counterName}, new abap.types.Integer().set(1))`;
+          }
+          const incrementLine = `${counterName}.set(${incrementExpression});`;
+
+          const llet = child.findDirectExpression(Expressions.Let);
+          let letCode = "";
+          if (llet) {
+            letCode = new LetTranspiler().transpile(llet, traversal).getCode();
+          }
+          const letSection = letCode === "" ? "" : "  " + letCode.replace(/\n/g, "\n  ") + "\n";
+
+          const condCode = traversal.traverse(cond).getCode();
+          const val = new TypeNameOrInfer().transpile(typ, traversal).getCode();
+
+          const preCheck = hasWhile ? `  if (!(${condCode})) {\n    break;\n  }\n` : "";
+          let postLoop = `  ${incrementLine}\n`;
+          if (hasUntil) {
+            postLoop += `  if (${condCode}) {\n    break;\n  }\n`;
+          }
+
+          ret = new Chunk().appendString(`await (async () => {
+${declare}
+${counterName}.set(${start});
+const VAL = ${val};
+while (true) {
+${preCheck}${letSection}  VAL`);
+          post = ";\n" + postLoop + "}\nreturn VAL;\n})()";
+        }
       } else if (child instanceof Nodes.TokenNode && child.getFirstToken().getStr().toUpperCase() === "DEFAULT") {
         // note: this is last in the body, so its okay to prepend and postpend
         const sources = body.findDirectExpressions(Expressions.Source);
