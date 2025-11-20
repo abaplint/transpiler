@@ -427,4 +427,32 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("3");
   });
 
+  it("INDEX INTO", async () => {
+    const code = `
+FORM run.
+  TYPES: BEGIN OF ty,
+           letter TYPE c,
+           number TYPE i,
+         END OF ty.
+  TYPES tty TYPE STANDARD TABLE OF ty WITH EMPTY KEY.
+  DATA legacy_data TYPE tty.
+
+  INSERT VALUE #( ) INTO TABLE legacy_data.
+  INSERT VALUE #( ) INTO TABLE legacy_data.
+
+  DATA(new_data) = VALUE tty( FOR legacy IN legacy_data INDEX INTO i ( number = i ) ).
+
+  LOOP AT new_data INTO DATA(neww).
+    WRITE / neww-number.
+  ENDLOOP.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2");
+  });
+
 });

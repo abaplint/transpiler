@@ -147,19 +147,36 @@ export class ValueBodyTranspiler {
           targetAction += new LetTranspiler().transpile(llet, traversal).getCode();
         }
 
+        const preBodyStatements: string[] = [];
+        if (targetAction !== "") {
+          preBodyStatements.push(targetAction);
+        }
+
         const source = traversal.traverse(loop.findDirectExpression(Expressions.Source)).getCode();
 
         if (targetDeclare !== "") {
           preLoopDecls.push(targetDeclare);
         }
 
-        descriptors.push({
+        const descriptor: LoopDescriptor = {
           beforeLoop: [],
           open: `for await (const ${uniqueName} of abap.statements.loop(${source}${loopWhere})) {`,
-          preBody: targetAction === "" ? [] : [targetAction],
+          preBody: preBodyStatements,
           postBody: [],
           close: "}",
-        });
+        };
+
+        const loopTokens = loop.concatTokens().toUpperCase();
+        const indexTarget = loopTokens.includes("INDEX INTO") ? loop.findExpressionAfterToken("INTO") : undefined;
+        if (indexTarget && indexTarget instanceof Nodes.ExpressionNode) {
+          const indexCode = traversal.traverse(indexTarget).getCode();
+          const counterName = `unique${uniqueCounter++}`;
+          descriptor.beforeLoop.push(`let ${counterName} = 1;`);
+          descriptor.preBody.push(`const ${indexCode} = new abap.types.Integer().set(${counterName});`);
+          descriptor.postBody.push(`${counterName}++;`);
+        }
+
+        descriptors.push(descriptor);
       } else {
         const counter = child.findDirectExpression(Expressions.InlineFieldDefinition);
         if (counter === undefined) {
