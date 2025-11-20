@@ -58,12 +58,12 @@ export class ValueBodyTranspiler {
           throw new Error("ValueBody FOR todo, " + body.concatTokens());
         }
 
-      let loopWhere = "";
-      const whereNode = child?.findDirectExpression(Expressions.ComponentCond);
-      if (whereNode) {
-        const where = traversal.traverse(whereNode).getCode();
-        loopWhere = `, {"where": async ` + where + `}`;
-      }
+        let loopWhere = "";
+        const whereNode = child?.findDirectExpression(Expressions.ComponentCond);
+        if (whereNode) {
+          const where = traversal.traverse(whereNode).getCode();
+          loopWhere = `, {"where": async ` + where + `}`;
+        }
 
         const base = loop.findDirectExpression(Expressions.ValueBase);
         if (base) {
