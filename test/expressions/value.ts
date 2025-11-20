@@ -366,7 +366,37 @@ ASSERT lines( new_data ) = 5.`;
     await f(abap);
   });
 
-  it.only("FOR THEN UNTIL", async () => {
+  it.only("VALUE FOR LET IN", async () => {
+    const code = `
+FORM run.
+  TYPES: BEGIN OF ty,
+           letter TYPE c,
+           number TYPE i,
+         END OF ty.
+  TYPES tty TYPE STANDARD TABLE OF ty WITH EMPTY KEY.
+  DATA legacy_data TYPE tty.
+
+  INSERT VALUE #( ) INTO TABLE legacy_Data.
+
+  DATA(new_data) = VALUE tty(
+               FOR legacy IN legacy_data
+               LET str = 'A'
+               IN ( letter = str
+                    number = legacy-number ) ).
+
+  WRITE / lines( new_data ).
+
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
+  it.only("VALUE FOR FOR LET IN", async () => {
     const code = `
 FORM run.
   TYPES: BEGIN OF ty,
