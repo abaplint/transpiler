@@ -396,7 +396,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1");
   });
 
-  it.only("VALUE FOR FOR LET IN", async () => {
+  it("VALUE FOR FOR LET IN", async () => {
     const code = `
 FORM run.
   TYPES: BEGIN OF ty,
