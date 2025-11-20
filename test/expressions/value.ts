@@ -366,7 +366,7 @@ ASSERT lines( new_data ) = 5.`;
     await f(abap);
   });
 
-  it.only("VALUE FOR LET IN", async () => {
+  it("VALUE FOR LET IN", async () => {
     const code = `
 FORM run.
   TYPES: BEGIN OF ty,
