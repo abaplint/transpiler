@@ -19,7 +19,7 @@ function dump(node: abaplint.INode): string {
   const children = node.getChildren();
   if (children.length === 3) {
     let operator = "";
-    switch (children[1].getFirstToken().getStr()) {
+    switch (children[1].getFirstToken().getStr().toUpperCase()) {
       case "-":
         operator = "minus";
         break;
@@ -28,6 +28,9 @@ function dump(node: abaplint.INode): string {
         break;
       case "*":
         operator = "mult";
+        break;
+      case "BIT-AND":
+        operator = "bitand";
         break;
       default:
         operator = "unknownOperator";
@@ -78,6 +81,17 @@ describe("The Rearranger of Nodes", () => {
     const source = run(abap);
     const text = dump(source);
     expect(text).to.equal("plus(5, mult(2, 2))");
+  });
+
+  it.only("test 4, BIT-AND and CONV", async () => {
+    const abap = `
+DATA binary_code TYPE x LENGTH 2.
+DATA binary_zero TYPE x LENGTH 2.
+DATA sdf TYPE x LENGTH 2.
+sdf = binary_code BIT-AND CONV xstring( 16 ).`;
+    const source = run(abap);
+    const text = dump(source);
+    expect(text).to.equal("bitand(binary_code, conv)");
   });
 
 });

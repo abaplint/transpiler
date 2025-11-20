@@ -304,4 +304,18 @@ WRITE / out-bar.`;
     expect(abap.console.get()).to.equal("1\n2");
   });
 
+  it("BIT-AND and CONV", async () => {
+    const code = `
+DATA binary_code TYPE x LENGTH 2.
+DATA binary_zero TYPE x LENGTH 2.
+DATA sdf TYPE x LENGTH 2.
+sdf = binary_code BIT-AND CONV xstring( 16 ).
+WRITE / sdf.`;
+    const js = await run(code);
+    console.dir(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0000");
+  });
+
 });

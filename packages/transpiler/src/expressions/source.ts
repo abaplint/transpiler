@@ -192,7 +192,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
 
     ret.appendChunk(post);
 
-//    console.dir(ret.getCode());
+//    console.dir("return: " + ret.getCode());
 
     return ret;
   }

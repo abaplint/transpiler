@@ -195,4 +195,16 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("yes");
   });
 
+  it("IF and conv", async () => {
+    const code = `
+data binary_code type x length 2.
+data binary_zero type x length 2.
+IF binary_code BIT-AND CONV xstring( 16 ) > binary_zero.
+ENDIF.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
