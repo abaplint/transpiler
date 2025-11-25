@@ -2641,7 +2641,7 @@ ENDCLASS.`;
     await dumpNrun(files, false);
   });
 
-  it.only("test-60", async () => {
+  it("test-60", async () => {
     // INSTANCEOF with global classes
 
     const tests = `
