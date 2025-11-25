@@ -2641,4 +2641,44 @@ ENDCLASS.`;
     await dumpNrun(files, false);
   });
 
+  it("test-60", async () => {
+    // INSTANCEOF with global classes
+
+    const tests = `
+CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS test FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+
+  METHOD test.
+    DATA ref TYPE REF TO object.
+    IF ref IS INSTANCE OF zcl_global.
+    ENDIF.
+  ENDMETHOD.
+
+ENDCLASS.`;
+
+const clas = `
+CLASS zcl_placeholder DEFINITION PUBLIC FINAL CREATE PUBLIC.
+ENDCLASS.
+
+CLASS zcl_placeholder IMPLEMENTATION.
+ENDCLASS.`;
+
+const zcl_global = `
+CLASS zcl_global DEFINITION PUBLIC FINAL CREATE PUBLIC.
+ENDCLASS.
+CLASS zcl_global IMPLEMENTATION.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "zcl_global.clas.abap", contents: zcl_global},
+      {filename: "zcl_placeholder.clas.testclasses.abap", contents: tests},
+      {filename: "zcl_placeholder.clas.abap", contents: clas},
+    ];
+    await dumpNrun(files, false);
+  });
+
 });
