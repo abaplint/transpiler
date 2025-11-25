@@ -56,12 +56,11 @@ export class CompareTranspiler implements IExpressionTranspiler {
         return new Chunk().appendString(pre + "INPUT && INPUT." + field + " === undefined && INPUT.importing?." + field + " === undefined");
       }
 
-      if (concat.startsWith("NOT ") || concat.includes(" IS NOT INSTANCE OF ")) {
+      if (concat.includes(" IS INSTANCE OF ")) {
+        const notted = concat.startsWith("NOT ") || concat.includes(" IS NOT INSTANCE OF ");
+        const falsed = notted ? " === false" : "";
         const cname = node.findDirectExpression(Expressions.ClassName)?.concatTokens();
-        return new Chunk().appendString("abap.compare.instance_of(").appendChunk(s0).appendString(`, ${cname}) === false`);
-      } else if (concat.includes(" IS INSTANCE OF ")) {
-        const cname = node.findDirectExpression(Expressions.ClassName)?.concatTokens();
-        return new Chunk().appendString("abap.compare.instance_of(").appendChunk(s0).appendString(`, ${cname})`);
+        return new Chunk().appendString("abap.compare.instance_of(").appendChunk(s0).appendString(`, ${cname})` + falsed);
       }
     } else if (sources.length === 2 && node.findDirectTokenByText("IN")) {
       if (concat.search(" NOT IN ") >= 0) {
