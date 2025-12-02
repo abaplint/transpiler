@@ -14,10 +14,15 @@ export function expandIN(fieldName: string, table: Table) {
     const values: string[] = [];
     fieldName = fieldName.replace("~", `"."`);
     for (const row of table.array()) {
+      const val = `'` + row.get().low?.get().replace(/'/g, "''") + "'";
       if (row.get().sign?.get() === "I" && row.get().option?.get() === "EQ") {
-        values.push(`"${fieldName}" = '` + row.get().low?.get().replace(/'/g, "''") + "'");
+        values.push(`"${fieldName}" = ` + val);
       } else if (row.get().sign?.get() === "I" && row.get().option?.get() === "NE") {
-        values.push(`"${fieldName}" <> '` + row.get().low?.get().replace(/'/g, "''") + "'");
+        values.push(`"${fieldName}" <> ` + val);
+      } else if (row.get().sign?.get() === "I" && row.get().option?.get() === "GE") {
+        values.push(`"${fieldName}" >= ` + val);
+      } else if (row.get().sign?.get() === "I" && row.get().option?.get() === "LE") {
+        values.push(`"${fieldName}" <= ` + val);
       } else if (row.get().sign?.get() === "I" && row.get().option?.get() === "CP") {
         values.push(`"${fieldName}" LIKE '` + row.get().low?.get().trimEnd().replace(/'/g, "''").replace(/\*/g, "%") + "'");
       } else {
