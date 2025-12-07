@@ -2,7 +2,6 @@ import * as abaplint from "@abaplint/core";
 import {Chunk} from "../chunk";
 import {IOutputFile} from "../types";
 
-// view, much like the tables
 export class HandleEnqu {
   public runObject(obj: abaplint.Objects.LockObject, _reg: abaplint.IRegistry): IOutputFile[] {
 
@@ -19,6 +18,7 @@ abap.FunctionModules["ENQUEUE_${obj.getName().toUpperCase()}"] = async (INPUT) =
   }
   await lookup.enqueue(INPUT);
 };
+
 abap.FunctionModules["DEQUEUE_${obj.getName().toUpperCase()}"] = async (INPUT) => {
   const lookup = abap.Classes["KERNEL_LOCK"];
   if (lookup === undefined) {
