@@ -10,13 +10,15 @@ export class HandleEnqu {
       return [];
     }
 
+    const tableName = obj.getPrimaryTable();
+
     const chunk = new Chunk().appendString(`// enqueue object
 abap.FunctionModules["ENQUEUE_${obj.getName().toUpperCase()}"] = async (INPUT) => {
   const lookup = abap.Classes["KERNEL_LOCK"];
   if (lookup === undefined) {
     throw new Error("Lock, kernel class missing");
   }
-  await lookup.enqueue(INPUT);
+  await lookup.enqueue({TABLE_NAME: "${tableName}", ENQUEUE_NAME: "${obj.getName().toUpperCase()}", ...INPUT});
 };
 
 abap.FunctionModules["DEQUEUE_${obj.getName().toUpperCase()}"] = async (INPUT) => {
@@ -24,7 +26,7 @@ abap.FunctionModules["DEQUEUE_${obj.getName().toUpperCase()}"] = async (INPUT) =
   if (lookup === undefined) {
     throw new Error("Lock, kernel class missing");
   }
-  await lookup.dequeue(INPUT);
+  await lookup.dequeue({TABLE_NAME: "${tableName}", ENQUEUE_NAME: "${obj.getName().toUpperCase()}", ...INPUT});
 };`);
 
     const output: IOutputFile = {
