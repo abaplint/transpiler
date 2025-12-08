@@ -18,7 +18,9 @@ abap.FunctionModules["ENQUEUE_${obj.getName().toUpperCase()}"] = async (INPUT) =
   if (lookup === undefined) {
     throw new Error("Lock, kernel class missing");
   }
-  await lookup.enqueue({TABLE_NAME: "${tableName}", ENQUEUE_NAME: "${obj.getName().toUpperCase()}", ...INPUT});
+  const table_name = new abap.types.String({qualifiedName: "STRING"}).set("${tableName}" );
+  const enqueue_name = new abap.types.String({qualifiedName: "STRING"}).set("${obj.getName().toUpperCase()}");
+  await lookup.enqueue({table_name: table_name, enqueue_name: enqueue_name, input: INPUT.exporting});
 };
 
 abap.FunctionModules["DEQUEUE_${obj.getName().toUpperCase()}"] = async (INPUT) => {
@@ -26,7 +28,9 @@ abap.FunctionModules["DEQUEUE_${obj.getName().toUpperCase()}"] = async (INPUT) =
   if (lookup === undefined) {
     throw new Error("Lock, kernel class missing");
   }
-  await lookup.dequeue({TABLE_NAME: "${tableName}", ENQUEUE_NAME: "${obj.getName().toUpperCase()}", ...INPUT});
+  const table_name = new abap.types.String({qualifiedName: "STRING"}).set("${tableName}" );
+  const enqueue_name = new abap.types.String({qualifiedName: "STRING"}).set("${obj.getName().toUpperCase()}");
+  await lookup.dequeue({table_name: table_name, enqueue_name: enqueue_name, input: INPUT.exporting});
 };`);
 
     const output: IOutputFile = {
