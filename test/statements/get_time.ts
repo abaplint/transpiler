@@ -52,7 +52,7 @@ describe("Running statements - GET TIME", () => {
 //    console.dir(abap.console.get());
   });
 
-  it.skip("GET TIME STAMP FIELD, high resolution", async () => {
+  it("GET TIME STAMP FIELD, high resolution", async () => {
     const code = `
   DATA lv TYPE p LENGTH 11 DECIMALS 7.
   GET TIME STAMP FIELD lv.
@@ -61,7 +61,7 @@ describe("Running statements - GET TIME", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    console.dir(abap.console.get());
+//    console.dir(abap.console.get());
   });
 
 });
