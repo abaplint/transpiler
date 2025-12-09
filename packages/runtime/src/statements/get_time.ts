@@ -1,9 +1,9 @@
-import {Structure} from "../types";
+import {Packed, Structure} from "../types";
 import {ICharacter} from "../types/_character";
 
 type options = {
   field?: ICharacter,
-  stamp?: ICharacter,
+  stamp?: ICharacter | Packed,
   sy?: Structure,
 };
 
@@ -35,5 +35,13 @@ export function getTime(options?: options): void {
   }
   if (options?.stamp) {
     options.stamp.set(date + time);
+
+    if (options.stamp instanceof Packed && options.stamp.getDecimals() === 7) {
+      const str = (d.getUTCMilliseconds() + "").padStart(3, "0") + "0000";
+      // note: parsing to float will make it imprecise,
+      // ie. filling the nanoseconds part with garbage, which is what we want
+      const decimals = Number.parseFloat("0." + str);
+      options.stamp.set(options.stamp.get() + decimals);
+    }
   }
 }
