@@ -11,6 +11,9 @@ export class CallTransformationOptionsTranspiler implements IExpressionTranspile
 
     for (const c of node.getChildren()) {
       if (c.get() instanceof abaplint.Expressions.Field || c.get() instanceof abaplint.Expressions.Integer) {
+        if (res.getCode() !== "{") {
+          res.appendString(",");
+        }
         res.appendString(c.concatTokens());
       } else if (c.get() instanceof abaplint.Expressions.Source) {
         res.appendChunk(traversal.traverse(c));

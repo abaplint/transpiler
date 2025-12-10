@@ -248,6 +248,13 @@ SOURCE
   fields = fields
 RESULT XML writer.`, js: `if (abap.Classes['KERNEL_CALL_TRANSFORMATION'] === undefined) throw new Error("CallTransformation, kernel class missing");
 await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",resultXML: writer,source: {data:fs_fs_,fields:fields}});`},
+    {abap: `
+  CALL TRANSFORMATION id
+      OPTIONS initial_components = 'suppress'
+      value_handling = 'move'
+      SOURCE (lt_stab)
+      RESULT XML li_doc.`, js: `if (abap.Classes['KERNEL_CALL_TRANSFORMATION'] === undefined) throw new Error("CallTransformation, kernel class missing");
+await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",resultXML: li_doc,options: {initial_components:abap.CharacterFactory.get(8, 'suppress'),value_handling:abap.CharacterFactory.get(4, 'move')},source: (lt_stab)});`},
 
     {abap: "SCAN ABAP-SOURCE src TOKENS INTO tokens STATEMENTS INTO statements.", js: `if (abap.Classes['KERNEL_SCAN_ABAP_SOURCE'] === undefined) throw new Error("ScanAbapSource, kernel class missing");
 await abap.Classes['KERNEL_SCAN_ABAP_SOURCE'].call({scan_abap_source: src, tokens_into: tokens, statements_into: statements});`},
