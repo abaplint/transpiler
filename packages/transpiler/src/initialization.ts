@@ -6,7 +6,7 @@ import {HandleFUGR} from "./handlers/handle_fugr";
 export function escapeNamespaceFilename(filename: string): string {
 // ES modules are resolved and cached as URLs. This means that special characters must be
 // percent-encoded, such as # with %23 and ? with %3F.
-    return filename.replace(/\//g, "%23").replace(/\./g, "%2e");
+    return filename.replace(/\//g, "%23");
 }
 
 export class Initialization {
