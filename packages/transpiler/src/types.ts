@@ -78,6 +78,8 @@ export interface ITranspilerOptions {
     seosubcodf?: boolean;
     /** insert into SEOSUBCOTX, skips if equals false */
     seosubcotx?: boolean;
+    /** insert into SEOSUBCOTX, skips if equals false */
+    wwwparams?: boolean;
   };
   /** ignore source map */
   ignoreSourceMap?: boolean;
