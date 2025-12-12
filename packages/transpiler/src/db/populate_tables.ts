@@ -8,6 +8,7 @@ export class PopulateTables {
   private readonly hasSEOSUBCOTX: boolean;
   private readonly hasT000: boolean;
   private readonly hasT100: boolean;
+  private readonly hasWWWPARAMS: boolean;
 
   public constructor(reg: abaplint.IRegistry) {
     this.hasREPOSRC = reg.getObject("TABL", "REPOSRC") !== undefined;
@@ -16,6 +17,7 @@ export class PopulateTables {
     this.hasSEOSUBCOTX = reg.getObject("TABL", "SEOSUBCOTX") !== undefined;
     this.hasT000 = reg.getObject("TABL", "T000") !== undefined;
     this.hasT100 = reg.getObject("TABL", "T100") !== undefined;
+    this.hasWWWPARAMS = reg.getObject("TABL", "WWWPARAMS") !== undefined;
   }
 
   public insertREPOSRC(obj: abaplint.Objects.Class | abaplint.Objects.Interface): string {
@@ -125,6 +127,19 @@ export class PopulateTables {
 
     // todo, this should take the client number from the json abap_transpile.json settings
     return `INSERT INTO t000 ("mandt", "cccategory", "ccnocliind") VALUES ('123', '', '');`;
+  }
+
+  public insertWWWPARAMS(obj: abaplint.Objects.WebMIME): string[] {
+    if (!this.hasWWWPARAMS) {
+      return [];
+    }
+
+    const ret = [];
+    const name = obj.getName().toUpperCase();
+    for (const [key, value] of Object.entries(obj.getParameters())) {
+      ret.push(`INSERT INTO "wwwparams" ("relid", "objid", "name", "value") VALUES ('MI', '${name}', '${this.escape(key)}', '${this.escape(value)}');`);
+    }
+    return ret;
   }
 
   private escape(value: string): string {
