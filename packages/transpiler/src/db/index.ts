@@ -61,6 +61,9 @@ export class DatabaseSetup {
     for (const obj of this.reg.getObjects()) {
       if (obj instanceof abaplint.Objects.MessageClass) {
         insert.push(...populateTables.insertT100(obj));
+      } else if (options?.populateTables?.wwwparams !== false
+          && obj instanceof abaplint.Objects.WebMIME) {
+        insert.push(...populateTables.insertWWWPARAMS(obj));
       } else if (obj instanceof abaplint.Objects.Class
           || obj instanceof abaplint.Objects.Interface) {
         if (options?.populateTables?.reposrc !== false) {

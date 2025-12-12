@@ -139,6 +139,13 @@ export class PopulateTables {
     for (const [key, value] of Object.entries(obj.getParameters())) {
       ret.push(`INSERT INTO "wwwparams" ("relid", "objid", "name", "value") VALUES ('MI', '${name}', '${this.escape(key)}', '${this.escape(value)}');`);
     }
+
+    const value = obj.getDataFile()?.getRaw().length.toString() || "0";
+    ret.push(`INSERT INTO "wwwparams" ("relid", "objid", "name", "value") VALUES ('MI', '${name}', 'filesize', '${this.escape(value)}');`);
+
+    const desc = obj.getDescription() || "";
+    ret.push(`INSERT INTO "wwwparams" ("relid", "objid", "name", "value") VALUES ('MI', '${name}', 'description', '${this.escape(desc)}');`);
+
     return ret;
   }
 
