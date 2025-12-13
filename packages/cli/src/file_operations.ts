@@ -32,11 +32,10 @@ export class FileOperations {
     const promises = filesToRead.map((filename) => {
       return limit(async () => {
 //        const isBinary = filename.includes(".w3mi.data.");
-        const isBinary = false;
         return {
           filename: path.basename(filename),
           relative: path.relative(outputFolder, path.dirname(filename)),
-          contents: await fsPromises.readFile(filename, isBinary ? null : "utf8"),
+          contents: await fsPromises.readFile(filename, "utf8"),
         };
       });
     });
