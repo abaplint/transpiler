@@ -13,6 +13,7 @@ const repos = [
   {name: "larshp/abap-wasm",                    command: "npm run unit"},
   {name: "larshp/abapNTLM",                     command: "npm test"},
   {name: "larshp/abapPGP",                      command: "npm test"},
+  {name: "oisee/zork-abap",                     command: "npm test"},
   {name: "open-abap/open-abap-core",            command: "npm test"},
   {name: "open-abap/open-abap-gui",             command: "npm test"},
   {name: "open-abap/open-abap-jobs",            command: "npm run docker:start && npm test && npm run docker:stop"},
