@@ -7,7 +7,7 @@ export interface IFile {
   filename: string,
   // from output folder to original source folder
   relative?: string,
-  contents: string | NonSharedBuffer,
+  contents: string,
 }
 
 export interface IObjectIdentifier {
