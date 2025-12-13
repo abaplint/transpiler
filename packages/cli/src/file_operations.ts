@@ -31,10 +31,11 @@ export class FileOperations {
     const limit = this.setupPLimit();
     const promises = filesToRead.map((filename) => {
       return limit(async () => {
+        const isBinary = filename.includes(".w3mi.data.");
         return {
           filename: path.basename(filename),
           relative: path.relative(outputFolder, path.dirname(filename)),
-          contents: await fsPromises.readFile(filename, "utf8"),
+          contents: await fsPromises.readFile(filename, isBinary ? null : "utf8"),
         };
       });
     });
