@@ -41,7 +41,7 @@
     },
     "homepage": "https://github.com/abaplint/transpiler_poc#readme",
     "devDependencies": {
-        "@abaplint/core": "^2.115.9",
+        "@abaplint/core": "^2.115.10",
         "@eslint/compat": "^2.0.0",
         "@eslint/eslintrc": "^3.3.3",
         "@eslint/js": "^9.39.2",
