@@ -620,6 +620,22 @@ try {
       unknownTypes: UnknownTypesEnum.runtimeError})).to.equals(expected);
   });
 
+  it("NEW unknown class, runtime error", async () => {
+    const abap = `
+FORM foo.
+  DATA(sdf) = NEW zcl_unknown( ).
+ENDFORM.`;
+
+    const expected = `async function foo(INPUT) {
+  let sdf = (() => { throw new Error("Void type: ZCL_UNKNOWN") })();
+  sdf.set(function() { throw new Error("Void type: ZCL_UNKNOWN") })();
+}
+abap.Forms['PROG-ZFOOBAR-FOO'] = foo;`;
+    expect(await runSingle(abap, {
+      ignoreSyntaxCheck: true,
+      unknownTypes: UnknownTypesEnum.runtimeError})).to.equals(expected);
+  });
+
   it("Upper case method impl name, should transpile to lower", async () => {
     const abap = `
 CLASS lcl_bar DEFINITION.
