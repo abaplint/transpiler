@@ -113,4 +113,20 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("inline ref to data", async () => {
+    const code = `
+FORM foo.
+  TYPES ty TYPE i.
+  DATA(lv_msgv1) = NEW ty( 2 ).
+  write lv_msgv1->*.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });

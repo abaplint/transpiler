@@ -17,6 +17,12 @@ export class TypeNameOrInfer implements IExpressionTranspiler {
     return type;
   }
 
+  public findTypeOrUndefined(node: Nodes.ExpressionNode, traversal: Traversal): AbstractType | undefined {
+    const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
+    const type = traversal.lookupInferred(node, scope);
+    return type;
+  }
+
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     const type = this.findType(node, traversal);
 
