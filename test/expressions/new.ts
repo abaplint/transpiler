@@ -113,7 +113,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.only("inline ref to data", async () => {
+  it("inline ref to data", async () => {
     const code = `
 FORM foo.
   TYPES ty TYPE i.
@@ -126,6 +126,7 @@ START-OF-SELECTION.
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+    expect(abap.console.get()).to.equal("2");
   });
 
 });

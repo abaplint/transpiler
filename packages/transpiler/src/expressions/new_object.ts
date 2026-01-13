@@ -51,7 +51,13 @@ export class NewObjectTranspiler implements IExpressionTranspiler {
       const clas = traversal.lookupClassOrInterface(type.getIdentifierName(), node.getFirstToken());
       ret.appendString(TranspileTypes.toType(type) + ".set(await (new " + clas + "()).constructor_(" + para + "))");
     } else {
-      throw new Error("NewObjectTranspiler: only ObjectReferenceType currently handled, todo");
+      const source = node.findFirstExpression(abaplint.Expressions.Source);
+      if (source === undefined) {
+        throw new Error("NewObjectTranspiler: DataReference source not found");
+      }
+      const typeCode = TranspileTypes.toType(type);
+      const sourceCode = traversal.traverse(source).getCode();
+      ret.appendString("((() => {const r = new abap.types.DataReference(" + typeCode + "); r.assign(" + sourceCode + "); return r; })())");
     }
 
     return ret;
