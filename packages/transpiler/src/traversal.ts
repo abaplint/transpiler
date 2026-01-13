@@ -701,7 +701,8 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
                     scope: abaplint.ISpaghettiScopeNode | undefined): abaplint.AbstractType | undefined {
     if (scope === undefined) {
       return undefined;
-    } else if (!(node.get() instanceof abaplint.Expressions.TypeName)) {
+    } else if (!(node.get() instanceof abaplint.Expressions.TypeName)
+        && !(node.get() instanceof abaplint.Expressions.TypeNameOrInfer)) {
       throw new Error("lookupType, node is not a TypeName, " + node.get());
     }
 

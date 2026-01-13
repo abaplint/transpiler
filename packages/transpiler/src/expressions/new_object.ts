@@ -23,7 +23,14 @@ export class NewObjectTranspiler implements IExpressionTranspiler {
       para = traversal.traverse(parameters).getCode();
     }
 
-    const type = new TypeNameOrInfer().findTypeOrUndefined(typeNameOrInfer, traversal);
+    console.dir(typeNameOrInfer);
+    console.dir(typeNameOrInfer.concatTokens());
+    let type = new TypeNameOrInfer().findTypeOrUndefined(typeNameOrInfer, traversal);
+    if (type === undefined) {
+      const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
+      type = traversal.lookupType(typeNameOrInfer, scope);
+    }
+
     if (type === undefined) {
       if (traversal.options?.unknownTypes === UnknownTypesEnum.runtimeError) {
         ret.appendString(`(function() { throw new Error("Void type: ${typeNameOrInfer.concatTokens().toUpperCase()}") })()`);
