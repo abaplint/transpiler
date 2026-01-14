@@ -11,7 +11,7 @@ export class ConstantTranspiler implements IExpressionTranspiler {
   }
 
   private handleInteger(int: Nodes.ExpressionNode, traversal: Traversal): Chunk {
-    const concat = int.concatTokens().trim();
+    const concat = int.concatTokens().trim().replace(/^0+/, "");
     const parsed = Number.parseInt(concat, 10);
     let code = "";
     if (concat.length > 18) {
