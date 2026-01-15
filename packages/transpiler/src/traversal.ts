@@ -583,7 +583,13 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
 
     // handle aliases after initialization of carrier variables
     for (const a of def.getAliases() || []) {
-      ret += "this." + a.getName().toLowerCase() + " = this." + Traversal.escapeNamespace(a.getComponent().replace("~", "$").toLowerCase()) + ";\n";
+      const thisName = `this.${a.getName().toLowerCase()}`;
+      const aliasName = "this." + Traversal.escapeNamespace(a.getComponent().replace("~", "$").toLowerCase());
+      ret += `if (${thisName} === undefined)\n`;
+      ret += thisName + " = " + aliasName + ";\n";
+      // or the method(if its a method) might be implemented as its aliased name
+      ret += `else if (${aliasName} === undefined)\n`;
+      ret += aliasName + " = " + thisName + ";\n";
     }
     // constants can be accessed both statically and via reference
     for (const c of def.getAttributes()?.getConstants() || []) {
