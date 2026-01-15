@@ -2518,4 +2518,35 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("0");
   });
 
+  it("test, alias via interface", async () => {
+    const code = `
+INTERFACE lif_interface.
+  METHODS write_foo.
+ENDINTERFACE.
+
+CLASS lcl_class DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif_interface.
+    ALIASES write_foo FOR lif_interface~write_foo.
+ENDCLASS.
+
+CLASS lcl_class IMPLEMENTATION.
+  METHOD write_foo.
+    WRITE / 'foo'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+
+DATA run TYPE REF TO lcl_class.
+CREATE OBJECT run.
+run->write_foo( ).
+run->lif_interface~write_foo( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("foo\nfoo");
+  });
+
 });
