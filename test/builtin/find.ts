@@ -84,7 +84,7 @@ lv_html = '<!DOCTYPE html><html><head><title>abapGit</title><link rel="styleshee
           ' src="js/common.js"></script></head>'.
 
 lv_offset = find( val = lv_html
-                  regex = |\\s*</head>|
+                  regex = |\\\\s*</head>|
                   case = abap_false ).
 
 WRITE lv_offset.`;
