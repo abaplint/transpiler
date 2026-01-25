@@ -104,9 +104,7 @@ function writeObjects(outputFiles: Transpiler.IOutputFile[], config: ITranspiler
     filesToWrite.push({path: outputFolder + path.sep + output.filename, contents});
   }
 
-  for (const file of filesToWrite) {
-    fs.writeFileSync(file.path, file.contents);
-  }
+  FileOperations.writeFiles(filesToWrite);
 }
 
 async function build(config: ITranspilerConfig, files: Transpiler.IFile[]) {

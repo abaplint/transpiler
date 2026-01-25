@@ -71,4 +71,10 @@ export class FileOperations {
     return files;
   }
 
+  public static writeFiles(files: {path: string, contents: string}[]) {
+    for (const file of files) {
+      fs.writeFileSync(file.path, file.contents);
+    }
+  }
+
 }
