@@ -70,8 +70,12 @@ async function loadLib(config: ITranspilerConfig): Promise<Transpiler.IFile[]> {
   return files;
 }
 
-function writeObjects(outputFiles: Transpiler.IOutputFile[], config: ITranspilerConfig, outputFolder: string, files: Transpiler.IFile[]) {
+async function writeObjects(outputFiles: Transpiler.IOutputFile[],
+  config: ITranspilerConfig, outputFolder: string, files: Transpiler.IFile[]) {
+
   const writeSourceMaps = config.write_source_map || false;
+  const filesToWrite: {path: string, contents: string}[] = [];
+
   for (const output of outputFiles) {
     let contents = output.chunk.getCode();
     if (writeSourceMaps === true
@@ -92,15 +96,17 @@ function writeObjects(outputFiles: Transpiler.IOutputFile[], config: ITranspiler
           map = map.replace(`"${f.filename}"`, withPath);
         }
       }
-      fs.writeFileSync(outputFolder + path.sep + name, map);
+      filesToWrite.push({path: outputFolder + path.sep + name, contents: map});
     }
 
     if (output.object.type.toUpperCase() === "PROG") {
       // hmm, will this work for INCLUDEs ?
       contents = `if (!globalThis.abap) await import("./_init.mjs");\n` + contents;
     }
-    fs.writeFileSync(outputFolder + path.sep + output.filename, contents);
+    filesToWrite.push({path: outputFolder + path.sep + output.filename, contents});
   }
+
+  await FileOperations.writeFiles(filesToWrite);
 }
 
 async function build(config: ITranspilerConfig, files: Transpiler.IFile[]) {
@@ -135,7 +141,7 @@ async function run() {
     fs.mkdirSync(outputFolder);
   }
 
-  writeObjects(output.objects, config, outputFolder, files);
+  await writeObjects(output.objects, config, outputFolder, files);
   console.log(output.objects.length + " objects written to disk");
 
   if (config.write_unit_tests === true) {

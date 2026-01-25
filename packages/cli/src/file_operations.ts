@@ -71,4 +71,14 @@ export class FileOperations {
     return files;
   }
 
+  public static async writeFiles(files: {path: string, contents: string}[]) {
+    const limit = this.setupPLimit();
+    const promises = files.map((file) => {
+      return limit(async () => {
+        await fsPromises.writeFile(file.path, file.contents);
+      });
+    });
+    await Promise.all(promises);
+  }
+
 }
