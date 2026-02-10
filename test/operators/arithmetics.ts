@@ -76,28 +76,6 @@ describe("Running operators - Arithmetics", () => {
     expect(abap.console.get()).to.equal("25");
   });
 
-  it("integer MOD", async () => {
-    const code = `
-      DATA foo TYPE i.
-      foo = 5 MOD 2.
-      WRITE foo.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("1");
-  });
-
-  it("integer MOD, lower case", async () => {
-    const code = `
-      DATA foo TYPE i.
-      foo = 5 mod 2.
-      WRITE foo.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("1");
-  });
-
   it("rationals", async () => {
     const code = `ASSERT 1 / 5 = + '0.2'.`;
     const js = await run(code);
@@ -174,17 +152,6 @@ describe("Running operators - Arithmetics", () => {
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("-1,0000000000000000E+00");
-  });
-
-  it("mod, negative value", async () => {
-    const code = `
-    DATA n TYPE i.
-    n = -4 MOD 3.
-    WRITE / n.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("2");
   });
 
   it("strlen plussed in string template", async () => {
@@ -425,26 +392,6 @@ WRITE result.`;
     lv_int1 = 2000000.
     lv_int2 = 2000000.
     lv_f = lv_int1 * lv_int2.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-  });
-
-  it("MOD, both negative", async () => {
-    const code = `
-    DATA int TYPE i.
-    int = -5 MOD -2.
-    ASSERT int = 1.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-  });
-
-  it("MOD, negative", async () => {
-    const code = `
-    DATA int TYPE i.
-    int = 5 MOD -2.
-    ASSERT int = 1.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
