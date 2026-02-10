@@ -67,4 +67,30 @@ describe("Running operators - MOD", () => {
     await f(abap);
   });
 
+  it("MOD, zero and zero", async () => {
+    const code = `
+DATA bar TYPE i.
+bar = 0 MOD 0.
+WRITE / bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
+  it("MOD, zero and zero", async () => {
+    const code = `
+DATA bar TYPE i.
+bar = 100 MOD 0.
+WRITE / bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch (e) {
+      expect(e.toString()).to.contain("CX_SY_ZERODIVIDE");
+    }
+  });
+
 });
