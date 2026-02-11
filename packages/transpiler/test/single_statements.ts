@@ -375,7 +375,7 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({});`}, // todo
       js: `await abap.statements.wait({cond: () => {return abap.compare.eq(gv_semaphore, abap.CharacterFactory.get(1, 'X'));}});`, skip: false},
 
     {abap: "MESSAGE lx_exception TYPE 'S' DISPLAY LIKE 'E'.",
-      js: `await abap.statements.message({exception: lx_exception, type: abap.CharacterFactory.get(1, 'S'), displayLike: abap.CharacterFactory.get(1, 'E')});`, skip: false},
+      js: `await abap.statements.message({exceptionOrText: lx_exception, type: abap.CharacterFactory.get(1, 'S'), displayLike: abap.CharacterFactory.get(1, 'E')});`, skip: false},
 
     {abap: "select count( * ) from tab into res where enable_sqlite = abap_true.",
       js: `await abap.statements.select(res, {select: "SELECT count( * )  from " + abap.buildDbTableName("tab") + " WHERE \\"enable_sqlite\\" = '" + abap.builtin.abap_true.get() + "'"});`, skip: false},
