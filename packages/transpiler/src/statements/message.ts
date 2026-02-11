@@ -48,13 +48,10 @@ export class MessageTranspiler implements IStatementTranspiler {
       }
     } else {
 // exception or constant based
-      const exception = node.findDirectExpression(abaplint.Expressions.MessageSourceSource
+      const source = node.findDirectExpression(abaplint.Expressions.MessageSourceSource
         )?.findDirectExpression(abaplint.Expressions.Source);
-      const str = exception?.findFirstExpression(abaplint.Expressions.Constant);
-      if (str) {
-        options.push("text: " + traversal.traverse(str).getCode());
-      } else {
-        options.push("exception: " + traversal.traverse(exception).getCode());
+      if (source) {
+        options.push("exceptionOrText: " + traversal.traverse(source).getCode());
       }
 
       const type = node.findExpressionAfterToken("TYPE");
