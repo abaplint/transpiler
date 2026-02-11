@@ -1,5 +1,5 @@
 import {Context} from "../context";
-import {ABAPObject, Character} from "../types";
+import {ABAPObject, Character, String} from "../types";
 import {ICharacter} from "../types/_character";
 import {ABAP} from "..";
 
@@ -10,10 +10,9 @@ export interface IMessageOptions {
   number?: ICharacter | string,
   type?: ICharacter | string,
   displayLike?: ICharacter | string,
-  exception?: ABAPObject,
+  exceptionOrText?: ABAPObject | ICharacter | String,
   with?: (ICharacter | string)[],
   into?: ICharacter,
-  text?: ICharacter,
 }
 
 function replace(text: string, w?: (ICharacter | string | Character)[]): string {
@@ -98,10 +97,12 @@ export class MessageStatement {
     abap.builtin.sy.get().msgty.set(msgty);
 
     let replaced = "";
-    if (options.text) {
-      replaced = options.text.get();
-    } else if (options.exception) {
-      replaced = await options.exception.get().if_message$get_text();
+    if (options.exceptionOrText) {
+      if (options.exceptionOrText instanceof ABAPObject) {
+        replaced = await options.exceptionOrText.get().if_message$get_text();
+      } else {
+        replaced = options.exceptionOrText.get();
+      }
     } else {
       const text = await findText(this.context, arbgb, msgnr, msgty);
       replaced = replace(text, options.with);
