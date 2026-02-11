@@ -95,7 +95,6 @@ describe("Running statements - MESSAGE", () => {
 
     const js = await run(code);
     new AsyncFunction("abap", js);
-// hmm, this currently writes to console
   });
 
   it("MESSAGE with complex", async () => {
@@ -103,7 +102,13 @@ describe("Running statements - MESSAGE", () => {
 
     const js = await run(code);
     new AsyncFunction("abap", js);
-// hmm, this currently writes to console
+  });
+
+  it("MESSAGE with string", async () => {
+    const code = `MESSAGE |hello| TYPE 'S'.`;
+
+    const js = await run(code);
+    new AsyncFunction("abap", js);
   });
 
 });
