@@ -880,14 +880,14 @@ ASSIGN ls_data-(var) TO <fs>.   " dynamic assign by name
 
 IF sy-subrc = 0.
   lv_result = <fs>.
-  WRITE: / 'OK:', lv_result.
+  WRITE: / lv_result.
 ELSE.
   WRITE: / 'ASSIGN failed (subrc=4)'.
 ENDIF.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.getTrimmed()).to.equal("OK: hello");
+    expect(abap.console.getTrimmed()).to.equal("hello");
   });
 
 });

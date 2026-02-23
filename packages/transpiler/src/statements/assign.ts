@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
-import {FieldChainTranspiler, FieldSymbolTranspiler, SourceTranspiler} from "../expressions";
+import {FieldChainTranspiler, FieldLengthTranspiler, FieldSymbolTranspiler, SourceTranspiler} from "../expressions";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 
@@ -29,7 +29,30 @@ export class AssignTranspiler implements IStatementTranspiler {
     options.push("target: " + fs);
     if (sources.length !== 0
         && assignSource?.findDirectExpression(abaplint.Expressions.Dynamic) === undefined) {
-      options.push("source: " + sources.pop());
+      // Check for struct-(var) pattern: dynamic component access via FieldLength after -
+      const sourceExprForCheck = assignSource?.findDirectExpressionsMulti(
+        [abaplint.Expressions.Source, abaplint.Expressions.SimpleSource3])[0];
+      const fieldChainForCheck = sourceExprForCheck?.findFirstExpression(abaplint.Expressions.FieldChain);
+      const fcChildren = fieldChainForCheck?.getChildren() ?? [];
+      const lastFC = fcChildren[fcChildren.length - 1];
+      const prevFC = fcChildren[fcChildren.length - 2];
+      const isStructDynField = fieldChainForCheck !== undefined
+        && lastFC instanceof abaplint.Nodes.ExpressionNode
+        && lastFC.get() instanceof abaplint.Expressions.FieldLength
+        && prevFC instanceof abaplint.Nodes.TokenNode
+        && prevFC.getFirstToken().getStr() === "-";
+      if (isStructDynField) {
+        const componentCode = new FieldLengthTranspiler().transpile(
+          lastFC as abaplint.Nodes.ExpressionNode, traversal).getCode();
+        const fullSource = sources.pop()!;
+        // Strip trailing .get().getOffset(...) to recover the base structure variable
+        const getOffsetIdx = fullSource.lastIndexOf(".get().getOffset(");
+        const baseSourceCode = getOffsetIdx >= 0 ? fullSource.substring(0, getOffsetIdx) : fullSource;
+        options.push("component: " + componentCode);
+        options.push("source: " + baseSourceCode);
+      } else {
+        options.push("source: " + sources.pop());
+      }
     } else {
 
       let dynamicName = "";
