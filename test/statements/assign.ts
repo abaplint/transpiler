@@ -860,7 +860,7 @@ WRITE / <lv_quantity>.`;
     expect(abap.console.getTrimmed()).to.equal("0");
   });
 
-  it.only("ASSIGN, field with namespace", async () => {
+  it("ASSIGN, field with namespace", async () => {
     const code = `
 TYPES: BEGIN OF ty_namespace,
          /namespace/field TYPE string,
