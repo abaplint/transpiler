@@ -1979,7 +1979,7 @@ WRITE sy-dbcnt.`;
     }, {snowflake: false});
   });
 
-  it.only("SELECT single into inline structured", async () => {
+  it("SELECT single into inline structured", async () => {
     const code = `
 FORM foo.
   SELECT SINGLE sprsl, arbgb
