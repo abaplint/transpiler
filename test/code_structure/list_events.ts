@@ -74,4 +74,20 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello\nhello\nworld\nworld");
   });
 
+  it.only("ignore these two", async () => {
+    const code = `
+REPORT zfoobar.
+
+AT SELECTION-SCREEN.
+  WRITE / 'world'.
+
+AT LINE-SELECTION.
+  WRITE / 'hello'.
+  `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("");
+  });
+
 });

@@ -137,6 +137,7 @@ export * from "./split";
 export * from "./start_of_selection";
 export * from "./submit";
 export * from "./subtract";
+export * from "./at_line_selection";
 export * from "./syntax_check";
 export * from "./system_call";
 export * from "./tables";
