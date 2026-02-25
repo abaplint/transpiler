@@ -6,6 +6,8 @@ enum EventKind {
   None,
   Start,
   End,
+  AtLineSelection,
+  AtSelectionScreen,
 }
 
 export class Rearranger {
@@ -38,8 +40,10 @@ export class Rearranger {
     // Check if there are any list event statements
     const hasStartOfSelection = children.some(c => c instanceof Nodes.StatementNode && c.get() instanceof Statements.StartOfSelection);
     const hasEndOfSelection = children.some(c => c instanceof Nodes.StatementNode && c.get() instanceof Statements.EndOfSelection);
+    const hasAtLineSelection = children.some(c => c instanceof Nodes.StatementNode && c.get() instanceof Statements.AtLineSelection);
+    const hasAtSelectionScreen = children.some(c => c instanceof Nodes.StatementNode && c.get() instanceof Statements.AtSelectionScreen);
 
-    if (!hasStartOfSelection && !hasEndOfSelection) {
+    if (!hasStartOfSelection && !hasEndOfSelection && !hasAtLineSelection && !hasAtSelectionScreen) {
       return node;
     }
 
@@ -47,6 +51,7 @@ export class Rearranger {
     const preamble: (Nodes.StatementNode | Nodes.StructureNode)[] = [];
     const startBlocks: (Nodes.StatementNode | Nodes.StructureNode)[] = [];
     const endBlocks: (Nodes.StatementNode | Nodes.StructureNode)[] = [];
+    // AT LINE-SELECTION and AT SELECTION-SCREEN are interactive events, their blocks are discarded
 
     let currentEvent = EventKind.None;
 
@@ -57,6 +62,10 @@ export class Rearranger {
       } else if (child instanceof Nodes.StatementNode && child.get() instanceof Statements.EndOfSelection) {
         currentEvent = EventKind.End;
         endBlocks.push(child);
+      } else if (child instanceof Nodes.StatementNode && child.get() instanceof Statements.AtLineSelection) {
+        currentEvent = EventKind.AtLineSelection;
+      } else if (child instanceof Nodes.StatementNode && child.get() instanceof Statements.AtSelectionScreen) {
+        currentEvent = EventKind.AtSelectionScreen;
       } else {
         switch (currentEvent) {
           case EventKind.None:
@@ -68,6 +77,10 @@ export class Rearranger {
           case EventKind.End:
             endBlocks.push(child as Nodes.StatementNode | Nodes.StructureNode);
             break;
+          case EventKind.AtLineSelection:
+          case EventKind.AtSelectionScreen:
+            // discard: these are interactive events not executed in batch
+            break;
           default:
             break;
         }
@@ -75,6 +88,7 @@ export class Rearranger {
     }
 
     // Reassemble: preamble, then START-OF-SELECTION blocks, then END-OF-SELECTION blocks
+    // AT LINE-SELECTION and AT SELECTION-SCREEN blocks are omitted
     const newChildren = [...preamble, ...startBlocks, ...endBlocks];
     node.setChildren(newChildren);
 

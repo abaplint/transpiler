@@ -6,7 +6,7 @@ import {Chunk} from "../chunk";
 export class AtSelectionScreenTranspiler implements IStatementTranspiler {
 
   public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    return new Chunk(`throw new Error("AtSelectionScreen, not supported, transpiler");`);
+    return new Chunk(``);
   }
 
 }
