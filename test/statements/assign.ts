@@ -860,4 +860,34 @@ WRITE / <lv_quantity>.`;
     expect(abap.console.getTrimmed()).to.equal("0");
   });
 
+  it("ASSIGN, field with namespace", async () => {
+    const code = `
+TYPES: BEGIN OF ty_namespace,
+         /namespace/field TYPE string,
+       END OF ty_namespace.
+
+DATA: ls_data   TYPE ty_namespace,
+var type string,
+      lv_result TYPE string.
+
+FIELD-SYMBOLS: <fs> TYPE any.
+
+ls_data-/namespace/field = 'hello'.
+var = '/namespace/field'.
+
+" This triggers the bug: ASSIGN with a namespaced component name
+ASSIGN ls_data-(var) TO <fs>.   " dynamic assign by name
+
+IF sy-subrc = 0.
+  lv_result = <fs>.
+  WRITE: / lv_result.
+ELSE.
+  WRITE: / 'ASSIGN failed (subrc=4)'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("hello");
+  });
+
 });
