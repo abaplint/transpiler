@@ -27,6 +27,7 @@ export * from "./collect";
 export * from "./commit";
 export * from "./compute";
 export * from "./concatenate";
+export * from "./end_of_selection";
 export * from "./condense";
 export * from "./constant";
 export * from "./continue";
