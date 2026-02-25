@@ -26,5 +26,34 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello world");
   });
 
+  it.only("start + end", async () => {
+    const code = `
+REPORT zfoobar.
+
+START-OF-SELECTION.
+  WRITE / 'hello'.
+
+END-OF-SELECTION.
+  WRITE / 'world'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello\nworld");
+  });
+
+  it("same the other way around, start + end", async () => {
+    const code = `
+REPORT zfoobar.
+
+END-OF-SELECTION.
+  WRITE / 'world'.
+
+START-OF-SELECTION.
+  WRITE / 'hello'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello\nworld");
+  });
 
 });
