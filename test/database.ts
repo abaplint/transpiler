@@ -1979,6 +1979,26 @@ WRITE sy-dbcnt.`;
     }, {snowflake: false});
   });
 
+  it.only("SELECT single into inline structured", async () => {
+    const code = `
+FORM foo.
+  SELECT SINGLE sprsl, arbgb
+    FROM t100
+    INTO @DATA(ls_t100).
+  WRITE sy-dbcnt.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("1");
+    }, {snowflake: false});
+  });
+
   it("basic VIEW", async () => {
     const zview = `<?xml version="1.0" encoding="utf-8"?>
 <abapGit version="v1.0.0" serializer="LCL_OBJECT_VIEW" serializer_version="v1.0.0">
