@@ -8,7 +8,7 @@ async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
 }
 
-describe.only("Running code structure - List Events", () => {
+describe("Running code structure - List Events", () => {
 
   beforeEach(async () => {
     abap = new ABAP({console: new MemoryConsole()});
@@ -54,6 +54,24 @@ START-OF-SELECTION.
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("hello\nworld");
+  });
+
+  it("same the other way around, start + end, multiple statements", async () => {
+    const code = `
+REPORT zfoobar.
+
+END-OF-SELECTION.
+  WRITE / 'world'.
+  WRITE / 'world'.
+
+START-OF-SELECTION.
+  WRITE / 'hello'.
+  WRITE / 'hello'.
+  `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello\nhello\nworld\nworld");
   });
 
 });
