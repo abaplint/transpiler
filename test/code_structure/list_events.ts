@@ -74,7 +74,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello\nhello\nworld\nworld");
   });
 
-  it.only("ignore these two", async () => {
+  it("ignore these two", async () => {
     const code = `
 REPORT zfoobar.
 
