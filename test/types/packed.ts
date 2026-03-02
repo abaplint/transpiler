@@ -319,4 +319,24 @@ ASSERT foo IS INITIAL.`;
     expect(packed.get()).to.equal(20241215123045);
   });
 
+  it("timestampl, assign ISO string in ABAP, zero", async () => {
+    const code = `
+    DATA lv_ts TYPE p LENGTH 8 DECIMALS 7.
+    lv_ts = '0000-00-00T00:00:00.0Z'.
+    ASSERT lv_ts = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("timestampl, assign ISO string in ABAP, non-zero", async () => {
+    const code = `
+    DATA lv_ts TYPE p LENGTH 8 DECIMALS 7.
+    lv_ts = '2024-12-15T12:30:45Z'.
+    ASSERT lv_ts > 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
