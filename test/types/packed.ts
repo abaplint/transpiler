@@ -295,4 +295,28 @@ ASSERT foo IS INITIAL.`;
     expect(abap.console.get()).to.include("1000");
   });
 
+  it("timestampl, set from ISO string, zero", () => {
+    const packed = new abap.types.Packed({length: 8, decimals: 7});
+    packed.set("0000-00-00T00:00:00.0Z");
+    expect(packed.get()).to.equal(0);
+  });
+
+  it("timestampl, set from ISO string, non-zero", () => {
+    const packed = new abap.types.Packed({length: 8, decimals: 7});
+    packed.set("2024-12-15T12:30:45.1234567Z");
+    expect(packed.get()).to.equal(20241215123045.125); // note: limited JavaScript number precision
+  });
+
+  it("timestampl, set from ISO string, no Z suffix", () => {
+    const packed = new abap.types.Packed({length: 8, decimals: 7});
+    packed.set("2024-12-15T12:30:45.0");
+    expect(packed.get()).to.equal(20241215123045);
+  });
+
+  it("timestampl, set from ISO string, no fractional seconds", () => {
+    const packed = new abap.types.Packed({length: 8, decimals: 7});
+    packed.set("2024-12-15T12:30:45Z");
+    expect(packed.get()).to.equal(20241215123045);
+  });
+
 });

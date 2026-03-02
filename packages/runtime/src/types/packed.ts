@@ -4,6 +4,7 @@ import {throwError} from "../throw_error";
 import {Integer8} from "./integer8";
 
 const digits = new RegExp(/^\s*-?\+?\d*\.?\d* *$/i);
+const isoTimestamp = new RegExp(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/);
 
 export class Packed implements INumeric {
   // todo: change this to bigint to get the proper precision? for larger than maxsafeint
@@ -51,6 +52,13 @@ export class Packed implements INumeric {
         this.value = 0;
         return this;
       } else if (digits.test(value) === false) {
+        const match = isoTimestamp.exec(value.trim());
+        if (match) {
+          const intPart = match[1] + match[2] + match[3] + match[4] + match[5] + match[6];
+          const frac = match[7] ? match[7].substring(1).substring(0, 7).padEnd(7, "0") : "0000000";
+          this.value = this.round(parseFloat(intPart + "." + frac), this.decimals);
+          return this;
+        }
         throwError("CX_SY_CONVERSION_NO_NUMBER");
       }
 
