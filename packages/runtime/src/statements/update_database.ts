@@ -1,9 +1,10 @@
 import {Context} from "../context";
 import {buildDbTableName} from "../prefix";
-import {FieldSymbol, Structure, Table} from "../types";
+import {FieldSymbol, String, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {toValue} from "./insert_database";
 import {ABAP} from "..";
+import {throwErrorWithParameters} from "../throw_error";
 
 declare const abap: ABAP;
 
@@ -26,7 +27,12 @@ export async function updateDatabase(table: string | ICharacter, options: IUpdat
     table = table.get();
   }
 
-  const keys: string[] = abap.DDIC[table.toUpperCase()].keyFields;
+  const tabl = abap.DDIC[table.toUpperCase()];
+  if (tabl === undefined) {
+    await throwErrorWithParameters("CX_SY_DYNAMIC_OSQL_SEMANTICS", {sqlmsg: new String().set(`Table ${table} not found`)});
+  }
+
+  const keys: string[] = tabl.keyFields;
   const where: string[] = [];
   const set: string[] = [];
 
