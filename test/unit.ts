@@ -2681,4 +2681,55 @@ ENDCLASS.`;
     await dumpNrun(files, false);
   });
 
+  it("test-61", async () => {
+// update non existing table, should throw cx_sy_dynamic_osql_semantics
+
+    const cxroot = `
+CLASS cx_root DEFINITION PUBLIC.
+ENDCLASS.
+CLASS cx_root IMPLEMENTATION.
+ENDCLASS.`;
+
+// "FROM cx_root" is not correct, but ok for the testcase
+    const cx = `CLASS cx_sy_dynamic_osql_semantics DEFINITION PUBLIC INHERITING FROM cx_root.
+ENDCLASS.
+CLASS cx_sy_dynamic_osql_semantics IMPLEMENTATION.
+ENDCLASS.`;
+
+    const clas = `CLASS zcl_select_nono DEFINITION PUBLIC.
+  PUBLIC SECTION.
+ENDCLASS.
+
+CLASS zcl_select_nono IMPLEMENTATION.
+ENDCLASS.`;
+
+    const tests = `
+CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS select FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD select.
+
+      TRY.
+          UPDATE ('ASDSDF') SET abap_language_version = 1 WHERE domname = 2.
+        CATCH cx_sy_dynamic_osql_semantics ##NO_HANDLER.
+          WRITE 'ok'.
+      ENDTRY.
+
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "t000.tabl.xml", contents: t000}, // one database table is required or database does not startup
+      {filename: "cx_sy_dynamic_osql_semantics.clas.abap", contents: cx},
+      {filename: "zcl_select_nono.clas.abap", contents: clas},
+      {filename: "zcl_select_nono.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("ok");
+  });
+
 });
