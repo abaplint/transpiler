@@ -36,10 +36,10 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
     if (abap.DDIC[options.name.trimEnd()] === undefined) {
       throwError("CX_SY_CREATE_DATA_ERROR");
     }
-    target.assign(new abap.types.Table(abap.DDIC[options.name.trimEnd()].type, tableOptions));
+    target.assign(new abap.types.Table(abap.DDIC[options.name.trimEnd()].type(), tableOptions));
   } else if (options?.name !== undefined) {
     if (abap.DDIC[options.name.trimEnd()]) {
-      target.assign(abap.DDIC[options.name.trimEnd()].type.clone());
+      target.assign(abap.DDIC[options.name.trimEnd()].type().clone());
     } else if (options.name.includes("=>")) {
       const [className, typeName] = options.name.trimEnd().toUpperCase().split("=>");
 
@@ -158,7 +158,7 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
         break;
       default:
         if (abap.DDIC[options.typeName.trimEnd()]) {
-          target.assign(abap.DDIC[options.typeName.trimEnd()].type.clone());
+          target.assign(abap.DDIC[options.typeName.trimEnd()].type().clone());
         } else if (options.typeName.includes("=>")) {
           const [className, typeName] = options.typeName.toUpperCase().split("=>");
 
