@@ -23,7 +23,7 @@ export class HandleDataElement {
 
     const chunk = new Chunk().appendString(`abap.DDIC["${obj.getName().toUpperCase()}"] = {
   "objectType": "DTEL",
-  "type": ${TranspileTypes.toType(type)},
+  "type": ${TranspileTypes.toTypeFunction(type)},
   "domain": ${JSON.stringify(obj.getDomainName())},
   "fixedValues": ${JSON.stringify(fixedValues)},
   "description": ${JSON.stringify(obj.getDescription())},

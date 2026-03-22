@@ -26,6 +26,7 @@ export class TranspileTypes {
     } else if (type instanceof abaplint.BasicTypes.VoidType) {
       return `() => { throw new Error("Void type: ${type.getVoided()}") }`;
     }
+    // return singleton,
     return "(() => { let _t; return () => (_t ??= " + this.toType(type) + "); })()";
   }
 
