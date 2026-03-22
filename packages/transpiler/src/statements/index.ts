@@ -135,6 +135,8 @@ export * from "./sort_dataset";
 export * from "./sort";
 export * from "./split";
 export * from "./start_of_selection";
+export * from "./load_of_program";
+export * from "./stop";
 export * from "./submit";
 export * from "./subtract";
 export * from "./at_line_selection";
