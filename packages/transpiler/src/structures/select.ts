@@ -28,7 +28,7 @@ export class SelectTranspiler implements IStructureTranspiler {
     // note: this implementation SELECTs everything into memory, which might be bad, and sometimes not correct
     const targetName = UniqueIdentifier.get();
     const loopName = UniqueIdentifier.get();
-    ret.appendString(`let ${targetName} = new abap.types.Table(abap.DDIC["${from}"].type);\n`);
+    ret.appendString(`let ${targetName} = new abap.types.Table(abap.DDIC["${from}"].type());\n`);
     ret.appendChunk(new SelectStatementTranspiler().transpile(selectStatement, traversal, targetName));
 
     // todo: optimize, it should do real streaming?

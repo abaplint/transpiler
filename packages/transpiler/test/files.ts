@@ -312,9 +312,11 @@ ENDINTERFACE.`;
 
     const output = await runFiles([file1, file2]);
 
+    const dtelType = `(() => { let _t; return () => ` +
+      `(_t ??= new abap.types.Character(1, {"qualifiedName":"ZDTEL","ddicName":"ZDTEL","description":"sdfsd"})); })()`;
     const expected = `abap.DDIC["ZDTEL"] = {
   "objectType": "DTEL",
-  "type": new abap.types.Character(1, {"qualifiedName":"ZDTEL","ddicName":"ZDTEL","description":"sdfsd"}),
+  "type": ${dtelType},
   "domain": "ZFIXEDVAL",
   "fixedValues": [{"description":"fixed","low":"F","language":"E"},{"description":"numbers","low":"1","high":"9","language":"E"}],
   "description": "sdfsd",

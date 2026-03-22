@@ -20,6 +20,17 @@ export class TranspileTypes {
     return pre + t.getName().toLowerCase() + " = " + code + ";\n";
   }
 
+  /** this returns a function, so it doesnt throw when loading the code, only when running */
+  public static toTypeFunction(type: abaplint.AbstractType): string {
+    if (type instanceof abaplint.BasicTypes.UnknownType) {
+      return `() => { throw new Error("Unknown type: ${type.getError()}") }`;
+    } else if (type instanceof abaplint.BasicTypes.VoidType) {
+      return `() => { throw new Error("Void type: ${type.getVoided()}") }`;
+    }
+    // return singleton,
+    return "(() => { let _t; return () => (_t ??= " + this.toType(type) + "); })()";
+  }
+
   public static toType(type: abaplint.AbstractType): string {
     let resolved = "";
     let extra = "";
