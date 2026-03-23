@@ -6,7 +6,7 @@ import {Chunk} from "../chunk";
 export class StopTranspiler implements IStatementTranspiler {
 
   public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    return new Chunk(`throw new Error("Stop, not supported, transpiler");`);
+    return new Chunk(`throw new Error("STOP, not supported, transpiler");`);
   }
 
 }

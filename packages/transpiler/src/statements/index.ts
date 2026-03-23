@@ -123,6 +123,7 @@ export * from "./select";
 export * from "./selection_screen";
 export * from "./set_bit";
 export * from "./set_dataset";
+export * from "./set_extended_check";
 export * from "./set_handler";
 export * from "./set_language";
 export * from "./set_locale";

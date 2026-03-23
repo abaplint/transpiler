@@ -363,9 +363,11 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({});`}, // todo
 
     {abap: "lo_foo ?= lo_bar.", js: "await abap.statements.cast(lo_foo, lo_bar);", skip: false},
 
-    {abap: "RETRY.", js: `throw new Error("Retry, not supported, transpiler");`, skip: false},
+    {abap: "RETRY.", js: `throw new Error("RETRY, not supported, transpiler");`, skip: false},
 
-    {abap: "STOP.", js: `throw new Error("Stop, not supported, transpiler");`, skip: false},
+    {abap: "STOP.", js: `throw new Error("STOP, not supported, transpiler");`, skip: false},
+
+    {abap: "SET EXTENDED CHECK OFF.", js: `throw new Error("SET EXTENDED CHECK, not supported, transpiler");`, skip: false},
 
     {abap: "delete foo where instance->field_type not in types.",
       js: `await abap.statements.deleteInternal(foo,{where: async (I) => {return !abap.compare.in(I.instance.get().field_type, types);}});`, skip: false},

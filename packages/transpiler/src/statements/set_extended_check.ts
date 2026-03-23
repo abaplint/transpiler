@@ -3,10 +3,10 @@ import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 
-export class RetryTranspiler implements IStatementTranspiler {
+export class SetExtendedCheckTranspiler implements IStatementTranspiler {
 
   public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    return new Chunk(`throw new Error("RETRY, not supported, transpiler");`);
+    return new Chunk(`throw new Error("SET EXTENDED CHECK, not supported, transpiler");`);
   }
 
 }
