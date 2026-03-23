@@ -98,9 +98,6 @@ export const config: IConfig = {
     "begin_end_names": true,
     "check_syntax": true,
     "form_no_dash": true,
-    "obsolete_statement": {
-      "setExtended": true,
-    },
     "forbidden_identifier": {
       "check": [],
     },
