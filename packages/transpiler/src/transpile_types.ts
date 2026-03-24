@@ -1,10 +1,6 @@
 import * as abaplint from "@abaplint/core";
 import {Traversal} from "./traversal";
 
-// EnumType is not part of abaplint's public API, extract it from internal module
-// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
-const EnumType: {new(...args: any[]): abaplint.AbstractType} = require("@abaplint/core/build/src/abap/types/basic/enum_type").EnumType;
-
 const featureHexUInt8 = false;
 
 export class TranspileTypes {
@@ -175,7 +171,7 @@ export class TranspileTypes {
       }
     } else if (type instanceof abaplint.BasicTypes.DecFloat34Type) {
       resolved = "DecFloat34";
-    } else if (type instanceof EnumType) {
+    } else if (type instanceof abaplint.BasicTypes.EnumType) {
       resolved = "String";
       if (type.getQualifiedName() !== undefined) {
         extra = "{qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\"}";
