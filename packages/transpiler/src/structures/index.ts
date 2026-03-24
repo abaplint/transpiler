@@ -15,6 +15,7 @@ export * from "./module";
 export * from "./select";
 export * from "./method";
 export * from "./try";
+export * from "./type_enum";
 export * from "./types";
 export * from "./when";
 export * from "./while";

@@ -14,7 +14,7 @@ describe("Running Examples - ENUMs", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
-  it.only("basics", async () => {
+  it("basics", async () => {
     const code = `
 TYPES: BEGIN OF ENUM ty_cache_policy STRUCTURE cache_policies,
          use_all,
@@ -27,7 +27,7 @@ WRITE / foo.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("USE_ALL\NUSE_ALL");
+    expect(abap.console.get()).to.equal("USE_ALL\nUSE_ALL");
   });
 
 });
