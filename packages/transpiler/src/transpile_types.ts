@@ -156,8 +156,12 @@ export class TranspileTypes {
       resolved = "Hex";
     } else if (type instanceof abaplint.BasicTypes.HexType) {
       resolved = featureHexUInt8 ? "HexUInt8" : "Hex";
-      if (type.getLength() !== 1) {
+      if (type.getLength() !== 1 && type.getQualifiedName() !== undefined) {
+        extra = "{length: " + type.getLength() + ", qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\"}";
+      } else if (type.getLength() !== 1) {
         extra = "{length: " + type.getLength() + "}";
+      } else if (type.getQualifiedName() !== undefined) {
+        extra = "{qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\"}";
       }
     } else if (type instanceof abaplint.BasicTypes.FloatType) {
       resolved = "Float";
@@ -171,11 +175,6 @@ export class TranspileTypes {
       }
     } else if (type instanceof abaplint.BasicTypes.DecFloat34Type) {
       resolved = "DecFloat34";
-    } else if (type instanceof abaplint.BasicTypes.EnumType) {
-      resolved = "String";
-      if (type.getQualifiedName() !== undefined) {
-        extra = "{qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\"}";
-      }
     } else if (type instanceof abaplint.BasicTypes.UnknownType) {
       return `(() => { throw new Error("Unknown type: ${type.getError()}") })()`;
     } else if (type instanceof abaplint.BasicTypes.VoidType) {
