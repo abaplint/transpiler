@@ -171,6 +171,11 @@ export class TranspileTypes {
       }
     } else if (type instanceof abaplint.BasicTypes.DecFloat34Type) {
       resolved = "DecFloat34";
+    } else if (type instanceof abaplint.BasicTypes.EnumType) {
+      resolved = "String";
+      if (type.getQualifiedName() !== undefined) {
+        extra = "{qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\"}";
+      }
     } else if (type instanceof abaplint.BasicTypes.UnknownType) {
       return `(() => { throw new Error("Unknown type: ${type.getError()}") })()`;
     } else if (type instanceof abaplint.BasicTypes.VoidType) {

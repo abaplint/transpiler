@@ -31,6 +31,14 @@ export class DataTranspiler implements IStatementTranspiler {
       value = DataTranspiler.buildValue(node, Traversal.prefixVariable(found.getName().toLowerCase()), traversal);
     }
 
+    // for enum types, initialize with the first enum value
+    if (found.getType() instanceof abaplint.BasicTypes.EnumType && value === "") {
+      const enumDefault = DataTranspiler.findEnumDefault(scope, found.getType());
+      if (enumDefault) {
+        value = "\n" + Traversal.prefixVariable(found.getName().toLowerCase()) + ".set(\"" + enumDefault + "\");";
+      }
+    }
+
     const ret = new Chunk()
       .appendString("let ")
       .appendString(Traversal.prefixVariable(Traversal.escapeNamespace(found.getName().toLowerCase())))
@@ -39,6 +47,27 @@ export class DataTranspiler implements IStatementTranspiler {
       .appendString(value);
 
     return ret;
+  }
+
+  public static findEnumDefault(scope: abaplint.ISpaghettiScopeNode, _enumType: abaplint.AbstractType): string | undefined {
+    let current: abaplint.ISpaghettiScopeNode | undefined = scope;
+    while (current) {
+      const vars = current.getData().vars;
+      for (const key of Object.keys(vars)) {
+        const v = vars[key];
+        if (v.getMeta().includes(abaplint.IdentifierMeta.Enum)) {
+          const structType = v.getType();
+          if (structType instanceof abaplint.BasicTypes.StructureType) {
+            const components = structType.getComponents();
+            if (components.length > 0) {
+              return components[0].name.toUpperCase();
+            }
+          }
+        }
+      }
+      current = current.getParent();
+    }
+    return undefined;
   }
 
   public static buildValue(node: abaplint.Nodes.StatementNode, name: string, traversal: Traversal): string {
