@@ -670,4 +670,39 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("0\n0");
   });
 
+  it.only("hashed, and more references", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         key   TYPE i,
+         value TYPE string,
+       END OF ty_row.
+TYPES ty_table TYPE HASHED TABLE OF ty_row
+               WITH UNIQUE KEY key.
+
+DATA lt_table TYPE ty_table.
+DATA ls_row   TYPE ty_row.
+DATA lr_row   TYPE REF TO ty_row.
+
+" First INSERT - succeeds, lr_row must reference the new row
+ls_row-key   = 1.
+ls_row-value = 'hello'.
+INSERT ls_row INTO TABLE lt_table REFERENCE INTO lr_row.
+
+ASSERT sy-subrc = 0.
+ASSERT lr_row IS NOT INITIAL.
+ASSERT lr_row->value = 'hello'.
+
+" Second INSERT with same key - must fail (sy-subrc = 4)
+" and lr_row must remain pointing to the originally inserted row
+ls_row-value = 'world'.
+INSERT ls_row INTO TABLE lt_table REFERENCE INTO lr_row.
+
+ASSERT sy-subrc = 4.
+ASSERT lr_row IS NOT INITIAL.
+ASSERT lr_row->value = 'hello'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
