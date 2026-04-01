@@ -91,11 +91,13 @@ export class PopulateTables {
           pardecltyp = "1";
         }
 
-        const paroptionl = optionalParameters.includes(parameter.getName()) ? "X" : " ";
+        const name = parameter.getName().toUpperCase();
+        const paroptionl = (optionalParameters.some(o => o.toUpperCase() === name) || method.getParameters().getParameterDefault(name) !== undefined) ? "X" : " ";
         const type = parameter.getType().getQualifiedName()?.toUpperCase() || "";
+        const parvalue = method.getParameters().getParameterDefault(name)?.concatTokens() || "";
 
-        ret.push(`INSERT INTO "seosubcodf" ("clsname", "cmpname", "sconame", "version", "editorder", "pardecltyp", "type", "paroptionl") VALUES ('${
-          obj.getName()}', '${method.getName().toUpperCase()}', '${parameter.getName().toUpperCase()}', '1', ${editorder}, '${pardecltyp}', '${type}', '${paroptionl}');`);
+        ret.push(`INSERT INTO "seosubcodf" ("clsname", "cmpname", "sconame", "version", "editorder", "pardecltyp", "type", "paroptionl", "parvalue") VALUES ('${
+          obj.getName()}', '${method.getName().toUpperCase()}', '${name}', '1', ${editorder}, '${pardecltyp}', '${type}', '${paroptionl}', '${this.escape(parvalue)}');`);
       }
     }
 
@@ -110,10 +112,34 @@ export class PopulateTables {
       return [];
     }
 
+    const descriptions: any[] = [];
+    const xml = obj.getXML();
+    if (xml) {
+      const parsed: any = (obj as any).parseRaw2();
+      const sub = parsed?.abapGit["asx:abap"]["asx:values"]?.DESCRIPTIONS?.SEOSUBCOTX;
+      if (sub) {
+        if (Array.isArray(sub)) {
+          descriptions.push(...sub);
+        } else {
+          descriptions.push(sub);
+        }
+      }
+    }
+
     for (const method of def.getMethodDefinitions().getAll()) {
       for (const parameter of method.getParameters().getAll()) {
+        const mName = method.getName().toUpperCase();
+        const pName = parameter.getName().toUpperCase();
+        let descript = "";
+        for (const d of descriptions) {
+          if (d.CMPNAME?.toUpperCase() === mName && d.SCONAME?.toUpperCase() === pName) {
+            descript = d.DESCRIPT || "";
+            break;
+          }
+        }
+
         ret.push(`INSERT INTO "seosubcotx" ("clsname", "cmpname", "sconame", "langu", "descript") VALUES ('${
-          obj.getName()}', '${method.getName().toUpperCase()}', '${parameter.getName().toUpperCase()}', 'E', 'todo');`);
+          obj.getName()}', '${mName}', '${pName}', 'E', '${this.escape(descript)}');`);
       }
     }
 

@@ -156,8 +156,12 @@ export class TranspileTypes {
       resolved = "Hex";
     } else if (type instanceof abaplint.BasicTypes.HexType) {
       resolved = featureHexUInt8 ? "HexUInt8" : "Hex";
-      if (type.getLength() !== 1) {
+      if (type.getLength() !== 1 && type.getQualifiedName() !== undefined) {
+        extra = "{length: " + type.getLength() + ", qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\"}";
+      } else if (type.getLength() !== 1) {
         extra = "{length: " + type.getLength() + "}";
+      } else if (type.getQualifiedName() !== undefined) {
+        extra = "{qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\"}";
       }
     } else if (type instanceof abaplint.BasicTypes.FloatType) {
       resolved = "Float";
