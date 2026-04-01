@@ -670,7 +670,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("0\n0");
   });
 
-  it.only("hashed, and more references", async () => {
+  it("hashed, and more references", async () => {
     const code = `
 TYPES: BEGIN OF ty_row,
          key   TYPE i,
