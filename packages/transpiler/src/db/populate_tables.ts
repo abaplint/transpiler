@@ -112,10 +112,34 @@ export class PopulateTables {
       return [];
     }
 
+    const descriptions: any[] = [];
+    const xml = obj.getXML();
+    if (xml) {
+      const parsed: any = (obj as any).parseRaw2();
+      const sub = parsed?.abapGit["asx:abap"]["asx:values"]?.DESCRIPTIONS?.SEOSUBCOTX;
+      if (sub) {
+        if (Array.isArray(sub)) {
+          descriptions.push(...sub);
+        } else {
+          descriptions.push(sub);
+        }
+      }
+    }
+
     for (const method of def.getMethodDefinitions().getAll()) {
       for (const parameter of method.getParameters().getAll()) {
+        const mName = method.getName().toUpperCase();
+        const pName = parameter.getName().toUpperCase();
+        let descript = "";
+        for (const d of descriptions) {
+          if (d.CMPNAME?.toUpperCase() === mName && d.SCONAME?.toUpperCase() === pName) {
+            descript = d.DESCRIPT || "";
+            break;
+          }
+        }
+
         ret.push(`INSERT INTO "seosubcotx" ("clsname", "cmpname", "sconame", "langu", "descript") VALUES ('${
-          obj.getName()}', '${method.getName().toUpperCase()}', '${parameter.getName().toUpperCase()}', 'E', 'todo');`);
+          obj.getName()}', '${mName}', '${pName}', 'E', '${this.escape(descript)}');`);
       }
     }
 
