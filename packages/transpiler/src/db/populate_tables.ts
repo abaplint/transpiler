@@ -91,11 +91,13 @@ export class PopulateTables {
           pardecltyp = "1";
         }
 
-        const paroptionl = optionalParameters.includes(parameter.getName()) ? "X" : " ";
+        const name = parameter.getName().toUpperCase();
+        const paroptionl = (optionalParameters.some(o => o.toUpperCase() === name) || method.getParameters().getParameterDefault(name) !== undefined) ? "X" : " ";
         const type = parameter.getType().getQualifiedName()?.toUpperCase() || "";
+        const parvalue = method.getParameters().getParameterDefault(name)?.concatTokens() || "";
 
-        ret.push(`INSERT INTO "seosubcodf" ("clsname", "cmpname", "sconame", "version", "editorder", "pardecltyp", "type", "paroptionl") VALUES ('${
-          obj.getName()}', '${method.getName().toUpperCase()}', '${parameter.getName().toUpperCase()}', '1', ${editorder}, '${pardecltyp}', '${type}', '${paroptionl}');`);
+        ret.push(`INSERT INTO "seosubcodf" ("clsname", "cmpname", "sconame", "version", "editorder", "pardecltyp", "type", "paroptionl", "parvalue") VALUES ('${
+          obj.getName()}', '${method.getName().toUpperCase()}', '${name}', '1', ${editorder}, '${pardecltyp}', '${type}', '${paroptionl}', '${this.escape(parvalue)}');`);
       }
     }
 
