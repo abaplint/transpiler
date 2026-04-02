@@ -100,7 +100,7 @@ describe("Running operators - Arithmetic precedence", () => {
     expect(abap.console.get()).to.equal("13");
   });
 
-  it.only("moar power", async () => {
+  it("moar power", async () => {
     const code = `
 DATA i TYPE i.
 i = 3 * 10 ** 3.
