@@ -62,7 +62,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("");
   });
 
-  it.only("something", async () => {
+  it.only("lower case ELSE", async () => {
     const code = `
 FORM foo.
   DATA include_tax TYPE abap_bool.
@@ -71,7 +71,7 @@ FORM foo.
   DATA(lv_tax) = COND decfloat34(
     WHEN include_tax = abap_true
     THEN lv_net * lv_tax_rate
-    ELSE 0 ).
+    else 0 ).
   WRITE / lv_tax.
 ENDFORM.
 
