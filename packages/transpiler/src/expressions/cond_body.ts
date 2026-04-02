@@ -21,7 +21,7 @@ export class CondBodyTranspiler {
 
     for (const c of body.getChildren()) {
       if (c instanceof Nodes.TokenNode) {
-        if (c.concatTokens() === "ELSE") {
+        if (c.concatTokens().toUpperCase() === "ELSE") {
           break;
         }
       } else {
