@@ -100,4 +100,15 @@ describe("Running operators - Arithmetic precedence", () => {
     expect(abap.console.get()).to.equal("13");
   });
 
+  it("moar power", async () => {
+    const code = `
+DATA i TYPE i.
+i = 3 * 10 ** 3.
+WRITE i.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3000");
+  });
+
 });

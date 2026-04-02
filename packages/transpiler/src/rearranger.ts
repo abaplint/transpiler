@@ -123,7 +123,7 @@ export class Rearranger {
 
     let splitAt: Nodes.ExpressionNode | undefined;
 
-    // multiplication/division and left to right
+    // lowest precedence: +, - (skip **, *, /, MOD, DIV)
     for (let i = arith.length - 1; i >= 0; i--) {
       const a = arith[i];
       const concat = a.concatTokens().toUpperCase();
@@ -138,7 +138,20 @@ export class Rearranger {
       break;
     }
 
-    // fallback
+    // medium precedence: *, /, MOD, DIV (skip only **)
+    if (splitAt === undefined) {
+      for (let i = arith.length - 1; i >= 0; i--) {
+        const a = arith[i];
+        const concat = a.concatTokens().toUpperCase();
+        if (concat === "**") {
+          continue;
+        }
+        splitAt = a;
+        break;
+      }
+    }
+
+    // fallback: all ** operators
     if (splitAt === undefined) {
       splitAt = arith[arith.length - 1];
     }

@@ -127,11 +127,13 @@ export function insertInternal(options: IInsertInternalOptions): void {
     }
   } else if (options.table instanceof HashedTable && data) {
     const {value: val, subrc: subrc} = options.table.insert(data as any);
-    if (options.assigning) {
-      options.assigning.assign(val);
-    }
-    if (options.referenceInto) {
-      options.referenceInto.assign(val);
+    if (subrc === 0) {
+      if (options.assigning) {
+        options.assigning.assign(val);
+      }
+      if (options.referenceInto) {
+        options.referenceInto.assign(val);
+      }
     }
     abap.builtin.sy.get().subrc.set(subrc);
     return;
