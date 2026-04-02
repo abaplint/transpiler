@@ -705,4 +705,46 @@ ASSERT lr_row->value = 'hello'.`;
     await f(abap);
   });
 
+  it("hashed, and secondary key", async () => {
+    const code = `
+TYPES:
+  BEGIN OF ts_row,
+    id     TYPE i,
+    is_new TYPE abap_bool,
+  END OF ts_row.
+TYPES:
+  tt_rows TYPE HASHED TABLE OF ts_row
+          WITH UNIQUE KEY id
+          WITH NON-UNIQUE SORTED KEY new COMPONENTS is_new.
+
+DATA: lt_rows  TYPE tt_rows,
+      ls_row   TYPE ts_row,
+      lv_count TYPE i.
+
+ls_row-id = 1.
+ls_row-is_new = abap_true.
+INSERT ls_row INTO TABLE lt_rows.
+
+" First loop — builds and caches the secondary index
+LOOP AT lt_rows INTO ls_row USING KEY new WHERE is_new = abap_true.
+  lv_count += 1.
+ENDLOOP.
+ASSERT lv_count = 1.  "passes
+
+" Insert a second row OUTSIDE any loop
+ls_row-id = 2.
+ls_row-is_new = abap_true.
+INSERT ls_row INTO TABLE lt_rows.
+
+" Second loop — STALE cache, misses the new row!
+lv_count = 0.
+LOOP AT lt_rows INTO ls_row USING KEY new WHERE is_new = abap_true.
+  lv_count += 1.
+ENDLOOP.
+ASSERT lv_count = 2.  " BUG: gets 1, not 2`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
