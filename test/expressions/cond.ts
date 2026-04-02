@@ -62,7 +62,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("");
   });
 
-  it.only("lower case ELSE", async () => {
+  it("lower case ELSE", async () => {
     const code = `
 FORM foo.
   DATA include_tax TYPE abap_bool.
