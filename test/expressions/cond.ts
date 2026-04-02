@@ -62,4 +62,25 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("");
   });
 
+  it.only("something", async () => {
+    const code = `
+FORM foo.
+  DATA include_tax TYPE abap_bool.
+  DATA lv_net TYPE i.
+  DATA lv_tax_rate TYPE i.
+  DATA(lv_tax) = COND decfloat34(
+    WHEN include_tax = abap_true
+    THEN lv_net * lv_tax_rate
+    ELSE 0 ).
+  WRITE / lv_tax.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
 });
