@@ -442,7 +442,7 @@ WRITE / link_for_testing.`;
     expect(abap.console.getTrimmed()).to.equal("foobar");
   });
 
-  it.only("REPLACE, ignoring case regex", async () => {
+  it("REPLACE, ignoring case regex", async () => {
     const code =
 `DATA lv_str TYPE string.
 lv_str = 'Hello hello HELLO'.
