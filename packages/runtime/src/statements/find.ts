@@ -53,7 +53,11 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
     s = s.replace(/\*/g, "\\*");
     s = s.replace(/\+/g, "\\+");
 
-    s = new RegExp(s, "g");
+    let flags = "g";
+    if (options.ignoringCase === true) {
+      flags += "i";
+    }
+    s = new RegExp(s, flags);
   } else if (options.regex || options.pcre) {
     s = ABAPRegExp.getRegex({all: true, ...options});
   } else {
