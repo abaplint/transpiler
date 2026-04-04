@@ -35,9 +35,22 @@ export function assign(input: IAssignInput) {
         const split = input.dynamicName.split(/->|-/);
         split.shift();
         for (const s of split) {
-          if (s === "*") {
+          const upperS = s.toUpperCase().trimEnd();
+          if (upperS === "*") {
             // @ts-ignore
             input.dynamicSource = input.dynamicSource.dereference();
+          } else if (upperS === "TABLE_LINE" && input.dynamicSource instanceof DataReference) {
+            // @ts-ignore
+            input.dynamicSource = input.dynamicSource.getPointer();
+            if (input.dynamicSource instanceof Table) {
+              const options = input.dynamicSource.getOptions();
+              if (options?.withHeader === true) {
+                // @ts-ignore
+                input.dynamicSource = input.dynamicSource.getHeader();
+              } else {
+                input.dynamicSource = undefined;
+              }
+            }
           } else {
             // @ts-ignore
             const source = input.dynamicSource.get();
@@ -45,6 +58,7 @@ export function assign(input: IAssignInput) {
               abap.builtin.sy.get().subrc.set(4);
               return;
             }
+            // @ts-ignore
             input.dynamicSource = source[s.toLowerCase().replace(/[~\\/]/g, "$") as any];
           }
         }

@@ -890,7 +890,7 @@ ENDIF.`;
     expect(abap.console.getTrimmed()).to.equal("hello");
   });
 
-  it.only("ASSIGN, table line dynamic", async () => {
+  it("ASSIGN, table line dynamic", async () => {
     const code = `
 TYPES: lty_tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
 
