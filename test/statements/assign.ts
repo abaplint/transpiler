@@ -890,4 +890,24 @@ ENDIF.`;
     expect(abap.console.getTrimmed()).to.equal("hello");
   });
 
+  it.only("ASSIGN, table line dynamic", async () => {
+    const code = `
+TYPES: lty_tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+
+DATA: lt      TYPE lty_tab,
+      lr      TYPE REF TO data,
+      lv_name TYPE string VALUE 'TABLE_LINE',
+      lr2     TYPE REF TO data.
+
+FIELD-SYMBOLS: <fs> TYPE any.
+
+GET REFERENCE OF lt INTO lr.
+ASSIGN lr->(lv_name) TO <fs>.
+ASSERT sy-subrc = 4.
+ASSERT <fs> IS NOT ASSIGNED.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
