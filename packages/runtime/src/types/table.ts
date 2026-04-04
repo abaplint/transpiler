@@ -257,6 +257,7 @@ export class HashedTable implements ITable {
         loopController.array.push(val);
       }
 
+      this.secondaryIndexes = {};
       this.value[hash] = val;
       return {value: val, subrc: 0};
     }
