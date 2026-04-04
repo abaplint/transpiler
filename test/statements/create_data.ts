@@ -388,6 +388,20 @@ CREATE DATA rdata TYPE ('').`;
     }
   });
 
+  it.only("CREATE DATA, decfloat34", async () => {
+    const code = `
+DATA dref TYPE REF TO data.
+FIELD-SYMBOLS <fs> TYPE any.
+CREATE DATA dref TYPE decfloat34.
+ASSIGN dref->* TO <fs>.
+<fs> = '1.5'.
+WRITE <fs>.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1.5");
+  });
+
   it("CREATE DATA, like standard table of", async () => {
     const code = `
 TYPES: BEGIN OF ty,
