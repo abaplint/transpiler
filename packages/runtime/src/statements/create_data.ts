@@ -1,5 +1,5 @@
 import {throwError} from "../throw_error";
-import {ABAPObject, Character, DataReference, Date, String, FieldSymbol, Float, Integer, Structure, Table, Time, XString, Hex, Packed, Numc, Integer8, UTCLong, ITableOptions, TableKeyType} from "../types";
+import {ABAPObject, Character, DataReference, Date, String, FieldSymbol, Float, Integer, Structure, Table, Time, XString, Hex, Packed, Numc, Integer8, UTCLong, DecFloat34, ITableOptions, TableKeyType} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {ABAP} from "..";
@@ -155,6 +155,9 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
         break;
       case "UTCLONG":
         target.assign(new UTCLong());
+        break;
+      case "DECFLOAT34":
+        target.assign(new DecFloat34());
         break;
       default:
         if (abap.DDIC[options.typeName.trimEnd()]) {
