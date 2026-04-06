@@ -317,4 +317,26 @@ WRITE / sdf.`;
     expect(abap.console.get()).to.equal("0000");
   });
 
+  it.only("negated method call", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS get_five RETURNING VALUE(rs) TYPE i.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD get_five.
+    rs = 5.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lv_neg TYPE i.
+  lv_neg = - lcl=>get_five( ).
+  WRITE lv_neg.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("-5");
+  });
+
 });
