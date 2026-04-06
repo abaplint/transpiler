@@ -22,7 +22,21 @@ export class SourceTranspiler implements IExpressionTranspiler {
     const post = new Chunk();
 
     const children = node.getChildren();
-    for (let i = 0; i < children.length; i++) {
+
+    // Pre-scan for unary prefix +/- tokens (WDashW / WPlusW) before any expression
+    let prefixNegated = false;
+    let startIdx = 0;
+    while (startIdx < children.length) {
+      const c = children[startIdx];
+      if (c instanceof Nodes.TokenNode) {
+        const s = c.getFirstToken().getStr();
+        if (s === "-") { prefixNegated = !prefixNegated; startIdx++; }
+        else if (s === "+") { startIdx++; }
+        else { break; }
+      } else { break; }
+    }
+
+    for (let i = startIdx; i < children.length; i++) {
       const c = children[i];
       const isLast = i === children.length - 1;
 
@@ -191,6 +205,10 @@ export class SourceTranspiler implements IExpressionTranspiler {
     }
 
     ret.appendChunk(post);
+
+    if (prefixNegated) {
+      ret = new Chunk().appendString("abap.operators.minus(0, ").appendChunk(ret).appendString(")");
+    }
 
 //    console.dir("return: " + ret.getCode());
 

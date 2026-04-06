@@ -317,7 +317,7 @@ WRITE / sdf.`;
     expect(abap.console.get()).to.equal("0000");
   });
 
-  it.only("negated method call", async () => {
+  it("negated method call", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
