@@ -442,4 +442,16 @@ WRITE / link_for_testing.`;
     expect(abap.console.getTrimmed()).to.equal("foobar");
   });
 
+  it("REPLACE, ignoring case regex", async () => {
+    const code =
+`DATA lv_str TYPE string.
+lv_str = 'Hello hello HELLO'.
+REPLACE ALL OCCURRENCES OF REGEX 'hello' IN lv_str WITH 'hi' IGNORING CASE.
+ASSERT lv_str = 'hi hi hi'.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
