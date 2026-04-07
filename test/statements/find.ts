@@ -802,4 +802,20 @@ ASSERT submatch IS INITIAL.`;
     await f(abap);
   });
 
+  it.only("FIND, slash", async () => {
+    const code = `
+FORM foo.
+  DATA str TYPE string.
+  DATA lv_search TYPE string.
+  lv_search = '\\'.
+  FIND ALL OCCURRENCES OF lv_search IN str RESULTS DATA(lt_results).
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
