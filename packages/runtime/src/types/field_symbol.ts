@@ -35,6 +35,10 @@ export class FieldSymbol  {
     this.pointer = pointer;
   }
 
+  public getType() {
+    return this.type;
+  }
+
   public setCasting() {
     this.casting =  true;
   }

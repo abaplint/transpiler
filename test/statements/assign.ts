@@ -510,7 +510,7 @@ WRITE sy-subrc.`;
     }
   });
 
-  it.only("wrong type", async () => {
+  it("wrong type", async () => {
     const code = `
 DATA dref TYPE REF TO data.
 FIELD-SYMBOLS <table> TYPE ANY TABLE.
