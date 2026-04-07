@@ -802,7 +802,7 @@ ASSERT submatch IS INITIAL.`;
     await f(abap);
   });
 
-  it.only("FIND, slash", async () => {
+  it("FIND, slash", async () => {
     const code = `
 FORM foo.
   DATA str TYPE string.
