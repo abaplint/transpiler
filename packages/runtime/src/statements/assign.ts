@@ -1,4 +1,4 @@
-import {ABAPObject, DataReference, FieldSymbol, Structure, Table} from "../types";
+import {ABAPObject, DataReference, FieldSymbol, HashedTable, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {ABAP} from "..";
@@ -155,7 +155,9 @@ export function assign(input: IAssignInput) {
     } else {
       if (input.source instanceof Table && input.source.getOptions()?.withHeader === true) {
         input.target.assign(input.source.getHeader());
-      } else if (input.target.getType() instanceof Table && !(input.source instanceof Table)) {
+      } else if (input.target.getType() instanceof Table
+          && !(input.source instanceof Table)
+          && !(input.source instanceof HashedTable)) {
         throw new Error("ASSIGN_TYPE_CONFLICT");
       } else {
         if (input.casting) {
