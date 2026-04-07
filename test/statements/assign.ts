@@ -510,6 +510,22 @@ WRITE sy-subrc.`;
     }
   });
 
+  it("wrong type", async () => {
+    const code = `
+DATA dref TYPE REF TO data.
+FIELD-SYMBOLS <table> TYPE ANY TABLE.
+CREATE DATA dref TYPE i.
+ASSIGN dref->* TO <table>.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch(e) {
+      expect(e.toString()).to.contain("ASSIGN_TYPE_CONFLICT");
+    }
+  });
+
   it("value from namespaced intf", async () => {
     const code = `
 INTERFACE /foo/if.

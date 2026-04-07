@@ -43,6 +43,7 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
       return;
     }
 
+    s = s.replace(/\\/g, "\\\\");
     s = s.replace(/\[/g, "\\[");
     s = s.replace(/\]/g, "\\]");
     s = s.replace(/\?/g, "\\?");
