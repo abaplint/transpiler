@@ -73,6 +73,9 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
       // eslint-disable-next-line no-cond-assign
       while(temp = s.exec(blah.get())) {
         matches.push({...temp, line});
+        if (temp.index === s.lastIndex) {
+          s.lastIndex++;
+        }
         if (options.first === true) {
           break;
         }
@@ -89,6 +92,9 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
     // eslint-disable-next-line no-cond-assign
     while(temp = s.exec(blah)) {
       matches.push(temp);
+      if (temp.index === s.lastIndex) {
+        s.lastIndex++;
+      }
       if (options.first === true) {
         break;
       }

@@ -342,6 +342,21 @@ describe("Running statements - FIND", () => {
     expect(abap.console.get()).to.equal("02\n02\n02\n42\n42");
   });
 
+  it("FIND, regex start of string", async () => {
+    const code = `
+DATA reg TYPE string.
+DATA str TYPE string.
+DATA cnt TYPE i.
+reg = '^'.
+FIND ALL OCCURRENCES OF REGEX reg IN str MATCH COUNT cnt IGNORING CASE.
+WRITE / sy-subrc.
+WRITE / cnt.`;
+    const js = await run(code);
+    const f = new Function("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n1");
+  });
+
   it("FIND, with REGEX :space:", async () => {
     const code = `
     DATA lv_string TYPE string.
