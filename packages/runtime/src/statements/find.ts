@@ -3,6 +3,7 @@ import {ABAPObject, Integer, Structure, Table, TableFactory} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {ABAP} from "..";
+import {throwError} from "../throw_error";
 
 declare const abap: ABAP;
 
@@ -85,6 +86,9 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
   } else {
     let blah = input.get();
     if (sectionOffset) {
+      if (sectionOffset > blah.length) {
+        throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
+      }
       blah = blah.substr(sectionOffset);
     }
 
@@ -180,7 +184,7 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
   if (options?.length && matches && matches[0]) {
     options.length?.set(matches[0][0].length);
   } else {
-    options.length?.clear();
+//    options.length?.clear();
   }
 
 }

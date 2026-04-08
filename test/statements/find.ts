@@ -833,4 +833,46 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("FIND, ok", async () => {
+    const code = `
+DATA lv_str TYPE string.
+DATA lv_length TYPE i.
+DATA lv_offset TYPE i.
+lv_str = 'abc'.
+lv_length = 1.
+lv_offset = 2.
+FIND REGEX 'abc' IN SECTION OFFSET 3 OF lv_str
+  MATCH OFFSET lv_offset
+  MATCH LENGTH lv_length
+  IGNORING CASE.
+WRITE / sy-subrc.
+WRITE / lv_offset.
+WRITE / lv_length.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n2\n1");
+  });
+
+  it("throw CX_SY_RANGE_OUT_OF_BOUNDS", async () => {
+    const code = `
+DATA lv_str TYPE string.
+DATA lv_length TYPE i.
+DATA lv_offset TYPE i.
+lv_str = 'abc'.
+FIND REGEX 'abc' IN SECTION OFFSET 100 OF lv_str
+  MATCH OFFSET lv_offset
+  MATCH LENGTH lv_length
+  IGNORING CASE.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch (e) {
+      expect(e.toString()).to.contain("CX_SY_RANGE_OUT_OF_BOUNDS");
+    }
+  });
+
 });
