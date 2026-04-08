@@ -342,7 +342,7 @@ describe("Running statements - FIND", () => {
     expect(abap.console.get()).to.equal("02\n02\n02\n42\n42");
   });
 
-  it.only("FIND, regex start of string", async () => {
+  it("FIND, regex start of string", async () => {
     const code = `
 DATA reg TYPE string.
 DATA str TYPE string.
