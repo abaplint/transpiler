@@ -1,10 +1,9 @@
-/*
-import {templateFormatting} from "../template_formatting";
-import {Character} from "../types";
-*/
 import {ICharacter} from "../types/_character";
 import {Temporal} from "temporal-polyfill";
 import {INumeric} from "../types/_numeric";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 export interface IConvertSource {
   date?: ICharacter | string,
@@ -66,7 +65,9 @@ export function convert(source: IConvertSource, target: IConvertTarget) {
     }
     zone = zone.trimEnd();
   }
+  let utcUsed = false;
   if (zone.trim() === "") {
+    utcUsed = true;
     zone = "UTC";
   }
 
@@ -103,6 +104,12 @@ export function convert(source: IConvertSource, target: IConvertTarget) {
   }
   if (target.time) {
     target.time.set(t);
+  }
+
+  if (utcUsed) {
+    abap.builtin.sy.get().subrc.set(4);
+  } else {
+    abap.builtin.sy.get().subrc.set(0);
   }
 
 }

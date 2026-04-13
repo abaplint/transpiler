@@ -47,6 +47,24 @@ WRITE / lv_time.`;
     expect(abap.console.get()).to.equal("120000");
   });
 
+  it("test 02, empty time zone", async () => {
+    const code = `
+DATA iv_val TYPE p LENGTH 8.
+DATA lv_utc TYPE string.
+DATA lv_date TYPE d.
+DATA lv_time TYPE t.
+iv_val = '20210505120000'.
+CONVERT TIME STAMP iv_val TIME ZONE lv_utc
+  INTO DATE lv_date TIME lv_time.
+ASSERT sy-subrc = 4.
+ASSERT lv_date = '20210505'.
+WRITE / lv_time.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("120000");
+  });
+
   it("initial date and time", async () => {
     const code = `
 DATA lv_timestamp TYPE p LENGTH 8.
