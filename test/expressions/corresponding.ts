@@ -78,4 +78,41 @@ WRITE / data1-bar.`;
     expect(abap.console.get()).to.equal("1\n2");
   });
 
+  it("more CORRESPONDING", async () => {
+    const code = `
+TYPES: BEGIN OF ty_configstatus_st,
+         status TYPE string,
+         text   TYPE string,
+       END OF ty_configstatus_st,
+       ty_configstatus_tt TYPE SORTED TABLE OF ty_configstatus_st WITH UNIQUE KEY status.
+
+FORM run.
+
+  TYPES: BEGIN OF ty_row,
+           low    TYPE string,
+           ddtext TYPE string,
+         END OF ty_row.
+
+  DATA lt_tab TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY.
+
+  INSERT VALUE #(
+    low    = 'hello'
+    ddtext = 'world' ) INTO TABLE lt_tab.
+
+  DATA(lt_confstat) = CORRESPONDING ty_configstatus_tt( lt_tab MAPPING status = low text = ddtext ).
+
+  ASSERT lines( lt_confstat ) = 1.
+  WRITE / lt_confstat[ 1 ]-status.
+  WRITE / lt_confstat[ 1 ]-text.
+
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello\nworld");
+  });
+
 });
