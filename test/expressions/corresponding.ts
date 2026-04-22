@@ -78,7 +78,7 @@ WRITE / data1-bar.`;
     expect(abap.console.get()).to.equal("1\n2");
   });
 
-  it.only("more CORRESPONDING", async () => {
+  it("more CORRESPONDING", async () => {
     const code = `
 TYPES: BEGIN OF ty_configstatus_st,
          status TYPE string,
