@@ -1,7 +1,7 @@
 import {expect} from "chai";
 import {ABAP, MemoryConsole} from "../packages/runtime/src/";
 import {AsyncFunction, runFiles} from "./_utils";
-import {ITranspilerOptions} from "packages/transpiler/src";
+import {ITranspilerOptions} from "../packages/transpiler/src";
 
 let abap: ABAP;
 
