@@ -25,10 +25,16 @@ export class UTCLong implements ICharacter {
     throw new Error("Method not implemented, getOffset(), utcLong");
   }
 
-  public set(_value: INumeric | ICharacter | Hex | string | number) {
-// todo
-    return this;
+public set(value: INumeric | ICharacter | Hex | string | number) {
+  if (typeof value === "string") {
+    this.value = value;
+  } else if (typeof value === "number") {
+    this.value = value + "";
+  } else {
+    this.set(value.get());
   }
+  return this;
+}
 
   public clear(): void {
     this.value = "";
