@@ -15,7 +15,7 @@
     "alwaysStrict": true,
     "target": "es2022",
     "sourceMap": true,
-    "baseUrl": ".",
+    "types": ["mocha", "node"]
   },
   "filesGlob": [
     "./test/**/*.ts",
