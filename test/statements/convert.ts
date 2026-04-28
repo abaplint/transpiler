@@ -8,6 +8,10 @@ async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
 }
 
+async function runV754(contents: string) {
+  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}], {skipVersionCheck: true});
+}
+
 describe("Running statements - CONVERT", () => {
 
   beforeEach(async () => {
@@ -179,4 +183,64 @@ WRITE / lv_timestamp.`;
     expect(abap.console.get()).to.equal("0");
   });
 
+  it("CONVERT UTCLONG to DATE with UTC zone", async () => {
+    const code = `
+DATA lv_date TYPE d.
+DATA lv_utclong TYPE utclong.
+lv_utclong = '2024-01-15 10:30:00.0000000'.
+CONVERT UTCLONG lv_utclong TIME ZONE 'UTC'
+  INTO DATE lv_date.
+WRITE lv_date.`;
+    const js = await runV754(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("20240115");
+  });
+
+  it("CONVERT UTCLONG to DATE and TIME with UTC zone", async () => {
+    const code = `
+DATA lv_date TYPE d.
+DATA lv_time TYPE t.
+DATA lv_utclong TYPE utclong.
+lv_utclong = '2024-01-15 10:30:45.0000000'.
+CONVERT UTCLONG lv_utclong TIME ZONE 'UTC'
+  INTO DATE lv_date TIME lv_time.
+WRITE / lv_date.
+WRITE / lv_time.`;
+    const js = await runV754(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("20240115\n103045");
+  });
+
+  it("CONVERT UTCLONG to DATE with CET zone shifts day", async () => {
+    const code = `
+DATA lv_date TYPE d.
+DATA lv_time TYPE t.
+DATA lv_utclong TYPE utclong.
+lv_utclong = '2024-01-15 23:30:00.0000000'.
+CONVERT UTCLONG lv_utclong TIME ZONE 'CET'
+  INTO DATE lv_date TIME lv_time.
+WRITE / lv_date.
+WRITE / lv_time.`;
+    const js = await runV754(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("20240116\n003000");
+  });
+
+  it("CONVERT UTCLONG initial value clears targets", async () => {
+    const code = `
+DATA lv_date TYPE d.
+DATA lv_time TYPE t.
+DATA lv_utclong TYPE utclong.
+lv_utclong = '0000-00-00 00:00:00.0000000'.
+CONVERT UTCLONG lv_utclong TIME ZONE 'UTC'
+  INTO DATE lv_date TIME lv_time.
+ASSERT lv_date IS INITIAL.
+ASSERT lv_time IS INITIAL.`;
+    const js = await runV754(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
 });

@@ -32,6 +32,13 @@ export class ConvertTranspiler implements IStatementTranspiler {
       target.push("stamp: " + new TargetTranspiler().transpile(stamp, traversal).getCode());
     }
 
+    const utclong = node.findExpressionAfterToken("UTCLONG");
+    if (utclong?.get() instanceof abaplint.Expressions.Source) {
+      source.push("utclong: " + new SourceTranspiler().transpile(utclong, traversal).getCode());
+    } else if (utclong?.get() instanceof abaplint.Expressions.Target) {
+      target.push("utclong: " + new TargetTranspiler().transpile(utclong, traversal).getCode());
+    }
+
     const zone = node.findExpressionAfterToken("ZONE");
     if (zone?.get() instanceof abaplint.Expressions.Source) {
       source.push("zone: " + new SourceTranspiler().transpile(zone, traversal).getCode());
