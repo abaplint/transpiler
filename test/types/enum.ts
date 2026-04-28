@@ -30,7 +30,7 @@ WRITE / foo.`;
     expect(abap.console.get()).to.equal("USE_ALL\nUSE_ALL");
   });
 
-  it.only("basics, in a class", async () => {
+  it("basics, in a class", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
@@ -44,7 +44,8 @@ CLASS lcl IMPLEMENTATION.
 ENDCLASS.
 
 START-OF-SELECTION.
-  ASSERT lcl=>enumvalues-value1 = lcl=>enumvalues-value1.`;
+  ASSERT lcl=>enumvalues-value1 = lcl=>enumvalues-value1.
+  ASSERT lcl=>enumvalues-value1 <> lcl=>enumvalues-value2.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
