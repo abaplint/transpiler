@@ -9,6 +9,7 @@ export interface IConvertSource {
   date?: ICharacter | string,
   time?: ICharacter | string,
   stamp?: ICharacter | INumeric | string,
+  utclong?: ICharacter | string,
   zone: ICharacter | string,
 }
 
@@ -16,6 +17,7 @@ export interface IConvertTarget {
   stamp?: ICharacter,
   date?: ICharacter,
   time?: ICharacter,
+  utclong?: ICharacter,
 }
 
 export function convert(source: IConvertSource, target: IConvertTarget) {
@@ -56,6 +58,16 @@ export function convert(source: IConvertSource, target: IConvertTarget) {
     }
   }
 
+  let utclong = "";
+  if (source.utclong) {
+    if (typeof source.utclong === "string") {
+      utclong = source.utclong;
+    } else {
+      utclong = source.utclong.get() + "";
+    }
+    utclong = utclong.trim();
+  }
+
   let zone = "";
   if (source.zone) {
     if (typeof source.zone === "string") {
@@ -74,7 +86,19 @@ export function convert(source: IConvertSource, target: IConvertTarget) {
 ////////////////////////
 
   let zoned: Temporal.ZonedDateTime | undefined = undefined;
-  if (date !== "" && time !== "") {
+  if (utclong !== "") {
+    if (utclong === "0000-00-00 00:00:00.0000000") {
+      target.date?.clear();
+      target.time?.clear();
+      target.utclong?.clear();
+      return;
+    }
+    const datePart = utclong.substring(0, 10);
+    const timePart = utclong.substring(11, 19);
+    const pt = Temporal.PlainTime.from(timePart);
+    zoned = Temporal.PlainDate.from(datePart).toZonedDateTime({timeZone: "UTC", plainTime: pt});
+    zoned = zoned.withTimeZone(zone);
+  } else if (date !== "" && time !== "") {
     if (date === "00000000" && time === "000000") {
       target.stamp?.clear();
       return;
@@ -104,6 +128,12 @@ export function convert(source: IConvertSource, target: IConvertTarget) {
   }
   if (target.time) {
     target.time.set(t);
+  }
+  if (target.utclong) {
+    const targetDate = zoned.toPlainDate().toString();
+    const targetTime = zoned.toPlainTime().toString().substring(0, 8);
+    const fractionalSeconds = utclong !== "" ? utclong.substring(19) : ".0000000";
+    target.utclong.set(targetDate + " " + targetTime + fractionalSeconds);
   }
 
   if (utcUsed) {
