@@ -3,7 +3,7 @@ import {DatabaseClient, DatabaseCursorCallbacks} from "./db/db";
 import * as RFC from "./rfc";
 
 export class Context {
-  public console: Console;
+  public console?: Console;
 
   public cursorCounter = 0;
   public cursors: {[key: number]: DatabaseCursorCallbacks} = {};

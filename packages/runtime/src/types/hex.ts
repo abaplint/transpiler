@@ -10,7 +10,7 @@ import {Integer8} from "./integer8";
 const REGEXP = /^(?![A-F0-9])/;
 
 export class Hex implements ICharacter {
-  private value: string;
+  private value: string = "";
   private readonly length: number;
   private readonly qualifiedName: string | undefined;
 

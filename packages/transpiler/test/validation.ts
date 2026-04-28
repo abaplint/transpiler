@@ -8,7 +8,7 @@ describe("Validation", () => {
     try {
       await runSingle(abap);
       expect.fail();
-    } catch (e) {
+    } catch (e: any) {
       expect(e.message).to.contain("not found");
     }
   });
@@ -18,7 +18,7 @@ describe("Validation", () => {
 
     try {
       await runSingle(abap);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.message).to.contain("foo");
     }
   });
@@ -29,7 +29,7 @@ describe("Validation", () => {
     try {
       await runSingle(abap);
       expect.fail();
-    } catch (e) {
+    } catch (e: any) {
       expect(e.message).to.contain("allowed");
     }
   });

@@ -7,7 +7,7 @@ import {Float} from "./float";
 import {parse} from "../operators/_parse";
 
 export class Date implements ICharacter {
-  private value: string;
+  private value: string = "";
   private readonly qualifiedName: string | undefined;
 
   public constructor(input?: {qualifiedName?: string}) {

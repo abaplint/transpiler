@@ -8,7 +8,7 @@ import {Chunk} from "../chunk";
 
 export class FieldChainTranspiler implements IExpressionTranspiler {
   private readonly addGet: boolean;
-  private addGetOffset: boolean;
+  private addGetOffset: boolean = false;
 
   public constructor(addGet = false) {
     this.addGet = addGet;

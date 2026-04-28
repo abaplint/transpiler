@@ -13,7 +13,7 @@ const TRIMREGEX = / *$/;
 const initialValues: {[length: number]: string} = {};
 
 export class Character implements ICharacter {
-  private value: string;
+  private value: string = "";
   private constant: boolean = false;
   private readonly length: number;
   private readonly extra: AbstractTypeData | undefined;

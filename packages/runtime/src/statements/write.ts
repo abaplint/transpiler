@@ -32,10 +32,10 @@ export class WriteStatement {
     }
 
     if (options?.skipLine === true) {
-      this.context.console.add("\n");
+      this.context.console?.add("\n");
     } else {
-      if (options?.newLine === true && this.context.console.isEmpty() === false) {
-        this.context.console.add("\n");
+      if (options?.newLine === true && this.context.console?.isEmpty() === false) {
+        this.context.console?.add("\n");
       }
 
       let result = "";
@@ -82,7 +82,7 @@ export class WriteStatement {
           options.target.set(result);
         }
       } else {
-        this.context.console.add(result);
+        this.context.console?.add(result);
       }
 
     }

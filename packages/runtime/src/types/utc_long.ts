@@ -3,7 +3,7 @@ import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 
 export class UTCLong implements ICharacter {
-  private value: string;
+  private value: string = "";
   private readonly qualifiedName: string | undefined;
 
   public constructor(input?: {qualifiedName?: string}) {

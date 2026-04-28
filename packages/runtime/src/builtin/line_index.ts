@@ -10,7 +10,7 @@ export async function line_index(callback: () => Promise<void>): Promise<Integer
   try {
     await callback();
   } catch (error) {
-    if (isLineNotFound(error)) {
+    if (isLineNotFound(error as any)) {
       return abap.IntegerFactory.get(0);
     }
     throw error;

@@ -11,7 +11,7 @@ export async function line_exists(callback: () => Promise<void>): Promise<IChara
   try {
     await callback();
   } catch (error) {
-    if (isLineNotFound(error)) {
+    if (isLineNotFound(error as any)) {
       return abap.builtin.abap_false;
     }
     throw error;

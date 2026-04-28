@@ -6,7 +6,7 @@ import {Float} from ".";
 import {parse} from "../operators/_parse";
 
 export class Time implements ICharacter {
-  private value: string;
+  private value: string = "";
   private readonly qualifiedName: string | undefined;
 
   public constructor(input?: {qualifiedName?: string}) {

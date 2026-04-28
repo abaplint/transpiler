@@ -9,7 +9,7 @@ const initialValues: {[length: number]: string} = {};
 const regexCharacters = /[a-zA-Z]/g;
 
 export class Numc implements ICharacter {
-  private value: string;
+  private value: string = "";
   private readonly length: number;
   private readonly qualifiedName: string | undefined;
 
