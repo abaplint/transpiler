@@ -30,4 +30,25 @@ WRITE / foo.`;
     expect(abap.console.get()).to.equal("USE_ALL\nUSE_ALL");
   });
 
+  it("basics, in a class", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    TYPES: BEGIN OF ENUM ty_foo STRUCTURE enumvalues,
+             value1,
+             value2,
+           END OF ENUM ty_foo STRUCTURE enumvalues.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  ASSERT lcl=>enumvalues-value1 = lcl=>enumvalues-value1.
+  ASSERT lcl=>enumvalues-value1 <> lcl=>enumvalues-value2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
