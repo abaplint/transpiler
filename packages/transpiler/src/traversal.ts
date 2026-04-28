@@ -891,6 +891,26 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
     const val = identifier.getValue();
     let ret = "";
 
+    // abaplint can use this sentinel for enum-like class constants. Synthesize
+    // deterministic member values so the enum fields have distinct runtime values.
+    if (val === "novalueClassAttributeEnum") {
+      const type = identifier.getType();
+      if (type instanceof abaplint.BasicTypes.StructureType) {
+        let index = 0;
+        for (const component of type.getComponents()) {
+          const fieldName = component.name.toLowerCase();
+          ret += Traversal.prefixVariable(name)
+            + ".get()["
+            + JSON.stringify(fieldName)
+            + "].set("
+            + index
+            + ");\n";
+          index++;
+        }
+      }
+      return ret;
+    }
+
     const handle = (val: any, name: string) => {
       if (typeof val === "string") {
         const e = ConstantTranspiler.escape(val);
