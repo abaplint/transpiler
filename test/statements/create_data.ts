@@ -383,7 +383,7 @@ CREATE DATA rdata TYPE ('').`;
     try {
       await f(abap);
       expect.fail();
-    } catch(e) {
+    } catch(e: any) {
       expect(e.toString()).to.contain("CX_SY_CREATE_DATA_ERROR");
     }
   });

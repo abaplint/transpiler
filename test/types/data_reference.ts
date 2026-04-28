@@ -153,7 +153,7 @@ ref = <fs>.`;
     try {
       await f(abap);
       expect.fail();
-    } catch(e) {
+    } catch(e: any) {
       expect(e.toString()).to.contain("GETWA_NOT_ASSIGNED");
     }
   });
@@ -170,7 +170,7 @@ ref = <fs>.`;
     try {
       await f(abap);
       expect.fail();
-    } catch(e) {
+    } catch(e: any) {
       expect(e.toString()).to.contain("OBJECTS_MOVE_NOT_SUPPORTED");
     }
   });

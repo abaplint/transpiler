@@ -88,7 +88,7 @@ WRITE / bar.`;
     try {
       await f(abap);
       expect.fail();
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).to.contain("CX_SY_ZERODIVIDE");
     }
   });

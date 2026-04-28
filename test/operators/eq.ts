@@ -93,7 +93,7 @@ ASSERT 1 = lv_val.`;
     try {
       await f(abap);
       expect.fail();
-    } catch(e) {
+    } catch(e: any) {
       expect(e.toString()).to.contain("CONVT_NO_NUMBER");
     }
   });

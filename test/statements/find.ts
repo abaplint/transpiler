@@ -870,7 +870,7 @@ FIND REGEX 'abc' IN SECTION OFFSET 100 OF lv_str
     try {
       await f(abap);
       expect.fail();
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).to.contain("CX_SY_RANGE_OUT_OF_BOUNDS");
     }
   });

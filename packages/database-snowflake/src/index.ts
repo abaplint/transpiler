@@ -4,7 +4,7 @@ import * as snowflake from "snowflake-sdk";
 
 export class SnowflakeDatabaseClient implements DB.DatabaseClient {
   public readonly name = "snowflake";
-  private connection: snowflake.Connection;
+  private connection?: snowflake.Connection;
   private readonly config: snowflake.ConnectionOptions;
   private readonly trace: boolean | undefined;
 
@@ -27,7 +27,7 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
     });
 
     await new Promise((resolve, reject) =>
-      this.connection.connectAsync((err, conn) => {
+      this.connection?.connectAsync((err, conn) => {
         err ? reject(err) : resolve(conn);
       })
     );
@@ -35,7 +35,7 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
 
   public async disconnect() {
     await new Promise((resolve, reject) =>
-      this.connection.destroy((err, conn) => {
+      this.connection?.destroy((err, conn) => {
         err ? reject(err) : resolve(conn);
       })
     );
@@ -47,7 +47,7 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
         return;
       }
       await new Promise((resolve, reject) =>
-        this.connection.execute({
+        this.connection?.execute({
           sqlText: sql,
           complete: function (err, _stmt, rows) {
             err ? reject(err) : resolve(rows);
@@ -58,7 +58,7 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
           continue;
         }
         await new Promise((resolve, reject) =>
-          this.connection.execute({
+          this.connection?.execute({
             sqlText: s,
             complete: function (err, _stmt, rows) {
               err ? reject(err) : resolve(rows);
@@ -90,7 +90,7 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
       }
 
       const res: any = await new Promise((resolve, _reject) =>
-        this.connection.execute({
+        this.connection?.execute({
           sqlText: sql,
           complete: function (err, stmt, rows) {
             if (err) {
@@ -125,7 +125,7 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
       }
 
       const res: any = await new Promise((resolve, _reject) =>
-        this.connection.execute({
+        this.connection?.execute({
           sqlText: sql,
           complete: function (err, stmt, rows) {
             if (err) {
@@ -161,7 +161,7 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
       }
 
       await new Promise((resolve, _reject) =>
-        this.connection.execute({
+        this.connection?.execute({
           sqlText: sql,
           complete: function (err, stmt, rows) {
             if (err) {
@@ -199,7 +199,7 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
     }
 
     const rows = await new Promise((resolve, _reject) =>
-      this.connection.execute({
+      this.connection?.execute({
         sqlText: options.select,
         complete: function (err, stmt, rows) {
           if (err) {
@@ -220,7 +220,7 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
     const counter = {counter: 0};
 
     return new Promise((resolve, reject) => {
-      this.connection.execute({
+      this.connection?.execute({
         sqlText: options.select,
         streamResult: true,
         complete: function (err, stmt) {

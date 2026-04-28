@@ -59,7 +59,7 @@ UNPACK lv_char4 TO lv_char6.`;
     try {
       await f(abap);
       expect.fail();
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).to.contain("CX_SY_CONVERSION_NO_NUMBER");
     }
   });

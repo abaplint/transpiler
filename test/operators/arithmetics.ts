@@ -362,7 +362,7 @@ WRITE result.`;
     try {
       await f(abap);
       expect.fail();
-    } catch(e) {
+    } catch(e: any) {
       expect(e.toString()).to.contain("COMPUTE_INT_TIMES_OVERFLOW");
     }
   });
@@ -379,7 +379,7 @@ WRITE result.`;
     try {
       await f(abap);
       expect.fail();
-    } catch(e) {
+    } catch(e: any) {
       expect(e.toString()).to.contain("COMPUTE_INT_TIMES_OVERFLOW");
     }
   });

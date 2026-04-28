@@ -505,7 +505,7 @@ WRITE sy-subrc.`;
     try {
       await f(abap);
       expect.fail();
-    } catch(e) {
+    } catch(e: any) {
       expect(e.toString()).to.contain("GETWA_NOT_ASSIGNED");
     }
   });
@@ -521,7 +521,7 @@ ASSIGN dref->* TO <table>.`;
     try {
       await f(abap);
       expect.fail();
-    } catch(e) {
+    } catch(e: any) {
       expect(e.toString()).to.contain("ASSIGN_TYPE_CONFLICT");
     }
   });

@@ -119,7 +119,7 @@ WRITE / tab[ 1 ].`;
     try {
       await f(abap);
       expect.fail();
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).to.contain("CX_SY_ITAB_LINE_NOT_FOUND");
     }
   });

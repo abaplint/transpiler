@@ -74,7 +74,7 @@ describe("Running Examples", () => {
     try {
       await run(code);
       expect.fail();
-    } catch (e) {
+    } catch (e: any) {
       expect(e.message).to.contain("Statement does not exist");
     }
   });
@@ -87,7 +87,7 @@ describe("Running Examples", () => {
     try {
       await run(code);
       expect.fail();
-    } catch (e) {
+    } catch (e: any) {
       expect(e.message).to.contain("Statement does not exist");
     }
   });

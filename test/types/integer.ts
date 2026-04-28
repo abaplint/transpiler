@@ -112,7 +112,7 @@ describe("Running Examples - Integer type", () => {
     try {
       await f(abap);
       expect.fail();
-    } catch(e) {
+    } catch(e: any) {
       expect(e.toString()).to.contain("CX_SY_ARITHMETIC_OVERFLOW");
     }
   });

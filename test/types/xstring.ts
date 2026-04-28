@@ -136,7 +136,7 @@ WRITE xstr+100(1).`;
     try {
       await f(abap);
       expect.fail();
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).to.contain("CX_SY_RANGE_OUT_OF_BOUNDS");
     }
   });
@@ -152,7 +152,7 @@ WRITE xstr+2(3).`;
     try {
       await f(abap);
       expect.fail();
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).to.contain("CX_SY_RANGE_OUT_OF_BOUNDS");
     }
   });

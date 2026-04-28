@@ -111,7 +111,7 @@ START-OF-SELECTION.
     try {
       await f(abap);
       expect.fail();
-    } catch(e) {
+    } catch(e: any) {
       expect(e.toString()).to.contain("Error");
       expect(e.constructor.name).to.contain("lcx");
     }
@@ -136,7 +136,7 @@ START-OF-SELECTION.
     try {
       await f(abap);
       expect.fail();
-    } catch(e) {
+    } catch(e: any) {
       expect(e.toString()).to.contain("Error");
       expect(e.constructor.name).to.contain("lcx");
     }

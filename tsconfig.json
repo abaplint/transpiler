@@ -10,6 +10,7 @@
     "noUnusedParameters": true,
     "noUnusedLocals": true,
     "noImplicitAny": true,
+    "esModuleInterop": true,
     "declaration": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
