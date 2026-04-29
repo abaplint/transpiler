@@ -115,4 +115,41 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("handled");
   });
 
+  it.only("private handler method", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS run.
+    EVENTS foo.
+  PRIVATE SECTION.
+    METHODS handler FOR EVENT foo OF lcl.
+    METHODS raise.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    DATA obj TYPE REF TO lcl.
+    CREATE OBJECT obj.
+    SET HANDLER obj->handler FOR obj.
+    obj->raise( ).
+  ENDMETHOD.
+
+  METHOD raise.
+    RAISE EVENT foo.
+  ENDMETHOD.
+
+  METHOD handler.
+    WRITE / 'hello'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>run( ).`;
+    const js = await run(code);
+    console.log(js);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello");
+  });
+
 });
