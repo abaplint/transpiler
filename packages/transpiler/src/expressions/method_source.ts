@@ -103,7 +103,8 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
         const m = traversal.findMethodReference(nameToken, traversal.findCurrentScopeByToken(nameToken));
         if (i === 0 && m) {
           this.prepend += "this.";
-          if (this.privatePrefix && m.def.getVisibility() === Visibility.Private) {
+          if (this.privatePrefix && m.def.getVisibility() === Visibility.Private
+              && m.def.isStatic() === false) { // todo: this is probably wrong?
             this.prepend += "#";
           }
         }
