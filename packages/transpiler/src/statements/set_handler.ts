@@ -12,9 +12,9 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
     let eventName: string | undefined = undefined;
 
     for (const m of node.findDirectExpressions(abaplint.Expressions.MethodSource)) {
-      let msource = new MethodSourceTranspiler().transpile(m, traversal).getCode().replace("await ", "");
+      const msource = new MethodSourceTranspiler("", true).transpile(m, traversal).getCode().replace("await ", "");
       // fallback to private method,
-      msource = "(" + msource + " || " + msource.replace(/(\w+)$/, "#$1") + ")";
+      // msource = "(" + msource + " || " + msource.replace(/(\w+)$/, "#$1") + ")";
       methods.push(msource + ".bind(this)");
 
       if (eventClass === undefined) {

@@ -119,22 +119,15 @@ START-OF-SELECTION.
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
-    CLASS-METHODS run.
+    METHODS run.
     EVENTS foo.
   PRIVATE SECTION.
     METHODS handler FOR EVENT foo OF lcl.
-    METHODS raise.
 ENDCLASS.
 
 CLASS lcl IMPLEMENTATION.
   METHOD run.
-    DATA obj TYPE REF TO lcl.
-    CREATE OBJECT obj.
-    SET HANDLER obj->handler FOR obj.
-    obj->raise( ).
-  ENDMETHOD.
-
-  METHOD raise.
+    SET HANDLER handler FOR me.
     RAISE EVENT foo.
   ENDMETHOD.
 
@@ -144,7 +137,9 @@ CLASS lcl IMPLEMENTATION.
 ENDCLASS.
 
 START-OF-SELECTION.
-  lcl=>run( ).`;
+  DATA obj TYPE REF TO lcl.
+  CREATE OBJECT obj.
+  obj->run( ).`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
