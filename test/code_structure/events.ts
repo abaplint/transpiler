@@ -115,7 +115,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("handled");
   });
 
-  it.only("private handler method", async () => {
+  it("private handler method", async () => {
     const code = `
 CLASS lcl DEFINITION.
   PUBLIC SECTION.
@@ -146,7 +146,6 @@ ENDCLASS.
 START-OF-SELECTION.
   lcl=>run( ).`;
     const js = await run(code);
-    console.log(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("hello");
