@@ -146,7 +146,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello");
   });
 
-  it.only("private handler method", async () => {
+  it("private handler method", async () => {
     const code = `
 CLASS lclevent DEFINITION.
   PUBLIC SECTION.
