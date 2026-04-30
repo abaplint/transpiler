@@ -23,7 +23,7 @@ export class ModifyDatabaseTranspiler implements IStatementTranspiler {
 
     const from = node.findExpressionAfterToken("FROM");
     if (from && from.get() instanceof abaplint.Expressions.SQLSource) {
-      const tvalues = traversal.traverse(from);
+      const tvalues = traversal.traverseWithTableContext(dbtab.concatTokens(), from);
       options.push(`"values": ` + tvalues.getCode());
     }
 
