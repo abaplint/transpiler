@@ -3,7 +3,7 @@ import * as path from "path";
 import * as glob from "glob";
 import * as childProcess from "child_process";
 import * as os from "os";
-import * as ProgressBar from "progress";
+import ProgressBar from "progress";
 import * as Transpiler from "@abaplint/transpiler";
 import * as abaplint from "@abaplint/core";
 import {TranspilerConfig} from "./config";
@@ -11,7 +11,7 @@ import {FileOperations} from "./file_operations";
 import {ITranspilerConfig} from "./types";
 
 class Progress implements Transpiler.IProgress {
-  private bar: ProgressBar;
+  private bar!: ProgressBar;
 
   public set(total: number, _text: string) {
     this.bar = new ProgressBar(":percent - :elapseds - :text", {total, renderThrottle: 100});

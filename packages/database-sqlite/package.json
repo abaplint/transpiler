@@ -24,6 +24,6 @@
     "@types/sql.js": "^1.4.9",
     "@types/node": "^22.18.1",
     "@abaplint/runtime": "^2.11.78",
-    "typescript": "^5.9.2"
+    "typescript": "^6.0.3"
   }
 }

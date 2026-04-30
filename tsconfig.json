@@ -10,12 +10,18 @@
     "noUnusedLocals": true,
     "noImplicitAny": true,
     "declaration": true,
+    "useUnknownInCatchVariables": false,
+    "strictPropertyInitialization": false,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "alwaysStrict": true,
     "target": "es2022",
     "sourceMap": true,
-    "baseUrl": "."
+    "types": [
+      "node",
+      "mocha",
+      "chai"
+    ]
   },
   "filesGlob": [
     "./test/**/*.ts",

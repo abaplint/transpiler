@@ -14,7 +14,12 @@
       "strictFunctionTypes": true,
       "alwaysStrict": true,
       "target": "es2017",
-      "sourceMap": true
+      "sourceMap": true,
+      "types": [
+          "node",
+          "mocha",
+          "chai"
+      ]
       },
   "filesGlob": [
       "./**/*.ts"
