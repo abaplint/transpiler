@@ -130,11 +130,6 @@ export class Traversal {
     return undefined;
   }
 
-
-  public setSQLInferredType(type: abaplint.AbstractType): void {
-    this.sqlInferredType = type;
-  }
-
   public getSQLInferredType(): abaplint.AbstractType | undefined {
     return this.sqlInferredType;
   }
