@@ -561,7 +561,7 @@ ASSERT sy-subrc = 0.`;
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
-      expect(abap.console.get().trim).to.equal("0inserted inline");
+      expect(abap.console.get().trim()).to.equal("0inserted inline");
     }, {snowflake: false});
   });
 
