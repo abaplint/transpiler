@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import {Nodes, Expressions, Tokens} from "@abaplint/core";
+import {Nodes, Expressions, Tokens, Visibility} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
@@ -7,9 +7,11 @@ import {FieldChainTranspiler} from ".";
 
 export class MethodSourceTranspiler implements IExpressionTranspiler {
   private prepend: string;
+  private readonly privatePrefix: boolean;
 
-  public constructor(prepend?: string) {
+  public constructor(prepend?: string, privatePrefix = false) {
     this.prepend = (prepend || "") + "await ";
+    this.privatePrefix = privatePrefix;
   }
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
@@ -101,6 +103,10 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
         const m = traversal.findMethodReference(nameToken, traversal.findCurrentScopeByToken(nameToken));
         if (i === 0 && m) {
           this.prepend += "this.";
+          if (this.privatePrefix && m.def.getVisibility() === Visibility.Private
+              && m.def.isStatic() === false) { // todo: this is probably wrong?
+            this.prepend += "#";
+          }
         }
 
         call += traversal.traverse(child).getCode();

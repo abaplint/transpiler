@@ -115,4 +115,63 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("handled");
   });
 
+  it("private handler method", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS run.
+    EVENTS foo.
+  PRIVATE SECTION.
+    METHODS handler FOR EVENT foo OF lcl.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    SET HANDLER handler FOR me.
+    RAISE EVENT foo.
+  ENDMETHOD.
+
+  METHOD handler.
+    WRITE / 'hello'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA obj TYPE REF TO lcl.
+  CREATE OBJECT obj.
+  obj->run( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello");
+  });
+
+  it("private handler method", async () => {
+    const code = `
+CLASS lclevent DEFINITION.
+  PUBLIC SECTION.
+    EVENTS link_click.
+ENDCLASS.
+CLASS lclevent IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS run.
+  PRIVATE SECTION.
+    CLASS-METHODS on_link_click FOR EVENT link_click OF lclevent.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    DATA lo_event TYPE REF TO lclevent.
+    SET HANDLER on_link_click FOR lo_event.
+  ENDMETHOD.
+  METHOD on_link_click.
+  ENDMETHOD.
+ENDCLASS.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
