@@ -11,6 +11,12 @@ export class TypeNameOrInfer implements IExpressionTranspiler {
     const type = traversal.lookupInferred(node, scope);
 
     if (type === undefined) {
+        if (node.concatTokens() === "#") {
+      const sqlType = traversal.getSQLInferredType();
+      if (sqlType !== undefined) {
+        return sqlType;
+      }
+    }
       throw new Error("TypeNameOrInfer, type not found: " + node.concatTokens() + ", " + traversal.getCurrentObject().getName() + " line " + node.getFirstToken().getStart().getRow());
     }
 
