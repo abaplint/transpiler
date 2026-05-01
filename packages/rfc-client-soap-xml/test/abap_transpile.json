@@ -2,13 +2,20 @@
   "input_folder": "test/abap",
   "input_filter": [],
   "output_folder": "output",
-  "lib": "https://github.com/open-abap/open-abap",
+  "libs": [
+    {
+      "url": "https://github.com/open-abap/open-abap-core"
+    }
+  ],
   "write_unit_tests": true,
   "write_source_map": true,
   "options": {
     "ignoreSyntaxCheck": false,
     "addFilenames": true,
-    "extraSetup": "../test/extra.mjs",
+    "setup": {
+      "filename": "../test/extra.mjs",
+      "preFunction": "setup"
+    },
     "addCommonJS": true
   }
 }

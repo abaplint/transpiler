@@ -1,4 +1,3 @@
-import fetch from "cross-fetch";
 import {XMLParser} from "fast-xml-parser";
 import * as runtime from "@abaplint/runtime";
 

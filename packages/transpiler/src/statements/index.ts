@@ -129,6 +129,7 @@ export * from "./set_language";
 export * from "./set_locale";
 export * from "./set_parameter";
 export * from "./set_pf_status";
+export * from "./generate_subroutine";
 export * from "./set_screen";
 export * from "./set_titlebar";
 export * from "./shift";
