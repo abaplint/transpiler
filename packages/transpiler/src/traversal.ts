@@ -15,6 +15,7 @@ export class Traversal {
   private readonly spaghetti: abaplint.ISpaghettiScope;
   private readonly file: abaplint.ABAPFile;
   private readonly obj: abaplint.ABAPObject;
+  private sqlInferredType: abaplint.AbstractType | undefined;
   public readonly reg: abaplint.IRegistry;
   public readonly options: ITranspilerOptions | undefined;
 
@@ -128,6 +129,18 @@ export class Traversal {
 
     return undefined;
   }
+
+  public getSQLInferredType(): abaplint.AbstractType | undefined {
+    return this.sqlInferredType;
+  }
+
+  public traverseWithTableContext(tableName: string, expressionNode: abaplint.Nodes.ExpressionNode): Chunk {
+    const tabl = this.reg.getObject("TABL", tableName) as abaplint.Objects.Table | undefined;
+    this.sqlInferredType = tabl?.parseType(this.reg);
+    const result = this.traverse(expressionNode);
+    this.sqlInferredType = undefined;
+    return result;
+}
 
   public getInterfaceDefinition(token: abaplint.Token): abaplint.IInterfaceDefinition | undefined {
     let scope = this.findCurrentScopeByToken(token);
