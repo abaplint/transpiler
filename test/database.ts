@@ -544,6 +544,27 @@ ASSERT sy-subrc = 0.`;
     });
   });
 
+  it("INSERT with VALUE # inline", async () => {
+    const code = `
+      INSERT t100 FROM @( VALUE #( sprsl = 'E' 
+                                  arbgb = 'INSERT_TEST' 
+                                  msgnr = '999' 
+                                  text = 'inserted inline' ) ).
+      WRITE sy-subrc.
+      
+      " Read it back to verify
+      DATA ls_check TYPE t100.
+      SELECT SINGLE * FROM t100 INTO @ls_check WHERE arbgb = 'INSERT_TEST'.
+      WRITE ls_check-text.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trim()).to.equal("0inserted inline");
+    }, {snowflake: false});
+  });
+
   it("INSERT FROM, escape ampersand", async () => {
     const code = `
     DATA ls_t100 TYPE t100.
@@ -754,6 +775,27 @@ ASSERT sy-subrc = 0.`;
       expect(abap.console.get()).to.equal("00");
     }, {snowflake: false});
   });
+
+  it("MODIFY with VALUE # inline", async () => {
+  const code = `
+    MODIFY t100 FROM @( VALUE #( sprsl = 'E' 
+                                 arbgb = 'TEST' 
+                                 msgnr = '001' 
+                                 text = 'inline value' ) ).
+    WRITE sy-subrc.
+    
+    " Now read it back to verify it worked
+    DATA ls_check TYPE t100.
+    SELECT SINGLE * FROM t100 INTO @ls_check WHERE arbgb = 'TEST'.
+    WRITE ls_check-text.`;
+  const files = [
+    {filename: "zfoobar.prog.abap", contents: code},
+    {filename: "t100.tabl.xml", contents: tabl_t100xml},
+    {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+  await runAllDatabases(abap, files, () => {
+    expect(abap.console.get().trim()).to.equal("0inline value");
+  }, {snowflake: false});
+});
 
   it("INSERT FROM TABLE", async () => {
     const code = `
