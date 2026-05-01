@@ -6,7 +6,12 @@ import {SnowflakeDatabaseClient} from "../packages/database-snowflake/src";
 import * as abaplint from "@abaplint/core";
 import * as crypto from "node:crypto";
 import {IFile, ITranspilerOptions} from "../packages/transpiler/src/types";
-import "dotenv/config";
+
+try {
+  process.loadEnvFile();
+} catch {
+  // ignore
+}
 
 // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AsyncFunction
 // eslint-disable-next-line @typescript-eslint/no-empty-function

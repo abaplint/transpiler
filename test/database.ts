@@ -3,7 +3,12 @@ import {AsyncFunction, runFiles as runRilesSqlite, runFilesPostgres, runFilesSno
 import {ABAP, MemoryConsole} from "../packages/runtime/src/";
 import {msag_escape, msag_zag_unit_test, tabl_t100xml, zquan, zt111, zt222} from "./_data";
 import {IFile} from "../packages/transpiler/src/types";
-import "dotenv/config";
+
+try {
+  process.loadEnvFile();
+} catch {
+  // ignore
+}
 
 async function runAllDatabases(abap: ABAP,
                                files: IFile[],
@@ -546,12 +551,12 @@ ASSERT sy-subrc = 0.`;
 
   it("INSERT with VALUE # inline", async () => {
     const code = `
-      INSERT t100 FROM @( VALUE #( sprsl = 'E' 
-                                  arbgb = 'INSERT_TEST' 
-                                  msgnr = '999' 
+      INSERT t100 FROM @( VALUE #( sprsl = 'E'
+                                  arbgb = 'INSERT_TEST'
+                                  msgnr = '999'
                                   text = 'inserted inline' ) ).
       WRITE sy-subrc.
-      
+
       " Read it back to verify
       DATA ls_check TYPE t100.
       SELECT SINGLE * FROM t100 INTO @ls_check WHERE arbgb = 'INSERT_TEST'.
@@ -778,12 +783,12 @@ ASSERT sy-subrc = 0.`;
 
   it("MODIFY with VALUE # inline", async () => {
   const code = `
-    MODIFY t100 FROM @( VALUE #( sprsl = 'E' 
-                                 arbgb = 'TEST' 
-                                 msgnr = '001' 
+    MODIFY t100 FROM @( VALUE #( sprsl = 'E'
+                                 arbgb = 'TEST'
+                                 msgnr = '001'
                                  text = 'inline value' ) ).
     WRITE sy-subrc.
-    
+
     " Now read it back to verify it worked
     DATA ls_check TYPE t100.
     SELECT SINGLE * FROM t100 INTO @ls_check WHERE arbgb = 'TEST'.
