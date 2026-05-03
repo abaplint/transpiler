@@ -18,7 +18,7 @@ describe("Running statements - RETURN", () => {
     const code = `
 CLASS LCL DEFINITION.
   PUBLIC SECTION.
-    METHODS MAIN RETURNING VALUE(RESULT) TYPE I.
+    class-METHODS MAIN RETURNING VALUE(RESULT) TYPE I.
 ENDCLASS.
 
 CLASS LCL IMPLEMENTATION.
@@ -28,7 +28,8 @@ CLASS LCL IMPLEMENTATION.
 ENDCLASS.
 
 start-of-selection.
-  DATA(RESULT) = LCL=>MAIN( ).
+  data result type i.
+  RESULT = LCL=>MAIN( ).
   WRITE / RESULT.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
