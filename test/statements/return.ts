@@ -14,7 +14,7 @@ describe("Running statements - RETURN", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
-  it.only("basic", async () => {
+  it("basic", async () => {
     const code = `
 CLASS LCL DEFINITION.
   PUBLIC SECTION.
