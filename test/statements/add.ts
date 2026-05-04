@@ -25,4 +25,30 @@ describe("Running statements - ADD", () => {
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("empty strings", async () => {
+    const code = `
+DATA val1 TYPE string.
+DATA val2 TYPE string.
+DATA float TYPE f.
+val1 = '0'.
+float = val1 + val2.
+ASSERT float = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("empty chars", async () => {
+    const code = `
+DATA val1 TYPE c LENGTH 10.
+DATA val2 TYPE c LENGTH 10.
+DATA float TYPE f.
+val1 = '0'.
+float = val1 + val2.
+ASSERT float = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

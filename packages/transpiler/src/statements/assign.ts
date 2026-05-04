@@ -7,11 +7,29 @@ import {Chunk} from "../chunk";
 
 export class AssignTranspiler implements IStatementTranspiler {
 
+  private tableExpressionSafeSource(node: abaplint.Nodes.ExpressionNode | undefined, code: string): string {
+    if (node?.findFirstExpression(abaplint.Expressions.TableExpression) === undefined) {
+      return code;
+    }
+
+    return `(await (async () => {
+  try {
+    return ${code};
+  } catch (error) {
+    if (abap.isLineNotFound(error)) {
+      return undefined;
+    }
+    throw error;
+  }
+})())`;
+  }
+
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const assignSource = node.findDirectExpression(abaplint.Expressions.AssignSource);
 
-    const sources = assignSource?.findDirectExpressionsMulti([abaplint.Expressions.Source,abaplint.Expressions.SimpleSource3]).map(
-      e => new SourceTranspiler(false).transpile(e, traversal).getCode()) || [];
+    const sourceExpressions = assignSource?.findDirectExpressionsMulti([abaplint.Expressions.Source,abaplint.Expressions.SimpleSource3]) || [];
+    const sources = sourceExpressions.map(
+      e => this.tableExpressionSafeSource(e, new SourceTranspiler(false).transpile(e, traversal).getCode()));
 
     let fsTarget = node.findDirectExpression(abaplint.Expressions.FSTarget);
     if (fsTarget?.getFirstChild()?.get() instanceof abaplint.Expressions.InlineFS) {
@@ -30,8 +48,7 @@ export class AssignTranspiler implements IStatementTranspiler {
     if (sources.length !== 0
         && assignSource?.findDirectExpression(abaplint.Expressions.Dynamic) === undefined) {
       // Check for struct-(var) pattern: dynamic component access via FieldLength after -
-      const sourceExprForCheck = assignSource?.findDirectExpressionsMulti(
-        [abaplint.Expressions.Source, abaplint.Expressions.SimpleSource3])[0];
+      const sourceExprForCheck = sourceExpressions[0];
       const fieldChainForCheck = sourceExprForCheck?.findFirstExpression(abaplint.Expressions.FieldChain);
       const fcChildren = fieldChainForCheck?.getChildren() ?? [];
       const lastFC = fcChildren[fcChildren.length - 1];

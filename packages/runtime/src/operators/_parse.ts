@@ -7,10 +7,13 @@ export function parse(val: INumeric | ICharacter | string | number | Float | Int
   if (typeof val === "number") {
     return val;
   } else if (typeof val === "string") {
-    if (val.includes(".")) {
-      return parseFloat(val);
+    const trimmed = val.trim();
+    if (trimmed === "") {
+      return 0;
+    } else if (trimmed.includes(".")) {
+      return parseFloat(trimmed);
     } else {
-      return parseInt(val, 10);
+      return parseInt(trimmed, 10);
     }
   } else if (val instanceof Integer) {
     // optimize, as this is the most common case

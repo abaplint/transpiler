@@ -7,6 +7,8 @@ import {UniqueIdentifier} from "../unique_identifier";
 export class ReturnTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
+    const source = node.findDirectExpression(abaplint.Expressions.Source);
+
     let extra = "";
     const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
     const vars = scope?.getData().vars;
@@ -25,6 +27,15 @@ export class ReturnTranspiler implements IStatementTranspiler {
     if (scope?.getIdentifier().stype === abaplint.ScopeType.Method
         && scope?.getIdentifier().sname.toLowerCase() === "constructor") {
       extra = " this";
+    }
+
+    // RETURN <source> assigns to the RETURNING parameter and exits immediately.
+    if (source && extra !== " this") {
+      return new Chunk().append(pre
+        + extra.trimStart()
+        + `.set(${traversal.traverse(source).getCode()});\nreturn`
+        + extra
+        + ";", node, traversal);
     }
 
     return new Chunk().append(pre + "return" + extra + ";", node, traversal);
