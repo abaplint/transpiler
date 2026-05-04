@@ -110,9 +110,6 @@ export class Structure {
         if (this.value[key2] === undefined) {
           break;
         }
-
-// this.value[key2].set(obj[key1]);
-
         // todo: can clone() be removed? might be needed for like Structure and Tables?
         this.value[key2].set(obj[key1].clone());
       }
