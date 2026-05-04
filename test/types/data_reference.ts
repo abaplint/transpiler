@@ -525,6 +525,38 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("g");
   });
 
+  it("structure assignment shallow copies REF TO data", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         payload TYPE REF TO data,
+       END OF ty.
+DATA lv_payload TYPE string.
+DATA lr_payload TYPE REF TO data.
+DATA source TYPE ty.
+DATA target TYPE ty.
+FIELD-SYMBOLS <payload> TYPE any.
+
+lv_payload = 'before'.
+GET REFERENCE OF lv_payload INTO lr_payload.
+source-payload = lr_payload.
+
+target = source.
+CLEAR source-payload.
+lv_payload = 'after'.
+
+ASSERT target-payload = lr_payload.
+ASSIGN target-payload->* TO <payload>.
+WRITE / <payload>.
+
+IF source-payload IS INITIAL.
+  WRITE / 'source cleared'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("after\nsource cleared");
+  });
+
   it("deep structure assignment keeps REF TO data shallow", async () => {
     const code = `
 TYPES: BEGIN OF ty_child,
