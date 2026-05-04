@@ -654,4 +654,117 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("after\nafter\n600\n12");
   });
 
+  it("repeated deep structure insert keeps shared REF TO data payload shallow", async () => {
+    const code = `
+TYPES: BEGIN OF ty_payload_row,
+         text TYPE string,
+       END OF ty_payload_row.
+TYPES ty_payload_rows TYPE STANDARD TABLE OF ty_payload_row WITH DEFAULT KEY.
+TYPES: BEGIN OF ty_payload,
+         marker TYPE string,
+         rows   TYPE ty_payload_rows,
+       END OF ty_payload.
+TYPES: BEGIN OF ty_child,
+         name    TYPE string,
+         payload TYPE REF TO data,
+       END OF ty_child.
+TYPES ty_children TYPE STANDARD TABLE OF ty_child WITH DEFAULT KEY.
+TYPES: BEGIN OF ty_parent_data,
+         id       TYPE i,
+         children TYPE ty_children,
+       END OF ty_parent_data.
+
+CLASS lcl_parent DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor
+      IMPORTING
+        iv_id      TYPE i
+        ir_payload TYPE REF TO data.
+    METHODS get_data_generic
+      IMPORTING
+        iv_deep TYPE abap_bool
+      RETURNING
+        VALUE(rs_data) TYPE ty_parent_data.
+  PRIVATE SECTION.
+    DATA mv_id TYPE i.
+    DATA mr_payload TYPE REF TO data.
+ENDCLASS.
+
+CLASS lcl_parent IMPLEMENTATION.
+  METHOD constructor.
+    mv_id = iv_id.
+    mr_payload = ir_payload.
+  ENDMETHOD.
+
+  METHOD get_data_generic.
+    DATA ls_child TYPE ty_child.
+
+    rs_data-id = mv_id.
+    IF iv_deep = abap_true.
+      DO 20 TIMES.
+        ls_child-name = |{ mv_id }/{ sy-index }|.
+        ls_child-payload = mr_payload.
+        INSERT ls_child INTO TABLE rs_data-children.
+      ENDDO.
+    ENDIF.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lr_payload TYPE REF TO data.
+  DATA ls_payload_row TYPE ty_payload_row.
+  DATA lo_parent TYPE REF TO lcl_parent.
+  DATA lt_parents TYPE STANDARD TABLE OF REF TO lcl_parent WITH DEFAULT KEY.
+  DATA lt_result TYPE STANDARD TABLE OF ty_parent_data WITH DEFAULT KEY.
+  DATA ls_result TYPE ty_parent_data.
+  DATA ls_child TYPE ty_child.
+  FIELD-SYMBOLS <payload> TYPE ty_payload.
+  FIELD-SYMBOLS <stored_payload> TYPE ty_payload.
+
+  CREATE DATA lr_payload TYPE ty_payload.
+  ASSIGN lr_payload->* TO <payload>.
+  <payload>-marker = 'before'.
+
+  DO 200 TIMES.
+    ls_payload_row-text = repeat( val = |payload-{ sy-index }| occ = 40 ).
+    INSERT ls_payload_row INTO TABLE <payload>-rows.
+  ENDDO.
+
+  DO 50 TIMES.
+    CREATE OBJECT lo_parent
+      EXPORTING
+        iv_id = sy-index
+        ir_payload = lr_payload.
+    INSERT lo_parent INTO TABLE lt_parents.
+  ENDDO.
+
+  DO 40 TIMES.
+    LOOP AT lt_parents INTO lo_parent.
+      ls_result = lo_parent->get_data_generic( iv_deep = abap_true ).
+      INSERT ls_result INTO TABLE lt_result.
+    ENDLOOP.
+  ENDDO.
+
+  <payload>-marker = 'after'.
+
+  READ TABLE lt_result INDEX 1 INTO ls_result.
+  READ TABLE ls_result-children INDEX 1 INTO ls_child.
+  ASSERT ls_child-payload = lr_payload.
+  ASSIGN ls_child-payload->* TO <stored_payload>.
+  WRITE / <stored_payload>-marker.
+  WRITE / lines( <stored_payload>-rows ).
+
+  READ TABLE lt_result INDEX lines( lt_result ) INTO ls_result.
+  READ TABLE ls_result-children INDEX lines( ls_result-children ) INTO ls_child.
+  ASSERT ls_child-payload = lr_payload.
+  ASSIGN ls_child-payload->* TO <stored_payload>.
+  WRITE / <stored_payload>-marker.
+  WRITE / lines( lt_result ).
+  WRITE / lines( ls_result-children ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("after\n200\nafter\n2000\n20");
+  });
+
 });
