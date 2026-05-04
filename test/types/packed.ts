@@ -295,7 +295,7 @@ ASSERT foo IS INITIAL.`;
     expect(abap.console.get()).to.include("1000");
   });
 
-  it.only("test convert", async () => {
+  it("test convert", async () => {
     const code = `
 TYPES: BEGIN OF ty_delivery_line,
          qty  TYPE string,
