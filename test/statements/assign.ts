@@ -926,4 +926,22 @@ ASSERT <fs> IS NOT ASSIGNED.`;
     await f(abap);
   });
 
+  it("ASSIGN, table expression should not throw", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         code TYPE i,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH EMPTY KEY.
+FIELD-SYMBOLS <fs> LIKE LINE OF tab.
+INSERT VALUE #( code = 1 ) INTO TABLE tab.
+ASSIGN tab[ code = 1 ] TO <fs>.
+WRITE / sy-subrc.
+ASSIGN tab[ code = 2 ] TO <fs>.
+WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("0\n4");
+  });
+
 });
