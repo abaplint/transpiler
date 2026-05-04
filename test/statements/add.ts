@@ -25,7 +25,7 @@ describe("Running statements - ADD", () => {
     expect(abap.console.get()).to.equal("2");
   });
 
-  it.only("empty strings", async () => {
+  it("empty strings", async () => {
     const code = `
 DATA val1 TYPE string.
 DATA val2 TYPE string.
