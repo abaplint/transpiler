@@ -4,6 +4,10 @@ import {INumeric} from "../types/_numeric";
 import {String} from "../types/string";
 import {parse} from "./_parse";
 
+function isIntegerCharacter(value: String | Character): boolean {
+  return value.get().trim().length > 0 && Number.isInteger(Number(value.get()));
+}
+
 export function add(left: INumeric | ICharacter | string | number | Float | Integer | Hex | FieldSymbol,
                     right: INumeric | ICharacter | string | number  | Float | Integer | Hex | FieldSymbol): Integer | Integer8 | Float {
 
@@ -18,10 +22,15 @@ export function add(left: INumeric | ICharacter | string | number | Float | Inte
   } else if (typeof right === "number" && Number.isInteger(right) && left instanceof Integer) {
     return new Integer().set(left.get() + right);
 
-  } else if ((left instanceof String || left instanceof Character) && Number.isInteger(Number(left.get())) && right instanceof Integer) {
+  } else if ((left instanceof String || left instanceof Character) && isIntegerCharacter(left) && right instanceof Integer) {
     return new Integer().set(Number.parseInt(left.get(), 10) + right.get());
-  } else if ((right instanceof String || right instanceof Character) && Number.isInteger(Number(right)) && left instanceof Integer) {
+  } else if ((right instanceof String || right instanceof Character) && isIntegerCharacter(right) && left instanceof Integer) {
     return new Integer().set(left.get() + Number.parseInt(right.get(), 10));
+  } else if ((left instanceof String || left instanceof Character)
+      && (right instanceof String || right instanceof Character)
+      && isIntegerCharacter(left)
+      && isIntegerCharacter(right)) {
+    return new Integer().set(Number.parseInt(left.get(), 10) + Number.parseInt(right.get(), 10));
   } else if (left instanceof Integer8) {
     if (right instanceof Integer8) {
       return new Integer8().set(left.get() + right.get());

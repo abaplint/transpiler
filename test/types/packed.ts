@@ -295,4 +295,32 @@ ASSERT foo IS INITIAL.`;
     expect(abap.console.get()).to.include("1000");
   });
 
+  it("test convert", async () => {
+    const code = `
+TYPES: BEGIN OF ty_delivery_line,
+         qty  TYPE string,
+       END OF ty_delivery_line.
+
+DATA lt_input TYPE STANDARD TABLE OF ty_delivery_line WITH EMPTY KEY.
+DATA ls_line TYPE ty_delivery_line.
+
+APPEND VALUE #( qty = '1' ) TO lt_input.
+
+ls_line-qty = 0.
+
+field-symbols <ls_input> like line of lt_input.
+LOOP AT lt_input ASSIGNING <ls_input>.
+  ls_line-qty = ls_line-qty + <ls_input>-qty.
+ENDLOOP.
+
+TYPES lfimg TYPE p LENGTH 10 DECIMALS 2.
+data lv_qty type lfimg.
+lv_qty = CONV lfimg( ls_line-qty ).
+WRITE: / |Converted quantity: { lv_qty }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.include("Converted quantity: 1.00");
+  });
+
 });

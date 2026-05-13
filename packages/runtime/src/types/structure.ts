@@ -98,6 +98,9 @@ export class Structure {
     } else if (input instanceof Table) {
       throw new Error("Structure, input is a table");
     } else if (input instanceof Structure) {
+      if (input === this) {
+        return this;
+      }
       const obj = input.get();
       const keys1 = Object.keys(obj);
       const keys2 = Object.keys(this.value);
