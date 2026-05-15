@@ -311,7 +311,9 @@ ENDINTERFACE.`;
     ]);
 
     expect(result.databaseSetup.insert).to.include(
-      `INSERT INTO "tadir" ("pgmid", "object", "obj_name", "devclass") VALUES ('R3TR', 'PROG', 'ZFOO', '$TMP');`);
+      `INSERT INTO "tadir" ("pgmid", "object", "obj_name", "devclass", "korrnum", ` +
+      `"srcsystem", "delflag", "genflag", "edtflag", "masterlang")
+      VALUES ('R3TR', 'PROG', 'ZFOO', '$TMP', '', 'ABC', '', '', '', 'E');`);
   });
 
   it("skip populate TADIR", async () => {

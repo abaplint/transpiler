@@ -164,7 +164,8 @@ export class PopulateTables {
 
     const type = obj.getType().toUpperCase();
     const name = obj.getName().toUpperCase();
-    return `INSERT INTO "tadir" ("pgmid", "object", "obj_name", "devclass") VALUES ('R3TR', '${type}', '${this.escape(name)}', '$TMP');`;
+    return `INSERT INTO "tadir" ("pgmid", "object", "obj_name", "devclass", "korrnum", "srcsystem", "delflag", "genflag", "edtflag", "masterlang")
+      VALUES ('R3TR', '${type}', '${this.escape(name)}', '$TMP', '', 'ABC', '', '', '', 'E');`;
   }
 
   public insertWWWPARAMS(obj: abaplint.Objects.WebMIME): string[] {
