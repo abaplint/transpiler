@@ -8,6 +8,7 @@ export class PopulateTables {
   private readonly hasSEOSUBCOTX: boolean;
   private readonly hasT000: boolean;
   private readonly hasT100: boolean;
+  private readonly hasTADIR: boolean;
   private readonly hasWWWPARAMS: boolean;
 
   public constructor(reg: abaplint.IRegistry) {
@@ -17,6 +18,7 @@ export class PopulateTables {
     this.hasSEOSUBCOTX = reg.getObject("TABL", "SEOSUBCOTX") !== undefined;
     this.hasT000 = reg.getObject("TABL", "T000") !== undefined;
     this.hasT100 = reg.getObject("TABL", "T100") !== undefined;
+    this.hasTADIR = reg.getObject("TABL", "TADIR") !== undefined;
     this.hasWWWPARAMS = reg.getObject("TABL", "WWWPARAMS") !== undefined;
   }
 
@@ -153,6 +155,16 @@ export class PopulateTables {
 
     // todo, this should take the client number from the json abap_transpile.json settings
     return `INSERT INTO t000 ("mandt", "cccategory", "ccnocliind") VALUES ('123', '', '');`;
+  }
+
+  public insertTADIR(obj: abaplint.IObject): string {
+    if (!this.hasTADIR) {
+      return "";
+    }
+
+    const type = obj.getType().toUpperCase();
+    const name = obj.getName().toUpperCase();
+    return `INSERT INTO "tadir" ("pgmid", "object", "obj_name", "devclass") VALUES ('R3TR', '${type}', '${this.escape(name)}', '$TMP');`;
   }
 
   public insertWWWPARAMS(obj: abaplint.Objects.WebMIME): string[] {
