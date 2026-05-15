@@ -59,6 +59,10 @@ export class DatabaseSetup {
     const populateTables = new PopulateTables(this.reg);
     // INSERT data
     for (const obj of this.reg.getObjects()) {
+      if (options?.populateTables?.tadir !== false) {
+        insert.push(populateTables.insertTADIR(obj));
+      }
+
       if (obj instanceof abaplint.Objects.MessageClass) {
         insert.push(...populateTables.insertT100(obj));
       } else if (options?.populateTables?.wwwparams !== false

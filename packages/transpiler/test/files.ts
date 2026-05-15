@@ -1,13 +1,19 @@
 import {expect} from "chai";
 import {Transpiler} from "../src";
 import * as abaplint from "@abaplint/core";
-import {IFile} from "../src/types";
+import {IFile, ITranspilerOptions} from "../src/types";
 
 async function runFiles(files: IFile[]) {
   const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
   const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
   const res = await new Transpiler().run(reg);
   return res.objects;
+}
+
+async function runResult(files: IFile[], options?: ITranspilerOptions) {
+  const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
+  const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
+  return new Transpiler(options).run(reg);
 }
 
 const t000 = `<?xml version="1.0" encoding="utf-8"?>
@@ -66,6 +72,85 @@ const t000 = `<?xml version="1.0" encoding="utf-8"?>
      <INTLEN>000002</INTLEN>
      <DATATYPE>CHAR</DATATYPE>
      <LENG>000001</LENG>
+     <MASK>  CHAR</MASK>
+    </DD03P>
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
+const tadir = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V>
+    <TABNAME>TADIR</TABNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <TABCLASS>TRANSP</TABCLASS>
+    <DDTEXT>TADIR</DDTEXT>
+    <CONTFLAG>A</CONTFLAG>
+    <EXCLASS>1</EXCLASS>
+   </DD02V>
+   <DD09L>
+    <TABNAME>TADIR</TABNAME>
+    <AS4LOCAL>A</AS4LOCAL>
+    <TABKAT>0</TABKAT>
+    <TABART>APPL0</TABART>
+    <BUFALLOW>N</BUFALLOW>
+   </DD09L>
+   <DD03P_TABLE>
+    <DD03P>
+     <TABNAME>TADIR</TABNAME>
+     <FIELDNAME>PGMID</FIELDNAME>
+     <DDLANGUAGE>E</DDLANGUAGE>
+     <POSITION>0001</POSITION>
+     <KEYFLAG>X</KEYFLAG>
+     <ADMINFIELD>0</ADMINFIELD>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000008</INTLEN>
+     <NOTNULL>X</NOTNULL>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000004</LENG>
+     <MASK>  CHAR</MASK>
+    </DD03P>
+    <DD03P>
+     <TABNAME>TADIR</TABNAME>
+     <FIELDNAME>OBJECT</FIELDNAME>
+     <DDLANGUAGE>E</DDLANGUAGE>
+     <POSITION>0002</POSITION>
+     <KEYFLAG>X</KEYFLAG>
+     <ADMINFIELD>0</ADMINFIELD>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000008</INTLEN>
+     <NOTNULL>X</NOTNULL>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000004</LENG>
+     <MASK>  CHAR</MASK>
+    </DD03P>
+    <DD03P>
+     <TABNAME>TADIR</TABNAME>
+     <FIELDNAME>OBJ_NAME</FIELDNAME>
+     <DDLANGUAGE>E</DDLANGUAGE>
+     <POSITION>0003</POSITION>
+     <KEYFLAG>X</KEYFLAG>
+     <ADMINFIELD>0</ADMINFIELD>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000080</INTLEN>
+     <NOTNULL>X</NOTNULL>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000040</LENG>
+     <MASK>  CHAR</MASK>
+    </DD03P>
+    <DD03P>
+     <TABNAME>TADIR</TABNAME>
+     <FIELDNAME>DEVCLASS</FIELDNAME>
+     <DDLANGUAGE>E</DDLANGUAGE>
+     <POSITION>0004</POSITION>
+     <ADMINFIELD>0</ADMINFIELD>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000060</INTLEN>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000030</LENG>
      <MASK>  CHAR</MASK>
     </DD03P>
    </DD03P_TABLE>
@@ -217,6 +302,25 @@ ENDINTERFACE.`;
     const output = await runFiles([file1]);
     expect(output.length).to.equal(1);
     expect(output[0].chunk.getCode()).to.include("T000");
+  });
+
+  it("populate TADIR", async () => {
+    const result = await runResult([
+      {filename: "tadir.tabl.xml", contents: tadir},
+      {filename: "zfoo.prog.abap", contents: "WRITE '1'."},
+    ]);
+
+    expect(result.databaseSetup.insert).to.include(
+      `INSERT INTO "tadir" ("pgmid", "object", "obj_name", "devclass") VALUES ('R3TR', 'PROG', 'ZFOO', '$TMP');`);
+  });
+
+  it("skip populate TADIR", async () => {
+    const result = await runResult([
+      {filename: "tadir.tabl.xml", contents: tadir},
+      {filename: "zfoo.prog.abap", contents: "WRITE '1'."},
+    ], {populateTables: {tadir: false}});
+
+    expect(result.databaseSetup.insert.some(i => i.includes(`INSERT INTO "tadir"`))).to.equal(false);
   });
 
   it("Global INTF + CLAS, static method from interface", async () => {
