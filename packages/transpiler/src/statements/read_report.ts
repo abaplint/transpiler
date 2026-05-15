@@ -22,7 +22,7 @@ export class ReadReportTranspiler implements IStatementTranspiler {
       options.push("state: " + new SourceTranspiler().transpile(stateNode, traversal).getCode());
     }
 
-    return new Chunk().appendString(`abap.statements.readReport(`)
+    return new Chunk().appendString(`await abap.statements.readReport(`)
       .appendChunk(reportChunk)
       .appendString(", {" + options.join(",") + "}")
       .appendString(");");

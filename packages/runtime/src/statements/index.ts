@@ -74,7 +74,6 @@ export class Statements {
   public find = find;
   public unpack = unpack;
   public getBit = getBit;
-  public readReport = readReport;
   public getLocale = getLocale;
   public getParameter = getParameter;
   public getRunTime = getRunTime;
@@ -149,6 +148,10 @@ export class Statements {
 
   public async message(options: IMessageOptions) {
     return new MessageStatement(this.context).message(options);
+  }
+
+  public async readReport(name: ICharacter, options: Parameters<typeof readReport>[1]) {
+    return readReport(name, options, this.context);
   }
 
   public write(source: INumeric | ICharacter | FieldSymbol | string | number, options?: IWriteOptions) {

@@ -373,7 +373,7 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({});`}, // todo
       js: `await abap.statements.deleteInternal(foo,{where: async (I) => {return !abap.compare.in(I.instance.get().field_type, types);}});`, skip: false},
 
     {abap: "READ REPORT name INTO text STATE 'A'.",
-      js: `abap.statements.readReport(name, {into: text,state: abap.CharacterFactory.get(1, 'A')});`, skip: false},
+      js: `await abap.statements.readReport(name, {into: text,state: abap.CharacterFactory.get(1, 'A')});`, skip: false},
 
     {abap: "WAIT UNTIL gv_semaphore = 'X'.",
       js: `await abap.statements.wait({cond: () => {return abap.compare.eq(gv_semaphore, abap.CharacterFactory.get(1, 'X'));}});`, skip: false},
