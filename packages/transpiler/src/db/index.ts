@@ -69,17 +69,21 @@ export class DatabaseSetup {
           && obj instanceof abaplint.Objects.WebMIME) {
         insert.push(...populateTables.insertWWWPARAMS(obj));
       } else if (obj instanceof abaplint.Objects.Class
-          || obj instanceof abaplint.Objects.Interface) {
+          || obj instanceof abaplint.Objects.Interface
+          || obj instanceof abaplint.Objects.Program) {
         if (options?.populateTables?.reposrc !== false) {
           insert.push(populateTables.insertREPOSRC(obj));
         }
-        if (options?.populateTables?.seosubco !== false) {
+        if ((obj instanceof abaplint.Objects.Class || obj instanceof abaplint.Objects.Interface)
+            && options?.populateTables?.seosubco !== false) {
           insert.push(...populateTables.insertSEOSUBCO(obj));
         }
-        if (options?.populateTables?.seosubcodf !== false) {
+        if ((obj instanceof abaplint.Objects.Class || obj instanceof abaplint.Objects.Interface)
+            && options?.populateTables?.seosubcodf !== false) {
           insert.push(...populateTables.insertSEOSUBCODF(obj));
         }
-        if (options?.populateTables?.seosubcotx !== false) {
+        if ((obj instanceof abaplint.Objects.Class || obj instanceof abaplint.Objects.Interface)
+            && options?.populateTables?.seosubcotx !== false) {
           insert.push(...populateTables.insertSEOSUBCOTX(obj));
         }
       }

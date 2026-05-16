@@ -22,7 +22,7 @@ export class PopulateTables {
     this.hasWWWPARAMS = reg.getObject("TABL", "WWWPARAMS") !== undefined;
   }
 
-  public insertREPOSRC(obj: abaplint.Objects.Class | abaplint.Objects.Interface): string {
+  public insertREPOSRC(obj: abaplint.Objects.Class | abaplint.Objects.Interface | abaplint.Objects.Program): string {
     if (!this.hasREPOSRC) {
       return "";
     }

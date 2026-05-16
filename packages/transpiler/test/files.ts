@@ -158,6 +158,56 @@ const tadir = `<?xml version="1.0" encoding="utf-8"?>
  </asx:abap>
 </abapGit>`;
 
+const reposrc = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V>
+    <TABNAME>REPOSRC</TABNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <TABCLASS>TRANSP</TABCLASS>
+    <DDTEXT>REPOSRC</DDTEXT>
+    <CONTFLAG>A</CONTFLAG>
+    <EXCLASS>1</EXCLASS>
+   </DD02V>
+   <DD09L>
+    <TABNAME>REPOSRC</TABNAME>
+    <AS4LOCAL>A</AS4LOCAL>
+    <TABKAT>0</TABKAT>
+    <TABART>APPL0</TABART>
+    <BUFALLOW>N</BUFALLOW>
+   </DD09L>
+   <DD03P_TABLE>
+    <DD03P>
+     <TABNAME>REPOSRC</TABNAME>
+     <FIELDNAME>PROGNAME</FIELDNAME>
+     <DDLANGUAGE>E</DDLANGUAGE>
+     <POSITION>0001</POSITION>
+     <KEYFLAG>X</KEYFLAG>
+     <ADMINFIELD>0</ADMINFIELD>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000080</INTLEN>
+     <NOTNULL>X</NOTNULL>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000040</LENG>
+     <MASK>  CHAR</MASK>
+    </DD03P>
+    <DD03P>
+     <TABNAME>REPOSRC</TABNAME>
+     <FIELDNAME>DATA</FIELDNAME>
+     <DDLANGUAGE>E</DDLANGUAGE>
+     <POSITION>0002</POSITION>
+     <ADMINFIELD>0</ADMINFIELD>
+     <INTTYPE>g</INTTYPE>
+     <INTLEN>000000</INTLEN>
+     <DATATYPE>STRG</DATATYPE>
+     <LENG>000000</LENG>
+    </DD03P>
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
 describe("Files", () => {
 
   it("Two reports", async () => {
@@ -323,6 +373,16 @@ ENDINTERFACE.`;
     ], {populateTables: {tadir: false}});
 
     expect(result.databaseSetup.insert.some(i => i.includes(`INSERT INTO "tadir"`))).to.equal(false);
+  });
+
+  it("populate REPOSRC for PROG", async () => {
+    const result = await runResult([
+      {filename: "reposrc.tabl.xml", contents: reposrc},
+      {filename: "zfoo.prog.abap", contents: "WRITE '1'."},
+    ]);
+
+    expect(result.databaseSetup.insert).to.include(
+      `INSERT INTO reposrc ('PROGNAME', 'DATA') VALUES ('ZFOO                                    ', 'WRITE ''1''.');`);
   });
 
   it("Global INTF + CLAS, static method from interface", async () => {
