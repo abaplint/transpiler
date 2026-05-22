@@ -28,4 +28,16 @@ describe("Builtin functions - match", () => {
     expect(abap.console.get()).to.equal("=");
   });
 
+  it("match with pcre", async () => {
+    const code = `
+    DATA result TYPE string.
+    result = match( val = 'foo=bar' pcre = '=' ).
+    WRITE / result.
+    ASSERT result = '='.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("=");
+  });
+
 });

@@ -9,6 +9,7 @@ export interface IReplaceInput {
   sub?: string | ICharacter,
   with?: string | ICharacter,
   regex?: string | ICharacter,
+  pcre?: string | ICharacter,
   off?: INumeric,
   len?: INumeric,
   occ?: INumeric,
@@ -45,10 +46,11 @@ export function replace(input: IReplaceInput) {
     sub = ABAPRegExp.escapeRegExp(sub);
   }
 
-  if (typeof input.regex === "string") {
-    sub = new RegExp(ABAPRegExp.convert(input.regex), "g");
-  } else if (input.regex) {
-    sub = new RegExp(ABAPRegExp.convert(input.regex.get()), "g");
+  const regexInput = input.pcre || input.regex;
+  if (typeof regexInput === "string") {
+    sub = new RegExp(ABAPRegExp.convert(regexInput), "g");
+  } else if (regexInput) {
+    sub = new RegExp(ABAPRegExp.convert(regexInput.get()), "g");
   }
 
   if (input.off && input.len && typeof input.val === "string") {
