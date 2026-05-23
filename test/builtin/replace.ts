@@ -69,6 +69,19 @@ write text.`;
     expect(abap.console.get()).to.equal("omg");
   });
 
+  it("replace with pcre", async () => {
+    const code = `data text type string.
+text = replace( val   = to_lower( 'O M G' )
+                pcre  = \`[ .,]\`
+                with  = \`\`
+                occ   = 0 ).
+write text.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("omg");
+  });
+
   it("replace with offset, 1", async () => {
     const code = `DATA str TYPE string.
     str = 'abcdefg'.
