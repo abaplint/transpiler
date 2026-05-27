@@ -1,8 +1,19 @@
 import {expandIN} from "./expand_in";
-import {FieldSymbol} from "./types";
+import {FieldSymbol, HashedTable, Table} from "./types";
 
-export function expandDynamic(code: string, evaluate: (name: string) => FieldSymbol | undefined) {
+type DynamicCondition = string | Table | HashedTable | {get(): string};
+
+export function expandDynamic(input: DynamicCondition, evaluate: (name: string) => FieldSymbol | undefined) {
 //  console.dir(code);
+  let code: string;
+  if (input instanceof Table || input instanceof HashedTable) {
+    code = input.array().map(row => row.get()).join(" ");
+  } else if (typeof input === "string") {
+    code = input;
+  } else {
+    code = input.get();
+  }
+
   if (code === "") {
     return "1 = 1";
   } else {
