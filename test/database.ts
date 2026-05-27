@@ -2046,6 +2046,45 @@ START-OF-SELECTION.
     }, {snowflake: false});
   });
 
+  it("SELECT, dynamic field list as table", async () => {
+    const code = `
+DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+DATA lt_fields TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+
+INSERT \`ARBGB\` INTO TABLE lt_fields.
+INSERT \`MSGNR\` INTO TABLE lt_fields.
+
+SELECT (lt_fields)
+  FROM t100
+  INTO CORRESPONDING FIELDS OF TABLE lt_t100
+  UP TO 100 ROWS.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("");
+    }, {snowflake: false});
+  });
+
+  it("SELECT, dynamic field list as table, empty", async () => {
+    const code = `
+DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+DATA lt_fields TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+
+SELECT (lt_fields)
+  FROM t100
+  INTO CORRESPONDING FIELDS OF TABLE lt_t100
+  UP TO 100 ROWS.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("");
+    }, {snowflake: false});
+  });
+
   it("basic VIEW", async () => {
     const zview = `<?xml version="1.0" encoding="utf-8"?>
 <abapGit version="v1.0.0" serializer="LCL_OBJECT_VIEW" serializer_version="v1.0.0">

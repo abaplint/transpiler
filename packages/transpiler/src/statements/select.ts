@@ -79,12 +79,18 @@ export class SelectTranspiler implements IStatementTranspiler {
       select += new SQLOrderByTranspiler().transpile(orderBy, traversal).getCode();
     }
 
+    const fieldListDynamics = new Set(fieldList.findAllExpressionsRecursive(abaplint.Expressions.Dynamic));
     for (const d of node.findAllExpressionsRecursive(abaplint.Expressions.Dynamic)) {
       const chain = d.findFirstExpression(abaplint.Expressions.FieldChain);
       if (chain) {
-        const code = new FieldChainTranspiler(true).transpile(chain, traversal).getCode();
         const search = d.concatTokens();
-        select = select.replace(search, `" + ${code} + "`);
+        if (fieldListDynamics.has(d)) {
+          const code = new FieldChainTranspiler(false).transpile(chain, traversal).getCode();
+          select = select.replace(search, `" + ${this.dynamicSelectList(code)} + "`);
+        } else {
+          const code = new FieldChainTranspiler(true).transpile(chain, traversal).getCode();
+          select = select.replace(search, `" + ${code} + "`);
+        }
       }
     }
 
@@ -152,6 +158,12 @@ export class SelectTranspiler implements IStatementTranspiler {
       }
     }
     return {table: tabl, keys};
+  }
+
+  private dynamicSelectList(code: string): string {
+    return `(${code} instanceof abap.types.Table || ${code} instanceof abap.types.HashedTable`
+      + ` ? (${code}.array().length === 0 ? "*" : ${code}.array().map(row => row.get()).join(", "))`
+      + ` : ${code}.get())`;
   }
 
   private isWhereExpression(node: abaplint.Nodes.StatementNode, expression: abaplint.Nodes.ExpressionNode): boolean {
