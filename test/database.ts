@@ -2046,7 +2046,7 @@ START-OF-SELECTION.
     }, {snowflake: false});
   });
 
-  it.only("SELECT, dynamic field list as table", async () => {
+  it("SELECT, dynamic field list as table", async () => {
     const code = `
 DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
 DATA lt_fields TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
@@ -2067,7 +2067,7 @@ SELECT (lt_fields)
     }, {snowflake: false});
   });
 
-  it.only("SELECT, dynamic field list as table, empty", async () => {
+  it("SELECT, dynamic field list as table, empty", async () => {
     const code = `
 DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
 DATA lt_fields TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
