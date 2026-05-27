@@ -998,6 +998,69 @@ WRITE / sy-subrc.`;
     });
   });
 
+  it("WHERE, dynamic table condition", async () => {
+    const code = `
+DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+DATA lt_where TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+
+SELECT *
+  FROM t100
+  INTO CORRESPONDING FIELDS OF TABLE lt_t100
+  UP TO 100 ROWS
+  WHERE (lt_where).
+WRITE sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test},
+    ];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2");
+    }, {snowflake: false});
+  });
+
+  it("group by dynamic tab", async () => {
+    const code = `
+DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+DATA lt_group TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+
+SELECT arbgb, msgnr
+  FROM t100
+  INTO CORRESPONDING FIELDS OF TABLE @lt_t100
+  UP TO 100 ROWS
+  GROUP BY (lt_group).
+WRITE sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test},
+    ];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2");
+    }, {snowflake: false});
+  });
+
+  it("order by dynamic tab", async () => {
+    const code = `
+DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+DATA lt_order TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+
+SELECT arbgb, msgnr
+  FROM t100
+  INTO CORRESPONDING FIELDS OF TABLE @lt_t100
+  UP TO 100 ROWS
+  ORDER BY (lt_order).
+WRITE sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test},
+    ];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2");
+    }, {snowflake: false});
+  });
+
   it("WHERE, empty dynamic condition", async () => {
     const code = `
 DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.

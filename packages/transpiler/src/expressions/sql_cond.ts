@@ -22,7 +22,7 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
         if (c.findDirectExpression(abaplint.Expressions.Dynamic)) {
           const chain = c.findDirectExpression(abaplint.Expressions.Dynamic)?.findFirstExpression(abaplint.Expressions.FieldChain);
           if (chain) {
-            const code = new FieldChainTranspiler(true).transpile(chain, traversal).getCode();
+            const code = new FieldChainTranspiler(false).transpile(chain, traversal).getCode();
             ret += `" + abap.expandDynamic(${code}, (name) => {try { return eval(name);} catch {}}) + "`;
           } else {
             const concat = c.concatTokens();

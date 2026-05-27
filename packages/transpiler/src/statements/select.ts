@@ -80,6 +80,8 @@ export class SelectTranspiler implements IStatementTranspiler {
     }
 
     const fieldListDynamics = new Set(fieldList.findAllExpressionsRecursive(abaplint.Expressions.Dynamic));
+    const groupByDynamics = new Set(groupBy?.findAllExpressionsRecursive(abaplint.Expressions.Dynamic) || []);
+    const orderByDynamics = new Set(orderBy?.findAllExpressionsRecursive(abaplint.Expressions.Dynamic) || []);
     for (const d of node.findAllExpressionsRecursive(abaplint.Expressions.Dynamic)) {
       const chain = d.findFirstExpression(abaplint.Expressions.FieldChain);
       if (chain) {
@@ -87,6 +89,12 @@ export class SelectTranspiler implements IStatementTranspiler {
         if (fieldListDynamics.has(d)) {
           const code = new FieldChainTranspiler(false).transpile(chain, traversal).getCode();
           select = select.replace(search, `" + ${this.dynamicSelectList(code)} + "`);
+        } else if (groupByDynamics.has(d)) {
+          const code = new FieldChainTranspiler(false).transpile(chain, traversal).getCode();
+          select = select.replace("GROUP BY " + search, `" + ${this.dynamicSQLClause("GROUP BY", code)} + "`);
+        } else if (orderByDynamics.has(d)) {
+          const code = new FieldChainTranspiler(false).transpile(chain, traversal).getCode();
+          select = select.replace("ORDER BY " + search, `" + ${this.dynamicSQLClause("ORDER BY", code)} + "`);
         } else {
           const code = new FieldChainTranspiler(true).transpile(chain, traversal).getCode();
           select = select.replace(search, `" + ${code} + "`);
@@ -164,6 +172,12 @@ export class SelectTranspiler implements IStatementTranspiler {
     return `(${code} instanceof abap.types.Table || ${code} instanceof abap.types.HashedTable`
       + ` ? (${code}.array().length === 0 ? "*" : ${code}.array().map(row => row.get()).join(", "))`
       + ` : ${code}.get())`;
+  }
+
+  private dynamicSQLClause(keyword: string, code: string): string {
+    return `(${code} instanceof abap.types.Table || ${code} instanceof abap.types.HashedTable`
+      + ` ? (${code}.array().length === 0 ? "" : "${keyword} " + ${code}.array().map(row => row.get()).join(" "))`
+      + ` : "${keyword} " + ${code}.get())`;
   }
 
   private isWhereExpression(node: abaplint.Nodes.StatementNode, expression: abaplint.Nodes.ExpressionNode): boolean {
