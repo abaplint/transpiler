@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Transpiler - rfc-client-soap-xml",
   "scripts": {
-    "test": "rm -rf output && npx tsc && npx abap_transpile test/abap_transpile.json && node output/index.mjs",
+    "test": "node test/run-test.mjs",
     "start": "node test/mock.mjs"
   },
   "author": "",
@@ -13,7 +13,7 @@
     "@types/express": "^4.17.17",
     "@types/node": "^22.19.17",
     "express": "^4.22.1",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.3"
   },
   "dependencies": {
     "@abaplint/runtime": "^2.13.20",

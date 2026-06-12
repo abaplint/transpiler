@@ -12,9 +12,14 @@
     "declaration": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
+    "strictPropertyInitialization": false,
+    "useUnknownInCatchVariables": false,
+    "esModuleInterop": true,
     "alwaysStrict": true,
     "target": "es2022",
     "sourceMap": true,
+    "ignoreDeprecations": "6.0",
+    "types": ["node", "mocha"],
     "baseUrl": "."
   },
   "filesGlob": [
