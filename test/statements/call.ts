@@ -495,4 +495,30 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello");
   });
 
+  it.only("dynamic call, interfaced metho", async () => {
+    const code = `
+INTERFACE lif.
+  METHODS _setup.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD lif~_setup.
+    WRITE / 'called'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo_object TYPE REF TO lif.
+  CREATE OBJECT lo_object TYPE lcl.
+  CALL METHOD lo_object->('_SETUP').`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("called");
+  });
+
 });
