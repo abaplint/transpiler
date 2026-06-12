@@ -20,7 +20,7 @@
     "publish:major": "npm --no-git-tag-version version major && rm -rf build && npm install && npm run test && npm publish --access public",
     "publish:minor": "npm --no-git-tag-version version minor && rm -rf build && npm install && npm run test && npm publish --access public",
     "publish:patch": "npm --no-git-tag-version version patch && rm -rf build && npm install && npm run test && npm publish --access public",
-    "schema": "ts-json-schema-generator --tsconfig tsconfig.json --jsDoc extended --path src/types.ts > schema.json",
+    "schema": "ts-json-schema-generator --tsconfig tsconfig.json --jsDoc extended --path src/types.ts --no-type-check > schema.json",
     "compile": "npm test",
     "webpack": "webpack --progress"
   },
@@ -35,7 +35,7 @@
     "glob": "=7.2.0",
     "p-limit": "^3.1.0",
     "progress": "^2.0.3",
-    "ts-json-schema-generator": "=2.4.0",
+    "ts-json-schema-generator": "^2.9.0",
     "typescript": "^6.0.3",
     "webpack": "^5.107.2",
     "webpack-cli": "^7.0.3"
