@@ -1,6 +1,6 @@
 import {DB} from "@abaplint/runtime";
 import * as pg from "pg";
-import * as Cursor from "pg-cursor";
+import Cursor from "pg-cursor";
 
 export type ConnectionSettings = {
   user: string,

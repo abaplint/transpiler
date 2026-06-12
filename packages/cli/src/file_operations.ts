@@ -3,7 +3,7 @@ import * as path from "path";
 import * as glob from "glob";
 import * as Transpiler from "@abaplint/transpiler";
 import {ITranspilerConfig} from "./types";
-import * as pLimit from "p-limit";
+import pLimit from "p-limit";
 import * as os from "node:os";
 import * as fsPromises from "node:fs/promises";
 
