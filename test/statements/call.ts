@@ -495,7 +495,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("hello");
   });
 
-  it.only("dynamic call, interfaced metho", async () => {
+  it("dynamic call, interfaced metho", async () => {
     const code = `
 INTERFACE lif.
   METHODS _setup.
