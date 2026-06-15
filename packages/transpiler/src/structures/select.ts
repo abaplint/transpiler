@@ -32,7 +32,8 @@ export class SelectTranspiler implements IStructureTranspiler {
     ret.appendChunk(new SelectStatementTranspiler().transpile(selectStatement, traversal, targetName));
 
     // todo: optimize, it should do real streaming?
-    const packageSize = node.findFirstExpression(abaplint.Expressions.SelectLoop)?.findExpressionAfterToken("SIZE");
+    const packageSize = selectStatement.findFirstExpression(abaplint.Expressions.SQLPackageSize)
+      ?.findFirstExpression(abaplint.Expressions.SQLSource);
     if (packageSize) {
       const getSize = new SQLSourceTranspiler().transpile(packageSize, traversal).getCode() + ".get()";
       ret.appendString(`if (${targetName}.array().length > ${getSize}) {

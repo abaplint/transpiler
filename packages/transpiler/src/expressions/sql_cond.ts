@@ -110,12 +110,7 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
       throw new Error("SQL Condition, transpiler todo2, " + c.concatTokens());
     }
 
-    let op = operator.concatTokens();
-    if (op.toUpperCase() === "EQ") {
-      op = "=";
-    } else if (op.toUpperCase() === "NE") {
-      op = "<>";
-    }
+    const op = this.sqlOperator(operator.concatTokens());
     ret += fieldName + " " + op + " ";
     ret += this.sqlSource(source, traversal, filename, table);
 
@@ -161,6 +156,11 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
 
   private basicConditionNew(node: abaplint.Nodes.ExpressionNode, traversal: Traversal, filename: string,
                             table: abaplint.Objects.Table | undefined): string {
+    const sourceWithComponents = this.sourceWithComponents(node, traversal);
+    if (sourceWithComponents) {
+      return sourceWithComponents;
+    }
+
     let ret = "";
     for (const child of node.getChildren()) {
       if (ret !== "") {
@@ -172,11 +172,71 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
       } else if (child.get() instanceof abaplint.Expressions.SQLSource
           && child instanceof abaplint.Nodes.ExpressionNode) {
         ret += this.sqlSource(child, traversal, filename, table);
+      } else if (child.get() instanceof abaplint.Expressions.SQLCompareOperator
+          && child instanceof abaplint.Nodes.ExpressionNode) {
+        ret += this.sqlOperator(child.concatTokens());
       } else {
         ret += child.concatTokens();
       }
     }
     return ret;
+  }
+
+  private sourceWithComponents(node: abaplint.Nodes.ExpressionNode, traversal: Traversal): string | undefined {
+    const children = node.getChildren();
+    const fieldName = children[0];
+    const operator = children[1];
+    const source = children[2];
+    if (!(fieldName instanceof abaplint.Nodes.ExpressionNode)
+        || !(fieldName.get() instanceof abaplint.Expressions.SQLFieldName)
+        || !(operator instanceof abaplint.Nodes.ExpressionNode)
+        || !(operator.get() instanceof abaplint.Expressions.SQLCompareOperator)
+        || !(source instanceof abaplint.Nodes.ExpressionNode)
+        || !(source.get() instanceof abaplint.Expressions.SQLSource)
+        || children.length < 5
+        || (children.length - 3) % 2 !== 0) {
+      return undefined;
+    }
+
+    const components: string[] = [];
+    for (let i = 3; i < children.length; i += 2) {
+      const dash = children[i];
+      const component = children[i + 1];
+      if (!(dash instanceof abaplint.Nodes.TokenNode)
+          || dash.getFirstToken().getStr() !== "-"
+          || !(component instanceof abaplint.Nodes.ExpressionNode)
+          || !(component.get() instanceof abaplint.Expressions.SQLFieldName)) {
+        return undefined;
+      }
+      components.push(component.concatTokens().toLowerCase());
+    }
+
+    const simple = source.findDirectExpression(abaplint.Expressions.SimpleSource3);
+    if (simple === undefined || simple.findDirectExpression(abaplint.Expressions.Constant)) {
+      return undefined;
+    }
+
+    let code = new SimpleSource3Transpiler(false).transpile(simple, traversal).getCode();
+    for (const component of components) {
+      if (component.match(/^\d/) || component.includes("/")) {
+        code += `.get()["${component}"]`;
+      } else {
+        code += `.get().${component}`;
+      }
+    }
+    code += ".get()";
+
+    const field = new SQLFieldNameTranspiler().transpile(fieldName, traversal).getCode();
+    return `${field} ${this.sqlOperator(operator.concatTokens())} '" + ${code} + "'`;
+  }
+
+  private sqlOperator(op: string): string {
+    if (op.toUpperCase() === "EQ") {
+      return "=";
+    } else if (op.toUpperCase() === "NE") {
+      return "<>";
+    }
+    return op;
   }
 
 }
