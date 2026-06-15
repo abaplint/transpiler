@@ -17,7 +17,7 @@ export class TypeNameOrInfer implements IExpressionTranspiler {
         return sqlType;
       }
     }
-      throw new Error("TypeNameOrInfer, type not found: " + node.concatTokens() + ", " + traversal.getCurrentObject().getName() + " line " + node.getFirstToken().getStart().getRow());
+      throw new Error("TypeNameOrInfer, type not found: " + node.concatTokens() + ", " + traversal.getCurrentObject().getName() + ", " + traversal.getFilename() + " line " + node.getFirstToken().getStart().getRow());
     }
 
     return type;
