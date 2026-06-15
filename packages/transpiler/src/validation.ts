@@ -46,6 +46,7 @@ export const config: IConfig = {
         "NSPC",
         "OA2P",
         "PARA",
+        "PINF",
         "PROG",
         "WAPA",
         "SHLP",
