@@ -374,6 +374,10 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({});`}, // todo
 
     {abap: "READ REPORT name INTO text STATE 'A'.",
       js: `await abap.statements.readReport(name, {into: text,state: abap.CharacterFactory.get(1, 'A')});`, skip: false},
+    {abap: "READ ENTITY zfoo ALL FIELDS WITH keys RESULT result.",
+      js: `throw new Error("ReadEntities, not supported, transpiler");`, skip: false},
+    {abap: "MODIFY ENTITY zfoo CREATE FROM input.",
+      js: `throw new Error("ModifyEntities, not supported, transpiler");`, skip: false},
 
     {abap: "WAIT UNTIL gv_semaphore = 'X'.",
       js: `await abap.statements.wait({cond: () => {return abap.compare.eq(gv_semaphore, abap.CharacterFactory.get(1, 'X'));}});`, skip: false},

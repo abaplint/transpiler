@@ -354,6 +354,23 @@ ENDINTERFACE.`;
     expect(output[0].chunk.getCode()).to.include("T000");
   });
 
+  it("Global PINF is skipped", async () => {
+    const file1 = {
+      filename: "zif_package.pinf.xml",
+      contents: `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_PINF" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+  </asx:values>
+ </asx:abap>
+</abapGit>`,
+    };
+
+    const output = await runFiles([file1]);
+
+    expect(output.length).to.equal(0);
+  });
+
   it("populate TADIR", async () => {
     const result = await runResult([
       {filename: "tadir.tabl.xml", contents: tadir},
