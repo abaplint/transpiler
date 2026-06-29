@@ -1,19 +1,30 @@
 import {ABAPRegExp} from "../abap_regex";
-import {Character} from "../types";
+import {Character, FieldSymbol} from "../types";
 import {ICharacter} from "../types/_character";
 import {String} from "../types/string";
 
 interface ISubstringAfterInput {
-  val: ICharacter | string,
+  val: ICharacter | FieldSymbol | string,
   sub?: ICharacter | string,
   regex?: ICharacter | string,
   pcre?: ICharacter | string,
 }
 
 export function substring_after(input: ISubstringAfterInput): ICharacter {
-  let val = typeof input.val === "string" ? input.val : input.val.get();
-  if (input.val instanceof Character) {
-    val = input.val.getTrimEnd();
+  let source: ICharacter | string;
+  if (input.val instanceof FieldSymbol) {
+    const pointer = input.val.getPointer() as ICharacter | undefined;
+    if (pointer === undefined) {
+      throw new Error("GETWA_NOT_ASSIGNED");
+    }
+    source = pointer;
+  } else {
+    source = input.val;
+  }
+
+  let val = typeof source === "string" ? source : source.get();
+  if (source instanceof Character) {
+    val = source.getTrimEnd();
   }
   let reg = "";
   if (typeof input.regex === "string") {

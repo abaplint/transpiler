@@ -2,67 +2,82 @@ import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {String} from "../types/string";
 import {ABAPRegExp} from "../abap_regex";
-import {Character} from "../types";
+import {Character, FieldSymbol} from "../types";
 
 export interface IReplaceInput {
-  val: string | ICharacter,
-  sub?: string | ICharacter,
-  with?: string | ICharacter,
-  regex?: string | ICharacter,
-  pcre?: string | ICharacter,
+  val: string | ICharacter | FieldSymbol,
+  sub?: string | ICharacter | FieldSymbol,
+  with?: string | ICharacter | FieldSymbol,
+  regex?: string | ICharacter | FieldSymbol,
+  pcre?: string | ICharacter | FieldSymbol,
   off?: INumeric,
   len?: INumeric,
   occ?: INumeric,
 }
 
+function dereference(input: string | ICharacter | FieldSymbol | undefined): string | ICharacter | undefined {
+  if (input instanceof FieldSymbol) {
+    const pointer = input.getPointer() as ICharacter | undefined;
+    if (pointer === undefined) {
+      throw new Error("GETWA_NOT_ASSIGNED");
+    }
+    return pointer;
+  }
+  return input;
+}
+
 export function replace(input: IReplaceInput) {
+  const source = dereference(input.val)!;
+  const withSource = dereference(input.with);
+  const subSource = dereference(input.sub);
+  const regexInput = dereference(input.pcre || input.regex);
+
   let val: string | undefined = undefined;
-  if (typeof input.val === "string") {
-    val = input.val;
-  } else if (input.val instanceof Character) {
-    val = input.val.getTrimEnd();
+  if (typeof source === "string") {
+    val = source;
+  } else if (source instanceof Character) {
+    val = source.getTrimEnd();
   } else {
-    val = input.val.get();
+    val = source.get();
   }
 
   let wi: string | undefined = undefined;
-  if (typeof input.with === "string") {
-    wi = input.with;
-  } else if (input.with instanceof Character) {
-    wi = input.with.getTrimEnd();
-  } else if (input.with) {
-    wi = input.with.get();
+  if (typeof withSource === "string") {
+    wi = withSource;
+  } else if (withSource instanceof Character) {
+    wi = withSource.getTrimEnd();
+  } else if (withSource) {
+    wi = withSource.get();
   }
 
   let sub: string | RegExp | undefined = undefined;
-  if (typeof input.sub === "string") {
-    sub = input.sub;
-  } else if (input.sub instanceof Character) {
-    sub = input.sub.getTrimEnd();
-  } else if (input.sub) {
-    sub = input.sub.get();
+  if (typeof subSource === "string") {
+    sub = subSource;
+  } else if (subSource instanceof Character) {
+    sub = subSource.getTrimEnd();
+  } else if (subSource) {
+    sub = subSource.get();
   }
   if (sub !== undefined) {
     sub = ABAPRegExp.escapeRegExp(sub);
   }
 
-  const regexInput = input.pcre || input.regex;
   if (typeof regexInput === "string") {
     sub = new RegExp(ABAPRegExp.convert(regexInput), "g");
   } else if (regexInput) {
     sub = new RegExp(ABAPRegExp.convert(regexInput.get()), "g");
   }
 
-  if (input.off && input.len && typeof input.val === "string") {
+  if (input.off && input.len && typeof source === "string") {
     const offset = input.off.get();
     const length = input.len.get();
     val = val.substring(0, offset) + wi + val.substring(offset + length);
-  } else if (input.off && input.len && !(typeof input.val === "string")) {
+  } else if (input.off && input.len && !(typeof source === "string")) {
     const offset = input.off.get();
     const length = input.len.get();
-    val = input.val.getOffset({offset: 0, length: offset}).get() +
+    val = source.getOffset({offset: 0, length: offset}).get() +
           wi +
-          input.val.getOffset({offset: offset + length}).get();
+          source.getOffset({offset: offset + length}).get();
   } else if (input.occ === undefined && sub && wi !== undefined) {
     if (typeof sub === "string") {
       sub = new RegExp(sub);

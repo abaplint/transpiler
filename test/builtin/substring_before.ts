@@ -67,6 +67,23 @@ describe("Builtin functions - substring_before", () => {
     expect(abap.console.get()).to.equal( `HELLO` );
   });
 
+  it("substring_before, field symbol to character", async () => {
+    const code = `
+    DATA res TYPE string.
+    DATA iv_program_name TYPE c LENGTH 40.
+    FIELD-SYMBOLS <iv_program_name> TYPE c.
+    iv_program_name = 'HELLO=CP'.
+    ASSIGN iv_program_name TO <iv_program_name>.
+    res = substring_before(
+      val   = <iv_program_name>
+      regex = '(=+CP)?$' ).
+    WRITE res.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal( `HELLO` );
+  });
+
   it("substring_before, escape regex", async () => {
     const code = `
 DATA val TYPE string.

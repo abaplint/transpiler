@@ -31,4 +31,22 @@ describe("Builtin functions - to_lower", () => {
     await f(abap);
   });
 
+  it("strings and fs", async () => {
+    const code = `
+    TYPES tabname TYPE c LENGTH 30.
+    DATA lv_tabname TYPE tabname VALUE 'TADIR'.
+    DATA lv_result  TYPE string.
+
+    FIELD-SYMBOLS <lv_tabname> TYPE tabname.
+    ASSIGN lv_tabname TO <lv_tabname>.
+
+    lv_result = to_lower( <lv_tabname> ).
+
+    ASSERT lv_result = 'tadir'.
+    ASSERT strlen( lv_result ) = 5.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

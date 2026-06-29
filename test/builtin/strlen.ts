@@ -49,4 +49,17 @@ describe("Builtin functions - strlen", () => {
     expect(abap.console.get()).to.equal("3");
   });
 
+  it("field symbol to character", async () => {
+    const code = `
+    TYPES tabname TYPE c LENGTH 30.
+    DATA lv_tabname TYPE tabname VALUE 'tadir'.
+    FIELD-SYMBOLS <lv_tabname> TYPE tabname.
+    ASSIGN lv_tabname TO <lv_tabname>.
+    WRITE strlen( <lv_tabname> ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("5");
+  });
+
 });
