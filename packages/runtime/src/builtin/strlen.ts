@@ -1,15 +1,26 @@
 import {IntegerFactory} from "../integer_factory";
-import {Character, Integer} from "../types";
+import {Character, FieldSymbol, Integer} from "../types";
 import {ICharacter} from "../types/_character";
 
-export function strlen(input: {val: ICharacter | string}): Integer {
-  let str = "";
-  if (typeof input.val === "string") {
-    str = input.val;
-  } else if (input.val instanceof Character) {
-    str = input.val.getTrimEnd();
+export function strlen(input: {val: ICharacter | FieldSymbol | string}): Integer {
+  let source: ICharacter | string;
+  if (input.val instanceof FieldSymbol) {
+    const pointer = input.val.getPointer() as ICharacter | undefined;
+    if (pointer === undefined) {
+      throw new Error("GETWA_NOT_ASSIGNED");
+    }
+    source = pointer;
   } else {
-    str = input.val.get();
+    source = input.val;
+  }
+
+  let str = "";
+  if (typeof source === "string") {
+    str = source;
+  } else if (source instanceof Character) {
+    str = source.getTrimEnd();
+  } else {
+    str = source.get();
   }
   if (str.length <= 200) {
     return IntegerFactory.get(str.length);

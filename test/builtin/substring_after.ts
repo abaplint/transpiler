@@ -38,6 +38,20 @@ ASSERT result = |FOO|.`;
     await f(abap);
   });
 
+  it("substring_after, field symbol to character", async () => {
+    const code = `
+DATA lv_classname TYPE c LENGTH 100.
+FIELD-SYMBOLS <lv_classname> TYPE c.
+DATA result TYPE string.
+lv_classname = 'CLASS=FOO'.
+ASSIGN lv_classname TO <lv_classname>.
+result = substring_after( val = <lv_classname> sub = 'CLASS=' ).
+ASSERT result = |FOO|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("substring_after, escape regex", async () => {
     const code = `
 DATA val TYPE string.

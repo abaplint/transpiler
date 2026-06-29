@@ -349,6 +349,31 @@ ASSERT lv_string = |'lbbrs'|.`;
     await f(abap);
   });
 
+  it("replace, field symbols to character", async () => {
+    const code = `
+DATA lv_string TYPE string.
+DATA lv_char TYPE c LENGTH 20.
+DATA lv_sub TYPE c LENGTH 2.
+DATA lv_with TYPE c LENGTH 3.
+FIELD-SYMBOLS <lv_char> TYPE c.
+FIELD-SYMBOLS <lv_sub> TYPE c.
+FIELD-SYMBOLS <lv_with> TYPE c.
+lv_char = 'lars'.
+lv_sub = |a|.
+lv_with = |bb|.
+ASSIGN lv_char TO <lv_char>.
+ASSIGN lv_sub TO <lv_sub>.
+ASSIGN lv_with TO <lv_with>.
+lv_string = |'{ replace( val  = <lv_char>
+                         sub  = <lv_sub>
+                         with = <lv_with>
+                         occ  = 0 ) }'|.
+ASSERT lv_string = |'lbbrs'|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("replace, slash dash", async () => {
     const code = `
 DATA res TYPE string.

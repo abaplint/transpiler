@@ -74,4 +74,18 @@ ASSERT foo = 'bb'.`;
     await f(abap);
   });
 
+  it("translate(), field symbol to character", async () => {
+    const code = `
+DATA foo TYPE string.
+DATA lv_to TYPE c LENGTH 4.
+FIELD-SYMBOLS <lv_to> TYPE c.
+lv_to = |u|.
+ASSIGN lv_to TO <lv_to>.
+foo = translate( val = |foo| from = |o| to = <lv_to> ).
+ASSERT foo = 'fuu'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

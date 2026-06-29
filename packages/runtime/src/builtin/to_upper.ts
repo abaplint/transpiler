@@ -1,11 +1,22 @@
-import {Character, String} from "../types";
+import {Character, FieldSymbol, String} from "../types";
 import {ICharacter} from "../types/_character";
 
-export function to_upper(input: {val: ICharacter | string}): ICharacter {
-  const val = typeof input.val === "string" ? input.val : input.val.get();
+export function to_upper(input: {val: ICharacter | FieldSymbol | string}): ICharacter {
+  let source: ICharacter | string;
+  if (input.val instanceof FieldSymbol) {
+    const pointer = input.val.getPointer() as ICharacter | undefined;
+    if (pointer === undefined) {
+      throw new Error("GETWA_NOT_ASSIGNED");
+    }
+    source = pointer;
+  } else {
+    source = input.val;
+  }
 
-  if (input.val instanceof Character) {
-    return new Character(input.val.getLength()).set(val.toUpperCase());
+  const val = typeof source === "string" ? source : source.get();
+
+  if (source instanceof Character) {
+    return new Character(source.getLength()).set(val.toUpperCase());
   } else {
     return new String().set(val.toUpperCase());
   }
