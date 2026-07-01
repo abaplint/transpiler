@@ -17,6 +17,14 @@ export class SQLJoinTranspiler implements IExpressionTranspiler {
         chunk.appendString(c.concatTokens() + " ");
       } else if (c.get() instanceof abaplint.Expressions.SQLCond) {
         chunk.appendChunk(new SQLCondTranspiler().transpile(c, traversal));
+      } else if (c.get() instanceof abaplint.Expressions.SQLJoinSource) {
+        // newer abaplint versions wrap the join source in a SQLJoinSource expression
+        const source = c.findDirectExpression(abaplint.Expressions.SQLFromSource);
+        if (source) {
+          chunk.appendChunk(new SQLFromSourceTranspiler().transpile(source, traversal));
+        } else {
+          chunk.appendString(c.concatTokens() + " ");
+        }
       } else if (c.get() instanceof abaplint.Expressions.SQLFromSource) {
         chunk.appendChunk(new SQLFromSourceTranspiler().transpile(c, traversal));
       } else {

@@ -51,7 +51,8 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
 
   private sqlIn(c: abaplint.Nodes.ExpressionNode, traversal: Traversal,
                 filename: string, table: abaplint.Objects.Table | undefined): string {
-    const fieldName = c.findDirectExpression(abaplint.Expressions.SQLFieldName);
+    const fieldName = c.findDirectExpression(abaplint.Expressions.SQLFieldName)
+      || c.findDirectExpression(abaplint.Expressions.SQLAliasField);
     const sqlin = c.findDirectExpression(abaplint.Expressions.SQLIn);
     const source = c.findFirstExpression(abaplint.Expressions.SimpleSource3);
 
@@ -88,7 +89,8 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
     }
 
     let fieldName: string | undefined = undefined;
-    const fieldNameExpression = c.findDirectExpression(abaplint.Expressions.SQLFieldName);
+    const fieldNameExpression = c.findDirectExpression(abaplint.Expressions.SQLFieldName)
+      || c.findDirectExpression(abaplint.Expressions.SQLAliasField);
     if (fieldNameExpression) {
       fieldName = new SQLFieldNameTranspiler().transpile(fieldNameExpression, traversal).getCode();
     }
@@ -166,7 +168,8 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
       if (ret !== "") {
         ret += " ";
       }
-      if (child.get() instanceof abaplint.Expressions.SQLFieldName
+      if ((child.get() instanceof abaplint.Expressions.SQLFieldName
+          || child.get() instanceof abaplint.Expressions.SQLAliasField)
           && child instanceof abaplint.Nodes.ExpressionNode) {
         ret += new SQLFieldNameTranspiler().transpile(child, traversal).getCode();
       } else if (child.get() instanceof abaplint.Expressions.SQLSource
