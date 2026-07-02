@@ -54,7 +54,7 @@
         "chai": "^4.5.0",
         "eslint": "^9.39.4",
         "eslint-plugin-import": "^2.32.0",
-        "fast-xml-parser": "^5.9.0",
+        "fast-xml-parser": "^5.9.3",
         "globals": "^17.7.0",
         "mocha": "^11.7.6",
         "pg": "^8.22.0",
