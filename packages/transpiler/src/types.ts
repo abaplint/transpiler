@@ -57,6 +57,9 @@ export interface ITranspilerPlugin {
    *  returned output files are imported in the initialization script,
    *  return an empty array to accept the object without producing output */
   handleObject(obj: abaplint.IObject, reg: abaplint.IRegistry, options: ITranspilerOptions): IOutputFile[] | undefined;
+  /** optional, called after the default schemas and inserts are built,
+   *  amend the database setup by mutating the supplied result directly */
+  amendDatabaseSetup?(dbSetup: DatabaseSetupResult, reg: abaplint.IRegistry, options: ITranspilerOptions): void;
 }
 
 export interface ITranspilerOptions {

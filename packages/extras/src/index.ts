@@ -1,5 +1,5 @@
 import * as abaplint from "@abaplint/core";
-import {IOutputFile, ITranspilerOptions, ITranspilerPlugin} from "@abaplint/transpiler";
+import {DatabaseSetupResult, IOutputFile, ITranspilerOptions, ITranspilerPlugin} from "@abaplint/transpiler";
 import {HandleAPLO} from "./handlers/handle_aplo";
 import {HandleBDEF} from "./handlers/handle_bdef";
 import {HandleDDLS} from "./handlers/handle_ddls";
@@ -37,6 +37,12 @@ class Extras implements ITranspilerPlugin {
       }
     }
     return undefined;
+  }
+
+  public amendDatabaseSetup(dbSetup: DatabaseSetupResult, reg: abaplint.IRegistry, options: ITranspilerOptions): void {
+    for (const handler of this.handlers) {
+      handler.amendDatabaseSetup?.(dbSetup, reg, options);
+    }
   }
 }
 

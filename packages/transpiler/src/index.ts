@@ -3,6 +3,7 @@ import {Validation, config} from "./validation";
 import {UnitTest} from "./unit_test";
 import {IFile, IOutput, IProgress, ITranspilerOptions, ITranspilerPlugin, IOutputFile, UnknownTypesEnum} from "./types";
 import {Chunk} from "./chunk";
+import {DatabaseSetupResult} from "./db/database_setup_result";
 import {DatabaseSetup} from "./db";
 import {HandleTable} from "./handlers/handle_table";
 import {HandleABAP} from "./handlers/handle_abap";
@@ -18,7 +19,8 @@ import {HandleOA2P} from "./handlers/handle_oa2p";
 import {HandleFUGR} from "./handlers/handle_fugr";
 import {Initialization} from "./initialization";
 
-export {config, ITranspilerOptions, ITranspilerPlugin, IFile, IProgress, IOutputFile, IOutput, UnknownTypesEnum, Chunk};
+export {config, ITranspilerOptions, ITranspilerPlugin, IFile, IProgress, IOutputFile, IOutput,
+  UnknownTypesEnum, Chunk, DatabaseSetupResult};
 
 export class Transpiler {
   private readonly options: ITranspilerOptions | undefined;
@@ -48,6 +50,7 @@ export class Transpiler {
     this.validate(reg);
 
     const dbSetup = new DatabaseSetup(reg).run(this.options);
+    this.plugin?.amendDatabaseSetup?.(dbSetup, reg, this.options || {});
 
     const output: IOutput = {
       objects: [],
