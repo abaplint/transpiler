@@ -1,3 +1,5 @@
+// PolyForm Noncommercial License 1.0.0, see LICENSE.md
+// Required Notice: Copyright Heliconia Labs ApS (hello@heliconialabs.com)
 import * as abaplint from "@abaplint/core";
 import {DatabaseSetupResult, IOutputFile, ITranspilerOptions, ITranspilerPlugin} from "@abaplint/transpiler";
 import {HandleAPLO} from "./handlers/handle_aplo";
