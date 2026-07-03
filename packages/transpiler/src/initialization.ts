@@ -1,6 +1,6 @@
 import {DatabaseSetupResult} from "./db/database_setup_result";
 import * as abaplint from "@abaplint/core";
-import {ITranspilerOptions, ITranspilerPlugin} from "./types";
+import {ITranspilerOptions, IOutputFile} from "./types";
 import {HandleFUGR} from "./handlers/handle_fugr";
 
 export function escapeNamespaceFilename(filename: string): string {
@@ -12,7 +12,7 @@ export function escapeNamespaceFilename(filename: string): string {
 export class Initialization {
 
   public script(reg: abaplint.IRegistry, dbSetup: DatabaseSetupResult, options: ITranspilerOptions | undefined,
-                useImport?: boolean, plugin?: ITranspilerPlugin) {
+                useImport?: boolean, pluginOutputs?: readonly IOutputFile[]) {
       let ret = "";
       if (useImport === true) {
         ret = `/* eslint-disable import/newline-after-import */
@@ -58,7 +58,7 @@ globalThis.abap = new runtime.ABAP();\n`;
       ret += `}\n\n`;
       ret += `await initializeABAP();\n\n`;
 
-      ret += `${this.buildImports(reg, useImport, options, plugin)}`;
+      ret += `${this.buildImports(reg, useImport, options, pluginOutputs)}`;
 
       if (options?.setup?.postFunction !== undefined) {
         ret += `\n\nawait setup.${options?.setup?.postFunction}();\n`;
@@ -68,17 +68,12 @@ globalThis.abap = new runtime.ABAP();\n`;
     }
 
   private buildImports(reg: abaplint.IRegistry, useImport?: boolean, options?: ITranspilerOptions,
-                       plugin?: ITranspilerPlugin): string {
+                       pluginOutputs?: readonly IOutputFile[]): string {
 // note: ES modules are hoised, so use the dynamic import(), due to setting of globalThis.abap
 // some sorting required: eg. a class constructor using constant from interface
 
     const list: string[] = [];
     const late: string[] = [];
-
-    const pluginTypes = new Set<string>();
-    for (const type of plugin?.objectTypes() || []) {
-      pluginTypes.add(type.toUpperCase());
-    }
 
     const imp = (filename: string) => {
       if (useImport === true) {
@@ -87,6 +82,10 @@ globalThis.abap = new runtime.ABAP();\n`;
         return `await import("./${filename}.mjs");`;
       }
     };
+
+    for (const pluginOutput of pluginOutputs || []) {
+      list.push(imp(pluginOutput.filename.replace(/\.mjs$/i, "")));
+    }
 
     for (const obj of reg.getObjects()) {
       if (obj instanceof abaplint.Objects.Table
@@ -97,8 +96,7 @@ globalThis.abap = new runtime.ABAP();\n`;
           || obj instanceof abaplint.Objects.Oauth2Profile
           || obj instanceof abaplint.Objects.WebMIME
           || obj instanceof abaplint.Objects.TypePool
-          || obj instanceof abaplint.Objects.TableType
-          || pluginTypes.has(obj.getType())) {
+          || obj instanceof abaplint.Objects.TableType) {
         list.push(imp(`${escapeNamespaceFilename(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}`));
       }
     }

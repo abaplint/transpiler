@@ -18,18 +18,3 @@ npm install @abaplint/transpiler-extras
 ```
 
 no configuration is needed, the CLI automatically detects and uses the package when it is installed.
-
-## Object Types
-
-| Type | Description                | Output                              |
-| ---- | -------------------------- | ----------------------------------- |
-| TRAN | Transaction codes          | registers `abap.TRAN[<tcode>]`      |
-
-## Development
-
-The package exports a single `plugin` implementing the `ITranspilerPlugin` interface from
-`@abaplint/transpiler`. Each object type handler lives in `src/handlers/` and is registered
-in the handler list in `src/index.ts`.
-
-Local builds compile against the sibling `packages/transpiler` via `npm run link-local`
-in the repository root, matching CI.

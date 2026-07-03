@@ -54,8 +54,8 @@ export interface ITranspilerPlugin {
   /** object types handled by the plugin, merged into allowed_object_types during validation */
   objectTypes(): string[];
   /** returns undefined if the object is not handled by the plugin,
-   *  output filenames must follow the convention "<name>.<type>.mjs"
-   *  for the file to be imported in the initialization script */
+   *  returned output files are imported in the initialization script,
+   *  return an empty array to accept the object without producing output */
   handleObject(obj: abaplint.IObject, reg: abaplint.IRegistry, options: ITranspilerOptions): IOutputFile[] | undefined;
 }
 

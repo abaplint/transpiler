@@ -53,11 +53,13 @@ export class Transpiler {
       objects: [],
       unitTestScript: new UnitTest().unitTestScript(reg, this.options?.skip),
       unitTestScriptOpen: new UnitTest().unitTestScriptOpen(reg, this.options?.skip),
-      initializationScript: new Initialization().script(reg, dbSetup, this.options, false, this.plugin),
-      initializationScript2: new Initialization().script(reg, dbSetup, this.options, true, this.plugin),
+      initializationScript: "",
+      initializationScript2: "",
       databaseSetup: dbSetup,
       reg: reg,
     };
+
+    const pluginOutputs: IOutputFile[] = [];
 
     progress?.set(reg.getObjectCount().total, "Building");
     for (const obj of reg.getObjects()) {
@@ -90,9 +92,14 @@ export class Transpiler {
         const handled = this.plugin.handleObject(obj, reg, this.options || {});
         if (handled !== undefined) {
           output.objects.push(...handled);
+          pluginOutputs.push(...handled);
         }
       }
     }
+
+    // after the object loop, only plugin output files that exist are imported
+    output.initializationScript = new Initialization().script(reg, dbSetup, this.options, false, pluginOutputs);
+    output.initializationScript2 = new Initialization().script(reg, dbSetup, this.options, true, pluginOutputs);
 
     return output;
   }

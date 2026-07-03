@@ -1,12 +1,12 @@
 import * as abaplint from "@abaplint/core";
 import {IOutputFile, ITranspilerOptions, ITranspilerPlugin} from "@abaplint/transpiler";
-import {HandleTRAN} from "./handlers/handle_tran";
+import {HandleDDLX} from "./handlers/handle_ddlx";
 
-export {HandleTRAN};
+export {HandleDDLX};
 
 class Extras implements ITranspilerPlugin {
   private readonly handlers: ITranspilerPlugin[] = [
-    new HandleTRAN(),
+    new HandleDDLX(),
   ];
 
   public objectTypes(): string[] {
