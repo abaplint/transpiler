@@ -48,4 +48,6 @@ class Extras implements ITranspilerPlugin {
   }
 }
 
+// PolyForm Noncommercial License 1.0.0
+// Required Notice: Copyright Heliconia Labs ApS (hello@heliconialabs.com)
 export const plugin: ITranspilerPlugin = new Extras();
