@@ -1,12 +1,24 @@
 import * as abaplint from "@abaplint/core";
 import {IOutputFile, ITranspilerOptions, ITranspilerPlugin} from "@abaplint/transpiler";
+import {HandleAPLO} from "./handlers/handle_aplo";
+import {HandleBDEF} from "./handlers/handle_bdef";
+import {HandleDDLS} from "./handlers/handle_ddls";
 import {HandleDDLX} from "./handlers/handle_ddlx";
+import {HandleSCO2} from "./handlers/handle_sco2";
+import {HandleSIA6} from "./handlers/handle_sia6";
+import {HandleSRVD} from "./handlers/handle_srvd";
 
-export {HandleDDLX};
+export {HandleAPLO, HandleBDEF, HandleDDLS, HandleDDLX, HandleSCO2, HandleSIA6, HandleSRVD};
 
 class Extras implements ITranspilerPlugin {
   private readonly handlers: ITranspilerPlugin[] = [
+    new HandleAPLO(),
+    new HandleBDEF(),
+    new HandleDDLS(),
     new HandleDDLX(),
+    new HandleSCO2(),
+    new HandleSIA6(),
+    new HandleSRVD(),
   ];
 
   public objectTypes(): string[] {

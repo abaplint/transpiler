@@ -1,14 +1,14 @@
 import * as abaplint from "@abaplint/core";
 import {IOutputFile, ITranspilerOptions, ITranspilerPlugin} from "@abaplint/transpiler";
 
-export class HandleDDLX implements ITranspilerPlugin {
+export class HandleBDEF implements ITranspilerPlugin {
 
   public objectTypes(): string[] {
-    return ["DDLX"];
+    return ["BDEF"];
   }
 
   public handleObject(obj: abaplint.IObject, _reg: abaplint.IRegistry, _options: ITranspilerOptions): IOutputFile[] | undefined {
-    if (obj.getType() !== "DDLX") {
+    if (obj.getType() !== "BDEF") {
       return undefined;
     }
 
