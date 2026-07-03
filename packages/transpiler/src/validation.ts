@@ -1,5 +1,75 @@
 import {Issue, IRegistry, Config, IConfig, Version} from "@abaplint/core";
-import {ITranspilerOptions, UnknownTypesEnum} from "./types";
+import {ITranspilerOptions, ITranspilerPlugin, UnknownTypesEnum} from "./types";
+
+const defaultAllowedObjectTypes = [
+  "APIS",
+  "AUTH",
+  "CLAS",
+  "DEVC",
+  "DOMA",
+  "DTEL",
+  "ENHO",
+  "ENHS",
+  "ENQU",
+  "FUGR",
+  "HTTP",
+  "INTF",
+  "IWMO",
+  "IWOM",
+  "IWPR",
+  "IWSG",
+  "IWSV",
+  "MSAG",
+  "NROB",
+  "NSPC",
+  "OA2P",
+  "PARA",
+  "PINF",
+  "PROG",
+  "WAPA",
+  "SHLP",
+  "SHMA",
+  "SICF",
+  "SMIM",
+  "SMIM",
+  "SPLO",
+  "SRFC",
+  "SUSC",
+  "SUSH",
+  "SUSO",
+  "SXCI",
+  "TABL",
+  "TOBJ",
+  "TRAN",
+  "TTYP",
+  "TYPE",
+  "VCLS",
+  "VIEW",
+  "W3MI",
+  "XSLT",
+  "ZN01",
+  "ZN02",
+  "ZN03",
+  "ZN04",
+  "ZN05",
+  "ZN06",
+  "ZN07",
+  "ZN08",
+  "ZN09",
+  "ZN10",
+  "ZN11",
+  "ZN12",
+  "ZN13",
+  "ZN14",
+  "ZN15",
+  "ZN16",
+  "ZN17",
+  "ZN18",
+  "ZN19",
+  "ZN20",
+  "ZN21",
+  "ZN22",
+];
 
 export const config: IConfig = {
   "global": {
@@ -23,75 +93,7 @@ export const config: IConfig = {
     },
     "parser_error": true,
     "allowed_object_types": {
-      "allowed": [
-        "APIS",
-        "AUTH",
-        "CLAS",
-        "DEVC",
-        "DOMA",
-        "DTEL",
-        "ENHO",
-        "ENHS",
-        "ENQU",
-        "FUGR",
-        "HTTP",
-        "INTF",
-        "IWMO",
-        "IWOM",
-        "IWPR",
-        "IWSG",
-        "IWSV",
-        "MSAG",
-        "NROB",
-        "NSPC",
-        "OA2P",
-        "PARA",
-        "PINF",
-        "PROG",
-        "WAPA",
-        "SHLP",
-        "SHMA",
-        "SICF",
-        "SMIM",
-        "SMIM",
-        "SPLO",
-        "SRFC",
-        "SUSC",
-        "SUSH",
-        "SUSO",
-        "SXCI",
-        "TABL",
-        "TOBJ",
-        "TRAN",
-        "TTYP",
-        "TYPE",
-        "VCLS",
-        "VIEW",
-        "W3MI",
-        "XSLT",
-        "ZN01",
-        "ZN02",
-        "ZN03",
-        "ZN04",
-        "ZN05",
-        "ZN06",
-        "ZN07",
-        "ZN08",
-        "ZN09",
-        "ZN10",
-        "ZN11",
-        "ZN12",
-        "ZN13",
-        "ZN14",
-        "ZN15",
-        "ZN16",
-        "ZN17",
-        "ZN18",
-        "ZN19",
-        "ZN20",
-        "ZN21",
-        "ZN22",
-      ],
+      "allowed": defaultAllowedObjectTypes,
     },
     "unknown_types": true,
     "ambiguous_statement": true,
@@ -112,9 +114,11 @@ export const config: IConfig = {
 export class Validation {
 
   private readonly options: ITranspilerOptions | undefined;
+  private readonly plugin: ITranspilerPlugin | undefined;
 
-  public constructor(options?: ITranspilerOptions) {
+  public constructor(options?: ITranspilerOptions, plugin?: ITranspilerPlugin) {
     this.options = options;
+    this.plugin = plugin;
   }
 
   public run(reg: IRegistry): readonly Issue[] {
@@ -125,6 +129,14 @@ export class Validation {
     }
 
     config.rules["forbidden_identifier"]["check"] = ["^unique\\d+$"];
+
+    const allowed = [...defaultAllowedObjectTypes];
+    for (const type of this.plugin?.objectTypes() || []) {
+      if (allowed.includes(type.toUpperCase()) === false) {
+        allowed.push(type.toUpperCase());
+      }
+    }
+    config.rules["allowed_object_types"]["allowed"] = allowed;
 
     if (this.options?.unknownTypes === UnknownTypesEnum.runtimeError) {
       // this is not a constant, just a regex that happens to not match anything

@@ -49,6 +49,16 @@ export enum UnknownTypesEnum {
   runtimeError = "runtimeError",
 }
 
+/** handles additional object types, may be supplied by a separate npm package */
+export interface ITranspilerPlugin {
+  /** object types handled by the plugin, merged into allowed_object_types during validation */
+  objectTypes(): string[];
+  /** returns undefined if the object is not handled by the plugin,
+   *  output filenames must follow the convention "<name>.<type>.mjs"
+   *  for the file to be imported in the initialization script */
+  handleObject(obj: abaplint.IObject, reg: abaplint.IRegistry, options: ITranspilerOptions): IOutputFile[] | undefined;
+}
+
 export interface ITranspilerOptions {
   /** ignore syntax check, used for internal testing */
   ignoreSyntaxCheck?: boolean;
