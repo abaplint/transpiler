@@ -15,6 +15,9 @@ export class SQLFromTranspiler implements IExpressionTranspiler {
       if (c instanceof abaplint.Nodes.TokenNode) {
         // keywords
         chunk.appendString(c.concatTokens() + " ");
+      } else if (c.get() instanceof abaplint.Expressions.SQLFromBody) {
+        // newer abaplint versions wrap the sources in a SQLFromBody expression
+        chunk.appendChunk(this.transpile(c, traversal));
       } else if (c.get() instanceof abaplint.Expressions.SQLJoin) {
         chunk.appendChunk(new SQLJoinTranspiler().transpile(c, traversal));
         chunk.appendString(" ");
