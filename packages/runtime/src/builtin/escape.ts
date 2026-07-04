@@ -35,6 +35,7 @@ export function escape(input: {val: ICharacter | string, format: INumeric | numb
       val = val.replace(/'/g, "\\'");
       break;
     case 24: // e_json_string
+      val = val.replace(/\\/g, "\\\\");
       val = val.replace(/"/g, "\\\"");
       val = val.replace(/\n/g, "\\n");
       break;
