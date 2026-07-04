@@ -100,7 +100,7 @@ export class Transpiler {
       }
     }
 
-    // after the object loop, only plugin output files that exist are imported
+    // after the object loop, plugin output files are imported by the initialization scripts
     output.initializationScript = new Initialization().script(reg, dbSetup, this.options, false, pluginOutputs);
     output.initializationScript2 = new Initialization().script(reg, dbSetup, this.options, true, pluginOutputs);
 
