@@ -6,11 +6,14 @@ import {HandleAPLO} from "./handlers/handle_aplo";
 import {HandleBDEF} from "./handlers/handle_bdef";
 import {HandleDDLS} from "./handlers/handle_ddls";
 import {HandleDDLX} from "./handlers/handle_ddlx";
+import {HandleSAJC} from "./handlers/handle_sajc";
+import {HandleSAJT} from "./handlers/handle_sajt";
 import {HandleSCO2} from "./handlers/handle_sco2";
 import {HandleSIA6} from "./handlers/handle_sia6";
+import {HandleSRVB} from "./handlers/handle_srvb";
 import {HandleSRVD} from "./handlers/handle_srvd";
 
-export {HandleAPLO, HandleBDEF, HandleDDLS, HandleDDLX, HandleSCO2, HandleSIA6, HandleSRVD};
+export {HandleAPLO, HandleBDEF, HandleDDLS, HandleDDLX, HandleSAJC, HandleSAJT, HandleSCO2, HandleSIA6, HandleSRVB, HandleSRVD};
 
 class Extras implements ITranspilerPlugin {
   private readonly handlers: ITranspilerPlugin[] = [
@@ -18,8 +21,11 @@ class Extras implements ITranspilerPlugin {
     new HandleBDEF(),
     new HandleDDLS(),
     new HandleDDLX(),
+    new HandleSAJC(),
+    new HandleSAJT(),
     new HandleSCO2(),
     new HandleSIA6(),
+    new HandleSRVB(),
     new HandleSRVD(),
   ];
 

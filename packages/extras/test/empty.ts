@@ -21,8 +21,11 @@ define behavior for ZDDLS
   expose ZDDLS;
 }`,
   "zaplo.aplo.xml": abapgitXML,
+  "zsajc.sajc.xml": abapgitXML,
+  "zsajt.sajt.xml": abapgitXML,
   "zsco2.sco2.xml": abapgitXML,
   "zsia6.sia6.xml": abapgitXML,
+  "zsrvb.srvb.xml": abapgitXML,
 };
 
 describe("empty handlers", () => {
