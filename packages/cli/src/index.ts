@@ -3,6 +3,7 @@ import * as path from "path";
 import * as glob from "glob";
 import * as childProcess from "child_process";
 import * as os from "os";
+import {createRequire} from "module";
 import ProgressBar from "progress";
 import * as Transpiler from "@abaplint/transpiler";
 import * as abaplint from "@abaplint/core";
@@ -109,9 +110,29 @@ async function writeObjects(outputFiles: Transpiler.IOutputFile[],
   await FileOperations.writeFiles(filesToWrite);
 }
 
+const PLUGIN_MODULE = "@abaplint/transpiler-extras";
+
+function loadPlugin(): Transpiler.ITranspilerPlugin | undefined {
+  // createRequire so the plugin resolves from the project consuming the CLI, also after webpacking
+  const projectRequire = createRequire(path.join(process.cwd(), "package.json"));
+  try {
+    projectRequire.resolve(PLUGIN_MODULE);
+  } catch {
+    // plugin package not installed
+    return undefined;
+  }
+  const plugin: Transpiler.ITranspilerPlugin | undefined = projectRequire(PLUGIN_MODULE).plugin;
+  if (plugin === undefined) {
+    throw new Error(PLUGIN_MODULE + " does not export a plugin");
+  }
+  console.log("Plugin loaded: " + PLUGIN_MODULE + ", object types: " + plugin.objectTypes().join(", "));
+  console.log("Note this requires license for commercial use");
+  return plugin;
+}
+
 async function build(config: ITranspilerConfig, files: Transpiler.IFile[]) {
   const libFiles = await loadLib(config);
-  const t = new Transpiler.Transpiler(config.options);
+  const t = new Transpiler.Transpiler(config.options, loadPlugin());
 
   const reg: abaplint.IRegistry = new abaplint.Registry();
   for (const f of files) {

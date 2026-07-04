@@ -27,7 +27,7 @@ export async function insertDatabase(table: string | ICharacter, options: IInser
   const values: string[] = [];
 
   if (options.values === undefined && options.table === undefined) {
-    throw "insertDatabase, wrong input";
+    throw new Error("insertDatabase, wrong input");
   }
 
   if (options.table !== undefined) {

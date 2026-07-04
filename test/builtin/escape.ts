@@ -97,6 +97,20 @@ describe("Builtin functions - escape", () => {
     await f(abap);
   });
 
+  it("escape(), json backslash", async () => {
+    const code = `
+    CONSTANTS e_json_string TYPE i VALUE 24.
+    DATA lv_result TYPE string.
+    lv_result = escape(
+      val    = 'a\\b'
+      format = e_json_string ).
+    WRITE lv_result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`a\\\\b`);
+  });
+
   it("escape(), xml attr", async () => {
     const code = `
     CONSTANTS e_xml_attr TYPE i VALUE 1.

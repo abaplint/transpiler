@@ -19,7 +19,7 @@ export function contains(input: ContainsInput) {
       || input.off !== undefined
       || input.len !== undefined
       || input.occ !== undefined) {
-    throw "runtime, contains() todo";
+    throw new Error("runtime, contains() todo");
   }
 
   let ret = " ";

@@ -40,7 +40,7 @@ export function replace(input: replaceInput): void {
     }
 
     if (inp.length === 0 && input.all === true) {
-      throw "REPLACE, zero length input";
+      throw new Error("REPLACE, zero length input");
     }
     found = temp.indexOf(inp) >= 0;
     inp = ABAPRegExp.escapeRegExp(inp);
@@ -55,7 +55,7 @@ export function replace(input: replaceInput): void {
     abap.builtin.sy.get().subrc.set(0);
     return;
   } else {
-    throw "REPLACE, unexpected input";
+    throw new Error("REPLACE, unexpected input");
   }
 
   let rr: string = "";

@@ -3,7 +3,7 @@ import {Character} from "../types";
 
 export function matches(input: {val: ICharacter | string, regex?: ICharacter | string, pcre?: ICharacter | string}): ICharacter {
   if (input.pcre === undefined && input.regex === undefined) {
-    throw "matches(), todo";
+    throw new Error("matches(), todo");
   }
 
   const val = typeof input.val === "string" ? input.val : input.val.get();

@@ -31,6 +31,9 @@ jobs:
         cp build/performance/results.json ../../results_after.json
         git checkout -f main
         git reset --hard
+        # remove gitignored build output from packages not existing on main,
+        # leftover declaration files otherwise break the root tsc run
+        git clean -fdx packages
         git status
         npm run install && npm run link-local && npm run performance
         cp build/performance/results.json ../../results_before.json

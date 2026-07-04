@@ -5,7 +5,7 @@ export function match(input: {val: ICharacter | string, regex?: ICharacter | str
   const val = typeof input.val === "string" ? input.val : input.val.get();
   const regexInput = input.pcre || input.regex;
   if (regexInput === undefined) {
-    throw "match() requires either regex or pcre parameter";
+    throw new Error("match() requires either regex or pcre parameter");
   }
   let reg = "";
   if (typeof regexInput === "string") {

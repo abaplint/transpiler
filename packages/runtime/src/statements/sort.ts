@@ -87,7 +87,7 @@ export function sort(input: Table | FieldSymbol | any[], options?: ISortOptions)
 
   if (options?.by) {
     if (options.by.length === 0) {
-      throw "SortByLengthZero";
+      throw new Error("SortByLengthZero");
     }
 
     input.sort((a, b) => {

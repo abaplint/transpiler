@@ -58,13 +58,13 @@ export class ABAPRegExp {
         ignoreCase = 'i';
       }
     } else if (typeof r !== "string") {
-      throw "getRegex(), unexpected input";
+      throw new Error("getRegex(), unexpected input");
     }
 
     r = ABAPRegExp.convert(r);
 
     if (r.length === 0 && options.all === true) {
-      throw "getRegex(), zero length input";
+      throw new Error("getRegex(), zero length input");
     }
 
     return new RegExp(r, "m" + ignoreCase + allOccurrences);

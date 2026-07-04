@@ -1,6 +1,6 @@
 import {DatabaseSetupResult} from "./db/database_setup_result";
 import * as abaplint from "@abaplint/core";
-import {ITranspilerOptions} from "./types";
+import {ITranspilerOptions, IOutputFile} from "./types";
 import {HandleFUGR} from "./handlers/handle_fugr";
 
 export function escapeNamespaceFilename(filename: string): string {
@@ -11,7 +11,8 @@ export function escapeNamespaceFilename(filename: string): string {
 
 export class Initialization {
 
-  public script(reg: abaplint.IRegistry, dbSetup: DatabaseSetupResult, options: ITranspilerOptions | undefined, useImport?: boolean) {
+  public script(reg: abaplint.IRegistry, dbSetup: DatabaseSetupResult, options: ITranspilerOptions | undefined,
+                useImport?: boolean, pluginOutputs?: readonly IOutputFile[]) {
       let ret = "";
       if (useImport === true) {
         ret = `/* eslint-disable import/newline-after-import */
@@ -57,7 +58,7 @@ globalThis.abap = new runtime.ABAP();\n`;
       ret += `}\n\n`;
       ret += `await initializeABAP();\n\n`;
 
-      ret += `${this.buildImports(reg, useImport, options)}`;
+      ret += `${this.buildImports(reg, useImport, options, pluginOutputs)}`;
 
       if (options?.setup?.postFunction !== undefined) {
         ret += `\n\nawait setup.${options?.setup?.postFunction}();\n`;
@@ -66,7 +67,8 @@ globalThis.abap = new runtime.ABAP();\n`;
       return ret;
     }
 
-  private buildImports(reg: abaplint.IRegistry, useImport?: boolean, options?: ITranspilerOptions): string {
+  private buildImports(reg: abaplint.IRegistry, useImport?: boolean, options?: ITranspilerOptions,
+                       pluginOutputs?: readonly IOutputFile[]): string {
 // note: ES modules are hoised, so use the dynamic import(), due to setting of globalThis.abap
 // some sorting required: eg. a class constructor using constant from interface
 
@@ -80,6 +82,10 @@ globalThis.abap = new runtime.ABAP();\n`;
         return `await import("./${filename}.mjs");`;
       }
     };
+
+    for (const pluginOutput of pluginOutputs || []) {
+      list.push(imp(pluginOutput.filename.replace(/\.mjs$/i, "")));
+    }
 
     for (const obj of reg.getObjects()) {
       if (obj instanceof abaplint.Objects.Table

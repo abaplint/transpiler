@@ -174,7 +174,7 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
 
           target.assign(abap.Classes[className][typeName.toLowerCase().trimEnd()].clone());
         } else {
-          throw "CREATE DATA, unknown type " + options.typeName;
+          throw new Error("CREATE DATA, unknown type " + options.typeName);
         }
     }
   } else if (options?.type) {

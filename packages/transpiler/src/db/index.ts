@@ -43,6 +43,7 @@ export class DatabaseSetup {
         statements.push(schemaGenerator.buildTABL(obj).trim());
       }
     }
+
     // CREATE VIEWs after TABLEs
     // todo: what if the view is based on another view?
     for (const obj of this.reg.getObjects()) {
@@ -50,6 +51,7 @@ export class DatabaseSetup {
         statements.push(schemaGenerator.buildVIEW(obj).trim());
       }
     }
+
     return statements;
   }
 

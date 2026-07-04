@@ -67,7 +67,7 @@ export function templateFormatting(source: ICharacter | INumeric, options?: opti
 
   if (options) {
     if (options.currency !== undefined) {
-      throw "template formatting with currency not supported";
+      throw new Error("template formatting with currency not supported");
     }
     if (options.date === "iso") {
       text = text.substr(0,4) + "-" + text.substr(4,2) + "-" + text.substr(6,2);

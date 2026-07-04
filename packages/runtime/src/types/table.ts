@@ -337,7 +337,7 @@ export class HashedTable implements ITable {
 
   public getHeader(): TableRowType {
     if (this.header === undefined) {
-      throw "table, getHeader";
+      throw new Error("table, getHeader");
     }
     return this.header;
   }

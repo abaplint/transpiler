@@ -49,6 +49,19 @@ export enum UnknownTypesEnum {
   runtimeError = "runtimeError",
 }
 
+/** handles additional object types, may be supplied by a separate npm package */
+export interface ITranspilerPlugin {
+  /** object types handled by the plugin, merged into allowed_object_types during validation */
+  objectTypes(): string[];
+  /** returns undefined if the object is not handled by the plugin,
+   *  returned output files are imported in the initialization script,
+   *  return an empty array to accept the object without producing output */
+  handleObject(obj: abaplint.IObject, reg: abaplint.IRegistry, options: ITranspilerOptions): IOutputFile[] | undefined;
+  /** optional, called after the default schemas and inserts are built,
+   *  amend the database setup by mutating the supplied result directly */
+  amendDatabaseSetup?(dbSetup: DatabaseSetupResult, reg: abaplint.IRegistry, options: ITranspilerOptions): void;
+}
+
 export interface ITranspilerOptions {
   /** ignore syntax check, used for internal testing */
   ignoreSyntaxCheck?: boolean;

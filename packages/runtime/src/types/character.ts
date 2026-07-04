@@ -21,9 +21,9 @@ export class Character implements ICharacter {
   public constructor(length?: number, extra?: AbstractTypeData) {
     this.length = length || 1;
     if (typeof this.length === "object") {
-      throw "Character, invalid length, object: " + JSON.stringify(this.length);
+      throw new Error("Character, invalid length, object: " + JSON.stringify(this.length));
     } else if (this.length <= 0) {
-      throw "Character, invalid length, less than zero";
+      throw new Error("Character, invalid length, less than zero");
     }
     this.extra = extra;
     this.clear();

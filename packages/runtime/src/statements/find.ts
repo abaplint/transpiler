@@ -63,7 +63,7 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
   } else if (options.regex || options.pcre) {
     s = ABAPRegExp.getRegex({all: true, ...options});
   } else {
-    throw "FIND, runtime, no input";
+    throw new Error("FIND, runtime, no input");
   }
 
   const matches = [];

@@ -18,12 +18,12 @@ export function find(input: IFindInput) {
   let val = typeof input.val === "string" ? input.val : input.val.get();
 
   if (input.len !== undefined) {
-    throw "transpiler find(), todo len";
+    throw new Error("transpiler find(), todo len");
   }
 
   if (input.regex || input.pcre) {
     if (input.off !== undefined) {
-      throw "transpiler find(), todo off regex";
+      throw new Error("transpiler find(), todo off regex");
     }
 
     const caseInput = typeof input.case === "string" ? input.case : input.case?.get();
