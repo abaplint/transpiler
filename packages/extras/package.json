@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/transpiler-extras",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Transpiler - additional object types, source-available under PolyForm Noncommercial 1.0.0",
   "main": "build/src/index.js",
   "typings": "build/src/index.d.ts",
