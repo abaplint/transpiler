@@ -19,7 +19,7 @@ export function append(input: IAppendOptions) {
   if (input.target instanceof FieldSymbol) {
     input.target = input.target.getPointer() as Table | undefined;
     if (input.target === undefined) {
-      throw "Field symbol not assigned";
+      throw new Error("Field symbol not assigned");
     }
   }
 
@@ -30,7 +30,7 @@ export function append(input: IAppendOptions) {
   if (input.target === undefined) {
     // short APPEND, use header field
     if (!(input.source instanceof Table)) {
-      throw "APPEND, header, table";
+      throw new Error("APPEND, header, table");
     }
     input.source.append(input.source.getHeader());
     abap.builtin.sy.get().tabix.set(input.source.array().length);

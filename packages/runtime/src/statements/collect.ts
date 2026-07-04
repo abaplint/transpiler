@@ -17,6 +17,6 @@ export function collect(source: ICharacter | Table, target?: Table) {
       insertInternal({table: target, data: source});
     }
   } else {
-    throw "COLLECT, no target specified";
+    throw new Error("COLLECT, no target specified");
   }
 }

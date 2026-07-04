@@ -15,7 +15,7 @@ export function round(input: {val: ICharacter | string, dec: INumeric | number, 
   const val = parse(input.val);
   const dec = parse(input.dec);
   if (dec !== 0) {
-    throw "round(), todo, handle decimals";
+    throw new Error("round(), todo, handle decimals");
   }
 
   const ret = new Float();
@@ -36,7 +36,7 @@ export function round(input: {val: ICharacter | string, dec: INumeric | number, 
       ret.set(Math.floor(val));
       break;
     default:
-      throw "round(), unknown mode: " + mode;
+      throw new Error("round(), unknown mode: " + mode);
   }
 
   return ret;

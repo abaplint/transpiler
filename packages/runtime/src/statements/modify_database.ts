@@ -30,6 +30,6 @@ export async function modifyDatabase(table: string | ICharacter, options: IModif
       await updateDatabase(table, {from: options.values}, context);
     }
   } else {
-    throw "modifyDatabase todo";
+    throw new Error("modifyDatabase todo");
   }
 }

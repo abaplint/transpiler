@@ -39,7 +39,7 @@ describe("Running statements - REPLACE", () => {
       await f(abap);
       expect.fail();
     } catch (e) {
-      expect(e).to.contain("REPLACE, zero length input");
+      expect(e.toString()).to.contain("REPLACE, zero length input");
     }
   });
 

@@ -7,11 +7,11 @@ import {Integer8} from "./integer8";
 /*
 function getNumberParts(x: number) {
   if(isNaN(x)) {
-    throw "Float NaN";
+    throw new Error("Float NaN";
   }
   const sig = x > 0 ? 1 : -1;
   if (!isFinite(x)) {
-    throw "Float not finite";
+    throw new Error("Float not finite";
   }
   x = Math.abs(x);
   const exp = Math.floor(Math.log(x) * Math.LOG2E) - 52;

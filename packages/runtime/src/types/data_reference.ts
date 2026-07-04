@@ -58,7 +58,7 @@ export class DataReference  {
 
   public get() {
     if (this.pointer === this) {
-      throw "Cyclic data reference";
+      throw new Error("Cyclic data reference");
     }
     // @ts-ignore
     return this.pointer?.get();

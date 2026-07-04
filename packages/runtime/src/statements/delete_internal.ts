@@ -48,7 +48,7 @@ export async function deleteInternal(target: Table | HashedTable | FieldSymbol, 
 
   if (options?.to) {
     if (options?.from !== undefined || options?.where !== undefined) {
-      throw "DeleteInternalTodo";
+      throw new Error("DeleteInternalTodo");
     }
     for (let i = 0; i < options.to.get(); i++) {
       target.deleteIndex(0);
