@@ -36,7 +36,9 @@ export class HandleDDLS implements ITranspilerPlugin {
   }
 
   private buildView(obj: abaplint.Objects.DataDefinition, reg: abaplint.IRegistry, quote: string): string | undefined {
-    obj.parse();
+    if (obj.getParsedData() === undefined) {
+      obj.parse();
+    }
     const parsed = obj.getParsedData();
     const source = parsed?.sources[0];
     if (parsed === undefined || source === undefined || parsed.fields.length === 0) {
