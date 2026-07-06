@@ -1,5 +1,5 @@
-import {throwError} from "../throw_error";
-import {Character, Date, FieldSymbol, Packed} from "../types";
+import {throwErrorWithParameters} from "../throw_error";
+import {Character, Date, FieldSymbol, Packed, String} from "../types";
 import {ICharacter} from "../types/_character";
 
 export async function unpack(source: ICharacter | FieldSymbol | Packed,
@@ -25,7 +25,7 @@ export async function unpack(source: ICharacter | FieldSymbol | Packed,
     const sourceValue = source.getTrimEnd().trimStart();
 
     if (sourceValue.length > 0 && /^\d+$/.test(sourceValue) === false) {
-      throwError("CX_SY_CONVERSION_NO_NUMBER");
+      await throwErrorWithParameters("CX_SY_CONVERSION_NO_NUMBER", {value: new String().set(sourceValue)});
     }
 
     target.set(sourceValue.padStart(target.getLength(), "0"));
