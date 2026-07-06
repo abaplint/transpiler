@@ -3,7 +3,7 @@ import {INumeric} from "./_numeric";
 import {throwError} from "../throw_error";
 import {Integer8} from "./integer8";
 
-const digits = new RegExp(/^\s*-?\+?\d*\.?\d* *$/i);
+const digits = new RegExp(/^\s*-?\+?\d*\.?\d*(?:E[+-]?\d+)? *$/i);
 
 export class Packed implements INumeric {
   // todo: change this to bigint to get the proper precision? for larger than maxsafeint
