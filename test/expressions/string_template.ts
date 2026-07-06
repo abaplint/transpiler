@@ -446,4 +446,13 @@ WRITE / mv_objnr.`;
     expect(abap.console.get().trimEnd()).to.equal("OR0000000001");
   });
 
+  it.only("ALPHA IN, initial", async () => {
+    const code = `DATA lv_upper_sscc TYPE c LENGTH 20.
+lv_upper_sscc = |{ lv_upper_sscc ALPHA = IN }|.
+ASSERT lv_upper_sscc IS INITIAL.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
