@@ -323,7 +323,7 @@ WRITE: / |Converted quantity: { lv_qty }|.`;
     expect(abap.console.get()).to.include("Converted quantity: 1.00");
   });
 
-  it.only("another, CONV", async () => {
+  it("another, CONV", async () => {
     const code = `
 FORM bar.
     TYPES ty_lfimg TYPE p LENGTH 7 DECIMALS 3.
