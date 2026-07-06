@@ -323,4 +323,22 @@ WRITE: / |Converted quantity: { lv_qty }|.`;
     expect(abap.console.get()).to.include("Converted quantity: 1.00");
   });
 
+  it.only("another, CONV", async () => {
+    const code = `
+FORM bar.
+    TYPES ty_lfimg TYPE p LENGTH 7 DECIMALS 3.
+    DATA(lv_sum) = CONV string( 0 ).
+    DATA(lv_quantity) = CONV string( '0.090' ).
+    lv_sum = lv_sum + lv_quantity.
+    DATA(lv_packed) = CONV ty_lfimg( lv_sum ).
+    ASSERT lv_packed = CONV ty_lfimg( '0.090' ).
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
