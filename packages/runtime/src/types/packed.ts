@@ -102,7 +102,8 @@ export class Packed implements INumeric {
 
     const kept = fracPart.slice(0, this.decimals).padEnd(this.decimals, "0");
     let scaled = BigInt(intPart + kept);
-    if (fracPart.length > this.decimals && (fracPart.charCodeAt(this.decimals) - 48) >= 5) {
+    // round half up based on the first dropped fractional digit
+    if (fracPart.length > this.decimals && fracPart[this.decimals] >= "5") {
       scaled += 1n;
     }
 
