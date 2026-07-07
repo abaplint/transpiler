@@ -45,9 +45,9 @@ export class String implements ICharacter {
     } else if (value instanceof Structure) {
       this.value = value.getCharacter().trimEnd();
     } else if (value instanceof Packed) {
-      const lv_sign = (value as Packed).get() >= 0 ? " " : "-";
-      this.value = Math.abs((value as Packed).get()).toFixed(value.getDecimals());
-      this.value += lv_sign;
+      const fixed = (value as Packed).toFixed(value.getDecimals());
+      const lv_sign = fixed.startsWith("-") ? "-" : " ";
+      this.value = (fixed.startsWith("-") ? fixed.slice(1) : fixed) + lv_sign;
     } else if (value instanceof Integer) {
       const lv_sign = (value as Integer).get() >= 0 ? " " : "-";
       this.value = Math.abs((value as Integer).get()) + "";

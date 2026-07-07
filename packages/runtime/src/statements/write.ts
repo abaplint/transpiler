@@ -57,14 +57,12 @@ export class WriteStatement {
           result = source.get().toString();
         }
       } else if (source instanceof Packed) {
-        let num = source.get();
-        let decimals = source.getDecimals();
         if (NO_DEICMAL_CURRENCIES.includes(options?.currency?.get().trimEnd() || "")) {
 // todo: more work needed here,
-          num = num * 100;
-          decimals = 0;
+          result = (source.get() * 100).toFixed(0).replace(".", ",");
+        } else {
+          result = source.toFixed(source.getDecimals()).replace(".", ",");
         }
-        result = num.toFixed(decimals).replace(".", ",");
         right = true;
       } else {
         result = source.get().toString();
