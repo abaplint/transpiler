@@ -51,9 +51,9 @@ export function templateFormatting(source: ICharacter | INumeric, options?: opti
     }
   } else if (source instanceof Packed) {
     if (options?.decimals) {
-      text = source.get().toFixed(options.decimals);
+      text = source.toFixed(options.decimals);
     } else {
-      text = source.get().toFixed(source.getDecimals());
+      text = source.toFixed(source.getDecimals());
     }
   } else {
     text = source.get() + "";
