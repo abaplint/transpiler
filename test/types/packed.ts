@@ -341,4 +341,17 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("timestampl, high precision, no floating point rounding", async () => {
+    const code = `
+    DATA lv_timestampl TYPE p LENGTH 11 DECIMALS 7.
+    DATA lv_str TYPE string.
+    lv_timestampl = '20210505120000.123456'.
+    lv_str = |{ lv_timestampl }|.
+    WRITE lv_str.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("20210505120000.1234560");
+  });
+
 });
