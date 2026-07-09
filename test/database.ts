@@ -2148,6 +2148,59 @@ SELECT (lt_fields)
     }, {snowflake: false});
   });
 
+  it("SELECT, dynamic field list as table, with sql function", async () => {
+    const code = `
+DATA lt_result TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+DATA lt_select TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+DATA lv TYPE string.
+
+APPEND \`LEFT( arbgb, 3 ) AS pre\` TO lt_select.
+
+SELECT (lt_select)
+  FROM t100
+  INTO CORRESPONDING FIELDS OF TABLE @lt_result
+  UP TO 3 ROWS.
+
+WRITE / sy-dbcnt.
+LOOP AT lt_result INTO lv.
+  WRITE / lv.
+ENDLOOP.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2\nZAG\nZAG");
+    }, {snowflake: false});
+  });
+
+  it("SELECT, dynamic field list as table, with RIGHT sql function", async () => {
+    const code = `
+DATA lt_result TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+DATA lt_select TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+DATA lv TYPE string.
+
+APPEND \`RIGHT( msgnr, 2 ) AS suf\` TO lt_select.
+
+SELECT (lt_select)
+  FROM t100
+  INTO CORRESPONDING FIELDS OF TABLE @lt_result
+  UP TO 3 ROWS
+  ORDER BY msgnr.
+
+WRITE / sy-dbcnt.
+LOOP AT lt_result INTO lv.
+  WRITE / lv.
+ENDLOOP.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2\n00\n23");
+    }, {snowflake: false});
+  });
+
   it("basic VIEW", async () => {
     const zview = `<?xml version="1.0" encoding="utf-8"?>
 <abapGit version="v1.0.0" serializer="LCL_OBJECT_VIEW" serializer_version="v1.0.0">

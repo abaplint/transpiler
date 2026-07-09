@@ -145,6 +145,9 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     options.select = options.select.replace(/ DESCENDING/ig, " DESC");
     options.select = options.select.replace(/~/g, ".");
     options.select = options.select.replace(/ LIMIT 0/g, ""); // hack, todo
+    // SQLite has no LEFT()/RIGHT() functions, translate to substr()
+    options.select = options.select.replace(/\bLEFT\s*\(\s*(.+?)\s*,\s*(\d+)\s*\)/ig, "substr($1, 1, $2)");
+    options.select = options.select.replace(/\bRIGHT\s*\(\s*(.+?)\s*,\s*(\d+)\s*\)/ig, "substr($1, -$2)");
 
     if (this.trace === true) {
       console.log(options.select);
