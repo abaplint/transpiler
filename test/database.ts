@@ -1040,10 +1040,34 @@ WRITE sy-dbcnt.`;
     }, {snowflake: false});
   });
 
-  it("order by dynamic tab", async () => {
+  it("order by dynamic tab, empty", async () => {
     const code = `
 DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
 DATA lt_order TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+
+SELECT arbgb, msgnr
+  FROM t100
+  INTO CORRESPONDING FIELDS OF TABLE @lt_t100
+  UP TO 100 ROWS
+  ORDER BY (lt_order).
+WRITE sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test},
+    ];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2");
+    }, {snowflake: false});
+  });
+
+  it("order by dynamic tab, two entries", async () => {
+    const code = `
+DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+DATA lt_order TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+
+APPEND 'ARBGB' TO lt_order.
+APPEND 'MSGNR' TO lt_order.
 
 SELECT arbgb, msgnr
   FROM t100
