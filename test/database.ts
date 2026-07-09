@@ -1040,10 +1040,34 @@ WRITE sy-dbcnt.`;
     }, {snowflake: false});
   });
 
-  it("order by dynamic tab", async () => {
+  it("order by dynamic tab, empty", async () => {
     const code = `
 DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
 DATA lt_order TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+
+SELECT arbgb, msgnr
+  FROM t100
+  INTO CORRESPONDING FIELDS OF TABLE @lt_t100
+  UP TO 100 ROWS
+  ORDER BY (lt_order).
+WRITE sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test},
+    ];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2");
+    }, {snowflake: false});
+  });
+
+  it("order by dynamic tab, two entries", async () => {
+    const code = `
+DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+DATA lt_order TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+
+APPEND 'ARBGB' TO lt_order.
+APPEND 'MSGNR' TO lt_order.
 
 SELECT arbgb, msgnr
   FROM t100
@@ -2145,6 +2169,59 @@ SELECT (lt_fields)
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("");
+    }, {snowflake: false});
+  });
+
+  it("SELECT, dynamic field list as table, with sql function", async () => {
+    const code = `
+DATA lt_result TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+DATA lt_select TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+DATA lv TYPE string.
+
+APPEND \`LEFT( arbgb, 3 ) AS pre\` TO lt_select.
+
+SELECT (lt_select)
+  FROM t100
+  INTO CORRESPONDING FIELDS OF TABLE @lt_result
+  UP TO 3 ROWS.
+
+WRITE / sy-dbcnt.
+LOOP AT lt_result INTO lv.
+  WRITE / lv.
+ENDLOOP.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2\nZAG\nZAG");
+    }, {snowflake: false});
+  });
+
+  it("SELECT, dynamic field list as table, with RIGHT sql function", async () => {
+    const code = `
+DATA lt_result TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+DATA lt_select TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+DATA lv TYPE string.
+
+APPEND \`RIGHT( msgnr, 2 ) AS suf\` TO lt_select.
+
+SELECT (lt_select)
+  FROM t100
+  INTO CORRESPONDING FIELDS OF TABLE @lt_result
+  UP TO 3 ROWS
+  ORDER BY msgnr.
+
+WRITE / sy-dbcnt.
+LOOP AT lt_result INTO lv.
+  WRITE / lv.
+ENDLOOP.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2\n00\n23");
     }, {snowflake: false});
   });
 

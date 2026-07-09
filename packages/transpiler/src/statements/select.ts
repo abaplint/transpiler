@@ -176,7 +176,7 @@ export class SelectTranspiler implements IStatementTranspiler {
 
   private dynamicSQLClause(keyword: string, code: string): string {
     return `(${code} instanceof abap.types.Table || ${code} instanceof abap.types.HashedTable`
-      + ` ? (${code}.array().length === 0 ? "" : "${keyword} " + ${code}.array().map(row => row.get()).join(" "))`
+      + ` ? (${code}.array().length === 0 ? "" : "${keyword} " + ${code}.array().map(row => row.get()).join(", "))`
       + ` : "${keyword} " + ${code}.get())`;
   }
 
