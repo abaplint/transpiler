@@ -2,7 +2,6 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {UniqueIdentifier} from "../unique_identifier";
 
 export class ReturnTranspiler implements IStatementTranspiler {
 
@@ -20,8 +19,9 @@ export class ReturnTranspiler implements IStatementTranspiler {
     }
 
     let pre = "";
-    if (traversal.isInsideDoOrWhile(node)) {
-      pre = `abap.builtin.sy.get().index.set(${UniqueIdentifier.getIndexBackup1()});\n`;
+    const syIndexBackup = traversal.findCurrentDoOrWhileIndexBackup(node);
+    if (syIndexBackup !== undefined) {
+      pre = `abap.builtin.sy.get().index.set(${syIndexBackup});\n`;
     }
 
     if (scope?.getIdentifier().stype === abaplint.ScopeType.Method

@@ -16,6 +16,7 @@ export class Traversal {
   private readonly file: abaplint.ABAPFile;
   private readonly obj: abaplint.ABAPObject;
   private sqlInferredType: abaplint.AbstractType | undefined;
+  private readonly doOrWhileIndexBackups: Map<abaplint.Nodes.StatementNode, string> = new Map();
   public readonly reg: abaplint.IRegistry;
   public readonly options: ITranspilerOptions | undefined;
 
@@ -869,13 +870,21 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
   }
 
   public isInsideDoOrWhile(node: abaplint.Nodes.StatementNode): boolean {
-    const stack: abaplint.Nodes.StatementNode[] = [];
+    return this.findCurrentDoOrWhileIndexBackup(node) !== undefined;
+  }
+
+  public registerDoOrWhileIndexBackup(node: abaplint.Nodes.StatementNode, name: string): void {
+    this.doOrWhileIndexBackups.set(node, name);
+  }
+
+  public findCurrentDoOrWhileIndexBackup(node: abaplint.Nodes.StatementNode): string | undefined {
+    const stack: (string | undefined)[] = [];
 
     for (const statement of this.getFile().getStatements()) {
       const get = statement.get();
       if (get instanceof abaplint.Statements.While
           || get instanceof abaplint.Statements.Do) {
-        stack.push(statement);
+        stack.push(this.doOrWhileIndexBackups.get(statement));
       } else if (get instanceof abaplint.Statements.EndWhile
           || get instanceof abaplint.Statements.EndDo) {
         stack.pop();
@@ -885,7 +894,7 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
       }
     }
 
-    return stack.length > 0;
+    return stack[stack.length - 1];
   }
 
   public registerClassOrInterface(def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined): string {
