@@ -397,4 +397,17 @@ WRITE result.`;
     await f(abap);
   });
 
+  it("multiply two short hex values", async () => {
+    const code = `
+    DATA byte_a TYPE x LENGTH 1 VALUE '02'.
+    DATA byte_b TYPE x LENGTH 1 VALUE '03'.
+    DATA lt_acc TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+    APPEND 0 TO lt_acc.
+    lt_acc[ 1 ] = lt_acc[ 1 ] + byte_a * byte_b.
+    ASSERT lt_acc[ 1 ] = 6.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
