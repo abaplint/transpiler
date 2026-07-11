@@ -83,6 +83,7 @@ describe("Single statements", () => {
     {abap: "IF ls_request-body = ''.\nENDIF.",        js: "if (abap.compare.eq(ls_request.get().body, abap.CharacterFactory.get(1, ''))) {\n}",  skip: false},
     {abap: "CONCATENATE 'foo' 'bar' INTO target.",    js: "abap.statements.concatenate({source: [abap.CharacterFactory.get(3, 'foo'), abap.CharacterFactory.get(3, 'bar')], target: target});", skip: false},
     {abap: "CONCATENATE foo bar INTO tg SEPARATED BY space.",    js: "abap.statements.concatenate({source: [foo, bar], target: tg, separatedBy: abap.builtin.space});", skip: false},
+    {abap: "CONCATENATE foo bar INTO tg IN BYTE MODE.",    js: "abap.statements.concatenate({source: [foo, bar], target: tg, byteMode: true});", skip: false},
     {abap: "zcl_bar=>do_something( ).",               js: "await abap.Classes['ZCL_BAR'].do_something();",                               skip: false},
     {abap: "SET BIT foo OF bar.",                     js: "abap.statements.setBit(foo, bar);",                     skip: false},
     {abap: "SET BIT foo OF bar TO moo.",              js: "abap.statements.setBit(foo, bar, moo);",                skip: false},

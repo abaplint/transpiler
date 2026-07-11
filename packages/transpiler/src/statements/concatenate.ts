@@ -26,6 +26,9 @@ export class ConcatenateTranspiler implements IStatementTranspiler {
     if (concat.includes(" RESPECTING BLANKS")) {
       extra += ", respectingBlanks: true";
     }
+    if (concat.includes(" IN BYTE MODE")) {
+      extra += ", byteMode: true";
+    }
 
     const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target));
 
