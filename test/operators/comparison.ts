@@ -619,6 +619,18 @@ ASSERT foo IS INITIAL.`;
     await f(abap);
   });
 
+  it("space substring compared with char1", async () => {
+    const code = `
+DATA text      TYPE string VALUE \`a b\`.
+DATA character TYPE c LENGTH 1.
+character = text+1(1).
+ASSERT character <> text+1(1).
+ASSERT character IS INITIAL.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("NP example", async () => {
     const code = `
     ASSERT 'aa 01.01.0001 foo' NP |++.++.++++ *|.`;

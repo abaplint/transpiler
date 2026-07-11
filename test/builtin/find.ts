@@ -210,4 +210,17 @@ WRITE lv_offset.`;
     await f(abap);
   });
 
+  it("FIND FIRST OCCURRENCE treats anchors as literals", async () => {
+    const code = `
+    DATA offset TYPE i.
+    FIND FIRST OCCURRENCE OF '$' IN 'abc' MATCH OFFSET offset.
+    ASSERT sy-subrc = 4.
+    FIND FIRST OCCURRENCE OF '^' IN 'a^b' MATCH OFFSET offset.
+    ASSERT sy-subrc = 0.
+    ASSERT offset = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
