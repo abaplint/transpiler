@@ -88,13 +88,13 @@ function concatenateByteMode(input: IConcatenateInput) {
     sep = rawByteValue(input.separatedBy);
   }
 
-  const list: string[] = [];
+  let result = "";
 
   if (input.lines === true) {
     const tab = input.source[0];
     if (tab instanceof Table) {
       for (const l of tab.array()) {
-        list.push(l.get().toString());
+        result += l.get().toString() + sep;
       }
     }
   } else {
@@ -102,9 +102,13 @@ function concatenateByteMode(input: IConcatenateInput) {
       if (source instanceof Table) {
         throw new Error("concatenate, error: input is table");
       }
-      list.push(rawByteValue(source));
+      result += rawByteValue(source) + sep;
     }
   }
 
-  input.target.set(list.join(sep));
+  if (sep.length > 0 && result.length > 0) {
+    result = result.slice(0, result.length - sep.length);
+  }
+
+  input.target.set(result);
 }
