@@ -44,16 +44,7 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
       return;
     }
 
-    s = s.replace(/\\/g, "\\\\");
-    s = s.replace(/\[/g, "\\[");
-    s = s.replace(/\]/g, "\\]");
-    s = s.replace(/\?/g, "\\?");
-    s = s.replace(/\(/g, "\\(");
-    s = s.replace(/\)/g, "\\)");
-    s = s.replace(/\./g, "\\.");
-    s = s.replace(/\|/g, "\\|");
-    s = s.replace(/\*/g, "\\*");
-    s = s.replace(/\+/g, "\\+");
+    s = ABAPRegExp.escapeRegExp(s);
 
     let flags = "g";
     if (options.ignoringCase === true) {
