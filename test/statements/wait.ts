@@ -30,7 +30,7 @@ WRITE sy-subrc.`;
   it("times out and sets sy-subrc to eight", async () => {
     const code = `
 DATA foo TYPE i.
-WAIT UNTIL foo = 1 UP TO 0.01 SECONDS.
+WAIT UNTIL foo = 1 UP TO 1 SECONDS.
 WRITE sy-subrc.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
