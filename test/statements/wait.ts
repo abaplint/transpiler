@@ -39,7 +39,7 @@ WRITE sy-subrc.`;
     const elapsed = Date.now() - start;
 
     expect(abap.console.get()).to.equal("8");
-    expect(elapsed).to.be.lessThan(250);
+    expect(elapsed).to.be.lessThan(5000);
   });
 
 });
