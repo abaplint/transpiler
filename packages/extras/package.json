@@ -29,11 +29,11 @@
   "license": "PolyForm-Noncommercial-1.0.0",
   "peerDependencies": {
     "@abaplint/core": "^2.119.65",
-    "@abaplint/transpiler": "^2.13.39"
+    "@abaplint/transpiler": "^2.13.40"
   },
   "devDependencies": {
     "@abaplint/core": "^2.119.65",
-    "@abaplint/transpiler": "^2.13.39",
+    "@abaplint/transpiler": "^2.13.40",
     "@types/chai": "^4.3.20",
     "@types/mocha": "^10.0.10",
     "@types/node": "^24.13.2",
