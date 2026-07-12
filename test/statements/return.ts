@@ -37,4 +37,35 @@ start-of-selection.
     expect(abap.console.get()).to.equal("4");
   });
 
+  it("inside WHILE in second CASE branch", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS run IMPORTING state TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    DATA cond TYPE abap_bool VALUE abap_true.
+    CASE state.
+      WHEN 1.
+        WHILE cond = abap_true.
+        ENDWHILE.
+      WHEN 2.
+        WHILE cond = abap_true.
+          RETURN.
+        ENDWHILE.
+    ENDCASE.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>run( state = 2 ).
+  WRITE 'after'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("after");
+  });
+
 });

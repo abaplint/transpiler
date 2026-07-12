@@ -51,8 +51,34 @@ describe("Running statements - CONCATENATE", () => {
     await f(abap);
   });
 
-  it("CONCATENATE, respecting blanks", async () => {
+  it("CONCATENATE xstring IN BYTE MODE", async () => {
     const code = `
+      DATA lv_x1 TYPE xstring.
+      DATA lv_x2 TYPE xstring.
+      DATA lv_res TYPE xstring.
+      lv_x1 = 'AB20'.
+      lv_x2 = 'CD00'.
+      CONCATENATE lv_x1 lv_x2 INTO lv_res IN BYTE MODE.
+      ASSERT lv_res = 'AB20CD00'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("CONCATENATE LINES OF xstring IN BYTE MODE", async () => {
+    const code = `
+      DATA lt_tab TYPE STANDARD TABLE OF xstring.
+      DATA lv_res TYPE xstring.
+      APPEND '2000' TO lt_tab.
+      APPEND '0020' TO lt_tab.
+      CONCATENATE LINES OF lt_tab INTO lv_res IN BYTE MODE.
+      ASSERT lv_res = '20000020'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("CONCATENATE, respecting blanks", async () => {    const code = `
     DATA character TYPE c LENGTH 1.
     DATA lv_str TYPE string.
     character = ' '.
