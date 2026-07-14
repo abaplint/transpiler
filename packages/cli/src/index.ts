@@ -78,32 +78,37 @@ async function writeObjects(outputFiles: Transpiler.IOutputFile[],
   const filesToWrite: {path: string, contents: string}[] = [];
 
   for (const output of outputFiles) {
+    const type = output.object.type.toUpperCase();
     let contents = output.chunk.getCode();
+
+    // PROG output gets a runtime bootstrap line prepended, which shifts every
+    // generated line down by one - the source map must account for this offset
+    let generatedLineOffset = 0;
+    if (type === "PROG") {
+      // hmm, will this work for INCLUDEs ?
+      contents = `if (!globalThis.abap) await import("./_init.mjs");\n` + contents;
+      generatedLineOffset = 1;
+    }
+
     if (writeSourceMaps === true
-        && output.object.type.toUpperCase() === "PROG"
-        && output.object.type.toUpperCase() === "FUGR"
-        && output.object.type.toUpperCase() === "CLAS") {
+        && (type === "PROG" || type === "FUGR" || type === "CLAS")) {
       const name = output.filename + ".map";
 // SourceMappingUrl needs to be percent-encoded, ref https://github.com/microsoft/TypeScript/issues/40951
       contents = contents + `\n//# sourceMappingURL=` + name.replace(/#/g, "%23");
-      let map = output.chunk.getMap(output.filename);
-      for (const f of files) { // hack the paths to the original files
+
+      // map the bare abap filename each mapping carries to its path on disk
+      const sourcePaths: {[filename: string]: string} = {};
+      for (const f of files) {
         if (f.relative === undefined) {
           continue;
         }
-        if (map.includes(`"${f.filename}"`)) {
-          let withPath = `"${f.relative}${path.sep}${f.filename}"`;
-          withPath = withPath.replace(/\\/g, "\\\\");
-          map = map.replace(`"${f.filename}"`, withPath);
-        }
+        sourcePaths[f.filename] = `${f.relative}${path.sep}${f.filename}`;
       }
+
+      const map = output.chunk.getMap(output.filename, {generatedLineOffset, sourcePaths});
       filesToWrite.push({path: outputFolder + path.sep + name, contents: map});
     }
 
-    if (output.object.type.toUpperCase() === "PROG") {
-      // hmm, will this work for INCLUDEs ?
-      contents = `if (!globalThis.abap) await import("./_init.mjs");\n` + contents;
-    }
     filesToWrite.push({path: outputFolder + path.sep + output.filename, contents});
   }
 

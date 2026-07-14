@@ -10,6 +10,22 @@
 * Database table buffering settings ignored, everything is always in the db
 * No XSLT or Simple Transformations
 
+# Source maps
+
+Generated code carries source-map mappings back to the original ABAP. Conventions for
+transpilers:
+
+* The first `Chunk.append()` of a statement uses the statement's first token position
+  (`node.getFirstToken().getStart()` or just `node`), so the generated statement maps
+  to the start of the ABAP statement — what a debugger needs for breakpoints/stepping.
+* Sub-expression chunks from `traversal.traverse(...)` are combined with
+  `Chunk.appendChunk()`, never flattened via `chunk.getCode()` — flattening discards
+  the expression-level mappings the traversal already produced.
+* Trailing generated syntax (`;`, `)`, `.clear()`, ...) is appended with the statement's
+  last token (`node.getLastToken()`), not `getLastToken().getEnd()` which points one
+  column past the statement.
+* `statements/clear.ts` is the reference implementation of these conventions.
+
 # Statements
 
 * WRITE statement

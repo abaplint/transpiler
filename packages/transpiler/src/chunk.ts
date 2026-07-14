@@ -43,13 +43,21 @@ export class Chunk {
     const lineCount = lines.length;
     const lastLine = lines[lines.length - 1];
     for (const m of append.mappings) {
-      // original stays the same, but adjust the generated positions
-      const add = m;
-      if (add.generated.line === 1 && this.raw.endsWith("\n") === false) {
+      // deep copy so the appended chunk's mappings are never mutated,
+      // otherwise appending the same chunk twice double-shifts its positions
+      const add: sourceMap.Mapping = {
+        source: m.source,
+        name: m.name,
+        generated: {line: m.generated.line, column: m.generated.column},
+        original: {line: m.original.line, column: m.original.column},
+      };
+      // original stays the same, but adjust the generated positions:
+      // the appended content begins at the end of the current buffer, so its
+      // first line continues lastLine, and every line moves down by lineCount-1
+      if (add.generated.line === 1) {
         add.generated.column += lastLine.length;
-      } else {
-        add.generated.line += lineCount - 1;
       }
+      add.generated.line += lineCount - 1;
       this.mappings.push(add);
     }
 
@@ -126,16 +134,18 @@ export class Chunk {
       if (l.startsWith("}")) {
         i = i - 1;
       }
-      if (i > 0) {
-        output.push(" ".repeat(i * 2) + l);
+      // clamp so unbalanced braces never produce a negative indent/shift
+      const indent = i > 0 ? i * 2 : 0;
+      if (indent > 0) {
+        output.push(" ".repeat(indent) + l);
       } else {
         output.push(l);
       }
 
-// fix maps
+// fix maps: shift columns by the indentation actually applied to this line
       for (const m of this.mappings) {
         if (m.generated.line === line) {
-          m.generated.column += i * 2;
+          m.generated.column += indent;
         }
       }
 
@@ -150,9 +160,25 @@ export class Chunk {
     return this;
   }
 
-  public getMap(generatedFilename: string): string {
+  /**
+   * @param generatedFilename name written to the "file" field of the map
+   * @param options.generatedLineOffset number of lines prepended to the generated
+   *   output after this chunk was built (e.g. a runtime import line); every mapping
+   *   is shifted down by this amount so the map stays aligned with the file on disk
+   * @param options.sourcePaths maps a mapping "source" (the bare abap filename) to
+   *   the path that should appear in the map, avoiding fragile post-hoc string edits
+   */
+  public getMap(generatedFilename: string, options?: {generatedLineOffset?: number, sourcePaths?: {[filename: string]: string}}): string {
+    const offset = options?.generatedLineOffset ?? 0;
+    const sourcePaths = options?.sourcePaths ?? {};
+
     const sourceMapGenerator = new sourceMap.SourceMapGenerator();
-    this.mappings.forEach(m => sourceMapGenerator.addMapping(m));
+    this.mappings.forEach(m => sourceMapGenerator.addMapping({
+      source: sourcePaths[m.source] ?? m.source,
+      name: m.name,
+      original: m.original,
+      generated: {line: m.generated.line + offset, column: m.generated.column},
+    }));
 
     const json = sourceMapGenerator.toJSON();
     json.file = generatedFilename;

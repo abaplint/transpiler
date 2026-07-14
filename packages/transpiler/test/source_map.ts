@@ -52,6 +52,33 @@ ENDIF.`;
     expect(perLine[1]).to.equal(4);
   });
 
+  it("CLEAR, target and trailing syntax mapped", async () => {
+    const abap = `DATA foo TYPE i.
+CLEAR foo.`;
+
+    const result = await runSingleMapped(abap, OPTIONS);
+    // the CLEAR statement is generated as "foo.clear();"
+    expect(result?.js).to.include("foo.clear();");
+
+    const consumer = await new sourceMap.SourceMapConsumer(JSON.parse(result!.map!));
+    const clearLine = result!.js.split("\n").findIndex(l => l.includes("foo.clear();")) + 1;
+
+    // the target "foo" (generated column 0) maps back to CLEAR's operand on abap line 2
+    const target = consumer.originalPositionFor({line: clearLine, column: 0});
+    expect(target.line).to.equal(2);
+
+    // there must also be a mapping for the ".clear();" trailing syntax on the same line
+    let mappingsOnClearLine = 0;
+    consumer.eachMapping(m => {
+      if (m.generatedLine === clearLine) {
+        mappingsOnClearLine++;
+        // every original position must sit within the abap source (line >= 1)
+        expect(m.originalLine).to.be.greaterThan(0);
+      }
+    });
+    expect(mappingsOnClearLine).to.be.greaterThan(1);
+  });
+
   it("global CLAS", async () => {
     const abap = `CLASS zcl_maptest DEFINITION PUBLIC CREATE PUBLIC.
 PUBLIC SECTION.

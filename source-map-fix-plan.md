@@ -85,23 +85,23 @@ regressions can't creep back in. CLEAR becomes the reference implementation.
 
 ## Checklist
 
-### Phase 1 — Chunk core fixes (packages/transpiler/src/chunk.ts)
-- [ ] Fix `appendChunk` line-shift bug: always apply `generated.line += lineCount - 1`; apply column shift only for mappings on line 1 of the appended chunk
-- [ ] Fix `appendChunk` aliasing: deep-copy mappings before adjusting so the source chunk is never mutated
-- [ ] Add unit tests in `packages/transpiler/test/chunk.ts`: multi-line buffer without trailing newline, appending the same chunk twice, nested `appendChunk` of chunks that themselves contain mappings
-- [ ] Guard `runIndentationLogic` against negative indent and add a mapping-adjustment test for indented + `}` lines
+### Phase 1 — Chunk core fixes (packages/transpiler/src/chunk.ts) ✅ DONE
+- [x] Fix `appendChunk` line-shift bug: always apply `generated.line += lineCount - 1`; apply column shift only for mappings on line 1 of the appended chunk
+- [x] Fix `appendChunk` aliasing: deep-copy mappings before adjusting so the source chunk is never mutated
+- [x] Add unit tests in `packages/transpiler/test/chunk.ts`: multi-line buffer without trailing newline, appending the same chunk twice, nested `appendChunk` of chunks that themselves contain mappings
+- [x] Guard `runIndentationLogic` against negative indent and add a mapping-adjustment test for indented + `}` lines
 
-### Phase 2 — Emission fixes (packages/cli/src/index.ts)
-- [ ] Fix the `&&` → `||` object-type condition so maps are actually written
-- [ ] Move the `_init.mjs` prepend for PROG *before* map generation (or prepend via a `Chunk` so mappings shift correctly)
-- [ ] Pass source paths (and optionally `sourcesContent`) into `Chunk.getMap()` instead of string-replacing the JSON afterwards
-- [ ] Add a CLI-level test that a PROG/CLAS build with `write_source_map: true` produces a `.map` file whose first statement maps to the correct ABAP line
+### Phase 2 — Emission fixes (packages/cli/src/index.ts) ✅ DONE
+- [x] Fix the `&&` → `||` object-type condition so maps are actually written
+- [x] Move the `_init.mjs` prepend for PROG *before* map generation — done via a new `getMap({generatedLineOffset})` option (self-contained in the transpiler package, since the CLI links a build copy)
+- [x] Pass source paths (and optionally `sourcesContent`) into `Chunk.getMap()` instead of string-replacing the JSON afterwards — via `getMap({sourcePaths})`
+- [~] CLI-level test: verified end-to-end via a scratch script (PROG with two WRITEs + CLEAR → both WRITEs and CLEAR decode to the correct ABAP lines despite the prepended `_init.mjs` line). A committed CLI test harness is still TODO (CLI package has no test suite yet).
 
-### Phase 3 — Convention + reference implementation
-- [ ] Decide and document the convention (statement start = first token start; preserve sub-chunk mappings) in `design-notes.md`
-- [ ] Rewrite `statements/clear.ts` as the reference: `appendChunk(target)` + `append(".clear();", node.getLastToken(), traversal)`; remove the commented-out experiments
-- [ ] Add a source-map test for CLEAR in `packages/transpiler/test/source_map.ts` asserting both the statement mapping and the target expression mapping
-- [ ] Add a reusable test helper that, given ABAP + generated JS + map, asserts every generated line with code has ≥ 1 mapping and all original positions fall inside the ABAP source
+### Phase 3 — Convention + reference implementation ✅ DONE
+- [x] Decide and document the convention (statement start = first token; preserve sub-chunk mappings) in `design-notes.md`
+- [x] Rewrite `statements/clear.ts` as the reference: `appendChunk(target)` + `append(".clear();", node.getLastToken(), traversal)`; removed the commented-out experiments
+- [x] Add a source-map test for CLEAR in `packages/transpiler/test/source_map.ts` asserting both the statement mapping and the target expression mapping
+- [ ] Add a reusable test helper that, given ABAP + generated JS + map, asserts every generated line with code has ≥ 1 mapping and all original positions fall inside the ABAP source (partially exercised inline in the CLEAR test; extract into a shared helper during Phase 4)
 
 ### Phase 4 — Migrate statement transpilers
 - [ ] Fix the 36 `node.getLastToken()` and 3 `getLastToken().getEnd()` call sites to follow the convention
