@@ -1,7 +1,13 @@
 import {expect} from "chai";
 import * as sourceMap from "source-map";
+import * as fs from "fs";
+import * as os from "os";
+import * as path from "path";
+import {execFileSync} from "child_process";
+import {Position} from "@abaplint/core";
 import {ITranspilerOptions} from "../src/types";
-import {runSingleMapped} from "./_utils";
+import {Chunk} from "../src/chunk";
+import {runSingleMapped, validateSourceMap} from "./_utils";
 
 const OPTIONS: ITranspilerOptions = {
   ignoreSyntaxCheck: true,
@@ -50,6 +56,29 @@ ENDIF.`;
 
     const perLine = await countMappingsPerGeneratedLine(result?.map);
     expect(perLine[1]).to.equal(4);
+  });
+
+  it("LOOP head and target-assignment line both map", async () => {
+    const abap = `DATA foo TYPE i.
+DATA tab TYPE STANDARD TABLE OF i.
+LOOP AT tab INTO foo.
+  WRITE foo.
+ENDLOOP.`;
+
+    const result = await runSingleMapped(abap, OPTIONS);
+    const consumer = await new sourceMap.SourceMapConsumer(JSON.parse(result!.map!));
+    const jsLines = result!.js.split("\n");
+
+    const headIdx = jsLines.findIndex(l => l.includes("abap.statements.loop("));
+    const targetIdx = jsLines.findIndex(l => l.includes("foo.set(") && l.includes("unique"));
+    expect(headIdx).to.be.greaterThan(-1);
+    expect(targetIdx).to.be.greaterThan(-1);
+
+    // both the "for await(...)" head and the "foo.set(unique)" line map to the LOOP (abap line 3);
+    // use each line's first non-whitespace column since the body line is indented
+    const codeCol = (l: string) => l.length - l.trimStart().length;
+    expect(consumer.originalPositionFor({line: headIdx + 1, column: codeCol(jsLines[headIdx])}).line).to.equal(3);
+    expect(consumer.originalPositionFor({line: targetIdx + 1, column: codeCol(jsLines[targetIdx])}).line).to.equal(3);
   });
 
   it("CLEAR, target and trailing syntax mapped", async () => {
@@ -138,6 +167,82 @@ export {zcl_maptest};`;
 
     const perLine = await countMappingsPerGeneratedLine(result?.map);
     expect(perLine[21]).to.equal(3); // the WRITE statement
+  });
+
+  it("method body: each statement kind resolves back to its abap line", async () => {
+    const abap = `CLASS zcl_cov DEFINITION PUBLIC CREATE PUBLIC.
+PUBLIC SECTION.
+  METHODS run.
+ENDCLASS.
+CLASS zcl_cov IMPLEMENTATION.
+  METHOD run.
+    DATA lv_i TYPE i.
+    DATA lt_tab TYPE STANDARD TABLE OF i.
+    lv_i = 2.
+    CLEAR lv_i.
+    APPEND lv_i TO lt_tab.
+    LOOP AT lt_tab INTO lv_i.
+      WRITE lv_i.
+    ENDLOOP.
+    DO 3 TIMES.
+      lv_i = lv_i + 1.
+    ENDDO.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const result = await runSingleMapped(abap, OPTIONS, "zcl_cov.clas.abap");
+    // validateSourceMap throws if any mapping points outside the abap source
+    await validateSourceMap(abap, result!.js, result!.map!);
+
+    // each statement I wrote in the body must resolve back to its abap line;
+    // collect the set of original lines the map covers and check the key ones
+    const consumer = await new sourceMap.SourceMapConsumer(JSON.parse(result!.map!));
+    const coveredOriginalLines = new Set<number>();
+    consumer.eachMapping(m => {
+      if (m.originalLine !== null) {
+        coveredOriginalLines.add(m.originalLine);
+      }
+    });
+
+    // 7=DATA 9=assign 10=CLEAR 11=APPEND 12=LOOP 13=WRITE 15=DO 16=assign
+    for (const abapLine of [7, 9, 10, 11, 12, 13, 15, 16]) {
+      expect(coveredOriginalLines.has(abapLine), `abap line ${abapLine} should be mapped`).to.equal(true);
+    }
+  });
+
+  it("node --enable-source-maps rewrites the stack to the source file", async () => {
+    // end-to-end: the map we emit must be consumable by V8's built-in source-map
+    // support (the same machinery VS Code uses). Build a tiny executable file
+    // through the real Chunk/getMap pipeline, run it, and inspect the stack.
+    const trav = {getFilename: () => "zsrc.abap"};
+    const c = new Chunk();
+    c.append("function boom() {", new Position(1, 1), trav);
+    c.appendString("\n");
+    c.append("throw new Error('boom from abap');", new Position(2, 3), trav); // abap 2:3
+    c.appendString("\n}\n");
+    c.append("boom();", new Position(4, 1), trav); // abap 4:1
+    c.appendString("\n");
+    c.runIndentationLogic();
+
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "smtest-"));
+    try {
+      const js = c.getCode() + "\n//# sourceMappingURL=prog.mjs.map";
+      fs.writeFileSync(path.join(dir, "prog.mjs"), js);
+      fs.writeFileSync(path.join(dir, "prog.mjs.map"), c.getMap("prog.mjs"));
+
+      let stack = "";
+      try {
+        execFileSync(process.execPath, ["--enable-source-maps", path.join(dir, "prog.mjs")], {stdio: "pipe"});
+      } catch (e: any) {
+        stack = (e.stderr?.toString() || "") + (e.stdout?.toString() || "");
+      }
+
+      // V8 must map the throw back to zsrc.abap line 2 (column 3) and the call to line 4
+      expect(stack).to.match(/zsrc\.abap:2:3/);
+      expect(stack).to.match(/zsrc\.abap:4:1/);
+    } finally {
+      fs.rmSync(dir, {recursive: true, force: true});
+    }
   });
 
 });

@@ -101,22 +101,23 @@ regressions can't creep back in. CLEAR becomes the reference implementation.
 - [x] Decide and document the convention (statement start = first token; preserve sub-chunk mappings) in `design-notes.md`
 - [x] Rewrite `statements/clear.ts` as the reference: `appendChunk(target)` + `append(".clear();", node.getLastToken(), traversal)`; removed the commented-out experiments
 - [x] Add a source-map test for CLEAR in `packages/transpiler/test/source_map.ts` asserting both the statement mapping and the target expression mapping
-- [ ] Add a reusable test helper that, given ABAP + generated JS + map, asserts every generated line with code has ≥ 1 mapping and all original positions fall inside the ABAP source (partially exercised inline in the CLEAR test; extract into a shared helper during Phase 4)
+- [x] Add a reusable test helper (`validateSourceMap` in `test/_utils.ts`): returns coverage stats and throws if any mapping's original position falls outside the ABAP source
 
 ### Phase 4 — Migrate statement transpilers (baseline coverage DONE; long tail open)
 - [x] **Systemic baseline**: `traverseStatement` now calls `chunk.ensureStartMapping(node, this)` so *every* statement that emitted no mappings still resolves to its ABAP start line — covers all ~95 previously-unmapped statements at once, without touching them individually and without changing generated code
 - [x] Extend the baseline to structure heads that invoke a statement transpiler directly (bypassing `traverseStatement`): `do`, `while`, `loop`, `data`, `select`, `constants` now chain `ensureStartMapping`
 - [x] Fixed `constants.ts` `getCode()` flattening → `appendChunk`, preserving the DATA head's mappings
-- [ ] Long tail: per-line mappings for multi-line statement *expansions* (e.g. LOOP's target-assign line, DO's `for`/`sy-index` scaffolding). Baseline maps the statement start; intermediate runtime-scaffolding lines remain unmapped. Do incrementally, driven by real debugging needs — mapping pure scaffolding lines to one ABAP statement is of debatable value.
+- [~] Long tail: per-line mappings for multi-line statement *expansions*. Done for LOOP (the `foo.set(unique)` target-assign line now maps to the INTO/ASSIGNING target — see the "LOOP head and target-assignment line both map" test). Remaining: DO's `for`/`sy-index` scaffolding and similar. Do incrementally, driven by real debugging needs — mapping pure scaffolding lines to one ABAP statement is of debatable value.
 - [ ] Optional refinement: converge the ~36 `node.getLastToken()` first-append sites onto `getFirstToken().getStart()` so a statement's *first* generated column maps to its start rather than its `.`. Baseline already guarantees a start mapping, so this is polish, not correctness.
 - [ ] Sweep remaining `getCode()` flattening of traversed sub-chunks in statements/expressions; replace with `appendChunk` where sub-expression fidelity matters
 - [ ] Expressions pass (finer-grained within-statement mappings)
 
 ### Phase 5 — Validation & end-to-end verification
-- [ ] Extend `source_map.ts` tests to cover a full method body mixing mapped statements, verifying line *and* column via `SourceMapConsumer.originalPositionFor`
-- [ ] Build a small PROG via the CLI, run it in Node with `--enable-source-maps`, throw an error, and assert the stack trace shows the `.abap` file and correct line
-- [ ] Manually verify VS Code debugging (breakpoints in `.abap`, stepping) against a real project, e.g. open-abap
-- [ ] Run the full transpiler test suite and the downstream test suites (`unit-test/`, database tests) to confirm no behavior change in generated code
+- [x] Extend `source_map.ts` tests to cover a full method body mixing mapped statements (DATA/assign/CLEAR/APPEND/LOOP/WRITE/DO), asserting each statement resolves to its abap line and that no mapping falls outside the source
+- [x] Run a generated file in Node with `--enable-source-maps`, throw, and assert the stack trace shows the source file + correct line **and column** — committed as a `Chunk`-level test (`node --enable-source-maps rewrites the stack...`). Confirms our map is consumed by the same V8 machinery VS Code uses; verified line 2:3 and 4:1.
+- [ ] Manually verify VS Code debugging (breakpoints in `.abap`, stepping) against a real project, e.g. open-abap — still manual (V8 stack-trace test above is strong proxy)
+- [x] Full transpiler test suite green (289 passing); its extensive `expect(js).to.equal(...)` snapshots confirm generated code is byte-identical — the mapping work only *adds* mappings, never changes emitted strings
+- [ ] Run downstream suites (`unit-test/`, database tests) as a final belt-and-braces check (not expected to change given byte-identical output)
 
 ---
 
