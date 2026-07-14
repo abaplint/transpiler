@@ -8,7 +8,7 @@ import {UniqueIdentifier} from "../unique_identifier";
 export class FunctionModuleTranspiler implements IStructureTranspiler {
 
   public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): Chunk {
-    let r = "";
+    const chunk = new Chunk();
     let name: string | undefined = "";
     for (const c of node.getChildren()) {
       if (c.get() instanceof abaplint.Statements.FunctionModule && c instanceof abaplint.Nodes.StatementNode) {
@@ -16,17 +16,17 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
         if (name === undefined) {
           name = "FunctionModuleTranspilerNameNotFound";
         }
-        r += `async function ${Traversal.escapeNamespace(name)}(INPUT) {\n`;
-        r += this.findSignature(traversal, name, c);
+        chunk.append(`async function ${Traversal.escapeNamespace(name)}(INPUT) {\n`, c, traversal);
+        chunk.appendString(this.findSignature(traversal, name, c));
       } else if (c.get() instanceof abaplint.Statements.EndFunction) {
-        r += "}\n";
-        r += `abap.FunctionModules['${name.toUpperCase()}'] = ${Traversal.escapeNamespace(name)};\n`;
+        chunk.append("}\n", c, traversal);
+        chunk.appendString(`abap.FunctionModules['${name.toUpperCase()}'] = ${Traversal.escapeNamespace(name)};\n`);
       } else {
-        r += traversal.traverse(c).getCode();
+        chunk.appendChunk(traversal.traverse(c));
       }
     }
     UniqueIdentifier.resetIndexBackup();
-    return new Chunk(r);
+    return chunk;
   }
 
 //////////////////////

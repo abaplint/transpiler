@@ -96,13 +96,14 @@ async function writeObjects(outputFiles: Transpiler.IOutputFile[],
 // SourceMappingUrl needs to be percent-encoded, ref https://github.com/microsoft/TypeScript/issues/40951
       contents = contents + `\n//# sourceMappingURL=` + name.replace(/#/g, "%23");
 
-      // map the bare abap filename each mapping carries to its path on disk
+      // map the bare abap filename each mapping carries to its path on disk;
+      // source map "sources" are URLs, so always forward slashes, also on Windows
       const sourcePaths: {[filename: string]: string} = {};
       for (const f of files) {
         if (f.relative === undefined) {
           continue;
         }
-        sourcePaths[f.filename] = `${f.relative}${path.sep}${f.filename}`;
+        sourcePaths[f.filename] = `${f.relative.split(path.sep).join("/")}/${f.filename}`;
       }
 
       const map = output.chunk.getMap(output.filename, {generatedLineOffset, sourcePaths});

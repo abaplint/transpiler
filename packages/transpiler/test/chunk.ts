@@ -102,6 +102,23 @@ describe("Chunk", () => {
     expect(inner?.generated.column).to.equal(2);
   });
 
+  it("position tracking survives stripLastNewline and runIndentationLogic", async () => {
+    // line count and last-line length are tracked incrementally; the two
+    // methods that rewrite the buffer must keep them in sync
+    const chunk = new Chunk("if (x) {\n");
+    chunk.appendChunk(new Chunk().append("body\n", new Position(2, 1), new Dummy()));
+    chunk.appendString("}\n");
+    chunk.stripLastNewline();
+    chunk.runIndentationLogic();
+    expect(chunk.getCode()).to.equal("if (x) {\n  body\n}");
+
+    chunk.append("!", new Position(9, 1), new Dummy());
+    expect(chunk.getCode()).to.equal("if (x) {\n  body\n}!");
+    const last = chunk.mappings[chunk.mappings.length - 1];
+    expect(last.generated.line).to.equal(3);
+    expect(last.generated.column).to.equal(1);
+  });
+
   it("getMap applies a generatedLineOffset", async () => {
     const chunk = new Chunk().append("code", new Position(7, 1), new Dummy());
     const consumer = await new sourceMap.SourceMapConsumer(JSON.parse(chunk.getMap("out.mjs", {generatedLineOffset: 2})));

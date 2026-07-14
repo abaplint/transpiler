@@ -14,10 +14,15 @@ abaplint:
 // Keeps track of source maps as generated code is added
 export class Chunk {
   private raw: string;
+  // tracked incrementally so appends never re-scan the whole buffer
+  private lineCount: number;
+  private lastLineLength: number;
   public mappings: sourceMap.Mapping[] = [];
 
   public constructor(str?: string) {
     this.raw = "";
+    this.lineCount = 1;
+    this.lastLineLength = 0;
     this.mappings = [];
     if (str) {
       this.appendString(str);
@@ -39,9 +44,6 @@ export class Chunk {
       return this;
     }
 
-    const lines = this.raw.split("\n");
-    const lineCount = lines.length;
-    const lastLine = lines[lines.length - 1];
     for (const m of append.mappings) {
       // deep copy so the appended chunk's mappings are never mutated,
       // otherwise appending the same chunk twice double-shifts its positions
@@ -53,16 +55,15 @@ export class Chunk {
       };
       // original stays the same, but adjust the generated positions:
       // the appended content begins at the end of the current buffer, so its
-      // first line continues lastLine, and every line moves down by lineCount-1
+      // first line continues the current last line, and every line moves down
       if (add.generated.line === 1) {
-        add.generated.column += lastLine.length;
+        add.generated.column += this.lastLineLength;
       }
-      add.generated.line += lineCount - 1;
+      add.generated.line += this.lineCount - 1;
       this.mappings.push(add);
     }
 
-    this.raw += append.getCode();
-    return this;
+    return this.appendString(append.getCode());
   }
 
   private originalPosition(pos: abaplint.Position | abaplint.INode | abaplint.Token): {line: number, column: number} {
@@ -79,22 +80,17 @@ export class Chunk {
     }
 
     if (pos && input !== "\n") {
-      const lines = this.raw.split("\n");
-      const lastLine = lines[lines.length - 1];
-      const original = this.originalPosition(pos);
-
       this.mappings.push({
         source: traversal.getFilename(),
         generated: {
-          line: lines.length,
-          column: lastLine.length,
+          line: this.lineCount,
+          column: this.lastLineLength,
         },
-        original: original,
+        original: this.originalPosition(pos),
       });
     }
 
-    this.raw += input;
-    return this;
+    return this.appendString(input);
   }
 
   /**
@@ -117,6 +113,13 @@ export class Chunk {
 
   public appendString(input: string) {
     this.raw += input;
+    const lastNewline = input.lastIndexOf("\n");
+    if (lastNewline < 0) {
+      this.lastLineLength += input.length;
+    } else {
+      this.lineCount += input.split("\n").length - 1;
+      this.lastLineLength = input.length - lastNewline - 1;
+    }
     return this;
   }
 
@@ -124,6 +127,8 @@ export class Chunk {
     // note: this will not change the source map
     if (this.raw.endsWith("\n")) {
       this.raw = this.raw.substring(0, this.raw.length - 1);
+      this.lineCount--;
+      this.lastLineLength = this.raw.length - this.raw.lastIndexOf("\n") - 1;
     }
   }
 
@@ -171,6 +176,8 @@ export class Chunk {
     }
 
     this.raw = output.join("\n");
+    // line structure is unchanged, but the last line may have been indented
+    this.lastLineLength = output[output.length - 1].length;
     return this;
   }
 

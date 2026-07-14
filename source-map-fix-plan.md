@@ -109,8 +109,13 @@ regressions can't creep back in. CLEAR becomes the reference implementation.
 - [x] Fixed `constants.ts` `getCode()` flattening → `appendChunk`, preserving the DATA head's mappings
 - [~] Long tail: per-line mappings for multi-line statement *expansions*. Done for LOOP (the `foo.set(unique)` target-assign line now maps to the INTO/ASSIGNING target — see the "LOOP head and target-assignment line both map" test). Remaining: DO's `for`/`sy-index` scaffolding and similar. Do incrementally, driven by real debugging needs — mapping pure scaffolding lines to one ABAP statement is of debatable value.
 - [ ] Optional refinement: converge the ~36 `node.getLastToken()` first-append sites onto `getFirstToken().getStart()` so a statement's *first* generated column maps to its start rather than its `.`. Baseline already guarantees a start mapping, so this is polish, not correctness.
-- [ ] Sweep remaining `getCode()` flattening of traversed sub-chunks in statements/expressions; replace with `appendChunk` where sub-expression fidelity matters
+- [~] Sweep remaining `getCode()` flattening of traversed sub-chunks in statements/expressions; replace with `appendChunk` where sub-expression fidelity matters — done for `structures/function_module.ts` (previously the entire function module body lost all mappings); long tail in statements/ still open
 - [ ] Expressions pass (finer-grained within-statement mappings)
+
+### Phase 4b — Follow-up fixes (2026-07-14) ✅ DONE
+- [x] CLI: source map `sources` used `path.sep` → backslashes on Windows; source map sources are URLs, now always forward slashes
+- [x] FUGR: `runIndentationLogic` ran once per appended file over the accumulated chunk, drifting the brace counter (later files over-indented) and shifting earlier files' mapping columns repeatedly — hoisted out of the loop; first FUGR tests added (`test/fugr.ts`, indentation + per-file mappings)
+- [x] `Chunk`: `append`/`appendChunk` re-split the whole buffer per call (O(n²) per file) — now tracks `lineCount`/`lastLineLength` incrementally; `stripLastNewline`/`runIndentationLogic` keep the counters in sync (guarded by a dedicated test)
 
 ### Phase 5 — Validation & end-to-end verification
 - [x] Extend `source_map.ts` tests to cover a full method body mixing mapped statements (DATA/assign/CLEAR/APPEND/LOOP/WRITE/DO), asserting each statement resolves to its abap line and that no mapping falls outside the source
