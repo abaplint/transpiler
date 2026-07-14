@@ -65,6 +65,14 @@ export class Chunk {
     return this;
   }
 
+  private originalPosition(pos: abaplint.Position | abaplint.INode | abaplint.Token): {line: number, column: number} {
+    if (pos instanceof abaplint.Position || pos instanceof abaplint.Token) {
+      return {line: pos.getRow(), column: pos.getCol() - 1};
+    } else {
+      return {line: pos.getFirstToken().getRow(), column: pos.getFirstToken().getCol() - 1};
+    }
+  }
+
   public append(input: string, pos: abaplint.Position | abaplint.INode | abaplint.Token, traversal: {getFilename(): string}): Chunk {
     if (input === "") {
       return this;
@@ -73,16 +81,7 @@ export class Chunk {
     if (pos && input !== "\n") {
       const lines = this.raw.split("\n");
       const lastLine = lines[lines.length - 1];
-
-      let originalLine = 0;
-      let originalColumn = 0;
-      if (pos instanceof abaplint.Position || pos instanceof abaplint.Token) {
-        originalLine = pos.getRow();
-        originalColumn = pos.getCol() - 1;
-      } else {
-        originalLine = pos.getFirstToken().getRow();
-        originalColumn = pos.getFirstToken().getCol() - 1;
-      }
+      const original = this.originalPosition(pos);
 
       this.mappings.push({
         source: traversal.getFilename(),
@@ -90,14 +89,29 @@ export class Chunk {
           line: lines.length,
           column: lastLine.length,
         },
-        original: {
-          line: originalLine,
-          column: originalColumn,
-        },
+        original: original,
       });
     }
 
     this.raw += input;
+    return this;
+  }
+
+  /**
+   * Baseline fallback so statements whose transpiler emitted no mappings still
+   * resolve to their ABAP source. Adds a single mapping from the start of this
+   * chunk (generated line 1, column 0) to `pos`. No-op if the chunk is empty or
+   * already carries mappings, so it never overrides finer-grained mappings.
+   */
+  public ensureStartMapping(pos: abaplint.Position | abaplint.INode | abaplint.Token, traversal: {getFilename(): string}): Chunk {
+    if (this.raw === "" || this.mappings.length > 0) {
+      return this;
+    }
+    this.mappings.push({
+      source: traversal.getFilename(),
+      generated: {line: 1, column: 0},
+      original: this.originalPosition(pos),
+    });
     return this;
   }
 

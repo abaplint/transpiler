@@ -79,6 +79,22 @@ CLEAR foo.`;
     expect(mappingsOnClearLine).to.be.greaterThan(1);
   });
 
+  it("baseline mapping for an otherwise unmapped statement (DATA)", async () => {
+    // DATA builds a plain string chunk with no per-token mappings; the traversal
+    // fallback must still give it a start mapping so it resolves to its source line
+    const abap = `WRITE 'x'.
+DATA foo TYPE i.`;
+
+    const result = await runSingleMapped(abap, OPTIONS);
+    const consumer = await new sourceMap.SourceMapConsumer(JSON.parse(result!.map!));
+
+    // find the generated line declaring foo, confirm it maps back to abap line 2
+    const dataLine = result!.js.split("\n").findIndex(l => l.includes("foo")) + 1;
+    expect(dataLine).to.be.greaterThan(0);
+    const orig = consumer.originalPositionFor({line: dataLine, column: 0});
+    expect(orig.line).to.equal(2);
+  });
+
   it("global CLAS", async () => {
     const abap = `CLASS zcl_maptest DEFINITION PUBLIC CREATE PUBLIC.
 PUBLIC SECTION.

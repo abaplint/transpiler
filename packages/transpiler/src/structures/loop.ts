@@ -62,7 +62,7 @@ export class LoopTranspiler implements IStructureTranspiler {
           ret.appendString(`let ${tabix} = undefined;\n`);
         }
         const loop = new LoopStatementTranspiler();
-        ret.appendChunk(loop.transpile(c, traversal));
+        ret.appendChunk(loop.transpile(c, traversal).ensureStartMapping(c, traversal));
         ret.appendString("\n");
         if (hasAt === true) {
           ret.appendString(tabix + " = new abap.types.Integer().set(abap.builtin.sy.get().tabix.get() + 1);\n");

@@ -103,11 +103,14 @@ regressions can't creep back in. CLEAR becomes the reference implementation.
 - [x] Add a source-map test for CLEAR in `packages/transpiler/test/source_map.ts` asserting both the statement mapping and the target expression mapping
 - [ ] Add a reusable test helper that, given ABAP + generated JS + map, asserts every generated line with code has ≥ 1 mapping and all original positions fall inside the ABAP source (partially exercised inline in the CLEAR test; extract into a shared helper during Phase 4)
 
-### Phase 4 — Migrate statement transpilers
-- [ ] Fix the 36 `node.getLastToken()` and 3 `getLastToken().getEnd()` call sites to follow the convention
-- [ ] Sweep the 69 mapped transpilers for `getCode()` flattening of traversed sub-chunks; replace with `appendChunk`
-- [ ] Add mappings to the ~96 unmapped statement transpilers, prioritized by frequency in real code (MOVE/compute, IF, LOOP, CALL METHOD, WRITE, APPEND, READ TABLE, ...)
-- [ ] Do the same pass over `expressions/` and `structures/` (structure transpilers emit the `{`/`}` scaffolding — map them to their opening/closing statements)
+### Phase 4 — Migrate statement transpilers (baseline coverage DONE; long tail open)
+- [x] **Systemic baseline**: `traverseStatement` now calls `chunk.ensureStartMapping(node, this)` so *every* statement that emitted no mappings still resolves to its ABAP start line — covers all ~95 previously-unmapped statements at once, without touching them individually and without changing generated code
+- [x] Extend the baseline to structure heads that invoke a statement transpiler directly (bypassing `traverseStatement`): `do`, `while`, `loop`, `data`, `select`, `constants` now chain `ensureStartMapping`
+- [x] Fixed `constants.ts` `getCode()` flattening → `appendChunk`, preserving the DATA head's mappings
+- [ ] Long tail: per-line mappings for multi-line statement *expansions* (e.g. LOOP's target-assign line, DO's `for`/`sy-index` scaffolding). Baseline maps the statement start; intermediate runtime-scaffolding lines remain unmapped. Do incrementally, driven by real debugging needs — mapping pure scaffolding lines to one ABAP statement is of debatable value.
+- [ ] Optional refinement: converge the ~36 `node.getLastToken()` first-append sites onto `getFirstToken().getStart()` so a statement's *first* generated column maps to its start rather than its `.`. Baseline already guarantees a start mapping, so this is polish, not correctness.
+- [ ] Sweep remaining `getCode()` flattening of traversed sub-chunks in statements/expressions; replace with `appendChunk` where sub-expression fidelity matters
+- [ ] Expressions pass (finer-grained within-statement mappings)
 
 ### Phase 5 — Validation & end-to-end verification
 - [ ] Extend `source_map.ts` tests to cover a full method body mixing mapped statements, verifying line *and* column via `SourceMapConsumer.originalPositionFor`
