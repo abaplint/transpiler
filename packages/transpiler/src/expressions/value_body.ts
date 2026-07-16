@@ -75,6 +75,8 @@ export class ValueBodyTranspiler {
         const pre = `(await (async () => { try { return `;
         ret = new Chunk().appendString(pre + ret.getCode());
         post += `; } catch (error) { if (abap.isLineNotFound(error)) { return ${deflt}; } throw error; } })())`;
+        // the default value Source is part of this DEFAULT handling, stop processing further children
+        break;
       } else if (child instanceof Nodes.TokenNode && child.getFirstToken().getStr().toUpperCase() === "OPTIONAL") {
         // note: this is last in the body, so its okay to prepend and postpend
         const pre = `(await (async () => { try { return `;
