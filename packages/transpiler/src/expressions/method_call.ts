@@ -1,15 +1,10 @@
-import {Nodes, Expressions, Visibility, ScopeType, BuiltIn, Types} from "@abaplint/core";
+import {Nodes, Expressions, Visibility, ScopeType} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {MethodCallParamTranspiler} from "./method_call_param";
 import {Chunk} from "../chunk";
 
 export class MethodCallTranspiler implements IExpressionTranspiler {
-  private readonly unqualified: boolean;
-
-  public constructor(unqualified = false) {
-    this.unqualified = unqualified;
-  }
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
 
@@ -24,14 +19,7 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
     const m = traversal.findMethodReference(nameToken, scope);
 
     let name = nameToken.getStr().toLowerCase();
-    // abaplint sometimes fails to register the builtin method reference, eg. when the call
-    // follows a REDUCE expression, so fall back to matching against the known builtin methods.
-    // Only do this for unqualified calls, ie. not calls on an object reference like "obj->count( )"
-    const builtinFallback = this.unqualified && m === undefined
-      ? BuiltIn.searchBuiltin(name) as Types.MethodDefinition | undefined
-      : undefined;
-    const isBuiltin = traversal.isBuiltinMethod(nameToken) || builtinFallback !== undefined;
-    if (isBuiltin) {
+    if (traversal.isBuiltinMethod(nameToken)) {
       // todo: this is not correct, the method name might be shadowed
       name = "abap.builtin." + name + "(";
       if (name === "abap.builtin.line_exists(" || name === "abap.builtin.line_index(") {
@@ -68,7 +56,7 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
 
     const ret = new Chunk();
     ret.append(name, nameToken, traversal);
-    ret.appendChunk(new MethodCallParamTranspiler(m?.def ?? builtinFallback).transpile(step, traversal));
+    ret.appendChunk(new MethodCallParamTranspiler(m?.def).transpile(step, traversal));
     ret.appendString(post + ")");
 
     return ret;

@@ -2,7 +2,6 @@ import {Nodes, Expressions} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {MethodCallTranspiler} from "./method_call";
 
 export class MethodCallChainTranspiler implements IExpressionTranspiler {
 
@@ -11,7 +10,7 @@ export class MethodCallChainTranspiler implements IExpressionTranspiler {
 
     for (const c of node.getChildren()) {
       if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.MethodCall) {
-        const sub = new MethodCallTranspiler(c === node.getFirstChild()).transpile(c, traversal);
+        const sub = traversal.traverse(c);
         if (sub.getCode().startsWith("abap.builtin.")
             || sub.getCode().startsWith("await abap.builtin.")) {
           ret.appendChunk(sub);
