@@ -179,7 +179,8 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("0");
   });
 
-  it("VALUE BASE structure", async () => {    const code = `
+  it("VALUE BASE structure", async () => {
+    const code = `
 TYPES: BEGIN OF ty,
          foo TYPE i,
          bar TYPE i,
