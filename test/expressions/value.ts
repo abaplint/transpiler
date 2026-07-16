@@ -315,6 +315,25 @@ WRITE / row.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("VALUE DEFAULT, existing row wins over default", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         k TYPE i,
+         v TYPE i,
+       END OF ty_row.
+DATA lt TYPE STANDARD TABLE OF ty_row WITH EMPTY KEY.
+DATA rv TYPE i.
+lt = VALUE #( ( k = 1 v = 42 ) ).
+rv = VALUE #( lt[ k = 1 ]-v DEFAULT 99 ).
+WRITE / rv.
+rv = VALUE #( lt[ k = 2 ]-v DEFAULT 99 ).
+WRITE / rv.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("42\n99");
+  });
+
   it("FOR WHERE", async () => {
     const code = `
 FORM run.
