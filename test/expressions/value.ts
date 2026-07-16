@@ -197,6 +197,37 @@ WRITE / val1-bar.`;
     expect(abap.console.get()).to.equal("1\n2");
   });
 
+  it("VALUE BASE table with FOR keeps base rows", async () => {
+    const code = `
+DATA base TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+DATA extra TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+DATA result TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+INSERT 1 INTO TABLE base.
+INSERT 2 INTO TABLE base.
+INSERT 3 INTO TABLE extra.
+result = VALUE #( BASE base FOR x IN extra ( x ) ).
+WRITE / lines( result ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3");
+  });
+
+  it("VALUE BASE table with empty FOR keeps base rows", async () => {
+    const code = `
+DATA base TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+DATA extra TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+DATA result TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+INSERT 1 INTO TABLE base.
+INSERT 2 INTO TABLE base.
+result = VALUE #( BASE base FOR x IN extra ( x ) ).
+WRITE / lines( result ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
   it("VALUE nested structure", async () => {
     const code = `
 TYPES: BEGIN OF ty,
@@ -313,6 +344,25 @@ WRITE / row.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("2");
+  });
+
+  it("VALUE DEFAULT, existing row wins over default", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         k TYPE i,
+         v TYPE i,
+       END OF ty_row.
+DATA lt TYPE STANDARD TABLE OF ty_row WITH EMPTY KEY.
+DATA rv TYPE i.
+lt = VALUE #( ( k = 1 v = 42 ) ).
+rv = VALUE #( lt[ k = 1 ]-v DEFAULT 99 ).
+WRITE / rv.
+rv = VALUE #( lt[ k = 2 ]-v DEFAULT 99 ).
+WRITE / rv.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("42\n99");
   });
 
   it("FOR WHERE", async () => {
