@@ -26,6 +26,7 @@ export class ValueBodyTranspiler {
 
     let post = "";
     let extraFields = "";
+    let baseCode: string | undefined = undefined;
     const hasLines = body.findDirectExpression(Expressions.ValueBodyLine) !== undefined;
 
     const children = body.getChildren();
@@ -40,7 +41,8 @@ export class ValueBodyTranspiler {
         }
       } else if (child.get() instanceof Expressions.ValueBase && child instanceof Nodes.ExpressionNode) {
         const source = traversal.traverse(child.findDirectExpression(Expressions.Source));
-        ret = new Chunk().appendString(source.getCode() + ".clone()");
+        baseCode = source.getCode() + ".clone()";
+        ret = new Chunk().appendString(baseCode);
       } else if (child.get() instanceof Expressions.ValueBodyLine && child instanceof Nodes.ExpressionNode) {
         if (!(context instanceof BasicTypes.TableType)) {
           throw new Error("ValueBodyTranspiler, Expected BasicTypes, " + body.concatTokens());
@@ -63,7 +65,7 @@ export class ValueBodyTranspiler {
           }
         }
         i = idx - 1;
-        const result = this.buildForChain(forNodes, typ, traversal, body);
+        const result = this.buildForChain(forNodes, typ, traversal, body, baseCode);
         ret = result.chunk;
         post = result.post;
       } else if (child instanceof Nodes.TokenNode && child.getFirstToken().getStr().toUpperCase() === "DEFAULT") {
@@ -92,7 +94,8 @@ export class ValueBodyTranspiler {
       forNodes: Nodes.ExpressionNode[],
       typ: Nodes.ExpressionNode,
       traversal: Traversal,
-      body: Nodes.ExpressionNode): {chunk: Chunk, post: string} {
+      body: Nodes.ExpressionNode,
+      baseCode?: string): {chunk: Chunk, post: string} {
 
     interface LoopDescriptor {
       beforeLoop: string[];
@@ -102,7 +105,7 @@ export class ValueBodyTranspiler {
       close: string;
     }
 
-    const val = new TypeNameOrInfer().transpile(typ, traversal).getCode();
+    const val = baseCode ?? new TypeNameOrInfer().transpile(typ, traversal).getCode();
     const chunk = new Chunk();
     const preLoopDecls: string[] = [];
     const descriptors: LoopDescriptor[] = [];
