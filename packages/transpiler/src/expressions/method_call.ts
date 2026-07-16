@@ -1,5 +1,4 @@
-import {Nodes, Expressions, Visibility, ScopeType, BuiltIn} from "@abaplint/core";
-import * as abaplint from "@abaplint/core";
+import {Nodes, Expressions, Visibility, ScopeType, BuiltIn, Types} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {MethodCallParamTranspiler} from "./method_call_param";
@@ -29,7 +28,7 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
     // follows a REDUCE expression, so fall back to matching against the known builtin methods.
     // Only do this for unqualified calls, ie. not calls on an object reference like "obj->count( )"
     const builtinFallback = this.unqualified && m === undefined
-      ? BuiltIn.searchBuiltin(name) as abaplint.Types.MethodDefinition | undefined
+      ? BuiltIn.searchBuiltin(name) as Types.MethodDefinition | undefined
       : undefined;
     const isBuiltin = traversal.isBuiltinMethod(nameToken) || builtinFallback !== undefined;
     if (isBuiltin) {
