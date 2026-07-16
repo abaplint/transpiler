@@ -78,4 +78,20 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("baz");
   });
 
+  it("ELSE, last WHEN matches", async () => {
+    const code = `
+FORM foo.
+  DATA(lv_name) = SWITCH string(
+    'bar' WHEN 'sdf' THEN 'foo' WHEN 'bar' THEN 'bar' ELSE 'baz' ).
+  WRITE / lv_name.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("bar");
+  });
+
 });
