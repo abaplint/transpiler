@@ -103,7 +103,8 @@ async function writeObjects(outputFiles: Transpiler.IOutputFile[],
         if (f.relative === undefined) {
           continue;
         }
-        sourcePaths[f.filename] = `${f.relative.split(path.sep).join("/")}/${f.filename}`;
+        const rel = f.relative.split(path.sep).join("/");
+        sourcePaths[f.filename] = rel === "" ? f.filename : `${rel}/${f.filename}`;
       }
 
       const map = output.chunk.getMap(output.filename, {generatedLineOffset, sourcePaths});
