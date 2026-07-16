@@ -16,10 +16,12 @@ export class ConstantsTranspiler implements IStructureTranspiler {
       throw "ConstantsTranspilerName";
     }
 
-    let ret = new DataTranspiler().transpile(begin, traversal).getCode() + "\n";
-    ret += ConstantsTranspiler.handleValues(name, node, traversal);
+    const ret = new Chunk();
+    ret.appendChunk(new DataTranspiler().transpile(begin, traversal).ensureStartMapping(begin, traversal));
+    ret.appendString("\n");
+    ret.appendString(ConstantsTranspiler.handleValues(name, node, traversal));
 
-    return new Chunk(ret);
+    return ret;
   }
 
   public static handleValues(prefix: string, node: abaplint.Nodes.StructureNode, traversal: Traversal): string {

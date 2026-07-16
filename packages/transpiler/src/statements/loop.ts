@@ -38,8 +38,11 @@ export class LoopTranspiler implements IStatementTranspiler {
 
     this.unique = UniqueIdentifier.get();
     let target = "";
+    // the abap expression the target-assignment line should map back to
+    let targetNode: abaplint.Nodes.ExpressionNode | undefined = undefined;
     const into = this.determineInto(node);
     if (into && this.skipInto !== true) {
+      targetNode = into;
       const concat = node.concatTokens().toUpperCase();
       const t = traversal.traverse(into).getCode();
 
@@ -57,6 +60,7 @@ export class LoopTranspiler implements IStatementTranspiler {
     } else if (this.skipInto !== true) {
       const assigning = node.findFirstExpression(abaplint.Expressions.FSTarget)?.findFirstExpression(abaplint.Expressions.FieldSymbol);
       if (assigning) {
+        targetNode = assigning;
         target = traversal.traverse(assigning).getCode() + ".assign(" + this.unique + ");";
       }
     }
@@ -139,7 +143,15 @@ export class LoopTranspiler implements IStatementTranspiler {
     if (extra.length > 0) {
       concat = ",{" + extra.join(",") + "}";
     }
-    return new Chunk(`for await (const ${this.unique} of abap.statements.loop(${source}${concat})) {\n${target}`);
+    // map the loop head to the statement start and the target-assignment line
+    // (foo.set(unique)) back to the INTO/ASSIGNING target expression
+    const ret = new Chunk();
+    ret.append(`for await (const ${this.unique} of abap.statements.loop(${source}${concat})) {`, node, traversal);
+    ret.appendString("\n");
+    if (target !== "") {
+      ret.append(target, targetNode ?? node, traversal);
+    }
+    return ret;
   }
 
 }

@@ -36,8 +36,11 @@ export class HandleFUGR {
       const contents = new Traversal(spaghetti, file, obj, reg, this.options).traverse(rearranged);
       chunk.appendChunk(contents);
       chunk.stripLastNewline();
-      chunk.runIndentationLogic(this.options?.ignoreSourceMap);
     }
+    // indentation must run once over the accumulated chunk: running it per
+    // appended file re-indents the earlier files, drifting the brace counter
+    // and shifting their mapping columns multiple times
+    chunk.runIndentationLogic(this.options?.ignoreSourceMap);
     chunk.appendString("\n}");
 
     const output: IOutputFile = {

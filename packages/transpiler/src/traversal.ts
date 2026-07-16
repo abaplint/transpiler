@@ -1022,6 +1022,8 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
     if (list[search]) {
       const transpiler = new list[search]() as IStatementTranspiler;
       const chunk = transpiler.transpile(node, this);
+      // baseline: statements that emitted no mappings still resolve to their source
+      chunk.ensureStartMapping(node, this);
       chunk.appendString("\n");
       return chunk;
     }

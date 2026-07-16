@@ -29,7 +29,8 @@ export class SelectTranspiler implements IStructureTranspiler {
     const targetName = UniqueIdentifier.get();
     const loopName = UniqueIdentifier.get();
     ret.appendString(`let ${targetName} = new abap.types.Table(abap.DDIC["${from}"].type());\n`);
-    ret.appendChunk(new SelectStatementTranspiler().transpile(selectStatement, traversal, targetName));
+    const selectHead = new SelectStatementTranspiler().transpile(selectStatement, traversal, targetName);
+    ret.appendChunk(selectHead.ensureStartMapping(selectStatement, traversal));
 
     // todo: optimize, it should do real streaming?
     const packageSize = selectStatement.findFirstExpression(abaplint.Expressions.SQLPackageSize)

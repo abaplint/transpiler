@@ -13,7 +13,7 @@ export class WhileTranspiler implements IStructureTranspiler {
     for (const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.While) {
         traversal.registerDoOrWhileIndexBackup(c, syIndexBackup);
-        ret.appendChunk(new WhileStatementTranspiler(syIndexBackup).transpile(c, traversal));
+        ret.appendChunk(new WhileStatementTranspiler(syIndexBackup).transpile(c, traversal).ensureStartMapping(c, traversal));
         ret.appendString("\n");
       } else if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.EndWhile) {
         ret.appendChunk(new EndWhileTranspiler(syIndexBackup).transpile(c, traversal));

@@ -62,6 +62,7 @@ export class LoopTranspiler implements IStructureTranspiler {
           ret.appendString(`let ${tabix} = undefined;\n`);
         }
         const loop = new LoopStatementTranspiler();
+        // LoopStatementTranspiler maps its own head, so no ensureStartMapping needed here
         ret.appendChunk(loop.transpile(c, traversal));
         ret.appendString("\n");
         if (hasAt === true) {

@@ -13,7 +13,7 @@ export class DoTranspiler implements IStructureTranspiler {
     for (const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.Do) {
         traversal.registerDoOrWhileIndexBackup(c, syIndexBackup);
-        ret.appendChunk(new DoStatementTranspiler(syIndexBackup).transpile(c, traversal));
+        ret.appendChunk(new DoStatementTranspiler(syIndexBackup).transpile(c, traversal).ensureStartMapping(c, traversal));
         ret.appendString("\n");
       } else if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.EndDo) {
         ret.appendChunk(new EndDoTranspiler(syIndexBackup).transpile(c, traversal));
