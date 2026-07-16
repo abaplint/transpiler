@@ -33,6 +33,8 @@ export class SwitchBodyTranspiler {
             mode = "WHEN";
           } else if (c.concatTokens() === "THEN") {
             mode = "THEN";
+          } else if (c.concatTokens() === "ELSE") {
+            mode = "";
           }
         } else if (mode === "WHEN" && c instanceof Nodes.ExpressionNode) {
           currentWhenThen.whenOr.push(c);
