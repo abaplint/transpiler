@@ -132,4 +132,21 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("3");
   });
 
+  it("divided by lines()", async () => {
+    const code = `
+TYPES ty_ints TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+DATA it TYPE ty_ints.
+DATA rv TYPE i.
+APPEND 10 TO it.
+APPEND 20 TO it.
+APPEND 30 TO it.
+rv = REDUCE i( INIT s = 0 FOR x IN it NEXT s = s + x ) / lines( it ).
+WRITE / rv.`;
+    const js = await run(code);
+    expect(js).to.not.contain("this.lines");
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("20");
+  });
+
 });
