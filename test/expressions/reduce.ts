@@ -132,4 +132,41 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("3");
   });
 
+  it("index based FOR with WHILE", async () => {
+    const code = `
+DATA rv TYPE string.
+DATA iv_times TYPE i.
+iv_times = 3.
+rv = REDUCE string( INIT text = \`\`
+                    FOR i = 1 WHILE i <= iv_times
+                    NEXT text = COND #( WHEN i = 1 THEN \`x\` ELSE |{ text }-x| ) ).
+WRITE / rv.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("x-x-x");
+  });
+
+  it("index based FOR with UNTIL", async () => {
+    const code = `
+DATA sum TYPE i.
+sum = REDUCE i( INIT s = 0 FOR j = 1 UNTIL j > 5 NEXT s = s + j ).
+WRITE / sum.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("15");
+  });
+
+  it("index based FOR with THEN step", async () => {
+    const code = `
+DATA sum TYPE i.
+sum = REDUCE i( INIT s = 0 FOR k = 0 THEN k + 2 WHILE k <= 6 NEXT s = s + k ).
+WRITE / sum.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("12");
+  });
+
 });
