@@ -40,6 +40,7 @@ import {test34} from "./test34";
 import {test35} from "./test35";
 import {test36} from "./test36";
 import {test37} from "./test37";
+import {test38} from "./test38";
 
 // NOTE: does not run via Mocha
 
@@ -92,6 +93,7 @@ const tests: Tests = [
   {name: "35: gt", abap: test35},
   {name: "36: CLEAR char", abap: test36},
   {name: "37: CLEAR numc", abap: test37},
+  {name: "38: Structure copy and APPEND", abap: test38},
 ];
 
 async function execute(t: Test) {

@@ -1,5 +1,5 @@
 import {FieldSymbol} from "./field_symbol";
-import {Table} from "./table";
+import {HashedTable, Table} from "./table";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {parse} from "../operators/_parse";
@@ -8,6 +8,18 @@ import {Character} from "./character";
 import {throwError} from "../throw_error";
 import {ABAPObject} from "./abap_object";
 
+// structures are typically instantiated repeatedly with the same literal names,
+// cache the uppercasing
+const upperCaseCache = new Map<string, string>();
+function cachedUpperCase(name: string): string {
+  let upper = upperCaseCache.get(name);
+  if (upper === undefined) {
+    upper = name.toUpperCase();
+    upperCaseCache.set(name, upper);
+  }
+  return upper;
+}
+
 export class Structure {
   private readonly value: {[key: string]: any};
   private readonly qualifiedName: string | undefined;
@@ -15,14 +27,22 @@ export class Structure {
   private readonly suffix: { [key: string]: string };
   private readonly asInclude: { [key: string]: boolean };
 
-  public constructor(fields: {[key: string]: any}, qualifiedName?: string, ddicName?: string, suffix?: any, asInclude?: any) {
+  // "cloning = true" is only used from clone(), the names are then already uppercased
+  public constructor(fields: {[key: string]: any}, qualifiedName?: string, ddicName?: string, suffix?: any, asInclude?: any, cloning = false) {
     this.value = fields;
-    this.qualifiedName = qualifiedName?.toUpperCase();
-    this.ddicName = ddicName?.toUpperCase();
+    if (cloning === true) {
+      this.qualifiedName = qualifiedName;
+      this.ddicName = ddicName;
+    } else {
+      this.qualifiedName = qualifiedName === undefined ? undefined : cachedUpperCase(qualifiedName);
+      this.ddicName = ddicName === undefined ? undefined : cachedUpperCase(ddicName);
+    }
     this.suffix = suffix;
     this.asInclude = asInclude;
 
-    this.linkGroupFields();
+    if (asInclude !== undefined) {
+      this.linkGroupFields();
+    }
   }
 
   private linkGroupFields() {
@@ -40,7 +60,9 @@ export class Structure {
       newValues[key] = this.value[key].clone();
     }
 
-    const n = new Structure(newValues, this.qualifiedName, this.ddicName, this.suffix, this.asInclude);
+    // note: when includes are present, the constructor re-links the group
+    // fields so they alias the cloned include's fields
+    const n = new Structure(newValues, this.qualifiedName, this.ddicName, this.suffix, this.asInclude, true);
     return n;
   }
 
@@ -110,8 +132,14 @@ export class Structure {
         if (this.value[key2] === undefined) {
           break;
         }
-        // todo: can clone() be removed? might be needed for like Structure and Tables?
-        this.value[key2].set(obj[key1].clone());
+        const val = obj[key1];
+        if (val instanceof Structure || val instanceof Table || val instanceof HashedTable) {
+          // deep types are cloned so the target never shares references with the source
+          this.value[key2].set(val.clone());
+        } else {
+          // elementary types copy by value in set(), no clone needed
+          this.value[key2].set(val);
+        }
       }
     } else {
       this.setCharacter(input);
