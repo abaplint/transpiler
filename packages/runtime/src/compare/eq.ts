@@ -23,6 +23,12 @@ function compareTables(left: Table | HashedTable, right: Table | HashedTable): b
   return true;
 }
 
+// module locals instead of the imported bindings, as the CommonJS re-export
+// getters add overhead on every access in the hot path below
+const IntegerC = Integer;
+const StringC = String;
+const CharacterC = Character;
+
 export function eq(
   left: number | string | ICharacter | Integer8 | INumeric | Float | String | ABAPObject | Structure | Hex | HashedTable | Table | FieldSymbol,
   right: number | string | ICharacter | Integer8 | INumeric | Float | String | ABAPObject | Structure | Hex | HashedTable | Table | FieldSymbol): boolean {
@@ -30,6 +36,24 @@ export function eq(
   console.dir(left);
   console.dir(right);
 */
+
+// fast path: same concrete type covers the vast majority of comparisons,
+// exact constructor identity, so subclasses and other types fall through
+  const leftConstructor = (left as any)?.constructor;
+  if (leftConstructor === (right as any)?.constructor) {
+    if (leftConstructor === IntegerC) {
+      return (left as Integer).get() === (right as Integer).get();
+    } else if (leftConstructor === StringC) {
+      return (left as String).get() === (right as String).get();
+    } else if (leftConstructor === CharacterC) {
+      if ((left as Character).getLength() === (right as Character).getLength()) {
+        return (left as Character).get() === (right as Character).get();
+      } else {
+        return (left as Character).getTrimEnd() === (right as Character).getTrimEnd();
+      }
+    }
+  }
+
   if (right instanceof FieldSymbol) {
     return eq(left, right.getPointer()!);
   } else if (left instanceof FieldSymbol) {
