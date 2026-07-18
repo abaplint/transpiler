@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import {ABAPObject, Character, Date, FieldSymbol, Float, HashedTable, String, Hex, Integer, Numc, Structure, Table, DataReference, toInteger, XString, Integer8, Packed, HexUInt8} from "../types";
+import {ABAPObject, Character, Date, FieldSymbol, Float, HashedTable, String, Hex, Integer, Numc, Structure, Table, DataReference, toInteger, XString, Integer8, Packed, HexUInt8, Time} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "../operators/_parse";
@@ -23,11 +23,42 @@ function compareTables(left: Table | HashedTable, right: Table | HashedTable): b
   return true;
 }
 
+function compareStructures(left: Structure, right: Structure): boolean {
+  const l = left.get();
+  const r = right.get();
+  const leftKeys = Object.keys(l);
+  const rightKeys = Object.keys(r);
+  if (leftKeys.length !== rightKeys.length) {
+    return false;
+  }
+  for (const k of leftKeys) {
+    const e = eq(l[k], r[k]);
+    if (e === false) {
+      return false;
+    }
+  }
+  return true;
+}
+
 // module locals instead of the imported bindings, as the CommonJS re-export
 // getters add overhead on every access in the hot path below
 const IntegerC = Integer;
 const StringC = String;
 const CharacterC = Character;
+const NumcC = Numc;
+const DateC = Date;
+const TimeC = Time;
+const PackedC = Packed;
+const FloatC = Float;
+const TableC = Table;
+const HashedTableC = HashedTable;
+const StructureC = Structure;
+const XStringC = XString;
+const HexC = Hex;
+const HexUInt8C = HexUInt8;
+const Integer8C = Integer8;
+const ABAPObjectC = ABAPObject;
+const DataReferenceC = DataReference;
 
 export function eq(
   left: number | string | ICharacter | Integer8 | INumeric | Float | String | ABAPObject | Structure | Hex | HashedTable | Table | FieldSymbol,
@@ -51,6 +82,33 @@ export function eq(
       } else {
         return (left as Character).getTrimEnd() === (right as Character).getTrimEnd();
       }
+    } else if (leftConstructor === NumcC) {
+      return (left as Numc).get() === (right as Numc).get();
+    } else if (leftConstructor === DateC) {
+      return (left as Date).get() === (right as Date).get();
+    } else if (leftConstructor === TimeC) {
+      return (left as Time).get() === (right as Time).get();
+    } else if (leftConstructor === PackedC) {
+      return (left as Packed).get() === (right as Packed).get();
+    } else if (leftConstructor === FloatC) {
+      return (left as Float).getRaw() === (right as Float).getRaw();
+    } else if (leftConstructor === TableC || leftConstructor === HashedTableC) {
+      return compareTables(left as Table, right as Table);
+    } else if (leftConstructor === StructureC) {
+      return compareStructures(left as Structure, right as Structure);
+    } else if (leftConstructor === XStringC) {
+      return (left as XString).get() === (right as XString).get();
+    } else if (leftConstructor === HexC || leftConstructor === HexUInt8C) {
+      if ((left as Hex).getLength() !== (right as Hex).getLength()) {
+        return initial(left as Hex) && initial(right as Hex);
+      }
+      return (left as Hex).get() === (right as Hex).get();
+    } else if (leftConstructor === Integer8C) {
+      return (left as Integer8).get() === (right as Integer8).get();
+    } else if (leftConstructor === ABAPObjectC) {
+      return (left as ABAPObject).get() === (right as ABAPObject).get();
+    } else if (leftConstructor === DataReferenceC) {
+      return (left as any).getPointer() === (right as any).getPointer();
     }
   }
 
@@ -191,20 +249,7 @@ export function eq(
     } else if (!(left instanceof Structure)) {
       return eq(left, (right as Structure).getCharacter());
     }
-    const l = left.get();
-    const r = right.get();
-    const leftKeys = Object.keys(l);
-    const rightKeys = Object.keys(r);
-    if (leftKeys.length !== rightKeys.length) {
-      return false;
-    }
-    for (const k of leftKeys) {
-      const e = eq(l[k], r[k]);
-      if (e === false) {
-        return false;
-      }
-    }
-    return true;
+    return compareStructures(left, right);
   }
 
   let l: number | string | undefined = undefined;
