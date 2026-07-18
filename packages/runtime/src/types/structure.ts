@@ -28,7 +28,9 @@ export class Structure {
   private readonly asInclude: { [key: string]: boolean };
 
   // "cloning = true" is only used from clone(), the names are then already uppercased
-  public constructor(fields: {[key: string]: any}, qualifiedName?: string, ddicName?: string, suffix?: any, asInclude?: any, cloning = false) {
+  public constructor(fields: {[key: string]: any}, qualifiedName?: string, ddicName?: string,
+    suffix?: any, asInclude?: any, cloning = false) {
+
     this.value = fields;
     if (cloning === true) {
       this.qualifiedName = qualifiedName;
