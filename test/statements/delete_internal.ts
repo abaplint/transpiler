@@ -26,6 +26,20 @@ describe("Running statements - DELETE internal", () => {
     await f(abap);
   });
 
+  it("DELETE WHERE sets sy-subrc", async () => {
+    const code = `
+      DATA table TYPE STANDARD TABLE OF i.
+      APPEND 1 TO table.
+      APPEND 2 TO table.
+      DELETE table WHERE table_line = 1.
+      ASSERT sy-subrc = 0.
+      DELETE table WHERE table_line = 1.
+      ASSERT sy-subrc = 4.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("DELETE from table INDEX 1", async () => {
     const code = `
       DATA foo TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
