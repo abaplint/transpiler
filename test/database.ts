@@ -2154,6 +2154,21 @@ SELECT (lt_fields)
     }, {snowflake: false});
   });
 
+  it.only("SELECT, dynamic empty order by", async () => {
+    const code = `
+DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH EMPTY KEY.
+DATA empty TYPE string.
+SELECT * FROM t100 INTO TABLE lt_t100 UP TO 10 ROWS ORDER BY (empty).
+WRITE sy-subrc.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("0");
+    }, {snowflake: false});
+  });
+
   it("SELECT, dynamic field list as table, empty", async () => {
     const code = `
 DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
