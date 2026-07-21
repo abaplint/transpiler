@@ -2154,7 +2154,7 @@ SELECT (lt_fields)
     }, {snowflake: false});
   });
 
-  it.only("SELECT, dynamic empty order by", async () => {
+  it("SELECT, dynamic empty order by", async () => {
     const code = `
 DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH EMPTY KEY.
 DATA empty TYPE string.
