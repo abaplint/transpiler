@@ -83,4 +83,29 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("0");
   });
 
+  it("LET in table comprehension", async () => {
+    const code = `
+FORM foo.
+  TYPES string_table TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+
+  DATA(input) = VALUE string_table( ( \`hello\` ) ).
+
+  DATA(output) = VALUE string_table(
+  FOR text IN input
+  ( COND string(
+      LET upper = to_upper( text )
+      IN
+      WHEN text IS NOT INITIAL THEN upper
+      ELSE text ) ) ).
+
+  ASSERT output = VALUE string_table( ( \`HELLO\` ) ).
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
