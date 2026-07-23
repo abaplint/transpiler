@@ -47,11 +47,13 @@ export async function deleteInternal(target: Table | HashedTable | FieldSymbol, 
   }
 
   if (options?.to) {
-    if (options?.from !== undefined || options?.where !== undefined) {
+    if (options?.where !== undefined) {
       throw new Error("DeleteInternalTodo");
     }
-    for (let i = 0; i < options.to.get(); i++) {
-      target.deleteIndex(0);
+    const from = options.from?.get() ?? 1;
+    const to = Math.min(options.to.get(), target.array().length);
+    for (let i = to; i >= from; i--) {
+      target.deleteIndex(i - 1);
     }
     return;
   }

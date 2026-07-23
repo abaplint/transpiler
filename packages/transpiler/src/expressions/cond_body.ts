@@ -5,6 +5,7 @@ import {TypeNameOrInfer} from "./type_name_or_infer";
 import {TranspileTypes} from "../transpile_types";
 import {CondTranspiler} from "./cond";
 import {SourceTranspiler} from "./source";
+import {LetTranspiler} from "./let";
 
 export class CondBodyTranspiler {
 
@@ -12,8 +13,6 @@ export class CondBodyTranspiler {
 
     if (!(typ.get() instanceof Expressions.TypeNameOrInfer)) {
       throw new Error("CondBodyTranspiler, Expected TypeNameOrInfer");
-    } else if (body.findDirectExpression(Expressions.Let)) {
-      throw new Error("CondBodyTranspiler, Let not supported, todo");
     }
 
     const whenThen: {when: Nodes.ExpressionNode, then: Nodes.ExpressionNode}[] = [];
@@ -24,7 +23,7 @@ export class CondBodyTranspiler {
         if (c.concatTokens().toUpperCase() === "ELSE") {
           break;
         }
-      } else {
+      } else if (!(c.get() instanceof Expressions.Let)) {
         expressions.push(c);
       }
     }
@@ -39,6 +38,11 @@ export class CondBodyTranspiler {
     const ret = new Chunk();
     ret.appendString("(" + target + ".set(");
     ret.appendString("await (async () => {\n");
+
+    const llet = body.findDirectExpression(Expressions.Let);
+    if (llet) {
+      ret.appendString(new LetTranspiler().transpile(llet, traversal).getCode());
+    }
 
     for (const {when, then} of whenThen) {
       let condition = "";

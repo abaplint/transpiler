@@ -42,7 +42,7 @@
     },
     "homepage": "https://github.com/abaplint/transpiler_poc#readme",
     "devDependencies": {
-        "@abaplint/core": "^2.120.4",
+        "@abaplint/core": "^2.120.5",
         "@eslint/compat": "^2.1.0",
         "@eslint/eslintrc": "^3.3.5",
         "@eslint/js": "^9.39.4",
@@ -55,7 +55,7 @@
         "chai": "^4.5.0",
         "eslint": "^9.39.4",
         "eslint-plugin-import": "^2.32.0",
-        "fast-xml-parser": "^5.9.3",
+        "fast-xml-parser": "^5.10.1",
         "globals": "^17.7.0",
         "mocha": "^11.7.6",
         "pg": "^8.22.0",
