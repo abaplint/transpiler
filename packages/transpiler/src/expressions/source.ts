@@ -79,7 +79,12 @@ export class SourceTranspiler implements IExpressionTranspiler {
         } else if (c.get() instanceof Expressions.Dereference) {
           ret = new Chunk().appendString("(").appendChunk(ret).appendString(").dereference()");
         } else if (c.get() instanceof Expressions.TextElement) {
-          ret = new Chunk().appendString(`new abap.types.String().set("${c.concatTokens()}")`);
+          const key = c.findFirstExpression(Expressions.TextElementKey)?.concatTokens().toUpperCase();
+          const textSymbol = key === undefined
+            ? undefined
+            : traversal.getCurrentObject().getTextSymbols()[key]?.entry;
+          const value = textSymbol ?? c.concatTokens();
+          ret = new Chunk().appendString(`new abap.types.String().set(${JSON.stringify(value)})`);
         } else if (c.get() instanceof Expressions.TypeNameOrInfer) {
           continue;
         } else if (c.get() instanceof Expressions.ConvBody) {

@@ -2825,4 +2825,68 @@ ENDCLASS.`;
     await dumpNrun(files);
   });
 
+  it("test-63", async () => {
+// resolve text symbols from class XML
+
+    const clas = `CLASS zcl_text_symbol_repro DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC.
+
+  PUBLIC SECTION.
+    CLASS-METHODS run RETURNING VALUE(result) TYPE string.
+ENDCLASS.
+
+CLASS zcl_text_symbol_repro IMPLEMENTATION.
+  METHOD run.
+    result = TEXT-001.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const xml = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_CLAS" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <VSEOCLASS>
+    <CLSNAME>ZCL_TEXT_SYMBOL_REPRO</CLSNAME>
+    <LANGU>E</LANGU>
+    <DESCRIPT>Text symbol transpiler reproducer</DESCRIPT>
+    <STATE>1</STATE>
+    <UNICODE>5</UNICODE>
+   </VSEOCLASS>
+   <TPOOL>
+    <item>
+     <ID>I</ID>
+     <KEY>001</KEY>
+     <ENTRY>Resolved text symbol</ENTRY>
+     <LENGTH>20</LENGTH>
+    </item>
+   </TPOOL>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
+    const tests = `CLASS ltcl_text_symbol_repro DEFINITION
+  FOR TESTING
+  RISK LEVEL HARMLESS
+  DURATION SHORT
+  FINAL.
+  PRIVATE SECTION.
+    METHODS resolves_text_symbol FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_text_symbol_repro IMPLEMENTATION.
+  METHOD resolves_text_symbol.
+    ASSERT zcl_text_symbol_repro=>run( ) = 'Resolved text symbol'.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "zcl_text_symbol_repro.clas.abap", contents: clas},
+      {filename: "zcl_text_symbol_repro.clas.xml", contents: xml},
+      {filename: "zcl_text_symbol_repro.clas.testclasses.abap", contents: tests},
+    ];
+    await dumpNrun(files, false);
+  });
+
 });
