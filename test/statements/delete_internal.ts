@@ -106,6 +106,19 @@ describe("Running statements - DELETE internal", () => {
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("DELETE table FROM index TO index", async () => {
+    const code = `
+TYPES integer_table TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+DATA numbers TYPE integer_table.
+numbers = VALUE integer_table( ( 1 ) ( 2 ) ( 3 ) ).
+DELETE numbers FROM 1 TO 2.
+ASSERT lines( numbers ) = 1.
+ASSERT numbers[ 1 ] = 3.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("DELETE INITIAL where IS INITIAL", async () => {
     const code = `
       DATA lt_keywords TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
