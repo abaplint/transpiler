@@ -62,7 +62,7 @@ describe("Builtin functions - trunc", () => {
     expect(abap.console.getTrimmed()).to.equal("12");
   });
 
-  it.only("test string template with packed number", async () => {
+  it("test string template with packed number", async () => {
     const code = `
 FORM run.
   DATA qty TYPE p LENGTH 10 DECIMALS 3.

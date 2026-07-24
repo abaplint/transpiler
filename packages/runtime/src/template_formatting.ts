@@ -17,7 +17,7 @@ type options = {
   align?: "left" | "right",
 };
 
-export function templateFormatting(source: ICharacter | INumeric, options?: options): string {
+export function templateFormatting(source: ICharacter | INumeric | number | string, options?: options): string {
   let text = "";
 
   if (source instanceof FieldSymbol) {
@@ -55,14 +55,22 @@ export function templateFormatting(source: ICharacter | INumeric, options?: opti
     } else {
       text = source.toFixed(source.getDecimals());
     }
+  } else if (typeof source === "number" || typeof source === "string") {
+    text = source + "";
   } else {
     text = source.get() + "";
   }
 
   if (options?.alpha === "out") {
-    text = alphaOut(source);
+    if (typeof source === "number" || typeof source === "string") {
+      text = text.replace(/^0+/, "");
+    } else {
+      text = alphaOut(source);
+    }
   } else if (options?.alpha === "in") {
-    text = alphaIn(source, options.alphaInContext);
+    if (typeof source !== "number" && typeof source !== "string") {
+      text = alphaIn(source, options.alphaInContext);
+    }
   }
 
   if (options) {
