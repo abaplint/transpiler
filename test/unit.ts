@@ -2889,7 +2889,7 @@ ENDCLASS.`;
     await dumpNrun(files, false);
   });
 
-  it.only("test-64", async () => {
+  it("test-64", async () => {
     // access private static variable via LOCAL FRIENDS
 
     const tests = `
