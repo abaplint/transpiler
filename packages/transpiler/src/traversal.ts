@@ -528,10 +528,15 @@ export class Traversal {
 
   private buildThisAttributes(def: abaplint.IClassDefinition, cName: string | undefined): string {
     let ret = "";
+    const constants = def.getAttributes()?.getConstants() || [];
     for (const a of def.getAttributes()?.getAll() || []) {
       let escaped = Traversal.escapeNamespace(a.getName().toLowerCase());
       if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
         ret += "this." + escaped + " = " + cName + "." + escaped + ";\n";
+        const isConstant = constants.some(c => c.getName().toUpperCase() === a.getName().toUpperCase());
+        if (a.getVisibility() === abaplint.Visibility.Private && isConstant === false) {
+          ret += `this.FRIENDS_ACCESS_INSTANCE["${escaped}"] = this.${escaped};\n`;
+        }
       } else {
         if (a.getVisibility() === abaplint.Visibility.Private) {
           escaped = "#" + escaped;

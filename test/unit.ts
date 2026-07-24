@@ -2889,4 +2889,42 @@ ENDCLASS.`;
     await dumpNrun(files, false);
   });
 
+  it("test-64", async () => {
+    // access private static variable via LOCAL FRIENDS
+
+    const tests = `
+CLASS ltcl_test DEFINITION DEFERRED.
+CLASS zcl_friends_test DEFINITION LOCAL FRIENDS ltcl_test.
+
+CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS access_private_static_variable FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD access_private_static_variable.
+    ASSERT zcl_friends_test=>priv = 42.
+
+    DATA cut TYPE REF TO zcl_friends_test.
+    CREATE OBJECT cut.
+    ASSERT cut->priv = 42.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const clas = `
+CLASS zcl_friends_test DEFINITION PUBLIC FINAL CREATE PUBLIC.
+  PRIVATE SECTION.
+    CLASS-DATA priv TYPE i VALUE 42.
+ENDCLASS.
+
+CLASS zcl_friends_test IMPLEMENTATION.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "zcl_friends_test.clas.testclasses.abap", contents: tests},
+      {filename: "zcl_friends_test.clas.abap", contents: clas},
+    ];
+    await dumpNrun(files, false);
+  });
+
 });
