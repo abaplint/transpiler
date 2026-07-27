@@ -9,7 +9,7 @@ export function trunc(input: {val: number | string | ICharacter | INumeric}) {
   } else if (typeof input.val === "string") {
     num_in = parseFloat(input.val);
   } else if (input.val instanceof Float) {
-    num_in = input.val.getRaw();
+    num_in = input.val.getCalculationValue();
   } else {
     num_in = parseFloat(input.val.get().toString());
   }

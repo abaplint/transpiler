@@ -25,10 +25,10 @@ export function multiply(left: INumeric | ICharacter | string | Integer8 | numbe
     return new Integer().set(val);
   } else if ((left instanceof String || left instanceof Character) && Number.isInteger(Number(left.get())) && right instanceof Integer) {
     const val = Number.parseInt(left.get(), 10) * right.get();
-    return new Integer().set(val);
+    return new Integer().set(val).clearIntegerCalculationType();
   } else if ((right instanceof String || right instanceof Character) && Number.isInteger(Number(right)) && left instanceof Integer) {
     const val = left.get() * Number.parseInt(right.get(), 10);
-    return new Integer().set(val);
+    return new Integer().set(val).clearIntegerCalculationType();
   }
 
   return new Float().set(parse(left) * parse(right));

@@ -45,7 +45,7 @@ export class ConstantTranspiler implements IExpressionTranspiler {
       str = node.findDirectExpression(Expressions.TextElementString);
     }
     if (str) {
-      let res = str.getFirstToken().getStr();
+      const res = str.getFirstToken().getStr();
       if (res.startsWith("'") && this.addGet === false) {
         const code = this.handleCharacter(res);
         return new Chunk().append(code, node, traversal);
@@ -53,10 +53,7 @@ export class ConstantTranspiler implements IExpressionTranspiler {
         const code = "new abap.types.String().set(" + ConstantTranspiler.escape(res) + ")";
         return new Chunk().append(code, node, traversal);
       } else {
-        if (res.startsWith("'")) {
-          res = "'" + res.substring(1, res.length - 1).trimEnd() + "'";
-        }
-        const code = ConstantTranspiler.escape(res);
+        const code = ConstantTranspiler.escape(ConstantTranspiler.trimTextFieldLiteral(res));
         return new Chunk().append(code, node, traversal);
       }
     }
@@ -97,6 +94,14 @@ export class ConstantTranspiler implements IExpressionTranspiler {
     const code = "abap.CharacterFactory.get(" + length + ", " + ConstantTranspiler.escape(res) + ")";
 //    const code = "new abap.types.Character(" + length + ").set(" + ConstantTranspiler.escape(res) + ")";
     return code;
+  }
+
+  // text field literals are of type c, trailing blanks are not part of the value
+  public static trimTextFieldLiteral(str: string): string {
+    if (str.startsWith("'") && str.endsWith("'") && str.length >= 2) {
+      return "'" + str.substring(1, str.length - 1).trimEnd() + "'";
+    }
+    return str;
   }
 
   public static escape(str: string): string {

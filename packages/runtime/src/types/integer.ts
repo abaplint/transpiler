@@ -34,11 +34,23 @@ export function toInteger(value: string, exception = true): number {
 export class Integer implements INumeric {
   private value: number;
   private constant: boolean = false;
+  private integerCalculationType = true;
   private readonly qualifiedName: string | undefined;
 
   public constructor(input?: {qualifiedName?: string}) {
     this.value = 0;
     this.qualifiedName = input?.qualifiedName;
+  }
+
+  /** ABAP determines the calculation type from the operand types, character-like operands raise it
+   * above type i even if the intermediate result is integer, ie. "'1.0' * 18 / 16" is not rounded */
+  public clearIntegerCalculationType(): Integer {
+    this.integerCalculationType = false;
+    return this;
+  }
+
+  public isIntegerCalculationType(): boolean {
+    return this.integerCalculationType;
   }
 
   public getQualifiedName() {

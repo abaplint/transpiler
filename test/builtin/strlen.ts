@@ -62,4 +62,13 @@ describe("Builtin functions - strlen", () => {
     expect(abap.console.get()).to.equal("5");
   });
 
+  it("trailing blanks in text field literal are not significant", async () => {
+    const code = `
+    DATA lv_error_separator TYPE string VALUE ': '.
+    ASSERT strlen( lv_error_separator ) = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

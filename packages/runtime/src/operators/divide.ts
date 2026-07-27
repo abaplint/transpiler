@@ -32,5 +32,16 @@ export function divide(left: INumeric | ICharacter | Integer8 | string | number,
   }
   const val = l / r;
 
-  return new Float().set(val);
+  const ret = new Float().set(val);
+  if (isIntegerOperand(left) && isIntegerOperand(right)) {
+    ret.setIntegerCalculationType();
+  }
+  return ret;
+}
+
+function isIntegerOperand(val: INumeric | ICharacter | Integer8 | string | number): boolean {
+  if (val instanceof Integer) {
+    return val.isIntegerCalculationType();
+  }
+  return val instanceof Integer8;
 }

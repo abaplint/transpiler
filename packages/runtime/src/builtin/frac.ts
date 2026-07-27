@@ -11,8 +11,9 @@ export function frac(input: {val: number | string | ICharacter | INumeric}) {
     num_in = input.val;
   } else if (typeof input.val === "string") {
     num_in = parseFloat(input.val);
-  } else if (input.val instanceof DecFloat34
-      || input.val instanceof Float) {
+  } else if (input.val instanceof Float) {
+    num_in = input.val.getCalculationValue();
+  } else if (input.val instanceof DecFloat34) {
     num_in = input.val.getRaw();
   } else {
     num_in = parseFloat(input.val.get().toString());

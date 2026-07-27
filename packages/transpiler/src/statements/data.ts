@@ -7,6 +7,34 @@ import {FieldChainTranspiler} from "../expressions";
 import {Chunk} from "../chunk";
 
 export class DataTranspiler implements IStatementTranspiler {
+  private readonly skipLoopScoping: boolean;
+  private variableName = "";
+  private loopScoped = false;
+
+  public constructor(options?: {skipLoopScoping?: boolean}) {
+    this.skipLoopScoping = options?.skipLoopScoping === true;
+  }
+
+  /** name of the declared javascript variable, set by transpile() */
+  public getVariableName(): string {
+    return this.variableName;
+  }
+
+  /** set by transpile(), true if the declaration is inside a loop */
+  public isLoopScoped(): boolean {
+    return this.loopScoped;
+  }
+
+  /** DATA is scoped to the enclosing method/form/program, but when the statement is inside a
+   * loop the generated declaration ends up inside the javascript block of the loop. Declaring
+   * with "var" hoists it out of the block, and the guard makes sure its constructed only on the
+   * first pass, ie. contents are kept across iterations, matching ABAP */
+  public static wrapLoopScoped(name: string, chunk: Chunk): Chunk {
+    return new Chunk()
+      .appendString(`if (${name} === undefined) {\n`)
+      .appendChunk(chunk)
+      .appendString("\n}");
+  }
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const token = node.findFirstExpression(abaplint.Expressions.DefinitionName)?.getFirstToken();
@@ -39,12 +67,19 @@ export class DataTranspiler implements IStatementTranspiler {
       }
     }
 
+    this.variableName = Traversal.prefixVariable(Traversal.escapeNamespace(found.getName().toLowerCase()));
+    this.loopScoped = traversal.isInsideLoop(node);
+
     const ret = new Chunk()
-      .appendString("let ")
-      .appendString(Traversal.prefixVariable(Traversal.escapeNamespace(found.getName().toLowerCase())))
+      .appendString(this.loopScoped === true ? "var " : "let ")
+      .appendString(this.variableName)
       .appendString(" = " + TranspileTypes.toType(found.getType()))
       .appendString(";")
       .appendString(value);
+
+    if (this.loopScoped === true && this.skipLoopScoping === false) {
+      return DataTranspiler.wrapLoopScoped(this.variableName, ret);
+    }
 
     return ret;
   }
@@ -79,7 +114,7 @@ export class DataTranspiler implements IStatementTranspiler {
         int = val.findFirstExpression(abaplint.Expressions.ConstantString);
       }
       if (int) {
-        const escaped = ConstantTranspiler.escape(int.concatTokens());
+        const escaped = ConstantTranspiler.escape(ConstantTranspiler.trimTextFieldLiteral(int.concatTokens()));
         value = "\n" + name + ".set(" + escaped + ");";
       } else if (val.getChildren()[1].get() instanceof abaplint.Expressions.SimpleFieldChain) {
         const s = new FieldChainTranspiler().transpile(val.getChildren()[1] as abaplint.Nodes.ExpressionNode, traversal).getCode();
