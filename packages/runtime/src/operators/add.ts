@@ -23,14 +23,14 @@ export function add(left: INumeric | ICharacter | string | number | Float | Inte
     return new Integer().set(left.get() + right);
 
   } else if ((left instanceof String || left instanceof Character) && isIntegerCharacter(left) && right instanceof Integer) {
-    return new Integer().set(Number.parseInt(left.get(), 10) + right.get());
+    return new Integer().set(Number.parseInt(left.get(), 10) + right.get()).clearIntegerCalculationType();
   } else if ((right instanceof String || right instanceof Character) && isIntegerCharacter(right) && left instanceof Integer) {
-    return new Integer().set(left.get() + Number.parseInt(right.get(), 10));
+    return new Integer().set(left.get() + Number.parseInt(right.get(), 10)).clearIntegerCalculationType();
   } else if ((left instanceof String || left instanceof Character)
       && (right instanceof String || right instanceof Character)
       && isIntegerCharacter(left)
       && isIntegerCharacter(right)) {
-    return new Integer().set(Number.parseInt(left.get(), 10) + Number.parseInt(right.get(), 10));
+    return new Integer().set(Number.parseInt(left.get(), 10) + Number.parseInt(right.get(), 10)).clearIntegerCalculationType();
   } else if (left instanceof Integer8) {
     if (right instanceof Integer8) {
       return new Integer8().set(left.get() + right.get());

@@ -80,4 +80,14 @@ START-OF-SELECTION.
     expect(abap.console.getTrimmed()).to.equal("10");
   });
 
+  it("integer division, calculation type is integer", async () => {
+    const code = `
+  DATA lv_eleven TYPE i VALUE 11.
+  ASSERT trunc( lv_eleven / 16 ) = 1.
+  ASSERT trunc( 3 / 2 ) = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

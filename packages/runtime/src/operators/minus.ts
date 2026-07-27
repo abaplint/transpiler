@@ -38,9 +38,9 @@ export function minus(left: INumeric | ICharacter | string | Integer8 | number |
     return new Integer().set(left.get() - right);
 
   } else if ((left instanceof String || left instanceof Character) && Number.isInteger(Number(left.get())) && right instanceof Integer) {
-    return new Integer().set(Number.parseInt(left.get(), 10) - right.get());
+    return new Integer().set(Number.parseInt(left.get(), 10) - right.get()).clearIntegerCalculationType();
   } else if ((right instanceof String || right instanceof Character) && Number.isInteger(Number(right)) && left instanceof Integer) {
-    return new Integer().set(left.get() - Number.parseInt(right.get(), 10));
+    return new Integer().set(left.get() - Number.parseInt(right.get(), 10)).clearIntegerCalculationType();
   }
 
   return new Float().set(parse(left) - parse(right));

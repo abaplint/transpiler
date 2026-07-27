@@ -22,6 +22,7 @@ function getNumberParts(x: number) {
 
 export class Float {
   private value: number;
+  private integerCalculationType = false;
   private readonly qualifiedName: string | undefined;
 
   public constructor(input?: {qualifiedName?: string}) {
@@ -33,6 +34,23 @@ export class Float {
     const n = new Float({qualifiedName: this.qualifiedName});
     n.value = this.value;
     return n;
+  }
+
+  /** ABAP calculates in type i if all operands are integers, ie. "3 / 2" is 2. The exact value is
+   * kept here, so assigning to a float or packed target, which raises the calculation type, still
+   * gives the exact result. Consumers without a target type must use getCalculationValue() */
+  public setIntegerCalculationType(): Float {
+    this.integerCalculationType = true;
+    return this;
+  }
+
+  /** value as seen by the calculation type, ie. rounded if the calculation type is integer */
+  public getCalculationValue(): number {
+    if (this.integerCalculationType === true) {
+      // ABAP rounds half away from zero
+      return this.value < 0 ? -Math.round(-this.value) : Math.round(this.value);
+    }
+    return this.value;
   }
 
   public getQualifiedName() {
