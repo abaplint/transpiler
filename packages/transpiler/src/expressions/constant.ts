@@ -45,7 +45,7 @@ export class ConstantTranspiler implements IExpressionTranspiler {
       str = node.findDirectExpression(Expressions.TextElementString);
     }
     if (str) {
-      let res = str.getFirstToken().getStr();
+      const res = str.getFirstToken().getStr();
       if (res.startsWith("'") && this.addGet === false) {
         const code = this.handleCharacter(res);
         return new Chunk().append(code, node, traversal);
