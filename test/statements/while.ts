@@ -61,7 +61,7 @@ ENDWHILE.`;
 00500`);
   });
 
-  it.only("DATA declared inside WHILE body is not re-initialized", async () => {
+  it("DATA declared inside WHILE body is not re-initialized", async () => {
     const code = `
 TYPES ty_ints TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
 DATA lv_index TYPE i.
@@ -70,7 +70,8 @@ WHILE lv_index < 3.
   DATA lt_arguments TYPE ty_ints.
   APPEND lv_index TO lt_arguments.
   ASSERT lines( lt_arguments ) = lv_index.
-ENDWHILE.`;
+ENDWHILE.
+ASSERT lines( lt_arguments ) = 3.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
