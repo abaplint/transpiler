@@ -104,6 +104,28 @@ describe("Top level tests, Database", () => {
     });
   });
 
+  it("MODIFY FROM TABLE sets sy-dbcnt for all rows", async () => {
+    const code = `
+    DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+    DATA row LIKE LINE OF tab.
+
+    row-arbgb = 'HELLO'.
+    row-msgnr = '001'.
+    APPEND row TO tab.
+
+    row-msgnr = '002'.
+    APPEND row TO tab.
+
+    MODIFY t100 FROM TABLE tab.
+    WRITE sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2");
+    }, {postgres: false, snowflake: false});
+  });
+
   it("MODIFY FROM, inserts and update", async () => {
     const code = `
     DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
