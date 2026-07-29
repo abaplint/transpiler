@@ -763,6 +763,21 @@ ASSERT sy-subrc = 0.`;
     });
   });
 
+  it("SELECT aggregate over empty result into packed", async () => {
+    const code = `
+    DATA lv_sum TYPE p LENGTH 7 DECIMALS 3.
+    SELECT SUM( valuefield ) FROM zquan INTO @lv_sum.
+    IF lv_sum = 0 AND sy-subrc = 0.
+      WRITE 'okay'.
+    ENDIF.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "zquan.tabl.xml", contents: zquan}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("okay");
+    }, {postgres: false, snowflake: false});
+  });
+
   it("MODIFY simple", async () => {
     const code = `
     DATA ls_t100 TYPE t100.
