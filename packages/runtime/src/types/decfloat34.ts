@@ -17,13 +17,15 @@ export class DecFloat34 {
     return n;
   }
 
-  public set(value: INumeric | ICharacter | Hex | string | number) {
+  public set(value: INumeric | ICharacter | Hex | string | number | DecFloat34) {
     if (typeof value === "number") {
       this.value = value;
     } else if (typeof value === "string" && value.trim().length === 0) {
       this.value = 0;
     } else if (typeof value === "string") {
       this.value = parseFloat(value);
+    } else if (value instanceof DecFloat34) {
+      this.value = value.getRaw();
     } else if (value instanceof Float) {
       this.value = value.getRaw();
     } else if (value instanceof Hex || value instanceof XString) {

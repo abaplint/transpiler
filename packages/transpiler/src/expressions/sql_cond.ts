@@ -164,14 +164,32 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
     }
 
     let ret = "";
+    let hostExpression = false;
     for (const child of node.getChildren()) {
+      if (!(child instanceof abaplint.Nodes.ExpressionNode) && child.getFirstToken().getStr() === "@") {
+        hostExpression = true;
+        continue;
+      }
       if (ret !== "") {
         ret += " ";
       }
-      if ((child.get() instanceof abaplint.Expressions.SQLFieldName
+      if (hostExpression
+          && child instanceof abaplint.Nodes.ExpressionNode
+          && child.get() instanceof abaplint.Expressions.SimpleSource3) {
+        const code = new SimpleSource3Transpiler(true).transpile(child, traversal).getCode();
+        ret += `'" + ${code} + "'`;
+        hostExpression = false;
+      } else if ((child.get() instanceof abaplint.Expressions.SQLFieldName
           || child.get() instanceof abaplint.Expressions.SQLAliasField)
           && child instanceof abaplint.Nodes.ExpressionNode) {
-        ret += new SQLFieldNameTranspiler().transpile(child, traversal).getCode();
+        if (hostExpression) {
+          let name = traversal.prefixAndName(child.getFirstToken(), filename).replace("~", "$");
+          name = Traversal.prefixVariable(Traversal.escapeNamespace(name)!);
+          ret += `'" + ${name}.get() + "'`;
+          hostExpression = false;
+        } else {
+          ret += new SQLFieldNameTranspiler().transpile(child, traversal).getCode();
+        }
       } else if (child.get() instanceof abaplint.Expressions.SQLSource
           && child instanceof abaplint.Nodes.ExpressionNode) {
         ret += this.sqlSource(child, traversal, filename, table);

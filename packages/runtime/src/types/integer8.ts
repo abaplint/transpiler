@@ -8,6 +8,7 @@ import {Integer} from "./integer";
 import {getBit} from "../statements/get_bit";
 import {Character} from "./character";
 import {HexUInt8} from "./hex_uint8";
+import {DecFloat34} from "./decfloat34";
 
 const digits = new RegExp(/^\s*-?\+?\d+\.?\d* *$/i);
 
@@ -31,7 +32,7 @@ export class Integer8 {
     return this.qualifiedName;
   }
 
-  public set(value: INumeric | ICharacter | Hex | string | number | bigint | Integer8 | Integer | Float) {
+  public set(value: INumeric | ICharacter | Hex | string | number | bigint | Integer8 | Integer | Float | DecFloat34) {
     if (typeof value === "number") {
       this.value = BigInt(value);
     } else if (typeof value === "bigint") {
@@ -46,7 +47,7 @@ export class Integer8 {
         throwError("CX_SY_CONVERSION_NO_NUMBER");
       }
       this.value = BigInt(value);
-    } else if (value instanceof Float) {
+    } else if (value instanceof Float || value instanceof DecFloat34) {
       this.set(Math.round(value.getRaw()));
     } else if (value instanceof Hex || value instanceof XString || value instanceof HexUInt8) {
       if (value.get().length === 16) {

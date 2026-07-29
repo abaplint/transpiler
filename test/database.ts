@@ -785,6 +785,28 @@ ASSERT sy-subrc = 0.`;
     });
   });
 
+  it("SELECT WHERE compares two host boolean values", async () => {
+    const code = `
+DATA shortage_only TYPE abap_bool VALUE abap_true.
+DATA lt_t100 TYPE STANDARD TABLE OF t100.
+SELECT * FROM t100
+  WHERE @shortage_only = @abap_false OR msgnr = '999'
+  INTO TABLE @lt_t100.
+WRITE lines( lt_t100 ).
+shortage_only = abap_false.
+SELECT * FROM t100
+  WHERE @shortage_only = @abap_false OR msgnr = '999'
+  INTO TABLE @lt_t100.
+WRITE lines( lt_t100 ).`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("02");
+    }, {postgres: false, snowflake: false});
+  });
+
   it("SELECT aggregate over empty result into packed", async () => {
     const code = `
     DATA lv_sum TYPE p LENGTH 7 DECIMALS 3.
