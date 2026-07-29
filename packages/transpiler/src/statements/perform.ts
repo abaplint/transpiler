@@ -62,7 +62,7 @@ export class PerformTranspiler implements IStatementTranspiler {
       }
 
       index = 0;
-      for (const u of node.findDirectExpression(abaplint.Expressions.PerformUsing)?.findDirectExpressions(abaplint.Expressions.Source) || []) {
+      for (const u of node.findDirectExpression(abaplint.Expressions.PerformUsing)?.findDirectExpressions(abaplint.Expressions.SimpleSource3) || []) {
         const name = def?.getUsingParameters()[index].getName().toLowerCase();
         if (name === undefined) {
           continue;
