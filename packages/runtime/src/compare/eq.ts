@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import {ABAPObject, Character, Date, FieldSymbol, Float, HashedTable, String, Hex, Integer, Numc, Structure, Table, DataReference, toInteger, XString, Integer8, Packed, HexUInt8, Time} from "../types";
+import {ABAPObject, Character, Date, DecFloat34, FieldSymbol, Float, HashedTable, String, Hex, Integer, Numc, Structure, Table, DataReference, toInteger, XString, Integer8, Packed, HexUInt8, Time} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "../operators/_parse";
@@ -50,6 +50,7 @@ const DateC = Date;
 const TimeC = Time;
 const PackedC = Packed;
 const FloatC = Float;
+const DecFloat34C = DecFloat34;
 const TableC = Table;
 const HashedTableC = HashedTable;
 const StructureC = Structure;
@@ -61,8 +62,8 @@ const ABAPObjectC = ABAPObject;
 const DataReferenceC = DataReference;
 
 export function eq(
-  left: number | string | ICharacter | Integer8 | INumeric | Float | String | ABAPObject | Structure | Hex | HashedTable | Table | FieldSymbol,
-  right: number | string | ICharacter | Integer8 | INumeric | Float | String | ABAPObject | Structure | Hex | HashedTable | Table | FieldSymbol): boolean {
+  left: number | string | ICharacter | Integer8 | INumeric | Float | DecFloat34 | String | ABAPObject | Structure | Hex | HashedTable | Table | FieldSymbol,
+  right: number | string | ICharacter | Integer8 | INumeric | Float | DecFloat34 | String | ABAPObject | Structure | Hex | HashedTable | Table | FieldSymbol): boolean {
 /*
   console.dir(left);
   console.dir(right);
@@ -92,6 +93,8 @@ export function eq(
       return (left as Packed).get() === (right as Packed).get();
     } else if (leftConstructor === FloatC) {
       return (left as Float).getRaw() === (right as Float).getRaw();
+    } else if (leftConstructor === DecFloat34C) {
+      return (left as DecFloat34).getRaw() === (right as DecFloat34).getRaw();
     } else if (leftConstructor === TableC || leftConstructor === HashedTableC) {
       return compareTables(left as Table, right as Table);
     } else if (leftConstructor === StructureC) {
@@ -225,6 +228,8 @@ export function eq(
       return right.get() === left.get();
     } else if (left instanceof Integer) {
       return right.get() === left.get();
+    } else if (left instanceof DecFloat34) {
+      return right.get() === left.getRaw();
     }
   } else if (right instanceof Integer8) {
     if (left instanceof Integer
@@ -239,6 +244,12 @@ export function eq(
       return right.getRaw() === left.getRaw();
     } else if (left instanceof Integer
         || left instanceof Integer8) {
+      return right.getRaw() === left.get();
+    }
+  } else if (right instanceof DecFloat34) {
+    if (left instanceof Float || left instanceof DecFloat34) {
+      return right.getRaw() === left.getRaw();
+    } else if (left instanceof Integer || left instanceof Packed) {
       return right.getRaw() === left.get();
     }
   }

@@ -80,6 +80,18 @@ WRITE / foo.`;
     await f(abap);
   });
 
+  it("compare packed and decfloat34, EQ", async () => {
+    const code = `
+DATA lv_packed TYPE p LENGTH 8 DECIMALS 3.
+DATA lv_decfloat TYPE decfloat34.
+lv_packed = '11.500'.
+lv_decfloat = '11.5'.
+ASSERT lv_packed = lv_decfloat.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("thousand", async () => {
     const code = `
 DATA foo TYPE decfloat34.
