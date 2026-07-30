@@ -161,6 +161,46 @@ WRITE count.`;
     expect(abap.console.get()).to.equal("5");
   });
 
+  it("CONCATENATE LINES OF, empty table", async () => {
+    const code = `
+DATA lt_tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+DATA res TYPE string.
+res = 'foo'.
+CONCATENATE LINES OF lt_tab INTO res SEPARATED BY '-'.
+ASSERT res IS INITIAL.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("CONCATENATE LINES OF, single line", async () => {
+    const code = `
+DATA lt_tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+DATA res TYPE string.
+APPEND 'foo' TO lt_tab.
+CONCATENATE LINES OF lt_tab INTO res SEPARATED BY '--'.
+ASSERT res = 'foo'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("CONCATENATE LINES OF, char table, trailing blanks removed", async () => {
+    const code = `
+TYPES char5 TYPE c LENGTH 5.
+DATA lt_tab TYPE STANDARD TABLE OF char5 WITH DEFAULT KEY.
+DATA res TYPE string.
+APPEND 'ab' TO lt_tab.
+APPEND 'cd' TO lt_tab.
+CONCATENATE LINES OF lt_tab INTO res SEPARATED BY '--'.
+ASSERT res = 'ab--cd'.
+CONCATENATE LINES OF lt_tab INTO res.
+ASSERT res = 'abcd'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("Separated by INTF constant", async () => {
     const code = `
 INTERFACE lif.
