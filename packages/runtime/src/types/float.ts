@@ -3,6 +3,7 @@ import {XString} from "./xstring";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {Integer8} from "./integer8";
+import {DecFloat34} from "./decfloat34";
 
 /*
 function getNumberParts(x: number) {
@@ -66,7 +67,7 @@ export class Float {
       this.value = parseFloat(value);
     } else if (value instanceof Integer8) {
       this.value = Number(value.get());
-    } else if (value instanceof Float) {
+    } else if (value instanceof Float || value instanceof DecFloat34) {
       this.value = value.getRaw();
     } else if (value instanceof Hex || value instanceof XString) {
 // todo, how/if should this work?

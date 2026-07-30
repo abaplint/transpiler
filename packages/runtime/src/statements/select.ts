@@ -66,7 +66,11 @@ export function rowsToTarget(target: Structure | Table | HashedTable | FieldSymb
         }
       } else {
         const columnName = Object.keys(row)[0];
-        targetRow.set(row[columnName]);
+        if (row[columnName] === null) {
+          targetRow.clear();
+        } else {
+          targetRow.set(row[columnName]);
+        }
       }
 
       abap.statements.insertInternal({table: target, data: targetRow, noClone: true});
@@ -74,10 +78,20 @@ export function rowsToTarget(target: Structure | Table | HashedTable | FieldSymb
   } else if (Array.isArray(target)) {
     for (let index = 0; index < target.length; index++) {
       const element = target[index];
-      element.set(rows[0][Object.keys(rows[0])[index]]);
+      const value = rows[0][Object.keys(rows[0])[index]];
+      if (value === null) {
+        element.clear();
+      } else {
+        element.set(value);
+      }
     }
   } else if (target !== undefined) {
-      // its a simple type
-    target.set(rows[0][Object.keys(rows[0])[0]]);
+    // its a simple type
+    const value = rows[0][Object.keys(rows[0])[0]];
+    if (value === null) {
+      target.clear();
+    } else {
+      target.set(value);
+    }
   }
 }

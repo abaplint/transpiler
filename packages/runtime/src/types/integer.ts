@@ -8,6 +8,7 @@ import {Integer8} from "./integer8";
 import {HexUInt8} from "./hex_uint8";
 import {Character} from "./character";
 import {String} from "./string";
+import {DecFloat34} from "./decfloat34";
 
 export const DIGITS = new RegExp(/^\s*-?\+?\d+\.?\d* *$/i);
 
@@ -69,7 +70,7 @@ export class Integer implements INumeric {
     return this;
   }
 
-  public set(value: INumeric | ICharacter | Hex | string | number | Integer | Float) {
+  public set(value: INumeric | ICharacter | Hex | string | number | Integer | Float | DecFloat34) {
     if (this.constant === true) {
       throw new Error("Changing constant");
     }
@@ -84,7 +85,7 @@ export class Integer implements INumeric {
       this.value = toInteger(value.get());
     } else if (value instanceof Integer8) {
       this.set(Number(value.get()));
-    } else if (value instanceof Float) {
+    } else if (value instanceof Float || value instanceof DecFloat34) {
       this.set(Math.round(value.getRaw()));
     } else if (value instanceof Hex || value instanceof XString || value instanceof HexUInt8) {
       let num = parseInt(value.get(), 16);

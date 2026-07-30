@@ -2,6 +2,7 @@ import {Float} from "./float";
 import {INumeric} from "./_numeric";
 import {throwError} from "../throw_error";
 import {Integer8} from "./integer8";
+import {DecFloat34} from "./decfloat34";
 
 const digits = new RegExp(/^\s*-?\+?\d*\.?\d*(?:E[+-]?\d+)? *$/i);
 
@@ -124,7 +125,7 @@ export class Packed implements INumeric {
       this.value = this.stringToScaled(value);
     } else if (value instanceof Integer8) {
       this.value = (value.get() as unknown as bigint) * pow10(this.decimals);
-    } else if (value instanceof Float) {
+    } else if (value instanceof Float || value instanceof DecFloat34) {
       this.value = this.numberToScaled(value.getRaw());
     } else {
       this.set(value.get());

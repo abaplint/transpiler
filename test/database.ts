@@ -104,6 +104,28 @@ describe("Top level tests, Database", () => {
     });
   });
 
+  it("MODIFY FROM TABLE sets sy-dbcnt for all rows", async () => {
+    const code = `
+    DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+    DATA row LIKE LINE OF tab.
+
+    row-arbgb = 'HELLO'.
+    row-msgnr = '001'.
+    APPEND row TO tab.
+
+    row-msgnr = '002'.
+    APPEND row TO tab.
+
+    MODIFY t100 FROM TABLE tab.
+    WRITE sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2");
+    }, {postgres: false, snowflake: false});
+  });
+
   it("MODIFY FROM, inserts and update", async () => {
     const code = `
     DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
@@ -761,6 +783,43 @@ ASSERT sy-subrc = 0.`;
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("2");
     });
+  });
+
+  it("SELECT WHERE compares two host boolean values", async () => {
+    const code = `
+DATA shortage_only TYPE abap_bool VALUE abap_true.
+DATA lt_t100 TYPE STANDARD TABLE OF t100.
+SELECT * FROM t100
+  WHERE @shortage_only = @abap_false OR msgnr = '999'
+  INTO TABLE @lt_t100.
+WRITE lines( lt_t100 ).
+shortage_only = abap_false.
+SELECT * FROM t100
+  WHERE @shortage_only = @abap_false OR msgnr = '999'
+  INTO TABLE @lt_t100.
+WRITE lines( lt_t100 ).`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("02");
+    }, {postgres: false, snowflake: false});
+  });
+
+  it("SELECT aggregate over empty result into packed", async () => {
+    const code = `
+    DATA lv_sum TYPE p LENGTH 7 DECIMALS 3.
+    SELECT SUM( valuefield ) FROM zquan INTO @lv_sum.
+    IF lv_sum = 0 AND sy-subrc = 0.
+      WRITE 'okay'.
+    ENDIF.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "zquan.tabl.xml", contents: zquan}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("okay");
+    }, {postgres: false, snowflake: false});
   });
 
   it("MODIFY simple", async () => {

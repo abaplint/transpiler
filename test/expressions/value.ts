@@ -505,4 +505,45 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1\n2");
   });
 
+  it("VALUE FOR assigns derived decfloat34 fields", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    TYPES: BEGIN OF ty_source,
+             count TYPE i,
+           END OF ty_source,
+           BEGIN OF ty_result,
+             count      TYPE i,
+             percentage TYPE decfloat34,
+             rounded    TYPE p LENGTH 8 DECIMALS 2,
+           END OF ty_result.
+    TYPES ty_sources TYPE STANDARD TABLE OF ty_source WITH EMPTY KEY.
+    TYPES ty_results TYPE STANDARD TABLE OF ty_result WITH EMPTY KEY.
+    CLASS-METHODS build RETURNING VALUE(result) TYPE ty_results.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD build.
+    DATA sources TYPE ty_sources.
+    sources = VALUE #( ( count = 1 ) ( count = 2 ) ).
+    result = VALUE #(
+      FOR source IN sources
+      ( count = source-count
+        percentage = CONV decfloat34( source-count * 100 / 3 )
+        rounded = CONV decfloat34( source-count * 100 / 3 ) ) ).
+  ENDMETHOD.
+ENDCLASS.
+START-OF-SELECTION.
+DATA results TYPE lcl=>ty_results.
+DATA row TYPE lcl=>ty_result.
+results = lcl=>build( ).
+LOOP AT results INTO row.
+  WRITE / row-percentage.
+  WRITE / row-rounded.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("33,333333333333336\n33,33\n66,66666666666667\n66,67");
+  });
+
 });

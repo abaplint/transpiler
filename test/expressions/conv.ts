@@ -48,6 +48,21 @@ WRITE / int.`;
     expect(abap.console.get()).to.equal("123");
   });
 
+  it("inline declaration in FORM", async () => {
+    const code = `
+FORM run.
+  DATA(sdf) = CONV decfloat34( 1 ).
+  WRITE / sdf.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 // todo: LET
 // todo: test concat and arithmetics
 
