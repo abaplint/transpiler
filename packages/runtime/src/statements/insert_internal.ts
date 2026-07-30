@@ -114,6 +114,19 @@ export function insertInternal(options: IInsertInternalOptions): void {
       }
     }
   } else if (options.initial === true) {
+    if (options.table instanceof HashedTable) {
+      const {value: val, subrc: subrc} = options.table.insert(options.table.getRowType());
+      if (subrc === 0) {
+        if (options.assigning) {
+          options.assigning.assign(val);
+        }
+        if (options.referenceInto) {
+          options.referenceInto.assign(val);
+        }
+      }
+      abap.builtin.sy.get().subrc.set(subrc);
+      return;
+    }
     let index = options.table.getArrayLength();
     if (options.index) {
       index = options.index.get() - 1;
