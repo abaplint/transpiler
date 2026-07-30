@@ -339,4 +339,24 @@ WRITE / sy-subrc.`;
     expect(abap.console.get()).to.equal("0");
   });
 
+  it("INSERT INITIAL LINE INTO hashed table", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field1 TYPE c LENGTH 10,
+         field2 TYPE c LENGTH 10,
+       END OF ty.
+TYPES ty2 TYPE HASHED TABLE OF ty WITH UNIQUE KEY field1.
+DATA tab2 TYPE ty2.
+INSERT INITIAL LINE INTO TABLE tab2.
+WRITE / sy-subrc.
+WRITE / lines( tab2 ).
+INSERT INITIAL LINE INTO TABLE tab2.
+WRITE / sy-subrc.
+WRITE / lines( tab2 ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n1\n4\n1");
+  });
+
 });
