@@ -173,6 +173,39 @@ describe("Running Examples - Integer type", () => {
     expect(abap.console.get()).to.equal("45141");
   });
 
+  it("hex to int, first bit is the sign", async () => {
+    const code = `
+    DATA lv_hex TYPE x LENGTH 4 VALUE 'FFFFFFFF'.
+    DATA lv_int TYPE i.
+    lv_int = lv_hex.
+    ASSERT lv_int = -1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("hex offset to int, first bit is the sign", async () => {
+    const code = `
+    DATA lv_hex TYPE x LENGTH 5 VALUE '00FFFFFFFF'.
+    DATA lv_int TYPE i.
+    lv_int = lv_hex+1.
+    ASSERT lv_int = -1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("hex offset length to int, positive", async () => {
+    const code = `
+    DATA lv_hex TYPE x LENGTH 5 VALUE '00FFFFFFFF'.
+    DATA lv_int TYPE i.
+    lv_int = lv_hex+1(2).
+    ASSERT lv_int = 65535.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("preceding zeros", async () => {
     const code = `
     DATA int TYPE i.
