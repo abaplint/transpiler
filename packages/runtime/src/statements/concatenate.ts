@@ -28,18 +28,22 @@ export function concatenate(input: IConcatenateInput) {
   }
 
   if (input.lines === true) {
-    const list: string[] = [];
+    let result = "";
     const tab = input.source[0];
     if (tab instanceof Table) {
-      for (const l of tab.array()) {
-        if (input.respectingBlanks !== true) {
-          list.push(l.get().trimEnd());
-        } else {
-          list.push(l.get());
+      const array = tab.array();
+      const length = array.length;
+      const respectingBlanks = input.respectingBlanks === true;
+      const hasSeparator = sep.length > 0;
+      for (let i = 0; i < length; i++) {
+        if (hasSeparator === true && i > 0) {
+          result += sep;
         }
+        const value = array[i].get();
+        result += respectingBlanks === true ? value : value.trimEnd();
       }
     }
-    input.target.set(list.join(sep));
+    input.target.set(result);
 
   } else {
     let result = "";
