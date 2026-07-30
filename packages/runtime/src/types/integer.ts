@@ -88,11 +88,11 @@ export class Integer implements INumeric {
     } else if (value instanceof Float || value instanceof DecFloat34) {
       this.set(Math.round(value.getRaw()));
     } else if (value instanceof Hex || value instanceof XString || value instanceof HexUInt8) {
-      let num = parseInt(value.get(), 16);
-// handle two complement,
-      if ((value instanceof Hex || value instanceof HexUInt8)
-          && value.getLength() >= 4) {
-        const maxVal = Math.pow(2, value.get().length / 2 * 8);
+      const hex = value.get();
+      let num = parseInt(hex, 16);
+// handle two complement, the first bit is the sign
+      if (hex.length >= 8) {
+        const maxVal = Math.pow(2, hex.length / 2 * 8);
         if (num > maxVal / 2 - 1) {
           num = num - maxVal;
         }
