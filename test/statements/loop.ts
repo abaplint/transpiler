@@ -1047,6 +1047,77 @@ ENDLOOP.`;
     expect(abap.console.getTrimmed()).to.equal("2");
   });
 
+  it("LOOP dynamic WHERE IN, upper case", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field TYPE i,
+       END OF ty.
+DATA range TYPE RANGE OF i.
+DATA dynamic TYPE string.
+DATA tab TYPE STANDARD TABLE OF ty.
+DATA row LIKE LINE OF tab.
+
+INSERT VALUE #( field = 2 ) INTO TABLE tab.
+INSERT VALUE #( field = 3 ) INTO TABLE tab.
+INSERT VALUE #( low = 2 option = 'EQ' sign = 'I' ) INTO TABLE range.
+dynamic = 'FIELD IN RANGE'.
+LOOP AT tab INTO row WHERE (dynamic).
+  WRITE / row-field.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("2");
+  });
+
+  it("LOOP dynamic WHERE NOT IN", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field TYPE i,
+       END OF ty.
+DATA range TYPE RANGE OF i.
+DATA dynamic TYPE string.
+DATA tab TYPE STANDARD TABLE OF ty.
+DATA row LIKE LINE OF tab.
+
+INSERT VALUE #( field = 2 ) INTO TABLE tab.
+INSERT VALUE #( field = 3 ) INTO TABLE tab.
+INSERT VALUE #( low = 2 option = 'EQ' sign = 'I' ) INTO TABLE range.
+dynamic = 'FIELD NOT IN RANGE'.
+LOOP AT tab INTO row WHERE (dynamic).
+  WRITE / row-field.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("3");
+  });
+
+  it("LOOP dynamic WHERE IN, field symbol range", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field TYPE i,
+       END OF ty.
+DATA range TYPE RANGE OF i.
+DATA dynamic TYPE string.
+DATA tab TYPE STANDARD TABLE OF ty.
+DATA row LIKE LINE OF tab.
+FIELD-SYMBOLS <range> LIKE range.
+
+INSERT VALUE #( field = 2 ) INTO TABLE tab.
+INSERT VALUE #( field = 3 ) INTO TABLE tab.
+INSERT VALUE #( low = 2 option = 'EQ' sign = 'I' ) INTO TABLE range.
+ASSIGN range TO <range>.
+dynamic = 'FIELD IN <RANGE>'.
+LOOP AT tab INTO row WHERE (dynamic).
+  WRITE / row-field.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("2");
+  });
+
   it("LOOP GROUP BY", async () => {
     const code = `
 TYPES:

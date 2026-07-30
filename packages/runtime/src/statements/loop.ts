@@ -51,10 +51,10 @@ function dynamicToWhere(condition: string, evaluate: (name: string) => FieldSymb
     throw new Error("Dynamic WHERE evaluation function is not defined");
   }
 
-  const matches = text.matchAll(/([\w-]+)\s+(\w+)\s+([<>\w-]+)/gi);
+  const matches = text.matchAll(/([\w-]+)\s+(NOT\s+IN|\w+)\s+([<>\w-]+)/gi);
   for (const match of matches) {
     const left = match[1];
-    const comparator = match[2].toLowerCase();
+    const comparator = match[2].toLowerCase().replace(/\s+/g, " ");
     let right = "";
 //    console.dir({left, right});
 
@@ -66,12 +66,20 @@ function dynamicToWhere(condition: string, evaluate: (name: string) => FieldSymb
       right = `evaluate("${name}").get()["${rightMatch[2].toLowerCase()}"]`;
     }
 
+    const fieldSymbol = match[3].match(/^<(\w+)>$/);
+    if (right === "" && fieldSymbol) {
+      right = `evaluate("fs_${fieldSymbol[1].toLowerCase()}_").getPointer()`;
+    }
+
     if (right === "") {
-      right = `evaluate("${match[3]}")`;
+      right = `evaluate("${match[3].toLowerCase()}")`;
     }
 
     if (comparator === "in") {
       const cnew = `abap.compare.in(${cleft}, ${right})`;
+      text = text.replace(match[0], cnew);
+    } else if (comparator === "not in") {
+      const cnew = `!abap.compare.in(${cleft}, ${right})`;
       text = text.replace(match[0], cnew);
     } else {
       const cnew = `abap.compare.${comparator}(${cleft}, ${right})`;
