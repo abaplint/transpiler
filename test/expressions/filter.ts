@@ -4,8 +4,8 @@ import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
-async function run(contents: string, skipVersionCheck = false) {
-  return runFiles(abap, [{filename: "zfoobar_filter.prog.abap", contents}], {skipVersionCheck});
+async function run(contents: string, skipVersionCheck = false, ignoreSyntaxCheck = false) {
+  return runFiles(abap, [{filename: "zfoobar_filter.prog.abap", contents}], {skipVersionCheck, ignoreSyntaxCheck});
 }
 
 describe("Running expressions - FILTER", () => {
@@ -38,7 +38,7 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1");
   });
 
-  it.skip("EXCEPT IN, different names", async () => {
+  it("EXCEPT IN, different names", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          id    TYPE i,
@@ -59,13 +59,12 @@ et_list = FILTER #( et_list EXCEPT IN lt_list WHERE id = id2 ).
 
 WRITE / lines( et_list ).`;
     const js = await run(code);
-    console.dir(js);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("1");
   });
 
-  it.skip("EXCEPT IN, empty list", async () => {
+  it("EXCEPT IN, empty list", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          id    TYPE i,
@@ -85,7 +84,7 @@ WRITE / lines( et_list ).`;
     expect(abap.console.get()).to.equal("1");
   });
 
-  it.skip("EXCEPT IN, filter hit", async () => {
+  it("EXCEPT IN, filter hit", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          id    TYPE i,
@@ -106,7 +105,7 @@ WRITE / lines( et_list ).`;
     expect(abap.console.get()).to.equal("0");
   });
 
-  it.skip("EXCEPT IN, filter miss", async () => {
+  it("EXCEPT IN, filter miss", async () => {
     const code = `
 TYPES: BEGIN OF ty,
          id    TYPE i,
@@ -121,6 +120,61 @@ INSERT VALUE #( id = 2 ) INTO TABLE lt_list.
 et_list = FILTER #( et_list EXCEPT IN lt_list WHERE id = id ).
 
 WRITE / lines( et_list ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
+  it("IN includes matching rows", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         id TYPE i,
+       END OF ty.
+DATA input TYPE SORTED TABLE OF ty WITH UNIQUE KEY id.
+DATA filter TYPE SORTED TABLE OF ty WITH UNIQUE KEY id.
+INSERT VALUE #( id = 1 ) INTO TABLE input.
+INSERT VALUE #( id = 2 ) INTO TABLE input.
+INSERT VALUE #( id = 2 ) INTO TABLE filter.
+DATA result LIKE input.
+result = FILTER #( input IN filter WHERE id = id ).
+WRITE / lines( result ).`;
+    const js = await run(code, false, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
+  it("EXCEPT without IN negates WHERE", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         id TYPE i,
+       END OF ty.
+DATA input TYPE SORTED TABLE OF ty WITH UNIQUE KEY id.
+INSERT VALUE #( id = 1 ) INTO TABLE input.
+INSERT VALUE #( id = 2 ) INTO TABLE input.
+DATA result LIKE input.
+result = FILTER #( input EXCEPT WHERE id = 2 ).
+WRITE / lines( result ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
+  it("IN honors USING KEY", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         id TYPE i,
+       END OF ty.
+DATA input TYPE SORTED TABLE OF ty WITH UNIQUE KEY id.
+DATA filter TYPE STANDARD TABLE OF ty
+  WITH NON-UNIQUE SORTED KEY by_id COMPONENTS id.
+INSERT VALUE #( id = 1 ) INTO TABLE input.
+INSERT VALUE #( id = 2 ) INTO TABLE input.
+INSERT VALUE #( id = 2 ) INTO TABLE filter.
+input = FILTER #( input EXCEPT IN filter USING KEY by_id WHERE id = id ).
+WRITE / lines( input ).`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
