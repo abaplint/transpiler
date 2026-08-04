@@ -45,6 +45,7 @@ import {test39} from "./test39";
 import {test40} from "./test40";
 import {test41} from "./test41";
 import {test42} from "./test42";
+import {test43} from "./test43";
 
 // NOTE: does not run via Mocha
 
@@ -102,6 +103,7 @@ const tests: Tests = [
   {name: "40: eq string", abap: test40},
   {name: "41: eq char, different lengths", abap: test41},
   {name: "42: eq int with numc", abap: test42},
+  {name: "43: CONCATENATE LINES OF", abap: test43},
 ];
 
 async function execute(t: Test) {
