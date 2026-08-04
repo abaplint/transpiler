@@ -2925,4 +2925,50 @@ ENDCLASS.`;
     await dumpNrun(files, false);
   });
 
+  it("test-65", async () => {
+    // global class with a constant in the local definitions include
+
+    const localsDef = `
+CLASS lcl_constants DEFINITION.
+  PUBLIC SECTION.
+    CONSTANTS gc_value TYPE i VALUE 42.
+ENDCLASS.`;
+
+    const localsImp = `
+CLASS lcl_constants IMPLEMENTATION.
+ENDCLASS.`;
+
+    const clas = `
+CLASS zcl_locals_def_constant DEFINITION PUBLIC FINAL CREATE PUBLIC.
+  PUBLIC SECTION.
+    CLASS-METHODS get_value RETURNING VALUE(result) TYPE i.
+ENDCLASS.
+
+CLASS zcl_locals_def_constant IMPLEMENTATION.
+  METHOD get_value.
+    result = lcl_constants=>gc_value.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const tests = `
+CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS constant_from_locals_def FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD constant_from_locals_def.
+    ASSERT zcl_locals_def_constant=>get_value( ) = 42.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "zcl_locals_def_constant.clas.locals_def.abap", contents: localsDef},
+      {filename: "zcl_locals_def_constant.clas.locals_imp.abap", contents: localsImp},
+      {filename: "zcl_locals_def_constant.clas.abap", contents: clas},
+      {filename: "zcl_locals_def_constant.clas.testclasses.abap", contents: tests},
+    ];
+    await dumpNrun(files, false);
+  });
+
 });
