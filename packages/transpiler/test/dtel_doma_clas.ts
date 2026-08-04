@@ -10,7 +10,44 @@ async function runFiles(files: IFile[]) {
   return res.objects;
 }
 
+const timestampDtel = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_DTEL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD04V>
+    <ROLLNAME>TIMESTAMP</ROLLNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <HEADLEN>19</HEADLEN>
+    <SCRLEN1>10</SCRLEN1>
+    <SCRLEN2>20</SCRLEN2>
+    <SCRLEN3>40</SCRLEN3>
+    <DDTEXT>TIMESTAMP</DDTEXT>
+    <REPTEXT>TIMESTAMP</REPTEXT>
+    <SCRTEXT_S>TIMESTAMP</SCRTEXT_S>
+    <SCRTEXT_M>TIMESTAMP</SCRTEXT_M>
+    <SCRTEXT_L>TIMESTAMP</SCRTEXT_L>
+    <DTELMASTER>E</DTELMASTER>
+    <DATATYPE>DEC</DATATYPE>
+    <LENG>000015</LENG>
+    <OUTPUTLEN>000019</OUTPUTLEN>
+   </DD04V>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
 describe("DTEL + DOMA + CLAS", () => {
+
+  it("TIMESTAMP used in code has packed length 8", async () => {
+    const output = await runFiles([
+      {filename: "timestamp.dtel.xml", contents: timestampDtel},
+      {filename: "ztimestamp.prog.abap", contents: "DATA timestamp TYPE timestamp."},
+    ]);
+    const program = output.find(file => file.filename === "ztimestamp.prog.mjs");
+
+    expect(program).to.not.equal(undefined);
+    expect(program!.chunk.getCode()).to.include(
+      'new abap.types.Packed({length: 8, decimals: 0, qualifiedName: "TIMESTAMP"})');
+  });
 
   it("Testing qualified names", async () => {
     const amoo_dtel = `<?xml version="1.0" encoding="utf-8"?>
