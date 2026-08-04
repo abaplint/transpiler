@@ -9,6 +9,7 @@ import * as Transpiler from "@abaplint/transpiler";
 import * as abaplint from "@abaplint/core";
 import {TranspilerConfig} from "./config";
 import {FileOperations} from "./file_operations";
+import {buildGitCloneArguments} from "./git_clone";
 import {ITranspilerConfig} from "./types";
 
 class Progress implements Transpiler.IProgress {
@@ -34,9 +35,13 @@ async function loadLib(config: ITranspilerConfig): Promise<Transpiler.IFile[]> {
       console.log("From folder: " + lib.folder);
       dir = process.cwd() + lib.folder;
     } else {
+      if (lib.url === undefined || lib.url === "") {
+        throw new Error("Library must define a non-empty url or an existing folder");
+      }
       console.log("Clone: " + lib.url);
       dir = fs.mkdtempSync(path.join(os.tmpdir(), "abap_transpile-"));
-      childProcess.execSync("git clone --quiet --depth 1 " + lib.url + " .", {cwd: dir, stdio: "inherit"});
+      const args = buildGitCloneArguments(lib.url);
+      childProcess.execFileSync("git", args, {cwd: dir, stdio: "inherit"});
       cleanupFolder = true;
     }
 

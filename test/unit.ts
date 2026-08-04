@@ -248,14 +248,12 @@ const zlock = `
 
 describe("Testing Unit Testing", () => {
   const base: string = path.join(__dirname, "..", "..", "unit-test/");
-  let name: string | undefined = "";
   let outputFolder: string = "";
 
   beforeEach(function() {
     if (fs.existsSync(base) === false) {
       fs.mkdirSync(base);
     }
-    name = this.currentTest?.title;
     outputFolder = base + this.currentTest?.title;
     if (fs.existsSync(outputFolder) === false) {
       fs.mkdirSync(outputFolder);
@@ -327,7 +325,7 @@ export async function setup(abap, schemas, insert) {
       `import runtime from "../../packages/runtime/build/src/index.js";`);
     fs.writeFileSync(outputFolder + path.sep + "init.mjs", output.initializationScript);
 
-    const buf = childProcess.execSync("node unit-test/" + name + "/index.mjs");
+    const buf = childProcess.execFileSync(process.execPath, [path.join(outputFolder, "index.mjs")]);
     return buf.toString();
   }
 

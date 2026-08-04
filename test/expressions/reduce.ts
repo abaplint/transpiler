@@ -186,4 +186,105 @@ WRITE / sum.`;
     expect(abap.console.get()).to.equal("12");
   });
 
+  it("assigns INIT and returns the first INIT field", async () => {
+    const code = `
+TYPES ints TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+DATA input TYPE ints.
+DATA result TYPE i.
+input = VALUE ints( ( 2 ) ( 3 ) ).
+result = REDUCE i( INIT sum = 10 count = 40
+                         FOR value IN input
+                         NEXT sum = sum + value count = count + 1 ).
+WRITE / result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("15");
+  });
+
+  it("outer LET", async () => {
+    const code = `
+TYPES ints TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+DATA input TYPE ints.
+DATA result TYPE i.
+input = VALUE ints( ( 2 ) ).
+result = REDUCE i( LET base = 5 IN
+                         INIT sum = base
+                         FOR value IN input
+                         NEXT sum = sum + value ).
+WRITE / result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("7");
+  });
+
+  it("multiple nested FOR clauses", async () => {
+    const code = `
+TYPES ints TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+DATA input TYPE ints.
+DATA result TYPE i.
+input = VALUE ints( ( 1 ) ( 2 ) ).
+result = REDUCE i( INIT sum = 0
+                         FOR left IN input
+                         FOR right IN input
+                         NEXT sum += left * right ).
+WRITE / result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("9");
+  });
+
+  it("table iteration FROM and TO", async () => {
+    const code = `
+TYPES ints TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+DATA input TYPE ints.
+DATA result TYPE i.
+input = VALUE ints( ( 1 ) ( 2 ) ( 3 ) ( 4 ) ).
+result = REDUCE i( INIT sum = 0
+                         FOR value IN input FROM 2 TO 3
+                         NEXT sum = sum + value ).
+WRITE / result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("5");
+  });
+
+  it("FOR LET and INDEX INTO", async () => {
+    const code = `
+TYPES ints TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+DATA input TYPE ints.
+DATA result TYPE i.
+input = VALUE ints( ( 2 ) ( 3 ) ).
+result = REDUCE i( INIT sum = 0
+                         FOR value IN input INDEX INTO index
+                           LET weighted = value * index IN
+                         NEXT sum = sum + weighted ).
+WRITE / result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("8");
+  });
+
+  it("GROUPS iteration", async () => {
+    const code = `
+TYPES: BEGIN OF row_type,
+         id TYPE i,
+       END OF row_type.
+DATA input TYPE STANDARD TABLE OF row_type WITH EMPTY KEY.
+DATA result TYPE i.
+input = VALUE #( ( id = 1 ) ( id = 1 ) ( id = 2 ) ).
+result = REDUCE i( INIT sum = 0
+                   FOR GROUPS group OF row IN input GROUP BY row-id
+                   NEXT sum = sum + group ).
+WRITE / result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3");
+  });
+
 });
