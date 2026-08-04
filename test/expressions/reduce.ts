@@ -230,7 +230,7 @@ result = REDUCE i( INIT sum = 0
                          FOR right IN input
                          NEXT sum += left * right ).
 WRITE / result.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("9");
@@ -281,7 +281,7 @@ result = REDUCE i( INIT sum = 0
                    FOR GROUPS group OF row IN input GROUP BY row-id
                    NEXT sum = sum + group ).
 WRITE / result.`;
-    const js = await run(code, true);
+    const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("3");
