@@ -1,5 +1,5 @@
 import * as abaplint from "@abaplint/core";
-import {DatabaseSchemaGenerator} from "./database_schema_generator";
+import {DatabaseSchemaGenerator, packedTypeToDatabase} from "./database_schema_generator";
 
 export class SnowflakeDatabaseSchema implements DatabaseSchemaGenerator {
   private readonly reg: abaplint.IRegistry;
@@ -62,7 +62,7 @@ export class SnowflakeDatabaseSchema implements DatabaseSchemaGenerator {
         || type instanceof abaplint.BasicTypes.FloatingPointType) {
       return `REAL`;
     } else if (type instanceof abaplint.BasicTypes.PackedType){
-      return `DECIMAL(${type.getLength()},${type.getDecimals()})`;
+      return packedTypeToDatabase(type);
     } else if (type instanceof abaplint.BasicTypes.VoidType) {
       throw `Type of ${errorInfo}-${fieldname} is VoidType(${type.getVoided()
       }), make sure the type is known, enable strict syntax checking`;

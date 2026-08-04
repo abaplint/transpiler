@@ -86,6 +86,83 @@ describe("Top level tests, Database", () => {
     });
   });
 
+  it("INSERT timestamp data element value from GET TIME STAMP", async () => {
+    const timestampDtel = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_DTEL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD04V>
+    <ROLLNAME>TIMESTAMP</ROLLNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <HEADLEN>19</HEADLEN>
+    <SCRLEN1>10</SCRLEN1>
+    <SCRLEN2>20</SCRLEN2>
+    <SCRLEN3>40</SCRLEN3>
+    <DDTEXT>TIMESTAMP</DDTEXT>
+    <REPTEXT>TIMESTAMP</REPTEXT>
+    <SCRTEXT_S>TIMESTAMP</SCRTEXT_S>
+    <SCRTEXT_M>TIMESTAMP</SCRTEXT_M>
+    <SCRTEXT_L>TIMESTAMP</SCRTEXT_L>
+    <DTELMASTER>E</DTELMASTER>
+    <DATATYPE>DEC</DATATYPE>
+    <LENG>000015</LENG>
+    <OUTPUTLEN>000019</OUTPUTLEN>
+   </DD04V>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+    const timestampTable = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V>
+    <TABNAME>ZTIMESTAMP_TEST</TABNAME>
+    <TABCLASS>TRANSP</TABCLASS>
+   </DD02V>
+   <DD03P_TABLE>
+    <DD03P>
+     <FIELDNAME>ID</FIELDNAME>
+     <KEYFLAG>X</KEYFLAG>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000002</INTLEN>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000001</LENG>
+    </DD03P>
+    <DD03P>
+     <FIELDNAME>CREATED_AT</FIELDNAME>
+     <ROLLNAME>TIMESTAMP</ROLLNAME>
+     <COMPTYPE>E</COMPTYPE>
+     <DATATYPE></DATATYPE>
+     <LENG></LENG>
+     <DECIMALS></DECIMALS>
+    </DD03P>
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+    const code = `
+    DATA row TYPE ztimestamp_test.
+    DATA expected TYPE timestamp.
+    row-id = '1'.
+    GET TIME STAMP FIELD row-created_at.
+    expected = row-created_at.
+    INSERT ztimestamp_test FROM row.
+    CLEAR row.
+    SELECT SINGLE * FROM ztimestamp_test INTO @row WHERE id = '1'.
+    IF sy-subrc = 0 AND row-created_at = expected.
+      WRITE 'okay'.
+    ENDIF.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "timestamp.dtel.xml", contents: timestampDtel},
+      {filename: "ztimestamp_test.tabl.xml", contents: timestampTable},
+    ];
+
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("okay");
+    });
+  });
+
   it("MODIFY FROM, inserts row", async () => {
     const code = `
     DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
