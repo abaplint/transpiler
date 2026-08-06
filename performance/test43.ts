@@ -6,7 +6,7 @@ DO 2000 TIMES.
   APPEND 'foobar' TO lt_tab.
 ENDDO.
 
-DO 1000 TIMES.
+DO 2000 TIMES.
   CONCATENATE LINES OF lt_tab INTO lv_str SEPARATED BY ','.
 ENDDO.
 `;
