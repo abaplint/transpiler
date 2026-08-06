@@ -19,6 +19,12 @@ export async function select(target: Structure | Table | HashedTable | FieldSymb
   }
 
   if (rows.length === 0) {
+    // INTO TABLE always initializes the target, also when nothing is found;
+    // a work area is left untouched instead
+    if (runtimeOptions?.appending !== true
+        && (target instanceof Table || target instanceof HashedTable)) {
+      target.clear();
+    }
     abap.builtin.sy.get().dbcnt.set(0);
     abap.builtin.sy.get().subrc.set(4);
     return;
