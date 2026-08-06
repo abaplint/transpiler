@@ -368,13 +368,17 @@ describe("Top level tests, Database", () => {
     SELECT SINGLE * FROM t100 INTO row.
     ASSERT row-arbgb IS NOT INITIAL.
     SELECT SINGLE * FROM t100 INTO row WHERE arbgb = 'NOT_THERE'.
-    WRITE row-arbgb.`;
+    IF row-arbgb = 'ZAG_UNIT_TEST'.
+      WRITE 'kept'.
+    ELSE.
+      WRITE 'cleared'.
+    ENDIF.`;
     const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
-      expect(abap.console.get()).to.equal("ZAG_UNIT_TEST");
+      expect(abap.console.get()).to.equal("kept");
     });
   });
 
