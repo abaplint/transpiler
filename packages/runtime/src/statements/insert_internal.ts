@@ -45,6 +45,7 @@ export function insertInternal(options: IInsertInternalOptions): void {
 
   if (isSorted === true
       && !(options.table instanceof HashedTable)
+      && options.index === undefined
       && options.lines !== true) {
     const insert = options.initial === true ? options.table.getRowType() : data;
     if (insert !== undefined) {
