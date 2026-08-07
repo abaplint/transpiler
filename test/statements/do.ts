@@ -76,6 +76,20 @@ WRITE / sy-index.`;
     expect(abap.console.get()).to.equal("1\n2\n10");
   });
 
+  it.only("DO, with CONV", async () => {
+    const code = `
+DATA times TYPE string.
+times = '2'.
+DATA iterations TYPE i.
+DO CONV i( times ) TIMES.
+  iterations += 1.
+ENDDO.
+ASSERT iterations = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("DO, early RETURN, should also reset sy-tabix", async () => {
     const code = `
 CLASS lcl DEFINITION.
