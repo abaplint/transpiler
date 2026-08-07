@@ -1,9 +1,7 @@
-import {eq, ne} from "../compare";
-import {ABAPObject, DataReference, FieldSymbol, HashedTable, Structure, Table, TableAccessType} from "../types";
+import {ABAPObject, DataReference, FieldSymbol, HashedTable, Structure, Table, TableAccessType, TableRowType} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
-import {readTable} from "./read_table";
-import {sort} from "./sort";
+import {compareRows, sort} from "./sort";
 import {ABAP} from "..";
 
 declare const abap: ABAP;
@@ -33,63 +31,39 @@ export function insertInternal(options: IInsertInternalOptions): void {
     options.data = options.data.getPointer();
   }
 
-  const tableOptions = options.table.getOptions();
-
-  let isSorted = tableOptions?.primaryKey?.type === TableAccessType.sorted
-    || tableOptions?.primaryKey?.type === TableAccessType.hashed;
-
-  if (options.table instanceof HashedTable) {
-    isSorted = false;
-  } else if (isSorted) {
-    const insert = options.data instanceof Structure ? options.data.get() : {table_line: options.data};
-
-    let compare = (row: any): boolean => {
-      for (const key of tableOptions?.primaryKey?.keyFields || []) {
-        if (key.includes("-")) {
-          const [first, second] = key.split("-");
-          if (ne(row[first.toLowerCase()].get()[second.toLowerCase()], insert[first.toLowerCase()].get()[second.toLowerCase()])) {
-            return false;
-          }
-        } else {
-          if (ne(row[key.toLowerCase()], insert[key.toLowerCase()])) {
-            return false;
-          }
-        }
-      }
-      return true;
-    };
-
-    if (tableOptions.primaryKey?.isUnique === true) {
-
-      const withKeyValue: {key: (i: any) => any, value: any}[] = [];
-      let binary = false;
-      const data = options?.data;
-      if (data instanceof Structure) {
-        const fieldName = tableOptions.primaryKey.keyFields[0].toLowerCase();
-        if (fieldName !== "table_line" && fieldName.includes("-") === false) {
-          withKeyValue.push({key: (i) => {return i[fieldName];}, value: data.get()[fieldName]});
-          binary = true;
-        }
-      } else {
-        compare = (row: any): boolean => {
-          // @ts-ignore
-          return eq(row.table_line, options.data);
-        };
-      }
-
-      readTable(options.table, {withKey: compare, withKeyValue: withKeyValue, binarySearch: binary});
-      if (abap.builtin.sy.get().subrc.get() === 0) {
-        abap.builtin.sy.get().subrc.set(4);
-        return;
-      }
-    }
-  }
-
   let data = options.data;
   if (typeof data === "string") {
     const tmp = options.table.getRowType().clone() as ICharacter;
     tmp.set(data);
     data = tmp;
+  }
+
+  const tableOptions = options.table.getOptions();
+
+  const isSorted = tableOptions?.primaryKey?.type === TableAccessType.sorted
+    || tableOptions?.primaryKey?.type === TableAccessType.hashed;
+
+  if (isSorted === true
+      && !(options.table instanceof HashedTable)
+      && options.lines !== true) {
+    const insert = options.initial === true ? options.table.getRowType() : data;
+    if (insert !== undefined) {
+      const result = options.table.insertSorted(
+        insert as TableRowType,
+        (a, b) => compareRows(a, b, tableOptions?.primaryKey?.keyFields || []),
+        tableOptions?.primaryKey?.isUnique === true,
+        options.noClone);
+      if (result.subrc === 0) {
+        if (options.assigning) {
+          options.assigning.assign(result.value);
+        }
+        if (options.referenceInto) {
+          options.referenceInto.assign(result.value);
+        }
+      }
+      abap.builtin.sy.get().subrc.set(result.subrc);
+      return;
+    }
   }
 
   if (data && options.index) {
