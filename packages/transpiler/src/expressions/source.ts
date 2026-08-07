@@ -98,6 +98,9 @@ export class SourceTranspiler implements IExpressionTranspiler {
           const context = new TypeNameOrInfer().findType(typ, traversal);
           ret.appendString(new SourceTranspiler().transpile(c.getFirstChild() as Nodes.ExpressionNode, traversal, context).getCode());
           ret.appendString(")");
+          if (this.addGet) {
+            ret.appendString(".get()");
+          }
         } else if (c.get() instanceof Expressions.ValueBody) {
           continue;
         } else if (c.get() instanceof Expressions.CorrespondingBody) {
