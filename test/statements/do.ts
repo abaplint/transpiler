@@ -76,7 +76,7 @@ WRITE / sy-index.`;
     expect(abap.console.get()).to.equal("1\n2\n10");
   });
 
-  it.only("DO, with CONV", async () => {
+  it("DO, with CONV", async () => {
     const code = `
 DATA times TYPE string.
 times = '2'.
