@@ -63,6 +63,34 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("invalid float conversion raises", async () => {
+    const code = `
+DATA value TYPE f.
+value = CONV f( 'abc' ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail("expected CX_SY_CONVERSION_NO_NUMBER");
+    } catch (e) {
+      expect(e.toString()).to.contain("CX_SY_CONVERSION_NO_NUMBER");
+    }
+  });
+
+  it("partial float conversion raises", async () => {
+    const code = `
+DATA value TYPE f.
+value = CONV f( '12abc' ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail("expected CX_SY_CONVERSION_NO_NUMBER");
+    } catch (e) {
+      expect(e.toString()).to.contain("CX_SY_CONVERSION_NO_NUMBER");
+    }
+  });
+
 // todo: LET
 // todo: test concat and arithmetics
 
