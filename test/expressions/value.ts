@@ -416,6 +416,25 @@ ASSERT lines( new_data ) = 5.`;
     await f(abap);
   });
 
+  it("VALUE LET FOR UNTIL with table expressions", async () => {
+    const code = `
+TYPES integer_table TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+DATA lt_matrix TYPE integer_table.
+DATA result TYPE integer_table.
+DATA index TYPE i VALUE 2.
+DATA lv_columns TYPE i VALUE 3.
+lt_matrix = VALUE #( ( 1 ) ( 2 ) ( 3 ) ( 4 ) ( 5 ) ( 6 ) ).
+result = VALUE #( LET lv_start = ( index - 1 ) * lv_columns + 1 IN
+                      FOR i = lv_start UNTIL i > lv_start + lv_columns - 1 ( lt_matrix[ i ] ) ).
+ASSERT lines( result ) = 3.
+ASSERT result[ 1 ] = 4.
+ASSERT result[ 2 ] = 5.
+ASSERT result[ 3 ] = 6.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("VALUE FOR LET IN", async () => {
     const code = `
 FORM run.

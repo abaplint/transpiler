@@ -28,6 +28,10 @@ export class ValueBodyTranspiler {
     let extraFields = "";
     let baseCode: string | undefined = undefined;
     const hasLines = body.findDirectExpression(Expressions.ValueBodyLine) !== undefined;
+    const outerLet = body.findDirectExpression(Expressions.Let);
+    const outerLetCode = outerLet === undefined
+      ? undefined
+      : new LetTranspiler().transpile(outerLet, traversal).getCode();
 
     const children = body.getChildren();
     for (let i = 0; i < children.length; i++) {
@@ -65,9 +69,11 @@ export class ValueBodyTranspiler {
           }
         }
         i = idx - 1;
-        const result = this.buildForChain(forNodes, typ, traversal, body, baseCode);
+        const result = this.buildForChain(forNodes, typ, traversal, body, baseCode, outerLetCode);
         ret = result.chunk;
         post = result.post;
+      } else if (child.get() instanceof Expressions.Let) {
+        continue;
       } else if (child instanceof Nodes.TokenNode && child.getFirstToken().getStr().toUpperCase() === "DEFAULT") {
         // note: this is last in the body, so its okay to prepend and postpend
         const sources = body.findDirectExpressions(Expressions.Source);
@@ -95,7 +101,8 @@ export class ValueBodyTranspiler {
       typ: Nodes.ExpressionNode,
       traversal: Traversal,
       body: Nodes.ExpressionNode,
-      baseCode?: string): {chunk: Chunk, post: string} {
+      baseCode?: string,
+      outerLetCode?: string): {chunk: Chunk, post: string} {
 
     interface LoopDescriptor {
       beforeLoop: string[];
@@ -107,7 +114,7 @@ export class ValueBodyTranspiler {
 
     const val = baseCode ?? new TypeNameOrInfer().transpile(typ, traversal).getCode();
     const chunk = new Chunk();
-    const preLoopDecls: string[] = [];
+    const preLoopDecls: string[] = outerLetCode === undefined ? [] : [outerLetCode];
     const descriptors: LoopDescriptor[] = [];
     const levelIndents: string[] = [];
     let uniqueCounter = 1;
