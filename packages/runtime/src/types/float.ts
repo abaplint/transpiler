@@ -1,9 +1,12 @@
+import {throwError} from "../throw_error";
 import {Hex} from "./hex";
 import {XString} from "./xstring";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {Integer8} from "./integer8";
 import {DecFloat34} from "./decfloat34";
+
+const FLOAT_DIGITS = new RegExp(/^\s*[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)? *$/);
 
 /*
 function getNumberParts(x: number) {
@@ -64,6 +67,12 @@ export class Float {
     } else if (typeof value === "string" && value.trim().length === 0) {
       this.value = 0;
     } else if (typeof value === "string") {
+      if (value.endsWith("-")) {
+        value = "-" + value.substring(0, value.length - 1);
+      }
+      if (FLOAT_DIGITS.test(value) === false) {
+        throwError("CX_SY_CONVERSION_NO_NUMBER");
+      }
       this.value = parseFloat(value);
     } else if (value instanceof Integer8) {
       this.value = Number(value.get());
