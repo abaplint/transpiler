@@ -35,6 +35,6 @@ https://open-abap.org
 
 ## Development
 
-Prerequisites: [Node.js](https://nodejs.org) 16+
+Prerequisites: [Node.js](https://nodejs.org) 22+
 
 For testing locally run `npm run install && npm test`

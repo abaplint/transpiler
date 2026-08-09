@@ -65,6 +65,33 @@ function compare(a: any, b: any, input: {component: string, descending?: boolean
   }
 }
 
+function compareWholeRows(a: TableRowType, b: TableRowType): number {
+  if (eq(a, b)) {
+    return 0;
+  } else if (lt(a, b)) {
+    return -1;
+  } else {
+    return 1;
+  }
+}
+
+export function compareRows(a: TableRowType, b: TableRowType, keyFields: readonly string[]): number {
+  if (keyFields.length > 0) {
+    for (const keyField of keyFields) {
+      const component = keyField.toLowerCase();
+      const result = component === "table_line"
+        ? compareWholeRows(a, b)
+        : compare(a, b, {component});
+      if (result !== 0) {
+        return result;
+      }
+    }
+    return 0;
+  } else {
+    return compareWholeRows(a, b);
+  }
+}
+
 export function sort(input: Table | FieldSymbol | any[], options?: ISortOptions) {
 //  console.dir(input);
 

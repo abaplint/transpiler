@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/transpiler",
-  "version": "2.13.50",
+  "version": "2.13.51",
   "description": "Transpiler",
   "main": "build/src/index.js",
   "typings": "build/src/index.d.ts",
@@ -11,9 +11,9 @@
   },
   "scripts": {
     "compile": "tsc",
-    "publish:major": "npm --no-git-tag-version version major && rm -rf build && npm install && npm run test && npm publish --access public",
-    "publish:minor": "npm --no-git-tag-version version minor && rm -rf build && npm install && npm run test && npm publish --access public",
-    "publish:patch": "npm --no-git-tag-version version patch && rm -rf build && npm install && npm run test && npm publish --access public",
+    "publish:major": "npm --no-git-tag-version version major && rimraf build && npm install && npm run test && npm publish --access public",
+    "publish:minor": "npm --no-git-tag-version version minor && rimraf build && npm install && npm run test && npm publish --access public",
+    "publish:patch": "npm --no-git-tag-version version patch && rimraf build && npm install && npm run test && npm publish --access public",
     "test": "npm run compile && mocha"
   },
   "mocha": {
@@ -29,7 +29,7 @@
   "author": "abaplint",
   "license": "MIT",
   "dependencies": {
-    "@abaplint/core": "^2.120.18",
+    "@abaplint/core": "^2.120.20",
     "source-map": "^0.7.6"
   },
   "devDependencies": {

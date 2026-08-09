@@ -540,6 +540,51 @@ export class Table implements ITable {
     return val;
   }
 
+  public insertSorted(
+      item: TableRowType,
+      compare: (a: TableRowType, b: TableRowType) => number,
+      unique: boolean,
+      noClone = false): {value: TableRowType | undefined, subrc: number} {
+    if (item instanceof FieldSymbol) {
+      const pointer = item.getPointer();
+      if (pointer === undefined) {
+        throw new Error("insertSorted, fs not assigned");
+      }
+      return this.insertSorted(pointer, compare, unique, noClone);
+    }
+
+    const val = noClone === true ? item : this.cloneRow(item);
+    const lastIndex = this.value.length - 1;
+
+    if (lastIndex < 0) {
+      return {value: this.insertIndex(val, 0, true), subrc: 0};
+    }
+
+    const lastComparison = compare(this.value[lastIndex], val);
+    if (lastComparison < 0 || (lastComparison === 0 && unique === false)) {
+      return {value: this.insertIndex(val, this.value.length, true), subrc: 0};
+    } else if (lastComparison === 0) {
+      return {value: undefined, subrc: 4};
+    }
+
+    let low = 0;
+    let high = this.value.length;
+    while (low < high) {
+      const middle = Math.floor((low + high) / 2);
+      if (compare(this.value[middle], val) <= 0) {
+        low = middle + 1;
+      } else {
+        high = middle;
+      }
+    }
+
+    if (unique === true && low > 0 && compare(this.value[low - 1], val) === 0) {
+      return {value: undefined, subrc: 4};
+    }
+
+    return {value: this.insertIndex(val, low, true), subrc: 0};
+  }
+
   /** index = javascript indexed */
   public deleteIndex(index: number) {
     this.secondaryIndexes = {};

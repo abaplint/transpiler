@@ -7,9 +7,9 @@
   "scripts": {
     "test": "tsc",
     "compile": "tsc",
-    "publish:major": "npm --no-git-tag-version version major && rm -rf build && npm install && npm run test && npm publish --access public",
-    "publish:minor": "npm --no-git-tag-version version minor && rm -rf build && npm install && npm run test && npm publish --access public",
-    "publish:patch": "npm --no-git-tag-version version patch && rm -rf build && npm install && npm run test && npm publish --access public"
+    "publish:major": "npm --no-git-tag-version version major && rimraf build && npm install && npm run test && npm publish --access public",
+    "publish:minor": "npm --no-git-tag-version version minor && rimraf build && npm install && npm run test && npm publish --access public",
+    "publish:patch": "npm --no-git-tag-version version patch && rimraf build && npm install && npm run test && npm publish --access public"
   },
   "repository": {
     "type": "git",
@@ -18,13 +18,13 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "pg": "^8.22.0",
-    "pg-cursor": "^2.21.0"
+    "pg": "^8.23.0",
+    "pg-cursor": "^2.22.0"
   },
   "devDependencies": {
     "@abaplint/runtime": "^2.13.50",
     "@types/node": "^22.18.1",
-    "@types/pg": "^8.20.4",
+    "@types/pg": "^8.21.0",
     "@types/pg-cursor": "^2.7.2",
     "typescript": "^6.0.3"
   }

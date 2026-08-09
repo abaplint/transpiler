@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/transpiler-cli",
-  "version": "2.13.50",
+  "version": "2.13.51",
   "description": "Transpiler - Command Line Interface",
   "funding": "https://github.com/sponsors/larshp",
   "bin": {
@@ -17,9 +17,9 @@
   },
   "scripts": {
     "test": "tsc && npm run webpack",
-    "publish:major": "npm --no-git-tag-version version major && rm -rf build && npm install && npm run test && npm publish --access public",
-    "publish:minor": "npm --no-git-tag-version version minor && rm -rf build && npm install && npm run test && npm publish --access public",
-    "publish:patch": "npm --no-git-tag-version version patch && rm -rf build && npm install && npm run test && npm publish --access public",
+    "publish:major": "npm --no-git-tag-version version major && rimraf build && npm install && npm run test && npm publish --access public",
+    "publish:minor": "npm --no-git-tag-version version minor && rimraf build && npm install && npm run test && npm publish --access public",
+    "publish:patch": "npm --no-git-tag-version version patch && rimraf build && npm install && npm run test && npm publish --access public",
     "schema": "ts-json-schema-generator --tsconfig tsconfig.json --jsDoc extended --path src/types.ts --no-type-check > schema.json",
     "compile": "npm test",
     "webpack": "webpack --progress"
@@ -27,8 +27,8 @@
   "author": "abaplint",
   "license": "MIT",
   "devDependencies": {
-    "@abaplint/core": "^2.120.18",
-    "@abaplint/transpiler": "^2.13.50",
+    "@abaplint/core": "^2.120.20",
+    "@abaplint/transpiler": "^2.13.51",
     "@types/glob": "^8.1.0",
     "@types/node": "^24.13.3",
     "@types/progress": "^2.0.7",
