@@ -119,7 +119,7 @@ WRITE / out.`;
     expect(abap.console.get()).to.equal("1,123\n1.123");
   });
 
-  it.only("initial", async () => {
+  it("initial", async () => {
     const code = `
 DATA value TYPE decfloat34.
 ASSERT value IS INITIAL.`;

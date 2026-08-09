@@ -1,4 +1,4 @@
-import {ABAPObject, Character, DataReference, Date, FieldSymbol, Float, HashedTable, Hex, HexUInt8, Integer8, Numc, Structure, Table, Time} from "../types";
+import {ABAPObject, Character, DataReference, Date, DecFloat34, FieldSymbol, Float, HashedTable, Hex, HexUInt8, Integer8, Numc, Structure, Table, Time} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -7,7 +7,7 @@ const REGEX_SPACES = /^ *$/;
 
 
 export function initial(val: ICharacter | INumeric | string | number |
-Integer8 | Structure | DataReference | FieldSymbol | Table | ABAPObject) {
+Integer8 | DecFloat34 | Structure | DataReference | FieldSymbol | Table | ABAPObject) {
 
   // todo, refactor? add as method in each type instead?
   if (val instanceof Table || val instanceof HashedTable) {
@@ -24,7 +24,7 @@ Integer8 | Structure | DataReference | FieldSymbol | Table | ABAPObject) {
     return val.get().match(REGEX_ZEROS) !== null;
   } else if (val instanceof Time) {
     return val.get() === "000000";
-  } else if (val instanceof Float) {
+  } else if (val instanceof Float || val instanceof DecFloat34) {
     return val.getRaw() === 0;
   } else if (val instanceof Character) {
     return val.get().match(REGEX_SPACES) !== null;
