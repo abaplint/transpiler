@@ -69,8 +69,11 @@ export function assign(input: IAssignInput) {
               abap.builtin.sy.get().subrc.set(4);
               return;
             }
+            const componentName = sourceContainer instanceof Structure
+              ? s.toLowerCase()
+              : s.toLowerCase().replace(/[~\\/]/g, "$");
             // @ts-ignore
-            input.dynamicSource = source[s.toLowerCase().replace(/[~\\/]/g, "$") as any];
+            input.dynamicSource = source[componentName as any];
           }
         }
       } else {
