@@ -926,6 +926,21 @@ ASSERT <fs> IS NOT ASSIGNED.`;
     await f(abap);
   });
 
+  it("ASSIGN, table dynamic non-component", async () => {
+    const code = `
+DATA lt_values TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+DATA lr_data   TYPE REF TO data.
+DATA component TYPE string VALUE 'NOT_A_COMPONENT'.
+FIELD-SYMBOLS <value> TYPE any.
+GET REFERENCE OF lt_values INTO lr_data.
+ASSIGN lr_data->(component) TO <value>.
+ASSERT sy-subrc = 4.
+ASSERT <value> IS NOT ASSIGNED.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("ASSIGN, table expression should not throw", async () => {
     const code = `
 TYPES: BEGIN OF ty,
