@@ -42,7 +42,7 @@ export function assign(input: IAssignInput) {
           } else if (upperS === "TABLE_LINE" && input.dynamicSource instanceof DataReference) {
             // @ts-ignore
             input.dynamicSource = input.dynamicSource.getPointer();
-            if (input.dynamicSource instanceof Table) {
+            if (input.dynamicSource instanceof Table || input.dynamicSource instanceof HashedTable) {
               const options = input.dynamicSource.getOptions();
               if (options?.withHeader === true) {
                 // @ts-ignore
@@ -52,8 +52,19 @@ export function assign(input: IAssignInput) {
               }
             }
           } else {
-            // @ts-ignore
-            const source = input.dynamicSource.get();
+            let sourceContainer: any = input.dynamicSource;
+            if (sourceContainer instanceof DataReference) {
+              sourceContainer = sourceContainer.getPointer();
+            }
+            if (sourceContainer instanceof Table || sourceContainer instanceof HashedTable) {
+              if (sourceContainer.getOptions()?.withHeader === true) {
+                sourceContainer = sourceContainer.getHeader();
+              } else {
+                abap.builtin.sy.get().subrc.set(4);
+                return;
+              }
+            }
+            const source = sourceContainer?.get();
             if (source === undefined) {
               abap.builtin.sy.get().subrc.set(4);
               return;
