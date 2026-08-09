@@ -6,7 +6,7 @@ import {INumeric} from "./_numeric";
 import {Integer8} from "./integer8";
 import {DecFloat34} from "./decfloat34";
 
-const FLOAT_DIGITS = new RegExp(/^\s*[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)? *$/);
+const FLOAT_DIGITS = /^\s*[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)? *$/;
 
 /*
 function getNumberParts(x: number) {
