@@ -33,6 +33,16 @@ export class Traversal {
     return name?.replace(/\//g, "$");
   }
 
+  /** the self reference "me", it is a FieldChain in eg. MethodCallChain and a SourceField in eg. MethodSource */
+  public static isMe(node: abaplint.Nodes.ExpressionNode
+    | abaplint.Nodes.TokenNode
+    | abaplint.Nodes.StructureNode): boolean {
+
+    return (node.get() instanceof abaplint.Expressions.FieldChain
+      || node.get() instanceof abaplint.Expressions.SourceField)
+      && node.concatTokens().toLowerCase() === "me";
+  }
+
   public static prefixVariable(name: string | undefined) {
     if (name && DEFAULT_KEYWORDS.has(name)) {
       return "$" + name;
@@ -428,9 +438,13 @@ export class Traversal {
    * in a sub class is not called. Returns the "{class}.prototype." prefix to call the method with,
    * or undefined if the normal dynamic dispatch via "this." is to be used.
    *
-   * Note that the prefix is the class currently being constructed, not the class defining the method,
-   * so the JS prototype chain finds the implementation as seen from that class, and interface methods
-   * are found as they are implemented in the class. */
+   * Note that the prefix is the class implementing the constructor, which is not necessarily the class
+   * being constructed, nor the class defining the method. Eg. constructing a sub class runs the constructor
+   * of the super class, and calls in there are bound to the super class. The JS prototype chain then finds
+   * the implementation as seen from that class, and interface methods as they are implemented in the class.
+   *
+   * Only calls written directly in the constructor body are bound statically, including nested scopes
+   * like FOR and LET. A method called from the constructor is dispatched dynamically as usual. */
   public constructorPrototypePrefix(token: abaplint.Token,
                                     def: abaplint.Types.MethodDefinition | undefined): string | undefined {
 

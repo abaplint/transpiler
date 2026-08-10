@@ -18,11 +18,6 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
     this.staticConstructorCall = staticConstructorCall;
   }
 
-  private static isMe(node: Nodes.ExpressionNode | Nodes.TokenNode | Nodes.StructureNode): boolean {
-    return (node.get() instanceof Expressions.FieldChain || node.get() instanceof Expressions.SourceField)
-      && node.concatTokens().toLowerCase() === "me";
-  }
-
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     const ret = new Chunk();
     const children = node.getChildren();
@@ -91,7 +86,7 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
         const scope = traversal.findCurrentScopeByToken(nameToken);
         const m = traversal.findMethodReference(nameToken, scope);
         // "me->name( )" has the same semantics as the unqualified "name( )"
-        const viaMe = i === 2 && children.length === 3 && MethodSourceTranspiler.isMe(children[0]);
+        const viaMe = i === 2 && children.length === 3 && Traversal.isMe(children[0]);
         if (this.staticConstructorCall && (i === 0 || viaMe)) {
           const prefix = traversal.constructorPrototypePrefix(nameToken, m?.def);
           if (prefix !== undefined) {

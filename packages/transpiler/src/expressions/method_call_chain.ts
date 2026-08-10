@@ -6,10 +6,6 @@ import {MethodCallTranspiler} from "./method_call";
 
 export class MethodCallChainTranspiler implements IExpressionTranspiler {
 
-  private static isMe(node: Nodes.ExpressionNode | Nodes.TokenNode | Nodes.StructureNode): boolean {
-    return node.get() instanceof Expressions.FieldChain && node.concatTokens().toLowerCase() === "me";
-  }
-
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     let ret = new Chunk();
     const children = node.getChildren();
@@ -19,7 +15,7 @@ export class MethodCallChainTranspiler implements IExpressionTranspiler {
         const isFirst = c === node.getFirstChild();
         // "me->name( )" has the same semantics as the unqualified "name( )",
         // only the first call in the chain is on "me", the rest is dispatched dynamically
-        const viaMe = c === children[2] && MethodCallChainTranspiler.isMe(children[0]);
+        const viaMe = c === children[2] && Traversal.isMe(children[0]);
 
         let prefix: string | undefined = undefined;
         if (isFirst || viaMe) {
