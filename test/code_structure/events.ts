@@ -304,7 +304,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.only("subrc", async () => {
+  it("subrc", async () => {
     const code = `
 CLASS lcl_sender DEFINITION FINAL.
   PUBLIC SECTION.
