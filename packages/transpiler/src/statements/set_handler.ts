@@ -32,7 +32,7 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
 
     let f: string | undefined = undefined;
     const forExpression = node.findExpressionAfterToken("FOR");
-    if (forExpression instanceof abaplint.Expressions.Source) {
+    if (forExpression?.get() instanceof abaplint.Expressions.Source) {
       f = new SourceTranspiler().transpile(forExpression, traversal).getCode();
     } else {
       f = `"ALL"`;

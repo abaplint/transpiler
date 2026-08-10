@@ -174,4 +174,55 @@ ENDCLASS.`;
     await f(abap);
   });
 
+  it("handlers are registered for the specified sender", async () => {
+    const code = `
+CLASS lcl_sender DEFINITION.
+  PUBLIC SECTION.
+    EVENTS fired.
+    METHODS fire.
+ENDCLASS.
+
+CLASS lcl_sender IMPLEMENTATION.
+  METHOD fire.
+    RAISE EVENT fired.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_handler DEFINITION.
+  PUBLIC SECTION.
+    DATA hits TYPE i READ-ONLY.
+    METHODS constructor IMPORTING sender TYPE REF TO lcl_sender.
+    METHODS on_fired FOR EVENT fired OF lcl_sender.
+ENDCLASS.
+
+CLASS lcl_handler IMPLEMENTATION.
+  METHOD constructor.
+    SET HANDLER on_fired FOR sender.
+  ENDMETHOD.
+
+  METHOD on_fired.
+    hits = hits + 1.
+  ENDMETHOD.
+ENDCLASS.
+
+DATA sender_1  TYPE REF TO lcl_sender.
+DATA sender_2  TYPE REF TO lcl_sender.
+DATA handler_1 TYPE REF TO lcl_handler.
+DATA handler_2 TYPE REF TO lcl_handler.
+
+START-OF-SELECTION.
+  sender_1  = NEW lcl_sender( ).
+  sender_2  = NEW lcl_sender( ).
+  handler_1 = NEW lcl_handler( sender_1 ).
+  handler_2 = NEW lcl_handler( sender_2 ).
+
+  sender_1->fire( ).
+
+  ASSERT handler_1->hits = 1.
+  ASSERT handler_2->hits = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
