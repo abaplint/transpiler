@@ -2549,4 +2549,58 @@ run->lif_interface~write_foo( ).`;
     expect(abap.console.get()).to.equal("foo\nfoo");
   });
 
+  it.only("super redefinition", async () => {
+    const code = `
+CLASS lcl_super DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor.
+    METHODS get_result
+      RETURNING VALUE(rv_result) TYPE string.
+  PROTECTED SECTION.
+    METHODS hook.
+    DATA result TYPE string.
+ENDCLASS.
+
+CLASS lcl_sub DEFINITION INHERITING FROM lcl_super.
+  PROTECTED SECTION.
+    METHODS hook REDEFINITION.
+ENDCLASS.
+
+CLASS lcl_super IMPLEMENTATION.
+  METHOD constructor.
+    " ABAP constructor semantics require the superclass implementation here.
+    hook( ).
+  ENDMETHOD.
+
+  METHOD hook.
+    result = 'SUPER'.
+  ENDMETHOD.
+
+  METHOD get_result.
+    rv_result = result.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_sub IMPLEMENTATION.
+  METHOD hook.
+    result = 'SUB'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA instance TYPE REF TO lcl_sub.
+  DATA actual TYPE string.
+
+  instance = NEW lcl_sub( ).
+  actual = instance->get_result( ).
+
+  WRITE / |Expected SUPER, actual { actual }|.
+  ASSERT actual = 'SUPER'.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("Expected SUPER, actual SUPER");
+  });
+
 });
