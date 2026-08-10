@@ -1,4 +1,4 @@
-import {Nodes, Expressions} from "@abaplint/core";
+import {Nodes, Expressions, ScopeType, Visibility} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
@@ -10,12 +10,26 @@ export class MethodCallChainTranspiler implements IExpressionTranspiler {
 
     for (const c of node.getChildren()) {
       if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.MethodCall) {
-        const sub = traversal.traverse(c);
+        let sub = traversal.traverse(c);
         if (sub.getCode().startsWith("abap.builtin.")
             || sub.getCode().startsWith("await abap.builtin.")) {
           ret.appendChunk(sub);
         } else {
-          const t = c === node.getFirstChild() ? "this." : "";
+          let t = c === node.getFirstChild() ? "this." : "";
+          const nameToken = c.findDirectExpression(Expressions.MethodName)?.getFirstToken();
+          const scope = nameToken ? traversal.findCurrentScopeByToken(nameToken) : undefined;
+          const method = nameToken ? traversal.findMethodReference(nameToken, scope) : undefined;
+          const isConstructor = scope?.getIdentifier().stype === ScopeType.Method
+            && scope.getIdentifier().sname.toLowerCase() === "constructor";
+          if (c === node.getFirstChild()
+              && isConstructor
+              && method?.def.getVisibility() !== Visibility.Private
+              && method?.def.isStatic() === false) {
+            t = traversal.lookupClassOrInterface(method.def.getClassName(), nameToken!) + ".prototype.";
+            const subCode = sub.getCode();
+            const parenthesis = subCode.indexOf("(");
+            sub = new Chunk(subCode.substring(0, parenthesis) + ".bind(this)" + subCode.substring(parenthesis));
+          }
           ret = new Chunk()
             .appendString("(await ")
             .append(t, node, traversal)

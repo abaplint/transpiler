@@ -2549,7 +2549,7 @@ run->lif_interface~write_foo( ).`;
     expect(abap.console.get()).to.equal("foo\nfoo");
   });
 
-  it.only("super redefinition", async () => {
+  it("super redefinition", async () => {
     const code = `
 CLASS lcl_super DEFINITION.
   PUBLIC SECTION.

@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import {Nodes, Expressions, Tokens, Visibility} from "@abaplint/core";
+import {Nodes, Expressions, Tokens, Visibility, ScopeType} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
@@ -18,6 +18,7 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
     const ret = new Chunk();
     const children = node.getChildren();
     let call: string = "";
+    let bindConstructorCall = false;
 
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
@@ -77,11 +78,19 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
         */
       } else if (child.get() instanceof Expressions.MethodName
           || child.get() instanceof Expressions.AttributeName) {
-        if (i === 0) {
-          this.prepend += "this.";
-        }
         const nameToken = child.getFirstToken();
-        const m = traversal.findMethodReference(nameToken, traversal.findCurrentScopeByToken(nameToken));
+        const scope = traversal.findCurrentScopeByToken(nameToken);
+        const m = traversal.findMethodReference(nameToken, scope);
+        if (i === 0) {
+          const isConstructor = scope?.getIdentifier().stype === ScopeType.Method
+            && scope.getIdentifier().sname.toLowerCase() === "constructor";
+          if (isConstructor && m?.def.getVisibility() !== Visibility.Private && m?.def.isStatic() === false) {
+            this.prepend += traversal.lookupClassOrInterface(m.def.getClassName(), nameToken) + ".prototype.";
+            bindConstructorCall = true;
+          } else {
+            this.prepend += "this.";
+          }
+        }
         if (m) {
           call += Traversal.escapeNamespace(m.name.toLowerCase().replace("~", "$"));
         } else {
@@ -100,10 +109,19 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
       } else if (child.get() instanceof Expressions.FieldChain
           || child.get() instanceof Expressions.SourceField) {
         const nameToken = child.getFirstToken();
-        const m = traversal.findMethodReference(nameToken, traversal.findCurrentScopeByToken(nameToken));
+        const scope = traversal.findCurrentScopeByToken(nameToken);
+        const m = traversal.findMethodReference(nameToken, scope);
         if (i === 0 && m) {
-          this.prepend += "this.";
-          if (this.privatePrefix && m.def.getVisibility() === Visibility.Private
+          const isPrivate = m.def.getVisibility() === Visibility.Private && m.def.isStatic() === false;
+          const isConstructor = scope?.getIdentifier().stype === ScopeType.Method
+            && scope.getIdentifier().sname.toLowerCase() === "constructor";
+          if (isConstructor && isPrivate === false && m.def.isStatic() === false) {
+            this.prepend += traversal.lookupClassOrInterface(m.def.getClassName(), nameToken) + ".prototype.";
+            bindConstructorCall = true;
+          } else {
+            this.prepend += "this.";
+          }
+          if (this.privatePrefix && isPrivate
               && m.def.isStatic() === false) { // todo: this is probably wrong?
             this.prepend += "#";
           }
@@ -119,6 +137,10 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
       } else {
         ret.appendString("MethodSourceTranspiler-" + child.get().constructor.name + "-todo");
       }
+    }
+
+    if (bindConstructorCall) {
+      call += ".bind(this)";
     }
 
     ret.appendString(this.prepend);
