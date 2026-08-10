@@ -304,4 +304,48 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it.only("subrc", async () => {
+    const code = `
+CLASS lcl_sender DEFINITION FINAL.
+  PUBLIC SECTION.
+    EVENTS ping.
+ENDCLASS.
+
+CLASS lcl_receiver DEFINITION FINAL.
+  PUBLIC SECTION.
+    METHODS on_ping FOR EVENT ping OF lcl_sender.
+ENDCLASS.
+
+CLASS lcl_sender IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lcl_receiver IMPLEMENTATION.
+  METHOD on_ping.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA sender   TYPE REF TO lcl_sender.
+  DATA receiver TYPE REF TO lcl_receiver.
+  DATA empty    TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+
+  CREATE OBJECT sender.
+  CREATE OBJECT receiver.
+
+  SET HANDLER receiver->on_ping FOR sender.
+
+  " Seed a nonzero return code. The following successful SET HANDLER
+  " must replace it with zero.
+  READ TABLE empty INDEX 1 TRANSPORTING NO FIELDS.
+  ASSERT sy-subrc = 4.
+
+  SET HANDLER receiver->on_ping FOR sender ACTIVATION abap_false.
+
+  WRITE: / |Expected sy-subrc 0, actual { sy-subrc }|.
+  ASSERT sy-subrc = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
