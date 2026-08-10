@@ -5,7 +5,10 @@ export type ABAPEventReference = {
   EVENT_CLASS: string;
 };
 
-type HandlerMethod = (parameters?: any) => Promise<void>;
+export type HandlerMethod = {
+  method: (parameters?: any) => Promise<void>;
+  receiver: object;
+};
 
 type Handlers = {
   handlers: HandlerMethod[];
@@ -39,12 +42,13 @@ export class ABAPEventing {
       if (methods.length > 1) {
         throw new Error("ABAPEventing.setHandler: deactivation of multiple methods not supported, todo");
       }
-      // todo: comparing the functions via toString might give the wrong result
       const index = handlers.findIndex(handler => {
         const sameObject = handler.forObject === "ALL"
           ? target === "ALL"
           : target !== "ALL" && handler.forObject.deref() === target;
-        return sameObject && handler.handlers[0].toString() === methods[0].toString();
+        const sameMethod = handler.handlers[0].method === methods[0].method
+          && handler.handlers[0].receiver === methods[0].receiver;
+        return sameObject && sameMethod;
       });
       if (index !== -1) {
         handlers.splice(index, 1);
@@ -62,11 +66,11 @@ export class ABAPEventing {
     for (const handler of handlers) {
       if (handler.forObject === "ALL") {
         for (const method of handler.handlers) {
-          await method(parameters);
+          await method.method.call(method.receiver, parameters);
         }
       } else if (handler.forObject.deref() === me.get()) {
         for (const method of handler.handlers) {
-          await method(parameters);
+          await method.method.call(method.receiver, parameters);
         }
       }
     }

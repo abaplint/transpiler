@@ -1,12 +1,12 @@
 import {ABAP} from "..";
-import {ABAPEventReference} from "../abap_eventing";
+import {ABAPEventReference, HandlerMethod} from "../abap_eventing";
 import {ABAPObject, FieldSymbol} from "../types";
 import {ICharacter} from "../types/_character";
 
 declare const abap: ABAP;
 
 export function setHandler(eventReference: ABAPEventReference,
-                           methods: any[],
+                           methods: HandlerMethod[],
                            forObject: ABAPObject | FieldSymbol,
                            activation?: ICharacter) {
 

@@ -225,4 +225,83 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("deregister handler for one receiver only", async () => {
+    const code = `
+CLASS lcl_sender DEFINITION FINAL.
+  PUBLIC SECTION.
+    EVENTS ping.
+    METHODS fire.
+ENDCLASS.
+
+CLASS lcl_receiver DEFINITION FINAL.
+  PUBLIC SECTION.
+    CLASS-DATA result TYPE string.
+
+    METHODS constructor
+      IMPORTING
+        iv_name TYPE c.
+
+    METHODS on_ping
+      FOR EVENT ping OF lcl_sender.
+
+    METHODS register
+      IMPORTING
+        io_sender TYPE REF TO lcl_sender.
+
+    METHODS unregister
+      IMPORTING
+        io_sender TYPE REF TO lcl_sender.
+
+  PRIVATE SECTION.
+    DATA name TYPE c LENGTH 1.
+ENDCLASS.
+
+CLASS lcl_sender IMPLEMENTATION.
+  METHOD fire.
+    RAISE EVENT ping.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_receiver IMPLEMENTATION.
+  METHOD constructor.
+    name = iv_name.
+  ENDMETHOD.
+
+  METHOD on_ping.
+    result = result && name.
+  ENDMETHOD.
+
+  METHOD register.
+    SET HANDLER me->on_ping FOR io_sender.
+  ENDMETHOD.
+
+  METHOD unregister.
+    SET HANDLER me->on_ping FOR io_sender ACTIVATION abap_false.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA sender TYPE REF TO lcl_sender.
+  DATA receiver_a TYPE REF TO lcl_receiver.
+  DATA receiver_b TYPE REF TO lcl_receiver.
+
+  sender = NEW lcl_sender( ).
+  receiver_a = NEW lcl_receiver( iv_name = 'A' ).
+  receiver_b = NEW lcl_receiver( iv_name = 'B' ).
+
+  receiver_a->register( sender ).
+  receiver_b->register( sender ).
+
+  " Must deactivate receiver B only.
+  receiver_b->unregister( sender ).
+
+  sender->fire( ).
+
+  WRITE / |Expected A, actual { lcl_receiver=>result }|.
+  ASSERT lcl_receiver=>result = 'A'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
