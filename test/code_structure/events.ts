@@ -225,7 +225,7 @@ START-OF-SELECTION.
     await f(abap);
   });
 
-  it.only("more another", async () => {
+  it("deregister handler for one receiver only", async () => {
     const code = `
 CLASS lcl_sender DEFINITION FINAL.
   PUBLIC SECTION.

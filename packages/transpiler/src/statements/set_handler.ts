@@ -13,9 +13,9 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
 
     for (const m of node.findDirectExpressions(abaplint.Expressions.MethodSource)) {
       const msource = new MethodSourceTranspiler("", true).transpile(m, traversal).getCode().replace("await ", "");
-      // fallback to private method,
-      // msource = "(" + msource + " || " + msource.replace(/(\w+)$/, "#$1") + ")";
-      methods.push(msource + ".bind(this)");
+      const lastDot = msource.lastIndexOf(".");
+      const receiver = lastDot === -1 ? "this" : msource.substring(0, lastDot);
+      methods.push(`{method: ${msource}, receiver: ${receiver}}`);
 
       if (eventClass === undefined) {
         const nameToken = m.getLastToken();
