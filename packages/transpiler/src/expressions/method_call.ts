@@ -1,4 +1,4 @@
-import {Nodes, Expressions, Visibility, ScopeType} from "@abaplint/core";
+import {Nodes, Expressions, Visibility, ScopeType, Types} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {MethodCallParamTranspiler} from "./method_call_param";
@@ -6,10 +6,13 @@ import {Chunk} from "../chunk";
 
 export class MethodCallTranspiler implements IExpressionTranspiler {
   private readonly postName: string;
+  private readonly method: {def: Types.MethodDefinition, name: string} | undefined;
 
-  /** @param postName inserted between the method name and the parameters, eg. ".bind(this)" */
-  public constructor(postName = "") {
+  /** @param postName inserted between the method name and the parameters, eg. ".bind(this)"
+   *  @param method   the already resolved method reference, saves looking it up again */
+  public constructor(postName = "", method?: {def: Types.MethodDefinition, name: string}) {
     this.postName = postName;
+    this.method = method;
   }
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
@@ -22,7 +25,7 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
     }
 
     const scope = traversal.findCurrentScopeByToken(nameToken);
-    const m = traversal.findMethodReference(nameToken, scope);
+    const m = this.method ?? traversal.findMethodReference(nameToken, scope);
 
     let name = nameToken.getStr().toLowerCase();
     if (traversal.isBuiltinMethod(nameToken)) {

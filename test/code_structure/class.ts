@@ -2921,4 +2921,36 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("SUPER");
   });
 
+  it("constructor calling builtin methods", async () => {
+    // builtins are not dispatched via the instance, so they must not get the constructor prototype prefix
+    const code = `
+CLASS lcl_foo DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS lcl_foo IMPLEMENTATION.
+  METHOD constructor.
+    DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+    APPEND 2 TO tab.
+    WRITE / strlen( 'abcd' ).
+    WRITE / lines( tab ).
+    WRITE / condense( |  bar  | ).
+    IF line_exists( tab[ table_line = 2 ] ).
+      WRITE / 'exists'.
+    ENDIF.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA foo TYPE REF TO lcl_foo.
+  foo = NEW lcl_foo( ).`;
+
+    const js = await run(code);
+    expect(js).to.not.include("prototype.abap.builtin");
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n1\nbar\nexists");
+  });
+
 });

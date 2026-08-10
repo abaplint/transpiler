@@ -1,4 +1,4 @@
-import {Nodes, Expressions} from "@abaplint/core";
+import {Nodes, Expressions, Types} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
@@ -18,17 +18,19 @@ export class MethodCallChainTranspiler implements IExpressionTranspiler {
         const viaMe = c === children[2] && Traversal.isMe(children[0]);
 
         let prefix: string | undefined = undefined;
-        if (isFirst || viaMe) {
-          const nameToken = c.findDirectExpression(Expressions.MethodName)?.getFirstToken();
-          if (nameToken) {
-            const method = traversal.findMethodReference(nameToken, traversal.findCurrentScopeByToken(nameToken));
-            prefix = traversal.constructorPrototypePrefix(nameToken, method?.def);
-          }
+        let method: {def: Types.MethodDefinition, name: string} | undefined = undefined;
+        const nameToken = isFirst || viaMe
+          ? c.findDirectExpression(Expressions.MethodName)?.getFirstToken()
+          : undefined;
+        // resolving the method reference is a linear scan of the scope, only do it when it can matter
+        if (nameToken && traversal.enclosingConstructorClass(nameToken) !== undefined) {
+          method = traversal.findMethodReference(nameToken, traversal.findCurrentScopeByToken(nameToken));
+          prefix = traversal.constructorPrototypePrefix(nameToken, method?.def);
         }
 
         const sub = prefix === undefined
           ? traversal.traverse(c)
-          : new MethodCallTranspiler(".bind(this)").transpile(c, traversal);
+          : new MethodCallTranspiler(".bind(this)", method).transpile(c, traversal);
 
         if (sub.getCode().startsWith("abap.builtin.")
             || sub.getCode().startsWith("await abap.builtin.")) {
