@@ -2803,4 +2803,122 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("run");
   });
 
+  it("super redefinition, called via me-> in a longer chain", async () => {
+    const code = `
+CLASS lcl_holder DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor
+      IMPORTING iv_name TYPE string.
+    METHODS name
+      RETURNING VALUE(rv_name) TYPE string.
+  PRIVATE SECTION.
+    DATA mv_name TYPE string.
+ENDCLASS.
+
+CLASS lcl_super DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor.
+    METHODS get_result
+      RETURNING VALUE(rv_result) TYPE string.
+  PROTECTED SECTION.
+    METHODS hook
+      RETURNING VALUE(ro_holder) TYPE REF TO lcl_holder.
+    DATA result TYPE string.
+ENDCLASS.
+
+CLASS lcl_sub DEFINITION INHERITING FROM lcl_super.
+  PROTECTED SECTION.
+    METHODS hook REDEFINITION.
+ENDCLASS.
+
+CLASS lcl_holder IMPLEMENTATION.
+  METHOD constructor.
+    mv_name = iv_name.
+  ENDMETHOD.
+
+  METHOD name.
+    rv_name = mv_name.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_super IMPLEMENTATION.
+  METHOD constructor.
+    " only the first call in the chain is on "me", ie. the superclass hook
+    result = me->hook( )->name( ).
+  ENDMETHOD.
+
+  METHOD hook.
+    ro_holder = NEW lcl_holder( 'SUPER' ).
+  ENDMETHOD.
+
+  METHOD get_result.
+    rv_result = result.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_sub IMPLEMENTATION.
+  METHOD hook.
+    ro_holder = NEW lcl_holder( 'SUB' ).
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA instance TYPE REF TO lcl_sub.
+  instance = NEW lcl_sub( ).
+  WRITE instance->get_result( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("SUPER");
+  });
+
+  it("super redefinition, CALL METHOD in constructor", async () => {
+    const code = `
+CLASS lcl_super DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor.
+    METHODS get_result
+      RETURNING VALUE(rv_result) TYPE string.
+  PROTECTED SECTION.
+    METHODS hook.
+    DATA result TYPE string.
+ENDCLASS.
+
+CLASS lcl_sub DEFINITION INHERITING FROM lcl_super.
+  PROTECTED SECTION.
+    METHODS hook REDEFINITION.
+ENDCLASS.
+
+CLASS lcl_super IMPLEMENTATION.
+  METHOD constructor.
+    CALL METHOD hook.
+  ENDMETHOD.
+
+  METHOD hook.
+    result = 'SUPER'.
+  ENDMETHOD.
+
+  METHOD get_result.
+    rv_result = result.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_sub IMPLEMENTATION.
+  METHOD hook.
+    result = 'SUB'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA instance TYPE REF TO lcl_sub.
+  instance = NEW lcl_sub( ).
+  WRITE instance->get_result( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("SUPER");
+  });
+
 });

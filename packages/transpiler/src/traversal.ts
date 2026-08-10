@@ -436,8 +436,10 @@ export class Traversal {
 
     if (def === undefined
         || def.isStatic() === true
-        || def.getVisibility() === abaplint.Visibility.Private) {
-      // static methods are not dispatched via the instance, and private methods cannot be redefined
+        || def.getVisibility() === abaplint.Visibility.Private
+        || def.isAbstract() === true) {
+      // static methods are not dispatched via the instance, and private methods cannot be redefined,
+      // abstract methods have no implementation to bind to, so keep the dynamic dispatch
       return undefined;
     }
 

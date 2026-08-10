@@ -17,8 +17,9 @@ export class MethodCallChainTranspiler implements IExpressionTranspiler {
     for (const c of children) {
       if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.MethodCall) {
         const isFirst = c === node.getFirstChild();
-        // "me->name( )" has the same semantics as the unqualified "name( )"
-        const viaMe = children.length === 3 && c === children[2] && MethodCallChainTranspiler.isMe(children[0]);
+        // "me->name( )" has the same semantics as the unqualified "name( )",
+        // only the first call in the chain is on "me", the rest is dispatched dynamically
+        const viaMe = c === children[2] && MethodCallChainTranspiler.isMe(children[0]);
 
         let prefix: string | undefined = undefined;
         if (isFirst || viaMe) {
