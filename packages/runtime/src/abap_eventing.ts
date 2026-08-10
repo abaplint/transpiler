@@ -9,7 +9,7 @@ type HandlerMethod = (parameters?: any) => Promise<void>;
 
 type Handlers = {
   handlers: HandlerMethod[];
-  forObject: WeakRef<ABAPObject> | "ALL";
+  forObject: WeakRef<object> | "ALL";
 }[];
 
 export class ABAPEventing {
@@ -27,20 +27,25 @@ export class ABAPEventing {
       this.registrations[event.EVENT_CLASS][event.EVENT_NAME] = [];
     }
 
-    const ref = forObject === "ALL" ? "ALL" : new WeakRef(forObject);
+    const target = forObject === "ALL" ? "ALL" : forObject.get();
     const handlers = this.registrations[event.EVENT_CLASS][event.EVENT_NAME];
     if (activation === true) {
       // todo: tackle duplicates
       handlers.push({
         handlers: methods,
-        forObject: ref,
+        forObject: target === "ALL" ? "ALL" : new WeakRef(target),
       });
     } else {
       if (methods.length > 1) {
         throw new Error("ABAPEventing.setHandler: deactivation of multiple methods not supported, todo");
       }
       // todo: comparing the functions via toString might give the wrong result
-      const index = handlers.findIndex(handler => handler.forObject === ref && handler.handlers[0].toString() === methods[0].toString());
+      const index = handlers.findIndex(handler => {
+        const sameObject = handler.forObject === "ALL"
+          ? target === "ALL"
+          : target !== "ALL" && handler.forObject.deref() === target;
+        return sameObject && handler.handlers[0].toString() === methods[0].toString();
+      });
       if (index !== -1) {
         handlers.splice(index, 1);
       }
@@ -59,7 +64,7 @@ export class ABAPEventing {
         for (const method of handler.handlers) {
           await method(parameters);
         }
-      } else if (handler.forObject.deref() === me) {
+      } else if (handler.forObject.deref() === me.get()) {
         for (const method of handler.handlers) {
           await method(parameters);
         }

@@ -174,7 +174,7 @@ ENDCLASS.`;
     await f(abap);
   });
 
-  it.only("another scenario", async () => {
+  it("handlers are registered for the specified sender", async () => {
     const code = `
 CLASS lcl_sender DEFINITION.
   PUBLIC SECTION.
