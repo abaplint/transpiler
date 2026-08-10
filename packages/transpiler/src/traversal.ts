@@ -424,6 +424,46 @@ export class Traversal {
     return candidate;
   }
 
+  /** Methods called in an instance constructor are bound statically in ABAP, ie. a redefinition
+   * in a sub class is not called. Returns the "{class}.prototype." prefix to call the method with,
+   * or undefined if the normal dynamic dispatch via "this." is to be used.
+   *
+   * Note that the prefix is the class currently being constructed, not the class defining the method,
+   * so the JS prototype chain finds the implementation as seen from that class, and interface methods
+   * are found as they are implemented in the class. */
+  public constructorPrototypePrefix(token: abaplint.Token,
+                                    def: abaplint.Types.MethodDefinition | undefined): string | undefined {
+
+    if (def === undefined
+        || def.isStatic() === true
+        || def.getVisibility() === abaplint.Visibility.Private) {
+      // static methods are not dispatched via the instance, and private methods cannot be redefined
+      return undefined;
+    }
+
+    let scope = this.findCurrentScopeByToken(token);
+    // the token might be in a scope nested inside the method, eg. FOR or LET
+    while (scope !== undefined && scope.getIdentifier().stype !== abaplint.ScopeType.Method) {
+      if (scope.getIdentifier().stype === abaplint.ScopeType.ClassImplementation) {
+        return undefined;
+      }
+      scope = scope.getParent();
+    }
+    if (scope === undefined || scope.getIdentifier().sname.toUpperCase() !== "CONSTRUCTOR") {
+      return undefined;
+    }
+
+    while (scope !== undefined && scope.getIdentifier().stype !== abaplint.ScopeType.ClassImplementation) {
+      scope = scope.getParent();
+    }
+    const className = scope?.getIdentifier().sname;
+    if (className === undefined) {
+      return undefined;
+    }
+
+    return this.lookupClassOrInterface(className, token) + ".prototype.";
+  }
+
   private isBuiltinVariable(token: abaplint.Token): boolean {
     const scope = this.findCurrentScopeByToken(token);
     if (scope === undefined) {

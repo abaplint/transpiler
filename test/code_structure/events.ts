@@ -348,4 +348,45 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("SET HANDLER in constructor, deactivate again", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    EVENTS ping.
+    METHODS constructor.
+    METHODS on_ping FOR EVENT ping OF lcl.
+    METHODS unregister.
+    METHODS fire.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD constructor.
+    SET HANDLER on_ping FOR me.
+  ENDMETHOD.
+
+  METHOD on_ping.
+    WRITE 'ping'.
+  ENDMETHOD.
+
+  METHOD unregister.
+    SET HANDLER on_ping FOR me ACTIVATION abap_false.
+  ENDMETHOD.
+
+  METHOD fire.
+    RAISE EVENT ping.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA obj TYPE REF TO lcl.
+  obj = NEW lcl( ).
+  obj->fire( ).
+  obj->unregister( ).
+  obj->fire( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ping");
+  });
+
 });

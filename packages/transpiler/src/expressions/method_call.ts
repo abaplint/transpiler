@@ -5,6 +5,12 @@ import {MethodCallParamTranspiler} from "./method_call_param";
 import {Chunk} from "../chunk";
 
 export class MethodCallTranspiler implements IExpressionTranspiler {
+  private readonly postName: string;
+
+  /** @param postName inserted between the method name and the parameters, eg. ".bind(this)" */
+  public constructor(postName = "") {
+    this.postName = postName;
+  }
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
 
@@ -41,11 +47,11 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
           name = `FRIENDS_ACCESS_INSTANCE["${name}"]`;
         }
       }
-      name = name + "(";
+      name = name + this.postName + "(";
     } else {
       // todo: this should never happen?
       name = Traversal.escapeNamespace(name.replace("~", "$"))!;
-      name = name + "(";
+      name = name + this.postName + "(";
     }
 
 

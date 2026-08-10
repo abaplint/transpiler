@@ -12,7 +12,9 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
     let eventName: string | undefined = undefined;
 
     for (const m of node.findDirectExpressions(abaplint.Expressions.MethodSource)) {
-      const msource = new MethodSourceTranspiler("", true).transpile(m, traversal).getCode().replace("await ", "");
+      // the handler method is registered as a reference, it is dispatched dynamically when the event is raised,
+      // so no static binding even if the SET HANDLER is inside a constructor
+      const msource = new MethodSourceTranspiler("", true, false).transpile(m, traversal).getCode().replace("await ", "");
       const lastDot = msource.lastIndexOf(".");
       const receiver = lastDot === -1 ? "this" : msource.substring(0, lastDot);
       methods.push(`{method: ${msource}, receiver: ${receiver}}`);

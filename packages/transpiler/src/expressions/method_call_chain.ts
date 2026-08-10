@@ -1,39 +1,52 @@
-import {Nodes, Expressions, ScopeType, Visibility} from "@abaplint/core";
+import {Nodes, Expressions} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
+import {MethodCallTranspiler} from "./method_call";
 
 export class MethodCallChainTranspiler implements IExpressionTranspiler {
 
+  private static isMe(node: Nodes.ExpressionNode | Nodes.TokenNode | Nodes.StructureNode): boolean {
+    return node.get() instanceof Expressions.FieldChain && node.concatTokens().toLowerCase() === "me";
+  }
+
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     let ret = new Chunk();
+    const children = node.getChildren();
 
-    for (const c of node.getChildren()) {
+    for (const c of children) {
       if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.MethodCall) {
-        let sub = traversal.traverse(c);
+        const isFirst = c === node.getFirstChild();
+        // "me->name( )" has the same semantics as the unqualified "name( )"
+        const viaMe = children.length === 3 && c === children[2] && MethodCallChainTranspiler.isMe(children[0]);
+
+        let prefix: string | undefined = undefined;
+        if (isFirst || viaMe) {
+          const nameToken = c.findDirectExpression(Expressions.MethodName)?.getFirstToken();
+          if (nameToken) {
+            const method = traversal.findMethodReference(nameToken, traversal.findCurrentScopeByToken(nameToken));
+            prefix = traversal.constructorPrototypePrefix(nameToken, method?.def);
+          }
+        }
+
+        const sub = prefix === undefined
+          ? traversal.traverse(c)
+          : new MethodCallTranspiler(".bind(this)").transpile(c, traversal);
+
         if (sub.getCode().startsWith("abap.builtin.")
             || sub.getCode().startsWith("await abap.builtin.")) {
           ret.appendChunk(sub);
         } else {
-          let t = c === node.getFirstChild() ? "this." : "";
-          const nameToken = c.findDirectExpression(Expressions.MethodName)?.getFirstToken();
-          const scope = nameToken ? traversal.findCurrentScopeByToken(nameToken) : undefined;
-          const method = nameToken ? traversal.findMethodReference(nameToken, scope) : undefined;
-          const isConstructor = scope?.getIdentifier().stype === ScopeType.Method
-            && scope.getIdentifier().sname.toLowerCase() === "constructor";
-          if (c === node.getFirstChild()
-              && isConstructor
-              && method?.def.getVisibility() !== Visibility.Private
-              && method?.def.isStatic() === false) {
-            t = traversal.lookupClassOrInterface(method.def.getClassName(), nameToken!) + ".prototype.";
-            const subCode = sub.getCode();
-            const parenthesis = subCode.indexOf("(");
-            sub = new Chunk(subCode.substring(0, parenthesis) + ".bind(this)" + subCode.substring(parenthesis));
+          let receiver = ret;
+          let t = isFirst ? "this." : "";
+          if (prefix !== undefined) {
+            t = prefix;
+            receiver = new Chunk(); // discard the "this.me.get()." built for the viaMe case
           }
           ret = new Chunk()
             .appendString("(await ")
             .append(t, node, traversal)
-            .appendChunk(ret)
+            .appendChunk(receiver)
             .appendChunk(sub)
             .appendString(")");
         }
