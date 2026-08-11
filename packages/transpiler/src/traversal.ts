@@ -469,9 +469,12 @@ export class Traversal {
    * of the super class, and calls in there are bound to the super class. The JS prototype chain then finds
    * the implementation as seen from that class, and interface methods as they are implemented in the class.
    *
-   * Only calls written directly in the constructor body are bound statically, see enclosingConstructorClass */
+   * Only calls written directly in the constructor body are bound statically, see enclosingConstructorClass
+   *
+   * @param enclosingClass the result of enclosingConstructorClass(token), pass it if already resolved */
   public constructorPrototypePrefix(token: abaplint.Token,
-                                    def: abaplint.Types.MethodDefinition | undefined): string | undefined {
+                                    def: abaplint.Types.MethodDefinition | undefined,
+                                    enclosingClass?: string): string | undefined {
 
     if (def === undefined
         || def.isStatic() === true
@@ -482,7 +485,7 @@ export class Traversal {
       return undefined;
     }
 
-    const className = this.enclosingConstructorClass(token);
+    const className = enclosingClass ?? this.enclosingConstructorClass(token);
     if (className === undefined) {
       return undefined;
     }

@@ -23,9 +23,10 @@ export class MethodCallChainTranspiler implements IExpressionTranspiler {
           ? c.findDirectExpression(Expressions.MethodName)?.getFirstToken()
           : undefined;
         // resolving the method reference is a linear scan of the scope, only do it when it can matter
-        if (nameToken && traversal.enclosingConstructorClass(nameToken) !== undefined) {
+        const enclosingClass = nameToken ? traversal.enclosingConstructorClass(nameToken) : undefined;
+        if (nameToken && enclosingClass !== undefined) {
           method = traversal.findMethodReference(nameToken, traversal.findCurrentScopeByToken(nameToken));
-          prefix = traversal.constructorPrototypePrefix(nameToken, method?.def);
+          prefix = traversal.constructorPrototypePrefix(nameToken, method?.def, enclosingClass);
         }
 
         const sub = prefix === undefined
