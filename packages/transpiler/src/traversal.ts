@@ -33,6 +33,16 @@ export class Traversal {
     return name?.replace(/\//g, "$");
   }
 
+  /** the self reference "me", it is a FieldChain in eg. MethodCallChain and a SourceField in eg. MethodSource */
+  public static isMe(node: abaplint.Nodes.ExpressionNode
+    | abaplint.Nodes.TokenNode
+    | abaplint.Nodes.StructureNode): boolean {
+
+    return (node.get() instanceof abaplint.Expressions.FieldChain
+      || node.get() instanceof abaplint.Expressions.SourceField)
+      && node.concatTokens().toLowerCase() === "me";
+  }
+
   public static prefixVariable(name: string | undefined) {
     if (name && DEFAULT_KEYWORDS.has(name)) {
       return "$" + name;
@@ -422,6 +432,65 @@ export class Traversal {
     }
 
     return candidate;
+  }
+
+  /** Returns the name of the class implementing the instance constructor the token is located in,
+   * or undefined if the token is not inside an instance constructor.
+   *
+   * Only the constructor body itself counts, including nested scopes like FOR and LET. A method
+   * called from the constructor is a scope of its own, and is not considered part of the constructor.
+   *
+   * This is cheap compared to resolving a method reference, so use it to bail out early. */
+  public enclosingConstructorClass(token: abaplint.Token): string | undefined {
+    let scope = this.findCurrentScopeByToken(token);
+    // the token might be in a scope nested inside the method, eg. FOR or LET
+    while (scope !== undefined && scope.getIdentifier().stype !== abaplint.ScopeType.Method) {
+      if (scope.getIdentifier().stype === abaplint.ScopeType.ClassImplementation) {
+        return undefined;
+      }
+      scope = scope.getParent();
+    }
+    if (scope === undefined || scope.getIdentifier().sname.toUpperCase() !== "CONSTRUCTOR") {
+      return undefined;
+    }
+
+    while (scope !== undefined && scope.getIdentifier().stype !== abaplint.ScopeType.ClassImplementation) {
+      scope = scope.getParent();
+    }
+    return scope?.getIdentifier().sname;
+  }
+
+  /** Methods called in an instance constructor are bound statically in ABAP, ie. a redefinition
+   * in a sub class is not called. Returns the "{class}.prototype." prefix to call the method with,
+   * or undefined if the normal dynamic dispatch via "this." is to be used.
+   *
+   * Note that the prefix is the class implementing the constructor, which is not necessarily the class
+   * being constructed, nor the class defining the method. Eg. constructing a sub class runs the constructor
+   * of the super class, and calls in there are bound to the super class. The JS prototype chain then finds
+   * the implementation as seen from that class, and interface methods as they are implemented in the class.
+   *
+   * Only calls written directly in the constructor body are bound statically, see enclosingConstructorClass
+   *
+   * @param enclosingClass the result of enclosingConstructorClass(token), pass it if already resolved */
+  public constructorPrototypePrefix(token: abaplint.Token,
+                                    def: abaplint.Types.MethodDefinition | undefined,
+                                    enclosingClass?: string): string | undefined {
+
+    if (def === undefined
+        || def.isStatic() === true
+        || def.getVisibility() === abaplint.Visibility.Private
+        || def.isAbstract() === true) {
+      // static methods are not dispatched via the instance, and private methods cannot be redefined,
+      // abstract methods have no implementation to bind to, so keep the dynamic dispatch
+      return undefined;
+    }
+
+    const className = enclosingClass ?? this.enclosingConstructorClass(token);
+    if (className === undefined) {
+      return undefined;
+    }
+
+    return this.lookupClassOrInterface(className, token) + ".prototype.";
   }
 
   private isBuiltinVariable(token: abaplint.Token): boolean {

@@ -1,25 +1,52 @@
-import {Nodes, Expressions} from "@abaplint/core";
+import {Nodes, Expressions, Types} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
+import {MethodCallTranspiler} from "./method_call";
 
 export class MethodCallChainTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     let ret = new Chunk();
+    const children = node.getChildren();
 
-    for (const c of node.getChildren()) {
+    for (const c of children) {
       if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.MethodCall) {
-        const sub = traversal.traverse(c);
+        const isFirst = c === node.getFirstChild();
+        // "me->name( )" has the same semantics as the unqualified "name( )",
+        // only the first call in the chain is on "me", the rest is dispatched dynamically
+        const viaMe = c === children[2] && Traversal.isMe(children[0]);
+
+        let prefix: string | undefined = undefined;
+        let method: {def: Types.MethodDefinition, name: string} | undefined = undefined;
+        const nameToken = isFirst || viaMe
+          ? c.findDirectExpression(Expressions.MethodName)?.getFirstToken()
+          : undefined;
+        // resolving the method reference is a linear scan of the scope, only do it when it can matter
+        const enclosingClass = nameToken ? traversal.enclosingConstructorClass(nameToken) : undefined;
+        if (nameToken && enclosingClass !== undefined) {
+          method = traversal.findMethodReference(nameToken, traversal.findCurrentScopeByToken(nameToken));
+          prefix = traversal.constructorPrototypePrefix(nameToken, method?.def, enclosingClass);
+        }
+
+        const sub = prefix === undefined
+          ? traversal.traverse(c)
+          : new MethodCallTranspiler(".bind(this)", method).transpile(c, traversal);
+
         if (sub.getCode().startsWith("abap.builtin.")
             || sub.getCode().startsWith("await abap.builtin.")) {
           ret.appendChunk(sub);
         } else {
-          const t = c === node.getFirstChild() ? "this." : "";
+          let receiver = ret;
+          let t = isFirst ? "this." : "";
+          if (prefix !== undefined) {
+            t = prefix;
+            receiver = new Chunk(); // discard the "this.me.get()." built for the viaMe case
+          }
           ret = new Chunk()
             .appendString("(await ")
             .append(t, node, traversal)
-            .appendChunk(ret)
+            .appendChunk(receiver)
             .appendChunk(sub)
             .appendString(")");
         }

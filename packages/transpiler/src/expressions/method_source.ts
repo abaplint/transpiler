@@ -8,16 +8,21 @@ import {FieldChainTranspiler} from ".";
 export class MethodSourceTranspiler implements IExpressionTranspiler {
   private prepend: string;
   private readonly privatePrefix: boolean;
+  private readonly staticConstructorCall: boolean;
 
-  public constructor(prepend?: string, privatePrefix = false) {
+  /** @param staticConstructorCall set to false when building a reference to the method instead of calling it,
+   *                               eg. SET HANDLER, where the dynamic method is the one to be registered */
+  public constructor(prepend?: string, privatePrefix = false, staticConstructorCall = true) {
     this.prepend = (prepend || "") + "await ";
     this.privatePrefix = privatePrefix;
+    this.staticConstructorCall = staticConstructorCall;
   }
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     const ret = new Chunk();
     const children = node.getChildren();
     let call: string = "";
+    let bindConstructorCall = false;
 
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
@@ -77,11 +82,23 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
         */
       } else if (child.get() instanceof Expressions.MethodName
           || child.get() instanceof Expressions.AttributeName) {
-        if (i === 0) {
+        const nameToken = child.getFirstToken();
+        const scope = traversal.findCurrentScopeByToken(nameToken);
+        const m = traversal.findMethodReference(nameToken, scope);
+        // "me->name( )" has the same semantics as the unqualified "name( )"
+        const viaMe = i === 2 && children.length === 3 && Traversal.isMe(children[0]);
+        if (this.staticConstructorCall && (i === 0 || viaMe)) {
+          const prefix = traversal.constructorPrototypePrefix(nameToken, m?.def);
+          if (prefix !== undefined) {
+            this.prepend += prefix;
+            call = ""; // discard the "this.me.get()." built for the viaMe case
+            bindConstructorCall = true;
+          } else if (i === 0) {
+            this.prepend += "this.";
+          }
+        } else if (i === 0) {
           this.prepend += "this.";
         }
-        const nameToken = child.getFirstToken();
-        const m = traversal.findMethodReference(nameToken, traversal.findCurrentScopeByToken(nameToken));
         if (m) {
           call += Traversal.escapeNamespace(m.name.toLowerCase().replace("~", "$"));
         } else {
@@ -100,9 +117,18 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
       } else if (child.get() instanceof Expressions.FieldChain
           || child.get() instanceof Expressions.SourceField) {
         const nameToken = child.getFirstToken();
-        const m = traversal.findMethodReference(nameToken, traversal.findCurrentScopeByToken(nameToken));
+        const scope = traversal.findCurrentScopeByToken(nameToken);
+        const m = traversal.findMethodReference(nameToken, scope);
         if (i === 0 && m) {
-          this.prepend += "this.";
+          const prefix = this.staticConstructorCall
+            ? traversal.constructorPrototypePrefix(nameToken, m.def)
+            : undefined;
+          if (prefix !== undefined) {
+            this.prepend += prefix;
+            bindConstructorCall = true;
+          } else {
+            this.prepend += "this.";
+          }
           if (this.privatePrefix && m.def.getVisibility() === Visibility.Private
               && m.def.isStatic() === false) { // todo: this is probably wrong?
             this.prepend += "#";
@@ -119,6 +145,10 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
       } else {
         ret.appendString("MethodSourceTranspiler-" + child.get().constructor.name + "-todo");
       }
+    }
+
+    if (bindConstructorCall) {
+      call += ".bind(this)";
     }
 
     ret.appendString(this.prepend);

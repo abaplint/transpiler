@@ -2549,4 +2549,408 @@ run->lif_interface~write_foo( ).`;
     expect(abap.console.get()).to.equal("foo\nfoo");
   });
 
+  it("super redefinition", async () => {
+    const code = `
+CLASS lcl_super DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor.
+    METHODS get_result
+      RETURNING VALUE(rv_result) TYPE string.
+  PROTECTED SECTION.
+    METHODS hook.
+    DATA result TYPE string.
+ENDCLASS.
+
+CLASS lcl_sub DEFINITION INHERITING FROM lcl_super.
+  PROTECTED SECTION.
+    METHODS hook REDEFINITION.
+ENDCLASS.
+
+CLASS lcl_super IMPLEMENTATION.
+  METHOD constructor.
+    " ABAP constructor semantics require the superclass implementation here.
+    hook( ).
+  ENDMETHOD.
+
+  METHOD hook.
+    result = 'SUPER'.
+  ENDMETHOD.
+
+  METHOD get_result.
+    rv_result = result.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_sub IMPLEMENTATION.
+  METHOD hook.
+    result = 'SUB'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA instance TYPE REF TO lcl_sub.
+  DATA actual TYPE string.
+
+  instance = NEW lcl_sub( ).
+  actual = instance->get_result( ).
+
+  WRITE / |Expected SUPER, actual { actual }|.
+  ASSERT actual = 'SUPER'.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("Expected SUPER, actual SUPER");
+  });
+
+  it("constructor calling own redefinition", async () => {
+    const code = `
+CLASS lcl_super DEFINITION.
+  PUBLIC SECTION.
+    METHODS get_result
+      RETURNING VALUE(rv_result) TYPE string.
+  PROTECTED SECTION.
+    METHODS hook.
+    DATA result TYPE string.
+ENDCLASS.
+
+CLASS lcl_sub DEFINITION INHERITING FROM lcl_super.
+  PUBLIC SECTION.
+    METHODS constructor.
+  PROTECTED SECTION.
+    METHODS hook REDEFINITION.
+ENDCLASS.
+
+CLASS lcl_super IMPLEMENTATION.
+  METHOD hook.
+    result = 'SUPER'.
+  ENDMETHOD.
+
+  METHOD get_result.
+    rv_result = result.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_sub IMPLEMENTATION.
+  METHOD constructor.
+    super->constructor( ).
+    " the class redefines hook itself, so its own implementation runs
+    hook( ).
+  ENDMETHOD.
+
+  METHOD hook.
+    result = 'SUB'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA instance TYPE REF TO lcl_sub.
+  instance = NEW lcl_sub( ).
+  WRITE instance->get_result( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("SUB");
+  });
+
+  it("super redefinition, called via me->", async () => {
+    const code = `
+CLASS lcl_super DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor.
+    METHODS get_result
+      RETURNING VALUE(rv_result) TYPE string.
+  PROTECTED SECTION.
+    METHODS hook.
+    DATA result TYPE string.
+ENDCLASS.
+
+CLASS lcl_sub DEFINITION INHERITING FROM lcl_super.
+  PROTECTED SECTION.
+    METHODS hook REDEFINITION.
+ENDCLASS.
+
+CLASS lcl_super IMPLEMENTATION.
+  METHOD constructor.
+    " ABAP constructor semantics require the superclass implementation here.
+    me->hook( ).
+  ENDMETHOD.
+
+  METHOD hook.
+    result = 'SUPER'.
+  ENDMETHOD.
+
+  METHOD get_result.
+    rv_result = result.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_sub IMPLEMENTATION.
+  METHOD hook.
+    result = 'SUB'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA instance TYPE REF TO lcl_sub.
+  instance = NEW lcl_sub( ).
+  WRITE instance->get_result( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("SUPER");
+  });
+
+  it("constructor calling interface method", async () => {
+    const code = `
+INTERFACE lif_bar.
+  METHODS run.
+ENDINTERFACE.
+
+CLASS lcl_foo DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif_bar.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS lcl_foo IMPLEMENTATION.
+  METHOD constructor.
+    lif_bar~run( ).
+  ENDMETHOD.
+
+  METHOD lif_bar~run.
+    WRITE 'run'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA foo TYPE REF TO lcl_foo.
+  foo = NEW lcl_foo( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("run");
+  });
+
+  it("constructor calling interface method, functional", async () => {
+    const code = `
+INTERFACE lif_bar.
+  METHODS get
+    RETURNING VALUE(rv_result) TYPE string.
+ENDINTERFACE.
+
+CLASS lcl_foo DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif_bar.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS lcl_foo IMPLEMENTATION.
+  METHOD constructor.
+    DATA result TYPE string.
+    result = lif_bar~get( ).
+    WRITE result.
+  ENDMETHOD.
+
+  METHOD lif_bar~get.
+    rv_result = 'got'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA foo TYPE REF TO lcl_foo.
+  foo = NEW lcl_foo( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("got");
+  });
+
+  it("constructor calling aliased interface method", async () => {
+    const code = `
+INTERFACE lif_bar.
+  METHODS run.
+ENDINTERFACE.
+
+CLASS lcl_foo DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif_bar.
+    ALIASES run FOR lif_bar~run.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS lcl_foo IMPLEMENTATION.
+  METHOD constructor.
+    run( ).
+  ENDMETHOD.
+
+  METHOD lif_bar~run.
+    WRITE 'run'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA foo TYPE REF TO lcl_foo.
+  foo = NEW lcl_foo( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("run");
+  });
+
+  it("super redefinition, called via me-> in a longer chain", async () => {
+    const code = `
+CLASS lcl_holder DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor
+      IMPORTING iv_name TYPE string.
+    METHODS name
+      RETURNING VALUE(rv_name) TYPE string.
+  PRIVATE SECTION.
+    DATA mv_name TYPE string.
+ENDCLASS.
+
+CLASS lcl_super DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor.
+    METHODS get_result
+      RETURNING VALUE(rv_result) TYPE string.
+  PROTECTED SECTION.
+    METHODS hook
+      RETURNING VALUE(ro_holder) TYPE REF TO lcl_holder.
+    DATA result TYPE string.
+ENDCLASS.
+
+CLASS lcl_sub DEFINITION INHERITING FROM lcl_super.
+  PROTECTED SECTION.
+    METHODS hook REDEFINITION.
+ENDCLASS.
+
+CLASS lcl_holder IMPLEMENTATION.
+  METHOD constructor.
+    mv_name = iv_name.
+  ENDMETHOD.
+
+  METHOD name.
+    rv_name = mv_name.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_super IMPLEMENTATION.
+  METHOD constructor.
+    " only the first call in the chain is on "me", ie. the superclass hook
+    result = me->hook( )->name( ).
+  ENDMETHOD.
+
+  METHOD hook.
+    ro_holder = NEW lcl_holder( 'SUPER' ).
+  ENDMETHOD.
+
+  METHOD get_result.
+    rv_result = result.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_sub IMPLEMENTATION.
+  METHOD hook.
+    ro_holder = NEW lcl_holder( 'SUB' ).
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA instance TYPE REF TO lcl_sub.
+  instance = NEW lcl_sub( ).
+  WRITE instance->get_result( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("SUPER");
+  });
+
+  it("super redefinition, CALL METHOD in constructor", async () => {
+    const code = `
+CLASS lcl_super DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor.
+    METHODS get_result
+      RETURNING VALUE(rv_result) TYPE string.
+  PROTECTED SECTION.
+    METHODS hook.
+    DATA result TYPE string.
+ENDCLASS.
+
+CLASS lcl_sub DEFINITION INHERITING FROM lcl_super.
+  PROTECTED SECTION.
+    METHODS hook REDEFINITION.
+ENDCLASS.
+
+CLASS lcl_super IMPLEMENTATION.
+  METHOD constructor.
+    CALL METHOD hook.
+  ENDMETHOD.
+
+  METHOD hook.
+    result = 'SUPER'.
+  ENDMETHOD.
+
+  METHOD get_result.
+    rv_result = result.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_sub IMPLEMENTATION.
+  METHOD hook.
+    result = 'SUB'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA instance TYPE REF TO lcl_sub.
+  instance = NEW lcl_sub( ).
+  WRITE instance->get_result( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("SUPER");
+  });
+
+  it("constructor calling builtin methods", async () => {
+    // builtins are not dispatched via the instance, so they must not get the constructor prototype prefix
+    const code = `
+CLASS lcl_foo DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS lcl_foo IMPLEMENTATION.
+  METHOD constructor.
+    DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+    APPEND 2 TO tab.
+    WRITE / strlen( 'abcd' ).
+    WRITE / lines( tab ).
+    WRITE / condense( |  bar  | ).
+    IF line_exists( tab[ table_line = 2 ] ).
+      WRITE / 'exists'.
+    ENDIF.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA foo TYPE REF TO lcl_foo.
+  foo = NEW lcl_foo( ).`;
+
+    const js = await run(code);
+    expect(js).to.not.include("prototype.abap.builtin");
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n1\nbar\nexists");
+  });
+
 });
