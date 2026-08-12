@@ -9,7 +9,7 @@ export const sy = new Structure({
   host: new Character(32).set("localhost"),
   index: new Integer(),
   langu: new Character(1).set("E"),
-  mandt: new Character(3).set("123"),
+  mandt: new Character(3, {qualifiedName: "SY-MANDT", ddicName: "MANDT"}).set("123"),
   msgid: new Character(20),
   msgno: new Numc({length: 3}),
   msgty: new Character(1),
@@ -23,7 +23,8 @@ export const sy = new Structure({
   tfill: new Integer(),
   timlo: new Time(),
   tzone: new Integer(), // 0 = UTC
-  uname: new Character(12).set("USERNAME"),
+  zonlo: new Character(6).set("UTC"),
+  uname: new Character(12, {qualifiedName: "SY-UNAME", ddicName: "UNAME"}).set("USERNAME"),
   uzeit: new Time(),
   dbsys: new Character(10),
   batch: new Character(1),
