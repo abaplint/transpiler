@@ -40,8 +40,13 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
     const cx = traversal.lookupClassOrInterface("CX_SY_CREATE_OBJECT_ERROR", node.getFirstToken());
     if (dynamic) {
       const id = UniqueIdentifier.get();
+      const internalName = UniqueIdentifier.get();
       ret += `let ${id} = abap.Classes["${traversal.buildPrefix()}"+${name}.trimEnd()];\n`;
       ret += `if (${id} === undefined) { ${id} = abap.Classes[${name}.trimEnd()]; }\n`;
+      ret += `if (${id} === undefined && abap.Classes['KERNEL_INTERNAL_NAME'] !== undefined) {\n`;
+      ret += `  const ${internalName} = await abap.Classes['KERNEL_INTERNAL_NAME'].rtti_to_internal({iv_rtti: ${name}});\n`;
+      ret += `  ${id} = abap.Classes[${internalName}.get().trimEnd()];\n`;
+      ret += `}\n`;
       ret += `if (${id} === undefined) { throw new ${cx}; }\n`;
       clas = id;
     }
