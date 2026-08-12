@@ -2140,6 +2140,58 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("sub");
   });
 
+  it("Class, inherited interface alias redefinition", async () => {
+    const code = `
+INTERFACE lif_message.
+  METHODS get_text
+    RETURNING
+      VALUE(result) TYPE string.
+ENDINTERFACE.
+
+CLASS lcl_base DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif_message.
+    ALIASES get_text FOR lif_message~get_text.
+ENDCLASS.
+
+CLASS lcl_base IMPLEMENTATION.
+  METHOD lif_message~get_text.
+    result = \`base text\`.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_middle DEFINITION
+  INHERITING FROM lcl_base.
+ENDCLASS.
+
+CLASS lcl_middle IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lcl_child DEFINITION
+  INHERITING FROM lcl_middle.
+
+  PUBLIC SECTION.
+    METHODS get_text REDEFINITION.
+ENDCLASS.
+
+CLASS lcl_child IMPLEMENTATION.
+  METHOD get_text.
+    result = \`child text\`.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA object TYPE REF TO lcl_child.
+
+  object = NEW lcl_child( ).
+
+  ASSERT object->get_text( ) = \`child text\`.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("Class, private method in inheritance", async () => {
     const code = `
 CLASS top DEFINITION.
