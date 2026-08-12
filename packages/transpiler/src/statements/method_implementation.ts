@@ -119,11 +119,15 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
       throw new Error(`Method name "then" not allowed`);
     }
 
-    const superDef = traversal.findClassDefinition(classDef?.getSuperClass(), scope);
-    for (const a of superDef?.getAliases() || []) {
-      if (a.getName().toLowerCase() === methodName) {
-        methodName = a.getComponent().replace("~", "$").toLowerCase();
+    let superClassName = classDef?.getSuperClass();
+    while (superClassName !== undefined) {
+      const superDef = traversal.findClassDefinition(superClassName, scope);
+      const alias = superDef?.getAliases().find(a => a.getName().toLowerCase() === methodName);
+      if (alias !== undefined) {
+        methodName = alias.getComponent().replace("~", "$").toLowerCase();
+        break;
       }
+      superClassName = superDef?.getSuperClass();
     }
 
     // https://github.com/tc39/proposal-class-fields
