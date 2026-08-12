@@ -23,6 +23,7 @@ export const sy = new Structure({
   tfill: new Integer(),
   timlo: new Time(),
   tzone: new Integer(), // 0 = UTC
+  zonlo: new Character(6).set("UTC"),
   uname: new Character(12).set("USERNAME"),
   uzeit: new Time(),
   dbsys: new Character(10),
