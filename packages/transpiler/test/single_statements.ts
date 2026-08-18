@@ -186,6 +186,11 @@ describe("Single statements", () => {
 
     {abap: "SELECT SINGLE * FROM t100 INTO ls_result.",
       js: `await abap.statements.select(ls_result, {select: "SELECT * FROM " + abap.buildDbTableName("t100") + " UP TO 1 ROWS"});`},
+    {abap: `SELECT DISTINCT item~matnr AS matnr
+      FROM vbap AS item
+      INNER JOIN vbak AS header ON header~vbeln = item~vbeln
+      INTO TABLE result.`,
+      js: `await abap.statements.select(result, {select: "SELECT DISTINCT \\"item\\".\\"matnr\\"AS matnr  FROM " + abap.buildDbTableName("vbap") + " AS item INNER JOIN " + abap.buildDbTableName("vbak") + " AS header ON \\"header\\".\\"vbeln\\" = item~vbeln"});`},
     {abap: "SELECT * FROM t100 INTO TABLE lt_result ORDER BY msgnr.",
       js: `await abap.statements.select(lt_result, {select: "SELECT * FROM " + abap.buildDbTableName("t100") + " ORDER BY \\"msgnr\\""});`},
     {abap: "SELECT * FROM t100 INTO TABLE lt_result UP TO 2 ROWS.",

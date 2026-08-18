@@ -35,7 +35,10 @@ export class SelectTranspiler implements IStatementTranspiler {
       target = traversal.traverse(node.findFirstExpression(abaplint.Expressions.SQLIntoStructure)).getCode();
     }
 
-    let select = "SELECT ";
+    const tokens = node.getTokens();
+    const isDistinct = tokens[0]?.getStr().toUpperCase() === "SELECT"
+      && tokens[1]?.getStr().toUpperCase() === "DISTINCT";
+    let select = isDistinct ? "SELECT DISTINCT " : "SELECT ";
     const fieldList = node.findFirstExpression(abaplint.Expressions.SQLFieldList)
       || node.findFirstExpression(abaplint.Expressions.SQLFieldListLoop);
     if (fieldList === undefined) {
