@@ -135,6 +135,7 @@ export * from "./generate_subroutine";
 export * from "./set_screen";
 export * from "./set_titlebar";
 export * from "./shift";
+export * from "./skip";
 export * from "./sort_dataset";
 export * from "./sort";
 export * from "./split";

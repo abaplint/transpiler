@@ -55,6 +55,7 @@ import {INumeric} from "../types/_numeric";
 import {CallFunction, ICallFunctionOptions} from "./call_function";
 import {SelectDatabaseOptions, SelectRuntimeOptions} from "../db/db";
 import {Trace} from "../trace";
+import {ISkipOptions, SkipStatement} from "./skip";
 
 // this is a class, as statements like SELECT needs access to the database object instance
 // and WRITE will access the Console
@@ -156,6 +157,10 @@ export class Statements {
 
   public write(source: INumeric | ICharacter | FieldSymbol | string | number, options?: IWriteOptions) {
     return new WriteStatement(this.context).write(source, options);
+  }
+
+  public skip(options?: ISkipOptions) {
+    return new SkipStatement(this.context).skip(options);
   }
 
 }
