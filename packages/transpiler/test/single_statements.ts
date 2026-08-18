@@ -324,7 +324,11 @@ await abap.Classes['KERNEL_CREATE_DATA_HANDLE'].call({handle: abc2, dref: abc1})
       js: `abap.statements.assert(abap.compare.assigned(fs_fs_));`},
     {abap: `AUTHORITY-CHECK OBJECT 'ZFOOBAR' ID 'ACTVT' FIELD '03'.`,
       js: `if (abap.Classes['KERNEL_AUTHORITY_CHECK'] === undefined) throw new Error("AuthorityCheck, kernel class missing");
-await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({});`}, // todo
+await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({object: abap.CharacterFactory.get(7, 'ZFOOBAR'),fields: [{id: abap.CharacterFactory.get(5, 'ACTVT'), field: abap.CharacterFactory.get(2, '03')}]});`},
+
+    {abap: `AUTHORITY-CHECK OBJECT obj FOR USER usr ID id1 FIELD val1 ID id2 DUMMY.`,
+      js: `if (abap.Classes['KERNEL_AUTHORITY_CHECK'] === undefined) throw new Error("AuthorityCheck, kernel class missing");
+await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({object: obj,user: usr,fields: [{id: id1, field: val1}, {id: id2, dummy: true}]});`},
 
     {abap: `CALL METHOD bar RECEIVING field = field.`,
       js: `field.set(await bar());`},
