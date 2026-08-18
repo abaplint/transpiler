@@ -95,9 +95,9 @@ ENDFUNCTION.`;
     {filename: "zfgroup.fugr.xml", contents: xml},
   ];
 
-  async function runFugr() {
+  async function runFugr(inputFiles = files) {
     UniqueIdentifier.reset();
-    const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
+    const memory = inputFiles.map(f => new abaplint.MemoryFile(f.filename, f.contents));
     const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
     const res = await new Transpiler().run(reg);
     const fugr = res.objects.find(o => o.object.type === "FUGR");
@@ -153,6 +153,24 @@ ENDFUNCTION.`;
       expect(orig.source).to.equal(needle.source);
       expect(orig.line).to.equal(needle.line);
     }
+  });
+
+  it("declares inline data in function module scope", async () => {
+    const inlineFiles = files.map(file => file.filename === "zfgroup.fugr.zfmodule1.abap" ? {
+      ...file,
+      contents: `FUNCTION zfmodule1.
+  DATA(ls_result) = 42.
+  WRITE ls_result.
+ENDFUNCTION.`,
+    } : file);
+
+    const fugr = await runFugr(inlineFiles);
+    const js = fugr.chunk.getCode();
+    const declaration = js.indexOf("let ls_result = new abap.types.Integer(");
+    const assignment = js.indexOf("ls_result.set(");
+
+    expect(declaration, js).to.be.greaterThan(-1);
+    expect(assignment, js).to.be.greaterThan(declaration);
   });
 
 });
