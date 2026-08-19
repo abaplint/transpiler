@@ -4,6 +4,7 @@ import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {TranspileTypes} from "../transpile_types";
 import {UniqueIdentifier} from "../unique_identifier";
+import {InlineDeclarations} from "../inline";
 
 export class FunctionModuleTranspiler implements IStructureTranspiler {
 
@@ -18,6 +19,7 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
         }
         chunk.append(`async function ${Traversal.escapeNamespace(name)}(INPUT) {\n`, c, traversal);
         chunk.appendString(this.findSignature(traversal, name, c));
+        chunk.appendString(InlineDeclarations.buildDeclarations(node, traversal));
       } else if (c.get() instanceof abaplint.Statements.EndFunction) {
         chunk.append("}\n", c, traversal);
         chunk.appendString(`abap.FunctionModules['${name.toUpperCase()}'] = ${Traversal.escapeNamespace(name)};\n`);
