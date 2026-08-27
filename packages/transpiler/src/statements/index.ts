@@ -67,6 +67,7 @@ export * from "./find";
 export * from "./form";
 export * from "./free_memory";
 export * from "./free";
+export * from "./format";
 export * from "./function_pool";
 export * from "./get_bit";
 export * from "./get_dataset";

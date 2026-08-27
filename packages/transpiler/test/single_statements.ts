@@ -376,6 +376,7 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({object: obj,user: usr,fields:
     {abap: "RETRY.", js: `throw new Error("RETRY, not supported, transpiler");`, skip: false},
 
     {abap: "STOP.", js: `throw new Error("STOP, not supported, transpiler");`, skip: false},
+    {abap: "FORMAT RESET.", js: `throw new Error("FORMAT, not supported, transpiler");`, skip: false},
     {abap: "SKIP.", js: `abap.statements.skip();`, skip: false},
     {abap: "SKIP 2.", js: `abap.statements.skip({lines: abap.IntegerFactory.get(2)});`, skip: false},
     {abap: "SKIP TO LINE 3.", js: `abap.statements.skip({toLine: abap.IntegerFactory.get(3)});`, skip: false},
