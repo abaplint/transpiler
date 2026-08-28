@@ -346,6 +346,22 @@ describe("Top level tests, Database", () => {
     });
   });
 
+  it("SELECT SINGLE, WHERE host expression", async () => {
+    const code = `
+    DATA ls_result TYPE t100.
+    SELECT SINGLE * FROM t100
+      WHERE arbgb = @( CONV t100-arbgb( 'ZAG_UNIT_TEST' ) )
+      INTO @ls_result.
+    WRITE sy-subrc.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("0");
+    }, {postgres: false, snowflake: false});
+  });
+
   it("SELECT INTO TABLE, empty result clears the target", async () => {
     const code = `
     DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.

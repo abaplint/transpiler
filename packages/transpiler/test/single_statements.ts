@@ -186,6 +186,11 @@ describe("Single statements", () => {
 
     {abap: "SELECT SINGLE * FROM t100 INTO ls_result.",
       js: `await abap.statements.select(ls_result, {select: "SELECT * FROM " + abap.buildDbTableName("t100") + " UP TO 1 ROWS"});`},
+    {abap: `SELECT DISTINCT item~matnr AS matnr
+      FROM vbap AS item
+      INNER JOIN vbak AS header ON header~vbeln = item~vbeln
+      INTO TABLE result.`,
+      js: `await abap.statements.select(result, {select: "SELECT DISTINCT \\"item\\".\\"matnr\\"AS matnr  FROM " + abap.buildDbTableName("vbap") + " AS item INNER JOIN " + abap.buildDbTableName("vbak") + " AS header ON \\"header\\".\\"vbeln\\" = item~vbeln"});`},
     {abap: "SELECT * FROM t100 INTO TABLE lt_result ORDER BY msgnr.",
       js: `await abap.statements.select(lt_result, {select: "SELECT * FROM " + abap.buildDbTableName("t100") + " ORDER BY \\"msgnr\\""});`},
     {abap: "SELECT * FROM t100 INTO TABLE lt_result UP TO 2 ROWS.",
@@ -319,7 +324,11 @@ await abap.Classes['KERNEL_CREATE_DATA_HANDLE'].call({handle: abc2, dref: abc1})
       js: `abap.statements.assert(abap.compare.assigned(fs_fs_));`},
     {abap: `AUTHORITY-CHECK OBJECT 'ZFOOBAR' ID 'ACTVT' FIELD '03'.`,
       js: `if (abap.Classes['KERNEL_AUTHORITY_CHECK'] === undefined) throw new Error("AuthorityCheck, kernel class missing");
-await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({});`}, // todo
+await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({object: abap.CharacterFactory.get(7, 'ZFOOBAR'),fields: [{id: abap.CharacterFactory.get(5, 'ACTVT'), field: abap.CharacterFactory.get(2, '03')}]});`},
+
+    {abap: `AUTHORITY-CHECK OBJECT obj FOR USER usr ID id1 FIELD val1 ID id2 DUMMY.`,
+      js: `if (abap.Classes['KERNEL_AUTHORITY_CHECK'] === undefined) throw new Error("AuthorityCheck, kernel class missing");
+await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({object: obj,user: usr,fields: [{id: id1, field: val1}, {id: id2, dummy: true}]});`},
 
     {abap: `CALL METHOD bar RECEIVING field = field.`,
       js: `field.set(await bar());`},
@@ -367,8 +376,15 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({});`}, // todo
     {abap: "RETRY.", js: `throw new Error("RETRY, not supported, transpiler");`, skip: false},
 
     {abap: "STOP.", js: `throw new Error("STOP, not supported, transpiler");`, skip: false},
+    {abap: "FORMAT RESET.", js: `throw new Error("FORMAT, not supported, transpiler");`, skip: false},
+    {abap: "SKIP.", js: `abap.statements.skip();`, skip: false},
+    {abap: "SKIP 2.", js: `abap.statements.skip({lines: abap.IntegerFactory.get(2)});`, skip: false},
+    {abap: "SKIP TO LINE 3.", js: `abap.statements.skip({toLine: abap.IntegerFactory.get(3)});`, skip: false},
 
     {abap: "SET EXTENDED CHECK OFF.", js: `throw new Error("SET EXTENDED CHECK, not supported, transpiler");`, skip: false},
+    {abap: "SET BLANK LINES ON.", js: `throw new Error("SET BLANK LINES, not supported, transpiler");`, skip: false},
+    {abap: "TOP-OF-PAGE.", js: `throw new Error("TOP-OF-PAGE, not supported, transpiler");`, skip: false},
+    {abap: "END-OF-PAGE.", js: `throw new Error("END-OF-PAGE, not supported, transpiler");`, skip: false},
 
     {abap: "delete foo where instance->field_type not in types.",
       js: `await abap.statements.deleteInternal(foo,{where: async (I) => {return !abap.compare.in(I.instance.get().field_type, types);}});`, skip: false},

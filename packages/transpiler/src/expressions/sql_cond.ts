@@ -123,8 +123,12 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
                     table: abaplint.Objects.Table | undefined) {
     let ret = "";
     const simple = source.findDirectExpression(abaplint.Expressions.SimpleSource3);
+    const hostExpression = source.findDirectExpression(abaplint.Expressions.Source);
     const alias = source.findDirectExpression(abaplint.Expressions.SQLAliasField);
-    if (simple && simple.findDirectExpression(abaplint.Expressions.Constant) === undefined) {
+    if (source.getFirstToken().getStr() === "@" && hostExpression) {
+      const code = new SourceTranspiler(true).transpile(hostExpression, traversal).getCode();
+      ret += "'\" + " + code + " + \"'";
+    } else if (simple && simple.findDirectExpression(abaplint.Expressions.Constant) === undefined) {
       ret += "'\" + " + new SimpleSource3Transpiler(true).transpile(simple, traversal).getCode() + " + \"'";
     } else if (alias) {
       // SQLAliasField might be a SQL reference or value from ABAP interface
