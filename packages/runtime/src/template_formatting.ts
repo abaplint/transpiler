@@ -79,8 +79,18 @@ export function templateFormatting(source: ICharacter | INumeric | number | stri
     }
     if (options.date === "iso") {
       text = text.substr(0,4) + "-" + text.substr(4,2) + "-" + text.substr(6,2);
-    }
-    if (options.time === "iso") {
+    } else if (options.date === "user" || options.date === "environment") {
+      const yyyy = text.substr(0, 4);
+      const mm = text.substr(4, 2);
+      const dd = text.substr(6, 2);
+      const date = new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
+      if (isNaN(date.getTime())) {
+          text = "00000000";         // Default SAP behaviour
+      } else {
+          text = new Intl.DateTimeFormat("default", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date); // options.userLocale || "default"  ?
+      }
+    }      
+    if (options.time === "iso" || options.time === "user" || options.time === "environment") {
       text = text.substr(0,2) + ":" + text.substr(2,2) + ":" + text.substr(4,2);
     }
     if (options.timestamp === "iso") {
