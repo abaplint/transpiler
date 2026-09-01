@@ -622,10 +622,17 @@ export class Traversal {
   }
 
   private buildFriendsAccess(def: abaplint.IClassDefinition, hasSuperClass: boolean): string {
-    let ret = "this.FRIENDS_ACCESS_INSTANCE = {\n";
+    let ret = "";
     if (hasSuperClass === true) {
-      ret += `"SUPER": sup.FRIENDS_ACCESS_INSTANCE,\n`;
+      // A subclass instance can be held through a superclass reference. In
+      // that case friend access must still find private members declared by
+      // the superclass.
+      ret += "this.FRIENDS_ACCESS_INSTANCE = Object.create(sup.FRIENDS_ACCESS_INSTANCE || null);\n";
+      ret += `this.FRIENDS_ACCESS_INSTANCE["SUPER"] = sup.FRIENDS_ACCESS_INSTANCE;\n`;
+    } else {
+      ret += "this.FRIENDS_ACCESS_INSTANCE = {\n";
     }
+
     for (const method of def.getMethodDefinitions()?.getAll() || []) {
       const name = method.getName().toLowerCase();
       if (name === "constructor" || method.isStatic() === true) {
@@ -638,10 +645,16 @@ export class Traversal {
       }
       const methodName = privateHash + Traversal.escapeNamespace(name.replace("~", "$"));
       // NOTE: currently all are needed in the unit test setup
-      ret += `"${name.replace("~", "$")}": this.${methodName}.bind(this),\n`;
+      if (hasSuperClass === true) {
+        ret += `this.FRIENDS_ACCESS_INSTANCE["${name.replace("~", "$")}"] = this.${methodName}.bind(this);\n`;
+      } else {
+        ret += `"${name.replace("~", "$")}": this.${methodName}.bind(this),\n`;
+      }
     }
 
-    ret += "};\n";
+    if (hasSuperClass === false) {
+      ret += "};\n";
+    }
     return ret;
   }
 
