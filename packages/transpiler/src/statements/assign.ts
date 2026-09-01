@@ -73,7 +73,14 @@ export class AssignTranspiler implements IStatementTranspiler {
     } else {
 
       let dynamicName = "";
-      for (const c of assignSource?.getChildren() || []) {
+      const first = assignSource?.getFirstChild();
+      // dynamicSource below already contains the first source expression.
+      // Keep only the dynamic suffix in dynamicName, otherwise structure
+      // components in that expression are resolved a second time at runtime.
+      const dynamicNameChildren = first?.get() instanceof abaplint.Expressions.Source
+        ? assignSource?.getChildren().slice(1)
+        : assignSource?.getChildren();
+      for (const c of dynamicNameChildren || []) {
         if (c instanceof abaplint.Nodes.ExpressionNode
             && c.get() instanceof abaplint.Expressions.Dynamic
             && c.findFirstExpression(abaplint.Expressions.ConstantString)) {
@@ -91,7 +98,10 @@ export class AssignTranspiler implements IStatementTranspiler {
         } else if (c.concatTokens() === "(" || c.concatTokens() === ")") {
           continue;
         } else if (c.concatTokens() === "=>" || c.concatTokens() === "->") {
-          dynamicName += " + '" + c.concatTokens() + "'";
+          if (dynamicName !== "") {
+            dynamicName += " + ";
+          }
+          dynamicName += "'" + c.concatTokens() + "'";
         } else {
           if (dynamicName !== "") {
             dynamicName += " + ";
@@ -102,7 +112,6 @@ export class AssignTranspiler implements IStatementTranspiler {
       options.push(`dynamicName: ` + dynamicName);
 
       // dynamicSource is the first part of the dynamic part
-      const first = assignSource?.getFirstChild();
       if (first?.get() instanceof abaplint.Expressions.Dynamic && first instanceof abaplint.Nodes.ExpressionNode) {
         const firstFirst = first.getChildren()[1];
         if (firstFirst?.get() instanceof abaplint.Expressions.Constant) {
