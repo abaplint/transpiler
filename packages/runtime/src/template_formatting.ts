@@ -78,10 +78,37 @@ export function templateFormatting(source: ICharacter | INumeric | number | stri
       throw new Error("template formatting with currency not supported");
     }
     if (options.date === "iso") {
-      text = text.substr(0,4) + "-" + text.substr(4,2) + "-" + text.substr(6,2);
+        text = text.substr(0, 4) + "-" + text.substr(4, 2) + "-" + text.substr(6, 2);
+    } else if (options.date === "user" || options.date === "environment") {
+        const yyyy = text.substr(0, 4);
+        const mm = text.substr(4, 2);
+        const dd = text.substr(6, 2);
+        const date = new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
+        if (isNaN(date.getTime())) {
+            text = "00000000";         // Default SAP behaviour
+        } else {
+            text = new Intl.DateTimeFormat("default",{day: "2-digit", month: "2-digit", year: "numeric"}).format(date);
+        }
     }
     if (options.time === "iso") {
-      text = text.substr(0,2) + ":" + text.substr(2,2) + ":" + text.substr(4,2);
+        text = text.substr(0, 2) + ":" + text.substr(2, 2) + ":" + text.substr(4, 2);
+    } else if (options.time === "user" || options.time === "environment") {
+        const hh = text.substr(0, 2);
+        const mm = text.substr(2, 2);
+        const ss = text.substr(4, 2) || "00";
+
+        const timeDate = new Date(`1970-01-01T${hh}:${mm}:${ss}`);
+
+        if (isNaN(timeDate.getTime())) {
+            text = "";         // Default SAP behaviour
+        } else {
+            // Leaving out hour12 makes it use the exact environment defaults!
+            text = new Intl.DateTimeFormat("default", {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+            }).format(timeDate);
+        }
     }
     if (options.timestamp === "iso") {
       // make sure to get decimals from packed number,
