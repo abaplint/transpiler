@@ -87,7 +87,7 @@ export function templateFormatting(source: ICharacter | INumeric | number | stri
         if (isNaN(date.getTime())) {
             text = "00000000";         // Default SAP behaviour
         } else {
-            text = new Intl.DateTimeFormat("default", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date); // options.userLocale || "default"  ?
+            text = new Intl.DateTimeFormat("default", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
         }
     }
     if (options.time === "iso") {
@@ -106,7 +106,7 @@ export function templateFormatting(source: ICharacter | INumeric | number | stri
             text = new Intl.DateTimeFormat("default", {
                 hour: "2-digit",
                 minute: "2-digit",
-                second: "2-digit"
+                second: "2-digit",
             }).format(timeDate);
         }
     }
