@@ -9,6 +9,12 @@ class Dummy {
   }
 }
 
+class DummyWithoutSourceMap extends Dummy {
+  public isSourceMapEnabled() {
+    return false;
+  }
+}
+
 describe("Chunk", () => {
 
   it("append lines", async () => {
@@ -100,6 +106,30 @@ describe("Chunk", () => {
     // the "bar" mapping is on generated line 2, indented by 2 spaces
     const inner = chunk.mappings.find(m => m.generated.line === 2);
     expect(inner?.generated.column).to.equal(2);
+  });
+
+  it("runIndentationLogic shifts mappings at multiple indentation levels", async () => {
+    const chunk = new Chunk().append("outer {", new Position(1, 1), new Dummy());
+    chunk.appendString("\n");
+    chunk.appendChunk(new Chunk().append("inner {", new Position(2, 1), new Dummy()));
+    chunk.appendString("\n");
+    chunk.appendChunk(new Chunk().append("body", new Position(3, 1), new Dummy()));
+    chunk.appendString("\n}\n}");
+
+    chunk.runIndentationLogic();
+
+    expect(chunk.getCode()).to.equal("outer {\n  inner {\n    body\n  }\n}");
+    expect(chunk.mappings.find(m => m.generated.line === 2)?.generated.column).to.equal(2);
+    expect(chunk.mappings.find(m => m.generated.line === 3)?.generated.column).to.equal(4);
+  });
+
+  it("does not allocate mappings when source maps are disabled", async () => {
+    const traversal = new DummyWithoutSourceMap();
+    const chunk = new Chunk().append("code", new Position(1, 1), traversal);
+    chunk.ensureStartMapping(new Position(1, 1), traversal);
+
+    expect(chunk.getCode()).to.equal("code");
+    expect(chunk.mappings.length).to.equal(0);
   });
 
   it("position tracking survives stripLastNewline and runIndentationLogic", async () => {

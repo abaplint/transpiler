@@ -98,7 +98,7 @@ ENDFUNCTION.`;
   async function runFugr(inputFiles = files) {
     UniqueIdentifier.reset();
     const memory = inputFiles.map(f => new abaplint.MemoryFile(f.filename, f.contents));
-    const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
+    const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory);
     const res = await new Transpiler().run(reg);
     const fugr = res.objects.find(o => o.object.type === "FUGR");
     expect(fugr).to.not.equal(undefined);

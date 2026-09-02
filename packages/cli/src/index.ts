@@ -144,7 +144,12 @@ function loadPlugin(): Transpiler.ITranspilerPlugin | undefined {
 
 async function build(config: ITranspilerConfig, files: Transpiler.IFile[]) {
   const libFiles = await loadLib(config);
-  const t = new Transpiler.Transpiler(config.options, loadPlugin());
+  const options = {...config.options};
+  if (config.write_source_map !== true) {
+    // Do not pay to allocate and copy mappings that the CLI will not write.
+    options.ignoreSourceMap = true;
+  }
+  const t = new Transpiler.Transpiler(options, loadPlugin());
 
   const reg: abaplint.IRegistry = new abaplint.Registry();
   for (const f of files) {
@@ -153,8 +158,6 @@ async function build(config: ITranspilerConfig, files: Transpiler.IFile[]) {
   for (const l of libFiles) {
     reg.addDependency(new abaplint.MemoryFile(l.filename, l.contents));
   }
-  reg.parse();
-
   const output = await t.run(reg, new Progress());
   return output;
 }

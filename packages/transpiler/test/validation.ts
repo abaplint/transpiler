@@ -1,7 +1,24 @@
 import {expect} from "chai";
 import {runSingle} from "./_utils";
+import {Transpiler} from "../src";
+import * as abaplint from "@abaplint/core";
 
 describe("Validation", () => {
+  it("parses an unparsed registry only once", async () => {
+    const reg = new abaplint.Registry().addFile(
+      new abaplint.MemoryFile("zfoobar.prog.abap", "DATA foo TYPE i."));
+    const originalParse = reg.parse.bind(reg);
+    let parseCalls = 0;
+    (reg as any).parse = () => {
+      parseCalls++;
+      return originalParse();
+    };
+
+    await new Transpiler().run(reg);
+
+    expect(parseCalls).to.equal(1);
+  });
+
   it("Unknown variable, throws error", async () => {
     const abap = `WRITE foowrite.`;
 

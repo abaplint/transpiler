@@ -40,13 +40,14 @@ export class Transpiler {
   // workaround for web/webpack
   public async runRaw(files: IFile[]): Promise<IOutput> {
     const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
-    const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
-    return new Transpiler().run(reg);
+    const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory);
+    return this.run(reg);
   }
 
   public async run(reg: abaplint.IRegistry, progress?: IProgress): Promise<IOutput> {
-
-    reg.parse();
+    // Validation installs the transpiler configuration and findIssues() parses
+    // dirty registries. Parsing before that would be wasted because setConfig()
+    // marks every registry object dirty again.
     this.validate(reg);
 
     const dbSetup = new DatabaseSetup(reg).run(this.options);

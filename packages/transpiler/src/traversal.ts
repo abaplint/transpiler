@@ -17,6 +17,8 @@ export class Traversal {
   private readonly obj: abaplint.ABAPObject;
   private sqlInferredType: abaplint.AbstractType | undefined;
   private readonly doOrWhileIndexBackups: Map<abaplint.Nodes.StatementNode, string> = new Map();
+  private readonly statementsInsideLoop: WeakSet<abaplint.Nodes.StatementNode> = new WeakSet();
+  private readonly enclosingDoOrWhile: WeakMap<abaplint.Nodes.StatementNode, abaplint.Nodes.StatementNode> = new WeakMap();
   public readonly reg: abaplint.IRegistry;
   public readonly options: ITranspilerOptions | undefined;
 
@@ -27,6 +29,46 @@ export class Traversal {
     this.obj = obj;
     this.reg = reg;
     this.options = options;
+    this.buildStatementContext();
+  }
+
+  /** Build file-level control-flow context once instead of rescanning all
+   * preceding statements for every DATA, CHECK, EXIT, and RETURN. */
+  private buildStatementContext(): void {
+    const loopStack: abaplint.Nodes.StatementNode[] = [];
+    const doOrWhileStack: abaplint.Nodes.StatementNode[] = [];
+
+    for (const statement of this.file.getStatements()) {
+      const get = statement.get();
+      if (get instanceof abaplint.Statements.Loop
+          || get instanceof abaplint.Statements.While
+          || get instanceof abaplint.Statements.SelectLoop
+          || get instanceof abaplint.Statements.Do) {
+        loopStack.push(statement);
+      } else if (get instanceof abaplint.Statements.EndLoop
+          || get instanceof abaplint.Statements.EndWhile
+          || get instanceof abaplint.Statements.EndSelect
+          || get instanceof abaplint.Statements.EndDo) {
+        loopStack.pop();
+      }
+
+      if (loopStack.length > 0) {
+        this.statementsInsideLoop.add(statement);
+      }
+
+      if (get instanceof abaplint.Statements.While
+          || get instanceof abaplint.Statements.Do) {
+        doOrWhileStack.push(statement);
+      } else if (get instanceof abaplint.Statements.EndWhile
+          || get instanceof abaplint.Statements.EndDo) {
+        doOrWhileStack.pop();
+      }
+
+      const enclosing = doOrWhileStack[doOrWhileStack.length - 1];
+      if (enclosing !== undefined) {
+        this.enclosingDoOrWhile.set(statement, enclosing);
+      }
+    }
   }
 
   public static escapeNamespace(name: string | undefined) {
@@ -79,6 +121,10 @@ export class Traversal {
 
   public getSpaghetti(): abaplint.ISpaghettiScope {
     return this.spaghetti;
+  }
+
+  public isSourceMapEnabled(): boolean {
+    return this.options?.ignoreSourceMap !== true;
   }
 
   /** finds a statement in the _current_ file given a position */
@@ -622,10 +668,17 @@ export class Traversal {
   }
 
   private buildFriendsAccess(def: abaplint.IClassDefinition, hasSuperClass: boolean): string {
-    let ret = "this.FRIENDS_ACCESS_INSTANCE = {\n";
+    let ret = "";
     if (hasSuperClass === true) {
-      ret += `"SUPER": sup.FRIENDS_ACCESS_INSTANCE,\n`;
+      // A subclass instance can be held through a superclass reference. In
+      // that case friend access must still find private members declared by
+      // the superclass.
+      ret += "this.FRIENDS_ACCESS_INSTANCE = Object.create(sup.FRIENDS_ACCESS_INSTANCE || null);\n";
+      ret += `this.FRIENDS_ACCESS_INSTANCE["SUPER"] = sup.FRIENDS_ACCESS_INSTANCE;\n`;
+    } else {
+      ret += "this.FRIENDS_ACCESS_INSTANCE = {\n";
     }
+
     for (const method of def.getMethodDefinitions()?.getAll() || []) {
       const name = method.getName().toLowerCase();
       if (name === "constructor" || method.isStatic() === true) {
@@ -638,10 +691,16 @@ export class Traversal {
       }
       const methodName = privateHash + Traversal.escapeNamespace(name.replace("~", "$"));
       // NOTE: currently all are needed in the unit test setup
-      ret += `"${name.replace("~", "$")}": this.${methodName}.bind(this),\n`;
+      if (hasSuperClass === true) {
+        ret += `this.FRIENDS_ACCESS_INSTANCE["${name.replace("~", "$")}"] = this.${methodName}.bind(this);\n`;
+      } else {
+        ret += `"${name.replace("~", "$")}": this.${methodName}.bind(this),\n`;
+      }
     }
 
-    ret += "};\n";
+    if (hasSuperClass === false) {
+      ret += "};\n";
+    }
     return ret;
   }
 
@@ -920,27 +979,7 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
   }
 
   public isInsideLoop(node: abaplint.Nodes.StatementNode): boolean {
-    const stack: abaplint.Nodes.StatementNode[] = [];
-
-    for (const statement of this.getFile().getStatements()) {
-      const get = statement.get();
-      if (get instanceof abaplint.Statements.Loop
-          || get instanceof abaplint.Statements.While
-          || get instanceof abaplint.Statements.SelectLoop
-          || get instanceof abaplint.Statements.Do) {
-        stack.push(statement);
-      } else if (get instanceof abaplint.Statements.EndLoop
-          || get instanceof abaplint.Statements.EndWhile
-          || get instanceof abaplint.Statements.EndSelect
-          || get instanceof abaplint.Statements.EndDo) {
-        stack.pop();
-      }
-      if (statement === node) {
-        break;
-      }
-    }
-
-    return stack.length > 0;
+    return this.statementsInsideLoop.has(node);
   }
 
   public isInsideDoOrWhile(node: abaplint.Nodes.StatementNode): boolean {
@@ -952,23 +991,8 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
   }
 
   public findCurrentDoOrWhileIndexBackup(node: abaplint.Nodes.StatementNode): string | undefined {
-    const stack: (string | undefined)[] = [];
-
-    for (const statement of this.getFile().getStatements()) {
-      const get = statement.get();
-      if (get instanceof abaplint.Statements.While
-          || get instanceof abaplint.Statements.Do) {
-        stack.push(this.doOrWhileIndexBackups.get(statement));
-      } else if (get instanceof abaplint.Statements.EndWhile
-          || get instanceof abaplint.Statements.EndDo) {
-        stack.pop();
-      }
-      if (statement === node) {
-        break;
-      }
-    }
-
-    return stack[stack.length - 1];
+    const enclosing = this.enclosingDoOrWhile.get(node);
+    return enclosing === undefined ? undefined : this.doOrWhileIndexBackups.get(enclosing);
   }
 
   public registerClassOrInterface(def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined): string {

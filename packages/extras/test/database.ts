@@ -72,7 +72,7 @@ class AmendDatabase implements ITranspilerPlugin {
 describe("amend database setup", () => {
 
   it("plugin schema and insert statements are added", async () => {
-    const reg = new abaplint.Registry().parse();
+    const reg = new abaplint.Registry();
 
     const res = await new Transpiler({}, new AmendDatabase()).run(reg);
 
@@ -92,8 +92,7 @@ describe("DDLS database setup", () => {
 }`;
     const reg = new abaplint.Registry()
       .addFile(new abaplint.MemoryFile("t000.tabl.xml", t000))
-      .addFile(new abaplint.MemoryFile("zddls.ddls.asddls", ddls))
-      .parse();
+      .addFile(new abaplint.MemoryFile("zddls.ddls.asddls", ddls));
 
     const res = await new Transpiler({}, plugin).run(reg);
     const sqlite = res.databaseSetup.schemas.sqlite.join("\n");

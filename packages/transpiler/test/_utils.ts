@@ -6,7 +6,7 @@ import * as sourceMap from "source-map";
 
 async function runFiles(files: IFile[], options?: ITranspilerOptions) {
   const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
-  const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
+  const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory);
   const res = await new Transpiler(options).run(reg);
   return res;
 }

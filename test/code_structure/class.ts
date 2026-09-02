@@ -2286,6 +2286,51 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("SUB");
   });
 
+  it("Class, friend access to private method on inherited instance", async () => {
+    const code = `
+CLASS lcl_friend DEFINITION DEFERRED.
+
+CLASS lcl_super DEFINITION FRIENDS lcl_friend.
+  PRIVATE SECTION.
+    METHODS meth.
+ENDCLASS.
+
+CLASS lcl_child DEFINITION INHERITING FROM lcl_super.
+ENDCLASS.
+
+CLASS lcl_friend DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor.
+  PRIVATE SECTION.
+    DATA mo_ref TYPE REF TO lcl_super.
+ENDCLASS.
+
+CLASS lcl_friend IMPLEMENTATION.
+  METHOD constructor.
+    mo_ref = NEW lcl_child( ).
+    mo_ref->meth( ).
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_super IMPLEMENTATION.
+  METHOD meth.
+    WRITE 'OK'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_child IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA friend TYPE REF TO lcl_friend.
+  friend = NEW lcl_friend( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("OK");
+  });
+
   it("static public calling static private", async () => {
     const code = `
 CLASS ltcl_test DEFINITION.

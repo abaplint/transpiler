@@ -5,14 +5,14 @@ import {IFile, ITranspilerOptions} from "../src/types";
 
 async function runFiles(files: IFile[]) {
   const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
-  const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
+  const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory);
   const res = await new Transpiler().run(reg);
   return res.objects;
 }
 
 async function runResult(files: IFile[], options?: ITranspilerOptions) {
   const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
-  const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
+  const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory);
   return new Transpiler(options).run(reg);
 }
 
@@ -390,6 +390,15 @@ ENDINTERFACE.`;
     ], {populateTables: {tadir: false}});
 
     expect(result.databaseSetup.insert.some(i => i.includes(`INSERT INTO "tadir"`))).to.equal(false);
+  });
+
+  it("does not retain empty database population statements", async () => {
+    const result = await runResult([
+      {filename: "zfoo.prog.abap", contents: "WRITE '1'."},
+    ]);
+
+    expect(result.databaseSetup.insert.length).to.equal(0);
+    expect(result.initializationScript).to.not.include("insert.push(``)");
   });
 
   it("populate REPOSRC for PROG", async () => {

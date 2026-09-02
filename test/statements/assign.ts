@@ -482,6 +482,38 @@ WRITE foo->field.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("ASSIGN dynamic attribute through structure object reference", async () => {
+    const code = `
+CLASS lcl_main DEFINITION.
+  PUBLIC SECTION.
+    DATA attr_1 TYPE i.
+    METHODS run.
+ENDCLASS.
+
+CLASS lcl_main IMPLEMENTATION.
+  METHOD run.
+    TYPES: BEGIN OF ty_struct,
+             o_main TYPE REF TO lcl_main,
+           END OF ty_struct.
+    DATA(ls_struct) = VALUE ty_struct( o_main = NEW #( ) ).
+    FIELD-SYMBOLS <attr_1> TYPE any.
+    ASSIGN ls_struct-o_main->('attr_1') TO <attr_1>.
+    ASSERT sy-subrc = 0.
+    <attr_1> = 42.
+    WRITE ls_struct-o_main->attr_1.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lcl_main.
+  CREATE OBJECT lo.
+  lo->run( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("42");
+  });
+
   it("ASSIGN unassigned deref data reference", async () => {
     const code = `
 DATA ref TYPE REF TO data.
