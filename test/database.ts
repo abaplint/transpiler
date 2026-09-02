@@ -10,6 +10,54 @@ try {
   // ignore
 }
 
+const tabl_t001wxml = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V>
+    <TABNAME>T001W</TABNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <TABCLASS>TRANSP</TABCLASS>
+   </DD02V>
+   <DD03P_TABLE>
+    <DD03P>
+     <TABNAME>T001W</TABNAME>
+     <FIELDNAME>MANDT</FIELDNAME>
+     <POSITION>0001</POSITION>
+     <KEYFLAG>X</KEYFLAG>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000006</INTLEN>
+     <NOTNULL>X</NOTNULL>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000003</LENG>
+    </DD03P>
+    <DD03P>
+     <TABNAME>T001W</TABNAME>
+     <FIELDNAME>KUNNR</FIELDNAME>
+     <POSITION>0002</POSITION>
+     <KEYFLAG>X</KEYFLAG>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000020</INTLEN>
+     <NOTNULL>X</NOTNULL>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000010</LENG>
+    </DD03P>
+    <DD03P>
+     <TABNAME>T001W</TABNAME>
+     <FIELDNAME>WERKS</FIELDNAME>
+     <POSITION>0003</POSITION>
+     <KEYFLAG>X</KEYFLAG>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000008</INTLEN>
+     <NOTNULL>X</NOTNULL>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000004</LENG>
+    </DD03P>
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
 async function runAllDatabases(abap: ABAP,
                                files: IFile[],
                                check: () => any,
@@ -70,6 +118,28 @@ describe("Top level tests, Database", () => {
     ];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("hello world");
+    });
+  });
+
+  it("SQL scalar subselect in a condition", async () => {
+    const code = `
+    DATA lw_keys TYPE t001w.
+    DATA ls_result TYPE t001w.
+
+    lw_keys-mandt = sy-mandt.
+    lw_keys-kunnr = '0000000001'.
+    lw_keys-werks = '1000'.
+    INSERT t001w FROM lw_keys.
+
+    SELECT SINGLE * FROM t001w INTO ls_result
+      WHERE kunnr EQ ( SELECT kunnr FROM t001w CLIENT SPECIFIED
+        WHERE mandt EQ sy-mandt AND werks EQ lw_keys-werks ).
+    WRITE sy-subrc.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t001w.tabl.xml", contents: tabl_t001wxml}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("0");
     });
   });
 
