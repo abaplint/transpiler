@@ -23,6 +23,14 @@ describe("Multiple lines", () => {
     expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.equal(expected);
   });
 
+  it("CATCH SYSTEM-EXCEPTIONS", async () => {
+    const abap = `
+    CATCH SYSTEM-EXCEPTIONS OTHERS = 1.
+    ENDCATCH.`;
+
+    expect(await runSingle(abap)).to.include(`throw new Error("CATCH SYSTEM-EXCEPTIONS, not supported, transpiler");`);
+  });
+
   it("Interfaces should not be skipped", async () => {
     const abap = `
   INTERFACE lif_foobar.
