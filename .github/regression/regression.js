@@ -15,7 +15,7 @@ const repos = [
   {name: "larshp/abapPGP",                      command: "npm test"},
   {name: "oisee/zork-abap",                     command: "npm test"},
   {name: "open-abap/open-abap-core",            command: "npm test"},
-  {name: "open-abap/open-abap-gui",             command: "npm test"},
+  {name: "open-abap/open-abap-gui",             command: "npx playwright install --with-deps chromium && npm test"},
   {name: "open-abap/open-abap-jobs",            command: "npm run docker:start && npm test && npm run docker:stop"},
   {name: "open-abap/open-abap-lock",            command: "npm run docker:start && npm test && npm run docker:stop"},
   {name: "open-abap/open-abap-odata",           command: "npm test"},
