@@ -188,7 +188,8 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
   }
 
   public async openCursor(options: DB.SelectDatabaseOptions): Promise<DB.DatabaseCursorCallbacks> {
-    const statement = this.sqlite!.prepare(options.select, null);
+    const select = options.select.replace(/ UP TO (\d+) ROWS(.*)/i, "$2 LIMIT $1");
+    const statement = this.sqlite!.prepare(select, null);
     return {
       fetchNextCursor: (packageSize: number) => this.fetchNextCursor.bind(this)(packageSize, statement),
       closeCursor: () => this.closeCursor.bind(this)(statement),

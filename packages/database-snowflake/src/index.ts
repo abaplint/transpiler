@@ -218,10 +218,11 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
   public async openCursor(options: DB.SelectDatabaseOptions): Promise<DB.DatabaseCursorCallbacks> {
     const outer = this;
     const counter = {counter: 0};
+    const select = options.select.replace(/ UP TO (\d+) ROWS(.*)/i, "$2 LIMIT $1");
 
     return new Promise((resolve, reject) => {
       this.connection.execute({
-        sqlText: options.select,
+        sqlText: select,
         streamResult: true,
         complete: function (err, stmt) {
           if (err) {

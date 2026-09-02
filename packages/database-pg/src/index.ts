@@ -232,7 +232,8 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     }
 
     const client = await this.pool!.connect();
-    const cursor = client.query(new Cursor(options.select));
+    const select = options.select.replace(/ UP TO (\d+) ROWS(.*)/i, "$2 LIMIT $1");
+    const cursor = client.query(new Cursor(select));
     return {
       fetchNextCursor: (packageSize: number) => this.fetchNextCursor.bind(this)(packageSize, cursor),
       closeCursor: () => this.closeCursor.bind(this)(cursor, client),
