@@ -3,6 +3,7 @@ import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {findConnection} from "./insert_database";
+import {SQLCondTranspiler, SQLOrderByTranspiler, SourceTranspiler} from "../expressions";
 
 export class OpenCursorTranspiler implements IStatementTranspiler {
 
@@ -17,12 +18,22 @@ export class OpenCursorTranspiler implements IStatementTranspiler {
 
     const cond = selectExpression?.findDirectExpression(abaplint.Expressions.SQLCond);
     if (cond) {
-      select += "WHERE " + traversal.traverse(node).getCode();
+      select += "WHERE " + new SQLCondTranspiler().transpile(cond, traversal).getCode() + " ";
+    }
+
+    const upTo = selectExpression?.findDirectExpression(abaplint.Expressions.SQLUpTo);
+    if (upTo) {
+      const source = upTo.findFirstExpression(abaplint.Expressions.SimpleSource3);
+      if (source) {
+        select += `UP TO " + ${new SourceTranspiler(true).transpile(source, traversal).getCode()} + " ROWS `;
+      } else {
+        select += upTo.concatTokens() + " ";
+      }
     }
 
     const orderBy = selectExpression?.findDirectExpression(abaplint.Expressions.SQLOrderBy);
     if (orderBy) {
-      select += "ORDER BY " + traversal.traverse(node).getCode();
+      select += "ORDER BY " + new SQLOrderByTranspiler().transpile(orderBy, traversal).getCode();
     }
 
     const options: string[] = [];

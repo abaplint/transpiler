@@ -1878,6 +1878,48 @@ CLOSE CURSOR dbcur.`;
     });
   });
 
+  it("OPEN CURSOR, dynamic table with UP TO and WHERE", async () => {
+    const code = `
+DATA cur TYPE cursor.
+DATA i_table TYPE string.
+DATA row TYPE zcursor_test.
+i_table = 'ZCURSOR_TEST'.
+OPEN CURSOR cur
+  FOR SELECT * FROM (i_table) UP TO 100 ROWS
+    WHERE bstyp = 'F'.
+FETCH NEXT CURSOR cur INTO row.
+WRITE sy-subrc.
+CLOSE CURSOR cur.`;
+    const zcursorTest = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V>
+    <TABNAME>ZCURSOR_TEST</TABNAME>
+    <TABCLASS>TRANSP</TABCLASS>
+   </DD02V>
+   <DD03P_TABLE>
+    <DD03P>
+     <FIELDNAME>BSTYP</FIELDNAME>
+     <KEYFLAG>X</KEYFLAG>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000004</INTLEN>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000002</LENG>
+    </DD03P>
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "zcursor_test.tabl.xml", contents: zcursorTest},
+    ];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("4");
+    }, {snowflake: false});
+  });
+
   it("INSERT CONNECTION default", async () => {
     const code = `
 DATA result TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
