@@ -2,6 +2,7 @@ export * from "./at_first";
 export * from "./at_last";
 export * from "./case_type";
 export * from "./case";
+export * from "./catch_system_exceptions";
 export * from "./class_definition";
 export * from "./class_implementation";
 export * from "./constants";
