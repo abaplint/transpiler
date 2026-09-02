@@ -1,6 +1,7 @@
 import {ITranspilerOptions} from "@abaplint/transpiler";
 
 export interface ITranspilerConfig {
+  /** @uniqueItems true */
   input_folder: string | string[];
   /** list of regex, case insensitive, empty gives all files, positive list
    * @uniqueItems true
