@@ -294,7 +294,7 @@ export async function setup(abap, schemas, insert) {
     fs.writeFileSync(outputFolder + path.sep + SETUP_NAME, setupLogic);
 
     const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
-    const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
+    const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory);
     const output = await new Transpiler(config).run(reg);
 
     for (const o of output.objects) {

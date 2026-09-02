@@ -33,7 +33,7 @@ describe("empty handlers", () => {
   for (const [filename, contents] of Object.entries(testFiles)) {
     it(filename + " is allowed and produces no output", async () => {
       const file = new abaplint.MemoryFile(filename, contents);
-      const reg = new abaplint.Registry().addFile(file).parse();
+      const reg = new abaplint.Registry().addFile(file);
 
       const res = await new Transpiler({}, plugin).run(reg);
 
@@ -44,7 +44,7 @@ describe("empty handlers", () => {
 
   it("without the plugin, DDLX fails validation", async () => {
     const file = new abaplint.MemoryFile("zexample.ddlx.asddlxs", testFiles["zexample.ddlx.asddlxs"]);
-    const reg = new abaplint.Registry().addFile(file).parse();
+    const reg = new abaplint.Registry().addFile(file);
 
     try {
       await new Transpiler().run(reg);

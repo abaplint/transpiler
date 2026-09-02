@@ -59,38 +59,49 @@ export class DatabaseSetup {
     // note: avoid hitting maximum statement size by splitting into multiple statements
     const insert: string[] = [];
     const populateTables = new PopulateTables(this.reg);
+    const add = (statement: string): void => {
+      if (statement.length > 0) {
+        insert.push(statement);
+      }
+    };
+    const addAll = (statements: readonly string[]): void => {
+      for (const statement of statements) {
+        add(statement);
+      }
+    };
+
     // INSERT data
     for (const obj of this.reg.getObjects()) {
       if (options?.populateTables?.tadir !== false) {
-        insert.push(populateTables.insertTADIR(obj));
+        add(populateTables.insertTADIR(obj));
       }
 
       if (obj instanceof abaplint.Objects.MessageClass) {
-        insert.push(...populateTables.insertT100(obj));
+        addAll(populateTables.insertT100(obj));
       } else if (options?.populateTables?.wwwparams !== false
           && obj instanceof abaplint.Objects.WebMIME) {
-        insert.push(...populateTables.insertWWWPARAMS(obj));
+        addAll(populateTables.insertWWWPARAMS(obj));
       } else if (obj instanceof abaplint.Objects.Class
           || obj instanceof abaplint.Objects.Interface
           || obj instanceof abaplint.Objects.Program) {
         if (options?.populateTables?.reposrc !== false) {
-          insert.push(populateTables.insertREPOSRC(obj));
+          add(populateTables.insertREPOSRC(obj));
         }
         if ((obj instanceof abaplint.Objects.Class || obj instanceof abaplint.Objects.Interface)
             && options?.populateTables?.seosubco !== false) {
-          insert.push(...populateTables.insertSEOSUBCO(obj));
+          addAll(populateTables.insertSEOSUBCO(obj));
         }
         if ((obj instanceof abaplint.Objects.Class || obj instanceof abaplint.Objects.Interface)
             && options?.populateTables?.seosubcodf !== false) {
-          insert.push(...populateTables.insertSEOSUBCODF(obj));
+          addAll(populateTables.insertSEOSUBCODF(obj));
         }
         if ((obj instanceof abaplint.Objects.Class || obj instanceof abaplint.Objects.Interface)
             && options?.populateTables?.seosubcotx !== false) {
-          insert.push(...populateTables.insertSEOSUBCOTX(obj));
+          addAll(populateTables.insertSEOSUBCOTX(obj));
         }
       }
     }
-    insert.push(populateTables.insertT000());
+    add(populateTables.insertT000());
     return insert;
   }
 

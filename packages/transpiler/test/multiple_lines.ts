@@ -382,6 +382,24 @@ abap.builtin.sy.get().index.set(indexBackup1);`;
     expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.equal(expected);
   });
 
+  it("precomputes loop context for DATA and RETURN", async () => {
+    const abap = `
+DATA top_level TYPE i.
+DO.
+  DATA nested TYPE i.
+  RETURN.
+ENDDO.
+DATA after_loop TYPE i.`;
+
+    const js = await runSingle(abap, {ignoreSyntaxCheck: true});
+
+    expect(js).to.contain("let top_level = new abap.types.Integer");
+    expect(js).to.contain("if (nested === undefined) {");
+    expect(js).to.contain("var nested = new abap.types.Integer");
+    expect(js).to.match(/abap\.builtin\.sy\.get\(\)\.index\.set\(indexBackup\d+\);\n {2}return;/);
+    expect(js).to.contain("let after_loop = new abap.types.Integer");
+  });
+
   it("Class constant, should set value", async () => {
     const abap = `
 CLASS zcl_ret DEFINITION.

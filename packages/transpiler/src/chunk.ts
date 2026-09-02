@@ -1,6 +1,11 @@
 import * as sourceMap from "source-map";
 import * as abaplint from "@abaplint/core";
 
+type SourceMapTraversal = {
+  getFilename(): string;
+  isSourceMapEnabled?(): boolean;
+};
+
 /*
 source-map:
   line: The line number is 1-based.
@@ -74,12 +79,12 @@ export class Chunk {
     }
   }
 
-  public append(input: string, pos: abaplint.Position | abaplint.INode | abaplint.Token, traversal: {getFilename(): string}): Chunk {
+  public append(input: string, pos: abaplint.Position | abaplint.INode | abaplint.Token, traversal: SourceMapTraversal): Chunk {
     if (input === "") {
       return this;
     }
 
-    if (pos && input !== "\n") {
+    if (pos && input !== "\n" && traversal.isSourceMapEnabled?.() !== false) {
       this.mappings.push({
         source: traversal.getFilename(),
         generated: {
@@ -99,8 +104,8 @@ export class Chunk {
    * chunk (generated line 1, column 0) to `pos`. No-op if the chunk is empty or
    * already carries mappings, so it never overrides finer-grained mappings.
    */
-  public ensureStartMapping(pos: abaplint.Position | abaplint.INode | abaplint.Token, traversal: {getFilename(): string}): Chunk {
-    if (this.raw === "" || this.mappings.length > 0) {
+  public ensureStartMapping(pos: abaplint.Position | abaplint.INode | abaplint.Token, traversal: SourceMapTraversal): Chunk {
+    if (this.raw === "" || this.mappings.length > 0 || traversal.isSourceMapEnabled?.() === false) {
       return this;
     }
     this.mappings.push({
@@ -148,6 +153,7 @@ export class Chunk {
     if (ignoreSourceMap === true) {
       this.mappings = [];
     }
+    const indentationByLine: number[] | undefined = this.mappings.length > 0 ? [] : undefined;
 
     for (const l of this.raw.split("\n")) {
       if (l.startsWith("}")) {
@@ -155,17 +161,13 @@ export class Chunk {
       }
       // clamp so unbalanced braces never produce a negative indent/shift
       const indent = i > 0 ? i * 2 : 0;
+      if (indentationByLine !== undefined) {
+        indentationByLine[line] = indent;
+      }
       if (indent > 0) {
         output.push(" ".repeat(indent) + l);
       } else {
         output.push(l);
-      }
-
-// fix maps: shift columns by the indentation actually applied to this line
-      for (const m of this.mappings) {
-        if (m.generated.line === line) {
-          m.generated.column += indent;
-        }
       }
 
       if (l.endsWith(" {")) {
@@ -173,6 +175,12 @@ export class Chunk {
       }
 
       line++;
+    }
+
+    // Shift every mapping once. The previous line-major implementation
+    // inspected every mapping for every generated line (O(lines * mappings)).
+    for (const m of this.mappings) {
+      m.generated.column += indentationByLine?.[m.generated.line] || 0;
     }
 
     this.raw = output.join("\n");

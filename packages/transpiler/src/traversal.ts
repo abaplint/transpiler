@@ -17,6 +17,8 @@ export class Traversal {
   private readonly obj: abaplint.ABAPObject;
   private sqlInferredType: abaplint.AbstractType | undefined;
   private readonly doOrWhileIndexBackups: Map<abaplint.Nodes.StatementNode, string> = new Map();
+  private readonly statementsInsideLoop: WeakSet<abaplint.Nodes.StatementNode> = new WeakSet();
+  private readonly enclosingDoOrWhile: WeakMap<abaplint.Nodes.StatementNode, abaplint.Nodes.StatementNode> = new WeakMap();
   public readonly reg: abaplint.IRegistry;
   public readonly options: ITranspilerOptions | undefined;
 
@@ -27,6 +29,46 @@ export class Traversal {
     this.obj = obj;
     this.reg = reg;
     this.options = options;
+    this.buildStatementContext();
+  }
+
+  /** Build file-level control-flow context once instead of rescanning all
+   * preceding statements for every DATA, CHECK, EXIT, and RETURN. */
+  private buildStatementContext(): void {
+    const loopStack: abaplint.Nodes.StatementNode[] = [];
+    const doOrWhileStack: abaplint.Nodes.StatementNode[] = [];
+
+    for (const statement of this.file.getStatements()) {
+      const get = statement.get();
+      if (get instanceof abaplint.Statements.Loop
+          || get instanceof abaplint.Statements.While
+          || get instanceof abaplint.Statements.SelectLoop
+          || get instanceof abaplint.Statements.Do) {
+        loopStack.push(statement);
+      } else if (get instanceof abaplint.Statements.EndLoop
+          || get instanceof abaplint.Statements.EndWhile
+          || get instanceof abaplint.Statements.EndSelect
+          || get instanceof abaplint.Statements.EndDo) {
+        loopStack.pop();
+      }
+
+      if (loopStack.length > 0) {
+        this.statementsInsideLoop.add(statement);
+      }
+
+      if (get instanceof abaplint.Statements.While
+          || get instanceof abaplint.Statements.Do) {
+        doOrWhileStack.push(statement);
+      } else if (get instanceof abaplint.Statements.EndWhile
+          || get instanceof abaplint.Statements.EndDo) {
+        doOrWhileStack.pop();
+      }
+
+      const enclosing = doOrWhileStack[doOrWhileStack.length - 1];
+      if (enclosing !== undefined) {
+        this.enclosingDoOrWhile.set(statement, enclosing);
+      }
+    }
   }
 
   public static escapeNamespace(name: string | undefined) {
@@ -79,6 +121,10 @@ export class Traversal {
 
   public getSpaghetti(): abaplint.ISpaghettiScope {
     return this.spaghetti;
+  }
+
+  public isSourceMapEnabled(): boolean {
+    return this.options?.ignoreSourceMap !== true;
   }
 
   /** finds a statement in the _current_ file given a position */
@@ -933,27 +979,7 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
   }
 
   public isInsideLoop(node: abaplint.Nodes.StatementNode): boolean {
-    const stack: abaplint.Nodes.StatementNode[] = [];
-
-    for (const statement of this.getFile().getStatements()) {
-      const get = statement.get();
-      if (get instanceof abaplint.Statements.Loop
-          || get instanceof abaplint.Statements.While
-          || get instanceof abaplint.Statements.SelectLoop
-          || get instanceof abaplint.Statements.Do) {
-        stack.push(statement);
-      } else if (get instanceof abaplint.Statements.EndLoop
-          || get instanceof abaplint.Statements.EndWhile
-          || get instanceof abaplint.Statements.EndSelect
-          || get instanceof abaplint.Statements.EndDo) {
-        stack.pop();
-      }
-      if (statement === node) {
-        break;
-      }
-    }
-
-    return stack.length > 0;
+    return this.statementsInsideLoop.has(node);
   }
 
   public isInsideDoOrWhile(node: abaplint.Nodes.StatementNode): boolean {
@@ -965,23 +991,8 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
   }
 
   public findCurrentDoOrWhileIndexBackup(node: abaplint.Nodes.StatementNode): string | undefined {
-    const stack: (string | undefined)[] = [];
-
-    for (const statement of this.getFile().getStatements()) {
-      const get = statement.get();
-      if (get instanceof abaplint.Statements.While
-          || get instanceof abaplint.Statements.Do) {
-        stack.push(this.doOrWhileIndexBackups.get(statement));
-      } else if (get instanceof abaplint.Statements.EndWhile
-          || get instanceof abaplint.Statements.EndDo) {
-        stack.pop();
-      }
-      if (statement === node) {
-        break;
-      }
-    }
-
-    return stack[stack.length - 1];
+    const enclosing = this.enclosingDoOrWhile.get(node);
+    return enclosing === undefined ? undefined : this.doOrWhileIndexBackups.get(enclosing);
   }
 
   public registerClassOrInterface(def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined): string {

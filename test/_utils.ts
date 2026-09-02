@@ -19,7 +19,7 @@ export const AsyncFunction = Object.getPrototypeOf(async ()=> {}).constructor;
 
 export async function runFiles(abap: ABAP, files: IFile[], options?: ITranspilerOptions & {skipDatabaseSetup?: boolean}) {
   const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
-  const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
+  const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory);
   if (options?.skipVersionCheck === true) {
     console.warn("Skipping version check, " + files[0].filename);
   }
@@ -43,7 +43,7 @@ export async function runFiles(abap: ABAP, files: IFile[], options?: ITranspiler
 
 export async function runFilesPostgres(abap: ABAP, files: IFile[]) {
   const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
-  const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
+  const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory);
   const res = await new Transpiler().run(reg);
   abap.console.clear();
   if (res.databaseSetup.schemas.pg.length > 0) {
@@ -81,7 +81,7 @@ export async function runFilesPostgres(abap: ABAP, files: IFile[]) {
 
 export async function runFilesSnowflake(abap: ABAP, files: IFile[]) {
   const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
-  const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
+  const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory);
   const res = await new Transpiler().run(reg);
   abap.console.clear();
   if (res.databaseSetup.schemas.snowflake.length > 0) {
@@ -109,7 +109,7 @@ export async function runFilesSnowflake(abap: ABAP, files: IFile[]) {
 
 export async function compileFiles(files: IFile[], options?: ITranspilerOptions) {
   const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
-  const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory).parse();
+  const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory);
   const res = await new Transpiler(options).run(reg);
   return res;
 }
