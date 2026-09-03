@@ -10,6 +10,7 @@ type topType = {[name: string]: INumeric | ICharacter};
 
 export interface ILoopOptions {
   where?: (i: any) => Promise<boolean>,
+  atLast?: (last: boolean) => void,
   usingKey?: string,
   from?: Integer,
   to?: Integer,
@@ -162,6 +163,8 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
 
       abap.builtin.sy.get().tabix.set(loopController.index + 1);
       entered = true;
+
+      options?.atLast?.(loopController.index + 1 >= loopController.loopTo);
 
       yield current;
 

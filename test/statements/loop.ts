@@ -730,6 +730,26 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("");
   });
 
+  it("AT LAST with inline DATA and EXIT", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         foo TYPE c LENGTH 10,
+       END OF ty.
+DATA itab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+INSERT VALUE #( ) INTO TABLE itab.
+LOOP AT itab INTO DATA(sdfsd).
+  AT LAST.
+    WRITE / 'last'.
+    EXIT.
+  ENDAT.
+  WRITE / 'bar'.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("last");
+  });
+
   it("AT NEW", async () => {
     const code = `
 TYPES: BEGIN OF ty,

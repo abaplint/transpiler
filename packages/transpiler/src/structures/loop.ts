@@ -7,6 +7,7 @@ import {AtLastTranspiler} from "./at_last";
 import {UniqueIdentifier} from "../unique_identifier";
 import {LoopTranspiler as LoopStatementTranspiler} from "../statements";
 import {AtTranspiler} from "./at";
+import {InlineDeclarations} from "../inline";
 
 
 export class LoopTranspiler implements IStructureTranspiler {
@@ -16,6 +17,7 @@ export class LoopTranspiler implements IStructureTranspiler {
     let pre = "";
     let atFirst: Chunk | undefined = undefined;
     let atLast: Chunk | undefined = undefined;
+    let atLastFlag = "";
     let loopStatement: abaplint.Nodes.StatementNode | undefined = undefined;
     let previous = "";
     let tabix = "";
@@ -27,6 +29,19 @@ export class LoopTranspiler implements IStructureTranspiler {
         hasAt = true;
         break;
       }
+    }
+
+    const hasAtLast = (node.findDirectStructure(abaplint.Structures.Body)
+      ?.findDirectStructures(abaplint.Structures.Normal) || [])
+      .some(n => n.findDirectStructure(abaplint.Structures.AtLast) !== undefined);
+    const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
+    if (scope?.getIdentifier().stype === abaplint.ScopeType.Program
+        || scope?.getIdentifier().stype === abaplint.ScopeType.SelectionEvent) {
+      ret.appendString(InlineDeclarations.buildDeclarations(node, traversal));
+    }
+    if (hasAtLast) {
+      atLastFlag = UniqueIdentifier.get();
+      ret.appendString(`let ${atLastFlag} = false;\n`);
     }
 
     if (node.findDirectStatement(abaplint.Statements.Loop)?.findDirectTokenByText("GROUP") !== undefined) {
@@ -47,6 +62,9 @@ export class LoopTranspiler implements IStructureTranspiler {
               ret.appendString("}\n");
             } else if (n instanceof abaplint.Nodes.StructureNode && n.get() instanceof abaplint.Structures.AtLast) {
               atLast = new AtLastTranspiler().transpile(n, traversal);
+              ret.appendString(`if (${atLastFlag}) {\n`);
+              ret.appendChunk(atLast);
+              ret.appendString("}\n");
             } else if (n instanceof abaplint.Nodes.StructureNode && n.get() instanceof abaplint.Structures.At) {
               ret.appendChunk(new AtTranspiler().transpile(n, traversal, previous, loopTarget, tabix, loopStatement));
             } else {
@@ -61,7 +79,7 @@ export class LoopTranspiler implements IStructureTranspiler {
           ret.appendString(`let ${previous} = undefined;\n`);
           ret.appendString(`let ${tabix} = undefined;\n`);
         }
-        const loop = new LoopStatementTranspiler();
+        const loop = new LoopStatementTranspiler({atLast: atLastFlag || undefined});
         // LoopStatementTranspiler maps its own head, so no ensureStartMapping needed here
         ret.appendChunk(loop.transpile(c, traversal));
         ret.appendString("\n");
@@ -86,12 +104,6 @@ export class LoopTranspiler implements IStructureTranspiler {
     }
 
     atted.appendChunk(ret);
-
-    if (atLast) {
-      atted.appendString("if (abap.builtin.sy.get().subrc.get() === 0) {\n");
-      atted.appendChunk(atLast);
-      atted.appendString("}\n");
-    }
 
     return atted;
   }
