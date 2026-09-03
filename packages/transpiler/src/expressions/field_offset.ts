@@ -15,7 +15,11 @@ export class FieldOffsetTranspiler implements IExpressionTranspiler {
         }
       } else if(c instanceof Nodes.TokenNode) {
         if (c.get() instanceof Tokens.Identifier) {
-          ret += c.getFirstToken().getStr().toLowerCase();
+          let value = c.getFirstToken().getStr().toLowerCase();
+          if (/^0+\d+$/.test(value)) {
+            value = value.replace(/^0+/, "") || "0";
+          }
+          ret += value;
         }
       }
     }
