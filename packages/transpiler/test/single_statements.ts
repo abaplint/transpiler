@@ -380,6 +380,7 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({object: obj,user: usr,fields:
     {abap: "RETRY.", js: `throw new Error("RETRY, not supported, transpiler");`, skip: false},
 
     {abap: "STOP.", js: `throw new Error("STOP, not supported, transpiler");`, skip: false},
+    {abap: "SET CURSOR FIELD foo.", js: `throw new Error("SET CURSOR, not supported, transpiler");`, skip: false},
     {abap: "SUM.", js: `throw new Error("SUM, not supported, transpiler");`, skip: false},
     {abap: "FORMAT RESET.", js: `throw new Error("FORMAT, not supported, transpiler");`, skip: false},
     {abap: "RESERVE 1 LINES.", js: `throw new Error("RESERVE, not supported, transpiler");`, skip: false},

@@ -135,6 +135,7 @@ export * from "./select";
 export * from "./selection_screen";
 export * from "./set_bit";
 export * from "./set_blank";
+export * from "./set_cursor";
 export * from "./set_dataset";
 export * from "./set_extended_check";
 export * from "./set_handler";
