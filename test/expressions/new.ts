@@ -129,4 +129,22 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("inline ref to local structure type", async () => {
+    const code = `
+FORM foo.
+  TYPES: BEGIN OF ty,
+           bar TYPE i,
+         END OF ty.
+  DATA(sdf) = NEW ty( ).
+  WRITE / sdf->bar.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
 });
