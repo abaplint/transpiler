@@ -42,7 +42,7 @@ describe("Running statements - WRITE", () => {
       bar+00(4) = 'sdfa'.
       WRITE bar.`;
     const js = await run(code);
-    const f = new AsyncFunction("abap", js);
+    const f = new AsyncFunction("abap", `"use strict";${js}`);
     await f(abap);
     expect(abap.console.get().trimEnd()).to.equal("sdfa");
   });
@@ -57,7 +57,7 @@ describe("Running statements - WRITE", () => {
         WRITE <wa>.
       ENDLOOP.`;
     const js = await run(code);
-    const f = new AsyncFunction("abap", js);
+    const f = new AsyncFunction("abap", `"use strict";${js}`);
     await f(abap);
     expect(abap.console.get()).to.equal("");
   });
