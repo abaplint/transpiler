@@ -8,6 +8,8 @@ import {FieldChainTranspiler} from "./field_chain";
 import {SQLFieldNameTranspiler} from "./sql_field_name";
 import {TranspileTypes} from "../transpile_types";
 import {SourceTranspiler} from "./source";
+import {SQLFieldListTranspiler} from "./sql_field_list";
+import {SQLFromTranspiler} from "./sql_from";
 
 export class SQLCondTranspiler implements IExpressionTranspiler {
 
@@ -35,6 +37,8 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
           }
         } else if (c.findDirectExpression(abaplint.Expressions.SQLIn)) {
           ret += this.sqlIn(c, traversal, traversal.getFilename(), table);
+        } else if (this.findSubselect(c)) {
+          ret += this.subselectCondition(c, traversal, table);
         } else {
           ret += this.basicCondition(c, traversal, traversal.getFilename(), table);
         }
@@ -54,15 +58,26 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
     const fieldName = c.findDirectExpression(abaplint.Expressions.SQLFieldName)
       || c.findDirectExpression(abaplint.Expressions.SQLAliasField);
     const sqlin = c.findDirectExpression(abaplint.Expressions.SQLIn);
-    const source = c.findFirstExpression(abaplint.Expressions.SimpleSource3);
+    const subselect = sqlin === undefined ? undefined : this.findSubselect(sqlin);
 
-    if (fieldName === undefined || sqlin === undefined || source === undefined) {
+    if (fieldName === undefined || sqlin === undefined) {
       throw new Error("SQL Condition, transpiler todo, " + c.concatTokens());
     }
 
     let pre = "";
     if (c.concatTokens().toUpperCase().includes(" NOT IN ")) {
       pre = "NOT ";
+    }
+
+    if (subselect) {
+      const field = new SQLFieldNameTranspiler().transpile(fieldName, traversal).getCode();
+      return `${field} ${pre}IN ${this.sqlSubselect(subselect, traversal, table)}`;
+    }
+
+    const source = c.findFirstExpression(abaplint.Expressions.SimpleSource3);
+
+    if (source === undefined) {
+      throw new Error("SQL Condition, transpiler todo, " + c.concatTokens());
     }
 
     if (sqlin.getChildren().length === 2) {
@@ -84,6 +99,11 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
   private basicCondition(c: abaplint.Nodes.ExpressionNode, traversal: Traversal, filename: string,
                          table: abaplint.Objects.Table | undefined): string {
     let ret = "";
+    const subselect = this.findSubselect(c);
+    if (subselect) {
+      return this.subselectCondition(c, traversal, table);
+    }
+
     if (c.getChildren().length !== 3) {
       return this.basicConditionNew(c, traversal, filename, table);
     }
@@ -117,6 +137,72 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
     ret += this.sqlSource(source, traversal, filename, table);
 
     return ret;
+  }
+
+  private subselectCondition(c: abaplint.Nodes.ExpressionNode, traversal: Traversal,
+                             table: abaplint.Objects.Table | undefined): string {
+    const subselect = this.findSubselect(c);
+    if (subselect === undefined) {
+      throw new Error("SQL Condition, subselect not found, " + c.concatTokens());
+    }
+
+    const fieldNameExpression = c.findDirectExpression(abaplint.Expressions.SQLFieldName)
+      || c.findDirectExpression(abaplint.Expressions.SQLAliasField);
+    const operator = c.findDirectExpression(abaplint.Expressions.SQLCompareOperator);
+    if (fieldNameExpression && operator) {
+      const fieldName = new SQLFieldNameTranspiler().transpile(fieldNameExpression, traversal).getCode();
+      const quantifier = c.getChildren().find(child => child instanceof abaplint.Nodes.TokenNode
+        && ["ALL", "ANY", "SOME"].includes(child.getFirstToken().getStr().toUpperCase()));
+      const suffix = quantifier ? " " + quantifier.concatTokens() : "";
+      return `${fieldName} ${this.sqlOperator(operator.concatTokens())}${suffix} ${this.sqlSubselect(subselect, traversal, table)}`;
+    }
+
+    if (c.findDirectTokenByText("EXISTS")) {
+      const not = c.findDirectTokenByText("NOT") ? "NOT " : "";
+      return `${not}EXISTS ${this.sqlSubselect(subselect, traversal, table)}`;
+    }
+
+    throw new Error("SQL Condition, unsupported subselect, " + c.concatTokens());
+  }
+
+  private findSubselect(node: abaplint.Nodes.ExpressionNode): abaplint.Nodes.ExpressionNode | undefined {
+    const grouped = node.findDirectExpression(abaplint.Expressions.SQLSetOpGroup);
+    if (grouped) {
+      return grouped;
+    }
+
+    // Older parser releases represent the scalar form as an inline sequence
+    // instead of wrapping it in SQLSetOpGroup.
+    if (node.getTokens().some(token => token.getStr().toUpperCase() === "SELECT")) {
+      return node;
+    }
+
+    return undefined;
+  }
+
+  private sqlSubselect(node: abaplint.Nodes.ExpressionNode, traversal: Traversal,
+                       table: abaplint.Objects.Table | undefined): string {
+    const fieldList = node.findFirstExpression(abaplint.Expressions.SQLFieldList);
+    const from = node.findFirstExpression(abaplint.Expressions.SQLFrom);
+    if (fieldList === undefined || from === undefined) {
+      throw new Error("SQL Condition, malformed subselect, " + node.concatTokens());
+    }
+
+    const tokens = node.getTokens();
+    const selectIndex = tokens.findIndex(token => token.getStr().toUpperCase() === "SELECT");
+    const distinct = selectIndex >= 0 && tokens[selectIndex + 1]?.getStr().toUpperCase() === "DISTINCT";
+    let ret = `(SELECT${distinct ? " DISTINCT" : ""} `;
+    ret += new SQLFieldListTranspiler().transpile(fieldList, traversal).getCode();
+    ret += " " + new SQLFromTranspiler().transpile(from, traversal).getCode().trim();
+
+    const where = node.findFirstExpression(abaplint.Expressions.SQLCond);
+    if (where) {
+      const subTable = from.findFirstExpression(abaplint.Expressions.DatabaseTable);
+      const conditionTable = subTable ? traversal.findTable(subTable.concatTokens()) : table;
+      ret += " WHERE " + new SQLCondTranspiler().transpile(where, traversal, conditionTable).getCode();
+    }
+
+    return ret + ")";
   }
 
   private sqlSource(source: abaplint.Nodes.ExpressionNode, traversal: Traversal, filename: string,
