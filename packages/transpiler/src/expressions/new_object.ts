@@ -55,7 +55,7 @@ export class NewObjectTranspiler implements IExpressionTranspiler {
     } else {
       const source = node.findFirstExpression(abaplint.Expressions.Source);
       if (source === undefined) {
-        throw new Error("NewObjectTranspiler: DataReference source not found");
+        throw new Error("NewObjectTranspiler: DataReference source not found, " + node.concatTokens() + ", " + traversal.getCurrentObject().getName() + " line " + node.getFirstToken().getStart().getRow());
       }
       const typeCode = TranspileTypes.toType(type);
       const sourceCode = traversal.traverse(source).getCode();
