@@ -36,6 +36,32 @@ describe("Running statements - WRITE", () => {
     expect(abap.console.get().trimEnd()).to.equal("A");
   });
 
+  it("WRITE - character field substring", async () => {
+    const code = `
+      DATA bar TYPE c LENGTH 10.
+      bar+00(4) = 'sdfa'.
+      WRITE bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", `"use strict";${js}`);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("sdfa");
+  });
+
+  it("WRITE - character field substring through field symbol", async () => {
+    const code = `
+      TYPES bar TYPE c LENGTH 10.
+      DATA itab TYPE STANDARD TABLE OF bar WITH EMPTY KEY.
+      FIELD-SYMBOLS <wa> LIKE LINE OF itab.
+      LOOP AT itab ASSIGNING <wa>.
+        <wa>+00(4) = 'sdfa'.
+        WRITE <wa>.
+      ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", `"use strict";${js}`);
+    await f(abap);
+    expect(abap.console.get()).to.equal("");
+  });
+
   it("WRITE - single positive integer ", async () => {
     const code = `
       data lv_test type i.
