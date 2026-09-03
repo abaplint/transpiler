@@ -149,6 +149,9 @@ export class Validation {
       config.syntax.version = Version.OpenABAP;
     }
 
+    // Keep abaplint's own rule runner in sync with the transpiler output filter.
+    config.global.skipGeneratedFunctionGroups = this.options?.skipGeneratedFunctionGroups === true;
+
     const conf = new Config(JSON.stringify(config));
     reg.setConfig(conf);
     const issues = reg.findIssues();

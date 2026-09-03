@@ -100,6 +100,8 @@ export interface ITranspilerOptions {
   ignoreSourceMap?: boolean;
   /** import programs */
   importProg?: boolean;
+  /** skip generated table maintenance function groups */
+  skipGeneratedFunctionGroups?: boolean;
   /** skips version check, not recommended */
   skipVersionCheck?: boolean;
 }

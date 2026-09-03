@@ -11,20 +11,20 @@ export class HandleFUGR {
     this.options = options;
   }
 
-  public static shouldSkip(obj: abaplint.ABAPObject, reg: abaplint.IRegistry) {
-    // @ts-ignore  todo
-    return new abaplint.SkipLogic(reg).isGeneratedFunctionGroup(obj);
+  public static shouldSkip(obj: abaplint.Objects.FunctionGroup, reg: abaplint.IRegistry,
+                           options?: ITranspilerOptions): boolean {
+    return options?.skipGeneratedFunctionGroups === true
+      && new abaplint.SkipLogic(reg).isGeneratedFunctionGroup(obj);
   }
 
   // function groups are compiled into a single file, with one closure for the function groups top variables
-  public runObject(obj: abaplint.ABAPObject, reg: abaplint.IRegistry): IOutputFile[] {
-    const spaghetti = new abaplint.SyntaxLogic(reg, obj).run().spaghetti;
-    const chunk = new Chunk().appendString("{\n");
-
-
-    if (HandleFUGR.shouldSkip(obj, reg)) {
+  public runObject(obj: abaplint.Objects.FunctionGroup, reg: abaplint.IRegistry): IOutputFile[] {
+    if (HandleFUGR.shouldSkip(obj, reg, this.options)) {
       return [];
     }
+
+    const spaghetti = new abaplint.SyntaxLogic(reg, obj).run().spaghetti;
+    const chunk = new Chunk().appendString("{\n");
 
     for (const file of obj.getSequencedFiles()) {
       if (this.options?.addFilenames === true) {

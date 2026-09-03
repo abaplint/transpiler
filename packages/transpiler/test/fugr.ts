@@ -155,6 +155,35 @@ ENDFUNCTION.`;
     }
   });
 
+  it("skips generated table maintenance function groups when requested", async () => {
+    const tobj = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TOBJ" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <TOBJ>
+    <TVDIR>
+     <AREA>ZFGroup</AREA>
+    </TVDIR>
+    <OBJH>
+     <OBJECTNAME>ZTABLE</OBJECTNAME>
+     <OBJECTTYPE>S</OBJECTTYPE>
+    </OBJH>
+   </TOBJ>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+    const inputFiles = [...files, {filename: "zfgroup.tobj.xml", contents: tobj}];
+    const memory = inputFiles.map(f => new abaplint.MemoryFile(f.filename, f.contents));
+    const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory);
+
+    const included = await new Transpiler().run(reg);
+    expect(included.objects.some(o => o.object.type === "FUGR" && o.object.name === "ZFGROUP")).to.equal(true);
+
+    const skipped = await new Transpiler({skipGeneratedFunctionGroups: true}).run(reg);
+    expect(skipped.objects.some(o => o.object.type === "FUGR" && o.object.name === "ZFGROUP")).to.equal(false);
+    expect(skipped.initializationScript).to.not.include("zfgroup.fugr.mjs");
+  });
+
   it("declares inline data in function module scope", async () => {
     const inlineFiles = files.map(file => file.filename === "zfgroup.fugr.zfmodule1.abap" ? {
       ...file,

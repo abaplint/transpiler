@@ -110,7 +110,8 @@ globalThis.abap = new runtime.ABAP();\n`;
         late.push(name);
       } else if (obj instanceof abaplint.Objects.Program && obj.isInclude() === true) {
         continue;
-      } else if (obj instanceof abaplint.Objects.FunctionGroup && HandleFUGR.shouldSkip(obj, reg) === true) {
+      } else if (obj instanceof abaplint.Objects.FunctionGroup
+          && HandleFUGR.shouldSkip(obj, reg, options) === true) {
         continue;
       } else if (obj instanceof abaplint.Objects.Interface
           || obj instanceof abaplint.Objects.FunctionGroup
