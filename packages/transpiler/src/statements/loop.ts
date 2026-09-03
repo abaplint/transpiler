@@ -9,10 +9,12 @@ export class LoopTranspiler implements IStatementTranspiler {
   private unique = "";
   private readonly injectFrom: string | undefined = undefined;
   private readonly skipInto: boolean | undefined = undefined;
+  private readonly atLast: string | undefined = undefined;
 
-  public constructor(options?: {injectFrom?: string, skipInto?: boolean}) {
+  public constructor(options?: {injectFrom?: string, skipInto?: boolean, atLast?: string}) {
     this.injectFrom = options?.injectFrom;
     this.skipInto = options?.skipInto;
+    this.atLast = options?.atLast;
   }
 
   public getTarget() {
@@ -113,6 +115,10 @@ export class LoopTranspiler implements IStatementTranspiler {
         code = `"transpiler, const dynamic loop where todo"`;
       }
       extra.push(`dynamicWhere: {condition: ${code}, evaluate: (name) => {try { return eval(name);} catch {}}}`);
+    }
+
+    if (this.atLast !== undefined) {
+      extra.push(`atLast: (last) => { ${this.atLast} = last; }`);
     }
 
     const topEquals: {[key: string]: string} = {};
