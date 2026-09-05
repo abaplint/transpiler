@@ -72,7 +72,7 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
         ret.append(".dereference()", c, traversal);
       } else if (c.get() instanceof Expressions.ComponentName) {
         const name = c.getFirstToken().getStr().toLowerCase();
-        if (name.match(/^\d/) || name.includes("/")) {
+        if (Traversal.isBracketComponent(name)) {
           ret.append(`["` + name + `"]`, c, traversal);
         } else {
           ret.append(`.` + name, c, traversal);
