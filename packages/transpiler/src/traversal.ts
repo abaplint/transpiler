@@ -92,6 +92,10 @@ export class Traversal {
     return name + "";
   }
 
+  public static isBracketComponent(name: string): boolean {
+    return name.match(/^\d/) !== null || name.includes("/") || name.startsWith("%");
+  }
+
   public getCurrentObject(): abaplint.ABAPObject {
     return this.obj;
   }
