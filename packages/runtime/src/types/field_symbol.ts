@@ -8,6 +8,7 @@ import {Hex} from "./hex";
 import {Float} from "./float";
 import {DataReference} from "./data_reference";
 import {HexUInt8} from "./hex_uint8";
+import {Date} from "./date";
 
 type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Structure | Float;
 
@@ -52,7 +53,7 @@ export class FieldSymbol  {
   }
 
   public getPointer() {
-    if (this.casting) {
+    if (this.needsReinterpretation()) {
       // todo, this wont work for everything, eg changing CASTING'ed values
       return this.get();
     }
@@ -74,7 +75,7 @@ export class FieldSymbol  {
   }
 
   public get() {
-    if (this.casting) {
+    if (this.needsReinterpretation()) {
       if (this.type instanceof Hex || this.type instanceof HexUInt8) {
         const pt = this.pointer;
         if (pt instanceof Float) {
@@ -113,7 +114,7 @@ export class FieldSymbol  {
   }
 
   public set(value: any) {
-    if (this.casting) {
+    if (this.needsReinterpretation()) {
       if (this.type instanceof Hex || this.type instanceof HexUInt8) {
         const pt = this.pointer;
         if (pt instanceof Float) {
@@ -130,5 +131,11 @@ export class FieldSymbol  {
 
   public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}) {
     return this.getPointer().getOffset(input);
+  }
+
+  private needsReinterpretation(): boolean {
+    // Date-to-date CASTING shares the original storage and must retain the Date
+    // wrapper so arithmetic uses day counts instead of parsing YYYYMMDD as a number.
+    return this.casting && !(this.type instanceof Date && this.pointer instanceof Date);
   }
 }

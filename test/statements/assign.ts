@@ -973,6 +973,38 @@ ASSERT <value> IS NOT ASSIGNED.`;
     await f(abap);
   });
 
+  it("ASSIGN CASTING preserves date arithmetic", async () => {
+    const code = `
+DATA lv_date TYPE d.
+FIELD-SYMBOLS <fs_date> TYPE d.
+lv_date = sy-datum + 2.
+ASSIGN lv_date TO <fs_date> CASTING.
+ASSERT 2 = <fs_date> - sy-datum.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("ASSIGN CASTING date stays linked across reads and writes", async () => {
+    const code = `
+DATA lv_date TYPE d VALUE '20240228'.
+DATA lv_start TYPE d VALUE '20240228'.
+FIELD-SYMBOLS <fs_date> TYPE d.
+ASSIGN lv_date TO <fs_date> CASTING.
+ASSERT <fs_date> = lv_start.
+lv_date = lv_date + 2.
+ASSERT <fs_date> = '20240301'.
+ASSERT 2 = <fs_date> - lv_start.
+ASSERT -2 = lv_start - <fs_date>.
+<fs_date> = <fs_date> + 1.
+ASSERT lv_date = '20240302'.
+CLEAR <fs_date>.
+ASSERT lv_date IS INITIAL.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("ASSIGN, data reference namespaced component", async () => {
     const code = `
 TYPES:
