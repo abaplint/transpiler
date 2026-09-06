@@ -40,6 +40,20 @@ ls_msg-A3 = 'A'.`;
     await f(abap);
   });
 
+  it("DATA, component name starting with percent", async () => {
+    const code = `
+TYPES: BEGIN OF bar,
+         %field TYPE i,
+       END OF bar.
+DATA moo TYPE bar.
+moo-%field = 2.
+WRITE moo-%field.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
   it("DATA, VALUE", async () => {
     const code = `
 DATA foo TYPE i VALUE 10.

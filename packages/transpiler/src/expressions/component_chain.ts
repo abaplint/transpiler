@@ -9,7 +9,8 @@ export class ComponentChainTranspiler implements IExpressionTranspiler {
     const ret = new Chunk();
     for (const n of node.getChildren()) {
       if (n.get() instanceof Expressions.ComponentName) {
-        ret.append(n.concatTokens().toLowerCase(), n, traversal);
+        const name = n.concatTokens().toLowerCase();
+        ret.append(Traversal.isBracketComponent(name) ? `["${name}"]` : name, n, traversal);
       } else if (n.concatTokens() === "-") {
         ret.append(".get().", n, traversal);
       }
