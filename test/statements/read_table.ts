@@ -70,6 +70,93 @@ describe("Running statements - READ TABLE", () => {
     await f(abap);
   });
 
+  it("READ TABLE percent component, empty table", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         %field TYPE i,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+READ TABLE tab WITH KEY %field = 2 TRANSPORTING NO FIELDS.
+WRITE sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4");
+  });
+
+  for (const tableType of ["STANDARD TABLE OF ty WITH DEFAULT KEY",
+    "SORTED TABLE OF ty WITH UNIQUE KEY %field", "HASHED TABLE OF ty WITH UNIQUE KEY %field"]) {
+    it(`READ TABLE percent component, ${tableType}`, async () => {
+      const code = `
+TYPES: BEGIN OF ty,
+         %field TYPE i,
+       END OF ty.
+DATA tab TYPE ${tableType}.
+DATA row TYPE ty.
+row-%field = 1.
+INSERT row INTO TABLE tab.
+row-%field = 2.
+INSERT row INTO TABLE tab.
+READ TABLE tab WITH KEY %FIELD = 2 INTO row.
+ASSERT sy-subrc = 0.
+ASSERT row-%field = 2.
+READ TABLE tab WITH KEY %field = 3 TRANSPORTING NO FIELDS.
+ASSERT sy-subrc <> 0.`;
+      const js = await run(code);
+      const f = new AsyncFunction("abap", js);
+      await f(abap);
+    });
+  }
+
+  it("READ TABLE percent component, nested structure", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         BEGIN OF %group,
+           %field TYPE i,
+         END OF %group,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row TYPE ty.
+row-%group-%field = 2.
+APPEND row TO tab.
+READ TABLE tab WITH KEY %group-%field = 2 TRANSPORTING NO FIELDS.
+ASSERT sy-subrc = 0.
+READ TABLE tab WITH KEY %group-%field = 3 TRANSPORTING NO FIELDS.
+ASSERT sy-subrc = 4.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("READ TABLE percent component, method key value", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-DATA calls TYPE i.
+    CLASS-METHODS value RETURNING VALUE(result) TYPE i.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD value.
+    calls = calls + 1.
+    result = 2.
+  ENDMETHOD.
+ENDCLASS.
+START-OF-SELECTION.
+  TYPES: BEGIN OF ty,
+           %field TYPE i,
+         END OF ty.
+  DATA tab TYPE HASHED TABLE OF ty WITH UNIQUE KEY %field.
+  DATA row TYPE ty.
+  row-%field = 2.
+  INSERT row INTO TABLE tab.
+  READ TABLE tab WITH TABLE KEY %field = lcl=>value( ) TRANSPORTING NO FIELDS.
+  ASSERT sy-subrc = 0.
+  ASSERT lcl=>calls = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("READ TABLE table_line", async () => {
     const code = `
       DATA tab TYPE STANDARD TABLE OF i.

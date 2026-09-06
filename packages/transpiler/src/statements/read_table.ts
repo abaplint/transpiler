@@ -72,10 +72,11 @@ export class ReadTableTranspiler implements IStatementTranspiler {
         const s = traversal.traverse(source).getCode();
 
         let field = "";
+        let key = left.concatTokens().toLowerCase();
         if (left.get() instanceof abaplint.Expressions.Dynamic
             && left instanceof abaplint.Nodes.ExpressionNode) {
-          const concat = left.concatTokens().toLowerCase();
-          field = "i." + concat.substring(2, concat.length - 2);
+          key = key.substring(2, key.length - 2);
+          field = "i." + key;
         } else if (left.get() instanceof abaplint.Expressions.ComponentChainSimple
             && left instanceof abaplint.Nodes.ExpressionNode) {
           field = new ComponentChainSimpleTranspiler("i.").transpile(left, traversal).getCode();
@@ -91,11 +92,11 @@ export class ReadTableTranspiler implements IStatementTranspiler {
           prefix += "const " + id + " = " + s + ";\n";
           withKey.push("abap.compare.eq(" + field + ", " + id + ")");
           withKeyValue.push(`{key: (i) => {return ${field}}, value: ${id}}`);
-          withKeySimple.push(`"${field.replace("i.", "").replace(/\$/g, "/")}": ${id}`);
+          withKeySimple.push(`${JSON.stringify(key)}: ${id}`);
         } else {
           withKey.push("abap.compare.eq(" + field + ", " + s + ")");
           withKeyValue.push(`{key: (i) => {return ${field}}, value: ${s}}`);
-          withKeySimple.push(`"${field.replace("i.", "").replace(/\$/g, "/")}": ${s}`);
+          withKeySimple.push(`${JSON.stringify(key)}: ${s}`);
         }
       }
       extra.push("withKey: (i) => {return " + withKey.join(" && ") + ";}");
