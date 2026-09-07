@@ -1,6 +1,6 @@
 {
   "name": "@abaplint/transpiler-extras",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Transpiler - additional object types, source-available under PolyForm Noncommercial 1.0.0",
   "main": "build/src/index.js",
   "typings": "build/src/index.d.ts",
@@ -29,11 +29,11 @@
   "license": "PolyForm-Noncommercial-1.0.0",
   "peerDependencies": {
     "@abaplint/core": "^2.120.43",
-    "@abaplint/transpiler": "^2.13.77"
+    "@abaplint/transpiler": "^2.13.78"
   },
   "devDependencies": {
     "@abaplint/core": "^2.120.43",
-    "@abaplint/transpiler": "^2.13.77",
+    "@abaplint/transpiler": "^2.13.78",
     "@types/chai": "^5.2.3",
     "@types/mocha": "^10.0.10",
     "@types/node": "^26.4.1",
