@@ -56,7 +56,7 @@ async function loadLib(config: ITranspilerConfig): Promise<Transpiler.IFile[]> {
 
     const filesToRead: string[] = [];
     for (const pattern of patterns) {
-      for (const filename of glob.sync(dir + pattern, {nosort: true, nodir: true})) {
+      for (const filename of glob.sync(dir + pattern, {nodir: true})) {
         if (filename.endsWith(".clas.testclasses.abap")) {
           continue;
         } else if (excludeFilters.length > 0 && excludeFilters.some(a => a.test(filename)) === true) {
