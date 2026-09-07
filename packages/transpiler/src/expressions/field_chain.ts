@@ -41,9 +41,11 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
 
         const interfaceName = traversal.isInterfaceAttribute(c.getFirstToken());
         let name = c.getFirstToken().getStr()!.toLowerCase();
+        const attributeContext = context;
+        context = traversal.narrowContextAttribute(context, c.getFirstToken().getStr(), scope);
 
-        if (context instanceof abaplint.BasicTypes.ObjectReferenceType) {
-          const cdef = traversal.findClassDefinition(context.getIdentifierName(), scope);
+        if (attributeContext instanceof abaplint.BasicTypes.ObjectReferenceType) {
+          const cdef = traversal.findClassDefinition(attributeContext.getIdentifierName(), scope);
           const tokenName = c.getFirstToken().getStr();
           const attr = cdef?.getAttributes().findByName(tokenName);
           // Do not mark constants as private JS fields. Constants are exposed on instances via constructor copying.
@@ -72,6 +74,7 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
         ret.append(".dereference()", c, traversal);
       } else if (c.get() instanceof Expressions.ComponentName) {
         const name = c.getFirstToken().getStr().toLowerCase();
+        context = Traversal.narrowContextComponent(context, c.getFirstToken().getStr());
         if (Traversal.isBracketComponent(name)) {
           ret.append(`["` + name + `"]`, c, traversal);
         } else {
@@ -95,6 +98,9 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
         this.addGetOffset = true;
       } else if (c instanceof Nodes.ExpressionNode
           && c.get() instanceof Expressions.TableExpression) {
+        if (context instanceof abaplint.BasicTypes.TableType) {
+          context = context.getRowType();
+        }
         ret = new TableExpressionTranspiler().transpile(c, traversal, ret);
       }
     }

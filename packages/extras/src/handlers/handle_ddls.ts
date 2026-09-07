@@ -1,5 +1,6 @@
 import * as abaplint from "@abaplint/core";
 import {DatabaseSetupResult, IOutputFile, ITranspilerOptions, ITranspilerPlugin} from "@abaplint/transpiler";
+import {CDSDatabaseView} from "./cds_database_view";
 
 export class HandleDDLS implements ITranspilerPlugin {
 
@@ -18,44 +19,19 @@ export class HandleDDLS implements ITranspilerPlugin {
 
   public amendDatabaseSetup(dbSetup: DatabaseSetupResult, reg: abaplint.IRegistry, _options: ITranspilerOptions): void {
     for (const obj of reg.getObjects()) {
-      if (!(obj instanceof abaplint.Objects.DataDefinition)) {
+      // The CLI bundles core, whereas this plugin loads core from node_modules.
+      // Object identity must not depend on those being the same module instance.
+      if (obj.getType() !== "DDLS") {
         continue;
       }
 
-      const view = this.buildView(obj, reg, "'");
+      const view = new CDSDatabaseView(reg).build(obj as abaplint.Objects.DataDefinition);
       if (view !== undefined) {
         dbSetup.schemas.sqlite.push(view);
-      }
-
-      const quotedView = this.buildView(obj, reg, "\"");
-      if (quotedView !== undefined) {
-        dbSetup.schemas.pg.push(quotedView);
-        dbSetup.schemas.snowflake.push(quotedView);
+        dbSetup.schemas.pg.push(view);
+        dbSetup.schemas.snowflake.push(view);
       }
     }
-  }
-
-  private buildView(obj: abaplint.Objects.DataDefinition, reg: abaplint.IRegistry, quote: string): string | undefined {
-    if (obj.getParsedData() === undefined) {
-      obj.parse();
-    }
-    const parsed = obj.getParsedData();
-    const source = parsed?.sources[0];
-    if (parsed === undefined || source === undefined || parsed.fields.length === 0) {
-      return undefined;
-    }
-
-    const table = reg.getObject("TABL", source.name);
-    if (!(table instanceof abaplint.Objects.Table)) {
-      return undefined;
-    }
-
-    const q = (name: string) => quote + name.toLowerCase() + quote;
-    const viewName = parsed.definitionName || obj.getName();
-    const columns = parsed.fields.map(field =>
-      q(source.name) + "." + q(field.name) + " AS " + field.name.toLowerCase()).join(", ");
-
-    return `CREATE VIEW ${q(viewName)} AS SELECT ${columns} FROM ${q(source.name)};`;
   }
 
 }

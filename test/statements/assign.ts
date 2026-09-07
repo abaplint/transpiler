@@ -514,6 +514,45 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("42");
   });
 
+  it("ASSIGN dynamic private attribute through structure object reference, friend", async () => {
+    const code = `
+CLASS lcl_friend DEFINITION DEFERRED.
+
+CLASS lcl_main DEFINITION FRIENDS lcl_friend.
+  PRIVATE SECTION.
+    DATA attr_1 TYPE i.
+ENDCLASS.
+
+CLASS lcl_main IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lcl_friend DEFINITION.
+  PUBLIC SECTION.
+    METHODS run.
+ENDCLASS.
+
+CLASS lcl_friend IMPLEMENTATION.
+  METHOD run.
+    TYPES: BEGIN OF ty_struct,
+             o_main TYPE REF TO lcl_main,
+           END OF ty_struct.
+    DATA(ls_struct) = VALUE ty_struct( o_main = NEW #( ) ).
+    FIELD-SYMBOLS <attr_1> TYPE any.
+    ASSIGN ls_struct-o_main->('attr_1') TO <attr_1>.
+    ASSERT sy-subrc = 0.
+    <attr_1> = 42.
+    WRITE ls_struct-o_main->attr_1.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  NEW lcl_friend( )->run( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("42");
+  });
+
   it("ASSIGN unassigned deref data reference", async () => {
     const code = `
 DATA ref TYPE REF TO data.
@@ -968,6 +1007,38 @@ GET REFERENCE OF lt_values INTO lr_data.
 ASSIGN lr_data->(component) TO <value>.
 ASSERT sy-subrc = 4.
 ASSERT <value> IS NOT ASSIGNED.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("ASSIGN CASTING preserves date arithmetic", async () => {
+    const code = `
+DATA lv_date TYPE d.
+FIELD-SYMBOLS <fs_date> TYPE d.
+lv_date = sy-datum + 2.
+ASSIGN lv_date TO <fs_date> CASTING.
+ASSERT 2 = <fs_date> - sy-datum.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("ASSIGN CASTING date stays linked across reads and writes", async () => {
+    const code = `
+DATA lv_date TYPE d VALUE '20240228'.
+DATA lv_start TYPE d VALUE '20240228'.
+FIELD-SYMBOLS <fs_date> TYPE d.
+ASSIGN lv_date TO <fs_date> CASTING.
+ASSERT <fs_date> = lv_start.
+lv_date = lv_date + 2.
+ASSERT <fs_date> = '20240301'.
+ASSERT 2 = <fs_date> - lv_start.
+ASSERT -2 = lv_start - <fs_date>.
+<fs_date> = <fs_date> + 1.
+ASSERT lv_date = '20240302'.
+CLEAR <fs_date>.
+ASSERT lv_date IS INITIAL.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);

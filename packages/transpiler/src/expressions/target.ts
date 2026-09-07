@@ -24,6 +24,9 @@ export class TargetTranspiler implements IExpressionTranspiler {
 
         context = scope?.findVariable(c.getFirstToken().getStr())?.getType();
       } else if (c.get() instanceof Expressions.TableExpression && c instanceof Nodes.ExpressionNode) {
+        if (context instanceof abaplint.BasicTypes.TableType) {
+          context = context.getRowType();
+        }
         ret = new TableExpressionTranspiler().transpile(c, traversal, ret);
 
       } else if (c.get() instanceof Expressions.InlineData && c instanceof Nodes.ExpressionNode) {
@@ -38,6 +41,7 @@ export class TargetTranspiler implements IExpressionTranspiler {
         ret.append(name, c, traversal);
       } else if (c.get() instanceof Expressions.ComponentName) {
         const name = c.getFirstToken().getStr().toLowerCase();
+        context = Traversal.narrowContextComponent(context, c.getFirstToken().getStr());
         if (Traversal.isBracketComponent(name)) {
           ret.append(`["` + name + `"]`, c, traversal);
         } else {
@@ -46,8 +50,10 @@ export class TargetTranspiler implements IExpressionTranspiler {
       } else if (c.get() instanceof Expressions.AttributeName) {
         let prefix = "";
         let postfix = "";
-        if (context instanceof abaplint.BasicTypes.ObjectReferenceType) {
-          const cdef = traversal.findClassDefinition(context.getIdentifierName(), scope);
+        const attributeContext = context;
+        context = traversal.narrowContextAttribute(context, c.getFirstToken().getStr(), scope);
+        if (attributeContext instanceof abaplint.BasicTypes.ObjectReferenceType) {
+          const cdef = traversal.findClassDefinition(attributeContext.getIdentifierName(), scope);
           const attr = cdef?.getAttributes().findByName(c.getFirstToken().getStr());
           if (attr?.getVisibility() === abaplint.Visibility.Private) {
             const id = scope?.getParent()?.getParent()?.getIdentifier();

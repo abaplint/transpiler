@@ -3,56 +3,7 @@ import * as abaplint from "@abaplint/core";
 import {DatabaseSetupResult, IOutputFile, ITranspilerOptions, ITranspilerPlugin, Transpiler} from "@abaplint/transpiler";
 import {plugin} from "../src";
 
-const t000 = `<?xml version="1.0" encoding="utf-8"?>
-<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
- <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
-  <asx:values>
-   <DD02V>
-    <TABNAME>T000</TABNAME>
-    <DDLANGUAGE>E</DDLANGUAGE>
-    <TABCLASS>TRANSP</TABCLASS>
-    <DDTEXT>T000</DDTEXT>
-    <CONTFLAG>A</CONTFLAG>
-    <EXCLASS>1</EXCLASS>
-   </DD02V>
-   <DD09L>
-    <TABNAME>T000</TABNAME>
-    <AS4LOCAL>A</AS4LOCAL>
-    <TABKAT>0</TABKAT>
-    <TABART>APPL0</TABART>
-    <BUFALLOW>N</BUFALLOW>
-   </DD09L>
-   <DD03P_TABLE>
-    <DD03P>
-     <TABNAME>T000</TABNAME>
-     <FIELDNAME>MANDT</FIELDNAME>
-     <DDLANGUAGE>E</DDLANGUAGE>
-     <POSITION>0001</POSITION>
-     <KEYFLAG>X</KEYFLAG>
-     <ADMINFIELD>0</ADMINFIELD>
-     <INTTYPE>C</INTTYPE>
-     <INTLEN>000006</INTLEN>
-     <NOTNULL>X</NOTNULL>
-     <DATATYPE>CHAR</DATATYPE>
-     <LENG>000003</LENG>
-     <MASK>  CHAR</MASK>
-    </DD03P>
-    <DD03P>
-     <TABNAME>T000</TABNAME>
-     <FIELDNAME>CCCATEGORY</FIELDNAME>
-     <DDLANGUAGE>E</DDLANGUAGE>
-     <POSITION>0002</POSITION>
-     <ADMINFIELD>0</ADMINFIELD>
-     <INTTYPE>C</INTTYPE>
-     <INTLEN>000002</INTLEN>
-     <DATATYPE>CHAR</DATATYPE>
-     <LENG>000001</LENG>
-     <MASK>  CHAR</MASK>
-    </DD03P>
-   </DD03P_TABLE>
-  </asx:values>
- </asx:abap>
-</abapGit>`;
+import {t000, joinedView, viewFiles} from "./_cds";
 
 class AmendDatabase implements ITranspilerPlugin {
   public objectTypes(): string[] {
@@ -98,8 +49,55 @@ describe("DDLS database setup", () => {
     const sqlite = res.databaseSetup.schemas.sqlite.join("\n");
 
     expect(sqlite).to.include(
-      "CREATE VIEW 'zddls' AS SELECT 't000'.'mandt' AS mandt, " +
-      "'t000'.'cccategory' AS cccategory FROM 't000';");
+      'CREATE VIEW "zddls" AS SELECT "t000"."mandt" AS "mandt", ' +
+      '"t000"."cccategory" AS "cccategory" FROM "t000";');
   });
+
+  it("preserves source fields, aliases, joins and filters in every schema and initialization", async () => {
+    const reg = new abaplint.Registry().addFiles(viewFiles().map(f => new abaplint.MemoryFile(f.filename, f.contents)));
+    const res = await new Transpiler({}, plugin).run(reg);
+    const expected = 'CREATE VIEW "zddls" AS SELECT "item"."mandt" AS "purchasingdocument", ' +
+      '"header"."cccategory" AS "headercategory", "text"."cccategory" AS "language", ' +
+      '"change"."cccategory" AS "changestatus" FROM "t000" AS "item" ' +
+      'INNER JOIN "t001" AS "header" ON "item"."mandt" = "header"."mandt" ' +
+      'LEFT OUTER JOIN "t002" AS "text" ON "header"."mandt" = "text"."mandt" ' +
+      'AND ( "text"."cccategory" = \'E\' OR "text"."cccategory" = \'F\' ) ' +
+      'LEFT OUTER JOIN "t003" AS "change" ON "item"."mandt" = "change"."mandt" WHERE "item"."mandt" <> \'999\';';
+    for (const dialect of ["sqlite", "pg", "snowflake"] as const) {
+      expect(res.databaseSetup.schemas[dialect]).to.include(expected);
+    }
+    expect(res.initializationScript).to.include(expected);
+    const direct: DatabaseSetupResult = {schemas: {sqlite: [], pg: [], snowflake: [], hdb: []}, insert: []};
+    plugin.amendDatabaseSetup!(direct, reg, {});
+    expect(direct.schemas.sqlite).to.deep.equal([expected]);
+  });
+
+  it("keeps the source column when a single-source projection is renamed", async () => {
+    const reg = new abaplint.Registry().addFiles(viewFiles(
+      "define view entity ZDDLS as select from t000 as client { key client.mandt as id }")
+      .map(f => new abaplint.MemoryFile(f.filename, f.contents)));
+    const res = await new Transpiler({}, plugin).run(reg);
+    expect(res.databaseSetup.schemas.sqlite).to.include(
+      'CREATE VIEW "zddls" AS SELECT "client"."mandt" AS "id" FROM "t000" AS "client";');
+  });
+
+  for (const [description, ddls, message] of [
+    ["unresolved first source", joinedView.replace("t000 as item", "missing as item"), "source missing"],
+    ["unresolved joined source", joinedView.replace("t003 as change", "missing as change"), "source missing"],
+    ["computed projection", joinedView.replace("change.cccategory as ChangeStatus", "coalesce(change.cccategory, 'N') as ChangeStatus"),
+      "coalesce"],
+    ["union", joinedView + " union select from t000 { mandt, cccategory, cccategory, cccategory }", "unsupported"],
+    ["grouping", joinedView + " group by item.mandt, header.cccategory, text.cccategory, change.cccategory", "group"],
+    ["parameters", joinedView.replace("as select", "with parameters p : abap.char(3) as select"), "parameters"],
+  ]) {
+    it("fails explicitly for " + description, async () => {
+      const reg = new abaplint.Registry().addFiles(viewFiles(ddls).map(f => new abaplint.MemoryFile(f.filename, f.contents)));
+      reg.parse();
+      const setup: DatabaseSetupResult = {schemas: {sqlite: [], pg: [], snowflake: [], hdb: []}, insert: []};
+      expect(() => plugin.amendDatabaseSetup!(setup, reg, {})).to.throw("CDS view zddls")
+        .with.property("message").that.includes(message);
+      expect(setup.schemas.sqlite).to.deep.equal([]);
+    });
+  }
 
 });
