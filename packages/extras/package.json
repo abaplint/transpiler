@@ -29,7 +29,7 @@
   "license": "PolyForm-Noncommercial-1.0.0",
   "peerDependencies": {
     "@abaplint/core": "^2.120.42",
-    "@abaplint/transpiler": "^2.13.64"
+    "@abaplint/transpiler": "^2.13.77"
   },
   "devDependencies": {
     "@abaplint/core": "^2.120.42",
