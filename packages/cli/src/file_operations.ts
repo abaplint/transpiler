@@ -51,7 +51,7 @@ export class FileOperations {
     const folders = Array.isArray(config.input_folder) ? config.input_folder : [config.input_folder];
     const filesToRead: string[] = [];
     for (const folder of folders) {
-      for (const filename of glob.sync(folder + "/**", {nosort: true, nodir: true})) {
+      for (const filename of glob.sync(folder + "/**", {nodir: true})) {
         if (inputFilters.length > 0 && inputFilters.some(a => a.test(filename)) === false) {
           skipped++;
           continue;

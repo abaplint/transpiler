@@ -9,14 +9,14 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@abaplint/transpiler-cli": "^2.13.20",
-    "@types/express": "^4.17.17",
-    "@types/node": "^22.19.17",
-    "express": "^4.22.1",
+    "@abaplint/transpiler-cli": "^2.13.77",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.4.1",
+    "express": "^5.2.1",
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "@abaplint/runtime": "^2.13.20",
-    "fast-xml-parser": "^5.7.2"
+    "@abaplint/runtime": "^2.13.77",
+    "fast-xml-parser": "^5.11.1"
   }
 }

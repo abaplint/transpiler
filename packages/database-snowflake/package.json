@@ -18,11 +18,11 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "snowflake-sdk": "^2.3.3"
+    "snowflake-sdk": "^3.3.0"
   },
   "devDependencies": {
-    "@abaplint/runtime": "^2.12.23",
-    "@types/node": "^22.19.5",
+    "@abaplint/runtime": "^2.13.77",
+    "@types/node": "^26.4.1",
     "@types/snowflake-sdk": "^1.6.24",
     "typescript": "^6.0.3"
   }
