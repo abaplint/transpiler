@@ -119,6 +119,9 @@ export class CDSDatabaseView {
       return this.keyword(node, ["WHERE", "AND", "OR", "NOT", "IS", "NULL", "LIKE", "ESCAPE", "BETWEEN",
         "=", "!", "<", ">", "(", ")"]);
     } else if (node.get() instanceof cds.CDSPrefixedName) {
+      if (node.getTokens().map(t => t.getStr()).join("").toLowerCase() === "$session.system_language") {
+        return "'E'";
+      }
       return this.field(node);
     } else if (node.get() instanceof cds.CDSString || node.get() instanceof cds.CDSInteger) {
       return node.getTokens().map(t => t.getStr()).join("");

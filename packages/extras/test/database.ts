@@ -72,6 +72,15 @@ describe("DDLS database setup", () => {
     expect(direct.schemas.sqlite).to.deep.equal([expected]);
   });
 
+  it("hardcodes session system language in join conditions", async () => {
+    const ddls = joinedView.replace("text.cccategory = 'E' or text.cccategory = 'F'",
+      "text.cccategory = $session.system_language or text.cccategory = 'F'");
+    const reg = new abaplint.Registry().addFiles(viewFiles(ddls).map(f => new abaplint.MemoryFile(f.filename, f.contents)));
+    const res = await new Transpiler({}, plugin).run(reg);
+    expect(res.databaseSetup.schemas.sqlite.join("\n")).to.include(
+      '"text"."cccategory" = \'E\' OR "text"."cccategory" = \'F\'');
+  });
+
   it("keeps the source column when a single-source projection is renamed", async () => {
     const reg = new abaplint.Registry().addFiles(viewFiles(
       "define view entity ZDDLS as select from t000 as client { key client.mandt as id }")
