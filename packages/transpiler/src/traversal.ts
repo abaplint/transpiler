@@ -570,6 +570,50 @@ export class Traversal {
     return undefined;
   }
 
+  // narrows the current type context of a chain, ie. "ls_struct-comp" or "lt_tab[ 1 ]-comp"
+  public static narrowContextComponent(context: abaplint.AbstractType | undefined, name: string): abaplint.AbstractType | undefined {
+    const structure = Traversal.dereferenceContext(context);
+    if (structure instanceof abaplint.BasicTypes.StructureType) {
+      return structure.getComponentByName(name);
+    }
+    return undefined;
+  }
+
+  // narrows the current type context of a chain, ie. "lo_ref->attr"
+  public narrowContextAttribute(context: abaplint.AbstractType | undefined, name: string,
+                                scope: abaplint.ISpaghettiScopeNode | undefined): abaplint.AbstractType | undefined {
+    if (context instanceof abaplint.BasicTypes.ObjectReferenceType === false) {
+      return undefined;
+    }
+    let identifierName: string | undefined = (context as abaplint.BasicTypes.ObjectReferenceType).getIdentifierName();
+    const visited = new Set<string>();
+    while (identifierName !== undefined && visited.has(identifierName.toUpperCase()) === false) {
+      visited.add(identifierName.toUpperCase());
+      const def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined =
+        this.findClassDefinition(identifierName, scope) || this.findInterfaceDefinition(identifierName, scope);
+      if (def === undefined) {
+        return undefined;
+      }
+      const type = def.getAttributes().findByName(name)?.getType();
+      if (type !== undefined) {
+        return type;
+      }
+      identifierName = def.getSuperClass();
+    }
+    return undefined;
+  }
+
+  private static dereferenceContext(context: abaplint.AbstractType | undefined): abaplint.AbstractType | undefined {
+    let ret = context;
+    if (ret instanceof abaplint.BasicTypes.TableType) {
+      ret = ret.getRowType();
+    }
+    if (ret instanceof abaplint.BasicTypes.DataReference) {
+      ret = ret.getType();
+    }
+    return ret;
+  }
+
   // returns the interface name if interfaced
   public isInterfaceAttribute(token: abaplint.Token): string | undefined {
     const ref = this.findReadOrWriteReference(token);

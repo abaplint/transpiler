@@ -2563,6 +2563,171 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("attribute friends access, via structure field, source", async () => {
+    const code = `
+CLASS lcl_friend_test DEFINITION DEFERRED.
+
+CLASS lcl_target DEFINITION FRIENDS lcl_friend_test.
+  PUBLIC SECTION.
+    METHODS constructor IMPORTING iv_secret TYPE string.
+  PRIVATE SECTION.
+    DATA mv_secret_data TYPE string.
+ENDCLASS.
+
+CLASS lcl_target IMPLEMENTATION.
+  METHOD constructor.
+    me->mv_secret_data = iv_secret.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_friend_test DEFINITION.
+  PUBLIC SECTION.
+    METHODS read_private_attr.
+ENDCLASS.
+
+CLASS lcl_friend_test IMPLEMENTATION.
+  METHOD read_private_attr.
+    TYPES: BEGIN OF ts_struct,
+            o_main TYPE REF TO lcl_target,
+           END OF ts_struct.
+
+    DATA(ls_struct) = VALUE ts_struct( o_main = NEW #( '123' ) ).
+
+    DATA(lv_extracted) = ls_struct-o_main->mv_secret_data.
+
+    WRITE lv_extracted.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  NEW lcl_friend_test( )->read_private_attr( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("123");
+  });
+
+  it("attribute friends access, via structure field, target", async () => {
+    const code = `
+CLASS lcl_friend_test DEFINITION DEFERRED.
+
+CLASS lcl_target DEFINITION FRIENDS lcl_friend_test.
+  PUBLIC SECTION.
+    METHODS get RETURNING VALUE(rv_val) TYPE string.
+  PRIVATE SECTION.
+    DATA mv_secret_data TYPE string.
+ENDCLASS.
+
+CLASS lcl_target IMPLEMENTATION.
+  METHOD get.
+    rv_val = mv_secret_data.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_friend_test DEFINITION.
+  PUBLIC SECTION.
+    METHODS write_private_attr.
+ENDCLASS.
+
+CLASS lcl_friend_test IMPLEMENTATION.
+  METHOD write_private_attr.
+    TYPES: BEGIN OF ts_struct,
+            o_main TYPE REF TO lcl_target,
+           END OF ts_struct.
+
+    DATA ls_struct TYPE ts_struct.
+    ls_struct-o_main = NEW lcl_target( ).
+    ls_struct-o_main->mv_secret_data = 'abc'.
+
+    WRITE ls_struct-o_main->get( ).
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  NEW lcl_friend_test( )->write_private_attr( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("abc");
+  });
+
+  it("attribute friends access, via object reference attribute", async () => {
+    const code = `
+CLASS lcl_friend_test DEFINITION DEFERRED.
+CLASS lcl_target DEFINITION DEFERRED.
+
+CLASS lcl_holder DEFINITION.
+  PUBLIC SECTION.
+    DATA mo_next TYPE REF TO lcl_target.
+ENDCLASS.
+
+CLASS lcl_holder IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lcl_target DEFINITION FRIENDS lcl_friend_test.
+  PRIVATE SECTION.
+    DATA mv_secret_data TYPE string.
+ENDCLASS.
+
+CLASS lcl_target IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lcl_friend_test DEFINITION.
+  PUBLIC SECTION.
+    METHODS run.
+ENDCLASS.
+
+CLASS lcl_friend_test IMPLEMENTATION.
+  METHOD run.
+    DATA lo_holder TYPE REF TO lcl_holder.
+    lo_holder = NEW lcl_holder( ).
+    lo_holder->mo_next = NEW lcl_target( ).
+    lo_holder->mo_next->mv_secret_data = 'foo'.
+    WRITE lo_holder->mo_next->mv_secret_data.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  NEW lcl_friend_test( )->run( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("foo");
+  });
+
+  it("private attribute via own structure field, inside class", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS run.
+  PRIVATE SECTION.
+    DATA mv_secret TYPE string.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    TYPES: BEGIN OF ts_struct,
+             o_main TYPE REF TO lcl,
+           END OF ts_struct.
+    DATA ls_struct TYPE ts_struct.
+    ls_struct-o_main = me.
+    ls_struct-o_main->mv_secret = 'bar'.
+    WRITE ls_struct-o_main->mv_secret.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  NEW lcl( )->run( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("bar");
+  });
+
   it("private constant via me", async () => {
     const code = `
 CLASS lcl DEFINITION.

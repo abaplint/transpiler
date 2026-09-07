@@ -72,8 +72,13 @@ export function assign(input: IAssignInput) {
             const componentName = sourceContainer instanceof Structure
               ? s.toLowerCase()
               : s.toLowerCase().replace(/[~\\/]/g, "$");
+            let next = source[componentName as any];
+            if (next === undefined && source.FRIENDS_ACCESS_INSTANCE !== undefined) {
+              // it might be private, note this currently does not respect encapsulation properly
+              next = source.FRIENDS_ACCESS_INSTANCE[componentName];
+            }
             // @ts-ignore
-            input.dynamicSource = source[componentName as any];
+            input.dynamicSource = next;
           }
         }
       } else {
