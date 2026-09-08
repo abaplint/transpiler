@@ -17,6 +17,25 @@ export class FileOperations {
     fs.rmSync(p, {recursive: true});
   }
 
+  /** posix + absolute make glob return forward slashed absolute paths on all
+      platforms, but on Windows in fully resolved UNC form, ie. //?/C:/foo.
+      path.relative() does not consider //?/C: and C: the same root, and would
+      return the full path instead of a relative one, so strip the prefix */
+  private static stripNamespace(filename: string): string {
+    if (filename.startsWith("//?/UNC/")) {
+      return "//" + filename.substring("//?/UNC/".length);
+    } else if (filename.startsWith("//?/")) {
+      return filename.substring("//?/".length);
+    }
+    return filename;
+  }
+
+  public static globSync(pattern: string): string[] {
+    // backslashes are escape characters in glob patterns, always hand it forward slashes
+    const normalized = pattern.split(path.sep).join("/");
+    return glob.sync(normalized, {nodir: true, absolute: true, posix: true}).map(f => this.stripNamespace(f));
+  }
+
   private static setupPLimit() {
     let concurrency = os.cpus().length;
     if (concurrency > 8) {
@@ -51,7 +70,7 @@ export class FileOperations {
     const folders = Array.isArray(config.input_folder) ? config.input_folder : [config.input_folder];
     const filesToRead: string[] = [];
     for (const folder of folders) {
-      for (const filename of glob.sync(folder + "/**", {nodir: true})) {
+      for (const filename of this.globSync(folder + "/**")) {
         if (inputFilters.length > 0 && inputFilters.some(a => a.test(filename)) === false) {
           skipped++;
           continue;

@@ -1,6 +1,5 @@
 import * as fs from "fs";
 import * as path from "path";
-import * as glob from "glob";
 import * as childProcess from "child_process";
 import * as os from "os";
 import {createRequire} from "module";
@@ -56,7 +55,7 @@ async function loadLib(config: ITranspilerConfig): Promise<Transpiler.IFile[]> {
 
     const filesToRead: string[] = [];
     for (const pattern of patterns) {
-      for (const filename of glob.sync(dir + pattern, {nodir: true})) {
+      for (const filename of FileOperations.globSync(dir + pattern)) {
         if (filename.endsWith(".clas.testclasses.abap")) {
           continue;
         } else if (excludeFilters.length > 0 && excludeFilters.some(a => a.test(filename)) === true) {
