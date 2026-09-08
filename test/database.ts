@@ -1656,6 +1656,40 @@ WRITE res-arbgb.`;
     });
   });
 
+  it("SINGLE field list into CORRESPONDING FIELDS OF, other fields untouched", async () => {
+    const code = `
+TYPES: BEGIN OF ty_wide,
+         arbgb     TYPE t100-arbgb,
+         untouched TYPE c LENGTH 10,
+       END OF ty_wide.
+
+DATA ls_t100 TYPE t100.
+DATA ls_wide TYPE ty_wide.
+
+ls_t100-sprsl = 'E'.
+ls_t100-arbgb = 'ZREPRO'.
+ls_t100-msgnr = '001'.
+ls_t100-text  = 'Testing'.
+MODIFY t100 FROM ls_t100.
+
+ls_wide-untouched = 'KEEP'.
+
+SELECT SINGLE arbgb FROM t100
+  INTO CORRESPONDING FIELDS OF ls_wide
+  WHERE sprsl = 'E' AND arbgb = 'ZREPRO' AND msgnr = '001'.
+
+ASSERT sy-subrc = 0.
+ASSERT ls_wide-arbgb = 'ZREPRO'.
+ASSERT ls_wide-untouched = 'KEEP'.
+WRITE |{ ls_wide-arbgb }-{ ls_wide-untouched }|.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("ZREPRO-KEEP");
+    });
+  });
+
   it("SELECT INTO TABLE, ORDER BY PRIMARY KEY, dynamic variable", async () => {
     const code = `
     DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.

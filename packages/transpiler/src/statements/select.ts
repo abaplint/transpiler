@@ -24,6 +24,7 @@ export class SelectTranspiler implements IStatementTranspiler {
     }
 
     let target = "undefined";
+    let intoCorrespondingStructure = false;
     if (targetOverride) {
       // SelectLoop structure uses override
       target = targetOverride;
@@ -32,7 +33,9 @@ export class SelectTranspiler implements IStatementTranspiler {
     } else if (node.findFirstExpression(abaplint.Expressions.SQLIntoList)) {
       target = traversal.traverse(node.findFirstExpression(abaplint.Expressions.SQLIntoList)).getCode();
     } else if (node.findFirstExpression(abaplint.Expressions.SQLIntoStructure)) {
-      target = traversal.traverse(node.findFirstExpression(abaplint.Expressions.SQLIntoStructure)).getCode();
+      const into = node.findFirstExpression(abaplint.Expressions.SQLIntoStructure)!;
+      target = traversal.traverse(into).getCode();
+      intoCorrespondingStructure = into.findDirectTokenByText("CORRESPONDING") !== undefined;
     }
 
     const tokens = node.getTokens();
@@ -114,6 +117,9 @@ export class SelectTranspiler implements IStatementTranspiler {
     const runtimeOptionsList: string[] = [];
     if (concat.includes(" APPENDING TABLE ") || concat.includes(" APPENDING CORRESPONDING FIELDS OF TABLE ")) {
       runtimeOptionsList.push(`appending: true`);
+    }
+    if (intoCorrespondingStructure) {
+      runtimeOptionsList.push(`corresponding: true`);
     }
     if (runtimeOptionsList.length > 0) {
       runtimeOptions = `, {` + runtimeOptionsList.join(", ") + `}`;

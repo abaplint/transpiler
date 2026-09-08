@@ -30,7 +30,11 @@ export async function select(target: Structure | Table | HashedTable | FieldSymb
     return;
   }
 
-  if (runtimeOptions?.appending !== true) {
+  // INTO CORRESPONDING FIELDS OF only assigns the identically named components,
+  // the rest of the work area is left untouched
+  const keepTarget = runtimeOptions?.corresponding === true && target instanceof Structure;
+
+  if (runtimeOptions?.appending !== true && keepTarget === false) {
     if (Array.isArray(target)) {
       target.forEach(f => f.clear());
     } else {
