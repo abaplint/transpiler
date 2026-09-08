@@ -2,7 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {MethodCallBodyTranspiler, MethodSourceTranspiler} from "../expressions";
+import {MethodCallBodyTranspiler, MethodCallChainTranspiler, MethodSourceTranspiler} from "../expressions";
 
 export class CallTranspiler implements IStatementTranspiler {
 
@@ -29,7 +29,8 @@ export class CallTranspiler implements IStatementTranspiler {
         post += build.post;
       }
 
-      const chainChunk = traversal.traverse(chain);
+      // without RECEIVING the value of the last call in the chain is thrown away
+      const chainChunk = new MethodCallChainTranspiler(receiving === undefined).transpile(chain, traversal);
       let chainCode = chainChunk.getCode();
       if (chainCode.startsWith("await super.constructor(")) {
 // semantics of constructors in JS vs ABAP is different, so the "constructor_" has been introduced,

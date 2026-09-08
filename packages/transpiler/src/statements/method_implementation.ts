@@ -100,6 +100,11 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
           }
         }
       } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodReturning)) {
+        // the caller flags a consumed RETURNING value in INPUT, see MethodCallParamTranspiler,
+        // so "result IS SUPPLIED" needs the parameter even if the method has nothing else
+        if (unique === "") {
+          unique = "INPUT";
+        }
         after = after + TranspileTypes.declare(identifier) + "\n";
       }
     }

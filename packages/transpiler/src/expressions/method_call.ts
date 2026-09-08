@@ -7,12 +7,15 @@ import {Chunk} from "../chunk";
 export class MethodCallTranspiler implements IExpressionTranspiler {
   private readonly postName: string;
   private readonly method: {def: Types.MethodDefinition, name: string} | undefined;
+  private readonly discardResult: boolean;
 
-  /** @param postName inserted between the method name and the parameters, eg. ".bind(this)"
-   *  @param method   the already resolved method reference, saves looking it up again */
-  public constructor(postName = "", method?: {def: Types.MethodDefinition, name: string}) {
+  /** @param postName      inserted between the method name and the parameters, eg. ".bind(this)"
+   *  @param method        the already resolved method reference, saves looking it up again
+   *  @param discardResult the RETURNING value of this call is not consumed */
+  public constructor(postName = "", method?: {def: Types.MethodDefinition, name: string}, discardResult = false) {
     this.postName = postName;
     this.method = method;
+    this.discardResult = discardResult;
   }
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
@@ -28,7 +31,8 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
     const m = this.method ?? traversal.findMethodReference(nameToken, scope);
 
     let name = nameToken.getStr().toLowerCase();
-    if (traversal.isBuiltinMethod(nameToken)) {
+    const isBuiltin = traversal.isBuiltinMethod(nameToken);
+    if (isBuiltin) {
       // todo: this is not correct, the method name might be shadowed
       name = "abap.builtin." + name + "(";
       if (name === "abap.builtin.line_exists(" || name === "abap.builtin.line_index(") {
@@ -63,9 +67,15 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
       throw new Error("MethodCallTranspiler, unexpected node");
     }
 
+    // "IS SUPPLIED" on a RETURNING parameter is true when the call is functional,
+    // the flag is only passed along when the value of this very call is consumed
+    const returning = isBuiltin === true || this.discardResult === true
+      ? undefined
+      : m?.def.getParameters().getReturning()?.getName().toLowerCase();
+
     const ret = new Chunk();
     ret.append(name, nameToken, traversal);
-    ret.appendChunk(new MethodCallParamTranspiler(m?.def).transpile(step, traversal));
+    ret.appendChunk(new MethodCallParamTranspiler(m?.def, returning).transpile(step, traversal));
     ret.appendString(post + ")");
 
     return ret;
