@@ -8,9 +8,12 @@ import {MethodCallParamTranspiler} from "./method_call_param";
 export class MethodCallBodyTranspiler implements IExpressionTranspiler {
 
   private readonly m: abaplint.Types.MethodDefinition | undefined;
+  private readonly suppliedReturning: string | undefined;
 
-  public constructor(m?: abaplint.Types.MethodDefinition) {
+  /** @param suppliedReturning see MethodCallParamTranspiler */
+  public constructor(m?: abaplint.Types.MethodDefinition, suppliedReturning?: string) {
     this.m = m;
+    this.suppliedReturning = suppliedReturning;
   }
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
@@ -41,7 +44,25 @@ export class MethodCallBodyTranspiler implements IExpressionTranspiler {
       }
     }
 
-    return ret;
+    return this.addReturning(ret);
+  }
+
+/////////////////////////////
+
+  /** see MethodCallParamTranspiler, "CALL METHOD ... RECEIVING" consumes the value,
+   * so the RETURNING parameter counts as supplied */
+  private addReturning(chunk: Chunk): Chunk {
+    if (this.suppliedReturning === undefined) {
+      return chunk;
+    }
+    const code = chunk.getCode();
+    if (code === "") {
+      return new Chunk("{" + this.suppliedReturning + ": 1}");
+    } else if (code.startsWith("{") && code.endsWith("}")) {
+      return chunk.appendObjectField(this.suppliedReturning + ": 1");
+    }
+    // the input is not an object, so there is nowhere to put the flag
+    return chunk;
   }
 
 }

@@ -28,7 +28,8 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
     const m = this.method ?? traversal.findMethodReference(nameToken, scope);
 
     let name = nameToken.getStr().toLowerCase();
-    if (traversal.isBuiltinMethod(nameToken)) {
+    const isBuiltin = traversal.isBuiltinMethod(nameToken);
+    if (isBuiltin) {
       // todo: this is not correct, the method name might be shadowed
       name = "abap.builtin." + name + "(";
       if (name === "abap.builtin.line_exists(" || name === "abap.builtin.line_index(") {
@@ -63,9 +64,15 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
       throw new Error("MethodCallTranspiler, unexpected node");
     }
 
+    // "IS SUPPLIED" on a RETURNING parameter is true when the call is functional,
+    // the flag is only passed along when the value of this very call is consumed
+    const returning = isBuiltin === true || traversal.isResultDiscarded(node) === true
+      ? undefined
+      : m?.def.getParameters().getReturning()?.getName().toLowerCase();
+
     const ret = new Chunk();
     ret.append(name, nameToken, traversal);
-    ret.appendChunk(new MethodCallParamTranspiler(m?.def).transpile(step, traversal));
+    ret.appendChunk(new MethodCallParamTranspiler(m?.def, returning).transpile(step, traversal));
     ret.appendString(post + ")");
 
     return ret;

@@ -130,7 +130,7 @@ abap.Classes['PROG-ZFOOBAR-LCL_FOOBAR'] = lcl_foobar;`;
     if (super.constructor_) { await super.constructor_(INPUT); }
     return this;
   }
-  async moo() {
+  async moo(INPUT) {
     let rv_foo = new abap.types.String({qualifiedName: "STRING"});
     return rv_foo;
   }
@@ -340,10 +340,10 @@ ENDCLASS.`;
     if (super.constructor_) { await super.constructor_(INPUT); }
     return this;
   }
-  async run() {
-    return zcl_ret.run();
+  async run(INPUT) {
+    return zcl_ret.run(INPUT);
   }
-  static async run() {
+  static async run(INPUT) {
     let rv_ret = new abap.types.String({qualifiedName: "STRING"});
     rv_ret.set(abap.CharacterFactory.get(1, 'X'));
     return rv_ret;

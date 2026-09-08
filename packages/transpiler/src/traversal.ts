@@ -16,6 +16,7 @@ export class Traversal {
   private readonly file: abaplint.ABAPFile;
   private readonly obj: abaplint.ABAPObject;
   private sqlInferredType: abaplint.AbstractType | undefined;
+  private discardedResult: abaplint.Nodes.ExpressionNode | undefined;
   private readonly doOrWhileIndexBackups: Map<abaplint.Nodes.StatementNode, string> = new Map();
   private readonly statementsInsideLoop: WeakSet<abaplint.Nodes.StatementNode> = new WeakSet();
   private readonly enclosingDoOrWhile: WeakMap<abaplint.Nodes.StatementNode, abaplint.Nodes.StatementNode> = new WeakMap();
@@ -193,6 +194,27 @@ export class Traversal {
 
   public getSQLInferredType(): abaplint.AbstractType | undefined {
     return this.sqlInferredType;
+  }
+
+  /**
+   * Traverses `node` with `call` flagged as the one method call whose RETURNING
+   * value is thrown away, ie. the call is a statement instead of a functional call.
+   * The flag is the node itself, so calls nested in the parameters are unaffected.
+   */
+  public traverseWithDiscardedResult(
+    call: abaplint.Nodes.ExpressionNode | undefined,
+    node: abaplint.Nodes.ExpressionNode): Chunk {
+
+    const previous = this.discardedResult;
+    this.discardedResult = call;
+    const result = this.traverse(node);
+    this.discardedResult = previous;
+    return result;
+  }
+
+  /** true if the RETURNING value of this method call is not consumed, see traverseWithDiscardedResult */
+  public isResultDiscarded(call: abaplint.Nodes.ExpressionNode): boolean {
+    return this.discardedResult === call;
   }
 
   public traverseWithTableContext(tableName: string, expressionNode: abaplint.Nodes.ExpressionNode): Chunk {

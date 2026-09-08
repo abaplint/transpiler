@@ -128,6 +128,22 @@ export class Chunk {
     return this;
   }
 
+  /**
+   * Appends `field` as an extra field to a chunk holding an object literal, ie.
+   * turns "{foo: 1}" into "{foo: 1, bar: 2}". The closing brace carries no
+   * mapping of its own, so re-appending it after the new content leaves the
+   * source map of everything before it untouched.
+   */
+  public appendObjectField(field: string): Chunk {
+    if (this.raw.endsWith("}") === false) {
+      throw new Error("appendObjectField, chunk is not an object literal");
+    }
+    const isEmpty = this.raw.endsWith("{}");
+    this.raw = this.raw.substring(0, this.raw.length - 1);
+    this.lastLineLength--;
+    return this.appendString((isEmpty ? "" : ", ") + field + "}");
+  }
+
   public stripLastNewline(): void {
     // note: this will not change the source map
     if (this.raw.endsWith("\n")) {
