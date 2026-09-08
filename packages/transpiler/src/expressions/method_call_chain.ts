@@ -5,10 +5,19 @@ import {Chunk} from "../chunk";
 import {MethodCallTranspiler} from "./method_call";
 
 export class MethodCallChainTranspiler implements IExpressionTranspiler {
+  private readonly discardResult: boolean;
+
+  /** @param discardResult the value of the last call in the chain is not consumed,
+   *                       ie. the chain is a standalone CALL statement */
+  public constructor(discardResult = false) {
+    this.discardResult = discardResult;
+  }
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     let ret = new Chunk();
     const children = node.getChildren();
+    const calls = node.findDirectExpressions(Expressions.MethodCall);
+    const lastCall = calls[calls.length - 1];
 
     for (const c of children) {
       if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.MethodCall) {
@@ -29,9 +38,10 @@ export class MethodCallChainTranspiler implements IExpressionTranspiler {
           prefix = traversal.constructorPrototypePrefix(nameToken, method?.def, enclosingClass);
         }
 
+        const discard = this.discardResult === true && c === lastCall;
         const sub = prefix === undefined
-          ? traversal.traverse(c)
-          : new MethodCallTranspiler(".bind(this)", method).transpile(c, traversal);
+          ? new MethodCallTranspiler("", undefined, discard).transpile(c, traversal)
+          : new MethodCallTranspiler(".bind(this)", method, discard).transpile(c, traversal);
 
         if (sub.getCode().startsWith("abap.builtin.")
             || sub.getCode().startsWith("await abap.builtin.")) {

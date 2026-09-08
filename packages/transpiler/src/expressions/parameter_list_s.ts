@@ -4,6 +4,12 @@ import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 
 export class ParameterListSTranspiler implements IExpressionTranspiler {
+  private readonly extra: string;
+
+  /** @param extra appended as an additional field of the emitted object, eg. "result: 1" */
+  public constructor(extra = "") {
+    this.extra = extra;
+  }
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     const parameters: Chunk[] = [];
@@ -14,7 +20,8 @@ export class ParameterListSTranspiler implements IExpressionTranspiler {
       }
     }
 
-    return new Chunk().appendString("{").join(parameters).appendString("}");
+    const post = this.extra === "" ? "}" : ", " + this.extra + "}";
+    return new Chunk().appendString("{").join(parameters).appendString(post);
   }
 
 }

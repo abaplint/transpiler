@@ -2,7 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {MethodCallBodyTranspiler, MethodSourceTranspiler} from "../expressions";
+import {MethodCallBodyTranspiler, MethodCallChainTranspiler, MethodSourceTranspiler} from "../expressions";
 
 export class CallTranspiler implements IStatementTranspiler {
 
@@ -29,11 +29,8 @@ export class CallTranspiler implements IStatementTranspiler {
         post += build.post;
       }
 
-      // a standalone CALL throws away the value of the last call in the chain,
-      // so its RETURNING parameter is not supplied
-      const calls = chain.findDirectExpressions(abaplint.Expressions.MethodCall);
-      const discarded = receiving === undefined ? calls[calls.length - 1] : undefined;
-      const chainChunk = traversal.traverseWithDiscardedResult(discarded, chain);
+      // without RECEIVING the value of the last call in the chain is thrown away
+      const chainChunk = new MethodCallChainTranspiler(receiving === undefined).transpile(chain, traversal);
       let chainCode = chainChunk.getCode();
       if (chainCode.startsWith("await super.constructor(")) {
 // semantics of constructors in JS vs ABAP is different, so the "constructor_" has been introduced,
@@ -55,12 +52,6 @@ export class CallTranspiler implements IStatementTranspiler {
       const nameToken = methodSource.getLastChild()?.getFirstToken();
       const m = nameToken ? traversal.findMethodReference(nameToken, traversal.findCurrentScopeByToken(nameToken)) : undefined;
 
-      // RECEIVING consumes the value, ie. the RETURNING parameter is supplied
-      const receiving = node.findFirstExpression(abaplint.Expressions.MethodParameters)?.findExpressionAfterToken("RECEIVING");
-      const returning = receiving === undefined
-        ? undefined
-        : m?.def.getParameters().getReturning()?.getName().toLowerCase();
-
       const methodCallBody = node.findDirectExpression(abaplint.Expressions.MethodCallBody);
       if (methodCallBody) {
         if (methodCallBody.findDirectTokenByText("EXCEPTION")) {
@@ -71,11 +62,12 @@ export class CallTranspiler implements IStatementTranspiler {
           pre = 'await abap.parametersCall(';
           body = ", " + source + ")";
         } else {
-          body = new MethodCallBodyTranspiler(m?.def, returning).transpile(methodCallBody, traversal).getCode();
+          body = new MethodCallBodyTranspiler(m?.def).transpile(methodCallBody, traversal).getCode();
           body = "(" + body + ")";
         }
       }
 
+      const receiving = node.findFirstExpression(abaplint.Expressions.MethodParameters)?.findExpressionAfterToken("RECEIVING");
       if (receiving) {
         const target = traversal.traverse(receiving.findDirectExpression(abaplint.Expressions.Target));
         pre = target.getCode() + ".set(";

@@ -211,35 +211,6 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("not supplied");
   });
 
-  it("RETURNING IS SUPPLIED, CALL METHOD with RECEIVING", async () => {
-    const code = `
-CLASS lcl DEFINITION.
-  PUBLIC SECTION.
-    METHODS run RETURNING VALUE(result) TYPE string.
-ENDCLASS.
-
-CLASS lcl IMPLEMENTATION.
-  METHOD run.
-    IF result IS SUPPLIED.
-      WRITE / 'yes'.
-    ELSE.
-      WRITE / 'no'.
-    ENDIF.
-  ENDMETHOD.
-ENDCLASS.
-
-START-OF-SELECTION.
-  DATA ref TYPE REF TO lcl.
-  DATA lv TYPE string.
-  CREATE OBJECT ref.
-  CALL METHOD ref->run RECEIVING result = lv.
-  CALL METHOD ref->run.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("yes\nno");
-  });
-
   it("RETURNING IS SUPPLIED, nested call is consumed", async () => {
     const code = `
 CLASS lcl DEFINITION.

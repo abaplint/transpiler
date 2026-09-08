@@ -3,14 +3,17 @@ import {Nodes, Expressions} from "@abaplint/core";
 import {Chunk} from "../chunk";
 import {Traversal} from "../traversal";
 import {IExpressionTranspiler} from "./_expression_transpiler";
+import {ParameterListSTranspiler} from "./parameter_list_s";
 
 export class MethodCallParamTranspiler implements IExpressionTranspiler {
   private readonly m: abaplint.Types.MethodDefinition | undefined;
   private readonly suppliedReturning: string | undefined;
 
-  /** @param m                 the resolved method definition
-   *  @param suppliedReturning name of the RETURNING parameter to flag as supplied,
-   *                           ie. the call is functional and the value is consumed */
+  /** On a real system "RETURNING IS SUPPLIED" is true exactly when the method is called
+   * functionally, so the caller has to say so.
+   * @param m                 the resolved method definition
+   * @param suppliedReturning name of the RETURNING parameter to flag as supplied,
+   *                          ie. the call is functional and the value is consumed */
   public constructor(m?: abaplint.Types.MethodDefinition, suppliedReturning?: string) {
     this.m = m;
     this.suppliedReturning = suppliedReturning;
@@ -22,6 +25,9 @@ export class MethodCallParamTranspiler implements IExpressionTranspiler {
       throw new Error("MethodCallParam, unexpected node, " + node?.get().constructor.name);
     }
 
+    // the RETURNING parameter is passed along when the call is functional, see the constructor
+    const extra = this.suppliedReturning === undefined ? "" : this.suppliedReturning + ": 1";
+
     const source = node.findDirectExpression(Expressions.Source);
     if (source) {
       const def = this.m?.getParameters().getDefaultImporting()?.toLowerCase();
@@ -29,16 +35,16 @@ export class MethodCallParamTranspiler implements IExpressionTranspiler {
         // the input is not an object, so there is nowhere to put the RETURNING flag
         return traversal.traverse(source);
       } else {
-        return this.addReturning(new Chunk()
+        return new Chunk()
           .appendString("{" + def + ": ")
           .appendChunk(traversal.traverse(source))
-          .appendString("}"));
+          .appendString(extra === "" ? "}" : ", " + extra + "}");
       }
     }
 
     const parameters = node.findDirectExpression(Expressions.ParameterListS);
     if (parameters) {
-      return this.addReturning(traversal.traverse(parameters));
+      return new ParameterListSTranspiler(extra).transpile(parameters, traversal);
     } else {
       const params = node.findDirectExpression(Expressions.MethodParameters);
       if (params) {
@@ -54,25 +60,12 @@ export class MethodCallParamTranspiler implements IExpressionTranspiler {
 
     name = name.replace(/}{/g, ", ");
 
-    if (name === "") {
-      return this.suppliedReturning === undefined
-        ? new Chunk(name)
-        : new Chunk("{" + this.suppliedReturning + ": 1}");
+    if (extra === "") {
+      return new Chunk(name);
+    } else if (name === "") {
+      return new Chunk("{" + extra + "}");
     }
-
-    return this.addReturning(new Chunk(name));
-  }
-
-/////////////////////////////
-
-  /** On a real system "RETURNING IS SUPPLIED" is true exactly when the method is
-   * called functionally, so the caller has to say so: the returning parameter is
-   * added to the input object when, and only when, the value is consumed */
-  private addReturning(chunk: Chunk): Chunk {
-    if (this.suppliedReturning === undefined) {
-      return chunk;
-    }
-    return chunk.appendObjectField(this.suppliedReturning + ": 1");
+    return new Chunk(name.replace(/}$/, ", " + extra + "}"));
   }
 
 }

@@ -7,12 +7,15 @@ import {Chunk} from "../chunk";
 export class MethodCallTranspiler implements IExpressionTranspiler {
   private readonly postName: string;
   private readonly method: {def: Types.MethodDefinition, name: string} | undefined;
+  private readonly discardResult: boolean;
 
-  /** @param postName inserted between the method name and the parameters, eg. ".bind(this)"
-   *  @param method   the already resolved method reference, saves looking it up again */
-  public constructor(postName = "", method?: {def: Types.MethodDefinition, name: string}) {
+  /** @param postName      inserted between the method name and the parameters, eg. ".bind(this)"
+   *  @param method        the already resolved method reference, saves looking it up again
+   *  @param discardResult the RETURNING value of this call is not consumed */
+  public constructor(postName = "", method?: {def: Types.MethodDefinition, name: string}, discardResult = false) {
     this.postName = postName;
     this.method = method;
+    this.discardResult = discardResult;
   }
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
@@ -66,7 +69,7 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
 
     // "IS SUPPLIED" on a RETURNING parameter is true when the call is functional,
     // the flag is only passed along when the value of this very call is consumed
-    const returning = isBuiltin === true || traversal.isResultDiscarded(node) === true
+    const returning = isBuiltin === true || this.discardResult === true
       ? undefined
       : m?.def.getParameters().getReturning()?.getName().toLowerCase();
 
