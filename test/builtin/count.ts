@@ -77,6 +77,19 @@ describe("Builtin functions - count", () => {
     expect(abap.console.get()).to.equal("0");
   });
 
+  it("sub with dot", async () => {
+    const code = `
+    DATA int TYPE i.
+    int = count(
+          val = 'foo.bar'
+          sub = '.' ).
+    WRITE / int.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
   it("pcre", async () => {
     const code = `
     DATA val TYPE i.

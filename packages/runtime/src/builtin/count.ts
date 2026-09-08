@@ -1,3 +1,4 @@
+import {ABAPRegExp} from "../abap_regex";
 import {initial} from "../compare";
 import {Integer} from "../types";
 import {ICharacter} from "../types/_character";
@@ -29,8 +30,7 @@ export function count(input: countInput) {
 
   let reg = "";
   if (input.sub) {
-    reg = input.sub.get();
-    reg = reg.replace(/\*/g, "\\*");
+    reg = ABAPRegExp.escapeRegExp(input.sub.get());
   } else if (input.regex) {
     reg = input.regex.get();
   } else if (input.pcre) {
