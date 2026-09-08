@@ -1681,13 +1681,12 @@ SELECT SINGLE arbgb FROM t100
 ASSERT sy-subrc = 0.
 ASSERT ls_wide-arbgb = 'ZREPRO'.
 ASSERT ls_wide-untouched = 'KEEP'.
-WRITE / ls_wide-arbgb.
-WRITE / ls_wide-untouched.`;
+WRITE |{ ls_wide-arbgb }-{ ls_wide-untouched }|.`;
     const files = [
       {filename: "zfoobar.prog.abap", contents: code},
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
     await runAllDatabases(abap, files, () => {
-      expect(abap.console.get().trimEnd()).to.equal("ZREPRO\nKEEP");
+      expect(abap.console.get()).to.equal("ZREPRO-KEEP");
     });
   });
 

@@ -24,6 +24,8 @@ export interface SelectDatabaseOptions {
 
 export interface SelectRuntimeOptions {
   appending?: boolean,
+  /** INTO CORRESPONDING FIELDS OF work area, components not in the field list are left untouched */
+  corresponding?: boolean,
 }
 
 export type DatabaseValue = number | string | Uint8Array | null;
