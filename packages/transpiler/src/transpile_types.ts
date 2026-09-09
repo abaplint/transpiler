@@ -31,7 +31,7 @@ export class TranspileTypes {
     return "(() => { let _t; return () => (_t ??= " + this.toType(type) + "); })()";
   }
 
-  public static toType(type: abaplint.AbstractType): string {
+  public static toType(type: abaplint.AbstractType, options?: {packedDecimals?: number}): string {
     let resolved = "";
     let extra = "";
 
@@ -137,10 +137,11 @@ export class TranspileTypes {
       }
     } else if (type instanceof abaplint.BasicTypes.PackedType) {
       resolved = "Packed";
+      const decimals = options?.packedDecimals ?? type.getDecimals();
       if (type.getQualifiedName()) {
-        extra = "{length: " + type.getLength() + ", decimals: " + type.getDecimals() + ", qualifiedName: \"" + type.getQualifiedName() + "\"}";
+        extra = "{length: " + type.getLength() + ", decimals: " + decimals + ", qualifiedName: \"" + type.getQualifiedName() + "\"}";
       } else {
-        extra = "{length: " + type.getLength() + ", decimals: " + type.getDecimals() + "}";
+        extra = "{length: " + type.getLength() + ", decimals: " + decimals + "}";
       }
     } else if (type instanceof abaplint.BasicTypes.NumericGenericType) {
       resolved = "Packed";

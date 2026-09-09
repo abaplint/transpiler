@@ -67,13 +67,21 @@ export class DataTranspiler implements IStatementTranspiler {
       }
     }
 
+    let packedDecimals: number | undefined;
+    if (found.getType() instanceof abaplint.BasicTypes.PackedType) {
+      const decimals = node.findFirstExpression(abaplint.Expressions.Decimals)?.findFirstExpression(abaplint.Expressions.Integer);
+      if (decimals) {
+        packedDecimals = parseInt(decimals.concatTokens(), 10);
+      }
+    }
+
     this.variableName = Traversal.prefixVariable(Traversal.escapeNamespace(found.getName().toLowerCase()));
     this.loopScoped = traversal.isInsideLoop(node);
 
     const ret = new Chunk()
       .appendString(this.loopScoped === true ? "var " : "let ")
       .appendString(this.variableName)
-      .appendString(" = " + TranspileTypes.toType(found.getType()))
+      .appendString(" = " + TranspileTypes.toType(found.getType(), {packedDecimals}))
       .appendString(";")
       .appendString(value);
 
