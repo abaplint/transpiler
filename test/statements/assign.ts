@@ -1082,4 +1082,36 @@ WRITE / sy-subrc.`;
     expect(abap.console.getTrimmed()).to.equal("0\n4");
   });
 
+  it("ASSIGN dynamic, dereference after a component that does not exist", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    DATA ref TYPE REF TO i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+FORM run.
+  DATA obj TYPE REF TO lcl.
+  FIELD-SYMBOLS <fs> TYPE any.
+  CREATE OBJECT obj.
+  GET REFERENCE OF 42 INTO obj->ref.
+
+  ASSIGN ('OBJ->REF->*') TO <fs>.
+  WRITE / sy-subrc.
+  WRITE / <fs>.
+
+  ASSIGN ('OBJ->NOT_THERE->*') TO <fs>.
+  WRITE / sy-subrc.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("0\n42\n4");
+  });
+
 });
