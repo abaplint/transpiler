@@ -147,6 +147,20 @@ ASSERT foo = '12345'.`;
     expect(abap.console.get()).to.equal("100,67");
   });
 
+  it("packed calculation type", async () => {
+    const code = `
+DATA lv_factor TYPE p DECIMALS 5.
+DATA lv_weight TYPE p DECIMALS 3.
+
+lv_factor = 80 / 60.
+lv_weight = 30 * lv_factor.
+
+ASSERT lv_weight = 40.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("changed over iteration", async () => {
     const code = `
     DATA lv_test TYPE p LENGTH 6 DECIMALS 3.
