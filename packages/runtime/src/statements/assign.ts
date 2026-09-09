@@ -37,6 +37,13 @@ export function assign(input: IAssignInput) {
         for (const s of split) {
           const upperS = s.toUpperCase().trimEnd();
           if (upperS === "*") {
+            if (!(input.dynamicSource instanceof DataReference)
+                && !(input.dynamicSource instanceof FieldSymbol)) {
+              // an earlier segment resolved to nothing, or to something that has
+              // no address, so the name cannot be followed: sy-subrc 4
+              abap.builtin.sy.get().subrc.set(4);
+              return;
+            }
             // @ts-ignore
             input.dynamicSource = input.dynamicSource.dereference();
           } else if (upperS === "TABLE_LINE" && input.dynamicSource instanceof DataReference) {
