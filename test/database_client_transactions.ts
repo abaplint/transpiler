@@ -107,7 +107,7 @@ describe("Database client transactions", () => {
     await db.rollback();
   });
 
-  it("PostgreSQL can roll back after a failed commit", async () => {
+  it("PostgreSQL, a failed commit is fatal", async () => {
     const calls: string[] = [];
     let releaseCalls = 0;
     const client = {
@@ -127,17 +127,39 @@ describe("Database client transactions", () => {
     await db.connect(pool as any);
     await db.beginTransaction();
 
-    let failed = false;
+    let message = "";
     try {
       await db.commit();
-    } catch {
-      failed = true;
+    } catch (error: any) {
+      message = error.message;
     }
-    expect(failed).to.equal(true);
-
-    await db.rollback();
-    expect(calls).to.deep.equal(["BEGIN", "COMMIT", "ROLLBACK"]);
+    expect(message).to.contain("COMMIT failed");
+    expect(message).to.contain("commit failed");
+    // postgres already ended the transaction, hand the connection straight back
+    expect(calls).to.deep.equal(["BEGIN", "COMMIT"]);
     expect(releaseCalls).to.equal(1);
+
+    // every further use must crash instead of degrading into sy-subrc = 4
+    const operations = [
+      () => db.insert({table: "example", columns: ["id"], values: ["1"]}),
+      () => db.update({table: "example", where: "id = 2", set: ["id = 1"]}),
+      () => db.delete({table: "example", where: "id = 1"}),
+      () => db.select({select: "SELECT * FROM example"}),
+      () => db.openCursor({select: "SELECT * FROM example"}),
+      () => db.execute("SELECT 1"),
+      () => db.beginTransaction(),
+    ];
+    for (const operation of operations) {
+      let thrown = "";
+      try {
+        await operation();
+      } catch (error: any) {
+        thrown = error.message;
+      }
+      expect(thrown).to.contain("COMMIT failed");
+    }
+    // and none of them reached the database
+    expect(calls).to.deep.equal(["BEGIN", "COMMIT"]);
   });
 
   it("PostgreSQL transaction cursors see uncommitted changes", async () => {

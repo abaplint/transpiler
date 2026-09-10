@@ -18,6 +18,8 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   private pool: pg.Pool | undefined;
   /** set while a transaction is open, all statements of the LUW must run on the same connection */
   private client: pg.PoolClient | undefined;
+  /** set if a COMMIT failed, the changes of that LUW are lost and the client is unusable */
+  private fatal: Error | undefined;
 
   /**
    * @param input Connection settings
@@ -56,13 +58,19 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async disconnect(): Promise<void> {
-    // ending the session performs an implicit commit
-    await this.commit();
-    await this.pool?.end();
-    this.pool = undefined;
+    try {
+      // ending the session performs an implicit commit
+      await this.commit();
+    } finally {
+      // release the pool even if the implicit commit threw, otherwise the
+      // process cannot terminate and the application hangs instead of crashing
+      await this.pool?.end();
+      this.pool = undefined;
+    }
   }
 
   public async execute(sql: string | string[]): Promise<void> {
+    this.checkFatal();
     if (this.lazy === true && this.pool === undefined) {
       await this.connect();
     }
@@ -91,6 +99,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async beginTransaction(): Promise<void> {
+    this.checkFatal();
     if (this.client !== undefined) {
       return;
     }
@@ -123,16 +132,28 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     if (client === undefined) {
       return;
     }
+    this.client = undefined;
     try {
       await client.query(sql);
-      this.client = undefined;
       client.release();
     } catch (error) {
-      if (sql === "ROLLBACK") {
-        this.client = undefined;
-        client.release(error instanceof Error ? error : true);
+      client.release(error instanceof Error ? error : true);
+      if (sql === "COMMIT") {
+        // postgres has already rolled the transaction back, so the changes of this LUW
+        // are gone. There is no way to complete the LUW, and silently carrying on would
+        // lose the data, so poison the client and take the application down
+        this.fatal = new Error("PG: COMMIT failed, the changes of the current LUW are lost: "
+          + (error instanceof Error ? error.message : error), {cause: error});
       }
-      throw error;
+      throw this.fatal ?? error;
+    }
+  }
+
+  /** a failed COMMIT is not recoverable, every further use of the client must crash
+      rather than degrade into sy-subrc = 4 */
+  private checkFatal(): void {
+    if (this.fatal !== undefined) {
+      throw this.fatal;
     }
   }
 
@@ -153,6 +174,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async delete(options: DB.DeleteDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
+    this.checkFatal();
     if (this.lazy === true && this.pool === undefined) {
       await this.connect();
     }
@@ -182,6 +204,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async update(options: DB.UpdateDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
+    this.checkFatal();
     if (this.lazy === true && this.pool === undefined) {
       await this.connect();
     }
@@ -208,6 +231,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async insert(options: DB.InsertDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
+    this.checkFatal();
     if (this.lazy === true && this.pool === undefined) {
       await this.connect();
     }
@@ -234,6 +258,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async select(options: DB.SelectDatabaseOptions): Promise<DB.SelectDatabaseResult> {
+    this.checkFatal();
     if (this.lazy === true && this.pool === undefined) {
       await this.connect();
     }
@@ -288,6 +313,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async openCursor(options: DB.SelectDatabaseOptions): Promise<DB.DatabaseCursorCallbacks> {
+    this.checkFatal();
     if (this.lazy === true && this.pool === undefined) {
       await this.connect();
     }
