@@ -16,6 +16,8 @@ export * from "./count";
 export * from "./escape";
 export * from "./exp";
 export * from "./find";
+export * from "./find_any_not_of"; 
+export * from "./find_any_of"
 export * from "./floor";
 export * from "./frac";
 export * from "./from_mixed";
