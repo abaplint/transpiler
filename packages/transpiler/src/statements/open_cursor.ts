@@ -39,8 +39,8 @@ export class OpenCursorTranspiler implements IStatementTranspiler {
     const options: string[] = [];
     const connection = node.findDirectExpression(abaplint.Expressions.DatabaseConnection);
     if (connection) {
-      const con = findConnection(connection);
-      options.push(`"connection": "${con}"`);
+      const con = findConnection(connection, traversal);
+      options.push(`"connection": ${con}`);
     }
 
     return new Chunk().append(`await abap.statements.openCursor(${target}, "${select}", {${options.join(", ")}});`, node, traversal);

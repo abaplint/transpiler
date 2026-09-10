@@ -91,9 +91,8 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
     if (this.inTransaction === false) {
       return;
     }
-    // reset first, a failing statement must not leave the flag set
-    this.inTransaction = false;
     await this.execute(sql);
+    this.inTransaction = false;
   }
 
   public async delete(options: DB.DeleteDatabaseOptions): Promise<{subrc: number, dbcnt: number}> {

@@ -70,9 +70,8 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
     if (this.inTransaction === false) {
       return;
     }
-    // reset first, a failing statement must not leave the flag set
-    this.inTransaction = false;
     this.sqlite!.run(sql);
+    this.inTransaction = false;
   }
 
   public async delete(options: DB.DeleteDatabaseOptions) {

@@ -11,7 +11,7 @@ export class CommitTranspiler implements IStatementTranspiler {
 
     const connection = node.findDirectExpression(abaplint.Expressions.DatabaseConnection);
     if (connection) {
-      options.push(`"connection": "${findConnection(connection)}"`);
+      options.push(`"connection": ${findConnection(connection, traversal)}`);
     } else if (node.findTokenSequencePosition("AND", "WAIT")) {
       options.push(`"wait": true`);
     }

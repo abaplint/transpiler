@@ -11,7 +11,7 @@ export class RollbackTranspiler implements IStatementTranspiler {
 
     const connection = node.findDirectExpression(abaplint.Expressions.DatabaseConnection);
     if (connection) {
-      options.push(`"connection": "${findConnection(connection)}"`);
+      options.push(`"connection": ${findConnection(connection, traversal)}`);
     }
 
     const opt = options.length === 0 ? "" : `{${options.join(", ")}}`;

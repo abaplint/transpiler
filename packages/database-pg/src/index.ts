@@ -100,8 +100,14 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     if (this.pool === undefined) {
       throw new Error("PG: Database connection not established");
     }
-    this.client = await this.pool.connect();
-    await this.client.query("BEGIN");
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      this.client = client;
+    } catch (error) {
+      client.release(error instanceof Error ? error : true);
+      throw error;
+    }
   }
 
   public async commit(): Promise<void> {
@@ -117,12 +123,16 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     if (client === undefined) {
       return;
     }
-    // reset first, a failing statement must not leave the connection checked out
-    this.client = undefined;
     try {
       await client.query(sql);
-    } finally {
+      this.client = undefined;
       client.release();
+    } catch (error) {
+      if (sql === "ROLLBACK") {
+        this.client = undefined;
+        client.release(error instanceof Error ? error : true);
+      }
+      throw error;
     }
   }
 
@@ -282,11 +292,26 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
       await this.connect();
     }
 
-    // note: the cursor gets its own connection, so it does not see uncommitted
-    // changes of the current transaction, the connection of an open transaction
-    // cannot be shared as the cursor blocks it until it is closed
-    const client = await this.pool!.connect();
     const select = options.select.replace(/ UP TO (\d+) ROWS(.*)/i, "$2 LIMIT $1");
+
+    // A pg-cursor blocks its connection until it is closed. Materialize cursors
+    // opened inside a transaction so they both see the LUW's uncommitted changes
+    // and allow further statements to execute while the cursor remains open.
+    if (this.client !== undefined) {
+      const result = await this.client.query(select);
+      const rows = this.convert(result);
+      let offset = 0;
+      return {
+        fetchNextCursor: async (packageSize: number) => {
+          const batch = rows.slice(offset, offset + packageSize);
+          offset += batch.length;
+          return {rows: batch};
+        },
+        closeCursor: async () => undefined,
+      };
+    }
+
+    const client = await this.pool!.connect();
     const cursor = client.query(new Cursor(select));
     return {
       fetchNextCursor: (packageSize: number) => this.fetchNextCursor.bind(this)(packageSize, cursor),
