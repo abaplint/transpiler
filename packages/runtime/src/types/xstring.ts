@@ -28,7 +28,9 @@ export class XString implements ICharacter {
 
   public set(value: ICharacter | INumeric | string | number) {
     if (typeof value === "string") {
-      this.value = value;
+      // the input is interpreted as hexadecimal digits, the conversion stops at
+      // the first character which is not an uppercase hex digit
+      this.value = /^[0-9A-F]*/.exec(value)?.[0] || "";
       if (this.value.length % 2 === 1) {
         this.value = this.value + "0";
       }
