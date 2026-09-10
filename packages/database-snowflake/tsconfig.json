@@ -4,6 +4,7 @@
     "declaration": true,
     "rootDir": "src",
     "outDir": "build",
+    "tsBuildInfoFile": "build/tsconfig.tsbuildinfo",
   },
   "exclude": [
     "node_modules",
