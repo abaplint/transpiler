@@ -7,6 +7,7 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
   public readonly name = "sqlite";
   private readonly trace: boolean;
   private sqlite: Database | undefined = undefined;
+  private inTransaction = false;
 
   public constructor(input?: {trace?: boolean}) {
     this.trace = input?.trace === true;
@@ -23,6 +24,8 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
   }
 
   public async disconnect() {
+    // ending the session performs an implicit commit
+    await this.commit();
     this.sqlite!.close();
     this.sqlite = undefined;
   }
@@ -41,22 +44,39 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
   }
 
   public export() {
+    // export() closes and reopens the database, which would roll back any
+    // uncommitted changes, so end the current transaction first
+    this.endTransaction("COMMIT");
     return this.sqlite?.export();
   }
 
   public async beginTransaction() {
-    return; // todo
+    if (this.inTransaction === true) {
+      return;
+    }
+    this.sqlite!.run("BEGIN TRANSACTION");
+    this.inTransaction = true;
   }
 
   public async commit() {
-    return; // todo
+    this.endTransaction("COMMIT");
   }
 
   public async rollback() {
-    return; // todo
+    this.endTransaction("ROLLBACK");
+  }
+
+  private endTransaction(sql: "COMMIT" | "ROLLBACK") {
+    if (this.inTransaction === false) {
+      return;
+    }
+    this.sqlite!.run(sql);
+    this.inTransaction = false;
   }
 
   public async delete(options: DB.DeleteDatabaseOptions) {
+    await this.beginTransaction();
+
     let sql = `DELETE FROM ${options.table}`;
     if (options.where !== "") {
       sql += ` WHERE ${options.where}`;
@@ -85,6 +105,8 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
   }
 
   public async update(options: DB.UpdateDatabaseOptions) {
+    await this.beginTransaction();
+
     const sql = `UPDATE ${options.table} SET ${options.set.join(", ")} WHERE ${options.where}`;
 
     let subrc = 0;
@@ -110,6 +132,8 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
   }
 
   public async insert(options: DB.InsertDatabaseOptions) {
+    await this.beginTransaction();
+
     const sql = `INSERT INTO ${options.table} (${options.columns.map(c => "'" + c + "'").join(",")}) VALUES (${options.values.join(",")})`;
 
     let subrc = 0;

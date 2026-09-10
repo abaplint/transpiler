@@ -51,9 +51,15 @@ export interface DatabaseClient {
   /*** execute any native SQL command */
   execute(sql: string | string[]): Promise<void>;
 
-  // transaction handling
+  // transaction handling, implementing the ABAP LUW,
+  // delete()/update()/insert() implicitly begin a transaction if none is open,
+  // so COMMIT WORK and ROLLBACK WORK are able to end it,
+  // disconnecting performs an implicit commit
+  /*** no-op if a transaction is already open */
   beginTransaction(): Promise<void>;
+  /*** no-op if no transaction is open */
   commit(): Promise<void>;
+  /*** no-op if no transaction is open */
   rollback(): Promise<void>;
 
   // operations, there is no modify(), it has been implemented using update() and insert() in the runtime
