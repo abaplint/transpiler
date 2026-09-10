@@ -810,6 +810,81 @@ ASSERT sy-subrc = 0.`;
     });
   });
 
+  it("ROLLBACK WORK, discards the uncommitted insert", async () => {
+    const code = `
+    DATA ls_t100 TYPE t100.
+    ls_t100-sprsl = 'E'.
+    ls_t100-arbgb = 'HELLO'.
+    INSERT t100 FROM ls_t100.
+    ASSERT sy-subrc = 0.
+
+    ROLLBACK WORK.
+
+    SELECT SINGLE * FROM t100 INTO ls_t100 WHERE arbgb = 'HELLO'.
+    WRITE sy-subrc.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("4");
+    });
+  });
+
+  it("COMMIT WORK, ROLLBACK WORK does not discard committed data", async () => {
+    const code = `
+    DATA ls_t100 TYPE t100.
+    ls_t100-sprsl = 'E'.
+    ls_t100-arbgb = 'HELLO'.
+    INSERT t100 FROM ls_t100.
+    ASSERT sy-subrc = 0.
+
+    COMMIT WORK.
+
+    ls_t100-arbgb = 'WORLD'.
+    INSERT t100 FROM ls_t100.
+    ASSERT sy-subrc = 0.
+
+    ROLLBACK WORK.
+
+    SELECT SINGLE * FROM t100 INTO ls_t100 WHERE arbgb = 'HELLO'.
+    WRITE sy-subrc.
+    SELECT SINGLE * FROM t100 INTO ls_t100 WHERE arbgb = 'WORLD'.
+    WRITE sy-subrc.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("04");
+    });
+  });
+
+  it("ROLLBACK WORK, discards uncommitted update and delete", async () => {
+    const code = `
+    DATA ls_t100 TYPE t100.
+    ls_t100-sprsl = 'E'.
+    ls_t100-arbgb = 'HELLO'.
+    ls_t100-msgnr = '001'.
+    ls_t100-text = 'initial'.
+    INSERT t100 FROM ls_t100.
+    ASSERT sy-subrc = 0.
+    COMMIT WORK.
+
+    UPDATE t100 SET text = 'updated' WHERE arbgb = 'HELLO'.
+    ASSERT sy-subrc = 0.
+    DELETE FROM t100 WHERE arbgb = 'HELLO' AND msgnr = '002'.
+    ROLLBACK WORK.
+
+    CLEAR ls_t100.
+    SELECT SINGLE * FROM t100 INTO ls_t100 WHERE arbgb = 'HELLO'.
+    WRITE ls_t100-text.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("initial");
+    }, {snowflake: false});
+  });
+
   it("SELECT, IN", async () => {
     const code = `
     TYPES ty_range TYPE RANGE OF t100-arbgb.

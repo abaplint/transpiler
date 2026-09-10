@@ -16,6 +16,10 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   private readonly trace: boolean | undefined;
   private readonly lazy: boolean | undefined;
   private pool: pg.Pool | undefined;
+  /** set while a transaction is open, all statements of the LUW must run on the same connection */
+  private client: pg.PoolClient | undefined;
+  /** set if a COMMIT failed, the changes of that LUW are lost and the client is unusable */
+  private fatal: Error | undefined;
 
   /**
    * @param input Connection settings
@@ -54,11 +58,19 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async disconnect(): Promise<void> {
-    await this.pool?.end();
-    this.pool = undefined;
+    try {
+      // ending the session performs an implicit commit
+      await this.commit();
+    } finally {
+      // release the pool even if the implicit commit threw, otherwise the
+      // process cannot terminate and the application hangs instead of crashing
+      await this.pool?.end();
+      this.pool = undefined;
+    }
   }
 
   public async execute(sql: string | string[]): Promise<void> {
+    this.checkFatal();
     if (this.lazy === true && this.pool === undefined) {
       await this.connect();
     }
@@ -67,7 +79,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
       if (sql === "") {
         return;
       }
-      await this.pool!.query(sql);
+      await this.query(sql);
     } else {
       for (const s of sql) {
         await this.execute(s);
@@ -75,19 +87,94 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     }
   }
 
+  /** runs on the transaction connection if a transaction is open, otherwise on the pool */
+  private async query(sql: string): Promise<pg.QueryResult<any>> {
+    if (this.client !== undefined) {
+      return this.client.query(sql);
+    }
+    if (this.pool === undefined) {
+      throw new Error("PG: Database connection not established");
+    }
+    return this.pool.query(sql);
+  }
+
   public async beginTransaction(): Promise<void> {
-    throw new Error("Method not implemented.");
+    this.checkFatal();
+    if (this.client !== undefined) {
+      return;
+    }
+    if (this.lazy === true && this.pool === undefined) {
+      await this.connect();
+    }
+    if (this.pool === undefined) {
+      throw new Error("PG: Database connection not established");
+    }
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      this.client = client;
+    } catch (error) {
+      client.release(error instanceof Error ? error : true);
+      throw error;
+    }
   }
 
   public async commit(): Promise<void> {
-    throw new Error("Method not implemented.");
+    await this.endTransaction("COMMIT");
   }
 
   public async rollback(): Promise<void> {
-    throw new Error("Method not implemented.");
+    await this.endTransaction("ROLLBACK");
+  }
+
+  private async endTransaction(sql: "COMMIT" | "ROLLBACK"): Promise<void> {
+    const client = this.client;
+    if (client === undefined) {
+      return;
+    }
+    this.client = undefined;
+    try {
+      await client.query(sql);
+      client.release();
+    } catch (error) {
+      client.release(error instanceof Error ? error : true);
+      if (sql === "COMMIT") {
+        // postgres has already rolled the transaction back, so the changes of this LUW
+        // are gone. There is no way to complete the LUW, and silently carrying on would
+        // lose the data, so poison the client and take the application down
+        this.fatal = new Error("PG: COMMIT failed, the changes of the current LUW are lost: "
+          + (error instanceof Error ? error.message : error), {cause: error});
+      }
+      throw this.fatal ?? error;
+    }
+  }
+
+  /** a failed COMMIT is not recoverable, every further use of the client must crash
+      rather than degrade into sy-subrc = 4 */
+  private checkFatal(): void {
+    if (this.fatal !== undefined) {
+      throw this.fatal;
+    }
+  }
+
+  /** postgres aborts the full transaction if a statement fails, so wrap modifying
+      statements in a savepoint, allowing the LUW to continue after eg. duplicate keys */
+  private async modifying(sql: string): Promise<pg.QueryResult<any>> {
+    await this.beginTransaction();
+
+    await this.client!.query("SAVEPOINT abap_stmt");
+    try {
+      const res = await this.client!.query(sql);
+      await this.client!.query("RELEASE SAVEPOINT abap_stmt");
+      return res;
+    } catch (error) {
+      await this.client!.query("ROLLBACK TO SAVEPOINT abap_stmt; RELEASE SAVEPOINT abap_stmt;");
+      throw error;
+    }
   }
 
   public async delete(options: DB.DeleteDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
+    this.checkFatal();
     if (this.lazy === true && this.pool === undefined) {
       await this.connect();
     }
@@ -104,7 +191,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
         console.log(sql);
       }
 
-      const res = await this.pool!.query(sql);
+      const res = await this.modifying(sql);
       dbcnt = res?.rowCount || 0;
       if (dbcnt === 0) {
         subrc = 4;
@@ -117,6 +204,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async update(options: DB.UpdateDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
+    this.checkFatal();
     if (this.lazy === true && this.pool === undefined) {
       await this.connect();
     }
@@ -130,7 +218,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
         console.log(sql);
       }
 
-      const res = await this.pool!.query(sql);
+      const res = await this.modifying(sql);
       dbcnt = res?.rowCount || 0;
       if (dbcnt === 0) {
         subrc = 4;
@@ -143,6 +231,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async insert(options: DB.InsertDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
+    this.checkFatal();
     if (this.lazy === true && this.pool === undefined) {
       await this.connect();
     }
@@ -156,7 +245,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
         console.log(sql);
       }
 
-      const res = await this.pool!.query(sql);
+      const res = await this.modifying(sql);
       dbcnt = res?.rowCount || 0;
     } catch (error) {
       if (this.trace === true) {
@@ -169,6 +258,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async select(options: DB.SelectDatabaseOptions): Promise<DB.SelectDatabaseResult> {
+    this.checkFatal();
     if (this.lazy === true && this.pool === undefined) {
       await this.connect();
     }
@@ -190,12 +280,8 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
       console.log(options.select);
     }
 
-    if (this.pool === undefined) {
-      throw new Error("PG: Database connection not established");
-    }
-
     try {
-      res = await this.pool.query(options.select);
+      res = await this.query(options.select);
     } catch (error) {
       // @ts-ignore
       if (abap.Classes["CX_SY_DYNAMIC_OSQL_SEMANTICS"] !== undefined) {
@@ -227,12 +313,31 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async openCursor(options: DB.SelectDatabaseOptions): Promise<DB.DatabaseCursorCallbacks> {
+    this.checkFatal();
     if (this.lazy === true && this.pool === undefined) {
       await this.connect();
     }
 
-    const client = await this.pool!.connect();
     const select = options.select.replace(/ UP TO (\d+) ROWS(.*)/i, "$2 LIMIT $1");
+
+    // A pg-cursor blocks its connection until it is closed. Materialize cursors
+    // opened inside a transaction so they both see the LUW's uncommitted changes
+    // and allow further statements to execute while the cursor remains open.
+    if (this.client !== undefined) {
+      const result = await this.client.query(select);
+      const rows = this.convert(result);
+      let offset = 0;
+      return {
+        fetchNextCursor: async (packageSize: number) => {
+          const batch = rows.slice(offset, offset + packageSize);
+          offset += batch.length;
+          return {rows: batch};
+        },
+        closeCursor: async () => undefined,
+      };
+    }
+
+    const client = await this.pool!.connect();
     const cursor = client.query(new Cursor(select));
     return {
       fetchNextCursor: (packageSize: number) => this.fetchNextCursor.bind(this)(packageSize, cursor),

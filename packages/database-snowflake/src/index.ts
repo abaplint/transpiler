@@ -7,6 +7,7 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
   private connection: snowflake.Connection;
   private readonly config: snowflake.ConnectionOptions;
   private readonly trace: boolean | undefined;
+  private inTransaction = false;
 
   public constructor(input: snowflake.ConnectionOptions & {trace?: boolean, checkAtInsert?: boolean}) {
     this.config = input;
@@ -34,6 +35,8 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
   }
 
   public async disconnect() {
+    // ending the session performs an implicit commit
+    await this.commit();
     await new Promise((resolve, reject) =>
       this.connection.destroy((err, conn) => {
         err ? reject(err) : resolve(conn);
@@ -68,18 +71,33 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
   }
 
   public async beginTransaction() {
-    return; // todo
+    if (this.inTransaction === true) {
+      return;
+    }
+    // note: a failing statement does not abort the transaction in snowflake
+    await this.execute("BEGIN");
+    this.inTransaction = true;
   }
 
   public async commit() {
-    return; // todo
+    await this.endTransaction("COMMIT");
   }
 
   public async rollback() {
-    return; // todo
+    await this.endTransaction("ROLLBACK");
+  }
+
+  private async endTransaction(sql: "COMMIT" | "ROLLBACK") {
+    if (this.inTransaction === false) {
+      return;
+    }
+    await this.execute(sql);
+    this.inTransaction = false;
   }
 
   public async delete(options: DB.DeleteDatabaseOptions): Promise<{subrc: number, dbcnt: number}> {
+    await this.beginTransaction();
+
     const sql = `DELETE FROM ${options.table} WHERE ${options.where}`;
 
     let subrc = 0;
@@ -115,6 +133,8 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
   }
 
   public async update(options: DB.UpdateDatabaseOptions): Promise<{subrc: number, dbcnt: number}> {
+    await this.beginTransaction();
+
     const sql = `UPDATE ${options.table} SET ${options.set.join(", ")} WHERE ${options.where}`;
 
     let subrc = 0;
@@ -151,6 +171,8 @@ export class SnowflakeDatabaseClient implements DB.DatabaseClient {
   }
 
   public async insert(options: DB.InsertDatabaseOptions): Promise<{subrc: number, dbcnt: number}> {
+    await this.beginTransaction();
+
     const sql = `INSERT INTO ${options.table} (${options.columns.map(c => "\"" + c + "\"").join(",")}) VALUES (${options.values.join(",")})`;
 
     let subrc = 0;

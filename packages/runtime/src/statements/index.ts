@@ -1,7 +1,7 @@
 import {append} from "./append";
 import {assert} from "./assert";
 import {assign} from "./assign";
-import {commit} from "./commit";
+import {commit, ICommitOptions} from "./commit";
 import {concatenate} from "./concatenate";
 import {condense} from "./condense";
 import {convert} from "./convert";
@@ -33,7 +33,7 @@ import {modifyInternal} from "./modify_internal";
 import {moveCorresponding} from "./move_corresponding";
 import {readTable} from "./read_table";
 import {replace} from "./replace";
-import {rollback} from "./rollback";
+import {IRollbackOptions, rollback} from "./rollback";
 import {select as selectDB} from "./select";
 import {setBit} from "./set_bit";
 import {shift} from "./shift";
@@ -65,7 +65,6 @@ export class Statements {
   public assign = assign;
   public cast = cast;
   public collect = collect;
-  public commit = commit;
   public concatenate = concatenate;
   public condense = condense;
   public convert = convert;
@@ -87,7 +86,6 @@ export class Statements {
   public raiseEvent = raiseEvent;
   public readTable = readTable;
   public replace = replace;
-  public rollback = rollback;
   public setBit = setBit;
   public setHandler = setHandler;
   public setLocale = setLocale;
@@ -121,6 +119,14 @@ export class Statements {
 
   public async closeCursor(cursor: INumeric) {
     await closeCursor(this.context, cursor.get());
+  }
+
+  public async commit(options?: ICommitOptions) {
+    return commit(this.context, options);
+  }
+
+  public async rollback(options?: IRollbackOptions) {
+    return rollback(this.context, options);
   }
 
   public async deleteDatabase(table: string | ICharacter, options: IDeleteDatabaseOptions) {
