@@ -3215,4 +3215,37 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("4\n1\nbar\nexists");
   });
 
+  it("ALIASES with UPPERCASE interface name, structured constant", async () => {
+    const code = `
+INTERFACE lif_test_aliases.
+  CONSTANTS: BEGIN OF mc_example,
+               one TYPE string VALUE 'one',
+               two TYPE string VALUE 'two',
+             END OF mc_example.
+  METHODS test.
+ENDINTERFACE.
+
+CLASS lcl_aliases DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif_test_aliases.
+    ALIASES mc_example FOR LIF_TEST_ALIASES~mc_example.
+ENDCLASS.
+
+CLASS lcl_aliases IMPLEMENTATION.
+  METHOD lif_test_aliases~test.
+    WRITE mc_example-one.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo_test TYPE REF TO lif_test_aliases.
+  lo_test = NEW lcl_aliases( ).
+  lo_test->test( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("one");
+  });
+
 });

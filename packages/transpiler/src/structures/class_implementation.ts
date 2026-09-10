@@ -132,11 +132,14 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     }
 
     for (const alias of cdef.getAliases()) {
-      const isStatic = staticAttributes.some(s => s.prefix.replace("$", "~") + s.identifier.getName() === alias.getComponent());
+      // note: the component is the raw source casing, so compare case insensitive
+      const component = alias.getComponent().toLowerCase();
+      const isStatic = staticAttributes.some(s =>
+        (s.prefix.replace("$", "~") + s.identifier.getName()).toLowerCase() === component);
       if (isStatic === false) {
         continue;
       }
-      ret += Traversal.escapeNamespace(clasName) + "." + alias.getName().toLowerCase() + " = " + Traversal.escapeNamespace(clasName) + "." + Traversal.escapeNamespace(alias.getComponent().replace("~", "$")) + ";\n";
+      ret += Traversal.escapeNamespace(clasName) + "." + alias.getName().toLowerCase() + " = " + Traversal.escapeNamespace(clasName) + "." + Traversal.escapeNamespace(component.replace("~", "$")) + ";\n";
     }
 
     for (const e of cdef.getEvents()) {
