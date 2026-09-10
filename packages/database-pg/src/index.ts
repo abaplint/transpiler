@@ -16,6 +16,8 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   private readonly trace: boolean | undefined;
   private readonly lazy: boolean | undefined;
   private pool: pg.Pool | undefined;
+  /** set while a transaction is open, all statements of the LUW must run on the same connection */
+  private client: pg.PoolClient | undefined;
 
   /**
    * @param input Connection settings
@@ -54,6 +56,8 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
   }
 
   public async disconnect(): Promise<void> {
+    // ending the session performs an implicit commit
+    await this.commit();
     await this.pool?.end();
     this.pool = undefined;
   }
@@ -67,7 +71,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
       if (sql === "") {
         return;
       }
-      await this.pool!.query(sql);
+      await this.query(sql);
     } else {
       for (const s of sql) {
         await this.execute(s);
@@ -75,16 +79,67 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     }
   }
 
+  /** runs on the transaction connection if a transaction is open, otherwise on the pool */
+  private async query(sql: string): Promise<pg.QueryResult<any>> {
+    if (this.client !== undefined) {
+      return this.client.query(sql);
+    }
+    if (this.pool === undefined) {
+      throw new Error("PG: Database connection not established");
+    }
+    return this.pool.query(sql);
+  }
+
   public async beginTransaction(): Promise<void> {
-    throw new Error("Method not implemented.");
+    if (this.client !== undefined) {
+      return;
+    }
+    if (this.lazy === true && this.pool === undefined) {
+      await this.connect();
+    }
+    if (this.pool === undefined) {
+      throw new Error("PG: Database connection not established");
+    }
+    this.client = await this.pool.connect();
+    await this.client.query("BEGIN");
   }
 
   public async commit(): Promise<void> {
-    throw new Error("Method not implemented.");
+    await this.endTransaction("COMMIT");
   }
 
   public async rollback(): Promise<void> {
-    throw new Error("Method not implemented.");
+    await this.endTransaction("ROLLBACK");
+  }
+
+  private async endTransaction(sql: "COMMIT" | "ROLLBACK"): Promise<void> {
+    const client = this.client;
+    if (client === undefined) {
+      return;
+    }
+    // reset first, a failing statement must not leave the connection checked out
+    this.client = undefined;
+    try {
+      await client.query(sql);
+    } finally {
+      client.release();
+    }
+  }
+
+  /** postgres aborts the full transaction if a statement fails, so wrap modifying
+      statements in a savepoint, allowing the LUW to continue after eg. duplicate keys */
+  private async modifying(sql: string): Promise<pg.QueryResult<any>> {
+    await this.beginTransaction();
+
+    await this.client!.query("SAVEPOINT abap_stmt");
+    try {
+      const res = await this.client!.query(sql);
+      await this.client!.query("RELEASE SAVEPOINT abap_stmt");
+      return res;
+    } catch (error) {
+      await this.client!.query("ROLLBACK TO SAVEPOINT abap_stmt; RELEASE SAVEPOINT abap_stmt;");
+      throw error;
+    }
   }
 
   public async delete(options: DB.DeleteDatabaseOptions): Promise<{ subrc: number; dbcnt: number; }> {
@@ -104,7 +159,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
         console.log(sql);
       }
 
-      const res = await this.pool!.query(sql);
+      const res = await this.modifying(sql);
       dbcnt = res?.rowCount || 0;
       if (dbcnt === 0) {
         subrc = 4;
@@ -130,7 +185,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
         console.log(sql);
       }
 
-      const res = await this.pool!.query(sql);
+      const res = await this.modifying(sql);
       dbcnt = res?.rowCount || 0;
       if (dbcnt === 0) {
         subrc = 4;
@@ -156,7 +211,7 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
         console.log(sql);
       }
 
-      const res = await this.pool!.query(sql);
+      const res = await this.modifying(sql);
       dbcnt = res?.rowCount || 0;
     } catch (error) {
       if (this.trace === true) {
@@ -190,12 +245,8 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
       console.log(options.select);
     }
 
-    if (this.pool === undefined) {
-      throw new Error("PG: Database connection not established");
-    }
-
     try {
-      res = await this.pool.query(options.select);
+      res = await this.query(options.select);
     } catch (error) {
       // @ts-ignore
       if (abap.Classes["CX_SY_DYNAMIC_OSQL_SEMANTICS"] !== undefined) {
@@ -231,6 +282,9 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
       await this.connect();
     }
 
+    // note: the cursor gets its own connection, so it does not see uncommitted
+    // changes of the current transaction, the connection of an open transaction
+    // cannot be shared as the cursor blocks it until it is closed
     const client = await this.pool!.connect();
     const select = options.select.replace(/ UP TO (\d+) ROWS(.*)/i, "$2 LIMIT $1");
     const cursor = client.query(new Cursor(select));
