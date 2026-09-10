@@ -875,4 +875,29 @@ FIND REGEX 'abc' IN SECTION OFFSET 100 OF lv_str
     }
   });
 
+  it("trailing blanks of character typed operands are ignored", async () => {
+    const code = `
+DATA lv_line   TYPE string VALUE 'want 1111 no-progress'.
+DATA lv_pad    TYPE c LENGTH 10 VALUE 'want'.
+DATA lv_offset TYPE i.
+
+FIND FIRST OCCURRENCE OF \` \` IN lv_line MATCH OFFSET lv_offset.
+WRITE / |literal:  subrc={ sy-subrc } offset={ lv_offset }|.
+
+CLEAR lv_offset.
+FIND FIRST OCCURRENCE OF space IN lv_line MATCH OFFSET lv_offset.
+WRITE / |space:    subrc={ sy-subrc } offset={ lv_offset }|.
+
+CLEAR lv_offset.
+FIND FIRST OCCURRENCE OF lv_pad IN lv_line MATCH OFFSET lv_offset.
+WRITE / |c(10):    subrc={ sy-subrc } offset={ lv_offset }|.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`literal:  subrc=0 offset=4
+space:    subrc=0 offset=0
+c(10):    subrc=0 offset=0`);
+  });
+
 });

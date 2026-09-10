@@ -167,4 +167,38 @@ WRITE data2-foo.`;
     await f(abap);
   });
 
+  it("string to xstring, hex digits only", async () => {
+    const code = `
+DATA lv_lower TYPE string VALUE 'abcd'.
+DATA lv_upper TYPE string VALUE 'ABCD'.
+DATA lv_text  TYPE string VALUE 'zz'.
+DATA lv_bytes TYPE xstring.
+DATA lv_back  TYPE string.
+
+lv_bytes = CONV xstring( lv_upper ).
+lv_back  = lv_bytes.
+WRITE / |upper: len={ xstrlen( lv_bytes ) } back={ lv_back }|.
+
+lv_bytes = CONV xstring( lv_lower ).
+lv_back  = lv_bytes.
+WRITE / |lower: len={ xstrlen( lv_bytes ) } back={ lv_back }|.
+
+IF CONV xstring( lv_lower ) = CONV xstring( lv_upper ).
+  WRITE / 'same bytes'.
+ELSE.
+  WRITE / 'DIFFERENT bytes'.
+ENDIF.
+
+lv_bytes = CONV xstring( lv_text ).      " not hex at all
+WRITE / |non hex text: len={ xstrlen( lv_bytes ) }|.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`upper: len=2 back=ABCD
+lower: len=0 back=
+DIFFERENT bytes
+non hex text: len=0`);
+  });
+
 });

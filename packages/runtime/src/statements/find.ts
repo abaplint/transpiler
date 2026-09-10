@@ -1,5 +1,5 @@
 import {ABAPRegExp} from "../abap_regex";
-import {ABAPObject, Integer, Structure, Table, TableFactory} from "../types";
+import {ABAPObject, Character, Integer, Structure, Table, TableFactory} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {ABAP} from "..";
@@ -36,7 +36,11 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
   let s: ICharacter | string | RegExp = "";
   if (options.find) {
     s = options.find;
-    if (typeof s !== "string") {
+    if (s instanceof Character) {
+      // trailing blanks are ignored for fixed length character typed operands,
+      // note that text string operands keep them
+      s = s.getTrimEnd();
+    } else if (typeof s !== "string") {
       s = s.get();
     }
     if (s === "") {
