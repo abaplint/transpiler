@@ -38,7 +38,7 @@ import {select as selectDB} from "./select";
 import {setBit} from "./set_bit";
 import {shift} from "./shift";
 import {sort} from "./sort";
-import {wait} from "./wait";
+import {IWaitOptions, wait} from "./wait";
 import {fetchNextCursor} from "./fetch_next_cursor";
 import {IOpenCursorDatabaseOptions, openCursor} from "./open_cursor";
 import {closeCursor} from "./close_cursor";
@@ -94,7 +94,6 @@ export class Statements {
   public sort = sort;
   public split = split;
   public translate = translate;
-  public wait = wait;
   public receive = receive;
   public callTransaction = callTransaction;
 
@@ -127,6 +126,10 @@ export class Statements {
 
   public async rollback(options?: IRollbackOptions) {
     return rollback(this.context, options);
+  }
+
+  public async wait(options: IWaitOptions) {
+    return wait(this.context, options);
   }
 
   public async deleteDatabase(table: string | ICharacter, options: IDeleteDatabaseOptions) {

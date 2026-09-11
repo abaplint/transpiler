@@ -2,7 +2,6 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {SourceTranspiler} from "../expressions";
 
 export class WaitTranspiler implements IStatementTranspiler {
 
@@ -15,10 +14,6 @@ export class WaitTranspiler implements IStatementTranspiler {
     }
 
     const concat = node.concatTokens().toUpperCase();
-    if (concat.includes(" UNTIL ") === false && seconds) {
-      const sec = new SourceTranspiler(true).transpile(seconds, traversal).getCode();
-      return new Chunk().appendString(`await new Promise(r => setTimeout(r, ${sec} * 1000));`);
-    }
 
     const cond = node.findFirstExpression(abaplint.Expressions.Cond);
     if (cond) {
