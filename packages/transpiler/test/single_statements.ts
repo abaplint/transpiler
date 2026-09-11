@@ -155,7 +155,7 @@ describe("Single statements", () => {
     {abap: "RAISE EXCEPTION instance.", js: `throw instance.get();`, skip: false},
     {abap: "CLASS ltcl_test DEFINITION DEFERRED.", js: ``, skip: false},
     {abap: "CLASS sdfsdf DEFINITION LOCAL FRIENDS ltcl_test ltcl_split_text.", js: ``, skip: false},
-    {abap: "WAIT UP TO 1 SECONDS.", js: `await new Promise(r => setTimeout(r, abap.IntegerFactory.get(1).get() * 1000));`, skip: false},
+    {abap: "WAIT UP TO 1 SECONDS.", js: `await abap.statements.wait({seconds: abap.IntegerFactory.get(1)});`, skip: false},
     {abap: "if_bar~field = 2.",                      js: `if_bar$field.set(abap.IntegerFactory.get(2));`, skip: false},
     {abap: "IF if_bar~field IS NOT INITIAL. ENDIF.", js: `if (abap.compare.initial(if_bar$field) === false) {\n}`, skip: false},
     {abap: "FUNCTION-POOL zopenabap.", js: ``, skip: false},
