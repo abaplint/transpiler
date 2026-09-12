@@ -62,9 +62,11 @@ export class SelectTranspiler implements IStatementTranspiler {
         where = sqlCond;
       }
     }
+    let whereClause = "";
     if (where) {
-      select += "WHERE " + new SQLCondTranspiler().transpile(where, traversal, table).getCode() + " ";
+      whereClause = "WHERE " + new SQLCondTranspiler().transpile(where, traversal, table).getCode() + " ";
     }
+    select += whereClause;
 
     const groupBy = node.findFirstExpression(abaplint.Expressions.SQLGroupBy);
     if (groupBy) {
@@ -104,6 +106,7 @@ export class SelectTranspiler implements IStatementTranspiler {
         } else {
           const code = new FieldChainTranspiler(true).transpile(chain, traversal).getCode();
           select = select.replace(search, `" + ${code} + "`);
+          whereClause = whereClause.replace(search, `" + ${code} + "`);
         }
       }
     }
@@ -135,6 +138,8 @@ export class SelectTranspiler implements IStatementTranspiler {
       const unique2 = UniqueIdentifier.get();
       const fn = node.findFirstExpression(abaplint.Expressions.SQLForAllEntries)?.findDirectExpression(abaplint.Expressions.SQLSource);
       const faeTranspiled = new SQLSourceTranspiler().transpile(fn!, traversal).getCode();
+      // ABAP semantics: with an empty driving table the whole WHERE condition is ignored
+      const selectEmpty = select.replace(whereClause, "");
       select = select.replace(new RegExp(" " + escapeRegExp(faeTranspiled!), "g"), " " + unique);
       select = select.replace(unique + ".get().table_line.get()", unique + ".get()");  // there can be only one?
 
@@ -144,7 +149,7 @@ export class SelectTranspiler implements IStatementTranspiler {
       }
 
       const code = `if (${faeTranspiled}.array().length === 0) {
-  throw new Error("FAE, todo, empty table");
+  await abap.statements.select(${target}, {select: "${selectEmpty.trim()}"${extra}});
 } else {
   const ${unique2} = ${faeTranspiled}.array();
   ${target}.clear();
