@@ -611,6 +611,33 @@ ENDSELECT.`;
     });
   });
 
+  it("FOR ALL ENTRIES, empty driving table selects all rows", async () => {
+    const code = `
+DATA lt_all TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+DATA lt_fae TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+
+SELECT * FROM t100 INTO TABLE lt_all.
+ASSERT lines( lt_all ) > 0.
+
+SELECT * FROM t100 INTO TABLE lt_t100
+  FOR ALL ENTRIES IN lt_fae
+  WHERE msgnr = lt_fae-msgnr
+  AND arbgb = 'DOESNOTEXIST'.
+IF lines( lt_t100 ) = lines( lt_all ) AND sy-dbcnt = lines( lt_all ).
+  WRITE 'all'.
+ELSE.
+  WRITE 'nope'.
+ENDIF.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("all");
+    });
+  });
+
   it("FOR ALL ENTRIES, condition not true", async () => {
     const code = `
 DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
