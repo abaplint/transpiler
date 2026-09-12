@@ -56,17 +56,17 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
         direction = "importing";
       }
       // note: all directions are optional
-      let name = p.name.toLowerCase();
-      if (traversal.options?.keywords?.some(a => a === name)) {
-        name += "_";
-      }
-      ret += `let ${name} = INPUT.${direction}?.${name};\n`;
+      const name = p.name.toLowerCase();
+      // a parameter named like a JavaScript keyword, RETURN on every BAPI,
+      // is declared the way the function body refers to it
+      const variable = Traversal.prefixVariable(name);
+      ret += `let ${variable} = INPUT.${direction}?.${name};\n`;
 
       const type = scope?.findVariable(name)?.getType();
       if (type !== undefined && p.optional === true) {
         // todo, set DEFAULT value
-        ret += `if (${name} === undefined) {
-  ${name} = ${TranspileTypes.toType(type)};
+        ret += `if (${variable} === undefined) {
+  ${variable} = ${TranspileTypes.toType(type)};
 }\n`;
       }
 

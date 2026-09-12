@@ -2574,6 +2574,138 @@ ENDFUNCTION.`;
     await dumpNrun(files, false);
   });
 
+  it("test-56-keyword-parameters", async () => {
+    // function module parameters named like JavaScript keywords, RETURN on every BAPI
+
+    const clas = `CLASS zcl_fugr_kw DEFINITION PUBLIC FINAL CREATE PUBLIC.
+  PUBLIC SECTION.
+ENDCLASS.
+
+CLASS zcl_fugr_kw IMPLEMENTATION.
+ENDCLASS.`;
+
+    const tests = `CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS FINAL.
+  PRIVATE SECTION.
+    METHODS test FOR TESTING.
+    METHODS optional_default FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+
+  METHOD test.
+    DATA lv_result TYPE i.
+
+    CALL FUNCTION 'ZFUGRKW_CALC'
+      EXPORTING
+        delete = 41
+      IMPORTING
+        return = lv_result.
+
+    ASSERT lv_result = 42.
+  ENDMETHOD.
+
+  METHOD optional_default.
+    DATA lv_result TYPE i.
+
+    CALL FUNCTION 'ZFUGRKW_CALC'
+      IMPORTING
+        return = lv_result.
+
+    ASSERT lv_result = 1.
+  ENDMETHOD.
+
+ENDCLASS.`;
+
+    const top = `FUNCTION-POOL zfugrkw.`;
+
+    const topxml = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <PROGDIR>
+    <NAME>LZFUGRKWTOP</NAME>
+    <SUBC>I</SUBC>
+    <UCCHECK>X</UCCHECK>
+   </PROGDIR>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
+    const sapl = `
+  INCLUDE LZFUGRKWTOP.
+  INCLUDE LZFUGRKWUXX.`;
+
+    const saplxml = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <PROGDIR>
+    <NAME>SAPLZFUGRKW</NAME>
+    <SUBC>F</SUBC>
+    <UCCHECK>X</UCCHECK>
+   </PROGDIR>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
+    const fugrxml = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_FUGR" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <AREAT>test</AREAT>
+   <INCLUDES>
+    <SOBJ_NAME>LZFUGRKWTOP</SOBJ_NAME>
+    <SOBJ_NAME>SAPLZFUGRKW</SOBJ_NAME>
+   </INCLUDES>
+   <FUNCTIONS>
+    <item>
+     <FUNCNAME>ZFUGRKW_CALC</FUNCNAME>
+     <SHORT_TEXT>keyword parameters</SHORT_TEXT>
+     <IMPORT>
+      <RSIMP>
+       <PARAMETER>DELETE</PARAMETER>
+       <OPTIONAL>X</OPTIONAL>
+       <TYP>I</TYP>
+      </RSIMP>
+     </IMPORT>
+     <EXPORT>
+      <RSEXP>
+       <PARAMETER>RETURN</PARAMETER>
+       <TYP>I</TYP>
+      </RSEXP>
+     </EXPORT>
+    </item>
+   </FUNCTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
+    const calc = `FUNCTION zfugrkw_calc.
+*"----------------------------------------------------------------------
+*"*"Local Interface:
+*"  IMPORTING
+*"     REFERENCE(DELETE) TYPE  I OPTIONAL
+*"  EXPORTING
+*"     VALUE(RETURN) TYPE  I
+*"----------------------------------------------------------------------
+
+  return = delete + 1.
+
+ENDFUNCTION.`;
+
+    const files = [
+      {filename: "zcl_fugr_kw.clas.abap", contents: clas},
+      {filename: "zcl_fugr_kw.clas.testclasses.abap", contents: tests},
+      {filename: "zfugrkw.fugr.lzfugrkwtop.abap", contents: top},
+      {filename: "zfugrkw.fugr.lzfugrkwtop.xml", contents: topxml},
+      {filename: "zfugrkw.fugr.saplzfugrkw.abap", contents: sapl},
+      {filename: "zfugrkw.fugr.saplzfugrkw.xml", contents: saplxml},
+      {filename: "zfugrkw.fugr.xml", contents: fugrxml},
+      {filename: "zfugrkw.fugr.zfugrkw_calc.abap", contents: calc},
+    ];
+    await dumpNrun(files, false);
+  });
+
   it("test-57", async () => {
     // check private SETUP method is called
 
