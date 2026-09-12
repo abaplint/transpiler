@@ -28,17 +28,17 @@
   "author": "Heliconia Labs ApS",
   "license": "PolyForm-Noncommercial-1.0.0",
   "peerDependencies": {
-    "@abaplint/core": "^2.120.48",
-    "@abaplint/transpiler": "^2.13.83"
+    "@abaplint/core": "^2.120.50",
+    "@abaplint/transpiler": "^2.13.85"
   },
   "devDependencies": {
-    "@abaplint/core": "^2.120.48",
-    "@abaplint/transpiler": "^2.13.83",
+    "@abaplint/core": "^2.120.50",
+    "@abaplint/transpiler": "^2.13.85",
     "@types/chai": "^5.2.3",
     "@types/mocha": "^10.0.10",
     "@types/node": "^26.4.1",
     "chai": "^6.2.2",
-    "mocha": "^12.0.0",
+    "mocha": "^12.0.1",
     "source-map-support": "^0.5.21",
     "typescript": "^6.0.3"
   }
