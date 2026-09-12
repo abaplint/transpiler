@@ -160,7 +160,10 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
         target.assign(new DecFloat34());
         break;
       default:
-        if (abap.DDIC[options.typeName.trimEnd()]) {
+        if (abap.DDIC[options.typeName.trimEnd()] && options.table) {
+          // static "TYPE STANDARD TABLE OF <ddic>", same as the dynamic name variant above
+          target.assign(new abap.types.Table(abap.DDIC[options.typeName.trimEnd()].type(), tableOptions));
+        } else if (abap.DDIC[options.typeName.trimEnd()]) {
           target.assign(abap.DDIC[options.typeName.trimEnd()].type().clone());
         } else if (options.typeName.includes("=>")) {
           const [className, typeName] = options.typeName.toUpperCase().split("=>");

@@ -34,7 +34,7 @@ export async function runFiles(abap: ABAP, files: IFile[], options?: ITranspiler
   }
   let pre = "";
   for (const o of res.objects) {
-    if (o.object.type === "TABL" || o.object.type === "TTYP") {
+    if (o.object.type === "TABL" || o.object.type === "TTYP" || o.object.type === "VIEW") {
       pre += o.chunk.getCode() + "\n";
     }
   }

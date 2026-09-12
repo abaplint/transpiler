@@ -2701,8 +2701,7 @@ ENDLOOP.`;
     }, {snowflake: false});
   });
 
-  it("basic VIEW", async () => {
-    const zview = `<?xml version="1.0" encoding="utf-8"?>
+const zview_xml = `<?xml version="1.0" encoding="utf-8"?>
 <abapGit version="v1.0.0" serializer="LCL_OBJECT_VIEW" serializer_version="v1.0.0">
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
@@ -2761,7 +2760,7 @@ ENDLOOP.`;
   </asx:values>
  </asx:abap>
 </abapGit>`;
-    const ztabl1 = `<?xml version="1.0" encoding="utf-8"?>
+const ztabl1_xml = `<?xml version="1.0" encoding="utf-8"?>
 <abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
@@ -2805,7 +2804,7 @@ ENDLOOP.`;
   </asx:values>
  </asx:abap>
 </abapGit>`;
-    const ztabl2 = `<?xml version="1.0" encoding="utf-8"?>
+const ztabl2_xml = `<?xml version="1.0" encoding="utf-8"?>
 <abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
@@ -2849,13 +2848,51 @@ ENDLOOP.`;
   </asx:values>
  </asx:abap>
 </abapGit>`;
+
+  it("basic VIEW", async () => {
     const files = [
-      {filename: "zview.view.xml", contents: zview},
-      {filename: "ztabl1.tabl.xml", contents: ztabl1},
-      {filename: "ztabl2.tabl.xml", contents: ztabl2},
+      {filename: "zview.view.xml", contents: zview_xml},
+      {filename: "ztabl1.tabl.xml", contents: ztabl1_xml},
+      {filename: "ztabl2.tabl.xml", contents: ztabl2_xml},
     ];
     await runAllDatabases(abap, files, () => {
 // check that the view was created
+    }, {snowflake: false});
+  });
+
+  it("CREATE DATA, TYPE STANDARD TABLE OF ddic table, SELECT into it", async () => {
+    const code = `
+DATA ref TYPE REF TO data.
+FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.
+CREATE DATA ref TYPE STANDARD TABLE OF t100.
+ASSIGN ref->* TO <tab>.
+SELECT * FROM t100 INTO TABLE <tab>.
+WRITE lines( <tab> ).`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+    ];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("0");
+    });
+  });
+
+  it("VIEW, CREATE DATA and SELECT into it", async () => {
+    const code = `
+DATA ref TYPE REF TO data.
+FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.
+CREATE DATA ref TYPE STANDARD TABLE OF zview.
+ASSIGN ref->* TO <tab>.
+SELECT * FROM zview INTO TABLE <tab>.
+WRITE lines( <tab> ).`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "zview.view.xml", contents: zview_xml},
+      {filename: "ztabl1.tabl.xml", contents: ztabl1_xml},
+      {filename: "ztabl2.tabl.xml", contents: ztabl2_xml},
+    ];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("0");
     }, {snowflake: false});
   });
 

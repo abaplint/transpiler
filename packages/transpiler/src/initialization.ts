@@ -96,7 +96,8 @@ globalThis.abap = new runtime.ABAP();\n`;
           || obj instanceof abaplint.Objects.Oauth2Profile
           || obj instanceof abaplint.Objects.WebMIME
           || obj instanceof abaplint.Objects.TypePool
-          || obj instanceof abaplint.Objects.TableType) {
+          || obj instanceof abaplint.Objects.TableType
+          || obj instanceof abaplint.Objects.View) {
         list.push(imp(`${escapeNamespaceFilename(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}`));
       }
     }
