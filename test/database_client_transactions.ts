@@ -3,6 +3,7 @@ import {ABAP, MemoryConsole} from "../packages/runtime/src";
 import {PostgresDatabaseClient} from "../packages/database-pg/src";
 import {SnowflakeDatabaseClient} from "../packages/database-snowflake/src";
 import {SQLiteDatabaseClient} from "../packages/database-sqlite/src";
+import {DuckDBDatabaseClient} from "../packages/database-duckdb/src";
 
 describe("Database client transactions", () => {
 
@@ -38,6 +39,39 @@ describe("Database client transactions", () => {
     // The internal transaction state must also allow a new LUW to start.
     await db.beginTransaction();
     await db.rollback();
+    await db.disconnect();
+  });
+
+  it("DuckDB, the LUW continues after a failed statement", async () => {
+    // DuckDB has no savepoints, a failed statement aborts the whole transaction,
+    // the client replays the successful statements of the LUW into a new one
+    const db = new DuckDBDatabaseClient();
+    await db.connect();
+    await db.execute("CREATE TABLE t(id VARCHAR(2) PRIMARY KEY, txt VARCHAR(10))");
+
+    let res = await db.insert({table: "t", columns: ["id", "txt"], values: ["'A '", "'first     '"]});
+    expect(res).to.deep.equal({subrc: 0, dbcnt: 1});
+    res = await db.insert({table: "t", columns: ["id", "txt"], values: ["'A '", "'dup       '"]});
+    expect(res.subrc).to.equal(4);
+    res = await db.insert({table: "t", columns: ["id", "txt"], values: ["'B '", "'second    '"]});
+    expect(res).to.deep.equal({subrc: 0, dbcnt: 1});
+    res = await db.update({table: "t", set: ["txt = 'changed   '"], where: "id = 'A  '"});
+    expect(res).to.deep.equal({subrc: 0, dbcnt: 1});
+
+    // trailing blanks in literals are trimmed, the padded key finds the row
+    let result = await db.select({select: "SELECT * FROM t WHERE id = 'A   ' ORDER BY PRIMARY KEY", primaryKey: ["id"]});
+    expect(result.rows).to.deep.equal([{id: "A", txt: "changed"}]);
+
+    await db.commit();
+    result = await db.select({select: "SELECT id FROM t ORDER BY id"});
+    expect(result.rows).to.deep.equal([{id: "A"}, {id: "B"}]);
+
+    // ROLLBACK WORK discards the open LUW
+    await db.delete({table: "t", where: "id = 'B'"});
+    await db.rollback();
+    result = await db.select({select: "SELECT COUNT(*) AS cnt FROM t"});
+    expect(result.rows).to.deep.equal([{cnt: 2}]);
+
     await db.disconnect();
   });
 

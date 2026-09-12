@@ -3,6 +3,7 @@ import {ABAP} from "../packages/runtime/src/";
 import {SQLiteDatabaseClient} from "../packages/database-sqlite/src/";
 import {PostgresDatabaseClient} from "../packages/database-pg/src";
 import {SnowflakeDatabaseClient} from "../packages/database-snowflake/src";
+import {DuckDBDatabaseClient} from "../packages/database-duckdb/src";
 import * as abaplint from "@abaplint/core";
 import * as crypto from "node:crypto";
 import {IFile, ITranspilerOptions} from "../packages/transpiler/src/types";
@@ -96,6 +97,27 @@ export async function runFilesSnowflake(abap: ABAP, files: IFile[]) {
     await abap.context.databaseConnections["DEFAULT"].execute(`CREATE SCHEMA "${dbName}";`);
     await abap.context.databaseConnections["DEFAULT"].execute(`USE SCHEMA "${dbName}";`);
     await abap.context.databaseConnections["DEFAULT"].execute(res.databaseSetup.schemas.snowflake);
+    await abap.context.databaseConnections["DEFAULT"].execute(res.databaseSetup.insert);
+  }
+  let pre = "";
+  for (const o of res.objects) {
+    if (o.object.type === "TABL") {
+      pre = o.chunk.getCode() + "\n";
+    }
+  }
+  return "global.abap = abap;\n" + pre + res.objects[0].chunk.getCode();
+}
+
+export async function runFilesDuckDB(abap: ABAP, files: IFile[]) {
+  const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
+  const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory);
+  const res = await new Transpiler().run(reg);
+  abap.console.clear();
+  if (res.databaseSetup.schemas.pg.length > 0) {
+    // DuckDB takes the PostgreSQL DDL, the client adjusts the character types
+    abap.context.databaseConnections["DEFAULT"] = new DuckDBDatabaseClient();
+    await abap.context.databaseConnections["DEFAULT"].connect();
+    await abap.context.databaseConnections["DEFAULT"].execute(res.databaseSetup.schemas.pg);
     await abap.context.databaseConnections["DEFAULT"].execute(res.databaseSetup.insert);
   }
   let pre = "";
