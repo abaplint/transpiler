@@ -143,10 +143,11 @@ export class SelectTranspiler implements IStatementTranspiler {
       select = select.replace(new RegExp(" " + escapeRegExp(faeTranspiled!), "g"), " " + unique);
       select = select.replace(unique + ".get().table_line.get()", unique + ".get()");  // there can be only one?
 
-      let by = `Object.keys(${target}.getRowType().get())`;
-      if (keys.length > 0) {
-        by = JSON.stringify(keys);
-      }
+      // FOR ALL ENTRIES removes duplicate rows from the result: duplicates of
+      // the selected columns, so de-duplicate by the target's components. The
+      // DB key alone is wrong for projections (INTO CORRESPONDING FIELDS
+      // without the key fields crashed on the missing component names)
+      const by = `Object.keys(${target}.getRowType().get())`;
 
       const code = `if (${faeTranspiled}.array().length === 0) {
   await abap.statements.select(${target}, {select: "${selectEmpty.trim()}"${extra}});
