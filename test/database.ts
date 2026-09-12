@@ -1582,6 +1582,31 @@ WRITE sy-dbcnt.`;
     });
   });
 
+  it("FOR ALL ENTRIES, projection without the key fields", async () => {
+    const code = `
+DATA: BEGIN OF ls_res,
+        arbgb TYPE t100-arbgb,
+        text  TYPE t100-text,
+      END OF ls_res.
+DATA lt_res LIKE STANDARD TABLE OF ls_res WITH DEFAULT KEY.
+DATA input TYPE STANDARD TABLE OF t100-arbgb WITH DEFAULT KEY.
+APPEND 'ZAG_UNIT_TEST' TO input.
+APPEND 'ZAG_UNIT_TEST' TO input.
+SELECT arbgb text FROM t100
+  INTO CORRESPONDING FIELDS OF TABLE lt_res
+  FOR ALL ENTRIES IN input
+  WHERE sprsl = 'E'
+  AND arbgb = input-table_line.
+WRITE sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2");
+    });
+  });
+
   it("SELECT LOOP CORRESPONDING", async () => {
     const code = `
 DATA: BEGIN OF res,
