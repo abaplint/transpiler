@@ -17,11 +17,53 @@ export class SourceTranspiler implements IExpressionTranspiler {
     this.addGet = addGet;
   }
 
+  // the operands of a chain of & / && (the rearranger leaves them as a binary
+  // tree of Source nodes); an empty list when the node is not such a chain
+  private concatOperands(node: Nodes.ExpressionNode): Nodes.ExpressionNode[] {
+    const children = node.getChildren();
+    if (children.length !== 3) {
+      return [];
+    }
+    const op = children[1];
+    if (!(op instanceof Nodes.TokenNode) || (op.getFirstToken().getStr() !== "&&" && op.getFirstToken().getStr() !== "&")) {
+      return [];
+    }
+    const side = (c: Nodes.TokenNode | Nodes.ExpressionNode): Nodes.ExpressionNode[] => {
+      if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.Source) {
+        const inner = this.concatOperands(c);
+        return inner.length > 0 ? inner : [c];
+      }
+      const wrapped = new Nodes.ExpressionNode(new Expressions.Source());
+      wrapped.setChildren([c]);
+      return [wrapped];
+    };
+    return [...side(children[0]), ...side(children[2])];
+  }
+
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal, context?: AbstractType): Chunk {
     let ret = new Chunk();
     const post = new Chunk();
 
     const children = node.getChildren();
+
+    // a & b & c ... : one flat concat([a, b, c]) instead of one nested
+    // concat( ) per operand (a long chain would otherwise exhaust the stack
+    // of a parser with a small budget, e.g. a service worker's)
+    const operands = this.concatOperands(node);
+    if (operands.length > 2) {
+      const flat = new Chunk().appendString("abap.operators.concat([");
+      for (let i = 0; i < operands.length; i++) {
+        if (i > 0) {
+          flat.appendString(",");
+        }
+        flat.appendChunk(new SourceTranspiler(false).transpile(operands[i], traversal, context));
+      }
+      flat.appendString("])");
+      if (this.addGet) {
+        flat.appendString(".get()");
+      }
+      return flat;
+    }
 
     // Pre-scan for unary prefix +/- tokens (WDashW / WPlusW) before any expression
     let prefixNegated = false;
