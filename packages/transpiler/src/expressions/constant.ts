@@ -85,8 +85,10 @@ export class ConstantTranspiler implements IExpressionTranspiler {
   }
 
   private handleCharacter(res: string): string {
-    const foo = res.replace(/''/g, "'");
-    let length = foo.length - 2;
+    // length of the value: strip the enclosing quotes first, an escaped
+    // quote ('') inside counts as one character and must not merge with them
+    const inner = res.substring(1, res.length - 1).replace(/''/g, "'");
+    let length = inner.length;
     if (length <= 0) {
       // note: Characters cannot have length = zero, 1 is minimum
       length = 1;
