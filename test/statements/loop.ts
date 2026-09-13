@@ -1234,6 +1234,48 @@ WRITE / lv_parts.`;
     expect(abap.console.getTrimmed()).to.equal("a,b,c");
   });
 
+  it("sy-tabix is 0 in a loop over a hashed table", async () => {
+    // a hashed table has no row number to report, and ABAP says so by
+    // leaving sy-tabix at 0 rather than by inventing a position. Handing out
+    // 1, 2, 3 there looks helpful and is a lie the caller cannot detect.
+    const code = `
+TYPES: BEGIN OF ty,
+         id TYPE string,
+       END OF ty.
+DATA lt TYPE HASHED TABLE OF ty WITH UNIQUE KEY id.
+DATA lv_out TYPE string.
+INSERT VALUE #( id = 'a' ) INTO TABLE lt.
+INSERT VALUE #( id = 'b' ) INTO TABLE lt.
+INSERT VALUE #( id = 'c' ) INTO TABLE lt.
+LOOP AT lt INTO DATA(ls).
+  lv_out = lv_out && |{ sy-tabix }|.
+ENDLOOP.
+WRITE / lv_out.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("000");
+  });
+
+  it("sy-tabix is still the row number in a loop over a sorted table", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         id TYPE string,
+       END OF ty.
+DATA lt TYPE SORTED TABLE OF ty WITH UNIQUE KEY id.
+DATA lv_out TYPE string.
+INSERT VALUE #( id = 'a' ) INTO TABLE lt.
+INSERT VALUE #( id = 'b' ) INTO TABLE lt.
+LOOP AT lt INTO DATA(ls).
+  lv_out = lv_out && |{ sy-tabix }|.
+ENDLOOP.
+WRITE / lv_out.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("12");
+  });
+
   it("LOOP GROUP BY", async () => {
     const code = `
 TYPES:

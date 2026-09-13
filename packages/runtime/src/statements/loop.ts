@@ -1,5 +1,5 @@
 import {binarySearchFrom, binarySearchTo} from "../binary_search";
-import {FieldSymbol, HashedTable, Integer, ITableKey, Structure, Table} from "../types";
+import {FieldSymbol, HashedTable, Integer, ITableKey, Structure, Table, TableAccessType} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {ABAP} from "..";
@@ -152,6 +152,18 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
   // the inner loop's last index as its own.
   const outerTabix = abap.builtin.sy.get().tabix.get();
 
+  // A hashed table has no row number to report, and ABAP says so by leaving
+  // sy-tabix at 0 for the whole loop rather than by inventing a position.
+  // The same goes for a loop that reads an index table through a hash
+  // secondary key. Handing out 1, 2, 3 there looks helpful and is a lie the
+  // caller cannot tell from the truth.
+  const usedKey = options?.usingKey === undefined || options.usingKey === "primary_key"
+    ? undefined
+    : table.getKeyByName(options.usingKey);
+  const hasRowNumber = usedKey !== undefined
+    ? usedKey.type !== TableAccessType.hashed
+    : !(table instanceof HashedTable);
+
   try {
     const isStructured = array[0] instanceof Structure;
 
@@ -169,7 +181,7 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
         }
       }
 
-      abap.builtin.sy.get().tabix.set(loopController.index + 1);
+      abap.builtin.sy.get().tabix.set(hasRowNumber ? loopController.index + 1 : 0);
       entered = true;
 
       options?.atLast?.(loopController.index + 1 >= loopController.loopTo);
