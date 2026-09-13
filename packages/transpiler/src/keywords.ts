@@ -17,5 +17,9 @@ export const DEFAULT_KEYWORDS = new Set<string>([
   "throw",	"throws", "transient", "true",
   "try",	"typeof", "var", "void",
   "delete",
-  "volatile",	"while", "yield"]);
-// "with"
+  "volatile",	"while", "yield",
+// both produce a SyntaxError in the emitted module: they are reserved words
+// in JavaScript and legal ABAP names. "super" is NOT in this list on purpose -
+// the emitted code uses the JS `super` for ABAP's `super->method( )`, and
+// escaping it turns that call into `$super.get().method()`
+  "case", "with"]);
