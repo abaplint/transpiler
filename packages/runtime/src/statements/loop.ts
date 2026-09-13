@@ -144,6 +144,14 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
   const loopController = table.startLoop(loopFrom, loopTo, array);
   let entered = false;
 
+  // ABAP hands sy-tabix back the way it found it. A LOOP owns sy-tabix only
+  // for as long as it runs; leaving it, by ENDLOOP or EXIT or RETURN or an
+  // exception, puts back whatever the enclosing loop had. Without that an
+  // inner loop, or a method that happens to contain one, silently rewrites
+  // the row number the outer loop is standing on, and the outer body reads
+  // the inner loop's last index as its own.
+  const outerTabix = abap.builtin.sy.get().tabix.get();
+
   try {
     const isStructured = array[0] instanceof Structure;
 
@@ -178,5 +186,6 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
   } finally {
     table.unregisterLoop(loopController);
     abap.builtin.sy.get().subrc.set(entered ? 0 : 4);
+    abap.builtin.sy.get().tabix.set(outerTabix);
   }
 }

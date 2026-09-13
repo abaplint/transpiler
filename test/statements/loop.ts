@@ -1138,6 +1138,102 @@ ENDLOOP.`;
     expect(abap.console.getTrimmed()).to.equal("2");
   });
 
+  it("sy-tabix is restored when an inner loop ends", async () => {
+    // ABAP hands sy-tabix back the way it found it. Without that an inner
+    // loop rewrites the row number the outer loop is standing on, and the
+    // outer body reads the inner loop's last index as its own.
+    const code = `
+DATA lt_outer TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+DATA lt_inner TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+DATA lv_out TYPE string.
+APPEND 'a' TO lt_outer.
+APPEND 'b' TO lt_outer.
+APPEND 'c' TO lt_outer.
+APPEND 'x' TO lt_inner.
+APPEND 'y' TO lt_inner.
+APPEND 'z' TO lt_inner.
+LOOP AT lt_outer INTO DATA(lv_o).
+  LOOP AT lt_inner INTO DATA(lv_i).
+  ENDLOOP.
+  lv_out = lv_out && |{ sy-tabix }|.
+ENDLOOP.
+WRITE / lv_out.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("123");
+  });
+
+  it("sy-tabix is restored when an inner loop is left with EXIT", async () => {
+    const code = `
+DATA lt_outer TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+DATA lt_inner TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+DATA lv_out TYPE string.
+APPEND 'a' TO lt_outer.
+APPEND 'b' TO lt_outer.
+APPEND 'x' TO lt_inner.
+APPEND 'y' TO lt_inner.
+APPEND 'z' TO lt_inner.
+LOOP AT lt_outer INTO DATA(lv_o).
+  LOOP AT lt_inner INTO DATA(lv_i).
+    IF lv_i = 'z'.
+      EXIT.
+    ENDIF.
+  ENDLOOP.
+  lv_out = lv_out && |{ sy-tabix }|.
+ENDLOOP.
+WRITE / lv_out.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("12");
+  });
+
+  it("sy-tabix survives a method that loops, called from a loop", async () => {
+    // the shape this was found in: a registry lookup in the loop body, and a
+    // separator that depends on sy-tabix after it
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-DATA gt TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+    CLASS-METHODS class_constructor.
+    CLASS-METHODS find IMPORTING iv TYPE string RETURNING VALUE(rv) TYPE string.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD class_constructor.
+    APPEND 'p' TO gt.
+    APPEND 'q' TO gt.
+    APPEND 'r' TO gt.
+  ENDMETHOD.
+  METHOD find.
+    LOOP AT gt INTO DATA(lv).
+      IF lv = 'r'.
+        rv = lv.
+        RETURN.
+      ENDIF.
+    ENDLOOP.
+  ENDMETHOD.
+ENDCLASS.
+
+DATA lt_ids TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+DATA lv_parts TYPE string.
+APPEND 'a' TO lt_ids.
+APPEND 'b' TO lt_ids.
+APPEND 'c' TO lt_ids.
+LOOP AT lt_ids INTO DATA(lv_id).
+  DATA(lv_found) = lcl=>find( lv_id ).
+  IF sy-tabix > 1.
+    lv_parts = lv_parts && |,|.
+  ENDIF.
+  lv_parts = lv_parts && lv_id.
+ENDLOOP.
+WRITE / lv_parts.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("a,b,c");
+  });
+
   it("LOOP GROUP BY", async () => {
     const code = `
 TYPES:
