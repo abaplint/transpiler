@@ -112,6 +112,8 @@ describe("Single statements", () => {
   withKeySimple: {"program_ndx": lv_program_ndx}});`,   skip: false},
 
     {abap: "MODIFY result INDEX 1 FROM 4.",           js: "abap.statements.modifyInternal(result,{index: abap.IntegerFactory.get(1),from: abap.IntegerFactory.get(4)});",   skip: false},
+    {abap: "WRITE |foo| && |bar| && |baz|.",
+      js: "abap.statements.write(abap.operators.concat([new abap.types.String().set(`foo`),new abap.types.String().set(`bar`),new abap.types.String().set(`baz`)]));", skip: false},
     {abap: "WRITE |foo| && |bar|.",                   js: "abap.statements.write(abap.operators.concat(new abap.types.String().set(`foo`),new abap.types.String().set(`bar`)));",                 skip: false},
     {abap: "WRITE zcl_name=>c_maxbits.",              js: "abap.statements.write(abap.Classes['ZCL_NAME'].c_maxbits);",            skip: false},
     {abap: "WRITE |`|.",                              js: "abap.statements.write(new abap.types.String().set(`\\``));",                         skip: false},
