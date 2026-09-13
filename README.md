@@ -15,6 +15,7 @@ Connecting to a database is optional, currently the following databases have dri
 * [SQLite](https://www.sqlite.org) via [@abaplint/database-sqlite](https://www.npmjs.com/package/@abaplint/database-sqlite)
 * [PostgreSQL](https://www.postgresql.org) via [@abaplint/database-pg](https://www.npmjs.com/package/@abaplint/database-pg)
 * [Snowflake](https://www.snowflake.com/) via [@abaplint/database-snowflake](https://www.npmjs.com/package/@abaplint/database-snowflake)
+* [DuckDB](https://duckdb.org) via [@abaplint/database-duckdb](https://www.npmjs.com/package/@abaplint/database-duckdb)
 
 ## Reuse library
 

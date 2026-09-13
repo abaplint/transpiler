@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {AsyncFunction, runFiles as runRilesSqlite, runFilesPostgres, runFilesSnowflake} from "./_utils";
+import {AsyncFunction, runFiles as runRilesSqlite, runFilesPostgres, runFilesSnowflake, runFilesDuckDB} from "./_utils";
 import {ABAP, MemoryConsole} from "../packages/runtime/src/";
 import {msag_escape, msag_zag_unit_test, tabl_t100xml, zquan, zt111, zt222} from "./_data";
 import {IFile} from "../packages/transpiler/src/types";
@@ -61,7 +61,8 @@ const tabl_t001wxml = `<?xml version="1.0" encoding="utf-8"?>
 async function runAllDatabases(abap: ABAP,
                                files: IFile[],
                                check: () => any,
-                               settings?: {sqlite?: boolean, postgres?: boolean, snowflake?: boolean, skipVersionCheck?: boolean}) {
+                               settings?: {sqlite?: boolean, postgres?: boolean, snowflake?: boolean,
+                                 duckdb?: boolean, skipVersionCheck?: boolean}) {
 
   // @ts-ignore
   global.abap = abap;
@@ -76,6 +77,14 @@ async function runAllDatabases(abap: ABAP,
 
   if (settings?.skipVersionCheck === true) {
     return;
+  }
+
+  if (settings === undefined || settings.duckdb === undefined || settings.duckdb === true) {
+    const js = await runFilesDuckDB(abap, files);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    await abap.context.databaseConnections["DEFAULT"].disconnect();
+    check();
   }
 
   if (settings === undefined || settings.postgres === undefined || settings.postgres === true) {
