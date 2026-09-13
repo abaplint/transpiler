@@ -136,4 +136,21 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("0");
   });
 
+  it("with, case", async () => {
+    // both are reserved in JavaScript and legal as ABAP names, so the emitted
+    // `let with = ...` is a SyntaxError rather than a wrong value
+    const code = `
+DATA with TYPE i.
+DATA case TYPE i.
+with = 1.
+case = 2.
+WRITE with.
+WRITE case.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("12");
+  });
+
 });
