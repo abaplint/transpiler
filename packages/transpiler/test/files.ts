@@ -16,6 +16,18 @@ async function runResult(files: IFile[], options?: ITranspilerOptions) {
   return new Transpiler(options).run(reg);
 }
 
+const w3miXML = (name: string, params = "") => `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_W3MI" serializer_version="v2.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <NAME>${name}</NAME>
+   <TEXT>test</TEXT>
+   <PARAMS>${params}
+   </PARAMS>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
 const t000 = `<?xml version="1.0" encoding="utf-8"?>
 <abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
@@ -78,6 +90,56 @@ const t000 = `<?xml version="1.0" encoding="utf-8"?>
   </asx:values>
  </asx:abap>
 </abapGit>`;
+
+// WWWPARAMS, built from its field list rather than pasted, because only the
+// four key and data fields matter here
+const wwwparams = (() => {
+  const fields = [
+    {name: "RELID", key: "X", len: 2},
+    {name: "OBJID", key: "X", len: 32},
+    {name: "NAME", key: "X", len: 32},
+    {name: "VALUE", key: " ", len: 255},
+  ];
+  const rows = fields.map((f, index) => `    <DD03P>
+     <TABNAME>WWWPARAMS</TABNAME>
+     <FIELDNAME>${f.name}</FIELDNAME>
+     <DDLANGUAGE>E</DDLANGUAGE>
+     <POSITION>000${index + 1}</POSITION>
+     <KEYFLAG>${f.key}</KEYFLAG>
+     <ADMINFIELD>0</ADMINFIELD>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>${String(f.len * 2).padStart(6, "0")}</INTLEN>
+     <NOTNULL>X</NOTNULL>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>${String(f.len).padStart(6, "0")}</LENG>
+     <MASK>  CHAR</MASK>
+    </DD03P>`).join("\n");
+  return `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V>
+    <TABNAME>WWWPARAMS</TABNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <TABCLASS>TRANSP</TABCLASS>
+    <DDTEXT>WWWPARAMS</DDTEXT>
+    <CONTFLAG>A</CONTFLAG>
+    <EXCLASS>1</EXCLASS>
+   </DD02V>
+   <DD09L>
+    <TABNAME>WWWPARAMS</TABNAME>
+    <AS4LOCAL>A</AS4LOCAL>
+    <TABKAT>0</TABKAT>
+    <TABART>APPL0</TABART>
+    <BUFALLOW>N</BUFALLOW>
+   </DD09L>
+   <DD03P_TABLE>
+${rows}
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+})();
 
 const tadir = `<?xml version="1.0" encoding="utf-8"?>
 <abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
@@ -550,6 +612,77 @@ ENDINTERFACE.`;
     const code = output[0].chunk.getCode();
     expect(code).to.include("class zif_aff_intf_v1");
     expect(code).to.not.include("zif_aff_oo_types");
+  });
+
+
+  it("W3MI, the registry is keyed on the object name, not the file name", async () => {
+    // abapGit percent-escapes what a file name cannot hold, so
+    // ZTEST.PNG is stored as ztest%2epng and abaplint derives the object's
+    // name from the file. A system knows it as wwwdata-objid, which abapGit
+    // writes into <NAME>, and ABAP that asks for it by that name has to find
+    // it. Keying on the file name turns a storage detail into an API.
+    const res = await runResult([
+      {filename: "ztest%2epng.w3mi.xml", contents: w3miXML("ZTEST.PNG")},
+      {filename: "ztest%2epng.w3mi.data.png", contents: "AAAA"},
+      {filename: "zfoo.prog.abap", contents: "WRITE '1'."},
+    ]);
+    const registry = res.objects.find(o => o.filename.endsWith(".w3mi.mjs"));
+    expect(registry?.chunk.getCode()).to.contain(`abap.W3MI["ZTEST.PNG"]`);
+    expect(registry?.chunk.getCode()).to.not.contain("ZTEST%2EPNG");
+  });
+
+  it("W3MI, wwwparams and tadir are keyed on the object name too", async () => {
+    const params = `
+    <WWWPARAMS>
+     <NAME>mimetype</NAME>
+     <VALUE>image/png</VALUE>
+    </WWWPARAMS>`;
+    const res = await runResult([
+      {filename: "wwwparams.tabl.xml", contents: wwwparams},
+      {filename: "tadir.tabl.xml", contents: tadir},
+      {filename: "ztest%2epng.w3mi.xml", contents: w3miXML("ZTEST.PNG", params)},
+      {filename: "ztest%2epng.w3mi.data.png", contents: "AAAA"},
+      {filename: "zfoo.prog.abap", contents: "WRITE '1'."},
+    ]);
+    const insert = res.databaseSetup.insert.join("\n");
+    expect(insert).to.contain(`'MI', 'ZTEST.PNG', 'mimetype'`);
+    expect(insert).to.contain(`'W3MI', 'ZTEST.PNG'`);
+    expect(insert).to.not.contain("ZTEST%2EPNG");
+  });
+
+  it("W3MI, a <NAME> in the parameters is not the object's name", async () => {
+    // every WWWPARAMS entry carries a <NAME> of its own; picking the wrong
+    // one would key the whole object on "mimetype"
+    const params = `
+    <WWWPARAMS>
+     <NAME>mimetype</NAME>
+     <VALUE>image/png</VALUE>
+    </WWWPARAMS>`;
+    const res = await runResult([
+      {filename: "ztest%2epng.w3mi.xml", contents: w3miXML("ZTEST.PNG", params)},
+      {filename: "ztest%2epng.w3mi.data.png", contents: "AAAA"},
+      {filename: "zfoo.prog.abap", contents: "WRITE '1'."},
+    ]);
+    const registry = res.objects.find(o => o.filename.endsWith(".w3mi.mjs"));
+    expect(registry?.chunk.getCode()).to.contain(`abap.W3MI["ZTEST.PNG"]`);
+  });
+
+  it("W3MI, no name in the XML falls back to the file name", async () => {
+    const empty = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_W3MI" serializer_version="v2.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <TEXT>test</TEXT>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+    const res = await runResult([
+      {filename: "ztest.w3mi.xml", contents: empty},
+      {filename: "ztest.w3mi.data.png", contents: "AAAA"},
+      {filename: "zfoo.prog.abap", contents: "WRITE '1'."},
+    ]);
+    const registry = res.objects.find(o => o.filename.endsWith(".w3mi.mjs"));
+    expect(registry?.chunk.getCode()).to.contain(`abap.W3MI["ZTEST"]`);
   });
 
 });
