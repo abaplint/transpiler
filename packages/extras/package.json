@@ -28,12 +28,12 @@
   "author": "Heliconia Labs ApS",
   "license": "PolyForm-Noncommercial-1.0.0",
   "peerDependencies": {
-    "@abaplint/core": "^2.120.50",
-    "@abaplint/transpiler": "^2.13.85"
+    "@abaplint/core": "^2.120.51",
+    "@abaplint/transpiler": "^2.13.86"
   },
   "devDependencies": {
-    "@abaplint/core": "^2.120.50",
-    "@abaplint/transpiler": "^2.13.85",
+    "@abaplint/core": "^2.120.51",
+    "@abaplint/transpiler": "^2.13.86",
     "@types/chai": "^5.2.3",
     "@types/mocha": "^10.0.10",
     "@types/node": "^26.4.1",
