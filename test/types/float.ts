@@ -158,6 +158,53 @@ describe("Running Examples - Float type", () => {
     await f(abap);
   });
 
+  it("Float, a value written out can be read back", async () => {
+    // moving a float into a character field writes the decimal separator as
+    // a comma, and moving it back has to accept one. Before this the pair was
+    // lossy in the worst way: no error on the way out, CX_SY_CONVERSION_NO_NUMBER
+    // on the way back, three layers from wherever the value came from
+    const code = `
+    DATA float TYPE f.
+    DATA ch TYPE c LENGTH 30.
+    DATA back TYPE f.
+    float = '9.79440789'.
+    ch = float.
+    back = ch.
+    ASSERT back = float.
+    WRITE / ch.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("9,7944078900000004E+00");
+  });
+
+  it("Float, a point is still a point", async () => {
+    // ABAP source literals carry a point, CONV f( '0.25' ) is everywhere, and
+    // accepting the comma must not cost that
+    const code = `
+    DATA float TYPE f.
+    float = CONV f( '0.25' ).
+    ASSERT float = '0.25'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("Float, a comma is a separator and not a licence for anything else", async () => {
+    // accepting the comma must not turn "1,2,3" or "abc" into a number
+    const code = `
+    DATA float TYPE f.
+    float = CONV f( '1,2,3' ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail("expected CX_SY_CONVERSION_NO_NUMBER");
+    } catch (e) {
+      expect(e.toString()).to.contain("CX_SY_CONVERSION_NO_NUMBER");
+    }
+  });
+
   it("Float to String", async () => {
     const code = `
     DATA float TYPE f.

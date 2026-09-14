@@ -16,6 +16,9 @@ describe("Single statements", () => {
     {abap: "foo = bar * 2.",                       js: "foo.set(abap.operators.multiply(bar,abap.IntegerFactory.get(2)));",        skip: false},
     {abap: "foo = bar / 2.",                       js: "foo.set(abap.operators.divide(bar,abap.IntegerFactory.get(2)));",          skip: false},
     {abap: "foo = bar + moo.",                     js: "foo.set(abap.operators.add(bar,moo));",                    skip: false},
+    // a constructor expression in the middle of an arithmetic chain is one
+    // operand, not its own children: hoisting them for precedence used to
+    {abap: "foo = ( 1 - 2 ) * CONV f( 3 ) / 256.", js: `foo.set(abap.operators.divide(abap.operators.multiply(abap.operators.minus(abap.IntegerFactory.get(1),abap.IntegerFactory.get(2)),new abap.types.Float({qualifiedName: "F"}).set(abap.IntegerFactory.get(3))),new abap.types.Integer().set(256)));`, skip: false},
     {abap: "DATA foo TYPE i VALUE 2.",             js: `let foo = new abap.types.Integer({qualifiedName: "I"});\nfoo.set(2);`, skip: false},
     {abap: "IF foo = bar. ENDIF.",                 js: "if (abap.compare.eq(foo, bar)) {\n}",       skip: false},
     {abap: "IF foo EQ bar. ENDIF.",                js: "if (abap.compare.eq(foo, bar)) {\n}",       skip: false},
