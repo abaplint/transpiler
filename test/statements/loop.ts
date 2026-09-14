@@ -1138,6 +1138,149 @@ ENDLOOP.`;
     expect(abap.console.getTrimmed()).to.equal("2");
   });
 
+  it("sy-tabix is restored when an inner loop ends", async () => {
+    // ABAP hands sy-tabix back the way it found it. Without that an inner
+    // loop rewrites the row number the outer loop is standing on, and the
+    // outer body reads the inner loop's last index as its own.
+    const code = `
+DATA lt_outer TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+DATA lt_inner TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+DATA lv_out TYPE string.
+APPEND 'a' TO lt_outer.
+APPEND 'b' TO lt_outer.
+APPEND 'c' TO lt_outer.
+APPEND 'x' TO lt_inner.
+APPEND 'y' TO lt_inner.
+APPEND 'z' TO lt_inner.
+LOOP AT lt_outer INTO DATA(lv_o).
+  LOOP AT lt_inner INTO DATA(lv_i).
+  ENDLOOP.
+  lv_out = lv_out && |{ sy-tabix }|.
+ENDLOOP.
+WRITE / lv_out.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("123");
+  });
+
+  it("sy-tabix is restored when an inner loop is left with EXIT", async () => {
+    const code = `
+DATA lt_outer TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+DATA lt_inner TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+DATA lv_out TYPE string.
+APPEND 'a' TO lt_outer.
+APPEND 'b' TO lt_outer.
+APPEND 'x' TO lt_inner.
+APPEND 'y' TO lt_inner.
+APPEND 'z' TO lt_inner.
+LOOP AT lt_outer INTO DATA(lv_o).
+  LOOP AT lt_inner INTO DATA(lv_i).
+    IF lv_i = 'z'.
+      EXIT.
+    ENDIF.
+  ENDLOOP.
+  lv_out = lv_out && |{ sy-tabix }|.
+ENDLOOP.
+WRITE / lv_out.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("12");
+  });
+
+  it("sy-tabix survives a method that loops, called from a loop", async () => {
+    // the shape this was found in: a registry lookup in the loop body, and a
+    // separator that depends on sy-tabix after it
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-DATA gt TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+    CLASS-METHODS class_constructor.
+    CLASS-METHODS find IMPORTING iv TYPE string RETURNING VALUE(rv) TYPE string.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD class_constructor.
+    APPEND 'p' TO gt.
+    APPEND 'q' TO gt.
+    APPEND 'r' TO gt.
+  ENDMETHOD.
+  METHOD find.
+    LOOP AT gt INTO DATA(lv).
+      IF lv = 'r'.
+        rv = lv.
+        RETURN.
+      ENDIF.
+    ENDLOOP.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+DATA lt_ids TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+DATA lv_parts TYPE string.
+" the registry is filled by a class constructor, and when that runs relative
+" to this program is a separate question from the one under test: warm it
+" first, so the only thing the loop below can read is its own row number
+lcl=>find( 'warm' ).
+APPEND 'a' TO lt_ids.
+APPEND 'b' TO lt_ids.
+APPEND 'c' TO lt_ids.
+LOOP AT lt_ids INTO DATA(lv_id).
+  DATA(lv_found) = lcl=>find( lv_id ).
+  IF sy-tabix > 1.
+    lv_parts = lv_parts && |,|.
+  ENDIF.
+  lv_parts = lv_parts && lv_id.
+ENDLOOP.
+WRITE / lv_parts.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("a,b,c");
+  });
+
+  it("sy-tabix is 0 in a loop over a hashed table", async () => {
+    // a hashed table has no row number to report, and ABAP says so by
+    // leaving sy-tabix at 0 rather than by inventing a position. Handing out
+    // 1, 2, 3 there looks helpful and is a lie the caller cannot detect.
+    const code = `
+TYPES: BEGIN OF ty,
+         id TYPE string,
+       END OF ty.
+DATA lt TYPE HASHED TABLE OF ty WITH UNIQUE KEY id.
+DATA lv_out TYPE string.
+INSERT VALUE #( id = 'a' ) INTO TABLE lt.
+INSERT VALUE #( id = 'b' ) INTO TABLE lt.
+INSERT VALUE #( id = 'c' ) INTO TABLE lt.
+LOOP AT lt INTO DATA(ls).
+  lv_out = lv_out && |{ sy-tabix }|.
+ENDLOOP.
+WRITE / lv_out.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("000");
+  });
+
+  it("sy-tabix is still the row number in a loop over a sorted table", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         id TYPE string,
+       END OF ty.
+DATA lt TYPE SORTED TABLE OF ty WITH UNIQUE KEY id.
+DATA lv_out TYPE string.
+INSERT VALUE #( id = 'a' ) INTO TABLE lt.
+INSERT VALUE #( id = 'b' ) INTO TABLE lt.
+LOOP AT lt INTO DATA(ls).
+  lv_out = lv_out && |{ sy-tabix }|.
+ENDLOOP.
+WRITE / lv_out.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("12");
+  });
+
   it("LOOP GROUP BY", async () => {
     const code = `
 TYPES:
