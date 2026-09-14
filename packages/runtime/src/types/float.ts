@@ -6,7 +6,12 @@ import {INumeric} from "./_numeric";
 import {Integer8} from "./integer8";
 import {DecFloat34} from "./decfloat34";
 
-const FLOAT_DIGITS = /^\s*[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)? *$/;
+// A float writes itself out with a comma for the decimal separator, so
+// reading one back has to accept a comma. Both are allowed rather than only
+// the comma: ABAP source literals carry a point, `CONV f( '0.25' )` is
+// everywhere, and a separator that is legal on the way out and illegal on the
+// way in is not a rule, it is a trap.
+const FLOAT_DIGITS = /^\s*[+-]?(\d+[.,]?\d*|[.,]\d+)([eE][+-]?\d+)? *$/;
 
 /*
 function getNumberParts(x: number) {
@@ -73,7 +78,7 @@ export class Float {
       if (FLOAT_DIGITS.test(value) === false) {
         throwError("CX_SY_CONVERSION_NO_NUMBER");
       }
-      this.value = parseFloat(value);
+      this.value = parseFloat(value.replace(",", "."));
     } else if (value instanceof Integer8) {
       this.value = Number(value.get());
     } else if (value instanceof Float || value instanceof DecFloat34) {
