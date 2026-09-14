@@ -119,6 +119,24 @@ WRITE / out.`;
     expect(abap.console.get()).to.equal("1,123\n1.123");
   });
 
+  it("decfloat34, a value written out can be read back", async () => {
+    // this one was silent rather than loud: parseFloat stops at the comma
+    // this type writes, so reading back 9,79440789 gave 9 and no error
+    const code = `
+DATA value TYPE decfloat34.
+DATA ch TYPE c LENGTH 30.
+DATA back TYPE decfloat34.
+value = '9.79440789'.
+ch = value.
+back = ch.
+ASSERT back = value.
+WRITE / ch.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("9,79440789");
+  });
+
   it("initial", async () => {
     const code = `
 DATA value TYPE decfloat34.
