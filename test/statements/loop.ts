@@ -1215,8 +1215,13 @@ CLASS lcl IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 
+START-OF-SELECTION.
 DATA lt_ids TYPE STANDARD TABLE OF string WITH EMPTY KEY.
 DATA lv_parts TYPE string.
+" the registry is filled by a class constructor, and when that runs relative
+" to this program is a separate question from the one under test: warm it
+" first, so the only thing the loop below can read is its own row number
+lcl=>find( 'warm' ).
 APPEND 'a' TO lt_ids.
 APPEND 'b' TO lt_ids.
 APPEND 'c' TO lt_ids.
