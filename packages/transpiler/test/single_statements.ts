@@ -19,6 +19,9 @@ describe("Single statements", () => {
     // a constructor expression in the middle of an arithmetic chain is one
     // operand, not its own children: hoisting them for precedence used to
     {abap: "foo = ( 1 - 2 ) * CONV f( 3 ) / 256.", js: `foo.set(abap.operators.divide(abap.operators.multiply(abap.operators.minus(abap.IntegerFactory.get(1),abap.IntegerFactory.get(2)),new abap.types.Float({qualifiedName: "F"}).set(abap.IntegerFactory.get(3))),new abap.types.Integer().set(256)));`, skip: false},
+    // the second CONV in one expression has no inferred type recorded for
+    // it, so the built-in name has to be enough on its own
+    {abap: "foo = CONV f( 1 ) + CONV f( 2 ).",     js: `foo.set(abap.operators.add(new abap.types.Float({qualifiedName: "F"}).set(abap.IntegerFactory.get(1)),new abap.types.Float({qualifiedName: "F"}).set(abap.IntegerFactory.get(2))));`, skip: false},
     {abap: "DATA foo TYPE i VALUE 2.",             js: `let foo = new abap.types.Integer({qualifiedName: "I"});\nfoo.set(2);`, skip: false},
     {abap: "IF foo = bar. ENDIF.",                 js: "if (abap.compare.eq(foo, bar)) {\n}",       skip: false},
     {abap: "IF foo EQ bar. ENDIF.",                js: "if (abap.compare.eq(foo, bar)) {\n}",       skip: false},
