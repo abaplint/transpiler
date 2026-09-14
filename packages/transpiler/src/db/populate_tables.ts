@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
 import * as abaplint from "@abaplint/core";
+import {w3miObjectName} from "../w3mi_name";
 
 export class PopulateTables {
   private readonly hasREPOSRC: boolean;
@@ -163,7 +164,9 @@ export class PopulateTables {
     }
 
     const type = obj.getType().toUpperCase();
-    const name = obj.getName().toUpperCase();
+    const name = obj instanceof abaplint.Objects.WebMIME
+      ? w3miObjectName(obj)
+      : obj.getName().toUpperCase();
     return `INSERT INTO "tadir" ("pgmid", "object", "obj_name", "devclass", "korrnum", "srcsystem", "delflag", "genflag", "edtflag", "masterlang")
       VALUES ('R3TR', '${type}', '${this.escape(name)}', '$TMP', '', 'ABC', '', '', '', 'E');`;
   }
@@ -174,7 +177,7 @@ export class PopulateTables {
     }
 
     const ret = [];
-    const name = obj.getName().toUpperCase();
+    const name = w3miObjectName(obj);
     for (const [key, value] of Object.entries(obj.getParameters())) {
       ret.push(`INSERT INTO "wwwparams" ("relid", "objid", "name", "value") VALUES ('MI', '${name}', '${this.escape(key)}', '${this.escape(value)}');`);
     }
