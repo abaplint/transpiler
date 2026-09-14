@@ -46,15 +46,33 @@ export class FileOperations {
     return pLimit(concurrency);
   }
 
+  // abapGit stores the content of a Web Repository or MIME object beside its
+  // XML, in a file whose name says .w3mi.data. or .smim.data. That content is
+  // bytes, and reading it as UTF-8 destroys it: every byte above 0x7F fails to
+  // decode and comes back as the replacement character, so a PNG arrives
+  // starting ef bf bd rather than 89 50 4e 47 and is served, with a plausible
+  // size and the right content type, as a broken image.
+  //
+  // latin1 rather than a Buffer because the whole pipeline carries a file as a
+  // string; latin1 maps every byte to the code point of the same value, so a
+  // read and a write of it are exact. Node's "binary" is the same encoding
+  // under its old name, so there is nothing more faithful to switch to: the
+  // only stronger answer is to carry a Buffer end to end and never make it a
+  // string at all, which is a change to every file the transpiler touches.
+  // Measured on an 11770 byte PNG: latin1 and binary both return it
+  // unchanged, utf8 returns 20175 bytes and no longer a PNG.
+  public static isBinaryFilename(filename: string): boolean {
+    return /\.(w3mi|smim)\.data\./i.test(filename);
+  }
+
   public static async readAllFiles(filesToRead: string[], outputFolder: string) {
     const limit = this.setupPLimit();
     const promises = filesToRead.map((filename) => {
       return limit(async () => {
-//        const isBinary = filename.includes(".w3mi.data.");
         return {
           filename: path.basename(filename),
           relative: path.relative(outputFolder, path.dirname(filename)),
-          contents: await fsPromises.readFile(filename, "utf8"),
+          contents: await fsPromises.readFile(filename, this.isBinaryFilename(filename) ? "latin1" : "utf8"),
         };
       });
     });
@@ -94,7 +112,10 @@ export class FileOperations {
     const limit = this.setupPLimit();
     const promises = files.map((file) => {
       return limit(async () => {
-        await fsPromises.writeFile(file.path, file.contents);
+        // read as latin1, written as latin1: anything else re-encodes the
+        // bytes on the way out and undoes the careful read
+        await fsPromises.writeFile(file.path, file.contents,
+                                   this.isBinaryFilename(file.path) ? {encoding: "latin1"} : undefined);
       });
     });
     await Promise.all(promises);
