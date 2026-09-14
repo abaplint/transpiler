@@ -4,6 +4,7 @@ import {Traversal} from "../traversal";
 import {Requires} from "../requires";
 import {Rearranger} from "../rearranger";
 import {Chunk} from "../chunk";
+import {escapeFilenameForImport} from "../initialization";
 
 export class HandleABAP {
   private readonly options: ITranspilerOptions | undefined;
@@ -130,9 +131,9 @@ export class HandleABAP {
         continue;
       }
       if (name) {
-        contents.appendString("const {" + Traversal.escapeNamespace(name) + "} = await import(\"./" + filename.replace(/#/g, "%23") + "\");\n");
+        contents.appendString("const {" + Traversal.escapeNamespace(name) + "} = await import(\"./" + escapeFilenameForImport(filename) + "\");\n");
       } else {
-        contents.appendString("await import(\"./" + filename.replace(/#/g, "%23") + "\");\n");
+        contents.appendString("await import(\"./" + escapeFilenameForImport(filename) + "\");\n");
       }
     }
     contents.appendChunk(output.chunk);
