@@ -213,7 +213,26 @@ export class Rearranger {
     }
 
     const withoutLast = node.getChildren().slice(0, children.length - 1);
-    const flat = withoutLast.concat(last.getChildren());
+
+    // The nested children come up so that precedence can be decided across
+    // the whole chain, and everything before the nested operator has to
+    // arrive as one operand. For "a * b / c" that is already true, b being a
+    // single Source. For "a * CONV f( b ) / c" it is not: CONV is five
+    // children, and hoisting them one by one puts the type name and the
+    // body beside the arithmetic, where the transpiler reads them as
+    // operands and loses the rest of the expression. So the head is wrapped
+    // back into one Source before it moves.
+    const nested = last.getChildren();
+    const firstOperator = nested.findIndex((c) =>
+      c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.ArithOperator);
+    let head = nested.slice(0, firstOperator);
+    if (head.length > 1) {
+      const operand = new Nodes.ExpressionNode(last.get());
+      operand.setChildren(head);
+      head = [operand];
+    }
+
+    const flat = withoutLast.concat(head, nested.slice(firstOperator));
     node.setChildren(flat);
 
     return node;

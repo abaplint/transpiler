@@ -23,7 +23,10 @@ export class DecFloat34 {
     } else if (typeof value === "string" && value.trim().length === 0) {
       this.value = 0;
     } else if (typeof value === "string") {
-      this.value = parseFloat(value);
+      // get() writes the decimal separator as a comma, and parseFloat stops
+      // at one: without this, reading back what this type just wrote gives a
+      // truncated number and no error at all
+      this.value = parseFloat(value.replace(",", "."));
     } else if (value instanceof DecFloat34) {
       this.value = value.getRaw();
     } else if (value instanceof Float) {
