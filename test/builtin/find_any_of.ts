@@ -238,4 +238,20 @@ describe("Builtin functions - find_any_not_of", () => {
     WRITE lv.`, "CX_SY_STRG_PAR_VAL");
   });
 
+  // nmin( ) returns a float, which used to arrive as "1,2000000000000000E+01"
+  it("find_any_of, off from nmin, two digits", async () => {
+    await expectValue(`
+    DATA lv TYPE i.
+    lv = find_any_of( val = 'aaaaaaaaaaaaaaaz' sub = 'z' off = nmin( val1 = 12 val2 = 30 ) ).
+    WRITE lv.`, "15");
+  });
+
+  it("find_any_not_of, len from nmin, two digits", async () => {
+    // the z sits just inside the window, a truncated length would report -1
+    await expectValue(`
+    DATA lv TYPE i.
+    lv = find_any_not_of( val = 'aaaaaaaaaaaazbbb' sub = 'a' len = nmin( val1 = 13 val2 = 30 ) ).
+    WRITE lv.`, "12");
+  });
+
 });

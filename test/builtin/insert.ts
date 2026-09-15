@@ -30,4 +30,12 @@ describe("Builtin functions - insert", () => {
     expect(abap.console.get()).to.equal(`vsubal`);
   });
 
+  it("off from nmin, two digits", async () => {
+    const code = `WRITE insert( val = |abcdefghijklmnop| sub = |XX| off = nmin( val1 = 12 val2 = 30 ) ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`abcdefghijklXXmnop`);
+  });
+
 });

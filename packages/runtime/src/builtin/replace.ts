@@ -3,6 +3,7 @@ import {INumeric} from "../types/_numeric";
 import {String} from "../types/string";
 import {ABAPRegExp} from "../abap_regex";
 import {Character, FieldSymbol} from "../types";
+import {position} from "./_position";
 
 export interface IReplaceInput {
   val: string | ICharacter | FieldSymbol,
@@ -68,13 +69,12 @@ export function replace(input: IReplaceInput) {
     sub = new RegExp(ABAPRegExp.convert(regexInput.get()), "g");
   }
 
-  if (input.off && input.len && typeof source === "string") {
-    const offset = input.off.get();
-    const length = input.len.get();
+  const offset = position(input.off);
+  const length = position(input.len);
+
+  if (offset !== undefined && length !== undefined && typeof source === "string") {
     val = val.substring(0, offset) + wi + val.substring(offset + length);
-  } else if (input.off && input.len && !(typeof source === "string")) {
-    const offset = input.off.get();
-    const length = input.len.get();
+  } else if (offset !== undefined && length !== undefined && !(typeof source === "string")) {
     val = source.getOffset({offset: 0, length: offset}).get() +
           wi +
           source.getOffset({offset: offset + length}).get();
@@ -83,7 +83,7 @@ export function replace(input: IReplaceInput) {
       sub = new RegExp(sub);
     }
     val = val.replace(sub, wi);
-  } else if (input.occ && input.occ.get() === 0 && sub && wi !== undefined) {
+  } else if (input.occ && position(input.occ) === 0 && sub && wi !== undefined) {
     if (typeof sub === "string") {
       sub = new RegExp(sub, "g");
     }

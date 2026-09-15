@@ -100,4 +100,24 @@ describe("Builtin functions - count", () => {
     await f(abap);
   });
 
+  it("off from nmin, two digits", async () => {
+    const code = `
+    DATA val TYPE i.
+    val = count( val = 'aaaaaaaaaaaaaaaa' sub = 'a' off = nmin( val1 = 12 val2 = 30 ) ).
+    ASSERT val = 4.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("len from nmin, two digits", async () => {
+    const code = `
+    DATA val TYPE i.
+    val = count( val = 'aaaaaaaaaaaaaaaa' sub = 'a' len = nmin( val1 = 12 val2 = 30 ) ).
+    ASSERT val = 12.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

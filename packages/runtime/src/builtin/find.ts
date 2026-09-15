@@ -2,6 +2,7 @@ import {throwError} from "../throw_error";
 import {Integer} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {position} from "./_position";
 
 export interface IFindInput {
   val: ICharacter | string;
@@ -45,8 +46,8 @@ export function find(input: IFindInput) {
     }
   } else {
     const sub = typeof input.sub === "string" ? input.sub : input.sub?.get();
-    let off = typeof input.off === "number" ? input.off : input.off?.get() || 0;
-    let occ = typeof input.occ === "number" ? input.occ : input.occ?.get();
+    let off = position(input.off) || 0;
+    let occ = position(input.occ);
 
     if (occ === 0) {
       throwError("CX_SY_STRG_PAR_VAL");
