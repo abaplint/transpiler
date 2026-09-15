@@ -23,6 +23,26 @@ export interface ICreateDataOptions {
 
 const tableOptions: ITableOptions = {withHeader: false, keyType: TableKeyType.default};
 
+/** CREATE DATA ... TYPE REF TO <name>, both the static and the dynamic spelling.
+ * "REF TO data" is the generic case: the created data object is itself an
+ * unbound data reference, so the target points at a DataReference. Anything
+ * else names a class or interface. */
+function createDataRefTo(target: DataReference, name: string) {
+  if (name.toUpperCase() === "DATA") {
+    // a DataReference pointing at a DataReference, same shape GET REFERENCE OF
+    // a "REF TO data" variable produces - the declared types do not model the
+    // nesting, so this mirrors get_reference's cast
+    target.assign(new DataReference(undefined) as any);
+    return;
+  }
+
+  if (abap.Classes[name.toUpperCase()] === undefined) {
+    throwError("CX_SY_CREATE_DATA_ERROR");
+  }
+
+  target.assign(new abap.types.ABAPObject({qualifiedName: name, RTTIName: name}));
+}
+
 export function createData(target: DataReference | FieldSymbol, options?: ICreateDataOptions) {
   // console.dir(options);
 
@@ -78,11 +98,7 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
     } else if (options.name.trimEnd() === "INT8") {
       target.assign(new Integer8());
     } else if (options.refTo === true) {
-      if (abap.Classes[options.name.toUpperCase()] === undefined) {
-        throwError("CX_SY_CREATE_DATA_ERROR");
-      }
-
-      target.assign(new abap.types.ABAPObject({qualifiedName: options.name, RTTIName: options.name}));
+      createDataRefTo(target, options.name);
     } else {
       throwError("CX_SY_CREATE_DATA_ERROR");
     }
@@ -176,6 +192,10 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
           }
 
           target.assign(abap.Classes[className][typeName.toLowerCase().trimEnd()].clone());
+        } else if (options.refTo === true) {
+          // statically written "TYPE REF TO ...", the dynamic "TYPE REF TO (name)"
+          // variant is handled in the options.name branch above
+          createDataRefTo(target, options.typeName.trimEnd());
         } else {
           throw new Error("CREATE DATA, unknown type " + options.typeName);
         }
