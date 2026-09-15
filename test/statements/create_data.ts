@@ -419,4 +419,51 @@ WRITE / lines( <fs> ).`;
     await f(abap);
     expect(abap.console.get()).to.equal("0");
   });
+
+  it("CREATE DATA, TYPE REF TO data", async () => {
+    // the created data object is itself a data reference, so the value can be
+    // reached through two dereferences
+    const code = `
+DATA outer TYPE REF TO data.
+DATA inner TYPE REF TO data.
+DATA val TYPE i.
+FIELD-SYMBOLS <ref> TYPE any.
+FIELD-SYMBOLS <val> TYPE any.
+
+CREATE DATA outer TYPE REF TO data.
+ASSERT outer IS NOT INITIAL.
+
+val = 42.
+GET REFERENCE OF val INTO inner.
+
+ASSIGN outer->* TO <ref>.
+ASSERT <ref> IS ASSIGNED.
+<ref> = inner.
+
+ASSIGN <ref>->* TO <val>.
+ASSERT <val> IS ASSIGNED.
+WRITE <val>.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("42");
+  });
+
+  it("CREATE DATA, dynamic TYPE REF TO (name), generic", async () => {
+    const code = `
+DATA dref TYPE REF TO data.
+DATA name TYPE string.
+FIELD-SYMBOLS <ref> TYPE any.
+
+name = 'DATA'.
+CREATE DATA dref TYPE REF TO (name).
+ASSERT dref IS NOT INITIAL.
+ASSIGN dref->* TO <ref>.
+ASSERT <ref> IS ASSIGNED.
+WRITE 'ok'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ok");
+  });
 });
