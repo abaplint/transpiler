@@ -23,6 +23,7 @@ export interface ICreateDataOptions {
 
 const tableOptions: ITableOptions = {withHeader: false, keyType: TableKeyType.default};
 
+
 /** CREATE DATA ... TYPE REF TO <name>, both the static and the dynamic spelling.
  * "REF TO data" is the generic case: the created data object is itself an
  * unbound data reference, so the target points at a DataReference. Anything
