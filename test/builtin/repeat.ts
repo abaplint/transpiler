@@ -21,4 +21,11 @@ describe("Builtin functions - repeat", () => {
     await f(abap);
   });
 
+  it("occ from nmin, two digits", async () => {
+    const code = `ASSERT strlen( repeat( val = 'a' occ = nmin( val1 = 12 val2 = 30 ) ) ) = 12.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

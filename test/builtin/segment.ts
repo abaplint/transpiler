@@ -47,4 +47,15 @@ WRITE val.`;
     expect(abap.console.get()).to.equal("world");
   });
 
+  it("segment, index from nmin, two digits", async () => {
+    const code = `
+DATA val TYPE string.
+val = segment( val = 'a,b,c,d,e,f,g,h,i,j,k,l' index = nmin( val1 = 12 val2 = 30 ) sep = ',' ).
+WRITE val.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("l");
+  });
+
 });

@@ -66,4 +66,14 @@ describe("Builtin functions - shift_left", () => {
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
+
+  it("places from nmin, two digits", async () => {
+    const code = `
+    DATA lv_str TYPE string.
+    lv_str = 'abcdefghijklmnop'.
+    ASSERT shift_left( val = lv_str places = nmin( val1 = 12 val2 = 30 ) ) = 'mnop'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
 });

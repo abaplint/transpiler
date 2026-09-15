@@ -1,11 +1,12 @@
 import {String} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {position} from "./_position";
 
 export function escape(input: {val: ICharacter | string, format: INumeric | number }): String {
 
   let val = typeof input.val === "string" ? input.val : input.val.get();
-  const format = typeof input.format === "number" ? input.format : input.format.get();
+  const format = position(input.format)!;
 
 // todo, optimize/cache regexes
   switch (format) {

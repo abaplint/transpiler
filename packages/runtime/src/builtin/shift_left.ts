@@ -2,6 +2,7 @@ import {ICharacter} from "../types/_character";
 import {String} from "../types/string";
 import {INumeric} from "../types/_numeric";
 import {throwError} from "../throw_error";
+import {position} from "./_position";
 
 export interface IShiftLeftInput {
   val: ICharacter | string,
@@ -19,16 +20,13 @@ export function shift_left(input: IShiftLeftInput): ICharacter {
       val = val.substr(sub.length);
     }
   } else if (input.places) {
-    let places = typeof input.places === "string" ? input.places : input.places.get();
-    if (typeof places === "string") {
-      places = parseInt(places, 10);
-    }
+    const places = position(input.places)!;
     if (places > val.length) {
       throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
     }
     val = val.substring(places);
   } else if (input.circular) {
-    const leftShifts = input.circular.get() % val.length;
+    const leftShifts = position(input.circular)! % val.length;
     val =  val.slice(leftShifts) + val.slice(0, leftShifts);
   } else {
     return shift_left({val: input.val, sub: " "});

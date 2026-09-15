@@ -3,6 +3,7 @@ import {initial} from "../compare";
 import {Integer} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {position} from "./_position";
 
 export type countInput = {
   val: ICharacter,
@@ -19,12 +20,12 @@ export function count(input: countInput) {
 
   let val = input.val.get();
 
-  if (input.off) {
-    const off = input.off.get();
+  const off = position(input.off);
+  if (off !== undefined) {
     val = val.substring(off);
   }
-  if (input.len) {
-    const len = input.len.get();
+  const len = position(input.len);
+  if (len !== undefined) {
     val = val.substring(0, len);
   }
 
