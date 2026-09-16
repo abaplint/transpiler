@@ -28,7 +28,7 @@ ASSERT lv_bool = abap_true.`;
   it("empty val is false", async () => {
     const code = `
 DATA lv_bool TYPE abap_bool.
-lv_bool = boolc( contains_any_not_of( val = '' sub = 'abc' ) ).
+lv_bool = boolc( contains_any_not_of( val = \`\` sub = 'abc' ) ).
 ASSERT lv_bool = abap_false.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
