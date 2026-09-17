@@ -29,6 +29,7 @@ https://open-abap.org
 ## Technical
 * `SY-SYSID` = `ABC`
 * `SY-MANDT` = `123`
+* Open SQL is **not** client aware: no `MANDT = SY-MANDT` predicate is added, and `INSERT`/`UPDATE`/`DELETE` reach every client. A `SELECT` from a client-dependent table returns the rows of all clients, so data captured from a system with more than one client gives more rows than the same statement gives there. See [#606](https://github.com/abaplint/transpiler/issues/606); run a separate database per client if you need the isolation
 * Fixed point arithmetic is always enabled
 * Encoding = [UCS-2](https://en.wikipedia.org/wiki/Universal_Coded_Character_Set)
 * Time zone = [UTC](https://en.wikipedia.org/wiki/Coordinated_Universal_Time)

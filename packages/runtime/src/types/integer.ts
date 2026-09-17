@@ -29,7 +29,15 @@ export function toInteger(value: string, exception = true): number {
       throw new Error("CONVT_NO_NUMBER");
     }
   }
-  return Math.round(parseFloat(value));
+  return roundHalfAwayFromZero(parseFloat(value));
+}
+
+// ABAP rounds a half away from zero when a float is moved to an integer,
+// on both sides: 0.5 is 1 and -0.5 is -1. Math.round rounds a half towards
+// positive infinity, so -0.5 was 0 (and -0 at that)
+export function roundHalfAwayFromZero(value: number): number {
+  const rounded = value < 0 ? -Math.round(-value) : Math.round(value);
+  return rounded === 0 ? 0 : rounded;
 }
 
 export class Integer implements INumeric {
@@ -76,7 +84,7 @@ export class Integer implements INumeric {
     }
 
     if (typeof value === "number") {
-      this.value = Math.round(value);
+      this.value = roundHalfAwayFromZero(value);
     } else if (value instanceof Integer) {
       this.set(value.get());
     } else if (value instanceof Character) {
@@ -86,7 +94,7 @@ export class Integer implements INumeric {
     } else if (value instanceof Integer8) {
       this.set(Number(value.get()));
     } else if (value instanceof Float || value instanceof DecFloat34) {
-      this.set(Math.round(value.getRaw()));
+      this.set(roundHalfAwayFromZero(value.getRaw()));
     } else if (value instanceof Hex || value instanceof XString || value instanceof HexUInt8) {
       const hex = value.get();
       let num = parseInt(hex, 16);

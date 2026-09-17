@@ -48,11 +48,40 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
       ret += `  ${id} = abap.Classes[${internalName}.get().trimEnd()];\n`;
       ret += `}\n`;
       ret += `if (${id} === undefined) { throw new ${cx}; }\n`;
+      // ...and it has to be compatible with the STATIC type of the target.
+      // A system raises CX_SY_CREATE_OBJECT_ERROR for a class that is not,
+      // before the constructor runs; without this the class was assigned to
+      // the reference whatever it was, and the mismatch surfaced later as a
+      // javascript TypeError on the first member access - which no CATCH
+      // takes, so a caller that guards its dynamic CREATE OBJECT the way the
+      // documentation asks for was not guarded at all
+      const staticName = this.findTargetTypeName(node, traversal);
+      if (staticName !== undefined) {
+        const staticType = traversal.lookupClassOrInterface(staticName, node.getFirstToken());
+        ret += `abap.statements.checkCreateObjectType(${id}, ${staticType}, "${staticName.toUpperCase()}");\n`;
+      }
       clas = id;
     }
     ret += target + ".set(await (new " + clas + "()).constructor_(" + para + "));";
 
     return new Chunk(ret);
+  }
+
+  /** The name of the target reference's STATIC type, or undefined when there
+   * is nothing to check against - a generic `REF TO object`, or a target this
+   * cannot resolve (which is reported by findClassName on the static path and
+   * must not turn a working dynamic CREATE OBJECT into a transpile error
+   * here). */
+  private findTargetTypeName(node: abaplint.Nodes.StatementNode, traversal: Traversal): string | undefined {
+    const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
+    if (scope === undefined) {
+      return undefined;
+    }
+    const type = traversal.determineType(node, scope);
+    if (type instanceof abaplint.BasicTypes.ObjectReferenceType) {
+      return type.getIdentifierName();
+    }
+    return undefined;
   }
 
   private findClassName(node: abaplint.Nodes.StatementNode, traversal: Traversal) {
