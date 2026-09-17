@@ -1,6 +1,7 @@
 import {INumeric} from "./_numeric";
 import {ICharacter} from "./_character";
 import {Integer} from "./integer";
+import {Float} from "./float";
 import {ABAPObject} from "./abap_object";
 import {String} from "./string";
 import {Structure} from "./structure";
@@ -347,8 +348,12 @@ export class HashedTable implements ITable {
   private cloneRow(item: TableRowType) {
     // make sure to do conversion if needed
     if (typeof item === "number") {
+      // a raw number is what the numeric built-ins return (sin, cos, sqrt,
+      // abs, floor, ...): a whole one is an integer, anything else is a
+      // float, and wrapping every one as an Integer first rounded a sine
+      // table to zeros before the row ever saw the value
       const tmp = this.getRowType().clone();
-      tmp.set(new Integer().set(item));
+      tmp.set(Number.isInteger(item) ? new Integer().set(item) : new Float().set(item));
       return tmp;
     } else if (typeof item === "string") {
       const tmp = this.getRowType().clone();
@@ -653,8 +658,12 @@ export class Table implements ITable {
   private cloneRow(item: TableRowType) {
     // make sure to do conversion if needed
     if (typeof item === "number") {
+      // a raw number is what the numeric built-ins return (sin, cos, sqrt,
+      // abs, floor, ...): a whole one is an integer, anything else is a
+      // float, and wrapping every one as an Integer first rounded a sine
+      // table to zeros before the row ever saw the value
       const tmp = this.getRowType().clone();
-      tmp.set(new Integer().set(item));
+      tmp.set(Number.isInteger(item) ? new Integer().set(item) : new Float().set(item));
       return tmp;
     } else if (typeof item === "string") {
       const tmp = this.getRowType().clone();
