@@ -244,6 +244,95 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("world2");
   });
 
+  it("CREATE OBJECT, dynamic name incompatible with the TYPED reference", async () => {
+    // CREATE OBJECT into a reference with a static type must refuse a class
+    // that is not compatible with it - the dynamic branch checked only that
+    // the name resolves to SOMETHING, so an unrelated class was assigned and
+    // the mismatch surfaced later as a raw javascript TypeError, which no
+    // CATCH takes. abap2UI5 reaches this from a client-supplied class name.
+    const code = `
+CLASS lcl_intf_holder DEFINITION.
+ENDCLASS.
+CLASS lcl_intf_holder IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lcl_expected DEFINITION.
+  PUBLIC SECTION.
+    METHODS run.
+ENDCLASS.
+CLASS lcl_expected IMPLEMENTATION.
+  METHOD run.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA foo TYPE REF TO lcl_expected.
+  DATA lv_name TYPE string.
+  lv_name = 'LCL_INTF_HOLDER'.
+  CREATE OBJECT foo TYPE (lv_name).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch (e) {
+      expect(e.toString()).to.contain("CX_SY_CREATE_OBJECT_ERROR");
+    }
+  });
+
+  it("CREATE OBJECT, dynamic name that does not implement the reference interface", async () => {
+    const code = `
+INTERFACE lif_bar.
+  METHODS run.
+ENDINTERFACE.
+
+CLASS lcl_without DEFINITION.
+ENDCLASS.
+CLASS lcl_without IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA foo TYPE REF TO lif_bar.
+  DATA lv_name TYPE string.
+  lv_name = 'LCL_WITHOUT'.
+  CREATE OBJECT foo TYPE (lv_name).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch (e) {
+      expect(e.toString()).to.contain("CX_SY_CREATE_OBJECT_ERROR");
+    }
+  });
+
+  it("CREATE OBJECT, dynamic name that DOES implement the reference interface", async () => {
+    const code = `
+INTERFACE lif_bar.
+  METHODS run.
+ENDINTERFACE.
+
+CLASS lcl_with DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif_bar.
+ENDCLASS.
+CLASS lcl_with IMPLEMENTATION.
+  METHOD lif_bar~run.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA foo TYPE REF TO lif_bar.
+  DATA lv_name TYPE string.
+  lv_name = 'LCL_WITH'.
+  CREATE OBJECT foo TYPE (lv_name).
+  WRITE 'created'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("created");
+  });
+
   it("CREATE OBJECT, in data object", async () => {
     const code = `
 CLASS lcl DEFINITION.

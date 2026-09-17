@@ -9,6 +9,8 @@ export * from "./ceil";
 export * from "./concat_lines_of";
 export * from "./condense";
 export * from "./contains";
+export * from "./contains_any_not_of";
+export * from "./contains_any_of";
 export * from "./cos";
 export * from "./cosh";
 export * from "./count_any_of";
