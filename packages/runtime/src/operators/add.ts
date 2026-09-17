@@ -13,6 +13,13 @@ export function add(left: INumeric | ICharacter | string | number | Float | Inte
 
   if (left instanceof Integer && right instanceof Integer) {
     return new Integer().set(left.get() + right.get());
+  } else if (left instanceof Float && right instanceof Float) {
+    // Two floats fall through the rest of the chain to exactly this, and
+    // float arithmetic is the most common thing there is: the remaining type
+    // tests all fail, and then parse() is called on each operand, which for a
+    // Float is getRaw(). It sits after the integer branch on purpose, so that
+    // integer arithmetic pays nothing for it.
+    return new Float().set(left.getRaw() + right.getRaw());
   } else if (typeof left === "number" && typeof right === "number"
       && Number.isInteger(left) && Number.isInteger(right)) {
     return new Integer().set(left + right);
