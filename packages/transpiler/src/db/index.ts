@@ -24,7 +24,14 @@ export class DatabaseSetup {
     return {
       schemas: {
         sqlite: this.driver(new SQLiteDatabaseSchema(this.reg)),
-        hdb: ["todo"],
+        // HANA takes the PG schema unchanged -- measured against HANA Express
+        // on a tree of 77 tables. The one thing it needs is that identifiers
+        // reach it quoted in UPPER case, and that is not a dialect of DDL: the
+        // same rule applies to every statement, so @abaplint/database-hdb
+        // folds them on the way out rather than a second generator doing it
+        // here. (Unquoted would nearly work and then meet a column called
+        // `cross`, which is one of HANA's reserved words.)
+        hdb: this.driver(new PGDatabaseSchema(this.reg)),
         pg: this.driver(new PGDatabaseSchema(this.reg)),
         snowflake: this.driver(new SnowflakeDatabaseSchema(this.reg)),
       },
