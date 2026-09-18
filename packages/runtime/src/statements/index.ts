@@ -12,6 +12,7 @@ import {find} from "./find";
 import {collect} from "./collect";
 import {overlay} from "./overlay";
 import {cast} from "./cast";
+import {checkCreateObjectType} from "./create_object";
 import {getBit} from "./get_bit";
 import {readReport} from "./read_report";
 import {getReference} from "./get_reference";
@@ -64,6 +65,7 @@ export class Statements {
   public assert = assert;
   public assign = assign;
   public cast = cast;
+  public checkCreateObjectType = checkCreateObjectType;
   public collect = collect;
   public concatenate = concatenate;
   public condense = condense;
