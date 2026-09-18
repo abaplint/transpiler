@@ -1,6 +1,7 @@
 import {String} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {position} from "./_position";
 
 export interface IInsertInput {
   val: ICharacter;
@@ -9,9 +10,9 @@ export interface IInsertInput {
 }
 
 export function insert(input: IInsertInput) {
-  let offset = 0;
-  if (input.off) {
-    offset = input.off.get();
+  let offset = position(input.off);
+  if (offset === undefined) {
+    offset = 0;
   }
 
   const value = input.val.getOffset({offset: 0, length: offset}).get() +

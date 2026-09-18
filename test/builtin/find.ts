@@ -223,4 +223,14 @@ WRITE lv_offset.`;
     await f(abap);
   });
 
+  it("off from nmin, two digits", async () => {
+    const code = `
+    DATA lv TYPE i.
+    lv = find( val = 'zaaaaaaaaaaaaaaz' sub = 'z' off = nmin( val1 = 12 val2 = 30 ) ).
+    ASSERT lv = 15.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

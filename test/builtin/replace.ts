@@ -386,4 +386,14 @@ ASSERT res = 'foo/bar-moo'.`;
     await f(abap);
   });
 
+  it("off and len from nmin, two digits", async () => {
+    const code = `
+DATA res TYPE string.
+res = replace( val = 'abcdefghijklmnop' off = nmin( val1 = 12 val2 = 30 ) len = nmin( val1 = 2 val2 = 30 ) with = 'XX' ).
+ASSERT res = 'abcdefghijklXXop'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

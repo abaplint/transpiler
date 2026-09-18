@@ -2,6 +2,7 @@ import {Integer} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {throwError} from "../throw_error";
+import {position} from "./_position";
 
 export interface IFindAnyNotOfInput {
   val: ICharacter | string;
@@ -15,9 +16,9 @@ export function find_any_not_of(input: IFindAnyNotOfInput) {
   const val = typeof input.val === "string" ? input.val : input.val.get();
   const sub = typeof input.sub === "string" ? input.sub : input.sub.get();
 
-  const off = typeof input.off === "number" ? input.off : input.off?.get() || 0;
-  const len = typeof input.len === "number" ? input.len : input.len?.get();
-  let occ = typeof input.occ === "number" ? input.occ : input.occ?.get();
+  const off = position(input.off) || 0;
+  const len = position(input.len);
+  let occ = position(input.occ);
 
   if (occ === 0) {
     throwError("CX_SY_STRG_PAR_VAL");
