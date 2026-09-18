@@ -98,7 +98,7 @@ async function writeObjects(outputFiles: Transpiler.IOutputFile[],
         && (type === "PROG" || type === "FUGR" || type === "CLAS")) {
       const name = output.filename + ".map";
 // SourceMappingUrl needs to be percent-encoded, ref https://github.com/microsoft/TypeScript/issues/40951
-      contents = contents + `\n//# sourceMappingURL=` + name.replace(/#/g, "%23");
+      contents = contents + `\n//# sourceMappingURL=` + name.replace(/%/g, "%25").replace(/#/g, "%23");
 
       // map the bare abap filename each mapping carries to its path on disk;
       // source map "sources" are URLs, so always forward slashes, also on Windows

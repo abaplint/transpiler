@@ -552,4 +552,31 @@ ENDINTERFACE.`;
     expect(code).to.not.include("zif_aff_oo_types");
   });
 
+  it("a percent in a filename survives the import specifier", async () => {
+    // abapGit encodes the dot of a Web Repository object's name, so
+    // ZO4D_06_PLASMA.PNG is stored as zo4d_06_plasma%2epng. A specifier is
+    // percent-decoded before it resolves, so the percent has to be escaped
+    // or the import looks for zo4d_06_plasma.png and the whole init script
+    // throws before anything is served
+    const w3mi = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_W3MI" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <WWWDATA>
+    <RELID>MI</RELID>
+    <OBJID>ZTEST%2EPNG</OBJID>
+    <TEXT>test</TEXT>
+   </WWWDATA>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+    const res = await runResult([
+      {filename: "ztest%2epng.w3mi.xml", contents: w3mi},
+      {filename: "ztest%2epng.w3mi.data", contents: "AAAA"},
+    ]);
+    const init = res.initializationScript + res.initializationScript2;
+    expect(init).to.contain("ztest%252epng.w3mi.mjs");
+    expect(init).to.not.contain('"./ztest%2epng.w3mi.mjs"');
+  });
+
 });
