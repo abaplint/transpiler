@@ -1,6 +1,7 @@
 import * as abaplint from "@abaplint/core";
 import {Chunk} from "../chunk";
 import {IOutputFile} from "../types";
+import {w3miObjectName} from "../w3mi_name";
 
 export class HandleW3MI {
   public runObject(obj: abaplint.Objects.WebMIME, _reg: abaplint.IRegistry): IOutputFile[] {
@@ -12,7 +13,7 @@ export class HandleW3MI {
 
     obj.parse();
     const dataFile = obj.getDataFile();
-    const chunk = new Chunk().appendString(`abap.W3MI["${obj.getName().toUpperCase()}"] = {
+    const chunk = new Chunk().appendString(`abap.W3MI["${w3miObjectName(obj)}"] = {
   "objectType": "W3MI",
   "filename": ${JSON.stringify(dataFile?.getFilename())},
 };`);

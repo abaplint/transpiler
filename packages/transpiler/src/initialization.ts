@@ -6,7 +6,19 @@ import {HandleFUGR} from "./handlers/handle_fugr";
 export function escapeNamespaceFilename(filename: string): string {
 // ES modules are resolved and cached as URLs. This means that special characters must be
 // percent-encoded, such as # with %23 and ? with %3F.
-    return filename.replace(/\//g, "%23");
+//
+// The percent sign goes first, and the order is the whole point. A URL is
+// percent-decoded before it is resolved, so a file whose *name* contains a
+// percent has to carry it escaped or the decoding eats it: abapGit stores
+// ZO4D_06_PLASMA.PNG as zo4d_06_plasma%2epng, and "./zo4d_06_plasma%2epng.w3mi.mjs"
+// resolves to zo4d_06_plasma.png.w3mi.mjs, which is not there. Escaping the
+// percent after the slash would corrupt the %23 this function just wrote.
+    return filename.replace(/%/g, "%25").replace(/\//g, "%23");
+}
+
+// The same rule for a name that already carries abapGit's # rather than a slash
+export function escapeFilenameForImport(filename: string): string {
+    return filename.replace(/%/g, "%25").replace(/#/g, "%23");
 }
 
 export class Initialization {
