@@ -41,7 +41,7 @@ export function mod(left: INumeric | ICharacter | string | Integer8 | number, ri
 
   // the calculation type of the operands decides: with a float operand the
   // remainder is a float, 2.75 MOD 1 is 0.75 and not 1
-  if (left instanceof Float || right instanceof Float || Number.isInteger(val) === false) {
+  if (left instanceof Float || right instanceof Float) {
     return new Float().set(val);
   }
   return new Integer().set(val);
