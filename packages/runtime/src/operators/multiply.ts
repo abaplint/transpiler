@@ -13,6 +13,13 @@ export function multiply(left: INumeric | ICharacter | string | Integer8 | numbe
   } else if (left instanceof Integer && right instanceof Integer) {
     const val = left.get() * right.get();
     return new Integer().set(val);
+  } else if (left instanceof Float && right instanceof Float) {
+    // Two floats fall through the rest of the chain to exactly this, and
+    // float arithmetic is the most common thing there is: the remaining type
+    // tests all fail, and then parse() is called on each operand, which for a
+    // Float is getRaw(). It sits after the integer branch on purpose, so that
+    // integer arithmetic pays nothing for it.
+    return new Float().set(left.getRaw() * right.getRaw());
   } else if (typeof left === "number" && typeof right === "number"
       && Number.isInteger(left) && Number.isInteger(right)) {
     const val = left * right;
