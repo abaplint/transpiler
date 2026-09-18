@@ -90,18 +90,13 @@ export function gt(
     r = right.get();
   }
 
+  // a character operand is converted to the type of the numeric one it is
+  // compared with: '0.5' against a float is 0.5, not 0. parse() knows the
+  // rules, and an empty string is 0 there too
   if (typeof l === "string" && typeof r === "number") {
-    if (l === "") {
-      l = 0;
-    } else {
-      l = parseInt(l, 10);
-    }
+    l = parse(l);
   } else if (typeof l === "number" && typeof r === "string") {
-    if (r === "") {
-      r = 0;
-    } else {
-      r = parseInt(r, 10);
-    }
+    r = parse(r);
   }
 
   if (l === undefined) {

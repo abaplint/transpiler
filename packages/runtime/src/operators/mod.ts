@@ -1,5 +1,5 @@
 import {throwError} from "../throw_error";
-import {Integer, Integer8} from "../types";
+import {Float, Integer, Integer8} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
@@ -39,10 +39,10 @@ export function mod(left: INumeric | ICharacter | string | Integer8 | number, ri
     val = val * -1;
   }
 
-  // hmm, to handle field symbols?
-  if (left instanceof Integer8 || right instanceof Integer8) {
-    return new Integer8().set(val);
-  } else {
-    return new Integer().set(val);
+  // the calculation type of the operands decides: with a float operand the
+  // remainder is a float, 2.75 MOD 1 is 0.75 and not 1
+  if (left instanceof Float || right instanceof Float || Number.isInteger(val) === false) {
+    return new Float().set(val);
   }
+  return new Integer().set(val);
 }
