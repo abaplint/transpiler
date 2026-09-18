@@ -33,6 +33,17 @@ describe("Arithmetics", () => {
     expect(abap.operators.mod(i, two).get()).to.equal(1);
   });
 
+  it("MOD with an int8 operand answers int8", () => {
+    const abap = new ABAP();
+    const i8 = new abap.types.Integer8();
+    i8.set(7n);
+    const two = new abap.types.Integer();
+    two.set(2);
+    const r = abap.operators.mod(i8 as any, two);
+    expect(r).to.be.instanceof(abap.types.Integer8);
+    expect((r as any).get()).to.equal(1n);
+  });
+
   // A float exactly on a half is rounded away from zero when it is moved to
   // an integer, on both sides: 0.5 is 1 and -0.5 is -1. Math.round rounds a
   // half towards positive infinity, so -0.5 used to be 0.
