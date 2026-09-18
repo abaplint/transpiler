@@ -1,4 +1,4 @@
-import {Date,Time,Hex, Float, Integer, DecFloat34, HexUInt8, Integer8} from "../types";
+import {Character, Date,Time,Hex, Float, Integer, DecFloat34, HexUInt8, Integer8} from "../types";
 import {XString} from "../types/xstring";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
@@ -20,6 +20,9 @@ export function parse(val: INumeric | ICharacter | string | number | Float | Int
     return val.get();
   } else if (val instanceof Float) {
     return val.getRaw();
+  } else if (val instanceof Character) {
+    // constants remember what they parse to, the value cannot change
+    return val.getNumeric();
   } else if (val instanceof XString) {
     if (val.get() === "") {
       return 0;

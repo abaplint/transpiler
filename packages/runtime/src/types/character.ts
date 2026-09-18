@@ -15,6 +15,10 @@ const initialValues: {[length: number]: string} = {};
 export class Character implements ICharacter {
   private value: string;
   private constant: boolean = false;
+  /** the value as a number, filled by getNumeric() only when this is a constant.
+   * set() cannot invalidate it because set() throws on a constant; clear() can,
+   * and does, because it is not covered by that check. */
+  private numeric: number | undefined = undefined;
   private readonly length: number;
   private readonly extra: AbstractTypeData | undefined;
 
@@ -95,6 +99,22 @@ export class Character implements ICharacter {
       initialValues[this.length] = " ".repeat(this.length);
     }
     this.value = initialValues[this.length];
+    this.numeric = undefined;
+  }
+
+  /** The value as a number. A constant cannot change, so it is parsed once and
+   * remembered: a character literal is how ABAP writes a non integer constant,
+   * ie. "lv_x = lv_y * '0.5'", and every arithmetic operation on one used to
+   * trim the string and parse it again. */
+  public getNumeric(): number {
+    let numeric = this.numeric;
+    if (numeric === undefined) {
+      numeric = parse(this.value);
+      if (this.constant === true) {
+        this.numeric = numeric;
+      }
+    }
+    return numeric;
   }
 
   public get(): string {
