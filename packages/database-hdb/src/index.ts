@@ -148,6 +148,14 @@ export class HanaDatabaseClient implements DB.DatabaseClient {
     if (sql === "") {
       return;
     }
+    // Open the LUW here, because this client has autocommit off: without
+    // this, `inTransaction` stays false for anything sent through execute(),
+    // commit() returns at its first line, and the work is lost at
+    // disconnect -- which the interface documents as an implicit commit.
+    // A single connection never sees it, since a session reads its own
+    // uncommitted rows. The other drivers run in autocommit, so they cannot
+    // lose it this way. beginTransaction() is a no-op when one is open.
+    await this.beginTransaction();
     const folded = foldIdentifiers(sql);
     if (this.trace) {
       console.log(folded);
