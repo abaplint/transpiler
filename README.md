@@ -15,6 +15,7 @@ Connecting to a database is optional, currently the following databases have dri
 * [SQLite](https://www.sqlite.org) via [@abaplint/database-sqlite](https://www.npmjs.com/package/@abaplint/database-sqlite)
 * [PostgreSQL](https://www.postgresql.org) via [@abaplint/database-pg](https://www.npmjs.com/package/@abaplint/database-pg)
 * [Snowflake](https://www.snowflake.com/) via [@abaplint/database-snowflake](https://www.npmjs.com/package/@abaplint/database-snowflake)
+* [SAP HANA](https://www.sap.com/products/technology-platform/hana.html) via [@abaplint/database-hdb](https://www.npmjs.com/package/@abaplint/database-hdb)
 
 ## Reuse library
 

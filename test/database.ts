@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {AsyncFunction, runFiles as runRilesSqlite, runFilesPostgres, runFilesSnowflake} from "./_utils";
+import {AsyncFunction, runFiles as runRilesSqlite, runFilesHana, runFilesPostgres, runFilesSnowflake} from "./_utils";
 import {ABAP, MemoryConsole} from "../packages/runtime/src/";
 import {msag_escape, msag_zag_unit_test, tabl_t100xml, zquan, zt111, zt222} from "./_data";
 import {IFile} from "../packages/transpiler/src/types";
@@ -61,7 +61,8 @@ const tabl_t001wxml = `<?xml version="1.0" encoding="utf-8"?>
 async function runAllDatabases(abap: ABAP,
                                files: IFile[],
                                check: () => any,
-                               settings?: {sqlite?: boolean, postgres?: boolean, snowflake?: boolean, skipVersionCheck?: boolean}) {
+                               settings?: {sqlite?: boolean, postgres?: boolean, snowflake?: boolean,
+                                 hana?: boolean, skipVersionCheck?: boolean}) {
 
   // @ts-ignore
   global.abap = abap;
@@ -80,6 +81,20 @@ async function runAllDatabases(abap: ABAP,
 
   if (settings === undefined || settings.postgres === undefined || settings.postgres === true) {
     const js = await runFilesPostgres(abap, files);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    await abap.context.databaseConnections["DEFAULT"].disconnect();
+    check();
+  }
+
+  // HANA, when there is one to talk to. It cannot join test/stack.yml the way
+  // postgres does -- the HANA Express image is 4.5 GB, wants a licence flag
+  // and some minutes to come up -- so this follows the snowflake shape: the
+  // cases run when the connection is in the environment and are skipped
+  // otherwise.
+  if ((settings === undefined || settings.hana === undefined || settings.hana === true)
+      && process.env.HANA_HOST) {
+    const js = await runFilesHana(abap, files);
     const f = new AsyncFunction("abap", js);
     await f(abap);
     await abap.context.databaseConnections["DEFAULT"].disconnect();

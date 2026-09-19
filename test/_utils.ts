@@ -2,6 +2,7 @@ import {Transpiler} from "../packages/transpiler/src/";
 import {ABAP} from "../packages/runtime/src/";
 import {SQLiteDatabaseClient} from "../packages/database-sqlite/src/";
 import {PostgresDatabaseClient} from "../packages/database-pg/src";
+import {HanaDatabaseClient} from "../packages/database-hdb/src";
 import {SnowflakeDatabaseClient} from "../packages/database-snowflake/src";
 import * as abaplint from "@abaplint/core";
 import * as crypto from "node:crypto";
@@ -68,6 +69,33 @@ export async function runFilesPostgres(abap: ABAP, files: IFile[]) {
     });
     await abap.context.databaseConnections["DEFAULT"].connect();
     await abap.context.databaseConnections["DEFAULT"].execute(res.databaseSetup.schemas.pg);
+    await abap.context.databaseConnections["DEFAULT"].execute(res.databaseSetup.insert);
+  }
+  let pre = "";
+  for (const o of res.objects) {
+    if (o.object.type === "TABL") {
+      pre = o.chunk.getCode() + "\n";
+    }
+  }
+  return "global.abap = abap;\n" + pre + res.objects[0].chunk.getCode();
+}
+
+export async function runFilesHana(abap: ABAP, files: IFile[]) {
+  const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
+  const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory);
+  const res = await new Transpiler().run(reg);
+  abap.console.clear();
+  if (res.databaseSetup.schemas.hdb.length > 0) {
+    const schema = "transpiler_" + crypto.randomBytes(10).toString("hex");
+    abap.context.databaseConnections["DEFAULT"] = new HanaDatabaseClient({
+      host: process.env.HANA_HOST!,
+      port: Number(process.env.HANA_PORT ?? 39017),
+      user: process.env.HANA_USER!,
+      password: process.env.HANA_PASSWORD!,
+      schema,
+    });
+    await abap.context.databaseConnections["DEFAULT"].connect();
+    await abap.context.databaseConnections["DEFAULT"].execute(res.databaseSetup.schemas.hdb);
     await abap.context.databaseConnections["DEFAULT"].execute(res.databaseSetup.insert);
   }
   let pre = "";

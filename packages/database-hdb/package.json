@@ -1,0 +1,28 @@
+{
+  "name": "@abaplint/database-hdb",
+  "version": "2.11.83",
+  "description": "Transpiler - SAP HANA driver",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "scripts": {
+    "test": "tsc",
+    "compile": "tsc",
+    "publish:major": "npm --no-git-tag-version version major && rimraf build && npm install && npm run test && npm publish --access public",
+    "publish:minor": "npm --no-git-tag-version version minor && rimraf build && npm install && npm run test && npm publish --access public",
+    "publish:patch": "npm --no-git-tag-version version patch && rimraf build && npm install && npm run test && npm publish --access public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abaplint/transpiler.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "hdb": "^2.29.6"
+  },
+  "devDependencies": {
+    "@abaplint/runtime": "^2.13.83",
+    "@types/node": "^26.4.1",
+    "typescript": "^6.0.3"
+  }
+}
