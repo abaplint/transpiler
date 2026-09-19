@@ -27,17 +27,17 @@
   "author": "abaplint",
   "license": "MIT",
   "devDependencies": {
-    "@abaplint/core": "^2.120.55",
+    "@abaplint/core": "^2.120.56",
     "@abaplint/transpiler": "^2.13.89",
     "@types/glob": "^9.0.0",
-    "@types/node": "^26.4.1",
+    "@types/node": "^26.6.2",
     "@types/progress": "^2.0.7",
     "glob": "^13.0.6",
     "p-limit": "^7.3.2",
     "progress": "^2.0.3",
     "ts-json-schema-generator": "^2.9.0",
     "typescript": "^6.0.3",
-    "webpack": "^5.110.3",
+    "webpack": "^5.111.1",
     "webpack-cli": "^7.2.3"
   }
 }
