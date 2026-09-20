@@ -470,7 +470,7 @@ ENDINTERFACE.`;
     ]);
 
     expect(result.databaseSetup.insert).to.include(
-      `INSERT INTO reposrc ('PROGNAME', 'DATA') VALUES ('ZFOO                                    ', 'WRITE ''1''.');`);
+      `INSERT INTO reposrc (progname, data) VALUES ('ZFOO                                    ', 'WRITE ''1''.');`);
   });
 
   it("Global INTF + CLAS, static method from interface", async () => {

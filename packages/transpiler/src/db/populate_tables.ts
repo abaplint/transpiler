@@ -34,7 +34,7 @@ export class PopulateTables {
       return "";
     }
 
-    return `INSERT INTO reposrc ('PROGNAME', 'DATA') VALUES ('${name.padEnd(40, " ")}', '${this.escape(raw)}');`;
+    return `INSERT INTO reposrc (progname, data) VALUES ('${name.padEnd(40, " ")}', '${this.escape(raw)}');`;
   }
 
   public insertT100(msag: abaplint.Objects.MessageClass): string[] {
