@@ -9,6 +9,7 @@ import * as abaplint from "@abaplint/core";
 import {TranspilerConfig} from "./config";
 import {FileOperations} from "./file_operations";
 import {buildGitCloneArguments} from "./git_clone";
+import {resolveLibFolder} from "./lib_folder";
 import {ITranspilerConfig} from "./types";
 
 class Progress implements Transpiler.IProgress {
