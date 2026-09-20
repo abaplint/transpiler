@@ -31,12 +31,16 @@ async function loadLib(config: ITranspilerConfig): Promise<Transpiler.IFile[]> {
   for (const lib of config.libs || []) {
     let dir = "";
     let cleanupFolder = false;
-    if (lib.folder !== undefined && lib.folder !== "" && fs.existsSync(process.cwd() + lib.folder)) {
-      console.log("From folder: " + lib.folder);
-      dir = process.cwd() + lib.folder;
+    const folder = resolveLibFolder(lib.folder, process.cwd());
+    if (folder !== undefined && fs.existsSync(folder)) {
+      console.log("From folder: " + folder);
+      dir = folder;
     } else {
       if (lib.url === undefined || lib.url === "") {
-        throw new Error("Library must define a non-empty url or an existing folder");
+        if (folder === undefined) {
+          throw new Error("Library must define a non-empty url or an existing folder");
+        }
+        throw new Error("Library folder not found: " + folder);
       }
       console.log("Clone: " + lib.url);
       dir = fs.mkdtempSync(path.join(os.tmpdir(), "abap_transpile-"));
