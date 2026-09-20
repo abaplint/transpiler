@@ -14,6 +14,7 @@ export interface ITranspilerConfig {
   output_folder: string;
   libs?: {
     url?: string,
+    /** relative to the current working directory */
     folder?: string,
     files?: string | string[],
     /** list of regex, case insensitive
