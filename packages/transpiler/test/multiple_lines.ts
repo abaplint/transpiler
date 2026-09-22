@@ -803,28 +803,6 @@ ENDCLASS.`;
     expect(await runSingle(abap)).to.include(`ATTRIBUTES = {"LIF_INTF~FIELD":`);
   });
 
-  it("CONV # into a generic parameter keeps the argument type", async () => {
-    const abap = `
-CLASS lcl DEFINITION.
-  PUBLIC SECTION.
-    CLASS-METHODS take IMPORTING p_name TYPE any.
-    CLASS-METHODS run.
-ENDCLASS.
-CLASS lcl IMPLEMENTATION.
-  METHOD take.
-    WRITE p_name.
-  ENDMETHOD.
-  METHOD run.
-    DATA lv_column TYPE string.
-    lv_column = 'MAPPING_VALUE'.
-    take( CONV #( lv_column ) ).
-  ENDMETHOD.
-ENDCLASS.`;
-    const js = await runSingle(abap);
-    expect(js).to.include(`take({p_name: (lv_column).clone()})`);
-    expect(js).to.not.include(`new abap.types.Character(4).set(lv_column)`);
-  });
-
   it("call fm exceptions", async () => {
     const abap = `
 CALL FUNCTION 'FUNCTION_EXISTS'

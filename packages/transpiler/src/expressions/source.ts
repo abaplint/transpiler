@@ -134,20 +134,12 @@ export class SourceTranspiler implements IExpressionTranspiler {
           if (typ === undefined) {
             throw new Error("TypeNameOrInfer not found in ConvBody");
           }
+          ret = new Chunk().appendString(new TypeNameOrInfer().transpile(typ, traversal).getCode());
+          ret.appendString(".set(");
           // todo: handle LET
           const context = new TypeNameOrInfer().findType(typ, traversal);
-          if (typ.concatTokens() === "#" && context.isGeneric()) {
-            // "CONV #( )" in an operand position with a generic type, eg. a "TYPE any" parameter:
-            // ABAP uses the type of the argument itself, so the result is a copy of the argument
-            ret = new Chunk().appendString("(");
-            ret.appendString(new SourceTranspiler().transpile(c.getFirstChild() as Nodes.ExpressionNode, traversal).getCode());
-            ret.appendString(").clone()");
-          } else {
-            ret = new Chunk().appendString(new TypeNameOrInfer().transpile(typ, traversal).getCode());
-            ret.appendString(".set(");
-            ret.appendString(new SourceTranspiler().transpile(c.getFirstChild() as Nodes.ExpressionNode, traversal, context).getCode());
-            ret.appendString(")");
-          }
+          ret.appendString(new SourceTranspiler().transpile(c.getFirstChild() as Nodes.ExpressionNode, traversal, context).getCode());
+          ret.appendString(")");
           if (this.addGet) {
             ret.appendString(".get()");
           }
