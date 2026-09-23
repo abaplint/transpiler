@@ -209,6 +209,151 @@ WRITE result.`;
     expect(abap.console.get()).to.equal("-1");
   });
 
+  it("DIV and MOD, negative divisor", async () => {
+    // the remainder is never negative and below |divisor|, so with a negative
+    // divisor DIV rounds up; values measured on a 7.58 system
+    const code = `
+    DATA d TYPE i.
+    DATA m TYPE i.
+    d = 7 DIV 2.
+    m = 7 MOD 2.
+    ASSERT d = 3.
+    ASSERT m = 1.
+    d = -7 DIV 2.
+    m = -7 MOD 2.
+    ASSERT d = -4.
+    ASSERT m = 1.
+    d = 7 DIV -2.
+    m = 7 MOD -2.
+    ASSERT d = -3.
+    ASSERT m = 1.
+    d = -7 DIV -2.
+    m = -7 MOD -2.
+    ASSERT d = 4.
+    ASSERT m = 1.
+    d = 6 DIV -2.
+    m = 6 MOD -2.
+    ASSERT d = -3.
+    ASSERT m = 0.
+    d = 7 DIV 3.
+    m = 7 MOD 3.
+    ASSERT d = 2.
+    ASSERT m = 1.
+    d = 7 DIV -3.
+    m = 7 MOD -3.
+    ASSERT d = -2.
+    ASSERT m = 1.
+    d = -7 DIV 3.
+    m = -7 MOD 3.
+    ASSERT d = -3.
+    ASSERT m = 2.
+    d = -7 DIV -3.
+    m = -7 MOD -3.
+    ASSERT d = 3.
+    ASSERT m = 2.
+    d = 11 DIV -4.
+    m = 11 MOD -4.
+    ASSERT d = -2.
+    ASSERT m = 3.
+    d = -11 DIV -4.
+    m = -11 MOD -4.
+    ASSERT d = 3.
+    ASSERT m = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("DIV and MOD, negative divisor, float", async () => {
+    // fractional operands of both signs; 0.5 MOD 0.1 is 0 on a system, as
+    // a - b * ( a DIV b ) in double precision; values measured on a 7.58 system
+    const code = `
+    DATA a TYPE f.
+    DATA b TYPE f.
+    DATA d TYPE f.
+    DATA m TYPE f.
+    a = '7.5'.
+    b = '2'.
+    d = a DIV b.
+    m = a MOD b.
+    ASSERT d = '3'.
+    ASSERT m = '1.5'.
+    a = '7.5'.
+    b = '-2'.
+    d = a DIV b.
+    m = a MOD b.
+    ASSERT d = '-3'.
+    ASSERT m = '1.5'.
+    a = '-7.5'.
+    b = '2'.
+    d = a DIV b.
+    m = a MOD b.
+    ASSERT d = '-4'.
+    ASSERT m = '0.5'.
+    a = '-7.5'.
+    b = '-2'.
+    d = a DIV b.
+    m = a MOD b.
+    ASSERT d = '4'.
+    ASSERT m = '0.5'.
+    a = '7'.
+    b = '2.5'.
+    d = a DIV b.
+    m = a MOD b.
+    ASSERT d = '2'.
+    ASSERT m = '2'.
+    a = '7'.
+    b = '-2.5'.
+    d = a DIV b.
+    m = a MOD b.
+    ASSERT d = '-2'.
+    ASSERT m = '2'.
+    a = '-7'.
+    b = '2.5'.
+    d = a DIV b.
+    m = a MOD b.
+    ASSERT d = '-3'.
+    ASSERT m = '0.5'.
+    a = '-7'.
+    b = '-2.5'.
+    d = a DIV b.
+    m = a MOD b.
+    ASSERT d = '3'.
+    ASSERT m = '0.5'.
+    a = '-7.5'.
+    b = '2.5'.
+    d = a DIV b.
+    m = a MOD b.
+    ASSERT d = '-3'.
+    ASSERT m = '0'.
+    a = '7.5'.
+    b = '-2.5'.
+    d = a DIV b.
+    m = a MOD b.
+    ASSERT d = '-3'.
+    ASSERT m = '0'.
+    a = '0.5'.
+    b = '0.1'.
+    d = a DIV b.
+    m = a MOD b.
+    ASSERT d = 5.
+    ASSERT m = 0.
+    b = '-0.1'.
+    d = a DIV b.
+    m = a MOD b.
+    ASSERT d = -5.
+    ASSERT m = 0.
+    a = '-0.5'.
+    b = '0.1'.
+    d = a DIV b.
+    m = a MOD b.
+    ASSERT d = -5.
+    ASSERT m = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("DIV, short hex, 1", async () => {
     const code = `
     DATA hex TYPE x LENGTH 1.

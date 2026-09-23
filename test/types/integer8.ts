@@ -599,6 +599,47 @@ describe("Running Examples - Integer8 type", () => {
     expect(abap.console.get()).to.equal("-2");
   });
 
+  it("DIV and MOD, negative divisor", async () => {
+    // values measured on a 7.58 system
+    const code = `
+    DATA d TYPE int8.
+    DATA m TYPE int8.
+    DATA a TYPE int8.
+    a = 7.
+    d = a DIV -2.
+    m = a MOD -2.
+    ASSERT d = -3.
+    ASSERT m = 1.
+    a = -7.
+    d = a DIV -2.
+    m = a MOD -2.
+    ASSERT d = 4.
+    ASSERT m = 1.
+    a = -7.
+    d = a DIV 2.
+    m = a MOD 2.
+    ASSERT d = -4.
+    ASSERT m = 1.
+    a = 7.
+    d = a DIV -3.
+    m = a MOD -3.
+    ASSERT d = -2.
+    ASSERT m = 1.
+    a = -7.
+    d = a DIV -3.
+    m = a MOD -3.
+    ASSERT d = 3.
+    ASSERT m = 2.
+    a = 11.
+    d = a DIV -4.
+    m = a MOD -4.
+    ASSERT d = -2.
+    ASSERT m = 3.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("DIV rounding1 plus", async () => {
     const code = `
     DATA int1 TYPE int8.

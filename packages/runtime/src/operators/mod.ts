@@ -16,9 +16,12 @@ export function mod(left: INumeric | ICharacter | string | Integer8 | number, ri
       }
     }
 
-    let val = ( ( l % r ) + r ) % r;
-    if (val < 0) {
-      val = val * -1n;
+    // the remainder is never negative and below |r|, whatever the signs:
+    // 7 MOD -3 = 1, -7 MOD -3 = 2
+    const a = r < 0n ? -r : r;
+    let val = l % a;
+    if (val < 0n) {
+      val = val + a;
     }
     return new Integer8().set(val);
   }
@@ -33,10 +36,14 @@ export function mod(left: INumeric | ICharacter | string | Integer8 | number, ri
     }
   }
 
-  let val = ( ( l % r ) + r ) % r;
-
-  if (val < 0) {
-    val = val * -1;
+  // a MOD r = a - r * ( a DIV r ), with the quotient rule of DIV:
+  // 7 MOD -3 = 1, -7 MOD -3 = 2, 7.5 MOD -2 = 1.5. For f this is also what a
+  // system computes in double precision, 0.5 MOD 0.1 = 0 there, where a
+  // remainder by % gives 0.09999999999999998
+  const q = r > 0 ? Math.floor(l / r) : -Math.floor(l / -r);
+  let val = l - r * q;
+  if (val === 0) {
+    val = 0; // not -0
   }
 
   // the calculation type of the operands decides: with a float operand the
