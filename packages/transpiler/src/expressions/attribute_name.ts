@@ -16,6 +16,16 @@ export class AttributeNameTranspiler implements IExpressionTranspiler {
       concat = "#" + concat;
     }
 
+    // an attribute declared in an interface lives on the object as "<intf>$<name>",
+    // also when it is reached via an interface reference without the "intf~" alias,
+    // eg. "obj->method( )->value" where method returns "REF TO lif_intf"
+    const interfaceName = traversal.isInterfaceAttribute(node.getFirstToken());
+    if (interfaceName && concat.startsWith(interfaceName) === false) {
+      concat = Traversal.escapeNamespace(interfaceName) + "$" + Traversal.escapeNamespace(concat)!.replace("~", "$");
+    } else {
+      concat = Traversal.escapeNamespace(concat)!.replace("~", "$");
+    }
+
     return new Chunk().append(concat, node, traversal);
   }
 
