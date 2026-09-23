@@ -403,6 +403,8 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({object: obj,user: usr,fields:
     {abap: "AT USER-COMMAND.", js: `throw new Error("AT USER-COMMAND, not supported, transpiler");`, skip: false},
     {abap: "AT PF5.", js: `throw new Error("AT PFnn, not supported, transpiler");`, skip: false},
     {abap: "CALL SELECTION-SCREEN 500 STARTING AT 10 5.", js: `throw new Error("CALL SELECTION-SCREEN, not supported, transpiler");`, skip: false},
+    {abap: "CONTROLS tab TYPE TABSTRIP.", js: `throw new Error("Controls, not supported, transpiler");`, skip: false},
+    {abap: "CONTROLS tc TYPE TABLEVIEW USING SCREEN 100.", js: `throw new Error("Controls, not supported, transpiler");`, skip: false},
     {abap: "SKIP.", js: `abap.statements.skip();`, skip: false},
     {abap: "SKIP 2.", js: `abap.statements.skip({lines: abap.IntegerFactory.get(2)});`, skip: false},
     {abap: "SKIP TO LINE 3.", js: `abap.statements.skip({toLine: abap.IntegerFactory.get(3)});`, skip: false},
