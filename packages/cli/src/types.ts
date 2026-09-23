@@ -11,6 +11,7 @@ export interface ITranspilerConfig {
    * @uniqueItems true
    */
   exclude_filter?: string[];
+  /** @minLength 1 */
   output_folder: string;
   libs?: {
     url?: string,
