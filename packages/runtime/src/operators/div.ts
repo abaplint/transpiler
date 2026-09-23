@@ -15,14 +15,13 @@ export function div(left: INumeric | ICharacter | Integer8 | string | number, ri
         throwError("CX_SY_ZERODIVIDE");
       }
     }
+    // DIV leaves a remainder that is never negative, 0 <= l - r * div < |r|,
+    // so a truncated quotient moves down for a positive divisor and up for
+    // a negative one: 7 DIV -2 = -3, -7 DIV -2 = 4
     const remainder = l % r;
     let div = l / r;
-    if (remainder !== 0n) {
-      const sign1 = l < 0n;
-      const sign2 = r < 0n;
-      if (sign1 !== sign2) {
-        div = div - 1n;
-      }
+    if (remainder < 0n) {
+      div = r > 0n ? div - 1n : div + 1n;
     }
     return new Integer8().set(div);
   }
@@ -36,6 +35,8 @@ export function div(left: INumeric | ICharacter | Integer8 | string | number, ri
       throwError("CX_SY_ZERODIVIDE");
     }
   } else {
-    return new Integer().set(Math.floor(l / r));
+    // floor only for a positive divisor; for a negative one the quotient
+    // rounds up, so that the remainder a - b * ( a DIV b ) is not negative
+    return new Integer().set(r > 0 ? Math.floor(l / r) : -Math.floor(l / -r));
   }
 }
