@@ -33,6 +33,7 @@ export * from "./concatenate";
 export * from "./end_of_selection";
 export * from "./condense";
 export * from "./constant";
+export * from "./controls";
 export * from "./continue";
 export * from "./convert";
 export * from "./create_data";
