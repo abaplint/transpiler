@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import {binarySearchFrom, binarySearchFromRow} from "../binary_search";
-import {eq, ge, gt} from "../compare";
+import {eq, ge, gt, lt} from "../compare";
 import {DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Integer8, Structure, Table, TableAccessType} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
@@ -121,6 +121,74 @@ export async function searchWithKeyPromise(arr: any, withKey: (i: any) => Promis
 
 /////////////////
 
+function toRow(a: any, isStructured: boolean, usesTableLine: boolean | undefined) {
+  if (usesTableLine === false && isStructured === true) {
+    return a.get();
+  }
+  return isStructured ? {table_line: a, ...a.get()} : {table_line: a};
+}
+
+/** READ with a key on a SORTED table: binary search over the leading key components that are given,
+ *  a miss gives sy-subrc 4 and sy-tabix of the row the key would be inserted before,
+ *  or sy-subrc 8 and sy-tabix lines + 1 when it would be inserted after the last row */
+/** true when every component of the condition is a component of the key */
+function onlyKeyComponents(keyFields: readonly string[], options: IReadTableOptions) {
+  const key = keyFields.map(k => k.toLowerCase());
+  return Object.keys(options.withKeySimple || {}).every(n => key.includes(n.toLowerCase()));
+}
+
+function readSortedWithKey(arr: readonly any[], keyFields: readonly string[], options: IReadTableOptions) {
+  const names = Object.keys(options.withKeySimple!).map(n => n.toLowerCase());
+  const prefix: {key: (i: any) => any, value: any}[] = [];
+  for (const keyField of keyFields) {
+    const index = names.indexOf(keyField.toLowerCase());
+    if (index < 0) {
+      break;
+    }
+    prefix.push(options.withKeyValue![index]);
+  }
+  if (prefix.length === 0) {
+    const searchResult = searchWithKey(arr, options.withKey!, 0, options.usesTableLine);
+    return {found: searchResult.found, foundIndex: searchResult.foundIndex, subrc: undefined};
+  }
+
+  const isStructured = arr[0] instanceof Structure;
+  const comparePrefix = (row: any) => {
+    for (const p of prefix) {
+      const value = p.key(row);
+      if (lt(value, p.value)) {
+        return -1;
+      } else if (gt(value, p.value)) {
+        return 1;
+      }
+    }
+    return 0;
+  };
+
+  let left = 0;
+  let right = arr.length;
+  while (left < right) {
+    const middle = Math.floor((left + right) / 2);
+    if (comparePrefix(toRow(arr[middle], isStructured, options.usesTableLine)) < 0) {
+      left = middle + 1;
+    } else {
+      right = middle;
+    }
+  }
+
+  for (let index = left; index < arr.length; index++) {
+    const row = toRow(arr[index], isStructured, options.usesTableLine);
+    if (comparePrefix(row) !== 0) {
+      break;
+    }
+    if (options.withKey!(row) === true) {
+      return {found: arr[index], foundIndex: index + 1, subrc: undefined};
+    }
+  }
+
+  return {found: undefined, foundIndex: left + 1, subrc: left >= arr.length ? 8 : 4};
+}
+
 export function readTable(table: Table | HashedTable | FieldSymbol, options?: IReadTableOptions): ReadTableReturn {
   let found: any = undefined;
   let foundIndex = 0;
@@ -223,17 +291,31 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
       return readTable(table, {...options, withKeySimple: undefined});
     }
 
-    const startIndex = binarySearchFrom(arr, 0, arr.length, firstKeyName.toLowerCase(), firstValue) - 1;
-//    console.dir("startindex: " + startIndex);
-
-    if (startIndex >= 0) {
-      const searchResult = searchWithKeyEarlyExit(arr, options.withKey, startIndex, options.usesTableLine, firstKeyName, firstValue);
-//      console.dir(searchResult);
-
-      found = searchResult.found;
-      foundIndex = searchResult.foundIndex;
+    if (keyInformation?.type === TableAccessType.sorted
+        && options.withKeyValue
+        && onlyKeyComponents(keyInformation.keyFields, options)) {
+      const result = readSortedWithKey(arr, keyInformation.keyFields, options);
+      found = result.found;
+      foundIndex = result.foundIndex;
+      binarySubrc = result.subrc;
+    } else {
+      const startIndex = binarySearchFrom(arr, 0, arr.length, firstKeyName.toLowerCase(), firstValue) - 1;
+      if (startIndex >= 0) {
+        const searchResult = searchWithKeyEarlyExit(arr, options.withKey, startIndex, options.usesTableLine, firstKeyName, firstValue);
+        found = searchResult.found;
+        foundIndex = searchResult.foundIndex;
+      }
     }
-
+  } else if (options?.withTableKey === true
+      && options.withKeyValue
+      && options.withKeySimple
+      && options.withKey
+      && table.getOptions().primaryKey?.type === TableAccessType.sorted
+      && onlyKeyComponents(table.getOptions().primaryKey?.keyFields || [], options)) {
+    const result = readSortedWithKey(table.array(), table.getOptions().primaryKey?.keyFields || [], options);
+    found = result.found;
+    foundIndex = result.foundIndex;
+    binarySubrc = result.subrc;
   } else if ((options?.binarySearch === true || options?.withTableKey === true)
       && options.withKeyValue
       && ( options?.binarySearch === true || table.getOptions().primaryKey?.type !== TableAccessType.standard )
