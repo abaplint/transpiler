@@ -1,7 +1,7 @@
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
-import {ComponentChainSimpleTranspiler, FieldSymbolTranspiler, SourceTranspiler} from "../expressions";
+import {ComponentChainSimpleTranspiler, FieldChainTranspiler, FieldSymbolTranspiler, SourceTranspiler} from "../expressions";
 import {UniqueIdentifier} from "../unique_identifier";
 import {Chunk} from "../chunk";
 
@@ -73,10 +73,21 @@ export class ReadTableTranspiler implements IStatementTranspiler {
 
         let field = "";
         let key = left.concatTokens().toLowerCase();
+        // the component name is a JS object key, computed at runtime for a dynamic variable
+        let keyExpression = "";
         if (left.get() instanceof abaplint.Expressions.Dynamic
             && left instanceof abaplint.Nodes.ExpressionNode) {
-          key = key.substring(2, key.length - 2);
-          field = "i." + key;
+          const chain = left.findDirectExpression(abaplint.Expressions.FieldChain);
+          if (chain) {
+            // WITH TABLE KEY (variable) = value
+            const name = new FieldChainTranspiler(true).transpile(chain, traversal).getCode();
+            keyExpression = name + ".trimEnd().toLowerCase()";
+            field = "i[" + keyExpression + "]";
+          } else {
+            // WITH TABLE KEY ('LITERAL') = value
+            key = key.substring(2, key.length - 2);
+            field = "i." + key;
+          }
         } else if (left.get() instanceof abaplint.Expressions.ComponentChainSimple
             && left instanceof abaplint.Nodes.ExpressionNode) {
           field = new ComponentChainSimpleTranspiler("i.").transpile(left, traversal).getCode();
@@ -87,16 +98,17 @@ export class ReadTableTranspiler implements IStatementTranspiler {
           usesTableLine = true;
         }
 
+        const simpleKey = keyExpression !== "" ? "[" + keyExpression + "]" : JSON.stringify(key);
         if (s.includes("await")) {
           const id = UniqueIdentifier.get();
           prefix += "const " + id + " = " + s + ";\n";
           withKey.push("abap.compare.eq(" + field + ", " + id + ")");
           withKeyValue.push(`{key: (i) => {return ${field}}, value: ${id}}`);
-          withKeySimple.push(`${JSON.stringify(key)}: ${id}`);
+          withKeySimple.push(`${simpleKey}: ${id}`);
         } else {
           withKey.push("abap.compare.eq(" + field + ", " + s + ")");
           withKeyValue.push(`{key: (i) => {return ${field}}, value: ${s}}`);
-          withKeySimple.push(`${JSON.stringify(key)}: ${s}`);
+          withKeySimple.push(`${simpleKey}: ${s}`);
         }
       }
       extra.push("withKey: (i) => {return " + withKey.join(" && ") + ";}");
