@@ -266,4 +266,20 @@ WRITE lv_value_c.`;
     expect(abap.console.get().trimEnd()).to.equal("    100399");
   });
 
+
+  it("float via field symbol, EXPONENT 0 NO-GROUPING NO-SIGN", async () => {
+    const code = `
+DATA foo TYPE f.
+FIELD-SYMBOLS <fs> TYPE any.
+foo = 1 / 1000.
+ASSIGN foo TO <fs>.
+DATA char TYPE c LENGTH 100.
+WRITE <fs> TO char EXPONENT 0 NO-GROUPING NO-SIGN.
+CONDENSE char.
+WRITE char.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().trimEnd()).to.equal("0,0010000000000000");
+  });
 });

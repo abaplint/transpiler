@@ -44,17 +44,19 @@ export class WriteStatement {
       } else if (source instanceof Structure) {
         const obj = source.getCharacter();
         this.write(obj, {...options});
-      } else if (source instanceof Float) {
+      } else if (source instanceof Float || (source instanceof FieldSymbol && source.getPointer() instanceof Float)) {
+        // a float behind a field symbol is formatted the same way
+        const float: Float = source instanceof FieldSymbol ? source.getPointer() : source;
         if (options?.exponent?.get() === 0) {
-          const tens = source.getRaw().toFixed(0).length - 1;
-          if (options.noSign === true  && source.getRaw() < 0) {
-            result = source.getRaw().toFixed(17 - tens).replace(".", ",");
+          const tens = float.getRaw().toFixed(0).length - 1;
+          if (options.noSign === true  && float.getRaw() < 0) {
+            result = float.getRaw().toFixed(17 - tens).replace(".", ",");
             result = result.replace("-", "");
           } else {
-            result = source.getRaw().toFixed(16 - tens).replace(".", ",");
+            result = float.getRaw().toFixed(16 - tens).replace(".", ",");
           }
         } else {
-          result = source.get().toString();
+          result = float.get().toString();
         }
       } else if (source instanceof Packed) {
         if (NO_DEICMAL_CURRENCIES.includes(options?.currency?.get().trimEnd() || "")) {
