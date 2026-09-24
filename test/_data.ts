@@ -266,3 +266,59 @@ export const zquan = `<?xml version="1.0" encoding="utf-8"?>
   </asx:values>
  </asx:abap>
 </abapGit>`;
+
+export const tabl_zrng = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V>
+    <TABNAME>ZRNG</TABNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <TABCLASS>TRANSP</TABCLASS>
+    <CLIDEP>X</CLIDEP>
+    <CONTFLAG>A</CONTFLAG>
+   </DD02V>
+   <DD03P_TABLE>
+    <DD03P>
+     <FIELDNAME>MANDT</FIELDNAME>
+     <KEYFLAG>X</KEYFLAG>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000006</INTLEN>
+     <NOTNULL>X</NOTNULL>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000003</LENG>
+    </DD03P>
+    <DD03P>
+     <FIELDNAME>K</FIELDNAME>
+     <KEYFLAG>X</KEYFLAG>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000016</INTLEN>
+     <NOTNULL>X</NOTNULL>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000008</LENG>
+    </DD03P>
+    <DD03P>
+     <FIELDNAME>N</FIELDNAME>
+     <INTTYPE>N</INTTYPE>
+     <INTLEN>000008</INTLEN>
+     <DATATYPE>NUMC</DATATYPE>
+     <LENG>000004</LENG>
+    </DD03P>
+    <DD03P>
+     <FIELDNAME>I</FIELDNAME>
+     <INTTYPE>X</INTTYPE>
+     <INTLEN>000004</INTLEN>
+     <DATATYPE>INT4</DATATYPE>
+     <LENG>000010</LENG>
+    </DD03P>
+    <DD03P>
+     <FIELDNAME>C</FIELDNAME>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000020</INTLEN>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000010</LENG>
+    </DD03P>
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
