@@ -403,8 +403,7 @@ DATA after_loop TYPE i.`;
 
     expect(js).to.contain("let top_level = new abap.types.Integer");
     // declared once, in front of the loop
-    expect(js).to.contain("let nested = new abap.types.Integer");
-    expect(js.indexOf("let nested")).to.be.lessThan(js.indexOf("while (true)"));
+    expect(js).to.match(/let nested = new abap\.types\.Integer[\s\S]*while \(true\)/);
     expect(js).to.match(/abap\.builtin\.sy\.get\(\)\.index\.set\(indexBackup\d+\);\n {2}return;/);
     expect(js).to.contain("let after_loop = new abap.types.Integer");
   });
