@@ -228,6 +228,236 @@ ASSERT numbers[ 1 ] = 3.`;
     expect(abap.console.get()).to.equal("00\n01\n02\n10\n11");
   });
 
+  it("DELETE ADJACENT DUPLICATES, default key is the character-like and byte-like components", async () => {
+    const code = `
+      TYPES:
+        BEGIN OF ty_row,
+          c    TYPE c LENGTH 2,
+          n    TYPE n LENGTH 2,
+          d    TYPE d,
+          t    TYPE t,
+          x    TYPE x LENGTH 1,
+          str  TYPE string,
+          xstr TYPE xstring,
+          i    TYPE i,
+          i8   TYPE int8,
+          p    TYPE p LENGTH 8 DECIMALS 2,
+          f    TYPE f,
+          df   TYPE decfloat34,
+        END OF ty_row.
+      DATA tab TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY.
+      DATA row TYPE ty_row.
+      DATA names TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+      DATA name TYPE string.
+      FIELD-SYMBOLS <field> TYPE any.
+      SPLIT 'C N D T X STR XSTR I I8 P F DF' AT space INTO TABLE names.
+      LOOP AT names INTO name.
+        CLEAR tab.
+        CLEAR row.
+        APPEND row TO tab.
+        ASSIGN COMPONENT name OF STRUCTURE row TO <field>.
+        <field> = '11'.
+        APPEND row TO tab.
+        DELETE ADJACENT DUPLICATES FROM tab.
+        WRITE / |{ name } { lines( tab ) }|.
+      ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("C 2\nN 2\nD 2\nT 2\nX 2\nSTR 2\nXSTR 2\nI 1\nI8 1\nP 1\nF 1\nDF 1");
+  });
+
+  it("DELETE ADJACENT DUPLICATES, default key of nested structure", async () => {
+    const code = `
+      TYPES:
+        BEGIN OF ty_sub,
+          c TYPE c LENGTH 2,
+          i TYPE i,
+        END OF ty_sub.
+      TYPES:
+        BEGIN OF ty_row,
+          k   TYPE c LENGTH 2,
+          sub TYPE ty_sub,
+          tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY,
+          ref TYPE REF TO i,
+        END OF ty_row.
+      DATA tab TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY.
+      DATA row TYPE ty_row.
+      DO 4 TIMES.
+        CLEAR tab.
+        CLEAR row.
+        APPEND row TO tab.
+        CASE sy-index.
+          WHEN 1.
+            row-sub-c = 'A'.
+          WHEN 2.
+            row-sub-i = 1.
+          WHEN 3.
+            APPEND 1 TO row-tab.
+          WHEN 4.
+            CREATE DATA row-ref.
+        ENDCASE.
+        APPEND row TO tab.
+        DELETE ADJACENT DUPLICATES FROM tab.
+        WRITE / lines( tab ).
+      ENDDO.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2\n1\n1\n1");
+  });
+
+  it("DELETE ADJACENT DUPLICATES, empty key deletes nothing", async () => {
+    const code = `
+      TYPES:
+        BEGIN OF ty_row,
+          i TYPE i,
+          p TYPE p LENGTH 8 DECIMALS 2,
+        END OF ty_row.
+      DATA numeric TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY.
+      DATA empty TYPE STANDARD TABLE OF ty_row WITH EMPTY KEY.
+      DATA row TYPE ty_row.
+      APPEND row TO numeric.
+      APPEND row TO numeric.
+      DELETE ADJACENT DUPLICATES FROM numeric.
+      WRITE / lines( numeric ).
+      APPEND row TO empty.
+      APPEND row TO empty.
+      DELETE ADJACENT DUPLICATES FROM empty.
+      WRITE / lines( empty ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2\n2");
+  });
+
+  it("DELETE ADJACENT DUPLICATES, table without key definition uses default key", async () => {
+    const code = `
+      TYPES:
+        BEGIN OF ty_row,
+          c TYPE c LENGTH 2,
+          i TYPE i,
+        END OF ty_row.
+      DATA tab TYPE TABLE OF ty_row.
+      DATA row TYPE ty_row.
+      APPEND row TO tab.
+      row-i = 7.
+      APPEND row TO tab.
+      DELETE ADJACENT DUPLICATES FROM tab.
+      WRITE / lines( tab ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
+  it("DELETE ADJACENT DUPLICATES, user defined key", async () => {
+    const code = `
+      TYPES:
+        BEGIN OF ty_row,
+          c TYPE c LENGTH 2,
+          n TYPE n LENGTH 2,
+          i TYPE i,
+        END OF ty_row.
+      DATA standard TYPE STANDARD TABLE OF ty_row WITH NON-UNIQUE KEY i.
+      DATA sorted TYPE SORTED TABLE OF ty_row WITH NON-UNIQUE KEY c.
+      DATA whole TYPE STANDARD TABLE OF ty_row WITH NON-UNIQUE KEY table_line.
+      DATA row TYPE ty_row.
+      APPEND row TO standard.
+      row-c = 'AB'.
+      APPEND row TO standard.
+      row-i = 5.
+      APPEND row TO standard.
+      DELETE ADJACENT DUPLICATES FROM standard.
+      WRITE / lines( standard ).
+      CLEAR row.
+      INSERT row INTO TABLE sorted.
+      row-n = '01'.
+      INSERT row INTO TABLE sorted.
+      row-c = 'B'.
+      INSERT row INTO TABLE sorted.
+      DELETE ADJACENT DUPLICATES FROM sorted.
+      WRITE / lines( sorted ).
+      CLEAR row.
+      APPEND row TO whole.
+      row-i = 1.
+      APPEND row TO whole.
+      APPEND row TO whole.
+      DELETE ADJACENT DUPLICATES FROM whole.
+      WRITE / lines( whole ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2\n2\n2");
+  });
+
+  it("DELETE ADJACENT DUPLICATES, DDIC table type with key table_line", async () => {
+    const ttyp = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TTYP" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD40V>
+    <TYPENAME>ZTTYP_ROW</TYPENAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <ROWTYPE>ZSROW</ROWTYPE>
+    <ROWKIND>S</ROWKIND>
+    <DATATYPE>STRU</DATATYPE>
+    <ACCESSMODE>T</ACCESSMODE>
+    <KEYDEF>T</KEYDEF>
+    <KEYKIND>N</KEYKIND>
+   </DD40V>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+    const tabl = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V>
+    <TABNAME>ZSROW</TABNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <TABCLASS>INTTAB</TABCLASS>
+    <EXCLASS>1</EXCLASS>
+   </DD02V>
+   <DD03P_TABLE>
+    <DD03P>
+     <FIELDNAME>C</FIELDNAME>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000004</INTLEN>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000002</LENG>
+     <MASK>  CHAR</MASK>
+    </DD03P>
+    <DD03P>
+     <FIELDNAME>I</FIELDNAME>
+     <INTTYPE>X</INTTYPE>
+     <INTLEN>000004</INTLEN>
+     <DATATYPE>INT4</DATATYPE>
+     <LENG>000010</LENG>
+     <MASK>  INT4</MASK>
+    </DD03P>
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+    const code = `
+      DATA tab TYPE zttyp_row.
+      DATA row TYPE zsrow.
+      APPEND row TO tab.
+      row-i = 1.
+      APPEND row TO tab.
+      APPEND row TO tab.
+      DELETE ADJACENT DUPLICATES FROM tab.
+      WRITE / lines( tab ).`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "zttyp_row.ttyp.xml", contents: ttyp},
+      {filename: "zsrow.tabl.xml", contents: tabl}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
   it("DELETE WHERE method_call( ), check it compiles to valid JS", async () => {
     const code = `
 CLASS lcl_bar DEFINITION.
