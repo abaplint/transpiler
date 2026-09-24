@@ -221,4 +221,32 @@ WRITE / res.`;
     expect(abap.console.get()).to.equal("foo-bar");
   });
 
+  it("CONCATENATE IN BYTE MODE sets sy-subrc 0", async () => {
+    const code = `
+DATA lt_empty TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+DATA lv_i TYPE i.
+DATA lv_xs TYPE xstring VALUE 'FF'.
+DATA lv_x TYPE x LENGTH 4 VALUE 'AB00CD00'.
+READ TABLE lt_empty INTO lv_i INDEX 1.
+CONCATENATE lv_xs lv_x INTO lv_xs IN BYTE MODE.
+WRITE / |{ lv_xs }/{ sy-subrc }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("FFAB00CD00/0");
+  });
+
+  it("CONCATENATE into a c field too short for the result sets sy-subrc 4", async () => {
+    const code = `
+DATA lv_c3 TYPE c LENGTH 3.
+CONCATENATE 'ab' 'cd' INTO lv_c3.
+WRITE / |[{ lv_c3 }]{ sy-subrc }|.
+CONCATENATE 'a' 'b' INTO lv_c3.
+WRITE / |[{ lv_c3 }]{ sy-subrc }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("[abc]4\n[ab]0");
+  });
+
 });
