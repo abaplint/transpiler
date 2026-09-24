@@ -318,4 +318,100 @@ WRITE / lv_hex8.`;
     expect(abap.console.get()).to.equal("0000000000000001\n0000000000000000");
   });
 
+  it("SHIFT RIGHT BY 2 PLACES, fixed length keeps the left part", async () => {
+    const code = `
+DATA text TYPE c LENGTH 6.
+text = 'abcdef'.
+SHIFT text RIGHT BY 2 PLACES.
+WRITE / text.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("  abcd");
+  });
+
+  it("SHIFT RIGHT BY 2 PLACES, string is extended", async () => {
+    const code = `
+DATA text TYPE string.
+text = 'abcdef'.
+SHIFT text RIGHT BY 2 PLACES.
+WRITE / text.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("  abcdef");
+  });
+
+  it("SHIFT RIGHT BY 2 PLACES CIRCULAR", async () => {
+    const code = `
+DATA text TYPE c LENGTH 6.
+text = 'abcdef'.
+SHIFT text RIGHT BY 2 PLACES CIRCULAR.
+WRITE / text.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("efabcd");
+  });
+
+  it("SHIFT RIGHT, one place", async () => {
+    const code = `
+DATA text TYPE c LENGTH 6.
+text = 'abcdef'.
+SHIFT text RIGHT.
+WRITE / text.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(" abcde");
+  });
+
+  it("SHIFT RIGHT BY 1 PLACES IN BYTE MODE, fixed length keeps the left part", async () => {
+    const code = `
+DATA lv_hex TYPE x LENGTH 4.
+lv_hex = 'AABBCCDD'.
+SHIFT lv_hex RIGHT BY 1 PLACES IN BYTE MODE.
+WRITE / lv_hex.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("00AABBCC");
+  });
+
+  it("SHIFT RIGHT BY 1 PLACES IN BYTE MODE, xstring is extended", async () => {
+    const code = `
+DATA lv_xstr TYPE xstring.
+lv_xstr = 'AABBCCDD'.
+SHIFT lv_xstr RIGHT BY 1 PLACES IN BYTE MODE.
+WRITE / lv_xstr.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("00AABBCCDD");
+  });
+
+  it("SHIFT RIGHT IN BYTE MODE, one place", async () => {
+    const code = `
+DATA lv_hex TYPE x LENGTH 4.
+lv_hex = 'AABBCCDD'.
+SHIFT lv_hex RIGHT IN BYTE MODE.
+WRITE / lv_hex.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("00AABBCC");
+  });
+
+  it("SHIFT RIGHT IN BYTE MODE CIRCULAR, one place", async () => {
+    const code = `
+DATA lv_hex TYPE x LENGTH 4.
+lv_hex = 'AABBCCDD'.
+SHIFT lv_hex RIGHT IN BYTE MODE CIRCULAR.
+WRITE / lv_hex.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("DDAABBCC");
+  });
+
 });
