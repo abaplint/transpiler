@@ -1630,4 +1630,83 @@ ASSERT sy-subrc = 4.`;
     await f(abap);
   });
 
+  it("WITH TABLE KEY (variable) = value, hashed", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         name  TYPE c LENGTH 10,
+         count TYPE i,
+       END OF ty_row.
+DATA tab TYPE HASHED TABLE OF ty_row WITH UNIQUE KEY name.
+DATA row TYPE ty_row.
+DATA column TYPE string.
+FIELD-SYMBOLS <row> TYPE ty_row.
+
+row-name = 'A'.
+row-count = 1.
+INSERT row INTO TABLE tab.
+row-name = 'B'.
+row-count = 2.
+INSERT row INTO TABLE tab.
+
+column = 'NAME'.
+READ TABLE tab ASSIGNING <row> WITH TABLE KEY (column) = 'B'.
+ASSERT sy-subrc = 0.
+ASSERT <row>-count = 2.
+
+READ TABLE tab ASSIGNING <row> WITH TABLE KEY (column) = 'Z'.
+ASSERT sy-subrc = 4.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("WITH KEY (variable) = value, standard, lower case name", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         name  TYPE c LENGTH 10,
+         count TYPE i,
+       END OF ty_row.
+DATA tab TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY.
+DATA row TYPE ty_row.
+DATA column TYPE c LENGTH 30.
+FIELD-SYMBOLS <row> TYPE ty_row.
+
+row-name = 'A'.
+row-count = 1.
+APPEND row TO tab.
+row-name = 'B'.
+row-count = 2.
+APPEND row TO tab.
+
+column = 'name'.
+READ TABLE tab ASSIGNING <row> WITH KEY (column) = 'B'.
+ASSERT sy-subrc = 0.
+ASSERT <row>-count = 2.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("WITH TABLE KEY ('LITERAL') = value still works", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         name  TYPE c LENGTH 10,
+         count TYPE i,
+       END OF ty_row.
+DATA tab TYPE HASHED TABLE OF ty_row WITH UNIQUE KEY name.
+DATA row TYPE ty_row.
+FIELD-SYMBOLS <row> TYPE ty_row.
+
+row-name = 'A'.
+row-count = 7.
+INSERT row INTO TABLE tab.
+
+READ TABLE tab ASSIGNING <row> WITH TABLE KEY ('NAME') = 'A'.
+ASSERT sy-subrc = 0.
+ASSERT <row>-count = 7.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
