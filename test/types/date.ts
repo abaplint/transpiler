@@ -120,4 +120,26 @@ describe("Running Examples - Date type", () => {
     await f(abap);
   });
 
+  it("Date, assignment from an empty string is the initial date", async () => {
+    const code = `
+    DATA lv_d TYPE d.
+    DATA lv_s TYPE string.
+    FIELD-SYMBOLS <lv_any> TYPE any.
+    lv_d = lv_s.
+    ASSERT lv_d IS INITIAL.
+    WRITE / lv_d.
+    lv_d = '20250107'.
+    ASSIGN lv_d TO <lv_any>.
+    <lv_any> = lv_s.
+    WRITE / lv_d.
+    lv_s = \`2025010\`.
+    lv_d = lv_s.
+    ASSERT lv_d IS NOT INITIAL.
+    WRITE / lv_d+0(4).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("00000000\n00000000\n2025");
+  });
+
 });
