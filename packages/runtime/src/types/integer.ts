@@ -96,14 +96,11 @@ export class Integer implements INumeric {
     } else if (value instanceof Float || value instanceof DecFloat34) {
       this.set(roundHalfAwayFromZero(value.getRaw()));
     } else if (value instanceof Hex || value instanceof XString || value instanceof HexUInt8) {
-      const hex = value.get();
-      let num = parseInt(hex, 16);
-// handle two complement, the first bit is the sign
-      if (hex.length >= 8) {
-        const maxVal = Math.pow(2, hex.length / 2 * 8);
-        if (num > maxVal / 2 - 1) {
-          num = num - maxVal;
-        }
+// the last four bytes, 00 on the left, as a signed integer; an empty xstring is 0
+      const hex = value.get().slice(-8);
+      let num = hex === "" ? 0 : parseInt(hex, 16);
+      if (hex.length === 8 && num > 0x7FFFFFFF) {
+        num = num - 0x100000000;
       }
       this.set(num);
     } else if (typeof value === "string") {
