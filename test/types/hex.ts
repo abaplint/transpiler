@@ -14,6 +14,39 @@ describe("Running Examples - Hex type", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
+  it("Hex, from character, takes the leading hexadecimal digits only", async () => {
+    const code = `
+  DATA lv_hex TYPE x LENGTH 4.
+  DATA lv_c6 TYPE c LENGTH 6.
+  DATA lv_str TYPE string.
+  lv_str = 'ABG1'.
+  lv_hex = lv_str.
+  WRITE / lv_hex.
+  lv_str = 'AB CD'.
+  lv_hex = lv_str.
+  WRITE / lv_hex.
+  lv_str = '0a1B'.
+  lv_hex = lv_str.
+  WRITE / lv_hex.
+  lv_str = '12ab'.
+  lv_hex = lv_str.
+  WRITE / lv_hex.
+  lv_str = 'A'.
+  lv_hex = lv_str.
+  WRITE / lv_hex.
+  lv_c6 = 'AB'.
+  lv_hex = lv_c6.
+  WRITE / lv_hex.
+  lv_str = '1234567890AB'.
+  lv_hex = lv_str.
+  WRITE / lv_hex.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    // as a 7.5x system answers
+    expect(abap.console.get()).to.equal("AB000000\nAB000000\n00000000\n12000000\nA0000000\nAB000000\n12345678");
+  });
+
   it("Hex, initial value", async () => {
     const code = `
   DATA lv_hex TYPE x LENGTH 1.
