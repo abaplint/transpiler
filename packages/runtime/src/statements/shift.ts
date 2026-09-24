@@ -46,10 +46,15 @@ function shift_character_mode(target: ICharacter, options?: IShiftOptions) {
   } else if (options?.places) {
     const p = options.places.get();
     if (options.circular) {
-      value = value.substr(p) + value.substr(0, p);
+      if (options.direction === "RIGHT") {
+        value = value.substr(value.length - p) + value.substr(0, value.length - p);
+      } else {
+        value = value.substr(p) + value.substr(0, p);
+      }
     } else {
       if (options.direction === "RIGHT") {
-        value = " ".repeat(options.places.get()) + value.substring(0, options.places.get());
+        // set() cuts a fixed length target, a string gets longer
+        value = " ".repeat(p) + value;
       } else {
         value = value.substr(p);
       }
@@ -72,6 +77,8 @@ function shift_character_mode(target: ICharacter, options?: IShiftOptions) {
     } else {
       value = value.substr(1) + value.substr(0, 1);
     }
+  } else if (options?.direction === "RIGHT") {
+    value = " " + value;
   } else {
     value = value.substr(1);
   }
@@ -110,7 +117,8 @@ function shift_byte_mode(target: ICharacter, options?: IShiftOptions) {
     } else {
       const p = options.places.get() * 2;
       if (options.direction === "RIGHT") {
-        value = "0".repeat(p) + value.substring(0, p);
+        // set() cuts a fixed length target, an xstring gets longer
+        value = "0".repeat(p) + value;
       } else {
         value = value.substr(p);
       }
@@ -128,7 +136,13 @@ function shift_byte_mode(target: ICharacter, options?: IShiftOptions) {
       value = value.substr(index);
     }
   } else if (options?.circular) {
-    value = value.substr(2) + value.substr(0, 2);
+    if (options.direction === "RIGHT") {
+      value = value.substr(value.length - 2) + value.substr(0, value.length - 2);
+    } else {
+      value = value.substr(2) + value.substr(0, 2);
+    }
+  } else if (options?.direction === "RIGHT") {
+    value = "00" + value;
   } else {
     value = value.substr(2);
   }
