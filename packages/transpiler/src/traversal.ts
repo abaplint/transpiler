@@ -11,6 +11,46 @@ import {ConstantTranspiler} from "./expressions";
 import {ITranspilerOptions} from "./types";
 import {DEFAULT_KEYWORDS} from "./keywords";
 
+type IReference = ReturnType<abaplint.ISpaghettiScopeNode["getData"]>["references"][number];
+
+/** the references of one scope, by where they start: built once per scope,
+ *  so finding the reference at a token no longer walks every reference of
+ *  the scope for every token, which made a long method quadratic */
+const REFERENCE_INDEX = new WeakMap<readonly IReference[], {plain: Map<string, number[]>, virtual: Map<string, number[]>}>();
+
+/** the references of a scope whose start equals the token's start, in the
+ *  scope's own order -- the same set and order the linear scan found:
+ *  Position.equals compares row and column, a VirtualPosition compares its
+ *  virtual row and column and only with another VirtualPosition */
+export function referencesAt(scope: abaplint.ISpaghettiScopeNode, token: abaplint.Token): IReference[] {
+  const references = scope.getData().references;
+  let index = REFERENCE_INDEX.get(references);
+  if (index === undefined) {
+    index = {plain: new Map(), virtual: new Map()};
+    references.forEach((r, n) => {
+      const start = r.position.getStart();
+      const key = start instanceof abaplint.VirtualPosition
+        ? start.vrow + ":" + start.vcol
+        : start.getRow() + ":" + start.getCol();
+      const map = start instanceof abaplint.VirtualPosition ? index!.virtual : index!.plain;
+      const list = map.get(key);
+      if (list === undefined) {
+        map.set(key, [n]);
+      } else {
+        list.push(n);
+      }
+    });
+    REFERENCE_INDEX.set(references, index);
+  }
+  const start = token.getStart();
+  const found = [...(index.plain.get(start.getRow() + ":" + start.getCol()) ?? [])];
+  if (start instanceof abaplint.VirtualPosition) {
+    found.push(...(index.virtual.get(start.vrow + ":" + start.vcol) ?? []));
+    found.sort((a, b) => a - b);
+  }
+  return found.map(n => references[n]);
+}
+
 export class Traversal {
   private readonly spaghetti: abaplint.ISpaghettiScope;
   private readonly file: abaplint.ABAPFile;
@@ -429,9 +469,8 @@ export class Traversal {
       return false;
     }
 
-    for (const r of scope.getData().references) {
-      if (r.referenceType === abaplint.ReferenceType.BuiltinMethodReference
-          && r.position.getStart().equals(token.getStart())) {
+    for (const r of referencesAt(scope, token)) {
+      if (r.referenceType === abaplint.ReferenceType.BuiltinMethodReference) {
         return true;
       }
     }
@@ -456,9 +495,8 @@ export class Traversal {
       return undefined;
     }
 
-    for (const r of scope.getData().references) {
+    for (const r of referencesAt(scope, token)) {
       if (r.referenceType === abaplint.ReferenceType.MethodReference
-          && r.position.getStart().equals(token.getStart())
           && r.resolved instanceof abaplint.Types.MethodDefinition) {
         let name = r.resolved.getName();
         if (r.extra?.ooName && r.extra?.ooType === "INTF") {
@@ -472,8 +510,7 @@ export class Traversal {
           continue;
         }
         return candidate;
-      } else if (r.referenceType === abaplint.ReferenceType.BuiltinMethodReference
-          && r.position.getStart().equals(token.getStart())) {
+      } else if (r.referenceType === abaplint.ReferenceType.BuiltinMethodReference) {
         const def = r.resolved as abaplint.Types.MethodDefinition;
         const name = def.getName();
 
@@ -645,10 +682,9 @@ export class Traversal {
       return undefined;
     }
 
-    for (const r of scope.getData().references) {
-      if ((r.referenceType === abaplint.ReferenceType.DataReadReference
-          || r.referenceType === abaplint.ReferenceType.DataWriteReference)
-          && r.position.getStart().equals(token.getStart())) {
+    for (const r of referencesAt(scope, token)) {
+      if (r.referenceType === abaplint.ReferenceType.DataReadReference
+          || r.referenceType === abaplint.ReferenceType.DataWriteReference) {
         return r.resolved;
       }
     }
@@ -661,9 +697,8 @@ export class Traversal {
       return undefined;
     }
 
-    for (const r of scope.getData().references) {
-      if (r.referenceType === abaplint.ReferenceType.InferredType
-          && r.position.getStart().equals(token.getStart())) {
+    for (const r of referencesAt(scope, token)) {
+      if (r.referenceType === abaplint.ReferenceType.InferredType) {
         if (r.resolved instanceof abaplint.TypedIdentifier) {
           return r.resolved.getType();
         }
@@ -678,9 +713,8 @@ export class Traversal {
       return undefined;
     }
 
-    for (const r of scope.getData().references) {
-      if (r.referenceType === abaplint.ReferenceType.TypeReference
-          && r.position.getStart().equals(token.getStart())) {
+    for (const r of referencesAt(scope, token)) {
+      if (r.referenceType === abaplint.ReferenceType.TypeReference) {
         if (r.resolved instanceof abaplint.TypedIdentifier) {
           return r.resolved.getType();
         }
