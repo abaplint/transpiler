@@ -1,33 +1,28 @@
+/*eslint no-bitwise: ["error", { "allow": [">>>"] }] */
 import {XString} from "../types";
 
-export function get_bit_operation_chunks(left: XString, right: XString): {leftChunk: number, rightChunk: number, chunkLen: number }[] {
-  const ret = [];
+// the shorter operand is padded with hex 0 on the right
+export function bit_operation(left: XString, right: XString, op: (l: number, r: number) => number): XString {
+  let leftHex = left.get();
+  let rightHex = right.get();
+  const maxLen = Math.ceil(Math.max(leftHex.length, rightHex.length) / 2) * 2;
+  leftHex = leftHex.padEnd(maxLen, "0");
+  rightHex = rightHex.padEnd(maxLen, "0");
 
-  let leftFull = left.get();
-  const leftLen = leftFull.length;
-  leftFull = leftFull.padEnd(Math.ceil(leftLen / 2) * 2, "0");
-
-  let rightFull = right.get();
-  const rightLen = rightFull.length;
-  rightFull = rightFull.padEnd(Math.ceil(rightLen / 2) * 2, "0");
-
-  const maxLen = leftFull.length > rightFull.length ? leftFull.length : rightFull.length;
-    // Using 3-byte chunkgs (6 hex positions) to avoid JavaScript negative values for extreme cases
-  const chunks = maxLen / 6;
-
-  for (let pass = chunks; pass > 0; pass--) {
-    const chunkStart = maxLen - pass * 6;
-    const chunkEnd = maxLen - (pass - 1) * 6;
-    let leftSlice = leftFull.slice(chunkStart,chunkEnd);
-    let rightSlice = rightFull.slice(chunkStart,chunkEnd);
-    const chunkLen = leftSlice.length > rightSlice.length ? leftSlice.length : rightSlice.length;
-    leftSlice = leftSlice.padEnd(chunkLen, "0");
-    rightSlice = rightSlice.padEnd(chunkLen, "0");
-    const leftChunk = parseInt(leftSlice,16);
-    const rightChunk = parseInt(rightSlice,16);
-
-    ret.push({leftChunk: leftChunk, rightChunk: rightChunk, chunkLen: chunkLen});
+  let result: string;
+  if (maxLen > 0 && maxLen <= 8) {
+    // up to 4 bytes in one 32 bit operation, >>> 0 makes the result unsigned
+    result = (op(parseInt(leftHex, 16), parseInt(rightHex, 16)) >>> 0).toString(16).padStart(maxLen, "0");
+  } else {
+    const l = Buffer.from(leftHex, "hex");
+    const r = Buffer.from(rightHex, "hex");
+    for (let i = 0; i < l.length; i++) {
+      l[i] = op(l[i], r[i]);
+    }
+    result = l.toString("hex");
   }
 
+  const ret = new XString();
+  ret.set(result.toUpperCase());
   return ret;
 }

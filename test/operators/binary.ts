@@ -174,4 +174,17 @@ ASSERT val3 = '6BC00C0D0A0B08090607040502030001'.`;
     await f(abap);
   });
 
+
+  it("Bit operators, empty xstrings", async () => {
+    const code = `
+DATA val1 TYPE xstring.
+DATA val2 TYPE xstring.
+DATA val3 TYPE xstring.
+val3 = val1 BIT-XOR val2.
+WRITE xstrlen( val3 ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
 });
