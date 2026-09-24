@@ -15,6 +15,23 @@ export interface IDescribeOptions {
   mode?: "BYTE" | "CHARACTER"
 }
 
+// a structure is deep when a component is a string, a table or a reference,
+// or a deep structure itself: type kind v, a flat structure is u
+function isDeep(structure: Structure): boolean {
+  for (const component of Object.values(structure.get())) {
+    if (component instanceof String
+        || component instanceof XString
+        || component instanceof Table
+        || component instanceof HashedTable
+        || component instanceof DataReference
+        || component instanceof ABAPObject
+        || (component instanceof Structure && isDeep(component))) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export function describe(input: IDescribeOptions) {
 //  console.dir(input);
   if (input.type) {
@@ -49,7 +66,7 @@ export function describe(input: IDescribeOptions) {
     } else if (input.field instanceof DecFloat34) {
       input.type.set("e");
     } else if (input.field instanceof Structure) {
-      input.type.set("u");
+      input.type.set(isDeep(input.field) ? "v" : "u");
     } else if (input.field instanceof ABAPObject) {
       input.type.set("r");
     } else if (input.field instanceof DataReference) {
