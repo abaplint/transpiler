@@ -1649,6 +1649,36 @@ WRITE sy-dbcnt.`;
     });
   });
 
+  it("FOR ALL ENTRIES, duplicates removed comparing all fields, not the key", async () => {
+    const code = `
+TYPES: BEGIN OF ty_res,
+         flag       TYPE c LENGTH 1,
+         valuefield TYPE zquan-valuefield,
+       END OF ty_res.
+DATA result TYPE STANDARD TABLE OF ty_res WITH DEFAULT KEY.
+DATA input TYPE STANDARD TABLE OF zquan-keyfield WITH DEFAULT KEY.
+DATA row TYPE zquan.
+row-keyfield = 'A'.
+row-valuefield = 1.
+INSERT zquan FROM row.
+row-keyfield = 'B'.
+row-valuefield = 2.
+INSERT zquan FROM row.
+APPEND 'A' TO input.
+APPEND 'B' TO input.
+SELECT valuefield FROM zquan
+  INTO CORRESPONDING FIELDS OF TABLE result
+  FOR ALL ENTRIES IN input
+  WHERE keyfield = input-table_line.
+WRITE sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "zquan.tabl.xml", contents: zquan}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2");
+    });
+  });
+
   it("SELECT LOOP CORRESPONDING", async () => {
     const code = `
 DATA: BEGIN OF res,
