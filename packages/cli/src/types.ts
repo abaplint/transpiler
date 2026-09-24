@@ -13,6 +13,13 @@ export interface ITranspilerConfig {
   exclude_filter?: string[];
   /** @minLength 1 */
   output_folder: string;
+  /** experimental */
+  converter?: {
+    /** @uniqueItems true */
+    input_folder: string | string[];
+    /** @minLength 1 */
+    output_folder: string;
+  },
   libs?: {
     url?: string,
     /** relative to the current working directory */
