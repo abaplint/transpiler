@@ -48,6 +48,8 @@ import {test42} from "./test42";
 import {test43} from "./test43";
 import {test44} from "./test44";
 import {test45} from "./test45";
+import {test46} from "./test46";
+import {test47} from "./test47";
 
 // NOTE: does not run via Mocha
 
@@ -108,6 +110,8 @@ const tests: Tests = [
   {name: "43: CONCATENATE LINES OF", abap: test43},
   {name: "44: INSERT INTO TABLE sorted", abap: test44},
   {name: "45: long && concat chain", abap: test45},
+  {name: "46: BIT-XOR / BIT-AND x LENGTH 4", abap: test46},
+  {name: "47: BIT-XOR long xstrings", abap: test47},
 ];
 
 async function execute(t: Test) {
