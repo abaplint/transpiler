@@ -402,8 +402,9 @@ DATA after_loop TYPE i.`;
     const js = await runSingle(abap, {ignoreSyntaxCheck: true});
 
     expect(js).to.contain("let top_level = new abap.types.Integer");
-    expect(js).to.contain("if (nested === undefined) {");
-    expect(js).to.contain("var nested = new abap.types.Integer");
+    // declared once, in front of the loop
+    expect(js).to.contain("let nested = new abap.types.Integer");
+    expect(js.indexOf("let nested")).to.be.lessThan(js.indexOf("while (true)"));
     expect(js).to.match(/abap\.builtin\.sy\.get\(\)\.index\.set\(indexBackup\d+\);\n {2}return;/);
     expect(js).to.contain("let after_loop = new abap.types.Integer");
   });

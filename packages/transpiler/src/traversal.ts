@@ -19,6 +19,10 @@ export class Traversal {
   private readonly doOrWhileIndexBackups: Map<abaplint.Nodes.StatementNode, string> = new Map();
   private readonly statementsInsideLoop: WeakSet<abaplint.Nodes.StatementNode> = new WeakSet();
   private readonly enclosingDoOrWhile: WeakMap<abaplint.Nodes.StatementNode, abaplint.Nodes.StatementNode> = new WeakMap();
+  /** DATA, CONSTANTS and FIELD-SYMBOLS nested in blocks, already declared in front of the block */
+  private readonly declaredEarly: WeakSet<abaplint.INode> = new WeakSet();
+  private emittingEarly = false;
+  private blockDepth = 0;
   public readonly reg: abaplint.IRegistry;
   public readonly options: ITranspilerOptions | undefined;
 
@@ -1027,7 +1031,7 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
   }
 
   public isInsideLoop(node: abaplint.Nodes.StatementNode): boolean {
-    return this.statementsInsideLoop.has(node);
+    return this.statementsInsideLoop.has(node) && !this.declaredEarly.has(node);
   }
 
   public isInsideDoOrWhile(node: abaplint.Nodes.StatementNode): boolean {
@@ -1139,7 +1143,89 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
 
 ////////////////////////////
 
+  /** In ABAP, DATA, CONSTANTS and FIELD-SYMBOLS are visible in the whole method/form/program, but a
+   * javascript "let" inside the block of an IF, LOOP, TRY etc. is not. So before each block on
+   * method/form/program level the declarations nested in it are output, in source order, and
+   * skipped inside the block. They then exist after the block even if the branch did not run,
+   * and are initialized once, also when the block is a loop */
+  private traverseProcedureLevel(node: abaplint.Nodes.StructureNode): Chunk {
+    const ret = new Chunk();
+    for (const c of node.getChildren()) {
+      if (c instanceof abaplint.Nodes.StructureNode && Traversal.isDeclaration(c) === false) {
+        ret.appendChunk(this.declareNestedEarly(c));
+        this.blockDepth++;
+        try {
+          ret.appendChunk(this.traverseStructure(c));
+        } finally {
+          this.blockDepth--;
+        }
+      } else {
+        ret.appendChunk(this.traverse(c));
+      }
+    }
+    return ret;
+  }
+
+  private declareNestedEarly(block: abaplint.Nodes.StructureNode): Chunk {
+    const found: (abaplint.Nodes.StructureNode | abaplint.Nodes.StatementNode)[] = [];
+    Traversal.findNestedDeclarations(block, found);
+
+    for (const node of found) {
+      this.declaredEarly.add(node);
+      if (node instanceof abaplint.Nodes.StructureNode) {
+        for (const statement of node.findAllStatementNodes()) {
+          this.declaredEarly.add(statement);
+        }
+      }
+    }
+
+    const ret = new Chunk();
+    this.emittingEarly = true;
+    try {
+      for (const node of found) {
+        ret.appendChunk(this.traverse(node));
+      }
+    } finally {
+      this.emittingEarly = false;
+    }
+    return ret;
+  }
+
+  private static isDeclaration(node: abaplint.Nodes.StructureNode): boolean {
+    const get = node.get();
+    return get instanceof abaplint.Structures.Data
+      || get instanceof abaplint.Structures.Constants
+      || get instanceof abaplint.Structures.Types;
+  }
+
+  private static findNestedDeclarations(node: abaplint.Nodes.StructureNode,
+                                        found: (abaplint.Nodes.StructureNode | abaplint.Nodes.StatementNode)[]): void {
+    for (const c of node.getChildren()) {
+      if (c instanceof abaplint.Nodes.StatementNode) {
+        const get = c.get();
+        if (get instanceof abaplint.Statements.Data
+            || get instanceof abaplint.Statements.Constant
+            || get instanceof abaplint.Statements.FieldSymbol) {
+          found.push(c);
+        }
+      } else if (c instanceof abaplint.Nodes.StructureNode) {
+        const get = c.get();
+        if (get instanceof abaplint.Structures.Data || get instanceof abaplint.Structures.Constants) {
+          found.push(c);
+        } else {
+          Traversal.findNestedDeclarations(c, found);
+        }
+      }
+    }
+  }
+
   protected traverseStructure(node: abaplint.Nodes.StructureNode): Chunk {
+    if (this.declaredEarly.has(node) && this.emittingEarly === false) {
+      return new Chunk();
+    } else if (this.blockDepth === 0 && node.get() instanceof abaplint.Structures.Normal) {
+      return this.traverseProcedureLevel(node);
+    }
+
     const list: any = StructureTranspilers;
     const ret = new Chunk();
 
@@ -1163,6 +1249,9 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
   }
 
   protected traverseStatement(node: abaplint.Nodes.StatementNode): Chunk {
+    if (this.declaredEarly.has(node) && this.emittingEarly === false) {
+      return new Chunk();
+    }
     const list: any = StatementTranspilers;
     const search = node.get().constructor.name + "Transpiler";
     if (list[search]) {
