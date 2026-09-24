@@ -1,11 +1,39 @@
-import {String} from "../types";
+import {Character, FieldSymbol, String} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {position} from "./_position";
 
-export function escape(input: {val: ICharacter | string, format: INumeric | number }): String {
+const JSON_SHORT: {[char: string]: string} = {
+  "\\": "\\\\",
+  "\"": "\\\"",
+  "\b": "\\b",
+  "\t": "\\t",
+  "\n": "\\n",
+  "\f": "\\f",
+  "\r": "\\r",
+};
 
-  let val = typeof input.val === "string" ? input.val : input.val.get();
+// backslash, quote, and \b \t \n \f \r by their short forms; the other control
+// characters below U+0020 as \u00XX in upper case hex; U+007F and non-ASCII unchanged
+function escapeJsonCharacter(char: string): string {
+  return JSON_SHORT[char] ?? "\\u" + char.charCodeAt(0).toString(16).toUpperCase().padStart(4, "0");
+}
+
+export function escape(input: {val: ICharacter | FieldSymbol | string, format: INumeric | number }): String {
+  let source: ICharacter | string;
+  if (input.val instanceof FieldSymbol) {
+    const pointer = input.val.getPointer() as ICharacter | undefined;
+    if (pointer === undefined) {
+      throw new Error("GETWA_NOT_ASSIGNED");
+    }
+    source = pointer;
+  } else {
+    source = input.val;
+  }
+
+  // a c operand counts without its trailing blanks, as in the other string functions
+  let val = typeof source === "string" ? source
+    : source instanceof Character ? source.getTrimEnd() : source.get();
   const format = position(input.format)!;
 
 // todo, optimize/cache regexes
@@ -36,9 +64,7 @@ export function escape(input: {val: ICharacter | string, format: INumeric | numb
       val = val.replace(/'/g, "\\'");
       break;
     case 24: // e_json_string
-      val = val.replace(/\\/g, "\\\\");
-      val = val.replace(/"/g, "\\\"");
-      val = val.replace(/\n/g, "\\n");
+      val = val.replace(/[\\"\u0000-\u001F]/g, escapeJsonCharacter);
       break;
     default:
 // todo, runtime error
