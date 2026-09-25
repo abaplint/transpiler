@@ -564,6 +564,32 @@ ENDIF.`;
     expect(abap.console.get()).to.equal(`nono`);
   });
 
+  it("comparing, different lengths, the shorter is padded with 00", async () => {
+    const code = `
+DATA lv_x1 TYPE x LENGTH 1.
+DATA lv_x2 TYPE x LENGTH 2.
+DATA lv_xs TYPE xstring.
+lv_x1 = 'AB'.
+lv_x2 = 'AB00'.
+WRITE / boolc( lv_x1 = lv_x2 ).
+WRITE / boolc( lv_x2 = lv_x1 ).
+WRITE / boolc( lv_x1 < lv_x2 ).
+WRITE / boolc( lv_x2 > lv_x1 ).
+lv_x2 = 'ABCD'.
+WRITE / boolc( lv_x1 < lv_x2 ).
+lv_x1 = 'AC'.
+WRITE / boolc( lv_x1 > lv_x2 ).
+lv_x2 = 'AB00'.
+lv_xs = 'AB'.
+WRITE / boolc( lv_x2 = lv_xs ).
+WRITE / boolc( lv_xs < lv_x2 ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`X\nX\n \n \nX\nX\n \nX`);
+  });
+
   it("test, loop", async () => {
     const code = `
 TYPES:
