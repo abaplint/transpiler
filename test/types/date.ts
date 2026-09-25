@@ -142,4 +142,18 @@ describe("Running Examples - Date type", () => {
     expect(abap.console.get()).to.equal("00000000\n00000000\n2025");
   });
 
+  it("Date, CONCATENATE of blank fields gives blanks", async () => {
+    const code = `
+    DATA lv_y TYPE c LENGTH 4.
+    DATA lv_m TYPE c LENGTH 2.
+    DATA lv_d TYPE c LENGTH 2.
+    DATA lv_date TYPE d.
+    CONCATENATE lv_y lv_m lv_d INTO lv_date.
+    WRITE / |<{ lv_date }>|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("<        >");
+  });
+
 });
