@@ -1,8 +1,9 @@
 import {Context} from "../context";
 import {buildDbTableName} from "../prefix";
-import {Structure, Table} from "../types";
+import {String, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {ABAP} from "..";
+import {throwErrorWithParameters} from "../throw_error";
 
 declare const abap: ABAP;
 
@@ -20,6 +21,7 @@ export interface IInsertDatabaseOptions {
   values?: Structure,
   table?: Table,
   connection?: string,
+  acceptingDuplicateKeys?: boolean,
 }
 
 export async function insertDatabase(table: string | ICharacter, options: IInsertDatabaseOptions, context: Context) {
@@ -31,12 +33,22 @@ export async function insertDatabase(table: string | ICharacter, options: IInser
   }
 
   if (options.table !== undefined) {
+    const subrcBefore = abap.builtin.sy.get().subrc.get();
+    const dbcntBefore = abap.builtin.sy.get().dbcnt.get();
     let subrc = 0;
     let dbcnt = 0;
     for (const row of options.table.array()) {
       await insertDatabase(table, {values: row, connection: options.connection}, context);
       subrc = Math.max(subrc, abap.builtin.sy.get().subrc.get());
       dbcnt += abap.builtin.sy.get().dbcnt.get();
+    }
+    if (subrc !== 0 && options.acceptingDuplicateKeys !== true) {
+      // without ACCEPTING DUPLICATE KEYS a row that cannot be inserted raises
+      // CX_SY_OPEN_SQL_DB; the other rows stay inserted and sy-subrc and
+      // sy-dbcnt keep the values they had before the statement
+      abap.builtin.sy.get().subrc.set(subrcBefore);
+      abap.builtin.sy.get().dbcnt.set(dbcntBefore);
+      await throwErrorWithParameters("CX_SY_OPEN_SQL_DB", {sqlmsg: new String().set(`INSERT ${typeof table === "string" ? table : table.get().trimEnd()} FROM TABLE: a row could not be inserted (duplicate key?)`)});
     }
     abap.builtin.sy.get().subrc.set(subrc);
     abap.builtin.sy.get().dbcnt.set(dbcnt);
