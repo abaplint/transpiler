@@ -1,5 +1,6 @@
-import {FieldSymbol, HashedTable, Table, TableAccessType, TableRowType} from "../types";
+import {FieldSymbol, HashedTable, Structure, Table, TableAccessType, TableKeyType, TableRowType} from "../types";
 import {eq, lt, gt} from "../compare";
+import {primaryKeyValues} from "../primary_key";
 
 export interface ISortOptions {
   descending?: boolean,
@@ -127,6 +128,26 @@ export function sort(input: Table | FieldSymbol | any[], options?: ISortOptions)
       return 0;
     });
 
+  } else if (input instanceof Table
+      && input.getRowType() instanceof Structure
+      && input.getOptions()?.keyType !== TableKeyType.empty) {
+    // without BY, rows of a structure are sorted by the primary key
+    const descending = options?.descending === true;
+    const keys = new Map<TableRowType, any[]>();
+    for (const row of input.array()) {
+      keys.set(row, primaryKeyValues(input, row));
+    }
+    input.sort((a: TableRowType, b: TableRowType) => {
+      const keyA = keys.get(a)!;
+      const keyB = keys.get(b)!;
+      for (let i = 0; i < keyA.length; i++) {
+        const result = compareWholeRows(keyA[i], keyB[i]);
+        if (result !== 0) {
+          return descending ? -result : result;
+        }
+      }
+      return 0;
+    });
   } else {
     const descending = options?.descending === true;
     input.sort((a: TableRowType, b: TableRowType) => {
