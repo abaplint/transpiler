@@ -1,5 +1,6 @@
-import {Character, Date, FieldSymbol, HashedTable, Hex, HexUInt8, Numc, String, Structure, Table, TableKeyType, Time, XString} from "../types";
+import {FieldSymbol, HashedTable, Structure, Table} from "../types";
 import {eq} from "../compare";
+import {primaryKeyValues} from "../primary_key";
 import {INumeric} from "../types/_numeric";
 import {loop} from "./loop";
 import {ABAP} from "..";
@@ -15,51 +16,6 @@ export interface IDeleteInternalOptions {
   fromValue?: any,
   from?: any,
   to?: any,
-}
-
-// the standard key, all character-like and byte-like components, substructures expanded
-function standardKeyValues(row: any): any[] {
-  if (!(row instanceof Structure)) {
-    return [row];
-  }
-  const ret: any[] = [];
-  for (const component of Object.values(row.get())) {
-    if (component instanceof Structure) {
-      ret.push(...standardKeyValues(component));
-    } else if (component instanceof Character
-        || component instanceof Numc
-        || component instanceof Date
-        || component instanceof Time
-        || component instanceof String
-        || component instanceof Hex
-        || component instanceof HexUInt8
-        || component instanceof XString) {
-      ret.push(component);
-    }
-  }
-  return ret;
-}
-
-// values of the primary key, an empty key gives no values
-function primaryKeyValues(target: Table, row: any): any[] {
-  const options = target.getOptions();
-  if (options?.keyType === TableKeyType.empty) {
-    return [];
-  }
-  const keyFields = options?.primaryKey?.keyFields ?? [];
-  if (keyFields.length === 0) {
-    return standardKeyValues(row);
-  }
-  return keyFields.map(k => {
-    if (k.toUpperCase() === "TABLE_LINE") {
-      return row;
-    }
-    let value = row;
-    for (const name of k.toLowerCase().split("-")) {
-      value = value.get()[name];
-    }
-    return value;
-  });
 }
 
 export async function deleteInternal(target: Table | HashedTable | FieldSymbol, options?: IDeleteInternalOptions): Promise<void> {

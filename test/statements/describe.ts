@@ -144,6 +144,33 @@ WRITE / lv_type.`;
     expect(abap.console.get()).to.equal("u");
   });
 
+  it("DESCRIBE FIELD, deep structure is v, flat is u", async () => {
+    const code = `
+TYPES: BEGIN OF ty_deep,
+         name TYPE string,
+         n    TYPE i,
+       END OF ty_deep.
+TYPES: BEGIN OF ty_flat,
+         a TYPE i,
+         b TYPE c LENGTH 2,
+       END OF ty_flat.
+DATA ls_deep TYPE ty_deep.
+DATA ls_flat TYPE ty_flat.
+DATA lv_type TYPE c.
+FIELD-SYMBOLS <struc> TYPE any.
+DESCRIBE FIELD ls_deep TYPE lv_type.
+WRITE / lv_type.
+DESCRIBE FIELD ls_flat TYPE lv_type.
+WRITE / lv_type.
+ASSIGN ls_deep TO <struc>.
+DESCRIBE FIELD <struc> TYPE lv_type.
+WRITE / lv_type.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("v\nu\nv");
+  });
+
   it("DESCRIBE FIELD, ref to data", async () => {
     const code = `
   DATA lv_type TYPE c.
