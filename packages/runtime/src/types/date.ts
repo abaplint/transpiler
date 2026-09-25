@@ -34,7 +34,12 @@ export class Date implements ICharacter {
       }
     } else if (value instanceof Float) {
       this.set(Math.round(value.getRaw()));
+    } else if (value instanceof String) {
+      // an empty string is the initial date, a shorter one is filled with blanks
+      const str = value.get();
+      this.value = str === "" ? "00000000" : str;
     } else if (typeof value === "string") {
+      // raw character results, eg. from CONCATENATE, are filled with blanks
       this.value = value;
     } else {
       this.set(value.get());
