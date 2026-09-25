@@ -3,7 +3,6 @@ import {ABAPObject, Character, Date, DecFloat34, FieldSymbol, Float, HashedTable
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "../operators/_parse";
-import {initial} from "./initial";
 
 function compareTables(left: Table | HashedTable, right: Table | HashedTable): boolean {
   const leftArray = left.array();
@@ -38,6 +37,15 @@ function compareStructures(left: Structure, right: Structure): boolean {
     }
   }
   return true;
+}
+
+// two x fields of different lengths: the shorter one is padded with 00 on the
+// right, so x'AB' = x'AB00'
+function eqHexPadded(left: Hex | HexUInt8, right: Hex | HexUInt8): boolean {
+  const l = left.get();
+  const r = right.get();
+  const length = Math.max(l.length, r.length);
+  return l.padEnd(length, "0") === r.padEnd(length, "0");
 }
 
 // module locals instead of the imported bindings, as the CommonJS re-export
@@ -103,7 +111,7 @@ export function eq(
       return (left as XString).get() === (right as XString).get();
     } else if (leftConstructor === HexC || leftConstructor === HexUInt8C) {
       if ((left as Hex).getLength() !== (right as Hex).getLength()) {
-        return initial(left as Hex) && initial(right as Hex);
+        return eqHexPadded(left as Hex, right as Hex);
       }
       return (left as Hex).get() === (right as Hex).get();
     } else if (leftConstructor === Integer8C) {
@@ -189,7 +197,7 @@ export function eq(
     if (left instanceof Hex || left instanceof HexUInt8) {
       // @ts-ignore
       if (right.getLength && right.getLength() !== left.getLength()) {
-        return initial(left) && initial(right);
+        return eqHexPadded(left, right as Hex | HexUInt8);
       }
       return right.get() === left.get();
     } else if (left instanceof XString ) {
