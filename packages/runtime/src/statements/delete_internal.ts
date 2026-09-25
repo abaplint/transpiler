@@ -1,5 +1,6 @@
 import {FieldSymbol, HashedTable, Structure, Table} from "../types";
 import {eq} from "../compare";
+import {primaryKeyValues} from "../primary_key";
 import {INumeric} from "../types/_numeric";
 import {loop} from "./loop";
 import {ABAP} from "..";
@@ -11,6 +12,7 @@ export interface IDeleteInternalOptions {
   index?: INumeric,
   adjacent?: boolean,
   comparing?: string[],
+  allFields?: boolean,
   fromValue?: any,
   from?: any,
   to?: any,
@@ -70,7 +72,11 @@ export async function deleteInternal(target: Table | HashedTable | FieldSymbol, 
       const prev = array[ index - 1];
       const i = array[ index ];
 
-      if (options?.comparing) {
+      if (options?.allFields === true) {
+        if (eq(prev, i) === true) {
+          target.deleteIndex(index);
+        }
+      } else if (options?.comparing) {
         let match = false;
         for (const compareField of options.comparing) {
           match = eq(prev.get()[compareField], i.get()[compareField]);
@@ -81,8 +87,13 @@ export async function deleteInternal(target: Table | HashedTable | FieldSymbol, 
         if (match) {
           target.deleteIndex(index);
         }
-      } else if (eq(prev, i) === true) {
-        target.deleteIndex(index);
+      } else {
+        // without COMPARING, rows are compared by the primary key, nothing is deleted if the key is empty
+        const prevKey = primaryKeyValues(target, prev);
+        const key = primaryKeyValues(target, i);
+        if (key.length > 0 && key.every((value, n) => eq(prevKey[n], value))) {
+          target.deleteIndex(index);
+        }
       }
     }
     return;

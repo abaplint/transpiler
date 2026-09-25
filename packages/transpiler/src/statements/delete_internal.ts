@@ -23,10 +23,11 @@ export class DeleteInternalTranspiler implements IStatementTranspiler {
     }
 
 // todo, this is not completely correct, fields might have the name ADJACENT
-// comparisons should be on table key unless other is specified, but we're unaware
     if (node.findDirectTokenByText("ADJACENT")) {
       extra.push("adjacent: true");
-      if (node.findDirectTokenByText("COMPARING") && !concat.includes("COMPARING ALL FIELDS")) {
+      if (concat.includes("COMPARING ALL FIELDS")) {
+        extra.push("allFields: true");
+      } else if (node.findDirectTokenByText("COMPARING")) {
         const comparing = node.findAllExpressions(abaplint.Expressions.SimpleFieldChain2);
         if (comparing) {
           const compareFields = comparing.map(i => "'" + i.getFirstToken().getStr() + "'").join(",");

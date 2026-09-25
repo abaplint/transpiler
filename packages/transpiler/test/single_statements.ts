@@ -75,6 +75,7 @@ describe("Single statements", () => {
     {abap: "WRITE |moo|.",                            js: "abap.statements.write(new abap.types.String().set(`moo`));",                                  skip: false},
     {abap: "DELETE foo WHERE bar = 2.",               js: "await abap.statements.deleteInternal(foo,{where: async (I) => {return abap.compare.eq(I.bar, abap.IntegerFactory.get(2));}});", skip: false},
     {abap: "DELETE ADJACENT DUPLICATES FROM foo.",    js: "await abap.statements.deleteInternal(foo,{adjacent: true});",          skip: false},
+    {abap: "DELETE ADJACENT DUPLICATES FROM foo COMPARING ALL FIELDS.", js: "await abap.statements.deleteInternal(foo,{adjacent: true,allFields: true});", skip: false},
     {abap: "DELETE foo INDEX 2.",                     js: "await abap.statements.deleteInternal(foo,{index: abap.IntegerFactory.get(2)});",       skip: false},
     {abap: "DELETE TABLE tab FROM <bar>.",            js: "await abap.statements.deleteInternal(tab,{fromValue: fs_bar_});",           skip: false},
     {abap: "* comment",                               js: "// * comment",                                                   skip: true},

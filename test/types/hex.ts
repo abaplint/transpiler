@@ -14,6 +14,39 @@ describe("Running Examples - Hex type", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
+  it("Hex, from character, takes the leading hexadecimal digits only", async () => {
+    const code = `
+  DATA lv_hex TYPE x LENGTH 4.
+  DATA lv_c6 TYPE c LENGTH 6.
+  DATA lv_str TYPE string.
+  lv_str = 'ABG1'.
+  lv_hex = lv_str.
+  WRITE / lv_hex.
+  lv_str = 'AB CD'.
+  lv_hex = lv_str.
+  WRITE / lv_hex.
+  lv_str = '0a1B'.
+  lv_hex = lv_str.
+  WRITE / lv_hex.
+  lv_str = '12ab'.
+  lv_hex = lv_str.
+  WRITE / lv_hex.
+  lv_str = 'A'.
+  lv_hex = lv_str.
+  WRITE / lv_hex.
+  lv_c6 = 'AB'.
+  lv_hex = lv_c6.
+  WRITE / lv_hex.
+  lv_str = '1234567890AB'.
+  lv_hex = lv_str.
+  WRITE / lv_hex.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    // as a 7.5x system answers
+    expect(abap.console.get()).to.equal("AB000000\nAB000000\n00000000\n12000000\nA0000000\nAB000000\n12345678");
+  });
+
   it("Hex, initial value", async () => {
     const code = `
   DATA lv_hex TYPE x LENGTH 1.
@@ -149,6 +182,42 @@ describe("Running Examples - Hex type", () => {
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal(`-1895821056`);
+  });
+
+  it("Hex and xstring to integer, the last four bytes", async () => {
+    const code = `
+    DATA lv_xs TYPE xstring.
+    DATA lv_x5 TYPE x LENGTH 5.
+    DATA lv_x1 TYPE x LENGTH 1.
+    DATA lv_int TYPE i.
+    lv_int = 7.
+    lv_int = lv_xs.
+    WRITE / lv_int.
+    lv_xs = '0100000002'.
+    lv_int = lv_xs.
+    WRITE / lv_int.
+    lv_x5 = '0100000002'.
+    lv_int = lv_x5.
+    WRITE / lv_int.
+    lv_xs = '0102'.
+    lv_int = lv_xs.
+    WRITE / lv_int.
+    lv_xs = 'FFFFFFFF'.
+    lv_int = lv_xs.
+    WRITE / lv_int.
+    lv_xs = '80000000'.
+    lv_int = lv_xs.
+    WRITE / lv_int.
+    lv_xs = 'FF'.
+    lv_int = lv_xs.
+    WRITE / lv_int.
+    lv_x1 = 'FF'.
+    lv_int = lv_x1.
+    WRITE / lv_int.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`0\n2\n2\n258\n-1\n-2147483648\n255\n255`);
   });
 
   it("Hex, to integer, two complement, negative value, 1", async () => {
@@ -493,6 +562,32 @@ ENDIF.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal(`nono`);
+  });
+
+  it("comparing, different lengths, the shorter is padded with 00", async () => {
+    const code = `
+DATA lv_x1 TYPE x LENGTH 1.
+DATA lv_x2 TYPE x LENGTH 2.
+DATA lv_xs TYPE xstring.
+lv_x1 = 'AB'.
+lv_x2 = 'AB00'.
+WRITE / boolc( lv_x1 = lv_x2 ).
+WRITE / boolc( lv_x2 = lv_x1 ).
+WRITE / boolc( lv_x1 < lv_x2 ).
+WRITE / boolc( lv_x2 > lv_x1 ).
+lv_x2 = 'ABCD'.
+WRITE / boolc( lv_x1 < lv_x2 ).
+lv_x1 = 'AC'.
+WRITE / boolc( lv_x1 > lv_x2 ).
+lv_x2 = 'AB00'.
+lv_xs = 'AB'.
+WRITE / boolc( lv_x2 = lv_xs ).
+WRITE / boolc( lv_xs < lv_x2 ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`X\nX\n \n \nX\nX\n \nX`);
   });
 
   it("test, loop", async () => {

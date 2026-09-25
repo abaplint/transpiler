@@ -159,7 +159,7 @@ export class SelectTranspiler implements IStatementTranspiler {
   }
   if (!(${target} instanceof abap.types.HashedTable) && ${target}.getOptions()?.primaryKey?.type !== "SORTED") {
     abap.statements.sort(${target}, {by: ${by}.map(k => { return {component: k}; })});
-    await abap.statements.deleteInternal(${target}, {adjacent: true, by: ${by}});
+    await abap.statements.deleteInternal(${target}, {adjacent: true, allFields: true});
   }
   abap.builtin.sy.get().dbcnt.set(${target}.getArrayLength());
 }`;
