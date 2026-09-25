@@ -1,7 +1,7 @@
 import {expect} from "chai";
 import {AsyncFunction, runFiles as runRilesSqlite, runFilesHana, runFilesPostgres, runFilesSnowflake} from "./_utils";
 import {ABAP, MemoryConsole} from "../packages/runtime/src/";
-import {msag_escape, msag_zag_unit_test, tabl_t100xml, zquan, zt111, zt222} from "./_data";
+import {msag_escape, msag_zag_unit_test, tabl_t100xml, tabl_zrng, zquan, zt111, zt222} from "./_data";
 import {IFile} from "../packages/transpiler/src/types";
 
 try {
@@ -2141,6 +2141,171 @@ WRITE lines( lt_t100 ).`;
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("2\n0");
+    });
+  });
+
+  it("SELECT, IN, every SIGN and OPTION as measured", async () => {
+    // cases measured on an ABAP 7.5x system (HANA), one line per case:
+    // index:sy-subrc:matched keys
+    const code = `
+DATA ls TYPE zrng.
+DATA lt_k TYPE STANDARD TABLE OF zrng-k WITH DEFAULT KEY.
+DATA lv_k TYPE zrng-k.
+DATA lv_out TYPE string.
+DATA lr_c TYPE RANGE OF zrng-c.
+DATA ls_c LIKE LINE OF lr_c.
+DATA lr_i TYPE RANGE OF zrng-i.
+DATA ls_i LIKE LINE OF lr_i.
+DATA lr_n TYPE RANGE OF zrng-n.
+DATA ls_n LIKE LINE OF lr_n.
+ls-k = 'K01'. ls-n = '0001'. ls-i = 1. ls-c = 'A'. INSERT zrng FROM ls.
+ls-k = 'K02'. ls-n = '0002'. ls-i = 2. ls-c = 'B'. INSERT zrng FROM ls.
+ls-k = 'K03'. ls-n = '0003'. ls-i = 3. ls-c = 'C'. INSERT zrng FROM ls.
+ls-k = 'K04'. ls-n = '0004'. ls-i = 4. ls-c = 'D'. INSERT zrng FROM ls.
+ls-k = 'K05'. ls-n = '0005'. ls-i = 5. ls-c = 'M'. INSERT zrng FROM ls.
+ls-k = 'K06'. ls-n = '0006'. ls-i = 6. ls-c = 'N'. INSERT zrng FROM ls.
+ls-k = 'K07'. ls-n = '0007'. ls-i = 7. ls-c = 'T'. INSERT zrng FROM ls.
+ls-k = 'K08'. ls-n = '0008'. ls-i = 8. ls-c = 'TA1*Z'. INSERT zrng FROM ls.
+ls-k = 'K09'. ls-n = '0009'. ls-i = 9. ls-c = 'T1*Z'. INSERT zrng FROM ls.
+ls-k = 'K10'. ls-n = '0010'. ls-i = 10. ls-c = 'TA1*'. INSERT zrng FROM ls.
+ls-k = 'K11'. ls-n = '0011'. ls-i = 11. ls-c = 'TA1XZ'. INSERT zrng FROM ls.
+ls-k = 'K12'. ls-n = '0012'. ls-i = 12. ls-c = 'TA1*ZZ'. INSERT zrng FROM ls.
+ls-k = 'K13'. ls-n = '0013'. ls-i = 13. ls-c = '50%_off'. INSERT zrng FROM ls.
+ls-k = 'K14'. ls-n = '0014'. ls-i = 14. ls-c = '50X_off'. INSERT zrng FROM ls.
+ls-k = 'K15'. ls-n = '0015'. ls-i = 15. ls-c = '50%Xoff'. INSERT zrng FROM ls.
+ls-k = 'K16'. ls-n = '0016'. ls-i = 16. ls-c = '50%_offer'. INSERT zrng FROM ls.
+ls-k = 'K17'. ls-n = '0017'. ls-i = -1. ls-c = 'A_1'. INSERT zrng FROM ls.
+ls-k = 'K18'. ls-n = '0018'. ls-i = 0. ls-c = 'A%1'. INSERT zrng FROM ls.
+ls-k = 'K19'. ls-n = '0019'. ls-i = 100. ls-c = 'A#1'. INSERT zrng FROM ls.
+ls-k = 'K20'. ls-n = '0020'. ls-i = -100. ls-c = 'A*1'. INSERT zrng FROM ls.
+ls-k = 'K21'. ls-n = '0021'. ls-i = 21. ls-c = 'A+1'. INSERT zrng FROM ls.
+ls-k = 'K22'. ls-n = '0022'. ls-i = 22. ls-c = 'AX1'. INSERT zrng FROM ls.
+ls-k = 'K23'. ls-n = '0023'. ls-i = 23. ls-c = 'a1'. INSERT zrng FROM ls.
+ls-k = 'K24'. ls-n = '0024'. ls-i = 24. ls-c = 'A1'. INSERT zrng FROM ls.
+ls-k = 'K25'. ls-n = '0025'. ls-i = 25. ls-c = 'X'. INSERT zrng FROM ls.
+ls-k = 'K26'. ls-n = '0026'. ls-i = 26. ls-c = 'XY'. INSERT zrng FROM ls.
+ls-k = 'K27'. ls-n = '0027'. ls-i = 27. ls-c = 'x1'. INSERT zrng FROM ls.
+ls-k = 'K28'. ls-n = '0028'. ls-i = 28. ls-c = ''. INSERT zrng FROM ls.
+ls-k = 'K29'. ls-n = '0029'. ls-i = 29. ls-c = 'TX'. INSERT zrng FROM ls.
+ls-k = 'K30'. ls-n = '0000'. ls-i = 30. ls-c = 'A B'. INSERT zrng FROM ls.
+ls-k = 'K31'. ls-n = '0031'. ls-i = 31. ls-c = 'ABCDEFGHIJ'. INSERT zrng FROM ls.
+* E EQ only
+CLEAR lr_c.
+CLEAR ls_c. ls_c-sign = 'E'. ls_c-option = 'EQ'. ls_c-low = 'A'. ls_c-high = ''. APPEND ls_c TO lr_c.
+SELECT k FROM zrng INTO TABLE lt_k WHERE c IN lr_c ORDER BY k.
+lv_out = |0:{ sy-subrc }:|.
+LOOP AT lt_k INTO lv_k.
+  lv_out = lv_out && lv_k && \`,\`.
+ENDLOOP.
+WRITE / lv_out.
+* I BT and E EQ
+CLEAR lr_c.
+CLEAR ls_c. ls_c-sign = 'I'. ls_c-option = 'BT'. ls_c-low = 'A'. ls_c-high = 'M'. APPEND ls_c TO lr_c.
+CLEAR ls_c. ls_c-sign = 'E'. ls_c-option = 'EQ'. ls_c-low = 'C'. ls_c-high = ''. APPEND ls_c TO lr_c.
+SELECT k FROM zrng INTO TABLE lt_k WHERE c IN lr_c ORDER BY k.
+lv_out = |1:{ sy-subrc }:|.
+LOOP AT lt_k INTO lv_k.
+  lv_out = lv_out && lv_k && \`,\`.
+ENDLOOP.
+WRITE / lv_out.
+* I NB
+CLEAR lr_c.
+CLEAR ls_c. ls_c-sign = 'I'. ls_c-option = 'NB'. ls_c-low = 'B'. ls_c-high = 'D'. APPEND ls_c TO lr_c.
+SELECT k FROM zrng INTO TABLE lt_k WHERE c IN lr_c ORDER BY k.
+lv_out = |2:{ sy-subrc }:|.
+LOOP AT lt_k INTO lv_k.
+  lv_out = lv_out && lv_k && \`,\`.
+ENDLOOP.
+WRITE / lv_out.
+* I GT
+CLEAR lr_c.
+CLEAR ls_c. ls_c-sign = 'I'. ls_c-option = 'GT'. ls_c-low = 'M'. ls_c-high = ''. APPEND ls_c TO lr_c.
+SELECT k FROM zrng INTO TABLE lt_k WHERE c IN lr_c ORDER BY k.
+lv_out = |3:{ sy-subrc }:|.
+LOOP AT lt_k INTO lv_k.
+  lv_out = lv_out && lv_k && \`,\`.
+ENDLOOP.
+WRITE / lv_out.
+* I LT
+CLEAR lr_c.
+CLEAR ls_c. ls_c-sign = 'I'. ls_c-option = 'LT'. ls_c-low = 'B'. ls_c-high = ''. APPEND ls_c TO lr_c.
+SELECT k FROM zrng INTO TABLE lt_k WHERE c IN lr_c ORDER BY k.
+lv_out = |4:{ sy-subrc }:|.
+LOOP AT lt_k INTO lv_k.
+  lv_out = lv_out && lv_k && \`,\`.
+ENDLOOP.
+WRITE / lv_out.
+* I BT with LOW > HIGH
+CLEAR lr_c.
+CLEAR ls_c. ls_c-sign = 'I'. ls_c-option = 'BT'. ls_c-low = 'M'. ls_c-high = 'A'. APPEND ls_c TO lr_c.
+SELECT k FROM zrng INTO TABLE lt_k WHERE c IN lr_c ORDER BY k.
+lv_out = |5:{ sy-subrc }:|.
+LOOP AT lt_k INTO lv_k.
+  lv_out = lv_out && lv_k && \`,\`.
+ENDLOOP.
+WRITE / lv_out.
+* E EQ twice (no I rows)
+CLEAR lr_c.
+CLEAR ls_c. ls_c-sign = 'E'. ls_c-option = 'EQ'. ls_c-low = 'A'. ls_c-high = ''. APPEND ls_c TO lr_c.
+CLEAR ls_c. ls_c-sign = 'E'. ls_c-option = 'EQ'. ls_c-low = 'B'. ls_c-high = ''. APPEND ls_c TO lr_c.
+SELECT k FROM zrng INTO TABLE lt_k WHERE c IN lr_c ORDER BY k.
+lv_out = |6:{ sy-subrc }:|.
+LOOP AT lt_k INTO lv_k.
+  lv_out = lv_out && lv_k && \`,\`.
+ENDLOOP.
+WRITE / lv_out.
+* E EQ initial LOW
+CLEAR lr_c.
+CLEAR ls_c. ls_c-sign = 'E'. ls_c-option = 'EQ'. ls_c-low = ''. ls_c-high = ''. APPEND ls_c TO lr_c.
+SELECT k FROM zrng INTO TABLE lt_k WHERE c IN lr_c ORDER BY k.
+lv_out = |7:{ sy-subrc }:|.
+LOOP AT lt_k INTO lv_k.
+  lv_out = lv_out && lv_k && \`,\`.
+ENDLOOP.
+WRITE / lv_out.
+* INT4 I BT
+CLEAR lr_i.
+CLEAR ls_i. ls_i-sign = 'I'. ls_i-option = 'BT'. ls_i-low = -1. ls_i-high = 5. APPEND ls_i TO lr_i.
+SELECT k FROM zrng INTO TABLE lt_k WHERE i IN lr_i ORDER BY k.
+lv_out = |8:{ sy-subrc }:|.
+LOOP AT lt_k INTO lv_k.
+  lv_out = lv_out && lv_k && \`,\`.
+ENDLOOP.
+WRITE / lv_out.
+* INT4 I NB
+CLEAR lr_i.
+CLEAR ls_i. ls_i-sign = 'I'. ls_i-option = 'NB'. ls_i-low = 1. ls_i-high = 99. APPEND ls_i TO lr_i.
+SELECT k FROM zrng INTO TABLE lt_k WHERE i IN lr_i ORDER BY k.
+lv_out = |9:{ sy-subrc }:|.
+LOOP AT lt_k INTO lv_k.
+  lv_out = lv_out && lv_k && \`,\`.
+ENDLOOP.
+WRITE / lv_out.
+* NUMC I BT via numc4 range
+CLEAR lr_n.
+CLEAR ls_n. ls_n-sign = 'I'. ls_n-option = 'BT'. ls_n-low = '5'. ls_n-high = '10'. APPEND ls_n TO lr_n.
+SELECT k FROM zrng INTO TABLE lt_k WHERE n IN lr_n ORDER BY k.
+lv_out = |10:{ sy-subrc }:|.
+LOOP AT lt_k INTO lv_k.
+  lv_out = lv_out && lv_k && \`,\`.
+ENDLOOP.
+WRITE / lv_out.`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "zrng.tabl.xml", contents: tabl_zrng}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal([
+        "0:0:K02,K03,K04,K05,K06,K07,K08,K09,K10,K11,K12,K13,K14,K15,K16,K17,K18,K19,K20,K21,K22,K23,K24,K25,K26,K27,K28,K29,K30,K31,",
+        "1:0:K01,K02,K04,K05,K17,K18,K19,K20,K21,K22,K24,K30,K31,",
+        "2:0:K01,K05,K06,K07,K08,K09,K10,K11,K12,K13,K14,K15,K16,K17,K18,K19,K20,K21,K22,K23,K24,K25,K26,K27,K28,K29,K30,K31,",
+        "3:0:K06,K07,K08,K09,K10,K11,K12,K23,K25,K26,K27,K29,",
+        "4:0:K01,K13,K14,K15,K16,K17,K18,K19,K20,K21,K22,K24,K28,K30,K31,",
+        "5:4:",
+        "6:0:K03,K04,K05,K06,K07,K08,K09,K10,K11,K12,K13,K14,K15,K16,K17,K18,K19,K20,K21,K22,K23,K24,K25,K26,K27,K28,K29,K30,K31,",
+        "7:0:K01,K02,K03,K04,K05,K06,K07,K08,K09,K10,K11,K12,K13,K14,K15,K16,K17,K18,K19,K20,K21,K22,K23,K24,K25,K26,K27,K29,K30,K31,",
+        "8:0:K01,K02,K03,K04,K05,K17,K18,",
+        "9:0:K17,K18,K19,K20,",
+        "10:0:K05,K06,K07,K08,K09,K10,"].join("\n"));
     });
   });
 
