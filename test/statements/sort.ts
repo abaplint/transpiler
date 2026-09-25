@@ -141,4 +141,31 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("SORT without BY, structure WITH DEFAULT KEY, sorts by the character-like components", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         name TYPE c LENGTH 2,
+         n    TYPE i,
+         s    TYPE string,
+       END OF ty_row.
+DATA lt_r TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY.
+DATA ls TYPE ty_row.
+DATA lv_out TYPE string.
+ls-name = 'b'. ls-n = 1. ls-s = \`x\`. APPEND ls TO lt_r.
+ls-name = 'a'. ls-n = 3. ls-s = \`y\`. APPEND ls TO lt_r.
+ls-name = 'a'. ls-n = 4. ls-s = \`y\`. APPEND ls TO lt_r.
+ls-name = 'a'. ls-n = 5. ls-s = \`y\`. APPEND ls TO lt_r.
+ls-name = 'a'. ls-n = 9. ls-s = \`a\`. APPEND ls TO lt_r.
+ls-name = 'A'. ls-n = 2. ls-s = \`z\`. APPEND ls TO lt_r.
+SORT lt_r.
+LOOP AT lt_r INTO ls.
+  lv_out = lv_out && |{ ls-name }{ ls-n }{ ls-s };|.
+ENDLOOP.
+WRITE / lv_out.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("A2z;a9a;a3y;a4y;a5y;b1x;");
+  });
+
 });

@@ -111,6 +111,42 @@ describe("Builtin functions - escape", () => {
     expect(abap.console.get()).to.equal(`a\\\\b`);
   });
 
+  it("escape(), json, tab and carriage return", async () => {
+    const code = `
+    CONSTANTS e_json_string TYPE i VALUE 24.
+    DATA lv_result TYPE string.
+    lv_result = escape(
+      val    = |a\\tb\\rc\\nd/e'f|
+      format = e_json_string ).
+    WRITE lv_result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`a\\tb\\rc\\nd/e'f`);
+  });
+
+  it("escape(), json, a c operand without its trailing blanks", async () => {
+    const code = `
+    CONSTANTS e_json_string TYPE i VALUE 24.
+    DATA lv_c TYPE c LENGTH 6.
+    DATA lv_result TYPE string.
+    FIELD-SYMBOLS <lv_any> TYPE any.
+    lv_c = 'a"b'.
+    lv_result = escape(
+      val    = lv_c
+      format = e_json_string ).
+    WRITE |[{ lv_result }]|.
+    ASSIGN lv_c TO <lv_any>.
+    lv_result = escape(
+      val    = <lv_any>
+      format = e_json_string ).
+    WRITE |[{ lv_result }]|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`[a\\"b][a\\"b]`);
+  });
+
   it("escape(), xml attr", async () => {
     const code = `
     CONSTANTS e_xml_attr TYPE i VALUE 1.

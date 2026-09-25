@@ -114,8 +114,14 @@ function gt_with_hex(
   left: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | Integer8,
   right: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | Integer8): boolean {
 
-  const left_hex = get_hex_from_parameter(left);
-  const right_hex = get_hex_from_parameter(right);
+  let left_hex = get_hex_from_parameter(left);
+  let right_hex = get_hex_from_parameter(right);
+  if ((left instanceof Hex || left instanceof HexUInt8) && (right instanceof Hex || right instanceof HexUInt8)) {
+    // two x fields of different lengths: the shorter one is padded with 00 on the right
+    const length = Math.max(left_hex.length, right_hex.length);
+    left_hex = left_hex.padEnd(length, "0");
+    right_hex = right_hex.padEnd(length, "0");
+  }
   return left_hex > right_hex;
 }
 

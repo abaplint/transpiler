@@ -25,14 +25,29 @@ export async function deleteDatabase(table: string | ICharacter, options: IDelet
   }
 
   if (options.table) {
+    // one DELETE per row; sy-subrc is 4 when any row was not found,
+    // sy-dbcnt counts the rows deleted
+    let subrc = 0;
+    let dbcnt = 0;
     for (const row of options.table.array()) {
       await deleteDatabase(table, {from: row}, context);
+      if (abap.builtin.sy.get().subrc.get() !== 0) {
+        subrc = 4;
+      }
+      dbcnt += abap.builtin.sy.get().dbcnt.get();
     }
+    abap.builtin.sy.get().subrc.set(subrc);
+    abap.builtin.sy.get().dbcnt.set(dbcnt);
   } else if (options.from) {
     let where: string[] | string = [];
 
+    // the row is found by its primary key, the other fields are not compared
+    const keys: string[] | undefined = abap.DDIC[table.toUpperCase()]?.keyFields;
     const structure = options.from.get();
     for (const k of Object.keys(structure)) {
+      if (keys !== undefined && keys.length > 0 && keys.includes(k.toUpperCase()) === false) {
+        continue;
+      }
       const str = `"${k.toLowerCase()}"` + " = " + toValue(structure[k].get());
       where.push(str);
     }
