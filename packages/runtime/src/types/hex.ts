@@ -7,7 +7,7 @@ import {INumeric} from "./_numeric";
 import {throwError} from "../throw_error";
 import {Integer8} from "./integer8";
 
-const REGEXP = /^(?![A-F0-9])/;
+const HEX_PREFIX = /^[A-F0-9]*/;
 
 export class Hex implements ICharacter {
   private value: string;
@@ -70,9 +70,12 @@ export class Hex implements ICharacter {
       } else if (typeof v === "number") {
         return this.set(v);
       } else {
-        this.value = v;
-        if (this.value.match(REGEXP)) {
-          this.value = "";
+        // c -> x: the leading hexadecimal digits, upper case only, and a
+        // trailing half byte padded with 0; the first other character ends
+        // the conversion, so "ABG1" is AB, "0a1B" is 00
+        this.value = HEX_PREFIX.exec(v)![0];
+        if (this.value.length % 2 === 1) {
+          this.value += "0";
         }
       }
     }
