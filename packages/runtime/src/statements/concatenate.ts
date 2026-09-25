@@ -1,6 +1,9 @@
 import {INumeric} from "../types/_numeric";
 import {ICharacter} from "../types/_character";
-import {Character, Table} from "../types";
+import {Character, FieldSymbol, Table} from "../types";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 export interface IConcatenateInput {
   source: (number | string | INumeric | ICharacter | Table)[],
@@ -9,6 +12,17 @@ export interface IConcatenateInput {
   respectingBlanks?: boolean,
   lines?: boolean,
   byteMode?: boolean,
+}
+
+// sy-subrc 4 when a c target cuts the result, else 0
+function setTarget(target: ICharacter, result: string) {
+  let subrc = 0;
+  const pointer = target instanceof FieldSymbol ? target.getPointer() : target;
+  if (pointer instanceof Character && result.trimEnd().length > pointer.getLength()) {
+    subrc = 4;
+  }
+  target.set(result);
+  abap.builtin.sy.get().subrc.set(subrc);
 }
 
 export function concatenate(input: IConcatenateInput) {
@@ -43,7 +57,7 @@ export function concatenate(input: IConcatenateInput) {
         result += respectingBlanks === true ? value : value.trimEnd();
       }
     }
-    input.target.set(result);
+    setTarget(input.target, result);
 
   } else {
     let result = "";
@@ -70,7 +84,7 @@ export function concatenate(input: IConcatenateInput) {
       result = result.slice(0, result.length - sep.length);
     }
 
-    input.target.set(result);
+    setTarget(input.target, result);
   }
 
 }
@@ -114,5 +128,5 @@ function concatenateByteMode(input: IConcatenateInput) {
     result = result.slice(0, result.length - sep.length);
   }
 
-  input.target.set(result);
+  setTarget(input.target, result);
 }
