@@ -33,6 +33,10 @@ export class InsertDatabaseTranspiler implements IStatementTranspiler {
       options.push(`"table": ` + tvalues.getCode());
     }
 
+    if (node.findDirectTokenByText("ACCEPTING") !== undefined) {
+      options.push(`"acceptingDuplicateKeys": true`);
+    }
+
     const connection = node.findDirectExpression(abaplint.Expressions.DatabaseConnection);
     if (connection) {
       const con = findConnection(connection, traversal);

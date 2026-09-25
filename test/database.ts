@@ -1269,6 +1269,32 @@ WRITE lines( lt_t100 ).`;
     });
   });
 
+  it("INSERT FROM TABLE ACCEPTING DUPLICATE KEYS", async () => {
+    const code = `
+DATA ls TYPE zdbw.
+DATA lt TYPE STANDARD TABLE OF zdbw WITH DEFAULT KEY.
+DATA lv_n TYPE i.
+ls-id = 'A'.
+INSERT zdbw FROM ls.
+ls-id = 'D'.
+APPEND ls TO lt.
+ls-id = 'A'.
+APPEND ls TO lt.
+ls-id = 'E'.
+APPEND ls TO lt.
+INSERT zdbw FROM TABLE lt ACCEPTING DUPLICATE KEYS.
+WRITE / sy-subrc.
+WRITE / sy-dbcnt.
+SELECT COUNT(*) FROM zdbw INTO lv_n.
+WRITE / lv_n.`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "zdbw.tabl.xml", contents: tabl_zdbw}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("4\n2\n3");
+    });
+  });
+
   it("tilde", async () => {
     const code = `
     DATA lv_msgnr TYPE t100-msgnr.
