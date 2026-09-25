@@ -3103,4 +3103,114 @@ ENDCLASS.`;
     await dumpNrun(files, false);
   });
 
+  it("test-66", async () => {
+// INSERT dbtab FROM TABLE with a duplicate key raises CX_SY_OPEN_SQL_DB,
+// leaves sy-subrc and sy-dbcnt alone and writes the other rows
+
+    const cxroot = `
+CLASS cx_root DEFINITION PUBLIC.
+ENDCLASS.
+CLASS cx_root IMPLEMENTATION.
+ENDCLASS.`;
+
+// "FROM cx_root" is not correct, but ok for the testcase
+    const cx = `CLASS cx_sy_open_sql_db DEFINITION PUBLIC INHERITING FROM cx_root.
+ENDCLASS.
+CLASS cx_sy_open_sql_db IMPLEMENTATION.
+ENDCLASS.`;
+
+    const zdbw = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V>
+    <TABNAME>ZDBW</TABNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <TABCLASS>TRANSP</TABCLASS>
+    <CLIDEP>X</CLIDEP>
+    <CONTFLAG>A</CONTFLAG>
+   </DD02V>
+   <DD03P_TABLE>
+    <DD03P>
+     <FIELDNAME>MANDT</FIELDNAME>
+     <KEYFLAG>X</KEYFLAG>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000006</INTLEN>
+     <NOTNULL>X</NOTNULL>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000003</LENG>
+    </DD03P>
+    <DD03P>
+     <FIELDNAME>ID</FIELDNAME>
+     <KEYFLAG>X</KEYFLAG>
+     <INTTYPE>C</INTTYPE>
+     <INTLEN>000020</INTLEN>
+     <NOTNULL>X</NOTNULL>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000010</LENG>
+    </DD03P>
+    <DD03P>
+     <FIELDNAME>VAL</FIELDNAME>
+     <INTTYPE>X</INTTYPE>
+     <INTLEN>000004</INTLEN>
+     <DATATYPE>INT4</DATATYPE>
+     <LENG>000010</LENG>
+    </DD03P>
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
+    const clas = `CLASS zcl_insert_dup DEFINITION PUBLIC.
+  PUBLIC SECTION.
+ENDCLASS.
+
+CLASS zcl_insert_dup IMPLEMENTATION.
+ENDCLASS.`;
+
+    const tests = `
+CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS insert FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD insert.
+    DATA ls TYPE zdbw.
+    DATA lt TYPE STANDARD TABLE OF zdbw WITH DEFAULT KEY.
+    DATA lv_n TYPE i.
+    DATA lv_out TYPE string.
+    ls-id = 'A'.
+    INSERT zdbw FROM ls.
+    ls-id = 'B'.
+    APPEND ls TO lt.
+    ls-id = 'A'.
+    APPEND ls TO lt.
+    ls-id = 'C'.
+    APPEND ls TO lt.
+    sy-subrc = 7.
+    sy-dbcnt = 7.
+    TRY.
+        INSERT zdbw FROM TABLE lt.
+        lv_out = |no exception { sy-subrc }/{ sy-dbcnt }|.
+      CATCH cx_sy_open_sql_db.
+        lv_out = |caught { sy-subrc }/{ sy-dbcnt }|.
+    ENDTRY.
+    SELECT COUNT(*) FROM zdbw INTO lv_n.
+    lv_out = |{ lv_out } { lv_n }|.
+    WRITE / lv_out.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "cx_sy_open_sql_db.clas.abap", contents: cx},
+      {filename: "zdbw.tabl.xml", contents: zdbw},
+      {filename: "zcl_insert_dup.clas.abap", contents: clas},
+      {filename: "zcl_insert_dup.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("caught 7/7 3");
+  });
+
 });

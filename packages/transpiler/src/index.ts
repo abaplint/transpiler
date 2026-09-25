@@ -1,5 +1,6 @@
 import * as abaplint from "@abaplint/core";
 import {Validation, config} from "./validation";
+import {UniqueIdentifier} from "./unique_identifier";
 import {UnitTest} from "./unit_test";
 import {IFile, IOutput, IProgress, ITranspilerOptions, ITranspilerPlugin, IOutputFile, UnknownTypesEnum} from "./types";
 import {Chunk} from "./chunk";
@@ -68,6 +69,12 @@ export class Transpiler {
     progress?.set(reg.getObjectCount().total, "Building");
     for (const obj of reg.getObjects()) {
       await progress?.tick("Building, " + obj.getName());
+      // the temporary names ("unique1", ..., and the DO/WHILE sy-index backups
+      // "indexBackup1", ...) are local to the module an object becomes, so each
+      // object numbers its own: its output then depends on the registry alone,
+      // not on the objects built before it or on an earlier run in the same process
+      UniqueIdentifier.reset();
+      UniqueIdentifier.resetIndexBackup();
       if (obj instanceof abaplint.Objects.TypePool) {
         output.objects.push(...new HandleTypePool().runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.FunctionGroup) {
