@@ -1709,4 +1709,170 @@ ASSERT <row>-count = 7.`;
     await f(abap);
   });
 
+  it("READ sorted table WITH KEY, a miss past the last row is sy-subrc 8 and sy-tabix lines + 1", async () => {
+    const code = `
+TYPES: BEGIN OF ty_kv,
+         k TYPE string,
+         v TYPE i,
+       END OF ty_kv.
+DATA lt_s TYPE SORTED TABLE OF ty_kv WITH UNIQUE KEY k.
+DATA ls_kv TYPE ty_kv.
+ls_kv-k = \`m\`. ls_kv-v = 3. INSERT ls_kv INTO TABLE lt_s.
+ls_kv-k = \`B\`. ls_kv-v = 1. INSERT ls_kv INTO TABLE lt_s.
+ls_kv-k = \`x\`. ls_kv-v = 4. INSERT ls_kv INTO TABLE lt_s.
+ls_kv-k = \`c\`. ls_kv-v = 2. INSERT ls_kv INTO TABLE lt_s.
+READ TABLE lt_s INTO ls_kv WITH KEY k = \`d\`.
+WRITE / |{ sy-subrc }/{ sy-tabix }|.
+READ TABLE lt_s INTO ls_kv WITH KEY k = \`A\`.
+WRITE / |{ sy-subrc }/{ sy-tabix }|.
+READ TABLE lt_s INTO ls_kv WITH KEY k = \`z\`.
+WRITE / |{ sy-subrc }/{ sy-tabix }|.
+READ TABLE lt_s INTO ls_kv WITH TABLE KEY k = \`z\`.
+WRITE / |{ sy-subrc }/{ sy-tabix }|.
+READ TABLE lt_s TRANSPORTING NO FIELDS WITH KEY k = \`y\`.
+WRITE / |{ sy-subrc }/{ sy-tabix }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4/3\n4/1\n8/5\n8/5\n8/5");
+  });
+
+  it("READ sorted table, two component key, a miss is sy-tabix of the row it would go before", async () => {
+    const code = `
+TYPES: BEGIN OF ty_ab,
+         a TYPE c LENGTH 1,
+         b TYPE c LENGTH 1,
+         v TYPE i,
+       END OF ty_ab.
+DATA lt_2 TYPE SORTED TABLE OF ty_ab WITH UNIQUE KEY a b.
+DATA ls_ab TYPE ty_ab.
+ls_ab-a = '1'. ls_ab-b = '3'. ls_ab-v = 2. INSERT ls_ab INTO TABLE lt_2.
+ls_ab-a = '1'. ls_ab-b = '1'. ls_ab-v = 1. INSERT ls_ab INTO TABLE lt_2.
+ls_ab-a = '3'. ls_ab-b = '1'. ls_ab-v = 4. INSERT ls_ab INTO TABLE lt_2.
+ls_ab-a = '2'. ls_ab-b = '2'. ls_ab-v = 3. INSERT ls_ab INTO TABLE lt_2.
+READ TABLE lt_2 INTO ls_ab WITH KEY a = '2'.
+WRITE / |{ sy-subrc }/{ sy-tabix }/{ ls_ab-v }|.
+READ TABLE lt_2 INTO ls_ab WITH KEY a = '1' b = '2'.
+WRITE / |{ sy-subrc }/{ sy-tabix }|.
+READ TABLE lt_2 INTO ls_ab WITH KEY a = '4'.
+WRITE / |{ sy-subrc }/{ sy-tabix }|.
+READ TABLE lt_2 INTO ls_ab WITH TABLE KEY a = '2' b = '3'.
+WRITE / |{ sy-subrc }/{ sy-tabix }|.
+READ TABLE lt_2 INTO ls_ab WITH KEY b = '9'.
+WRITE / |{ sy-subrc }/{ sy-tabix }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0/3/3\n4/2\n8/5\n4/4\n4/0");
+  });
+
+  it("READ sorted table WITH KEY table_line, a miss leaves the work area", async () => {
+    const code = `
+DATA lt_l TYPE SORTED TABLE OF string WITH UNIQUE KEY table_line.
+DATA lv_l TYPE string.
+INSERT \`q\` INTO TABLE lt_l.
+INSERT \`f\` INTO TABLE lt_l.
+READ TABLE lt_l INTO lv_l INDEX 1.
+READ TABLE lt_l INTO lv_l WITH KEY table_line = \`g\`.
+WRITE / |{ sy-subrc }/{ sy-tabix }/{ lv_l }|.
+READ TABLE lt_l INTO lv_l WITH TABLE KEY table_line = \`r\`.
+WRITE / |{ sy-subrc }/{ sy-tabix }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4/2/f\n8/3");
+  });
+
+  it("READ WITH KEY of a sorted secondary key, a miss is sy-subrc 4 or 8 and sy-tabix where the key would go", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         u TYPE string,
+         n TYPE i,
+       END OF ty_row.
+TYPES ty_tab TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY
+  WITH UNIQUE SORTED KEY k_u COMPONENTS u.
+DATA lt TYPE ty_tab.
+DATA ls TYPE ty_row.
+ls-u = 'u5'. ls-n = 1. APPEND ls TO lt.
+ls-u = 'u4'. ls-n = 2. APPEND ls TO lt.
+ls-u = 'u3'. ls-n = 3. APPEND ls TO lt.
+ls-u = 'u2'. ls-n = 4. APPEND ls TO lt.
+ls-u = 'u1'. ls-n = 5. APPEND ls TO lt.
+ls-u = 'u0'. ls-n = 0. APPEND ls TO lt.
+READ TABLE lt INTO ls WITH KEY k_u COMPONENTS u = 'u3'.
+WRITE / |{ sy-subrc }/{ ls-n }/{ sy-tabix }|.
+CLEAR ls.
+READ TABLE lt INTO ls WITH KEY k_u COMPONENTS u = 'zz'.
+WRITE / |{ sy-subrc }/{ ls-n }/{ sy-tabix }|.
+READ TABLE lt INTO ls WITH KEY k_u COMPONENTS u = 'a'.
+WRITE / |{ sy-subrc }/{ ls-n }/{ sy-tabix }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0/3/4\n8/0/7\n4/0/1");
+  });
+
+  it("READ sorted table, a key part and a component outside the key, a miss", async () => {
+    const code = `
+TYPES: BEGIN OF ty_kv,
+         k TYPE string,
+         v TYPE i,
+       END OF ty_kv.
+DATA lt_s TYPE SORTED TABLE OF ty_kv WITH UNIQUE KEY k.
+DATA ls_kv TYPE ty_kv.
+ls_kv-k = \`m\`. ls_kv-v = 3. INSERT ls_kv INTO TABLE lt_s.
+ls_kv-k = \`B\`. ls_kv-v = 1. INSERT ls_kv INTO TABLE lt_s.
+ls_kv-k = \`x\`. ls_kv-v = 4. INSERT ls_kv INTO TABLE lt_s.
+ls_kv-k = \`c\`. ls_kv-v = 2. INSERT ls_kv INTO TABLE lt_s.
+READ TABLE lt_s INTO ls_kv WITH KEY k = \`m\` v = 9.
+WRITE / |{ sy-subrc }/{ sy-tabix }|.
+READ TABLE lt_s INTO ls_kv WITH KEY k = \`x\` v = 9.
+WRITE / |{ sy-subrc }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4/3\n8");
+  });
+
+  it("READ sorted table WITH KEY, string key component found with a c value with trailing blanks", async () => {
+    const code = `
+TYPES: BEGIN OF ty_cache,
+         name TYPE string,
+         v    TYPE i,
+       END OF ty_cache.
+DATA lt_one TYPE SORTED TABLE OF ty_cache WITH UNIQUE KEY name.
+DATA lt_three TYPE SORTED TABLE OF ty_cache WITH UNIQUE KEY name.
+DATA lt_sec TYPE STANDARD TABLE OF ty_cache WITH DEFAULT KEY
+  WITH UNIQUE SORTED KEY by_name COMPONENTS name.
+DATA ls_c TYPE ty_cache.
+DATA lv_name TYPE c LENGTH 30.
+ls_c-name = \`CX_ROOT\`. ls_c-v = 1.
+INSERT ls_c INTO TABLE lt_one.
+INSERT ls_c INTO TABLE lt_three.
+INSERT ls_c INTO TABLE lt_sec.
+ls_c-name = \`CX_A\`. ls_c-v = 2.
+INSERT ls_c INTO TABLE lt_three.
+INSERT ls_c INTO TABLE lt_sec.
+ls_c-name = \`CX_Z\`. ls_c-v = 3.
+INSERT ls_c INTO TABLE lt_three.
+INSERT ls_c INTO TABLE lt_sec.
+lv_name = 'CX_ROOT'.
+CLEAR ls_c.
+READ TABLE lt_one INTO ls_c WITH KEY name = lv_name.
+WRITE / |{ sy-subrc }/{ sy-tabix }/{ ls_c-v }|.
+CLEAR ls_c.
+READ TABLE lt_three INTO ls_c WITH KEY name = lv_name.
+WRITE / |{ sy-subrc }/{ sy-tabix }/{ ls_c-v }|.
+CLEAR ls_c.
+READ TABLE lt_three INTO ls_c WITH TABLE KEY name = lv_name.
+WRITE / |{ sy-subrc }/{ sy-tabix }/{ ls_c-v }|.
+CLEAR ls_c.
+READ TABLE lt_sec INTO ls_c WITH KEY by_name COMPONENTS name = lv_name.
+WRITE / |{ sy-subrc }/{ sy-tabix }/{ ls_c-v }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0/1/1\n0/2/1\n0/2/1\n0/2/1");
+  });
+
 });
