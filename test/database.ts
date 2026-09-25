@@ -1083,6 +1083,37 @@ ASSERT sy-subrc = 0.`;
     }, {snowflake: false});
   });
 
+  it("DELETE FROM TABLE, rows found by key", async () => {
+    const code = `
+DATA ls TYPE zdbw.
+DATA lt TYPE STANDARD TABLE OF zdbw WITH DEFAULT KEY.
+DATA lv_n TYPE i.
+ls-id = 'D'.
+ls-val = 11.
+INSERT zdbw FROM ls.
+ls-id = 'E'.
+ls-val = 12.
+INSERT zdbw FROM ls.
+ls-id = 'D'.
+ls-val = 18.
+APPEND ls TO lt.
+ls-id = 'Q'.
+APPEND ls TO lt.
+DELETE zdbw FROM TABLE lt.
+WRITE / sy-subrc.
+WRITE / sy-dbcnt.
+SELECT COUNT(*) FROM zdbw INTO lv_n WHERE id = 'D'.
+WRITE / lv_n.
+SELECT COUNT(*) FROM zdbw INTO lv_n.
+WRITE / lv_n.`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "zdbw.tabl.xml", contents: tabl_zdbw}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("4\n1\n0\n1");
+    });
+  });
+
   it("DELETE WHERE", async () => {
     const code = `
     DATA ls_t100 TYPE t100.
