@@ -184,6 +184,42 @@ describe("Running Examples - Hex type", () => {
     expect(abap.console.get()).to.equal(`-1895821056`);
   });
 
+  it("Hex and xstring to integer, the last four bytes", async () => {
+    const code = `
+    DATA lv_xs TYPE xstring.
+    DATA lv_x5 TYPE x LENGTH 5.
+    DATA lv_x1 TYPE x LENGTH 1.
+    DATA lv_int TYPE i.
+    lv_int = 7.
+    lv_int = lv_xs.
+    WRITE / lv_int.
+    lv_xs = '0100000002'.
+    lv_int = lv_xs.
+    WRITE / lv_int.
+    lv_x5 = '0100000002'.
+    lv_int = lv_x5.
+    WRITE / lv_int.
+    lv_xs = '0102'.
+    lv_int = lv_xs.
+    WRITE / lv_int.
+    lv_xs = 'FFFFFFFF'.
+    lv_int = lv_xs.
+    WRITE / lv_int.
+    lv_xs = '80000000'.
+    lv_int = lv_xs.
+    WRITE / lv_int.
+    lv_xs = 'FF'.
+    lv_int = lv_xs.
+    WRITE / lv_int.
+    lv_x1 = 'FF'.
+    lv_int = lv_x1.
+    WRITE / lv_int.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`0\n2\n2\n258\n-1\n-2147483648\n255\n255`);
+  });
+
   it("Hex, to integer, two complement, negative value, 1", async () => {
     const code = `
   DATA hex TYPE x LENGTH 4.
