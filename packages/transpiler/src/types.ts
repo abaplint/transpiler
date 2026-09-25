@@ -104,6 +104,8 @@ export interface ITranspilerOptions {
   skipVersionCheck?: boolean;
   /** build the output of only the objects this returns true for, eg. the ones a change touched,
    * when the rest are kept from an earlier run; the validation, the database setup and the
-   * initialization scripts still cover the whole registry. Ignored when a plugin is given */
+   * initialization scripts still cover the whole registry. Ignored when a plugin is given.
+   * A second run with this over the same registry checks only the chosen objects again and
+   * the others keep their earlier check, so they must include every reader of a changed one */
   only?: (obj: abaplint.IObject) => boolean;
 }
