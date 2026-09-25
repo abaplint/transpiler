@@ -1834,4 +1834,45 @@ WRITE / |{ sy-subrc }|.`;
     expect(abap.console.get()).to.equal("4/3\n8");
   });
 
+  it("READ sorted table WITH KEY, string key component found with a c value with trailing blanks", async () => {
+    const code = `
+TYPES: BEGIN OF ty_cache,
+         name TYPE string,
+         v    TYPE i,
+       END OF ty_cache.
+DATA lt_one TYPE SORTED TABLE OF ty_cache WITH UNIQUE KEY name.
+DATA lt_three TYPE SORTED TABLE OF ty_cache WITH UNIQUE KEY name.
+DATA lt_sec TYPE STANDARD TABLE OF ty_cache WITH DEFAULT KEY
+  WITH UNIQUE SORTED KEY by_name COMPONENTS name.
+DATA ls_c TYPE ty_cache.
+DATA lv_name TYPE c LENGTH 30.
+ls_c-name = \`CX_ROOT\`. ls_c-v = 1.
+INSERT ls_c INTO TABLE lt_one.
+INSERT ls_c INTO TABLE lt_three.
+INSERT ls_c INTO TABLE lt_sec.
+ls_c-name = \`CX_A\`. ls_c-v = 2.
+INSERT ls_c INTO TABLE lt_three.
+INSERT ls_c INTO TABLE lt_sec.
+ls_c-name = \`CX_Z\`. ls_c-v = 3.
+INSERT ls_c INTO TABLE lt_three.
+INSERT ls_c INTO TABLE lt_sec.
+lv_name = 'CX_ROOT'.
+CLEAR ls_c.
+READ TABLE lt_one INTO ls_c WITH KEY name = lv_name.
+WRITE / |{ sy-subrc }/{ sy-tabix }/{ ls_c-v }|.
+CLEAR ls_c.
+READ TABLE lt_three INTO ls_c WITH KEY name = lv_name.
+WRITE / |{ sy-subrc }/{ sy-tabix }/{ ls_c-v }|.
+CLEAR ls_c.
+READ TABLE lt_three INTO ls_c WITH TABLE KEY name = lv_name.
+WRITE / |{ sy-subrc }/{ sy-tabix }/{ ls_c-v }|.
+CLEAR ls_c.
+READ TABLE lt_sec INTO ls_c WITH KEY by_name COMPONENTS name = lv_name.
+WRITE / |{ sy-subrc }/{ sy-tabix }/{ ls_c-v }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0/1/1\n0/2/1\n0/2/1\n0/2/1");
+  });
+
 });

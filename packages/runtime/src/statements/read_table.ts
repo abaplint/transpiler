@@ -156,7 +156,10 @@ function readSortedWithKey(arr: readonly any[], keyFields: readonly string[], op
   const comparePrefix = (row: any) => {
     for (const p of prefix) {
       const value = p.key(row);
-      if (lt(value, p.value)) {
+      // eq first, lt and gt compare a c operand with its trailing blanks against a string
+      if (eq(value, p.value)) {
+        continue;
+      } else if (lt(value, p.value)) {
         return -1;
       } else if (gt(value, p.value)) {
         return 1;
