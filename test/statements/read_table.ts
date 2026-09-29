@@ -1875,4 +1875,39 @@ WRITE / |{ sy-subrc }/{ sy-tabix }/{ ls_c-v }|.`;
     expect(abap.console.get()).to.equal("0/1/1\n0/2/1\n0/2/1\n0/2/1");
   });
 
+  it("READ TABLE WITH KEY, a string component and an f value", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         x TYPE string,
+         y TYPE i,
+       END OF ty_row.
+DATA tab TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY.
+DATA row TYPE ty_row.
+DATA f TYPE f.
+DATA d TYPE decfloat34.
+
+f = '148.5'.
+row-x = f.
+row-y = 1.
+APPEND row TO tab.
+CLEAR row.
+
+READ TABLE tab INTO row WITH KEY x = f.
+WRITE / sy-subrc.
+WRITE / row-y.
+IF row-x = f.
+  WRITE / 'equal'.
+ENDIF.
+
+d = '2.68'.
+row-x = '2.68'.
+IF row-x = d.
+  WRITE / 'equal'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n1\nequal\nequal");
+  });
+
 });
