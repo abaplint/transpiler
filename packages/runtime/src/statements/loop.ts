@@ -24,14 +24,17 @@ function determineFromTo(array: readonly any[], topEquals: topType | undefined, 
     return {from: 1, to: array.length};
   }
 
-  let from = 0;
+  // 1-based, as the branch without topEquals above answers: a WHERE that
+  // does not name the key's first field narrows nothing, and must not start
+  // the loop at row index -1
+  let from = 1;
   let to = array.length;
 
 // todo: multi field
   const keyField = key.keyFields[0].toLowerCase();
   const keyValue = topEquals[keyField];
   if (keyField && keyValue) {
-    from = binarySearchFrom(array, from, to, keyField, keyValue);
+    from = binarySearchFrom(array, 0, to, keyField, keyValue);
     to = binarySearchTo(array, from, to, keyField, keyValue);
 //    console.dir("from: " + from + ", to: " + to);
   }
@@ -168,7 +171,9 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
     const isStructured = array[0] instanceof Structure;
 
     while (loopController.index < loopController.loopTo) {
-      if (loopController.index > array.length) {
+      // the body may have deleted rows: never read past the end, where
+      // array[array.length] is undefined
+      if (loopController.index >= array.length) {
         break;
       }
       const current = array[loopController.index];

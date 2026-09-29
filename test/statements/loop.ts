@@ -1315,4 +1315,57 @@ ENDLOOP.`;
     */
   });
 
+
+  it("LOOP USING KEY WHERE on a field that is not the key's", async () => {
+    const code = `
+TYPES: BEGIN OF ty, a TYPE i, b TYPE i, END OF ty.
+DATA t TYPE STANDARD TABLE OF ty WITH NON-UNIQUE KEY a b
+       WITH NON-UNIQUE SORTED KEY k COMPONENTS a.
+DATA r TYPE ty.
+t = VALUE #( ( a = 1 b = 0 ) ( a = 2 b = 2 ) ( a = 3 b = 0 ) ( a = 1 b = 2 ) ).
+LOOP AT t INTO r USING KEY k WHERE b = 2.
+  WRITE / |{ r-a }/{ r-b }|.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1/2\n2/2");
+  });
+
+  it("LOOP USING KEY primary_key, DELETE in the body", async () => {
+    const code = `
+TYPES: BEGIN OF ty, a TYPE i, b TYPE i, END OF ty.
+DATA s TYPE SORTED TABLE OF ty WITH NON-UNIQUE KEY a.
+DATA r TYPE ty.
+s = VALUE #( ( a = 1 b = 1 ) ( a = 1 b = 2 ) ( a = 2 b = 3 ) ).
+LOOP AT s INTO r USING KEY primary_key.
+  WRITE / |{ r-a }/{ r-b }|.
+  IF lines( s ) = 3.
+    DELETE s INDEX 3.
+  ENDIF.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1/1\n1/2");
+  });
+
+  it("LOOP USING KEY (name) WHERE, name primary_key, DELETE in the body", async () => {
+    const code = `
+TYPES: BEGIN OF ty, a TYPE i, b TYPE i, END OF ty.
+DATA s TYPE SORTED TABLE OF ty WITH NON-UNIQUE KEY a.
+DATA r TYPE ty.
+DATA name TYPE string VALUE 'primary_key'.
+s = VALUE #( ( a = 1 b = 1 ) ( a = 1 b = 2 ) ( a = 2 b = 3 ) ).
+LOOP AT s INTO r USING KEY (name) WHERE a = 1.
+  WRITE / |{ r-a }/{ r-b }|.
+  IF lines( s ) = 3.
+    DELETE s INDEX 3.
+  ENDIF.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1/1\n1/2");
+  });
 });
