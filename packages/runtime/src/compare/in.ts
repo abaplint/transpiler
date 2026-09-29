@@ -3,31 +3,52 @@ import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {cp} from "./cp";
 import {eq} from "./eq";
+import {ge} from "./ge";
+import {gt} from "./gt";
+import {le} from "./le";
+import {lt} from "./lt";
 import {ne} from "./ne";
 
-export function compareIn(left: number | string | ICharacter | INumeric, right: Table): boolean {
-  if (right.array().length === 0) {
-    return true;
+type Operand = number | string | ICharacter | INumeric;
+
+function matches(left: Operand, option: string, low: any, high: any): boolean {
+  switch (option) {
+    case "EQ": return eq(left, low);
+    case "NE": return ne(left, low);
+    case "GT": return gt(left, low);
+    case "GE": return ge(left, low);
+    case "LT": return lt(left, low);
+    case "LE": return le(left, low);
+    case "BT": return ge(left, low) && le(left, high);
+    case "NB": return !(ge(left, low) && le(left, high));
+    case "CP": return cp(left, low);
+    case "NP": return !cp(left, low);
+    default: throw new Error("compareIn, unknown option " + option);
   }
+}
+
+// A value is in a range table when some I row admits it, or there is no I
+// row at all, and no E row admits it. An empty table admits everything.
+export function compareIn(left: Operand, right: Table): boolean {
+  let included = false;
+  let hasInclude = false;
 
   for (const row of right.array()) {
-    if (eq(row.get()["sign"], "I") && eq(row.get()["option"], "EQ")) {
-      if (eq(row.get()["low"], left)) {
-        return true;
-      }
-    } else if (eq(row.get()["sign"], "E") && eq(row.get()["option"], "EQ")) {
-      if (ne(row.get()["low"], left)) {
-        return true;
-      }
-    } else if (eq(row.get()["sign"], "I") && eq(row.get()["option"], "CP")) {
-      if (cp(left, row.get()["low"])) {
-        return true;
+    const r = row.get();
+    const sign = r["sign"].get().toString().toUpperCase();
+    const option = r["option"].get().toString().toUpperCase().trim();
+    const hit = matches(left, option, r["low"], r["high"]);
+    if (sign === "I") {
+      hasInclude = true;
+      included = included || hit;
+    } else if (sign === "E") {
+      if (hit) {
+        return false;
       }
     } else {
-      console.dir(row);
-      throw new Error("compareIn todo");
+      throw new Error("compareIn, unknown sign " + sign);
     }
   }
 
-  return false;
+  return hasInclude === false || included;
 }
