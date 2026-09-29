@@ -122,7 +122,11 @@ export class LoopTranspiler implements IStatementTranspiler {
     }
 
     const topEquals: {[key: string]: string} = {};
-    for (const compare of whereNode?.findDirectExpressions(abaplint.Expressions.ComponentCompare) || []) {
+    // only a pure conjunction makes each top-level `=` a condition every row
+    // has to meet: `a = 1 OR b = 2` narrows by neither
+    const onlyAnd = whereNode?.getChildren().every(
+      c => !(c instanceof abaplint.Nodes.TokenNode) || c.concatTokens().toUpperCase() !== "OR") ?? true;
+    for (const compare of onlyAnd ? whereNode?.findDirectExpressions(abaplint.Expressions.ComponentCompare) || [] : []) {
       const op = compare.findDirectExpression(abaplint.Expressions.CompareOperator)?.concatTokens().toUpperCase();
       if (op !== "=" && op !== "EQ") {
         continue;

@@ -1315,4 +1315,20 @@ ENDLOOP.`;
     */
   });
 
+
+  it("LOOP USING KEY WHERE with OR, the OR side outside the key is not dropped", async () => {
+    const code = `
+TYPES: BEGIN OF ty, a TYPE i, b TYPE i, END OF ty.
+DATA t TYPE STANDARD TABLE OF ty WITH NON-UNIQUE KEY a b
+       WITH NON-UNIQUE SORTED KEY k COMPONENTS a.
+DATA r TYPE ty.
+t = VALUE #( ( a = 1 b = 0 ) ( a = 2 b = 2 ) ( a = 3 b = 0 ) ( a = 1 b = 2 ) ).
+LOOP AT t INTO r USING KEY k WHERE a = 1 OR b = 2.
+  WRITE / |{ r-a }/{ r-b }|.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1/0\n1/2\n2/2");
+  });
 });
