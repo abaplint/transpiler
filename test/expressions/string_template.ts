@@ -150,6 +150,41 @@ describe("Running expressions - String templates", () => {
     expect(abap.console.get()).to.equal("f = 10.20");
   });
 
+  it("DECIMALS = 0", async () => {
+    const code = `
+    DATA f TYPE f VALUE '922.9649'.
+    DATA p TYPE p LENGTH 8 DECIMALS 2 VALUE '922.96'.
+    DATA n TYPE i VALUE 5.
+    DATA dec TYPE i VALUE 0.
+    WRITE / |{ f DECIMALS = 0 }|.
+    WRITE / |{ p DECIMALS = dec }|.
+    WRITE / |{ n DECIMALS = 0 }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("923\n923\n5");
+  });
+
+  it("decfloat34 DECIMALS", async () => {
+    // a decimal number rounds its decimal digits: 2.675 is 2.68, the nearest
+    // binary float of 2.675 would give 2.67
+    const code = `
+    DATA d TYPE decfloat34 VALUE '0.829029134'.
+    WRITE / |{ d DECIMALS = 3 }|.
+    d = '2.675'.
+    WRITE / |{ d DECIMALS = 2 }|.
+    d = '-2.675'.
+    WRITE / |{ d DECIMALS = 2 }|.
+    d = '5'.
+    WRITE / |{ d DECIMALS = 2 }|.
+    d = '922.5'.
+    WRITE / |{ d DECIMALS = 0 }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0.829\n2.68\n-2.68\n5.00\n923");
+  });
+
   it("WIDTH and PAD", async () => {
     const code = `
   data h type i value 2.
