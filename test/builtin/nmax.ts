@@ -61,4 +61,26 @@ describe("Builtin functions - nmin", () => {
     expect(abap.console.get()).to.equal("15,30");
   });
 
+  it("packed arguments give a packed result", async () => {
+    const code = `
+      DATA total1 TYPE p LENGTH 3 DECIMALS 2 VALUE '15.3'.
+      DATA total2 TYPE p LENGTH 3 DECIMALS 2 VALUE '15.2'.
+      WRITE / |{ nmax( val1 = total1 val2 = total2 ) }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("15.30");
+  });
+
+  it("a decfloat34 argument gives a decfloat34", async () => {
+    const code = `
+      DATA d TYPE decfloat34 VALUE '1.25'.
+      DATA i TYPE i VALUE 1.
+      WRITE / |{ nmax( val1 = i val2 = d ) }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1.25");
+  });
+
 });
