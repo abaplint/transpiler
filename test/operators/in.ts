@@ -91,7 +91,6 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("1\n3");
   });
 
-
   it("every option, I sign", async () => {
     const code = `
 DATA range TYPE RANGE OF i.

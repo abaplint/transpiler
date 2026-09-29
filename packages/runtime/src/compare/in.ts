@@ -35,7 +35,7 @@ export function compareIn(left: Operand, right: Table): boolean {
 
   for (const row of right.array()) {
     const r = row.get();
-    const sign = r["sign"].get().toString().toUpperCase();
+    const sign = r["sign"].get().toString().toUpperCase().trim();
     const option = r["option"].get().toString().toUpperCase().trim();
     const hit = matches(left, option, r["low"], r["high"]);
     if (sign === "I") {
