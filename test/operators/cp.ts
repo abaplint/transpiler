@@ -221,4 +221,29 @@ ENDLOOP.`;
     await f(abap);
   });
 
+  it("CP with a trailing wildcard, escapes and case, the same pattern twice", async () => {
+    const code = `
+DATA text TYPE string.
+DEFINE _cp.
+  IF &1 CP &2. WRITE / 'X'. ELSE. WRITE / '-'. ENDIF.
+END-OF-DEFINITION.
+text = |<?xml version="1.0"?>\\n<root/>|.
+_cp text '<?*'.
+_cp text '<!--*'.
+_cp text '<*'.
+_cp 'abc' 'abc*'.
+_cp 'ab' 'abc*'.
+_cp 'ABC' 'a*'.
+_cp 'x*y' 'x#*y'.
+_cp 'xzy' 'x#*y'.
+_cp 'x*y' 'x#**'.
+_cp 'a#' 'a#'.
+_cp 'a' 'a**'.
+_cp '' '*'.
+_cp 'abc' 'abc*'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("X\n-\nX\nX\n-\nX\nX\n-\nX\nX\nX\nX\nX");
+  });
 });
