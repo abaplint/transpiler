@@ -90,6 +90,88 @@ WRITE <fs_value>.`;
     expect(abap.console.get()).to.equal("115555");
   });
 
+  it("CREATE DATA, LIKE takes the type, not the content", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field TYPE i,
+         text  TYPE string,
+       END OF ty.
+DATA val TYPE i.
+DATA struc TYPE ty.
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA ref TYPE REF TO data.
+FIELD-SYMBOLS <fs> TYPE any.
+FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.
+
+val = 42.
+struc-field = 2.
+struc-text = 'hello'.
+APPEND 1 TO tab.
+APPEND 2 TO tab.
+
+CREATE DATA ref LIKE val.
+ASSIGN ref->* TO <fs>.
+WRITE / <fs>.
+
+CREATE DATA ref LIKE struc.
+ASSIGN ref->* TO <fs>.
+ASSERT <fs> IS INITIAL.
+
+CREATE DATA ref LIKE tab.
+ASSIGN ref->* TO <tab>.
+WRITE / lines( <tab> ).
+WRITE / lines( tab ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n0\n2");
+  });
+
+  it("CREATE DATA, LIKE a field symbol pointing at a filled table", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA ref TYPE REF TO data.
+FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.
+FIELD-SYMBOLS <new> TYPE STANDARD TABLE.
+
+APPEND 1 TO tab.
+APPEND 2 TO tab.
+APPEND 3 TO tab.
+ASSIGN tab TO <tab>.
+
+CREATE DATA ref LIKE <tab>.
+ASSIGN ref->* TO <new>.
+WRITE / lines( <new> ).
+APPEND 4 TO <new>.
+WRITE / lines( <new> ).
+WRITE / lines( tab ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n1\n3");
+  });
+
+  it("CREATE DATA, LIKE STANDARD TABLE OF a filled row, initial line", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         field TYPE i,
+       END OF ty.
+DATA row TYPE ty.
+DATA dref TYPE REF TO data.
+FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.
+FIELD-SYMBOLS <line> TYPE ty.
+
+row-field = 5.
+CREATE DATA dref LIKE STANDARD TABLE OF row.
+ASSIGN dref->* TO <tab>.
+APPEND INITIAL LINE TO <tab> ASSIGNING <line>.
+WRITE / <line>-field.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
   it("CREATE DATA, LENGTH", async () => {
     const code = `
 DATA ref TYPE REF TO data.
