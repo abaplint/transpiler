@@ -566,9 +566,9 @@ export class Table implements ITable {
     }
 
     const lastComparison = compare(this.value[lastIndex], val);
-    if (lastComparison < 0 || (lastComparison === 0 && unique === false)) {
+    if (lastComparison < 0) {
       return {value: this.insertIndex(val, this.value.length, true), subrc: 0};
-    } else if (lastComparison === 0) {
+    } else if (lastComparison === 0 && unique === true) {
       return {value: undefined, subrc: 4};
     }
 
@@ -576,14 +576,15 @@ export class Table implements ITable {
     let high = this.value.length;
     while (low < high) {
       const middle = Math.floor((low + high) / 2);
-      if (compare(this.value[middle], val) <= 0) {
+      // a duplicate of a non-unique key goes in front of the rows it duplicates
+      if (compare(this.value[middle], val) < 0) {
         low = middle + 1;
       } else {
         high = middle;
       }
     }
 
-    if (unique === true && low > 0 && compare(this.value[low - 1], val) === 0) {
+    if (unique === true && low < this.value.length && compare(this.value[low], val) === 0) {
       return {value: undefined, subrc: 4};
     }
 

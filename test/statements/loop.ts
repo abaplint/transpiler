@@ -1348,7 +1348,7 @@ ENDLOOP.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("1/1\n1/2");
+    expect(abap.console.get()).to.equal("1/2\n1/1");
   });
 
   it("LOOP USING KEY (name) WHERE, name primary_key, DELETE in the body", async () => {
@@ -1367,6 +1367,6 @@ ENDLOOP.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("1/1\n1/2");
+    expect(abap.console.get()).to.equal("1/2\n1/1");
   });
 });
