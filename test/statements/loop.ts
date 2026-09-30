@@ -1421,4 +1421,21 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("1/2\n1/0\n2/2");
   });
 
+  it("LOOP USING KEY, non-unique sorted secondary key, three duplicates, reversed", async () => {
+    const code = `
+TYPES: BEGIN OF ts, x TYPE i, END OF ts.
+TYPES: BEGIN OF ty, s TYPE ts, b TYPE i, END OF ty.
+DATA t TYPE STANDARD TABLE OF ty WITH EMPTY KEY
+       WITH NON-UNIQUE SORTED KEY k COMPONENTS s-x.
+DATA r TYPE ty.
+t = VALUE #( ( s = VALUE #( x = 1 ) b = 1 ) ( s = VALUE #( x = 1 ) b = 2 ) ( s = VALUE #( x = 1 ) b = 3 ) ).
+LOOP AT t INTO r USING KEY k.
+  WRITE / |{ r-s-x }/{ r-b }|.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1/3\n1/2\n1/1");
+  });
+
 });
