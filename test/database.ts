@@ -1269,6 +1269,30 @@ WRITE lines( lt_t100 ).`;
     });
   });
 
+  it("UPDATE FROM TABLE, one row found and one not", async () => {
+    const code = `
+DATA ls TYPE zdbw.
+DATA lt TYPE STANDARD TABLE OF zdbw WITH DEFAULT KEY.
+ls-id = 'A'.
+ls-val = 1.
+INSERT zdbw FROM ls.
+ls-val = 2.
+APPEND ls TO lt.
+ls-id = 'Y'.
+APPEND ls TO lt.
+UPDATE zdbw FROM TABLE lt.
+WRITE / sy-subrc.
+WRITE / sy-dbcnt.
+SELECT SINGLE * FROM zdbw INTO ls WHERE id = 'A'.
+WRITE / ls-val.`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "zdbw.tabl.xml", contents: tabl_zdbw}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("4\n1\n2");
+    });
+  });
+
   it("INSERT FROM TABLE ACCEPTING DUPLICATE KEYS", async () => {
     const code = `
 DATA ls TYPE zdbw.
