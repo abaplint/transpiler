@@ -24,17 +24,14 @@ function determineFromTo(array: readonly any[], topEquals: topType | undefined, 
     return {from: 1, to: array.length};
   }
 
-  // 1-based, as the branch without topEquals above answers: a WHERE that
-  // does not name the key's first field narrows nothing, and must not start
-  // the loop at row index -1
-  let from = 1;
+  let from = 0;
   let to = array.length;
 
 // todo: multi field
   const keyField = key.keyFields[0].toLowerCase();
   const keyValue = topEquals[keyField];
   if (keyField && keyValue) {
-    from = binarySearchFrom(array, 0, to, keyField, keyValue);
+    from = binarySearchFrom(array, from, to, keyField, keyValue);
     to = binarySearchTo(array, from, to, keyField, keyValue);
 //    console.dir("from: " + from + ", to: " + to);
   }
