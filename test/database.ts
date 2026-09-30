@@ -1857,6 +1857,84 @@ WRITE sy-dbcnt.`;
     });
   });
 
+  it("FOR ALL ENTRIES, UP TO counts the whole result, not each driving row", async () => {
+    // measured on a 7.5x system: two driving rows, four matches each, UP TO 3 ROWS gives 3
+    const code = `
+DATA ls TYPE zdbw.
+DATA lt TYPE STANDARD TABLE OF zdbw WITH DEFAULT KEY.
+DATA lt_keys TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DO 8 TIMES.
+  ls-id = sy-index.
+  ls-val = sy-index MOD 2.
+  INSERT zdbw FROM ls.
+ENDDO.
+APPEND 0 TO lt_keys.
+APPEND 1 TO lt_keys.
+SELECT * FROM zdbw INTO TABLE lt UP TO 3 ROWS
+  FOR ALL ENTRIES IN lt_keys WHERE val = lt_keys-table_line.
+WRITE / lines( lt ).
+WRITE / sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "zdbw.tabl.xml", contents: tabl_zdbw}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("3\n3");
+    });
+  });
+
+  it("FOR ALL ENTRIES, UP TO over blocks into a non-unique SORTED table", async () => {
+    // no de-duplication for a sorted target, so equal rows from two blocks
+    // stay; UP TO still keeps exactly its number of rows
+    const code = `
+DATA ls TYPE zdbw.
+DATA lt TYPE SORTED TABLE OF zdbw WITH NON-UNIQUE KEY val.
+DATA lt_keys TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DO 8 TIMES.
+  ls-id = sy-index.
+  ls-val = 0.
+  INSERT zdbw FROM ls.
+ENDDO.
+DO 60 TIMES.
+  APPEND 0 TO lt_keys.
+ENDDO.
+SELECT * FROM zdbw INTO TABLE lt UP TO 5 ROWS
+  FOR ALL ENTRIES IN lt_keys WHERE val = lt_keys-table_line.
+WRITE / lines( lt ).
+WRITE / sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "zdbw.tabl.xml", contents: tabl_zdbw}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("5\n5");
+    });
+  });
+
+  it("FOR ALL ENTRIES, more driving rows than one block", async () => {
+    const code = `
+DATA ls TYPE zdbw.
+DATA lt TYPE STANDARD TABLE OF zdbw WITH DEFAULT KEY.
+DATA lt_keys TYPE STANDARD TABLE OF zdbw WITH DEFAULT KEY.
+DO 130 TIMES.
+  ls-id = sy-index.
+  ls-val = sy-index.
+  INSERT zdbw FROM ls.
+  IF sy-index <= 120.
+    APPEND ls TO lt_keys.
+    APPEND ls TO lt_keys.
+  ENDIF.
+ENDDO.
+SELECT * FROM zdbw INTO TABLE lt
+  FOR ALL ENTRIES IN lt_keys WHERE id = lt_keys-id AND val = lt_keys-val.
+WRITE / lines( lt ).
+WRITE / sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "zdbw.tabl.xml", contents: tabl_zdbw}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("120\n120");
+    });
+  });
+
   it("FOR ALL ENTRIES, into HASHED", async () => {
     const code = `
     DATA lt_t100 TYPE HASHED TABLE OF t100 WITH UNIQUE KEY sprsl arbgb msgnr.
