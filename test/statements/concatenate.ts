@@ -51,6 +51,39 @@ describe("Running statements - CONCATENATE", () => {
     await f(abap);
   });
 
+  it("CONCATENATE LINES OF, string rows keep trailing blanks", async () => {
+    const code = `
+      DATA lv_res TYPE string.
+      DATA lt_tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+      APPEND \`a \` TO lt_tab.
+      APPEND \`b\` TO lt_tab.
+      CONCATENATE LINES OF lt_tab INTO lv_res.
+      WRITE / strlen( lv_res ).
+      CONCATENATE LINES OF lt_tab INTO lv_res SEPARATED BY '-'.
+      WRITE / lv_res.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3\na -b");
+  });
+
+  it("CONCATENATE LINES OF, character rows drop trailing blanks", async () => {
+    const code = `
+      DATA lv_res TYPE string.
+      TYPES ty_c3 TYPE c LENGTH 3.
+      DATA lt_c3 TYPE STANDARD TABLE OF ty_c3 WITH DEFAULT KEY.
+      APPEND 'a' TO lt_c3.
+      APPEND 'b' TO lt_c3.
+      CONCATENATE LINES OF lt_c3 INTO lv_res.
+      WRITE / lv_res.
+      CONCATENATE LINES OF lt_c3 INTO lv_res RESPECTING BLANKS.
+      WRITE / strlen( lv_res ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ab\n6");
+  });
+
   it("CONCATENATE xstring IN BYTE MODE", async () => {
     const code = `
       DATA lv_x1 TYPE xstring.
