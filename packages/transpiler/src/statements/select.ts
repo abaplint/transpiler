@@ -206,11 +206,13 @@ export class SelectTranspiler implements IStatementTranspiler {
   }
   ${dedup}
   const ${unique4}max = ${upToCode};
-  if (${unique4}max > 0) {
-    while (${target}.getArrayLength() > ${unique4}max) {
-      if (${target} instanceof abap.types.HashedTable) {
-        await abap.statements.deleteInternal(${target}, {fromValue: ${target}.array()[${target}.getArrayLength() - 1]});
-      } else {
+  if (${unique4}max > 0 && ${target}.getArrayLength() > ${unique4}max) {
+    if (${target} instanceof abap.types.HashedTable) {
+      for (const ${unique4}row of ${target}.array().slice(${unique4}max)) {
+        await abap.statements.deleteInternal(${target}, {fromValue: ${unique4}row});
+      }
+    } else {
+      while (${target}.getArrayLength() > ${unique4}max) {
         ${target}.deleteIndex(${target}.getArrayLength() - 1);
       }
     }
