@@ -61,14 +61,14 @@ export function find(input: IFindInput) {
       sub = foldCase(sub);
     }
 
-    if (occ < 0 && sub !== "") {
+    if (occ < 0 && sub !== "" && off === 0) {
       // search from the right, on the string as it is, so a "sub" of any length
       // matches and the offset needs no mapping back
       let from = val.length - sub.length;
       let found = -1;
       for (let i = 0; i < Math.abs(occ); i++) {
-        found = from < off ? -1 : val.lastIndexOf(sub, from);
-        if (found < off) {
+        found = from < 0 ? -1 : val.lastIndexOf(sub, from);
+        if (found < 0) {
           return new Integer().set(-1);
         }
         from = found - 1;
@@ -76,7 +76,7 @@ export function find(input: IFindInput) {
       return new Integer().set(found);
     }
 
-    // only an empty "sub" still comes here with a negative "occ", unchanged
+    // a negative "occ" with an empty "sub" or an "off" still comes here, unchanged
     let negative = false;
     if (occ < 0) {
       negative = true;

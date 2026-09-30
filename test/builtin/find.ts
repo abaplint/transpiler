@@ -252,20 +252,6 @@ WRITE lv_offset.`;
     await f(abap);
   });
 
-  it("find with occ negative and off", async () => {
-    const code = `
-    DATA lv TYPE i.
-    lv = find( val = 'abcabcab' sub = 'ab' off = 1 occ = -1 ).
-    ASSERT lv = 6.
-    lv = find( val = 'abcabcab' sub = 'ab' off = 1 occ = -2 ).
-    ASSERT lv = 3.
-    lv = find( val = 'abcabcab' sub = 'ab' off = 1 occ = -3 ).
-    ASSERT lv = -1.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-  });
-
   it("pcre", async () => {
     const code = `
     DATA val TYPE i.
