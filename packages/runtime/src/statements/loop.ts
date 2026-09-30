@@ -135,7 +135,9 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
   let loopTo = options?.to && options.to.get() < length ? options.to.get() : length;
 
   let array: any[] = [];
-  if (options?.usingKey && options.usingKey !== undefined && options.usingKey !== "primary_key") {
+  // a dynamic key name may come in any case, USING KEY ('PRIMARY_KEY') is the primary key too
+  const isPrimaryKey = options?.usingKey === undefined || options.usingKey.toLowerCase() === "primary_key";
+  if (options?.usingKey && isPrimaryKey === false) {
     array = table.getSecondaryIndex(options.usingKey);
 
     const {from, to} = determineFromTo(array, options.topEquals, table.getKeyByName(options.usingKey)!);
@@ -161,7 +163,7 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
   // The same goes for a loop that reads an index table through a hash
   // secondary key. Handing out 1, 2, 3 there looks helpful and is a lie the
   // caller cannot tell from the truth.
-  const usedKey = options?.usingKey === undefined || options.usingKey === "primary_key"
+  const usedKey = options?.usingKey === undefined || isPrimaryKey
     ? undefined
     : table.getKeyByName(options.usingKey);
   const hasRowNumber = usedKey !== undefined
