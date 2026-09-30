@@ -1316,6 +1316,23 @@ ENDLOOP.`;
   });
 
 
+  it("LOOP USING KEY WHERE, key over a component of a substructure", async () => {
+    const code = `
+TYPES: BEGIN OF ts, x TYPE i, END OF ts.
+TYPES: BEGIN OF ty, s TYPE ts, b TYPE i, END OF ty.
+DATA t TYPE STANDARD TABLE OF ty WITH EMPTY KEY
+       WITH NON-UNIQUE SORTED KEY k COMPONENTS s-x.
+DATA r TYPE ty.
+t = VALUE #( ( s = VALUE #( x = 1 ) b = 0 ) ( s = VALUE #( x = 2 ) b = 2 ) ( s = VALUE #( x = 1 ) b = 2 ) ).
+LOOP AT t INTO r USING KEY k WHERE s-x = 1 AND b = 2.
+  WRITE / |{ r-s-x }/{ r-b }|.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1/2");
+  });
+
   it("LOOP USING KEY primary_key, DELETE in the body", async () => {
     const code = `
 TYPES: BEGIN OF ty, a TYPE i, b TYPE i, END OF ty.

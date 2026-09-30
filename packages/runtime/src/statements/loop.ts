@@ -24,14 +24,18 @@ function determineFromTo(array: readonly any[], topEquals: topType | undefined, 
     return {from: 1, to: array.length};
   }
 
-  let from = 0;
+  // 1-based, as the branch without topEquals above answers: when the key's
+  // first field is not in topEquals (a key over a substructure component,
+  // s-x, is never put there) nothing is narrowed, and the loop must not start
+  // at row index -1
+  let from = 1;
   let to = array.length;
 
 // todo: multi field
   const keyField = key.keyFields[0].toLowerCase();
   const keyValue = topEquals[keyField];
   if (keyField && keyValue) {
-    from = binarySearchFrom(array, from, to, keyField, keyValue);
+    from = binarySearchFrom(array, 0, to, keyField, keyValue);
     to = binarySearchTo(array, from, to, keyField, keyValue);
 //    console.dir("from: " + from + ", to: " + to);
   }
