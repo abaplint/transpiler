@@ -24,6 +24,7 @@ import {parametersCall} from "./parameters_call";
 import {alphaIn, alphaOut} from "./alpha";
 
 export {RFC, types, DB, MemoryConsole};
+export type {DatasetHost, DatasetHandle, DatasetMode} from "./statements/dataset";
 
 export type RuntimeDatabaseOptions = {
   /* prefix all operations with schema*/
