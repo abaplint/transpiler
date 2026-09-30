@@ -1,6 +1,6 @@
 import {INumeric} from "../types/_numeric";
 import {ICharacter} from "../types/_character";
-import {Character, FieldSymbol, Table} from "../types";
+import {Character, FieldSymbol, String, Table} from "../types";
 import {ABAP} from "..";
 
 declare const abap: ABAP;
@@ -53,8 +53,10 @@ export function concatenate(input: IConcatenateInput) {
         if (hasSeparator === true && i > 0) {
           result += sep;
         }
-        const value = array[i].get();
-        result += respectingBlanks === true ? value : value.trimEnd();
+        const row = array[i];
+        const value = row.get();
+        // Preserve trailing blanks in string rows even without RESPECTING BLANKS.
+        result += respectingBlanks === true || row instanceof String ? value : value.trimEnd();
       }
     }
     setTarget(input.target, result);

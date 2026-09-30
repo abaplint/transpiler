@@ -8,7 +8,7 @@ import {Structure} from "./structure";
 import {FieldSymbol} from "./field_symbol";
 import {DataReference} from "./data_reference";
 import {insertInternal} from "../statements/insert_internal";
-import {sort} from "../statements/sort";
+import {compareRows, sort} from "../statements/sort";
 import {Character} from "./character";
 import {Hex} from "./hex";
 import {HexUInt8} from "./hex_uint8";
@@ -635,8 +635,18 @@ export class Table implements ITable {
     }
   }
 
-  /* appends and returns this */
+  /* appends and returns this - how VALUE #( ) builds a table, row by row.
+   * A sorted table gets each row at its sorted place, as INSERT ... INTO
+   * TABLE puts it: pushed, it was in insertion order until something
+   * assigned it, so a VALUE #( ) handed straight to a method or looped over
+   * was a SORTED table unsorted, and every binary search on it could miss.
+   * A duplicate of a unique key is kept, as before */
   public appendThis(item: TableRowType) {
+    const primary = this.getOptions()?.primaryKey;
+    if (primary?.type === TableAccessType.sorted && !(item instanceof DataReference)) {
+      this.insertSorted(item, (a, b) => compareRows(a, b, primary.keyFields), false);
+      return this;
+    }
     this.append(item);
     return this;
   }

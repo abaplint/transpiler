@@ -565,4 +565,32 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("33,333333333333336\n33,33\n66,66666666666667\n66,67");
   });
 
+  it("VALUE #( ) of a sorted table type handed straight to a method is sorted", async () => {
+    const code = `
+TYPES: BEGIN OF ty, a TYPE i, END OF ty.
+TYPES ty_sorted TYPE SORTED TABLE OF ty WITH NON-UNIQUE KEY a.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS show IMPORTING it TYPE ty_sorted.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD show.
+    DATA r TYPE ty.
+    LOOP AT it INTO r.
+      WRITE / r-a.
+    ENDLOOP.
+    READ TABLE it WITH TABLE KEY a = 5 TRANSPORTING NO FIELDS.
+    WRITE / sy-subrc.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>show( VALUE ty_sorted( ( a = 5 ) ( a = 4 ) ( a = 3 ) ( a = 2 ) ( a = 1 ) ) ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n3\n4\n5\n0");
+  });
 });
