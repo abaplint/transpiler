@@ -17,6 +17,18 @@ type options = {
   align?: "left" | "right",
 };
 
+/** DECIMALS for a decimal number: its decimal digits are rounded, half away
+ * from zero, the way ABAP rounds commercially - 2.675 gives 2.68, where
+ * toFixed( ) on the nearest binary float gives 2.67 */
+function decimalsOfDecimal(value: number, decimals: number): string {
+  const shift = (x: number, places: number) => {
+    const [mantissa, exponent] = (x + "").split("e");
+    return Number(mantissa + "e" + (Number(exponent || 0) + places));
+  };
+  const rounded = shift(Math.round(shift(Math.abs(value), decimals)), -decimals);
+  return (value < 0 && rounded !== 0 ? "-" : "") + rounded.toFixed(decimals);
+}
+
 export function templateFormatting(source: ICharacter | INumeric | number | string, options?: options): string {
   let text = "";
 
@@ -34,7 +46,9 @@ export function templateFormatting(source: ICharacter | INumeric | number | stri
     text = source.getTrimEnd();
   } else if (source instanceof DecFloat34) {
     const raw = source.getRaw();
-    if (Number.isInteger(raw)) {
+    if (options?.decimals !== undefined) {
+      text = decimalsOfDecimal(raw, options.decimals);
+    } else if (Number.isInteger(raw)) {
       text = raw.toFixed(0);
     } else {
       text = raw + "";
@@ -50,7 +64,7 @@ export function templateFormatting(source: ICharacter | INumeric | number | stri
       text = raw.toFixed(16);
     }
   } else if (source instanceof Packed) {
-    if (options?.decimals) {
+    if (options?.decimals !== undefined) {
       text = source.toFixed(options.decimals);
     } else {
       text = source.toFixed(source.getDecimals());
@@ -125,9 +139,9 @@ export function templateFormatting(source: ICharacter | INumeric | number | stri
       }
     } else if (options.width) {
       text = text.trimEnd().padEnd(options.width, " ");
-    } else if (options.decimals && source instanceof Integer) {
+    } else if (options.decimals !== undefined && source instanceof Integer) {
       text = source.get().toFixed(options.decimals);
-    } else if (options.decimals && source instanceof Float) {
+    } else if (options.decimals !== undefined && source instanceof Float) {
       text = source.getRaw().toFixed(options.decimals);
     }
   }

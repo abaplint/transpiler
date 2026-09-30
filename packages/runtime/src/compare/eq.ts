@@ -308,6 +308,14 @@ export function eq(
     l = left.getRaw();
   } else if (right instanceof Float && typeof l === "number") {
     r = right.getRaw();
+  } else if ((right instanceof Float || right instanceof DecFloat34) && typeof l === "string") {
+    // a character-like operand is compared as a number: get( ) of a float
+    // writes 1,4800000000000000E+02, which no text compares equal with
+    r = right.getRaw();
+    l = Number(l);
+  } else if (left instanceof DecFloat34 && typeof r === "string") {
+    l = left.getRaw();
+    r = Number(r);
   } else if (left instanceof Float) {
     if (typeof r === "number") {
       l = left.getRaw();

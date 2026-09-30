@@ -123,4 +123,33 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1\n1\n1\n2\n1\n2");
   });
 
+  it("DO with a count that is not an i", async () => {
+    const code = `
+DATA f TYPE f VALUE 3.
+DATA half TYPE f VALUE '2.5'.
+DATA p TYPE p LENGTH 8 DECIMALS 1 VALUE '2.4'.
+DATA count TYPE i.
+
+DO f TIMES.
+  count = count + 1.
+ENDDO.
+WRITE / count.
+
+CLEAR count.
+DO half TIMES.
+  count = count + 1.
+ENDDO.
+WRITE / count.
+
+CLEAR count.
+DO p TIMES.
+  count = count + 1.
+ENDDO.
+WRITE / count.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3\n3\n2");
+  });
+
 });

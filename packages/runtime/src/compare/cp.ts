@@ -6,6 +6,40 @@ function escapeRegExpCharacter(input: string): string {
   return input.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
 }
 
+const CACHE_SIZE = 1000;
+const cache = new Map<string, RegExp>();
+
+/** `end` is the pattern's length after the last token that is not a `*`: what
+ *  follows is a run of trailing `[\s\S]*`, which matches any rest of the
+ *  string - so it goes, and so does the `$` that made the engine walk there */
+function compile(r: string): RegExp {
+  let pattern = "";
+  let end = 0;
+  for (let i = 0; i < r.length; i++) {
+    const current = r[i];
+    if (current === "*") {
+      pattern += "[\\s\\S]*";
+      continue;
+    }
+    if (current === "#") {
+      if (i + 1 < r.length) {
+        const next = r[i + 1];
+        pattern += next === "#" ? "#" : escapeRegExpCharacter(next);
+        i++;
+      } else {
+        pattern += "#";
+      }
+    } else if (current === "+") {
+      pattern += "[\\s\\S]";
+    } else {
+      pattern += escapeRegExpCharacter(current);
+    }
+    end = pattern.length;
+  }
+  const open = end < pattern.length;
+  return new RegExp("^" + pattern.slice(0, end) + (open ? "" : "$"), "iu");
+}
+
 export function cp(left: number | string | ICharacter | INumeric | Structure, right: string | ICharacter): boolean {
   let l = "";
   if (typeof left === "number" || typeof left === "string") {
@@ -32,32 +66,13 @@ export function cp(left: number | string | ICharacter | INumeric | Structure, ri
     r = right.get().toString().trimEnd();
   }
 
-  let pattern = "";
-  for (let i = 0; i < r.length; i++) {
-    const current = r[i];
-    if (current === "#") {
-      if (i + 1 < r.length) {
-        const next = r[i + 1];
-        if (next === "#") {
-          pattern += "#";
-          i++;
-        } else {
-          pattern += escapeRegExpCharacter(next);
-          i++;
-        }
-      } else {
-        pattern += "#";
-      }
-    } else if (current === "*") {
-      pattern += "[\\s\\S]*";
-    } else if (current === "+") {
-      pattern += "[\\s\\S]";
-    } else {
-      pattern += escapeRegExpCharacter(current);
+  let reg = cache.get(r);
+  if (reg === undefined) {
+    reg = compile(r);
+    if (cache.size >= CACHE_SIZE) {
+      cache.delete(cache.keys().next().value!);
     }
+    cache.set(r, reg);
   }
-
-  const reg = new RegExp("^" + pattern + "$", "iu");
-
-  return l.match(reg) !== null;
+  return reg.test(l);
 }

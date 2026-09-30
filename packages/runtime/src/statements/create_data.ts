@@ -1,5 +1,5 @@
 import {throwError} from "../throw_error";
-import {ABAPObject, Character, DataReference, Date, String, FieldSymbol, Float, Integer, Structure, Table, Time, XString, Hex, Packed, Numc, Integer8, UTCLong, DecFloat34, ITableOptions, TableKeyType} from "../types";
+import {ABAPObject, Character, DataReference, Date, String, FieldSymbol, Float, HashedTable, Integer, Structure, Table, Time, XString, Hex, Packed, Numc, Integer8, UTCLong, DecFloat34, ITableOptions, TableKeyType} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {ABAP} from "..";
@@ -42,6 +42,19 @@ function createDataRefTo(target: DataReference, name: string) {
   }
 
   target.assign(new abap.types.ABAPObject({qualifiedName: name, RTTIName: name}));
+}
+
+/** CREATE DATA ... LIKE dobj takes the type of dobj, never its content: the
+ * created data object starts initial. A table is created empty right away
+ * instead of copying its rows first. */
+function initialLike(like: any) {
+  if (like instanceof Table || like instanceof HashedTable) {
+    const TableType = like.constructor as typeof Table;
+    return new TableType(like.getRowType(), like.getOptions(), like.getQualifiedName());
+  }
+  const copy = like.clone();
+  copy.clear();
+  return copy;
 }
 
 export function createData(target: DataReference | FieldSymbol, options?: ICreateDataOptions) {
@@ -213,9 +226,9 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
       options.like = options.like.getPointer();
     }
     if (options.table === true) {
-      target.assign(new abap.types.Table(options.like.clone(), tableOptions));
+      target.assign(new abap.types.Table(initialLike(options.like), tableOptions));
     } else {
-      target.assign(options.like.clone());
+      target.assign(initialLike(options.like));
     }
   } else {
     target.assign(target.getType()?.clone());

@@ -200,6 +200,58 @@ WRITE lv_offset.`;
     expect(abap.console.get()).to.equal("5");
   });
 
+  it("find, case = abap_false with sub", async () => {
+    const code = `
+    DATA lv TYPE i.
+    lv = find( val = 'Hello World' sub = 'WORLD' case = abap_false ).
+    ASSERT lv = 6.
+    lv = find( val = '{"startDate":"2018"}' sub = '"startdate":"' case = abap_false ).
+    ASSERT lv = 1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("find, case = abap_true with sub stays case sensitive", async () => {
+    const code = `
+    DATA lv TYPE i.
+    lv = find( val = 'Hello World' sub = 'WORLD' case = abap_true ).
+    ASSERT lv = -1.
+    lv = find( val = 'Hello World' sub = 'WORLD' ).
+    ASSERT lv = -1.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("find, case = abap_false with sub and occ", async () => {
+    const code = `
+    DATA lv TYPE i.
+    lv = find( val = 'aXbxcX' sub = 'x' occ = 2 case = abap_false ).
+    ASSERT lv = 3.
+    lv = find( val = 'aXbxcX' sub = 'x' occ = -1 case = abap_false ).
+    ASSERT lv = 5.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("find with occ negative, sub longer than one character", async () => {
+    const code = `
+    DATA lv TYPE i.
+    lv = find( val = 'abcab' sub = 'ab' occ = -1 ).
+    ASSERT lv = 3.
+    lv = find( val = 'abcab' sub = 'ab' occ = -2 ).
+    ASSERT lv = 0.
+    lv = find( val = 'abcab' sub = 'ab' occ = -3 ).
+    ASSERT lv = -1.
+    lv = find( val = 'foo/barr/moo' sub = 'rr/' occ = -1 ).
+    ASSERT lv = 6.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("pcre", async () => {
     const code = `
     DATA val TYPE i.
