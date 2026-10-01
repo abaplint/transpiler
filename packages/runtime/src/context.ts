@@ -1,7 +1,7 @@
 import {Console} from "./console/console";
 import {DatabaseClient, DatabaseCursorCallbacks} from "./db/db";
 import * as RFC from "./rfc";
-import {DatasetHost, DatasetHandle, DatasetMode} from "./statements/dataset";
+import {DatasetHost, OpenDataset} from "./dataset/dataset";
 
 export class Context {
   public console: Console;
@@ -17,7 +17,7 @@ export class Context {
   // the file system OPEN DATASET and friends read and write; none by default,
   // and then every DATASET statement throws
   public dataset: DatasetHost | undefined = undefined;
-  public datasets: {[name: string]: {handle: DatasetHandle, mode: DatasetMode, binary: boolean, position: number}} = {};
+  public datasets: {[name: string]: OpenDataset} = {};
 
   public defaultDB() {
     if (this.databaseConnections["DEFAULT"] === undefined) {

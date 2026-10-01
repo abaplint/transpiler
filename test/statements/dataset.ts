@@ -1,48 +1,11 @@
 import {expect} from "chai";
-import {ABAP, MemoryConsole} from "../../packages/runtime/src";
-import type {DatasetHandle, DatasetHost, DatasetMode} from "../../packages/runtime/src";
+import {ABAP, MemoryConsole, MemoryDataset} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
+// the runtime's own in-memory host: the file system the runtime asks for
+// nothing but bytes
 let files: {[name: string]: Uint8Array};
-
-// A host over a map of names to bytes: the file system the runtime asks for
-// nothing but bytes, so a test double is a dozen lines.
-function memoryHost(): DatasetHost {
-  return {
-    open: async (name: string, mode: DatasetMode) => {
-      if (files[name] === undefined) {
-        if (mode === "INPUT") {
-          return {message: "No such file or directory"};
-        }
-        files[name] = new Uint8Array(0);
-      }
-      if (mode === "OUTPUT") {
-        files[name] = new Uint8Array(0);
-      }
-      const handle: DatasetHandle = {
-        read: async (position: number, length: number) => files[name].slice(position, position + length),
-        write: async (position: number, bytes: Uint8Array) => {
-          const end = Math.max(files[name].length, position + bytes.length);
-          const out = new Uint8Array(end);
-          out.set(files[name], 0);
-          out.set(bytes, position);
-          files[name] = out;
-        },
-        size: async () => files[name].length,
-        close: async () => undefined,
-      };
-      return handle;
-    },
-    delete: async (name: string) => {
-      if (files[name] === undefined) {
-        return false;
-      }
-      delete files[name];
-      return true;
-    },
-  };
-}
 
 const cxroot = `
 CLASS cx_root DEFINITION PUBLIC.
@@ -81,13 +44,13 @@ const bytesOf = (text: string) => new TextEncoder().encode(text);
 describe("Running statements - DATASET", () => {
 
   beforeEach(async () => {
-    abap = new ABAP({console: new MemoryConsole()});
-    files = {};
-    abap.context.dataset = memoryHost();
+    const dataset = new MemoryDataset();
+    files = dataset.files;
+    abap = new ABAP({console: new MemoryConsole(), dataset});
   });
 
   it("without a host, OPEN DATASET is not supported", async () => {
-    abap.context.dataset = undefined;
+    abap = new ABAP({console: new MemoryConsole()});
     let message = "";
     try {
       await run(`OPEN DATASET 'f' FOR INPUT IN BINARY MODE.`);

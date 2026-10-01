@@ -22,9 +22,11 @@ import {ABAPEventing} from "./abap_eventing";
 import {isLineNotFound} from "./is_line_not_found";
 import {parametersCall} from "./parameters_call";
 import {alphaIn, alphaOut} from "./alpha";
+import {DatasetHost} from "./dataset/dataset";
 
 export {RFC, types, DB, MemoryConsole};
-export type {DatasetHost, DatasetHandle, DatasetMode} from "./statements/dataset";
+export type {DatasetHost, DatasetHandle, DatasetMode} from "./dataset/dataset";
+export {MemoryDataset} from "./dataset/memory_dataset";
 
 export type RuntimeDatabaseOptions = {
   /* prefix all operations with schema*/
@@ -39,6 +41,8 @@ export type RuntimeDatabaseOptions = {
 export type RuntimeOptions = {
   console?: Console,
   database?: RuntimeDatabaseOptions,
+  /* the file system DATASET statements read and write; without one they throw */
+  dataset?: DatasetHost,
 };
 
 export class ABAP {
@@ -87,6 +91,7 @@ export class ABAP {
     this.context = new Context();
     this.console = input?.console ? input?.console : new StandardOutConsole();
     this.context.console = this.console;
+    this.context.dataset = input?.dataset;
 
     this.dbo = input?.database || {schemaPrefix: "", tablePrefix: ""};
     if (this.dbo.schemaPrefix === undefined) {

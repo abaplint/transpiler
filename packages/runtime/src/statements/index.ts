@@ -1,5 +1,6 @@
 import {append} from "./append";
-import {DatasetStatements, IGetDatasetOptions, IOpenDatasetOptions, IReadDatasetOptions, ITransferOptions} from "./dataset";
+import {DatasetStatements} from "./dataset";
+import {IGetDatasetOptions, IOpenDatasetOptions, IReadDatasetOptions, ITransferOptions} from "../dataset/dataset";
 import {assert} from "./assert";
 import {assign} from "./assign";
 import {commit, ICommitOptions} from "./commit";

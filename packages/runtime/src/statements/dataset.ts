@@ -4,6 +4,7 @@ import {Character, FieldSymbol, Hex, HexUInt8, String, XString} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {ABAP} from "..";
+import {DatasetHost, IGetDatasetOptions, IOpenDatasetOptions, IReadDatasetOptions, ITransferOptions, OpenDataset} from "../dataset/dataset";
 
 declare const abap: ABAP;
 
@@ -11,62 +12,11 @@ declare const abap: ABAP;
 //
 // The ABAP semantics live here, once: text lines, the byte layout of each
 // mode, ACTUAL LENGTH, sy-subrc and the exceptions. A host supplies bytes
-// only (DatasetHost below), the way a DatabaseClient supplies rows, so that
+// only (DatasetHost), the way a DatabaseClient supplies rows, so that
 // a sandboxed file system, an in-memory one in a browser and a test double
 // all behave the same. Without a host every statement throws, as before.
-
-export type DatasetMode = "INPUT" | "OUTPUT" | "APPENDING" | "UPDATE";
-
-/** an open file: positional reads and writes, the runtime keeps the position */
-export interface DatasetHandle {
-  /** up to length bytes from position; fewer at the end of the file */
-  read(position: number, length: number): Promise<Uint8Array>;
-  write(position: number, bytes: Uint8Array): Promise<void>;
-  size(): Promise<number>;
-  close(): Promise<void>;
-}
-
-export interface DatasetHost {
-  /** OUTPUT truncates or creates, APPENDING and UPDATE keep the content;
-   *  a failure is returned as the text OPEN DATASET ... MESSAGE receives
-   *  and becomes sy-subrc 8 */
-  open(name: string, mode: DatasetMode): Promise<DatasetHandle | {message: string}>;
-  /** false when there was nothing to delete (sy-subrc 4) */
-  delete(name: string): Promise<boolean>;
-}
-
-export interface IOpenDatasetOptions {
-  mode: DatasetMode;
-  binary: boolean;
-  encoding?: "DEFAULT" | "UTF-8" | "NON-UNICODE";
-  legacy?: boolean;
-  message?: ICharacter | FieldSymbol;
-  position?: INumeric | FieldSymbol;
-  /** additions this runtime does not implement, by name */
-  unsupported?: string[];
-}
-
-export interface ITransferOptions {
-  length?: INumeric | FieldSymbol;
-  noEndOfLine?: boolean;
-}
-
-export interface IReadDatasetOptions {
-  maximumLength?: INumeric | FieldSymbol;
-  actualLength?: INumeric | FieldSymbol;
-}
-
-export interface IGetDatasetOptions {
-  position?: INumeric | FieldSymbol;
-  attributes?: any;
-}
-
-interface OpenDataset {
-  handle: DatasetHandle;
-  mode: DatasetMode;
-  binary: boolean;
-  position: number;
-}
+// The host and the options are defined in ../dataset/dataset.ts, and an
+// in-memory host is ../dataset/memory_dataset.ts.
 
 // what the text mode reads per host call while it looks for the end of a line
 const CHUNK = 64 * 1024;
