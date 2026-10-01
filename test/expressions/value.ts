@@ -593,4 +593,34 @@ START-OF-SELECTION.
     await f(abap);
     expect(abap.console.get()).to.equal("1\n2\n3\n4\n5\n0");
   });
+
+  it("VALUE #( ) of a sorted table, non-unique key, a duplicate goes in front", async () => {
+    const code = `
+TYPES: BEGIN OF ty, a TYPE i, b TYPE i, END OF ty.
+DATA s TYPE SORTED TABLE OF ty WITH NON-UNIQUE KEY a.
+DATA r TYPE ty.
+s = VALUE #( ( a = 1 b = 1 ) ( a = 1 b = 2 ) ( a = 2 b = 3 ) ).
+LOOP AT s INTO r.
+  WRITE / |{ r-a }/{ r-b }|.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1/2\n1/1\n2/3");
+  });
+  it("VALUE #( ) of a sorted table, non-unique key, three duplicates, each goes in front", async () => {
+    const code = `
+TYPES: BEGIN OF ty, a TYPE i, b TYPE i, END OF ty.
+DATA s TYPE SORTED TABLE OF ty WITH NON-UNIQUE KEY a.
+DATA r TYPE ty.
+s = VALUE #( ( a = 1 b = 1 ) ( a = 1 b = 2 ) ( a = 1 b = 3 ) ).
+LOOP AT s INTO r.
+  WRITE / |{ r-a }/{ r-b }|.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1/3\n1/2\n1/1");
+  });
+
 });

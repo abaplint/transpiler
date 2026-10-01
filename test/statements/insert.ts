@@ -359,4 +359,38 @@ WRITE / lines( tab2 ).`;
     expect(abap.console.get()).to.equal("0\n1\n4\n1");
   });
 
+  it("INSERT INTO TABLE, sorted table, non-unique key, a duplicate goes in front", async () => {
+    const code = `
+TYPES: BEGIN OF ty, a TYPE i, b TYPE i, END OF ty.
+DATA s TYPE SORTED TABLE OF ty WITH NON-UNIQUE KEY a.
+DATA r TYPE ty.
+r-a = 1. r-b = 1. INSERT r INTO TABLE s.
+r-a = 1. r-b = 2. INSERT r INTO TABLE s.
+r-a = 2. r-b = 3. INSERT r INTO TABLE s.
+LOOP AT s INTO r.
+  WRITE / |{ r-a }/{ r-b }|.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1/2\n1/1\n2/3");
+  });
+
+  it("INSERT LINES OF INTO TABLE, sorted table, non-unique key, the order is kept", async () => {
+    const code = `
+TYPES: BEGIN OF ty, a TYPE i, b TYPE i, END OF ty.
+DATA s TYPE SORTED TABLE OF ty WITH NON-UNIQUE KEY a.
+DATA r TYPE ty.
+DATA std TYPE STANDARD TABLE OF ty WITH EMPTY KEY.
+std = VALUE #( ( a = 1 b = 1 ) ( a = 1 b = 2 ) ( a = 2 b = 3 ) ).
+INSERT LINES OF std INTO TABLE s.
+LOOP AT s INTO r.
+  WRITE / |{ r-a }/{ r-b }|.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1/1\n1/2\n2/3");
+  });
+
 });
