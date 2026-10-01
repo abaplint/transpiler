@@ -64,6 +64,9 @@ export class LoopTranspiler implements IStatementTranspiler {
       if (assigning) {
         targetNode = assigning;
         target = traversal.traverse(assigning).getCode() + ".assign(" + this.unique + ");";
+      } else if (!node.concatTokens().toUpperCase().includes(" TRANSPORTING NO FIELDS") && this.hasHeaderLine(loopSource, traversal)) {
+        // LOOP AT itab. without a target: the row goes into the header line of the table
+        target = source + ".getHeader().set(" + this.unique + ");";
       }
     }
 
@@ -162,6 +165,16 @@ export class LoopTranspiler implements IStatementTranspiler {
       ret.append(target, targetNode ?? node, traversal);
     }
     return ret;
+  }
+
+
+  private hasHeaderLine(loopSource: abaplint.Nodes.ExpressionNode | abaplint.Nodes.TokenNode | undefined, traversal: Traversal): boolean {
+    if (loopSource === undefined || /^[\w\/]+$/.test(loopSource.concatTokens()) === false) {
+      return false;
+    }
+    const token = loopSource.getFirstToken();
+    const type = traversal.findCurrentScopeByToken(token)?.findVariable(loopSource.concatTokens())?.getType();
+    return type instanceof abaplint.BasicTypes.TableType && type.isWithHeader();
   }
 
 }
