@@ -1857,6 +1857,139 @@ WRITE sy-dbcnt.`;
     });
   });
 
+  it("FOR ALL ENTRIES, UP TO counts the whole result, not each driving row", async () => {
+    // measured on a 7.5x system: two driving rows, four matches each, UP TO 3 ROWS gives 3
+    const code = `
+DATA ls TYPE zdbw.
+DATA lt TYPE STANDARD TABLE OF zdbw WITH DEFAULT KEY.
+DATA lt_keys TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DO 8 TIMES.
+  ls-id = sy-index.
+  ls-val = sy-index MOD 2.
+  INSERT zdbw FROM ls.
+ENDDO.
+APPEND 0 TO lt_keys.
+APPEND 1 TO lt_keys.
+SELECT * FROM zdbw INTO TABLE lt UP TO 3 ROWS
+  FOR ALL ENTRIES IN lt_keys WHERE val = lt_keys-table_line.
+WRITE / lines( lt ).
+WRITE / sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "zdbw.tabl.xml", contents: tabl_zdbw}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("3\n3");
+    });
+  });
+
+  it("FOR ALL ENTRIES, UP TO over blocks into a non-unique SORTED table", async () => {
+    // this runtime does not de-duplicate a sorted target, so equal rows from
+    // two blocks stay; UP TO still keeps exactly its number of rows
+    const code = `
+DATA ls TYPE zdbw.
+DATA lt TYPE SORTED TABLE OF zdbw WITH NON-UNIQUE KEY val.
+DATA lt_keys TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DO 8 TIMES.
+  ls-id = sy-index.
+  ls-val = 0.
+  INSERT zdbw FROM ls.
+ENDDO.
+DO 60 TIMES.
+  APPEND 0 TO lt_keys.
+ENDDO.
+SELECT * FROM zdbw INTO TABLE lt UP TO 5 ROWS
+  FOR ALL ENTRIES IN lt_keys WHERE val = lt_keys-table_line.
+WRITE / lines( lt ).
+WRITE / sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "zdbw.tabl.xml", contents: tabl_zdbw}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("5\n5");
+    });
+  });
+
+  it("FOR ALL ENTRIES, UP TO with ORDER BY keeps the first rows of that order", async () => {
+    // ids 2, 4, 6, 8 match; ORDER BY id DESCENDING UP TO 2 is 8 and 6. This
+    // runtime's de-duplication then sorts the target, so they print ascending
+    const code = `
+DATA ls TYPE zdbw.
+DATA lt TYPE STANDARD TABLE OF zdbw WITH DEFAULT KEY.
+DATA lt_keys TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA lv TYPE string.
+DO 8 TIMES.
+  ls-id = |{ sy-index }|.
+  ls-val = sy-index MOD 2.
+  INSERT zdbw FROM ls.
+ENDDO.
+APPEND 0 TO lt_keys.
+SELECT * FROM zdbw INTO TABLE lt UP TO 2 ROWS
+  FOR ALL ENTRIES IN lt_keys WHERE val = lt_keys-table_line ORDER BY id DESCENDING.
+LOOP AT lt INTO ls.
+  lv = ls-id.
+  CONDENSE lv.
+  WRITE / lv.
+ENDLOOP.`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "zdbw.tabl.xml", contents: tabl_zdbw}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("6\n8");
+    });
+  });
+
+  it("FOR ALL ENTRIES, an OR outside the driving condition over two blocks", async () => {
+    // each driving row's whole condition goes in its own parentheses, so the
+    // OR stays inside it; 60 equal driving rows make two blocks
+    const code = `
+DATA ls TYPE zdbw.
+DATA lt TYPE STANDARD TABLE OF zdbw WITH DEFAULT KEY.
+DATA lt_keys TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DO 8 TIMES.
+  ls-id = |{ sy-index }|.
+  ls-val = sy-index MOD 2.
+  INSERT zdbw FROM ls.
+ENDDO.
+DO 60 TIMES.
+  APPEND 1 TO lt_keys.
+ENDDO.
+SELECT * FROM zdbw INTO TABLE lt
+  FOR ALL ENTRIES IN lt_keys WHERE id = '2' OR val = lt_keys-table_line.
+WRITE / lines( lt ).`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "zdbw.tabl.xml", contents: tabl_zdbw}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("5");
+    });
+  });
+
+  it("FOR ALL ENTRIES, more driving rows than one block", async () => {
+    const code = `
+DATA ls TYPE zdbw.
+DATA lt TYPE STANDARD TABLE OF zdbw WITH DEFAULT KEY.
+DATA lt_keys TYPE STANDARD TABLE OF zdbw WITH DEFAULT KEY.
+DO 130 TIMES.
+  ls-id = sy-index.
+  ls-val = sy-index.
+  INSERT zdbw FROM ls.
+  IF sy-index <= 120.
+    APPEND ls TO lt_keys.
+    APPEND ls TO lt_keys.
+  ENDIF.
+ENDDO.
+SELECT * FROM zdbw INTO TABLE lt
+  FOR ALL ENTRIES IN lt_keys WHERE id = lt_keys-id AND val = lt_keys-val.
+WRITE / lines( lt ).
+WRITE / sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "zdbw.tabl.xml", contents: tabl_zdbw}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("120\n120");
+    });
+  });
+
   it("FOR ALL ENTRIES, into HASHED", async () => {
     const code = `
     DATA lt_t100 TYPE HASHED TABLE OF t100 WITH UNIQUE KEY sprsl arbgb msgnr.
@@ -2711,6 +2844,80 @@ START-OF-SELECTION.
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("");
+    });
+  });
+
+  it("GROUP BY with HAVING", async () => {
+    const tabl = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V><TABNAME>ZSHIP</TABNAME><TABCLASS>TRANSP</TABCLASS></DD02V>
+   <DD03P_TABLE>
+    <DD03P>
+     <FIELDNAME>SHIP_ID</FIELDNAME><KEYFLAG>X</KEYFLAG><INTTYPE>C</INTTYPE>
+     <INTLEN>000008</INTLEN><DATATYPE>CHAR</DATATYPE><LENG>000004</LENG>
+    </DD03P>
+    <DD03P>
+     <FIELDNAME>SEQ</FIELDNAME><KEYFLAG>X</KEYFLAG><INTTYPE>X</INTTYPE>
+     <INTLEN>000004</INTLEN><DATATYPE>INT4</DATATYPE><LENG>000010</LENG>
+    </DD03P>
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+    const code = `
+DATA ls_ship TYPE zship.
+DATA lt_result TYPE STANDARD TABLE OF zship-ship_id WITH EMPTY KEY.
+ls_ship-ship_id = 'P001'.
+DO 3 TIMES.
+  ls_ship-seq = sy-index.
+  INSERT zship FROM @ls_ship.
+ENDDO.
+ls_ship-ship_id = 'P002'.
+DO 2 TIMES.
+  ls_ship-seq = sy-index.
+  INSERT zship FROM @ls_ship.
+ENDDO.
+SELECT ship_id FROM zship
+  GROUP BY ship_id HAVING COUNT( * ) > 2
+  INTO TABLE @lt_result.
+LOOP AT lt_result INTO DATA(lv_ship_id).
+  WRITE / lv_ship_id.
+ENDLOOP.`;
+    const files = [
+      {filename: "zship_test.prog.abap", contents: code},
+      {filename: "zship.tabl.xml", contents: tabl}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("P001");
+    });
+  });
+
+  it("GROUP BY with HAVING numeric host values", async () => {
+    const code = `
+DATA ls_row TYPE zdbw.
+DATA lt_result TYPE STANDARD TABLE OF zdbw-id WITH EMPTY KEY.
+DATA lv TYPE i VALUE 30.
+ls_row-id = 'A'.
+ls_row-val = 30.
+INSERT zdbw FROM @ls_row.
+ls_row-id = 'B'.
+ls_row-val = 5.
+INSERT zdbw FROM @ls_row.
+SELECT id FROM zdbw GROUP BY id HAVING SUM( val ) >= @lv INTO TABLE @lt_result.
+LOOP AT lt_result INTO DATA(lv_id).
+  WRITE / lv_id.
+ENDLOOP.
+CLEAR lt_result.
+lv = 15.
+SELECT id FROM zdbw GROUP BY id HAVING MAX( val ) > lv INTO TABLE @lt_result.
+LOOP AT lt_result INTO lv_id.
+  WRITE / lv_id.
+ENDLOOP.`;
+    const files = [{filename: "zdbw_having.prog.abap", contents: code},
+      {filename: "zdbw.tabl.xml", contents: tabl_zdbw}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd().split("\n").map(line => line.trim()).join("\n")).to.equal("A\nA");
     });
   });
 
