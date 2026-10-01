@@ -5,7 +5,11 @@ import {Chunk} from "../chunk";
 
 export class LeaveTranspiler implements IStatementTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
+  public transpile(node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
+    if (node.concatTokens().toUpperCase() === "LEAVE PROGRAM.") {
+      // ends the program; a SUBMIT ... AND RETURN that started it continues
+      return new Chunk(`throw new abap.LeaveProgram();`);
+    }
     return new Chunk(`throw new Error("Leave, transpiler todo");`);
   }
 

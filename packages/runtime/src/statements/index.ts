@@ -28,6 +28,8 @@ import {IInsertDatabaseOptions, insertDatabase} from "./insert_database";
 import {insertInternal} from "./insert_internal";
 import {deleteDatabase, IDeleteDatabaseOptions} from "./delete_database";
 import {loop} from "./loop";
+import {SubmitStatement} from "./submit";
+import {SubmitCall} from "../submit/submit";
 import {IMessageOptions, MessageStatement} from "./message";
 import {IModifyDatabaseOptions, modifyDatabase} from "./modify_database";
 import {modifyInternal} from "./modify_internal";
@@ -100,9 +102,11 @@ export class Statements {
   public callTransaction = callTransaction;
 
   private readonly context: Context;
+  private readonly submitStatement: SubmitStatement;
 
   public constructor(context: Context) {
     this.context = context;
+    this.submitStatement = new SubmitStatement(context);
   }
 
   public _setTrace(min = 10, totals = false) {
@@ -120,6 +124,18 @@ export class Statements {
 
   public async closeCursor(cursor: INumeric) {
     await closeCursor(this.context, cursor.get());
+  }
+
+  public async submit(call: SubmitCall) {
+    return this.submitStatement.submit(call);
+  }
+
+  public selectionParameter(program: string, name: string, target: any, lowerCase: boolean) {
+    this.submitStatement.parameter(program, name, target, lowerCase);
+  }
+
+  public selectionSelectOption(program: string, name: string, target: any, lowerCase: boolean) {
+    this.submitStatement.selectOption(program, name, target, lowerCase);
   }
 
   public async commit(options?: ICommitOptions) {

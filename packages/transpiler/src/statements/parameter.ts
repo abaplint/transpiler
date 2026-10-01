@@ -27,6 +27,7 @@ export class ParameterTranspiler implements IStatementTranspiler {
       // a radio button group without DEFAULT 'X' starts with its first button chosen
       ret.appendString("\n" + name + ".set('X');");
     }
+    ret.appendString(SelectionDefault.submitted(node, traversal, name, "selectionParameter"));
 
     return ret;
   }
