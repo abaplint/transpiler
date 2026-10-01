@@ -24,10 +24,13 @@ import {isLineNotFound} from "./is_line_not_found";
 import {parametersCall} from "./parameters_call";
 import {alphaIn, alphaOut} from "./alpha";
 import {DatasetHost} from "./dataset/dataset";
+import {LeaveProgram, ProgramRegistry, SubmitHost} from "./submit/submit";
 
 export {RFC, types, DB, MemoryConsole};
 export type {DatasetHost, DatasetHandle, DatasetMode} from "./dataset/dataset";
 export {MemoryDataset} from "./dataset/memory_dataset";
+export type {SubmitHost, SubmitCall, SubmitSelection} from "./submit/submit";
+export {ProgramRegistry, LeaveProgram};
 
 export type RuntimeDatabaseOptions = {
   /* prefix all operations with schema*/
@@ -44,6 +47,8 @@ export type RuntimeOptions = {
   database?: RuntimeDatabaseOptions,
   /* the file system DATASET statements read and write; without one they throw */
   dataset?: DatasetHost,
+  /* runs the program of a SUBMIT ... AND RETURN; without one SUBMIT throws */
+  submit?: SubmitHost,
 };
 
 export class ABAP {
@@ -77,6 +82,7 @@ export class ABAP {
   public isLineNotFound = isLineNotFound;
   public buildDbTableName = buildDbTableName;
   public ClassicError = ClassicError;
+  public LeaveProgram = LeaveProgram;
   public dynamicCallLookup = dynamicCallLookup;
   public parametersCall = parametersCall;
   public eventing = new ABAPEventing();
@@ -94,6 +100,7 @@ export class ABAP {
     this.console = input?.console ? input?.console : new StandardOutConsole();
     this.context.console = this.console;
     this.context.dataset = input?.dataset;
+    this.context.submit = input?.submit;
 
     this.dbo = input?.database || {schemaPrefix: "", tablePrefix: ""};
     if (this.dbo.schemaPrefix === undefined) {

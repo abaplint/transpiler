@@ -48,4 +48,16 @@ export class SelectionDefault {
     return code;
   }
 
+  /** after the default: the value a SUBMIT ... WITH gave, which the runtime knows */
+  public static submitted(node: abaplint.Nodes.StatementNode, traversal: Traversal, name: string, method: string): string {
+    const obj = traversal.getCurrentObject();
+    if (!(obj instanceof abaplint.Objects.Program)) {
+      return "";
+    }
+    const selection = node.findDirectExpression(abaplint.Expressions.FieldSub)!.concatTokens().toUpperCase();
+    const lower = node.findDirectTokenByText("LOWER") !== undefined;
+    return "\nabap.statements." + method + "(" + JSON.stringify(obj.getName().toUpperCase()) + ", "
+      + JSON.stringify(selection) + ", " + name + ", " + lower + ");";
+  }
+
 }

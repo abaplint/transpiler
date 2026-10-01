@@ -2,6 +2,7 @@ import {Console} from "./console/console";
 import {DatabaseClient, DatabaseCursorCallbacks} from "./db/db";
 import * as RFC from "./rfc";
 import {DatasetHost, OpenDataset} from "./dataset/dataset";
+import {SubmitCall, SubmitHost} from "./submit/submit";
 
 export class Context {
   public console: Console;
@@ -34,6 +35,9 @@ export class Context {
 
   // GET RUN TIME, the clock reading of the first call, and the last unwrapped microsecond count
   public runTime: {start: number, last: number} | undefined = undefined;
+  /* runs the programs of SUBMIT, and the SUBMITs in progress, innermost last */
+  public submit: SubmitHost | undefined;
+  public submitted: SubmitCall[] = [];
 
   public defaultDB() {
     if (this.databaseConnections["DEFAULT"] === undefined) {

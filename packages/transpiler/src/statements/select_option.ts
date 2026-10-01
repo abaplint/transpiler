@@ -22,7 +22,7 @@ export class SelectOptionTranspiler implements IStatementTranspiler {
     // stays in the header line: I EQ, or I BT with TO, unless OPTION or SIGN say otherwise
     const low = SelectionDefault.after(node, "DEFAULT");
     if (low === undefined) {
-      return ret;
+      return ret.appendString(SelectionDefault.submitted(node, traversal, name, "selectionSelectOption"));
     }
     const high = SelectionDefault.after(node, "TO");
     const option = SelectionDefault.after(node, "OPTION")?.concatTokens().toUpperCase() ?? (high ? "BT" : "EQ");
@@ -35,7 +35,7 @@ export class SelectOptionTranspiler implements IStatementTranspiler {
       ret.appendString(SelectionDefault.set(node, name + ".get().high", lowType, high, traversal));
     }
     ret.appendString("\nabap.statements.append({source: " + name + "});");
-    return ret;
+    return ret.appendString(SelectionDefault.submitted(node, traversal, name, "selectionSelectOption"));
   }
 
 }
