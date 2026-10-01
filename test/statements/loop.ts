@@ -1457,4 +1457,25 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("1/3\n1/2\n1/1");
   });
 
+  it("LOOP AT a table with header line, no target, fills the header line", async () => {
+    const code = `
+    DATA gt TYPE STANDARD TABLE OF i WITH HEADER LINE.
+    DATA gr TYPE RANGE OF i WITH HEADER LINE.
+    gt = 1. APPEND gt. gt = 2. APPEND gt.
+    LOOP AT gt.
+      WRITE / gt.
+    ENDLOOP.
+    gr-low = 5. APPEND gr. gr-low = 6. APPEND gr.
+    LOOP AT gr WHERE low > 5.
+      WRITE / gr-low.
+    ENDLOOP.
+    LOOP AT gt TRANSPORTING NO FIELDS WHERE table_line = 1.
+      WRITE / gt.
+    ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n6\n2");
+  });
+
 });
