@@ -2847,6 +2847,46 @@ START-OF-SELECTION.
     });
   });
 
+  it("GROUP BY with HAVING", async () => {
+    const tabl = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V><TABNAME>ZSHIP</TABNAME><TABCLASS>TRANSP</TABCLASS></DD02V>
+   <DD03P_TABLE>
+    <DD03P><FIELDNAME>SHIP_ID</FIELDNAME><KEYFLAG>X</KEYFLAG><INTTYPE>C</INTTYPE><INTLEN>000008</INTLEN><DATATYPE>CHAR</DATATYPE><LENG>000004</LENG></DD03P>
+    <DD03P><FIELDNAME>SEQ</FIELDNAME><KEYFLAG>X</KEYFLAG><INTTYPE>X</INTTYPE><INTLEN>000004</INTLEN><DATATYPE>INT4</DATATYPE><LENG>000010</LENG></DD03P>
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+    const code = `
+DATA ls_ship TYPE zship.
+DATA lt_result TYPE STANDARD TABLE OF zship-ship_id WITH EMPTY KEY.
+ls_ship-ship_id = 'P001'.
+DO 3 TIMES.
+  ls_ship-seq = sy-index.
+  INSERT zship FROM @ls_ship.
+ENDDO.
+ls_ship-ship_id = 'P002'.
+DO 2 TIMES.
+  ls_ship-seq = sy-index.
+  INSERT zship FROM @ls_ship.
+ENDDO.
+SELECT ship_id FROM zship
+  GROUP BY ship_id HAVING COUNT( * ) > 2
+  INTO TABLE @lt_result.
+LOOP AT lt_result INTO DATA(lv_ship_id).
+  WRITE / lv_ship_id.
+ENDLOOP.`;
+    const files = [
+      {filename: "zship_test.prog.abap", contents: code},
+      {filename: "zship.tabl.xml", contents: tabl}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("P001");
+    }, {sqlite: true, postgres: false, snowflake: false, hana: false});
+  });
+
   it("basic GROUP BY with WHERE", async () => {
     const code = `
 FORM foo.

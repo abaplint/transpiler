@@ -128,6 +128,12 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
       return ret;
     }
 
+    const aggregation = c.findDirectExpression(abaplint.Expressions.SQLAggregation);
+    if (aggregation && operator && source) {
+      return aggregation.concatTokens() + " " + this.sqlOperator(operator.concatTokens()) + " "
+        + this.sqlSource(source, traversal, filename, table);
+    }
+
     if (fieldName === undefined || operator === undefined || source === undefined) {
       throw new Error("SQL Condition, transpiler todo2, " + c.concatTokens());
     }
