@@ -1316,6 +1316,25 @@ ENDLOOP.`;
   });
 
 
+  it("LOOP USING KEY (name) WHERE with OR, the OR side outside the key is not dropped", async () => {
+    // statically, USING KEY k WHERE a = 1 OR b = 2 is a syntax error, a secondary key needs
+    // an optimizable WHERE; with the key name dynamic it runs, and every row matching either side is looped
+    const code = `
+TYPES: BEGIN OF ty, a TYPE i, b TYPE i, END OF ty.
+DATA t TYPE STANDARD TABLE OF ty WITH NON-UNIQUE KEY a b
+       WITH NON-UNIQUE SORTED KEY k COMPONENTS a.
+DATA r TYPE ty.
+DATA name TYPE string VALUE 'K'.
+t = VALUE #( ( a = 1 b = 0 ) ( a = 2 b = 0 ) ( a = 3 b = 2 ) ).
+LOOP AT t INTO r USING KEY (name) WHERE a = 1 OR b = 2.
+  WRITE / |{ r-a }/{ r-b }|.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1/0\n3/2");
+  });
+
   it("LOOP USING KEY WHERE, key over a component of a substructure", async () => {
     const code = `
 TYPES: BEGIN OF ts, x TYPE i, END OF ts.
