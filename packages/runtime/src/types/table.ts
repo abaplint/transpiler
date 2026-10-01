@@ -30,6 +30,16 @@ export enum TableKeyType {
   empty = "EMPTY",
 }
 
+/* rows are handed to a sorted secondary key in table order, and a duplicate of a
+ * non-unique key goes in front of its equals, as INSERT ... INTO TABLE does: reversed
+ * before the stable sort, the later of two equal rows comes first */
+function secondaryDuplicatesFirst(rows: any[], key: ITableKey): any[] {
+  if (key.type === TableAccessType.sorted && key.isUnique !== true) {
+    rows.reverse();
+  }
+  return rows;
+}
+
 export class LoopController {
   public index: number;
   public loopTo: number;
@@ -148,7 +158,7 @@ export class HashedTable implements ITable {
       throw `Table, secondary key "${name}" not found`;
     }
     // note, array() already is a copy, so it can be used,
-    const copy = this.array();
+    const copy = secondaryDuplicatesFirst(this.array(), secondary);
     sort(copy as any, {by: secondary.keyFields.map(k => {return {component: k.toLowerCase()};})});
 
     this.secondaryIndexes[name.toUpperCase()] = copy;
@@ -423,7 +433,7 @@ export class Table implements ITable {
     if (secondary === undefined) {
       throw `Table, secondary key "${name}" not found`;
     }
-    const copy = [...this.value];
+    const copy = secondaryDuplicatesFirst([...this.value], secondary);
     sort(copy as any, {by: secondary.keyFields.map(k => {return {component: k.toLowerCase()};}), skipSortedCheck: true});
 
     this.secondaryIndexes[name.toUpperCase()] = copy;
@@ -566,9 +576,9 @@ export class Table implements ITable {
     }
 
     const lastComparison = compare(this.value[lastIndex], val);
-    if (lastComparison < 0 || (lastComparison === 0 && unique === false)) {
+    if (lastComparison < 0) {
       return {value: this.insertIndex(val, this.value.length, true), subrc: 0};
-    } else if (lastComparison === 0) {
+    } else if (lastComparison === 0 && unique === true) {
       return {value: undefined, subrc: 4};
     }
 
@@ -576,14 +586,15 @@ export class Table implements ITable {
     let high = this.value.length;
     while (low < high) {
       const middle = Math.floor((low + high) / 2);
-      if (compare(this.value[middle], val) <= 0) {
+      // a duplicate of a non-unique key goes in front of the rows it duplicates
+      if (compare(this.value[middle], val) < 0) {
         low = middle + 1;
       } else {
         high = middle;
       }
     }
 
-    if (unique === true && low > 0 && compare(this.value[low - 1], val) === 0) {
+    if (unique === true && low < this.value.length && compare(this.value[low], val) === 0) {
       return {value: undefined, subrc: 4};
     }
 

@@ -24,14 +24,18 @@ function determineFromTo(array: readonly any[], topEquals: topType | undefined, 
     return {from: 1, to: array.length};
   }
 
-  let from = 0;
+  // 1-based, as the branch without topEquals above answers: when the key's
+  // first field is not in topEquals (a key over a substructure component,
+  // s-x, is never put there) nothing is narrowed, and the loop must not start
+  // at row index -1
+  let from = 1;
   let to = array.length;
 
 // todo: multi field
   const keyField = key.keyFields[0].toLowerCase();
   const keyValue = topEquals[keyField];
   if (keyField && keyValue) {
-    from = binarySearchFrom(array, from, to, keyField, keyValue);
+    from = binarySearchFrom(array, 0, to, keyField, keyValue);
     to = binarySearchTo(array, from, to, keyField, keyValue);
 //    console.dir("from: " + from + ", to: " + to);
   }
@@ -131,7 +135,9 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
   let loopTo = options?.to && options.to.get() < length ? options.to.get() : length;
 
   let array: any[] = [];
-  if (options?.usingKey && options.usingKey !== undefined && options.usingKey !== "primary_key") {
+  // a dynamic key name may come in any case, USING KEY ('PRIMARY_KEY') is the primary key too
+  const isPrimaryKey = options?.usingKey === undefined || options.usingKey.toLowerCase() === "primary_key";
+  if (options?.usingKey && isPrimaryKey === false) {
     array = table.getSecondaryIndex(options.usingKey);
 
     const {from, to} = determineFromTo(array, options.topEquals, table.getKeyByName(options.usingKey)!);
@@ -157,7 +163,7 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
   // The same goes for a loop that reads an index table through a hash
   // secondary key. Handing out 1, 2, 3 there looks helpful and is a lie the
   // caller cannot tell from the truth.
-  const usedKey = options?.usingKey === undefined || options.usingKey === "primary_key"
+  const usedKey = options?.usingKey === undefined || isPrimaryKey
     ? undefined
     : table.getKeyByName(options.usingKey);
   const hasRowNumber = usedKey !== undefined
@@ -168,7 +174,9 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
     const isStructured = array[0] instanceof Structure;
 
     while (loopController.index < loopController.loopTo) {
-      if (loopController.index > array.length) {
+      // the body may have deleted rows: never read past the end, where
+      // array[array.length] is undefined
+      if (loopController.index >= array.length) {
         break;
       }
       const current = array[loopController.index];
