@@ -22,8 +22,11 @@ import {ABAPEventing} from "./abap_eventing";
 import {isLineNotFound} from "./is_line_not_found";
 import {parametersCall} from "./parameters_call";
 import {alphaIn, alphaOut} from "./alpha";
+import {LeaveProgram, ProgramRegistry, SubmitHost} from "./submit/submit";
 
 export {RFC, types, DB, MemoryConsole};
+export type {SubmitHost, SubmitCall, SubmitSelection} from "./submit/submit";
+export {ProgramRegistry, LeaveProgram};
 
 export type RuntimeDatabaseOptions = {
   /* prefix all operations with schema*/
@@ -38,6 +41,8 @@ export type RuntimeDatabaseOptions = {
 export type RuntimeOptions = {
   console?: Console,
   database?: RuntimeDatabaseOptions,
+  /* runs the program of a SUBMIT ... AND RETURN; without one SUBMIT throws */
+  submit?: SubmitHost,
 };
 
 export class ABAP {
@@ -70,6 +75,7 @@ export class ABAP {
   public isLineNotFound = isLineNotFound;
   public buildDbTableName = buildDbTableName;
   public ClassicError = ClassicError;
+  public LeaveProgram = LeaveProgram;
   public dynamicCallLookup = dynamicCallLookup;
   public parametersCall = parametersCall;
   public eventing = new ABAPEventing();
@@ -86,6 +92,7 @@ export class ABAP {
     this.context = new Context();
     this.console = input?.console ? input?.console : new StandardOutConsole();
     this.context.console = this.console;
+    this.context.submit = input?.submit;
 
     this.dbo = input?.database || {schemaPrefix: "", tablePrefix: ""};
     if (this.dbo.schemaPrefix === undefined) {
