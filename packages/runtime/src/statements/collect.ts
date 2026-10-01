@@ -1,8 +1,11 @@
 import {eq} from "../compare";
 import {primaryKeyValues} from "../primary_key";
-import {DecFloat34, Float, HashedTable, Integer, Integer8, Packed, Structure, Table, TableKeyType} from "../types";
+import {DecFloat34, Float, HashedTable, Integer, Integer8, Packed, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {insertInternal} from "./insert_internal";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 function sumNumeric(found: any, source: any, keyValues: Set<any>): void {
   if (found instanceof Structure && source instanceof Structure) {
@@ -31,15 +34,6 @@ function sumNumeric(found: any, source: any, keyValues: Set<any>): void {
   }
 }
 
-function collectKeys(target: Table | HashedTable, row: any): any[] {
-  if (target.getOptions().keyType === TableKeyType.default
-      && (row instanceof Integer || row instanceof Integer8 || row instanceof Packed
-        || row instanceof Float || row instanceof DecFloat34)) {
-    return [];
-  }
-  return primaryKeyValues(target, row);
-}
-
 export function collect(source: ICharacter | Structure | Table, target?: Table | HashedTable) {
   if (target === undefined && source instanceof Table) {
     target = source;
@@ -49,14 +43,19 @@ export function collect(source: ICharacter | Structure | Table, target?: Table |
     throw new Error("COLLECT, no target specified");
   }
 
-  const sourceKeys = collectKeys(target, source);
-  const found = target.array().find(row => {
-    const rowKeys = collectKeys(target, row);
+  const sourceKeys = primaryKeyValues(target, source);
+  const matches = (row: any) => {
+    const rowKeys = primaryKeyValues(target, row);
     return rowKeys.length === sourceKeys.length && rowKeys.every((key, index) => eq(key, sourceKeys[index]));
-  });
-  if (found) {
-    sumNumeric(found, source, new Set(sourceKeys));
+  };
+  const rows = target.array();
+  let index = rows.findIndex(matches);
+  if (index >= 0) {
+    sumNumeric(rows[index], source, new Set(sourceKeys));
+    abap.builtin.sy.get().subrc.set(0);
   } else {
     insertInternal({table: target, data: source});
+    index = target.array().findIndex(matches);
   }
+  abap.builtin.sy.get().tabix.set(target instanceof HashedTable ? 0 : index + 1);
 }
