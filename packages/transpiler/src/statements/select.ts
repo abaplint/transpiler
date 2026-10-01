@@ -73,7 +73,8 @@ export class SelectTranspiler implements IStatementTranspiler {
       select += new SQLGroupByTranspiler().transpile(groupBy, traversal).getCode() + " ";
     }
 
-    const having = node.findFirstExpression(abaplint.Expressions.SQLHaving);
+    const having = node.findDirectExpression(abaplint.Expressions.Select)
+      ?.findDirectExpression(abaplint.Expressions.SQLHaving);
     const havingCond = having?.findFirstExpression(abaplint.Expressions.SQLCond);
     if (havingCond) {
       select += "HAVING " + new SQLCondTranspiler().transpile(havingCond, traversal, table).getCode() + " ";

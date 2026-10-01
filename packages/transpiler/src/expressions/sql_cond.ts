@@ -131,7 +131,7 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
     const aggregation = c.findDirectExpression(abaplint.Expressions.SQLAggregation);
     if (aggregation && operator && source) {
       return aggregation.concatTokens() + " " + this.sqlOperator(operator.concatTokens()) + " "
-        + this.sqlSource(source, traversal, filename, table);
+        + this.sqlSource(source, traversal, filename, table, true);
     }
 
     if (fieldName === undefined || operator === undefined || source === undefined) {
@@ -212,16 +212,17 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
   }
 
   private sqlSource(source: abaplint.Nodes.ExpressionNode, traversal: Traversal, filename: string,
-                    table: abaplint.Objects.Table | undefined) {
+                    table: abaplint.Objects.Table | undefined, numericHost = false) {
     let ret = "";
     const simple = source.findDirectExpression(abaplint.Expressions.SimpleSource3);
     const hostExpression = source.findDirectExpression(abaplint.Expressions.Source);
     const alias = source.findDirectExpression(abaplint.Expressions.SQLAliasField);
     if (source.getFirstToken().getStr() === "@" && hostExpression) {
       const code = new SourceTranspiler(true).transpile(hostExpression, traversal).getCode();
-      ret += "'\" + " + code + " + \"'";
+      ret += this.sqlHost(code, numericHost);
     } else if (simple && simple.findDirectExpression(abaplint.Expressions.Constant) === undefined) {
-      ret += "'\" + " + new SimpleSource3Transpiler(true).transpile(simple, traversal).getCode() + " + \"'";
+      const code = new SimpleSource3Transpiler(true).transpile(simple, traversal).getCode();
+      ret += this.sqlHost(code, numericHost);
     } else if (alias) {
       // SQLAliasField might be a SQL reference or value from ABAP interface
       const pre = alias.concatTokens().split("~")[0];
@@ -250,6 +251,13 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
       }
     }
     return ret;
+  }
+
+  private sqlHost(code: string, numericHost: boolean): string {
+    if (numericHost) {
+      return `" + ((value) => typeof value === "number" || typeof value === "bigint" ? value : "'" + value + "'")(${code}) + "`;
+    }
+    return "'\" + " + code + " + \"'";
   }
 
   private basicConditionNew(node: abaplint.Nodes.ExpressionNode, traversal: Traversal, filename: string,
