@@ -1883,8 +1883,8 @@ WRITE / sy-dbcnt.`;
   });
 
   it("FOR ALL ENTRIES, UP TO over blocks into a non-unique SORTED table", async () => {
-    // no de-duplication for a sorted target, so equal rows from two blocks
-    // stay; UP TO still keeps exactly its number of rows
+    // this runtime does not de-duplicate a sorted target, so equal rows from
+    // two blocks stay; UP TO still keeps exactly its number of rows
     const code = `
 DATA ls TYPE zdbw.
 DATA lt TYPE SORTED TABLE OF zdbw WITH NON-UNIQUE KEY val.
@@ -1906,6 +1906,61 @@ WRITE / sy-dbcnt.`;
       {filename: "zdbw.tabl.xml", contents: tabl_zdbw}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("5\n5");
+    });
+  });
+
+  it("FOR ALL ENTRIES, UP TO with ORDER BY keeps the first rows of that order", async () => {
+    // ids 2, 4, 6, 8 match; ORDER BY id DESCENDING UP TO 2 is 8 and 6. This
+    // runtime's de-duplication then sorts the target, so they print ascending
+    const code = `
+DATA ls TYPE zdbw.
+DATA lt TYPE STANDARD TABLE OF zdbw WITH DEFAULT KEY.
+DATA lt_keys TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA lv TYPE string.
+DO 8 TIMES.
+  ls-id = |{ sy-index }|.
+  ls-val = sy-index MOD 2.
+  INSERT zdbw FROM ls.
+ENDDO.
+APPEND 0 TO lt_keys.
+SELECT * FROM zdbw INTO TABLE lt UP TO 2 ROWS
+  FOR ALL ENTRIES IN lt_keys WHERE val = lt_keys-table_line ORDER BY id DESCENDING.
+LOOP AT lt INTO ls.
+  lv = ls-id.
+  CONDENSE lv.
+  WRITE / lv.
+ENDLOOP.`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "zdbw.tabl.xml", contents: tabl_zdbw}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("6\n8");
+    });
+  });
+
+  it("FOR ALL ENTRIES, an OR outside the driving condition over two blocks", async () => {
+    // each driving row's whole condition goes in its own parentheses, so the
+    // OR stays inside it; 60 equal driving rows make two blocks
+    const code = `
+DATA ls TYPE zdbw.
+DATA lt TYPE STANDARD TABLE OF zdbw WITH DEFAULT KEY.
+DATA lt_keys TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DO 8 TIMES.
+  ls-id = |{ sy-index }|.
+  ls-val = sy-index MOD 2.
+  INSERT zdbw FROM ls.
+ENDDO.
+DO 60 TIMES.
+  APPEND 1 TO lt_keys.
+ENDDO.
+SELECT * FROM zdbw INTO TABLE lt
+  FOR ALL ENTRIES IN lt_keys WHERE id = '2' OR val = lt_keys-table_line.
+WRITE / lines( lt ).`;
+    const files = [
+      {filename: "zfoobar_database.prog.abap", contents: code},
+      {filename: "zdbw.tabl.xml", contents: tabl_zdbw}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("5");
     });
   });
 

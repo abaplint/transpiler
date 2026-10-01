@@ -157,7 +157,9 @@ export class SelectTranspiler implements IStatementTranspiler {
   }`;
 
       const at = where.startsWith("WHERE ") ? select.indexOf(where) : -1;
-      if (concat.startsWith("SELECT SINGLE ") || at < 0) {
+      // UP TO with ORDER BY keeps the first n rows in that order; the blocks
+      // trim after the de-duplicating sort, so that pair stays row by row
+      if (concat.startsWith("SELECT SINGLE ") || at < 0 || (upTo && orderBy)) {
         const code = `if (${faeTranspiled}.array().length === 0) {
   await abap.statements.select(${target}, {select: "${selectEmpty.trim()}"${extra}});
 } else {
