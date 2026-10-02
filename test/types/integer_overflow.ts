@@ -92,9 +92,9 @@ const cases: Case[] = [
   lv_i = lv_p.`, expected: "CX_SY_CONVERSION_OVERFLOW"},
   {name: "i = p max.5", code: `lv_p1 = '2147483647.5'.
   lv_i = lv_p1.`, expected: "CX_SY_CONVERSION_OVERFLOW"},
-  {name: "i = p max.4", code: `lv_p1 = '2147483647.4'.
+  {name: "UNMEASURED: i = p max.4", code: `lv_p1 = '2147483647.4'.
   lv_i = lv_p1.`, expected: "2147483647"},
-  {name: "i = f min.4", code: `lv_f = '-2147483648.4'.
+  {name: "UNMEASURED: i = f min.4", code: `lv_f = '-2147483648.4'.
   lv_i = lv_f.`, expected: "-2147483648"},
   {name: "i = p min.4", code: `lv_p1 = '-2147483648.4'.
   lv_i = lv_p1.`, expected: "-2147483648"},
