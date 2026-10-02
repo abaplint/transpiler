@@ -1,7 +1,7 @@
 import {Context} from "../context";
 import {RFCClient} from "../rfc";
 import {throwError} from "../throw_error";
-import {Character} from "../types";
+import {Character, FieldSymbol} from "../types";
 import {_receiveSetResult} from "./receive";
 import {ABAP} from "..";
 
@@ -9,6 +9,7 @@ declare const abap: ABAP;
 
 export interface ICallFunctionOptions {
   name: string,
+  updateTask?: boolean,
   destination?: string,
   calling?: (INPUT: any) => any,
   exporting?: any,
@@ -25,7 +26,7 @@ export class CallFunction {
     this.context = context;
   }
 
-// note: this is only called if DESTINIATION is supplied
+// called for DESTINATION, CALLING or IN UPDATE TASK
   public async callFunction(options: ICallFunctionOptions) {
     const param = {
       exporting: options.exporting,
@@ -37,7 +38,30 @@ export class CallFunction {
     options.name = options.name.trimEnd();
     const fm = abap.FunctionModules[options.name];
 
-    if (options.destination) {
+    if (options.updateTask) {
+      if (fm === undefined) {
+        throwError("CX_SY_DYN_CALL_ILLEGAL_FUNC");
+      }
+      const copy = (values: any) => {
+        if (values === undefined) {
+          return undefined;
+        }
+        const result: any = {};
+        for (const key of Object.keys(values)) {
+          const value = values[key];
+          result[key] = value instanceof FieldSymbol ? value.getPointer().clone() : value.clone();
+        }
+        return result;
+      };
+      // IMPORTING and CHANGING do not apply to update modules.
+      const copied = {exporting: copy(options.exporting), tables: copy(options.tables)};
+      if (this.context.updateTask) {
+        await this.context.updateTask.register(options.name, copied);
+      } else {
+        await fm(copied);
+      }
+      return;
+    } else if (options.destination) {
       if (options.destination.trim() === "") {
         if (fm === undefined) {
           throwError("CX_SY_DYN_CALL_ILLEGAL_FUNC");

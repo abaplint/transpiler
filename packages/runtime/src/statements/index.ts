@@ -1,4 +1,6 @@
 import {append} from "./append";
+import {DatasetStatements} from "./dataset";
+import {IGetDatasetOptions, IOpenDatasetOptions, IReadDatasetOptions, ITransferOptions} from "../dataset/dataset";
 import {assert} from "./assert";
 import {assign} from "./assign";
 import {commit, ICommitOptions} from "./commit";
@@ -168,6 +170,34 @@ export class Statements {
 
   public write(source: INumeric | ICharacter | FieldSymbol | string | number, options?: IWriteOptions) {
     return new WriteStatement(this.context).write(source, options);
+  }
+
+  public async openDataset(name: any, options: IOpenDatasetOptions) {
+    return new DatasetStatements(this.context).openDataset(name, options);
+  }
+
+  public async closeDataset(name: any) {
+    return new DatasetStatements(this.context).closeDataset(name);
+  }
+
+  public async deleteDataset(name: any) {
+    return new DatasetStatements(this.context).deleteDataset(name);
+  }
+
+  public async transfer(source: any, name: any, options?: ITransferOptions) {
+    return new DatasetStatements(this.context).transfer(source, name, options);
+  }
+
+  public async readDataset(name: any, target: any, options?: IReadDatasetOptions) {
+    return new DatasetStatements(this.context).readDataset(name, target, options);
+  }
+
+  public async getDataset(name: any, options: IGetDatasetOptions) {
+    return new DatasetStatements(this.context).getDataset(name, options);
+  }
+
+  public async setDataset(name: any, options: {position?: any, endOfFile?: boolean}) {
+    return new DatasetStatements(this.context).setDataset(name, options);
   }
 
   public skip(options?: ISkipOptions) {
