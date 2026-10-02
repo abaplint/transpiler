@@ -22,6 +22,9 @@ export class Context {
   public dataset: DatasetHost | undefined = undefined;
   public datasets: {[name: string]: OpenDataset} = {};
 
+  // GET RUN TIME, the clock reading of the first call, and the last value returned
+  public runTime: {start: number, last: number} | undefined = undefined;
+
   public defaultDB() {
     if (this.databaseConnections["DEFAULT"] === undefined) {
       throw new Error("Runtime, database not initialized");
