@@ -14,6 +14,9 @@ export class Context {
 
   public RFCDestinations: {[name: string]: RFC.RFCClient} = {};
 
+  // CALL FUNCTION IN UPDATE TASK hands the copied parameters to the host, if one is set
+  public updateTask: {register(name: string, param: {exporting?: any, tables?: any}): Promise<void> | void} | undefined = undefined;
+
   // the file system OPEN DATASET and friends read and write; none by default,
   // and then every DATASET statement throws
   public dataset: DatasetHost | undefined = undefined;

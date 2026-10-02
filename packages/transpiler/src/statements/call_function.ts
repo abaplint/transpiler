@@ -36,11 +36,12 @@ export class CallFunctionTranspiler implements IStatementTranspiler {
 
     const calling = node.findExpressionAfterToken("CALLING");
     const dest = node.findDirectExpression(abaplint.Expressions.Destination)?.findDirectExpression(abaplint.Expressions.Source);
-    if (dest) {
+    const updateTask = node.findDirectTokenByText("UPDATE") !== undefined;
+    if (dest && updateTask === false) {
       const s = new SourceTranspiler(true).transpile(dest, traversal);
       param = param.replace("{", ",").replace(/}$/, "");
       ret.appendString(`await abap.statements.callFunction({name:${fmname},destination:${s.getCode()}${param}});`);
-    } else if (calling) {
+    } else if (calling && updateTask === false) {
       param = param.replace("{", ",").replace(/}$/, "");
       // typically used in combination with STARTING NEW TASK so dont await,
       ret.appendString(`abap.statements.callFunction({name:${fmname},calling:this.${
@@ -50,7 +51,12 @@ export class CallFunctionTranspiler implements IStatementTranspiler {
       const call = `abap.FunctionModules[${fmname}]`;
       // eslint-disable-next-line max-len
       ret.appendString(`if (${call} === undefined) { if (${illegalFunc} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_FUNC not found"; } else { throw await new ${illegalFunc}().constructor_({function: new abap.types.String().set(${fmname})});} }\n`);
-      ret.appendString(`await ${call}(${param});`);
+      if (updateTask) {
+        param = param.replace("{", ",").replace(/}$/, "");
+        ret.appendString(`await abap.statements.callFunction({name:${fmname},updateTask:true${param}});`);
+      } else {
+        ret.appendString(`await ${call}(${param});`);
+      }
     }
 
     if (exceptions) {
