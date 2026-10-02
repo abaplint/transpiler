@@ -5,8 +5,12 @@ import {Chunk} from "../chunk";
 
 export class DeleteDatasetTranspiler implements IStatementTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    return new Chunk(`throw new Error("DeleteDataset, not supported, transpiler");`);
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
+    const name = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Source)).getCode();
+    return new Chunk()
+      .append("await abap.statements.deleteDataset(", node, traversal)
+      .appendString(name)
+      .append(");", node.getLastToken(), traversal);
   }
 
 }
