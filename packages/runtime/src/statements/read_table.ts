@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import {binarySearchFrom, binarySearchFromRow} from "../binary_search";
 import {eq, ge, gt, lt} from "../compare";
-import {DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Integer8, Structure, Table, TableAccessType} from "../types";
+import {DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Integer8, secondaryKeyName, Structure, Table, TableAccessType} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {ABAP} from "..";
@@ -205,6 +205,12 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
     }
     // return readTable(table.getPointer(), options);
     table = table.getPointer() as Table | HashedTable;
+  }
+
+  // WITH [TABLE] KEY primary_key COMPONENTS reads as the same READ without
+  // the key name; any other name, as ABAP reads it (secondaryKeyName)
+  if (options?.keyName !== undefined && secondaryKeyName(options.keyName) !== options.keyName) {
+    options = {...options, keyName: secondaryKeyName(options.keyName)};
   }
 
   // check if it is a primary index read specified with WITH KEY instead of WITH TABLE KEY

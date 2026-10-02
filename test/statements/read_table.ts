@@ -1910,4 +1910,21 @@ ENDIF.`;
     expect(abap.console.get()).to.equal("0\n1\nequal\nequal");
   });
 
+  it("READ TABLE WITH KEY primary_key COMPONENTS, and WITH TABLE KEY primary_key COMPONENTS", async () => {
+    const code = `
+TYPES: BEGIN OF ty, a TYPE i, b TYPE i, END OF ty.
+DATA s TYPE SORTED TABLE OF ty WITH NON-UNIQUE KEY a.
+DATA r TYPE ty.
+s = VALUE #( ( a = 1 b = 1 ) ( a = 2 b = 2 ) ).
+READ TABLE s INTO r WITH KEY primary_key COMPONENTS a = 2.
+WRITE / |{ sy-subrc } { r-a }/{ r-b }|.
+CLEAR r.
+READ TABLE s INTO r WITH TABLE KEY primary_key COMPONENTS a = 2.
+WRITE / |{ sy-subrc } { r-a }/{ r-b }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0 2/2\n0 2/2");
+  });
+
 });

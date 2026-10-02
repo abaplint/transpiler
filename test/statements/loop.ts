@@ -1523,4 +1523,63 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("b1\nb2\nb4");
   });
 
+  it("LOOP USING KEY PRIMARY_KEY, the name in upper case", async () => {
+    const code = `
+TYPES: BEGIN OF ty, a TYPE i, b TYPE i, END OF ty.
+DATA t TYPE STANDARD TABLE OF ty WITH NON-UNIQUE KEY a b
+       WITH NON-UNIQUE SORTED KEY k COMPONENTS a.
+DATA r TYPE ty.
+DATA name TYPE string VALUE 'PRIMARY_KEY'.
+t = VALUE #( ( a = 2 b = 0 ) ( a = 1 b = 0 ) ).
+LOOP AT t INTO r USING KEY PRIMARY_KEY.
+  WRITE / r-a.
+ENDLOOP.
+LOOP AT t INTO r USING KEY (name).
+  WRITE / r-a.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2\n1\n2\n1");
+  });
+
+  it("LOOP USING KEY (name), the name in a c field, padded with blanks", async () => {
+    const code = `
+TYPES: BEGIN OF ty, a TYPE i, b TYPE i, END OF ty.
+DATA t TYPE STANDARD TABLE OF ty WITH NON-UNIQUE KEY a b
+       WITH NON-UNIQUE SORTED KEY k COMPONENTS a.
+DATA r TYPE ty.
+DATA key TYPE c LENGTH 20 VALUE 'K'.
+DATA primary TYPE c LENGTH 20 VALUE 'primary_key'.
+t = VALUE #( ( a = 2 b = 0 ) ( a = 1 b = 0 ) ).
+LOOP AT t INTO r USING KEY (key).
+  WRITE / r-a.
+ENDLOOP.
+LOOP AT t INTO r USING KEY (primary).
+  WRITE / r-a.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n2\n1");
+  });
+
+  it("LOOP USING KEY primary_key visits a row the body appends, as a LOOP without USING KEY does", async () => {
+    const code = `
+DATA t TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA v TYPE i.
+APPEND 1 TO t.
+LOOP AT t INTO v USING KEY primary_key.
+  WRITE / v.
+  IF v < 3.
+    DATA(n) = v + 1.
+    APPEND n TO t.
+  ENDIF.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n3");
+  });
+
 });
