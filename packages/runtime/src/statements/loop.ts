@@ -1,5 +1,7 @@
 import {binarySearchFrom, binarySearchTo} from "../binary_search";
-import {FieldSymbol, HashedTable, Integer, ITableKey, Structure, Table, TableAccessType} from "../types";
+import {eq, lt} from "../compare";
+import {Character, FieldSymbol, HashedTable, Hex, Integer, ITableKey, Numc, String as AString,
+  Structure, Table, TableAccessType} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {ABAP} from "..";
@@ -44,6 +46,55 @@ function determineFromTo(array: readonly any[], topEquals: topType | undefined, 
     from: from,
     to: to,
   };
+}
+
+/** -1 / 0 / 1: the key field x sorts before / equal to / after the WHERE operand
+ *  v - only for pairs whose order agrees with the table's sort (sort.ts compares
+ *  the fields with lt/eq): the same type, of the same length for c, n and x, or
+ *  a c operand against a string field, which eq compares by its getTrimEnd() */
+function keyComparator(sample: any, value: any): ((x: any, v: any) => number) | undefined {
+  if (value === null || typeof value !== "object" || sample === null || typeof sample !== "object") {
+    return undefined;
+  }
+  if (sample.constructor === value.constructor) {
+    const fixed = sample instanceof Character || sample instanceof Numc || sample instanceof Hex;
+    if (fixed && sample.getLength() !== value.getLength()) {
+      return undefined;
+    }
+    return (x, v) => (eq(x, v) ? 0 : lt(x, v) ? -1 : 1);
+  }
+  if (sample instanceof AString && value instanceof Character) {
+    return (x, v) => {
+      const s = v.getTrimEnd();
+      const xs = x.get();
+      return xs === s ? 0 : xs < s ? -1 : 1;
+    };
+  }
+  return undefined;
+}
+
+/** A SORTED primary key, and a WHERE that requires its first field to equal a
+ *  value: the rows the WHERE can accept are one block of the array. Relies on
+ *  topEquals holding only conditions every row has to meet - see the
+ *  transpiler's LoopTranspiler, which emits it for a conjunction only */
+function sortedPrimaryBlock(table: Table | HashedTable, options: ILoopOptions | undefined): ((row: any) => number) | undefined {
+  const primary = table.getOptions()?.primaryKey;
+  if (!(table instanceof Table) || primary?.type !== TableAccessType.sorted
+      || !primary.keyFields?.length || options?.topEquals === undefined) {
+    return undefined;
+  }
+  const field = primary.keyFields[0].toLowerCase();
+  const value = options.topEquals[field];
+  const rowType = table.getRowType();
+  const structured = rowType instanceof Structure;
+  if (value === undefined || structured === (field === "table_line")) {
+    return undefined;
+  }
+  const compare = keyComparator(structured ? (rowType as Structure).get()[field] : rowType, value);
+  if (compare === undefined) {
+    return undefined;
+  }
+  return structured ? (row: any) => compare(row.get()[field], value) : (row: any) => compare(row, value);
 }
 
 // todo: rewrite, this is a mess & hack & slow
@@ -135,6 +186,7 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
   let loopTo = options?.to && options.to.get() < length ? options.to.get() : length;
 
   let array: any[] = [];
+  let block: ((row: any) => number) | undefined = undefined;
   // a dynamic key name may come in any case, USING KEY ('PRIMARY_KEY') is the primary key too
   const isPrimaryKey = options?.usingKey === undefined || options.usingKey.toLowerCase() === "primary_key";
   if (options?.usingKey && isPrimaryKey === false) {
@@ -145,6 +197,23 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
     loopTo = Math.min(loopTo, to);
   } else {
     array = table.array();
+    if (options?.where !== undefined && options.from === undefined && options.to === undefined) {
+      block = sortedPrimaryBlock(table, options);
+    }
+    if (block !== undefined) {
+      // the first row that does not sort before the value
+      let lo = 0;
+      let hi = array.length;
+      while (lo < hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        if (block(array[mid]) < 0) {
+          lo = mid + 1;
+        } else {
+          hi = mid;
+        }
+      }
+      loopFrom = lo;
+    }
   }
 
   const loopController = table.startLoop(loopFrom, loopTo, array);
@@ -180,6 +249,11 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
         break;
       }
       const current = array[loopController.index];
+
+      if (block !== undefined && block(current) > 0) {
+        // this row sorts after the value, and so does every row behind it
+        break;
+      }
 
       if (options?.where) {
         const row = isStructured ? current.get() : {table_line: current};
