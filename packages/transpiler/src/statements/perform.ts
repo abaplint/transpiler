@@ -11,15 +11,17 @@ export class PerformTranspiler implements IStatementTranspiler {
     if (formName === undefined) {
       return new Chunk(`throw new Error("PerformTranspiler FormName not found");`);
     } else if (node.concatTokens().toUpperCase().includes(" IN PROGRAM ")) {
-// todo: throw exception if not found?
       const expression = node.findExpressionAfterToken("PROGRAM");
       let ref = "";
+      let program = "";
       if (expression?.get() instanceof abaplint.Expressions.Dynamic) {
         const name = expression.getChildren()[1].concatTokens() + ".get().trimEnd()";
         ref = `abap.Forms['PROG-' + ${name} + '-${formName.concatTokens().toUpperCase()}']`;
+        program = `'PROG-' + ${name} + '-'`;
       } else {
         const progName = expression?.concatTokens().toUpperCase();
         ref = `abap.Forms['PROG-${progName}-${formName.concatTokens().toUpperCase()}']`;
+        program = `'PROG-${progName}-'`;
       }
       const params: string[] = [];
 // hacky hack
@@ -31,6 +33,15 @@ export class PerformTranspiler implements IStatementTranspiler {
       let call = "await " + ref + `({${params.join(",")}});`;
       if (node.concatTokens().toUpperCase().includes(" IF FOUND")) {
         call = `if (${ref} !== undefined) { ${call} }`;
+      } else {
+        // the form is missing from a program whose forms are registered: CX_SY_DYN_CALL_ILLEGAL_FORM,
+        // no form of the program is registered: CX_SY_PROGRAM_NOT_FOUND
+        const raise = (name: string) => {
+          const cls = traversal.lookupClassOrInterface(`'${name}'`, node.getFirstToken(), true);
+          return `if (${cls} === undefined) { throw "${name} not found"; } else { throw await new ${cls}().constructor_(); }`;
+        };
+        const loaded = `Object.keys(abap.Forms).some(k => k.startsWith(${program}))`;
+        call = `if (${ref} === undefined) { if (${loaded}) { ${raise("CX_SY_DYN_CALL_ILLEGAL_FORM")} } else { ${raise("CX_SY_PROGRAM_NOT_FOUND")} } }\n` + call;
       }
 
       return new Chunk(call);

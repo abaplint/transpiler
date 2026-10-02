@@ -3,10 +3,49 @@ import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 
+// GENERATE SUBROUTINE POOL cannot be supported, there is no compiler at runtime.
+// The statement is refused without an exception: sy-subrc = 8 (documented as "other
+// generation error"), NAME initial, MESSAGE filled, LINE 0 and WORD initial. This is
+// a refusal of its own, not what a system answers; the other additions are left untouched.
 export class GenerateSubroutineTranspiler implements IStatementTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    return new Chunk(`throw new Error("GenerateSubroutine, not supported, transpiler");`);
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
+    const ret = new Chunk();
+
+    const name = this.findAddition(node, "NAME");
+    if (name) {
+      ret.appendString(traversal.traverse(name).getCode() + ".clear();\n");
+    }
+    const message = this.findAddition(node, "MESSAGE");
+    if (message) {
+      ret.appendString(traversal.traverse(message).getCode() + `.set("GENERATE SUBROUTINE POOL is not supported");\n`);
+    }
+    const line = this.findAddition(node, "LINE");
+    if (line) {
+      ret.appendString(traversal.traverse(line).getCode() + ".set(0);\n");
+    }
+    const word = this.findAddition(node, "WORD");
+    if (word) {
+      ret.appendString(traversal.traverse(word).getCode() + ".clear();\n");
+    }
+
+    ret.append("abap.builtin.sy.get().subrc.set(8);", node, traversal);
+    return ret;
+  }
+
+  /** the expression directly after the addition keyword, MESSAGE does not match MESSAGE-ID */
+  private findAddition(node: abaplint.Nodes.StatementNode, keyword: string): abaplint.Nodes.ExpressionNode | undefined {
+    const children = node.getChildren();
+    for (let i = 0; i < children.length - 1; i++) {
+      const child = children[i];
+      const next = children[i + 1];
+      if (child instanceof abaplint.Nodes.TokenNode
+          && child.getFirstToken().getStr().toUpperCase() === keyword
+          && next instanceof abaplint.Nodes.ExpressionNode) {
+        return next;
+      }
+    }
+    return undefined;
   }
 
 }
