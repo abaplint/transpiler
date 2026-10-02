@@ -107,6 +107,15 @@ export class SortedTable {
 }
 */
 
+/** The secondary key a key name selects, as ABAP reads the name: without the
+ *  blanks a c field pads it with, in any case - and undefined for the primary
+ *  key, which primary_key names however it is written, and so does an initial
+ *  name (a dynamic USING KEY ( name ) that is empty). */
+export function secondaryKeyName(name: string | undefined): string | undefined {
+  const trimmed = name?.trimEnd();
+  return trimmed === undefined || trimmed === "" || trimmed.toLowerCase() === "primary_key" ? undefined : trimmed;
+}
+
 export class HashedTable implements ITable {
   private value: {[hash: string]: TableRowType};
   private readonly header: TableRowType | undefined;
@@ -145,12 +154,12 @@ export class HashedTable implements ITable {
   }
 
   public getKeyByName(name: string) {
-    return this.getOptions()?.secondary?.find(s => s.name.toUpperCase() === name.toUpperCase());
+    return this.getOptions()?.secondary?.find(s => s.name.toUpperCase() === name.trimEnd().toUpperCase());
   }
 
   public getSecondaryIndex(name: string) {
-    if (this.secondaryIndexes[name.toUpperCase()]) {
-      return this.secondaryIndexes[name.toUpperCase()];
+    if (this.secondaryIndexes[name.trimEnd().toUpperCase()]) {
+      return this.secondaryIndexes[name.trimEnd().toUpperCase()];
     }
 
     const secondary = this.getKeyByName(name);
@@ -161,7 +170,7 @@ export class HashedTable implements ITable {
     const copy = secondaryDuplicatesFirst(this.array(), secondary);
     sort(copy as any, {by: secondary.keyFields.map(k => {return {component: k.toLowerCase()};})});
 
-    this.secondaryIndexes[name.toUpperCase()] = copy;
+    this.secondaryIndexes[name.trimEnd().toUpperCase()] = copy;
     return copy;
   }
 
@@ -421,12 +430,12 @@ export class Table implements ITable {
   }
 
   public getKeyByName(name: string) {
-    return this.getOptions()?.secondary?.find(s => s.name.toUpperCase() === name.toUpperCase());
+    return this.getOptions()?.secondary?.find(s => s.name.toUpperCase() === name.trimEnd().toUpperCase());
   }
 
   public getSecondaryIndex(name: string) {
-    if (this.secondaryIndexes[name.toUpperCase()]) {
-      return this.secondaryIndexes[name.toUpperCase()];
+    if (this.secondaryIndexes[name.trimEnd().toUpperCase()]) {
+      return this.secondaryIndexes[name.trimEnd().toUpperCase()];
     }
 
     const secondary = this.getKeyByName(name);
@@ -436,7 +445,7 @@ export class Table implements ITable {
     const copy = secondaryDuplicatesFirst([...this.value], secondary);
     sort(copy as any, {by: secondary.keyFields.map(k => {return {component: k.toLowerCase()};}), skipSortedCheck: true});
 
-    this.secondaryIndexes[name.toUpperCase()] = copy;
+    this.secondaryIndexes[name.trimEnd().toUpperCase()] = copy;
     return copy;
   }
 

@@ -1,7 +1,7 @@
 import {binarySearchFrom, binarySearchTo} from "../binary_search";
 import {eq, lt} from "../compare";
 import {Character, FieldSymbol, HashedTable, Hex, Integer, ITableKey, Numc, String as AString,
-  Structure, Table, TableAccessType} from "../types";
+  secondaryKeyName, Structure, Table, TableAccessType} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {ABAP} from "..";
@@ -187,12 +187,13 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
 
   let array: any[] = [];
   let block: ((row: any) => number) | undefined = undefined;
-  // a dynamic key name may come in any case, USING KEY ('PRIMARY_KEY') is the primary key too
-  const isPrimaryKey = options?.usingKey === undefined || options.usingKey.toLowerCase() === "primary_key";
-  if (options?.usingKey && isPrimaryKey === false) {
-    array = table.getSecondaryIndex(options.usingKey);
+  // the secondary key the loop runs over; undefined is the primary key, also
+  // when it is named - USING KEY PRIMARY_KEY, or a dynamic name holding it
+  const usingKey = secondaryKeyName(options?.usingKey);
+  if (usingKey !== undefined) {
+    array = table.getSecondaryIndex(usingKey);
 
-    const {from, to} = determineFromTo(array, options.topEquals, table.getKeyByName(options.usingKey)!);
+    const {from, to} = determineFromTo(array, options?.topEquals, table.getKeyByName(usingKey)!);
     loopFrom = Math.max(loopFrom, from) - 1;
     loopTo = Math.min(loopTo, to);
   } else {
@@ -232,9 +233,7 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
   // The same goes for a loop that reads an index table through a hash
   // secondary key. Handing out 1, 2, 3 there looks helpful and is a lie the
   // caller cannot tell from the truth.
-  const usedKey = options?.usingKey === undefined || isPrimaryKey
-    ? undefined
-    : table.getKeyByName(options.usingKey);
+  const usedKey = usingKey === undefined ? undefined : table.getKeyByName(usingKey);
   const hasRowNumber = usedKey !== undefined
     ? usedKey.type !== TableAccessType.hashed
     : !(table instanceof HashedTable);
@@ -272,7 +271,7 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
 
       loopController.index++;
 
-      if (options?.to === undefined && options?.usingKey === undefined) {
+      if (options?.to === undefined && usingKey === undefined) {
         // extra rows might have been inserted inside the loop
         loopController.loopTo = array.length;
       }
