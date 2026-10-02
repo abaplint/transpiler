@@ -4,9 +4,9 @@ import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 
 // GENERATE SUBROUTINE POOL cannot be supported, there is no compiler at runtime.
-// It is refused the way a system reports a pool it could not generate, no exception:
-// sy-subrc = 8 ("other generation error"), NAME initial, MESSAGE filled, LINE and WORD
-// initial. The other additions are left untouched.
+// The statement is refused without an exception: sy-subrc = 8 (documented as "other
+// generation error"), NAME initial, MESSAGE filled, LINE 0 and WORD initial. This is
+// a refusal of its own, not what a system answers; the other additions are left untouched.
 export class GenerateSubroutineTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {

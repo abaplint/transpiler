@@ -264,10 +264,11 @@ describe("Testing Unit Testing", () => {
     }
   });
 
-  async function dumpNrun(files: IFile[], database = true): Promise<string> {
+  async function dumpNrun(files: IFile[], database = true, importProg = false): Promise<string> {
     const SETUP_NAME = "mysetup.mjs";
     const config: ITranspilerOptions = {
       addCommonJS: true,
+      importProg,
       setup: {
         filename: "./" + SETUP_NAME,
         preFunction: "setup",
@@ -3211,6 +3212,78 @@ ENDCLASS.`;
     ];
     const cons = await dumpNrun(files);
     expect(cons.split("\n")[1]).to.equal("caught 7/7 3");
+  });
+
+  it("test-67", async () => {
+// PERFORM IN PROGRAM: a registered form runs, a missing form of a loaded program raises
+// CX_SY_DYN_CALL_ILLEGAL_FORM, a program with no registered form CX_SY_PROGRAM_NOT_FOUND
+
+    const prog = `FORM hello.
+  WRITE 'hello'.
+ENDFORM.`;
+
+    const clas = `CLASS zcl_perform DEFINITION PUBLIC.
+  PUBLIC SECTION.
+ENDCLASS.
+CLASS zcl_perform IMPLEMENTATION.
+ENDCLASS.`;
+
+    const tests = `
+CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS test FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD test.
+    DATA lv_prog TYPE c LENGTH 40.
+    DATA lv_result TYPE string.
+    lv_prog = 'ZPERFORM_TARGET'.
+    PERFORM hello IN PROGRAM (lv_prog).
+    TRY.
+        PERFORM missing IN PROGRAM (lv_prog).
+        lv_result = 'none'.
+      CATCH cx_sy_dyn_call_illegal_form.
+        lv_result = 'form'.
+      CATCH cx_sy_program_not_found.
+        lv_result = 'program'.
+    ENDTRY.
+    CLEAR lv_prog.
+    TRY.
+        PERFORM hello IN PROGRAM (lv_prog).
+        lv_result = lv_result && ' none'.
+      CATCH cx_sy_dyn_call_illegal_form.
+        lv_result = lv_result && ' form'.
+      CATCH cx_sy_program_not_found.
+        lv_result = lv_result && ' program'.
+    ENDTRY.
+    WRITE / lv_result.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const cxform = `
+CLASS cx_sy_dyn_call_illegal_form DEFINITION PUBLIC INHERITING FROM cx_root.
+ENDCLASS.
+CLASS cx_sy_dyn_call_illegal_form IMPLEMENTATION.
+ENDCLASS.`;
+
+    const cxprog = `
+CLASS cx_sy_program_not_found DEFINITION PUBLIC INHERITING FROM cx_root.
+ENDCLASS.
+CLASS cx_sy_program_not_found IMPLEMENTATION.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "cx_sy_dyn_call_illegal_form.clas.abap", contents: cxform},
+      {filename: "cx_sy_program_not_found.clas.abap", contents: cxprog},
+      {filename: "zperform_target.prog.abap", contents: prog},
+      {filename: "zcl_perform.clas.abap", contents: clas},
+      {filename: "zcl_perform.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false, true);
+    expect(cons).to.include("hello");
+    expect(cons).to.include("form program");
   });
 
 });
