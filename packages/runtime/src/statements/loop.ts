@@ -186,8 +186,9 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
   // FROM and TO are positions of type i, an arithmetic result outside it raises
   const optionFrom = options?.from ? parsePosition(options.from) : undefined;
   const optionTo = options?.to ? parsePosition(options.to) : undefined;
-  let loopFrom = optionFrom && optionFrom > 0 ? optionFrom - 1 : 0;
-  let loopTo = optionTo && optionTo < length ? optionTo : length;
+  // checked against undefined, a bound of 0 is a bound: TO 0 runs no row
+  let loopFrom = optionFrom !== undefined && optionFrom > 0 ? optionFrom - 1 : 0;
+  let loopTo = optionTo !== undefined && optionTo < length ? optionTo : length;
 
   let array: any[] = [];
   let block: ((row: any) => number) | undefined = undefined;

@@ -1,5 +1,6 @@
 import {expect} from "chai";
 import {ABAP, MemoryConsole} from "../../packages/runtime/src/";
+import {Integer, MAX_INTEGER, MIN_INTEGER} from "../../packages/runtime/src/types/integer";
 import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
@@ -91,6 +92,10 @@ const cases: Case[] = [
   lv_i = lv_p.`, expected: "CX_SY_CONVERSION_OVERFLOW"},
   {name: "i = p max.5", code: `lv_p1 = '2147483647.5'.
   lv_i = lv_p1.`, expected: "CX_SY_CONVERSION_OVERFLOW"},
+  {name: "i = p max.4", code: `lv_p1 = '2147483647.4'.
+  lv_i = lv_p1.`, expected: "2147483647"},
+  {name: "i = f min.4", code: `lv_f = '-2147483648.4'.
+  lv_i = lv_f.`, expected: "-2147483648"},
   {name: "i = p min.4", code: `lv_p1 = '-2147483648.4'.
   lv_i = lv_p1.`, expected: "-2147483648"},
   {name: "i = p min.5", code: `lv_p1 = '-2147483648.5'.
@@ -127,6 +132,11 @@ const cases: Case[] = [
   {name: "UNMEASURED: LOOP FROM past max", code: `APPEND 1 TO lt_tab.
   LOOP AT lt_tab INTO lv_i FROM lv_max + 1.
   ENDLOOP.`, expected: "CX_SY_ARITHMETIC_OVERFLOW"},
+  {name: "UNMEASURED: LOOP TO past max", code: `APPEND 1 TO lt_tab.
+  LOOP AT lt_tab INTO lv_i TO lv_max + 1.
+  ENDLOOP.`, expected: "CX_SY_ARITHMETIC_OVERFLOW"},
+  {name: "UNMEASURED: i = f1 + f2 past max", code: `lv_f = '2E9'.
+  lv_i = lv_f + lv_f.`, expected: "CX_SY_ARITHMETIC_OVERFLOW"},
   {name: "UNMEASURED: substring( ) offset past max", code: `lv_s = |abc|.
   lv_s = substring( val = lv_s off = lv_max + 1 len = 1 ).`, expected: "CX_SY_ARITHMETIC_OVERFLOW"},
   {name: "UNMEASURED: sy-tabix plus max", code: `APPEND 1 TO lt_tab.
@@ -170,5 +180,69 @@ describe("Running Examples - Integer overflow", () => {
       expect(abap.console.get().trim()).to.equal(c.expected);
     });
   }
+
+});
+
+// An offset or a length in ABAP source is a literal or a variable, so the source cannot
+// hand it an arithmetic result. These call the runtime directly with one, the way
+// generated code would if it did
+describe("Integer overflow - offset and length positions", () => {
+
+  class ArithmeticOverflow {}
+  class RangeOutOfBounds {}
+
+  beforeEach(async () => {
+    abap = new ABAP({console: new MemoryConsole()});
+    (global as any).abap = abap;
+    abap.Classes["CX_SY_ARITHMETIC_OVERFLOW"] = ArithmeticOverflow;
+    abap.Classes["CX_SY_RANGE_OUT_OF_BOUNDS"] = RangeOutOfBounds;
+  });
+
+  function raised(f: () => any): string {
+    try {
+      f();
+    } catch (e) {
+      if (e instanceof ArithmeticOverflow) {
+        return "CX_SY_ARITHMETIC_OVERFLOW";
+      } else if (e instanceof RangeOutOfBounds) {
+        return "CX_SY_RANGE_OUT_OF_BOUNDS";
+      }
+      throw e;
+    }
+    return "nothing";
+  }
+
+  const past = () => Integer.calculated(MAX_INTEGER + 1);
+  const below = () => Integer.calculated(MIN_INTEGER - 1);
+
+  it("Character getOffset, offset past max", async () => {
+    const c = new abap.types.Character(10).set("abcdefghij");
+    expect(raised(() => c.getOffset({offset: past()}))).to.equal("CX_SY_ARITHMETIC_OVERFLOW");
+  });
+
+  it("Character getOffset, length past max", async () => {
+    const c = new abap.types.Character(10).set("abcdefghij");
+    expect(raised(() => c.getOffset({offset: 1, length: past()}))).to.equal("CX_SY_ARITHMETIC_OVERFLOW");
+  });
+
+  it("String getOffset, offset below min", async () => {
+    const s = new abap.types.String().set("abcdefghij");
+    expect(raised(() => s.getOffset({offset: below()}))).to.equal("CX_SY_ARITHMETIC_OVERFLOW");
+  });
+
+  it("OffsetLength, offset past max", async () => {
+    const c = new abap.types.Character(10).set("abcdefghij");
+    expect(raised(() => new abap.OffsetLength(c, {offset: past(), length: 1}))).to.equal("CX_SY_ARITHMETIC_OVERFLOW");
+  });
+
+  it("OffsetLength, length past max", async () => {
+    const c = new abap.types.Character(10).set("abcdefghij");
+    expect(raised(() => new abap.OffsetLength(c, {offset: 1, length: past()}))).to.equal("CX_SY_ARITHMETIC_OVERFLOW");
+  });
+
+  it("Character getOffset, an i in range is still a position", async () => {
+    const c = new abap.types.Character(10).set("abcdefghij");
+    expect(c.getOffset({offset: new Integer().set(2), length: new Integer().set(3)}).get()).to.equal("cde");
+  });
 
 });
