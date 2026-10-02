@@ -97,10 +97,14 @@ export class SourceTranspiler implements IExpressionTranspiler {
         } else if (c.get() instanceof Expressions.Cond) {
           ret.appendChunk(traversal.traverse(c));
         } else if (c.get() instanceof Expressions.ArithOperator) {
+          // "/" rounds in calculation type int8, the runtime's divide() does not know the target
+          const operator = this.int8 === true && c.concatTokens().trim() === "/"
+            ? new Chunk().append("abap.operators.divideInt8", c, traversal)
+            : traversal.traverse(c);
           if (this.int8 === true && leftIsInt8 === false) {
-            ret = new Chunk().appendChunk(traversal.traverse(c)).appendString("(new abap.types.Integer8().set(").appendChunk(ret).appendString("),");
+            ret = new Chunk().appendChunk(operator).appendString("(new abap.types.Integer8().set(").appendChunk(ret).appendString("),");
           } else {
-            ret = new Chunk().appendChunk(traversal.traverse(c)).appendString("(").appendChunk(ret).appendString(",");
+            ret = new Chunk().appendChunk(operator).appendString("(").appendChunk(ret).appendString(",");
           }
           // the result of an operation with an int8 operand is an int8
           leftIsInt8 = true;

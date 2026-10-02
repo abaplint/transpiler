@@ -18,6 +18,8 @@ async function runAndOutput(code: string): Promise<string> {
 // The target field is part of the calculation type: with an int8 target and
 // operands of type i, the calculation type is int8, and i * i is exact.
 // A double holds it exactly only up to 2^53.
+// Measured on a system: "i * i above 2^53" (9007199515875289) and the divisions
+// marked below. The other expected values are exact int8 arithmetic, UNMEASURED.
 describe("Running Examples - int8 target, calculation type int8", () => {
 
   beforeEach(async () => {
@@ -125,7 +127,8 @@ WRITE lv_8.`;
     expect(await runAndOutput(code)).to.equal("9007199515875289");
   });
 
-  it("int8 / int8 rounds half away from zero", async () => {
+  // measured on a system: int8 operands 7 and 2 give 4, -7 and 2 give -4
+  it("int8 / int8 into int8 rounds half away from zero", async () => {
     const code = `
 DATA lv_x TYPE int8.
 DATA lv_y TYPE int8.
@@ -136,24 +139,54 @@ lv_8 = lv_x / lv_y.
 WRITE / lv_8.
 lv_x = -7.
 lv_8 = lv_x / lv_y.
-WRITE / lv_8.
-lv_x = 5.
-lv_y = 3.
-lv_8 = lv_x / lv_y.
 WRITE / lv_8.`;
-    expect(await runAndOutput(code)).to.equal("4\n-4\n2");
+    expect(await runAndOutput(code)).to.equal("4\n-4");
   });
 
+  // measured on a system: 7 / 2 gives 4, -7 / 2 gives -4, 5 / 2 gives 3
   it("i / i into int8 rounds half away from zero", async () => {
     const code = `
 DATA lv_a TYPE i.
 DATA lv_b TYPE i.
 DATA lv_8 TYPE int8.
-lv_a = -7.
 lv_b = 2.
+lv_a = 7.
 lv_8 = lv_a / lv_b.
-WRITE lv_8.`;
-    expect(await runAndOutput(code)).to.equal("-4");
+WRITE / lv_8.
+lv_a = -7.
+lv_8 = lv_a / lv_b.
+WRITE / lv_8.
+lv_a = 5.
+lv_8 = lv_a / lv_b.
+WRITE / lv_8.`;
+    expect(await runAndOutput(code)).to.equal("4\n-4\n3");
+  });
+
+  // UNMEASURED: an int8 operand makes the calculation type int8 also with an i target,
+  // so "/" rounds there too
+  it("int8 / int8 into i rounds half away from zero", async () => {
+    const code = `
+DATA lv_x TYPE int8.
+DATA lv_y TYPE int8.
+DATA lv_i TYPE i.
+lv_x = 7.
+lv_y = 2.
+lv_i = lv_x / lv_y.
+WRITE lv_i.`;
+    expect(await runAndOutput(code)).to.equal("4");
+  });
+
+  // UNMEASURED: an f target makes the calculation type f, the int8 rounding does not apply
+  it("int8 / int8 into f does not round to a whole number", async () => {
+    const code = `
+DATA lv_x TYPE int8.
+DATA lv_y TYPE int8.
+DATA lv_f TYPE f.
+lv_x = 7.
+lv_y = 2.
+lv_f = lv_x / lv_y.
+ASSERT lv_f < 4.`;
+    await runAndOutput(code);
   });
 
   it("an f operand keeps calculation type f", async () => {

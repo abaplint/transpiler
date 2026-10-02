@@ -97,10 +97,11 @@ export class MoveTranspiler implements IStatementTranspiler {
   }
 
   // The calculation type of an arithmetic expression comes from its operands and the target
-  // field. An int8 target with operands of type i makes it int8, so i * i is exact up to 2^62.
-  // The runtime decides by the operands alone, it does not know the target, so here the
-  // operands are converted to int8 before the calculation. Only for operands whose type is
-  // known to be i or int8, and not for **, which has calculation type f
+  // field, the type with the largest range wins. With operands of type i or int8 it is int8
+  // when the target or an operand is int8: i * i into int8 is exact up to 2^62, and "/"
+  // rounds. The runtime decides by the operands alone and does not know the target, so here
+  // the operands are converted to int8 before the calculation. Only for an i or int8 target
+  // and operands whose type is known to be i or int8, and not for **, which counts as f
   private isInt8Calculation(node: abaplint.Nodes.StatementNode, source: abaplint.Nodes.ExpressionNode | undefined,
                             targets: number, traversal: Traversal): boolean {
     if (source === undefined
@@ -109,20 +110,23 @@ export class MoveTranspiler implements IStatementTranspiler {
       return false;
     }
     const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
-    if (!(traversal.determineType(node, scope) instanceof abaplint.BasicTypes.Integer8Type)) {
+    const target = traversal.determineType(node, scope);
+    const found = {int8: target instanceof abaplint.BasicTypes.Integer8Type};
+    if (found.int8 === false && !(target instanceof abaplint.BasicTypes.IntegerType)) {
       return false;
     }
-    return this.integerOperands(source, scope);
+    return this.integerOperands(source, scope, found) && found.int8;
   }
 
-  private integerOperands(node: abaplint.Nodes.ExpressionNode, scope: abaplint.ISpaghettiScopeNode | undefined): boolean {
+  private integerOperands(node: abaplint.Nodes.ExpressionNode, scope: abaplint.ISpaghettiScopeNode | undefined,
+                          found: {int8: boolean}): boolean {
     for (const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.TokenNode) {
         if (["(", ")", "-", "+"].includes(c.getFirstToken().getStr()) === false) {
           return false;
         }
       } else if (c.get() instanceof abaplint.Expressions.Source) {
-        if (this.integerOperands(c as abaplint.Nodes.ExpressionNode, scope) === false) {
+        if (this.integerOperands(c as abaplint.Nodes.ExpressionNode, scope, found) === false) {
           return false;
         }
       } else if (c.get() instanceof abaplint.Expressions.ArithOperator) {
@@ -130,8 +134,12 @@ export class MoveTranspiler implements IStatementTranspiler {
           return false;
         }
       } else if (c.get() instanceof abaplint.Expressions.Constant) {
-        if (c.findDirectExpression(abaplint.Expressions.Integer) === undefined) {
+        const integer = c.findDirectExpression(abaplint.Expressions.Integer);
+        if (integer === undefined) {
           return false;
+        } else if (Math.abs(parseInt(integer.concatTokens().replace(/ /g, ""), 10)) > 2147483647) {
+          // the transpiler makes an int8 of a literal outside the range of i
+          found.int8 = true;
         }
       } else if (c.get() instanceof abaplint.Expressions.FieldChain) {
         const children = c.getChildren();
@@ -141,6 +149,9 @@ export class MoveTranspiler implements IStatementTranspiler {
         const type = scope?.findVariable(children[0].concatTokens())?.getType();
         if (!(type instanceof abaplint.BasicTypes.IntegerType) && !(type instanceof abaplint.BasicTypes.Integer8Type)) {
           return false;
+        }
+        if (type instanceof abaplint.BasicTypes.Integer8Type) {
+          found.int8 = true;
         }
       } else {
         return false;
