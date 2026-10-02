@@ -11,7 +11,6 @@ export class PerformTranspiler implements IStatementTranspiler {
     if (formName === undefined) {
       return new Chunk(`throw new Error("PerformTranspiler FormName not found");`);
     } else if (node.concatTokens().toUpperCase().includes(" IN PROGRAM ")) {
-// todo: throw exception if not found?
       const expression = node.findExpressionAfterToken("PROGRAM");
       let ref = "";
       if (expression?.get() instanceof abaplint.Expressions.Dynamic) {
@@ -31,6 +30,9 @@ export class PerformTranspiler implements IStatementTranspiler {
       let call = "await " + ref + `({${params.join(",")}});`;
       if (node.concatTokens().toUpperCase().includes(" IF FOUND")) {
         call = `if (${ref} !== undefined) { ${call} }`;
+      } else {
+        const illegalForm = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_FORM'", node.getFirstToken(), true);
+        call = `if (${ref} === undefined) { if (${illegalForm} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_FORM not found"; } else { throw await new ${illegalForm}().constructor_(); } }\n` + call;
       }
 
       return new Chunk(call);
