@@ -1,6 +1,8 @@
 import {alphaIn, alphaOut} from "./alpha";
 import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Integer, Packed, Structure, Table} from "./types";
 import {ICharacter} from "./types/_character";
+import {MAX_INTEGER, MIN_INTEGER} from "./types/integer";
+import {throwError} from "./throw_error";
 import {INumeric} from "./types/_numeric";
 
 type options = {
@@ -71,6 +73,13 @@ export function templateFormatting(source: ICharacter | INumeric | number | stri
     }
   } else if (typeof source === "number" || typeof source === "string") {
     text = source + "";
+  } else if (source instanceof Integer) {
+    // an embedded expression of i operands is calculated in i, a template gives it no wider type
+    const value = source.get();
+    if (value > MAX_INTEGER || value < MIN_INTEGER) {
+      throwError("CX_SY_ARITHMETIC_OVERFLOW");
+    }
+    text = value + "";
   } else {
     text = source.get() + "";
   }

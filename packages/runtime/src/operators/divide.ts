@@ -32,7 +32,7 @@ export function divide(left: INumeric | ICharacter | Integer8 | string | number,
   }
   const val = l / r;
 
-  const ret = new Float().set(val);
+  const ret = new Float().set(val).setCalculated();
   if (isIntegerOperand(left) && isIntegerOperand(right)) {
     ret.setIntegerCalculationType();
   }

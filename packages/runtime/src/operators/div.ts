@@ -30,13 +30,14 @@ export function div(left: INumeric | ICharacter | Integer8 | string | number, ri
   const r = parse(right);
   if (r === 0) {
     if (l === 0) {
-      return new Integer().set(0);
+      return Integer.calculated(0);
     } else {
       throwError("CX_SY_ZERODIVIDE");
     }
   } else {
     // floor only for a positive divisor; for a negative one the quotient
     // rounds up, so that the remainder a - b * ( a DIV b ) is not negative
-    return new Integer().set(r > 0 ? Math.floor(l / r) : -Math.floor(l / -r));
+    // + 0 turns the -0 of 0 DIV -1 into 0; min DIV -1 is out of range, which the target decides
+    return Integer.calculated((r > 0 ? Math.floor(l / r) : -Math.floor(l / -r)) + 0);
   }
 }
