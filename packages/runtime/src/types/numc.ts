@@ -1,5 +1,5 @@
 import {Hex} from "./hex";
-import {parse} from "../operators/_parse";
+import {parsePosition} from "../operators/_parse";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {throwError} from "../throw_error";
@@ -80,12 +80,12 @@ export class Numc implements ICharacter {
   public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}): Numc {
     let offset = input?.offset;
     if (offset) {
-      offset = parse(offset);
+      offset = parsePosition(offset);
     }
 
     let length = input?.length;
     if (length) {
-      length = parse(length);
+      length = parsePosition(length);
     }
 
     if ((offset && offset >= this.length)

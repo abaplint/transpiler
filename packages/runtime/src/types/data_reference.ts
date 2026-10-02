@@ -6,7 +6,7 @@ import {String} from "./string";
 import {Structure} from "./structure";
 import {Float} from "./float";
 import {Hex} from "./hex";
-import {parse} from "../operators/_parse";
+import {parsePosition} from "../operators/_parse";
 import {FieldSymbol} from "./field_symbol";
 import {Integer8} from "./integer8";
 import {DecFloat34} from "./decfloat34";
@@ -93,10 +93,10 @@ export class DataReference  {
 
   public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}) {
     if (input?.offset) {
-      input.offset = parse(input.offset);
+      input.offset = parsePosition(input.offset);
     }
     if (input?.length) {
-      input.length = parse(input.length);
+      input.length = parsePosition(input.length);
     }
     // Assuming we're interested in Strings here, for now...
     let ret = this.get();

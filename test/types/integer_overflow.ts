@@ -4,8 +4,34 @@ import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
 
+const EXCEPTIONS = ["CX_SY_ARITHMETIC_OVERFLOW", "CX_SY_CONVERSION_OVERFLOW", "CX_SY_ZERODIVIDE", "CX_SY_RANGE_OUT_OF_BOUNDS"];
+
+const cxroot = `
+CLASS cx_root DEFINITION PUBLIC.
+ENDCLASS.
+CLASS cx_root IMPLEMENTATION.
+ENDCLASS.`;
+
+const cx = (name: string) => `
+CLASS ${name} DEFINITION PUBLIC INHERITING FROM cx_root.
+ENDCLASS.
+CLASS ${name} IMPLEMENTATION.
+ENDCLASS.`;
+
+// the program first: runFiles evaluates the first object only, so the exception
+// classes are in the registry for the syntax check and stand in as plain
+// JavaScript classes at run time
 async function run(contents: string) {
-  return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
+  const files = [{filename: "zfoobar.prog.abap", contents}, {filename: "cx_root.clas.abap", contents: cxroot}];
+  for (const name of EXCEPTIONS) {
+    files.push({filename: name.toLowerCase() + ".clas.abap", contents: cx(name.toLowerCase())});
+  }
+  const js = await runFiles(abap, files);
+  abap.Classes["CX_ROOT"] = class CxRoot {};
+  for (const name of EXCEPTIONS) {
+    abap.Classes[name] = class extends abap.Classes["CX_ROOT"] {};
+  }
+  return js;
 }
 
 const DECLARATIONS = `
@@ -20,13 +46,15 @@ const DECLARATIONS = `
   DATA lv_c TYPE c LENGTH 12.
   DATA lv_s TYPE string.
   DATA lv_8 TYPE int8.
+  DATA lt_tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
   lv_min = -2147483647.
   lv_min = lv_min - 1.`;
 
 // What a SAP kernel answers for TYPE i at and beyond its range, measured with
 // an ABAP Unit probe on a SAP system: a case name, the statements, and either
 // the value WRITE gives for lv_i (or the variable named) or the class of the
-// exception raised
+// exception raised. Cases marked UNMEASURED were not on the probe, they pin
+// what this runtime does by the same rule
 type Case = {name: string, code: string, write?: string, expected: string};
 
 const cases: Case[] = [
@@ -92,6 +120,27 @@ const cases: Case[] = [
   lv_i = lv_i * 12.`, expected: "479001600"},
   {name: "string template of an i expression past max", code: `lv_i = 20713.
   lv_s = |{ ( lv_i * 86400 + 0 ) * 1000 }|.`, expected: "CX_SY_ARITHMETIC_OVERFLOW"},
+  // positions of type i: the result of i arithmetic is checked there too
+  {name: "template, i division past max", code: `lv_s = |{ ( lv_max + 1 ) / 1 }|.`, expected: "CX_SY_ARITHMETIC_OVERFLOW"},
+  {name: "UNMEASURED: READ TABLE INDEX past max", code: `APPEND 1 TO lt_tab.
+  READ TABLE lt_tab INDEX lv_max + 1 INTO lv_i.`, expected: "CX_SY_ARITHMETIC_OVERFLOW"},
+  {name: "UNMEASURED: LOOP FROM past max", code: `APPEND 1 TO lt_tab.
+  LOOP AT lt_tab INTO lv_i FROM lv_max + 1.
+  ENDLOOP.`, expected: "CX_SY_ARITHMETIC_OVERFLOW"},
+  {name: "UNMEASURED: substring( ) offset past max", code: `lv_s = |abc|.
+  lv_s = substring( val = lv_s off = lv_max + 1 len = 1 ).`, expected: "CX_SY_ARITHMETIC_OVERFLOW"},
+  {name: "UNMEASURED: sy-tabix plus max", code: `APPEND 1 TO lt_tab.
+  LOOP AT lt_tab INTO lv_i.
+    lv_i = sy-tabix + lv_max.
+  ENDLOOP.`, expected: "CX_SY_ARITHMETIC_OVERFLOW"},
+  {name: "UNMEASURED: DO with a p count past max", code: `lv_p = 3000000000.
+  DO lv_p TIMES.
+    EXIT.
+  ENDDO.`, expected: "CX_SY_CONVERSION_OVERFLOW"},
+  {name: "DO with an i count of max", code: `DO lv_max TIMES.
+    lv_i = sy-index.
+    EXIT.
+  ENDDO.`, expected: "1"},
 ];
 
 describe("Running Examples - Integer overflow", () => {
@@ -103,22 +152,22 @@ describe("Running Examples - Integer overflow", () => {
   for (const c of cases) {
     it(c.name + ": " + c.expected, async () => {
       const code = DECLARATIONS + `
+  TRY.
   ` + c.code + `
-  WRITE ` + (c.write ?? "lv_i") + `.`;
+      WRITE ` + (c.write ?? "lv_i") + `.
+    CATCH cx_sy_arithmetic_overflow.
+      WRITE 'CX_SY_ARITHMETIC_OVERFLOW'.
+    CATCH cx_sy_conversion_overflow.
+      WRITE 'CX_SY_CONVERSION_OVERFLOW'.
+    CATCH cx_sy_zerodivide.
+      WRITE 'CX_SY_ZERODIVIDE'.
+    CATCH cx_sy_range_out_of_bounds.
+      WRITE 'CX_SY_RANGE_OUT_OF_BOUNDS'.
+  ENDTRY.`;
       const js = await run(code);
       const f = new AsyncFunction("abap", js);
-      if (c.expected.startsWith("CX_")) {
-        let raised = "";
-        try {
-          await f(abap);
-        } catch (e) {
-          raised = e.toString();
-        }
-        expect(raised, "WRITE gave " + abap.console.get()).to.contain(c.expected);
-      } else {
-        await f(abap);
-        expect(abap.console.get().trim()).to.equal(c.expected);
-      }
+      await f(abap);
+      expect(abap.console.get().trim()).to.equal(c.expected);
     });
   }
 

@@ -61,6 +61,10 @@ export class Float {
     return this;
   }
 
+  public isIntegerCalculationType(): boolean {
+    return this.integerCalculationType;
+  }
+
   public isCalculated(): boolean {
     return this.calculated;
   }

@@ -1,9 +1,10 @@
 /* eslint-disable max-len */
 import {binarySearchFrom, binarySearchFromRow} from "../binary_search";
 import {eq, ge, gt, lt} from "../compare";
-import {DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Integer8, secondaryKeyName, Structure, Table, TableAccessType} from "../types";
+import {DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Integer, Integer8, secondaryKeyName, Structure, Table, TableAccessType} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {parsePosition} from "../operators/_parse";
 import {ABAP} from "..";
 
 declare const abap: ABAP;
@@ -256,8 +257,11 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
         index = index.getPointer() as INumeric;
       }
 
-      if (index instanceof Float || index instanceof DecFloat34) {
-        index = index.getRaw();
+      if (index instanceof Integer) {
+        // INDEX is a position of type i, an arithmetic result outside it raises
+        index = parsePosition(index);
+      } else if (index instanceof Float || index instanceof DecFloat34) {
+        index = index instanceof Float ? parsePosition(index) : index.getRaw();
       } else if (index instanceof Integer8) {
         index = Number(index.get());
       } else {
