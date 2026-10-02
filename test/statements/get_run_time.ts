@@ -33,6 +33,8 @@ describe("Running statements - GET RUN TIME", () => {
   });
 
 
+  // measured on a system: the first call gives 0, and the unit is microseconds
+  // (a loop of 100000 additions measured 717)
   it("microseconds since the first call", async () => {
     const code = `
     DATA lv_t0 TYPE i.
@@ -58,6 +60,8 @@ describe("Running statements - GET RUN TIME", () => {
     expect(t2 - t1).to.be.greaterThan(90000);
   });
 
+  // measured on a system: the first call gives 0. UNMEASURED: that a new ABAP
+  // instance stands for a new internal session is the runtime's own mapping
   it("the first call in each internal session gives 0", async () => {
     const code = `
     DATA lv_t TYPE i.
@@ -74,6 +78,8 @@ describe("Running statements - GET RUN TIME", () => {
     }
   });
 
+  // measured on a system: two calls in a row differ by 0. UNMEASURED: that a
+  // reading is never below the one before, which follows from the documentation
   it("never goes backwards", async () => {
     const code = `
     DATA lv_prev TYPE i.
