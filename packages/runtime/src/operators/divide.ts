@@ -17,7 +17,13 @@ export function divide(left: INumeric | ICharacter | Integer8 | string | number,
         throwError("CX_SY_ZERODIVIDE");
       }
     }
-    return new Integer8().set(l / r);
+    // rounded half away from zero, as in calculation type i: 7 / 2 = 4, -7 / 2 = -4
+    let q = l / r;
+    const rem = l % r;
+    if ((rem < 0n ? -rem : rem) * 2n >= (r < 0n ? -r : r)) {
+      q = (l < 0n) === (r < 0n) ? q + 1n : q - 1n;
+    }
+    return new Integer8().set(q);
   }
 
   const r = parse(right);
