@@ -38,7 +38,7 @@ WRITE lv_8.`;
     expect(await runAndOutput(code)).to.equal("9007199515875289");
   });
 
-  it("max * max", async () => {
+  it("UNMEASURED: max * max", async () => {
     const code = `
 DATA lv_a TYPE i.
 DATA lv_8 TYPE int8.
@@ -48,7 +48,7 @@ WRITE lv_8.`;
     expect(await runAndOutput(code)).to.equal("4611686014132420609");
   });
 
-  it("i * constant", async () => {
+  it("UNMEASURED: i * constant", async () => {
     const code = `
 DATA lv_a TYPE i.
 DATA lv_8 TYPE int8.
@@ -58,7 +58,7 @@ WRITE lv_8.`;
     expect(await runAndOutput(code)).to.equal("9007199515875289");
   });
 
-  it("negated product", async () => {
+  it("UNMEASURED: negated product", async () => {
     const code = `
 DATA lv_a TYPE i.
 DATA lv_8 TYPE int8.
@@ -68,7 +68,7 @@ WRITE lv_8.`;
     expect(await runAndOutput(code)).to.equal("-9007199515875289");
   });
 
-  it("product minus product", async () => {
+  it("UNMEASURED: product minus product", async () => {
     const code = `
 DATA lv_a TYPE i.
 DATA lv_b TYPE i.
@@ -82,7 +82,7 @@ WRITE lv_8.`;
     expect(await runAndOutput(code)).to.equal("9007199515875274");
   });
 
-  it("parentheses", async () => {
+  it("UNMEASURED: parentheses", async () => {
     const code = `
 DATA lv_a TYPE i.
 DATA lv_8 TYPE int8.
@@ -92,7 +92,7 @@ WRITE lv_8.`;
     expect(await runAndOutput(code)).to.equal("18014399031750578");
   });
 
-  it("product DIV and MOD", async () => {
+  it("UNMEASURED: product DIV and MOD", async () => {
     const code = `
 DATA lv_a TYPE i.
 DATA lv_8 TYPE int8.
@@ -104,7 +104,7 @@ WRITE / lv_8.`;
     expect(await runAndOutput(code)).to.equal("3002399838625096\n289");
   });
 
-  it("+= with a product", async () => {
+  it("UNMEASURED: += with a product", async () => {
     const code = `
 DATA lv_a TYPE i.
 DATA lv_8 TYPE int8.
@@ -115,7 +115,7 @@ WRITE lv_8.`;
     expect(await runAndOutput(code)).to.equal("9007199515875289");
   });
 
-  it("field symbol operand", async () => {
+  it("UNMEASURED: field symbol operand", async () => {
     const code = `
 DATA lv_a TYPE i.
 DATA lv_8 TYPE int8.
@@ -164,7 +164,7 @@ WRITE / lv_8.`;
 
   // UNMEASURED: an int8 operand makes the calculation type int8 also with an i target,
   // so "/" rounds there too
-  it("int8 / int8 into i rounds half away from zero", async () => {
+  it("UNMEASURED: int8 / int8 into i rounds half away from zero", async () => {
     const code = `
 DATA lv_x TYPE int8.
 DATA lv_y TYPE int8.
@@ -176,8 +176,10 @@ WRITE lv_i.`;
     expect(await runAndOutput(code)).to.equal("4");
   });
 
-  // UNMEASURED: an f target makes the calculation type f, the int8 rounding does not apply
-  it("int8 / int8 into f does not round to a whole number", async () => {
+  // Calculation type f: a system gives 3.5. The runtime gives 3 (its divide() truncates
+  // with int8 operands); that is a separate defect, this pins that the int8 rounding of
+  // this change does not reach an f target
+  it("UNMEASURED: int8 / int8 into f, today's value 3", async () => {
     const code = `
 DATA lv_x TYPE int8.
 DATA lv_y TYPE int8.
@@ -185,11 +187,38 @@ DATA lv_f TYPE f.
 lv_x = 7.
 lv_y = 2.
 lv_f = lv_x / lv_y.
-ASSERT lv_f < 4.`;
+ASSERT lv_f = 3.`;
     await runAndOutput(code);
   });
 
-  it("an f operand keeps calculation type f", async () => {
+  // Calculation type p: a system gives 3.5 into p DECIMALS 1. The runtime gives 3, the
+  // same separate defect; this pins that the int8 rounding does not reach a p target
+  it("UNMEASURED: int8 / int8 into p, today's value 3", async () => {
+    const code = `
+DATA lv_x TYPE int8.
+DATA lv_y TYPE int8.
+DATA lv_p TYPE p LENGTH 8 DECIMALS 1.
+lv_x = 7.
+lv_y = 2.
+lv_p = lv_x / lv_y.
+ASSERT lv_p = 3.`;
+    await runAndOutput(code);
+  });
+
+  // int8 calculation type rounds every intermediate quotient: 7 / 2 is 4, times 2 is 8
+  it("UNMEASURED: intermediate rounding, a / b * b into int8", async () => {
+    const code = `
+DATA lv_a TYPE i.
+DATA lv_b TYPE i.
+DATA lv_8 TYPE int8.
+lv_a = 7.
+lv_b = 2.
+lv_8 = lv_a / lv_b * lv_b.
+WRITE lv_8.`;
+    expect(await runAndOutput(code)).to.equal("8");
+  });
+
+  it("UNMEASURED: an f operand keeps calculation type f", async () => {
     const code = `
 DATA lv_f TYPE f.
 DATA lv_a TYPE i.
@@ -201,7 +230,7 @@ WRITE lv_8.`;
     expect(await runAndOutput(code)).to.equal("8");
   });
 
-  it("an i target is unchanged", async () => {
+  it("UNMEASURED: an i target is unchanged", async () => {
     const code = `
 DATA lv_a TYPE i.
 DATA lv_i TYPE i.
