@@ -54,7 +54,7 @@ export class CreateDataTranspiler implements IStatementTranspiler {
 
     const handle = node.findExpressionAfterToken("HANDLE");
     if (handle) {
-      const so = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Source));
+      const so = traversal.traverse(handle);
       const lookup = traversal.lookupClassOrInterface("KERNEL_CREATE_DATA_HANDLE", node.getFirstToken());
       const call = `await ${lookup}.call({handle: ${so.getCode()}, dref: ${target.getCode()}});`;
       return new Chunk().append(
