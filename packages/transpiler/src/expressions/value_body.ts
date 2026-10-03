@@ -33,6 +33,7 @@ export class ValueBodyTranspiler {
       ? undefined
       : new LetTranspiler().transpile(outerLet, traversal).getCode();
 
+    let hasFor = false;
     const children = body.getChildren();
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
@@ -69,6 +70,7 @@ export class ValueBodyTranspiler {
           }
         }
         i = idx - 1;
+        hasFor = true;
         const result = this.buildForChain(forNodes, typ, traversal, body, baseCode, outerLetCode);
         ret = result.chunk;
         post = result.post;
@@ -93,7 +95,12 @@ export class ValueBodyTranspiler {
       }
     }
 
-    return ret.appendString(post);
+    ret.appendString(post);
+    if (outerLetCode !== undefined && hasFor === false) {
+      // without FOR the LET bindings are declared here, in a scope of their own, before the value is built
+      ret = new Chunk().appendString(`(await (async () => { ${outerLetCode} return ${ret.getCode()}; })())`);
+    }
+    return ret;
   }
 
   private buildForChain(
