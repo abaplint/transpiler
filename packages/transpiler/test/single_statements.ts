@@ -368,13 +368,13 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({object: obj,user: usr,fields:
   abap.builtin.sy.get().subrc.set(0);
 } catch (e) {
   if (e.classic) {
-      switch (e.classic.toUpperCase()) {
+    switch (e.classic.toUpperCase()) {
       case "COMPONENT_NOT_FOUND": abap.builtin.sy.get().subrc.set(4); break;
-        }
-    } else {
-        throw e;
     }
-  }`},
+  } else {
+    throw e;
+  }
+}`},
 
     {abap: `MODIFY ztab FROM TABLE tab.`,
       js: `await abap.statements.modifyDatabase("ztab", {"table": tab});`},
