@@ -168,4 +168,82 @@ WRITE / lv_out.`;
     expect(abap.console.get()).to.equal("A2z;a9a;a3y;a4y;a5y;b1x;");
   });
 
+
+  it("SORT BY (name), dynamic component, ascending and descending", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         a TYPE i,
+         b TYPE string,
+       END OF ty.
+DATA lt TYPE STANDARD TABLE OF ty WITH EMPTY KEY.
+DATA ls LIKE LINE OF lt.
+DATA lv_name TYPE string.
+ls-a = 1. ls-b = \`y\`. APPEND ls TO lt.
+ls-a = 3. ls-b = \`x\`. APPEND ls TO lt.
+ls-a = 2. ls-b = \`z\`. APPEND ls TO lt.
+lv_name = 'A'.
+SORT lt BY (lv_name).
+LOOP AT lt INTO ls.
+  WRITE / ls-a.
+ENDLOOP.
+SORT lt BY (lv_name) DESCENDING.
+LOOP AT lt INTO ls.
+  WRITE / ls-a.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n3\n3\n2\n1");
+  });
+
+  it("SORT BY (name), literal, and a name with trailing blanks", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         a TYPE i,
+         b TYPE string,
+       END OF ty.
+DATA lt TYPE STANDARD TABLE OF ty WITH EMPTY KEY.
+DATA ls LIKE LINE OF lt.
+DATA lv_name TYPE c LENGTH 10.
+ls-a = 1. ls-b = \`y\`. APPEND ls TO lt.
+ls-a = 3. ls-b = \`x\`. APPEND ls TO lt.
+ls-a = 2. ls-b = \`z\`. APPEND ls TO lt.
+SORT lt BY ('B').
+LOOP AT lt INTO ls.
+  WRITE / ls-a.
+ENDLOOP.
+lv_name = 'A'.
+SORT lt BY (lv_name).
+LOOP AT lt INTO ls.
+  WRITE / ls-a.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3\n1\n2\n1\n2\n3");
+  });
+
+  it("SORT BY (name), dynamic and static component mixed", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         a TYPE i,
+         b TYPE i,
+       END OF ty.
+DATA lt TYPE STANDARD TABLE OF ty WITH EMPTY KEY.
+DATA ls LIKE LINE OF lt.
+DATA lv_name TYPE string VALUE 'B'.
+ls-a = 1. ls-b = 1. APPEND ls TO lt.
+ls-a = 2. ls-b = 2. APPEND ls TO lt.
+ls-a = 1. ls-b = 2. APPEND ls TO lt.
+ls-a = 2. ls-b = 1. APPEND ls TO lt.
+SORT lt BY a DESCENDING (lv_name).
+LOOP AT lt INTO ls.
+  WRITE / |{ ls-a }{ ls-b }|.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("21\n22\n11\n12");
+  });
+
 });
