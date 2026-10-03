@@ -50,17 +50,8 @@ export class Hex implements ICharacter {
       }
       this.value = this.value.padStart(doubleLength, "0");
     } else if (value instanceof Integer8) {
-      let hex = "";
-      if (value.get() < 0) {
-        hex = (value.get() + 0x10000000000000000n).toString(16).toUpperCase();
-        if (hex.length > doubleLength) {
-          hex = hex.substring(hex.length - doubleLength);
-        }
-      } else {
-        hex = value.get().toString(16).toUpperCase();
-        hex = hex.padStart(doubleLength, "0");
-      }
-      return this.set(hex);
+      const hex = BigInt.asUintN(64, value.get()).toString(16).toUpperCase();
+      return this.set(hex.slice(-doubleLength).padStart(doubleLength, "0"));
     } else if (value instanceof Hex || value instanceof XString) {
       this.value = value.get();
     } else {
