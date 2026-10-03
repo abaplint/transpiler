@@ -69,6 +69,9 @@ export class Transpiler {
     progress?.set(reg.getObjectCount().total, "Building");
     for (const obj of reg.getObjects()) {
       await progress?.tick("Building, " + obj.getName());
+      if (this.plugin === undefined && this.options?.only?.(obj) === false) {
+        continue;
+      }
       // the temporary names ("unique1", ..., and the DO/WHILE sy-index backups
       // "indexBackup1", ...) are local to the module an object becomes, so each
       // object numbers its own: its output then depends on the registry alone,

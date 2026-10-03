@@ -102,4 +102,8 @@ export interface ITranspilerOptions {
   importProg?: boolean;
   /** skips version check, not recommended */
   skipVersionCheck?: boolean;
+  /** build the output of only the objects this returns true for, eg. the ones a change touched,
+   * when the rest are kept from an earlier run; the validation, the database setup and the
+   * initialization scripts still cover the whole registry. Ignored when a plugin is given */
+  only?: (obj: abaplint.IObject) => boolean;
 }
