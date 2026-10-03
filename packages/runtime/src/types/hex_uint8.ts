@@ -1,5 +1,5 @@
 /* eslint-disable no-bitwise */
-import {parse} from "../operators/_parse";
+import {parsePosition} from "../operators/_parse";
 import {Float} from "./float";
 import {Integer} from "./integer";
 import {XString} from "./xstring";
@@ -138,7 +138,7 @@ export class HexUInt8 implements ICharacter {
       if (offset instanceof Integer8) {
         offset = Number(offset.get());
       } else {
-        offset = parse(offset);
+        offset = parsePosition(offset);
       }
       if (offset > this.length
           || offset < 0) {
@@ -153,7 +153,7 @@ export class HexUInt8 implements ICharacter {
       if (length instanceof Integer8) {
         length = Number(length.get());
       } else {
-        length = parse(length);
+        length = parsePosition(length);
       }
       if (length > this.length
           || length < 0) {

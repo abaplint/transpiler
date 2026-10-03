@@ -10,5 +10,5 @@ export function power(left: INumeric | ICharacter | Integer8 | string | number, 
     return new Integer8().set(l ** r);
   }
 
-  return new Float().set(Math.pow(parse(left), parse(right)));
+  return new Float().set(Math.pow(parse(left), parse(right))).setCalculated();
 }

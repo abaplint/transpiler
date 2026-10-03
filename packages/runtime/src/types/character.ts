@@ -1,4 +1,4 @@
-import {parse} from "../operators/_parse";
+import {parse, parsePosition} from "../operators/_parse";
 import {throwError} from "../throw_error";
 import {FieldSymbol} from "./field_symbol";
 import {Hex} from "./hex";
@@ -132,12 +132,12 @@ export class Character implements ICharacter {
   public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}) {
     let offset = input?.offset;
     if (offset) {
-      offset = parse(offset);
+      offset = parsePosition(offset);
     }
 
     let length = input?.length;
     if (length) {
-      length = parse(length);
+      length = parsePosition(length);
     }
 
     if ((offset && offset >= this.length)

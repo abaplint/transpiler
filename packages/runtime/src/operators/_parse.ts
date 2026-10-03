@@ -2,6 +2,8 @@ import {Character, Date,Time,Hex, Float, Integer, DecFloat34, HexUInt8, Integer8
 import {XString} from "../types/xstring";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {MAX_INTEGER, MIN_INTEGER} from "../types/integer";
+import {throwError} from "../throw_error";
 
 export function parse(val: INumeric | ICharacter | string | number | Float | Integer |Integer8): number {
   if (typeof val === "number") {
@@ -51,4 +53,25 @@ export function parse(val: INumeric | ICharacter | string | number | Float | Int
   } else {
     return parse(val.get());
   }
+}
+
+
+/** an operand in a position of type i: an offset, a length, a table index, a loop bound.
+ * An arithmetic result that does not fit into i raises CX_SY_ARITHMETIC_OVERFLOW there, as
+ * it does when it is assigned to an i, instead of reading as an offset out of bounds or a
+ * missing line */
+export function parsePosition(val: INumeric | ICharacter | string | number | Float | Integer | Integer8): number {
+  if (val instanceof Integer) {
+    const value = val.get();
+    if (value > MAX_INTEGER || value < MIN_INTEGER) {
+      throwError("CX_SY_ARITHMETIC_OVERFLOW");
+    }
+    return value;
+  } else if (val instanceof Float && val.isCalculated()) {
+    const value = Math.round(val.getRaw());
+    if (value > MAX_INTEGER || value < MIN_INTEGER) {
+      throwError("CX_SY_ARITHMETIC_OVERFLOW");
+    }
+  }
+  return parse(val);
 }

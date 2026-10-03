@@ -1,4 +1,4 @@
-import {parse} from "../operators/_parse";
+import {parsePosition} from "../operators/_parse";
 import {Float} from "./float";
 import {Integer} from "./integer";
 import {XString} from "./xstring";
@@ -107,7 +107,7 @@ export class Hex implements ICharacter {
       if (offset instanceof Integer8) {
         offset = Number(offset.get());
       } else {
-        offset = parse(offset);
+        offset = parsePosition(offset);
       }
       if (offset * 2 > this.value.length
           || offset < 0) {
@@ -120,7 +120,7 @@ export class Hex implements ICharacter {
       if (length instanceof Integer8) {
         length = Number(length.get());
       } else {
-        length = parse(length);
+        length = parsePosition(length);
       }
       if (length * 2 > this.value.length
           || length < 0) {

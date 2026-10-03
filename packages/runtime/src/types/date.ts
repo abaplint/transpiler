@@ -4,7 +4,7 @@ import {INumeric} from "./_numeric";
 import {String} from "./string";
 import {getDateFromNumber, getNumberFromDate} from "./_date_helper";
 import {Float} from "./float";
-import {parse} from "../operators/_parse";
+import {parsePosition} from "../operators/_parse";
 
 export class Date implements ICharacter {
   private value: string;
@@ -68,10 +68,10 @@ export class Date implements ICharacter {
 
   public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}) {
     if (input?.offset) {
-      input.offset = parse(input.offset);
+      input.offset = parsePosition(input.offset);
     }
     if (input?.length) {
-      input.length = parse(input.length);
+      input.length = parsePosition(input.length);
     }
     let ret = this.value;
     if (input?.offset) {
