@@ -5,7 +5,7 @@ import {templateFormatting} from "./template_formatting";
 import * as builtin from "./builtin";
 import * as compare from "./compare";
 import * as DB from "./db/db";
-import * as operators from "./operators";
+import * as operators from "./operators/_standard";
 import * as RFC from "./rfc";
 import * as types from "./types";
 import {expandIN} from "./expand_in";
@@ -23,6 +23,7 @@ import {isLineNotFound} from "./is_line_not_found";
 import {parametersCall} from "./parameters_call";
 import {alphaIn, alphaOut} from "./alpha";
 import {DatasetHost} from "./dataset/dataset";
+import * as packedOperators from "./operators/_packed";
 
 export {RFC, types, DB, MemoryConsole};
 export type {DatasetHost, DatasetHandle, DatasetMode} from "./dataset/dataset";
@@ -86,6 +87,12 @@ export class ABAP {
 
   public readonly context: Context;
   public readonly dbo: RuntimeDatabaseOptions;
+
+  // Packed assignments use their own namespace so the ordinary operators keep
+  // the same property layout and dispatch as programs without packed arithmetic.
+  public get packedOperators() {
+    return packedOperators;
+  }
 
   public constructor(input?: RuntimeOptions) {
     this.context = new Context();

@@ -29,8 +29,11 @@ export class MoveTranspiler implements IStatementTranspiler {
       return ret;
     }
 
+    const packedTarget = this.isPackedTarget(node, sourceExpression, targetExpressions.length, traversal);
     let source = this.isInt8Calculation(node, sourceExpression, targetExpressions.length, traversal)
       ? new SourceTranspiler(false, true).transpile(sourceExpression!, traversal)
+      : packedTarget
+      ? new SourceTranspiler(false, false, true).transpile(sourceExpression!, traversal)
       : traversal.traverse(sourceExpression);
 
     const second = node.getChildren()[1]?.concatTokens();
@@ -94,6 +97,71 @@ export class MoveTranspiler implements IStatementTranspiler {
     }
 
     return ret;
+  }
+
+  // The target and every operand establish one calculation type for the whole RHS.
+  // A floating operand anywhere must keep even earlier subexpressions off the
+  // packed path: their fourteen-decimal division would already lose precision.
+  private isPackedTarget(node: abaplint.Nodes.StatementNode, source: abaplint.Nodes.ExpressionNode | undefined,
+                         targets: number, traversal: Traversal): boolean {
+    if (source === undefined || targets !== 1
+        || source.findFirstExpression(abaplint.Expressions.ArithOperator) === undefined) {
+      return false;
+    }
+    if (source.findAllExpressions(abaplint.Expressions.ArithOperator).some(op => op.concatTokens().trim() === "**")) {
+      return false;
+    }
+    const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
+    return traversal.determineType(node, scope) instanceof abaplint.BasicTypes.PackedType
+      && this.packedOperands(source, traversal);
+  }
+
+  private packedOperands(node: abaplint.Nodes.ExpressionNode, traversal: Traversal): boolean {
+    for (const c of node.getChildren()) {
+      if (c instanceof abaplint.Nodes.TokenNode) {
+        if (!["(", ")", "-", "+"].includes(c.getFirstToken().getStr())) {
+          return false;
+        }
+      } else if (c.get() instanceof abaplint.Expressions.Source) {
+        if (!this.packedOperands(c as abaplint.Nodes.ExpressionNode, traversal)) {
+          return false;
+        }
+      } else if (c.get() instanceof abaplint.Expressions.ArithOperator
+          || c.get() instanceof abaplint.Expressions.Constant) {
+        continue;
+      } else if (c.get() instanceof abaplint.Expressions.FieldChain) {
+        const scope = traversal.findCurrentScopeByToken(c.getFirstToken());
+        const reference = traversal.findReadOrWriteReference(c.getFirstToken());
+        let type = (reference instanceof abaplint.TypedIdentifier ? reference.getType() : undefined)
+          ?? scope?.findVariable(c.getFirstToken().getStr())?.getType();
+        for (const part of c.getChildren().slice(1)) {
+          if (part.get() instanceof abaplint.Expressions.ComponentName) {
+            type = Traversal.narrowContextComponent(type, part.concatTokens());
+          } else if (part.get() instanceof abaplint.Expressions.AttributeName) {
+            type = traversal.narrowContextAttribute(type, part.concatTokens(), scope);
+          } else if (part.get() instanceof abaplint.Expressions.TableExpression
+              && type instanceof abaplint.BasicTypes.TableType) {
+            type = type.getRowType();
+          } else if (part.get() instanceof abaplint.Expressions.Dereference
+              && type instanceof abaplint.BasicTypes.DataReference) {
+            type = type.getType();
+          }
+        }
+        if (!(type instanceof abaplint.BasicTypes.PackedType)
+            && !(type instanceof abaplint.BasicTypes.IntegerType)
+            && !(type instanceof abaplint.BasicTypes.Integer8Type)
+            && !(type instanceof abaplint.BasicTypes.NumericType)
+            && !(type instanceof abaplint.BasicTypes.CharacterType)
+            && !(type instanceof abaplint.BasicTypes.StringType)) {
+          // Includes f, decfloat and generic operands whose runtime type is unknown.
+          return false;
+        }
+      } else {
+        // Constructor/function expressions retain ordinary expression dispatch.
+        return false;
+      }
+    }
+    return true;
   }
 
   // The calculation type of an arithmetic expression comes from its operands and the target
