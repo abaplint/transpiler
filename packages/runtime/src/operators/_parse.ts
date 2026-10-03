@@ -1,4 +1,4 @@
-import {Character, Date,Time,Hex, Float, Integer, DecFloat34, HexUInt8, Integer8} from "../types";
+import {Character, Date,Time,Hex, Float, Integer, DecFloat34, HexUInt8, Integer8, FieldSymbol} from "../types";
 import {XString} from "../types/xstring";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
@@ -48,6 +48,10 @@ export function parse(val: INumeric | ICharacter | string | number | Float | Int
       throw new Error("int8 value too large for table expression index");
     }
     return Number(bigint);
+  } else if (val instanceof FieldSymbol) {
+    // Preserve the numeric type behind a field symbol. Float.get() is formatted
+    // text with a decimal comma, whereas arithmetic needs its raw value.
+    return parse(val.getPointer());
   } else {
     return parse(val.get());
   }

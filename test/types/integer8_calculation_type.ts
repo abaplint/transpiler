@@ -191,9 +191,8 @@ ASSERT lv_f = 3.`;
     await runAndOutput(code);
   });
 
-  // Calculation type p: a system gives 3.5 into p DECIMALS 1. The runtime gives 3, the
-  // same separate defect; this pins that the int8 rounding does not reach a p target
-  it("UNMEASURED: int8 / int8 into p, today's value 3", async () => {
+  // A packed target selects packed division, including with int8 operands.
+  it("int8 / int8 into p uses packed division", async () => {
     const code = `
 DATA lv_x TYPE int8.
 DATA lv_y TYPE int8.
@@ -201,7 +200,7 @@ DATA lv_p TYPE p LENGTH 8 DECIMALS 1.
 lv_x = 7.
 lv_y = 2.
 lv_p = lv_x / lv_y.
-ASSERT lv_p = 3.`;
+ASSERT lv_p = '3.5'.`;
     await runAndOutput(code);
   });
 
