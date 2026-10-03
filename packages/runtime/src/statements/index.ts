@@ -80,7 +80,6 @@ export class Statements {
   public getBit = getBit;
   public getLocale = getLocale;
   public getParameter = getParameter;
-  public getRunTime = getRunTime;
   public getTime = getTime;
   public insertInternal = insertInternal;
   public loop = loop;
@@ -109,6 +108,10 @@ export class Statements {
 
   public _setTrace(min = 10, totals = false) {
     return new Trace().setTrace(min, totals, this);
+  }
+
+  public getRunTime(value: INumeric) {
+    getRunTime(this.context, value);
   }
 
   public async openCursor(target: INumeric, select: string, options: IOpenCursorDatabaseOptions) {
