@@ -8,6 +8,7 @@ import {IExpressionTranspiler} from "./_expression_transpiler";
 import {ReduceBodyTranspiler} from "./reduce_body";
 import {TranspileTypes} from "../transpile_types";
 import {Traversal} from "../traversal";
+import {LetTranspiler} from "./let";
 import {ValueBodyTranspiler} from "./value_body";
 
 export class SourceTranspiler implements IExpressionTranspiler {
@@ -159,12 +160,18 @@ export class SourceTranspiler implements IExpressionTranspiler {
           }
           ret = new Chunk().appendString(new TypeNameOrInfer().transpile(typ, traversal).getCode());
           ret.appendString(".set(");
-          // todo: handle LET
           const context = new TypeNameOrInfer().findType(typ, traversal);
-          ret.appendString(new SourceTranspiler().transpile(c.getFirstChild() as Nodes.ExpressionNode, traversal, context).getCode());
+          const convSource = c.findDirectExpression(Expressions.Source)!;
+          ret.appendString(new SourceTranspiler().transpile(convSource, traversal, context).getCode());
           ret.appendString(")");
           if (this.addGet) {
             ret.appendString(".get()");
+          }
+          const convLet = c.findDirectExpression(Expressions.Let);
+          if (convLet) {
+            // the LET bindings are declared in a scope of their own, before the value is built
+            const letCode = new LetTranspiler().transpile(convLet, traversal).getCode();
+            ret = new Chunk().appendString(`(await (async () => { ${letCode} return ${ret.getCode()}; })())`);
           }
         } else if (c.get() instanceof Expressions.ValueBody) {
           continue;
