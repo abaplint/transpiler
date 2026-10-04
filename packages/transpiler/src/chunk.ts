@@ -156,7 +156,8 @@ export class Chunk {
     const indentationByLine: number[] | undefined = this.mappings.length > 0 ? [] : undefined;
 
     for (const l of this.raw.split("\n")) {
-      if (l.startsWith("}")) {
+      // trimStart, a pre-indented closing brace must still close its level
+      if (l.trimStart().startsWith("}")) {
         i = i - 1;
       }
       // clamp so unbalanced braces never produce a negative indent/shift

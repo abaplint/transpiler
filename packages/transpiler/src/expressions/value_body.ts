@@ -123,7 +123,6 @@ export class ValueBodyTranspiler {
     const chunk = new Chunk();
     const preLoopDecls: string[] = outerLetCode === undefined ? [] : [outerLetCode];
     const descriptors: LoopDescriptor[] = [];
-    const levelIndents: string[] = [];
     let uniqueCounter = 1;
 
     for (const child of forNodes) {
@@ -257,11 +256,11 @@ export class ValueBodyTranspiler {
 
         const condCode = traversal.traverse(cond).getCode();
 
-        const preCheck = hasWhile ? `if (!(${condCode})) {\n  break;\n}` : "";
+        const preCheck = hasWhile ? `if (!(${condCode})) {\nbreak;\n}` : "";
         const postLoop: string[] = [];
         postLoop.push(incrementLine);
         if (hasUntil) {
-          postLoop.push(`if (${condCode}) {\n  break;\n}`);
+          postLoop.push(`if (${condCode}) {\nbreak;\n}`);
         }
 
         descriptors.push({
@@ -279,40 +278,37 @@ export class ValueBodyTranspiler {
     }
 
     chunk.appendString("await (async () => {\n");
-    this.appendBlocks(chunk, preLoopDecls, "");
+    this.appendBlocks(chunk, preLoopDecls);
     chunk.appendString(`const VAL = ${val};\n`);
 
-    let indent = "";
+    // no manual indentation, Chunk.runIndentationLogic indents by brace depth,
+    // pre-indented closing braces would not be recognized and drift the indentation
     for (const desc of descriptors) {
-      this.appendBlocks(chunk, desc.beforeLoop, indent);
-      chunk.appendString(indent + desc.open + "\n");
-      indent += "  ";
-      levelIndents.push(indent);
-      this.appendBlocks(chunk, desc.preBody, indent);
+      this.appendBlocks(chunk, desc.beforeLoop);
+      chunk.appendString(desc.open + "\n");
+      this.appendBlocks(chunk, desc.preBody);
     }
 
-    chunk.appendString(indent + "VAL");
+    chunk.appendString("VAL");
 
     let post = ";\n";
     for (let i = descriptors.length - 1; i >= 0; i--) {
       const desc = descriptors[i];
-      const currentIndent = levelIndents[i] ?? "";
-      post += this.blocksToString(desc.postBody, currentIndent);
-      const parentIndent = currentIndent.substring(0, Math.max(0, currentIndent.length - 2));
-      post += parentIndent + desc.close + "\n";
+      post += this.blocksToString(desc.postBody);
+      post += desc.close + "\n";
     }
     post += "return VAL;\n})()";
 
     return {chunk, post};
   }
 
-  private appendBlocks(chunk: Chunk, blocks: string[], indent: string): void {
+  private appendBlocks(chunk: Chunk, blocks: string[]): void {
     for (const block of blocks) {
-      this.appendBlock(chunk, block, indent);
+      this.appendBlock(chunk, block);
     }
   }
 
-  private appendBlock(chunk: Chunk, block: string, indent: string): void {
+  private appendBlock(chunk: Chunk, block: string): void {
     if (block === "") {
       return;
     }
@@ -322,11 +318,11 @@ export class ValueBodyTranspiler {
       if (clean.trim() === "") {
         continue;
       }
-      chunk.appendString(indent + clean + "\n");
+      chunk.appendString(clean + "\n");
     }
   }
 
-  private blocksToString(blocks: string[], indent: string): string {
+  private blocksToString(blocks: string[]): string {
     let ret = "";
     for (const block of blocks) {
       if (block === "") {
@@ -338,7 +334,7 @@ export class ValueBodyTranspiler {
         if (clean.trim() === "") {
           continue;
         }
-        ret += indent + clean + "\n";
+        ret += clean + "\n";
       }
     }
     return ret;

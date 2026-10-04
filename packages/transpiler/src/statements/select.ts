@@ -158,25 +158,26 @@ export class SelectTranspiler implements IStatementTranspiler {
       // DB key alone is wrong for projections (INTO CORRESPONDING FIELDS
       // without the key fields crashed on the missing component names)
       const by = `Object.keys(${target}.getRowType().get())`;
+      // generated code is not indented, Chunk.runIndentationLogic indents by brace depth
       const dedup = `if (!(${target} instanceof abap.types.HashedTable) && ${target}.getOptions()?.primaryKey?.type !== "SORTED") {
-    abap.statements.sort(${target}, {by: ${by}.map(k => { return {component: k}; })});
-    await abap.statements.deleteInternal(${target}, {adjacent: true, allFields: true});
-  }`;
+abap.statements.sort(${target}, {by: ${by}.map(k => { return {component: k}; })});
+await abap.statements.deleteInternal(${target}, {adjacent: true, allFields: true});
+}`;
 
       const at = where.startsWith("WHERE ") ? select.indexOf(where) : -1;
       // UP TO with ORDER BY keeps the first n rows in that order; the blocks
       // trim after the de-duplicating sort, so that pair stays row by row
       if (concat.startsWith("SELECT SINGLE ") || at < 0 || (upTo && orderBy)) {
         const code = `if (${faeTranspiled}.array().length === 0) {
-  await abap.statements.select(${target}, {select: "${selectEmpty.trim()}"${extra}});
+await abap.statements.select(${target}, {select: "${selectEmpty.trim()}"${extra}});
 } else {
-  const ${unique2} = ${faeTranspiled}.array();
-  ${target}.clear();
-  for await (const ${unique} of ${unique2}) {
-    await abap.statements.select(${target}, {select: "${select.trim()}"${extra}}, {appending: true});
-  }
-  ${dedup}
-  abap.builtin.sy.get().dbcnt.set(${target}.getArrayLength());
+const ${unique2} = ${faeTranspiled}.array();
+${target}.clear();
+for await (const ${unique} of ${unique2}) {
+await abap.statements.select(${target}, {select: "${select.trim()}"${extra}}, {appending: true});
+}
+${dedup}
+abap.builtin.sy.get().dbcnt.set(${target}.getArrayLength());
 }`;
         return new Chunk().append(code, node, traversal);
       }
@@ -204,29 +205,29 @@ export class SelectTranspiler implements IStatementTranspiler {
       const unique3 = UniqueIdentifier.get();
       const unique4 = UniqueIdentifier.get();
       const code = `if (${faeTranspiled}.array().length === 0) {
-  await abap.statements.select(${target}, {select: "${selectEmpty.trim()}"${extra}});
+await abap.statements.select(${target}, {select: "${selectEmpty.trim()}"${extra}});
 } else {
-  const ${unique2} = ${faeTranspiled}.array();
-  ${target}.clear();
-  const ${unique3} = (${unique}) => "(${condition})";
-  for (let ${unique4} = 0; ${unique4} < ${unique2}.length; ${unique4} += 50) {
-    const ${unique4}where = ${unique2}.slice(${unique4}, ${unique4} + 50).map(${unique3}).join(" OR ");
-    await abap.statements.select(${target}, {select: "${head}WHERE " + ${unique4}where + " ${tail.trim()}"${extra}}, {appending: true});
-  }
-  ${dedup}
-  const ${unique4}max = ${upToCode};
-  if (${unique4}max > 0 && ${target}.getArrayLength() > ${unique4}max) {
-    if (${target} instanceof abap.types.HashedTable) {
-      for (const ${unique4}row of ${target}.array().slice(${unique4}max)) {
-        await abap.statements.deleteInternal(${target}, {fromValue: ${unique4}row});
-      }
-    } else {
-      while (${target}.getArrayLength() > ${unique4}max) {
-        ${target}.deleteIndex(${target}.getArrayLength() - 1);
-      }
-    }
-  }
-  abap.builtin.sy.get().dbcnt.set(${target}.getArrayLength());
+const ${unique2} = ${faeTranspiled}.array();
+${target}.clear();
+const ${unique3} = (${unique}) => "(${condition})";
+for (let ${unique4} = 0; ${unique4} < ${unique2}.length; ${unique4} += 50) {
+const ${unique4}where = ${unique2}.slice(${unique4}, ${unique4} + 50).map(${unique3}).join(" OR ");
+await abap.statements.select(${target}, {select: "${head}WHERE " + ${unique4}where + " ${tail.trim()}"${extra}}, {appending: true});
+}
+${dedup}
+const ${unique4}max = ${upToCode};
+if (${unique4}max > 0 && ${target}.getArrayLength() > ${unique4}max) {
+if (${target} instanceof abap.types.HashedTable) {
+for (const ${unique4}row of ${target}.array().slice(${unique4}max)) {
+await abap.statements.deleteInternal(${target}, {fromValue: ${unique4}row});
+}
+} else {
+while (${target}.getArrayLength() > ${unique4}max) {
+${target}.deleteIndex(${target}.getArrayLength() - 1);
+}
+}
+}
+abap.builtin.sy.get().dbcnt.set(${target}.getArrayLength());
 }`;
       return new Chunk().append(code, node, traversal);
     } else {
