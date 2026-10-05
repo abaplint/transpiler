@@ -94,4 +94,27 @@ value = CONV f( '12abc' ).`;
 // todo: LET
 // todo: test concat and arithmetics
 
+
+  it("CONV with LET", async () => {
+    const code = `
+DATA lv TYPE string.
+lv = CONV string( LET a = \`y\` IN a ).
+WRITE / lv.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("y");
+  });
+
+  it("CONV with LET, two bindings and a conversion", async () => {
+    const code = `
+DATA lv TYPE i.
+lv = CONV i( LET a = \`4\` b = 3 IN a + b ).
+WRITE / lv.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("7");
+  });
+
 });
