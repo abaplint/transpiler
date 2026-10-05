@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {ABAP, MemoryConsole} from "../../packages/runtime/src";
-import {AsyncFunction, runFiles} from "../_utils";
+import {AsyncFunction, compileFiles, runFiles} from "../_utils";
 
 let abap: ABAP;
 
@@ -157,6 +157,326 @@ START-OF-SELECTION.
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("helloworld");
+  });
+
+  it("CREATE OBJECT, attribute of a method parameter", async () => {
+    const code = `
+CLASS lcl_list_tree DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor.
+    METHODS get_value RETURNING VALUE(rv_value) TYPE i.
+ENDCLASS.
+CLASS lcl_list_tree IMPLEMENTATION.
+  METHOD constructor.
+    WRITE 'tree'.
+  ENDMETHOD.
+  METHOD get_value.
+    rv_value = 42.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_base DEFINITION.
+  PUBLIC SECTION.
+    DATA go_list_tree TYPE REF TO lcl_list_tree.
+ENDCLASS.
+CLASS lcl_base IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lcl_owner DEFINITION.
+  PUBLIC SECTION.
+    DATA go_list_tree TYPE REF TO lcl_list_tree.
+    METHODS constructor.
+ENDCLASS.
+CLASS lcl_owner IMPLEMENTATION.
+  METHOD constructor.
+    WRITE 'owner'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_builder DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS build IMPORTING io_owner TYPE REF TO lcl_owner.
+ENDCLASS.
+CLASS lcl_builder IMPLEMENTATION.
+  METHOD build.
+    CREATE OBJECT io_owner->go_list_tree.
+    ASSERT io_owner->go_list_tree->get_value( ) = 42.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA owner TYPE REF TO lcl_owner.
+  CREATE OBJECT owner.
+  lcl_builder=>build( owner ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ownertree");
+  });
+
+  it("CREATE OBJECT, dynamic attribute of a method parameter", async () => {
+    const code = `
+CLASS lcl_list_tree DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor.
+    METHODS get_value RETURNING VALUE(rv_value) TYPE i.
+ENDCLASS.
+CLASS lcl_list_tree IMPLEMENTATION.
+  METHOD constructor.
+    WRITE 'tree'.
+  ENDMETHOD.
+  METHOD get_value.
+    rv_value = 42.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_base DEFINITION.
+  PUBLIC SECTION.
+    DATA go_list_tree TYPE REF TO lcl_list_tree.
+ENDCLASS.
+CLASS lcl_base IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lcl_owner DEFINITION.
+  PUBLIC SECTION.
+    DATA go_list_tree TYPE REF TO lcl_list_tree.
+    METHODS constructor.
+ENDCLASS.
+CLASS lcl_owner IMPLEMENTATION.
+  METHOD constructor.
+    WRITE 'owner'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_builder DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS build IMPORTING io_owner TYPE REF TO lcl_owner.
+ENDCLASS.
+CLASS lcl_builder IMPLEMENTATION.
+  METHOD build.
+    CREATE OBJECT io_owner->go_list_tree TYPE ('LCL_LIST_TREE').
+    ASSERT io_owner->go_list_tree->get_value( ) = 42.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA owner TYPE REF TO lcl_owner.
+  CREATE OBJECT owner.
+  lcl_builder=>build( owner ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ownertree");
+  });
+
+  it("CREATE OBJECT, inherited attribute of a method parameter", async () => {
+    const code = `
+CLASS lcl_list_tree DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor.
+    METHODS get_value RETURNING VALUE(rv_value) TYPE i.
+ENDCLASS.
+CLASS lcl_list_tree IMPLEMENTATION.
+  METHOD constructor.
+    WRITE 'tree'.
+  ENDMETHOD.
+  METHOD get_value.
+    rv_value = 42.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_base DEFINITION.
+  PUBLIC SECTION.
+    DATA go_list_tree TYPE REF TO lcl_list_tree.
+ENDCLASS.
+CLASS lcl_base IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lcl_owner DEFINITION INHERITING FROM lcl_base.
+  PUBLIC SECTION.
+
+    METHODS constructor.
+ENDCLASS.
+CLASS lcl_owner IMPLEMENTATION.
+  METHOD constructor.
+    super->constructor( ).
+    WRITE 'owner'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_builder DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS build IMPORTING io_owner TYPE REF TO lcl_owner.
+ENDCLASS.
+CLASS lcl_builder IMPLEMENTATION.
+  METHOD build.
+    CREATE OBJECT io_owner->go_list_tree.
+    ASSERT io_owner->go_list_tree->get_value( ) = 42.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA owner TYPE REF TO lcl_owner.
+  CREATE OBJECT owner.
+  lcl_builder=>build( owner ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ownertree");
+  });
+
+  it("CREATE OBJECT, dynamic inherited attribute of a method parameter", async () => {
+    const code = `
+CLASS lcl_list_tree DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor.
+    METHODS get_value RETURNING VALUE(rv_value) TYPE i.
+ENDCLASS.
+CLASS lcl_list_tree IMPLEMENTATION.
+  METHOD constructor.
+    WRITE 'tree'.
+  ENDMETHOD.
+  METHOD get_value.
+    rv_value = 42.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_base DEFINITION.
+  PUBLIC SECTION.
+    DATA go_list_tree TYPE REF TO lcl_list_tree.
+ENDCLASS.
+CLASS lcl_base IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lcl_owner DEFINITION INHERITING FROM lcl_base.
+  PUBLIC SECTION.
+
+    METHODS constructor.
+ENDCLASS.
+CLASS lcl_owner IMPLEMENTATION.
+  METHOD constructor.
+    super->constructor( ).
+    WRITE 'owner'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_builder DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS build IMPORTING io_owner TYPE REF TO lcl_owner.
+ENDCLASS.
+CLASS lcl_builder IMPLEMENTATION.
+  METHOD build.
+    CREATE OBJECT io_owner->go_list_tree TYPE ('LCL_LIST_TREE').
+    ASSERT io_owner->go_list_tree->get_value( ) = 42.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA owner TYPE REF TO lcl_owner.
+  CREATE OBJECT owner.
+  lcl_builder=>build( owner ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ownertree");
+  });
+
+  it("CREATE OBJECT, attribute of a global owner", async () => {
+    const result = await compileFiles([
+      {filename: "zcl_list_tree.clas.abap", contents: `
+CLASS zcl_list_tree DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    METHODS constructor.
+    METHODS get_value RETURNING VALUE(rv_value) TYPE i.
+ENDCLASS.
+CLASS zcl_list_tree IMPLEMENTATION.
+  METHOD constructor.
+    WRITE 'tree'.
+  ENDMETHOD.
+  METHOD get_value.
+    rv_value = 42.
+  ENDMETHOD.
+ENDCLASS.`},
+      {filename: "zcl_owner.clas.abap", contents: `
+CLASS zcl_owner DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    DATA go_list_tree TYPE REF TO zcl_list_tree.
+    METHODS constructor.
+ENDCLASS.
+CLASS zcl_owner IMPLEMENTATION.
+  METHOD constructor.
+    WRITE 'owner'.
+  ENDMETHOD.
+ENDCLASS.`},
+      {filename: "zfoobar.prog.abap", contents: `
+CLASS lcl_builder DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS build IMPORTING io_owner TYPE REF TO zcl_owner.
+ENDCLASS.
+CLASS lcl_builder IMPLEMENTATION.
+  METHOD build.
+    CREATE OBJECT io_owner->go_list_tree.
+    ASSERT io_owner->go_list_tree->get_value( ) = 42.
+  ENDMETHOD.
+ENDCLASS.
+START-OF-SELECTION.
+  DATA owner TYPE REF TO zcl_owner.
+  CREATE OBJECT owner.
+  lcl_builder=>build( owner ).`},
+    ]);
+    const js = "global.abap = abap;\n" + result.objects.map(o => o.chunk.getCode()).join("\n");
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ownertree");
+  });
+
+  it("CREATE OBJECT, dynamic attribute of a global owner", async () => {
+    const result = await compileFiles([
+      {filename: "zcl_list_tree.clas.abap", contents: `
+CLASS zcl_list_tree DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    METHODS constructor.
+    METHODS get_value RETURNING VALUE(rv_value) TYPE i.
+ENDCLASS.
+CLASS zcl_list_tree IMPLEMENTATION.
+  METHOD constructor.
+    WRITE 'tree'.
+  ENDMETHOD.
+  METHOD get_value.
+    rv_value = 42.
+  ENDMETHOD.
+ENDCLASS.`},
+      {filename: "zcl_owner.clas.abap", contents: `
+CLASS zcl_owner DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    DATA go_list_tree TYPE REF TO zcl_list_tree.
+    METHODS constructor.
+ENDCLASS.
+CLASS zcl_owner IMPLEMENTATION.
+  METHOD constructor.
+    WRITE 'owner'.
+  ENDMETHOD.
+ENDCLASS.`},
+      {filename: "zfoobar.prog.abap", contents: `
+CLASS lcl_builder DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS build IMPORTING io_owner TYPE REF TO zcl_owner.
+ENDCLASS.
+CLASS lcl_builder IMPLEMENTATION.
+  METHOD build.
+    CREATE OBJECT io_owner->go_list_tree TYPE ('ZCL_LIST_TREE').
+    ASSERT io_owner->go_list_tree->get_value( ) = 42.
+  ENDMETHOD.
+ENDCLASS.
+START-OF-SELECTION.
+  DATA owner TYPE REF TO zcl_owner.
+  CREATE OBJECT owner.
+  lcl_builder=>build( owner ).`},
+    ]);
+    const js = "global.abap = abap;\n" + result.objects.map(o => o.chunk.getCode()).join("\n");
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ownertree");
   });
 
   it("CREATE OBJECT, determine correct class, interfaced", async () => {
