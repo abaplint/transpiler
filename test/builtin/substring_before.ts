@@ -95,4 +95,15 @@ WRITE val.`;
     expect(abap.console.get()).to.equal("foo");
   });
 
+  it("substring_before, newline", async () => {
+    const code = `
+data lv_text type string.
+lv_text = |a\\nb;c|.
+ASSERT substring_before( val = lv_text
+                         sub = ';' ) = |a\\nb|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
