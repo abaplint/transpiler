@@ -1041,16 +1041,14 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
         context = context.getComponentByName(c.getFirstToken().getStr());
       } else if (c.get() instanceof abaplint.Expressions.AttributeName
           && context instanceof abaplint.BasicTypes.ObjectReferenceType) {
-        const id = context.getIdentifier();
-        if (id instanceof abaplint.Types.ClassDefinition || id instanceof abaplint.Types.InterfaceDefinition) {
-          const concat = c.concatTokens();
-          if (concat.includes("~")) {
-            const [iname, aname] = concat.split("~");
-            const intf = this.findInterfaceDefinition(iname, scope);
-            context = intf?.getAttributes().findByName(aname)?.getType();
-          } else {
-            context = id.getAttributes().findByName(concat)?.getType();
-          }
+        const concat = c.concatTokens();
+        if (concat.includes("~")) {
+          const [iname, aname] = concat.split("~");
+          const intf = this.findInterfaceDefinition(iname, scope);
+          context = intf?.getAttributes().findByName(aname)?.getType();
+        } else {
+          // Global references can carry an identifier rather than a class definition.
+          context = this.narrowContextAttribute(context, concat, scope);
         }
       } else if (c.get() instanceof abaplint.Expressions.AttributeName
           && context instanceof abaplint.BasicTypes.DataReference) {
