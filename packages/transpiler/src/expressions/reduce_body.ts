@@ -44,24 +44,20 @@ export class ReduceBodyTranspiler {
       ret.appendString(declaration + "\n");
     }
 
-    let indent = "";
-    const levelIndents: string[] = [];
+    // no manual indentation, Chunk.runIndentationLogic indents by brace depth,
+    // pre-indented closing braces would not be recognized and drift the indentation
     for (const descriptor of descriptors) {
-      this.appendBlocks(ret, descriptor.beforeLoop, indent);
-      ret.appendString(indent + descriptor.open + "\n");
-      indent += "  ";
-      levelIndents.push(indent);
-      this.appendBlocks(ret, descriptor.preBody, indent);
+      this.appendBlocks(ret, descriptor.beforeLoop);
+      ret.appendString(descriptor.open + "\n");
+      this.appendBlocks(ret, descriptor.preBody);
     }
 
-    this.appendBlock(ret, this.transpileNext(body, traversal), indent);
+    this.appendBlock(ret, this.transpileNext(body, traversal));
 
     for (let i = descriptors.length - 1; i >= 0; i--) {
       const descriptor = descriptors[i];
-      const currentIndent = levelIndents[i];
-      this.appendBlocks(ret, descriptor.postBody, currentIndent);
-      indent = currentIndent.substring(0, Math.max(0, currentIndent.length - 2));
-      ret.appendString(indent + descriptor.close + "\n");
+      this.appendBlocks(ret, descriptor.postBody);
+      ret.appendString(descriptor.close + "\n");
     }
 
     ret.appendString(`return ${returnField};\n`);
@@ -304,16 +300,16 @@ export class ReduceBodyTranspiler {
     return ret;
   }
 
-  private appendBlocks(ret: Chunk, blocks: string[], indent: string): void {
+  private appendBlocks(ret: Chunk, blocks: string[]): void {
     for (const block of blocks) {
-      this.appendBlock(ret, block, indent);
+      this.appendBlock(ret, block);
     }
   }
 
-  private appendBlock(ret: Chunk, block: string, indent: string): void {
+  private appendBlock(ret: Chunk, block: string): void {
     for (const line of block.split("\n")) {
       if (line.trim() !== "") {
-        ret.appendString(indent + line.replace(/\r/g, "") + "\n");
+        ret.appendString(line.replace(/\r/g, "") + "\n");
       }
     }
   }

@@ -48,4 +48,126 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("foo");
   });
 
+  it("sums numeric components using the standard default key", async () => {
+    const code = `
+TYPES: BEGIN OF ty_line,
+         id TYPE c LENGTH 4,
+         amount TYPE i,
+       END OF ty_line.
+DATA lt_lines TYPE STANDARD TABLE OF ty_line WITH DEFAULT KEY.
+DATA ls_line TYPE ty_line.
+ls_line-id = 'P001'.
+ls_line-amount = 1.
+COLLECT ls_line INTO lt_lines.
+COLLECT ls_line INTO lt_lines.
+ls_line-amount = 2.
+COLLECT ls_line INTO lt_lines.
+WRITE / lines( lt_lines ).
+LOOP AT lt_lines INTO ls_line.
+  WRITE / ls_line-amount.
+ENDLOOP.`;
+    const js = await run(code);
+    await new AsyncFunction("abap", js)(abap);
+    expect(abap.console.get()).to.equal("1\n4");
+  });
+
+  it("uses the numeric table line as its default key", async () => {
+    const code = `
+DATA lt_values TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA lv_value TYPE i VALUE 1.
+COLLECT lv_value INTO lt_values.
+COLLECT lv_value INTO lt_values.
+WRITE / lines( lt_values ).
+LOOP AT lt_values INTO lv_value.
+  WRITE / lv_value.
+ENDLOOP.`;
+    const js = await run(code);
+    await new AsyncFunction("abap", js)(abap);
+    expect(abap.console.get()).to.equal("1\n1");
+  });
+
+  it("sets sy-tabix for inserted and found standard table rows", async () => {
+    const code = `
+TYPES: BEGIN OF ty_line,
+         id TYPE c LENGTH 1,
+         amount TYPE i,
+       END OF ty_line.
+DATA lt_lines TYPE STANDARD TABLE OF ty_line WITH DEFAULT KEY.
+DATA ls_line TYPE ty_line.
+ls_line-id = 'A'.
+COLLECT ls_line INTO lt_lines.
+WRITE / sy-tabix.
+ls_line-id = 'B'.
+COLLECT ls_line INTO lt_lines.
+WRITE / sy-tabix.
+sy-tabix = 99.
+COLLECT ls_line INTO lt_lines.
+WRITE / sy-tabix.`;
+    const js = await run(code);
+    await new AsyncFunction("abap", js)(abap);
+    expect(abap.console.get()).to.equal("1\n2\n2");
+  });
+
+  it("sets sy-tabix to the insertion position in a sorted table", async () => {
+    const code = `
+TYPES: BEGIN OF ty_line,
+         id TYPE c LENGTH 1,
+         amount TYPE i,
+       END OF ty_line.
+DATA lt_lines TYPE SORTED TABLE OF ty_line WITH UNIQUE KEY id.
+DATA ls_line TYPE ty_line.
+ls_line-id = 'B'.
+COLLECT ls_line INTO lt_lines.
+ls_line-id = 'A'.
+sy-tabix = 99.
+COLLECT ls_line INTO lt_lines.
+WRITE / sy-tabix.`;
+    const js = await run(code);
+    await new AsyncFunction("abap", js)(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
+  it("sets sy-tabix to zero for a hashed table", async () => {
+    const code = `
+TYPES: BEGIN OF ty_line,
+         id TYPE c LENGTH 1,
+         amount TYPE i,
+       END OF ty_line.
+DATA lt_lines TYPE HASHED TABLE OF ty_line WITH UNIQUE KEY id.
+DATA ls_line TYPE ty_line.
+ls_line-id = 'A'.
+sy-tabix = 99.
+COLLECT ls_line INTO lt_lines.
+WRITE / sy-tabix.
+sy-tabix = 99.
+COLLECT ls_line INTO lt_lines.
+WRITE / sy-tabix.`;
+    const js = await run(code);
+    await new AsyncFunction("abap", js)(abap);
+    expect(abap.console.get()).to.equal("0\n0");
+  });
+
+  for (const tableType of ["SORTED", "HASHED"]) {
+    it(`sums numeric components in a ${tableType.toLowerCase()} table`, async () => {
+      const code = `
+TYPES: BEGIN OF ty_line,
+         id TYPE c LENGTH 4,
+         amount TYPE i,
+       END OF ty_line.
+DATA lt_lines TYPE ${tableType} TABLE OF ty_line WITH UNIQUE KEY id.
+DATA ls_line TYPE ty_line.
+ls_line-id = 'P001'.
+ls_line-amount = 1.
+COLLECT ls_line INTO lt_lines.
+COLLECT ls_line INTO lt_lines.
+WRITE / lines( lt_lines ).
+LOOP AT lt_lines INTO ls_line.
+  WRITE / ls_line-amount.
+ENDLOOP.`;
+      const js = await run(code);
+      await new AsyncFunction("abap", js)(abap);
+      expect(abap.console.get()).to.equal("1\n2");
+    });
+  }
+
 });

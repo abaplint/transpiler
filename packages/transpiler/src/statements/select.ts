@@ -73,6 +73,13 @@ export class SelectTranspiler implements IStatementTranspiler {
       select += new SQLGroupByTranspiler().transpile(groupBy, traversal).getCode() + " ";
     }
 
+    const having = node.findDirectExpression(abaplint.Expressions.Select)
+      ?.findDirectExpression(abaplint.Expressions.SQLHaving);
+    const havingCond = having?.findFirstExpression(abaplint.Expressions.SQLCond);
+    if (havingCond) {
+      select += "HAVING " + new SQLCondTranspiler().transpile(havingCond, traversal, table).getCode() + " ";
+    }
+
     const upTo = node.findFirstExpression(abaplint.Expressions.SQLUpTo);
     if (upTo) {
       const s = upTo.findFirstExpression(abaplint.Expressions.SimpleSource3);
@@ -140,28 +147,87 @@ export class SelectTranspiler implements IStatementTranspiler {
       const faeTranspiled = new SQLSourceTranspiler().transpile(fn!, traversal).getCode();
       // ABAP semantics: with an empty driving table the whole WHERE condition is ignored
       const selectEmpty = select.replace(whereClause, "");
-      select = select.replace(new RegExp(" " + escapeRegExp(faeTranspiled!), "g"), " " + unique);
-      select = select.replace(unique + ".get().table_line.get()", unique + ".get()");  // there can be only one?
+      const bindRow = (text: string) => text
+        .replace(new RegExp(" " + escapeRegExp(faeTranspiled!), "g"), " " + unique)
+        .replace(unique + ".get().table_line.get()", unique + ".get()");  // there can be only one?
+      select = bindRow(select);
+      const where = bindRow(whereClause);
 
       // FOR ALL ENTRIES removes duplicate rows from the result: duplicates of
       // the selected columns, so de-duplicate by the target's components. The
       // DB key alone is wrong for projections (INTO CORRESPONDING FIELDS
       // without the key fields crashed on the missing component names)
       const by = `Object.keys(${target}.getRowType().get())`;
+      // generated code is not indented, Chunk.runIndentationLogic indents by brace depth
+      const dedup = `if (!(${target} instanceof abap.types.HashedTable) && ${target}.getOptions()?.primaryKey?.type !== "SORTED") {
+abap.statements.sort(${target}, {by: ${by}.map(k => { return {component: k}; })});
+await abap.statements.deleteInternal(${target}, {adjacent: true, allFields: true});
+}`;
 
-      const code = `if (${faeTranspiled}.array().length === 0) {
-  await abap.statements.select(${target}, {select: "${selectEmpty.trim()}"${extra}});
+      const at = where.startsWith("WHERE ") ? select.indexOf(where) : -1;
+      // UP TO with ORDER BY keeps the first n rows in that order; the blocks
+      // trim after the de-duplicating sort, so that pair stays row by row
+      if (concat.startsWith("SELECT SINGLE ") || at < 0 || (upTo && orderBy)) {
+        const code = `if (${faeTranspiled}.array().length === 0) {
+await abap.statements.select(${target}, {select: "${selectEmpty.trim()}"${extra}});
 } else {
-  const ${unique2} = ${faeTranspiled}.array();
-  ${target}.clear();
-  for await (const ${unique} of ${unique2}) {
-    await abap.statements.select(${target}, {select: "${select.trim()}"${extra}}, {appending: true});
-  }
-  if (!(${target} instanceof abap.types.HashedTable) && ${target}.getOptions()?.primaryKey?.type !== "SORTED") {
-    abap.statements.sort(${target}, {by: ${by}.map(k => { return {component: k}; })});
-    await abap.statements.deleteInternal(${target}, {adjacent: true, allFields: true});
-  }
-  abap.builtin.sy.get().dbcnt.set(${target}.getArrayLength());
+const ${unique2} = ${faeTranspiled}.array();
+${target}.clear();
+for await (const ${unique} of ${unique2}) {
+await abap.statements.select(${target}, {select: "${select.trim()}"${extra}}, {appending: true});
+}
+${dedup}
+abap.builtin.sy.get().dbcnt.set(${target}.getArrayLength());
+}`;
+        return new Chunk().append(code, node, traversal);
+      }
+
+      // One SELECT per block of driving rows, similar to the kernel's blocking
+      // of FOR ALL ENTRIES (rsdb/max_blocking_factor): the condition of each row in
+      // parentheses, joined with OR. Not one SELECT per row. UP TO n ROWS
+      // counts the whole de-duplicated result, not each block (measured on
+      // a 7.5x system: two driving rows and UP TO 3 give 3 rows).
+      let tail = select.substring(at + where.length);
+      let upToCode = "0";
+      if (upTo) {
+        const s = upTo.findFirstExpression(abaplint.Expressions.SimpleSource3);
+        if (s) {
+          const n = new SourceTranspiler(true).transpile(s, traversal).getCode();
+          tail = tail.replace(`UP TO " + ${n} + " ROWS `, "");
+          upToCode = `parseInt(${n}, 10)`;
+        } else {
+          tail = tail.replace(upTo.concatTokens() + " ", "");
+          upToCode = String(parseInt(upTo.findFirstExpression(abaplint.Expressions.Integer)?.concatTokens() ?? "0", 10));
+        }
+      }
+      const head = select.substring(0, at);
+      const condition = where.substring("WHERE ".length).trimEnd();
+      const unique3 = UniqueIdentifier.get();
+      const unique4 = UniqueIdentifier.get();
+      const code = `if (${faeTranspiled}.array().length === 0) {
+await abap.statements.select(${target}, {select: "${selectEmpty.trim()}"${extra}});
+} else {
+const ${unique2} = ${faeTranspiled}.array();
+${target}.clear();
+const ${unique3} = (${unique}) => "(${condition})";
+for (let ${unique4} = 0; ${unique4} < ${unique2}.length; ${unique4} += 50) {
+const ${unique4}where = ${unique2}.slice(${unique4}, ${unique4} + 50).map(${unique3}).join(" OR ");
+await abap.statements.select(${target}, {select: "${head}WHERE " + ${unique4}where + " ${tail.trim()}"${extra}}, {appending: true});
+}
+${dedup}
+const ${unique4}max = ${upToCode};
+if (${unique4}max > 0 && ${target}.getArrayLength() > ${unique4}max) {
+if (${target} instanceof abap.types.HashedTable) {
+for (const ${unique4}row of ${target}.array().slice(${unique4}max)) {
+await abap.statements.deleteInternal(${target}, {fromValue: ${unique4}row});
+}
+} else {
+while (${target}.getArrayLength() > ${unique4}max) {
+${target}.deleteIndex(${target}.getArrayLength() - 1);
+}
+}
+}
+abap.builtin.sy.get().dbcnt.set(${target}.getArrayLength());
 }`;
       return new Chunk().append(code, node, traversal);
     } else {

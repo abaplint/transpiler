@@ -27,6 +27,21 @@ export async function updateDatabase(table: string | ICharacter, options: IUpdat
     table = table.get();
   }
 
+  if (options.table !== undefined) {
+    // row by row, as a work area each: sy-subrc 4 when a row found nothing
+    // to update, sy-dbcnt the rows updated
+    let subrc = 0;
+    let dbcnt = 0;
+    for (const row of options.table.array()) {
+      await updateDatabase(table, {from: row}, context);
+      subrc = Math.max(subrc, abap.builtin.sy.get().subrc.get());
+      dbcnt += abap.builtin.sy.get().dbcnt.get();
+    }
+    abap.builtin.sy.get().subrc.set(subrc);
+    abap.builtin.sy.get().dbcnt.set(dbcnt);
+    return subrc;
+  }
+
   const tabl = abap.DDIC[table.toUpperCase()];
   if (tabl === undefined) {
     await throwErrorWithParameters("CX_SY_DYNAMIC_OSQL_SEMANTICS", {sqlmsg: new String().set(`Table ${table} not found`)});

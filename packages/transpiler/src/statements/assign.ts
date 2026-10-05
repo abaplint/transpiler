@@ -12,15 +12,16 @@ export class AssignTranspiler implements IStatementTranspiler {
       return code;
     }
 
+    // not indented, Chunk.runIndentationLogic indents by brace depth
     return `(await (async () => {
-  try {
-    return ${code};
-  } catch (error) {
-    if (abap.isLineNotFound(error)) {
-      return undefined;
-    }
-    throw error;
-  }
+try {
+return ${code};
+} catch (error) {
+if (abap.isLineNotFound(error)) {
+return undefined;
+}
+throw error;
+}
 })())`;
   }
 

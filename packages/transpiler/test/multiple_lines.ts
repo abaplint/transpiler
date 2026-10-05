@@ -865,14 +865,14 @@ CALL FUNCTION 'FUNCTION_EXISTS'
   abap.builtin.sy.get().subrc.set(0);
 } catch (e) {
   if (e.classic) {
-      switch (e.classic.toUpperCase()) {
+    switch (e.classic.toUpperCase()) {
       case "FUNCTION_NOT_EXIST": abap.builtin.sy.get().subrc.set(1); break;
       default: abap.builtin.sy.get().subrc.set(2); break;
-        }
-    } else {
-        throw e;
     }
-  }`;
+  } else {
+    throw e;
+  }
+}`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
@@ -901,6 +901,36 @@ ASSIGN (l_fieldname) TO <l_record_all>.
 WRITE 'sdf'.`;
     const js = await runSingle(abap);
     expect(js).to.include("\nabap.statements.write(abap.CharacterFactory.get(3, 'sdf'));");
+  });
+
+  it("indentation of JS does not drift after nested FOR and FOR WHILE/UNTIL", async () => {
+    const abap = `
+TYPES ty TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+DATA tab TYPE ty.
+DATA res TYPE ty.
+DATA sum TYPE i.
+res = VALUE ty( FOR a IN tab FOR b IN tab ( a ) ).
+res = VALUE ty( FOR i = 0 WHILE i < 3 ( i ) ).
+res = VALUE ty( FOR j = 0 UNTIL j > 3 ( j ) ).
+sum = REDUCE i( INIT s = 0 FOR c IN tab FOR d IN tab NEXT s = s + c ).
+sum = REDUCE i( INIT t = 0 FOR k = 0 WHILE k < 3 NEXT t = t + k ).
+WRITE 'sdf'.`;
+    const js = await runSingle(abap);
+    expect(js).to.include("\nabap.statements.write(abap.CharacterFactory.get(3, 'sdf'));");
+
+    // every line must be indented by exactly its brace depth
+    let depth = 0;
+    for (const l of js!.split("\n")) {
+      const trimmed = l.trimStart();
+      if (trimmed.startsWith("}")) {
+        depth--;
+      }
+      expect(l.length - trimmed.length, `indent of line "${l}" in:\n${js}`).to.equal(depth > 0 ? depth * 2 : 0);
+      if (trimmed.endsWith(" {")) {
+        depth++;
+      }
+    }
+    expect(depth).to.equal(0);
   });
 
 });

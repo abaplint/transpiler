@@ -30,6 +30,16 @@ export enum TableKeyType {
   empty = "EMPTY",
 }
 
+/* rows are handed to a sorted secondary key in table order, and a duplicate of a
+ * non-unique key goes in front of its equals, as INSERT ... INTO TABLE does: reversed
+ * before the stable sort, the later of two equal rows comes first */
+function secondaryDuplicatesFirst(rows: any[], key: ITableKey): any[] {
+  if (key.type === TableAccessType.sorted && key.isUnique !== true) {
+    rows.reverse();
+  }
+  return rows;
+}
+
 export class LoopController {
   public index: number;
   public loopTo: number;
@@ -97,6 +107,15 @@ export class SortedTable {
 }
 */
 
+/** The secondary key a key name selects, as ABAP reads the name: without the
+ *  blanks a c field pads it with, in any case - and undefined for the primary
+ *  key, which primary_key names however it is written, and so does an initial
+ *  name (a dynamic USING KEY ( name ) that is empty). */
+export function secondaryKeyName(name: string | undefined): string | undefined {
+  const trimmed = name?.trimEnd();
+  return trimmed === undefined || trimmed === "" || trimmed.toLowerCase() === "primary_key" ? undefined : trimmed;
+}
+
 export class HashedTable implements ITable {
   private value: {[hash: string]: TableRowType};
   private readonly header: TableRowType | undefined;
@@ -135,12 +154,12 @@ export class HashedTable implements ITable {
   }
 
   public getKeyByName(name: string) {
-    return this.getOptions()?.secondary?.find(s => s.name.toUpperCase() === name.toUpperCase());
+    return this.getOptions()?.secondary?.find(s => s.name.toUpperCase() === name.trimEnd().toUpperCase());
   }
 
   public getSecondaryIndex(name: string) {
-    if (this.secondaryIndexes[name.toUpperCase()]) {
-      return this.secondaryIndexes[name.toUpperCase()];
+    if (this.secondaryIndexes[name.trimEnd().toUpperCase()]) {
+      return this.secondaryIndexes[name.trimEnd().toUpperCase()];
     }
 
     const secondary = this.getKeyByName(name);
@@ -148,10 +167,10 @@ export class HashedTable implements ITable {
       throw `Table, secondary key "${name}" not found`;
     }
     // note, array() already is a copy, so it can be used,
-    const copy = this.array();
+    const copy = secondaryDuplicatesFirst(this.array(), secondary);
     sort(copy as any, {by: secondary.keyFields.map(k => {return {component: k.toLowerCase()};})});
 
-    this.secondaryIndexes[name.toUpperCase()] = copy;
+    this.secondaryIndexes[name.trimEnd().toUpperCase()] = copy;
     return copy;
   }
 
@@ -411,22 +430,22 @@ export class Table implements ITable {
   }
 
   public getKeyByName(name: string) {
-    return this.getOptions()?.secondary?.find(s => s.name.toUpperCase() === name.toUpperCase());
+    return this.getOptions()?.secondary?.find(s => s.name.toUpperCase() === name.trimEnd().toUpperCase());
   }
 
   public getSecondaryIndex(name: string) {
-    if (this.secondaryIndexes[name.toUpperCase()]) {
-      return this.secondaryIndexes[name.toUpperCase()];
+    if (this.secondaryIndexes[name.trimEnd().toUpperCase()]) {
+      return this.secondaryIndexes[name.trimEnd().toUpperCase()];
     }
 
     const secondary = this.getKeyByName(name);
     if (secondary === undefined) {
       throw `Table, secondary key "${name}" not found`;
     }
-    const copy = [...this.value];
+    const copy = secondaryDuplicatesFirst([...this.value], secondary);
     sort(copy as any, {by: secondary.keyFields.map(k => {return {component: k.toLowerCase()};}), skipSortedCheck: true});
 
-    this.secondaryIndexes[name.toUpperCase()] = copy;
+    this.secondaryIndexes[name.trimEnd().toUpperCase()] = copy;
     return copy;
   }
 
@@ -566,9 +585,9 @@ export class Table implements ITable {
     }
 
     const lastComparison = compare(this.value[lastIndex], val);
-    if (lastComparison < 0 || (lastComparison === 0 && unique === false)) {
+    if (lastComparison < 0) {
       return {value: this.insertIndex(val, this.value.length, true), subrc: 0};
-    } else if (lastComparison === 0) {
+    } else if (lastComparison === 0 && unique === true) {
       return {value: undefined, subrc: 4};
     }
 
@@ -576,14 +595,15 @@ export class Table implements ITable {
     let high = this.value.length;
     while (low < high) {
       const middle = Math.floor((low + high) / 2);
-      if (compare(this.value[middle], val) <= 0) {
+      // a duplicate of a non-unique key goes in front of the rows it duplicates
+      if (compare(this.value[middle], val) < 0) {
         low = middle + 1;
       } else {
         high = middle;
       }
     }
 
-    if (unique === true && low > 0 && compare(this.value[low - 1], val) === 0) {
+    if (unique === true && low < this.value.length && compare(this.value[low], val) === 0) {
       return {value: undefined, subrc: 4};
     }
 

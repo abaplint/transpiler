@@ -58,6 +58,8 @@ export class SnowflakeDatabaseSchema implements DatabaseSchemaGenerator {
       return `NCHAR(${type.getLength() * 2})`;
     } else if (type instanceof abaplint.BasicTypes.IntegerType) {
       return `INT`;
+    } else if (type instanceof abaplint.BasicTypes.Integer8Type) {
+      return `NUMBER(19)`;
     } else if (type instanceof abaplint.BasicTypes.FloatType
         || type instanceof abaplint.BasicTypes.FloatingPointType) {
       return `REAL`;

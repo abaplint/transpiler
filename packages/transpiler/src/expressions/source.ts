@@ -8,13 +8,17 @@ import {IExpressionTranspiler} from "./_expression_transpiler";
 import {ReduceBodyTranspiler} from "./reduce_body";
 import {TranspileTypes} from "../transpile_types";
 import {Traversal} from "../traversal";
+import {LetTranspiler} from "./let";
 import {ValueBodyTranspiler} from "./value_body";
 
 export class SourceTranspiler implements IExpressionTranspiler {
   private readonly addGet: boolean;
+  private readonly int8: boolean;
 
-  public constructor(addGet = false) {
+  /** int8: the calculation type is int8, each operation gets its left operand as an int8 */
+  public constructor(addGet = false, int8 = false) {
     this.addGet = addGet;
+    this.int8 = int8;
   }
 
   // the operands of a chain of & / && (the rearranger leaves them as a binary
@@ -78,6 +82,8 @@ export class SourceTranspiler implements IExpressionTranspiler {
       } else { break; }
     }
 
+    // int8: whether the operand left of the next operator is already an int8
+    let leftIsInt8 = false;
     for (let i = startIdx; i < children.length; i++) {
       const c = children[i];
       const isLast = i === children.length - 1;
@@ -92,7 +98,17 @@ export class SourceTranspiler implements IExpressionTranspiler {
         } else if (c.get() instanceof Expressions.Cond) {
           ret.appendChunk(traversal.traverse(c));
         } else if (c.get() instanceof Expressions.ArithOperator) {
-          ret = new Chunk().appendChunk(traversal.traverse(c)).appendString("(").appendChunk(ret).appendString(",");
+          // "/" rounds in calculation type int8, the runtime's divide() does not know the target
+          const operator = this.int8 === true && c.concatTokens().trim() === "/"
+            ? new Chunk().append("abap.operators.divideInt8", c, traversal)
+            : traversal.traverse(c);
+          if (this.int8 === true && leftIsInt8 === false) {
+            ret = new Chunk().appendChunk(operator).appendString("(new abap.types.Integer8().set(").appendChunk(ret).appendString("),");
+          } else {
+            ret = new Chunk().appendChunk(operator).appendString("(").appendChunk(ret).appendString(",");
+          }
+          // the result of an operation with an int8 operand is an int8
+          leftIsInt8 = true;
           post.appendString(")");
           if (this.addGet) {
             post.append(".get()", c, traversal);
@@ -107,7 +123,8 @@ export class SourceTranspiler implements IExpressionTranspiler {
             ret.append(".get()", c, traversal);
           }
         } else if (c.get() instanceof Expressions.Source) {
-          ret.appendChunk(new SourceTranspiler(this.addGet).transpile(c, traversal));
+          ret.appendChunk(new SourceTranspiler(this.addGet, this.int8).transpile(c, traversal));
+          leftIsInt8 = c.findDirectExpression(Expressions.ArithOperator) !== undefined;
         } else if (c.get() instanceof Expressions.Arrow) {
           ret = new Chunk().appendString("(").appendChunk(ret).appendString(").get().");
         } else if (c.get() instanceof Expressions.AttributeChain) {
@@ -136,12 +153,18 @@ export class SourceTranspiler implements IExpressionTranspiler {
           }
           ret = new Chunk().appendString(new TypeNameOrInfer().transpile(typ, traversal).getCode());
           ret.appendString(".set(");
-          // todo: handle LET
           const context = new TypeNameOrInfer().findType(typ, traversal);
-          ret.appendString(new SourceTranspiler().transpile(c.getFirstChild() as Nodes.ExpressionNode, traversal, context).getCode());
+          const convSource = c.findDirectExpression(Expressions.Source)!;
+          ret.appendString(new SourceTranspiler().transpile(convSource, traversal, context).getCode());
           ret.appendString(")");
           if (this.addGet) {
             ret.appendString(".get()");
+          }
+          const convLet = c.findDirectExpression(Expressions.Let);
+          if (convLet) {
+            // the LET bindings are declared in a scope of their own, before the value is built
+            const letCode = new LetTranspiler().transpile(convLet, traversal).getCode();
+            ret = new Chunk().appendString(`(await (async () => { ${letCode} return ${ret.getCode()}; })())`);
           }
         } else if (c.get() instanceof Expressions.ValueBody) {
           continue;

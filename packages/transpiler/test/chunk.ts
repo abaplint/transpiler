@@ -123,6 +123,14 @@ describe("Chunk", () => {
     expect(chunk.mappings.find(m => m.generated.line === 3)?.generated.column).to.equal(4);
   });
 
+  it("runIndentationLogic closes levels on pre-indented closing braces", async () => {
+    const chunk = new Chunk("outer {\n  inner {\nbody\n  }\n}\nafter");
+
+    chunk.runIndentationLogic();
+
+    expect(chunk.getCode()).to.equal("outer {\n    inner {\n    body\n    }\n}\nafter");
+  });
+
   it("does not allocate mappings when source maps are disabled", async () => {
     const traversal = new DummyWithoutSourceMap();
     const chunk = new Chunk().append("code", new Position(1, 1), traversal);
