@@ -2131,8 +2131,11 @@ ENDCLASS.
 CLASS lcl IMPLEMENTATION.
   METHOD run.
     DATA lv_type TYPE c LENGTH 1.
+    DATA lv_decimals TYPE i.
     DESCRIBE FIELD iv TYPE lv_type.
     WRITE / lv_type.
+    DESCRIBE FIELD iv DECIMALS lv_decimals.
+    WRITE / lv_decimals.
     IF iv IS INITIAL.
       WRITE / 'initial'.
     ENDIF.
@@ -2145,7 +2148,7 @@ START-OF-SELECTION.
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.getTrimmed()).to.equal("P\ninitial");
+    expect(abap.console.getTrimmed()).to.equal("P\n0\ninitial");
   });
 
   it("Class, tables in+out, clear", async () => {
