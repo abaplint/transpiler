@@ -368,7 +368,8 @@ export class Traversal {
     return undefined;
   }
 
-  public buildMethods(def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined): string[] {
+    public buildMethods(def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined,
+                      scope?: abaplint.ISpaghettiScopeNode): string[] {
     const methods: string[] = [];
     if (def === undefined) {
       return methods;
@@ -381,37 +382,69 @@ export class Traversal {
     }
 
     for (const m of methodDefinitions.getAll()) {
-      const parameters: string[] = [];
-      for (const p of m.getParameters().getAll()) {
-        const type = TranspileTypes.toType(p.getType());
-        const optional = m.getParameters().getOptional().includes(p.getName()) ? "X" : " ";
+      methods.push(this.buildMethod(m.getName(), m, m.getVisibility()));
+    }
 
-        let pKind = "";
-        if (pKind === "") {
-          pKind = m.getParameters().getImporting().find((t) => {return t.getName() === p.getName();}) ? "I" : "";
-        }
-        if (pKind === "") {
-          pKind = m.getParameters().getChanging().find((t) => {return t.getName() === p.getName();}) ? "C" : "";
-        }
-        if (pKind === "") {
-          pKind = m.getParameters().getExporting().find((t) => {return t.getName() === p.getName();}) ? "E" : "";
-        }
-        if (pKind === "") {
-          pKind = m.getParameters().getReturning()?.getName() === p.getName() ? "R" : "";
-        }
-
-        parameters.push(`"${p.getName().toUpperCase()}": {"type": () => {return ${type
-          };}, "is_optional": "${optional
-          }", "parm_kind": "${pKind
-          }", "type_name": "${p.getType().constructor.name}"}`);
+    // an alias for an interface method is listed under its own name, pointing to the method
+    for (const a of def.getAliases() || []) {
+      const [intfName, methodName] = a.getComponent().split("~");
+      if (methodName === undefined) {
+        continue;
       }
-
-      methods.push(`"${m.getName().toUpperCase()}": {"visibility": "${
-        this.mapVisibility(m.getVisibility())}", "parameters": {${
-        parameters.join(", ")}}}`);
+      const aliased = this.findInterfaceDefinition(intfName, scope)?.getMethodDefinitions()?.getByName(methodName);
+      if (aliased === undefined) {
+        // not a method, or the interface is unknown
+        continue;
+      }
+      methods.push(this.buildMethod(a.getName(), aliased, a.getVisibility(), a.getComponent()));
     }
 
     return methods;
+  }
+
+  private buildMethod(name: string, m: abaplint.IMethodDefinition, visibility: abaplint.Visibility, aliasFor?: string): string {
+    const optionalNames = m.getParameters().getOptional().map(o => o.toUpperCase());
+
+    const parameters: string[] = [];
+    for (const p of m.getParameters().getAll()) {
+      const type = TranspileTypes.toType(p.getType());
+      const optional = optionalNames.includes(p.getName().toUpperCase()) ? "X" : " ";
+
+      let pKind = "";
+      if (pKind === "") {
+        pKind = m.getParameters().getImporting().find((t) => {return t.getName() === p.getName();}) ? "I" : "";
+      }
+      if (pKind === "") {
+        pKind = m.getParameters().getChanging().find((t) => {return t.getName() === p.getName();}) ? "C" : "";
+      }
+      if (pKind === "") {
+        pKind = m.getParameters().getExporting().find((t) => {return t.getName() === p.getName();}) ? "E" : "";
+      }
+      if (pKind === "") {
+        pKind = m.getParameters().getReturning()?.getName() === p.getName() ? "R" : "";
+      }
+
+      parameters.push(`"${p.getName().toUpperCase()}": {"type": () => {return ${type
+        };}, "is_optional": "${optional
+        }", "parm_kind": "${pKind
+        }", "type_name": "${p.getType().constructor.name}"}`);
+    }
+
+    // only written when set, a method without them is described as before
+    let extra = "";
+    if (m.isStatic() === true) {
+      extra += `"is_class": "X", `;
+    }
+    if (m.getRaising().length > 0) {
+      extra += `"exceptions": [${m.getRaising().map(e => `"${e.toUpperCase()}"`).join(", ")}], `;
+    }
+    if (aliasFor !== undefined) {
+      extra += `"alias_for": "${aliasFor.toUpperCase()}", `;
+    }
+
+    return `"${name.toUpperCase()}": {"visibility": "${
+      this.mapVisibility(visibility)}", ${extra}"parameters": {${
+      parameters.join(", ")}}}`;
   }
 
   private mapVisibility(vis: abaplint.Visibility) {
