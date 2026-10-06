@@ -1589,6 +1589,54 @@ WRITE / sy-dbcnt.`;
     });
   });
 
+  it("SELECT with blank dynamic HAVING conditions", async () => {
+    const code = `
+DATA lt_result TYPE STANDARD TABLE OF t100 WITH EMPTY KEY.
+DATA lv_having TYPE string.
+DATA lv_having_char TYPE c LENGTH 40.
+DATA lt_having TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+SELECT * FROM t100 INTO TABLE @lt_result HAVING (lv_having).
+WRITE / sy-dbcnt.
+SELECT * FROM t100 INTO TABLE @lt_result HAVING (lv_having_char).
+WRITE / sy-dbcnt.
+APPEND '   ' TO lt_having.
+SELECT * FROM t100 INTO TABLE @lt_result HAVING (lt_having).
+WRITE / sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test},
+    ];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("2\n2\n2");
+    });
+  });
+
+  it("GROUP BY with dynamic HAVING conditions", async () => {
+    const code = `
+DATA lt_result TYPE STANDARD TABLE OF t100-arbgb WITH EMPTY KEY.
+DATA lt_having TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+DATA lv_having TYPE string.
+DATA lv_group TYPE t100-arbgb VALUE 'ZAG_UNIT_TEST'.
+FIELD-SYMBOLS <group> TYPE t100-arbgb.
+ASSIGN lv_group TO <group>.
+APPEND 'COUNT( * ) > 1' TO lt_having.
+APPEND 'AND ARBGB EQ @<group>' TO lt_having.
+SELECT arbgb FROM t100 GROUP BY arbgb HAVING (lt_having) INTO TABLE @lt_result.
+WRITE / sy-dbcnt.
+lv_having = 'COUNT( * ) > 2'.
+SELECT arbgb FROM t100 GROUP BY arbgb HAVING (lv_having) INTO TABLE @lt_result.
+WRITE / sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test},
+    ];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("1\n0");
+    });
+  });
+
   it("order by dynamic tab, empty", async () => {
     const code = `
 DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
