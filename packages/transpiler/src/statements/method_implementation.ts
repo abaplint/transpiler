@@ -73,18 +73,16 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
           } else {
             after += `let ${varPrefixed} = ${unique}?.${varName};\n`;
           }
-          
           if (passByValue === true) {
             // pass by value: the method works on its own copy, also for a generic type,
             // which keeps the type of the actual parameter.
             // A field symbol that is unassigned or assigned with CASTING is passed on as it is
-                      after += `if (${varPrefixed} instanceof abap.types.FieldSymbol) {
-            if (${varPrefixed}.getPointer()?.clone !== undefined) { ${varPrefixed} = ${varPrefixed}.getPointer().clone(); }
-          } else if (${unique}?.${varName} !== undefined && ${varPrefixed}?.clone !== undefined) {
-            ${varPrefixed} = ${varPrefixed}.clone();
-          }\n`;
+            after += `if (${varPrefixed} instanceof abap.types.FieldSymbol) {
+  if (${varPrefixed}.getPointer()?.clone !== undefined) { ${varPrefixed} = ${varPrefixed}.getPointer().clone(); }
+} else if (${unique}?.${varName} !== undefined && ${varPrefixed}?.clone !== undefined) {
+  ${varPrefixed} = ${varPrefixed}.clone();
+}\n`;
           }
-          
           if (type instanceof abaplint.BasicTypes.NumericGenericType) {
             after += `if (${varPrefixed}.constructor.name === "Character") {
   ${varPrefixed} = ${TranspileTypes.toType(identifier.getType())};
