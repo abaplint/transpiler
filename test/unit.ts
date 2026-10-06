@@ -3286,4 +3286,50 @@ ENDCLASS.`;
     expect(cons).to.include("form program");
   });
 
+  it("test-68", async () => {
+// cast to a local class of a class pool should throw cx_sy_move_cast_error
+    const clas = `
+    CLASS zcl_foo DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_foo IMPLEMENTATION.
+    ENDCLASS.`;
+    const imp = `
+    CLASS lcl_bar DEFINITION.
+    ENDCLASS.
+    CLASS lcl_bar IMPLEMENTATION.
+    ENDCLASS.
+    CLASS lcl_baz DEFINITION.
+    ENDCLASS.
+    CLASS lcl_baz IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA foo TYPE REF TO object.
+        DATA bar TYPE REF TO lcl_bar.
+        CREATE OBJECT foo TYPE lcl_baz.
+        TRY.
+            bar ?= foo.
+            WRITE 'not expected'.
+          CATCH cx_sy_move_cast_error.
+            WRITE 'expected'.
+        ENDTRY.
+      ENDMETHOD.
+    ENDCLASS.`;
+
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "cx_sy_move_cast_error.clas.abap", contents: cxmovecast},
+      {filename: "zcl_foo.clas.abap", contents: clas},
+      {filename: "zcl_foo.clas.locals_imp.abap", contents: imp},
+      {filename: "zcl_foo.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n")[1]).to.equal("expected");
+  });
+
 });

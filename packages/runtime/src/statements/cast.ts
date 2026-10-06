@@ -5,7 +5,6 @@ import {ABAP} from "..";
 declare const abap: ABAP;
 
 // todo, field symbols as input?
-// todo, local classes?
 // check with javascript instanceof?
 // handling interfaces?
 // todo: remove the "async"
@@ -37,6 +36,14 @@ export async function cast(target: ABAPObject | FieldSymbol, source: ABAPObject)
   if (targetClass === undefined) {
     // todo, for unit testing,
     targetClass = abap.Classes["PROG-ZFOOBAR-" + targetName];
+  }
+  if (targetClass === undefined && target.getRTTIName) {
+    // local class, RTTI name "\CLASS-POOL=ZCL_FOO\CLASS=LCL_BAR" is registered as "CLAS-ZCL_FOO-LCL_BAR"
+    const match = /^\\(CLASS-POOL|PROGRAM)=([^\\]+)\\CLASS=(.+)$/.exec(target.getRTTIName()?.toUpperCase() || "");
+    if (match) {
+      const prefix = match[1] === "PROGRAM" ? "PROG" : "CLAS";
+      targetClass = abap.Classes[prefix + "-" + match[2] + "-" + match[3]];
+    }
   }
 
   if (targetClass?.INTERNAL_TYPE === "CLAS") {
