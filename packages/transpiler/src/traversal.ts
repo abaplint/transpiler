@@ -369,7 +369,7 @@ export class Traversal {
   }
 
     public buildMethods(def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined,
-                      scope?: abaplint.ISpaghettiScopeNode): string[] {
+                        scope?: abaplint.ISpaghettiScopeNode): string[] {
     const methods: string[] = [];
     if (def === undefined) {
       return methods;
