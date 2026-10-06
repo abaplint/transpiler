@@ -73,4 +73,15 @@ WRITE val.`;
     await f(abap);
   });
 
+  it("substring_after, newline", async () => {
+    const code = `
+data lv_text type string.
+lv_text = |a;b\\nc|.
+ASSERT substring_after( val = lv_text
+                        sub = ';' ) = |b\\nc|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
