@@ -327,7 +327,7 @@ ENDCLASS.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-ZCL_RET';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"BAR": {"type": () => {return new abap.types.Integer({qualifiedName: "I"});}, "visibility": "U", "is_constant": " ", "is_class": " "}};
-  static METHODS = {"RUN": {"visibility": "U", "parameters": {"RV_RET": {"type": () => {return new abap.types.String({qualifiedName: "STRING"});}, "is_optional": " ", "parm_kind": "R", "type_name": "StringType"}}}};
+    static METHODS = {"RUN": {"visibility": "U", "is_class": "X", "parameters": {"RV_RET": {"type": () => {return new abap.types.String({qualifiedName: "STRING"});}, "is_optional": " ", "parm_kind": "R", "type_name": "StringType"}}}};
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
