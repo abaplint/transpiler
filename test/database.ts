@@ -1538,6 +1538,57 @@ WRITE sy-dbcnt.`;
     }, {snowflake: false});
   });
 
+  it("SELECT with empty dynamic WHERE, GROUP BY and HAVING tables", async () => {
+    const code = `
+DATA lt_tadir TYPE STANDARD TABLE OF tadir WITH EMPTY KEY.
+DATA lt_where TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+DATA lt_group_by TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+DATA lt_having TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+SELECT obj_name
+  INTO CORRESPONDING FIELDS OF TABLE @lt_tadir
+  FROM tadir
+  UP TO 1 ROWS
+  WHERE (lt_where)
+  GROUP BY (lt_group_by)
+  HAVING (lt_having).
+WRITE / sy-dbcnt.`;
+    const tabl_tadir = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V>
+    <TABNAME>TADIR</TABNAME>
+    <TABCLASS>TRANSP</TABCLASS>
+   </DD02V>
+   <DD03P_TABLE>
+    <DD03P><FIELDNAME>PGMID</FIELDNAME><KEYFLAG>X</KEYFLAG><DATATYPE>CHAR</DATATYPE><LENG>000004</LENG></DD03P>
+    <DD03P><FIELDNAME>OBJECT</FIELDNAME><KEYFLAG>X</KEYFLAG><DATATYPE>CHAR</DATATYPE><LENG>000004</LENG></DD03P>
+    <DD03P>
+     <FIELDNAME>OBJ_NAME</FIELDNAME>
+     <KEYFLAG>X</KEYFLAG>
+     <DATATYPE>CHAR</DATATYPE>
+     <LENG>000040</LENG>
+    </DD03P>
+    <DD03P><FIELDNAME>DEVCLASS</FIELDNAME><DATATYPE>CHAR</DATATYPE><LENG>000030</LENG></DD03P>
+    <DD03P><FIELDNAME>KORRNUM</FIELDNAME><DATATYPE>CHAR</DATATYPE><LENG>000020</LENG></DD03P>
+    <DD03P><FIELDNAME>SRCSYSTEM</FIELDNAME><DATATYPE>CHAR</DATATYPE><LENG>000003</LENG></DD03P>
+    <DD03P><FIELDNAME>DELFLAG</FIELDNAME><DATATYPE>CHAR</DATATYPE><LENG>000001</LENG></DD03P>
+    <DD03P><FIELDNAME>GENFLAG</FIELDNAME><DATATYPE>CHAR</DATATYPE><LENG>000001</LENG></DD03P>
+    <DD03P><FIELDNAME>EDTFLAG</FIELDNAME><DATATYPE>CHAR</DATATYPE><LENG>000001</LENG></DD03P>
+    <DD03P><FIELDNAME>MASTERLANG</FIELDNAME><DATATYPE>CHAR</DATATYPE><LENG>000001</LENG></DD03P>
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "tadir.tabl.xml", contents: tabl_tadir},
+    ];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("1");
+    });
+  });
+
   it("order by dynamic tab, empty", async () => {
     const code = `
 DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
