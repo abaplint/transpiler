@@ -38,7 +38,7 @@ export function substring_before(input: {
     reg = ABAPRegExp.escapeRegExp(input.sub.get());
   }
 
-  const r = new RegExp("(.*?)" + reg);
+  const r = new RegExp("([\\s\\S]*?)" + reg);
   const res = val.match(r);
 
   let ret = "";
