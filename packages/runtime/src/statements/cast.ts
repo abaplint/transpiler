@@ -37,7 +37,7 @@ export async function cast(target: ABAPObject | FieldSymbol, source: ABAPObject)
     // todo, for unit testing,
     targetClass = abap.Classes["PROG-ZFOOBAR-" + targetName];
   }
-  if (targetClass === undefined && target.getRTTIName) {
+  if (targetClass === undefined && target instanceof ABAPObject) {
     // local class, RTTI name "\CLASS-POOL=ZCL_FOO\CLASS=LCL_BAR" is registered as "CLAS-ZCL_FOO-LCL_BAR"
     const match = /^\\(CLASS-POOL|PROGRAM)=([^\\]+)\\CLASS=(.+)$/.exec(target.getRTTIName()?.toUpperCase() || "");
     if (match) {
