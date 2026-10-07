@@ -2,7 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {Validation, config} from "./validation";
 import {UniqueIdentifier} from "./unique_identifier";
 import {UnitTest} from "./unit_test";
-import {IFile, IOutput, IProgress, ITranspilerOptions, ITranspilerPlugin, IOutputFile, UnknownTypesEnum} from "./types";
+import {IFile, IOutput, IProgress, ITranspilerOptions, IOutputFile, UnknownTypesEnum} from "./types";
 import {Chunk} from "./chunk";
 import {DatabaseSetupResult} from "./db/database_setup_result";
 import {DatabaseSetup} from "./db";
@@ -23,16 +23,14 @@ import {OutputLayout, OutputFolders} from "./output_layout";
 
 export {OutputLayout, OutputFolders, importPath} from "./output_layout";
 
-export {config, ITranspilerOptions, ITranspilerPlugin, IFile, IProgress, IOutputFile, IOutput,
+export {config, ITranspilerOptions, IFile, IProgress, IOutputFile, IOutput,
   UnknownTypesEnum, Chunk, DatabaseSetupResult};
 
 export class Transpiler {
   private readonly options: ITranspilerOptions | undefined;
-  private readonly plugin: ITranspilerPlugin | undefined;
 
-  public constructor(options?: ITranspilerOptions, plugin?: ITranspilerPlugin) {
+  public constructor(options?: ITranspilerOptions) {
     this.options = options;
-    this.plugin = plugin;
     if (this.options === undefined) {
       this.options = {};
     }
@@ -56,7 +54,6 @@ export class Transpiler {
     const layout = new OutputLayout(reg, folders);
 
     const dbSetup = new DatabaseSetup(reg).run(this.options);
-    this.plugin?.amendDatabaseSetup?.(dbSetup, reg, this.options || {});
 
     const output: IOutput = {
       objects: [],
@@ -67,8 +64,6 @@ export class Transpiler {
       databaseSetup: dbSetup,
       reg: reg,
     };
-
-    const pluginOutputs: IOutputFile[] = [];
 
     progress?.set(reg.getObjectCount().total, "Building");
     for (const obj of reg.getObjects()) {
@@ -103,18 +98,11 @@ export class Transpiler {
         output.objects.push(...new HandleW3MI(layout).runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.MessageClass) {
         output.objects.push(...new HandleMSAG().runObject(obj, reg));
-      } else if (this.plugin !== undefined) {
-        const handled = this.plugin.handleObject(obj, reg, this.options || {});
-        if (handled !== undefined) {
-          output.objects.push(...handled);
-          pluginOutputs.push(...handled);
-        }
       }
     }
 
-    // after the object loop, plugin output files are imported by the initialization scripts
-    output.initializationScript = new Initialization(layout).script(reg, dbSetup, this.options, false, pluginOutputs);
-    output.initializationScript2 = new Initialization(layout).script(reg, dbSetup, this.options, true, pluginOutputs);
+    output.initializationScript = new Initialization(layout).script(reg, dbSetup, this.options, false);
+    output.initializationScript2 = new Initialization(layout).script(reg, dbSetup, this.options, true);
 
     for (const file of output.objects) {
       file.filename = layout.file(file.object, file.filename);
@@ -125,7 +113,7 @@ export class Transpiler {
 // ///////////////////////////////
 
   protected validate(reg: abaplint.IRegistry): void {
-    const issues = new Validation(this.options, this.plugin).run(reg);
+    const issues = new Validation(this.options).run(reg);
     if (issues.length > 0) {
       const messages = issues.map(i => i.getKey() + ", " +
         i.getMessage() + ", " +

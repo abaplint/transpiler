@@ -6,6 +6,7 @@ import {PGDatabaseSchema} from "./schema_generation/pg_database_schema";
 import {DatabaseSchemaGenerator} from "./schema_generation/database_schema_generator";
 import {SnowflakeDatabaseSchema} from "./schema_generation/snowflake_database_schema";
 import {PopulateTables} from "./populate_tables";
+import {CDSDatabaseView} from "./cds_database_view";
 
 /////////////////////////
 // NOTES
@@ -21,9 +22,11 @@ export class DatabaseSetup {
   }
 
   public run(options?: ITranspilerOptions | undefined): DatabaseSetupResult {
+    // CDS views are dialect independent SQL, added after the tables and views they select from
+    const cdsViews = this.buildCDSViews();
     return {
       schemas: {
-        sqlite: this.driver(new SQLiteDatabaseSchema(this.reg)),
+        sqlite: [...this.driver(new SQLiteDatabaseSchema(this.reg)), ...cdsViews],
         // HANA takes the PG schema unchanged -- measured against HANA Express
         // on a tree of 77 tables. The one thing it needs is that identifiers
         // reach it quoted in UPPER case, and that is not a dialect of DDL: the
@@ -32,14 +35,27 @@ export class DatabaseSetup {
         // here. (Unquoted would nearly work and then meet a column called
         // `cross`, which is one of HANA's reserved words.)
         hdb: this.driver(new PGDatabaseSchema(this.reg)),
-        pg: this.driver(new PGDatabaseSchema(this.reg)),
-        snowflake: this.driver(new SnowflakeDatabaseSchema(this.reg)),
+        pg: [...this.driver(new PGDatabaseSchema(this.reg)), ...cdsViews],
+        snowflake: [...this.driver(new SnowflakeDatabaseSchema(this.reg)), ...cdsViews],
       },
       insert: this.buildInsert(options),
     };
   }
 
 ////////////////////
+
+  private buildCDSViews(): string[] {
+    const views: string[] = [];
+    for (const obj of this.reg.getObjects()) {
+      if (obj instanceof abaplint.Objects.DataDefinition) {
+        const view = new CDSDatabaseView(this.reg).build(obj);
+        if (view !== undefined) {
+          views.push(view);
+        }
+      }
+    }
+    return views;
+  }
 
   private driver(schemaGenerator: DatabaseSchemaGenerator): string[] {
     const statements: string[] = [];

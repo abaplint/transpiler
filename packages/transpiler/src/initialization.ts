@@ -1,6 +1,6 @@
 import {DatabaseSetupResult} from "./db/database_setup_result";
 import * as abaplint from "@abaplint/core";
-import {ITranspilerOptions, IOutputFile} from "./types";
+import {ITranspilerOptions} from "./types";
 import {HandleFUGR} from "./handlers/handle_fugr";
 import {OutputLayout, importPath} from "./output_layout";
 
@@ -29,7 +29,7 @@ export class Initialization {
   }
 
   public script(reg: abaplint.IRegistry, dbSetup: DatabaseSetupResult, options: ITranspilerOptions | undefined,
-                useImport?: boolean, pluginOutputs?: readonly IOutputFile[]) {
+                useImport?: boolean) {
       let ret = "";
       if (useImport === true) {
         ret = `/* eslint-disable import/newline-after-import */
@@ -75,7 +75,7 @@ globalThis.abap = new runtime.ABAP();\n`;
       ret += `}\n\n`;
       ret += `await initializeABAP();\n\n`;
 
-      ret += `${this.buildImports(reg, useImport, options, pluginOutputs)}`;
+      ret += `${this.buildImports(reg, useImport, options)}`;
 
       if (options?.setup?.postFunction !== undefined) {
         ret += `\n\nawait setup.${options?.setup?.postFunction}();\n`;
@@ -84,8 +84,7 @@ globalThis.abap = new runtime.ABAP();\n`;
       return ret;
     }
 
-  private buildImports(reg: abaplint.IRegistry, useImport?: boolean, options?: ITranspilerOptions,
-                       pluginOutputs?: readonly IOutputFile[]): string {
+  private buildImports(reg: abaplint.IRegistry, useImport?: boolean, options?: ITranspilerOptions): string {
 // note: ES modules are hoised, so use the dynamic import(), due to setting of globalThis.abap
 // some sorting required: eg. a class constructor using constant from interface
 
@@ -99,10 +98,6 @@ globalThis.abap = new runtime.ABAP();\n`;
         code: useImport === true ? `import "${specifier}";` : `await import("${specifier}");`,
       };
     };
-
-    for (const pluginOutput of pluginOutputs || []) {
-      list.push(imp(this.layout.file(pluginOutput.object, pluginOutput.filename)));
-    }
 
     for (const obj of reg.getObjects()) {
       if (obj instanceof abaplint.Objects.Table

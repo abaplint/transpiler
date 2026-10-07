@@ -57,22 +57,4 @@ describe("Output layout", () => {
     const layout = new OutputLayout(reg, new Map([["zapp.prog.abap", "project"]]));
     expect(() => layout.file({type: "PROG", name: "ZAPP"}, "../init.mjs")).to.throw("Invalid output filename");
   });
-
-  it("groups plugin outputs using object ownership", async () => {
-    const reg = new abaplint.Registry().addDependency(new abaplint.MemoryFile("zlib.devc.xml", "<abapGit/>"));
-    const {Chunk} = await import("../src/chunk");
-    const output = await new Transpiler({}, {
-      objectTypes: () => ["DEVC"],
-      handleObject: obj => [{
-        object: {name: obj.getName(), type: obj.getType()},
-        filename: "zplugin.mjs",
-        chunk: new Chunk("globalThis.pluginLoaded = true;"),
-        requires: [],
-        exports: [],
-      }],
-    }).run(reg, undefined, new Map([["zlib.devc.xml", "lib%#"]]));
-    expect(output.objects[0].filename).to.equal("lib%#/zplugin.mjs");
-    expect(output.initializationScript).to.contain('await import("./lib%25%23/zplugin.mjs")');
-    expect(output.initializationScript2).to.contain('import "./lib%25%23/zplugin.mjs"');
-  });
 });

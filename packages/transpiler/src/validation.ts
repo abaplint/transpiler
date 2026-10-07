@@ -1,10 +1,14 @@
 import {Issue, IRegistry, Config, IConfig, Version} from "@abaplint/core";
-import {ITranspilerOptions, ITranspilerPlugin, UnknownTypesEnum} from "./types";
+import {ITranspilerOptions, UnknownTypesEnum} from "./types";
 
 const defaultAllowedObjectTypes = [
   "APIS",
+  "APLO",
   "AUTH",
+  "BDEF",
   "CLAS",
+  "DDLS",
+  "DDLX",
   "DEVC",
   "DOMA",
   "DTEL",
@@ -26,13 +30,19 @@ const defaultAllowedObjectTypes = [
   "PARA",
   "PINF",
   "PROG",
+  "SAJC",
+  "SAJT",
+  "SCO2",
   "WAPA",
   "SHLP",
   "SHMA",
+  "SIA6",
   "SICF",
   "SMIM",
   "SPLO",
   "SRFC",
+  "SRVB",
+  "SRVD",
   "SUSC",
   "SUSH",
   "SUSO",
@@ -113,11 +123,9 @@ export const config: IConfig = {
 export class Validation {
 
   private readonly options: ITranspilerOptions | undefined;
-  private readonly plugin: ITranspilerPlugin | undefined;
 
-  public constructor(options?: ITranspilerOptions, plugin?: ITranspilerPlugin) {
+  public constructor(options?: ITranspilerOptions) {
     this.options = options;
-    this.plugin = plugin;
   }
 
   public run(reg: IRegistry): readonly Issue[] {
@@ -128,14 +136,6 @@ export class Validation {
     }
 
     config.rules["forbidden_identifier"]["check"] = ["^unique\\d+$"];
-
-    const allowed = [...defaultAllowedObjectTypes];
-    for (const type of this.plugin?.objectTypes() || []) {
-      if (allowed.includes(type.toUpperCase()) === false) {
-        allowed.push(type.toUpperCase());
-      }
-    }
-    config.rules["allowed_object_types"]["allowed"] = allowed;
 
     if (this.options?.unknownTypes === UnknownTypesEnum.runtimeError) {
       // this is not a constant, just a regex that happens to not match anything

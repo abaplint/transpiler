@@ -53,7 +53,7 @@ unique without regard to case, and `project` is reserved. A conflicting derived
 name needs an explicit `libs[].name`. Duplicate ABAP objects across libraries
 are rejected; a project object replaces a library object of the same type/name.
 
-Class locals, test classes, function groups, plugin modules, MIME data, and
+Class locals, test classes, function groups, MIME data, and
 source maps follow their owning object. Source maps include ABAP source content,
 including libraries loaded from temporary Git checkouts. Imports and registered
 MIME filenames reference the new paths.

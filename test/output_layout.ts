@@ -173,26 +173,6 @@ describe("CLI grouped output", () => {
     expect(read("project/zcl_app.clas.mjs")).to.equal(before);
   });
 
-  it("rejects conflicting plugin outputs before writing files", () => {
-    write("src/zpackage.devc.xml", "<abapGit/>");
-    write("node_modules/@abaplint/transpiler-extras/package.json", JSON.stringify({main: "index.js"}));
-    write("node_modules/@abaplint/transpiler-extras/index.js", [
-      "exports.plugin = {objectTypes: () => ['DEVC'], handleObject: obj => {",
-      "  const file = {object: {name: obj.getName(), type: obj.getType()},",
-      "    filename: 'same.mjs', chunk: {getCode: () => ''}, requires: [], exports: []};",
-      "  return [file, {...file}];",
-      "}};",
-    ].join("\n"));
-    let message = "";
-    try {
-      build(config());
-    } catch (error) {
-      message = String(error.stdout);
-    }
-    expect(message).to.contain("Conflicting output file: project/same.mjs");
-    expect(existsSync(path.join(folder, "nested/output/project/same.mjs"))).to.equal(false);
-  });
-
   it("groups project inputs without libraries or maps", () => {
     write("src/zfirst.prog.abap", "ASSERT 1 = 1.");
     write("extra/zsecond.prog.abap", "ASSERT 2 = 2.");

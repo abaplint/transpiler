@@ -12,8 +12,6 @@ export class CDSDatabaseView {
 
   public build(obj: abaplint.Objects.DataDefinition): string | undefined {
     this.viewName = obj.getName();
-    // Parse with the plugin's core so expression class identity also works when
-    // the registry came from a webpack bundle or a different installation.
     const tree = new abaplint.CDSParser().parse(obj.findSourceFile());
     if (tree === undefined) {
       return this.unsupported("could not parse CDS definition");
