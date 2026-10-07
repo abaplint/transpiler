@@ -1114,4 +1114,73 @@ START-OF-SELECTION.
     expect(abap.console.getTrimmed()).to.equal("0\n42\n4");
   });
 
+  it("ASSIGN, a static data object does not set sy-subrc", async () => {
+    // as measured on a 7.58 system, sy-subrc is 4 from the READ TABLE before each ASSIGN
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    DATA mv_attr TYPE i VALUE 7.
+    DATA mo_obj TYPE REF TO object.
+    METHODS run.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    DATA lt_empty TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+    DATA lv_i TYPE i VALUE 1.
+    DATA lv_c TYPE c LENGTH 5 VALUE 'abcde'.
+    DATA lr TYPE REF TO i.
+    DATA lt_i TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+    DATA: BEGIN OF ls,
+            a TYPE i,
+            b TYPE i,
+          END OF ls.
+    FIELD-SYMBOLS <fs> TYPE any.
+
+    lr = REF #( lv_i ).
+    APPEND 1 TO lt_i.
+    mo_obj = me.
+
+    READ TABLE lt_empty INDEX 1 TRANSPORTING NO FIELDS.
+    ASSIGN lv_i TO <fs>.
+    WRITE / sy-subrc.
+
+    READ TABLE lt_empty INDEX 1 TRANSPORTING NO FIELDS.
+    ASSIGN me->mv_attr TO <fs>.
+    WRITE / sy-subrc.
+
+    READ TABLE lt_empty INDEX 1 TRANSPORTING NO FIELDS.
+    ASSIGN mo_obj TO <fs>.
+    WRITE / sy-subrc.
+
+    READ TABLE lt_empty INDEX 1 TRANSPORTING NO FIELDS.
+    ASSIGN lv_c+1(2) TO <fs>.
+    WRITE / sy-subrc.
+
+    READ TABLE lt_empty INDEX 1 TRANSPORTING NO FIELDS.
+    ASSIGN ('ME->MV_ATTR') TO <fs>.
+    WRITE / sy-subrc.
+
+    READ TABLE lt_empty INDEX 1 TRANSPORTING NO FIELDS.
+    ASSIGN lr->* TO <fs>.
+    WRITE / sy-subrc.
+
+    READ TABLE lt_empty INDEX 1 TRANSPORTING NO FIELDS.
+    ASSIGN lt_i[ 1 ] TO <fs>.
+    WRITE / sy-subrc.
+
+    READ TABLE lt_empty INDEX 1 TRANSPORTING NO FIELDS.
+    ASSIGN COMPONENT 1 OF STRUCTURE ls TO <fs>.
+    WRITE / sy-subrc.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  NEW lcl( )->run( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("4\n4\n4\n4\n0\n0\n0\n0");
+  });
+
 });

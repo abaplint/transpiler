@@ -25,6 +25,23 @@ throw error;
 })())`;
   }
 
+  /** ASSIGN of a statically specified data object, e.g. a variable, an attribute or an offset/length,
+   *  does not set sy-subrc, a dereference, a table expression or COMPONENT does */
+  private isStaticDataObject(node: abaplint.Nodes.StatementNode, source: abaplint.Nodes.ExpressionNode | undefined): boolean {
+    const concat = node.concatTokens().toUpperCase();
+    if (source === undefined
+        || concat.startsWith("ASSIGN COMPONENT ")
+        || concat.includes(" INCREMENT ")
+        || concat.includes(" ELSE UNASSIGN")
+        || source.findFirstExpression(abaplint.Expressions.Dereference) !== undefined
+        || source.findFirstExpression(abaplint.Expressions.TableExpression) !== undefined) {
+      return false;
+    }
+    // field symbols are left as they are, not measured
+    const first = source.findFirstExpression(abaplint.Expressions.FieldChain)?.getFirstChild();
+    return first !== undefined && !(first.get() instanceof abaplint.Expressions.SourceFieldSymbol);
+  }
+
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const assignSource = node.findDirectExpression(abaplint.Expressions.AssignSource);
 
@@ -70,6 +87,9 @@ throw error;
         options.push("source: " + baseSourceCode);
       } else {
         options.push("source: " + sources.pop());
+        if (this.isStaticDataObject(node, sourceExprForCheck)) {
+          options.push("keepSubrc: true");
+        }
       }
     } else {
 
