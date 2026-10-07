@@ -19,6 +19,9 @@ import {HandleMSAG} from "./handlers/handle_msag";
 import {HandleOA2P} from "./handlers/handle_oa2p";
 import {HandleFUGR} from "./handlers/handle_fugr";
 import {Initialization} from "./initialization";
+import {OutputLayout, OutputFolders} from "./output_layout";
+
+export {OutputLayout, OutputFolders, importPath} from "./output_layout";
 
 export {config, ITranspilerOptions, ITranspilerPlugin, IFile, IProgress, IOutputFile, IOutput,
   UnknownTypesEnum, Chunk, DatabaseSetupResult};
@@ -45,19 +48,20 @@ export class Transpiler {
     return this.run(reg);
   }
 
-  public async run(reg: abaplint.IRegistry, progress?: IProgress): Promise<IOutput> {
+  public async run(reg: abaplint.IRegistry, progress?: IProgress, folders?: OutputFolders): Promise<IOutput> {
     // Validation installs the transpiler configuration and findIssues() parses
     // dirty registries. Parsing before that would be wasted because setConfig()
     // marks every registry object dirty again.
     this.validate(reg);
+    const layout = new OutputLayout(reg, folders);
 
     const dbSetup = new DatabaseSetup(reg).run(this.options);
     this.plugin?.amendDatabaseSetup?.(dbSetup, reg, this.options || {});
 
     const output: IOutput = {
       objects: [],
-      unitTestScript: new UnitTest().unitTestScript(reg, this.options?.skip),
-      unitTestScriptOpen: new UnitTest().unitTestScriptOpen(reg, this.options?.skip),
+      unitTestScript: new UnitTest(layout).unitTestScript(reg, this.options?.skip),
+      unitTestScriptOpen: new UnitTest(layout).unitTestScriptOpen(reg, this.options?.skip),
       initializationScript: "",
       initializationScript2: "",
       databaseSetup: dbSetup,
@@ -80,7 +84,7 @@ export class Transpiler {
       } else if (obj instanceof abaplint.Objects.FunctionGroup) {
         output.objects.push(...new HandleFUGR(this.options).runObject(obj, reg));
       } else if (obj instanceof abaplint.ABAPObject) {
-        output.objects.push(...new HandleABAP(this.options).runObject(obj, reg));
+        output.objects.push(...new HandleABAP(this.options, layout).runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.Oauth2Profile) {
         output.objects.push(...new HandleOA2P().runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.Table) {
@@ -94,9 +98,9 @@ export class Transpiler {
       } else if (obj instanceof abaplint.Objects.TableType) {
         output.objects.push(...new HandleTableType().runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.MIMEObject) {
-        output.objects.push(...new HandleSMIM().runObject(obj, reg));
+        output.objects.push(...new HandleSMIM(layout).runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.WebMIME) {
-        output.objects.push(...new HandleW3MI().runObject(obj, reg));
+        output.objects.push(...new HandleW3MI(layout).runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.MessageClass) {
         output.objects.push(...new HandleMSAG().runObject(obj, reg));
       } else if (this.plugin !== undefined) {
@@ -109,9 +113,12 @@ export class Transpiler {
     }
 
     // after the object loop, plugin output files are imported by the initialization scripts
-    output.initializationScript = new Initialization().script(reg, dbSetup, this.options, false, pluginOutputs);
-    output.initializationScript2 = new Initialization().script(reg, dbSetup, this.options, true, pluginOutputs);
+    output.initializationScript = new Initialization(layout).script(reg, dbSetup, this.options, false, pluginOutputs);
+    output.initializationScript2 = new Initialization(layout).script(reg, dbSetup, this.options, true, pluginOutputs);
 
+    for (const file of output.objects) {
+      file.filename = layout.file(file.object, file.filename);
+    }
     return output;
   }
 

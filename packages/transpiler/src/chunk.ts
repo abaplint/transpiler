@@ -198,7 +198,11 @@ export class Chunk {
    * @param options.sourcePaths maps a mapping "source" (the bare abap filename) to
    *   the path that should appear in the map, avoiding fragile post-hoc string edits
    */
-  public getMap(generatedFilename: string, options?: {generatedLineOffset?: number, sourcePaths?: {[filename: string]: string}}): string {
+  public getMap(generatedFilename: string, options?: {
+    generatedLineOffset?: number,
+    sourcePaths?: {[filename: string]: string},
+    sourceContents?: {[filename: string]: string},
+  }): string {
     const offset = options?.generatedLineOffset ?? 0;
     const sourcePaths = options?.sourcePaths ?? {};
 
@@ -210,6 +214,12 @@ export class Chunk {
       generated: {line: m.generated.line + offset, column: m.generated.column},
     }));
 
+    for (const source of new Set(this.mappings.map(m => m.source))) {
+      const contents = options?.sourceContents?.[source];
+      if (contents !== undefined) {
+        sourceMapGenerator.setSourceContent(sourcePaths[source] ?? source, contents);
+      }
+    }
     const json = sourceMapGenerator.toJSON();
     json.file = generatedFilename;
     json.sourceRoot = "";

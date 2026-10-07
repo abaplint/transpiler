@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import * as abaplint from "@abaplint/core";
-import {escapeNamespaceFilename} from "./initialization";
+import {OutputLayout, importPath} from "./output_layout";
 
 /** @uniqueItems true */
 export type TestMethodList = {
@@ -14,6 +14,10 @@ export type TestMethodList = {
 }[];
 
 export class UnitTest {
+
+  public constructor(private readonly layout = new OutputLayout()) {
+    // Test runners live at the output root.
+  }
 
   public unitTestScriptOpen(reg: abaplint.IRegistry, _skip?: TestMethodList): string {
     let ret = `/* eslint-disable curly */
@@ -36,7 +40,7 @@ async function run() {
       }
       const hasTestFile = obj.getFiles().some(f => { return f.getFilename().includes(".testclasses."); });
       if (hasTestFile === true) {
-        ret += `  await import("./${escapeNamespaceFilename(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}.testclasses.mjs");\n`;
+        ret += `  await import("${importPath("index.mjs", this.layout.objectModule(obj, ".testclasses"))}");\n`;
       }
 
       for (const file of obj.getABAPFiles()) {
@@ -115,7 +119,7 @@ run().then(() => {
 
           tests.push({
             obj,
-            filename: `./${escapeNamespaceFilename(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}.testclasses.mjs`,
+            filename: `${importPath("index.mjs", this.layout.objectModule(obj, ".testclasses"))}`,
             localClass: def.name.toLowerCase(),
             riskLevel: def.riskLevel,
             duration: def.duration,

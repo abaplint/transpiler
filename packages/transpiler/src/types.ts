@@ -38,6 +38,7 @@ export interface IProgress {
 /** one javascript output file for each object */
 export interface IOutputFile {
   object: IObjectIdentifier;
+  /** POSIX path relative to the output root; includes its folder when a layout is supplied. */
   filename: string,
   chunk: Chunk,
   requires: readonly IRequire[];
