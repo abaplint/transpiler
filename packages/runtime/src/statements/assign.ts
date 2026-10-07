@@ -12,6 +12,8 @@ export interface IAssignInput {
   dynamicSource?: ICharacter, // first part only
   casting?: boolean,
   component?: string | ICharacter,
+  // a statically specified data object, ASSIGN does not set sy-subrc then
+  keepSubrc?: boolean,
 }
 
 export function assign(input: IAssignInput) {
@@ -191,7 +193,9 @@ export function assign(input: IAssignInput) {
         }
         input.target.assign(input.source);
       }
-      abap.builtin.sy.get().subrc.set(0);
+      if (input.keepSubrc !== true) {
+        abap.builtin.sy.get().subrc.set(0);
+      }
     }
 
   }
