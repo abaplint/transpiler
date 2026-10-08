@@ -32,6 +32,10 @@ export class FieldSymbol  {
     return this.type.getQualifiedName();
   }
 
+  public getRTTIName() {
+    return this.type instanceof ABAPObject ? this.type.getRTTIName() : undefined;
+  }
+
   public assign(pointer: PointerType) {
     this.pointer = pointer;
   }
