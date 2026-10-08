@@ -4,6 +4,7 @@ import {Character, FieldSymbol, HashedTable, Hex, Integer, ITableKey, Numc, Stri
   secondaryKeyName, Structure, Table, TableAccessType} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {parsePosition} from "../operators/_parse";
 import {ABAP} from "..";
 
 declare const abap: ABAP;
@@ -182,8 +183,12 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
     return;
   }
 
-  let loopFrom = options?.from && options?.from.get() > 0 ? options.from.get() - 1 : 0;
-  let loopTo = options?.to && options.to.get() < length ? options.to.get() : length;
+  // FROM and TO are positions of type i, an arithmetic result outside it raises
+  const optionFrom = options?.from ? parsePosition(options.from) : undefined;
+  const optionTo = options?.to ? parsePosition(options.to) : undefined;
+  // checked against undefined, a bound of 0 is a bound: TO 0 runs no row
+  let loopFrom = optionFrom !== undefined && optionFrom > 0 ? optionFrom - 1 : 0;
+  let loopTo = optionTo !== undefined && optionTo < length ? optionTo : length;
 
   let array: any[] = [];
   let block: ((row: any) => number) | undefined = undefined;

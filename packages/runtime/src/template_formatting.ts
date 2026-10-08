@@ -1,6 +1,8 @@
 import {alphaIn, alphaOut} from "./alpha";
 import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Integer, Packed, Structure, Table} from "./types";
 import {ICharacter} from "./types/_character";
+import {MAX_INTEGER, MIN_INTEGER} from "./types/integer";
+import {throwError} from "./throw_error";
 import {INumeric} from "./types/_numeric";
 
 type options = {
@@ -29,6 +31,12 @@ function decimalsOfDecimal(value: number, decimals: number): string {
   return (value < 0 && rounded !== 0 ? "-" : "") + rounded.toFixed(decimals);
 }
 
+function checkIntegerResult(value: number): void {
+  if (value > MAX_INTEGER || value < MIN_INTEGER) {
+    throwError("CX_SY_ARITHMETIC_OVERFLOW");
+  }
+}
+
 export function templateFormatting(source: ICharacter | INumeric | number | string, options?: options): string {
   let text = "";
 
@@ -54,6 +62,10 @@ export function templateFormatting(source: ICharacter | INumeric | number | stri
       text = raw + "";
     }
   } else if (source instanceof Float) {
+    if (source.isIntegerCalculationType()) {
+      // a division of i operands, its calculation type is i like the Integer case below
+      checkIntegerResult(source.getCalculationValue());
+    }
     const raw = source.getRaw();
     if (options?.style === "scientific") {
       text = raw.toExponential().toUpperCase();
@@ -71,6 +83,11 @@ export function templateFormatting(source: ICharacter | INumeric | number | stri
     }
   } else if (typeof source === "number" || typeof source === "string") {
     text = source + "";
+  } else if (source instanceof Integer) {
+    // an embedded expression of i operands is calculated in i, a template gives it no wider type
+    const value = source.get();
+    checkIntegerResult(value);
+    text = value + "";
   } else {
     text = source.get() + "";
   }

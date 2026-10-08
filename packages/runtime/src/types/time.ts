@@ -3,7 +3,7 @@ import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {String} from "./string";
 import {Float} from ".";
-import {parse} from "../operators/_parse";
+import {parsePosition} from "../operators/_parse";
 
 export class Time implements ICharacter {
   private value: string;
@@ -63,10 +63,10 @@ export class Time implements ICharacter {
 
   public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}) {
     if (input?.offset) {
-      input.offset = parse(input.offset);
+      input.offset = parsePosition(input.offset);
     }
     if (input?.length) {
-      input.length = parse(input.length);
+      input.length = parsePosition(input.length);
     }
     let ret = this.value;
     if (input?.offset) {

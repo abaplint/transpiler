@@ -32,6 +32,7 @@ function getNumberParts(x: number) {
 export class Float {
   private value: number;
   private integerCalculationType = false;
+  private calculated = false;
   private readonly qualifiedName: string | undefined;
 
   public constructor(input?: {qualifiedName?: string}) {
@@ -51,6 +52,21 @@ export class Float {
   public setIntegerCalculationType(): Float {
     this.integerCalculationType = true;
     return this;
+  }
+
+  /** marks the result of an arithmetic expression: assigning it to an i that cannot hold it
+   * raises CX_SY_ARITHMETIC_OVERFLOW, where a variable raises CX_SY_CONVERSION_OVERFLOW */
+  public setCalculated(): Float {
+    this.calculated = true;
+    return this;
+  }
+
+  public isIntegerCalculationType(): boolean {
+    return this.integerCalculationType;
+  }
+
+  public isCalculated(): boolean {
+    return this.calculated;
   }
 
   /** value as seen by the calculation type, ie. rounded if the calculation type is integer */

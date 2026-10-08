@@ -2,7 +2,7 @@ import {FieldSymbol} from "./field_symbol";
 import {HashedTable, Table} from "./table";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
-import {parse} from "../operators/_parse";
+import {parsePosition} from "../operators/_parse";
 import {Hex} from "./hex";
 import {Character} from "./character";
 import {throwError} from "../throw_error";
@@ -190,12 +190,12 @@ export class Structure {
   public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}) {
     let offset = input?.offset;
     if (offset) {
-      offset = parse(offset);
+      offset = parsePosition(offset);
     }
 
     let length = input?.length;
     if (length) {
-      length = parse(length);
+      length = parsePosition(length);
     }
 
     const val = this.getCharacter();

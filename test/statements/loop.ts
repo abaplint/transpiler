@@ -160,6 +160,26 @@ describe("Running statements - LOOP", () => {
     expect(abap.console.get()).to.equal("4567");
   });
 
+  it("LOOPing TO 0 runs no row", async () => {
+    const code = `
+      DATA tab TYPE STANDARD TABLE OF i.
+      DATA line TYPE i.
+      DATA to TYPE i.
+      APPEND 1 TO tab.
+      LOOP AT tab TO 0 INTO line.
+        WRITE / 'entered'.
+      ENDLOOP.
+      WRITE / sy-subrc.
+      LOOP AT tab TO to INTO line.
+        WRITE / 'entered'.
+      ENDLOOP.
+      WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n4");
+  });
+
   it("LOOPing FROM and TO and WHERE", async () => {
     const code = `
       TYPES:

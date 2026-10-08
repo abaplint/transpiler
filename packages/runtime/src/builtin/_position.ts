@@ -1,4 +1,4 @@
-import {parse} from "../operators/_parse";
+import {parsePosition} from "../operators/_parse";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -10,10 +10,11 @@ import {INumeric} from "../types/_numeric";
  * silently becomes 1. nmin( ) and nmax( ) return a Float, and the syntax check lets them
  * through where it rejects a declared TYPE f, so they are the way a float gets here.
  *
- * Rounded because ABAP converts the argument to type i, the same as assigning to one. */
+ * Rounded because ABAP converts the argument to type i, the same as assigning to one, and
+ * an arithmetic result that does not fit raises CX_SY_ARITHMETIC_OVERFLOW. */
 export function position(input: INumeric | ICharacter | string | number | undefined): number | undefined {
   if (input === undefined) {
     return undefined;
   }
-  return Math.round(parse(input));
+  return Math.round(parsePosition(input));
 }

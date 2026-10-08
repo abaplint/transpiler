@@ -23,32 +23,32 @@ export function minus(left: INumeric | ICharacter | string | Integer8 | number |
   }
 
   if (left instanceof Integer && right instanceof Integer) {
-    return new Integer().set(left.get() - right.get());
+    return Integer.calculated(left.get() - right.get());
   } else if (left instanceof Float && right instanceof Float) {
     // Two floats fall through the rest of the chain to exactly this, and
     // float arithmetic is the most common thing there is: the remaining type
     // tests all fail, and then parse() is called on each operand, which for a
     // Float is getRaw(). It sits after the integer branch on purpose, so that
     // integer arithmetic pays nothing for it.
-    return new Float().set(left.getRaw() - right.getRaw());
+    return new Float().set(left.getRaw() - right.getRaw()).setCalculated();
   } else if (left instanceof Integer8 || right instanceof Integer8) {
     const l = left instanceof Integer8 ? left.get() : BigInt(parse(left));
     const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));
     return new Integer8().set(l - r);
   } else if (typeof left === "number" && typeof right === "number"
       && Number.isInteger(left) && Number.isInteger(right)) {
-    return new Integer().set(left - right);
+    return Integer.calculated(left - right);
 
   } else if (typeof left === "number" && Number.isInteger(left) && right instanceof Integer) {
-    return new Integer().set(left - right.get());
+    return Integer.calculated(left - right.get());
   } else if (typeof right === "number" && Number.isInteger(right) && left instanceof Integer) {
-    return new Integer().set(left.get() - right);
+    return Integer.calculated(left.get() - right);
 
   } else if ((left instanceof String || left instanceof Character) && Number.isInteger(Number(left.get())) && right instanceof Integer) {
-    return new Integer().set(Number.parseInt(left.get(), 10) - right.get()).clearIntegerCalculationType();
+    return Integer.calculated(Number.parseInt(left.get(), 10) - right.get()).clearIntegerCalculationType();
   } else if ((right instanceof String || right instanceof Character) && Number.isInteger(Number(right)) && left instanceof Integer) {
-    return new Integer().set(left.get() - Number.parseInt(right.get(), 10)).clearIntegerCalculationType();
+    return Integer.calculated(left.get() - Number.parseInt(right.get(), 10)).clearIntegerCalculationType();
   }
 
-  return new Float().set(parse(left) - parse(right));
+  return new Float().set(parse(left) - parse(right)).setCalculated();
 }
