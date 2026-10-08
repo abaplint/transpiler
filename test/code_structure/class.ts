@@ -2065,6 +2065,92 @@ START-OF-SELECTION.
     expect(abap.console.getTrimmed()).to.equal("P\n2");
   });
 
+  it("Class, generic p, changing", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS double
+      IMPORTING iv TYPE p
+      CHANGING  cv TYPE p.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD double.
+    cv = iv * 2.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lv_in2 TYPE p LENGTH 8 DECIMALS 2 VALUE '1.25'.
+  DATA lv_out2 TYPE p LENGTH 8 DECIMALS 2.
+  DATA lv_in0 TYPE p LENGTH 8 DECIMALS 0 VALUE 7.
+  DATA lv_out0 TYPE p LENGTH 8 DECIMALS 0.
+  lcl=>double( EXPORTING iv = lv_in2 CHANGING cv = lv_out2 ).
+  WRITE / |{ lv_out2 }|.
+  lcl=>double( EXPORTING iv = lv_in0 CHANGING cv = lv_out0 ).
+  WRITE / |{ lv_out0 }|.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("2.50\n14");
+  });
+
+  it("Class, generic p, exporting not received", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS run
+      EXPORTING ev TYPE p.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    ev = 3.
+    WRITE / 'done'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>run( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("done");
+  });
+
+  it("Class, generic p, optional importing not supplied", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS run
+      IMPORTING iv TYPE p OPTIONAL.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    DATA lv_type TYPE c LENGTH 1.
+    DATA lv_decimals TYPE i.
+    DESCRIBE FIELD iv TYPE lv_type.
+    WRITE / lv_type.
+    DESCRIBE FIELD iv DECIMALS lv_decimals.
+    WRITE / lv_decimals.
+    IF iv IS INITIAL.
+      WRITE / 'initial'.
+    ENDIF.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>run( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("P\n0\ninitial");
+  });
+
   it("Class, tables in+out, clear", async () => {
     const code = `
 CLASS lcl DEFINITION.

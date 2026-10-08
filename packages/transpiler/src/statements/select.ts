@@ -76,8 +76,17 @@ export class SelectTranspiler implements IStatementTranspiler {
     const having = node.findDirectExpression(abaplint.Expressions.Select)
       ?.findDirectExpression(abaplint.Expressions.SQLHaving);
     const havingCond = having?.findFirstExpression(abaplint.Expressions.SQLCond);
+    let dynamicHaving: abaplint.Nodes.ExpressionNode | undefined;
     if (havingCond) {
-      select += "HAVING " + new SQLCondTranspiler().transpile(havingCond, traversal, table).getCode() + " ";
+      const dynamic = havingCond.findFirstExpression(abaplint.Expressions.Dynamic);
+      const chain = dynamic?.findFirstExpression(abaplint.Expressions.FieldChain);
+      if (chain && havingCond.concatTokens() === dynamic?.concatTokens()) {
+        dynamicHaving = dynamic;
+        const code = new FieldChainTranspiler(false).transpile(chain, traversal).getCode();
+        select += `" + ${this.dynamicHavingClause(code)} + " `;
+      } else {
+        select += "HAVING " + new SQLCondTranspiler().transpile(havingCond, traversal, table).getCode() + " ";
+      }
     }
 
     const upTo = node.findFirstExpression(abaplint.Expressions.SQLUpTo);
@@ -98,6 +107,9 @@ export class SelectTranspiler implements IStatementTranspiler {
     const groupByDynamics = new Set(groupBy?.findAllExpressionsRecursive(abaplint.Expressions.Dynamic) || []);
     const orderByDynamics = new Set(orderBy?.findAllExpressionsRecursive(abaplint.Expressions.Dynamic) || []);
     for (const d of node.findAllExpressionsRecursive(abaplint.Expressions.Dynamic)) {
+      if (d === dynamicHaving) {
+        continue;
+      }
       const chain = d.findFirstExpression(abaplint.Expressions.FieldChain);
       if (chain) {
         const search = d.concatTokens();
@@ -259,6 +271,14 @@ abap.builtin.sy.get().dbcnt.set(${target}.getArrayLength());
     return `(${code} instanceof abap.types.Table || ${code} instanceof abap.types.HashedTable`
       + ` ? (${code}.array().length === 0 ? "" : "${keyword} " + ${code}.array().map(row => row.get()).join(", "))`
       + ` : (("" + ${code}.get()).trim() === "" ? "" : "${keyword} " + ${code}.get()))`;
+  }
+
+  private dynamicHavingClause(code: string): string {
+    return `((value) => {
+const condition = value instanceof abap.types.Table || value instanceof abap.types.HashedTable
+  ? value.array().map(row => row.get()).join(" ") : value.get();
+return condition.trim() === "" ? "" : "HAVING " + abap.expandDynamic(condition, (name) => {try { return eval(name);} catch {}});
+})(${code})`;
   }
 
   private isWhereExpression(node: abaplint.Nodes.StatementNode, expression: abaplint.Nodes.ExpressionNode): boolean {

@@ -41,7 +41,7 @@ export function substring_after(input: ISubstringAfterInput): ICharacter {
     reg = ABAPRegExp.escapeRegExp(input.sub.get());
   }
 
-  const r = new RegExp(reg + "(.*)");
+  const r = new RegExp(reg + "([\\s\\S]*)");
   const res = val.match(r);
 
   let ret = "";
