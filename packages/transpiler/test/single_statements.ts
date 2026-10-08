@@ -97,7 +97,7 @@ describe("Single statements", () => {
     {abap: "GET BIT foo OF bar INTO moo.",            js: "abap.statements.getBit(foo, bar, moo);",                skip: false},
     {abap: "WRITE sy-index.",                         js: "abap.statements.write(abap.builtin.sy.get().index);",   skip: false},
     {abap: "FIELD-SYMBOLS <bar> TYPE i.",             js: `let fs_bar_ = new abap.types.FieldSymbol(new abap.types.Integer({qualifiedName: "I"}));`, skip: false},
-    {abap: "ASSIGN da TO <name>.",                    js: "abap.statements.assign({target: fs_name_, source: da});",        skip: false},
+    {abap: "ASSIGN da TO <name>.",                    js: "abap.statements.assign({target: fs_name_, source: da, keepSubrc: true});", skip: false},
     {abap: "ASSIGN <fs1> TO <fs2>.",                  js: "abap.statements.assign({target: fs_fs2_, source: fs_fs1_});",    skip: false},
     {abap: "ASSERT <name> = 1.",                      js: "abap.statements.assert(abap.compare.eq(fs_name_, abap.IntegerFactory.get(1)));", skip: false},
     {abap: "<name> = 1.",                             js: "fs_name_.set(abap.IntegerFactory.get(1));",                                      skip: false},
@@ -241,7 +241,7 @@ describe("Single statements", () => {
     {abap: "ASSERT 5 IN bar.", js: `abap.statements.assert(abap.compare.in(abap.IntegerFactory.get(5), bar));`, skip: false},
     {abap: "INSERT INITIAL LINE INTO tab ASSIGNING <row> INDEX 1.", js: `abap.statements.insertInternal({initial: true, index: abap.IntegerFactory.get(1), assigning: fs_row_, table: tab});`, skip: false},
     {abap: "DELETE lt_log_temp WHERE msg-level < iv_min_level.", js: `await abap.statements.deleteInternal(lt_log_temp,{where: async (I) => {return abap.compare.lt(I.msg.get().level, iv_min_level);}});`, skip: false},
-    {abap: "ASSIGN lv_x TO <lv_y> CASTING.", js: `abap.statements.assign({target: fs_lv_y_, source: lv_x, casting: true});`, skip: false},
+    {abap: "ASSIGN lv_x TO <lv_y> CASTING.", js: `abap.statements.assign({target: fs_lv_y_, source: lv_x, keepSubrc: true, casting: true});`, skip: false},
 
     {abap: `CALL TRANSFORMATION id
     OPTIONS value_handling = 'accept_data_loss'

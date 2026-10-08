@@ -59,6 +59,10 @@ export class Traversal {
   private readonly doOrWhileIndexBackups: Map<abaplint.Nodes.StatementNode, string> = new Map();
   private readonly statementsInsideLoop: WeakSet<abaplint.Nodes.StatementNode> = new WeakSet();
   private readonly enclosingDoOrWhile: WeakMap<abaplint.Nodes.StatementNode, abaplint.Nodes.StatementNode> = new WeakMap();
+  /** DATA, CONSTANTS and FIELD-SYMBOLS nested in blocks, already declared in front of the block */
+  private readonly declaredEarly: WeakSet<abaplint.INode> = new WeakSet();
+  private emittingEarly = false;
+  private blockDepth = 0;
   public readonly reg: abaplint.IRegistry;
   public readonly options: ITranspilerOptions | undefined;
 
@@ -364,7 +368,8 @@ export class Traversal {
     return undefined;
   }
 
-  public buildMethods(def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined): string[] {
+    public buildMethods(def: abaplint.IClassDefinition | abaplint.IInterfaceDefinition | undefined,
+                        scope?: abaplint.ISpaghettiScopeNode): string[] {
     const methods: string[] = [];
     if (def === undefined) {
       return methods;
@@ -377,37 +382,69 @@ export class Traversal {
     }
 
     for (const m of methodDefinitions.getAll()) {
-      const parameters: string[] = [];
-      for (const p of m.getParameters().getAll()) {
-        const type = TranspileTypes.toType(p.getType());
-        const optional = m.getParameters().getOptional().includes(p.getName()) ? "X" : " ";
+      methods.push(this.buildMethod(m.getName(), m, m.getVisibility()));
+    }
 
-        let pKind = "";
-        if (pKind === "") {
-          pKind = m.getParameters().getImporting().find((t) => {return t.getName() === p.getName();}) ? "I" : "";
-        }
-        if (pKind === "") {
-          pKind = m.getParameters().getChanging().find((t) => {return t.getName() === p.getName();}) ? "C" : "";
-        }
-        if (pKind === "") {
-          pKind = m.getParameters().getExporting().find((t) => {return t.getName() === p.getName();}) ? "E" : "";
-        }
-        if (pKind === "") {
-          pKind = m.getParameters().getReturning()?.getName() === p.getName() ? "R" : "";
-        }
-
-        parameters.push(`"${p.getName().toUpperCase()}": {"type": () => {return ${type
-          };}, "is_optional": "${optional
-          }", "parm_kind": "${pKind
-          }", "type_name": "${p.getType().constructor.name}"}`);
+    // an alias for an interface method is listed under its own name, pointing to the method
+    for (const a of def.getAliases() || []) {
+      const [intfName, methodName] = a.getComponent().split("~");
+      if (methodName === undefined) {
+        continue;
       }
-
-      methods.push(`"${m.getName().toUpperCase()}": {"visibility": "${
-        this.mapVisibility(m.getVisibility())}", "parameters": {${
-        parameters.join(", ")}}}`);
+      const aliased = this.findInterfaceDefinition(intfName, scope)?.getMethodDefinitions()?.getByName(methodName);
+      if (aliased === undefined) {
+        // not a method, or the interface is unknown
+        continue;
+      }
+      methods.push(this.buildMethod(a.getName(), aliased, a.getVisibility(), a.getComponent()));
     }
 
     return methods;
+  }
+
+  private buildMethod(name: string, m: abaplint.IMethodDefinition, visibility: abaplint.Visibility, aliasFor?: string): string {
+    const optionalNames = m.getParameters().getOptional().map(o => o.toUpperCase());
+
+    const parameters: string[] = [];
+    for (const p of m.getParameters().getAll()) {
+      const type = TranspileTypes.toType(p.getType());
+      const optional = optionalNames.includes(p.getName().toUpperCase()) ? "X" : " ";
+
+      let pKind = "";
+      if (pKind === "") {
+        pKind = m.getParameters().getImporting().find((t) => {return t.getName() === p.getName();}) ? "I" : "";
+      }
+      if (pKind === "") {
+        pKind = m.getParameters().getChanging().find((t) => {return t.getName() === p.getName();}) ? "C" : "";
+      }
+      if (pKind === "") {
+        pKind = m.getParameters().getExporting().find((t) => {return t.getName() === p.getName();}) ? "E" : "";
+      }
+      if (pKind === "") {
+        pKind = m.getParameters().getReturning()?.getName() === p.getName() ? "R" : "";
+      }
+
+      parameters.push(`"${p.getName().toUpperCase()}": {"type": () => {return ${type
+        };}, "is_optional": "${optional
+        }", "parm_kind": "${pKind
+        }", "type_name": "${p.getType().constructor.name}"}`);
+    }
+
+    // only written when set, a method without them is described as before
+    let extra = "";
+    if (m.isStatic() === true) {
+      extra += `"is_class": "X", `;
+    }
+    if (m.getRaising().length > 0) {
+      extra += `"exceptions": [${m.getRaising().map(e => `"${e.toUpperCase()}"`).join(", ")}], `;
+    }
+    if (aliasFor !== undefined) {
+      extra += `"alias_for": "${aliasFor.toUpperCase()}", `;
+    }
+
+    return `"${name.toUpperCase()}": {"visibility": "${
+      this.mapVisibility(visibility)}", ${extra}"parameters": {${
+      parameters.join(", ")}}}`;
   }
 
   private mapVisibility(vis: abaplint.Visibility) {
@@ -1037,16 +1074,14 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
         context = context.getComponentByName(c.getFirstToken().getStr());
       } else if (c.get() instanceof abaplint.Expressions.AttributeName
           && context instanceof abaplint.BasicTypes.ObjectReferenceType) {
-        const id = context.getIdentifier();
-        if (id instanceof abaplint.Types.ClassDefinition || id instanceof abaplint.Types.InterfaceDefinition) {
-          const concat = c.concatTokens();
-          if (concat.includes("~")) {
-            const [iname, aname] = concat.split("~");
-            const intf = this.findInterfaceDefinition(iname, scope);
-            context = intf?.getAttributes().findByName(aname)?.getType();
-          } else {
-            context = id.getAttributes().findByName(concat)?.getType();
-          }
+        const concat = c.concatTokens();
+        if (concat.includes("~")) {
+          const [iname, aname] = concat.split("~");
+          const intf = this.findInterfaceDefinition(iname, scope);
+          context = intf?.getAttributes().findByName(aname)?.getType();
+        } else {
+          // Global references can carry an identifier rather than a class definition.
+          context = this.narrowContextAttribute(context, concat, scope);
         }
       } else if (c.get() instanceof abaplint.Expressions.AttributeName
           && context instanceof abaplint.BasicTypes.DataReference) {
@@ -1061,7 +1096,7 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
   }
 
   public isInsideLoop(node: abaplint.Nodes.StatementNode): boolean {
-    return this.statementsInsideLoop.has(node);
+    return this.statementsInsideLoop.has(node) && !this.declaredEarly.has(node);
   }
 
   public isInsideDoOrWhile(node: abaplint.Nodes.StatementNode): boolean {
@@ -1173,7 +1208,89 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
 
 ////////////////////////////
 
+  /** In ABAP, DATA, CONSTANTS and FIELD-SYMBOLS are visible in the whole method/form/program, but a
+   * javascript "let" inside the block of an IF, LOOP, TRY etc. is not. So before each block on
+   * method/form/program level the declarations nested in it are output, in source order, and
+   * skipped inside the block. They then exist after the block even if the branch did not run,
+   * and are initialized once, also when the block is a loop */
+  private traverseProcedureLevel(node: abaplint.Nodes.StructureNode): Chunk {
+    const ret = new Chunk();
+    for (const c of node.getChildren()) {
+      if (c instanceof abaplint.Nodes.StructureNode && Traversal.isDeclaration(c) === false) {
+        ret.appendChunk(this.declareNestedEarly(c));
+        this.blockDepth++;
+        try {
+          ret.appendChunk(this.traverseStructure(c));
+        } finally {
+          this.blockDepth--;
+        }
+      } else {
+        ret.appendChunk(this.traverse(c));
+      }
+    }
+    return ret;
+  }
+
+  private declareNestedEarly(block: abaplint.Nodes.StructureNode): Chunk {
+    const found: (abaplint.Nodes.StructureNode | abaplint.Nodes.StatementNode)[] = [];
+    Traversal.findNestedDeclarations(block, found);
+
+    for (const node of found) {
+      this.declaredEarly.add(node);
+      if (node instanceof abaplint.Nodes.StructureNode) {
+        for (const statement of node.findAllStatementNodes()) {
+          this.declaredEarly.add(statement);
+        }
+      }
+    }
+
+    const ret = new Chunk();
+    this.emittingEarly = true;
+    try {
+      for (const node of found) {
+        ret.appendChunk(this.traverse(node));
+      }
+    } finally {
+      this.emittingEarly = false;
+    }
+    return ret;
+  }
+
+  private static isDeclaration(node: abaplint.Nodes.StructureNode): boolean {
+    const get = node.get();
+    return get instanceof abaplint.Structures.Data
+      || get instanceof abaplint.Structures.Constants
+      || get instanceof abaplint.Structures.Types;
+  }
+
+  private static findNestedDeclarations(node: abaplint.Nodes.StructureNode,
+                                        found: (abaplint.Nodes.StructureNode | abaplint.Nodes.StatementNode)[]): void {
+    for (const c of node.getChildren()) {
+      if (c instanceof abaplint.Nodes.StatementNode) {
+        const get = c.get();
+        if (get instanceof abaplint.Statements.Data
+            || get instanceof abaplint.Statements.Constant
+            || get instanceof abaplint.Statements.FieldSymbol) {
+          found.push(c);
+        }
+      } else if (c instanceof abaplint.Nodes.StructureNode) {
+        const get = c.get();
+        if (get instanceof abaplint.Structures.Data || get instanceof abaplint.Structures.Constants) {
+          found.push(c);
+        } else {
+          Traversal.findNestedDeclarations(c, found);
+        }
+      }
+    }
+  }
+
   protected traverseStructure(node: abaplint.Nodes.StructureNode): Chunk {
+    if (this.declaredEarly.has(node) && this.emittingEarly === false) {
+      return new Chunk();
+    } else if (this.blockDepth === 0 && node.get() instanceof abaplint.Structures.Normal) {
+      return this.traverseProcedureLevel(node);
+    }
+
     const list: any = StructureTranspilers;
     const ret = new Chunk();
 
@@ -1197,6 +1314,9 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
   }
 
   protected traverseStatement(node: abaplint.Nodes.StatementNode): Chunk {
+    if (this.declaredEarly.has(node) && this.emittingEarly === false) {
+      return new Chunk();
+    }
     const list: any = StatementTranspilers;
     const search = node.get().constructor.name + "Transpiler";
     if (list[search]) {

@@ -327,7 +327,7 @@ ENDCLASS.`;
   static INTERNAL_NAME = 'PROG-ZFOOBAR-ZCL_RET';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {"BAR": {"type": () => {return new abap.types.Integer({qualifiedName: "I"});}, "visibility": "U", "is_constant": " ", "is_class": " "}};
-  static METHODS = {"RUN": {"visibility": "U", "parameters": {"RV_RET": {"type": () => {return new abap.types.String({qualifiedName: "STRING"});}, "is_optional": " ", "parm_kind": "R", "type_name": "StringType"}}}};
+  static METHODS = {"RUN": {"visibility": "U", "is_class": "X", "parameters": {"RV_RET": {"type": () => {return new abap.types.String({qualifiedName: "STRING"});}, "is_optional": " ", "parm_kind": "R", "type_name": "StringType"}}}};
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
@@ -402,8 +402,8 @@ DATA after_loop TYPE i.`;
     const js = await runSingle(abap, {ignoreSyntaxCheck: true});
 
     expect(js).to.contain("let top_level = new abap.types.Integer");
-    expect(js).to.contain("if (nested === undefined) {");
-    expect(js).to.contain("var nested = new abap.types.Integer");
+    // declared once, in front of the loop
+    expect(js).to.match(/let nested = new abap\.types\.Integer[\s\S]*while \(true\)/);
     expect(js).to.match(/abap\.builtin\.sy\.get\(\)\.index\.set\(indexBackup\d+\);\n {2}return;/);
     expect(js).to.contain("let after_loop = new abap.types.Integer");
   });
@@ -742,7 +742,7 @@ class lcl {
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL';
   static IMPLEMENTED_INTERFACES = [];
   static ATTRIBUTES = {};
-  static METHODS = {"FOO": {"visibility": "U", "parameters": {"BAR": {"type": () => {return new abap.types.String({qualifiedName: "STRING"});}, "is_optional": " ", "parm_kind": "I", "type_name": "StringType"}}}};
+  static METHODS = {"FOO": {"visibility": "U", "is_class": "X", "parameters": {"BAR": {"type": () => {return new abap.types.String({qualifiedName: "STRING"});}, "is_optional": "X", "parm_kind": "I", "type_name": "StringType"}}}};
   constructor() {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
