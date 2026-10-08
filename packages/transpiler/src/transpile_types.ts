@@ -38,8 +38,22 @@ export class TranspileTypes {
     if (type instanceof abaplint.BasicTypes.ObjectReferenceType
         || type instanceof abaplint.BasicTypes.GenericObjectReferenceType) {
       resolved = "ABAPObject";
-      extra = "{qualifiedName: " + JSON.stringify(type.getQualifiedName()?.toUpperCase()) +
-        ", RTTIName: " + JSON.stringify(type.getRTTIName()?.toUpperCase()) + "}";
+      const qualifiedName = type.getQualifiedName()
+        ?? (type instanceof abaplint.BasicTypes.ObjectReferenceType ? type.getIdentifierName() : undefined);
+      let RTTIName = type.getRTTIName();
+      if (type instanceof abaplint.BasicTypes.ObjectReferenceType && RTTIName === undefined) {
+        const id = type.getIdentifier();
+        // NEW and CAST can omit metadata; recover it from the referenced definition.
+        const [name, kind] = id.getFilename().split("/").pop()!.replace(/#/g, "/").split(".");
+        const local = (id instanceof abaplint.Types.ClassDefinition || id instanceof abaplint.Types.InterfaceDefinition)
+          && id.isGlobal() === false;
+        const prefix = local && kind === "prog" ? "\\PROGRAM=" + name
+          : local && kind === "clas" ? "\\CLASS-POOL=" + name : "";
+        const category = id instanceof abaplint.Types.InterfaceDefinition || kind === "intf" ? "INTERFACE" : "CLASS";
+        RTTIName = prefix + "\\" + category + "=" + id.getName();
+      }
+      extra = "{qualifiedName: " + JSON.stringify(qualifiedName?.toUpperCase()) +
+        ", RTTIName: " + JSON.stringify(RTTIName?.toUpperCase()) + "}";
     } else if (type instanceof abaplint.BasicTypes.TableType) {
       resolved = "Table";
       extra = this.toType(type.getRowType());

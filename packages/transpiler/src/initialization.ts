@@ -1,7 +1,8 @@
 import {DatabaseSetupResult} from "./db/database_setup_result";
 import * as abaplint from "@abaplint/core";
-import {ITranspilerOptions, IOutputFile} from "./types";
+import {ITranspilerOptions} from "./types";
 import {HandleFUGR} from "./handlers/handle_fugr";
+import {OutputLayout, importPath} from "./output_layout";
 
 export function escapeNamespaceFilename(filename: string): string {
 // ES modules are resolved and cached as URLs. This means that special characters must be
@@ -23,8 +24,12 @@ export function escapeFilenameForImport(filename: string): string {
 
 export class Initialization {
 
+  public constructor(private readonly layout = new OutputLayout()) {
+    // Flat output unless the caller supplies ownership information.
+  }
+
   public script(reg: abaplint.IRegistry, dbSetup: DatabaseSetupResult, options: ITranspilerOptions | undefined,
-                useImport?: boolean, pluginOutputs?: readonly IOutputFile[]) {
+                useImport?: boolean) {
       let ret = "";
       if (useImport === true) {
         ret = `/* eslint-disable import/newline-after-import */
@@ -70,7 +75,7 @@ globalThis.abap = new runtime.ABAP();\n`;
       ret += `}\n\n`;
       ret += `await initializeABAP();\n\n`;
 
-      ret += `${this.buildImports(reg, useImport, options, pluginOutputs)}`;
+      ret += `${this.buildImports(reg, useImport, options)}`;
 
       if (options?.setup?.postFunction !== undefined) {
         ret += `\n\nawait setup.${options?.setup?.postFunction}();\n`;
@@ -79,25 +84,20 @@ globalThis.abap = new runtime.ABAP();\n`;
       return ret;
     }
 
-  private buildImports(reg: abaplint.IRegistry, useImport?: boolean, options?: ITranspilerOptions,
-                       pluginOutputs?: readonly IOutputFile[]): string {
+  private buildImports(reg: abaplint.IRegistry, useImport?: boolean, options?: ITranspilerOptions): string {
 // note: ES modules are hoised, so use the dynamic import(), due to setting of globalThis.abap
 // some sorting required: eg. a class constructor using constant from interface
 
-    const list: string[] = [];
-    const late: string[] = [];
+    const list: {filename: string, code: string}[] = [];
+    const late: {filename: string, code: string}[] = [];
 
     const imp = (filename: string) => {
-      if (useImport === true) {
-        return `import "./${filename}.mjs";`;
-      } else {
-        return `await import("./${filename}.mjs");`;
-      }
+      const specifier = importPath("init.mjs", filename);
+      return {
+        filename: specifier.split("/").pop()!,
+        code: useImport === true ? `import "${specifier}";` : `await import("${specifier}");`,
+      };
     };
-
-    for (const pluginOutput of pluginOutputs || []) {
-      list.push(imp(pluginOutput.filename.replace(/\.mjs$/i, "")));
-    }
 
     for (const obj of reg.getObjects()) {
       if (obj instanceof abaplint.Objects.Table
@@ -110,12 +110,12 @@ globalThis.abap = new runtime.ABAP();\n`;
           || obj instanceof abaplint.Objects.TypePool
           || obj instanceof abaplint.Objects.TableType
           || obj instanceof abaplint.Objects.View) {
-        list.push(imp(`${escapeNamespaceFilename(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}`));
+        list.push(imp(this.layout.objectModule(obj)));
       }
     }
 
     for (const obj of reg.getObjects()) {
-      const name = imp(`${escapeNamespaceFilename(obj.getName().toLowerCase())}.${obj.getType().toLowerCase()}`);
+      const name = imp(this.layout.objectModule(obj));
       if (obj instanceof abaplint.Objects.Class
           && obj.getName().toUpperCase() !== "CL_ABAP_CHAR_UTILITIES"
           && this.hasClassConstructor(reg, obj)) {
@@ -133,7 +133,9 @@ globalThis.abap = new runtime.ABAP();\n`;
       }
     }
 
-    return [...list.sort(), ...late].join("\n");
+    // Folder names must not change the original module initialization order.
+    list.sort((a, b) => a.filename < b.filename ? -1 : a.filename > b.filename ? 1 : 0);
+    return [...list, ...late].map(entry => entry.code).join("\n");
   }
 
   // class constructors might make early use of eg. constants from interfaces
