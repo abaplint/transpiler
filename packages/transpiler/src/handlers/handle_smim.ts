@@ -1,8 +1,13 @@
 import * as abaplint from "@abaplint/core";
 import {Chunk} from "../chunk";
 import {IOutputFile} from "../types";
+import {OutputLayout} from "../output_layout";
 
 export class HandleSMIM {
+  public constructor(private readonly layout = new OutputLayout()) {
+    // Asset paths are relative to the output root.
+  }
+
   public runObject(obj: abaplint.Objects.MIMEObject, _reg: abaplint.IRegistry): IOutputFile[] {
 
     const filename = obj.getXMLFile()?.getFilename().replace(".xml", ".mjs").toLowerCase();
@@ -12,9 +17,10 @@ export class HandleSMIM {
 
     obj.parse();
     const dataFile = obj.getDataFile();
+    const dataFilename = dataFile ? this.layout.file({name: obj.getName(), type: obj.getType()}, dataFile.getFilename()) : undefined;
     const chunk = new Chunk().appendString(`abap.SMIM["${obj.getName().toUpperCase()}"] = {
   "objectType": "SMIM",
-  "filename": ${JSON.stringify(dataFile?.getFilename())},
+  "filename": ${JSON.stringify(dataFilename)},
   "url": ${JSON.stringify(obj.getURL())},
   "class": ${JSON.stringify(obj.getClass())},
 };`);

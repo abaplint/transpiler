@@ -4,12 +4,12 @@ import {Traversal} from "../traversal";
 import {Requires} from "../requires";
 import {Rearranger} from "../rearranger";
 import {Chunk} from "../chunk";
-import {escapeFilenameForImport} from "../initialization";
+import {OutputLayout, importPath} from "../output_layout";
 
 export class HandleABAP {
   private readonly options: ITranspilerOptions | undefined;
 
-  public constructor(options?: ITranspilerOptions) {
+  public constructor(options?: ITranspilerOptions, private readonly layout = new OutputLayout()) {
     this.options = options;
   }
 
@@ -130,10 +130,11 @@ export class HandleABAP {
       if (filename === output.filename) {
         continue;
       }
+      const specifier = importPath(this.layout.file(output.object, output.filename), this.layout.sourceModule(r.filename));
       if (name) {
-        contents.appendString("const {" + Traversal.escapeNamespace(name) + "} = await import(\"./" + escapeFilenameForImport(filename) + "\");\n");
+        contents.appendString("const {" + Traversal.escapeNamespace(name) + "} = await import(\"" + specifier + "\");\n");
       } else {
-        contents.appendString("await import(\"./" + escapeFilenameForImport(filename) + "\");\n");
+        contents.appendString("await import(\"" + specifier + "\");\n");
       }
     }
     contents.appendChunk(output.chunk);

@@ -21,6 +21,10 @@ export interface ITranspilerConfig {
     output_folder: string;
   },
   libs?: {
+    /** output directory name; defaults to the repository or local folder name
+     * @minLength 1
+     */
+    name?: string,
     url?: string,
     /** relative to the current working directory */
     folder?: string,
