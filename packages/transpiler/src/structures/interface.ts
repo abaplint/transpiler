@@ -22,7 +22,10 @@ export class InterfaceTranspiler implements IStructureTranspiler {
         ret += `static INTERNAL_NAME = '${traversal.buildInternalName(token.getStr(), def)}';\n`;
         ret += `static ATTRIBUTES = {${Array.from(traversal.buildAttributes(def, scope)).join(",\n")}};\n`;
         ret += `static METHODS = {${traversal.buildMethods(def, scope).join(",\n")}};\n`;
-        // todo, add IMPLEMENTED_INTERFACES ?
+        const interfaces = def?.getImplementing().map(i => `"${i.name.toUpperCase()}"`) || [];
+        if (interfaces.length > 0) {
+          ret += `static IMPLEMENTED_INTERFACES = [${interfaces.join(",")}];\n`;
+        }
       } else if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.EndInterface) {
         ret += "}\n";
         ret += traversal.registerClassOrInterface(def);
