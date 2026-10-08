@@ -9,6 +9,8 @@ import {getBit} from "../statements/get_bit";
 import {Character} from "./character";
 import {HexUInt8} from "./hex_uint8";
 import {DecFloat34} from "./decfloat34";
+import {Time} from "./time";
+import {FieldSymbol} from "./field_symbol";
 
 const digits = new RegExp(/^\s*-?\+?\d+\.?\d* *$/i);
 
@@ -49,6 +51,15 @@ export class Integer8 {
       this.value = BigInt(value);
     } else if (value instanceof Float || value instanceof DecFloat34) {
       this.set(roundHalfAwayFromZero(value.getRaw()));
+    } else if (value instanceof FieldSymbol) {
+// dispatch on the type the field symbol points to, get() would only give its plain value
+      if (value.getPointer() === undefined) {
+        throw new Error("GETWA_NOT_ASSIGNED");
+      }
+      this.set(value.getPointer());
+    } else if (value instanceof Time) {
+// t is converted to the number of seconds since midnight, not the HHMMSS digits
+      this.value = BigInt(value.getNumeric());
     } else if (value instanceof Hex || value instanceof XString || value instanceof HexUInt8) {
       if (value.get().length === 16) {
         const lv_bit = new Character();

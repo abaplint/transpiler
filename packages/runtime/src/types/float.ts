@@ -5,6 +5,8 @@ import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {Integer8} from "./integer8";
 import {DecFloat34} from "./decfloat34";
+import {Time} from "./time";
+import {FieldSymbol} from "./field_symbol";
 
 // A float writes itself out with a comma for the decimal separator, so
 // reading one back has to accept a comma. Both are allowed rather than only
@@ -83,6 +85,15 @@ export class Float {
       this.value = Number(value.get());
     } else if (value instanceof Float || value instanceof DecFloat34) {
       this.value = value.getRaw();
+    } else if (value instanceof FieldSymbol) {
+// dispatch on the type the field symbol points to, get() would only give its plain value
+      if (value.getPointer() === undefined) {
+        throw new Error("GETWA_NOT_ASSIGNED");
+      }
+      this.set(value.getPointer());
+    } else if (value instanceof Time) {
+// t is converted to the number of seconds since midnight, not the HHMMSS digits
+      this.value = value.getNumeric();
     } else if (value instanceof Hex || value instanceof XString) {
 // todo, how/if should this work?
       this.set(parseInt(value.get(), 16));

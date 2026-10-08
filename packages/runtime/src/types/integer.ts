@@ -9,6 +9,8 @@ import {HexUInt8} from "./hex_uint8";
 import {Character} from "./character";
 import {String} from "./string";
 import {DecFloat34} from "./decfloat34";
+import {Time} from "./time";
+import {FieldSymbol} from "./field_symbol";
 
 export const DIGITS = new RegExp(/^\s*-?\+?\d+\.?\d* *$/i);
 
@@ -93,6 +95,15 @@ export class Integer implements INumeric {
       this.value = toInteger(value.get());
     } else if (value instanceof Integer8) {
       this.set(Number(value.get()));
+    } else if (value instanceof FieldSymbol) {
+// dispatch on the type the field symbol points to, get() would only give its plain value
+      if (value.getPointer() === undefined) {
+        throw new Error("GETWA_NOT_ASSIGNED");
+      }
+      this.set(value.getPointer());
+    } else if (value instanceof Time) {
+// t is converted to the number of seconds since midnight, not the HHMMSS digits
+      this.value = value.getNumeric();
     } else if (value instanceof Float || value instanceof DecFloat34) {
       this.set(roundHalfAwayFromZero(value.getRaw()));
     } else if (value instanceof Hex || value instanceof XString || value instanceof HexUInt8) {

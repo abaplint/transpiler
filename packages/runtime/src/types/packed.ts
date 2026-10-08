@@ -3,6 +3,8 @@ import {INumeric} from "./_numeric";
 import {throwError} from "../throw_error";
 import {Integer8} from "./integer8";
 import {DecFloat34} from "./decfloat34";
+import {Time} from "./time";
+import {FieldSymbol} from "./field_symbol";
 
 const digits = new RegExp(/^\s*-?\+?\d*\.?\d*(?:E[+-]?\d+)? *$/i);
 
@@ -127,6 +129,15 @@ export class Packed implements INumeric {
       this.value = (value.get() as unknown as bigint) * pow10(this.decimals);
     } else if (value instanceof Float || value instanceof DecFloat34) {
       this.value = this.numberToScaled(value.getRaw());
+    } else if (value instanceof FieldSymbol) {
+// dispatch on the type the field symbol points to, get() would only give its plain value
+      if (value.getPointer() === undefined) {
+        throw new Error("GETWA_NOT_ASSIGNED");
+      }
+      this.set(value.getPointer());
+    } else if (value instanceof Time) {
+// t is converted to the number of seconds since midnight, not the HHMMSS digits
+      this.value = BigInt(value.getNumeric()) * pow10(this.decimals);
     } else {
       this.set(value.get());
     }
