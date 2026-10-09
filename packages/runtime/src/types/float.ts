@@ -1,4 +1,5 @@
 import {throwError} from "../throw_error";
+import {Date} from "./date";
 import {Hex} from "./hex";
 import {XString} from "./xstring";
 import {ICharacter} from "./_character";
@@ -81,6 +82,9 @@ export class Float {
       this.value = parseFloat(value.replace(",", "."));
     } else if (value instanceof Integer8) {
       this.value = Number(value.get());
+    } else if (value instanceof Date) {
+// d is converted to the number of days since 01.01.0001, not the YYYYMMDD digits
+      this.value = value.getNumeric();
     } else if (value instanceof Float || value instanceof DecFloat34) {
       this.value = value.getRaw();
     } else if (value instanceof Hex || value instanceof XString) {
