@@ -84,13 +84,14 @@ export async function loadLibraries(config: ITranspilerConfig): Promise<LoadedLi
   return result;
 }
 
-export function libraryRegistry(files: IFile[], libraries: LoadedLibrary[]) {
+export function libraryRegistry(files: IFile[], libraries: LoadedLibrary[], skipDuplicateDependencies = false) {
   const reg = new abaplint.Registry();
   const folders = new Map<string, string>();
   const objects = new Map<string, string>();
   const sources = new Map<string, IFile>();
   // Libraries first: addFile() then replaces a dependency object with the project's object.
   for (const lib of libraries) {
+    const skipped = new Set<string>();
     for (const file of lib.files) {
       const memory = new abaplint.MemoryFile(file.filename, file.contents);
       const type = memory.getObjectType()?.toUpperCase();
@@ -101,6 +102,14 @@ export function libraryRegistry(files: IFile[], libraries: LoadedLibrary[]) {
       const owner = objects.get(key);
       // abapGit repeats package.devc.xml across repositories; the registry keeps the last copy.
       if (key !== "DEVC:PACKAGE" && owner !== undefined && owner !== lib.name) {
+        if (skipDuplicateDependencies === true) {
+          if (!skipped.has(key)) {
+            console.warn("Skipping duplicate dependency object " + key + " in " + lib.name + "; using " + owner);
+            skipped.add(key);
+          }
+          // Skip every file of the losing object, including locals, metadata, and binary assets.
+          continue;
+        }
         throw new Error("Ambiguous dependency object " + key + " in " + owner + " and " + lib.name);
       }
       objects.set(key, lib.name);
