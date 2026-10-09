@@ -62,35 +62,42 @@ function normalizeRelative(filename: string, label: string): string {
   return segments.join("/");
 }
 
-function validateArtifactPaths(artifacts: IOutputArtifact[]): IPreparedArtifact[] {
-  const seen = new Set<string>();
-  const prepared: IPreparedArtifact[] = [];
-  for (const artifact of artifacts) {
-    const relative = normalizeRelative(artifact.path.replace(/\\/g, "/"), "output");
+function validatePaths(filenames: unknown[], label: string): string[] {
+  const paths = new Map<string, string>();
+  for (const filename of filenames) {
+    if (typeof filename !== "string") {
+      throw new Error("Invalid " + label + " path");
+    }
+    const relative = normalizeRelative(filename, label);
     const key = relative.toLowerCase();
-    if (key === MANIFEST.toLowerCase() || key.startsWith(MANIFEST.toLowerCase() + "/")) {
-      throw new Error("Output path is reserved for the incremental manifest: " + relative);
+    if (key === MANIFEST || key.startsWith(MANIFEST + "/")) {
+      throw new Error("Reserved " + label + " path: " + relative);
     }
-    if (seen.has(key)) {
-      throw new Error("Conflicting output file: " + relative);
+    const existing = paths.get(key);
+    if (existing !== undefined) {
+      throw new Error("Conflicting " + label + " paths: " + existing + " and " + relative);
     }
-    seen.add(key);
-    prepared.push({
-      ...artifact,
-      relative,
-      byteLength: Buffer.byteLength(artifact.contents, FileOperations.isBinaryFilename(relative) ? "latin1" : "utf8"),
-      binary: FileOperations.isBinaryFilename(relative),
-    });
+    paths.set(key, relative);
   }
-  for (const artifact of prepared) {
-    const segments = artifact.relative.split("/");
+  for (const filename of paths.values()) {
+    const segments = filename.split("/");
     for (let index = 1; index < segments.length; index++) {
-      if (seen.has(segments.slice(0, index).join("/").toLowerCase())) {
-        throw new Error("Conflicting output file path: " + artifact.relative);
+      if (paths.has(segments.slice(0, index).join("/").toLowerCase())) {
+        throw new Error("Conflicting " + label + " file and directory paths: " + filename);
       }
     }
   }
-  return prepared;
+  return [...paths.values()];
+}
+
+function validateArtifactPaths(artifacts: IOutputArtifact[]): IPreparedArtifact[] {
+  const paths = validatePaths(artifacts.map(artifact => artifact.path.replace(/\\/g, "/")), "output");
+  return artifacts.map((artifact, index) => ({
+    ...artifact,
+    relative: paths[index],
+    byteLength: Buffer.byteLength(artifact.contents, FileOperations.isBinaryFilename(paths[index]) ? "latin1" : "utf8"),
+    binary: FileOperations.isBinaryFilename(paths[index]),
+  }));
 }
 
 function parseManifest(contents: string): IManifest {
@@ -104,45 +111,11 @@ function parseManifest(contents: string): IManifest {
       || parsed.version !== 1 || !Array.isArray(parsed.files)) {
     throw new Error("Unsupported incremental output manifest");
   }
-  const files: string[] = [];
-  const seen = new Set<string>();
-  for (const entry of parsed.files) {
-    if (typeof entry !== "string") {
-      throw new Error("Invalid incremental output manifest path");
-    }
-    const relative = normalizeRelative(entry, "manifest");
-    const key = relative.toLowerCase();
-    if (key === MANIFEST.toLowerCase() || key.startsWith(MANIFEST.toLowerCase() + "/") || seen.has(key)) {
-      throw new Error("Duplicate or reserved path in incremental output manifest: " + relative);
-    }
-    seen.add(key);
-    files.push(relative);
-  }
-  return {version: 1, files};
+  return {version: 1, files: validatePaths(parsed.files, "incremental output manifest")};
 }
 
 function serializeManifest(files: Set<string>): string {
   return JSON.stringify({version: 1, files: [...files].sort()}, null, 2) + "\n";
-}
-
-function validateCombinedPaths(current: IPreparedArtifact[], previous: string[]) {
-  const all = new Map<string, string>();
-  for (const path of [...current.map(file => file.relative), ...previous]) {
-    const key = path.toLowerCase();
-    const existing = all.get(key);
-    if (existing !== undefined && existing !== path) {
-      throw new Error("Case-insensitive output path collision: " + existing + " and " + path);
-    }
-    all.set(key, path);
-  }
-  for (const filename of all.values()) {
-    const segments = filename.split("/");
-    for (let index = 1; index < segments.length; index++) {
-      if (all.has(segments.slice(0, index).join("/").toLowerCase())) {
-        throw new Error("Conflicting file and directory paths in incremental output: " + filename);
-      }
-    }
-  }
 }
 
 async function lstatOrMissing(filename: string): Promise<fs.Stats | undefined> {
@@ -266,7 +239,8 @@ export async function writeOutput(rootFolder: string, artifacts: IOutputArtifact
     }
   }
 
-  validateCombinedPaths(prepared, previous);
+  // A path can belong to both inventories; each inventory rejects its own duplicates.
+  validatePaths([...new Set([...prepared.map(file => file.relative), ...previous])], "incremental output");
   const previousPaths = new Set(previous);
   const current = new Set(prepared.map(file => file.relative));
   const stale = previous.filter(filename => !current.has(filename));

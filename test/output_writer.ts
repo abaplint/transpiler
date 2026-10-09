@@ -106,15 +106,27 @@ describe("Incremental output writer", () => {
 
   it("rejects invalid manifests before writing artifacts", async () => {
     mkdirSync(output, {recursive: true});
-    writeFileSync(path.join(output, ".abap-transpile-manifest.json"), "{");
-    let failed = false;
-    try {
-      await writeOutput(output, [artifact("new.mjs", "new")], true);
-    } catch {
-      failed = true;
+    const manifest = path.join(output, ".abap-transpile-manifest.json");
+    const invalidPaths = [
+      [42], ["../escape.mjs"], ["C:/escape.mjs"], ["nested\\file.mjs"],
+      ["app.mjs", "app.mjs"], ["App.mjs", "app.mjs"],
+      [".ABAP-TRANSPILE-MANIFEST.JSON"], [".abap-transpile-manifest.json/child"],
+      ["parent", "parent/child.mjs"], ["parent/child.mjs", "parent"],
+    ];
+    const invalidManifests = ["{", JSON.stringify({version: 2, files: []}),
+      ...invalidPaths.map(files => JSON.stringify({version: 1, files}))];
+    for (const contents of invalidManifests) {
+      writeFileSync(manifest, contents);
+      let failed = false;
+      try {
+        await writeOutput(output, [artifact("new.mjs", "new")], true);
+      } catch {
+        failed = true;
+      }
+      expect(failed, contents).to.equal(true);
+      expect(existsSync(path.join(output, "new.mjs"))).to.equal(false);
+      expect(readFileSync(manifest, "utf8")).to.equal(contents);
     }
-    expect(failed).to.equal(true);
-    expect(existsSync(path.join(output, "new.mjs"))).to.equal(false);
   });
 
   it("rejects escaping destinations and symlinked output parents", async () => {
@@ -158,6 +170,29 @@ describe("Incremental output writer", () => {
         expect(rejected).to.equal(true);
         expect(existsSync(output)).to.equal(false);
       }
+    }
+  });
+
+  it("rejects collisions between current and previous paths before changing output", async () => {
+    const collisions = [
+      ["app.mjs", "APP.mjs"],
+      ["parent", "parent/child.mjs"],
+      ["parent/child.mjs", "parent"],
+    ];
+    for (const [index, [previous, current]] of collisions.entries()) {
+      const root = path.join(output, String(index));
+      await writeOutput(root, [artifact(previous, "original")], true);
+      const manifest = path.join(root, ".abap-transpile-manifest.json");
+      const before = readFileSync(manifest, "utf8");
+      let rejected = false;
+      try {
+        await writeOutput(root, [artifact(current, "updated")], true);
+      } catch {
+        rejected = true;
+      }
+      expect(rejected).to.equal(true);
+      expect(readFileSync(path.join(root, previous), "utf8")).to.equal("original");
+      expect(readFileSync(manifest, "utf8")).to.equal(before);
     }
   });
 

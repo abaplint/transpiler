@@ -107,5 +107,7 @@ DDIC types, available methods, and runtime behavior, or cause syntax errors in
 code expecting the skipped version. This option does not check that copies are
 equivalent or suppress syntax checking. Put the intended provider first and
 run your application's tests. For selective control, use `libs[].exclude_filter`
-to exclude only the unwanted object's files instead. Use a clean generated
-output directory when changing providers, since old output is not removed.
+to exclude only the unwanted object's files instead. With `incremental_output`
+enabled, changing providers removes obsolete files tracked in the manifest.
+Use a clean generated output directory when changing providers in legacy mode
+or when untracked stale output remains from earlier builds.
