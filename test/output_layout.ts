@@ -184,6 +184,30 @@ describe("CLI grouped output", () => {
     run("nested/output/index.mjs");
   });
 
+  it("skips identical output and removes tracked modules, maps, and test runners", () => {
+    write("src/zfirst.prog.abap", "ASSERT 1 = 1.");
+    const settings = {...config(), incremental_output: true};
+    const first = build(settings);
+    expect(first).to.contain("7 created");
+    write("nested/output/custom.txt", "keep");
+
+    const module = path.join(folder, "nested/output/project/zfirst.prog.mjs");
+    const before = readFileSync(module, "utf8");
+    const second = build(settings);
+    expect(second).to.contain("7 unchanged");
+    expect(readFileSync(module, "utf8")).to.equal(before);
+
+    rmSync(path.join(folder, "src/zfirst.prog.abap"));
+    const withoutRunners = {...settings, write_source_map: false, write_unit_tests: false};
+    const third = build(withoutRunners);
+    expect(third).to.contain("4 deleted");
+    expect(existsSync(module)).to.equal(false);
+    expect(existsSync(module + ".map")).to.equal(false);
+    expect(existsSync(path.join(folder, "nested/output/index.mjs"))).to.equal(false);
+    expect(existsSync(path.join(folder, "nested/output/_unit_open.mjs"))).to.equal(false);
+    expect(read("custom.txt")).to.equal("keep");
+  });
+
   it("maps program errors to the original ABAP line after the bootstrap", () => {
     write("src/zbad.prog.abap", "WRITE 'before'.\nASSERT 1 = 2.");
     build(config());
@@ -209,10 +233,16 @@ describe("CLI grouped output", () => {
       execFileSync("git", args, {cwd: repo, stdio: "pipe"});
     }
     build(config([{url: repo, name: "cloned"}]));
-    const map = JSON.parse(read("cloned/zcl_dep.clas.mjs.map"));
+    const mapText = read("cloned/zcl_dep.clas.mjs.map");
+    const map = JSON.parse(mapText);
     expect(map.sourcesContent[0]).to.contain("CLASS zcl_dep");
-    const checkoutSource = path.resolve(folder, "nested/output/cloned", decodeURIComponent(map.sources[0]));
-    expect(existsSync(checkoutSource)).to.equal(false);
+    expect(map.sources).to.deep.equal(["abaplint://cloned/src/zcl_dep.clas.abap"]);
+    expect(mapText).not.to.contain("abap_transpile-");
+    expect(mapText).not.to.contain(path.resolve(folder).replace(/\\/g, "/"));
+
+    const incremental = {...config([{url: repo, name: "cloned"}]), incremental_output: true};
+    build(incremental);
+    expect(read("cloned/zcl_dep.clas.mjs.map")).to.equal(mapText);
     run("nested/output/init.mjs");
   });
 });

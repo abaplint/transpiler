@@ -13,6 +13,8 @@ export interface ITranspilerConfig {
   exclude_filter?: string[];
   /** @minLength 1 */
   output_folder: string;
+  /** Skip unchanged generated files and remove tracked obsolete output */
+  incremental_output?: boolean;
   /** experimental */
   converter?: {
     /** @uniqueItems true */
