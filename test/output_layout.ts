@@ -34,11 +34,62 @@ describe("Library output names", () => {
 
   it("preserves project precedence and rejects objects shared by two libraries", () => {
     const file = {filename: "zcl_app.clas.abap", contents: ""};
-    const lib = {name: "lib", files: [file]};
-    const {reg, folders} = libraryRegistry([file], [lib]);
+    const lib = {name: "lib", files: [{...file, sourceMapPath: "abaplint://lib/src/zcl_app.clas.abap"}]};
+    const {reg, folders, sources} = libraryRegistry([file], [lib]);
     expect(reg.isDependency(reg.getObject("CLAS", "ZCL_APP")!)).to.equal(false);
     expect(folders.get(file.filename)).to.equal("project");
+    expect(sources).to.deep.equal([file]);
     expect(() => libraryRegistry([], [lib, {...lib, name: "other"}])).to.throw("Ambiguous dependency object");
+    expect(() => libraryRegistry([], [lib, {...lib, name: "other"}], false)).to.throw("Ambiguous dependency object");
+  });
+
+  it("skips whole duplicate objects, keeps independent objects, and warns once per object per library", () => {
+    const winner = [
+      {filename: "sxco_transport.dtel.xml", contents: "first type"},
+      {filename: "zcl_dep.clas.abap", contents: "first class"},
+      {filename: "zcl_dep.clas.locals_def.abap", contents: "first locals"},
+      {filename: "zimage.w3mi.xml", contents: "first metadata"},
+      {filename: "zimage.w3mi.data.png", contents: "first bytes"},
+    ];
+    const loser = [
+      {filename: "SXCO_TRANSPORT.dtel.xml", contents: "second type"},
+      {filename: "zcl_dep.clas.abap", contents: "second class"},
+      {filename: "zcl_dep.clas.locals_imp.abap", contents: "second-only locals"},
+      {filename: "zimage.w3mi.data.jpg", contents: "second-only bytes"},
+      {filename: "zimage.w3mi.xml", contents: "second metadata"},
+      {filename: "zother.prog.abap", contents: "independent"},
+    ];
+    const warnings: string[] = [];
+    const originalWarn = console.warn;
+    console.warn = (message: string) => warnings.push(message);
+    try {
+      const {reg, folders, sources} = libraryRegistry([], [
+        {name: "first", files: winner}, {name: "second", files: loser},
+        {name: "third", files: [loser[0]]},
+      ], true);
+      expect(reg.getObject("DTEL", "SXCO_TRANSPORT")!.getFiles()[0].getRaw()).to.equal("first type");
+      expect(reg.getObject("CLAS", "ZCL_DEP")!.getFiles().map(f => f.getFilename()))
+        .to.deep.equal(["zcl_dep.clas.abap", "zcl_dep.clas.locals_def.abap"]);
+      expect(reg.getObject("W3MI", "ZIMAGE")!.getFiles().map(f => f.getFilename()))
+        .to.deep.equal(["zimage.w3mi.xml", "zimage.w3mi.data.png"]);
+      expect(sources).to.deep.equal([...winner, loser[5]]);
+      expect([...folders.values()]).to.deep.equal(["first", "first", "first", "first", "first", "second"]);
+      expect(warnings).to.deep.equal([
+        "Skipping duplicate dependency object DTEL:SXCO_TRANSPORT in second; using first",
+        "Skipping duplicate dependency object CLAS:ZCL_DEP in second; using first",
+        "Skipping duplicate dependency object W3MI:ZIMAGE in second; using first",
+        "Skipping duplicate dependency object DTEL:SXCO_TRANSPORT in third; using first",
+      ]);
+
+      const project = {filename: "sxco_transport.dtel.xml", contents: "project type"};
+      const overridden = libraryRegistry([project], [{name: "first", files: winner}, {name: "second", files: loser}], true);
+      expect(overridden.reg.isDependency(overridden.reg.getObject("DTEL", "SXCO_TRANSPORT")!)).to.equal(false);
+      expect(overridden.reg.getObject("DTEL", "SXCO_TRANSPORT")!.getFiles()[0].getRaw()).to.equal("project type");
+      expect(overridden.folders.get(project.filename)).to.equal("project");
+      expect(overridden.sources.find(f => f.filename === project.filename)).to.equal(project);
+    } finally {
+      console.warn = originalWarn;
+    }
   });
 });
 
@@ -60,7 +111,7 @@ describe("CLI grouped output", () => {
   });
   const build = (settings: object) => {
     write("abap_transpile.json", JSON.stringify(settings));
-    return execFileSync(process.execPath, [cli], {cwd: folder, encoding: "utf8", timeout: 30000});
+    return execFileSync(process.execPath, [cli], {cwd: folder, encoding: "utf8", timeout: 30000, stdio: "pipe"});
   };
   const run = (module: string) => execFileSync(process.execPath, [module], {cwd: folder, encoding: "utf8", timeout: 30000});
   const read = (file: string) => readFileSync(path.join(folder, "nested/output", file), "utf8");
@@ -184,6 +235,65 @@ describe("CLI grouped output", () => {
     run("nested/output/index.mjs");
   });
 
+  it("skips identical output and removes tracked modules, maps, and test runners", () => {
+    write("src/zfirst.prog.abap", "ASSERT 1 = 1.");
+    const settings = {...config(), incremental_output: true};
+    const first = build(settings);
+    expect(first).to.contain("7 created");
+    write("nested/output/custom.txt", "keep");
+
+    const module = path.join(folder, "nested/output/project/zfirst.prog.mjs");
+    const before = readFileSync(module, "utf8");
+    const second = build(settings);
+    expect(second).to.contain("7 unchanged");
+    expect(readFileSync(module, "utf8")).to.equal(before);
+
+    rmSync(path.join(folder, "src/zfirst.prog.abap"));
+    const withoutRunners = {...settings, write_source_map: false, write_unit_tests: false};
+    const third = build(withoutRunners);
+    expect(third).to.contain("4 deleted");
+    expect(existsSync(module)).to.equal(false);
+    expect(existsSync(module + ".map")).to.equal(false);
+    expect(existsSync(path.join(folder, "nested/output/index.mjs"))).to.equal(false);
+    expect(existsSync(path.join(folder, "nested/output/_unit_open.mjs"))).to.equal(false);
+    expect(read("custom.txt")).to.equal("keep");
+  });
+
+  it("uses the first duplicate dependency for imports, source maps, and runtime behavior", () => {
+    for (const [name, value] of [["first", 7], ["second", 9]] as const) {
+      write("deps/" + name + "/src/sxco_transport.dtel.xml",
+        '<abapGit><asx:abap xmlns:asx="http://www.sap.com/abapxml"><asx:values><DD04V>' +
+        '<ROLLNAME>SXCO_TRANSPORT</ROLLNAME><DATATYPE>CHAR</DATATYPE><LENG>' + value + '</LENG>' +
+        '</DD04V></asx:values></asx:abap></abapGit>');
+      write("deps/" + name + "/src/zcl_dep.clas.abap", [
+        "CLASS zcl_dep DEFINITION PUBLIC.",
+        "PUBLIC SECTION. CLASS-DATA value TYPE i VALUE " + value + ". ENDCLASS.",
+        "CLASS zcl_dep IMPLEMENTATION. ENDCLASS.",
+      ].join("\n"));
+    }
+    write("deps/second/src/zcl_dep.clas.locals_imp.abap", "invalid losing file must be skipped");
+    write("src/zcl_app.clas.abap",
+      "CLASS zcl_app DEFINITION PUBLIC INHERITING FROM zcl_dep. ENDCLASS. CLASS zcl_app IMPLEMENTATION. ENDCLASS.");
+    const program = "DATA value TYPE sxco_transport. value = '123456789'. ASSERT strlen( value ) = zcl_dep=>value.\n";
+    write("src/zapp.prog.abap", program + "ASSERT zcl_dep=>value = 7.");
+    const libs = [{folder: "deps/first"}, {folder: "deps/second"}];
+    build({...config(libs), skip_duplicate_dependencies: true});
+    expect(read("project/zcl_app.clas.mjs")).to.contain('../first/zcl_dep.clas.mjs');
+    expect(existsSync(path.join(folder, "nested/output/second/zcl_dep.clas.mjs"))).to.equal(false);
+    expect(existsSync(path.join(folder, "nested/output/second/sxco_transport.dtel.mjs"))).to.equal(false);
+    const map = JSON.parse(read("first/zcl_dep.clas.mjs.map"));
+    expect(map.sources).to.deep.equal(["../../../deps/first/src/zcl_dep.clas.abap"]);
+    expect(map.sourcesContent[0]).to.contain("VALUE 7");
+    run("nested/output/project/zapp.prog.mjs");
+
+    // Reversing libs must select the other implementation rather than blending the copies.
+    write("deps/second/src/zcl_dep.clas.locals_imp.abap", "");
+    write("src/zapp.prog.abap", program + "ASSERT zcl_dep=>value = 9.");
+    build({...config([...libs].reverse()), skip_duplicate_dependencies: true});
+    expect(read("project/zcl_app.clas.mjs")).to.contain('../second/zcl_dep.clas.mjs');
+    run("nested/output/project/zapp.prog.mjs");
+  });
+
   it("maps program errors to the original ABAP line after the bootstrap", () => {
     write("src/zbad.prog.abap", "WRITE 'before'.\nASSERT 1 = 2.");
     build(config());
@@ -209,10 +319,17 @@ describe("CLI grouped output", () => {
       execFileSync("git", args, {cwd: repo, stdio: "pipe"});
     }
     build(config([{url: repo, name: "cloned"}]));
-    const map = JSON.parse(read("cloned/zcl_dep.clas.mjs.map"));
+    const mapText = read("cloned/zcl_dep.clas.mjs.map");
+    const map = JSON.parse(mapText);
     expect(map.sourcesContent[0]).to.contain("CLASS zcl_dep");
-    const checkoutSource = path.resolve(folder, "nested/output/cloned", decodeURIComponent(map.sources[0]));
-    expect(existsSync(checkoutSource)).to.equal(false);
+    expect(map.sources).to.deep.equal(["abaplint://cloned/src/zcl_dep.clas.abap"]);
+    expect(mapText).not.to.contain("abap_transpile-");
+    expect(mapText).not.to.contain(path.resolve(folder).replace(/\\/g, "/"));
+
+    const incremental = {...config([{url: repo, name: "cloned"}]), incremental_output: true};
+    build(incremental);
+    expect(read("cloned/zcl_dep.clas.mjs.map")).to.equal(mapText);
+    expect(build(incremental)).to.contain("0 created, 0 updated");
     run("nested/output/init.mjs");
   });
 });

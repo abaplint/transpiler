@@ -13,7 +13,17 @@ type Library = NonNullable<ITranspilerConfig["libs"]>[number];
 
 export interface LoadedLibrary {
   name: string;
-  files: IFile[];
+  files: ISourceFile[];
+}
+
+export interface ISourceFile extends IFile {
+  sourceMapPath?: string;
+}
+
+function logicalLibrarySource(library: string, directory: string, filename: string): string {
+  const relative = path.relative(directory, filename).split(path.sep)
+    .map(segment => encodeURIComponent(segment)).join("/");
+  return "abaplint://" + encodeURIComponent(library) + "/" + relative;
 }
 
 export function libraryNames(libs: readonly Library[]): string[] {
@@ -40,6 +50,7 @@ export async function loadLibraries(config: ITranspilerConfig): Promise<LoadedLi
   const names = libraryNames(libs);
   const result: LoadedLibrary[] = [];
   for (const [index, lib] of libs.entries()) {
+    const libraryName = names[index];
     let dir: string;
     let cleanupFolder = false;
     const folder = resolveLibFolder(lib.folder, process.cwd());
@@ -72,8 +83,15 @@ export async function loadLibraries(config: ITranspilerConfig): Promise<LoadedLi
           filesToRead.add(filename);
         }
       }
-      const files = await FileOperations.readAllFiles([...filesToRead], config.output_folder);
-      result.push({name: names[index], files});
+      const filenames = [...filesToRead];
+      const files: ISourceFile[] = await FileOperations.readAllFiles(filenames, config.output_folder);
+      if (cleanupFolder) {
+        for (const [index, file] of files.entries()) {
+          file.sourceMapPath = logicalLibrarySource(libraryName, dir, filenames[index]);
+          delete file.relative;
+        }
+      }
+      result.push({name: libraryName, files});
       console.log("\t" + files.length + " files added from lib");
     } finally {
       if (cleanupFolder) {
@@ -84,13 +102,14 @@ export async function loadLibraries(config: ITranspilerConfig): Promise<LoadedLi
   return result;
 }
 
-export function libraryRegistry(files: IFile[], libraries: LoadedLibrary[]) {
+export function libraryRegistry(files: IFile[], libraries: LoadedLibrary[], skipDuplicateDependencies = false) {
   const reg = new abaplint.Registry();
   const folders = new Map<string, string>();
   const objects = new Map<string, string>();
-  const sources = new Map<string, IFile>();
+  const sources = new Map<string, ISourceFile>();
   // Libraries first: addFile() then replaces a dependency object with the project's object.
   for (const lib of libraries) {
+    const skipped = new Set<string>();
     for (const file of lib.files) {
       const memory = new abaplint.MemoryFile(file.filename, file.contents);
       const type = memory.getObjectType()?.toUpperCase();
@@ -101,6 +120,14 @@ export function libraryRegistry(files: IFile[], libraries: LoadedLibrary[]) {
       const owner = objects.get(key);
       // abapGit repeats package.devc.xml across repositories; the registry keeps the last copy.
       if (key !== "DEVC:PACKAGE" && owner !== undefined && owner !== lib.name) {
+        if (skipDuplicateDependencies === true) {
+          if (!skipped.has(key)) {
+            console.warn("Skipping duplicate dependency object " + key + " in " + lib.name + "; using " + owner);
+            skipped.add(key);
+          }
+          // Skip every file of the losing object, including locals, metadata, and binary assets.
+          continue;
+        }
         throw new Error("Ambiguous dependency object " + key + " in " + owner + " and " + lib.name);
       }
       objects.set(key, lib.name);

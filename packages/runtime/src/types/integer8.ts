@@ -1,4 +1,5 @@
 import {throwError} from "../throw_error";
+import {Date} from "./date";
 import {Float} from "./float";
 import {Hex} from "./hex";
 import {XString} from "./xstring";
@@ -49,6 +50,9 @@ export class Integer8 {
         throwError("CX_SY_CONVERSION_NO_NUMBER");
       }
       this.value = BigInt(value);
+    } else if (value instanceof Date) {
+// d is converted to the number of days since 01.01.0001, not the YYYYMMDD digits
+      this.value = BigInt(value.getNumeric());
     } else if (value instanceof Float || value instanceof DecFloat34) {
       this.set(roundHalfAwayFromZero(value.getRaw()));
     } else if (value instanceof FieldSymbol) {

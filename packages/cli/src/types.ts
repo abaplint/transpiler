@@ -13,6 +13,8 @@ export interface ITranspilerConfig {
   exclude_filter?: string[];
   /** @minLength 1 */
   output_folder: string;
+  /** Skip unchanged generated files and remove tracked obsolete output */
+  incremental_output?: boolean;
   /** experimental */
   converter?: {
     /** @uniqueItems true */
@@ -34,6 +36,8 @@ export interface ITranspilerConfig {
      */
     exclude_filter?: string[];
   }[],
+  /** skip duplicate dependency objects after the first library in libs, with a warning; defaults to false */
+  skip_duplicate_dependencies?: boolean;
   write_unit_tests?: boolean;
   write_source_map?: boolean;
 

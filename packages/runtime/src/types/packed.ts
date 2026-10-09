@@ -1,4 +1,5 @@
 import {Float} from "./float";
+import {Date} from "./date";
 import {INumeric} from "./_numeric";
 import {throwError} from "../throw_error";
 import {Integer8} from "./integer8";
@@ -127,6 +128,9 @@ export class Packed implements INumeric {
       this.value = this.stringToScaled(value);
     } else if (value instanceof Integer8) {
       this.value = (value.get() as unknown as bigint) * pow10(this.decimals);
+    } else if (value instanceof Date) {
+// d is converted to the number of days since 01.01.0001, not the YYYYMMDD digits
+      this.value = BigInt(value.getNumeric()) * pow10(this.decimals);
     } else if (value instanceof Float || value instanceof DecFloat34) {
       this.value = this.numberToScaled(value.getRaw());
     } else if (value instanceof FieldSymbol) {

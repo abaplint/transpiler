@@ -1,12 +1,11 @@
-import * as fs from "fs";
-import * as path from "path";
 import ProgressBar from "progress";
 import * as Transpiler from "@abaplint/transpiler";
 import {TranspilerConfig} from "./config";
 import {FileOperations} from "./file_operations";
 import {ITranspilerConfig} from "./types";
 import {loadLibraries, libraryRegistry} from "./libraries";
-import {writeObjects} from "./write_objects";
+import {collectObjectFiles} from "./write_objects";
+import {IOutputArtifact, writeOutput} from "./output_writer";
 
 class Progress implements Transpiler.IProgress {
   private bar: ProgressBar;
@@ -30,7 +29,7 @@ async function build(config: ITranspilerConfig, files: Transpiler.IFile[]) {
   }
   const t = new Transpiler.Transpiler(options);
 
-  const {reg, folders, sources} = libraryRegistry(files, libraries);
+  const {reg, folders, sources} = libraryRegistry(files, libraries, config.skip_duplicate_dependencies);
   const output = await t.run(reg, new Progress(), folders);
   return {output, sources};
 }
@@ -45,26 +44,22 @@ async function run() {
   const {output, sources} = await build(config, files);
 
   console.log("\nOutput");
-  const outputFolder = config.output_folder;
-  if (!fs.existsSync(outputFolder)) {
-    fs.mkdirSync(outputFolder, {recursive: true});
-  }
-
-  await writeObjects(output.objects, config, sources);
-  console.log(output.objects.length + " objects written to disk");
-
+  const artifacts: IOutputArtifact[] = collectObjectFiles(output.objects, config, sources);
   if (config.write_unit_tests === true) {
-    // breaking change? rename this output file,
-    fs.writeFileSync(outputFolder + path.sep + "index.mjs", output.unitTestScript);
-    fs.writeFileSync(outputFolder + path.sep + "_unit_open.mjs", output.unitTestScriptOpen);
+    artifacts.push({path: "index.mjs", contents: output.unitTestScript});
+    artifacts.push({path: "_unit_open.mjs", contents: output.unitTestScriptOpen});
   }
-  // breaking change? rename this output file,
-  fs.writeFileSync(outputFolder + path.sep + "init.mjs", output.initializationScript);
-
-// new static referenced imports,
-  fs.writeFileSync(outputFolder + path.sep + "_init.mjs", output.initializationScript2);
-  fs.writeFileSync(outputFolder + path.sep + "_top.mjs", `import runtime from "@abaplint/runtime";
-globalThis.abap = new runtime.ABAP();`);
+  artifacts.push({path: "init.mjs", contents: output.initializationScript});
+  artifacts.push({path: "_init.mjs", contents: output.initializationScript2});
+  artifacts.push({path: "_top.mjs", contents: `import runtime from "@abaplint/runtime";
+globalThis.abap = new runtime.ABAP();`});
+  const written = await writeOutput(config.output_folder, artifacts, config.incremental_output === true);
+  if (config.incremental_output === true) {
+    console.log("Output files: " + written.created + " created, " +
+      written.updated + " updated, " + written.unchanged + " unchanged, " + written.deleted + " deleted");
+  } else {
+    console.log(`Output files: ${written.updated} written`);
+  }
 }
 
 run().then(() => {
