@@ -122,6 +122,8 @@ export class Packed implements INumeric {
         this.value = 0n;
         return this;
       } else if (digits.test(value) === false) {
+        // a system clears the target before it raises, so the handler sees it initial
+        this.value = 0n;
         throwError("CX_SY_CONVERSION_NO_NUMBER");
       }
 
