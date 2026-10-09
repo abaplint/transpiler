@@ -292,4 +292,36 @@ START-OF-SELECTION.
     await new AsyncFunction("abap", await run(code))(abap);
   });
 
+  it("bound reference is an instance of an interface its class implements", async () => {
+    const code = `
+INTERFACE lif_base.
+ENDINTERFACE.
+INTERFACE lif_x.
+  INTERFACES lif_base.
+ENDINTERFACE.
+INTERFACE lif_other.
+ENDINTERFACE.
+CLASS lcl_a DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif_x.
+ENDCLASS.
+CLASS lcl_a IMPLEMENTATION.
+ENDCLASS.
+CLASS lcl_b DEFINITION INHERITING FROM lcl_a.
+ENDCLASS.
+CLASS lcl_b IMPLEMENTATION.
+ENDCLASS.
+START-OF-SELECTION.
+  DATA o TYPE REF TO object.
+  CREATE OBJECT o TYPE lcl_a.
+  ASSERT o IS INSTANCE OF lif_x.
+  ASSERT o IS INSTANCE OF lif_base.
+  ASSERT o IS NOT INSTANCE OF lif_other.
+  CREATE OBJECT o TYPE lcl_b.
+  ASSERT o IS INSTANCE OF lif_x.
+  ASSERT o IS INSTANCE OF lif_base.
+  ASSERT o IS NOT INSTANCE OF lif_other.`;
+    await new AsyncFunction("abap", await run(code))(abap);
+  });
+
 });
