@@ -695,9 +695,15 @@ export class Traversal {
       return undefined;
     }
 
-    // local
+    // local, also when the interface is declared in another include of the same object,
+    // eg. a local interface in the locals_imp of a class, used in its test classes
     if (ref.getFilename() === this.getFilename()) {
       const scope = this.findCurrentScopeByToken(ref.getToken());
+      if (scope?.getIdentifier().stype === abaplint.ScopeType.Interface) {
+        return scope?.getIdentifier().sname;
+      }
+    } else if (this.getCurrentObject().getABAPFileByName(ref.getFilename()) !== undefined) {
+      const scope = this.spaghetti.lookupPosition(ref.getStart(), ref.getFilename());
       if (scope?.getIdentifier().stype === abaplint.ScopeType.Interface) {
         return scope?.getIdentifier().sname;
       }
