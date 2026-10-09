@@ -22,6 +22,7 @@ basename of `folder` for a local-only library. Set `libs[].name` to override it:
 {
   "input_folder": ["src", "extra"],
   "output_folder": "output",
+  "incremental_output": true,
   "libs": [
     {"url": "https://github.com/open-abap/open-abap-core"},
     {"folder": "./deps/utilities", "name": "utilities"}
@@ -55,15 +56,28 @@ are rejected by default; a project object replaces a library object of the same 
 
 Class locals, test classes, function groups, MIME data, and
 source maps follow their owning object. Source maps include ABAP source content,
-including libraries loaded from temporary Git checkouts. Imports and registered
-MIME filenames reference the new paths.
+including libraries loaded from temporary Git checkouts; they use stable
+library-qualified paths and do not expose the temporary checkout location.
+Imports and registered MIME filenames reference the new paths.
 
 Shared initialization scripts and test runners remain at the output root.
 Run programs with `node output/project/zapp.prog.mjs`; run project unit tests
 with `node output/index.mjs`. When migrating from flat output, rebuild a clean
 generated output directory and update scripts that reference individual
-modules or assets. The CLI does not remove old generated files or unrelated
-files automatically.
+modules or assets.
+
+Set `incremental_output` to `true` to skip writing unchanged files, replace
+changed generated files, and remove obsolete files recorded in
+`output/.abap-transpile-manifest.json`. The CLI preserves files it did not
+generate, including custom setup scripts and other user data. Existing output
+from runs before this option was enabled has no ownership inventory; do one
+clean build when adopting the option to remove legacy stale files. Set the
+option to `false` (the default) to restore unconditional writes. Files
+generated while it is disabled are not added to the inventory.
+
+The manifest is updated atomically and retained as a recovery aid if a run
+fails. This does not make the entire output tree transactional. Use one
+transpiler process per output directory.
 
 The transpiler library retains flat output unless its caller supplies an output
 folder map as the third argument to `Transpiler.run()`. This layout is enabled
@@ -93,5 +107,7 @@ DDIC types, available methods, and runtime behavior, or cause syntax errors in
 code expecting the skipped version. This option does not check that copies are
 equivalent or suppress syntax checking. Put the intended provider first and
 run your application's tests. For selective control, use `libs[].exclude_filter`
-to exclude only the unwanted object's files instead. Use a clean generated
-output directory when changing providers, since old output is not removed.
+to exclude only the unwanted object's files instead. With `incremental_output`
+enabled, changing providers removes obsolete files tracked in the manifest.
+Use a clean generated output directory when changing providers in legacy mode
+or when untracked stale output remains from earlier builds.
