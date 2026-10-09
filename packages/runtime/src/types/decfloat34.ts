@@ -4,6 +4,8 @@ import {Hex} from "./hex";
 import {XString} from "./xstring";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
+import {Time} from "./time";
+import {FieldSymbol} from "./field_symbol";
 
 export class DecFloat34 {
   private value: number;
@@ -35,6 +37,15 @@ export class DecFloat34 {
       this.value = value.getNumeric();
     } else if (value instanceof Float) {
       this.value = value.getRaw();
+    } else if (value instanceof FieldSymbol) {
+// dispatch on the type the field symbol points to, get() would only give its plain value
+      if (value.getPointer() === undefined) {
+        throw new Error("GETWA_NOT_ASSIGNED");
+      }
+      this.set(value.getPointer());
+    } else if (value instanceof Time) {
+// t is converted to the number of seconds since midnight, not the HHMMSS digits
+      this.value = value.getNumeric();
     } else if (value instanceof Hex || value instanceof XString) {
 // todo, how/if should this work?
       this.set(parseInt(value.get(), 16));
