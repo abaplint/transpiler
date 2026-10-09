@@ -34,10 +34,11 @@ describe("Library output names", () => {
 
   it("preserves project precedence and rejects objects shared by two libraries", () => {
     const file = {filename: "zcl_app.clas.abap", contents: ""};
-    const lib = {name: "lib", files: [file]};
-    const {reg, folders} = libraryRegistry([file], [lib]);
+    const lib = {name: "lib", files: [{...file, sourceMapPath: "abaplint://lib/src/zcl_app.clas.abap"}]};
+    const {reg, folders, sources} = libraryRegistry([file], [lib]);
     expect(reg.isDependency(reg.getObject("CLAS", "ZCL_APP")!)).to.equal(false);
     expect(folders.get(file.filename)).to.equal("project");
+    expect(sources).to.deep.equal([file]);
     expect(() => libraryRegistry([], [lib, {...lib, name: "other"}])).to.throw("Ambiguous dependency object");
     expect(() => libraryRegistry([], [lib, {...lib, name: "other"}], false)).to.throw("Ambiguous dependency object");
   });
@@ -328,6 +329,7 @@ describe("CLI grouped output", () => {
     const incremental = {...config([{url: repo, name: "cloned"}]), incremental_output: true};
     build(incremental);
     expect(read("cloned/zcl_dep.clas.mjs.map")).to.equal(mapText);
+    expect(build(incremental)).to.contain("0 created, 0 updated");
     run("nested/output/init.mjs");
   });
 });

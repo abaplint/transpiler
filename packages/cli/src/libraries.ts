@@ -13,10 +13,12 @@ type Library = NonNullable<ITranspilerConfig["libs"]>[number];
 
 export interface LoadedLibrary {
   name: string;
-  files: IFile[];
+  files: ISourceFile[];
 }
 
-type ISourceFile = IFile & {sourceMapPath?: string};
+export interface ISourceFile extends IFile {
+  sourceMapPath?: string;
+}
 
 function logicalLibrarySource(library: string, directory: string, filename: string): string {
   const relative = path.relative(directory, filename).split(path.sep)
@@ -82,12 +84,11 @@ export async function loadLibraries(config: ITranspilerConfig): Promise<LoadedLi
         }
       }
       const filenames = [...filesToRead];
-      const files = await FileOperations.readAllFiles(filenames, config.output_folder);
+      const files: ISourceFile[] = await FileOperations.readAllFiles(filenames, config.output_folder);
       if (cleanupFolder) {
         for (const [index, file] of files.entries()) {
-          const source = file as ISourceFile;
-          source.sourceMapPath = logicalLibrarySource(libraryName, dir, filenames[index]);
-          delete source.relative;
+          file.sourceMapPath = logicalLibrarySource(libraryName, dir, filenames[index]);
+          delete file.relative;
         }
       }
       result.push({name: libraryName, files});
@@ -105,8 +106,7 @@ export function libraryRegistry(files: IFile[], libraries: LoadedLibrary[], skip
   const reg = new abaplint.Registry();
   const folders = new Map<string, string>();
   const objects = new Map<string, string>();
-  const sources = new Map<string, IFile>();
-  const sourceMapPaths = new Map<string, string>();
+  const sources = new Map<string, ISourceFile>();
   // Libraries first: addFile() then replaces a dependency object with the project's object.
   for (const lib of libraries) {
     const skipped = new Set<string>();
@@ -134,17 +134,12 @@ export function libraryRegistry(files: IFile[], libraries: LoadedLibrary[], skip
       reg.addDependency(memory);
       folders.set(file.filename.toLowerCase(), lib.name);
       sources.set(file.filename.toLowerCase(), file);
-      const sourceMapPath = (file as ISourceFile).sourceMapPath;
-      if (sourceMapPath !== undefined) {
-        sourceMapPaths.set(file.filename.toLowerCase(), sourceMapPath);
-      }
     }
   }
   for (const file of files) {
     reg.addFile(new abaplint.MemoryFile(file.filename, file.contents));
     folders.set(file.filename.toLowerCase(), "project");
     sources.set(file.filename.toLowerCase(), file);
-    sourceMapPaths.delete(file.filename.toLowerCase());
   }
-  return {reg, folders, sources: [...sources.values()], sourceMapPaths};
+  return {reg, folders, sources: [...sources.values()]};
 }

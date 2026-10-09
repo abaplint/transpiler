@@ -23,18 +23,17 @@ describe("Incremental output writer", () => {
     const files = [artifact("project/app.mjs", "export const value = 1;")];
     const first = await writeOutput(output, files, true);
     expect(first.created).to.equal(1);
-    expect(first.fileWrites).to.equal(1);
-    expect(first.manifestWrites).to.equal(1);
     const target = path.join(output, "project/app.mjs");
+    const manifest = path.join(output, ".abap-transpile-manifest.json");
+    expect(JSON.parse(readFileSync(manifest, "utf8")).files).to.deep.equal(["project/app.mjs"]);
     const knownTime = new Date("2020-01-02T03:04:06.000Z");
     utimesSync(target, knownTime, knownTime);
+    utimesSync(manifest, knownTime, knownTime);
 
     const second = await writeOutput(output, files, true);
-    expect(second.unchanged).to.equal(1);
-    expect(second.fileWrites).to.equal(0);
-    expect(second.manifestWrites).to.equal(0);
-    expect(second.filesRead).to.equal(1);
+    expect(second).to.deep.equal({created: 0, updated: 0, unchanged: 1, deleted: 0});
     expect(statSync(target).mtimeMs).to.equal(knownTime.getTime());
+    expect(statSync(manifest).mtimeMs).to.equal(knownTime.getTime());
   });
 
   it("rewrites same-size edits and creates missing files", async () => {
@@ -48,7 +47,6 @@ describe("Incremental output writer", () => {
     ], true);
     expect(result.updated).to.equal(1);
     expect(result.created).to.equal(1);
-    expect(result.filesRead).to.equal(1);
     expect(readFileSync(path.join(output, "app.mjs"), "utf8")).to.equal("updated!");
     expect(readFileSync(path.join(output, "missing.mjs"), "utf8")).to.equal("created");
   });
@@ -63,12 +61,25 @@ describe("Incremental output writer", () => {
     ], true);
     writeFileSync(path.join(output, "custom.mjs"), "keep");
 
-    const result = await writeOutput(output, [
-      artifact("stable.mjs", "same"),
-      artifact("size.mjs", "longer"),
-    ], true);
-    expect(result.filesRead).to.equal(1);
-    expect(result.deleted).to.equal(1);
+    const nativeFs = createRequire(__filename)("node:fs/promises") as typeof import("node:fs/promises");
+    const originalReadFile = nativeFs.readFile;
+    const reads: string[] = [];
+    nativeFs.readFile = (async (...args: Parameters<typeof originalReadFile>) => {
+      reads.push(String(args[0]));
+      return originalReadFile(...args);
+    }) as typeof originalReadFile;
+    try {
+      const result = await writeOutput(output, [
+        artifact("stable.mjs", "same"),
+        artifact("size.mjs", "longer"),
+        artifact("missing.mjs", "new"),
+      ], true);
+      expect(result.deleted).to.equal(1);
+    } finally {
+      nativeFs.readFile = originalReadFile;
+    }
+    expect(reads.map(filename => path.basename(filename)).sort())
+      .to.deep.equal([".abap-transpile-manifest.json", "stable.mjs"]);
     expect(readFileSync(path.join(output, "size.mjs"), "utf8")).to.equal("longer");
     expect(existsSync(path.join(output, "obsolete-lib/owned.mjs"))).to.equal(false);
     expect(readFileSync(path.join(output, "obsolete-lib/unowned.txt"), "utf8")).to.equal("keep");
@@ -136,15 +147,17 @@ describe("Incremental output writer", () => {
       [artifact("parent", "one"), artifact("parent/child.mjs", "two")],
       [artifact(".abap-transpile-manifest.json/child", "reserved")],
     ];
-    for (const files of invalidSets) {
-      let rejected = false;
-      try {
-        await writeOutput(output, files, true);
-      } catch {
-        rejected = true;
+    for (const incremental of [false, true]) {
+      for (const files of invalidSets) {
+        let rejected = false;
+        try {
+          await writeOutput(output, files, incremental);
+        } catch {
+          rejected = true;
+        }
+        expect(rejected).to.equal(true);
+        expect(existsSync(output)).to.equal(false);
       }
-      expect(rejected).to.equal(true);
-      expect(existsSync(output)).to.equal(false);
     }
   });
 
@@ -189,7 +202,7 @@ describe("Incremental output writer", () => {
     utimesSync(target, knownTime, knownTime);
 
     const result = await writeOutput(output, [artifact("app.mjs", "original")], false);
-    expect(result.fileWrites).to.equal(1);
+    expect(result.updated).to.equal(1);
     expect(statSync(target).mtimeMs).to.be.greaterThan(knownTime.getTime());
     expect(existsSync(path.join(output, "old.mjs"))).to.equal(true);
     expect(existsSync(path.join(output, ".abap-transpile-manifest.json"))).to.equal(false);

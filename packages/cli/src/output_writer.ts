@@ -2,7 +2,6 @@ import * as fs from "node:fs";
 import * as fsPromises from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import {performance} from "node:perf_hooks";
 import {FileOperations} from "./file_operations";
 
 export interface IOutputArtifact {
@@ -15,18 +14,6 @@ export interface IOutputWriteResult {
   updated: number;
   unchanged: number;
   deleted: number;
-  metadataChecks: number;
-  bytesRead: number;
-  bytesWritten: number;
-  filesRead: number;
-  fileWrites: number;
-  directoriesCreated: number;
-  manifestWrites: number;
-  validationMs: number;
-  comparisonMs: number;
-  artifactWriteMs: number;
-  cleanupMs: number;
-  manifestMs: number;
 }
 
 interface IManifest {
@@ -176,7 +163,6 @@ function isBelowRoot(root: string, filename: string): boolean {
 
 async function inspectPaths(root: string, relativePaths: string[], rootStats: fs.Stats | undefined, ioConcurrency: number) {
   const metadata = new Map<string, fs.Stats | undefined>();
-  let checks = 0;
 
   const nodes = new Map<string, boolean>();
   for (const filename of relativePaths) {
@@ -204,7 +190,6 @@ async function inspectPaths(root: string, relativePaths: string[], rootStats: fs
       await forEachLimit(candidates, async relative => {
         const absolute = path.resolve(root, ...relative.split("/"));
         const stat = await lstatOrMissing(absolute);
-        checks++;
         if (stat?.isSymbolicLink()) {
           throw new Error("Output path must not traverse a symlink: " + relative);
         }
@@ -222,12 +207,12 @@ async function inspectPaths(root: string, relativePaths: string[], rootStats: fs
       metadata.set(relative, undefined);
     }
   }
-  return {metadata, checks};
+  return metadata;
 }
 
-async function atomicWriteManifest(root: string, contents: string, current?: string): Promise<number> {
+async function atomicWriteManifest(root: string, contents: string, current?: string): Promise<void> {
   if (current === contents) {
-    return 0;
+    return;
   }
   await fsPromises.mkdir(root, {recursive: true});
   const temporary = path.join(root, MANIFEST + ".tmp-" + process.pid + "-" + Math.random().toString(36).slice(2));
@@ -242,36 +227,25 @@ async function atomicWriteManifest(root: string, contents: string, current?: str
     }
     throw error;
   }
-  return Buffer.byteLength(contents, "utf8");
 }
 
 export async function writeOutput(rootFolder: string, artifacts: IOutputArtifact[], incremental: boolean,
                                   ioConcurrency = concurrency()): Promise<IOutputWriteResult> {
   const root = path.resolve(rootFolder);
-  const validationStart = performance.now();
   const prepared = validateArtifactPaths(artifacts);
   const result: IOutputWriteResult = {
-    created: 0, updated: 0, unchanged: 0, deleted: 0, metadataChecks: 0, bytesRead: 0, bytesWritten: 0,
-    filesRead: 0, fileWrites: 0, directoriesCreated: 0, manifestWrites: 0,
-    validationMs: 0, comparisonMs: 0, artifactWriteMs: 0, cleanupMs: 0, manifestMs: 0,
+    created: 0, updated: 0, unchanged: 0, deleted: 0,
   };
-  result.validationMs = performance.now() - validationStart;
 
   if (!incremental) {
     const files = prepared.map(file => ({path: path.resolve(root, file.relative), contents: file.contents}));
-    const writeStart = performance.now();
     await FileOperations.writeFiles(files);
-    result.artifactWriteMs = performance.now() - writeStart;
     result.updated = files.length;
-    result.fileWrites = files.length;
-    result.bytesWritten = prepared.reduce((total, file) => total + file.byteLength, 0);
     return result;
   }
 
-  const manifestStart = performance.now();
   const manifestPath = path.join(root, MANIFEST);
   const rootStats = await lstatOrMissing(root);
-  result.metadataChecks++;
   if (rootStats?.isSymbolicLink()) {
     throw new Error("Output folder must not be a symlink: " + root);
   }
@@ -282,32 +256,26 @@ export async function writeOutput(rootFolder: string, artifacts: IOutputArtifact
   let previous: string[] = [];
   if (rootStats !== undefined) {
     const manifestStat = await lstatOrMissing(manifestPath);
-    result.metadataChecks++;
     if (manifestStat?.isSymbolicLink() || (manifestStat !== undefined && !manifestStat.isFile())) {
       throw new Error("Incremental output manifest must be a regular file");
     }
     if (manifestStat !== undefined) {
       const contents = await fsPromises.readFile(manifestPath, "utf8");
-      result.bytesRead += Buffer.byteLength(contents, "utf8");
       manifestContents = contents;
       previous = parseManifest(contents).files;
     }
   }
 
   validateCombinedPaths(prepared, previous);
-  result.validationMs += performance.now() - manifestStart;
   const previousPaths = new Set(previous);
-  const currentPaths = new Set(prepared.map(file => file.relative));
-  const stale = previous.filter(filename => !currentPaths.has(filename));
   const current = new Set(prepared.map(file => file.relative));
+  const stale = previous.filter(filename => !current.has(filename));
   const additions = prepared.some(file => !previousPaths.has(file.relative));
   const pathsToInspect = [...new Set([...prepared.map(file => file.relative), ...stale])];
-  const comparisonStart = performance.now();
-  const inspected = await inspectPaths(root, pathsToInspect, rootStats, ioConcurrency);
-  result.metadataChecks += inspected.checks;
+  const metadata = await inspectPaths(root, pathsToInspect, rootStats, ioConcurrency);
 
   await forEachLimit(prepared, async file => {
-    const stat = inspected.metadata.get(file.relative);
+    const stat = metadata.get(file.relative);
     file.existed = stat !== undefined;
     if (stat === undefined || stat.size !== file.byteLength) {
       file.changed = true;
@@ -324,23 +292,14 @@ export async function writeOutput(rootFolder: string, artifacts: IOutputArtifact
       }
       throw error;
     }
-    result.filesRead++;
-    result.bytesRead += existing.length;
     const generated = Buffer.from(file.contents, file.binary ? "latin1" : "utf8");
     file.changed = !existing.equals(generated);
   }, ioConcurrency);
-  result.comparisonMs = performance.now() - comparisonStart;
 
   if (additions) {
-    const union = new Set([...previous, ...current]);
-    const manifestWriteStart = performance.now();
-    const bytes = await atomicWriteManifest(root, serializeManifest(union), manifestContents);
-    result.manifestMs += performance.now() - manifestWriteStart;
-    result.bytesWritten += bytes;
-    if (bytes > 0) {
-      manifestContents = serializeManifest(union);
-      result.manifestWrites++;
-    }
+    const union = serializeManifest(new Set([...previous, ...current]));
+    await atomicWriteManifest(root, union, manifestContents);
+    manifestContents = union;
   }
 
   const toWrite = prepared.filter(file => file.changed);
@@ -349,30 +308,24 @@ export async function writeOutput(rootFolder: string, artifacts: IOutputArtifact
     const segments = file.relative.split("/");
     for (let index = 1; index < segments.length; index++) {
       const relative = segments.slice(0, index).join("/");
-      if (inspected.metadata.get(relative) === undefined) {
+      if (metadata.get(relative) === undefined) {
         directories.set(relative, index);
       }
     }
   }
   const directoryDepths = [...new Set(directories.values())].sort((a, b) => a - b);
-  const artifactWriteStart = performance.now();
   for (const depth of directoryDepths) {
     const atDepth = [...directories.entries()].filter(([, candidateDepth]) => candidateDepth === depth)
       .map(([relative]) => path.resolve(root, ...relative.split("/")));
     await forEachLimit(atDepth, async directory => {
       await fsPromises.mkdir(directory);
-      result.directoriesCreated++;
     }, ioConcurrency);
   }
   await forEachLimit(toWrite, async file => {
     await fsPromises.writeFile(path.resolve(root, ...file.relative.split("/")), file.contents,
       file.binary ? {encoding: "latin1"} : undefined);
-    result.bytesWritten += file.byteLength;
-    result.fileWrites++;
   }, ioConcurrency);
-  result.artifactWriteMs = performance.now() - artifactWriteStart;
 
-  const cleanupStart = performance.now();
   const staleFiles = stale.map(filename => path.resolve(root, ...filename.split("/")));
   const removedDirectories = new Set<string>();
   for (const filename of staleFiles) {
@@ -400,16 +353,9 @@ export async function writeOutput(rootFolder: string, artifacts: IOutputArtifact
       }
     }
   });
-  result.cleanupMs = performance.now() - cleanupStart;
 
   const finalManifest = serializeManifest(current);
-  const finalManifestStart = performance.now();
-  const manifestBytes = await atomicWriteManifest(root, finalManifest, manifestContents);
-  result.manifestMs += performance.now() - finalManifestStart;
-  result.bytesWritten += manifestBytes;
-  if (manifestBytes > 0) {
-    result.manifestWrites++;
-  }
+  await atomicWriteManifest(root, finalManifest, manifestContents);
   result.created = prepared.filter(file => file.changed && !file.existed).length;
   result.updated = prepared.filter(file => file.changed && file.existed).length;
   result.unchanged = prepared.filter(file => !file.changed).length;
