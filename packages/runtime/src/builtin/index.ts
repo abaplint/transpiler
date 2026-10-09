@@ -15,6 +15,7 @@ export * from "./cos";
 export * from "./cosh";
 export * from "./count_any_of";
 export * from "./count";
+export * from "./distance";
 export * from "./escape";
 export * from "./exp";
 export * from "./find";
