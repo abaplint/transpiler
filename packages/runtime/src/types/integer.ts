@@ -81,6 +81,16 @@ export class Integer implements INumeric {
     return this;
   }
 
+  private fromText(text: string): number {
+    try {
+      return toInteger(text);
+    } catch (e) {
+      // a system clears the target before it raises, so the handler sees it initial
+      this.value = 0;
+      throw e;
+    }
+  }
+
   public set(value: INumeric | ICharacter | Hex | string | number | Integer | Float | DecFloat34) {
     if (this.constant === true) {
       throw new Error("Changing constant");
@@ -91,9 +101,9 @@ export class Integer implements INumeric {
     } else if (value instanceof Integer) {
       this.set(value.get());
     } else if (value instanceof Character) {
-      this.value = toInteger(value.get());
+      this.value = this.fromText(value.get());
     } else if (value instanceof String) {
-      this.value = toInteger(value.get());
+      this.value = this.fromText(value.get());
     } else if (value instanceof Integer8) {
       this.set(Number(value.get()));
     } else if (value instanceof FieldSymbol) {
@@ -119,7 +129,7 @@ export class Integer implements INumeric {
       }
       this.set(num);
     } else if (typeof value === "string") {
-      this.value = toInteger(value);
+      this.value = this.fromText(value);
     } else {
       this.set(value.get());
     }
