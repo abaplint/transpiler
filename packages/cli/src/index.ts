@@ -32,7 +32,7 @@ async function build(config: ITranspilerConfig, files: Transpiler.IFile[]) {
   }
   const t = new Transpiler.Transpiler(options);
 
-  const {reg, folders, sources, sourceMapPaths} = libraryRegistry(files, libraries);
+  const {reg, folders, sources, sourceMapPaths} = libraryRegistry(files, libraries, config.skip_duplicate_dependencies);
   const transpileStart = performance.now();
   const output = await t.run(reg, new Progress(), folders);
   const transpilationMs = performance.now() - transpileStart;

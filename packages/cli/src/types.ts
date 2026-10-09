@@ -36,6 +36,8 @@ export interface ITranspilerConfig {
      */
     exclude_filter?: string[];
   }[],
+  /** skip duplicate dependency objects after the first library in libs, with a warning; defaults to false */
+  skip_duplicate_dependencies?: boolean;
   write_unit_tests?: boolean;
   write_source_map?: boolean;
 
