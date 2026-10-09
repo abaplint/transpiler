@@ -110,7 +110,7 @@ describe("CLI grouped output", () => {
   });
   const build = (settings: object) => {
     write("abap_transpile.json", JSON.stringify(settings));
-    return execFileSync(process.execPath, [cli], {cwd: folder, encoding: "utf8", timeout: 30000});
+    return execFileSync(process.execPath, [cli], {cwd: folder, encoding: "utf8", timeout: 30000, stdio: "pipe"});
   };
   const run = (module: string) => execFileSync(process.execPath, [module], {cwd: folder, encoding: "utf8", timeout: 30000});
   const read = (file: string) => readFileSync(path.join(folder, "nested/output", file), "utf8");
