@@ -1121,7 +1121,33 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
   }
 
   public setValues(identifier: abaplint.TypedIdentifier, name: string) {
+    // an enumerated value of a class or interface, declared without STRUCTURE: number the
+    // values in the order they are declared, like the STRUCTURE components in setValues below
+    if (identifier.getValue() === "novalueClassAttributeEnum"
+        && !(identifier.getType() instanceof abaplint.BasicTypes.StructureType)) {
+      const index = this.findEnumValueIndex(identifier);
+      return index === undefined ? "" : Traversal.prefixVariable(name) + ".set(" + index + ");\n";
+    }
     return Traversal.setValues(identifier, name);
+  }
+
+  /** position of an enumerated value in its TYPES BEGIN OF ENUM, counting from 0 */
+  private findEnumValueIndex(identifier: abaplint.TypedIdentifier): number | undefined {
+    // the enum can be declared in another object, eg. a global interface the class implements
+    const filename = identifier.getFilename();
+    const raw = this.reg.getFileByName(filename);
+    const obj = raw === undefined ? undefined : this.reg.findObjectForFile(raw);
+    const file = obj instanceof abaplint.ABAPObject ? obj.getABAPFileByName(filename) : undefined;
+    for (const enumeration of file?.getStructure()?.findAllStructures(abaplint.Structures.TypeEnum) || []) {
+      const values = enumeration.getChildren().filter(c => c instanceof abaplint.Nodes.StatementNode
+        && (c.get() instanceof abaplint.Statements.Type || c.get() instanceof abaplint.Statements.TypeEnum));
+      const index = values.findIndex(v => (v as abaplint.Nodes.StatementNode)
+        .findFirstExpression(abaplint.Expressions.NamespaceSimpleName)?.getFirstToken().getStart().equals(identifier.getStart()));
+      if (index >= 0) {
+        return index;
+      }
+    }
+    return undefined;
   }
 
   public static setValues(identifier: abaplint.TypedIdentifier, name: string) {
