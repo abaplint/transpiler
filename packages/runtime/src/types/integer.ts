@@ -1,4 +1,5 @@
 import {throwError} from "../throw_error";
+import {Date} from "./date";
 import {Float} from "./float";
 import {Hex} from "./hex";
 import {XString} from "./xstring";
@@ -95,6 +96,9 @@ export class Integer implements INumeric {
       this.set(Number(value.get()));
     } else if (value instanceof Float || value instanceof DecFloat34) {
       this.set(roundHalfAwayFromZero(value.getRaw()));
+    } else if (value instanceof Date) {
+// d is converted to the number of days since 01.01.0001, not the YYYYMMDD digits
+      this.value = value.getNumeric();
     } else if (value instanceof Hex || value instanceof XString || value instanceof HexUInt8) {
 // the last four bytes, 00 on the left, as a signed integer; an empty xstring is 0
       const hex = value.get().slice(-8);
