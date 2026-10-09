@@ -79,6 +79,8 @@ export class Float {
         value = "-" + value.substring(0, value.length - 1);
       }
       if (FLOAT_DIGITS.test(value) === false) {
+        // a system clears the target before it raises, so the handler sees it initial
+        this.value = 0;
         throwError("CX_SY_CONVERSION_NO_NUMBER");
       }
       this.value = parseFloat(value.replace(",", "."));
