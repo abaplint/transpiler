@@ -156,4 +156,134 @@ describe("Running Examples - Date type", () => {
     expect(abap.console.get()).to.equal("<        >");
   });
 
+  it("Date, to integer is days since 01.01.0001", async () => {
+    const code = `
+    DATA lv_date TYPE d.
+    DATA lv_days TYPE i.
+    lv_date = '00010101'.
+    lv_days = lv_date.
+    WRITE / lv_days.
+    lv_date = '00010102'.
+    lv_days = lv_date.
+    WRITE / lv_days.
+    lv_date = '20240229'.
+    lv_days = lv_date.
+    WRITE / lv_days.
+    CLEAR lv_date.
+    lv_days = lv_date.
+    WRITE / lv_days.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n1\n738946\n0");
+  });
+
+  it("Date, blank date to integer is 0", async () => {
+    const code = `
+    DATA lv_date TYPE d.
+    DATA lv_days TYPE i.
+    lv_date = '        '.
+    lv_days = lv_date.
+    WRITE / lv_days.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
+  });
+
+  it("Date, to int8 is days since 01.01.0001", async () => {
+    const code = `
+    DATA lv_date TYPE d VALUE '20240229'.
+    DATA lv_days TYPE int8.
+    lv_days = lv_date.
+    WRITE / lv_days.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("738946");
+  });
+
+  it("Date, to packed is days since 01.01.0001", async () => {
+    const code = `
+    DATA lv_date TYPE d VALUE '20240229'.
+    DATA lv_days TYPE p LENGTH 10 DECIMALS 0.
+    lv_days = lv_date.
+    WRITE / lv_days.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("738946");
+  });
+
+  it("Date, to float is days since 01.01.0001", async () => {
+    const code = `
+    DATA lv_date TYPE d VALUE '00010102'.
+    DATA lv_days TYPE f.
+    DATA lv_int TYPE i.
+    lv_days = lv_date.
+    lv_int = lv_days.
+    WRITE / lv_int.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
+  it("Date, to decfloat34 is days since 01.01.0001", async () => {
+    const code = `
+    DATA lv_date TYPE d VALUE '20240229'.
+    DATA lv_days TYPE decfloat34.
+    DATA lv_int TYPE i.
+    lv_days = lv_date.
+    lv_int = lv_days.
+    WRITE / lv_int.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("738946");
+  });
+
+  it("Date, days between two dates", async () => {
+    const code = `
+    DATA lv_from TYPE d VALUE '20231231'.
+    DATA lv_to TYPE d VALUE '20240301'.
+    DATA lv_days TYPE i.
+    lv_days = lv_to - lv_from.
+    WRITE / lv_days.
+    lv_days = lv_from - lv_to.
+    WRITE / lv_days.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("61\n-61");
+  });
+
+  it("Date, roundtrip via integer", async () => {
+    const code = `
+    DATA lv_date TYPE d VALUE '20240229'.
+    DATA lv_days TYPE i.
+    lv_days = lv_date.
+    lv_date = lv_days.
+    WRITE / lv_date.
+    lv_days = lv_days + 1.
+    lv_date = lv_days.
+    WRITE / lv_date.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("20240229\n20240301");
+  });
+
+  it("Date, to integer via CONV", async () => {
+    const code = `
+    DATA lv_date TYPE d VALUE '00010102'.
+    DATA lv_days TYPE i.
+    lv_days = CONV i( lv_date ).
+    WRITE / lv_days.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });
