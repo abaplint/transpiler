@@ -116,6 +116,11 @@ run().then(() => {
             }
             methods.push(m.name);
           }
+          if (methods.length === 0) {
+            // FOR TESTING helper class without test methods, nothing to run; it might also
+            // live in locals_imp, which is not exported from the .testclasses module
+            continue;
+          }
 
           tests.push({
             obj,
