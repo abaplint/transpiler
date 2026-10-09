@@ -1,26 +1,16 @@
 import * as path from "path";
 import {pathToFileURL} from "url";
-import {IFile, IOutputFile, importPath} from "@abaplint/transpiler";
-import {FileOperations} from "./file_operations";
+import {IOutputFile, importPath} from "@abaplint/transpiler";
 import {ITranspilerConfig} from "./types";
+import {ISourceFile} from "./libraries";
+import {IOutputArtifact} from "./output_writer";
 
-export async function writeObjects(outputFiles: IOutputFile[], config: ITranspilerConfig, files: IFile[]) {
+export function collectObjectFiles(outputFiles: IOutputFile[], config: ITranspilerConfig, files: ISourceFile[]) {
   const root = path.resolve(config.output_folder);
-  const filesToWrite: {path: string, contents: string}[] = [];
-  const destinations = new Set<string>();
+  const filesToWrite: IOutputArtifact[] = [];
   const sources = new Map(files.map(file => [file.filename.toLowerCase(), file]));
   const add = (filename: string, contents: string) => {
-    const target = path.resolve(root, filename);
-    const relative = path.relative(root, target);
-    if (relative === "" || relative.startsWith(".." + path.sep) || relative === ".." || path.isAbsolute(relative)) {
-      throw new Error("Output file escapes output_folder: " + filename);
-    }
-    const key = target.toLowerCase();
-    if (destinations.has(key)) {
-      throw new Error("Conflicting output file: " + filename);
-    }
-    destinations.add(key);
-    filesToWrite.push({path: target, contents});
+    filesToWrite.push({path: filename.replace(/\\/g, "/"), contents});
   };
 
   for (const output of outputFiles) {
@@ -42,19 +32,21 @@ export async function writeObjects(outputFiles: IOutputFile[], config: ITranspil
         if (file === undefined) {
           continue;
         }
-        if (file.relative !== undefined) {
+        if (file.sourceMapPath !== undefined) {
+          sourcePaths[filename] = file.sourceMapPath;
+        } else if (file.relative !== undefined) {
           const source = path.resolve(root, file.relative, file.filename);
           const relative = path.relative(mapDirectory, source);
           // Sources on another Windows drive cannot be expressed as relative paths.
           sourcePaths[filename] = path.isAbsolute(relative) ? pathToFileURL(source).href
             : relative.split(path.sep).map(segment => encodeURIComponent(segment)).join("/");
         }
-        // Include sources for local and cloned libraries; clones are removed before emission.
+        // Embedding source text keeps maps useful after temporary checkouts are removed.
         sourceContents[filename] = file.contents;
       }
       add(name, output.chunk.getMap(path.basename(output.filename), {generatedLineOffset, sourcePaths, sourceContents}));
     }
     add(output.filename, contents);
   }
-  await FileOperations.writeFiles(filesToWrite);
+  return filesToWrite;
 }
