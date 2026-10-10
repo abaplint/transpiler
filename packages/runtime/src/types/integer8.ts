@@ -6,8 +6,6 @@ import {XString} from "./xstring";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {Integer, roundHalfAwayFromZero} from "./integer";
-import {getBit} from "../statements/get_bit";
-import {Character} from "./character";
 import {HexUInt8} from "./hex_uint8";
 import {DecFloat34} from "./decfloat34";
 import {Time} from "./time";
@@ -67,19 +65,8 @@ export class Integer8 {
 // t is converted to the number of seconds since midnight, not the HHMMSS digits
       this.value = BigInt(value.getNumeric());
     } else if (value instanceof Hex || value instanceof XString || value instanceof HexUInt8) {
-      if (value.get().length === 16) {
-        const lv_bit = new Character();
-        getBit(new Integer().set(1), value, lv_bit);
-        if (lv_bit.get() === "1") {
-          const val = BigInt("0x" + value.get());
-          this.value = val - BigInt("0x10000000000000000");
-        } else {
-          this.value = BigInt("0x" + value.get());
-        }
-      } else {
-// todo, what if the input is longer than 16 bytes?
-        this.value = BigInt("0x" + value.get());
-      }
+      const hex = value.get().slice(-16);
+      this.value = BigInt.asIntN(64, hex === "" ? 0n : BigInt("0x" + hex));
     } else {
       this.set(value.get());
     }
