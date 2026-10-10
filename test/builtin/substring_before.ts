@@ -8,6 +8,25 @@ async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
 }
 
+
+async function expectValue(code: string, expected: string) {
+  const js = await run(code);
+  const f = new AsyncFunction("abap", js);
+  await f(abap);
+  expect(abap.console.get()).to.equal(expected);
+}
+
+async function expectThrows(code: string, exception: string) {
+  const js = await run(code);
+  const f = new AsyncFunction("abap", js);
+  try {
+    await f(abap);
+    expect.fail("expected " + exception);
+  } catch (e) {
+    expect(e.toString()).to.contain(exception);
+  }
+}
+
 describe("Builtin functions - substring_before", () => {
 
   beforeEach(async () => {
@@ -104,6 +123,38 @@ ASSERT substring_before( val = lv_text
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("substring_before, the example of the keyword documentation", async () => {
+    await expectValue(`WRITE substring_before( val = 'ABCDEFGH' sub = 'CD' ).`, "AB");
+  });
+
+  it("substring_before, occ", async () => {
+    await expectValue(`WRITE substring_before( val = 'aa1bb2aa3bb4' sub = 'aa' occ = 2 ).`, "aa1bb2");
+    abap.console.clear();
+    await expectValue(`WRITE substring_before( val = 'a-b-c' sub = '-' occ = -1 ).`, "a-b");
+  });
+
+  it("substring_before, the len characters in front of the occurrence", async () => {
+    await expectValue(`WRITE substring_before( val = 'ABCDEFGH' sub = 'CD' len = 1 ).`, "B");
+  });
+
+  it("substring_before, len past the start", async () => {
+    await expectThrows(`WRITE substring_before( val = 'ABCDEFGH' sub = 'CD' len = 3 ).`, "CX_SY_RANGE_OUT_OF_BOUNDS");
+  });
+
+  it("substring_before, case", async () => {
+    await expectValue(`WRITE substring_before( val = 'abCDef' sub = 'cd' case = abap_false ).`, "ab");
+    abap.console.clear();
+    await expectValue(`WRITE substring_before( val = 'abCDef' sub = 'cd' ).`, "");
+  });
+
+  it("substring_before, regex with a negative occ", async () => {
+    await expectValue(`WRITE substring_before( val = 'a1b2c3' regex = '[0-9]' occ = -1 ).`, "a1b2c");
+  });
+
+  it("substring_before, occ = 0", async () => {
+    await expectThrows(`WRITE substring_before( val = 'a-b-c' sub = '-' occ = 0 ).`, "CX_SY_STRG_PAR_VAL");
   });
 
 });
