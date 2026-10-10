@@ -22,7 +22,7 @@ export class Context {
   public dataset: DatasetHost | undefined = undefined;
   public datasets: {[name: string]: OpenDataset} = {};
 
-  // GET RUN TIME, the clock reading of the first call, and the last value returned
+  // GET RUN TIME, the clock reading of the first call, and the last unwrapped microsecond count
   public runTime: {start: number, last: number} | undefined = undefined;
 
   public defaultDB() {
