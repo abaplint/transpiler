@@ -8,6 +8,14 @@ async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
 }
 
+
+async function output(code: string): Promise<string> {
+  const js = await run(code);
+  const f = new AsyncFunction("abap", js);
+  await f(abap);
+  return abap.console.get();
+}
+
 describe("Builtin functions - replace", () => {
 
   beforeEach(async () => {
@@ -394,6 +402,25 @@ ASSERT res = 'abcdefghijklXXop'.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  for (const [val, sub, wi, expected] of [
+    ["a{b", "{", "\\{", "a\\{b"],
+    ["axb", "x", "$&", "a$&b"],
+    ["axb", "x", "$$", "a$$b"],
+    ["axb", "x", "$1", "a$1b"],
+  ]) {
+    it(`replace( sub = '${sub}' with = '${wi}' ) inserts the text as it is`, async () => {
+      const out = await output(`
+WRITE / replace( val = \`${val}\` sub = \`${sub}\` with = \`${wi}\` occ = 0 ).
+WRITE / replace( val = \`${val}\` sub = \`${sub}\` with = \`${wi}\` ).`);
+      expect(out).to.equal(expected + "\n" + expected);
+    });
+  }
+
+  it("replace( regex = ... ) still reads $1", async () => {
+    const out = await output(`WRITE replace( val = 'abc' regex = '(b)' with = '[$1]' occ = 0 ).`);
+    expect(out).to.equal("a[b]c");
   });
 
 });

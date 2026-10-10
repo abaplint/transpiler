@@ -67,12 +67,17 @@ export function replace(input: replaceInput): void {
     } else {
       rr = input.with.get();
     }
-    rr = rr.replace(/\\\$/g, "$");
-    rr = rr.replace(/\\\{/g, "{");
-    rr = rr.replace(/\\\}/g, "}");
+    if (!input.of) {
+      // only a regex replacement reads escapes, REPLACE ... OF inserts the text as it is
+      rr = rr.replace(/\\\$/g, "$");
+      rr = rr.replace(/\\\{/g, "{");
+      rr = rr.replace(/\\\}/g, "}");
+    }
   }
 
-  if (input.replacementLength) {
+  if (input.replacementLength && input.of) {
+    input.replacementLength.set(rr.length);
+  } else if (input.replacementLength) {
     const match = temp.match(search);
     let replacement = rr;
     for (let counter = 1; counter < 10; counter++) {
@@ -89,7 +94,12 @@ export function replace(input: replaceInput): void {
     input.replacementCount.set(match?.length || 0);
   }
 
-  temp = temp.replace(search, rr);
+  if (input.of) {
+    // a replacer function, JS reads $&, $$, $1 in a replacement string as patterns
+    temp = temp.replace(search, () => rr);
+  } else {
+    temp = temp.replace(search, rr);
+  }
 
   const subrc = found ? 0 : 4;
   abap.builtin.sy.get().subrc.set(subrc);
