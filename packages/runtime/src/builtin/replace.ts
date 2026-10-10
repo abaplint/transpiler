@@ -27,6 +27,12 @@ function dereference(input: string | ICharacter | FieldSymbol | undefined): stri
   return input;
 }
 
+/** with sub the text is inserted as it is, a replacer function is never read as a pattern;
+ *  with regex or pcre $1, $& and the like refer to the match */
+function substitute(val: string, search: RegExp, wi: string, literal: boolean): string {
+  return literal ? val.replace(search, () => wi) : val.replace(search, wi);
+}
+
 export function replace(input: IReplaceInput) {
   const source = dereference(input.val)!;
   const withSource = dereference(input.with);
@@ -82,12 +88,12 @@ export function replace(input: IReplaceInput) {
     if (typeof sub === "string") {
       sub = new RegExp(sub);
     }
-    val = val.replace(sub, wi);
+    val = substitute(val, sub, wi, regexInput === undefined);
   } else if (input.occ && position(input.occ) === 0 && sub && wi !== undefined) {
     if (typeof sub === "string") {
       sub = new RegExp(sub, "g");
     }
-    val = val.replace(sub, wi);
+    val = substitute(val, sub, wi, regexInput === undefined);
   }
 
   return new String().set(val);
