@@ -1,6 +1,5 @@
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
-import {TranspileTypes} from "../transpile_types";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 
@@ -25,7 +24,7 @@ export class TablesTranspiler implements IStatementTranspiler {
     const ret = new Chunk()
       .appendString("let ")
       .append(found.getName().toLowerCase(), token, traversal)
-      .appendString(" = " + TranspileTypes.toType(found.getType()))
+      .appendString(" = " + traversal.toType(found.getType()))
       .append(";", node.getLastToken(), traversal);
 
     return ret;

@@ -2,7 +2,6 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {TranspileTypes} from "../transpile_types";
 
 export class RangesTranspiler implements IStatementTranspiler {
 
@@ -25,7 +24,7 @@ export class RangesTranspiler implements IStatementTranspiler {
     const ret = new Chunk()
       .appendString("let ")
       .appendString(Traversal.prefixVariable(Traversal.escapeNamespace(found.getName().toLowerCase())))
-      .appendString(" = " + TranspileTypes.toType(found.getType()))
+      .appendString(" = " + traversal.toType(found.getType()))
       .appendString(";");
 
     return ret;

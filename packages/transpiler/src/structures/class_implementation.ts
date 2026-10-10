@@ -1,7 +1,6 @@
 import * as abaplint from "@abaplint/core";
 import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
-import {TranspileTypes} from "../transpile_types";
 import {Chunk} from "../chunk";
 
 export class ClassImplementationTranspiler implements IStructureTranspiler {
@@ -83,7 +82,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     const prefix = Traversal.escapeNamespace(cdef.getName().toLowerCase()) + ".";
     let ret = "";
     for (const ty of cdef.getTypeDefinitions().getAll()) {
-      ret += TranspileTypes.declareStaticSkipVoid(prefix, ty.type);
+      ret += traversal.declareStaticSkipVoid(prefix, ty.type);
     }
     return ret;
   }
@@ -126,7 +125,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     const staticAttributes = this.findStaticAttributes(cdef, scope, traversal);
     for (const attr of staticAttributes) {
       const name = Traversal.escapeNamespace(clasName) + "." + Traversal.escapeNamespace(attr.prefix) + Traversal.escapeNamespace(attr.identifier.getName().toLowerCase());
-      ret += name + " = " + TranspileTypes.toType(attr.identifier.getType()) + ";\n";
+      ret += name + " = " + traversal.toType(attr.identifier.getType()) + ";\n";
 
       ret += traversal.setValues(attr.identifier, name);
     }

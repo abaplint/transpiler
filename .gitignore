@@ -10,3 +10,4 @@ comment-*
 perf*.mjs
 snowflake.log
 *.tsbuildinfo
+.tmp_upstream

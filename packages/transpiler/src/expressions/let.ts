@@ -1,7 +1,6 @@
 import {Expressions, Nodes} from "@abaplint/core";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {TranspileTypes} from "../transpile_types";
 
 export class LetTranspiler {
 
@@ -24,7 +23,7 @@ export class LetTranspiler {
       if (variable === undefined) {
         throw new Error("LetTranspiler, Expected Variable");
       }
-      ret.appendString(TranspileTypes.declare(variable));
+      ret.appendString(traversal.declare(variable));
 
       const source = def.findDirectExpression(Expressions.Source);
       if (source) {

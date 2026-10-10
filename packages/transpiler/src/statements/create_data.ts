@@ -3,7 +3,6 @@ import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {FieldChainTranspiler} from "../expressions";
-import {TranspileTypes} from "../transpile_types";
 
 export class CreateDataTranspiler implements IStatementTranspiler {
 
@@ -27,7 +26,7 @@ export class CreateDataTranspiler implements IStatementTranspiler {
     if (typeNameNode) {
       const id = traversal.findCurrentScopeByToken(typeNameNode.getFirstToken())?.findType(typeNameNode.concatTokens());
       if (id) {
-        options.push(`"type": ` + TranspileTypes.toType(id.getType()));
+        options.push(`"type": ` + traversal.toType(id.getType()));
       } else {
         options.push(`"typeName": "${typeNameNode.concatTokens().toUpperCase()}"`);
       }

@@ -2,7 +2,6 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {TranspileTypes} from "../transpile_types";
 import {SelectionDefault} from "./_selection";
 
 export class SelectOptionTranspiler implements IStatementTranspiler {
@@ -17,7 +16,7 @@ export class SelectOptionTranspiler implements IStatementTranspiler {
     }
     const {name, type} = variable;
 
-    const ret = new Chunk().appendString("let " + name + " = " + TranspileTypes.toType(type) + ";");
+    const ret = new Chunk().appendString("let " + name + " = " + traversal.toType(type) + ";");
 
     // DEFAULT low [TO high] [OPTION o] [SIGN s] is the first row of the table and
     // stays in the header line: I EQ, or I BT with TO, unless OPTION or SIGN say otherwise

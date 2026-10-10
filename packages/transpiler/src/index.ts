@@ -34,6 +34,9 @@ export class Transpiler {
     if (this.options === undefined) {
       this.options = {};
     }
+    if (this.options.sharedTypeFactories === undefined) {
+      this.options.sharedTypeFactories = true;
+    }
     if (this.options.unknownTypes === undefined) {
       this.options.unknownTypes = UnknownTypesEnum.compileError;
     }
@@ -75,7 +78,7 @@ export class Transpiler {
       UniqueIdentifier.reset();
       UniqueIdentifier.resetIndexBackup();
       if (obj instanceof abaplint.Objects.TypePool) {
-        output.objects.push(...new HandleTypePool().runObject(obj, reg));
+        output.objects.push(...new HandleTypePool(this.options).runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.FunctionGroup) {
         output.objects.push(...new HandleFUGR(this.options).runObject(obj, reg));
       } else if (obj instanceof abaplint.ABAPObject) {
@@ -83,15 +86,15 @@ export class Transpiler {
       } else if (obj instanceof abaplint.Objects.Oauth2Profile) {
         output.objects.push(...new HandleOA2P().runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.Table) {
-        output.objects.push(...new HandleTable().runObject(obj, reg));
+        output.objects.push(...new HandleTable(this.options).runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.View) {
-        output.objects.push(...new HandleView().runObject(obj, reg));
+        output.objects.push(...new HandleView(this.options).runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.LockObject) {
         output.objects.push(...new HandleEnqu().runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.DataElement) {
-        output.objects.push(...new HandleDataElement().runObject(obj, reg));
+        output.objects.push(...new HandleDataElement(this.options).runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.TableType) {
-        output.objects.push(...new HandleTableType().runObject(obj, reg));
+        output.objects.push(...new HandleTableType(this.options).runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.MIMEObject) {
         output.objects.push(...new HandleSMIM(layout).runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.WebMIME) {

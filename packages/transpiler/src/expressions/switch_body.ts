@@ -2,7 +2,6 @@ import {Expressions, Nodes} from "@abaplint/core";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {TypeNameOrInfer} from "./type_name_or_infer";
-import {TranspileTypes} from "../transpile_types";
 import {SourceTranspiler} from "./source";
 
 export class SwitchBodyTranspiler {
@@ -48,7 +47,7 @@ export class SwitchBodyTranspiler {
     }
 
     const type = new TypeNameOrInfer().findType(typ, traversal);
-    const target = TranspileTypes.toType(type);
+    const target = traversal.toType(type);
 
     const ret = new Chunk();
     ret.appendString("(" + target + ".set(");

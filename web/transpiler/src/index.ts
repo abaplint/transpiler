@@ -142,7 +142,7 @@ async function abapChanged() {
     reg.parse();
     abapMonaco.updateMarkers(reg, model1);
 
-    const res = await new Transpiler().runRaw([{filename, contents}]);
+    const res = await new Transpiler({sharedTypeFactories: true}).runRaw([{filename, contents}]);
     const obj = res.objects[0];
     const chunk = obj.chunk;
     hover.setMap(chunk.getMap(obj.filename));

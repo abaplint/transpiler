@@ -4,7 +4,6 @@ import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {TypeNameOrInfer} from "./type_name_or_infer";
-import {TranspileTypes} from "../transpile_types";
 import {UnknownTypesEnum} from "../types";
 
 export class NewObjectTranspiler implements IExpressionTranspiler {
@@ -51,10 +50,10 @@ export class NewObjectTranspiler implements IExpressionTranspiler {
       }
 
       const clas = traversal.lookupClassOrInterface(type.getIdentifierName(), node.getFirstToken());
-      ret.appendString(TranspileTypes.toType(type) + ".set(await (new " + clas + "()).constructor_(" + para + "))");
+      ret.appendString(traversal.toType(type) + ".set(await (new " + clas + "()).constructor_(" + para + "))");
     } else {
       const source = node.findFirstExpression(abaplint.Expressions.Source);
-      const typeCode = TranspileTypes.toType(type);
+      const typeCode = traversal.toType(type);
       const sourceCode = source === undefined ? typeCode : traversal.traverse(source).getCode();
       ret.appendString("((() => {const r = new abap.types.DataReference(" + typeCode + "); r.assign(" + sourceCode + "); return r; })())");
     }

@@ -42,4 +42,20 @@ foo.set(await (new abap.Classes['RUNTIME_ERROR']()).constructor_());`;
     expect(await runSingle(abap, options)).to.equal(expected);
   });
 
+  it("keeps nested unknowns inline with shared factories enabled", async () => {
+    const abap = `TYPES: BEGIN OF ty_bad,
+  missing TYPE REF TO zcl_missing,
+END OF ty_bad.
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-DATA bad TYPE ty_bad.
+ENDCLASS.
+DATA first TYPE ty_bad.
+DATA second TYPE ty_bad.`;
+    const output = await runSingle(abap, {...options, sharedTypeFactories: true});
+    expect(output).not.to.include("function $t_");
+    expect(output).to.include("static ATTRIBUTES = {}");
+    expect(output).to.include('throw new Error("Void type: ZCL_MISSING")');
+  });
+
 });

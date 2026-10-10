@@ -11,6 +11,7 @@
         "compile": "cd packages/runtime && npm run compile && cd ../../ && cd packages/transpiler && npm run compile && cd ../../ && cd packages/cli && npm run compile && cd ../../ && cd packages/database-pg && npm run compile && cd ../../ && cd packages/database-sqlite && npm run compile && cd ../../ && cd packages/database-snowflake && npm run compile && cd ../../ && cd packages/database-hdb && npm run compile && cd ../../ && tsc",
         "performance": "npm run compile && node --expose-gc build/performance/index.js",
         "performance:output": "npm run compile && node --expose-gc build/performance/output_writer.js",
+        "performance:type-factories": "npm run compile && node --expose-gc build/performance/type_factories.js",
         "test": "npm run compile && mocha --timeout 60000 && npm run lint",
         "regression": "node .github/regression/regression.js",
         "link-local": "npm run link:transpiler && npm run link:cli && npm run link:runtime && npm run link:rfc-client-soap-xml && npm run link:database-sqlite && npm run link:database-pg && npm run link:database-snowflake && npm run link:database-hdb",

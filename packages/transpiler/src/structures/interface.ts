@@ -1,7 +1,6 @@
 import * as abaplint from "@abaplint/core";
 import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
-import {TranspileTypes} from "../transpile_types";
 import {ConstantTranspiler, FieldChainTranspiler} from "../expressions";
 import {Chunk} from "../chunk";
 
@@ -32,12 +31,12 @@ export class InterfaceTranspiler implements IStructureTranspiler {
       }
     }
     ret += this.buildConstants(node.findFirstExpression(abaplint.Expressions.InterfaceName), traversal, def);
-    ret += this.buildTypes(def);
+    ret += this.buildTypes(def, traversal);
 
     return new Chunk(ret);
   }
 
-  private buildTypes(idef: abaplint.IInterfaceDefinition | undefined): string {
+  private buildTypes(idef: abaplint.IInterfaceDefinition | undefined, traversal: Traversal): string {
     if (idef === undefined) {
       return "";
     }
@@ -45,7 +44,7 @@ export class InterfaceTranspiler implements IStructureTranspiler {
     const prefix = Traversal.escapeNamespace(idef.getName().toLowerCase()) + ".";
     let ret = "";
     for (const ty of idef.getTypeDefinitions().getAll()) {
-      ret += TranspileTypes.declareStaticSkipVoid(prefix, ty.type);
+      ret += traversal.declareStaticSkipVoid(prefix, ty.type);
     }
     return ret;
   }
@@ -72,7 +71,7 @@ export class InterfaceTranspiler implements IStructureTranspiler {
       }
       const interfaceName = Traversal.escapeNamespace(node.getFirstToken().getStr().toLowerCase());
       const name = interfaceName + "." + interfaceName + "$" + n.toLowerCase();
-      ret += name + " = " + TranspileTypes.toType(identifier.getType()) + ";\n";
+      ret += name + " = " + traversal.toType(identifier.getType()) + ";\n";
 
       const alias = idef?.getAliases().find(a => a.getName().toUpperCase() === n.toUpperCase());
       if (alias) {
