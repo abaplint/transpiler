@@ -635,8 +635,12 @@ try {
     const unique1 = await (new abap.Classes['CX_ABAP_MESSAGE_DIGEST']()).constructor_();
     unique1.EXTRA_CX = {"INTERNAL_FILENAME": "zfoobar.prog.abap","INTERNAL_LINE": 5};
     throw unique1;
-  } finally {
-    // Transpiler todo: CLEANUP ignored
+  } catch (e) {
+    if (abap.Classes['CX_ROOT'] && e instanceof abap.Classes['CX_ROOT']) {
+      cx.set(e);
+      abap.statements.write(abap.CharacterFactory.get(3, 'foo'),{newLine: true});
+    }
+    throw e;
   }
 } catch (e) {
   if ((abap.Classes['CX_ROOT'] && e instanceof abap.Classes['CX_ROOT'])) {
