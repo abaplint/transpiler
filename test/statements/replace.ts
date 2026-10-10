@@ -8,6 +8,14 @@ async function run(contents: string) {
   return runFiles(abap, [{filename: "zfoobar.prog.abap", contents}]);
 }
 
+
+async function output(code: string): Promise<string> {
+  const js = await run(code);
+  const f = new AsyncFunction("abap", js);
+  await f(abap);
+  return abap.console.get();
+}
+
 describe("Running statements - REPLACE", () => {
 
   beforeEach(async () => {
@@ -452,6 +460,42 @@ ASSERT lv_str = 'hi hi hi'.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  // ABAP inserts the WITH text of a REPLACE ... OF unchanged, only a regex replacement reads
+  // $1, $& or the escapes \\$ \\{ \\}; measured on a system, see abap2UI5's backlog item
+  // runtime-replace-with-literal
+  for (const [val, of, wi, expected] of [
+    ["a{b", "{", "\\{", "a\\{b"],
+    ["a}b", "}", "\\}", "a\\}b"],
+    ["axb", "x", "\\$", "a\\$b"],
+    ["axb", "x", "$&", "a$&b"],
+    ["axb", "x", "$$", "a$$b"],
+    ["axb", "x", "$1", "a$1b"],
+    ["a\\b", "\\", "\\\\", "a\\\\b"],
+  ]) {
+    it(`REPLACE OF '${of}' WITH '${wi}' inserts the text as it is`, async () => {
+      const out = await output(`
+DATA lv TYPE string.
+DATA lv_len TYPE i.
+lv = \`${val}\`.
+REPLACE ALL OCCURRENCES OF \`${of}\` IN lv WITH \`${wi}\` REPLACEMENT LENGTH lv_len.
+WRITE / lv.
+WRITE / lv_len.`);
+      expect(out).to.equal(expected + "\n" + wi.length);
+    });
+  }
+
+  it("REPLACE REGEX still reads $1 and the escaped dollar", async () => {
+    const out = await output(`
+DATA lv TYPE string.
+lv = 'abc'.
+REPLACE ALL OCCURRENCES OF REGEX '(b)' IN lv WITH '[$1]'.
+WRITE / lv.
+lv = 'abc'.
+REPLACE ALL OCCURRENCES OF REGEX 'b' IN lv WITH '\\$'.
+WRITE / lv.`);
+    expect(out).to.equal("a[b]c\na$c");
   });
 
 });
