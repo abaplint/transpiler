@@ -14,6 +14,32 @@ describe("Builtin functions - escape", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
+  it("escape() for xml text", async () => {
+    const code = `
+      CONSTANTS e_xml_text TYPE i VALUE 0.
+      DATA lv_result TYPE string.
+      lv_result = escape( val = |abc123&<>"'| format = e_xml_text ).
+      WRITE lv_result.
+      `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(
+      `abc123&amp;&lt;>"'`);
+  });
+
+  it("escape() for xml text, control characters stay", async () => {
+    const code = `
+      CONSTANTS e_xml_text TYPE i VALUE 0.
+      DATA lv_result TYPE string.
+      lv_result = escape( val = |a\\tb\\nc\\rd&| format = e_xml_text ).
+      ASSERT lv_result = |a\\tb\\nc\\rd&amp;|.
+      `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("escape() for html attribute", async () => {
     const code = `
       CONSTANTS e_html_attr TYPE i VALUE 5.
