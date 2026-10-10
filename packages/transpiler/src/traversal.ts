@@ -5,11 +5,12 @@ import * as StructureTranspilers from "./structures";
 import {IStatementTranspiler} from "./statements/_statement_transpiler";
 import {IExpressionTranspiler} from "./expressions/_expression_transpiler";
 import {IStructureTranspiler} from "./structures/_structure_transpiler";
-import {TranspileTypes} from "./transpile_types";
 import {Chunk} from "./chunk";
 import {ConstantTranspiler} from "./expressions";
 import {ITranspilerOptions} from "./types";
 import {DEFAULT_KEYWORDS} from "./keywords";
+import {TypeFactoryRegistry} from "./type_factory_registry";
+import {TranspileTypes} from "./transpile_types";
 
 type IReference = ReturnType<abaplint.ISpaghettiScopeNode["getData"]>["references"][number];
 
@@ -65,15 +66,30 @@ export class Traversal {
   private blockDepth = 0;
   public readonly reg: abaplint.IRegistry;
   public readonly options: ITranspilerOptions | undefined;
+  public readonly typeFactories: TypeFactoryRegistry | undefined;
 
   public constructor(spaghetti: abaplint.ISpaghettiScope, file: abaplint.ABAPFile,
-                     obj: abaplint.ABAPObject, reg: abaplint.IRegistry, options?: ITranspilerOptions) {
+                     obj: abaplint.ABAPObject, reg: abaplint.IRegistry, options?: ITranspilerOptions,
+                     typeFactories?: TypeFactoryRegistry) {
     this.spaghetti = spaghetti;
     this.file = file;
     this.obj = obj;
     this.reg = reg;
     this.options = options;
+    this.typeFactories = typeFactories;
     this.buildStatementContext();
+  }
+
+  public toType(type: abaplint.AbstractType, options?: {packedDecimals?: number}): string {
+    return TranspileTypes.toType(type, options, this.typeFactories);
+  }
+
+  public declare(type: abaplint.TypedIdentifier): string {
+    return TranspileTypes.declare(type, this.typeFactories);
+  }
+
+  public declareStaticSkipVoid(pre: string, type: abaplint.TypedIdentifier): string {
+    return TranspileTypes.declareStaticSkipVoid(pre, type, this.typeFactories);
   }
 
   /** Build file-level control-flow context once instead of rescanning all
@@ -407,7 +423,7 @@ export class Traversal {
 
     const parameters: string[] = [];
     for (const p of m.getParameters().getAll()) {
-      const type = TranspileTypes.toType(p.getType());
+      const type = this.toType(p.getType());
       const optional = optionalNames.includes(p.getName().toUpperCase()) ? "X" : " ";
 
       let pKind = "";
@@ -468,7 +484,7 @@ export class Traversal {
     }
 
     for (const a of def.getAttributes()?.getAll() || []) {
-      const type = TranspileTypes.toType(a.getType());
+      const type = this.toType(a.getType());
       const runtime = this.mapVisibility(a.getVisibility());
       const isClass = a.getMeta().includes(abaplint.IdentifierMeta.Static) ? "X" : " ";
       attr.add(`"${prefix + a.getName().toUpperCase()}": {"type": () => {return ${type};}, "visibility": "${
@@ -476,7 +492,7 @@ export class Traversal {
     }
 
     for (const a of def.getAttributes()?.getConstants() || []) {
-      const type = TranspileTypes.toType(a.getType());
+      const type = this.toType(a.getType());
       let runtime = "";
       switch (a.getVisibility()) {
         case abaplint.Visibility.Private:
@@ -782,7 +798,7 @@ export class Traversal {
           escaped = "#" + escaped;
         }
         const name = "this." + escaped;
-        ret += name + " = " + TranspileTypes.toType(a.getType()) + ";\n";
+        ret += name + " = " + this.toType(a.getType()) + ";\n";
         ret += this.setValues(a, name);
         if (escaped?.startsWith("#")) {
           ret += `this.FRIENDS_ACCESS_INSTANCE["${escaped.replace("#", "")}"] = ${name};\n`;
@@ -944,7 +960,7 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
       if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
         ret += "if (this." + n + " === undefined) this." + n + " = " + cname + "." + n + ";\n";
       } else {
-        ret += "if (this." + n + " === undefined) this." + n + " = " + TranspileTypes.toType(a.getType()) + ";\n";
+        ret += "if (this." + n + " === undefined) this." + n + " = " + this.toType(a.getType()) + ";\n";
       }
     }
 

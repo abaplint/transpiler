@@ -2,7 +2,6 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {TranspileTypes} from "../transpile_types";
 import {SelectionDefault} from "./_selection";
 
 export class ParameterTranspiler implements IStatementTranspiler {
@@ -18,7 +17,7 @@ export class ParameterTranspiler implements IStatementTranspiler {
     }
     const {name, type} = variable;
 
-    const ret = new Chunk().appendString("let " + name + " = " + TranspileTypes.toType(type) + ";");
+    const ret = new Chunk().appendString("let " + name + " = " + traversal.toType(type) + ";");
 
     const operand = SelectionDefault.after(node, "DEFAULT");
     if (operand) {

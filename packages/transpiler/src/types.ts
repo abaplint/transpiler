@@ -51,6 +51,8 @@ export enum UnknownTypesEnum {
 }
 
 export interface ITranspilerOptions {
+  /** deduplicate generated composite type constructors within each output module (default: true) */
+  sharedTypeFactories?: boolean;
   /** ignore syntax check, used for internal testing */
   ignoreSyntaxCheck?: boolean;
   /** adds common js modules */

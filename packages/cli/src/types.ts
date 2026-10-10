@@ -1,4 +1,9 @@
-import {ITranspilerOptions} from "@abaplint/transpiler";
+import {ITranspilerOptions as TranspilerOptions} from "@abaplint/transpiler";
+
+export interface ICLITranspilerOptions extends TranspilerOptions {
+  /** Deduplicate generated composite type constructors within each output module (default: true). */
+  sharedTypeFactories?: boolean;
+}
 
 export interface ITranspilerConfig {
   /** @uniqueItems true */
@@ -41,5 +46,5 @@ export interface ITranspilerConfig {
   write_unit_tests?: boolean;
   write_source_map?: boolean;
 
-  options: ITranspilerOptions;
+  options: ICLITranspilerOptions;
 }

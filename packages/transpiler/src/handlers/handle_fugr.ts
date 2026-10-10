@@ -3,6 +3,7 @@ import {IOutputFile, ITranspilerOptions} from "../types";
 import {Traversal} from "../traversal";
 import {Rearranger} from "../rearranger";
 import {Chunk} from "../chunk";
+import {TypeFactoryRegistry} from "../type_factory_registry";
 
 export class HandleFUGR {
   private readonly options: ITranspilerOptions | undefined;
@@ -20,10 +21,16 @@ export class HandleFUGR {
   public runObject(obj: abaplint.ABAPObject, reg: abaplint.IRegistry): IOutputFile[] {
     const spaghetti = new abaplint.SyntaxLogic(reg, obj).run().spaghetti;
     const chunk = new Chunk().appendString("{\n");
+    const typeFactory = this.options?.sharedTypeFactories === true
+      ? new TypeFactoryRegistry(obj.getName().toLowerCase().replace(/\//g, "#") + ".fugr.mjs") : undefined;
 
 
     if (HandleFUGR.shouldSkip(obj, reg)) {
       return [];
+    }
+
+    for (const file of obj.getSequencedFiles()) {
+      typeFactory?.reserveSource(file.getRaw());
     }
 
     for (const file of obj.getSequencedFiles()) {
@@ -33,15 +40,17 @@ export class HandleFUGR {
 
       const rearranged = new Rearranger().run(obj.getType(), file.getStructure());
 
-      const contents = new Traversal(spaghetti, file, obj, reg, this.options).traverse(rearranged);
+      const contents = new Traversal(spaghetti, file, obj, reg, this.options, typeFactory).traverse(rearranged);
       chunk.appendChunk(contents);
       chunk.stripLastNewline();
     }
+    const helpers = typeFactory?.finalize(chunk) ?? "";
+    const assembled = helpers === "" ? chunk : new Chunk(helpers).appendChunk(chunk);
     // indentation must run once over the accumulated chunk: running it per
     // appended file re-indents the earlier files, drifting the brace counter
     // and shifting their mapping columns multiple times
-    chunk.runIndentationLogic(this.options?.ignoreSourceMap);
-    chunk.appendString("\n}");
+    assembled.runIndentationLogic(this.options?.ignoreSourceMap);
+    assembled.appendString("\n}");
 
     const output: IOutputFile = {
       object: {
@@ -49,7 +58,7 @@ export class HandleFUGR {
         type: obj.getType(),
       },
       filename: obj.getName().toLowerCase().replace(/\//g, "#") + ".fugr.mjs",
-      chunk: chunk,
+      chunk: assembled,
       requires: [],
       exports: [],
     };

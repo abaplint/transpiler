@@ -2,7 +2,6 @@ import * as abaplint from "@abaplint/core";
 import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {TranspileTypes} from "../transpile_types";
 import {UniqueIdentifier} from "../unique_identifier";
 import {InlineDeclarations} from "../inline";
 
@@ -66,7 +65,7 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
       if (type !== undefined && p.optional === true) {
         // todo, set DEFAULT value
         ret += `if (${variable} === undefined) {
-  ${variable} = ${TranspileTypes.toType(type)};
+  ${variable} = ${traversal.toType(type)};
 }\n`;
       }
 

@@ -3,7 +3,6 @@ import {IStatementTranspiler} from "./_statement_transpiler";
 import {FieldSymbolTranspiler as Expr} from "../expressions/field_symbol";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {TranspileTypes} from "../transpile_types";
 
 export class FieldSymbolTranspiler implements IStatementTranspiler {
 
@@ -29,7 +28,7 @@ export class FieldSymbolTranspiler implements IStatementTranspiler {
       return new Chunk()
         .appendString("let ")
         .appendString(new Expr().transpile(name, traversal).getCode())
-        .appendString(" = new abap.types.FieldSymbol(" + TranspileTypes.toType(found.getType()) + ");");
+        .appendString(" = new abap.types.FieldSymbol(" + traversal.toType(found.getType()) + ");");
     }
 
     throw new Error("FieldSymbolTranspiler, name not found");

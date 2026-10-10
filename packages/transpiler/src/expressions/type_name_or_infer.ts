@@ -2,7 +2,6 @@ import {AbstractType, Nodes} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {TranspileTypes} from "../transpile_types";
 
 export class TypeNameOrInfer implements IExpressionTranspiler {
 
@@ -33,7 +32,7 @@ export class TypeNameOrInfer implements IExpressionTranspiler {
     const type = this.findType(node, traversal);
 
     const ret = new Chunk();
-    ret.appendString(TranspileTypes.toType(type));
+    ret.appendString(traversal.toType(type));
     return ret;
   }
 
