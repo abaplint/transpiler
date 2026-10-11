@@ -14,7 +14,8 @@ export class TranspileTypes {
   public static declareStaticSkipVoid(pre: string, t: abaplint.TypedIdentifier, registry?: TypeFactoryRegistry): string {
     const type = t.getType();
     // todo, this should look at the configuration, for runtime vs compile time errors
-    if (this.hasUnsupportedType(type)) {
+    // unknown types are kept, they throw when the declaration is evaluated
+    if (this.hasUnsupportedType(type, true)) {
       return "";
     }
     const code = this.toType(type, undefined, registry);
@@ -246,8 +247,10 @@ export class TranspileTypes {
     return false;
   }
 
-  private static hasUnsupportedType(type: abaplint.AbstractType, seen?: Set<abaplint.AbstractType>): boolean {
-    if (type instanceof abaplint.BasicTypes.UnknownType || type instanceof abaplint.BasicTypes.VoidType) {
+  private static hasUnsupportedType(type: abaplint.AbstractType, ignoreUnknown = false, seen?: Set<abaplint.AbstractType>): boolean {
+    if (type instanceof abaplint.BasicTypes.UnknownType) {
+      return !ignoreUnknown;
+    } else if (type instanceof abaplint.BasicTypes.VoidType) {
       return true;
     } else if (type instanceof abaplint.BasicTypes.StructureType) {
       if (seen?.has(type)) {
@@ -255,21 +258,21 @@ export class TranspileTypes {
       }
       seen ??= new Set<abaplint.AbstractType>();
       seen.add(type);
-      return type.getComponents().some(component => this.hasUnsupportedType(component.type, seen));
+      return type.getComponents().some(component => this.hasUnsupportedType(component.type, ignoreUnknown, seen));
     } else if (type instanceof abaplint.BasicTypes.TableType) {
       if (seen?.has(type)) {
         return false;
       }
       seen ??= new Set<abaplint.AbstractType>();
       seen.add(type);
-      return this.hasUnsupportedType(type.getRowType(), seen);
+      return this.hasUnsupportedType(type.getRowType(), ignoreUnknown, seen);
     } else if (type instanceof abaplint.BasicTypes.DataReference) {
       if (seen?.has(type)) {
         return false;
       }
       seen ??= new Set<abaplint.AbstractType>();
       seen.add(type);
-      return this.hasUnsupportedType(type.getType(), seen);
+      return this.hasUnsupportedType(type.getType(), ignoreUnknown, seen);
     } else if (type instanceof abaplint.BasicTypes.IntegerType
         || type instanceof abaplint.BasicTypes.CharacterType
         || type instanceof abaplint.BasicTypes.NumericType

@@ -138,6 +138,15 @@ WRITE first-value.`;
     expect(JSON.parse(ignored!.map).mappings).to.equal("");
   });
 
+  it("keeps unknown static types as runtime errors", () => {
+    const token = new abaplint.Tokens.Identifier(new abaplint.Position(1, 1), "ty");
+    const unknown = new abaplint.TypedIdentifier(token, "zunknown.prog.abap", new abaplint.BasicTypes.UnknownType("not found"));
+    for (const registry of [undefined, new TypeFactoryRegistry("zunknown.prog.mjs")]) {
+      expect(TranspileTypes.declareStaticSkipVoid("lcl.", unknown, registry))
+        .to.equal(`lcl.ty = (() => { throw new Error("Unknown type: not found") })();\n`);
+    }
+  });
+
   it("produces deterministic output across independent runs", async () => {
     const options = {sharedTypeFactories: true};
     const first = await transpile(source, options);

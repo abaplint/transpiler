@@ -1,4 +1,4 @@
-import {AbstractType, Expressions, Nodes} from "@abaplint/core";
+import {AbstractType, BasicTypes, Expressions, Nodes} from "@abaplint/core";
 import {AttributeChainTranspiler, ComponentChainTranspiler, CondBodyTranspiler, FieldChainTranspiler, StringTemplateTranspiler, SwitchBodyTranspiler, TypeNameOrInfer} from ".";
 import {Chunk} from "../chunk";
 import {ConstantTranspiler} from "./constant";
@@ -264,10 +264,10 @@ export class SourceTranspiler implements IExpressionTranspiler {
         if (inferType === undefined) {
           throw new Error("transpiler: REF # todo, lookupInferred, " + node.concatTokens());
         }
-        const typ = traversal.toType(inferType);
-        if (typ.startsWith("new abap.types.DataReference(") === false) {
+        if (!(inferType instanceof BasicTypes.DataReference)) {
           throw new Error("transpiler: REF # unexpected type");
         }
+        const typ = traversal.toType(inferType);
         ret.append(`abap.statements.getReference(${typ}, `, c, traversal);
         post.append(")", c, traversal);
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "BIT") { // todo, this will not work in the general case
