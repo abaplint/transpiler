@@ -38,6 +38,10 @@ export function escape(input: {val: ICharacter | FieldSymbol | string, format: I
 
 // todo, optimize/cache regexes
   switch (format) {
+    case 0: // e_xml_text: & and < only, as in SAP; >, quotes and control characters stay
+      val = val.replace(/&/g, "&amp;");
+      val = val.replace(/</g, "&lt;");
+      break;
     case 1: // e_xml_attr
       val = val.replace(/&/g, "&amp;");
       val = val.replace(/</g, "&lt;");

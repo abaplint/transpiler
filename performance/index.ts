@@ -51,6 +51,7 @@ import {test45} from "./test45";
 import {test46} from "./test46";
 import {test47} from "./test47";
 import {test48} from "./test48";
+import {test49} from "./test49";
 
 // NOTE: does not run via Mocha
 
@@ -114,6 +115,7 @@ const tests: Tests = [
   {name: "46: BIT-XOR / BIT-AND x LENGTH 4", abap: test46},
   {name: "47: BIT-XOR long xstrings", abap: test47},
   {name: "48: Repeated nested value construction", abap: test48},
+  {name: "49: Nested structures and table value construction", abap: test49},
 ];
 
 async function execute(t: Test) {

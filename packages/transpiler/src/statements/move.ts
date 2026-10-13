@@ -40,6 +40,7 @@ export class MoveTranspiler implements IStatementTranspiler {
           .appendChunk(targets[0])
           .appendString(", ")
           .appendChunk(source)
+          .appendString(", " + traversal.buildExtraCX(node))
           .append(");", node.getLastToken(), traversal);
         break;
       case "+":
