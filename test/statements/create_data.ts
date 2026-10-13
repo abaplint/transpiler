@@ -271,6 +271,18 @@ WRITE lv_type.`;
     await f(abap);
   });
 
+  it("CREATE DATA, TYPE dynamic t100 in lower case", async () => {
+    const code = `
+    DATA foo type ref to data.
+    CREATE DATA foo TYPE ('t100').
+    ASSERT foo IS NOT INITIAL.`;
+    const js = await runFiles(abap, [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}]);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("CREATE DATA, TYPE dynamic T100 space", async () => {
     const code = `
     DATA foo type ref to data.
@@ -359,6 +371,25 @@ CREATE DATA parameter_value TYPE ('I').`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("CREATE DATA, lower case type names", async () => {
+    // a type name is not case-sensitive on a system
+    const code = `
+DATA lr TYPE REF TO data.
+CREATE DATA lr TYPE ('utclong').
+ASSERT lr IS BOUND.
+CREATE DATA lr TYPE ('string').
+ASSERT lr IS BOUND.
+CREATE DATA lr TYPE ('int8 ').
+ASSERT lr IS BOUND.
+CREATE DATA lr TYPE ('abap_bool').
+ASSERT lr IS BOUND.
+WRITE 'OK'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("OK");
   });
 
   it("CREATE DATA, STRING 2", async () => {
