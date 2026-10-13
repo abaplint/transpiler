@@ -35,7 +35,8 @@ async function run() {
 `;
 
     for (const obj of reg.getObjects()) {
-      if (reg.isDependency(obj) || !(obj instanceof abaplint.Objects.Class)) {
+      if (reg.isDependency(obj) || !(obj instanceof abaplint.Objects.Class)
+          || this.layout.isExternal({type: obj.getType(), name: obj.getName()})) {
         continue;
       }
       const hasTestFile = obj.getFiles().some(f => { return f.getFilename().includes(".testclasses."); });
@@ -90,7 +91,8 @@ run().then(() => {
     }[] = [];
 
     for (const obj of reg.getObjects()) {
-      if (reg.isDependency(obj) || !(obj instanceof abaplint.Objects.Class)) {
+      if (reg.isDependency(obj) || !(obj instanceof abaplint.Objects.Class)
+          || this.layout.isExternal({type: obj.getType(), name: obj.getName()})) {
         continue;
       }
 

@@ -19,9 +19,9 @@ import {HandleMSAG} from "./handlers/handle_msag";
 import {HandleOA2P} from "./handlers/handle_oa2p";
 import {HandleFUGR} from "./handlers/handle_fugr";
 import {Initialization} from "./initialization";
-import {OutputLayout, OutputFolders} from "./output_layout";
+import {OutputLayout, OutputFolders, ExternalFolders} from "./output_layout";
 
-export {OutputLayout, OutputFolders, importPath} from "./output_layout";
+export {OutputLayout, OutputFolders, ExternalFolders, importPath} from "./output_layout";
 
 export {config, ITranspilerOptions, IFile, IProgress, IOutputFile, IOutput,
   UnknownTypesEnum, Chunk, DatabaseSetupResult};
@@ -46,12 +46,15 @@ export class Transpiler {
     return this.run(reg);
   }
 
-  public async run(reg: abaplint.IRegistry, progress?: IProgress, folders?: OutputFolders): Promise<IOutput> {
+  /** `externals` names output folders that are not emitted: their objects are
+   * imported from a module specifier instead (see ExternalFolders). */
+  public async run(reg: abaplint.IRegistry, progress?: IProgress, folders?: OutputFolders,
+                   externals?: ExternalFolders): Promise<IOutput> {
     // Validation installs the transpiler configuration and findIssues() parses
     // dirty registries. Parsing before that would be wasted because setConfig()
     // marks every registry object dirty again.
     this.validate(reg);
-    const layout = new OutputLayout(reg, folders);
+    const layout = new OutputLayout(reg, folders, externals);
 
     const dbSetup = new DatabaseSetup(reg).run(this.options);
 
@@ -68,6 +71,9 @@ export class Transpiler {
     progress?.set(reg.getObjectCount().total, "Building");
     for (const obj of reg.getObjects()) {
       await progress?.tick("Building, " + obj.getName());
+      if (layout.isExternal({type: obj.getType(), name: obj.getName()})) {
+        continue;
+      }
       // the temporary names ("unique1", ..., and the DO/WHILE sy-index backups
       // "indexBackup1", ...) are local to the module an object becomes, so each
       // object numbers its own: its output then depends on the registry alone,

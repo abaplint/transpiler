@@ -2,7 +2,7 @@ import {DatabaseSetupResult} from "./db/database_setup_result";
 import * as abaplint from "@abaplint/core";
 import {ITranspilerOptions} from "./types";
 import {HandleFUGR} from "./handlers/handle_fugr";
-import {OutputLayout, importPath} from "./output_layout";
+import {OutputLayout} from "./output_layout";
 
 export function escapeNamespaceFilename(filename: string): string {
 // ES modules are resolved and cached as URLs. This means that special characters must be
@@ -92,7 +92,7 @@ globalThis.abap = new runtime.ABAP();\n`;
     const late: {filename: string, code: string}[] = [];
 
     const imp = (filename: string) => {
-      const specifier = importPath("init.mjs", filename);
+      const specifier = this.layout.specifier("init.mjs", filename);
       return {
         filename: specifier.split("/").pop()!,
         code: useImport === true ? `import "${specifier}";` : `await import("${specifier}");`,

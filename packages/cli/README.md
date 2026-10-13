@@ -83,6 +83,33 @@ The transpiler library retains flat output unless its caller supplies an output
 folder map as the third argument to `Transpiler.run()`. This layout is enabled
 automatically by the CLI.
 
+## Libraries transpiled elsewhere
+
+A library that is already transpiled and published, e.g. as an npm package,
+is still needed for the type check, but writing it to the output again loads
+a second copy of it: its classes register themselves in `abap.Classes` again,
+and a second `CX_ROOT` no longer matches the exceptions of the first. Set
+`libs[].import` to the module specifier of the library's transpiled modules:
+
+```json
+{
+  "libs": [
+    {
+      "folder": "node_modules/my-package/src",
+      "name": "core",
+      "import": "my-package/output/core"
+    }
+  ]
+}
+```
+
+The library is read for the type check but not written, and the generated
+code imports each of its objects from below the specifier, e.g.
+`import("my-package/output/core/cx_root.clas.mjs")` instead of
+`import("../core/cx_root.clas.mjs")`. `init.mjs` imports its objects from the
+same specifiers, so the package's own modules are loaded and nothing is
+duplicated. Its unit tests are not run.
+
 ## Duplicate dependencies
 
 By default, two libraries defining the same ABAP object (type and name) cause

@@ -35,6 +35,13 @@ export interface ITranspilerConfig {
      * @uniqueItems true
      */
     exclude_filter?: string[];
+    /** module specifier of this library's already transpiled output, e.g.
+     * "my-package/output/core"; the library is then read for the type check
+     * but not written, and the generated code imports its objects from below
+     * this specifier
+     * @minLength 1
+     */
+    import?: string;
   }[],
   /** skip duplicate dependency objects after the first library in libs, with a warning; defaults to false */
   skip_duplicate_dependencies?: boolean;

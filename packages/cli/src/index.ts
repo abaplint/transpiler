@@ -3,7 +3,7 @@ import * as Transpiler from "@abaplint/transpiler";
 import {TranspilerConfig} from "./config";
 import {FileOperations} from "./file_operations";
 import {ITranspilerConfig} from "./types";
-import {loadLibraries, libraryRegistry} from "./libraries";
+import {loadLibraries, libraryRegistry, libraryImports} from "./libraries";
 import {collectObjectFiles} from "./write_objects";
 import {IOutputArtifact, writeOutput} from "./output_writer";
 
@@ -30,7 +30,7 @@ async function build(config: ITranspilerConfig, files: Transpiler.IFile[]) {
   const t = new Transpiler.Transpiler(options);
 
   const {reg, folders, sources} = libraryRegistry(files, libraries, config.skip_duplicate_dependencies);
-  const output = await t.run(reg, new Progress(), folders);
+  const output = await t.run(reg, new Progress(), folders, libraryImports(config.libs || []));
   return {output, sources};
 }
 

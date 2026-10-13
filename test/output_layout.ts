@@ -294,6 +294,39 @@ describe("CLI grouped output", () => {
     run("nested/output/project/zapp.prog.mjs");
   });
 
+  it("imports a library with libs[].import from its already transpiled package instead of writing a copy", () => {
+    write("deps/core/src/zcl_dep.clas.abap", [
+      "CLASS zcl_dep DEFINITION PUBLIC.",
+      "PUBLIC SECTION. CLASS-DATA value TYPE i VALUE 7. ENDCLASS.",
+      "CLASS zcl_dep IMPLEMENTATION. ENDCLASS.",
+    ].join("\n"));
+    build({...config(), input_folder: ["deps/core/src"], output_folder: "node_modules/libpkg/out", write_unit_tests: false});
+
+    write("src/zcl_app.clas.abap",
+      "CLASS zcl_app DEFINITION PUBLIC INHERITING FROM zcl_dep. ENDCLASS. CLASS zcl_app IMPLEMENTATION. ENDCLASS.");
+    write("src/zapp.prog.abap", "ASSERT zcl_app=>value = 7.");
+    build(config([{folder: "deps/core", name: "core", import: "libpkg/out/project"}]));
+    expect(existsSync(path.join(folder, "nested/output/core"))).to.equal(false);
+    expect(read("project/zcl_app.clas.mjs")).to.contain('import("libpkg/out/project/zcl_dep.clas.mjs")');
+    expect(read("init.mjs")).to.contain('"libpkg/out/project/zcl_dep.clas.mjs"');
+    expect(read("_unit_open.mjs")).not.to.contain("zcl_dep");
+    run("nested/output/project/zapp.prog.mjs");
+    write("check.mjs", [
+      'await import("./nested/output/init.mjs");',
+      'const {zcl_dep} = await import("libpkg/out/project/zcl_dep.clas.mjs");',
+      'if (abap.Classes.ZCL_DEP !== zcl_dep) throw new Error("second copy of ZCL_DEP");',
+    ].join("\n"));
+    run("check.mjs");
+
+    let output = "";
+    try {
+      build(config([{folder: "deps/core", import: " "}]));
+    } catch (error) {
+      output = String(error.stdout);
+    }
+    expect(output).to.contain("Invalid libs[].import for library core");
+  });
+
   it("maps program errors to the original ABAP line after the bootstrap", () => {
     write("src/zbad.prog.abap", "WRITE 'before'.\nASSERT 1 = 2.");
     build(config());

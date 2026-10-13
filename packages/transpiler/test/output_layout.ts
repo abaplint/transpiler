@@ -57,4 +57,33 @@ describe("Output layout", () => {
     const layout = new OutputLayout(reg, new Map([["zapp.prog.abap", "project"]]));
     expect(() => layout.file({type: "PROG", name: "ZAPP"}, "../init.mjs")).to.throw("Invalid output filename");
   });
+  it("imports objects of external folders from their module specifier", () => {
+    const reg = new abaplint.Registry().addFiles([
+      new abaplint.MemoryFile("zapp.prog.abap", ""),
+      new abaplint.MemoryFile("cx_root.clas.abap", ""),
+    ]);
+    const layout = new OutputLayout(reg, new Map([["zapp.prog.abap", "project"], ["cx_root.clas.abap", "core"]]),
+      new Map([["core", "@scope/pkg/output/core/"]]));
+    expect(layout.isExternal({type: "CLAS", name: "CX_ROOT"})).to.equal(true);
+    expect(layout.isExternal({type: "PROG", name: "ZAPP"})).to.equal(false);
+    expect(layout.specifier("project/zapp.prog.mjs", "core/cx_root.clas.mjs")).to.equal("@scope/pkg/output/core/cx_root.clas.mjs");
+    expect(layout.specifier("project/zapp.prog.mjs", "core/%23cl#x.clas.mjs")).to.equal("@scope/pkg/output/core/%2523cl%23x.clas.mjs");
+    expect(layout.specifier("project/a.mjs", "project/b.mjs")).to.equal("./b.mjs");
+    expect(() => new OutputLayout(reg, undefined, new Map([["core", " "]]))).to.throw("Empty import specifier");
+  });
+
+  it("does not emit external objects and imports them by specifier", async () => {
+    const reg = new abaplint.Registry().addFiles([
+      new abaplint.MemoryFile("zcl_app.clas.abap",
+        "CLASS zcl_app DEFINITION PUBLIC INHERITING FROM lcl_base. ENDCLASS. CLASS zcl_app IMPLEMENTATION. ENDCLASS."),
+    ]);
+    reg.addDependency(new abaplint.MemoryFile("lcl_base.clas.abap",
+      "CLASS lcl_base DEFINITION PUBLIC. ENDCLASS. CLASS lcl_base IMPLEMENTATION. ENDCLASS."));
+    const output = await new Transpiler({addCommonJS: true}).run(reg, undefined,
+      new Map([["zcl_app.clas.abap", "project"], ["lcl_base.clas.abap", "core"]]), new Map([["core", "pkg/core"]]));
+    expect(output.objects.map(file => file.filename)).to.deep.equal(["project/zcl_app.clas.mjs"]);
+    expect(output.objects[0].chunk.getCode()).to.contain('import("pkg/core/lcl_base.clas.mjs")');
+    expect(output.initializationScript).to.contain('"pkg/core/lcl_base.clas.mjs"');
+    expect(output.initializationScript).to.contain('"./project/zcl_app.clas.mjs"');
+  });
 });

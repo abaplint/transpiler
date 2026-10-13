@@ -45,6 +45,23 @@ export function libraryNames(libs: readonly Library[]): string[] {
   });
 }
 
+/** The libraries whose output is not written, by output folder name: their
+ * objects are imported from libs[].import instead. */
+export function libraryImports(libs: readonly Library[]): Map<string, string> {
+  const names = libraryNames(libs);
+  const result = new Map<string, string>();
+  for (const [index, lib] of libs.entries()) {
+    if (lib.import === undefined) {
+      continue;
+    }
+    if (typeof lib.import !== "string" || lib.import.trim() === "") {
+      throw new Error("Invalid libs[].import for library " + names[index] + ": a non-empty module specifier is expected");
+    }
+    result.set(names[index], lib.import);
+  }
+  return result;
+}
+
 export async function loadLibraries(config: ITranspilerConfig): Promise<LoadedLibrary[]> {
   const libs = config.libs || [];
   const names = libraryNames(libs);
