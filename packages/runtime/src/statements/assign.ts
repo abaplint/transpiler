@@ -158,9 +158,10 @@ export function assign(input: IAssignInput) {
       // component whose NAME has a dash (RAP's %element-<field>); then the
       // dash as a path, where a missing step is sy-subrc 4
       const name = component.toLowerCase().trimEnd();
-      result = input.source.get()[name];
+      const source: any = input.source;
+      result = source.get()[name];
       if (result === undefined && name.includes("-")) {
-        result = input.source;
+        result = source;
         for (const s of name.split("-")) {
           result = result?.get()[s];
         }
