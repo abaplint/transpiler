@@ -10,6 +10,17 @@ export class ValueBodyLineTranspiler {
   public transpile(rowType: AbstractType, line: Nodes.ExpressionNode, traversal: Traversal, extraFields: string): Chunk {
     const ret = new Chunk();
 
+    const lines = line.findDirectExpression(Expressions.ValueBodyLines);
+    if (lines) {
+      const source = traversal.traverse(lines.findDirectExpression(Expressions.Source)).getCode();
+      const from = lines.findExpressionAfterToken("FROM");
+      const to = lines.findExpressionAfterToken("TO");
+      const fromCode = from ? traversal.traverse(from).getCode() : "undefined";
+      const toCode = to ? ", " + traversal.traverse(to).getCode() : "";
+      const range = from || to ? ", " + fromCode + toCode : "";
+      return ret.appendString(`.appendLines(${source}${range})`);
+    }
+
     ret.appendString(`.appendThis(${TranspileTypes.toType(rowType)}`);
 
     for (const child of line.getChildren()) {
