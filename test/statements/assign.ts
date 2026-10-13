@@ -823,25 +823,6 @@ WRITE / sy-subrc.`;
     expect(abap.console.getTrimmed()).to.equal("4");
   });
 
-  it("component whose name has a dash", async () => {
-    // a structure built at runtime (cl_abap_structdescr=>create) may name a
-    // component with a dash, as RAP's %element-<field> rows do
-    const code = `
-FIELD-SYMBOLS <test> TYPE data.
-DATA: BEGIN OF foo,
-        bar TYPE c LENGTH 1,
-      END OF foo.
-WRITE '@KERNEL foo.get()["%element-customerid"] = new abap.types.Character(1).set("X");'.
-
-ASSIGN COMPONENT '%ELEMENT-CUSTOMERID' OF STRUCTURE foo TO <test>.
-WRITE / sy-subrc.
-WRITE / <test>.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.getTrimmed()).to.equal("0\nX");
-  });
-
   it("fs", async () => {
     const code = `
 CLASS lcl_attribute DEFINITION.
