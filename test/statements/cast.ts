@@ -283,6 +283,69 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("CX_SY_MOVE_CAST_ERROR carries the source position", async () => {
+    class MoveCastError extends Error {}
+    abap.Classes["CX_SY_MOVE_CAST_ERROR"] = MoveCastError;
+    const code = `
+CLASS sup DEFINITION.
+ENDCLASS.
+CLASS sup IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lcl DEFINITION INHERITING FROM sup.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA foo TYPE REF TO sup.
+  DATA bar TYPE REF TO lcl.
+  CREATE OBJECT foo.
+  bar ?= foo.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    let caught: any;
+    try {
+      await f(abap);
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).to.be.instanceof(MoveCastError);
+    expect(caught.EXTRA_CX).to.deep.equal({INTERNAL_FILENAME: "zfoobar.prog.abap", INTERNAL_LINE: 16});
+  });
+
+  it("CX_SY_MOVE_CAST_ERROR from CAST carries the source position", async () => {
+    class MoveCastError extends Error {}
+    abap.Classes["CX_SY_MOVE_CAST_ERROR"] = MoveCastError;
+    const code = `
+CLASS sup DEFINITION.
+ENDCLASS.
+CLASS sup IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lcl DEFINITION INHERITING FROM sup.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA foo TYPE REF TO sup.
+  DATA bar TYPE REF TO lcl.
+  CREATE OBJECT foo.
+  bar = CAST lcl(
+    foo ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    let caught: any;
+    try {
+      await f(abap);
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).to.be.instanceof(MoveCastError);
+    expect(caught.EXTRA_CX).to.deep.equal({INTERNAL_FILENAME: "zfoobar.prog.abap", INTERNAL_LINE: 16});
+  });
+
 // unit tests throwing cx_sy_move_cast_error not part of this file
 
 });

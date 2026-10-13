@@ -31,6 +31,7 @@ export class CastTranspiler implements IExpressionTranspiler {
       .appendString(target)
       .appendString(", ")
       .appendChunk(traversal.traverse(source))
+      .appendString(", " + traversal.buildExtraCX(node))
       .append("))", node.getLastToken(), traversal);
 
     return ret;
