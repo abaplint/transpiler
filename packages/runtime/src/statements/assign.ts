@@ -154,10 +154,17 @@ export function assign(input: IAssignInput) {
         result = structure_as_object[component_name];
       }
     } else if (!(input.source instanceof Table)){
-      const split = component.toLowerCase().trimEnd().split("-");
-      result = input.source;
-      for (const s of split) {
-        result = result.get()[s];
+      // the whole name first: a structure built at runtime may carry a
+      // component whose NAME has a dash (RAP's %element-<field>); then the
+      // dash as a path, where a missing step is sy-subrc 4
+      const name = component.toLowerCase().trimEnd();
+      const source: any = input.source;
+      result = source.get()[name];
+      if (result === undefined && name.includes("-")) {
+        result = source;
+        for (const s of name.split("-")) {
+          result = result?.get()[s];
+        }
       }
     }
 
