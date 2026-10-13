@@ -28,6 +28,7 @@ export class CallFunctionTranspiler implements IStatementTranspiler {
     }
 
     const ret = new Chunk();
+    const extra = traversal.buildExtraCX(node);
 
     const exceptions = node.findFirstExpression(abaplint.Expressions.ParameterListExceptions);
     if (exceptions) {
@@ -40,20 +41,20 @@ export class CallFunctionTranspiler implements IStatementTranspiler {
     if (dest && updateTask === false) {
       const s = new SourceTranspiler(true).transpile(dest, traversal);
       param = param.replace("{", ",").replace(/}$/, "");
-      ret.appendString(`await abap.statements.callFunction({name:${fmname},destination:${s.getCode()}${param}});`);
+      ret.appendString(`await abap.statements.callFunction({name:${fmname},extra:${extra},destination:${s.getCode()}${param}});`);
     } else if (calling && updateTask === false) {
       param = param.replace("{", ",").replace(/}$/, "");
       // typically used in combination with STARTING NEW TASK so dont await,
-      ret.appendString(`abap.statements.callFunction({name:${fmname},calling:this.${
+      ret.appendString(`abap.statements.callFunction({name:${fmname},extra:${extra},calling:this.${
         calling.concatTokens().toLowerCase()}${param}});`);
     } else {
       const illegalFunc = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_FUNC'", node.getFirstToken(), true);
       const call = `abap.FunctionModules[${fmname}]`;
       // eslint-disable-next-line max-len
-      ret.appendString(`if (${call} === undefined) { if (${illegalFunc} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_FUNC not found"; } else { throw await new ${illegalFunc}().constructor_({function: new abap.types.String().set(${fmname})});} }\n`);
+      ret.appendString(`if (${call} === undefined) { if (${illegalFunc} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_FUNC not found"; } else { throw Object.assign(await new ${illegalFunc}().constructor_({function: new abap.types.String().set(${fmname})}), {EXTRA_CX: ${extra}});} }\n`);
       if (updateTask) {
         param = param.replace("{", ",").replace(/}$/, "");
-        ret.appendString(`await abap.statements.callFunction({name:${fmname},updateTask:true${param}});`);
+        ret.appendString(`await abap.statements.callFunction({name:${fmname},extra:${extra},updateTask:true${param}});`);
       } else {
         ret.appendString(`await ${call}(${param});`);
       }

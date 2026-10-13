@@ -163,6 +163,11 @@ export class Traversal {
     return this.file.getFilename();
   }
 
+  /** source position attached to raised exceptions as EXTRA_CX, read by CX_ROOT->GET_SOURCE_POSITION */
+  public buildExtraCX(node: abaplint.INode): string {
+    return `{"INTERNAL_FILENAME": "${this.getFilename()}","INTERNAL_LINE": ${node.getFirstToken().getStart().getRow()}}`;
+  }
+
   public getFile(): abaplint.ABAPFile {
     return this.file;
   }
