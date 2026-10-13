@@ -93,11 +93,15 @@ CLASS lcl_foo IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 
-START-OF-SELECTION.
+FORM run.
   DATA(tab) = VALUE ty_tt( ( LINES OF lcl_foo=>method( ) ) ).
   LOOP AT tab INTO DATA(row).
     WRITE / row.
-  ENDLOOP.`;
+  ENDLOOP.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
@@ -107,11 +111,16 @@ START-OF-SELECTION.
   it("LINES OF mixed with rows, FROM TO", async () => {
     const code = `
 TYPES ty_tt TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
-DATA(src) = VALUE ty_tt( ( 1 ) ( 2 ) ( 3 ) ( 4 ) ).
-DATA(tab) = VALUE ty_tt( ( 0 ) ( LINES OF src FROM 2 TO 3 ) ( 9 ) ).
-LOOP AT tab INTO DATA(row).
-  WRITE / row.
-ENDLOOP.`;
+FORM run.
+  DATA(src) = VALUE ty_tt( ( 1 ) ( 2 ) ( 3 ) ( 4 ) ).
+  DATA(tab) = VALUE ty_tt( ( 0 ) ( LINES OF src FROM 2 TO 3 ) ( 9 ) ).
+  LOOP AT tab INTO DATA(row).
+    WRITE / row.
+  ENDLOOP.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
