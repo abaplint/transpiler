@@ -38,6 +38,7 @@ export * from "./nmin";
 export * from "./numofchar";
 export * from "./repeat";
 export * from "./replace";
+export * from "./rescale";
 export * from "./reverse";
 export * from "./round";
 export * from "./segment";
