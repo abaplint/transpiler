@@ -317,7 +317,7 @@ export class Traversal {
   }
 
   public prefixAndName(t: abaplint.Token, filename?: string): string {
-    let name = t.getStr().toLowerCase();
+    let name = t.getStr().toLowerCase().replace(/^!/, "");
 
     if (filename && this.getCurrentObject().getABAPFileByName(filename) === undefined) {
       // the prefix is from a different object
