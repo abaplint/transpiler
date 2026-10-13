@@ -67,15 +67,18 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
     throw new Error("CREATE_DATA_REFERENCE_EXPECTED");
   }
   if (options?.name && options?.table) {
-    if (abap.DDIC[options.name.trimEnd()] === undefined) {
+    const name = options.name.trimEnd().toUpperCase();
+    if (abap.DDIC[name] === undefined) {
       throwError("CX_SY_CREATE_DATA_ERROR");
     }
-    target.assign(new abap.types.Table(abap.DDIC[options.name.trimEnd()].type(), tableOptions));
+    target.assign(new abap.types.Table(abap.DDIC[name].type(), tableOptions));
   } else if (options?.name !== undefined) {
-    if (abap.DDIC[options.name.trimEnd()]) {
-      target.assign(abap.DDIC[options.name.trimEnd()].type().clone());
-    } else if (options.name.includes("=>")) {
-      const [className, typeName] = options.name.trimEnd().toUpperCase().split("=>");
+    // a type name is not case-sensitive: TYPE ('utclong') is TYPE ('UTCLONG')
+    const name = options.name.trimEnd().toUpperCase();
+    if (abap.DDIC[name]) {
+      target.assign(abap.DDIC[name].type().clone());
+    } else if (name.includes("=>")) {
+      const [className, typeName] = name.split("=>");
 
       if (abap.Classes[className] === undefined) {
         throwError("CX_SY_CREATE_DATA_ERROR");
@@ -92,24 +95,24 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
         throw new Error("CreateData, kernel class missing");
       }
       clas.anonymous({name: options.name.trimEnd(), dref: target});
-    } else if (options.name.trimEnd() === "ABAP_BOOL") {
+    } else if (name === "ABAP_BOOL") {
 // ABAP_BOOL is special, its not part of the type pool, its built-into abaplint
       target.assign(new Character(1, {qualifiedName: "ABAP_BOOL", ddicName: "ABAP_BOOL"}));
-    } else if (options.name.trimEnd() === "STRING") {
+    } else if (name === "STRING") {
       target.assign(new String());
-    } else if (options.name.trimEnd() === "XSTRING") {
+    } else if (name === "XSTRING") {
       target.assign(new XString());
-    } else if (options.name.trimEnd() === "UTCLONG") {
+    } else if (name === "UTCLONG") {
       target.assign(new UTCLong());
-    } else if (options.name.trimEnd() === "I") {
+    } else if (name === "I") {
       target.assign(new Integer());
-    } else if (options.name.trimEnd() === "T") {
+    } else if (name === "T") {
       target.assign(new Time());
-    } else if (options.name.trimEnd() === "D") {
+    } else if (name === "D") {
       target.assign(new Date());
-    } else if (options.name.trimEnd() === "F") {
+    } else if (name === "F") {
       target.assign(new Float());
-    } else if (options.name.trimEnd() === "INT8") {
+    } else if (name === "INT8") {
       target.assign(new Integer8());
     } else if (options.refTo === true) {
       createDataRefTo(target, options.name);
