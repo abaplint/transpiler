@@ -16,6 +16,25 @@ import {ABAP} from "..";
 
 declare const abap: ABAP;
 
+/* VALUE #( ( LINES OF src [FROM idx1] [TO idx2] ) ), appends the rows via appendThis */
+function appendLinesOf(target: Table | HashedTable, source: Table | HashedTable | FieldSymbol,
+                       from?: ICharacter | INumeric, to?: ICharacter | INumeric) {
+  if (source instanceof FieldSymbol) {
+    const pointer = source.getPointer();
+    if (pointer === undefined) {
+      throw new Error("LINES OF, fs not assigned");
+    }
+    source = pointer as Table | HashedTable;
+  }
+  const rows = source.array();
+  const low = from ? parseInt(from.get() + "", 10) : 1;
+  const high = to ? parseInt(to.get() + "", 10) : rows.length;
+  for (let index = Math.max(low, 1); index <= Math.min(high, rows.length); index++) {
+    target.appendThis(rows[index - 1]);
+  }
+  return target;
+}
+
 export enum TableAccessType {
   standard = "STANDARD",
   sorted = "SORTED",
@@ -286,6 +305,10 @@ export class HashedTable implements ITable {
   public appendThis(data: TableRowType) {
     this.insert(data);
     return this;
+  }
+
+  public appendLines(source: Table | HashedTable | FieldSymbol, from?: ICharacter | INumeric, to?: ICharacter | INumeric) {
+    return appendLinesOf(this, source, from, to);
   }
 
   public array(): any[] {
@@ -669,6 +692,10 @@ export class Table implements ITable {
     }
     this.append(item);
     return this;
+  }
+
+  public appendLines(source: Table | HashedTable | FieldSymbol, from?: ICharacter | INumeric, to?: ICharacter | INumeric) {
+    return appendLinesOf(this, source, from, to);
   }
 
   public appendInitial() {
