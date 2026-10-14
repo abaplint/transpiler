@@ -20,9 +20,12 @@ export class DecFloat34 {
     return n;
   }
 
-  public set(value: INumeric | ICharacter | Hex | string | number | DecFloat34) {
+  public set(value: INumeric | ICharacter | Hex | string | number | bigint | DecFloat34) {
     if (typeof value === "number") {
       this.value = value;
+    } else if (typeof value === "bigint") {
+      // what an int8 gives from get()
+      this.value = Number(value);
     } else if (typeof value === "string" && value.trim().length === 0) {
       this.value = 0;
     } else if (typeof value === "string") {
