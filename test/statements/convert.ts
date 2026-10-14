@@ -239,4 +239,78 @@ ASSERT lv_time IS INITIAL.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
   });
+  
+  it("CONVERT UTCLONG, SAP time zone INDIA", async () => {
+    // INDIA is SAP's own name for UTC+5:30, not an IANA identifier
+    const code = `
+DATA lv_date TYPE d.
+DATA lv_time TYPE t.
+DATA lv_utclong TYPE utclong.
+lv_utclong = '2024-01-15 12:00:00.0000000'.
+CONVERT UTCLONG lv_utclong TIME ZONE 'INDIA'
+  INTO DATE lv_date TIME lv_time.
+WRITE / lv_date.
+WRITE / lv_time.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("20240115\n173000");
+  });
+
+  it("CONVERT TIME STAMP, DAYLIGHT SAVING TIME", async () => {
+    const code = `
+DATA lv_stamp TYPE p LENGTH 8.
+DATA lv_date TYPE d.
+DATA lv_time TYPE t.
+DATA lv_dst TYPE c LENGTH 1.
+lv_stamp = '20260715100000'.
+CONVERT TIME STAMP lv_stamp TIME ZONE 'CET'
+  INTO DATE lv_date TIME lv_time DAYLIGHT SAVING TIME lv_dst.
+WRITE / lv_dst.
+WRITE / lv_time.
+lv_stamp = '20260115100000'.
+CONVERT TIME STAMP lv_stamp TIME ZONE 'CET'
+  INTO DATE lv_date TIME lv_time DAYLIGHT SAVING TIME lv_dst.
+IF lv_dst = space.
+  WRITE / 'winter'.
+ENDIF.
+WRITE / lv_time.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("X\n120000\nwinter\n110000");
+  });
+
+  it("CONVERT TIME STAMP, DAYLIGHT SAVING TIME before INTO TIME", async () => {
+    // the flag must not be taken for the TIME operand
+    const code = `
+DATA lv_stamp TYPE p LENGTH 8.
+DATA lv_date TYPE d.
+DATA lv_time TYPE t.
+DATA lv_dst TYPE c LENGTH 1.
+lv_stamp = '20260715100000'.
+CONVERT TIME STAMP lv_stamp TIME ZONE 'CET' DAYLIGHT SAVING TIME lv_dst
+  INTO TIME lv_time DATE lv_date.
+WRITE / lv_dst.
+WRITE / lv_time.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("X\n120000");
+  });
+
+  it("CONVERT TIME STAMP, DAYLIGHT SAVING TIME, southern hemisphere", async () => {
+    const code = `
+DATA lv_stamp TYPE p LENGTH 8.
+DATA lv_date TYPE d.
+DATA lv_dst TYPE c LENGTH 1.
+lv_stamp = '20260115100000'.
+CONVERT TIME STAMP lv_stamp TIME ZONE 'Australia/Sydney'
+  INTO DATE lv_date DAYLIGHT SAVING TIME lv_dst.
+WRITE lv_dst.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("X");
+  });
 });
