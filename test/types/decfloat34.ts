@@ -146,4 +146,19 @@ ASSERT value IS INITIAL.`;
     await f(abap);
   });
 
+  
+  it("decfloat34 from int8", async () => {
+    const code = `
+    DATA i8 TYPE int8.
+    DATA dec TYPE decfloat34.
+    DATA int TYPE i.
+    i8 = 1730617950.
+    dec = i8.
+    int = dec - 1730617900.
+    WRITE int.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("50");
+  });
 });

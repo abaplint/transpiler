@@ -128,6 +128,9 @@ export class Packed implements INumeric {
       }
 
       this.value = this.stringToScaled(value);
+    } else if (value instanceof Packed) {
+// exact, get() would go through a double and lose digits beyond 2^53
+      this.value = this.stringToScaled(value.toFixed(value.getDecimals()));
     } else if (value instanceof Integer8) {
       this.value = (value.get() as unknown as bigint) * pow10(this.decimals);
     } else if (value instanceof Date) {
