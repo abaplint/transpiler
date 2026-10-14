@@ -367,5 +367,17 @@ START-OF-SELECTION.
     await f(abap);
     expect(abap.console.get()).to.equal("20210505120000.1234560");
   });
-
+  
+  it("timestamp to timestampl, exact", async () => {
+    const code = `
+    DATA short TYPE p LENGTH 8.
+    DATA long TYPE p LENGTH 11 DECIMALS 7.
+    short = '20260915100000'.
+    long = short.
+    WRITE long.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("20260915100000,0000000");
+  });
 });
