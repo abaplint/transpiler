@@ -19,6 +19,10 @@ export interface ITranspilerConfig {
   converter?: {
     /** @uniqueItems true */
     input_folder: string | string[];
+    /** list of regex, case insensitive
+     * @uniqueItems true
+     */
+    exclude_filter?: string[];
     /** @minLength 1 */
     output_folder: string;
   },
