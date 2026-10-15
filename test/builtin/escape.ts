@@ -209,4 +209,19 @@ describe("Builtin functions - escape", () => {
     await f(abap);
   });
 
+  it("escape() for url, full formats", async () => {
+    const code = `
+      CONSTANTS e_url_full TYPE i VALUE 14.
+      CONSTANTS e_uri_full TYPE i VALUE 18.
+      DATA lv_result TYPE string.
+      lv_result = escape( val = 'a b&c=d~' format = e_url_full ).
+      WRITE / lv_result.
+      lv_result = escape( val = 'a b&c=d~' format = e_uri_full ).
+      WRITE / lv_result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("a%20b%26c%3Dd%7E\na%20b%26c%3Dd~");
+  });
+
 });

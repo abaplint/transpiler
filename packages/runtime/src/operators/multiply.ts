@@ -3,9 +3,14 @@ import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
 import {String} from "../types/string";
+import {decFloat34Result, isDecFloat34Operand, toDecimal} from "./_decfloat";
+import {multiplyDecimal} from "../types/_decimal";
 
 export function multiply(left: INumeric | ICharacter | string | Integer8 | number,
                          right: INumeric | ICharacter | string | Integer8 | number) {
+  if (isDecFloat34Operand(left) || isDecFloat34Operand(right)) {
+    return decFloat34Result(multiplyDecimal(toDecimal(left), toDecimal(right)));
+  }
   if (left instanceof Integer8 || right instanceof Integer8) {
     const l = left instanceof Integer8 ? left.get() : BigInt(parse(left));
     const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));

@@ -1,5 +1,6 @@
 import {ICharacter} from "../types/_character";
 import {Character} from "../types";
+import {ABAPRegExp} from "../abap_regex";
 
 export function matches(input: {val: ICharacter | string, regex?: ICharacter | string, pcre?: ICharacter | string}): ICharacter {
   if (input.pcre === undefined && input.regex === undefined) {
@@ -22,7 +23,8 @@ export function matches(input: {val: ICharacter | string, regex?: ICharacter | s
     }
   }
 
-  const r = new RegExp("^" + reg + "$");
+  // the whole text must match, also when the pattern has alternatives
+  const r = ABAPRegExp.create("^(?:" + reg + ")$", "");
   const res = val.match(r);
 
   if (res !== null) {

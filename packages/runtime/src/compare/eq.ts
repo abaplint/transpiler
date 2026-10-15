@@ -3,6 +3,8 @@ import {ABAPObject, Character, Date, DecFloat34, FieldSymbol, Float, HashedTable
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "../operators/_parse";
+import {compareDecFloat34} from "../operators/_decfloat";
+import {compareDecimal} from "../types/_decimal";
 
 function compareTables(left: Table | HashedTable, right: Table | HashedTable): boolean {
   const leftArray = left.array();
@@ -102,7 +104,7 @@ export function eq(
     } else if (leftConstructor === FloatC) {
       return (left as Float).getRaw() === (right as Float).getRaw();
     } else if (leftConstructor === DecFloat34C) {
-      return (left as DecFloat34).getRaw() === (right as DecFloat34).getRaw();
+      return compareDecimal((left as DecFloat34).getDecimal(), (right as DecFloat34).getDecimal()) === 0;
     } else if (leftConstructor === TableC || leftConstructor === HashedTableC) {
       return compareTables(left as Table, right as Table);
     } else if (leftConstructor === StructureC) {
@@ -120,6 +122,14 @@ export function eq(
       return (left as ABAPObject).get() === (right as ABAPObject).get();
     } else if (leftConstructor === DataReferenceC) {
       return (left as any).getPointer() === (right as any).getPointer();
+    }
+  }
+
+  if (left instanceof DecFloat34 || right instanceof DecFloat34) {
+    // exact, getRaw() would compare the nearest doubles
+    const compared = compareDecFloat34(left, right);
+    if (compared !== undefined) {
+      return compared === 0;
     }
   }
 

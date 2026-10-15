@@ -1,12 +1,14 @@
-import {Character, FieldSymbol, Float, Integer, Integer8} from "../types";
+import {Character, DecFloat34, FieldSymbol, Float, Integer, Integer8} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
 import {String} from "../types/string";
+import {decFloat34Result, isDecFloat34Operand, toDecimal} from "./_decfloat";
+import {subtractDecimal} from "../types/_decimal";
 
 export function minus(left: INumeric | ICharacter | string | Integer8 | number | Integer | Float | FieldSymbol,
                       right: INumeric | ICharacter | string | Integer8 | number | Integer | Float | FieldSymbol):
-  Integer | Integer8 | Float {
+  Integer | Integer8 | Float | DecFloat34 {
 
   if (left instanceof FieldSymbol) {
     if (left.getPointer() === undefined) {
@@ -20,6 +22,10 @@ export function minus(left: INumeric | ICharacter | string | Integer8 | number |
       throw new Error("GETWA_NOT_ASSIGNED");
     }
     return minus(left, right.getPointer());
+  }
+
+  if (isDecFloat34Operand(left) || isDecFloat34Operand(right)) {
+    return decFloat34Result(subtractDecimal(toDecimal(left), toDecimal(right)));
   }
 
   if (left instanceof Integer && right instanceof Integer) {

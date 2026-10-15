@@ -1,15 +1,18 @@
-import {Character, FieldSymbol, Float, Hex, Integer, Integer8} from "../types";
+import {Character, DecFloat34, FieldSymbol, Float, Hex, Integer, Integer8} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {String} from "../types/string";
 import {parse} from "./_parse";
+import {decFloat34Result, isDecFloat34Operand, toDecimal} from "./_decfloat";
+import {addDecimal} from "../types/_decimal";
 
 function isIntegerCharacter(value: String | Character): boolean {
   return value.get().trim().length > 0 && Number.isInteger(Number(value.get()));
 }
 
 export function add(left: INumeric | ICharacter | string | number | Float | Integer | Hex | FieldSymbol,
-                    right: INumeric | ICharacter | string | number  | Float | Integer | Hex | FieldSymbol): Integer | Integer8 | Float {
+                    right: INumeric | ICharacter | string | number  | Float | Integer | Hex | FieldSymbol):
+  Integer | Integer8 | Float | DecFloat34 {
 
   if (left instanceof Integer && right instanceof Integer) {
     return new Integer().set(left.get() + right.get());
@@ -20,6 +23,8 @@ export function add(left: INumeric | ICharacter | string | number | Float | Inte
     // Float is getRaw(). It sits after the integer branch on purpose, so that
     // integer arithmetic pays nothing for it.
     return new Float().set(left.getRaw() + right.getRaw());
+  } else if (isDecFloat34Operand(left) || isDecFloat34Operand(right)) {
+    return decFloat34Result(addDecimal(toDecimal(left), toDecimal(right)));
   } else if (typeof left === "number" && typeof right === "number"
       && Number.isInteger(left) && Number.isInteger(right)) {
     return new Integer().set(left + right);
