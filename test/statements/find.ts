@@ -900,6 +900,24 @@ space:    subrc=0 offset=0
 c(10):    subrc=0 offset=0`);
   });
 
+  it("regex anchors \\A and \\z", async () => {
+    const code = `
+DATA lv_input TYPE string VALUE \`ztest\`.
+FIND REGEX '\\A[A-Za-z0-9_]+\\z' IN lv_input.
+WRITE / |anchors \\\\A \\\\z: sy-subrc = { sy-subrc }|.
+FIND REGEX '^[A-Za-z0-9_]+$' IN lv_input.
+WRITE / |anchors ^ $:   sy-subrc = { sy-subrc }|.
+FIND REGEX '\\A[A-Za-z0-9_]+\\z' IN \`Aztestz\`.
+WRITE / |literal A..z:  sy-subrc = { sy-subrc }|.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`anchors \\A \\z: sy-subrc = 0
+anchors ^ $:   sy-subrc = 0
+literal A..z:  sy-subrc = 0`);
+  });
+
   it("FIND RESULTS, IN SECTION OFFSET, offsets count from the start", async () => {
     const code = `
       TYPES: BEGIN OF ty_submatch,
