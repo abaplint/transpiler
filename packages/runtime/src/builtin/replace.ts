@@ -28,9 +28,10 @@ function dereference(input: string | ICharacter | FieldSymbol | undefined): stri
 }
 
 /** with sub the text is inserted as it is, a replacer function is never read as a pattern;
- *  with regex or pcre $1, $& and the like refer to the match */
+ *  with regex or pcre $1, $& and the like refer to the match, and a backslash takes the next
+ *  character literally */
 function substitute(val: string, search: RegExp, wi: string, literal: boolean): string {
-  return literal ? val.replace(search, () => wi) : val.replace(search, wi);
+  return literal ? val.replace(search, () => wi) : val.replace(search, ABAPRegExp.convertReplacement(wi));
 }
 
 export function replace(input: IReplaceInput) {
@@ -70,9 +71,9 @@ export function replace(input: IReplaceInput) {
   }
 
   if (typeof regexInput === "string") {
-    sub = new RegExp(ABAPRegExp.convert(regexInput), "g");
+    sub = ABAPRegExp.create(ABAPRegExp.convert(regexInput), "g");
   } else if (regexInput) {
-    sub = new RegExp(ABAPRegExp.convert(regexInput.get()), "g");
+    sub = ABAPRegExp.create(ABAPRegExp.convert(regexInput.get()), "g");
   }
 
   const offset = position(input.off);

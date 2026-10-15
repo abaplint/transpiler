@@ -1,9 +1,15 @@
 
-import {DecFloat34, Float} from "../types";
+import {Float} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {exactNumericFunction} from "./_exact";
+import {fracDecimal} from "../types/_decimal";
 
 export function frac(input: {val: number | string | ICharacter | INumeric}) {
+  const exact = exactNumericFunction(input.val, fracDecimal);
+  if (exact !== undefined) {
+    return exact;
+  }
   let num_in: number | undefined = undefined;
   let ret = 0;
   let pre = "0.";
@@ -13,8 +19,6 @@ export function frac(input: {val: number | string | ICharacter | INumeric}) {
     num_in = parseFloat(input.val);
   } else if (input.val instanceof Float) {
     num_in = input.val.getCalculationValue();
-  } else if (input.val instanceof DecFloat34) {
-    num_in = input.val.getRaw();
   } else {
     num_in = parseFloat(input.val.get().toString());
   }
@@ -27,9 +31,7 @@ export function frac(input: {val: number | string | ICharacter | INumeric}) {
     ret = parseFloat(pre + numSplit[1]);
   }
 
-  if (input.val instanceof DecFloat34) {
-    return new DecFloat34().set(ret);
-  } else if (input.val instanceof Float) {
+  if (input.val instanceof Float) {
     return new Float().set(ret);
   } else {
     return ret;

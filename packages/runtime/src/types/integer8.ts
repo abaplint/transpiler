@@ -12,6 +12,7 @@ import {HexUInt8} from "./hex_uint8";
 import {DecFloat34} from "./decfloat34";
 import {Time} from "./time";
 import {FieldSymbol} from "./field_symbol";
+import {roundToBigInt} from "./_decimal";
 
 const digits = new RegExp(/^\s*-?\+?\d+\.?\d* *$/i);
 
@@ -55,7 +56,10 @@ export class Integer8 {
     } else if (value instanceof Date) {
 // d is converted to the number of days since 01.01.0001, not the YYYYMMDD digits
       this.value = BigInt(value.getNumeric());
-    } else if (value instanceof Float || value instanceof DecFloat34) {
+    } else if (value instanceof DecFloat34) {
+// exact, getRaw() would go through a double
+      this.value = roundToBigInt(value.getDecimal());
+    } else if (value instanceof Float) {
       this.set(roundHalfAwayFromZero(value.getRaw()));
     } else if (value instanceof FieldSymbol) {
 // dispatch on the type the field symbol points to, get() would only give its plain value

@@ -423,4 +423,19 @@ WRITE / replace( val = \`${val}\` sub = \`${sub}\` with = \`${wi}\` ).`);
     expect(out).to.equal("a[b]c");
   });
 
+  it("replace(), pcre, the replacement reads $0 and a backslash", async () => {
+    const code = `
+DATA result TYPE string.
+result = replace( val = 'a.b' pcre = '([.])' with = '\\\\$1' occ = 0 ).
+WRITE / result.
+result = replace( val = 'a.b' pcre = '[.]' with = '<$0>' occ = 0 ).
+WRITE / result.
+result = replace( val = 'a.b' pcre = '[.]' with = '\\$' occ = 0 ).
+WRITE / result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("a\\.b\na<.>b\na$b");
+  });
+
 });

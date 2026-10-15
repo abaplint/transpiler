@@ -66,4 +66,18 @@ ENDIF.`;
     expect(abap.console.get()).to.equal(`yes`);
   });
 
+  it("matches(), Unicode property and the whole text", async () => {
+    const code = `
+IF matches( val = '8' pcre = '\\p{N}' ) = abap_true.
+  WRITE / 'digit'.
+ENDIF.
+IF matches( val = 'ab' pcre = 'a|b' ) = abap_false.
+  WRITE / 'not whole'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("digit\nnot whole");
+  });
+
 });

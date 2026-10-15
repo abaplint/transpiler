@@ -37,6 +37,77 @@ export class ABAPRegExp {
     return ret;
   }
 
+  /** A JavaScript regular expression for an ABAP pattern; Unicode properties like \p{L} need the u flag */
+  public static create(pattern: string, flags: string): RegExp {
+    return new RegExp(pattern, /\\[pP]\{/.test(pattern) ? flags + "u" : flags);
+  }
+
+  /** The replacement text of a regex replacement in JavaScript notation: $0 and $& are the match, $1 to $9
+   * a submatch, a backslash takes the next character literally, and any other $ is a dollar sign */
+  public static convertReplacement(input: string): string {
+    let ret = "";
+    for (let i = 0; i < input.length; i++) {
+      const c = input[i];
+      const next = input[i + 1];
+      if (c === "\\" && next !== undefined) {
+        ret += next === "$" ? "$$" : next;
+        i++;
+      } else if (c === "$" && (next === "0" || next === "&")) {
+        ret += "$&";
+        i++;
+      } else if (c === "$" && next !== undefined && "123456789`'".includes(next)) {
+        ret += c + next;
+        i++;
+      } else if (c === "$" && next === "{" && /^\{\d+\}/.test(input.substring(i + 1))) {
+        const digits = /^\{(\d+)\}/.exec(input.substring(i + 1))![1];
+        ret += digits === "0" ? "$&" : "$" + digits;
+        i += digits.length + 2;
+      } else if (c === "$") {
+        ret += "$$";
+      } else {
+        ret += c;
+      }
+    }
+    return ret;
+  }
+
+  /** Extended mode: white space outside a character class is ignored and # starts a comment to the end of the line */
+  public static removeExtended(pattern: string): string {
+    let ret = "";
+    let inClass = false;
+    for (let i = 0; i < pattern.length; i++) {
+      const c = pattern[i];
+      if (c === "\\" && i + 1 < pattern.length) {
+        ret += c + pattern[i + 1];
+        i++;
+      } else if (inClass) {
+        ret += c;
+        if (c === "]") {
+          inClass = false;
+        }
+      } else if (c === "[") {
+        inClass = true;
+        ret += c;
+        // a ] right after [ or [^ is a character, not the end of the class
+        if (pattern[i + 1] === "^") {
+          ret += "^";
+          i++;
+        }
+        if (pattern[i + 1] === "]") {
+          ret += "]";
+          i++;
+        }
+      } else if (c === "#") {
+        while (i + 1 < pattern.length && pattern[i + 1] !== "\n") {
+          i++;
+        }
+      } else if (/\s/.test(c) === false) {
+        ret += c;
+      }
+    }
+    return ret;
+  }
+
   public static escapeRegExp(text: string) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#]/g, "\\$&");
   }
@@ -53,6 +124,9 @@ export class ABAPRegExp {
     }
 
     let ignoreCase = options.ignoringCase === true ? "i" : "";
+    let multiLine = "m";
+    let dotAll = "";
+    let extended = false;
     const allOccurrences = options.all === true ? "g" : "";
 
     let r = options.regex!;
@@ -72,16 +146,30 @@ export class ABAPRegExp {
       if (obj.mv_ignore_case.get() === "X") {
         ignoreCase = 'i';
       }
+      // a regex from create_pcre( ) carries its options: the anchors match at line breaks only with
+      // enable_multiline, the dot matches a line break only with dot_all, and extended is the default
+      // @ts-ignore
+      if (obj.mv_pcre?.get() === "X") {
+        // @ts-ignore
+        multiLine = obj.mv_multiline?.get() === "X" ? "m" : "";
+        // @ts-ignore
+        dotAll = obj.mv_dot_all?.get() === "X" ? "s" : "";
+        // @ts-ignore
+        extended = obj.mv_extended?.get() === "X";
+      }
     } else if (typeof r !== "string") {
       throw new Error("getRegex(), unexpected input");
     }
 
     r = ABAPRegExp.convert(r);
+    if (extended === true) {
+      r = ABAPRegExp.removeExtended(r);
+    }
 
     if (r.length === 0 && options.all === true) {
       throw new Error("getRegex(), zero length input");
     }
 
-    return new RegExp(r, "m" + ignoreCase + allOccurrences);
+    return ABAPRegExp.create(r, multiLine + dotAll + ignoreCase + allOccurrences);
   }
 }
