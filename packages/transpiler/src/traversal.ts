@@ -179,6 +179,11 @@ export class Traversal {
     return this.file.getFilename();
   }
 
+  /** source position attached to raised exceptions as EXTRA_CX, read by CX_ROOT->GET_SOURCE_POSITION */
+  public buildExtraCX(node: abaplint.INode): string {
+    return `{"INTERNAL_FILENAME": "${this.getFilename()}","INTERNAL_LINE": ${node.getFirstToken().getStart().getRow()}}`;
+  }
+
   public getFile(): abaplint.ABAPFile {
     return this.file;
   }
@@ -328,7 +333,7 @@ export class Traversal {
   }
 
   public prefixAndName(t: abaplint.Token, filename?: string): string {
-    let name = t.getStr().toLowerCase();
+    let name = t.getStr().toLowerCase().replace(/^!/, "");
 
     if (filename && this.getCurrentObject().getABAPFileByName(filename) === undefined) {
       // the prefix is from a different object

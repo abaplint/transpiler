@@ -635,8 +635,12 @@ try {
     const unique1 = await (new abap.Classes['CX_ABAP_MESSAGE_DIGEST']()).constructor_();
     unique1.EXTRA_CX = {"INTERNAL_FILENAME": "zfoobar.prog.abap","INTERNAL_LINE": 5};
     throw unique1;
-  } finally {
-    // Transpiler todo: CLEANUP ignored
+  } catch (e) {
+    if (abap.Classes['CX_ROOT'] && e instanceof abap.Classes['CX_ROOT']) {
+      cx.set(e);
+      abap.statements.write(abap.CharacterFactory.get(3, 'foo'),{newLine: true});
+    }
+    throw e;
   }
 } catch (e) {
   if ((abap.Classes['CX_ROOT'] && e instanceof abap.Classes['CX_ROOT'])) {
@@ -860,7 +864,7 @@ CALL FUNCTION 'FUNCTION_EXISTS'
     function_not_exist = 1
     OTHERS             = 2.`;
     const expected = `try {
-  if (abap.FunctionModules['FUNCTION_EXISTS'] === undefined) { if (abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FUNC'.trimEnd()] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_FUNC not found"; } else { throw await new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FUNC'.trimEnd()]().constructor_({function: new abap.types.String().set('FUNCTION_EXISTS')});} }
+  if (abap.FunctionModules['FUNCTION_EXISTS'] === undefined) { if (abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FUNC'.trimEnd()] === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_FUNC not found"; } else { throw Object.assign(await new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FUNC'.trimEnd()]().constructor_({function: new abap.types.String().set('FUNCTION_EXISTS')}), {EXTRA_CX: {"INTERNAL_FILENAME": "zfoobar.prog.abap","INTERNAL_LINE": 2}});} }
   await abap.FunctionModules['FUNCTION_EXISTS']({exporting: {funcname: abap.CharacterFactory.get(8, 'SDFSDFSD')}});
   abap.builtin.sy.get().subrc.set(0);
 } catch (e) {

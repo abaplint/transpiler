@@ -19,6 +19,27 @@ function escapeJsonCharacter(char: string): string {
   return JSON_SHORT[char] ?? "\\u" + char.charCodeAt(0).toString(16).toUpperCase().padStart(4, "0");
 }
 
+// the characters below 0x80 each URL format keeps, all others below 0x80 become %hh
+const URL_KEEP_ALWAYS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const URL_KEPT: {[format: number]: string} = {
+  12: URL_KEEP_ALWAYS + "!$'()*+,-._&/:;=?@",
+  14: URL_KEEP_ALWAYS + "!$'()*+,-._",
+  16: URL_KEEP_ALWAYS + "!$'()*+,-._&/:;=?@~#[]",
+  18: URL_KEEP_ALWAYS + "-._~",
+};
+
+function escapeUrl(val: string, kept: string): string {
+  let ret = "";
+  for (const char of val) {
+    if (char.charCodeAt(0) < 0x80 && kept.includes(char) === false) {
+      ret += "%" + char.charCodeAt(0).toString(16).toUpperCase().padStart(2, "0");
+    } else {
+      ret += char;
+    }
+  }
+  return ret;
+}
+
 export function escape(input: {val: ICharacter | FieldSymbol | string, format: INumeric | number }): String {
   let source: ICharacter | string;
   if (input.val instanceof FieldSymbol) {
@@ -61,7 +82,10 @@ export function escape(input: {val: ICharacter | FieldSymbol | string, format: I
       val = val.replace(/'/g, "&#39;");
       break;
     case 12: // e_url
-      val = encodeURI(val);
+    case 14: // e_url_full
+    case 16: // e_uri
+    case 18: // e_uri_full
+      val = escapeUrl(val, URL_KEPT[format]);
       break;
     case 8: // e_html_js
       val = val.replace(/"/g, "\\\"");

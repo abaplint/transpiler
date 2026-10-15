@@ -1112,6 +1112,39 @@ ENDFORM.`;
     await f(abap);
   });
 
+  it("escaped parameter name and escaped variable in method call", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    METHODS run
+      IMPORTING !foo TYPE abap_bool.
+    METHODS create_2040
+      IMPORTING !bar TYPE abap_bool
+      RETURNING VALUE(ro_reply) TYPE string.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    DATA ro_reply TYPE string.
+    ro_reply = create_2040( !bar = !foo ).
+    WRITE ro_reply.
+  ENDMETHOD.
+
+  METHOD create_2040.
+    ro_reply = |hello{ bar }|.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo_obj TYPE REF TO lcl.
+  CREATE OBJECT lo_obj.
+  lo_obj->run( abap_true ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("helloX");
+  });
+
   it("test escaping of namespace in class constants", async () => {
     const code = `
 CLASS /dsdf/sdf DEFINITION.

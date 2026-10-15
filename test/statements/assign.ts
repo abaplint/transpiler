@@ -806,6 +806,23 @@ ENDIF.`;
     expect(abap.console.getTrimmed()).to.equal("OK");
   });
 
+  it("component deep, missing step", async () => {
+    const code = `
+FIELD-SYMBOLS <test> TYPE data.
+DATA: BEGIN OF foo,
+        BEGIN OF bar,
+          baz TYPE string,
+        END OF bar,
+      END OF foo.
+
+ASSIGN COMPONENT 'NOPE-BAZ' OF STRUCTURE foo TO <test>.
+WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("4");
+  });
+
   it("fs", async () => {
     const code = `
 CLASS lcl_attribute DEFINITION.

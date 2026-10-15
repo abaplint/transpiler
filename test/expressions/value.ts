@@ -78,6 +78,55 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("1\n2");
   });
 
+  it("LINES OF method call, inline DATA", async () => {
+    const code = `
+TYPES ty_tt TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+
+CLASS lcl_foo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS method RETURNING VALUE(rt) TYPE ty_tt.
+ENDCLASS.
+
+CLASS lcl_foo IMPLEMENTATION.
+  METHOD method.
+    rt = VALUE #( ( 1 ) ( 2 ) ).
+  ENDMETHOD.
+ENDCLASS.
+
+FORM run.
+  DATA(tab) = VALUE ty_tt( ( LINES OF lcl_foo=>method( ) ) ).
+  LOOP AT tab INTO DATA(row).
+    WRITE / row.
+  ENDLOOP.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2");
+  });
+
+  it("LINES OF mixed with rows, FROM TO", async () => {
+    const code = `
+TYPES ty_tt TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+FORM run.
+  DATA(src) = VALUE ty_tt( ( 1 ) ( 2 ) ( 3 ) ( 4 ) ).
+  DATA(tab) = VALUE ty_tt( ( 0 ) ( LINES OF src FROM 2 TO 3 ) ( 9 ) ).
+  LOOP AT tab INTO DATA(row).
+    WRITE / row.
+  ENDLOOP.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n2\n3\n9");
+  });
+
   it("table rows, hashed", async () => {
     const code = `
 TYPES: BEGIN OF ty,
