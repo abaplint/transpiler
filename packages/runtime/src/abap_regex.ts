@@ -19,6 +19,21 @@ export class ABAPRegExp {
 
     ret = ret.replace("[[:space:]]", "\\s");
 
+    // buffer anchors, note that the "m" flag is set, so ^ and $ cannot be used
+    // https://help.sap.com/doc/abapdocu_750_index_htm/7.50/en-US/abenregex_search.htm
+    ret = ret.replace(/\\[\s\S]/g, (m) => {
+      switch (m) {
+        case "\\A":
+          return "(?<![\\s\\S])";
+        case "\\z":
+          return "(?![\\s\\S])";
+        case "\\Z":
+          return "(?=\\n*(?![\\s\\S]))";
+        default:
+          return m;
+      }
+    });
+
     return ret;
   }
 
