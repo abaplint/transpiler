@@ -2,8 +2,14 @@
 import {Float} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {exactNumericFunction} from "./_exact";
+import {absDecimal} from "../types/_decimal";
 
 export function abs(input: {val: number | string | ICharacter | INumeric}) {
+  const exact = exactNumericFunction(input.val, absDecimal);
+  if (exact !== undefined) {
+    return exact;
+  }
   let num_in: number | undefined = undefined;
   if (typeof input.val === "number") {
     num_in = input.val;

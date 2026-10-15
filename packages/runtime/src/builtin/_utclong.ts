@@ -119,7 +119,9 @@ function decimalText(input: NumberInput): string {
     return value.get().toString();
   } else if (value instanceof Integer) {
     return value.get().toString();
-  } else if (value instanceof Float || value instanceof DecFloat34) {
+  } else if (value instanceof DecFloat34) {
+    return value.toText();
+  } else if (value instanceof Float) {
     return decimalText(value.getRaw());
   } else if (value instanceof Character || value instanceof String) {
     return value.get().trim();

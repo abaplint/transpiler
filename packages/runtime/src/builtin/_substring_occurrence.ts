@@ -5,6 +5,7 @@ import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {position} from "./_position";
 import {find} from "./find";
+import {ABAPRegExp} from "../abap_regex";
 
 export interface ISubstringSearchInput {
   val: ICharacter | FieldSymbol | string,
@@ -61,7 +62,7 @@ export function substringOccurrence(input: ISubstringSearchInput): {val: string,
   }
 
   const insensitive = input.case !== undefined && initial(input.case);
-  const matches = [...val.matchAll(new RegExp(regex, insensitive ? "gi" : "g"))];
+  const matches = [...val.matchAll(ABAPRegExp.create(regex, insensitive ? "gi" : "g"))];
   if (occ < 0) {
     occ = matches.length + occ + 1;
   }

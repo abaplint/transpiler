@@ -2,6 +2,7 @@ import {alphaIn, alphaOut} from "./alpha";
 import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Integer, Packed, Structure, Table} from "./types";
 import {ICharacter} from "./types/_character";
 import {INumeric} from "./types/_numeric";
+import {decimalToFixed} from "./types/_decimal";
 
 type options = {
   timestamp?: string,
@@ -16,18 +17,6 @@ type options = {
   alphaInContext?: any,
   align?: "left" | "right",
 };
-
-/** DECIMALS for a decimal number: its decimal digits are rounded, half away
- * from zero, the way ABAP rounds commercially - 2.675 gives 2.68, where
- * toFixed( ) on the nearest binary float gives 2.67 */
-function decimalsOfDecimal(value: number, decimals: number): string {
-  const shift = (x: number, places: number) => {
-    const [mantissa, exponent] = (x + "").split("e");
-    return Number(mantissa + "e" + (Number(exponent || 0) + places));
-  };
-  const rounded = shift(Math.round(shift(Math.abs(value), decimals)), -decimals);
-  return (value < 0 && rounded !== 0 ? "-" : "") + rounded.toFixed(decimals);
-}
 
 export function templateFormatting(source: ICharacter | INumeric | number | string, options?: options): string {
   let text = "";
@@ -45,13 +34,11 @@ export function templateFormatting(source: ICharacter | INumeric | number | stri
   } else if (source instanceof Character) {
     text = source.getTrimEnd();
   } else if (source instanceof DecFloat34) {
-    const raw = source.getRaw();
+    // exact, the value has up to 34 digits
     if (options?.decimals !== undefined) {
-      text = decimalsOfDecimal(raw, options.decimals);
-    } else if (Number.isInteger(raw)) {
-      text = raw.toFixed(0);
+      text = decimalToFixed(source.getDecimal(), options.decimals);
     } else {
-      text = raw + "";
+      text = source.toText();
     }
   } else if (source instanceof Float) {
     const raw = source.getRaw();

@@ -45,7 +45,7 @@ export function count(input: countInput) {
   }
 
   if (val !== "") {
-    const res = val.match(new RegExp(reg, options));
+    const res = val.match(ABAPRegExp.create(reg, options));
     if (res) {
       found = res.length;
     }

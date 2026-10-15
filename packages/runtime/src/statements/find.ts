@@ -90,6 +90,11 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
     let temp: RegExpExecArray | null;
     // eslint-disable-next-line no-cond-assign
     while(temp = s.exec(blah)) {
+      if (options.byteMode && temp.index % 2 === 1) {
+        // in byte mode a match starts at a byte, not between the two hex digits of one
+        s.lastIndex = temp.index + 1;
+        continue;
+      }
       matches.push(temp);
       if (temp.index === s.lastIndex) {
         s.lastIndex++;
@@ -99,6 +104,11 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
       }
     }
   }
+
+  // offsets count from the start of the data object, also when the search starts in a section,
+  // and in byte mode they count bytes
+  const position = (index: number) => ((sectionOffset || 0) + index) / (options.byteMode ? 2 : 1);
+  const size = (length: number) => length / (options.byteMode ? 2 : 1);
 
   if (options.submatches) {
     for (let index = 0; index < options.submatches.length; index++) {
@@ -124,8 +134,8 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
       });
 
       match.get().line.set((m as any).line || 0);
-      match.get().offset.set(m.index);
-      match.get().length.set(m[0].length);
+      match.get().offset.set(position(m.index));
+      match.get().length.set(size(m[0].length));
 
       const submatch = new Structure({offset: new Integer(), length: new Integer()});
       for (let i = 1; i < m.length; i++) {
@@ -135,9 +145,9 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
           submatch.get().length.set(0);
         } else {
 // @ts-ignore
-          submatch.get().offset.set(m.index + m[0].indexOf(m[i]));
+          submatch.get().offset.set(position(m.index + m[0].indexOf(m[i])));
 // @ts-ignore
-          submatch.get().length.set(m[i].length);
+          submatch.get().length.set(size(m[i].length));
         }
         match.get().submatches.append(submatch);
       }
@@ -160,14 +170,7 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
   }
 
   if (matches[0]?.index !== undefined) {
-    let val = matches[0].index;
-    if (sectionOffset) {
-      val += sectionOffset;
-    }
-    if (options.byteMode) {
-      val = val / 2;
-    }
-    options.offset?.set(val);
+    options.offset?.set(position(matches[0].index));
   }
 
   if (options?.count) {
@@ -177,7 +180,7 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
   }
 
   if (options?.length && matches && matches[0]) {
-    options.length?.set(matches[0][0].length);
+    options.length?.set(size(matches[0][0].length));
   } else {
 //    options.length?.clear();
   }

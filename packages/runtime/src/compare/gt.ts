@@ -3,11 +3,20 @@ import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Hex,
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {Integer} from "../types/integer";
+import {compareDecFloat34} from "../operators/_decfloat";
 
 
 export function gt(
   left: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | HashedTable | Integer8,
   right: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | HashedTable | Integer8): boolean {
+
+  if (left instanceof DecFloat34 || right instanceof DecFloat34) {
+    // exact, getRaw() would compare the nearest doubles
+    const compared = compareDecFloat34(left, right);
+    if (compared !== undefined) {
+      return compared > 0;
+    }
+  }
 
   if (right instanceof Integer) {
     if (left instanceof Integer) {
