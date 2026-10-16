@@ -143,4 +143,31 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("class attribute between two method calls", async () => {
+    const code = setup + `
+CLASS lcl_holder DEFINITION.
+  PUBLIC SECTION.
+    DATA sy TYPE REF TO lif_sy.
+    METHODS constructor.
+    METHODS me_ref RETURNING VALUE(ro_holder) TYPE REF TO lcl_holder.
+ENDCLASS.
+CLASS lcl_holder IMPLEMENTATION.
+  METHOD constructor.
+    sy = NEW lcl_sy( ).
+  ENDMETHOD.
+  METHOD me_ref.
+    ro_holder = me.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo_holder TYPE REF TO lcl_holder.
+  lo_holder = NEW #( ).
+  WRITE lo_holder->me_ref( )->sy->language( )->value.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("E");
+  });
+
 });
