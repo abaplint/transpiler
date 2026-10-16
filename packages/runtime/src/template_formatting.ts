@@ -120,12 +120,12 @@ export function templateFormatting(source: ICharacter | INumeric | number | stri
       }
     } else if (options.width && options.pad) {
       if (options.align === "right") {
-        text = text.trimEnd().padStart(options.width, options.pad);
+        text = text.padStart(options.width, options.pad);
       } else {
-        text = text.trimEnd().padEnd(options.width, options.pad);
+        text = text.padEnd(options.width, options.pad);
       }
     } else if (options.width) {
-      text = text.trimEnd().padEnd(options.width, " ");
+      text = text.padEnd(options.width, " ");
     } else if (options.decimals !== undefined && source instanceof Integer) {
       text = source.get().toFixed(options.decimals);
     } else if (options.decimals !== undefined && source instanceof Float) {
