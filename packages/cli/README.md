@@ -8,6 +8,21 @@ Call `abap_transpile` on the command line, see example in
 
 https://github.com/larshp/abap-advent-2020/blob/main/package.json#L8
 
+Shared factory functions for repeated composite type constructors are enabled by
+default. Each factory call creates a fresh ABAP value. To preserve inline
+constructor output, set `options.sharedTypeFactories` to `false` in
+`abap_transpile.json`:
+
+```json
+{
+  "options": {
+    "sharedTypeFactories": false
+  }
+}
+```
+
+Omit the option or set it to `true` to use shared factories.
+
 ## Output layout
 
 The CLI writes generated project files into `output_folder/project/`. All

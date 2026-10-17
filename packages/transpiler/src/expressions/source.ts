@@ -1,4 +1,4 @@
-import {AbstractType, Expressions, Nodes} from "@abaplint/core";
+import {AbstractType, BasicTypes, Expressions, Nodes} from "@abaplint/core";
 import {AttributeChainTranspiler, ComponentChainTranspiler, CondBodyTranspiler, FieldChainTranspiler, StringTemplateTranspiler, SwitchBodyTranspiler, TypeNameOrInfer} from ".";
 import {Chunk} from "../chunk";
 import {ConstantTranspiler} from "./constant";
@@ -6,7 +6,6 @@ import {CorrespondingBodyTranspiler} from "./corresponding_body";
 import {FilterBodyTranspiler} from "./filter_body";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {ReduceBodyTranspiler} from "./reduce_body";
-import {TranspileTypes} from "../transpile_types";
 import {Traversal} from "../traversal";
 import {LetTranspiler} from "./let";
 import {ValueBodyTranspiler} from "./value_body";
@@ -203,7 +202,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
           ret.appendChunk(new ValueBodyTranspiler().transpile(typ, valueBody, traversal));
         } else {
           const context = new TypeNameOrInfer().findType(typ, traversal);
-          ret.appendString(TranspileTypes.toType(context));
+          ret.appendString(traversal.toType(context));
         }
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "CORRESPONDING") {
         const typ = node.findDirectExpression(Expressions.TypeNameOrInfer);
@@ -265,10 +264,10 @@ export class SourceTranspiler implements IExpressionTranspiler {
         if (inferType === undefined) {
           throw new Error("transpiler: REF # todo, lookupInferred, " + node.concatTokens());
         }
-        const typ = TranspileTypes.toType(inferType);
-        if (typ.startsWith("new abap.types.DataReference(") === false) {
+        if (!(inferType instanceof BasicTypes.DataReference)) {
           throw new Error("transpiler: REF # unexpected type");
         }
+        const typ = traversal.toType(inferType);
         ret.append(`abap.statements.getReference(${typ}, `, c, traversal);
         post.append(")", c, traversal);
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr().toUpperCase() === "BIT") { // todo, this will not work in the general case

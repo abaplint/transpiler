@@ -1,7 +1,6 @@
 import {Expressions, Nodes} from "@abaplint/core";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {TranspileTypes} from "../transpile_types";
 import {TargetTranspiler} from "./target";
 import {LetTranspiler} from "./let";
 import {FieldSymbolTranspiler} from "../statements";
@@ -233,7 +232,7 @@ export class ReduceBodyTranspiler {
     }
 
     return {
-      beforeLoop: [TranspileTypes.declare(variable), `${counterName}.set(${traversal.traverse(source).getCode()});`],
+      beforeLoop: [traversal.declare(variable), `${counterName}.set(${traversal.traverse(source).getCode()});`],
       open: "while (true) {",
       preBody,
       postBody,
@@ -256,7 +255,7 @@ export class ReduceBodyTranspiler {
         throw new Error(`ReduceBodyTranspiler: variable ${fieldName} not found`);
       }
       const target = Traversal.prefixVariable(fieldName);
-      ret.appendString(TranspileTypes.declare(variable) + "\n");
+      ret.appendString(traversal.declare(variable) + "\n");
       const source = init.findDirectExpression(Expressions.Source);
       if (source) {
         ret.appendString(`${target}.set(${traversal.traverse(source).getCode()});\n`);

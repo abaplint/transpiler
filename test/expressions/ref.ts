@@ -104,4 +104,26 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("g\nI");
   });
 
+  it("structure and table", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         a TYPE i,
+       END OF ty.
+TYPES ty_tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA ls TYPE ty.
+DATA lr TYPE REF TO ty.
+DATA lt TYPE ty_tab.
+DATA lr_tab TYPE REF TO ty_tab.
+ls-a = 2.
+APPEND ls TO lt.
+lr = REF #( ls ).
+WRITE / lr->a.
+lr_tab = REF #( lt ).
+WRITE / lines( lr_tab->* ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2\n1");
+  });
+
 });

@@ -3,7 +3,17 @@ import {execFileSync} from "child_process";
 import {existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync} from "fs";
 import {tmpdir} from "os";
 import * as path from "path";
+import * as sourceMap from "source-map";
+import * as abaplint from "@abaplint/core";
+import {Transpiler} from "../packages/transpiler/src";
+import type {ITranspilerConfig} from "../packages/cli/src/types";
 import {libraryNames, libraryRegistry} from "../packages/cli/src/libraries";
+
+// Load from the CLI package directory so its transpiler dependency resolves
+// through the package's own node_modules during the in-process integration test.
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const collectObjectFiles = (require(path.resolve("packages/cli/build/write_objects")) as
+  typeof import("../packages/cli/src/write_objects")).collectObjectFiles;
 
 describe("Library output names", () => {
   it("derives stable names or uses an explicit override", () => {
@@ -107,7 +117,8 @@ describe("CLI grouped output", () => {
     libs,
     write_source_map: maps,
     write_unit_tests: true,
-    options: {addCommonJS: true, setup: undefined as {filename: string, postFunction: string} | undefined},
+    options: {addCommonJS: true, sharedTypeFactories: false,
+      setup: undefined as {filename: string, postFunction: string} | undefined},
   });
   const build = (settings: object) => {
     write("abap_transpile.json", JSON.stringify(settings));
@@ -115,6 +126,52 @@ describe("CLI grouped output", () => {
   };
   const run = (module: string) => execFileSync(process.execPath, [module], {cwd: folder, encoding: "utf8", timeout: 30000});
   const read = (file: string) => readFileSync(path.join(folder, "nested/output", file), "utf8");
+
+  it("maps retained factories through the CLI program preamble", async () => {
+    const fields = Array.from({length: 20}, (_, i) => "field_" + i + " TYPE c LENGTH 40");
+    const programSource = [
+      "TYPES: BEGIN OF ty_shared,",
+      ...fields.map(field => "  " + field + ","),
+      "END OF ty_shared.",
+      "DATA first TYPE ty_shared.",
+      "DATA second TYPE ty_shared.",
+      "WRITE first-field_0.",
+    ].join("\n");
+    const file = {filename: "zmap.prog.abap", contents: programSource, relative: "src"};
+    const registry = new abaplint.Registry().addFiles([new abaplint.MemoryFile(file.filename, file.contents)]);
+    const transpiled = await new Transpiler({sharedTypeFactories: true, addCommonJS: true})
+      .run(registry, undefined, new Map([[file.filename, "project"]]));
+    const config: ITranspilerConfig = {
+      input_folder: "src",
+      output_folder: "nested/output",
+      write_source_map: true,
+      options: {sharedTypeFactories: true, addCommonJS: true},
+    };
+    const artifacts = collectObjectFiles(
+      transpiled.objects as unknown as Parameters<typeof collectObjectFiles>[0], config, [file]);
+    const program = artifacts.find(artifact => artifact.path.endsWith("project/zmap.prog.mjs"))!;
+    const mapArtifact = artifacts.find(artifact => artifact.path.endsWith("project/zmap.prog.mjs.map"))!;
+    expect(program.contents).to.include("function $t_");
+    const map = JSON.parse(mapArtifact.contents);
+    const generatedLine = program.contents.split("\n").findIndex(line => line.includes("let first = $t_"));
+    const consumer = await new sourceMap.SourceMapConsumer(map);
+    const original = consumer.originalPositionFor({line: generatedLine + 1, column: 0});
+    expect(original.line).to.equal(programSource.split("\n").findIndex(line => line.startsWith("DATA first")) + 1);
+
+    const flatRegistry = new abaplint.Registry().addFiles([new abaplint.MemoryFile(file.filename, file.contents)]);
+    const flatOutput = await new Transpiler({sharedTypeFactories: true, addCommonJS: true}).run(flatRegistry);
+    const flatConfig: ITranspilerConfig = {
+      input_folder: ["src"],
+      output_folder: "nested/output",
+      write_source_map: true,
+      options: {sharedTypeFactories: true, addCommonJS: true},
+    };
+    const flatArtifacts = collectObjectFiles(
+      flatOutput.objects as unknown as Parameters<typeof collectObjectFiles>[0], flatConfig, [file]);
+    expect(flatArtifacts.map(artifact => artifact.path)).to.include("zmap.prog.mjs");
+    expect(flatArtifacts.map(artifact => artifact.path)).to.include("zmap.prog.mjs.map");
+    expect(flatArtifacts.find(artifact => artifact.path === "zmap.prog.mjs")!.contents).to.include("function $t_");
+  });
 
   beforeEach(() => {
     folder = mkdtempSync(path.join(tmpdir(), "abaplint-layout-"));
@@ -128,7 +185,7 @@ describe("CLI grouped output", () => {
     rmSync(folder, {recursive: true, force: true});
   });
 
-  it("executes project modules and tests across two libraries with maps and binary assets", () => {
+  it("executes project modules and tests across two libraries with maps and binary assets", async () => {
     write("deps/base/src/#demo#cl_base.clas.abap", [
       "CLASS /demo/cl_base DEFINITION PUBLIC.",
       "PUBLIC SECTION. CLASS-DATA value TYPE i VALUE 7. ENDCLASS.",
@@ -144,10 +201,26 @@ describe("CLI grouped output", () => {
       "PUBLIC SECTION. CLASS-METHODS run. ENDCLASS.",
       "CLASS zcl_app IMPLEMENTATION. METHOD run. lcl_helper=>run( ). ENDMETHOD. ENDCLASS.",
     ].join("\n"));
-    write("src/zcl_app.clas.locals_def.abap",
-      "CLASS lcl_helper DEFINITION. PUBLIC SECTION. CLASS-METHODS run. ENDCLASS.");
-    write("src/zcl_app.clas.locals_imp.abap",
-      "CLASS lcl_helper IMPLEMENTATION. METHOD run. ASSERT zcl_middle=>value = 7. ENDMETHOD. ENDCLASS.");
+    const localFields = Array.from({length: 12}, (_, i) => "field_" + i + " TYPE c LENGTH 40");
+    write("src/zcl_app.clas.locals_def.abap", [
+      "CLASS lcl_helper DEFINITION.",
+      "PUBLIC SECTION.",
+      "TYPES: BEGIN OF ty_shared,",
+      ...localFields.map(field => "  " + field + ","),
+      "END OF ty_shared.",
+      "DATA item TYPE ty_shared.",
+      "CLASS-METHODS run.",
+      "ENDCLASS.",
+    ].join("\n"));
+    write("src/zcl_app.clas.locals_imp.abap", [
+      "CLASS lcl_helper IMPLEMENTATION.",
+      "METHOD run.",
+      "DATA local_a TYPE ty_shared.",
+      "DATA local_b TYPE ty_shared.",
+      "ASSERT zcl_middle=>value = 7.",
+      "ENDMETHOD.",
+      "ENDCLASS.",
+    ].join("\n"));
     write("src/zcl_app.clas.testclasses.abap", [
       "CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT.",
       "PRIVATE SECTION. METHODS test FOR TESTING. ENDCLASS.",
@@ -177,7 +250,16 @@ describe("CLI grouped output", () => {
     write("deps/middle/src/zfunctions.fugr.lzfunctionstop.abap", "FUNCTION-POOL zfunctions.");
     write("deps/middle/src/zfunctions.fugr.saplzfunctions.abap", "INCLUDE lzfunctionstop.\nINCLUDE lzfunctionsuxx.");
     write("deps/middle/src/zfunctions.fugr.zlayout_test.abap", "FUNCTION zlayout_test. ASSERT 1 = 1. ENDFUNCTION.");
-    write("extra/zapp.prog.abap", "zcl_app=>run( ).\nCALL FUNCTION 'ZLAYOUT_TEST'.");
+    const programSource = [
+      "TYPES: BEGIN OF ty_shared,",
+      ...Array.from({length: 20}, (_, i) => "  field_" + i + " TYPE c LENGTH 40,"),
+      "END OF ty_shared.",
+      "DATA first TYPE ty_shared.",
+      "DATA second TYPE ty_shared.",
+      "zcl_app=>run( ).",
+      "CALL FUNCTION 'ZLAYOUT_TEST'.",
+    ].join("\n");
+    write("extra/zapp.prog.abap", programSource);
     write("deps/base/src/package.devc.xml", "<abapGit/>");
     write("deps/middle/src/package.devc.xml", "<abapGit/>");
     const settings = config([
@@ -196,10 +278,13 @@ describe("CLI grouped output", () => {
       "  }};",
       "}",
     ].join("\n"));
-    settings.options = {...settings.options, setup: {filename: "./test-setup.mjs", postFunction: "setup"}};
+    settings.options = {...settings.options, sharedTypeFactories: true,
+      setup: {filename: "./test-setup.mjs", postFunction: "setup"}};
     build(settings);
     expect(existsSync(path.join(folder, "nested/output/zapp.prog.mjs"))).to.equal(false);
-    expect(read("project/zapp.prog.mjs")).to.contain('import("../_init.mjs")');
+    const programCode = read("project/zapp.prog.mjs");
+    expect(programCode).to.contain('import("../_init.mjs")');
+    expect(programCode).to.contain("function $t_");
     expect(read("project/zcl_app.clas.mjs")).to.contain('import("../middle/zcl_middle.clas.mjs")');
     expect(read("middle/zcl_middle.clas.mjs")).to.contain('import("../base%25%23/%23demo%23cl_base.clas.mjs")');
     expect(read("init.mjs")).to.contain('./project/zcl_app.clas.mjs');
@@ -209,8 +294,14 @@ describe("CLI grouped output", () => {
     const map = JSON.parse(read("project/zapp.prog.mjs.map"));
     expect(map.file).to.equal("zapp.prog.mjs");
     expect(map.sources).to.deep.equal(["../../../extra/zapp.prog.abap"]);
-    expect(map.sourcesContent).to.deep.equal(["zcl_app=>run( ).\nCALL FUNCTION 'ZLAYOUT_TEST'."]);
+    expect(map.sourcesContent).to.deep.equal([programSource]);
     expect(read("project/zapp.prog.mjs")).to.contain("sourceMappingURL=zapp.prog.mjs.map");
+    const generatedDeclaration = programCode.split("\n").findIndex(line => line.includes("let first = $t_") );
+    const programMap = await new sourceMap.SourceMapConsumer(map);
+    const mappedDeclaration = programMap.originalPositionFor({line: generatedDeclaration + 1, column: 0});
+    expect(mappedDeclaration.line).to.equal(programSource.split("\n").findIndex(line => line.startsWith("DATA first")) + 1);
+    const localsMap = JSON.parse(read("project/zcl_app.clas.locals.mjs.map"));
+    expect(localsMap.sources.some((source: string) => source.endsWith("zcl_app.clas.locals_imp.abap"))).to.equal(true);
     expect(read("project/zfont.smim.mjs")).to.contain("project/zfont.smim.data.woff");
     expect(readFileSync(path.join(folder, "nested/output/project/zfont.smim.data.woff")).equals(bytes)).to.equal(true);
     expect(read("init.mjs")).to.contain("./middle/zfunctions.fugr.mjs");
@@ -233,6 +324,44 @@ describe("CLI grouped output", () => {
     expect(existsSync(path.join(folder, "nested/output/project/zfirst.prog.mjs.map"))).to.equal(false);
     run("nested/output/project/zfirst.prog.mjs");
     run("nested/output/index.mjs");
+  });
+
+  it("enables shared factories by default when the CLI option is omitted", () => {
+    const fields = Array.from({length: 20}, (_, i) => "field_" + i + " TYPE c LENGTH 40");
+    const source = [
+      "TYPES: BEGIN OF ty_shared,",
+      ...fields.map(field => "  " + field + ","),
+      "END OF ty_shared.",
+      "DATA first TYPE ty_shared.",
+      "DATA second TYPE ty_shared.",
+      "ASSERT first-field_0 = second-field_0.",
+    ].join("\n");
+    write("src/zdefault.prog.abap", source);
+    const settings = {...config([], false), input_folder: "src", options: {addCommonJS: true}};
+    build(settings);
+    const generated = read("project/zdefault.prog.mjs");
+    expect(generated).to.contain("function $t_");
+    expect(generated).to.contain("let first = $t_");
+    run("nested/output/project/zdefault.prog.mjs");
+  });
+
+  it("executes flat CLI output with shared factories enabled", () => {
+    const fields = Array.from({length: 20}, (_, i) => "field_" + i + " TYPE c LENGTH 40");
+    const source = [
+      "TYPES: BEGIN OF ty_shared,",
+      ...fields.map(field => "  " + field + ","),
+      "END OF ty_shared.",
+      "DATA first TYPE ty_shared.",
+      "DATA second TYPE ty_shared.",
+      "ASSERT first-field_0 = second-field_0.",
+    ].join("\n");
+    write("src/zflat.prog.abap", source);
+    const settings = {...config([], false), input_folder: "src"};
+    settings.options = {...settings.options, sharedTypeFactories: true};
+    build(settings);
+    const generated = read("project/zflat.prog.mjs");
+    expect(generated).to.contain("function $t_");
+    run("nested/output/project/zflat.prog.mjs");
   });
 
   it("skips identical output and removes tracked modules, maps, and test runners", () => {

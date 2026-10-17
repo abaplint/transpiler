@@ -1,7 +1,6 @@
 import {Nodes, AbstractType, Expressions} from "@abaplint/core";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {TranspileTypes} from "../transpile_types";
 import {FieldAssignmentTranspiler} from "./field_assignment";
 import {SourceTranspiler} from "./source";
 
@@ -21,7 +20,7 @@ export class ValueBodyLineTranspiler {
       return ret.appendString(`.appendLines(${source}${range})`);
     }
 
-    ret.appendString(`.appendThis(${TranspileTypes.toType(rowType)}`);
+    ret.appendString(`.appendThis(${traversal.toType(rowType)}`);
 
     for (const child of line.getChildren()) {
       if (child instanceof Nodes.TokenNode) {

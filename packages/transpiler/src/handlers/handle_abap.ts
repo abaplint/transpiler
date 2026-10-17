@@ -5,6 +5,7 @@ import {Requires} from "../requires";
 import {Rearranger} from "../rearranger";
 import {Chunk} from "../chunk";
 import {OutputLayout, importPath} from "../output_layout";
+import {TypeFactoryRegistry} from "../type_factory_registry";
 
 export class HandleABAP {
   private readonly options: ITranspilerOptions | undefined;
@@ -15,6 +16,8 @@ export class HandleABAP {
 
   public runObject(obj: abaplint.ABAPObject, reg: abaplint.IRegistry): IOutputFile[] {
     let ret: IOutputFile[] = [];
+    const typeFactories = new Map<string, TypeFactoryRegistry>();
+    const sequencedFiles = obj.getSequencedFiles();
 
     if (obj instanceof abaplint.Objects.Program && obj.isInclude() === true) {
       // includes are only compiled along with the programs where its used?
@@ -23,8 +26,26 @@ export class HandleABAP {
 
     const spaghetti = new abaplint.SyntaxLogic(reg, obj).run().spaghetti;
 
-    for (const file of obj.getSequencedFiles()) {
+    if (this.options?.sharedTypeFactories === true) {
+      // Reserve names across every source contributing to each final module
+      // before traversal assigns any helper names (notably merged class locals).
+      for (const file of sequencedFiles) {
+        const filename = file.getFilename().replace(".abap", ".mjs").toLowerCase();
+        const registryKey = filename.replace(/\.clas\.locals_(def|imp)\.mjs$/, ".clas.locals.mjs");
+        let typeFactory = typeFactories.get(registryKey);
+        if (typeFactory === undefined) {
+          typeFactory = new TypeFactoryRegistry(registryKey);
+          typeFactories.set(registryKey, typeFactory);
+        }
+        typeFactory.reserveSource(file.getRaw());
+      }
+    }
+
+    for (const file of sequencedFiles) {
       const chunk = new Chunk();
+      const filename = file.getFilename().replace(".abap", ".mjs").toLowerCase();
+      const registryKey = filename.replace(/\.clas\.locals_(def|imp)\.mjs$/, ".clas.locals.mjs");
+      const typeFactory = typeFactories.get(registryKey);
 
       if (this.options?.addFilenames === true) {
         chunk.appendString("// " + file.getFilename() + "\n");
@@ -36,14 +57,14 @@ export class HandleABAP {
 
       const rearranged = new Rearranger().run(obj.getType(), file.getStructure());
 
-      const contents = new Traversal(spaghetti, file, obj, reg, this.options).traverse(rearranged);
+      const contents = new Traversal(spaghetti, file, obj, reg, this.options, typeFactory).traverse(rearranged);
       chunk.appendChunk(contents);
       chunk.stripLastNewline();
-      chunk.runIndentationLogic(this.options?.ignoreSourceMap);
+      if (this.options?.sharedTypeFactories !== true) {
+        chunk.runIndentationLogic(this.options?.ignoreSourceMap);
+      }
 
       const exports = this.findExports(file.getStructure());
-      const filename = file.getFilename().replace(".abap", ".mjs").toLowerCase();
-
       const output: IOutputFile = {
         object: {
           name: obj.getName(),
@@ -59,6 +80,17 @@ export class HandleABAP {
     }
 
     ret = this.rearrangeClassLocals(obj, ret);
+
+    if (this.options?.sharedTypeFactories === true) {
+      for (const output of ret) {
+        const registry = typeFactories.get(output.filename);
+        const code = registry?.finalize(output.chunk) ?? "";
+        if (code !== "") {
+          output.chunk = new Chunk(code).appendChunk(output.chunk);
+        }
+        output.chunk.runIndentationLogic(this.options?.ignoreSourceMap);
+      }
+    }
 
     if (this.options?.addCommonJS === true) {
       ret.map(output => output.chunk = this.addImportsAndExports(output));

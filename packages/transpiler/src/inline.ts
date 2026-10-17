@@ -1,6 +1,5 @@
 import * as abaplint from "@abaplint/core";
 import {Traversal} from "./traversal";
-import {TranspileTypes} from "./transpile_types";
 import {FieldSymbolTranspiler} from "./statements";
 
 export class InlineDeclarations {
@@ -20,7 +19,7 @@ export class InlineDeclarations {
         throw new Error("InlineDeclarations: no variable found");
       }
 
-      result += TranspileTypes.declare(variable) + "\n";
+      result += traversal.declare(variable) + "\n";
     }
 
 // todo: declare DATA and FSes according to when they appear in the code

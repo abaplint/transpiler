@@ -30,8 +30,10 @@ export class TypeEnumTranspiler implements IStructureTranspiler {
       `"${v}": new abap.types.String()`
     ).join(",\n");
 
-    let ret = `let ${Traversal.prefixVariable(structureName)} = new abap.types.Structure({
-${fields}});\n`;
+    const expression = `new abap.types.Structure({
+${fields}})`;
+    const constructor = _traversal.typeFactories?.register(expression) ?? expression;
+    let ret = `let ${Traversal.prefixVariable(structureName)} = ${constructor};\n`;
 
     for (const v of values) {
       ret += `${Traversal.prefixVariable(structureName)}.get().${v}.set("${v.toUpperCase()}");\n`;

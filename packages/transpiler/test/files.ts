@@ -3,6 +3,9 @@ import {Transpiler} from "../src";
 import * as abaplint from "@abaplint/core";
 import {IFile, ITranspilerOptions} from "../src/types";
 
+const AsyncFunction = Object.getPrototypeOf(async () => undefined).constructor as
+  new (...args: string[]) => (abap: unknown) => Promise<void>;
+
 async function runFiles(files: IFile[]) {
   const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
   const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory);
@@ -414,6 +417,31 @@ ENDINTERFACE.`;
     const output = await runFiles([file1]);
     expect(output.length).to.equal(1);
     expect(output[0].chunk.getCode()).to.include("T000");
+  });
+
+  it("keeps shared DDIC type construction lazy and memoized", async () => {
+    const result = await runResult([{filename: "t000.tabl.xml", contents: t000}], {sharedTypeFactories: true});
+    const code = result.objects[0].chunk.getCode();
+    const calls: string[] = [];
+    const types = new Proxy({}, {
+      get: (_target, name: string | symbol) => class {
+        public constructor(..._args: unknown[]) {
+          calls.push(String(name));
+        }
+      },
+    });
+    const abap = {DDIC: {} as Record<string, {type: () => object}>, types};
+    const run = new AsyncFunction("abap", code);
+    await run(abap);
+    expect(calls).to.deep.equal([]);
+
+    const typeFactory = abap.DDIC.T000.type;
+    const first = typeFactory();
+    expect(calls.length).to.be.greaterThan(0);
+    const callCount = calls.length;
+    const second = typeFactory();
+    expect(second).to.equal(first);
+    expect(calls.length).to.equal(callCount);
   });
 
   it("Global PINF is skipped", async () => {
