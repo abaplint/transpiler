@@ -84,6 +84,17 @@ describe("Running expressions - String templates", () => {
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("WIDTH, keep trailing newline and spaces", async () => {
+    const code = `
+    DATA ch TYPE c LENGTH 1.
+    ch = |\\n|.
+    ASSERT |{ ch WIDTH = 1 }| = |\\n|.
+    ASSERT |{ \`a \` WIDTH = 1 }| = \`a \`.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("integer DECIMALS", async () => {
     const code = `
     DATA out TYPE string.

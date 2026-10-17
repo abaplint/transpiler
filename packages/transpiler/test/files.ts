@@ -461,6 +461,16 @@ ENDINTERFACE.`;
     expect(output.length).to.equal(0);
   });
 
+  it("Global CHKO, CHKC and CHKV are skipped", async () => {
+    const output = await runFiles([
+      {filename: "zchko.chko.json", contents: `{"formatVersion": "1", "header": {"description": "test", "originalLanguage": "en"}}`},
+      {filename: "zchkc.chkc.json", contents: `{"formatVersion": "1", "header": {"description": "test", "originalLanguage": "en"}}`},
+      {filename: "zchkv.chkv.json", contents: `{"formatVersion": "1", "header": {"description": "test", "originalLanguage": "en"}}`},
+    ]);
+
+    expect(output.length).to.equal(0);
+  });
+
   it("populate TADIR", async () => {
     const result = await runResult([
       {filename: "tadir.tabl.xml", contents: tadir},
