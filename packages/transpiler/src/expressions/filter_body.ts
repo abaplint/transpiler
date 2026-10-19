@@ -2,7 +2,6 @@ import {Expressions, Nodes} from "@abaplint/core";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {TypeNameOrInfer} from "./type_name_or_infer";
-import {TranspileTypes} from "../transpile_types";
 import {UniqueIdentifier} from "../unique_identifier";
 import {ComponentChainSimpleTranspiler} from "./component_chain_simple";
 
@@ -19,7 +18,7 @@ export class FilterBodyTranspiler {
     }
     const source = traversal.traverse(sources[0]).getCode();
     const type = new TypeNameOrInfer().findType(typ, traversal);
-    const target = TranspileTypes.toType(type);
+    const target = traversal.toType(type);
     const whereNode = body.findDirectExpression(Expressions.ComponentCond);
     if (whereNode === undefined) {
       throw new Error("FilterBodyTranspiler, WHERE not found");

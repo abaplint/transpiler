@@ -11,6 +11,7 @@
         "compile": "cd packages/runtime && npm run compile && cd ../../ && cd packages/transpiler && npm run compile && cd ../../ && cd packages/cli && npm run compile && cd ../../ && cd packages/database-pg && npm run compile && cd ../../ && cd packages/database-sqlite && npm run compile && cd ../../ && cd packages/database-snowflake && npm run compile && cd ../../ && cd packages/database-hdb && npm run compile && cd ../../ && tsc",
         "performance": "npm run compile && node --expose-gc build/performance/index.js",
         "performance:output": "npm run compile && node --expose-gc build/performance/output_writer.js",
+        "performance:type-factories": "npm run compile && node --expose-gc build/performance/type_factories.js",
         "test": "npm run compile && mocha --timeout 60000 && npm run lint",
         "regression": "node .github/regression/regression.js",
         "link-local": "npm run link:transpiler && npm run link:cli && npm run link:runtime && npm run link:rfc-client-soap-xml && npm run link:database-sqlite && npm run link:database-pg && npm run link:database-snowflake && npm run link:database-hdb",
@@ -46,13 +47,13 @@
     },
     "homepage": "https://github.com/abaplint/transpiler_poc#readme",
     "devDependencies": {
-        "@abaplint/core": "^2.120.80",
+        "@abaplint/core": "^2.120.82",
         "@eslint/compat": "^2.1.1",
         "@eslint/eslintrc": "^3.3.7",
         "@eslint/js": "^9.39.5",
         "@types/chai": "^5.2.3",
         "@types/mocha": "^10.0.10",
-        "@types/node": "^26.6.2",
+        "@types/node": "^26.6.5",
         "@types/sql.js": "^1.4.11",
         "@typescript-eslint/eslint-plugin": "^8.69.0",
         "@typescript-eslint/parser": "^8.69.0",
@@ -68,8 +69,8 @@
         "rimraf": "^6.1.3",
         "snowflake-sdk": "^3.3.0",
         "source-map-support": "^0.5.21",
-        "sql.js": "^1.14.2",
-        "temporal-polyfill": "^1.0.5",
+        "sql.js": "^1.15.0",
+        "temporal-polyfill": "^1.0.6",
         "typescript": "^6.0.3"
     }
 }

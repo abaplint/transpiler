@@ -2,7 +2,6 @@ import {Expressions, Nodes, BasicTypes} from "@abaplint/core";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {TypeNameOrInfer} from "./type_name_or_infer";
-import {TranspileTypes} from "../transpile_types";
 import {ComponentChainTranspiler} from "./component_chain";
 import {UniqueIdentifier} from "../unique_identifier";
 
@@ -14,7 +13,7 @@ export class CorrespondingBodyTranspiler {
       throw new Error("CorrespondingBodyTranspiler, Expected TypeNameOrInfer");
     }
     const type = new TypeNameOrInfer().findType(typ, traversal);
-    let target = TranspileTypes.toType(type);
+    let target = traversal.toType(type);
     let source: Chunk | undefined;
     const isTableType = type instanceof BasicTypes.TableType;
 
@@ -55,7 +54,7 @@ export class CorrespondingBodyTranspiler {
     ret.appendString(`const ${sourceId} = ${source!.getCode()};\n`);
 
     if (isTableType) {
-      const rowTargetType = TranspileTypes.toType(type.getRowType());
+      const rowTargetType = traversal.toType(type.getRowType());
       const sourceRowId = UniqueIdentifier.get();
       const targetRowId = UniqueIdentifier.get();
       ret.appendString(`for (const ${sourceRowId} of ${sourceId}.array()) {\n`);

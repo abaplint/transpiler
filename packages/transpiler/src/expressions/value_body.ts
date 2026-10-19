@@ -6,7 +6,6 @@ import {ValueBodyLineTranspiler} from "./value_body_line";
 import {FieldAssignmentTranspiler} from "./field_assignment";
 import {FieldSymbolTranspiler} from "../statements";
 import {SourceFieldSymbolTranspiler} from "./source_field_symbol";
-import {TranspileTypes} from "../transpile_types";
 import {LetTranspiler} from "./let";
 
 export class ValueBodyTranspiler {
@@ -21,7 +20,7 @@ export class ValueBodyTranspiler {
     const context = new TypeNameOrInfer().findType(typ, traversal);
     if (context instanceof BasicTypes.VoidType || context instanceof BasicTypes.UnknownType) {
       // compile option is runtime error, or it failed during the validation step
-      return new Chunk(TranspileTypes.toType(context));
+      return new Chunk(traversal.toType(context));
     }
 
     let post = "";
@@ -89,7 +88,7 @@ export class ValueBodyTranspiler {
         // note: this is last in the body, so its okay to prepend and postpend
         const pre = `(await (async () => { try { return `;
         ret = new Chunk().appendString(pre + ret.getCode());
-        post += `; } catch (error) { if (abap.isLineNotFound(error)) { return ${TranspileTypes.toType(context)}; } throw error; } })())`;
+        post += `; } catch (error) { if (abap.isLineNotFound(error)) { return ${traversal.toType(context)}; } throw error; } })())`;
       } else {
         throw new Error("ValueBodyTranspiler, unknown " + child.get().constructor.name + " \"" + child.concatTokens()) + "\"";
       }
@@ -230,7 +229,7 @@ export class ValueBodyTranspiler {
         if (variable === undefined) {
           throw new Error("ValueBody FOR todo, variable, " + body.concatTokens());
         }
-        const declare = TranspileTypes.declare(variable);
+        const declare = traversal.declare(variable);
         const counterName = Traversal.prefixVariable(fieldName);
 
         const startSource = counter.findDirectExpression(Expressions.Source);

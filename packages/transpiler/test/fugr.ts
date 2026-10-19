@@ -3,7 +3,7 @@ import * as abaplint from "@abaplint/core";
 import * as sourceMap from "source-map";
 import {Transpiler} from "../src";
 import {UniqueIdentifier} from "../src/unique_identifier";
-import {IFile} from "../src/types";
+import {IFile, ITranspilerOptions} from "../src/types";
 
 // function groups are compiled file by file into one chunk, so they exercise
 // the accumulation logic in HandleFUGR: indentation must run once over the
@@ -95,11 +95,11 @@ ENDFUNCTION.`;
     {filename: "zfgroup.fugr.xml", contents: xml},
   ];
 
-  async function runFugr(inputFiles = files) {
+  async function runFugr(inputFiles = files, options?: ITranspilerOptions) {
     UniqueIdentifier.reset();
     const memory = inputFiles.map(f => new abaplint.MemoryFile(f.filename, f.contents));
     const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory);
-    const res = await new Transpiler().run(reg);
+    const res = await new Transpiler(options).run(reg);
     const fugr = res.objects.find(o => o.object.type === "FUGR");
     expect(fugr).to.not.equal(undefined);
     return fugr!;
@@ -153,6 +153,24 @@ ENDFUNCTION.`;
       expect(orig.source).to.equal(needle.source);
       expect(orig.line).to.equal(needle.line);
     }
+  });
+
+  it("shares constructors across source files in the final function-group module", async () => {
+    const repeated = (name: string) => `FUNCTION ${name}.
+TYPES: BEGIN OF ty_shared,
+  value TYPE i,
+END OF ty_shared.
+DATA item TYPE ty_shared.
+ENDFUNCTION.`;
+    const input = files.map(file => file.filename === "zfgroup.fugr.zfmodule1.abap"
+      ? {...file, contents: repeated("zfmodule1")}
+      : file.filename === "zfgroup.fugr.zfmodule2.abap"
+        ? {...file, contents: repeated("zfmodule2")}
+        : file);
+    const fugr = await runFugr(input, {sharedTypeFactories: true});
+    const code = fugr.chunk.getCode();
+    expect(code.match(/function \$t_/g)?.length).to.equal(1);
+    expect(code.match(/\$t_[\w$]+\(\)/g)?.length).to.be.greaterThan(2);
   });
 
   it("declares inline data in function module scope", async () => {

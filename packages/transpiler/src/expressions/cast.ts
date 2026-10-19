@@ -3,7 +3,6 @@ import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {TypeNameOrInfer} from "./type_name_or_infer";
-import {TranspileTypes} from "../transpile_types";
 
 export class CastTranspiler implements IExpressionTranspiler {
 
@@ -20,7 +19,7 @@ export class CastTranspiler implements IExpressionTranspiler {
       throw new Error("CastTranspiler, TypeNameOrInfer not found");
     }
     const type = new TypeNameOrInfer().findType(tni, traversal);
-    const target = TranspileTypes.toType(type);
+    const target = traversal.toType(type);
 
     const lett = node.findDirectExpression(Expressions.Let);
     if (lett !== undefined) {

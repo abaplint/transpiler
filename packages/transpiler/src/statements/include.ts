@@ -21,7 +21,8 @@ export class IncludeTranspiler implements IStatementTranspiler {
           throw new Error(`Include ${includeName} not found`);
         }
 
-        const sub = new Traversal(traversal.getSpaghetti(), include, traversal.getCurrentObject(), traversal.reg, traversal.options);
+        const sub = new Traversal(traversal.getSpaghetti(), include, traversal.getCurrentObject(), traversal.reg,
+          traversal.options, traversal.typeFactories);
         const rearranged = new Rearranger().run(obj.getType(), include.getStructure());
         const chunk = sub.traverse(rearranged);
 //        console.dir(chunk.getCode());
