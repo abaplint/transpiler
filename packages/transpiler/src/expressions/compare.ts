@@ -72,7 +72,7 @@ export class CompareTranspiler implements IExpressionTranspiler {
       const s1 = traversal.traverse(sources[1]);
       return new Chunk().appendString(pre + "abap.compare.in(").join([s0, s1]).appendString(")");
     } else if (sources.length === 2) {
-      const operator = traversal.traverse(node.findFirstExpression(Expressions.CompareOperator));
+      const operator = traversal.traverse(node.findDirectExpression(Expressions.CompareOperator));
       const s0 = traversal.traverse(sources[0]);
       const s1 = traversal.traverse(sources[1]);
       return new Chunk().appendString(pre + "abap.compare.").appendChunk(operator).appendString("(").join([s0, s1]).appendString(")");
