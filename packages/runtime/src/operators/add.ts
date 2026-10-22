@@ -1,9 +1,9 @@
-import {Character, DecFloat34, FieldSymbol, Float, Hex, Integer, Integer8} from "../types";
+import {Character, DecFloat34, FieldSymbol, Float, Hex, Integer, Integer8, Packed} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {String} from "../types/string";
 import {parse} from "./_parse";
-import {decFloat34Result, isDecFloat34Operand, toDecimal} from "./_decfloat";
+import {decFloat34Result, isDecFloat34Operand, isPackedCalculation, packedDecimals, packedResult, toDecimal} from "./_decfloat";
 import {addDecimal} from "../types/_decimal";
 
 function isIntegerCharacter(value: String | Character): boolean {
@@ -12,7 +12,7 @@ function isIntegerCharacter(value: String | Character): boolean {
 
 export function add(left: INumeric | ICharacter | string | number | Float | Integer | Hex | FieldSymbol,
                     right: INumeric | ICharacter | string | number  | Float | Integer | Hex | FieldSymbol):
-  Integer | Integer8 | Float | DecFloat34 {
+  Integer | Integer8 | Float | DecFloat34 | Packed {
 
   if (left instanceof Integer && right instanceof Integer) {
     return new Integer().set(left.get() + right.get());
@@ -65,6 +65,10 @@ export function add(left: INumeric | ICharacter | string | number | Float | Inte
       throw new Error("GETWA_NOT_ASSIGNED");
     }
     return add(left, right.getPointer());
+  }
+
+  if (isPackedCalculation(left, right)) {
+    return packedResult(addDecimal(toDecimal(left), toDecimal(right)), packedDecimals(left, right));
   }
 
   const ret = new Float().set(parse(left) + parse(right));
