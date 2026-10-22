@@ -10,6 +10,9 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     const ret = new Chunk();
 
     for (const c of node.getChildren()) {
+      if (c.get() instanceof abaplint.Statements.EndClass) {
+        ret.appendString(this.buildPartiallyImplementedStubs(node, traversal));
+      }
       ret.appendChunk(traversal.traverse(c));
       if (c.get() instanceof abaplint.Statements.ClassImplementation) {
         ret.appendString(this.buildConstructor(node.getFirstStatement(), traversal));
@@ -28,6 +31,112 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
   }
 
 ///////////////////////////////
+
+  /** INTERFACES ... PARTIALLY IMPLEMENTED: a system generates every interface
+   * method the class does not implement as an empty method, so a test double
+   * answers initial values for the methods the test does not care about.
+   * Emits those stubs with the body an empty METHOD/ENDMETHOD gets, under the
+   * name the implementation would have had */
+  private buildPartiallyImplementedStubs(node: abaplint.Nodes.StructureNode, traversal: Traversal): string {
+    const token = node.findFirstExpression(abaplint.Expressions.ClassName)?.getFirstToken();
+    if (token === undefined) {
+      return "";
+    }
+    const cdef = traversal.getClassDefinition(token);
+    const scope = traversal.findCurrentScopeByToken(token);
+    if (cdef === undefined || scope === undefined) {
+      return "";
+    }
+    const partial = cdef.getImplementing().filter(i => i.partial === true);
+    if (partial.length === 0) {
+      return "";
+    }
+
+    // the methods the class implements itself, by the emitted name
+    const implemented = new Set<string>();
+    for (const m of node.findAllStatements(abaplint.Statements.MethodImplementation)) {
+      const name = m.findFirstExpression(abaplint.Expressions.MethodName)?.getFirstToken().getStr();
+      if (name !== undefined) {
+        implemented.add(Traversal.escapeNamespace(name.replace("~", "$").toLowerCase())!);
+      }
+    }
+
+    // an interface a superclass implements is inherited, with the real implementations,
+    // a stub for one of its methods would override those
+    const inherited = new Set<string>();
+    let sup = cdef.getSuperClass();
+    while (sup !== undefined) {
+      const sdef = traversal.findClassDefinition(sup, scope);
+      for (const name of this.findIncludedInterfaces(sdef?.getImplementing().map(i => i.name) || [], scope, traversal)) {
+        inherited.add(name);
+      }
+      sup = sdef?.getSuperClass();
+    }
+
+    let ret = "";
+    for (const name of this.findIncludedInterfaces(partial.map(i => i.name), scope, traversal)) {
+      if (inherited.has(name)) {
+        continue;
+      }
+      const intf = traversal.findInterfaceDefinition(name, scope);
+      if (intf === undefined) {
+        continue;
+      }
+      const prefix = Traversal.escapeNamespace(intf.getName().toLowerCase()) + "$";
+      for (const m of intf.getMethodDefinitions().getAll()) {
+        const emitted = prefix + Traversal.escapeNamespace(m.getName().toLowerCase());
+        if (implemented.has(emitted)) {
+          continue;
+        }
+        implemented.add(emitted);
+        ret += this.buildEmptyMethod(emitted, m, token.getStr().toLowerCase(), traversal);
+      }
+    }
+    return ret;
+  }
+
+  /** the interfaces, upper cased, with the interfaces they include, recursively */
+  private findIncludedInterfaces(names: string[], scope: abaplint.ISpaghettiScopeNode, traversal: Traversal): string[] {
+    const ret: string[] = [];
+    const queue = [...names];
+    while (queue.length > 0) {
+      const name = queue.shift()!.toUpperCase();
+      if (ret.includes(name)) {
+        continue;
+      }
+      ret.push(name);
+      const intf = traversal.findInterfaceDefinition(name, scope);
+      queue.push(...(intf?.getImplementing().map(i => i.name) || []));
+    }
+    return ret;
+  }
+
+  /** the same shape MethodImplementationTranspiler and EndMethodTranspiler emit for
+   * an empty METHOD/ENDMETHOD: the RETURNING parameter is declared and returned,
+   * sy-subrc is cleared when the method has classic exceptions */
+  private buildEmptyMethod(emitted: string, m: abaplint.IMethodDefinition, className: string, traversal: Traversal): string {
+    const unique = m.getParameters().getAll().length > 0 ? "INPUT" : "";
+    let body = "";
+    if (m.getExceptions().length > 0) {
+      body += "abap.builtin.sy.get().subrc.set(0);\n";
+    }
+    const returning = m.getParameters().getReturning();
+    if (returning !== undefined) {
+      const name = Traversal.prefixVariable(returning.getName().toLowerCase());
+      body += "let " + name + " = " + traversal.toType(returning.getType()) + ";\n";
+      body += "return " + name + ";\n";
+    }
+
+    let ret = "";
+    if (m.isStatic() === true) {
+      // in ABAP static methods can be called with instance arrows, "->"
+      ret += "async " + emitted + "(" + unique + ") {\n" +
+        "return " + Traversal.escapeNamespace(className) + "." + emitted + "(" + unique + ");\n" +
+        "}\n" + "static ";
+    }
+    ret += "async " + emitted + "(" + unique + ") {\n" + body + "}\n";
+    return ret;
+  }
 
   private hasConstructor(node: abaplint.Nodes.StructureNode): boolean {
     for (const m of node.findAllStatements(abaplint.Statements.MethodImplementation)) {

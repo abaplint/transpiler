@@ -640,4 +640,148 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("moo");
   });
 
+
+  // INTERFACES ... PARTIALLY IMPLEMENTED: a system generates the methods the class
+  // does not implement as empty methods, the transpiler emitted nothing for them
+  it("PARTIALLY IMPLEMENTED, unimplemented method returns initial", async () => {
+    const code = `
+INTERFACE lif.
+  METHODS a.
+  METHODS b RETURNING VALUE(r) TYPE i.
+ENDINTERFACE.
+
+CLASS ltd DEFINITION FOR TESTING.
+  PUBLIC SECTION.
+    INTERFACES lif PARTIALLY IMPLEMENTED.
+ENDCLASS.
+
+CLASS ltd IMPLEMENTATION.
+  METHOD lif~a.
+    WRITE 'a'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lif.
+  DATA v TYPE i.
+  CREATE OBJECT lo TYPE ltd.
+  lo->a( ).
+  v = lo->b( ).
+  WRITE v.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("a0");
+  });
+
+  it("PARTIALLY IMPLEMENTED, exporting, static, classic exceptions and included interface", async () => {
+    const code = `
+INTERFACE lif_inner.
+  METHODS inner RETURNING VALUE(r) TYPE string.
+ENDINTERFACE.
+
+INTERFACE lif.
+  INTERFACES lif_inner.
+  METHODS exp EXPORTING e TYPE string.
+  METHODS exc EXCEPTIONS oops.
+  CLASS-METHODS stat RETURNING VALUE(r) TYPE i.
+ENDINTERFACE.
+
+CLASS ltd DEFINITION FOR TESTING.
+  PUBLIC SECTION.
+    INTERFACES lif PARTIALLY IMPLEMENTED.
+ENDCLASS.
+
+CLASS ltd IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO ltd.
+  DATA str TYPE string.
+  CREATE OBJECT lo.
+  str = lo->lif_inner~inner( ).
+  ASSERT str IS INITIAL.
+  lo->lif~exp( IMPORTING e = str ).
+  ASSERT str IS INITIAL.
+  sy-subrc = 4.
+  lo->lif~exc( EXCEPTIONS oops = 1 ).
+  WRITE sy-subrc.
+  WRITE ltd=>lif~stat( ).
+  WRITE lo->lif~stat( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("000");
+  });
+
+  it("PARTIALLY IMPLEMENTED, interface inherited from the superclass keeps its implementation", async () => {
+    const code = `
+INTERFACE lif_inner.
+  METHODS inner RETURNING VALUE(r) TYPE i.
+ENDINTERFACE.
+
+INTERFACE lif.
+  INTERFACES lif_inner.
+  METHODS b RETURNING VALUE(r) TYPE i.
+ENDINTERFACE.
+
+CLASS lcl_base DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif_inner.
+ENDCLASS.
+
+CLASS lcl_base IMPLEMENTATION.
+  METHOD lif_inner~inner.
+    r = 7.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS ltd DEFINITION INHERITING FROM lcl_base FOR TESTING.
+  PUBLIC SECTION.
+    INTERFACES lif PARTIALLY IMPLEMENTED.
+ENDCLASS.
+
+CLASS ltd IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lif.
+  CREATE OBJECT lo TYPE ltd.
+  WRITE lo->lif_inner~inner( ).
+  WRITE lo->b( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("70");
+  });
+
+  it("without PARTIALLY IMPLEMENTED the missing method is still reported", async () => {
+    const code = `
+INTERFACE lif.
+  METHODS a.
+  METHODS b RETURNING VALUE(r) TYPE i.
+ENDINTERFACE.
+
+CLASS ltd DEFINITION FOR TESTING.
+  PUBLIC SECTION.
+    INTERFACES lif.
+ENDCLASS.
+
+CLASS ltd IMPLEMENTATION.
+  METHOD lif~a.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    let message = "";
+    try {
+      await run(code);
+    } catch (e: any) {
+      message = e.message;
+    }
+    expect(message).to.contain("implement_methods");
+  });
+
 });
