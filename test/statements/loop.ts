@@ -1582,4 +1582,101 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("1\n2\n3");
   });
 
+  it("LOOP USING KEY, a sorted secondary key over a REF TO data component", async () => {
+    const code = `
+TYPES: BEGIN OF ty, id TYPE i, ref TYPE REF TO data, END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH NON-UNIQUE SORTED KEY k COMPONENTS ref.
+DATA ls TYPE ty.
+DATA r1 TYPE REF TO i.
+DATA r2 TYPE REF TO i.
+DATA r3 TYPE REF TO i.
+CREATE DATA r1.
+CREATE DATA r2.
+CREATE DATA r3.
+ls-id = 1. ls-ref = r1. INSERT ls INTO TABLE tab.
+ls-id = 2. ls-ref = r2. INSERT ls INTO TABLE tab.
+ls-id = 3. ls-ref = r3. INSERT ls INTO TABLE tab.
+LOOP AT tab INTO ls USING KEY k WHERE ref = r2.
+  WRITE / ls-id.
+ENDLOOP.
+LOOP AT tab INTO ls WHERE ref = r2.
+  WRITE / ls-id.
+ENDLOOP.
+READ TABLE tab INTO ls WITH KEY k COMPONENTS ref = r2.
+WRITE / sy-subrc.
+WRITE / ls-id.
+LOOP AT tab INTO ls USING KEY k WHERE ref = r1.
+  WRITE / ls-id.
+ENDLOOP.
+LOOP AT tab INTO ls USING KEY k WHERE ref = r3.
+  WRITE / ls-id.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2\n2\n0\n2\n1\n3");
+  });
+
+  it("LOOP USING KEY, a sorted secondary key over a REF TO object component", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  TYPES: BEGIN OF ty, id TYPE i, ref TYPE REF TO lcl, END OF ty.
+  DATA tab TYPE STANDARD TABLE OF ty WITH NON-UNIQUE SORTED KEY k COMPONENTS ref.
+  DATA ls TYPE ty.
+  DATA r1 TYPE REF TO lcl.
+  DATA r2 TYPE REF TO lcl.
+  CREATE OBJECT r1.
+  CREATE OBJECT r2.
+  ls-id = 1. ls-ref = r1. INSERT ls INTO TABLE tab.
+  ls-id = 2. ls-ref = r2. INSERT ls INTO TABLE tab.
+  LOOP AT tab INTO ls USING KEY k WHERE ref = r2.
+    WRITE / ls-id.
+  ENDLOOP.
+  LOOP AT tab INTO ls WHERE ref = r2.
+    WRITE / ls-id.
+  ENDLOOP.
+  READ TABLE tab INTO ls WITH KEY k COMPONENTS ref = r2.
+  WRITE / sy-subrc.
+  WRITE / ls-id.
+  LOOP AT tab INTO ls USING KEY k WHERE ref = r1.
+    WRITE / ls-id.
+  ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2\n2\n0\n2\n1");
+  });
+
+  it("LOOP USING KEY, a sorted secondary key over a REF TO data component, same target twice", async () => {
+    const code = `
+TYPES: BEGIN OF ty, id TYPE i, ref TYPE REF TO data, END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH NON-UNIQUE SORTED KEY k COMPONENTS ref.
+DATA ls TYPE ty.
+DATA r1 TYPE REF TO i.
+DATA r2 TYPE REF TO i.
+CREATE DATA r1.
+CREATE DATA r2.
+ls-id = 1. ls-ref = r1. INSERT ls INTO TABLE tab.
+ls-id = 2. ls-ref = r2. INSERT ls INTO TABLE tab.
+ls-id = 3. ls-ref = r2. INSERT ls INTO TABLE tab.
+DATA count TYPE i.
+DATA sum TYPE i.
+LOOP AT tab INTO ls USING KEY k WHERE ref = r2.
+  count = count + 1.
+  sum = sum + ls-id.
+ENDLOOP.
+WRITE / count.
+WRITE / sum.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    // the order of the two rows is the order of the index, not under test here
+    expect(abap.console.get()).to.equal("2\n5");
+  });
+
 });

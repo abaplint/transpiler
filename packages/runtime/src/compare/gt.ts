@@ -1,10 +1,28 @@
 import {parse} from "../operators/_parse";
-import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Hex, HexUInt8, Integer8, Structure, Table, XString} from "../types";
+import {ABAPObject, Character, DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Hex, HexUInt8, Integer8, Structure, Table, XString} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {Integer} from "../types/integer";
 import {compareDecFloat34} from "../operators/_decfloat";
 
+// references have no value to order by, but a sorted key over a REF TO component
+// is allowed and needs one order the sort and the binary search agree on: every
+// target gets a number on first use, which stands for the rest of its life
+const referenceIds = new WeakMap<object, number>();
+let nextReferenceId = 1;
+
+/** the position of a reference target in the identity order; an unbound reference is first */
+function referenceId(target: object | undefined): number {
+  if (target === undefined || target === null) {
+    return 0;
+  }
+  let id = referenceIds.get(target);
+  if (id === undefined) {
+    id = nextReferenceId++;
+    referenceIds.set(target, id);
+  }
+  return id;
+}
 
 export function gt(
   left: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | HashedTable | Integer8,
@@ -59,6 +77,12 @@ export function gt(
       throw new Error("GETWA_NOT_ASSIGNED");
     }
     return gt(left, right.getPointer());
+  }
+
+  if (left instanceof DataReference && right instanceof DataReference) {
+    return referenceId(left.getPointer()) > referenceId(right.getPointer());
+  } else if (left instanceof ABAPObject && right instanceof ABAPObject) {
+    return referenceId(left.get()) > referenceId(right.get());
   }
 
   if (left instanceof Table || right instanceof Table || left instanceof HashedTable || right instanceof HashedTable) {
