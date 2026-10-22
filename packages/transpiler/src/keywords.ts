@@ -22,4 +22,9 @@ export const DEFAULT_KEYWORDS = new Set<string>([
 // in JavaScript and legal ABAP names. "super" is NOT in this list on purpose -
 // the emitted code uses the JS `super` for ABAP's `super->method( )`, and
 // escaping it turns that call into `$super.get().method()`
-  "case", "with"]);
+  "case", "with",
+// not a JS reserved word, but the name the emitted code reaches the runtime
+// through (`abap.types`, `abap.statements`): an ABAP variable named `abap`
+// would be emitted as `let abap` and shadow it - a SyntaxError at top level or
+// a temporal-dead-zone ReferenceError inside a method
+  "abap"]);
