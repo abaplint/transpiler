@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {runSingle} from "./_utils";
-import {Transpiler} from "../src";
+import {Transpiler, TranspilerValidationError} from "../src";
 import * as abaplint from "@abaplint/core";
 
 describe("Validation", () => {
@@ -48,6 +48,38 @@ describe("Validation", () => {
       expect.fail();
     } catch (e) {
       expect(e.message).to.contain("allowed");
+    }
+  });
+
+  it("throws TranspilerValidationError carrying the issues", async () => {
+    const reg = new abaplint.Registry().addFile(
+      new abaplint.MemoryFile("zfoobar.prog.abap", "WRITE foowrite."));
+
+    try {
+      await new Transpiler().run(reg);
+      expect.fail();
+    } catch (e) {
+      expect(e).to.be.instanceof(TranspilerValidationError);
+      expect(e).to.be.instanceof(Error);
+      expect(e.issues.length).to.equal(1);
+      expect(e.issues[0].getFilename()).to.equal("zfoobar.prog.abap");
+      expect(e.issues[0].getStart().getRow()).to.equal(1);
+      expect(e.message).to.equal(e.issues[0].getKey() + ", " + e.issues[0].getMessage() + ", zfoobar.prog.abap:1");
+      expect(e.message).to.match(/^[a-z_]+, .+, zfoobar\.prog\.abap:1$/);
+    }
+  });
+
+  it("joins several issues with a newline", async () => {
+    const reg = new abaplint.Registry().addFile(
+      new abaplint.MemoryFile("zfoobar.prog.abap", "WRITE foowrite.\nWRITE barwrite."));
+
+    try {
+      await new Transpiler().run(reg);
+      expect.fail();
+    } catch (e) {
+      expect(e).to.be.instanceof(TranspilerValidationError);
+      expect(e.issues.length).to.equal(2);
+      expect(e.message.split("\n")).to.have.lengthOf(2);
     }
   });
 });

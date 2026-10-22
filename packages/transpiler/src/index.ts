@@ -26,6 +26,23 @@ export {OutputLayout, OutputFolders, importPath} from "./output_layout";
 export {config, ITranspilerOptions, IFile, IProgress, IOutputFile, IOutput,
   UnknownTypesEnum, Chunk, DatabaseSetupResult};
 
+/** Thrown by Transpiler.run() when the registry does not validate. The message
+ * is every issue formatted as "key, text, filename:row", one per line; the
+ * issues themselves are kept so a host can show them without parsing the text. */
+export class TranspilerValidationError extends Error {
+  public readonly issues: readonly abaplint.Issue[];
+
+  public constructor(issues: readonly abaplint.Issue[]) {
+    const messages = issues.map(i => i.getKey() + ", " +
+      i.getMessage() + ", " +
+      i.getFilename() + ":" +
+      i.getStart().getRow());
+    super(messages.join("\n"));
+    this.name = "TranspilerValidationError";
+    this.issues = issues;
+  }
+}
+
 export class Transpiler {
   private readonly options: ITranspilerOptions | undefined;
 
@@ -118,11 +135,7 @@ export class Transpiler {
   protected validate(reg: abaplint.IRegistry): void {
     const issues = new Validation(this.options).run(reg);
     if (issues.length > 0) {
-      const messages = issues.map(i => i.getKey() + ", " +
-        i.getMessage() + ", " +
-        i.getFilename() + ":" +
-        i.getStart().getRow());
-      throw new Error(messages.join("\n"));
+      throw new TranspilerValidationError(issues);
     }
   }
 
