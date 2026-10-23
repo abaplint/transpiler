@@ -23,6 +23,24 @@ constructor output, set `options.sharedTypeFactories` to `false` in
 
 Omit the option or set it to `true` to use shared factories.
 
+`WRITE '@KERNEL <js>'.` emits the literal as raw JavaScript, which runs with
+the privileges of the host. To restrict it, set `options.kernel.allow` to the
+list of regular expressions (matched case insensitively against the object
+name) that may use it; a `@KERNEL` literal in any other object fails the
+transpile with the issue `kernel_not_allowed`, naming file and line. Libraries
+are allowed the same way, by listing the object name patterns they use, for
+example `"^CL_"` and `"^KERNEL_"` for open-abap-core:
+
+```json
+{
+  "options": {
+    "kernel": {"allow": ["^CL_", "^KERNEL_", "^ZCL_MY_FFI$"]}
+  }
+}
+```
+
+Omit `kernel` to allow `@KERNEL` everywhere (the default).
+
 ## Output layout
 
 The CLI writes generated project files into `output_folder/project/`. All
