@@ -81,6 +81,16 @@ export class Integer implements INumeric {
     return this;
   }
 
+  /** The result of + - * DIV MOD on integer operands, not checked against the range of i:
+   * the calculation type depends on the target as well, f = i * i is computed in f on a
+   * system, and the runtime does not know the target here. The check is made where the
+   * result is moved to an i, see set( ) */
+  public static arithmeticResult(value: number): Integer {
+    const n = new Integer();
+    n.value = value;
+    return n;
+  }
+
   private fromText(text: string): number {
     try {
       return toInteger(text);
@@ -96,10 +106,17 @@ export class Integer implements INumeric {
       throw new Error("Changing constant");
     }
 
+    const before = this.value;
     if (typeof value === "number") {
       this.value = roundHalfAwayFromZero(value);
     } else if (value instanceof Integer) {
-      this.set(value.get());
+      // an i always fits; a value outside the range is the result of + - * in calculation
+      // type i, which a system raises as CX_SY_ARITHMETIC_OVERFLOW, 2147483647 + 1 does not wrap
+      const number = value.get();
+      if (number > MAX_INTEGER || number < MIN_INTEGER) {
+        throwError("CX_SY_ARITHMETIC_OVERFLOW");
+      }
+      this.value = number;
     } else if (value instanceof Character) {
       this.value = this.fromText(value.get());
     } else if (value instanceof String) {
@@ -133,11 +150,14 @@ export class Integer implements INumeric {
     } else {
       this.set(value.get());
     }
-/*
-    if (this.value > 2147483647 || this.value < -2147483648) {
-      throwError("CX_SY_ARITHMETIC_OVERFLOW");
+
+    // a value that does not fit into i raises, a system does not wrap: 10000000000 from a
+    // p, an f, an int8 or text is CX_SY_CONVERSION_OVERFLOW, and the target keeps its value.
+    // An x is read as the last four bytes in two's complement above, which always fits
+    if (this.value > MAX_INTEGER || this.value < MIN_INTEGER) {
+      this.value = before;
+      throwError("CX_SY_CONVERSION_OVERFLOW");
     }
-*/
     return this;
   }
 
