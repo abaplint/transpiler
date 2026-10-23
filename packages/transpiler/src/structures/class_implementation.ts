@@ -32,11 +32,10 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
 
 ///////////////////////////////
 
-  /** INTERFACES ... PARTIALLY IMPLEMENTED: a system generates every interface
-   * method the class does not implement as an empty method, so a test double
-   * answers initial values for the methods the test does not care about.
-   * Emits those stubs with the body an empty METHOD/ENDMETHOD gets, under the
-   * name the implementation would have had */
+  /** INTERFACES ... PARTIALLY IMPLEMENTED: the interface methods the test class
+   * does not implement exist on a system and raise CX_SY_DYN_CALL_ILLEGAL_METHOD
+   * when called. Emits a method of that shape under the name the implementation
+   * would have had, so the call ends in that exception and not in a TypeError */
   private buildPartiallyImplementedStubs(node: abaplint.Nodes.StructureNode, traversal: Traversal): string {
     const token = node.findFirstExpression(abaplint.Expressions.ClassName)?.getFirstToken();
     if (token === undefined) {
@@ -89,7 +88,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
           continue;
         }
         implemented.add(emitted);
-        ret += this.buildEmptyMethod(emitted, m, token.getStr().toLowerCase(), traversal);
+        ret += this.buildNotImplementedMethod(emitted, m, token.getStr().toLowerCase(), intf.getName(), token, traversal);
       }
     }
     return ret;
@@ -111,21 +110,21 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     return ret;
   }
 
-  /** the same shape MethodImplementationTranspiler and EndMethodTranspiler emit for
-   * an empty METHOD/ENDMETHOD: the RETURNING parameter is declared and returned,
-   * sy-subrc is cleared when the method has classic exceptions */
-  private buildEmptyMethod(emitted: string, m: abaplint.IMethodDefinition, className: string, traversal: Traversal): string {
+  /** the method a system generates for an interface method the test class leaves
+   * out under PARTIALLY IMPLEMENTED: calling it raises CX_SY_DYN_CALL_ILLEGAL_METHOD
+   * (ABAP keyword documentation, INTERFACES - PARTIALLY IMPLEMENTED), the class and
+   * method named, instead of a JavaScript TypeError no CATCH sees */
+  private buildNotImplementedMethod(emitted: string, m: abaplint.IMethodDefinition, className: string,
+                                    interfaceName: string, token: abaplint.Token, traversal: Traversal): string {
     const unique = m.getParameters().getAll().length > 0 ? "INPUT" : "";
-    let body = "";
-    if (m.getExceptions().length > 0) {
-      body += "abap.builtin.sy.get().subrc.set(0);\n";
-    }
-    const returning = m.getParameters().getReturning();
-    if (returning !== undefined) {
-      const name = Traversal.prefixVariable(returning.getName().toLowerCase());
-      body += "let " + name + " = " + traversal.toType(returning.getType()) + ";\n";
-      body += "return " + name + ";\n";
-    }
+    const exception = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_METHOD'", token, true);
+    const classUpper = className.toUpperCase();
+    const methodUpper = interfaceName.toUpperCase() + "~" + m.getName().toUpperCase();
+    const notFound = `CX_SY_DYN_CALL_ILLEGAL_METHOD not found, ${classUpper}->${methodUpper} is not implemented`;
+    const body = `if (${exception} === undefined) { throw new Error("${notFound}"); }\n` +
+      `throw await new ${exception}().constructor_({` +
+      `classname: new abap.types.String().set("${classUpper}"), ` +
+      `methodname: new abap.types.String().set("${methodUpper}")});\n`;
 
     let ret = "";
     if (m.isStatic() === true) {
