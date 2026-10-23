@@ -239,4 +239,126 @@ WRITE / foo[ index ].`;
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("KEY primary_key COMPONENTS", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         key TYPE i,
+         val TYPE i,
+       END OF ty.
+DATA itab TYPE SORTED TABLE OF ty WITH UNIQUE KEY key.
+INSERT VALUE #( key = 2 val = 20 ) INTO TABLE itab.
+INSERT VALUE #( key = 1 val = 10 ) INTO TABLE itab.
+WRITE / itab[ KEY primary_key COMPONENTS key = 2 ]-val.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("20");
+  });
+
+  it("KEY primary_key INDEX", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         key TYPE i,
+         val TYPE i,
+       END OF ty.
+DATA itab TYPE SORTED TABLE OF ty WITH UNIQUE KEY key.
+INSERT VALUE #( key = 2 val = 20 ) INTO TABLE itab.
+INSERT VALUE #( key = 1 val = 10 ) INTO TABLE itab.
+WRITE / itab[ KEY primary_key INDEX 2 ]-val.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("20");
+  });
+
+  it("KEY primary_key COMPONENTS, hashed", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         key TYPE i,
+         val TYPE i,
+       END OF ty.
+DATA itab TYPE HASHED TABLE OF ty WITH UNIQUE KEY key.
+INSERT VALUE #( key = 1 val = 20 ) INTO TABLE itab.
+INSERT VALUE #( key = 2 val = 10 ) INTO TABLE itab.
+WRITE / itab[ KEY primary_key COMPONENTS key = 2 ]-val.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("10");
+  });
+
+  it("KEY secondary, INDEX and COMPONENTS", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         key TYPE i,
+         val TYPE i,
+       END OF ty.
+DATA itab TYPE STANDARD TABLE OF ty WITH EMPTY KEY WITH NON-UNIQUE SORTED KEY sk COMPONENTS val.
+APPEND VALUE #( key = 1 val = 20 ) TO itab.
+APPEND VALUE #( key = 2 val = 10 ) TO itab.
+APPEND VALUE #( key = 3 val = 30 ) TO itab.
+WRITE / itab[ KEY sk INDEX 1 ]-key.
+WRITE / itab[ KEY sk COMPONENTS val = 20 ]-key.
+WRITE / itab[ KEY sk val = 10 ]-key.
+WRITE / itab[ 1 ]-key.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2\n1\n2\n1");
+  });
+
+  it("KEY secondary INDEX, hashed", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         key TYPE i,
+         val TYPE i,
+       END OF ty.
+DATA itab TYPE HASHED TABLE OF ty WITH UNIQUE KEY key WITH NON-UNIQUE SORTED KEY sk COMPONENTS val.
+INSERT VALUE #( key = 1 val = 20 ) INTO TABLE itab.
+INSERT VALUE #( key = 2 val = 10 ) INTO TABLE itab.
+WRITE / itab[ KEY sk INDEX 1 ]-key.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+  it("KEY secondary, line_index is the line in the secondary key", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         key TYPE i,
+         val TYPE i,
+       END OF ty.
+DATA itab TYPE STANDARD TABLE OF ty WITH EMPTY KEY WITH NON-UNIQUE SORTED KEY sk COMPONENTS val.
+APPEND VALUE #( key = 1 val = 20 ) TO itab.
+APPEND VALUE #( key = 2 val = 10 ) TO itab.
+APPEND VALUE #( key = 3 val = 30 ) TO itab.
+WRITE / line_index( itab[ KEY sk val = 20 ] ).
+WRITE / line_index( itab[ KEY sk val = 99 ] ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2\n0");
+  });
+
+  it("KEY secondary, not found", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         key TYPE i,
+         val TYPE i,
+       END OF ty.
+DATA itab TYPE STANDARD TABLE OF ty WITH EMPTY KEY WITH NON-UNIQUE SORTED KEY sk COMPONENTS val.
+APPEND VALUE #( key = 1 val = 20 ) TO itab.
+WRITE / itab[ KEY sk val = 99 ]-key.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+
+    try {
+      await f(abap);
+      expect.fail();
+    } catch (e) {
+      expect(e.toString()).to.contain("CX_SY_ITAB_LINE_NOT_FOUND");
+    }
+  });
+
 });
