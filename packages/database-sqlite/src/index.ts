@@ -1,20 +1,30 @@
-import initSqlJs, {Database, QueryExecResult, Statement, SqlValue} from "sql.js";
+import initSqlJs, {Database, QueryExecResult, Statement, SqlValue, SqlJsConfig} from "sql.js";
 import {ABAP, DB} from "@abaplint/runtime";
 
 declare const abap: ABAP;
 
+export interface SQLiteDatabaseClientOptions {
+  /** log every statement to the console */
+  trace?: boolean;
+  /** passed to initSqlJs() as is, eg. locateFile or wasmBinary to tell sql.js
+   * where its .wasm is when the page is not served from the site root */
+  sqlJs?: SqlJsConfig;
+}
+
 export class SQLiteDatabaseClient implements DB.DatabaseClient {
   public readonly name = "sqlite";
   private readonly trace: boolean;
+  private readonly sqlJs: SqlJsConfig | undefined;
   private sqlite: Database | undefined = undefined;
   private inTransaction = false;
 
-  public constructor(input?: {trace?: boolean}) {
+  public constructor(input?: SQLiteDatabaseClientOptions) {
     this.trace = input?.trace === true;
+    this.sqlJs = input?.sqlJs;
   }
 
   public async connect(data?: ArrayLike<number> | Buffer | null) {
-    const SQL = await initSqlJs();
+    const SQL = await initSqlJs(this.sqlJs);
     this.sqlite = new SQL.Database(data);
 
     if (abap?.context?.databaseConnections
