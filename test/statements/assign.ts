@@ -1200,4 +1200,103 @@ START-OF-SELECTION.
     expect(abap.console.getTrimmed()).to.equal("4\n4\n4\n4\n0\n0\n0\n0");
   });
 
+  it("ASSIGN of a sorted table to a STANDARD TABLE field symbol is a type conflict", async () => {
+    const code = `
+DATA st TYPE SORTED TABLE OF i WITH UNIQUE KEY table_line.
+FIELD-SYMBOLS <t> TYPE STANDARD TABLE.
+ASSIGN st TO <t>.
+WRITE sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail("expected ASSIGN_TYPE_CONFLICT");
+    } catch(e) {
+      expect(e.toString()).to.contain("ASSIGN_TYPE_CONFLICT");
+    }
+  });
+
+  it("ASSIGN, the table kind of the field symbol against the kind of the source", async () => {
+    const cases: [string, string, boolean][] = [
+      ["HASHED", "STANDARD TABLE", true],
+      ["STANDARD", "SORTED TABLE", true],
+      ["STANDARD", "HASHED TABLE", true],
+      ["SORTED", "HASHED TABLE", true],
+      ["HASHED", "INDEX TABLE", true],
+      ["STANDARD", "STANDARD TABLE", false],
+      ["SORTED", "SORTED TABLE", false],
+      ["HASHED", "HASHED TABLE", false],
+      ["STANDARD", "INDEX TABLE", false],
+      ["SORTED", "INDEX TABLE", false],
+      ["STANDARD", "ANY TABLE", false],
+      ["SORTED", "ANY TABLE", false],
+      ["HASHED", "ANY TABLE", false],
+    ];
+    for (const [source, target, conflict] of cases) {
+      const key = source === "STANDARD" ? "WITH DEFAULT KEY" : "WITH UNIQUE KEY table_line";
+      const code = `
+DATA tab TYPE ${source} TABLE OF i ${key}.
+FIELD-SYMBOLS <t> TYPE ${target}.
+ASSIGN tab TO <t>.
+WRITE sy-subrc.`;
+      const js = await run(code);
+      const f = new AsyncFunction("abap", js);
+      abap = new ABAP({console: new MemoryConsole()});
+      let thrown = "";
+      try {
+        await f(abap);
+      } catch(e) {
+        thrown = e.toString();
+      }
+      if (conflict) {
+        expect(thrown, source + " to " + target).to.contain("ASSIGN_TYPE_CONFLICT");
+      } else {
+        expect(thrown, source + " to " + target).to.equal("");
+        expect(abap.console.get(), source + " to " + target).to.equal("0");
+      }
+    }
+  });
+
+  it("ASSIGN of a dereferenced string to a TYPE i field symbol is an illegal cast", async () => {
+    const code = `
+DATA r TYPE REF TO data.
+FIELD-SYMBOLS <i> TYPE i.
+CREATE DATA r TYPE string.
+ASSIGN r->* TO <i>.
+WRITE sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail("expected ASSIGN_CAST_ILLEGAL_CAST");
+    } catch(e) {
+      expect(e.toString()).to.contain("ASSIGN_CAST_ILLEGAL_CAST");
+    }
+  });
+
+  it("ASSIGN of a dereferenced string to a TYPE any field symbol, and with CASTING, and the same type", async () => {
+    const code = `
+DATA r TYPE REF TO data.
+DATA c TYPE c LENGTH 4.
+FIELD-SYMBOLS <a> TYPE any.
+FIELD-SYMBOLS <i> TYPE i.
+FIELD-SYMBOLS <s> TYPE string.
+CREATE DATA r TYPE string.
+ASSIGN r->* TO <a>.
+WRITE / sy-subrc.
+ASSIGN r->* TO <s>.
+WRITE / sy-subrc.
+ASSIGN c TO <i> CASTING.
+IF <i> IS ASSIGNED.
+  WRITE / 'casting'.
+ENDIF.
+CREATE DATA r TYPE i.
+ASSIGN r->* TO <i>.
+WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n0\ncasting\n0");
+  });
+
 });
