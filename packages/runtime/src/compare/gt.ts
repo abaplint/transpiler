@@ -5,9 +5,11 @@ import {INumeric} from "../types/_numeric";
 import {Integer} from "../types/integer";
 import {compareDecFloat34} from "../operators/_decfloat";
 
-// references have no value to order by, but a sorted key over a REF TO component
-// is allowed and needs one order the sort and the binary search agree on: every
-// target gets a number on first use, which stands for the rest of its life
+// references have no value to order by, and a sorted key over a REF TO component is
+// not allowed; a hashed secondary key over one is, and the runtime keeps a hashed
+// secondary key as a sorted index too, so the sort and the binary search need one
+// order they agree on: every target gets a number on first use, which stands for
+// the rest of its life
 const referenceIds = new WeakMap<object, number>();
 let nextReferenceId = 1;
 
