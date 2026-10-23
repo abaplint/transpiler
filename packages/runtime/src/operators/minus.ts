@@ -1,14 +1,14 @@
-import {Character, DecFloat34, FieldSymbol, Float, Integer, Integer8} from "../types";
+import {Character, DecFloat34, FieldSymbol, Float, Integer, Integer8, Packed} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
 import {String} from "../types/string";
-import {decFloat34Result, isDecFloat34Operand, toDecimal} from "./_decfloat";
+import {decFloat34Result, isDecFloat34Operand, isPackedCalculation, packedDecimals, packedResult, toDecimal} from "./_decfloat";
 import {subtractDecimal} from "../types/_decimal";
 
 export function minus(left: INumeric | ICharacter | string | Integer8 | number | Integer | Float | FieldSymbol,
                       right: INumeric | ICharacter | string | Integer8 | number | Integer | Float | FieldSymbol):
-  Integer | Integer8 | Float | DecFloat34 {
+  Integer | Integer8 | Float | DecFloat34 | Packed {
 
   if (left instanceof FieldSymbol) {
     if (left.getPointer() === undefined) {
@@ -54,6 +54,10 @@ export function minus(left: INumeric | ICharacter | string | Integer8 | number |
     return new Integer().set(Number.parseInt(left.get(), 10) - right.get()).clearIntegerCalculationType();
   } else if ((right instanceof String || right instanceof Character) && Number.isInteger(Number(right)) && left instanceof Integer) {
     return new Integer().set(left.get() - Number.parseInt(right.get(), 10)).clearIntegerCalculationType();
+  }
+
+  if (isPackedCalculation(left, right)) {
+    return packedResult(subtractDecimal(toDecimal(left), toDecimal(right)), packedDecimals(left, right));
   }
 
   return new Float().set(parse(left) - parse(right));
