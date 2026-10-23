@@ -38,9 +38,10 @@ export class TranspilerValidationError extends Error {
       i.getFilename() + ":" +
       i.getStart().getRow());
     super(messages.join("\n"));
-    this.name = "TranspilerValidationError";
-    // not enumerable: the CLI prints the error with console.log, which would
-    // otherwise dump every Issue object after the message
+    // both not enumerable: the CLI prints the error with console.log, which
+    // would otherwise list them after the stack, the issues as a dump of
+    // every Issue object
+    Object.defineProperty(this, "name", {value: "TranspilerValidationError", enumerable: false, writable: true, configurable: true});
     Object.defineProperty(this, "issues", {value: issues, enumerable: false, writable: false});
   }
 }
