@@ -12,6 +12,7 @@ import {HexUInt8} from "./hex_uint8";
 import {DecFloat34} from "./decfloat34";
 import {Time} from "./time";
 import {FieldSymbol} from "./field_symbol";
+import {Packed} from "./packed";
 import {roundToBigInt} from "./_decimal";
 
 const digits = new RegExp(/^\s*-?\+?\d+\.?\d* *$/i);
@@ -38,7 +39,7 @@ export class Integer8 {
 
   public set(value: INumeric | ICharacter | Hex | string | number | bigint | Integer8 | Integer | Float | DecFloat34) {
     if (typeof value === "number") {
-      this.value = BigInt(value);
+      this.value = BigInt(roundHalfAwayFromZero(value));
     } else if (typeof value === "bigint") {
       this.value = value;
     } else if (typeof value === "string") {
@@ -59,6 +60,9 @@ export class Integer8 {
     } else if (value instanceof DecFloat34) {
 // exact, getRaw() would go through a double
       this.value = roundToBigInt(value.getDecimal());
+    } else if (value instanceof Packed) {
+// exact and rounded half away from zero, get() would go through a double
+      this.value = BigInt(value.toFixed(0));
     } else if (value instanceof Float) {
       this.set(roundHalfAwayFromZero(value.getRaw()));
     } else if (value instanceof FieldSymbol) {
