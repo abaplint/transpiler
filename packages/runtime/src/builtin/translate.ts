@@ -3,7 +3,7 @@ import {ICharacter} from "../types/_character";
 import {String} from "../types/string";
 
 export function translate(input: {val: ICharacter | string, from: ICharacter | string, to: ICharacter | FieldSymbol | string}): ICharacter {
-  let val = typeof input.val === "string" ? input.val : input.val.get();
+  const val = typeof input.val === "string" ? input.val : input.val.get();
   const from = typeof input.from === "string" ? input.from : input.from.get();
 
   let toSource: ICharacter | string;
@@ -22,16 +22,21 @@ export function translate(input: {val: ICharacter | string, from: ICharacter | s
     to = toSource.getTrimEnd();
   }
 
-  const fromSplit = from.split("");
-  const toSplit = to.split("");
-
-  const chars: {[index: string]: string} = {};
-  for (let i = 0; i < fromSplit.length; i++) {
-    chars[fromSplit[i]] = toSplit[i] || "";
+  // FROM is a list of characters, never a pattern: the character at position n of
+  // FROM becomes the character at position n of TO, and is removed when TO has no
+  // character there; the first occurrence of a repeated FROM character counts
+  const map = new Map<string, string>();
+  for (let i = 0; i < from.length; i++) {
+    if (map.has(from[i]) === false) {
+      map.set(from[i], to[i] ?? "");
+    }
   }
 
-  const reg = new RegExp("[" + from + "]", "g");
-  val = val.replace(reg, m => chars[m] || "");
+  let result = "";
+  for (const c of val) {
+    const mapped = map.get(c);
+    result += mapped === undefined ? c : mapped;
+  }
 
-  return new String().set(val);
+  return new String().set(result);
 }
