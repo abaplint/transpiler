@@ -498,4 +498,67 @@ WRITE / lv.`);
     expect(out).to.equal("a[b]c\na$c");
   });
 
+  it("REPLACE REGEX [[:cntrl:]] removes the line feed and the tab", async () => {
+    const out = await output(`
+DATA lv TYPE string.
+lv = 'a' && |\\n| && 'b' && |\\t| && 'c'.
+REPLACE ALL OCCURRENCES OF REGEX '[[:cntrl:]]' IN lv WITH ''.
+WRITE / lv.`);
+    expect(out).to.equal("abc");
+  });
+
+  it("REPLACE REGEX [[:alpha:]]", async () => {
+    const out = await output(`
+DATA lv TYPE string.
+lv = 'ab12cd'.
+REPLACE ALL OCCURRENCES OF REGEX '[[:alpha:]]' IN lv WITH 'X'.
+WRITE / lv.`);
+    expect(out).to.equal("XX12XX");
+  });
+
+  it("REPLACE REGEX [^[:alpha:]], negated class", async () => {
+    const out = await output(`
+DATA lv TYPE string.
+lv = 'ab12cd'.
+REPLACE ALL OCCURRENCES OF REGEX '[^[:alpha:]]' IN lv WITH 'X'.
+WRITE / lv.`);
+    expect(out).to.equal("abXXcd");
+  });
+
+  it("REPLACE REGEX, two classes and a character in one bracket expression", async () => {
+    const out = await output(`
+DATA lv TYPE string.
+lv = 'ab_12-cd'.
+REPLACE ALL OCCURRENCES OF REGEX '[[:alpha:][:digit:]]' IN lv WITH 'X'.
+WRITE / lv.
+lv = 'ab_12-cd'.
+REPLACE ALL OCCURRENCES OF REGEX '[^[:alpha:][:digit:]]' IN lv WITH 'X'.
+WRITE / lv.
+lv = 'ab_12-cd'.
+REPLACE ALL OCCURRENCES OF REGEX '[[:alpha:]_]+' IN lv WITH 'X'.
+WRITE / lv.
+lv = 'ab 12' && |\\t| && 'cd'.
+REPLACE ALL OCCURRENCES OF REGEX '[[:space:]]' IN lv WITH 'X'.
+WRITE / lv.
+lv = 'aB1f.g'.
+REPLACE ALL OCCURRENCES OF REGEX '[[:upper:][:xdigit:]]' IN lv WITH 'X'.
+WRITE / lv.`);
+    expect(out).to.equal("XX_XX-XX\nabX12Xcd\nX12-X\nabX12Xcd\nXXXX.g");
+  });
+
+  it("REPLACE REGEX, an unknown POSIX class throws", async () => {
+    const code = `
+DATA lv TYPE string.
+lv = 'abc'.
+REPLACE ALL OCCURRENCES OF REGEX '[[:foo:]]' IN lv WITH 'X'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail("expected an error");
+    } catch (e) {
+      expect(e.message).to.contain("CX_SY_REGEX");
+    }
+  });
+
 });
