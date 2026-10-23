@@ -49,6 +49,8 @@ export interface ITranspilerConfig {
   skip_duplicate_dependencies?: boolean;
   write_unit_tests?: boolean;
   write_source_map?: boolean;
+  /** write the CREATE statements per table and view as schema.json next to init.mjs */
+  write_schema?: boolean;
 
   options: ICLITranspilerOptions;
 }
