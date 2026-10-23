@@ -4,27 +4,7 @@ import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {Integer} from "../types/integer";
 import {compareDecFloat34} from "../operators/_decfloat";
-
-// references have no value to order by, and a sorted key over a REF TO component is
-// not allowed; a hashed secondary key over one is, and the runtime keeps a hashed
-// secondary key as a sorted index too, so the sort and the binary search need one
-// order they agree on: every target gets a number on first use, which stands for
-// the rest of its life
-const referenceIds = new WeakMap<object, number>();
-let nextReferenceId = 1;
-
-/** the position of a reference target in the identity order; an unbound reference is first */
-function referenceId(target: object | undefined): number {
-  if (target === undefined || target === null) {
-    return 0;
-  }
-  let id = referenceIds.get(target);
-  if (id === undefined) {
-    id = nextReferenceId++;
-    referenceIds.set(target, id);
-  }
-  return id;
-}
+import {referenceIdentity} from "../types/_reference_identity";
 
 export function gt(
   left: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | HashedTable | Integer8,
@@ -82,9 +62,9 @@ export function gt(
   }
 
   if (left instanceof DataReference && right instanceof DataReference) {
-    return referenceId(left.getPointer()) > referenceId(right.getPointer());
+    return referenceIdentity(left.getPointer()) > referenceIdentity(right.getPointer());
   } else if (left instanceof ABAPObject && right instanceof ABAPObject) {
-    return referenceId(left.get()) > referenceId(right.get());
+    return referenceIdentity(left.get()) > referenceIdentity(right.get());
   }
 
   if (left instanceof Table || right instanceof Table || left instanceof HashedTable || right instanceof HashedTable) {
