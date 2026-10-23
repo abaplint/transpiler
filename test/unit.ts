@@ -3428,4 +3428,106 @@ ENDCLASS.`;
     expect(cons.split("\n").slice(1, 4)).to.deep.equal(["from locals_def", "from locals_def", "from locals_def"]);
   });
 
+  // FOR TESTING methods inherited from a local ABSTRACT base: the runner listed the
+  // methods of each concrete class from its own definition, so a subclass with no
+  // methods of its own never ran
+  it("inherited test methods, abstract base with two concrete subclasses", async () => {
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltc_base DEFINITION ABSTRACT FOR TESTING RISK LEVEL HARMLESS DURATION SHORT.
+      PROTECTED SECTION.
+        METHODS create ABSTRACT RETURNING VALUE(r) TYPE string.
+      PRIVATE SECTION.
+        METHODS it_works FOR TESTING.
+    ENDCLASS.
+    CLASS ltc_base IMPLEMENTATION.
+      METHOD it_works.
+        WRITE create( ).
+      ENDMETHOD.
+    ENDCLASS.
+
+    CLASS ltc_impl_a DEFINITION INHERITING FROM ltc_base FOR TESTING RISK LEVEL HARMLESS DURATION SHORT.
+      PROTECTED SECTION.
+        METHODS create REDEFINITION.
+    ENDCLASS.
+    CLASS ltc_impl_a IMPLEMENTATION.
+      METHOD create.
+        r = 'from a'.
+      ENDMETHOD.
+    ENDCLASS.
+
+    CLASS ltc_impl_b DEFINITION INHERITING FROM ltc_base FOR TESTING RISK LEVEL HARMLESS DURATION SHORT.
+      PROTECTED SECTION.
+        METHODS create REDEFINITION.
+      PRIVATE SECTION.
+        METHODS own FOR TESTING.
+    ENDCLASS.
+    CLASS ltc_impl_b IMPLEMENTATION.
+      METHOD create.
+        r = 'from b'.
+      ENDMETHOD.
+      METHOD own.
+        WRITE 'own'.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false);
+    // WRITE output has no trailing newline, so check the order of occurrence
+    let pos = -1;
+    for (const expected of [
+      "ZCL_CLIENT: running ltc_impl_a->it_works",
+      "from a",
+      "ZCL_CLIENT: running ltc_impl_b->it_works",
+      "from b",
+      "ZCL_CLIENT: running ltc_impl_b->own",
+      "own",
+    ]) {
+      const next = cons.indexOf(expected, pos + 1);
+      expect(next, expected).to.be.greaterThan(pos);
+      pos = next;
+    }
+    expect(cons).to.not.include("ltc_base");
+  });
+
+  it("inherited test methods, listed in the open runner script, the abstract base is not", async () => {
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltc_base DEFINITION ABSTRACT FOR TESTING RISK LEVEL HARMLESS DURATION SHORT.
+      PRIVATE SECTION.
+        METHODS it_works FOR TESTING.
+    ENDCLASS.
+    CLASS ltc_base IMPLEMENTATION.
+      METHOD it_works.
+      ENDMETHOD.
+    ENDCLASS.
+
+    CLASS ltc_impl DEFINITION INHERITING FROM ltc_base FOR TESTING RISK LEVEL HARMLESS DURATION SHORT.
+    ENDCLASS.
+    CLASS ltc_impl IMPLEMENTATION.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const memory = files.map(f => new abaplint.MemoryFile(f.filename, f.contents));
+    const reg: abaplint.IRegistry = new abaplint.Registry().addFiles(memory);
+    const output = await new Transpiler({addCommonJS: true}).run(reg);
+    expect(output.unitTestScriptOpen).to.include(`testclass_name.set("LTC_IMPL");`);
+    expect(output.unitTestScriptOpen).to.include(`method_name.set("IT_WORKS");`);
+    expect(output.unitTestScriptOpen).to.not.include(`testclass_name.set("LTC_BASE");`);
+    expect(output.unitTestScript).to.include(`localClass: "ltc_impl"`);
+    expect(output.unitTestScript).to.not.include(`localClass: "ltc_base"`);
+  });
+
 });
