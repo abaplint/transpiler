@@ -700,4 +700,77 @@ describe("Running Examples - Integer8 type", () => {
     expect(abap.console.get()).to.equal("430656791676715017");
   });
 
+  it("int8 from packed with decimals, rounded half away from zero", async () => {
+    const code = `
+    DATA p TYPE p LENGTH 10 DECIMALS 2.
+    DATA int8 TYPE int8.
+    p = '2.5'.
+    int8 = p.
+    WRITE / int8.
+    p = '-2.5'.
+    int8 = p.
+    WRITE / int8.
+    p = '2.49'.
+    int8 = p.
+    WRITE / int8.
+    p = '3.5'.
+    int8 = p.
+    WRITE / int8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3\n-3\n2\n4");
+  });
+
+  it("int8 from packed, exact beyond the precision of a double", async () => {
+    const code = `
+    DATA p TYPE p LENGTH 16 DECIMALS 1.
+    DATA int8 TYPE int8.
+    p = '1234567890123456789.5'.
+    int8 = p.
+    WRITE / int8.
+    p = '-1234567890123456789.4'.
+    int8 = p.
+    WRITE / int8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1234567890123456790\n-1234567890123456789");
+  });
+
+  it("int8 from float with decimals, rounded half away from zero", async () => {
+    const code = `
+    DATA float TYPE f.
+    DATA int8 TYPE int8.
+    float = '2.5'.
+    int8 = float.
+    WRITE / int8.
+    float = '-2.5'.
+    int8 = float.
+    WRITE / int8.
+    float = '0.5'.
+    int8 = float.
+    WRITE / int8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3\n-3\n1");
+  });
+
+  it("int8 from decfloat34 with decimals, rounded half away from zero", async () => {
+    const code = `
+    DATA dec TYPE decfloat34.
+    DATA int8 TYPE int8.
+    dec = '2.5'.
+    int8 = dec.
+    WRITE / int8.
+    dec = '-2.5'.
+    int8 = dec.
+    WRITE / int8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3\n-3");
+  });
+
 });
