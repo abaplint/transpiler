@@ -1,3 +1,4 @@
+import {inspect} from "util";
 import {expect} from "chai";
 import {runSingle} from "./_utils";
 import {Transpiler, TranspilerValidationError} from "../src";
@@ -66,6 +67,9 @@ describe("Validation", () => {
       expect(e.issues[0].getStart().getRow()).to.equal(1);
       expect(e.message).to.equal(e.issues[0].getKey() + ", " + e.issues[0].getMessage() + ", zfoobar.prog.abap:1");
       expect(e.message).to.match(/^[a-z_]+, .+, zfoobar\.prog\.abap:1$/);
+      // console.log(e) in the CLI shows the message and the stack, not the issues
+      expect(Object.keys(e)).to.deep.equal([]);
+      expect(inspect(e)).to.not.contain("issues");
     }
   });
 
