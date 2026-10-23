@@ -23,6 +23,30 @@ constructor output, set `options.sharedTypeFactories` to `false` in
 
 Omit the option or set it to `true` to use shared factories.
 
+## Database schema
+
+`init.mjs` carries the `CREATE TABLE` and `CREATE VIEW` statements per dialect.
+For a database that outlives one run, set `options.databaseSetup.ifNotExists`
+and the statements become `CREATE TABLE IF NOT EXISTS` where the dialect accepts
+it: SQLite (tables and views), PostgreSQL and Snowflake (tables). HANA has no
+`IF NOT EXISTS` on `CREATE TABLE`, so its statements, and the CDS views, are
+unchanged.
+
+Set the top-level flag `write_schema` to also write `schema.json` next to
+`init.mjs`: one entry per table and view with `name` (upper case), `type`
+(`TABL` or `VIEW`) and the statement for each dialect (`sqlite`, `pg`, `hdb`,
+`snowflake`), so a host does not have to parse the table names back out of the
+SQL.
+
+```json
+{
+  "write_schema": true,
+  "options": {
+    "databaseSetup": {"ifNotExists": true}
+  }
+}
+```
+
 ## Output layout
 
 The CLI writes generated project files into `output_folder/project/`. All

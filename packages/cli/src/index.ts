@@ -50,6 +50,9 @@ async function run() {
     artifacts.push({path: "_unit_open.mjs", contents: output.unitTestScriptOpen});
   }
   artifacts.push({path: "init.mjs", contents: output.initializationScript});
+  if (config.write_schema === true) {
+    artifacts.push({path: "schema.json", contents: JSON.stringify(output.databaseSetup.tables, null, 2) + "\n"});
+  }
   artifacts.push({path: "_init.mjs", contents: output.initializationScript2});
   artifacts.push({path: "_top.mjs", contents: `import runtime from "@abaplint/runtime";
 globalThis.abap = new runtime.ABAP();`});

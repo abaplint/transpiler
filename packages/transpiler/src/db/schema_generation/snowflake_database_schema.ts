@@ -1,11 +1,13 @@
 import * as abaplint from "@abaplint/core";
-import {DatabaseSchemaGenerator, packedTypeToDatabase} from "./database_schema_generator";
+import {DatabaseSchemaGenerator, ifNotExistsClause, packedTypeToDatabase} from "./database_schema_generator";
 
 export class SnowflakeDatabaseSchema implements DatabaseSchemaGenerator {
   private readonly reg: abaplint.IRegistry;
+  private readonly ifNotExists: boolean;
 
-  public constructor(reg: abaplint.IRegistry) {
+  public constructor(reg: abaplint.IRegistry, ifNotExists = false) {
     this.reg = reg;
+    this.ifNotExists = ifNotExists;
   }
 
   public buildVIEW(_view: abaplint.Objects.View): string {
@@ -35,7 +37,7 @@ export class SnowflakeDatabaseSchema implements DatabaseSchemaGenerator {
       .filter(e => fieldsRaw.includes(e.toLowerCase()))
       .map(e => "\"" + e.toLowerCase() + "\"").join(",") + ")";
 
-    return `CREATE TABLE "${tabl.getName().toLowerCase()}" (${fields.join(", ")}${key});\n`;
+    return `CREATE TABLE ${ifNotExistsClause(this.ifNotExists)}"${tabl.getName().toLowerCase()}" (${fields.join(", ")}${key});\n`;
   }
 
   // https://docs.snowflake.com/en/sql-reference/collation

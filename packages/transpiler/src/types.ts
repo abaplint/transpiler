@@ -86,6 +86,13 @@ export interface ITranspilerOptions {
     /** insert into WWWPARAMS, skips if equals false */
     wwwparams?: boolean;
   };
+  /** database setup, the CREATE statements handed out in IOutput.databaseSetup */
+  databaseSetup?: {
+    /** CREATE TABLE IF NOT EXISTS, so the DDL can be re-run against an existing database;
+     * applied where the dialect accepts it: sqlite (tables and views), pg and snowflake (tables),
+     * hdb and CDS views are unchanged */
+    ifNotExists?: boolean;
+  };
   /** ignore source map */
   ignoreSourceMap?: boolean;
   /** import programs */

@@ -1,6 +1,6 @@
 import * as abaplint from "@abaplint/core";
 import {ITranspilerOptions} from "../types";
-import {DatabaseSetupResult} from "./database_setup_result";
+import {DatabaseSetupInsert, DatabaseSetupResult, DatabaseSetupTable} from "./database_setup_result";
 import {SQLiteDatabaseSchema} from "./schema_generation/sqlite_database_schema";
 import {PGDatabaseSchema} from "./schema_generation/pg_database_schema";
 import {DatabaseSchemaGenerator} from "./schema_generation/database_schema_generator";
@@ -22,23 +22,34 @@ export class DatabaseSetup {
   }
 
   public run(options?: ITranspilerOptions | undefined): DatabaseSetupResult {
+    const ifNotExists = options?.databaseSetup?.ifNotExists === true;
     // CDS views are dialect independent SQL, added after the tables and views they select from
     const cdsViews = this.buildCDSViews();
+    const tables = this.buildTables({
+      sqlite: new SQLiteDatabaseSchema(this.reg, ifNotExists),
+      pg: new PGDatabaseSchema(this.reg, ifNotExists),
+      // HANA takes the PG schema unchanged -- measured against HANA Express
+      // on a tree of 77 tables. The one thing it needs is that identifiers
+      // reach it quoted in UPPER case, and that is not a dialect of DDL: the
+      // same rule applies to every statement, so @abaplint/database-hdb
+      // folds them on the way out rather than a second generator doing it
+      // here. (Unquoted would nearly work and then meet a column called
+      // `cross`, which is one of HANA's reserved words.)
+      // HANA has no IF NOT EXISTS on CREATE TABLE, so the option does not reach it.
+      hdb: new PGDatabaseSchema(this.reg, false),
+      snowflake: new SnowflakeDatabaseSchema(this.reg, ifNotExists),
+    });
+    const inserts = this.buildInsert(options);
     return {
       schemas: {
-        sqlite: [...this.driver(new SQLiteDatabaseSchema(this.reg)), ...cdsViews],
-        // HANA takes the PG schema unchanged -- measured against HANA Express
-        // on a tree of 77 tables. The one thing it needs is that identifiers
-        // reach it quoted in UPPER case, and that is not a dialect of DDL: the
-        // same rule applies to every statement, so @abaplint/database-hdb
-        // folds them on the way out rather than a second generator doing it
-        // here. (Unquoted would nearly work and then meet a column called
-        // `cross`, which is one of HANA's reserved words.)
-        hdb: this.driver(new PGDatabaseSchema(this.reg)),
-        pg: [...this.driver(new PGDatabaseSchema(this.reg)), ...cdsViews],
-        snowflake: [...this.driver(new SnowflakeDatabaseSchema(this.reg)), ...cdsViews],
+        sqlite: [...tables.map(t => t.sqlite), ...cdsViews],
+        hdb: tables.map(t => t.hdb),
+        pg: [...tables.map(t => t.pg), ...cdsViews],
+        snowflake: [...tables.map(t => t.snowflake), ...cdsViews],
       },
-      insert: this.buildInsert(options),
+      tables,
+      insert: inserts.map(i => i.sql),
+      inserts,
     };
   }
 
@@ -57,13 +68,24 @@ export class DatabaseSetup {
     return views;
   }
 
-  private driver(schemaGenerator: DatabaseSchemaGenerator): string[] {
-    const statements: string[] = [];
+  private buildTables(generators: {[dialect in "sqlite" | "pg" | "hdb" | "snowflake"]: DatabaseSchemaGenerator}): DatabaseSetupTable[] {
+    const tables: DatabaseSetupTable[] = [];
+    const build = (name: string, type: "TABL" | "VIEW", statement: (g: DatabaseSchemaGenerator) => string) => {
+      tables.push({
+        name: name.toUpperCase(),
+        type,
+        sqlite: statement(generators.sqlite).trim(),
+        pg: statement(generators.pg).trim(),
+        hdb: statement(generators.hdb).trim(),
+        snowflake: statement(generators.snowflake).trim(),
+      });
+    };
+
     // CREATE TABLEs
     for (const obj of this.reg.getObjects()) {
       if (obj instanceof abaplint.Objects.Table
           && obj.getTableCategory() === abaplint.Objects.TableCategory.Transparent) {
-        statements.push(schemaGenerator.buildTABL(obj).trim());
+        build(obj.getName(), "TABL", g => g.buildTABL(obj));
       }
     }
 
@@ -71,61 +93,61 @@ export class DatabaseSetup {
     // todo: what if the view is based on another view?
     for (const obj of this.reg.getObjects()) {
       if (obj instanceof abaplint.Objects.View) {
-        statements.push(schemaGenerator.buildVIEW(obj).trim());
+        build(obj.getName(), "VIEW", g => g.buildVIEW(obj));
       }
     }
 
-    return statements;
+    return tables;
   }
 
-  private buildInsert(options?: ITranspilerOptions | undefined): string[] {
+  private buildInsert(options?: ITranspilerOptions | undefined): DatabaseSetupInsert[] {
     // note: avoid hitting maximum statement size by splitting into multiple statements
-    const insert: string[] = [];
+    const inserts: DatabaseSetupInsert[] = [];
     const populateTables = new PopulateTables(this.reg);
-    const add = (statement: string): void => {
-      if (statement.length > 0) {
-        insert.push(statement);
+    const add = (table: string, sql: string): void => {
+      if (sql.length > 0) {
+        inserts.push({table, sql});
       }
     };
-    const addAll = (statements: readonly string[]): void => {
-      for (const statement of statements) {
-        add(statement);
+    const addAll = (table: string, statements: readonly string[]): void => {
+      for (const sql of statements) {
+        add(table, sql);
       }
     };
 
     // INSERT data
     for (const obj of this.reg.getObjects()) {
       if (options?.populateTables?.tadir !== false) {
-        add(populateTables.insertTADIR(obj));
+        add("TADIR", populateTables.insertTADIR(obj));
       }
 
       if (obj instanceof abaplint.Objects.MessageClass) {
-        addAll(populateTables.insertT100(obj));
+        addAll("T100", populateTables.insertT100(obj));
       } else if (options?.populateTables?.wwwparams !== false
           && obj instanceof abaplint.Objects.WebMIME) {
-        addAll(populateTables.insertWWWPARAMS(obj));
+        addAll("WWWPARAMS", populateTables.insertWWWPARAMS(obj));
       } else if (obj instanceof abaplint.Objects.Class
           || obj instanceof abaplint.Objects.Interface
           || obj instanceof abaplint.Objects.Program) {
         if (options?.populateTables?.reposrc !== false) {
-          add(populateTables.insertREPOSRC(obj));
+          add("REPOSRC", populateTables.insertREPOSRC(obj));
         }
         if ((obj instanceof abaplint.Objects.Class || obj instanceof abaplint.Objects.Interface)
             && options?.populateTables?.seosubco !== false) {
-          addAll(populateTables.insertSEOSUBCO(obj));
+          addAll("SEOSUBCO", populateTables.insertSEOSUBCO(obj));
         }
         if ((obj instanceof abaplint.Objects.Class || obj instanceof abaplint.Objects.Interface)
             && options?.populateTables?.seosubcodf !== false) {
-          addAll(populateTables.insertSEOSUBCODF(obj));
+          addAll("SEOSUBCODF", populateTables.insertSEOSUBCODF(obj));
         }
         if ((obj instanceof abaplint.Objects.Class || obj instanceof abaplint.Objects.Interface)
             && options?.populateTables?.seosubcotx !== false) {
-          addAll(populateTables.insertSEOSUBCOTX(obj));
+          addAll("SEOSUBCOTX", populateTables.insertSEOSUBCOTX(obj));
         }
       }
     }
-    add(populateTables.insertT000());
-    return insert;
+    add("T000", populateTables.insertT000());
+    return inserts;
   }
 
 }

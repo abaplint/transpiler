@@ -1,19 +1,21 @@
 import * as abaplint from "@abaplint/core";
-import {DatabaseSchemaGenerator, packedTypeToDatabase} from "./database_schema_generator";
+import {DatabaseSchemaGenerator, ifNotExistsClause, packedTypeToDatabase} from "./database_schema_generator";
 import {DatabaseSchemaReuse} from "./_database_schema_reuse";
 
 const QUOTE = "'";
 
 export class SQLiteDatabaseSchema implements DatabaseSchemaGenerator {
   private readonly reg: abaplint.IRegistry;
+  private readonly ifNotExists: boolean;
 
-  public constructor(reg: abaplint.IRegistry) {
+  public constructor(reg: abaplint.IRegistry, ifNotExists = false) {
     this.reg = reg;
+    this.ifNotExists = ifNotExists;
   }
 
-  // https://www.sqlite.org/lang_createview.html
+  // https://www.sqlite.org/lang_createview.html, IF NOT EXISTS is accepted on views too
   public buildVIEW(view: abaplint.Objects.View): string {
-    return new DatabaseSchemaReuse(QUOTE).buildVIEW(view);
+    return new DatabaseSchemaReuse(QUOTE, this.ifNotExists).buildVIEW(view);
   }
 
   public buildTABL(tabl: abaplint.Objects.Table): string {
@@ -39,7 +41,7 @@ export class SQLiteDatabaseSchema implements DatabaseSchemaGenerator {
       .filter(e => fieldsRaw.includes(e.toLowerCase()))
       .map(e => "'" + e.toLowerCase() + "'").join(",") + ")";
 
-    return `CREATE TABLE '${tabl.getName().toLowerCase()}' (${fields.join(", ")}${key});\n`;
+    return `CREATE TABLE ${ifNotExistsClause(this.ifNotExists)}'${tabl.getName().toLowerCase()}' (${fields.join(", ")}${key});\n`;
   }
 
   private toType(type: abaplint.AbstractType, fieldname: string, errorInfo: string): string {

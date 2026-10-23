@@ -4,7 +4,7 @@ import {UniqueIdentifier} from "./unique_identifier";
 import {UnitTest} from "./unit_test";
 import {IFile, IOutput, IProgress, ITranspilerOptions, IOutputFile, UnknownTypesEnum} from "./types";
 import {Chunk} from "./chunk";
-import {DatabaseSetupResult} from "./db/database_setup_result";
+import {DatabaseSetupInsert, DatabaseSetupResult, DatabaseSetupTable} from "./db/database_setup_result";
 import {DatabaseSetup} from "./db";
 import {HandleTable} from "./handlers/handle_table";
 import {HandleABAP} from "./handlers/handle_abap";
@@ -24,7 +24,7 @@ import {OutputLayout, OutputFolders} from "./output_layout";
 export {OutputLayout, OutputFolders, importPath} from "./output_layout";
 
 export {config, ITranspilerOptions, IFile, IProgress, IOutputFile, IOutput,
-  UnknownTypesEnum, Chunk, DatabaseSetupResult};
+  UnknownTypesEnum, Chunk, DatabaseSetupResult, DatabaseSetupTable, DatabaseSetupInsert};
 
 export class Transpiler {
   private readonly options: ITranspilerOptions | undefined;

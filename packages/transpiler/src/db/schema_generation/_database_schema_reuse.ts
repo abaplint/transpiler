@@ -2,9 +2,11 @@ import * as abaplint from "@abaplint/core";
 
 export class DatabaseSchemaReuse {
   private readonly myQuote: string;
+  private readonly ifNotExists: boolean;
 
-  public constructor(quote: string) {
+  public constructor(quote: string, ifNotExists = false) {
     this.myQuote = quote;
+    this.ifNotExists = ifNotExists;
   }
 
   private quote(name: string): string {
@@ -36,7 +38,7 @@ export class DatabaseSchemaReuse {
       from = firstTabname;
     }
 
-    return `CREATE VIEW ${this.quote(view.getName().toLowerCase())} AS SELECT ${columns} FROM ${from};\n`;
+    return `CREATE VIEW ${this.ifNotExists ? "IF NOT EXISTS " : ""}${this.quote(view.getName().toLowerCase())} AS SELECT ${columns} FROM ${from};\n`;
   }
 
 }
