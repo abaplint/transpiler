@@ -29,7 +29,7 @@ export function minus(left: INumeric | ICharacter | string | Integer8 | number |
   }
 
   if (left instanceof Integer && right instanceof Integer) {
-    return new Integer().set(left.get() - right.get());
+    return Integer.arithmeticResult(left.get() - right.get());
   } else if (left instanceof Float && right instanceof Float) {
     // Two floats fall through the rest of the chain to exactly this, and
     // float arithmetic is the most common thing there is: the remaining type
@@ -43,17 +43,17 @@ export function minus(left: INumeric | ICharacter | string | Integer8 | number |
     return new Integer8().set(l - r);
   } else if (typeof left === "number" && typeof right === "number"
       && Number.isInteger(left) && Number.isInteger(right)) {
-    return new Integer().set(left - right);
+    return Integer.arithmeticResult(left - right);
 
   } else if (typeof left === "number" && Number.isInteger(left) && right instanceof Integer) {
-    return new Integer().set(left - right.get());
+    return Integer.arithmeticResult(left - right.get());
   } else if (typeof right === "number" && Number.isInteger(right) && left instanceof Integer) {
-    return new Integer().set(left.get() - right);
+    return Integer.arithmeticResult(left.get() - right);
 
   } else if ((left instanceof String || left instanceof Character) && Number.isInteger(Number(left.get())) && right instanceof Integer) {
-    return new Integer().set(Number.parseInt(left.get(), 10) - right.get()).clearIntegerCalculationType();
+    return Integer.arithmeticResult(Number.parseInt(left.get(), 10) - right.get()).clearIntegerCalculationType();
   } else if ((right instanceof String || right instanceof Character) && Number.isInteger(Number(right)) && left instanceof Integer) {
-    return new Integer().set(left.get() - Number.parseInt(right.get(), 10)).clearIntegerCalculationType();
+    return Integer.arithmeticResult(left.get() - Number.parseInt(right.get(), 10)).clearIntegerCalculationType();
   }
 
   return new Float().set(parse(left) - parse(right));
