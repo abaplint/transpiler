@@ -1582,4 +1582,69 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("1\n2\n3");
   });
 
+  it("a hashed secondary key over a REF TO data component", async () => {
+    // a reference cannot be a component of a sorted key (it has no order a program
+    // could rely on), only of a hashed one; the runtime keeps a hashed secondary key
+    // as a sorted index too, so it needs an order the sort and the search agree on.
+    // READ TABLE ... WITH TABLE KEY k answered sy-subrc 8 for r1 before
+    const code = `
+TYPES: BEGIN OF ty, id TYPE i, ref TYPE REF TO data, END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH UNIQUE HASHED KEY k COMPONENTS ref.
+DATA ls TYPE ty.
+DATA r1 TYPE REF TO i.
+DATA r2 TYPE REF TO i.
+DATA r3 TYPE REF TO i.
+CREATE DATA r1.
+CREATE DATA r2.
+CREATE DATA r3.
+ls-id = 1. ls-ref = r1. INSERT ls INTO TABLE tab.
+ls-id = 2. ls-ref = r2. INSERT ls INTO TABLE tab.
+ls-id = 3. ls-ref = r3. INSERT ls INTO TABLE tab.
+LOOP AT tab INTO ls WHERE ref = r2.
+  WRITE / ls-id.
+ENDLOOP.
+READ TABLE tab INTO ls WITH TABLE KEY k COMPONENTS ref = r2.
+WRITE / sy-subrc.
+WRITE / ls-id.
+READ TABLE tab INTO ls WITH TABLE KEY k COMPONENTS ref = r1.
+WRITE / sy-subrc.
+WRITE / ls-id.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2\n0\n2\n0\n1");
+  });
+
+  it("a hashed secondary key over a REF TO object component", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  TYPES: BEGIN OF ty, id TYPE i, ref TYPE REF TO lcl, END OF ty.
+  DATA tab TYPE STANDARD TABLE OF ty WITH UNIQUE HASHED KEY k COMPONENTS ref.
+  DATA ls TYPE ty.
+  DATA r1 TYPE REF TO lcl.
+  DATA r2 TYPE REF TO lcl.
+  CREATE OBJECT r1.
+  CREATE OBJECT r2.
+  ls-id = 1. ls-ref = r1. INSERT ls INTO TABLE tab.
+  ls-id = 2. ls-ref = r2. INSERT ls INTO TABLE tab.
+  LOOP AT tab INTO ls WHERE ref = r2.
+    WRITE / ls-id.
+  ENDLOOP.
+  READ TABLE tab INTO ls WITH TABLE KEY k COMPONENTS ref = r2.
+  WRITE / sy-subrc.
+  WRITE / ls-id.
+  READ TABLE tab INTO ls WITH TABLE KEY k COMPONENTS ref = r1.
+  WRITE / sy-subrc.
+  WRITE / ls-id.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2\n0\n2\n0\n1");
+  });
+
 });
