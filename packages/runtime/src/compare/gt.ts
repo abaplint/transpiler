@@ -1,10 +1,10 @@
 import {parse} from "../operators/_parse";
-import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Hex, HexUInt8, Integer8, Structure, Table, XString} from "../types";
+import {ABAPObject, Character, DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Hex, HexUInt8, Integer8, Structure, Table, XString} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {Integer} from "../types/integer";
 import {compareDecFloat34} from "../operators/_decfloat";
-
+import {referenceIdentity} from "../types/_reference_identity";
 
 export function gt(
   left: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | HashedTable | Integer8,
@@ -59,6 +59,12 @@ export function gt(
       throw new Error("GETWA_NOT_ASSIGNED");
     }
     return gt(left, right.getPointer());
+  }
+
+  if (left instanceof DataReference && right instanceof DataReference) {
+    return referenceIdentity(left.getPointer()) > referenceIdentity(right.getPointer());
+  } else if (left instanceof ABAPObject && right instanceof ABAPObject) {
+    return referenceIdentity(left.get()) > referenceIdentity(right.get());
   }
 
   if (left instanceof Table || right instanceof Table || left instanceof HashedTable || right instanceof HashedTable) {
