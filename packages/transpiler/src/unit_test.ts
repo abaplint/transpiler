@@ -45,18 +45,15 @@ async function run() {
 
       for (const file of obj.getABAPFiles()) {
         for (const def of file.getInfo().listClassDefinitions()) {
-          if (def.isForTesting === false || def.isGlobal === true  || def.methods.length === 0) {
+          if (def.isForTesting === false || def.isGlobal === true || def.isAbstract === true) {
           // todo, fix, there might be global test methods
             continue;
           }
 
-          for (const m of def.methods) {
-            if (m.isForTesting === false) {
-              continue;
-            }
+          for (const m of this.findTestMethods(def, obj, reg)) {
             ret += `  ls_input.get().class_name.set("${obj.getName()}");
   ls_input.get().testclass_name.set("${def.name.toUpperCase()}");
-  ls_input.get().method_name.set("${m.name.toUpperCase()}");
+  ls_input.get().method_name.set("${m.toUpperCase()}");
   abap.statements.append({source: ls_input, target: lt_input});\n`;
           }
         }
@@ -77,6 +74,59 @@ run().then(() => {
 });`;
 
     return ret;
+  }
+
+  /** the FOR TESTING methods of the class, with those inherited from its superclasses:
+   * a concrete test class may get all its tests from a local ABSTRACT base, the way a
+   * suite runs the same tests against several implementations. A redefinition, or a
+   * method of the same name, replaces the ancestor's entry */
+  private findTestMethods(def: abaplint.Info.InfoClassDefinition, obj: abaplint.Objects.Class, reg: abaplint.IRegistry): string[] {
+    const chain: abaplint.Info.InfoClassDefinition[] = [];
+    const seen = new Set<string>();
+    let current: abaplint.Info.InfoClassDefinition | undefined = def;
+    while (current !== undefined && seen.has(current.name.toUpperCase()) === false) {
+      seen.add(current.name.toUpperCase());
+      chain.push(current);
+      current = this.findClassDefinition(current.superClassName, obj, reg);
+    }
+
+    // the root ancestor's methods first, so a redefinition keeps its place in the order
+    const methods = new Map<string, string>();
+    for (const c of chain.reverse()) {
+      for (const m of c.methods) {
+        if (m.isForTesting === false) {
+          continue;
+        }
+        methods.set(m.name.toUpperCase(), m.name);
+      }
+    }
+    return [...methods.values()];
+  }
+
+  /** a local class of the same object, in any of its files, or else a global class */
+  private findClassDefinition(name: string | undefined, obj: abaplint.Objects.Class, reg: abaplint.IRegistry): abaplint.Info.InfoClassDefinition | undefined {
+    if (name === undefined) {
+      return undefined;
+    }
+    const upper = name.toUpperCase();
+    for (const file of obj.getABAPFiles()) {
+      for (const def of file.getInfo().listClassDefinitions()) {
+        if (def.name.toUpperCase() === upper) {
+          return def;
+        }
+      }
+    }
+    const global = reg.getObject("CLAS", upper);
+    if (global instanceof abaplint.Objects.Class) {
+      for (const file of global.getABAPFiles()) {
+        for (const def of file.getInfo().listClassDefinitions()) {
+          if (def.name.toUpperCase() === upper) {
+            return def;
+          }
+        }
+      }
+    }
+    return undefined;
   }
 
   private getSortedTests(reg: abaplint.IRegistry) {
@@ -103,19 +153,12 @@ run().then(() => {
         for (const def of file.getInfo().listClassDefinitions()) {
           if (def.isForTesting === false
               || def.isGlobal === true
-              || def.methods.length === 0
               || def.isAbstract === true) {
             // todo, fix, there might be global test methods
             continue;
           }
 
-          const methods: string[] = [];
-          for (const m of def.methods) {
-            if (m.isForTesting === false) {
-              continue;
-            }
-            methods.push(m.name);
-          }
+          const methods = this.findTestMethods(def, obj, reg);
           if (methods.length === 0) {
             // FOR TESTING helper class without test methods, nothing to run; it might also
             // live in locals_imp, which is not exported from the .testclasses module
