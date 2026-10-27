@@ -85,6 +85,7 @@ export function gt(
     } else if (!(left instanceof Structure)) {
       return gt(left, (right as Structure).getCharacter());
     }
+    return gtStructures(left as Structure, right);
   }
 
   let l: number | string | undefined = undefined;
@@ -176,4 +177,18 @@ function get_hex_from_parameter(
   }
 
   return hex_from_parameter;
+}
+
+// structures are compared component by component, the first unequal component decides
+function gtStructures(left: Structure, right: Structure): boolean {
+  const l = left.get();
+  const r = right.get();
+  for (const k of Object.keys(l)) {
+    if (gt(l[k], r[k])) {
+      return true;
+    } else if (gt(r[k], l[k])) {
+      return false;
+    }
+  }
+  return false;
 }
