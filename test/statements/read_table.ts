@@ -1927,6 +1927,50 @@ WRITE / |{ sy-subrc } { r-a }/{ r-b }|.`;
     expect(abap.console.get()).to.equal("0 2/2\n0 2/2");
   });
 
+  it("READ TABLE WITH TABLE KEY, sorted table keyed on a structure", async () => {
+    const code = `
+TYPES: BEGIN OF ty_item,
+         obj_type TYPE c LENGTH 4,
+         obj_name TYPE c LENGTH 10,
+       END OF ty_item.
+TYPES: BEGIN OF ty_row,
+         item     TYPE ty_item,
+         filename TYPE string,
+         name     TYPE string,
+       END OF ty_row.
+DATA tab TYPE SORTED TABLE OF ty_row WITH UNIQUE KEY item filename.
+DATA row TYPE ty_row.
+DATA key TYPE ty_item.
+
+row-item-obj_type = 'CLAS'.
+row-item-obj_name = 'ZCL_C'.
+row-filename = 'zcl_c.clas.abap'.
+row-name = 'third'.
+INSERT row INTO TABLE tab.
+row-item-obj_name = 'ZCL_A'.
+row-filename = 'zcl_a.clas.abap'.
+row-name = 'first'.
+INSERT row INTO TABLE tab.
+row-item-obj_name = 'ZCL_B'.
+row-filename = 'zcl_b.clas.abap'.
+row-name = 'second'.
+INSERT row INTO TABLE tab.
+
+LOOP AT tab INTO row.
+  WRITE / row-name.
+ENDLOOP.
+
+key-obj_type = 'CLAS'.
+key-obj_name = 'ZCL_A'.
+CLEAR row.
+READ TABLE tab INTO row WITH TABLE KEY item = key filename = 'zcl_a.clas.abap'.
+WRITE / sy-subrc.
+WRITE / row-name.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("first\nsecond\nthird\n0\nfirst");
+  });
 
   it("HASHED TABLE keyed by a REF TO data component, read and duplicate", async () => {
     // the hash of a data reference is its target, not the value the target holds:
