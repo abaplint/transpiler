@@ -37,6 +37,8 @@ export interface ITranspilerConfig {
      */
     name?: string,
     url?: string,
+    /** commit SHA, tag or branch to check out from url; defaults to the default branch */
+    ref?: string,
     /** relative to the current working directory */
     folder?: string,
     files?: string | string[],
