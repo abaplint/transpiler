@@ -1927,4 +1927,97 @@ WRITE / |{ sy-subrc } { r-a }/{ r-b }|.`;
     expect(abap.console.get()).to.equal("0 2/2\n0 2/2");
   });
 
+  it("READ TABLE WITH TABLE KEY, sorted table keyed on a structure", async () => {
+    const code = `
+TYPES: BEGIN OF ty_item,
+         obj_type TYPE c LENGTH 4,
+         obj_name TYPE c LENGTH 10,
+       END OF ty_item.
+TYPES: BEGIN OF ty_row,
+         item     TYPE ty_item,
+         filename TYPE string,
+         name     TYPE string,
+       END OF ty_row.
+DATA tab TYPE SORTED TABLE OF ty_row WITH UNIQUE KEY item filename.
+DATA row TYPE ty_row.
+DATA key TYPE ty_item.
+
+row-item-obj_type = 'CLAS'.
+row-item-obj_name = 'ZCL_C'.
+row-filename = 'zcl_c.clas.abap'.
+row-name = 'third'.
+INSERT row INTO TABLE tab.
+row-item-obj_name = 'ZCL_A'.
+row-filename = 'zcl_a.clas.abap'.
+row-name = 'first'.
+INSERT row INTO TABLE tab.
+row-item-obj_name = 'ZCL_B'.
+row-filename = 'zcl_b.clas.abap'.
+row-name = 'second'.
+INSERT row INTO TABLE tab.
+
+LOOP AT tab INTO row.
+  WRITE / row-name.
+ENDLOOP.
+
+key-obj_type = 'CLAS'.
+key-obj_name = 'ZCL_A'.
+CLEAR row.
+READ TABLE tab INTO row WITH TABLE KEY item = key filename = 'zcl_a.clas.abap'.
+WRITE / sy-subrc.
+WRITE / row-name.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("first\nsecond\nthird\n0\nfirst");
+  });
+
+  it("HASHED TABLE keyed by a REF TO data component, read and duplicate", async () => {
+    // the hash of a data reference is its target, not the value the target holds:
+    // before, two references to two initial integers hashed alike, the second
+    // INSERT was refused as a duplicate and the first row was never found again
+    const code = `
+TYPES: BEGIN OF ty, id TYPE i, ref TYPE REF TO data, END OF ty.
+DATA tab TYPE HASHED TABLE OF ty WITH UNIQUE KEY ref.
+DATA ls TYPE ty.
+DATA r1 TYPE REF TO i.
+DATA r2 TYPE REF TO i.
+CREATE DATA r1.
+CREATE DATA r2.
+ls-id = 1. ls-ref = r1. INSERT ls INTO TABLE tab. WRITE / sy-subrc.
+ls-id = 2. ls-ref = r2. INSERT ls INTO TABLE tab. WRITE / sy-subrc.
+ls-id = 3. ls-ref = r1. INSERT ls INTO TABLE tab. WRITE / sy-subrc.
+WRITE / lines( tab ).
+READ TABLE tab INTO ls WITH TABLE KEY ref = r1.
+WRITE / sy-subrc.
+WRITE / ls-id.
+READ TABLE tab INTO ls WITH TABLE KEY ref = r2.
+WRITE / sy-subrc.
+WRITE / ls-id.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n0\n4\n2\n0\n1\n0\n2");
+  });
+
+  it("HASHED TABLE OF REF TO data keyed by table_line", async () => {
+    const code = `
+DATA tab TYPE HASHED TABLE OF REF TO i WITH UNIQUE KEY table_line.
+DATA r1 TYPE REF TO i.
+DATA r2 TYPE REF TO i.
+DATA r TYPE REF TO i.
+CREATE DATA r1.
+CREATE DATA r2.
+INSERT r1 INTO TABLE tab. WRITE / sy-subrc.
+INSERT r2 INTO TABLE tab. WRITE / sy-subrc.
+INSERT r1 INTO TABLE tab. WRITE / sy-subrc.
+WRITE / lines( tab ).
+READ TABLE tab INTO r WITH TABLE KEY table_line = r2.
+WRITE / sy-subrc.
+IF r = r2. WRITE / 'same'. ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n0\n4\n2\n0\nsame");
+  });
 });

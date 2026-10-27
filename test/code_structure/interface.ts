@@ -640,4 +640,260 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("moo");
   });
 
+
+  // INTERFACES ... PARTIALLY IMPLEMENTED: a system generates the methods the class
+  // does not implement as empty methods, the transpiler emitted nothing for them
+  it("PARTIALLY IMPLEMENTED, calling an unimplemented method raises CX_SY_DYN_CALL_ILLEGAL_METHOD", async () => {
+    // ABAP keyword documentation, INTERFACES - PARTIALLY IMPLEMENTED: "If an interface
+    // method that is not implemented is called during a test, an exception from the
+    // class CX_SY_DYN_CALL_ILLEGAL_METHOD is raised." Before, it was a TypeError
+    const code = `
+CLASS cx_root DEFINITION ABSTRACT PUBLIC.
+ENDCLASS.
+CLASS cx_root IMPLEMENTATION.
+ENDCLASS.
+
+CLASS cx_sy_dyn_call_illegal_method DEFINITION PUBLIC INHERITING FROM cx_root.
+  PUBLIC SECTION.
+    DATA classname TYPE string.
+    DATA methodname TYPE string.
+    METHODS constructor IMPORTING classname TYPE string OPTIONAL methodname TYPE string OPTIONAL.
+ENDCLASS.
+CLASS cx_sy_dyn_call_illegal_method IMPLEMENTATION.
+  METHOD constructor.
+    super->constructor( ).
+    me->classname = classname.
+    me->methodname = methodname.
+  ENDMETHOD.
+ENDCLASS.
+
+INTERFACE lif.
+  METHODS a.
+  METHODS b RETURNING VALUE(r) TYPE i.
+ENDINTERFACE.
+
+CLASS ltd DEFINITION FOR TESTING.
+  PUBLIC SECTION.
+    INTERFACES lif PARTIALLY IMPLEMENTED.
+ENDCLASS.
+
+CLASS ltd IMPLEMENTATION.
+  METHOD lif~a.
+    WRITE 'a'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lif.
+  DATA lx TYPE REF TO cx_sy_dyn_call_illegal_method.
+  DATA v TYPE i.
+  CREATE OBJECT lo TYPE ltd.
+  lo->a( ).
+  TRY.
+      v = lo->b( ).
+      WRITE 'no exception'.
+    CATCH cx_sy_dyn_call_illegal_method INTO lx.
+      WRITE lx->classname.
+      WRITE lx->methodname.
+  ENDTRY.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("aLTDLIF~B");
+  });
+
+  it("PARTIALLY IMPLEMENTED, without the exception class the error names the method", async () => {
+    const code = `
+INTERFACE lif.
+  METHODS b RETURNING VALUE(r) TYPE i.
+ENDINTERFACE.
+
+CLASS ltd DEFINITION FOR TESTING.
+  PUBLIC SECTION.
+    INTERFACES lif PARTIALLY IMPLEMENTED.
+ENDCLASS.
+
+CLASS ltd IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lif.
+  DATA v TYPE i.
+  CREATE OBJECT lo TYPE ltd.
+  v = lo->b( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    let message = "";
+    try {
+      await f(abap);
+    } catch (e) {
+      message = e.message;
+    }
+    expect(message).to.contain("CX_SY_DYN_CALL_ILLEGAL_METHOD");
+    expect(message).to.contain("LTD->LIF~B");
+  });
+
+  it("PARTIALLY IMPLEMENTED, static method, included interface, and the implemented methods keep working", async () => {
+    const code = `
+CLASS cx_root DEFINITION ABSTRACT PUBLIC.
+ENDCLASS.
+CLASS cx_root IMPLEMENTATION.
+ENDCLASS.
+
+CLASS cx_sy_dyn_call_illegal_method DEFINITION PUBLIC INHERITING FROM cx_root.
+  PUBLIC SECTION.
+    DATA classname TYPE string.
+    DATA methodname TYPE string.
+    METHODS constructor IMPORTING classname TYPE string OPTIONAL methodname TYPE string OPTIONAL.
+ENDCLASS.
+CLASS cx_sy_dyn_call_illegal_method IMPLEMENTATION.
+  METHOD constructor.
+    super->constructor( ).
+    me->classname = classname.
+    me->methodname = methodname.
+  ENDMETHOD.
+ENDCLASS.
+
+INTERFACE lif_inner.
+  METHODS inner RETURNING VALUE(r) TYPE string.
+ENDINTERFACE.
+
+INTERFACE lif.
+  INTERFACES lif_inner.
+  METHODS done RETURNING VALUE(r) TYPE i.
+  CLASS-METHODS stat RETURNING VALUE(r) TYPE i.
+ENDINTERFACE.
+
+CLASS ltd DEFINITION FOR TESTING.
+  PUBLIC SECTION.
+    INTERFACES lif PARTIALLY IMPLEMENTED.
+ENDCLASS.
+
+CLASS ltd IMPLEMENTATION.
+  METHOD lif~done.
+    r = 1.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO ltd.
+  DATA lx TYPE REF TO cx_sy_dyn_call_illegal_method.
+  CREATE OBJECT lo.
+  WRITE lo->lif~done( ).
+  TRY.
+      lo->lif_inner~inner( ).
+    CATCH cx_sy_dyn_call_illegal_method INTO lx.
+      WRITE lx->methodname.
+  ENDTRY.
+  TRY.
+      ltd=>lif~stat( ).
+    CATCH cx_sy_dyn_call_illegal_method INTO lx.
+      WRITE lx->methodname.
+  ENDTRY.
+  TRY.
+      lo->lif~stat( ).
+    CATCH cx_sy_dyn_call_illegal_method INTO lx.
+      WRITE lx->methodname.
+  ENDTRY.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1LIF_INNER~INNERLIF~STATLIF~STAT");
+  });
+
+  it("PARTIALLY IMPLEMENTED, interface inherited from the superclass keeps its implementation", async () => {
+    const code = `
+CLASS cx_root DEFINITION ABSTRACT PUBLIC.
+ENDCLASS.
+CLASS cx_root IMPLEMENTATION.
+ENDCLASS.
+
+CLASS cx_sy_dyn_call_illegal_method DEFINITION PUBLIC INHERITING FROM cx_root.
+  PUBLIC SECTION.
+    DATA classname TYPE string.
+    DATA methodname TYPE string.
+    METHODS constructor IMPORTING classname TYPE string OPTIONAL methodname TYPE string OPTIONAL.
+ENDCLASS.
+CLASS cx_sy_dyn_call_illegal_method IMPLEMENTATION.
+  METHOD constructor.
+    super->constructor( ).
+    me->classname = classname.
+    me->methodname = methodname.
+  ENDMETHOD.
+ENDCLASS.
+
+INTERFACE lif_inner.
+  METHODS inner RETURNING VALUE(r) TYPE i.
+ENDINTERFACE.
+
+INTERFACE lif.
+  INTERFACES lif_inner.
+  METHODS b RETURNING VALUE(r) TYPE i.
+ENDINTERFACE.
+
+CLASS lcl_base DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif_inner.
+ENDCLASS.
+
+CLASS lcl_base IMPLEMENTATION.
+  METHOD lif_inner~inner.
+    r = 7.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS ltd DEFINITION INHERITING FROM lcl_base FOR TESTING.
+  PUBLIC SECTION.
+    INTERFACES lif PARTIALLY IMPLEMENTED.
+ENDCLASS.
+
+CLASS ltd IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lif.
+  DATA lx TYPE REF TO cx_sy_dyn_call_illegal_method.
+  CREATE OBJECT lo TYPE ltd.
+  WRITE lo->lif_inner~inner( ).
+  TRY.
+      lo->b( ).
+    CATCH cx_sy_dyn_call_illegal_method INTO lx.
+      WRITE lx->methodname.
+  ENDTRY.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("7LIF~B");
+  });
+
+  it("without PARTIALLY IMPLEMENTED the missing method is still reported", async () => {
+    const code = `
+INTERFACE lif.
+  METHODS a.
+  METHODS b RETURNING VALUE(r) TYPE i.
+ENDINTERFACE.
+
+CLASS ltd DEFINITION FOR TESTING.
+  PUBLIC SECTION.
+    INTERFACES lif.
+ENDCLASS.
+
+CLASS ltd IMPLEMENTATION.
+  METHOD lif~a.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    let message = "";
+    try {
+      await run(code);
+    } catch (e: any) {
+      message = e.message;
+    }
+    expect(message).to.contain("implement_methods");
+  });
+
 });
