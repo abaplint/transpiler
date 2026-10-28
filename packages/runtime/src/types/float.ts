@@ -1,10 +1,13 @@
 import {throwError} from "../throw_error";
+import {Date} from "./date";
 import {Hex} from "./hex";
 import {XString} from "./xstring";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {Integer8} from "./integer8";
 import {DecFloat34} from "./decfloat34";
+import {Time} from "./time";
+import {FieldSymbol} from "./field_symbol";
 
 // A float writes itself out with a comma for the decimal separator, so
 // reading one back has to accept a comma. Both are allowed rather than only
@@ -76,13 +79,27 @@ export class Float {
         value = "-" + value.substring(0, value.length - 1);
       }
       if (FLOAT_DIGITS.test(value) === false) {
+        // a system clears the target before it raises, so the handler sees it initial
+        this.value = 0;
         throwError("CX_SY_CONVERSION_NO_NUMBER");
       }
       this.value = parseFloat(value.replace(",", "."));
     } else if (value instanceof Integer8) {
       this.value = Number(value.get());
+    } else if (value instanceof Date) {
+// d is converted to the number of days since 01.01.0001, not the YYYYMMDD digits
+      this.value = value.getNumeric();
     } else if (value instanceof Float || value instanceof DecFloat34) {
       this.value = value.getRaw();
+    } else if (value instanceof FieldSymbol) {
+// dispatch on the type the field symbol points to, get() would only give its plain value
+      if (value.getPointer() === undefined) {
+        throw new Error("GETWA_NOT_ASSIGNED");
+      }
+      this.set(value.getPointer());
+    } else if (value instanceof Time) {
+// t is converted to the number of seconds since midnight, not the HHMMSS digits
+      this.value = value.getNumeric();
     } else if (value instanceof Hex || value instanceof XString) {
 // todo, how/if should this work?
       this.set(parseInt(value.get(), 16));

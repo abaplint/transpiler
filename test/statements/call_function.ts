@@ -76,6 +76,7 @@ READ TABLE tab INDEX 1 ASSIGNING <row>.
     }
     expect(caught).to.be.instanceof(IllegalFunction);
     expect(caught.function.get()).to.equal("MISSING");
+    expect(caught.EXTRA_CX).to.deep.equal({INTERNAL_FILENAME: "zfoobar.prog.abap", INTERNAL_LINE: 1});
     expect(registrations).to.equal(0);
     expect(abap.console.get()).to.equal("");
   });
@@ -97,5 +98,24 @@ value = 'after'.
 CLEAR tab.`);
     expect(registered.exporting.foo.get()).to.equal("before");
     expect(registered.tables.tab.array()[0].get()).to.equal("row before");
+  });
+
+  it("CX_SY_DYN_CALL_ILLEGAL_FUNC carries the source position", async () => {
+    class IllegalFunction extends Error {
+      public async constructor_() {
+        return this;
+      }
+    }
+    abap.Classes["CX_SY_DYN_CALL_ILLEGAL_FUNC"] = IllegalFunction;
+    let caught: any;
+    try {
+      await run(`
+WRITE 'before'.
+CALL FUNCTION 'MISSING'.`);
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).to.be.instanceof(IllegalFunction);
+    expect(caught.EXTRA_CX).to.deep.equal({INTERNAL_FILENAME: "zfoobar.prog.abap", INTERNAL_LINE: 3});
   });
 });

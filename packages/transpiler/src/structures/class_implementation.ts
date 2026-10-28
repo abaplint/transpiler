@@ -1,7 +1,6 @@
 import * as abaplint from "@abaplint/core";
 import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
-import {TranspileTypes} from "../transpile_types";
 import {Chunk} from "../chunk";
 
 export class ClassImplementationTranspiler implements IStructureTranspiler {
@@ -11,6 +10,9 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     const ret = new Chunk();
 
     for (const c of node.getChildren()) {
+      if (c.get() instanceof abaplint.Statements.EndClass) {
+        ret.appendString(this.buildPartiallyImplementedStubs(node, traversal));
+      }
       ret.appendChunk(traversal.traverse(c));
       if (c.get() instanceof abaplint.Statements.ClassImplementation) {
         ret.appendString(this.buildConstructor(node.getFirstStatement(), traversal));
@@ -29,6 +31,111 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
   }
 
 ///////////////////////////////
+
+  /** INTERFACES ... PARTIALLY IMPLEMENTED: the interface methods the test class
+   * does not implement exist on a system and raise CX_SY_DYN_CALL_ILLEGAL_METHOD
+   * when called. Emits a method of that shape under the name the implementation
+   * would have had, so the call ends in that exception and not in a TypeError */
+  private buildPartiallyImplementedStubs(node: abaplint.Nodes.StructureNode, traversal: Traversal): string {
+    const token = node.findFirstExpression(abaplint.Expressions.ClassName)?.getFirstToken();
+    if (token === undefined) {
+      return "";
+    }
+    const cdef = traversal.getClassDefinition(token);
+    const scope = traversal.findCurrentScopeByToken(token);
+    if (cdef === undefined || scope === undefined) {
+      return "";
+    }
+    const partial = cdef.getImplementing().filter(i => i.partial === true);
+    if (partial.length === 0) {
+      return "";
+    }
+
+    // the methods the class implements itself, by the emitted name
+    const implemented = new Set<string>();
+    for (const m of node.findAllStatements(abaplint.Statements.MethodImplementation)) {
+      const name = m.findFirstExpression(abaplint.Expressions.MethodName)?.getFirstToken().getStr();
+      if (name !== undefined) {
+        implemented.add(Traversal.escapeNamespace(name.replace("~", "$").toLowerCase())!);
+      }
+    }
+
+    // an interface a superclass implements is inherited, with the real implementations,
+    // a stub for one of its methods would override those
+    const inherited = new Set<string>();
+    let sup = cdef.getSuperClass();
+    while (sup !== undefined) {
+      const sdef = traversal.findClassDefinition(sup, scope);
+      for (const name of this.findIncludedInterfaces(sdef?.getImplementing().map(i => i.name) || [], scope, traversal)) {
+        inherited.add(name);
+      }
+      sup = sdef?.getSuperClass();
+    }
+
+    let ret = "";
+    for (const name of this.findIncludedInterfaces(partial.map(i => i.name), scope, traversal)) {
+      if (inherited.has(name)) {
+        continue;
+      }
+      const intf = traversal.findInterfaceDefinition(name, scope);
+      if (intf === undefined) {
+        continue;
+      }
+      const prefix = Traversal.escapeNamespace(intf.getName().toLowerCase()) + "$";
+      for (const m of intf.getMethodDefinitions().getAll()) {
+        const emitted = prefix + Traversal.escapeNamespace(m.getName().toLowerCase());
+        if (implemented.has(emitted)) {
+          continue;
+        }
+        implemented.add(emitted);
+        ret += this.buildNotImplementedMethod(emitted, m, token.getStr().toLowerCase(), intf.getName(), token, traversal);
+      }
+    }
+    return ret;
+  }
+
+  /** the interfaces, upper cased, with the interfaces they include, recursively */
+  private findIncludedInterfaces(names: string[], scope: abaplint.ISpaghettiScopeNode, traversal: Traversal): string[] {
+    const ret: string[] = [];
+    const queue = [...names];
+    while (queue.length > 0) {
+      const name = queue.shift()!.toUpperCase();
+      if (ret.includes(name)) {
+        continue;
+      }
+      ret.push(name);
+      const intf = traversal.findInterfaceDefinition(name, scope);
+      queue.push(...(intf?.getImplementing().map(i => i.name) || []));
+    }
+    return ret;
+  }
+
+  /** the method a system generates for an interface method the test class leaves
+   * out under PARTIALLY IMPLEMENTED: calling it raises CX_SY_DYN_CALL_ILLEGAL_METHOD
+   * (ABAP keyword documentation, INTERFACES - PARTIALLY IMPLEMENTED), the class and
+   * method named, instead of a JavaScript TypeError no CATCH sees */
+  private buildNotImplementedMethod(emitted: string, m: abaplint.IMethodDefinition, className: string,
+                                    interfaceName: string, token: abaplint.Token, traversal: Traversal): string {
+    const unique = m.getParameters().getAll().length > 0 ? "INPUT" : "";
+    const exception = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_METHOD'", token, true);
+    const classUpper = className.toUpperCase();
+    const methodUpper = interfaceName.toUpperCase() + "~" + m.getName().toUpperCase();
+    const notFound = `CX_SY_DYN_CALL_ILLEGAL_METHOD not found, ${classUpper}->${methodUpper} is not implemented`;
+    const body = `if (${exception} === undefined) { throw new Error("${notFound}"); }\n` +
+      `throw await new ${exception}().constructor_({` +
+      `classname: new abap.types.String().set("${classUpper}"), ` +
+      `methodname: new abap.types.String().set("${methodUpper}")});\n`;
+
+    let ret = "";
+    if (m.isStatic() === true) {
+      // in ABAP static methods can be called with instance arrows, "->"
+      ret += "async " + emitted + "(" + unique + ") {\n" +
+        "return " + Traversal.escapeNamespace(className) + "." + emitted + "(" + unique + ");\n" +
+        "}\n" + "static ";
+    }
+    ret += "async " + emitted + "(" + unique + ") {\n" + body + "}\n";
+    return ret;
+  }
 
   private hasConstructor(node: abaplint.Nodes.StructureNode): boolean {
     for (const m of node.findAllStatements(abaplint.Statements.MethodImplementation)) {
@@ -83,7 +190,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     const prefix = Traversal.escapeNamespace(cdef.getName().toLowerCase()) + ".";
     let ret = "";
     for (const ty of cdef.getTypeDefinitions().getAll()) {
-      ret += TranspileTypes.declareStaticSkipVoid(prefix, ty.type);
+      ret += traversal.declareStaticSkipVoid(prefix, ty.type);
     }
     return ret;
   }
@@ -126,7 +233,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     const staticAttributes = this.findStaticAttributes(cdef, scope, traversal);
     for (const attr of staticAttributes) {
       const name = Traversal.escapeNamespace(clasName) + "." + Traversal.escapeNamespace(attr.prefix) + Traversal.escapeNamespace(attr.identifier.getName().toLowerCase());
-      ret += name + " = " + TranspileTypes.toType(attr.identifier.getType()) + ";\n";
+      ret += name + " = " + traversal.toType(attr.identifier.getType()) + ";\n";
 
       ret += traversal.setValues(attr.identifier, name);
     }

@@ -83,6 +83,9 @@ export class MethodCallChainTranspiler implements IExpressionTranspiler {
         ret.append("." + c.concatTokens().toLowerCase(), c, traversal);
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.Cast) {
         ret.appendChunk(traversal.traverse(c));
+      } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.AttributeName) {
+        // an attribute between two calls, eg. "doc->get_workbook( )->worksheet->at_position( 1 )"
+        ret.appendChunk(traversal.traverse(c));
       } else {
         ret.append("MethodCallChainTranspilerTodo$" + c.get().constructor.name, c, traversal);
       }

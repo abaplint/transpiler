@@ -367,5 +367,43 @@ START-OF-SELECTION.
     await f(abap);
     expect(abap.console.get()).to.equal("20210505120000.1234560");
   });
+  
+  it("timestamp to timestampl, exact", async () => {
+    const code = `
+    DATA short TYPE p LENGTH 8.
+    DATA long TYPE p LENGTH 11 DECIMALS 7.
+    short = '20260915100000'.
+    long = short.
+    WRITE long.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("20260915100000,0000000");
+  });
+
+  it("packed, the largest number that fits", async () => {
+    const code = `
+DATA small TYPE p LENGTH 2.
+small = 999.
+WRITE small.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("999");
+  });
+
+  it("packed, a number that does not fit", async () => {
+    const code = `
+DATA small TYPE p LENGTH 2 DECIMALS 1.
+small = 100.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch (e) {
+      expect(e.toString()).to.contain("CX_SY_CONVERSION_OVERFLOW");
+    }
+  });
 
 });

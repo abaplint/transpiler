@@ -56,12 +56,12 @@ export class CompareTranspiler implements IExpressionTranspiler {
         return new Chunk().appendString(pre + "INPUT && INPUT." + field + " === undefined && INPUT.importing?." + field + " === undefined");
       }
 
-      if (concat.includes(" IS INSTANCE OF ")) {
-        const notted = concat.startsWith("NOT ") || concat.includes(" IS NOT INSTANCE OF ");
+      if (concat.includes(" IS INSTANCE OF ") || concat.includes(" IS NOT INSTANCE OF ")) {
+        const notted = concat.startsWith("NOT ") !== concat.includes(" IS NOT INSTANCE OF ");
         const falsed = notted ? " === false" : "";
         const expr = node.findDirectExpression(Expressions.ClassName);
         const cname = expr?.concatTokens();
-        const lookup = traversal.lookupClassOrInterface(cname, expr?.getFirstToken());
+        const lookup = cname?.toUpperCase() === "OBJECT" ? '"OBJECT"' : traversal.lookupClassOrInterface(cname, expr?.getFirstToken());
         return new Chunk().appendString("abap.compare.instance_of(").appendChunk(s0).appendString(`, ${lookup})` + falsed);
       }
     } else if (sources.length === 2 && node.findDirectTokenByText("IN")) {
@@ -72,7 +72,7 @@ export class CompareTranspiler implements IExpressionTranspiler {
       const s1 = traversal.traverse(sources[1]);
       return new Chunk().appendString(pre + "abap.compare.in(").join([s0, s1]).appendString(")");
     } else if (sources.length === 2) {
-      const operator = traversal.traverse(node.findFirstExpression(Expressions.CompareOperator));
+      const operator = traversal.traverse(node.findDirectExpression(Expressions.CompareOperator));
       const s0 = traversal.traverse(sources[0]);
       const s1 = traversal.traverse(sources[1]);
       return new Chunk().appendString(pre + "abap.compare.").appendChunk(operator).appendString("(").join([s0, s1]).appendString(")");

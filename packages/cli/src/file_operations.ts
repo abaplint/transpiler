@@ -114,6 +114,7 @@ export class FileOperations {
       return limit(async () => {
         // read as latin1, written as latin1: anything else re-encodes the
         // bytes on the way out and undoes the careful read
+        await fsPromises.mkdir(path.dirname(file.path), {recursive: true});
         await fsPromises.writeFile(file.path, file.contents,
                                    this.isBinaryFilename(file.path) ? {encoding: "latin1"} : undefined);
       });

@@ -5,11 +5,12 @@ import * as StructureTranspilers from "./structures";
 import {IStatementTranspiler} from "./statements/_statement_transpiler";
 import {IExpressionTranspiler} from "./expressions/_expression_transpiler";
 import {IStructureTranspiler} from "./structures/_structure_transpiler";
-import {TranspileTypes} from "./transpile_types";
 import {Chunk} from "./chunk";
 import {ConstantTranspiler} from "./expressions";
 import {ITranspilerOptions} from "./types";
 import {DEFAULT_KEYWORDS} from "./keywords";
+import {TypeFactoryRegistry} from "./type_factory_registry";
+import {TranspileTypes} from "./transpile_types";
 
 type IReference = ReturnType<abaplint.ISpaghettiScopeNode["getData"]>["references"][number];
 
@@ -65,15 +66,30 @@ export class Traversal {
   private blockDepth = 0;
   public readonly reg: abaplint.IRegistry;
   public readonly options: ITranspilerOptions | undefined;
+  public readonly typeFactories: TypeFactoryRegistry | undefined;
 
   public constructor(spaghetti: abaplint.ISpaghettiScope, file: abaplint.ABAPFile,
-                     obj: abaplint.ABAPObject, reg: abaplint.IRegistry, options?: ITranspilerOptions) {
+                     obj: abaplint.ABAPObject, reg: abaplint.IRegistry, options?: ITranspilerOptions,
+                     typeFactories?: TypeFactoryRegistry) {
     this.spaghetti = spaghetti;
     this.file = file;
     this.obj = obj;
     this.reg = reg;
     this.options = options;
+    this.typeFactories = typeFactories;
     this.buildStatementContext();
+  }
+
+  public toType(type: abaplint.AbstractType, options?: {packedDecimals?: number}): string {
+    return TranspileTypes.toType(type, options, this.typeFactories);
+  }
+
+  public declare(type: abaplint.TypedIdentifier): string {
+    return TranspileTypes.declare(type, this.typeFactories);
+  }
+
+  public declareStaticSkipVoid(pre: string, type: abaplint.TypedIdentifier): string {
+    return TranspileTypes.declareStaticSkipVoid(pre, type, this.typeFactories);
   }
 
   /** Build file-level control-flow context once instead of rescanning all
@@ -161,6 +177,11 @@ export class Traversal {
 
   public getFilename(): string {
     return this.file.getFilename();
+  }
+
+  /** source position attached to raised exceptions as EXTRA_CX, read by CX_ROOT->GET_SOURCE_POSITION */
+  public buildExtraCX(node: abaplint.INode): string {
+    return `{"INTERNAL_FILENAME": "${this.getFilename()}","INTERNAL_LINE": ${node.getFirstToken().getStart().getRow()}}`;
   }
 
   public getFile(): abaplint.ABAPFile {
@@ -312,7 +333,7 @@ export class Traversal {
   }
 
   public prefixAndName(t: abaplint.Token, filename?: string): string {
-    let name = t.getStr().toLowerCase();
+    let name = t.getStr().toLowerCase().replace(/^!/, "");
 
     if (filename && this.getCurrentObject().getABAPFileByName(filename) === undefined) {
       // the prefix is from a different object
@@ -407,7 +428,7 @@ export class Traversal {
 
     const parameters: string[] = [];
     for (const p of m.getParameters().getAll()) {
-      const type = TranspileTypes.toType(p.getType());
+      const type = this.toType(p.getType());
       const optional = optionalNames.includes(p.getName().toUpperCase()) ? "X" : " ";
 
       let pKind = "";
@@ -468,7 +489,7 @@ export class Traversal {
     }
 
     for (const a of def.getAttributes()?.getAll() || []) {
-      const type = TranspileTypes.toType(a.getType());
+      const type = this.toType(a.getType());
       const runtime = this.mapVisibility(a.getVisibility());
       const isClass = a.getMeta().includes(abaplint.IdentifierMeta.Static) ? "X" : " ";
       attr.add(`"${prefix + a.getName().toUpperCase()}": {"type": () => {return ${type};}, "visibility": "${
@@ -476,7 +497,7 @@ export class Traversal {
     }
 
     for (const a of def.getAttributes()?.getConstants() || []) {
-      const type = TranspileTypes.toType(a.getType());
+      const type = this.toType(a.getType());
       let runtime = "";
       switch (a.getVisibility()) {
         case abaplint.Visibility.Private:
@@ -695,9 +716,15 @@ export class Traversal {
       return undefined;
     }
 
-    // local
+    // local, also when the interface is declared in another include of the same object,
+    // eg. a local interface in the locals_imp of a class, used in its test classes
     if (ref.getFilename() === this.getFilename()) {
       const scope = this.findCurrentScopeByToken(ref.getToken());
+      if (scope?.getIdentifier().stype === abaplint.ScopeType.Interface) {
+        return scope?.getIdentifier().sname;
+      }
+    } else if (this.getCurrentObject().getABAPFileByName(ref.getFilename()) !== undefined) {
+      const scope = this.spaghetti.lookupPosition(ref.getStart(), ref.getFilename());
       if (scope?.getIdentifier().stype === abaplint.ScopeType.Interface) {
         return scope?.getIdentifier().sname;
       }
@@ -776,7 +803,7 @@ export class Traversal {
           escaped = "#" + escaped;
         }
         const name = "this." + escaped;
-        ret += name + " = " + TranspileTypes.toType(a.getType()) + ";\n";
+        ret += name + " = " + this.toType(a.getType()) + ";\n";
         ret += this.setValues(a, name);
         if (escaped?.startsWith("#")) {
           ret += `this.FRIENDS_ACCESS_INSTANCE["${escaped.replace("#", "")}"] = ${name};\n`;
@@ -938,7 +965,7 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
       if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
         ret += "if (this." + n + " === undefined) this." + n + " = " + cname + "." + n + ";\n";
       } else {
-        ret += "if (this." + n + " === undefined) this." + n + " = " + TranspileTypes.toType(a.getType()) + ";\n";
+        ret += "if (this." + n + " === undefined) this." + n + " = " + this.toType(a.getType()) + ";\n";
       }
     }
 
@@ -1121,7 +1148,33 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
   }
 
   public setValues(identifier: abaplint.TypedIdentifier, name: string) {
+    // an enumerated value of a class or interface, declared without STRUCTURE: number the
+    // values in the order they are declared, like the STRUCTURE components in setValues below
+    if (identifier.getValue() === "novalueClassAttributeEnum"
+        && !(identifier.getType() instanceof abaplint.BasicTypes.StructureType)) {
+      const index = this.findEnumValueIndex(identifier);
+      return index === undefined ? "" : Traversal.prefixVariable(name) + ".set(" + index + ");\n";
+    }
     return Traversal.setValues(identifier, name);
+  }
+
+  /** position of an enumerated value in its TYPES BEGIN OF ENUM, counting from 0 */
+  private findEnumValueIndex(identifier: abaplint.TypedIdentifier): number | undefined {
+    // the enum can be declared in another object, eg. a global interface the class implements
+    const filename = identifier.getFilename();
+    const raw = this.reg.getFileByName(filename);
+    const obj = raw === undefined ? undefined : this.reg.findObjectForFile(raw);
+    const file = obj instanceof abaplint.ABAPObject ? obj.getABAPFileByName(filename) : undefined;
+    for (const enumeration of file?.getStructure()?.findAllStructures(abaplint.Structures.TypeEnum) || []) {
+      const values = enumeration.getChildren().filter(c => c instanceof abaplint.Nodes.StatementNode
+        && (c.get() instanceof abaplint.Statements.Type || c.get() instanceof abaplint.Statements.TypeEnum));
+      const index = values.findIndex(v => (v as abaplint.Nodes.StatementNode)
+        .findFirstExpression(abaplint.Expressions.NamespaceSimpleName)?.getFirstToken().getStart().equals(identifier.getStart()));
+      if (index >= 0) {
+        return index;
+      }
+    }
+    return undefined;
   }
 
   public static setValues(identifier: abaplint.TypedIdentifier, name: string) {

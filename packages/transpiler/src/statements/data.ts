@@ -1,6 +1,5 @@
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
-import {TranspileTypes} from "../transpile_types";
 import {Traversal} from "../traversal";
 import {ConstantTranspiler} from "../expressions/constant";
 import {FieldChainTranspiler} from "../expressions";
@@ -81,7 +80,7 @@ export class DataTranspiler implements IStatementTranspiler {
     const ret = new Chunk()
       .appendString(this.loopScoped === true ? "var " : "let ")
       .appendString(this.variableName)
-      .appendString(" = " + TranspileTypes.toType(found.getType(), {packedDecimals}))
+      .appendString(" = " + traversal.toType(found.getType(), {packedDecimals}))
       .appendString(";")
       .appendString(value);
 

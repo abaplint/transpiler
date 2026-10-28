@@ -1,6 +1,6 @@
 import {Context} from "../context";
 import {RFCClient} from "../rfc";
-import {throwError} from "../throw_error";
+import {ExtraCX, throwError} from "../throw_error";
 import {Character, FieldSymbol} from "../types";
 import {_receiveSetResult} from "./receive";
 import {ABAP} from "..";
@@ -9,6 +9,7 @@ declare const abap: ABAP;
 
 export interface ICallFunctionOptions {
   name: string,
+  extra?: ExtraCX,
   updateTask?: boolean,
   destination?: string,
   calling?: (INPUT: any) => any,
@@ -40,7 +41,7 @@ export class CallFunction {
 
     if (options.updateTask) {
       if (fm === undefined) {
-        throwError("CX_SY_DYN_CALL_ILLEGAL_FUNC");
+        throwError("CX_SY_DYN_CALL_ILLEGAL_FUNC", options.extra);
       }
       const copy = (values: any) => {
         if (values === undefined) {
@@ -64,7 +65,7 @@ export class CallFunction {
     } else if (options.destination) {
       if (options.destination.trim() === "") {
         if (fm === undefined) {
-          throwError("CX_SY_DYN_CALL_ILLEGAL_FUNC");
+          throwError("CX_SY_DYN_CALL_ILLEGAL_FUNC", options.extra);
         }
         await fm(param);
         return;
@@ -84,7 +85,7 @@ export class CallFunction {
       });
     } else if (options.calling) {
       if (fm === undefined) {
-        throwError("CX_SY_DYN_CALL_ILLEGAL_FUNC");
+        throwError("CX_SY_DYN_CALL_ILLEGAL_FUNC", options.extra);
       }
       await fm(param);
 

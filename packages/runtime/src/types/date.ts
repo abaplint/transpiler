@@ -63,6 +63,10 @@ export class Date implements ICharacter {
   }
 
   public getNumeric(): number {
+// the initial date and content that is not a date, eg. blanks, convert to 0
+    if (this.value === "00000000" || /^\d{8}$/.test(this.value) === false) {
+      return 0;
+    }
     return getNumberFromDate(this.value);
   }
 

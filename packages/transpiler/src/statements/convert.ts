@@ -4,49 +4,41 @@ import {SourceTranspiler, TargetTranspiler} from "../expressions";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 
+const OPERANDS = ["date", "time", "stamp", "utclong", "zone", "daylight"];
+
 export class ConvertTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
 
-    const source: string[] = [];
-    const target: string[] = [];
+    const source: {[name: string]: string} = {};
+    const target: {[name: string]: string} = {};
 
-    const date = node.findExpressionAfterToken("DATE");
-    if (date?.get() instanceof abaplint.Expressions.Source) {
-      source.push("date: " + new SourceTranspiler().transpile(date, traversal).getCode());
-    } else if (date?.get() instanceof abaplint.Expressions.Target) {
-      target.push("date: " + new TargetTranspiler().transpile(date, traversal).getCode());
+    // each operand is named by the keyword in front of it; "TIME" after "SAVING" is the
+    // daylight saving flag, which may come before or after the TIME operand
+    const children = node.getChildren();
+    for (let i = 1; i < children.length; i++) {
+      const child = children[i];
+      if (!(child instanceof abaplint.Nodes.ExpressionNode)) {
+        continue;
+      }
+      const keyword = children[i - 1].concatTokens().toUpperCase();
+      const before = i >= 2 ? children[i - 2].concatTokens().toUpperCase() : "";
+      const name = keyword === "TIME" && before === "SAVING" ? "daylight" : keyword.toLowerCase();
+      if (OPERANDS.includes(name) === false || source[name] !== undefined || target[name] !== undefined) {
+        continue;
+      }
+
+      if (child.get() instanceof abaplint.Expressions.Source) {
+        source[name] = new SourceTranspiler().transpile(child, traversal).getCode();
+      } else if (child.get() instanceof abaplint.Expressions.Target) {
+        target[name] = new TargetTranspiler().transpile(child, traversal).getCode();
+      }
     }
 
-    const time = node.findExpressionAfterToken("TIME");
-    if (time?.get() instanceof abaplint.Expressions.Source) {
-      source.push("time: " + new SourceTranspiler().transpile(time, traversal).getCode());
-    } else if (time?.get() instanceof abaplint.Expressions.Target) {
-      target.push("time: " + new TargetTranspiler().transpile(time, traversal).getCode());
-    }
+    const list = (operands: {[name: string]: string}) =>
+      OPERANDS.filter(n => operands[n] !== undefined).map(n => n + ": " + operands[n]).join(",");
 
-    const stamp = node.findExpressionAfterToken("STAMP");
-    if (stamp?.get() instanceof abaplint.Expressions.Source) {
-      source.push("stamp: " + new SourceTranspiler().transpile(stamp, traversal).getCode());
-    } else if (stamp?.get() instanceof abaplint.Expressions.Target) {
-      target.push("stamp: " + new TargetTranspiler().transpile(stamp, traversal).getCode());
-    }
-
-    const utclong = node.findExpressionAfterToken("UTCLONG");
-    if (utclong?.get() instanceof abaplint.Expressions.Source) {
-      source.push("utclong: " + new SourceTranspiler().transpile(utclong, traversal).getCode());
-    } else if (utclong?.get() instanceof abaplint.Expressions.Target) {
-      target.push("utclong: " + new TargetTranspiler().transpile(utclong, traversal).getCode());
-    }
-
-    const zone = node.findExpressionAfterToken("ZONE");
-    if (zone?.get() instanceof abaplint.Expressions.Source) {
-      source.push("zone: " + new SourceTranspiler().transpile(zone, traversal).getCode());
-    } else if (zone?.get() instanceof abaplint.Expressions.Target) {
-      target.push("zone: " + new TargetTranspiler().transpile(zone, traversal).getCode());
-    }
-
-    return new Chunk(`abap.statements.convert({${source.join(",")}}, {${target.join(",")}});`);
+    return new Chunk(`abap.statements.convert({${list(source)}}, {${list(target)}});`);
   }
 
 }

@@ -4,8 +4,8 @@ import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {TypeNameOrInfer} from "./type_name_or_infer";
-import {TranspileTypes} from "../transpile_types";
 import {UnknownTypesEnum} from "../types";
+import {FieldAssignmentTranspiler} from "./field_assignment";
 
 export class NewObjectTranspiler implements IExpressionTranspiler {
 
@@ -51,14 +51,52 @@ export class NewObjectTranspiler implements IExpressionTranspiler {
       }
 
       const clas = traversal.lookupClassOrInterface(type.getIdentifierName(), node.getFirstToken());
-      ret.appendString(TranspileTypes.toType(type) + ".set(await (new " + clas + "()).constructor_(" + para + "))");
+      ret.appendString(traversal.toType(type) + ".set(await (new " + clas + "()).constructor_(" + para + "))");
     } else {
-      const source = node.findFirstExpression(abaplint.Expressions.Source);
-      const typeCode = TranspileTypes.toType(type);
-      const sourceCode = source === undefined ? typeCode : traversal.traverse(source).getCode();
-      ret.appendString("((() => {const r = new abap.types.DataReference(" + typeCode + "); r.assign(" + sourceCode + "); return r; })())");
+      // a new data object with a copy of the value, never the source itself; async, as sources can await
+      const typeCode = traversal.toType(type);
+      const setCode = this.buildValue(node, type, traversal);
+      ret.appendString("(await (async () => {const r = new abap.types.DataReference(" + typeCode + "); r.assign(" + typeCode + ");" + setCode + " return r; })())");
     }
 
+    return ret;
+  }
+
+  private buildValue(node: Nodes.ExpressionNode, type: abaplint.AbstractType, traversal: Traversal): string {
+    let ret = "";
+    const parameters = node.findDirectExpression(Expressions.ParameterListS);
+    if (parameters) {
+      // NEW ty( a = 1 b = 2 ), components of a structure
+      for (const p of parameters.findDirectExpressions(Expressions.ParameterS)) {
+        const name = p.findDirectExpression(Expressions.ParameterName)!.concatTokens().toLowerCase();
+        const source = traversal.traverse(p.findDirectExpression(Expressions.Source)).getCode();
+        ret += ` r.getPointer().setField("${name}", ${source});`;
+      }
+      return ret;
+    }
+
+    const single = node.getChildren()[3];
+    if (single instanceof Nodes.ExpressionNode && single.get() instanceof Expressions.Source) {
+      return ` r.getPointer().set(${traversal.traverse(single).getCode()});`;
+    } else if (!(type instanceof abaplint.BasicTypes.TableType)) {
+      return ret;
+    }
+
+    // NEW tab( ( 1 ) ( a = 2 ) ), table lines
+    const rowType = traversal.toType(type.getRowType());
+    let row = "";
+    for (const c of node.getChildren().slice(3)) {
+      if (c instanceof Nodes.TokenNode) {
+        if (c.getFirstToken().getStr() === ")" && row !== "") {
+          ret += ` r.getPointer().appendThis(${rowType}${row});`;
+          row = "";
+        }
+      } else if (c.get() instanceof Expressions.Source) {
+        row += `.set(${traversal.traverse(c).getCode()})`;
+      } else if (c.get() instanceof Expressions.FieldAssignment && c instanceof Nodes.ExpressionNode) {
+        row += new FieldAssignmentTranspiler().transpile(c, traversal).getCode();
+      }
+    }
     return ret;
   }
 

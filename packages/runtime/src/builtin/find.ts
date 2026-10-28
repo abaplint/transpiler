@@ -3,6 +3,7 @@ import {Integer} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {position} from "./_position";
+import {ABAPRegExp} from "../abap_regex";
 
 export interface IFindInput {
   val: ICharacter | string;
@@ -36,7 +37,7 @@ export function find(input: IFindInput) {
     }
 
     const flags = caseInput !== "X" ? "i" : "";
-    const reg = new RegExp(regex, flags);
+    const reg = ABAPRegExp.create(regex, flags);
 
     const ret = val.match(reg)?.index;
     if (ret !== undefined) {

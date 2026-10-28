@@ -14,6 +14,32 @@ describe("Builtin functions - escape", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
+  it("escape() for xml text", async () => {
+    const code = `
+      CONSTANTS e_xml_text TYPE i VALUE 0.
+      DATA lv_result TYPE string.
+      lv_result = escape( val = |abc123&<>"'| format = e_xml_text ).
+      WRITE lv_result.
+      `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(
+      `abc123&amp;&lt;>"'`);
+  });
+
+  it("escape() for xml text, control characters stay", async () => {
+    const code = `
+      CONSTANTS e_xml_text TYPE i VALUE 0.
+      DATA lv_result TYPE string.
+      lv_result = escape( val = |a\\tb\\nc\\rd&| format = e_xml_text ).
+      ASSERT lv_result = |a\\tb\\nc\\rd&amp;|.
+      `;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("escape() for html attribute", async () => {
     const code = `
       CONSTANTS e_html_attr TYPE i VALUE 5.
@@ -181,6 +207,21 @@ describe("Builtin functions - escape", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("escape() for url, full formats", async () => {
+    const code = `
+      CONSTANTS e_url_full TYPE i VALUE 14.
+      CONSTANTS e_uri_full TYPE i VALUE 18.
+      DATA lv_result TYPE string.
+      lv_result = escape( val = 'a b&c=d~' format = e_url_full ).
+      WRITE / lv_result.
+      lv_result = escape( val = 'a b&c=d~' format = e_uri_full ).
+      WRITE / lv_result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("a%20b%26c%3Dd%7E\na%20b%26c%3Dd~");
   });
 
 });

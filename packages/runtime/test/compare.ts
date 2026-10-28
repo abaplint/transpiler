@@ -2,6 +2,31 @@ import {expect} from "chai";
 import {ABAP} from "../src";
 
 describe("Compare", () => {
+  it("instance_of uses the static type only for initial references", () => {
+    const abap = new ABAP();
+    (globalThis as any).abap = abap;
+    class Foo {
+      public static INTERNAL_NAME = "FOO";
+    }
+    class Bar extends Foo {
+      public static INTERNAL_NAME = "PROG-TEST-BAR";
+    }
+    abap.Classes["FOO"] = Foo;
+    abap.Classes["PROG-TEST-BAR"] = Bar;
+    const generic = new abap.types.ABAPObject();
+    expect(abap.compare.instance_of(generic, Foo)).to.equal(false);
+    expect(abap.compare.instance_of(generic, "OBJECT")).to.equal(true);
+    const ref = new abap.types.ABAPObject({qualifiedName: "FOO"});
+    expect(abap.compare.instance_of(ref, Foo)).to.equal(true);
+    expect(abap.compare.instance_of(ref, Bar)).to.equal(false);
+    const sub = new abap.types.ABAPObject({qualifiedName: "BAR", RTTIName: "\\PROGRAM=TEST\\CLASS=BAR"});
+    expect(abap.compare.instance_of(sub, Foo)).to.equal(true);
+    ref.set(new Bar());
+    expect(abap.compare.instance_of(ref, Foo)).to.equal(true);
+    expect(abap.compare.instance_of(ref, Bar)).to.equal(true);
+    expect(abap.compare.instance_of(ref, "OBJECT")).to.equal(true);
+  });
+
   it("2 = 2", () => {
     const abap = new ABAP();
     const foo = new abap.types.Integer();

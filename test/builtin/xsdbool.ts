@@ -28,4 +28,18 @@ describe("Builtin functions - xsdbool", () => {
     await f(abap);
   });
 
+  it("xsdbool with less than, in IF", async () => {
+    const code = `
+DATA lv_one TYPE i VALUE 1.
+DATA lv_two TYPE i VALUE 2.
+DATA lv_hit TYPE abap_bool.
+IF xsdbool( lv_one < lv_two ) = abap_true.
+  lv_hit = abap_true.
+ENDIF.
+ASSERT lv_hit = abap_true.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

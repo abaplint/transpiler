@@ -1,7 +1,6 @@
 import {expect} from "chai";
 import * as abaplint from "@abaplint/core";
-import {Transpiler} from "@abaplint/transpiler";
-import {plugin} from "../src";
+import {Transpiler} from "../src";
 
 const abapgitXML = `<?xml version="1.0" encoding="utf-8"?>
 <abapGit version="v1.0.0">
@@ -28,30 +27,18 @@ define behavior for ZDDLS
   "zsrvb.srvb.xml": abapgitXML,
 };
 
-describe("empty handlers", () => {
+describe("object types without output", () => {
 
   for (const [filename, contents] of Object.entries(testFiles)) {
     it(filename + " is allowed and produces no output", async () => {
       const file = new abaplint.MemoryFile(filename, contents);
       const reg = new abaplint.Registry().addFile(file);
 
-      const res = await new Transpiler({}, plugin).run(reg);
+      const res = await new Transpiler().run(reg);
 
       expect(res.objects.length).to.equal(0);
       expect(res.initializationScript).to.not.include(filename.split(".")[1]);
     });
   }
-
-  it("without the plugin, DDLX fails validation", async () => {
-    const file = new abaplint.MemoryFile("zexample.ddlx.asddlxs", testFiles["zexample.ddlx.asddlxs"]);
-    const reg = new abaplint.Registry().addFile(file);
-
-    try {
-      await new Transpiler().run(reg);
-      expect.fail("expected validation error");
-    } catch (error) {
-      expect(error.message).to.include("allowed_object_types");
-    }
-  });
 
 });

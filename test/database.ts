@@ -3,6 +3,7 @@ import {AsyncFunction, runFiles as runRilesSqlite, runFilesHana, runFilesPostgre
 import {ABAP, MemoryConsole} from "../packages/runtime/src/";
 import {msag_escape, msag_zag_unit_test, tabl_t100xml, tabl_zrng, zquan, zt111, zt222} from "./_data";
 import {IFile} from "../packages/transpiler/src/types";
+import {zhead, zinfo, ztext, zvHeadText} from "../packages/transpiler/test/_view";
 
 try {
   process.loadEnvFile();
@@ -3496,6 +3497,33 @@ const ztabl2_xml = `<?xml version="1.0" encoding="utf-8"?>
     ];
     await runAllDatabases(abap, files, () => {
 // check that the view was created
+    }, {snowflake: false});
+  });
+
+  it("VIEW, join condition with constant, third table joined to second", async () => {
+    const code = `
+DATA ls_head TYPE zhead.
+DATA ls_text TYPE ztext.
+DATA ls_info TYPE zinfo.
+DATA lt_view TYPE STANDARD TABLE OF zv_head_text WITH DEFAULT KEY.
+ls_head-id = '1'. INSERT zhead FROM ls_head.
+ls_text-id = '1'. ls_text-langu = 'EN'. ls_text-descr = 'english'. INSERT ztext FROM ls_text.
+ls_text-id = '1'. ls_text-langu = 'DE'. ls_text-descr = 'german'. INSERT ztext FROM ls_text.
+ls_info-id = '1'. ls_info-info = 'hello'. INSERT zinfo FROM ls_info.
+SELECT * FROM zv_head_text INTO TABLE lt_view.
+WRITE / lines( lt_view ).
+LOOP AT lt_view INTO DATA(ls_view).
+  WRITE / ls_view-descr.
+ENDLOOP.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "zv_head_text.view.xml", contents: zvHeadText()},
+      {filename: "zhead.tabl.xml", contents: zhead},
+      {filename: "ztext.tabl.xml", contents: ztext},
+      {filename: "zinfo.tabl.xml", contents: zinfo},
+    ];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("1\nenglish");
     }, {snowflake: false});
   });
 

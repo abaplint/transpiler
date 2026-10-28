@@ -128,6 +128,54 @@ export class Chunk {
     return this;
   }
 
+  /** Replace generated code while keeping source-map positions after every
+   * occurrence aligned, including replacements that add new lines. */
+  public replaceAll(search: string, replacement: string): Chunk {
+    if (search === "") {
+      throw new Error("Chunk.replaceAll, search string must not be empty");
+    }
+    const positions: number[] = [];
+    let cursor = 0;
+    while (true) {
+      const index = this.raw.indexOf(search, cursor);
+      if (index < 0) {
+        break;
+      }
+      positions.push(index);
+      cursor = index + search.length;
+    }
+
+    const replacementLines = replacement.split("\n");
+    const lineDelta = replacementLines.length - 1;
+    const replacementLastLineLength = replacementLines[replacementLines.length - 1].length;
+    for (const index of positions.reverse()) {
+      const before = this.raw.substring(0, index);
+      const startLine = before.split("\n").length;
+      const startColumn = before.length - before.lastIndexOf("\n") - 1;
+      const endColumn = startColumn + search.length;
+
+      for (const mapping of this.mappings) {
+        if (mapping.generated.line > startLine) {
+          mapping.generated.line += lineDelta;
+        } else if (mapping.generated.line === startLine && mapping.generated.column >= endColumn) {
+          if (lineDelta === 0) {
+            mapping.generated.column += replacement.length - search.length;
+          } else {
+            mapping.generated.line += lineDelta;
+            mapping.generated.column = replacementLastLineLength + mapping.generated.column - endColumn;
+          }
+        }
+      }
+
+      this.raw = this.raw.substring(0, index) + replacement + this.raw.substring(index + search.length);
+    }
+
+    const lastNewline = this.raw.lastIndexOf("\n");
+    this.lineCount = this.raw.split("\n").length;
+    this.lastLineLength = this.raw.length - lastNewline - 1;
+    return this;
+  }
+
   public stripLastNewline(): void {
     // note: this will not change the source map
     if (this.raw.endsWith("\n")) {
@@ -198,7 +246,11 @@ export class Chunk {
    * @param options.sourcePaths maps a mapping "source" (the bare abap filename) to
    *   the path that should appear in the map, avoiding fragile post-hoc string edits
    */
-  public getMap(generatedFilename: string, options?: {generatedLineOffset?: number, sourcePaths?: {[filename: string]: string}}): string {
+  public getMap(generatedFilename: string, options?: {
+    generatedLineOffset?: number,
+    sourcePaths?: {[filename: string]: string},
+    sourceContents?: {[filename: string]: string},
+  }): string {
     const offset = options?.generatedLineOffset ?? 0;
     const sourcePaths = options?.sourcePaths ?? {};
 
@@ -210,6 +262,12 @@ export class Chunk {
       generated: {line: m.generated.line + offset, column: m.generated.column},
     }));
 
+    for (const source of new Set(this.mappings.map(m => m.source))) {
+      const contents = options?.sourceContents?.[source];
+      if (contents !== undefined) {
+        sourceMapGenerator.setSourceContent(sourcePaths[source] ?? source, contents);
+      }
+    }
     const json = sourceMapGenerator.toJSON();
     json.file = generatedFilename;
     json.sourceRoot = "";

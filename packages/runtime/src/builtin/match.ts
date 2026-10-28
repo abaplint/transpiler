@@ -1,5 +1,6 @@
 import {ICharacter} from "../types/_character";
 import {String} from "../types/string";
+import {ABAPRegExp} from "../abap_regex";
 
 export function match(input: {val: ICharacter | string, regex?: ICharacter | string, pcre?: ICharacter | string}): ICharacter {
   const val = typeof input.val === "string" ? input.val : input.val.get();
@@ -14,7 +15,7 @@ export function match(input: {val: ICharacter | string, regex?: ICharacter | str
     reg = regexInput.get();
   }
 
-  const r = new RegExp(reg);
+  const r = ABAPRegExp.create(reg, "");
   const res = val.match(r);
 
   let ret = "";

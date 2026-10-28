@@ -1,7 +1,6 @@
 /* eslint-disable max-len */
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
-import {TranspileTypes} from "../transpile_types";
 import {Traversal} from "../traversal";
 import {ConstantTranspiler, FieldChainTranspiler} from "../expressions";
 import {Chunk} from "../chunk";
@@ -53,7 +52,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
 
         const type = identifier.getType();
         if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodExporting)) {
-          after += `let ${varPrefixed} = ${unique}?.${varName} || ${TranspileTypes.toType(identifier.getType())};\n`;
+          after += `let ${varPrefixed} = ${unique}?.${varName} || ${traversal.toType(identifier.getType())};\n`;
         } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
             && parameterDefault === undefined
             && passByValue === false
@@ -64,12 +63,12 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
           if (identifier.getType().getQualifiedName() !== undefined && identifier.getType().getQualifiedName() !== "") {
             after += `if (${varPrefixed}?.getQualifiedName === undefined || ${varPrefixed}.getQualifiedName() !== "${identifier.getType().getQualifiedName()?.toUpperCase()}") { ${varPrefixed} = undefined; }\n`;
           }
-          after += `if (${varPrefixed} === undefined) { ${varPrefixed} = ${TranspileTypes.toType(identifier.getType())}.set(${unique}.${varName}); }\n`;
+          after += `if (${varPrefixed} === undefined) { ${varPrefixed} = ${traversal.toType(identifier.getType())}.set(${unique}.${varName}); }\n`;
 
         } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
             && type.isGeneric() === true) {
           if (isOptional === true) {
-            after += `let ${varPrefixed} = ${unique}?.${varName} || ${TranspileTypes.toType(identifier.getType())};\n`;
+            after += `let ${varPrefixed} = ${unique}?.${varName} || ${traversal.toType(identifier.getType())};\n`;
           } else {
             after += `let ${varPrefixed} = ${unique}?.${varName};\n`;
           }
@@ -85,18 +84,18 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
           }
           if (type instanceof abaplint.BasicTypes.NumericGenericType) {
             after += `if (${varPrefixed}.constructor.name === "Character") {
-  ${varPrefixed} = ${TranspileTypes.toType(identifier.getType())};
+  ${varPrefixed} = ${traversal.toType(identifier.getType())};
   ${varPrefixed}.set(${unique}?.${varName});
 }\n`;
           }
 
         } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)
             && type.isGeneric() === false) {
-          after += TranspileTypes.declare(identifier) + "\n";
+          after += traversal.declare(identifier) + "\n";
           // note: it might be nessesary to do a type conversion, eg char is passed to xstring parameter
           after += "if (" + unique + " && " + unique + "." + varName + ") {" + varPrefixed + ".set(" + unique + "." + varName + ");}\n";
         } else {
-          after += TranspileTypes.declare(identifier) + "\n";
+          after += traversal.declare(identifier) + "\n";
           after += "if (" + unique + " && " + unique + "." + varName + ") {" + varPrefixed + " = " + unique + "." + varName + ";}\n";
         }
 
@@ -114,7 +113,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
         if (unique === "") {
           unique = "INPUT";
         }
-        after = after + TranspileTypes.declare(identifier) + "\n";
+        after = after + traversal.declare(identifier) + "\n";
       }
     }
 

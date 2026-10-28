@@ -1,4 +1,5 @@
 import {throwError} from "../throw_error";
+import {Date} from "./date";
 import {Float} from "./float";
 import {Hex} from "./hex";
 import {XString} from "./xstring";
@@ -9,6 +10,8 @@ import {HexUInt8} from "./hex_uint8";
 import {Character} from "./character";
 import {String} from "./string";
 import {DecFloat34} from "./decfloat34";
+import {Time} from "./time";
+import {FieldSymbol} from "./field_symbol";
 
 export const DIGITS = new RegExp(/^\s*-?\+?\d+\.?\d* *$/i);
 
@@ -78,6 +81,16 @@ export class Integer implements INumeric {
     return this;
   }
 
+  private fromText(text: string): number {
+    try {
+      return toInteger(text);
+    } catch (e) {
+      // a system clears the target before it raises, so the handler sees it initial
+      this.value = 0;
+      throw e;
+    }
+  }
+
   public set(value: INumeric | ICharacter | Hex | string | number | Integer | Float | DecFloat34) {
     if (this.constant === true) {
       throw new Error("Changing constant");
@@ -88,13 +101,25 @@ export class Integer implements INumeric {
     } else if (value instanceof Integer) {
       this.set(value.get());
     } else if (value instanceof Character) {
-      this.value = toInteger(value.get());
+      this.value = this.fromText(value.get());
     } else if (value instanceof String) {
-      this.value = toInteger(value.get());
+      this.value = this.fromText(value.get());
     } else if (value instanceof Integer8) {
       this.set(Number(value.get()));
+    } else if (value instanceof FieldSymbol) {
+// dispatch on the type the field symbol points to, get() would only give its plain value
+      if (value.getPointer() === undefined) {
+        throw new Error("GETWA_NOT_ASSIGNED");
+      }
+      this.set(value.getPointer());
+    } else if (value instanceof Time) {
+// t is converted to the number of seconds since midnight, not the HHMMSS digits
+      this.value = value.getNumeric();
     } else if (value instanceof Float || value instanceof DecFloat34) {
       this.set(roundHalfAwayFromZero(value.getRaw()));
+    } else if (value instanceof Date) {
+// d is converted to the number of days since 01.01.0001, not the YYYYMMDD digits
+      this.value = value.getNumeric();
     } else if (value instanceof Hex || value instanceof XString || value instanceof HexUInt8) {
 // the last four bytes, 00 on the left, as a signed integer; an empty xstring is 0
       const hex = value.get().slice(-8);
@@ -104,7 +129,7 @@ export class Integer implements INumeric {
       }
       this.set(num);
     } else if (typeof value === "string") {
-      this.value = toInteger(value);
+      this.value = this.fromText(value);
     } else {
       this.set(value.get());
     }

@@ -33,7 +33,7 @@ export class RaiseTranspiler implements IStatementTranspiler {
     if (parameters) {
       p = traversal.traverse(parameters).getCode();
     }
-    const extra = `{"INTERNAL_FILENAME": "${traversal.getFilename()}","INTERNAL_LINE": ${node.getStart().getRow()}}`;
+    const extra = traversal.buildExtraCX(node);
     const lookup = traversal.lookupClassOrInterface(classNameToken?.getStr(), classNameToken);
     const id = UniqueIdentifier.get();
 

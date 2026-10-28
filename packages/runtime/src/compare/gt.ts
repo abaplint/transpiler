@@ -1,13 +1,22 @@
 import {parse} from "../operators/_parse";
-import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Hex, HexUInt8, Integer8, Structure, Table, XString} from "../types";
+import {ABAPObject, Character, DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Hex, HexUInt8, Integer8, Structure, Table, XString} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {Integer} from "../types/integer";
-
+import {compareDecFloat34} from "../operators/_decfloat";
+import {referenceIdentity} from "../types/_reference_identity";
 
 export function gt(
   left: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | HashedTable | Integer8,
   right: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | HashedTable | Integer8): boolean {
+
+  if (left instanceof DecFloat34 || right instanceof DecFloat34) {
+    // exact, getRaw() would compare the nearest doubles
+    const compared = compareDecFloat34(left, right);
+    if (compared !== undefined) {
+      return compared > 0;
+    }
+  }
 
   if (right instanceof Integer) {
     if (left instanceof Integer) {
@@ -52,6 +61,12 @@ export function gt(
     return gt(left, right.getPointer());
   }
 
+  if (left instanceof DataReference && right instanceof DataReference) {
+    return referenceIdentity(left.getPointer()) > referenceIdentity(right.getPointer());
+  } else if (left instanceof ABAPObject && right instanceof ABAPObject) {
+    return referenceIdentity(left.get()) > referenceIdentity(right.get());
+  }
+
   if (left instanceof Table || right instanceof Table || left instanceof HashedTable || right instanceof HashedTable) {
     throw new Error("runtime_todo, gt TABLE");
   } else if (left instanceof Hex || right instanceof Hex || left instanceof HexUInt8 || right instanceof HexUInt8) {
@@ -70,6 +85,7 @@ export function gt(
     } else if (!(left instanceof Structure)) {
       return gt(left, (right as Structure).getCharacter());
     }
+    return gtStructures(left as Structure, right);
   }
 
   let l: number | string | undefined = undefined;
@@ -161,4 +177,18 @@ function get_hex_from_parameter(
   }
 
   return hex_from_parameter;
+}
+
+// structures are compared component by component, the first unequal component decides
+function gtStructures(left: Structure, right: Structure): boolean {
+  const l = left.get();
+  const r = right.get();
+  for (const k of Object.keys(l)) {
+    if (gt(l[k], r[k])) {
+      return true;
+    } else if (gt(r[k], l[k])) {
+      return false;
+    }
+  }
+  return false;
 }

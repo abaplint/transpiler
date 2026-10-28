@@ -1,4 +1,9 @@
-import {ITranspilerOptions} from "@abaplint/transpiler";
+import {ITranspilerOptions as TranspilerOptions} from "@abaplint/transpiler";
+
+export interface ICLITranspilerOptions extends TranspilerOptions {
+  /** Deduplicate generated composite type constructors within each output module (default: true). */
+  sharedTypeFactories?: boolean;
+}
 
 export interface ITranspilerConfig {
   /** @uniqueItems true */
@@ -13,15 +18,27 @@ export interface ITranspilerConfig {
   exclude_filter?: string[];
   /** @minLength 1 */
   output_folder: string;
+  /** Skip unchanged generated files and remove tracked obsolete output */
+  incremental_output?: boolean;
   /** experimental */
   converter?: {
     /** @uniqueItems true */
     input_folder: string | string[];
+    /** list of regex, case insensitive
+     * @uniqueItems true
+     */
+    exclude_filter?: string[];
     /** @minLength 1 */
     output_folder: string;
   },
   libs?: {
+    /** output directory name; defaults to the repository or local folder name
+     * @minLength 1
+     */
+    name?: string,
     url?: string,
+    /** commit SHA, tag or branch to check out from url; defaults to the default branch */
+    ref?: string,
     /** relative to the current working directory */
     folder?: string,
     files?: string | string[],
@@ -30,8 +47,10 @@ export interface ITranspilerConfig {
      */
     exclude_filter?: string[];
   }[],
+  /** skip duplicate dependency objects after the first library in libs, with a warning; defaults to false */
+  skip_duplicate_dependencies?: boolean;
   write_unit_tests?: boolean;
   write_source_map?: boolean;
 
-  options: ITranspilerOptions;
+  options: ICLITranspilerOptions;
 }

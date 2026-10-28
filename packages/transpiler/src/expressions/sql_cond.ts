@@ -6,7 +6,6 @@ import {Chunk} from "../chunk";
 import {SimpleSource3Transpiler} from "./simple_source3";
 import {FieldChainTranspiler} from "./field_chain";
 import {SQLFieldNameTranspiler} from "./sql_field_name";
-import {TranspileTypes} from "../transpile_types";
 import {SourceTranspiler} from "./source";
 import {SQLFieldListTranspiler} from "./sql_field_list";
 import {SQLFromTranspiler} from "./sql_from";
@@ -243,7 +242,7 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
       const conversionField = traversal.isSQLConversion(source.getFirstToken());
       if (conversionField) {
         const field = (table?.parseType(traversal.reg) as abaplint.BasicTypes.StructureType).getComponentByName(conversionField);
-        ret += "'\" + " + TranspileTypes.toType(field!) + ".set(" + concat + ").get() + \"'";
+        ret += "'\" + " + traversal.toType(field!) + ".set(" + concat + ").get() + \"'";
       } else if (concat.startsWith("`")) {
         ret += "'" + concat.substring(1, concat.length - 1) + "'";
       } else {

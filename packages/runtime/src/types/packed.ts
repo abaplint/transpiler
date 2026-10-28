@@ -1,10 +1,16 @@
 import {Float} from "./float";
+import {Date} from "./date";
 import {INumeric} from "./_numeric";
 import {throwError} from "../throw_error";
 import {Integer8} from "./integer8";
 import {DecFloat34} from "./decfloat34";
+import {Time} from "./time";
+import {FieldSymbol} from "./field_symbol";
 
 const digits = new RegExp(/^\s*-?\+?\d*\.?\d*(?:E[+-]?\d+)? *$/i);
+
+// the largest scaled value per length
+const MAXIMUM = new Map<number, bigint>();
 
 function pow10(exp: number): bigint {
   return 10n ** BigInt(exp);
@@ -112,6 +118,7 @@ export class Packed implements INumeric {
   }
 
   public set(value: INumeric | number | string) {
+    const before = this.value;
     if (typeof value === "number") {
       this.value = this.numberToScaled(value);
     } else if (typeof value === "string") {
@@ -119,18 +126,53 @@ export class Packed implements INumeric {
         this.value = 0n;
         return this;
       } else if (digits.test(value) === false) {
+        // a system clears the target before it raises, so the handler sees it initial
+        this.value = 0n;
         throwError("CX_SY_CONVERSION_NO_NUMBER");
       }
 
       this.value = this.stringToScaled(value);
+    } else if (value instanceof Packed) {
+// exact, get() would go through a double and lose digits beyond 2^53
+      this.value = this.stringToScaled(value.toFixed(value.getDecimals()));
     } else if (value instanceof Integer8) {
       this.value = (value.get() as unknown as bigint) * pow10(this.decimals);
-    } else if (value instanceof Float || value instanceof DecFloat34) {
+    } else if (value instanceof Date) {
+// d is converted to the number of days since 01.01.0001, not the YYYYMMDD digits
+      this.value = BigInt(value.getNumeric()) * pow10(this.decimals);
+    } else if (value instanceof DecFloat34) {
+// exact, getRaw() would go through a double
+      this.value = this.stringToScaled(value.toText());
+    } else if (value instanceof Float) {
       this.value = this.numberToScaled(value.getRaw());
+    } else if (value instanceof FieldSymbol) {
+// dispatch on the type the field symbol points to, get() would only give its plain value
+      if (value.getPointer() === undefined) {
+        throw new Error("GETWA_NOT_ASSIGNED");
+      }
+      this.set(value.getPointer());
+    } else if (value instanceof Time) {
+// t is converted to the number of seconds since midnight, not the HHMMSS digits
+      this.value = BigInt(value.getNumeric()) * pow10(this.decimals);
     } else {
       this.set(value.get());
     }
+
+    // LENGTH n holds 2n - 1 digits, including the decimals
+    if (this.value > this.maximum() || this.value < -this.maximum()) {
+      this.value = before;
+      throwError("CX_SY_CONVERSION_OVERFLOW");
+    }
     return this;
+  }
+
+  private maximum(): bigint {
+    let maximum = MAXIMUM.get(this.length);
+    if (maximum === undefined) {
+      maximum = pow10(this.length * 2 - 1) - 1n;
+      MAXIMUM.set(this.length, maximum);
+    }
+    return maximum;
   }
 
   public getLength() {

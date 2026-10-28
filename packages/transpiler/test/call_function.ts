@@ -5,24 +5,25 @@ describe("Transpile CALL FUNCTION", () => {
   const name = "'BAR'";
   const call = `abap.FunctionModules[${name}]`;
   const illegalFunc = "abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FUNC'.trimEnd()]";
+  const extra = `{"INTERNAL_FILENAME": "zfoobar.prog.abap","INTERNAL_LINE": 1}`;
   // eslint-disable-next-line max-len
-  const guard = `if (${call} === undefined) { if (${illegalFunc} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_FUNC not found"; } else { throw await new ${illegalFunc}().constructor_({function: new abap.types.String().set(${name})});} }\n`;
+  const guard = `if (${call} === undefined) { if (${illegalFunc} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_FUNC not found"; } else { throw Object.assign(await new ${illegalFunc}().constructor_({function: new abap.types.String().set(${name})}), {EXTRA_CX: ${extra}});} }\n`;
 
   const tests = [
     {abap: "CALL FUNCTION 'BAR' IN UPDATE TASK.",
-      js: guard + "await abap.statements.callFunction({name:'BAR',updateTask:true});"},
+      js: guard + "await abap.statements.callFunction({name:'BAR',extra:" + extra + ",updateTask:true});"},
     {abap: "CALL FUNCTION 'BAR' IN UPDATE TASK EXPORTING foo = boo TABLES tab = itab.",
-      js: guard + "await abap.statements.callFunction({name:'BAR',updateTask:true,exporting: {foo: boo}, tables: {tab: itab}});"},
+      js: guard + "await abap.statements.callFunction({name:'BAR',extra:" + extra + ",updateTask:true,exporting: {foo: boo}, tables: {tab: itab}});"},
     {abap: "call function 'BAR' in\nupdate task exporting foo = boo.",
-      js: guard + "await abap.statements.callFunction({name:'BAR',updateTask:true,exporting: {foo: boo}});"},
+      js: guard + "await abap.statements.callFunction({name:'BAR',extra:" + extra + ",updateTask:true,exporting: {foo: boo}});"},
     {abap: "CALL FUNCTION 'BAR' EXPORTING foo = boo.",
       js: guard + `await ${call}({exporting: {foo: boo}});`},
     {abap: "CALL FUNCTION 'BAR' EXPORTING update = task.",
       js: guard + `await ${call}({exporting: {update: task}});`},
     {abap: "CALL FUNCTION 'BAR' DESTINATION 'MOO' EXPORTING foo = boo.",
-      js: "await abap.statements.callFunction({name:'BAR',destination:'MOO',exporting: {foo: boo}});"},
+      js: "await abap.statements.callFunction({name:'BAR',extra:" + extra + ",destination:'MOO',exporting: {foo: boo}});"},
     {abap: "CALL FUNCTION 'BAR' STARTING NEW TASK 'foo' CALLING return_info ON END OF TASK EXPORTING foo = boo.",
-      js: "abap.statements.callFunction({name:'BAR',calling:this.return_info,exporting: {foo: boo}});"},
+      js: "abap.statements.callFunction({name:'BAR',extra:" + extra + ",calling:this.return_info,exporting: {foo: boo}});"},
     {abap: "CALL FUNCTION 'BAR' STARTING NEW TASK 'foo' EXPORTING foo = boo.",
       js: guard + `await ${call}({exporting: {foo: boo}});`},
   ];
@@ -37,6 +38,6 @@ describe("Transpile CALL FUNCTION", () => {
     const plain = await runSingle("CALL FUNCTION 'BAR' EXCEPTIONS error = 1 OTHERS = 2.", {ignoreSyntaxCheck: true});
     const update = await runSingle("CALL FUNCTION 'BAR' IN UPDATE TASK EXCEPTIONS error = 1 OTHERS = 2.",
       {ignoreSyntaxCheck: true});
-    expect(update).to.equal(plain?.replace(`await ${call}({});`, "await abap.statements.callFunction({name:'BAR',updateTask:true,});"));
+    expect(update).to.equal(plain?.replace(`await ${call}({});`, "await abap.statements.callFunction({name:'BAR',extra:" + extra + ",updateTask:true,});"));
   });
 });

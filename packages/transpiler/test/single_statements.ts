@@ -171,11 +171,11 @@ describe("Single statements", () => {
     {abap: "INCLUDE lzopenabaptop.", js: `// transpiler TODO: INCLUDE lzopenabaptop\n`, skip: false},
 
     {abap: "CALL FUNCTION 'BAR' DESTINATION 'MOO'.",
-      js: `await abap.statements.callFunction({name:'BAR',destination:'MOO'});`, skip: false},
+      js: `await abap.statements.callFunction({name:'BAR',extra:{"INTERNAL_FILENAME": "zfoobar.prog.abap","INTERNAL_LINE": 1},destination:'MOO'});`, skip: false},
     {abap: `CALL FUNCTION 'BAR' DESTINATION 'MOO' EXPORTING foo = boo.`,
-      js: `await abap.statements.callFunction({name:'BAR',destination:'MOO',exporting: {foo: boo}});`, skip: false},
+      js: `await abap.statements.callFunction({name:'BAR',extra:{"INTERNAL_FILENAME": "zfoobar.prog.abap","INTERNAL_LINE": 1},destination:'MOO',exporting: {foo: boo}});`, skip: false},
     {abap: `CALL FUNCTION 'BAR' STARTING NEW TASK 'foo' CALLING return_info ON END OF TASK EXPORTING foo = boo.`,
-      js: `abap.statements.callFunction({name:'BAR',calling:this.return_info,exporting: {foo: boo}});`, skip: false},
+      js: `abap.statements.callFunction({name:'BAR',extra:{"INTERNAL_FILENAME": "zfoobar.prog.abap","INTERNAL_LINE": 1},calling:this.return_info,exporting: {foo: boo}});`, skip: false},
 
     {abap: `RECEIVE RESULTS FROM FUNCTION 'BAR' IMPORTING param = val.`,
       js: `abap.statements.receive({name:'BAR',importing: {param: val}});`, skip: false},
@@ -390,7 +390,7 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({object: obj,user: usr,fields:
       AND file-filename = zif=>c_dot ).`,
     js: `await abap.statements.deleteInternal(ct_files,{where: async (I) => {return abap.compare.initial(I.item) && !(abap.compare.eq(I.file.get().path, abap.Classes['ZIF'].c_dir) && abap.compare.eq(I.file.get().filename, abap.Classes['ZIF'].c_dot));}});`},
 
-    {abap: "lo_foo ?= lo_bar.", js: "await abap.statements.cast(lo_foo, lo_bar);", skip: false},
+    {abap: "lo_foo ?= lo_bar.", js: 'await abap.statements.cast(lo_foo, lo_bar, {"INTERNAL_FILENAME": "zfoobar.prog.abap","INTERNAL_LINE": 1});', skip: false},
 
     {abap: "RETRY.", js: `throw new Error("RETRY, not supported, transpiler");`, skip: false},
 

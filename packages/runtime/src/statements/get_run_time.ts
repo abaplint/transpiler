@@ -23,5 +23,6 @@ export function getRunTime(context: Context, value: INumeric) {
     micro = context.runTime.last;
   }
   context.runTime.last = micro;
-  value.set(micro);
+  // like the kernel: the count wraps modulo 2^31 and stays non-negative
+  value.set(micro % 2147483648);
 }

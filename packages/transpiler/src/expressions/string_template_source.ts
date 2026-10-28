@@ -2,7 +2,6 @@ import {Nodes, Expressions, AbstractType} from "@abaplint/core";
 import {SourceTranspiler} from ".";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {TranspileTypes} from "../transpile_types";
 
 export class StringTemplateSourceTranspiler {
 
@@ -49,7 +48,7 @@ export class StringTemplateSourceTranspiler {
     }
     if (option.startsWith(`"alpha":"in"`)) {
       if (context !== undefined) {
-        option += `, "alphaInContext": ` + TranspileTypes.toType(context);
+        option += `, "alphaInContext": ` + traversal.toType(context);
       }
     }
     if (option !== "") {

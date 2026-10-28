@@ -900,4 +900,117 @@ space:    subrc=0 offset=0
 c(10):    subrc=0 offset=0`);
   });
 
+  it("regex anchors \\A and \\z", async () => {
+    const code = `
+DATA lv_input TYPE string VALUE \`ztest\`.
+FIND REGEX '\\A[A-Za-z0-9_]+\\z' IN lv_input.
+WRITE / |anchors \\\\A \\\\z: sy-subrc = { sy-subrc }|.
+FIND REGEX '^[A-Za-z0-9_]+$' IN lv_input.
+WRITE / |anchors ^ $:   sy-subrc = { sy-subrc }|.
+FIND REGEX '\\A[A-Za-z0-9_]+\\z' IN \`Aztestz\`.
+WRITE / |literal A..z:  sy-subrc = { sy-subrc }|.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(`anchors \\A \\z: sy-subrc = 0
+anchors ^ $:   sy-subrc = 0
+literal A..z:  sy-subrc = 0`);
+  });
+
+  it("FIND RESULTS, IN SECTION OFFSET, offsets count from the start", async () => {
+    const code = `
+      TYPES: BEGIN OF ty_submatch,
+              offset TYPE i,
+              length TYPE i,
+            END OF ty_submatch.
+      TYPES: BEGIN OF ty_match,
+              line       TYPE i,
+              offset     TYPE i,
+              length     TYPE i,
+              submatches TYPE STANDARD TABLE OF ty_submatch WITH DEFAULT KEY,
+            END OF ty_match.
+      DATA lt_matches TYPE STANDARD TABLE OF ty_match WITH DEFAULT KEY.
+      DATA ls_match LIKE LINE OF lt_matches.
+      DATA ls_submatch TYPE ty_submatch.
+      FIND ALL OCCURRENCES OF REGEX '(b)' IN SECTION OFFSET 2 OF 'abcabc' RESULTS lt_matches.
+      READ TABLE lt_matches INDEX 1 INTO ls_match.
+      READ TABLE ls_match-submatches INDEX 1 INTO ls_submatch.
+      WRITE / ls_match-offset.
+      WRITE / ls_submatch-offset.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n4");
+  });
+
+  it("FIND IN BYTE MODE, a match starts at a byte", async () => {
+    const code = `
+      DATA hex TYPE xstring.
+      DATA needle TYPE xstring.
+      DATA off TYPE i.
+      DATA len TYPE i.
+      needle = '22'.
+      hex = '3220'.
+      FIND needle IN hex IN BYTE MODE.
+      WRITE / sy-subrc.
+      hex = '322220'.
+      FIND needle IN hex IN BYTE MODE MATCH OFFSET off MATCH LENGTH len.
+      WRITE / sy-subrc.
+      WRITE / off.
+      WRITE / len.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n0\n1\n1");
+  });
+
+  it("FIND REGEX, options of a PCRE object", async () => {
+    const code = `
+CLASS cl_abap_regex DEFINITION.
+  PUBLIC SECTION.
+    DATA mv_pattern TYPE string.
+    DATA mv_ignore_case TYPE abap_bool.
+    DATA mv_multiline TYPE abap_bool.
+    DATA mv_dot_all TYPE abap_bool.
+    DATA mv_extended TYPE abap_bool.
+    DATA mv_pcre TYPE abap_bool.
+ENDCLASS.
+
+CLASS cl_abap_regex IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA regex TYPE REF TO cl_abap_regex.
+  DATA text TYPE string.
+  CREATE OBJECT regex.
+  text = |a\\nb|.
+  regex->mv_pattern = '^b$'.
+  FIND REGEX regex IN text.
+  WRITE / sy-subrc.
+  regex->mv_pcre = abap_true.
+  FIND REGEX regex IN text.
+  WRITE / sy-subrc.
+  regex->mv_multiline = abap_true.
+  FIND REGEX regex IN text.
+  WRITE / sy-subrc.
+  regex->mv_pattern = 'a.b'.
+  FIND REGEX regex IN text.
+  WRITE / sy-subrc.
+  regex->mv_dot_all = abap_true.
+  FIND REGEX regex IN text.
+  WRITE / sy-subrc.
+  regex->mv_pattern = 'a b # comment'.
+  text = 'ab'.
+  FIND REGEX regex IN text.
+  WRITE / sy-subrc.
+  regex->mv_extended = abap_true.
+  FIND REGEX regex IN text.
+  WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n4\n0\n4\n0\n4\n0");
+  });
+
 });

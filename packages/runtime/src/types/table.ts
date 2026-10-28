@@ -7,6 +7,7 @@ import {String} from "./string";
 import {Structure} from "./structure";
 import {FieldSymbol} from "./field_symbol";
 import {DataReference} from "./data_reference";
+import {referenceIdentity} from "./_reference_identity";
 import {insertInternal} from "../statements/insert_internal";
 import {compareRows, sort} from "../statements/sort";
 import {Character} from "./character";
@@ -15,6 +16,25 @@ import {HexUInt8} from "./hex_uint8";
 import {ABAP} from "..";
 
 declare const abap: ABAP;
+
+/* VALUE #( ( LINES OF src [FROM idx1] [TO idx2] ) ), appends the rows via appendThis */
+function appendLinesOf(target: Table | HashedTable, source: Table | HashedTable | FieldSymbol,
+                       from?: ICharacter | INumeric, to?: ICharacter | INumeric) {
+  if (source instanceof FieldSymbol) {
+    const pointer = source.getPointer();
+    if (pointer === undefined) {
+      throw new Error("LINES OF, fs not assigned");
+    }
+    source = pointer as Table | HashedTable;
+  }
+  const rows = source.array();
+  const low = from ? parseInt(from.get() + "", 10) : 1;
+  const high = to ? parseInt(to.get() + "", 10) : rows.length;
+  for (let index = Math.max(low, 1); index <= Math.min(high, rows.length); index++) {
+    target.appendThis(rows[index - 1]);
+  }
+  return target;
+}
 
 export enum TableAccessType {
   standard = "STANDARD",
@@ -183,6 +203,8 @@ export class HashedTable implements ITable {
         } else if (data instanceof ABAPObject) {
           const moo = data.getInternalID();
           hash += k + ":" + moo + "|";
+        } else if (data instanceof DataReference) {
+          hash += k + ":ref#" + referenceIdentity(data.getPointer()) + "|";
         } else {
           // @ts-ignore
           hash += k + ":" + data.get() + "|";
@@ -194,6 +216,8 @@ export class HashedTable implements ITable {
           val = val.getCharacter(true);
         } else if (val instanceof ABAPObject) {
           val = val.getInternalID();
+        } else if (val instanceof DataReference) {
+          val = "ref#" + referenceIdentity(val.getPointer());
         } else {
           val = val.get();
         }
@@ -227,7 +251,9 @@ export class HashedTable implements ITable {
       }
 
       // convert to correct type, eg Chars have specific length, or rounding,
-      if (k === "TABLE_LINE") {
+      if (k === "TABLE_LINE" && val instanceof DataReference) {
+        val = "ref#" + referenceIdentity(val.getPointer());
+      } else if (k === "TABLE_LINE") {
         const row = tableRowType.clone() as any;
         row.set(val.get());
         val = row.get();
@@ -244,6 +270,8 @@ export class HashedTable implements ITable {
           val = val.get();
         } else if (val instanceof ABAPObject) {
           val = val.getInternalID();
+        } else if (val instanceof DataReference) {
+          val = "ref#" + referenceIdentity(val.getPointer());
         } else if (val instanceof Structure) {
           val = val.getCharacter(true);
         } else {
@@ -286,6 +314,10 @@ export class HashedTable implements ITable {
   public appendThis(data: TableRowType) {
     this.insert(data);
     return this;
+  }
+
+  public appendLines(source: Table | HashedTable | FieldSymbol, from?: ICharacter | INumeric, to?: ICharacter | INumeric) {
+    return appendLinesOf(this, source, from, to);
   }
 
   public array(): any[] {
@@ -669,6 +701,10 @@ export class Table implements ITable {
     }
     this.append(item);
     return this;
+  }
+
+  public appendLines(source: Table | HashedTable | FieldSymbol, from?: ICharacter | INumeric, to?: ICharacter | INumeric) {
+    return appendLinesOf(this, source, from, to);
   }
 
   public appendInitial() {

@@ -3332,4 +3332,100 @@ ENDCLASS.`;
     expect(cons.split("\n")[1]).to.equal("expected");
   });
 
+  it("test-69", async () => {
+// FOR TESTING helper classes without test methods are not run, also when they live in locals_imp
+    const clas = `
+    CLASS zcl_helped DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_helped IMPLEMENTATION.
+    ENDCLASS.`;
+    const imp = `
+    CLASS lth_in_locals DEFINITION FINAL FOR TESTING.
+      PUBLIC SECTION.
+        CLASS-METHODS text RETURNING VALUE(result) TYPE string.
+    ENDCLASS.
+    CLASS lth_in_locals IMPLEMENTATION.
+      METHOD text.
+        result = 'from locals'.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const tests = `
+    CLASS lth_in_testclasses DEFINITION FINAL FOR TESTING.
+      PUBLIC SECTION.
+        CLASS-METHODS text RETURNING VALUE(result) TYPE string.
+    ENDCLASS.
+    CLASS lth_in_testclasses IMPLEMENTATION.
+      METHOD text.
+        result = 'from testclasses'.
+      ENDMETHOD.
+    ENDCLASS.
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        WRITE lth_in_locals=>text( ).
+        WRITE / lth_in_testclasses=>text( ).
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zcl_helped.clas.abap", contents: clas},
+      {filename: "zcl_helped.clas.locals_imp.abap", contents: imp},
+      {filename: "zcl_helped.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons).to.include("from locals");
+    expect(cons).to.include("from testclasses");
+    expect(cons).to.not.include("lth_");
+  });
+
+  it("test-70", async () => {
+// a constant of a local interface in locals_def, used from the class, locals_imp and the test classes
+    const clas = `
+    CLASS zcl_texts DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        CLASS-METHODS from_main RETURNING VALUE(result) TYPE string.
+    ENDCLASS.
+    CLASS zcl_texts IMPLEMENTATION.
+      METHOD from_main.
+        result = lif_texts=>main.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const def = `
+    INTERFACE lif_texts.
+      CONSTANTS main TYPE string VALUE \`from locals_def\`.
+    ENDINTERFACE.`;
+    const imp = `
+    CLASS lcl_reader DEFINITION.
+      PUBLIC SECTION.
+        CLASS-METHODS read RETURNING VALUE(result) TYPE string.
+    ENDCLASS.
+    CLASS lcl_reader IMPLEMENTATION.
+      METHOD read.
+        result = lif_texts=>main.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        WRITE / zcl_texts=>from_main( ).
+        WRITE / lcl_reader=>read( ).
+        WRITE / lif_texts=>main.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zcl_texts.clas.abap", contents: clas},
+      {filename: "zcl_texts.clas.locals_def.abap", contents: def},
+      {filename: "zcl_texts.clas.locals_imp.abap", contents: imp},
+      {filename: "zcl_texts.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons.split("\n").slice(1, 4)).to.deep.equal(["from locals_def", "from locals_def", "from locals_def"]);
+  });
+
 });

@@ -5,6 +5,22 @@ import {ABAP} from "..";
 
 declare const abap: ABAP;
 
+/** SAP time zone names that are not IANA identifiers. Most of the standard content
+ *  is named after an IANA zone, or after an abbreviation IANA still carries (UTC,
+ *  CET, EET, WET), and reaches Temporal unchanged. */
+const SAP_TIME_ZONES: {[name: string]: string} = {
+  "INDIA": "Asia/Kolkata",
+  "JAPAN": "Asia/Tokyo",
+};
+
+/** Summer time: the zone is ahead of its standard offset, the lower of the offsets on
+ *  1 January and 1 July, which also holds on the southern hemisphere. */
+function isDaylightSaving(zoned: Temporal.ZonedDateTime): boolean {
+  const january = Temporal.PlainDate.from({year: zoned.year, month: 1, day: 1}).toZonedDateTime({timeZone: zoned.timeZoneId});
+  const july = Temporal.PlainDate.from({year: zoned.year, month: 7, day: 1}).toZonedDateTime({timeZone: zoned.timeZoneId});
+  return zoned.offsetNanoseconds > Math.min(january.offsetNanoseconds, july.offsetNanoseconds);
+}
+
 export interface IConvertSource {
   date?: ICharacter | string,
   time?: ICharacter | string,
@@ -18,6 +34,7 @@ export interface IConvertTarget {
   date?: ICharacter,
   time?: ICharacter,
   utclong?: ICharacter,
+  daylight?: ICharacter,
 }
 
 export function convert(source: IConvertSource, target: IConvertTarget) {
@@ -82,6 +99,7 @@ export function convert(source: IConvertSource, target: IConvertTarget) {
     utcUsed = true;
     zone = "UTC";
   }
+  zone = SAP_TIME_ZONES[zone.toUpperCase()] ?? zone;
 
 ////////////////////////
 
@@ -91,6 +109,7 @@ export function convert(source: IConvertSource, target: IConvertTarget) {
       target.date?.clear();
       target.time?.clear();
       target.utclong?.clear();
+      target.daylight?.clear();
       return;
     }
     const datePart = utclong.substring(0, 10);
@@ -110,6 +129,7 @@ export function convert(source: IConvertSource, target: IConvertTarget) {
     if (stamp === "0") {
       target.date?.clear();
       target.time?.clear();
+      target.daylight?.clear();
       return;
     }
     const pt = Temporal.PlainTime.from(stamp.substring(8, 10) + ":" + stamp.substring(10, 12) + ":" + stamp.substring(12, 14));
@@ -120,6 +140,9 @@ export function convert(source: IConvertSource, target: IConvertTarget) {
   const d = zoned.toPlainDate().toString().replace(/-/g, "");
   const t = zoned.toPlainTime().toString().replace(/:/g, "");
 
+  if (target.daylight) {
+    target.daylight.set(isDaylightSaving(zoned) ? "X" : " ");
+  }
   if (target.stamp) {
     target.stamp.set(d + t);
   }

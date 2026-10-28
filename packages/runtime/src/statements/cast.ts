@@ -1,4 +1,4 @@
-import {throwError} from "../throw_error";
+import {ExtraCX, throwError} from "../throw_error";
 import {ABAPObject, FieldSymbol} from "../types";
 import {ABAP} from "..";
 
@@ -8,7 +8,7 @@ declare const abap: ABAP;
 // check with javascript instanceof?
 // handling interfaces?
 // todo: remove the "async"
-export async function cast(target: ABAPObject | FieldSymbol, source: ABAPObject) {
+export async function cast(target: ABAPObject | FieldSymbol, source: ABAPObject, extra?: ExtraCX) {
   if (source instanceof ABAPObject && source.get() === undefined) {
     target.clear();
     return;
@@ -21,7 +21,7 @@ export async function cast(target: ABAPObject | FieldSymbol, source: ABAPObject)
     if (source.getPointer() === undefined) {
       throw new Error("GETWA_NOT_ASSIGNED");
     }
-    await cast(target, source.getPointer());
+    await cast(target, source.getPointer(), extra);
     return;
   } else if (target instanceof FieldSymbol && target.getPointer() === undefined) {
     throw new Error("GETWA_NOT_ASSIGNED");
@@ -50,13 +50,13 @@ export async function cast(target: ABAPObject | FieldSymbol, source: ABAPObject)
     // using "instanceof" is probably wrong in some cases,
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/instanceof
     if (source.get() instanceof targetClass === false) {
-      throwError("CX_SY_MOVE_CAST_ERROR");
+      throwError("CX_SY_MOVE_CAST_ERROR", extra);
     }
   } else if (checkIntf === true && targetClass?.INTERNAL_TYPE === "INTF") {
     const list: string[] = source.get().constructor.IMPLEMENTED_INTERFACES;
     const isImplemented = list.some(i => i === targetName);
     if (isImplemented === false) {
-      throwError("CX_SY_MOVE_CAST_ERROR");
+      throwError("CX_SY_MOVE_CAST_ERROR", extra);
     }
   }
   target.set(source);

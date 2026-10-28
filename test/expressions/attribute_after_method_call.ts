@@ -143,4 +143,74 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("class attribute between two method calls", async () => {
+    const code = setup + `
+CLASS lcl_holder DEFINITION.
+  PUBLIC SECTION.
+    DATA sy TYPE REF TO lif_sy.
+    METHODS constructor.
+    METHODS me_ref RETURNING VALUE(ro_holder) TYPE REF TO lcl_holder.
+ENDCLASS.
+CLASS lcl_holder IMPLEMENTATION.
+  METHOD constructor.
+    sy = NEW lcl_sy( ).
+  ENDMETHOD.
+  METHOD me_ref.
+    ro_holder = me.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo_holder TYPE REF TO lcl_holder.
+  lo_holder = NEW #( ).
+  WRITE lo_holder->me_ref( )->sy->language( )->value.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("E");
+  });
+
+  it("method call followed by two attribute accesses", async () => {
+    const code = `
+CLASS lcl_position DEFINITION.
+  PUBLIC SECTION.
+    DATA row TYPE i.
+ENDCLASS.
+
+CLASS lcl_position IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lcl_token DEFINITION.
+  PUBLIC SECTION.
+    DATA start TYPE REF TO lcl_position.
+ENDCLASS.
+
+CLASS lcl_token IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lcl_node DEFINITION.
+  PUBLIC SECTION.
+    METHODS get_first_token RETURNING VALUE(result) TYPE REF TO lcl_token.
+ENDCLASS.
+
+CLASS lcl_node IMPLEMENTATION.
+  METHOD get_first_token.
+    CREATE OBJECT result.
+    CREATE OBJECT result->start.
+    result->start->row = 5.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo_node TYPE REF TO lcl_node.
+  DATA lv_row TYPE i.
+  CREATE OBJECT lo_node.
+  " method call followed by two attribute accesses
+  lv_row = lo_node->get_first_token( )->start->row.
+  ASSERT lv_row = 5.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

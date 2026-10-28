@@ -146,4 +146,154 @@ ASSERT value IS INITIAL.`;
     await f(abap);
   });
 
+  
+  it("decfloat34 from int8", async () => {
+    const code = `
+    DATA i8 TYPE int8.
+    DATA dec TYPE decfloat34.
+    DATA int TYPE i.
+    i8 = 1730617950.
+    dec = i8.
+    int = dec - 1730617900.
+    WRITE int.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("50");
+  });
+
+  it("decfloat34, exact sum", async () => {
+    const code = `
+DATA a TYPE decfloat34.
+DATA b TYPE decfloat34.
+DATA sum TYPE decfloat34.
+a = '0.1'.
+b = '0.2'.
+sum = a + b.
+ASSERT sum = '0.3'.
+WRITE sum.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0,3");
+  });
+
+  it("decfloat34, 34 significant digits", async () => {
+    const code = `
+DATA dec TYPE decfloat34.
+DATA text TYPE string.
+dec = '1234567890123456789012345678901234'.
+dec = dec + 1.
+text = |{ dec }|.
+WRITE text.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1234567890123456789012345678901235");
+  });
+
+  it("decfloat34, division rounded to 34 digits", async () => {
+    const code = `
+DATA dec TYPE decfloat34.
+DATA text TYPE string.
+dec = 2.
+dec = dec / 3.
+text = |{ dec }|.
+WRITE text.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0.6666666666666666666666666666666667");
+  });
+
+  it("decfloat34, text that is not a number", async () => {
+    const code = `
+DATA dec TYPE decfloat34.
+dec = CONV decfloat34( 'abc' ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch (e) {
+      expect(e.toString()).to.contain("CX_SY_CONVERSION_NO_NUMBER");
+    }
+  });
+
+  it("decfloat34, to a packed number with seven decimals", async () => {
+    const code = `
+DATA dec TYPE decfloat34.
+DATA stamp TYPE p LENGTH 11 DECIMALS 7.
+dec = '20260915100000.1234567'.
+stamp = dec.
+WRITE stamp.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("20260915100000,1234567");
+  });
+
+  it("decfloat34, frac( ) and floor( ) keep all digits", async () => {
+    const code = `
+DATA stamp TYPE p LENGTH 11 DECIMALS 7.
+DATA dec TYPE decfloat34.
+DATA text TYPE string.
+stamp = '20260915100000.1234567'.
+dec = frac( stamp ).
+text = |{ dec }|.
+WRITE / text.
+dec = stamp.
+dec = floor( dec ).
+text = |{ dec }|.
+WRITE / text.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0.1234567\n20260915100000");
+  });
+
+  it("decfloat34, compared exactly", async () => {
+    const code = `
+DATA big TYPE decfloat34.
+DATA next TYPE decfloat34.
+big = '10000000000000000'.
+next = '10000000000000001'.
+IF next > big.
+  WRITE / 'greater'.
+ENDIF.
+IF next <> big.
+  WRITE / 'different'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("greater\ndifferent");
+  });
+
+  it("decfloat34, to int8 exactly", async () => {
+    const code = `
+DATA dec TYPE decfloat34.
+DATA i8 TYPE int8.
+dec = '9007199254740993.4'.
+i8 = dec.
+WRITE i8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("9007199254740993");
+  });
+
+  it("decfloat34, string template without exponent", async () => {
+    const code = `
+DATA dec TYPE decfloat34.
+DATA text TYPE string.
+dec = '0.0000001'.
+text = |{ dec }|.
+WRITE text.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0.0000001");
+  });
+
 });
