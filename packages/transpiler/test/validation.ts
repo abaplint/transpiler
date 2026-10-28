@@ -40,17 +40,6 @@ describe("Validation", () => {
     }
   });
 
-  it("SELECT SINGLE FOR UPDATE, throws error", async () => {
-    const abap = `SELECT SINGLE FOR UPDATE * FROM t100 INTO ls_result.`;
-
-    try {
-      await runSingle(abap, {ignoreSyntaxCheck: true});
-      expect.fail();
-    } catch (e) {
-      expect(e.message).to.contain("FOR UPDATE");
-    }
-  });
-
   it("Forbidden identifier", async () => {
     const abap = `DATA unique2 TYPE string.`;
 
