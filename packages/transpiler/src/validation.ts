@@ -116,6 +116,7 @@ export const config: IConfig = {
     "forbidden_identifier": {
       "check": [],
     },
+    "forbidden_kernel_write": false,
   },
 };
 
@@ -139,6 +140,15 @@ export class Validation {
     }
 
     config.rules["forbidden_identifier"]["check"] = ["^unique\\d+$"];
+
+    // WRITE '@KERNEL ...' is emitted as raw JavaScript, see statements/write.ts. In the rule an
+    // empty allow list allows everything, here it allows nothing, "^$" matches no object name
+    const allow = this.options?.kernel?.allow;
+    if (allow === undefined) {
+      config.rules["forbidden_kernel_write"] = false;
+    } else {
+      config.rules["forbidden_kernel_write"] = {allow: allow.length === 0 ? ["^$"] : allow};
+    }
 
     if (this.options?.unknownTypes === UnknownTypesEnum.runtimeError) {
       // this is not a constant, just a regex that happens to not match anything
