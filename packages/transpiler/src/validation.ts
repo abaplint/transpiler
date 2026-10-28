@@ -1,4 +1,4 @@
-import {Issue, IRegistry, Config, IConfig, Version, ABAPObject, Statements, Expressions} from "@abaplint/core";
+import {Issue, IRegistry, Config, IConfig, Version} from "@abaplint/core";
 import {ITranspilerOptions, UnknownTypesEnum} from "./types";
 
 const defaultAllowedObjectTypes = [
@@ -116,6 +116,7 @@ export const config: IConfig = {
     "forbidden_identifier": {
       "check": [],
     },
+    "forbidden_kernel_write": false,
   },
 };
 
@@ -140,6 +141,15 @@ export class Validation {
 
     config.rules["forbidden_identifier"]["check"] = ["^unique\\d+$"];
 
+    // WRITE '@KERNEL ...' is emitted as raw JavaScript, see statements/write.ts. In the rule an
+    // empty allow list allows everything, here it allows nothing, "^$" matches no object name
+    const allow = this.options?.kernel?.allow;
+    if (allow === undefined) {
+      config.rules["forbidden_kernel_write"] = false;
+    } else {
+      config.rules["forbidden_kernel_write"] = {allow: allow.length === 0 ? ["^$"] : allow};
+    }
+
     if (this.options?.unknownTypes === UnknownTypesEnum.runtimeError) {
       // this is not a constant, just a regex that happens to not match anything
       config.syntax.errorNamespace = "VOID_EVERYTHING";
@@ -154,39 +164,7 @@ export class Validation {
 
     const conf = new Config(JSON.stringify(config));
     reg.setConfig(conf);
-    const issues = [...reg.findIssues()];
-    issues.push(...this.checkKernel(reg));
-    return issues;
-  }
-
-  /** WRITE '@KERNEL ...' is emitted as raw JavaScript, see statements/write.ts; when
-   *  options.kernel is set, only objects whose name matches the allow list may use it */
-  private checkKernel(reg: IRegistry): Issue[] {
-    const allow = this.options?.kernel?.allow;
-    if (allow === undefined) {
-      return [];
-    }
-    const patterns = allow.map(a => new RegExp(a, "i"));
-
-    const issues: Issue[] = [];
-    for (const obj of reg.getObjects()) {
-      if (!(obj instanceof ABAPObject) || patterns.some(p => p.test(obj.getName()))) {
-        continue;
-      }
-      for (const file of obj.getABAPFiles()) {
-        for (const statement of file.getStatements()) {
-          if (!(statement.get() instanceof Statements.Write)) {
-            continue;
-          }
-          const source = statement.findDirectExpression(Expressions.Source)?.concatTokens();
-          if (source?.startsWith("'@KERNEL ") !== true) {
-            continue;
-          }
-          const message = "@KERNEL is not allowed in " + obj.getName() + ", see transpiler option kernel.allow";
-          issues.push(Issue.atStatement(file, statement, message, "kernel_not_allowed"));
-        }
-      }
-    }
+    const issues = reg.findIssues();
     return issues;
   }
 

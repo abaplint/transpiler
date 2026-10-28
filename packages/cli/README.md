@@ -26,8 +26,9 @@ Omit the option or set it to `true` to use shared factories.
 `WRITE '@KERNEL <js>'.` emits the literal as raw JavaScript, which runs with
 the privileges of the host. To restrict it, set `options.kernel.allow` to the
 list of regular expressions (matched case insensitively against the object
-name) that may use it; a `@KERNEL` literal in any other object fails the
-transpile with the issue `kernel_not_allowed`, naming file and line. Libraries
+name) that may use it, an empty list allows none. A `@KERNEL` literal in any
+other object fails the transpile with the issue of the abaplint rule
+`forbidden_kernel_write`, naming file and line. Libraries
 are allowed the same way, by listing the object name patterns they use, for
 example `"^CL_"` and `"^KERNEL_"` for open-abap-core:
 

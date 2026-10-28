@@ -76,14 +76,21 @@ ENDCLASS.`);
       expect(issues.length).to.equal(0);
     });
 
-    it("other object gets kernel_not_allowed with file and row", async () => {
+    it("other object gets forbidden_kernel_write with file and row", async () => {
       const reg = new abaplint.Registry().addFile(kernelClass("ZOTHER")).addFile(kernelClass("ZALLOWED_CLASS"));
       const issues = new Validation({kernel: {allow: ["^ZALLOWED"]}}).run(reg);
       expect(issues.length).to.equal(1);
-      expect(issues[0].getKey()).to.equal("kernel_not_allowed");
+      expect(issues[0].getKey()).to.equal("forbidden_kernel_write");
       expect(issues[0].getFilename()).to.equal("zother.clas.abap");
       expect(issues[0].getStart().getRow()).to.equal(8);
       expect(issues[0].getMessage()).to.contain("ZOTHER");
+    });
+
+    it("empty allow list forbids every object", async () => {
+      const reg = new abaplint.Registry().addFile(kernelClass("ZALLOWED_CLASS"));
+      const issues = new Validation({kernel: {allow: []}}).run(reg);
+      expect(issues.length).to.equal(1);
+      expect(issues[0].getKey()).to.equal("forbidden_kernel_write");
     });
 
     it("patterns are matched case insensitively against the object name", async () => {
@@ -98,7 +105,7 @@ ENDCLASS.`);
         await new Transpiler({kernel: {allow: ["^ZALLOWED"]}}).run(reg);
         expect.fail();
       } catch (e) {
-        expect(e.message).to.contain("kernel_not_allowed");
+        expect(e.message).to.contain("forbidden_kernel_write");
         expect(e.message).to.contain("zother.clas.abap:8");
       }
     });

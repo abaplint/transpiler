@@ -93,8 +93,8 @@ export interface ITranspilerOptions {
   /** skips version check, not recommended */
   skipVersionCheck?: boolean;
   /** restricts WRITE '@KERNEL ...' (raw JavaScript) to the objects whose name matches one of the
-   * regular expressions in allow, case insensitive; a literal anywhere else is reported as the
-   * validation issue kernel_not_allowed. Undefined allows @KERNEL everywhere */
+   * regular expressions in allow, case insensitive, an empty list allows none; a literal anywhere else is
+   * reported by the abaplint rule forbidden_kernel_write. Undefined allows @KERNEL everywhere */
   kernel?: {
     allow: string[];
   };
