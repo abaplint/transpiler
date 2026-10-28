@@ -39,6 +39,17 @@ export class XString implements ICharacter {
       if (this.value.length % 2 === 1) {
         this.value = "0" + this.value;
       }
+    } else if (value instanceof Integer8) {
+      const v: bigint = (value as Integer8).get();
+      if (v < 0n) {
+        // two's complement, as int8 -> x LENGTH 8
+        this.value = new Hex({length: 8}).set(value).get();
+      } else {
+        this.value = v.toString(16).toUpperCase();
+        if (this.value.length % 2 === 1) {
+          this.value = "0" + this.value;
+        }
+      }
     } else {
       let v = value.get();
       if (value instanceof Float) {
