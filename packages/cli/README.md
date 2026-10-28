@@ -122,6 +122,29 @@ The transpiler library retains flat output unless its caller supplies an output
 folder map as the third argument to `Transpiler.run()`. This layout is enabled
 automatically by the CLI.
 
+## Pinning a library
+
+A library given by `url` is cloned when the CLI runs, so without more the
+default branch of that moment is used and the same project commit can build
+differently from one day to the next. Set `libs[].ref` to a commit SHA, a tag
+or a branch to make the build reproducible:
+
+```json
+{
+  "libs": [
+    {"url": "https://github.com/open-abap/open-abap-core", "ref": "239b817e6fd05e62854fed25663f002c60dda07c"},
+    {"url": "https://github.com/example/utilities", "ref": "v1.2.0"}
+  ]
+}
+```
+
+A branch or tag is cloned shallow. A commit is fetched shallow by name; when
+the server does not serve that, or the SHA is abbreviated, the full history is
+fetched and the commit checked out from it. The CLI prints the commit of every
+library it clones, and of every `folder` library that is a git checkout, as
+`commit: <sha>` next to the file count, so the commits of a build can be
+recorded.
+
 ## Duplicate dependencies
 
 By default, two libraries defining the same ABAP object (type and name) cause
