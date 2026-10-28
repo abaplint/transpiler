@@ -22,7 +22,7 @@ export class SelectTranspiler implements IStatementTranspiler {
     } else if (node.findDirectTokenByText("DISTINCT") !== undefined) {
       throw new Error("SelectTranspiler, UNION DISTINCT todo");
     } else if (node.findDirectExpression(abaplint.Expressions.Select)?.findDirectTokenByText("UPDATE") !== undefined) {
-      throw new Error("SELECT SINGLE FOR UPDATE, not supported, transpiler");
+      return new Chunk(`throw new Error("SELECT SINGLE FOR UPDATE, not supported, transpiler");`);
     }
 
     let target = "undefined";
