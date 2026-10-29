@@ -60,7 +60,8 @@ DATA row LIKE LINE OF lt_tab.
 row-name = 'foo'.
 row-value = 'bar'.
 MODIFY TABLE lt_tab FROM row.
-ASSERT lines( lt_tab ) = 1.`;
+ASSERT sy-subrc = 4.
+ASSERT lines( lt_tab ) = 0.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
@@ -145,6 +146,282 @@ ENDLOOP.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("MOO\nBAR");
+  });
+
+  it("MODIFY TABLE, hashed", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         name TYPE string,
+         size TYPE i,
+       END OF ty_row.
+TYPES ty_rows TYPE HASHED TABLE OF ty_row WITH UNIQUE KEY name.
+DATA mt_rows TYPE ty_rows.
+DATA ls_row TYPE ty_row.
+
+ls_row-name = 'a'.
+INSERT ls_row INTO TABLE mt_rows.
+ls_row-size = 1.
+MODIFY TABLE mt_rows FROM ls_row.
+WRITE / sy-subrc.
+WRITE / lines( mt_rows ).
+CLEAR ls_row.
+READ TABLE mt_rows WITH TABLE KEY name = 'a' INTO ls_row.
+WRITE / ls_row-size.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n1\n1");
+  });
+
+  it("MODIFY TABLE, hashed, not found", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         name TYPE string,
+         size TYPE i,
+       END OF ty_row.
+TYPES ty_rows TYPE HASHED TABLE OF ty_row WITH UNIQUE KEY name.
+DATA mt_rows TYPE ty_rows.
+DATA ls_row TYPE ty_row.
+
+ls_row-name = 'a'.
+INSERT ls_row INTO TABLE mt_rows.
+ls_row-name = 'b'.
+ls_row-size = 1.
+MODIFY TABLE mt_rows FROM ls_row.
+WRITE / sy-subrc.
+WRITE / lines( mt_rows ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n1");
+  });
+
+  it("MODIFY TABLE, hashed, TRANSPORTING", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         name  TYPE string,
+         size  TYPE i,
+         other TYPE i,
+       END OF ty_row.
+TYPES ty_rows TYPE HASHED TABLE OF ty_row WITH UNIQUE KEY name.
+DATA mt_rows TYPE ty_rows.
+DATA ls_row TYPE ty_row.
+
+ls_row-name = 'a'.
+ls_row-size = 1.
+ls_row-other = 1.
+INSERT ls_row INTO TABLE mt_rows.
+ls_row-size = 2.
+ls_row-other = 2.
+MODIFY TABLE mt_rows FROM ls_row TRANSPORTING size.
+WRITE / sy-subrc.
+CLEAR ls_row.
+READ TABLE mt_rows WITH TABLE KEY name = 'a' INTO ls_row.
+WRITE / ls_row-size.
+WRITE / ls_row-other.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n2\n1");
+  });
+
+  it("MODIFY TABLE, sorted", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         name TYPE string,
+         size TYPE i,
+       END OF ty_row.
+TYPES ty_rows TYPE SORTED TABLE OF ty_row WITH UNIQUE KEY name.
+DATA mt_rows TYPE ty_rows.
+DATA ls_row TYPE ty_row.
+
+ls_row-name = 'b'.
+INSERT ls_row INTO TABLE mt_rows.
+ls_row-name = 'a'.
+INSERT ls_row INTO TABLE mt_rows.
+ls_row-size = 1.
+MODIFY TABLE mt_rows FROM ls_row.
+WRITE / sy-subrc.
+LOOP AT mt_rows INTO ls_row.
+  WRITE / |{ ls_row-name } { ls_row-size }|.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\na 1\nb 0");
+  });
+
+  it("MODIFY TABLE, standard, keeps order", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         name TYPE string,
+         size TYPE i,
+       END OF ty_row.
+TYPES ty_rows TYPE STANDARD TABLE OF ty_row WITH NON-UNIQUE KEY name.
+DATA mt_rows TYPE ty_rows.
+DATA ls_row TYPE ty_row.
+
+ls_row-name = 'a'.
+APPEND ls_row TO mt_rows.
+ls_row-name = 'b'.
+APPEND ls_row TO mt_rows.
+ls_row-name = 'a'.
+ls_row-size = 1.
+MODIFY TABLE mt_rows FROM ls_row.
+WRITE / sy-subrc.
+LOOP AT mt_rows INTO ls_row.
+  WRITE / |{ ls_row-name } { ls_row-size }|.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\na 1\nb 0");
+  });
+
+  it("MODIFY TABLE, standard, not found", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         name TYPE string,
+         size TYPE i,
+       END OF ty_row.
+TYPES ty_rows TYPE STANDARD TABLE OF ty_row WITH NON-UNIQUE KEY name.
+DATA mt_rows TYPE ty_rows.
+DATA ls_row TYPE ty_row.
+
+ls_row-name = 'a'.
+APPEND ls_row TO mt_rows.
+ls_row-name = 'b'.
+MODIFY TABLE mt_rows FROM ls_row.
+WRITE / sy-subrc.
+WRITE / lines( mt_rows ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n1");
+  });
+
+  it("MODIFY TABLE, standard default key, integers", async () => {
+    const code = `
+DATA integers TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+APPEND 1 TO integers.
+APPEND 2 TO integers.
+MODIFY TABLE integers FROM 2.
+WRITE / sy-subrc.
+MODIFY TABLE integers FROM 3.
+WRITE / sy-subrc.
+WRITE / lines( integers ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n4\n2");
+  });
+
+  it("MODIFY TABLE, standard default key, structure", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         name TYPE string,
+         size TYPE i,
+       END OF ty_row.
+TYPES ty_rows TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY.
+DATA mt_rows TYPE ty_rows.
+DATA ls_row TYPE ty_row.
+
+ls_row-name = 'a'.
+APPEND ls_row TO mt_rows.
+ls_row-name = 'b'.
+APPEND ls_row TO mt_rows.
+ls_row-size = 1.
+MODIFY TABLE mt_rows FROM ls_row.
+WRITE / sy-subrc.
+LOOP AT mt_rows INTO ls_row.
+  WRITE / |{ ls_row-name } { ls_row-size }|.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\na 0\nb 1");
+  });
+
+  it("MODIFY TABLE, field symbol to row stays assigned", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         name TYPE string,
+         size TYPE i,
+       END OF ty_row.
+TYPES ty_rows TYPE HASHED TABLE OF ty_row WITH UNIQUE KEY name.
+DATA mt_rows TYPE ty_rows.
+DATA ls_row TYPE ty_row.
+FIELD-SYMBOLS <ls_row> TYPE ty_row.
+
+ls_row-name = 'a'.
+INSERT ls_row INTO TABLE mt_rows.
+READ TABLE mt_rows WITH TABLE KEY name = 'a' ASSIGNING <ls_row>.
+ls_row-size = 1.
+MODIFY TABLE mt_rows FROM ls_row.
+WRITE / <ls_row>-size.
+<ls_row>-size = 2.
+CLEAR ls_row.
+READ TABLE mt_rows WITH TABLE KEY name = 'a' INTO ls_row.
+WRITE / ls_row-size.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2");
+  });
+
+  it("MODIFY INDEX, TRANSPORTING", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         name  TYPE string,
+         size  TYPE i,
+         other TYPE i,
+       END OF ty_row.
+DATA mt_rows TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY.
+DATA ls_row TYPE ty_row.
+
+ls_row-name = 'a'.
+ls_row-size = 1.
+ls_row-other = 1.
+APPEND ls_row TO mt_rows.
+ls_row-size = 2.
+ls_row-other = 2.
+MODIFY mt_rows FROM ls_row INDEX 1 TRANSPORTING size.
+WRITE / sy-subrc.
+CLEAR ls_row.
+READ TABLE mt_rows INDEX 1 INTO ls_row.
+WRITE / ls_row-size.
+WRITE / ls_row-other.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n2\n1");
+  });
+
+  it("READ TABLE FROM, standard default key, structure", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         name TYPE string,
+         size TYPE i,
+       END OF ty_row.
+DATA mt_rows TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY.
+DATA ls_row TYPE ty_row.
+DATA ls_read TYPE ty_row.
+
+ls_row-name = 'a'.
+ls_row-size = 1.
+APPEND ls_row TO mt_rows.
+ls_row-name = 'b'.
+ls_row-size = 2.
+APPEND ls_row TO mt_rows.
+ls_row-size = 0.
+READ TABLE mt_rows FROM ls_row INTO ls_read.
+WRITE / sy-subrc.
+WRITE / sy-tabix.
+WRITE / ls_read-size.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n2\n2");
   });
 
 });
