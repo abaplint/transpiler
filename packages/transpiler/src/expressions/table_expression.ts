@@ -16,12 +16,18 @@ export class TableExpressionTranspiler {
     let usesTableLine = false;
     const withKey: string[] = [];
 
+    // KEY name, the primary key or a secondary key
+    const keyName = node.findDirectExpression(Expressions.SimpleName)?.concatTokens().toLowerCase();
+    if (keyName !== undefined && keyName !== "primary_key") {
+      extra.push(`keyName: "${keyName}"`);
+    }
+
     if (node.getChildren().length === 3 && node.findDirectExpression(Expressions.Source)) {
+      extra.push(`index: ${traversal.traverse(node.findDirectExpression(Expressions.Source)).getCode()}`);
+    } else if (node.findDirectTokenByText("INDEX") && keyName !== undefined) {
       extra.push(`index: ${traversal.traverse(node.findDirectExpression(Expressions.Source)).getCode()}`);
     } else if (node.findDirectTokenByText("INDEX")) {
       throw new Error("TableExpressionTranspiler: todo, other INDEX");
-    } else if (node.findDirectExpression(Expressions.SimpleName)) {
-      throw new Error("TableExpressionTranspiler: todo, SimpleName");
     } else if (node.findDirectExpression(Expressions.Dynamic)) {
       throw new Error("TableExpressionTranspiler: todo, Dynamic");
     } else {
@@ -35,6 +41,9 @@ export class TableExpressionTranspiler {
         } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.Source) {
           withKey.push("abap.compare.eq(" + field + ", " + traversal.traverse(c).getCode() + ")");
         } else if (c.concatTokens() === "=" || c.concatTokens() === "[" || c.concatTokens() === "]") {
+          continue;
+        } else if (c.get() instanceof Expressions.SimpleName
+            || ["KEY", "COMPONENTS"].includes(c.concatTokens().toUpperCase())) {
           continue;
         } else {
           throw new Error("TableExpressionTranspiler: todo, other, " + c.concatTokens());
