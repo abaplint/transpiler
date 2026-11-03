@@ -39,6 +39,7 @@ export * from "./convert";
 export * from "./create_data";
 export * from "./create_object";
 export * from "./data";
+export * from "./delete_cluster";
 export * from "./delete_database";
 export * from "./delete_dataset";
 export * from "./delete_internal";
