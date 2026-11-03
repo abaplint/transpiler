@@ -143,6 +143,10 @@ export class Validation {
     if (this.options?.unknownTypes === UnknownTypesEnum.runtimeError) {
       // this is not a constant, just a regex that happens to not match anything
       config.syntax.errorNamespace = "VOID_EVERYTHING";
+      // missing method implementations fail when called, "is not a function"
+      config.rules["implement_methods"] = false;
+    } else {
+      config.rules["implement_methods"] = true;
     }
 
     if (this.options?.skipVersionCheck === true) {
