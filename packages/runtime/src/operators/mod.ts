@@ -3,6 +3,8 @@ import {Float, Integer, Integer8} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
+import {checkDivisor, isPackedCalculation, packedDecimals, packedResult, toDecimal} from "./_decfloat";
+import {modDecimal} from "../types/_decimal";
 
 export function mod(left: INumeric | ICharacter | string | Integer8 | number, right: INumeric | Integer8 | ICharacter | string | number) {
   if (left instanceof Integer8 || right instanceof Integer8) {
@@ -24,6 +26,12 @@ export function mod(left: INumeric | ICharacter | string | Integer8 | number, ri
       val = val + a;
     }
     return new Integer8().set(val);
+  }
+
+  if (isPackedCalculation(left, right)) {
+    const l = toDecimal(left);
+    const r = toDecimal(right);
+    return packedResult(checkDivisor(l, r) ? modDecimal(l, r) : r, packedDecimals(left, right));
   }
 
   const l = parse(left);

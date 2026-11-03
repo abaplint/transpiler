@@ -139,6 +139,26 @@ export function divideDecimal(left: Decimal, right: Decimal): Decimal {
   return roundSignificant({digits: quotient, scale: left.scale + extra - right.scale});
 }
 
+/** The quotient of DIV, an integer: the remainder a - b * ( a DIV b ) is never negative,
+ * so a truncated quotient moves down for a positive divisor and up for a negative one,
+ * 7 DIV -2 = -3, -7 DIV -2 = 4. The divisor must not be zero. */
+export function divDecimal(left: Decimal, right: Decimal): Decimal {
+  const [l, r] = align(left, right);
+  let quotient = l / r;
+  if (l % r < 0n) {
+    quotient = r > 0n ? quotient - 1n : quotient + 1n;
+  }
+  return {digits: quotient, scale: 0};
+}
+
+/** a MOD b = a - b * ( a DIV b ), never negative and below |b|: 7 MOD -3 = 1, 7.5 MOD -2 = 1.5.
+ * The divisor must not be zero. */
+export function modDecimal(left: Decimal, right: Decimal): Decimal {
+  const [l, r, scale] = align(left, right);
+  const quotient = divDecimal(left, right).digits;
+  return normalize({digits: l - r * quotient, scale});
+}
+
 /** The integer part, cut off towards zero */
 export function truncDecimal(value: Decimal): Decimal {
   return {digits: value.digits / pow10(value.scale), scale: 0};

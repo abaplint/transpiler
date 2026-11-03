@@ -1,7 +1,7 @@
 import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Hex, HexUInt8, Integer, Integer8, Packed, Structure, Table} from "../types";
 import {String} from "../types/string";
 import {XString} from "../types/xstring";
-import {compareDecimal, Decimal, decimalFromBigInt, decimalFromNumber, isZero, parseDecimal} from "../types/_decimal";
+import {compareDecimal, Decimal, decimalFromBigInt, decimalFromNumber, decimalToFixed, isZero, parseDecimal} from "../types/_decimal";
 import {throwError} from "../throw_error";
 import {parse} from "./_parse";
 
@@ -11,6 +11,34 @@ export function isDecFloat34Operand(value: unknown): boolean {
     return value.getPointer() instanceof DecFloat34;
   }
   return value instanceof DecFloat34;
+}
+
+function unwrap(value: unknown): unknown {
+  return value instanceof FieldSymbol ? value.getPointer() : value;
+}
+
+/** An arithmetic expression has calculation type p when an operand is packed and none is
+ * f or decfloat34 (decfloat34 is tested first). It is computed exactly: through a double,
+ * a 21-digit p loses its last digits, 20261014103400.1234567 + '0.0000001' gave .1235968 */
+export function isPackedCalculation(left: unknown, right: unknown): boolean {
+  const l = unwrap(left);
+  const r = unwrap(right);
+  return (l instanceof Packed || r instanceof Packed) && !(l instanceof Float) && !(r instanceof Float);
+}
+
+/** The decimals of the packed operands, the most of them */
+export function packedDecimals(left: unknown, right: unknown): number {
+  const l = unwrap(left);
+  const r = unwrap(right);
+  return Math.max(l instanceof Packed ? l.getDecimals() : 0, r instanceof Packed ? r.getDecimals() : 0);
+}
+
+/** An intermediate result in calculation type p, with at least the given decimals and all the
+ * digits of the value: no length, so it never overflows, and the target's set( ) checks its
+ * own length and rescales the value exactly */
+export function packedResult(value: Decimal, decimals: number): Packed {
+  const scale = Math.max(decimals, value.scale);
+  return new Packed({decimals: scale}).set(decimalToFixed(value, scale));
 }
 
 /** An operand as an exact decimal; text that is not a number raises CX_SY_CONVERSION_NO_NUMBER */
