@@ -49,7 +49,22 @@ export class Transpiler {
     return this.run(reg);
   }
 
+  /** Transpiles the registry. The transpiler installs its own abaplint
+   * configuration (OpenABAP syntax, its rule set) on the registry for the
+   * duration of the run and puts the caller's configuration back before
+   * returning, also when it throws. setConfig() marks every object dirty, so
+   * the registry is left unparsed: abaplint parses it again with the restored
+   * configuration on the next findIssues() or parse(). */
   public async run(reg: abaplint.IRegistry, progress?: IProgress, folders?: OutputFolders): Promise<IOutput> {
+    const previousConfig = reg.getConfig();
+    try {
+      return await this.runWithTranspilerConfig(reg, progress, folders);
+    } finally {
+      reg.setConfig(previousConfig);
+    }
+  }
+
+  private async runWithTranspilerConfig(reg: abaplint.IRegistry, progress?: IProgress, folders?: OutputFolders): Promise<IOutput> {
     // Validation installs the transpiler configuration and findIssues() parses
     // dirty registries. Parsing before that would be wasted because setConfig()
     // marks every registry object dirty again.

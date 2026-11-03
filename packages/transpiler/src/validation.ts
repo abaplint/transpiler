@@ -131,6 +131,9 @@ export class Validation {
     this.options = options;
   }
 
+  /** Installs the transpiler configuration on the registry and runs the
+   * abaplint checks. The configuration stays installed because the transpile
+   * that follows depends on it; Transpiler.run() restores the caller's. */
   public run(reg: IRegistry): readonly Issue[] {
     if (this.options?.ignoreSyntaxCheck === true) {
       config.rules["check_syntax"] = false;
