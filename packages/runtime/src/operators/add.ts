@@ -15,7 +15,7 @@ export function add(left: INumeric | ICharacter | string | number | Float | Inte
   Integer | Integer8 | Float | DecFloat34 {
 
   if (left instanceof Integer && right instanceof Integer) {
-    return new Integer().set(left.get() + right.get());
+    return Integer.arithmeticResult(left.get() + right.get());
   } else if (left instanceof Float && right instanceof Float) {
     // Two floats fall through the rest of the chain to exactly this, and
     // float arithmetic is the most common thing there is: the remaining type
@@ -27,22 +27,22 @@ export function add(left: INumeric | ICharacter | string | number | Float | Inte
     return decFloat34Result(addDecimal(toDecimal(left), toDecimal(right)));
   } else if (typeof left === "number" && typeof right === "number"
       && Number.isInteger(left) && Number.isInteger(right)) {
-    return new Integer().set(left + right);
+    return Integer.arithmeticResult(left + right);
 
   } else if (typeof left === "number" && Number.isInteger(left) && right instanceof Integer) {
-    return new Integer().set(left + right.get());
+    return Integer.arithmeticResult(left + right.get());
   } else if (typeof right === "number" && Number.isInteger(right) && left instanceof Integer) {
-    return new Integer().set(left.get() + right);
+    return Integer.arithmeticResult(left.get() + right);
 
   } else if ((left instanceof String || left instanceof Character) && isIntegerCharacter(left) && right instanceof Integer) {
-    return new Integer().set(Number.parseInt(left.get(), 10) + right.get()).clearIntegerCalculationType();
+    return Integer.arithmeticResult(Number.parseInt(left.get(), 10) + right.get()).clearIntegerCalculationType();
   } else if ((right instanceof String || right instanceof Character) && isIntegerCharacter(right) && left instanceof Integer) {
-    return new Integer().set(left.get() + Number.parseInt(right.get(), 10)).clearIntegerCalculationType();
+    return Integer.arithmeticResult(left.get() + Number.parseInt(right.get(), 10)).clearIntegerCalculationType();
   } else if ((left instanceof String || left instanceof Character)
       && (right instanceof String || right instanceof Character)
       && isIntegerCharacter(left)
       && isIntegerCharacter(right)) {
-    return new Integer().set(Number.parseInt(left.get(), 10) + Number.parseInt(right.get(), 10)).clearIntegerCalculationType();
+    return Integer.arithmeticResult(Number.parseInt(left.get(), 10) + Number.parseInt(right.get(), 10)).clearIntegerCalculationType();
   } else if (left instanceof Integer8) {
     if (right instanceof Integer8) {
       return new Integer8().set(left.get() + right.get());
