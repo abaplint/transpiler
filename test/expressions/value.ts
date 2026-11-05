@@ -742,4 +742,134 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("1\n2");
   });
 
+  it("VALUE, FOR GROUPS, field symbol member, WITHOUT MEMBERS, range rows", async () => {
+    const code = `
+TYPES: BEGIN OF ty_upload,
+         category TYPE c LENGTH 4,
+         amount   TYPE i,
+       END OF ty_upload.
+TYPES ty_uploads TYPE STANDARD TABLE OF ty_upload WITH EMPTY KEY.
+TYPES ty_range TYPE RANGE OF ty_upload-category.
+DATA lt_upload TYPE ty_uploads.
+DATA lt_unique TYPE ty_range.
+DATA ls_unique LIKE LINE OF lt_unique.
+lt_upload = VALUE #(
+  ( category = 'AAAA' amount = 1 )
+  ( category = 'BBBB' amount = 2 )
+  ( category = 'AAAA' amount = 3 )
+  ( category = 'CCCC' amount = 4 )
+  ( category = 'BBBB' amount = 5 ) ).
+lt_unique = VALUE #(
+  FOR GROUPS category OF <ls_line> IN lt_upload
+  GROUP BY <ls_line>-category WITHOUT MEMBERS ( sign = 'I' option = 'EQ' low = category ) ).
+WRITE / lines( lt_unique ).
+LOOP AT lt_unique INTO ls_unique.
+  WRITE / |{ ls_unique-sign }{ ls_unique-option }{ ls_unique-low }|.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3\nIEQAAAA\nIEQBBBB\nIEQCCCC");
+  });
+
+  it("VALUE, FOR GROUPS, field symbol member, used inside a method", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    TYPES: BEGIN OF ty_row,
+             key   TYPE c LENGTH 2,
+             value TYPE i,
+           END OF ty_row.
+    TYPES ty_rows TYPE STANDARD TABLE OF ty_row WITH EMPTY KEY.
+    TYPES ty_keys TYPE STANDARD TABLE OF ty_row-key WITH EMPTY KEY.
+    CLASS-METHODS run
+      IMPORTING it_rows        TYPE ty_rows
+      RETURNING VALUE(rt_keys) TYPE ty_keys.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    rt_keys = VALUE #(
+      FOR GROUPS grp OF <ls_row> IN it_rows
+      GROUP BY <ls_row>-key WITHOUT MEMBERS ( grp ) ).
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lv_key TYPE c LENGTH 2.
+  LOOP AT lcl=>run( VALUE #( ( key = 'XY' value = 1 ) ( key = 'AB' value = 2 ) ( key = 'XY' value = 3 ) ) ) INTO lv_key.
+    WRITE / lv_key.
+  ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("XY\nAB");
+  });
+
+  it("VALUE, FOR GROUPS, field member, with members", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         id TYPE i,
+       END OF ty_row.
+DATA lt_rows TYPE STANDARD TABLE OF ty_row WITH EMPTY KEY.
+DATA lt_ids TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+DATA lv_id TYPE i.
+lt_rows = VALUE #( ( id = 3 ) ( id = 1 ) ( id = 3 ) ( id = 2 ) ( id = 1 ) ).
+lt_ids = VALUE #( FOR GROUPS grp OF row IN lt_rows GROUP BY row-id ( grp ) ).
+LOOP AT lt_ids INTO lv_id.
+  WRITE / lv_id.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3\n1\n2");
+  });
+
+  it("VALUE, FOR GROUPS, ASCENDING and DESCENDING", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         id TYPE i,
+       END OF ty_row.
+DATA lt_rows TYPE STANDARD TABLE OF ty_row WITH EMPTY KEY.
+DATA lt_ids TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+DATA lv_id TYPE i.
+lt_rows = VALUE #( ( id = 3 ) ( id = 1 ) ( id = 3 ) ( id = 2 ) ( id = 1 ) ).
+lt_ids = VALUE #( FOR GROUPS grp OF <row> IN lt_rows GROUP BY <row>-id ASCENDING WITHOUT MEMBERS ( grp ) ).
+LOOP AT lt_ids INTO lv_id.
+  WRITE / lv_id.
+ENDLOOP.
+lt_ids = VALUE #( FOR GROUPS grp OF <row> IN lt_rows GROUP BY <row>-id DESCENDING ( grp ) ).
+LOOP AT lt_ids INTO lv_id.
+  WRITE / lv_id.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2\n3\n3\n2\n1");
+  });
+
+  it("VALUE, FOR GROUPS, group key used in a structure row", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         name  TYPE string,
+         value TYPE i,
+       END OF ty_row.
+TYPES: BEGIN OF ty_out,
+         name TYPE string,
+         flag TYPE c LENGTH 1,
+       END OF ty_out.
+DATA lt_rows TYPE STANDARD TABLE OF ty_row WITH EMPTY KEY.
+DATA lt_out TYPE STANDARD TABLE OF ty_out WITH EMPTY KEY.
+DATA ls_out TYPE ty_out.
+lt_rows = VALUE #( ( name = \`foo\` value = 1 ) ( name = \`bar\` value = 2 ) ( name = \`foo\` value = 3 ) ).
+lt_out = VALUE #( FOR GROUPS g OF <r> IN lt_rows GROUP BY <r>-name WITHOUT MEMBERS ( name = g flag = 'X' ) ).
+LOOP AT lt_out INTO ls_out.
+  WRITE / |{ ls_out-name }{ ls_out-flag }|.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("fooX\nbarX");
+  });
+
 });
