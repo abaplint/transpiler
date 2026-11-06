@@ -225,6 +225,66 @@ WRITE lv_out.`;
     await f(abap);
   });
 
+  it("ASSIGN CASTING, character field to structure", async () => {
+    const code = `
+TYPES: BEGIN OF ty_code,
+         country TYPE c LENGTH 2,
+         number  TYPE c LENGTH 4,
+       END OF ty_code.
+DATA gv_code TYPE c LENGTH 6 VALUE 'DK1234'.
+FIELD-SYMBOLS <ls_code> TYPE ty_code.
+ASSIGN gv_code TO <ls_code> CASTING.
+WRITE / <ls_code>-country.
+WRITE / <ls_code>-number.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("DK\n1234");
+  });
+
+  it("ASSIGN CASTING, structure to structure", async () => {
+    const code = `
+TYPES: BEGIN OF ty_src,
+         a TYPE c LENGTH 3,
+         b TYPE c LENGTH 3,
+       END OF ty_src.
+TYPES: BEGIN OF ty_tgt,
+         x TYPE c LENGTH 2,
+         y TYPE c LENGTH 4,
+       END OF ty_tgt.
+DATA ls_src TYPE ty_src.
+FIELD-SYMBOLS <ls_tgt> TYPE ty_tgt.
+ls_src-a = 'ABC'.
+ls_src-b = 'DEF'.
+ASSIGN ls_src TO <ls_tgt> CASTING.
+WRITE / <ls_tgt>-x.
+WRITE / <ls_tgt>-y.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("AB\nCDEF");
+  });
+
+  it("ASSIGN CASTING, structure written back to character field", async () => {
+    const code = `
+TYPES: BEGIN OF ty_code,
+         country TYPE c LENGTH 2,
+         number  TYPE c LENGTH 4,
+       END OF ty_code.
+DATA gv_code TYPE c LENGTH 6 VALUE 'DK1234'.
+DATA ls_new TYPE ty_code.
+FIELD-SYMBOLS <ls_code> TYPE ty_code.
+ASSIGN gv_code TO <ls_code> CASTING.
+ls_new-country = 'SE'.
+ls_new-number = '9876'.
+<ls_code> = ls_new.
+WRITE gv_code.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("SE9876");
+  });
+
   it("ASSIGN COMPONENT of non STRUCTURE, should set subrc", async () => {
     const code = `
 CLASS lcl DEFINITION.
