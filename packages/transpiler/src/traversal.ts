@@ -160,6 +160,16 @@ export class Traversal {
     return this.obj;
   }
 
+  /** true if the file is part of the current object, include programs are inlined into the object using them */
+  public isCurrentObjectFile(filename: string): boolean {
+    if (this.getCurrentObject().getABAPFileByName(filename) !== undefined) {
+      return true;
+    }
+    const file = this.reg.getFileByName(filename);
+    const found = file ? this.reg.findObjectForFile(file) : undefined;
+    return found instanceof abaplint.Objects.Program && found.isInclude();
+  }
+
   public traverse(node: abaplint.INode | undefined): Chunk {
     if (node instanceof abaplint.Nodes.StructureNode) {
       return this.traverseStructure(node);
@@ -239,6 +249,14 @@ export class Traversal {
         && this.obj.getInclude(filename.split(".")[2].replace(/#/g, "/"))) {
       // workaround for INCLUDEs in function groups
       return this.fuctionGroupWorkaround(token);
+    }
+
+    if (node === undefined
+        && this.obj instanceof abaplint.Objects.Program
+        && this.obj.getABAPFileByName(filename) === undefined
+        && this.isCurrentObjectFile(filename)) {
+      // INCLUDE in program, the program level scope only covers the main file
+      return this.spaghetti.getFirstChild()?.getFirstChild();
     }
 
     return node;
@@ -335,7 +353,7 @@ export class Traversal {
   public prefixAndName(t: abaplint.Token, filename?: string): string {
     let name = t.getStr().toLowerCase().replace(/^!/, "");
 
-    if (filename && this.getCurrentObject().getABAPFileByName(filename) === undefined) {
+    if (filename && this.isCurrentObjectFile(filename) === false) {
       // the prefix is from a different object
       const file = this.reg.getFileByName(filename);
       if (file) {
@@ -723,7 +741,7 @@ export class Traversal {
       if (scope?.getIdentifier().stype === abaplint.ScopeType.Interface) {
         return scope?.getIdentifier().sname;
       }
-    } else if (this.getCurrentObject().getABAPFileByName(ref.getFilename()) !== undefined) {
+    } else if (this.isCurrentObjectFile(ref.getFilename())) {
       const scope = this.spaghetti.lookupPosition(ref.getStart(), ref.getFilename());
       if (scope?.getIdentifier().stype === abaplint.ScopeType.Interface) {
         return scope?.getIdentifier().sname;
