@@ -67,6 +67,9 @@ export class Traversal {
   public readonly reg: abaplint.IRegistry;
   public readonly options: ITranspilerOptions | undefined;
   public readonly typeFactories: TypeFactoryRegistry | undefined;
+  /** set when the executable program level code is collected into the program's main function,
+   * shared with the traversals of its INCLUDEs, see traverseProgramLevel */
+  public programMain: Chunk | undefined = undefined;
 
   public constructor(spaghetti: abaplint.ISpaghettiScope, file: abaplint.ABAPFile,
                      obj: abaplint.ABAPObject, reg: abaplint.IRegistry, options?: ITranspilerOptions,
@@ -1355,9 +1358,72 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
     }
   }
 
+  private static readonly PROGRAM_LEVEL_DECLARATIONS = [
+    abaplint.Statements.Data, abaplint.Statements.DataBegin, abaplint.Statements.DataEnd,
+    abaplint.Statements.Constant, abaplint.Statements.ConstantBegin,
+    abaplint.Statements.Type, abaplint.Statements.TypeBegin, abaplint.Statements.TypeEnum,
+    abaplint.Statements.FieldSymbol, abaplint.Statements.Static, abaplint.Statements.StaticBegin,
+    abaplint.Statements.Tables, abaplint.Statements.TypePools, abaplint.Statements.Ranges, abaplint.Statements.Nodes,
+    abaplint.Statements.Parameter, abaplint.Statements.SelectOption, abaplint.Statements.SelectionScreen,
+    abaplint.Statements.ClassDeferred, abaplint.Statements.InterfaceDeferred,
+    abaplint.Statements.ClassDefinitionLoad, abaplint.Statements.InterfaceLoad,
+    abaplint.Statements.Define, abaplint.Statements.Include, abaplint.Statements.Report, abaplint.Statements.Program,
+  ];
+
+  private static isProgramLevelDeclaration(node: abaplint.INode): boolean {
+    const get = node.get();
+    if (node instanceof abaplint.Nodes.StatementNode) {
+      return Traversal.PROGRAM_LEVEL_DECLARATIONS.some(d => get instanceof d);
+    } else if (node instanceof abaplint.Nodes.StructureNode) {
+      return get instanceof abaplint.Structures.Data
+        || get instanceof abaplint.Structures.Constants
+        || get instanceof abaplint.Structures.Types
+        || get instanceof abaplint.Structures.TypeEnum
+        || get instanceof abaplint.Structures.Statics
+        || get instanceof abaplint.Structures.Define;
+    }
+    return false;
+  }
+
+  /** Splits the top level of a program, or of an INCLUDE expanded into it: declarations, classes and FORMs
+   * stay on module level and are returned, the executable statements and event blocks are appended to
+   * programMain. Declarations nested in executable blocks are global in ABAP, they stay on module level */
+  private traverseProgramLevel(node: abaplint.Nodes.StructureNode, main: Chunk): Chunk {
+    const ret = new Chunk();
+    for (const c of node.getChildren()) {
+      if (c instanceof abaplint.Nodes.StatementNode) {
+        // event statements like INITIALIZATION are executable, REPORT, PARAMETERS etc. are declarations
+        (Traversal.isProgramLevelDeclaration(c) ? ret : main).appendChunk(this.traverse(c));
+        continue;
+      } else if (!(c.get() instanceof abaplint.Structures.Normal)) {
+        // classes, interfaces, FORMs
+        ret.appendChunk(this.traverse(c));
+        continue;
+      }
+      for (const n of c.getChildren()) {
+        if (Traversal.isProgramLevelDeclaration(n)) {
+          ret.appendChunk(this.traverse(n));
+        } else if (n instanceof abaplint.Nodes.StructureNode) {
+          ret.appendChunk(this.declareNestedEarly(n));
+          this.blockDepth++;
+          try {
+            main.appendChunk(this.traverseStructure(n));
+          } finally {
+            this.blockDepth--;
+          }
+        } else {
+          main.appendChunk(this.traverse(n));
+        }
+      }
+    }
+    return ret;
+  }
+
   protected traverseStructure(node: abaplint.Nodes.StructureNode): Chunk {
     if (this.declaredEarly.has(node) && this.emittingEarly === false) {
       return new Chunk();
+    } else if (this.programMain !== undefined && node.get() instanceof abaplint.Structures.Any) {
+      return this.traverseProgramLevel(node, this.programMain);
     } else if (this.blockDepth === 0 && node.get() instanceof abaplint.Structures.Normal) {
       return this.traverseProcedureLevel(node);
     }

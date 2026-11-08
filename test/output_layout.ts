@@ -173,6 +173,33 @@ describe("CLI grouped output", () => {
     expect(flatArtifacts.find(artifact => artifact.path === "zmap.prog.mjs")!.contents).to.include("function $t_");
   });
 
+  it("runs a program executed directly, but not when its module is imported", async () => {
+    const source = [
+      "DATA gv_value TYPE i.",
+      "START-OF-SELECTION.",
+      "  gv_value = 2.",
+      "  WRITE / |ran { gv_value }|.",
+    ].join("\n");
+    const file = {filename: "zmain.prog.abap", contents: source, relative: "src"};
+    const registry = new abaplint.Registry().addFiles([new abaplint.MemoryFile(file.filename, file.contents)]);
+    const transpiled = await new Transpiler({addCommonJS: true}).run(registry);
+    const settings: ITranspilerConfig = {input_folder: "src", output_folder: "nested/output", options: {addCommonJS: true}};
+    const objects = transpiled.objects as unknown as Parameters<typeof collectObjectFiles>[0];
+    for (const artifact of collectObjectFiles(objects, settings, [file])) {
+      write("nested/output/" + artifact.path, artifact.contents);
+    }
+    write("nested/output/_init.mjs", `import runtime from "@abaplint/runtime";\nglobalThis.abap = new runtime.ABAP();`);
+    write("nested/output/importer.mjs", [
+      `import "./_init.mjs";`,
+      `const prog = await import("./zmain.prog.mjs");`,
+      `console.log("imported");`,
+      `await prog.$main();`,
+    ].join("\n"));
+
+    expect(run("nested/output/zmain.prog.mjs").trim()).to.equal("ran 2");
+    expect(run("nested/output/importer.mjs").trim().split(/\r?\n/)).to.deep.equal(["imported", "ran 2"]);
+  });
+
   beforeEach(() => {
     folder = mkdtempSync(path.join(tmpdir(), "abaplint-layout-"));
     mkdirSync(path.join(folder, "node_modules/@abaplint"), {recursive: true});

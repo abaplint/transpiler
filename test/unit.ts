@@ -3518,4 +3518,47 @@ ENDCLASS.`;
     expect(cons).to.include("doubled");
   });
 
+  it("test-73", async () => {
+// importing the program for unit testing must not run its event blocks, test class in a nested include
+    const prog = `REPORT zevents.
+
+DATA gv_state TYPE string.
+
+INITIALIZATION.
+  gv_state = 'initialization'.
+
+START-OF-SELECTION.
+  gv_state = 'start'.
+  WRITE / 'report ran'.
+
+END-OF-SELECTION.
+  gv_state = 'end'.
+
+INCLUDE zevents_a.`;
+    const includeA = `INCLUDE zevents_b.`;
+    const includeB = `CLASS ltcl_test DEFINITION FINAL FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS not_run FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD not_run.
+    ASSERT gv_state IS INITIAL.
+    WRITE / 'state initial'.
+  ENDMETHOD.
+ENDCLASS.`;
+    const files = [
+      {filename: "zevents.prog.abap", contents: prog},
+      {filename: "zevents.prog.xml", contents: progXml("zevents", "1")},
+      {filename: "zevents_a.prog.abap", contents: includeA},
+      {filename: "zevents_a.prog.xml", contents: progXml("zevents_a", "I")},
+      {filename: "zevents_b.prog.abap", contents: includeB},
+      {filename: "zevents_b.prog.xml", contents: progXml("zevents_b", "I")},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons).to.include("ZEVENTS: running ltcl_test->not_run");
+    expect(cons).to.include("state initial");
+    expect(cons).to.not.include("report ran");
+  });
+
 });

@@ -37,6 +37,7 @@ export class IncludeTranspiler implements IStatementTranspiler {
         // traversed with the spaghetti of the main program, the include can use its types and data
         const sub = new Traversal(traversal.getSpaghetti(), file, obj, traversal.reg,
           traversal.options, traversal.typeFactories);
+        sub.programMain = traversal.programMain;
         const rearranged = new Rearranger().run(obj.getType(), file.getStructure());
         const chunk = new Chunk();
         if (traversal.options?.addFilenames === true) {
