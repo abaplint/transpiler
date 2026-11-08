@@ -872,4 +872,26 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("fooX\nbarX");
   });
 
+  it("VALUE, nested VALUE # for structure component in table row", async () => {
+    const code = `
+TYPES: BEGIN OF ty_inner,
+         value TYPE i,
+       END OF ty_inner.
+TYPES: BEGIN OF ty_row,
+         c1 TYPE ty_inner,
+       END OF ty_row.
+TYPES ty_rows TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY.
+DATA lt_rows TYPE ty_rows.
+DATA ls_row TYPE ty_row.
+
+lt_rows = VALUE #( ( c1 = VALUE #( value = 1 ) ) ).
+LOOP AT lt_rows INTO ls_row.
+  WRITE / ls_row-c1-value.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });
