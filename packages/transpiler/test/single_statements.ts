@@ -421,10 +421,66 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({object: obj,user: usr,fields:
 
     {abap: "READ REPORT name INTO text STATE 'A'.",
       js: `await abap.statements.readReport(name, {into: text,state: abap.CharacterFactory.get(1, 'A')});`, skip: false},
+    // EML is lowered onto a kernel class: begin with the statement's targets
+    // (the statement boundary), then one call per operation, with the names
+    // as strings and the tables and targets as they are
     {abap: "READ ENTITY zfoo ALL FIELDS WITH keys RESULT result.",
-      js: `throw new Error("ReadEntities, not supported, transpiler");`, skip: false},
+      js: `if (abap.Classes['KERNEL_RAP_EML'] === undefined) throw new Error("ReadEntities, kernel class missing");
+await abap.Classes['KERNEL_RAP_EML'].begin({bdef: new abap.types.String().set("ZFOO")});
+await abap.Classes['KERNEL_RAP_EML'].read({bdef: new abap.types.String().set("ZFOO"), entity: new abap.types.String().set("ZFOO"), keys: keys, fields: new abap.types.String().set("*"), result: result});`, skip: false},
     {abap: "MODIFY ENTITY zfoo CREATE FROM input.",
-      js: `throw new Error("ModifyEntities, not supported, transpiler");`, skip: false},
+      js: `if (abap.Classes['KERNEL_RAP_EML'] === undefined) throw new Error("ModifyEntities, kernel class missing");
+await abap.Classes['KERNEL_RAP_EML'].begin({bdef: new abap.types.String().set("ZFOO")});
+await abap.Classes['KERNEL_RAP_EML'].modify({bdef: new abap.types.String().set("ZFOO"), entity: new abap.types.String().set("ZFOO"), operation: new abap.types.String().set("CREATE"), rows: input});`, skip: false},
+    {abap: `MODIFY ENTITIES OF zi_note ENTITY Note
+      CREATE FROM lt_create
+      UPDATE FROM lt_update
+      DELETE FROM lt_delete
+      EXECUTE Approve FROM lt_approve
+      MAPPED ls_mapped FAILED ls_failed REPORTED ls_reported.`,
+      js: `if (abap.Classes['KERNEL_RAP_EML'] === undefined) throw new Error("ModifyEntities, kernel class missing");
+await abap.Classes['KERNEL_RAP_EML'].begin({bdef: new abap.types.String().set("ZI_NOTE"), mapped: ls_mapped, failed: ls_failed, reported: ls_reported});
+await abap.Classes['KERNEL_RAP_EML'].modify({bdef: new abap.types.String().set("ZI_NOTE"), entity: new abap.types.String().set("NOTE"), operation: new abap.types.String().set("CREATE"), rows: lt_create});
+await abap.Classes['KERNEL_RAP_EML'].modify({bdef: new abap.types.String().set("ZI_NOTE"), entity: new abap.types.String().set("NOTE"), operation: new abap.types.String().set("UPDATE"), rows: lt_update});
+await abap.Classes['KERNEL_RAP_EML'].modify({bdef: new abap.types.String().set("ZI_NOTE"), entity: new abap.types.String().set("NOTE"), operation: new abap.types.String().set("DELETE"), rows: lt_delete});
+await abap.Classes['KERNEL_RAP_EML'].execute({bdef: new abap.types.String().set("ZI_NOTE"), entity: new abap.types.String().set("NOTE"), action: new abap.types.String().set("APPROVE"), rows: lt_approve});`, skip: false},
+    {abap: "MODIFY ENTITIES OF zi_note ENTITY Note CREATE AUTO FILL CID FIELDS ( NoteText Status ) WITH lt_create MAPPED ls_mapped.",
+      js: `if (abap.Classes['KERNEL_RAP_EML'] === undefined) throw new Error("ModifyEntities, kernel class missing");
+await abap.Classes['KERNEL_RAP_EML'].begin({bdef: new abap.types.String().set("ZI_NOTE"), mapped: ls_mapped});
+await abap.Classes['KERNEL_RAP_EML'].modify({bdef: new abap.types.String().set("ZI_NOTE"), entity: new abap.types.String().set("NOTE"), operation: new abap.types.String().set("CREATE"), rows: lt_create, fields: new abap.types.String().set("NOTETEXT,STATUS"), auto_fill_cid: abap.CharacterFactory.get(1, 'X')});`, skip: false},
+    {abap: "MODIFY ENTITIES OF zi_note ENTITY Note UPDATE SET FIELDS WITH lt_update FAILED ls_failed.",
+      js: `if (abap.Classes['KERNEL_RAP_EML'] === undefined) throw new Error("ModifyEntities, kernel class missing");
+await abap.Classes['KERNEL_RAP_EML'].begin({bdef: new abap.types.String().set("ZI_NOTE"), failed: ls_failed});
+await abap.Classes['KERNEL_RAP_EML'].modify({bdef: new abap.types.String().set("ZI_NOTE"), entity: new abap.types.String().set("NOTE"), operation: new abap.types.String().set("UPDATE"), rows: lt_update, set_fields: abap.CharacterFactory.get(1, 'X')});`, skip: false},
+    {abap: "MODIFY ENTITIES OF zi_note ENTITY Note EXECUTE Approve FROM lt_keys RESULT lt_result FAILED ls_failed.",
+      js: `if (abap.Classes['KERNEL_RAP_EML'] === undefined) throw new Error("ModifyEntities, kernel class missing");
+await abap.Classes['KERNEL_RAP_EML'].begin({bdef: new abap.types.String().set("ZI_NOTE"), failed: ls_failed});
+await abap.Classes['KERNEL_RAP_EML'].execute({bdef: new abap.types.String().set("ZI_NOTE"), entity: new abap.types.String().set("NOTE"), action: new abap.types.String().set("APPROVE"), rows: lt_keys, result: lt_result});`, skip: false},
+    {abap: "MODIFY ENTITIES OF zi_note ENTITY Note CREATE BY \\_Item FROM lt_items MAPPED ls_mapped.",
+      js: `throw new Error("ModifyEntities BY, not supported, transpiler");`, skip: false},
+    {abap: "MODIFY ENTITIES OPERATIONS lt_operations FAILED ls_failed.",
+      js: `throw new Error("ModifyEntities OPERATIONS, not supported, transpiler");`, skip: false},
+    {abap: `READ ENTITIES OF zi_note ENTITY Note
+      FROM lt_keys RESULT lt_notes
+      FIELDS ( NoteText ) WITH lt_more RESULT lt_texts
+      FAILED ls_failed REPORTED ls_reported.`,
+      js: `if (abap.Classes['KERNEL_RAP_EML'] === undefined) throw new Error("ReadEntities, kernel class missing");
+await abap.Classes['KERNEL_RAP_EML'].begin({bdef: new abap.types.String().set("ZI_NOTE"), failed: ls_failed, reported: ls_reported});
+await abap.Classes['KERNEL_RAP_EML'].read({bdef: new abap.types.String().set("ZI_NOTE"), entity: new abap.types.String().set("NOTE"), keys: lt_keys, result: lt_notes});
+await abap.Classes['KERNEL_RAP_EML'].read({bdef: new abap.types.String().set("ZI_NOTE"), entity: new abap.types.String().set("NOTE"), keys: lt_more, fields: new abap.types.String().set("NOTETEXT"), result: lt_texts});`, skip: false},
+    {abap: "READ ENTITIES OF zi_note ENTITY Note EXECUTE GetText FROM lt_keys RESULT lt_result.",
+      js: `throw new Error("ReadEntities EXECUTE, not supported, transpiler");`, skip: false},
+    {abap: "COMMIT ENTITIES.",
+      js: `if (abap.Classes['KERNEL_RAP_EML'] === undefined) throw new Error("CommitEntities, kernel class missing");
+await abap.Classes['KERNEL_RAP_EML'].commit({});`, skip: false},
+    {abap: "COMMIT ENTITIES RESPONSE OF zi_note FAILED ls_failed REPORTED ls_reported.",
+      js: `if (abap.Classes['KERNEL_RAP_EML'] === undefined) throw new Error("CommitEntities, kernel class missing");
+await abap.Classes['KERNEL_RAP_EML'].commit({bdef: new abap.types.String().set("ZI_NOTE"), failed: ls_failed, reported: ls_reported});`, skip: false},
+    {abap: "COMMIT ENTITIES IN SIMULATION MODE.",
+      js: `throw new Error("CommitEntities SIMULATION, not supported, transpiler");`, skip: false},
+    {abap: "ROLLBACK ENTITIES.",
+      js: `if (abap.Classes['KERNEL_RAP_EML'] === undefined) throw new Error("RollbackEntities, kernel class missing");
+await abap.Classes['KERNEL_RAP_EML'].rollback();`, skip: false},
 
     {abap: "WAIT UNTIL gv_semaphore = 'X'.",
       js: `await abap.statements.wait({cond: () => {return abap.compare.eq(gv_semaphore, abap.CharacterFactory.get(1, 'X'));}});`, skip: false},
