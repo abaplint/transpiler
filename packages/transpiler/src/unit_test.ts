@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 import * as abaplint from "@abaplint/core";
 import {OutputLayout, importPath} from "./output_layout";
+import {filesWithProgramIncludes} from "./program_includes";
 
 /** @uniqueItems true */
 export type TestMethodList = {
@@ -90,16 +91,28 @@ run().then(() => {
     }[] = [];
 
     for (const obj of reg.getObjects()) {
-      if (reg.isDependency(obj) || !(obj instanceof abaplint.Objects.Class)) {
+      if (reg.isDependency(obj)) {
         continue;
       }
 
-      const hasTestFile = obj.getFiles().some(f => { return f.getFilename().includes(".testclasses."); });
-      if (hasTestFile === false) {
+      let files: readonly abaplint.ABAPFile[] = [];
+      let filename = "";
+      if (obj instanceof abaplint.Objects.Class) {
+        const hasTestFile = obj.getFiles().some(f => { return f.getFilename().includes(".testclasses."); });
+        if (hasTestFile === false) {
+          continue;
+        }
+        files = obj.getABAPFiles();
+        filename = importPath("index.mjs", this.layout.objectModule(obj, ".testclasses"));
+      } else if (obj instanceof abaplint.Objects.Program && obj.isInclude() === false) {
+        // local test classes are in the program or its includes, the includes are expanded into the program module
+        files = filesWithProgramIncludes(obj, reg);
+        filename = importPath("index.mjs", this.layout.objectModule(obj));
+      } else {
         continue;
       }
 
-      for (const file of obj.getABAPFiles()) {
+      for (const file of files) {
         for (const def of file.getInfo().listClassDefinitions()) {
           if (def.isForTesting === false
               || def.isGlobal === true
@@ -124,7 +137,7 @@ run().then(() => {
 
           tests.push({
             obj,
-            filename: `${importPath("index.mjs", this.layout.objectModule(obj, ".testclasses"))}`,
+            filename: filename,
             localClass: def.name.toLowerCase(),
             riskLevel: def.riskLevel,
             duration: def.duration,

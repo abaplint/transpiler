@@ -3428,4 +3428,94 @@ ENDCLASS.`;
     expect(cons.split("\n").slice(1, 4)).to.deep.equal(["from locals_def", "from locals_def", "from locals_def"]);
   });
 
+  function progXml(name: string, subc: "1" | "I") {
+    return `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_PROG" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <PROGDIR>
+    <NAME>${name.toUpperCase()}</NAME>
+    <SUBC>${subc}</SUBC>
+   </PROGDIR>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+  }
+
+  it("test-71", async () => {
+// local test class in an include of a program, using global data from the TOP include
+    const prog = `REPORT zrepro.
+
+INCLUDE zrepro_top.
+
+START-OF-SELECTION.
+  PERFORM run.
+
+FORM run.
+  gv_value = gv_value + 1.
+ENDFORM.
+
+INCLUDE zrepro_t01.`;
+    const top = `DATA gv_value TYPE i.`;
+    const t01 = `CLASS ltcl_test DEFINITION FINAL FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS test_run FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD test_run.
+    CLEAR gv_value.
+    PERFORM run.
+    ASSERT gv_value = 1.
+    WRITE / |value { gv_value }|.
+  ENDMETHOD.
+ENDCLASS.`;
+    const files = [
+      {filename: "zrepro.prog.abap", contents: prog},
+      {filename: "zrepro.prog.xml", contents: progXml("zrepro", "1")},
+      {filename: "zrepro_top.prog.abap", contents: top},
+      {filename: "zrepro_top.prog.xml", contents: progXml("zrepro_top", "I")},
+      {filename: "zrepro_t01.prog.abap", contents: t01},
+      {filename: "zrepro_t01.prog.xml", contents: progXml("zrepro_t01", "I")},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons).to.include("ZREPRO: running ltcl_test->test_run");
+    expect(cons).to.include("value 1");
+  });
+
+  it("test-72", async () => {
+// local test class directly in the main program
+    const prog = `REPORT zdirect.
+
+CLASS lcl_calc DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS double IMPORTING iv TYPE i RETURNING VALUE(rv) TYPE i.
+ENDCLASS.
+
+CLASS lcl_calc IMPLEMENTATION.
+  METHOD double.
+    rv = iv * 2.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS ltcl_test DEFINITION FINAL FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS test_double FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD test_double.
+    ASSERT lcl_calc=>double( 21 ) = 42.
+    WRITE / 'doubled'.
+  ENDMETHOD.
+ENDCLASS.`;
+    const files = [
+      {filename: "zdirect.prog.abap", contents: prog},
+      {filename: "zdirect.prog.xml", contents: progXml("zdirect", "1")},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons).to.include("ZDIRECT: running ltcl_test->test_double");
+    expect(cons).to.include("doubled");
+  });
+
 });
