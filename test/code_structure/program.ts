@@ -63,4 +63,43 @@ ENDFORM.`;
     expect(abap.console.get()).to.equal("1\nnested");
   });
 
+  it("local classes and forms from INCLUDEs are exported from the program", async () => {
+    const main = `REPORT zrepro.
+INCLUDE zrepro_top.
+START-OF-SELECTION.
+  PERFORM run.
+INCLUDE zrepro_f01.`;
+    const top = `DATA gv_value TYPE i.
+INCLUDE zrepro_t01.`;
+    const f01 = `FORM run.
+  gv_value = gv_value + 1.
+ENDFORM.`;
+    const t01 = `CLASS ltcl_test DEFINITION FINAL FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS test_run FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD test_run.
+    CLEAR gv_value.
+    PERFORM run.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const res = await compileFiles([
+      {filename: "zrepro.prog.abap", contents: main},
+      {filename: "zrepro.prog.xml", contents: progXml("zrepro", "1")},
+      {filename: "zrepro_top.prog.abap", contents: top},
+      {filename: "zrepro_top.prog.xml", contents: progXml("zrepro_top", "I")},
+      {filename: "zrepro_f01.prog.abap", contents: f01},
+      {filename: "zrepro_f01.prog.xml", contents: progXml("zrepro_f01", "I")},
+      {filename: "zrepro_t01.prog.abap", contents: t01},
+      {filename: "zrepro_t01.prog.xml", contents: progXml("zrepro_t01", "I")},
+    ], {addCommonJS: true});
+    const prog = res.objects.find(o => o.object.name === "ZREPRO");
+    expect(prog).to.not.equal(undefined);
+    expect(prog!.exports).to.have.members(["ltcl_test", "run"]);
+    expect(prog!.chunk.getCode()).to.include("export {ltcl_test, run};");
+  });
+
 });

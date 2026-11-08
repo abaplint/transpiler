@@ -65,6 +65,12 @@ export class HandleABAP {
       }
 
       const exports = this.findExports(file.getStructure());
+      if (obj instanceof abaplint.Objects.Program) {
+        // INCLUDEs are expanded into the program, so export their contents too
+        for (const include of this.findIncludes(file, reg)) {
+          exports.push(...this.findExports(include.getStructure()).filter(e => exports.includes(e) === false));
+        }
+      }
       const output: IOutputFile = {
         object: {
           name: obj.getName(),
@@ -175,6 +181,23 @@ export class HandleABAP {
     }
 
     return contents;
+  }
+
+  /** include programs referenced by INCLUDE statements, recursively, each returned once */
+  private findIncludes(file: abaplint.ABAPFile, reg: abaplint.IRegistry, visited = new Set<string>()): abaplint.ABAPFile[] {
+    const ret: abaplint.ABAPFile[] = [];
+    for (const statement of file.getStructure()?.findAllStatements(abaplint.Statements.Include) || []) {
+      const name = statement.findDirectExpression(abaplint.Expressions.IncludeName)?.concatTokens().toUpperCase();
+      if (name === undefined || visited.has(name)) {
+        continue;
+      }
+      visited.add(name);
+      const include = (reg.getObject("PROG", name) as abaplint.Objects.Program | undefined)?.getMainABAPFile();
+      if (include !== undefined) {
+        ret.push(include, ...this.findIncludes(include, reg, visited));
+      }
+    }
+    return ret;
   }
 
   protected findExports(node: abaplint.Nodes.StructureNode | undefined): string[] {
