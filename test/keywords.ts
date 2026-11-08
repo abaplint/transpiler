@@ -153,4 +153,131 @@ WRITE case.`;
     expect(abap.console.get()).to.equal("12");
   });
 
+  // "abap" is not a JavaScript reserved word, but the emitted code reaches the
+  // runtime through a free identifier of that name: a `let abap` at program
+  // level is "Identifier 'abap' has already been declared", inside a method
+  // every `abap.types...` above the declaration is in the temporal dead zone
+  it("abap, DATA at program level", async () => {
+    const code = `
+DATA x TYPE i.
+x = 1.
+DATA abap TYPE i.
+abap = x + 1.
+WRITE abap.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+  it("abap, local DATA in a method, declared after a runtime access", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS foo.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD foo.
+    DATA x TYPE i.
+    x = 1.
+    DATA(abap) = x + 1.
+    WRITE abap.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl=>foo( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+  it("abap, method parameters, importing and exporting", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS foo IMPORTING abap TYPE i RETURNING VALUE(r) TYPE i.
+    CLASS-METHODS bar EXPORTING abap TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD foo.
+    r = abap + 1.
+  ENDMETHOD.
+  METHOD bar.
+    abap = 7.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA v TYPE i.
+  v = lcl=>foo( abap = 1 ).
+  WRITE v.
+  lcl=>bar( IMPORTING abap = v ).
+  WRITE v.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("27");
+  });
+
+  it("abap, field symbol", async () => {
+    const code = `
+DATA v TYPE i.
+FIELD-SYMBOLS <abap> TYPE i.
+ASSIGN v TO <abap>.
+<abap> = 5.
+WRITE v.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("5");
+  });
+
+  it("abap, class attribute and method name", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    DATA abap TYPE i.
+    METHODS set IMPORTING val TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD set.
+    me->abap = val.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl2 DEFINITION.
+  PUBLIC SECTION.
+    METHODS abap RETURNING VALUE(r) TYPE i.
+ENDCLASS.
+
+CLASS lcl2 IMPLEMENTATION.
+  METHOD abap.
+    r = 9.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lcl.
+  DATA lo2 TYPE REF TO lcl2.
+  CREATE OBJECT lo.
+  CREATE OBJECT lo2.
+  lo->set( 3 ).
+  WRITE lo->abap.
+  WRITE lo2->abap( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("39");
+  });
+
 });
