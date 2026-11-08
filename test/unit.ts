@@ -3481,6 +3481,13 @@ ENDCLASS.`;
     const cons = await dumpNrun(files, false);
     expect(cons).to.include("ZREPRO: running ltcl_test->test_run");
     expect(cons).to.include("value 1");
+
+    // KERNEL_UNIT_RUNNER finds the class as "PROG-ZREPRO-LTCL_TEST" after the program module is imported
+    const open = fs.readFileSync(path.join(outputFolder, "index_open.mjs"), "utf8");
+    expect(open).to.include(`await import("./zrepro.prog.mjs");`);
+    expect(open).to.include(`class_name.set("ZREPRO");`);
+    expect(open).to.include(`testclass_name.set("LTCL_TEST");`);
+    expect(open).to.include(`method_name.set("TEST_RUN");`);
   });
 
   it("test-72", async () => {

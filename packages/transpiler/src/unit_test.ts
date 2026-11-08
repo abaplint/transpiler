@@ -36,15 +36,29 @@ async function run() {
 `;
 
     for (const obj of reg.getObjects()) {
-      if (reg.isDependency(obj) || !(obj instanceof abaplint.Objects.Class)) {
+      if (reg.isDependency(obj)) {
         continue;
       }
-      const hasTestFile = obj.getFiles().some(f => { return f.getFilename().includes(".testclasses."); });
-      if (hasTestFile === true) {
-        ret += `  await import("${importPath("index.mjs", this.layout.objectModule(obj, ".testclasses"))}");\n`;
+
+      let files: readonly abaplint.ABAPFile[] = [];
+      if (obj instanceof abaplint.Objects.Class) {
+        const hasTestFile = obj.getFiles().some(f => { return f.getFilename().includes(".testclasses."); });
+        if (hasTestFile === true) {
+          ret += `  await import("${importPath("index.mjs", this.layout.objectModule(obj, ".testclasses"))}");\n`;
+        }
+        files = obj.getABAPFiles();
+      } else if (obj instanceof abaplint.Objects.Program && obj.isInclude() === false) {
+        // KERNEL_UNIT_RUNNER finds local classes of programs as "PROG-<program>-<class>",
+        // importing the program module registers them, its main function is not run
+        files = filesWithProgramIncludes(obj, reg);
+        if (files.some(f => f.getInfo().listClassDefinitions().some(d => d.isForTesting === true && d.isGlobal === false))) {
+          ret += `  await import("${importPath("index.mjs", this.layout.objectModule(obj))}");\n`;
+        }
+      } else {
+        continue;
       }
 
-      for (const file of obj.getABAPFiles()) {
+      for (const file of files) {
         for (const def of file.getInfo().listClassDefinitions()) {
           if (def.isForTesting === false || def.isGlobal === true  || def.methods.length === 0) {
           // todo, fix, there might be global test methods
