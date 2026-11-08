@@ -7,8 +7,14 @@ type Node = abaplint.Nodes.ExpressionNode | abaplint.Nodes.TokenNode;
 export class CDSDatabaseView {
   private viewName = "";
   private readonly sources: string[] = [];
+  private readonly dependencies = new Set<string>();
 
   public constructor(private readonly reg: abaplint.IRegistry) {}
+
+  /** Names of the CDS views selected from, valid after build() */
+  public getDependencies(): string[] {
+    return Array.from(this.dependencies);
+  }
 
   public build(obj: abaplint.Objects.DataDefinition): string | undefined {
     this.viewName = obj.getName();
@@ -65,8 +71,10 @@ export class CDSDatabaseView {
       return this.unsupported("expected a table source");
     }
     const name = this.name(nameNode);
-    if (this.reg.getObject("TABL", name)?.getType() !== "TABL") {
-      return this.unsupported(`source ${name} does not resolve to a TABL`);
+    if (this.reg.getObject("DDLS", name) instanceof abaplint.Objects.DataDefinition) {
+      this.dependencies.add(name);
+    } else if (this.reg.getObject("TABL", name) === undefined && this.reg.getObject("VIEW", name) === undefined) {
+      return this.unsupported(`source ${name} does not resolve to a TABL, VIEW or DDLS`);
     }
     const as = node.findDirectExpression(cds.CDSAs);
     const alias = as?.findDirectExpression(cds.CDSName) || node.findDirectExpression(cds.CDSName);

@@ -45,16 +45,40 @@ export class DatabaseSetup {
 ////////////////////
 
   private buildCDSViews(): string[] {
-    const views: string[] = [];
+    const views = new Map<string, {sql: string, dependencies: string[]}>();
     for (const obj of this.reg.getObjects()) {
       if (obj instanceof abaplint.Objects.DataDefinition) {
-        const view = new CDSDatabaseView(this.reg).build(obj);
-        if (view !== undefined) {
-          views.push(view);
+        const builder = new CDSDatabaseView(this.reg);
+        const sql = builder.build(obj);
+        if (sql !== undefined) {
+          views.set(obj.getName().toLowerCase(), {sql, dependencies: builder.getDependencies()});
         }
       }
     }
-    return views;
+
+    // CDS views selecting from other CDS views must be created after their sources
+    const result: string[] = [];
+    const done = new Set<string>();
+    const visiting = new Set<string>();
+    const visit = (name: string): void => {
+      const view = views.get(name);
+      if (view === undefined || done.has(name)) {
+        return;
+      } else if (visiting.has(name)) {
+        throw new Error(`CDS view ${name}: cyclic dependency`);
+      }
+      visiting.add(name);
+      for (const dependency of view.dependencies) {
+        visit(dependency);
+      }
+      visiting.delete(name);
+      done.add(name);
+      result.push(view.sql);
+    };
+    for (const name of views.keys()) {
+      visit(name);
+    }
+    return result;
   }
 
   private driver(schemaGenerator: DatabaseSchemaGenerator): string[] {
