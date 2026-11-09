@@ -24,15 +24,16 @@ export class SwitchBodyTranspiler {
       let mode: "WHEN" | "THEN" | "" = "";
       for (const c of body.getChildren()) {
         if (c instanceof Nodes.TokenNode) {
-          if (c.concatTokens() === "WHEN") {
+          const keyword = c.concatTokens().toUpperCase();
+          if (keyword === "WHEN") {
             if (currentWhenThen.whenOr.length > 0) {
               whenThenOr.push(currentWhenThen);
             }
             currentWhenThen = {whenOr: [], then: undefined};
             mode = "WHEN";
-          } else if (c.concatTokens() === "THEN") {
+          } else if (keyword === "THEN") {
             mode = "THEN";
-          } else if (c.concatTokens() === "ELSE") {
+          } else if (keyword === "ELSE") {
             mode = "";
           }
         } else if (mode === "WHEN" && c instanceof Nodes.ExpressionNode) {
