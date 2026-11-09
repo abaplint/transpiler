@@ -3,7 +3,7 @@ import {AsyncFunction, runFiles as runRilesSqlite, runFilesHana, runFilesPostgre
 import {ABAP, MemoryConsole} from "../packages/runtime/src/";
 import {msag_escape, msag_zag_unit_test, tabl_t100xml, tabl_zrng, zquan, zt111, zt222} from "./_data";
 import {IFile} from "../packages/transpiler/src/types";
-import {zhead, zinfo, ztext, zvHeadText} from "../packages/transpiler/test/_view";
+import {zhead, zinfo, ztext, zvExtPrio, zvHeadText} from "../packages/transpiler/test/_view";
 
 try {
   process.loadEnvFile();
@@ -3946,6 +3946,18 @@ SELECT loc AS cust, item, valid_from, valid_to, branch, unit, seq
 1000 ITEM0004 20260201 20261231 B1 PC 01
 3000 ITEM0005 20260201 20261231 B2 KG 02`);
       });
+    });
+  });
+
+  it("external view, VIEWCLASS X, is created as an empty table", async () => {
+    const code = `
+    SELECT COUNT(*) FROM zvext_prio.
+    WRITE sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "zvext_prio.view.xml", contents: zvExtPrio}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("0");
     });
   });
 
