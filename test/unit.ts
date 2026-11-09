@@ -3568,4 +3568,64 @@ ENDCLASS.`;
     expect(cons).to.not.include("report ran");
   });
 
+  it("test-74", async () => {
+// program with a selection screen, a FORM name with dashes and a local exception class without IMPLEMENTATION
+    const prog = `REPORT zscreen.
+
+SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE TEXT-001.
+SELECTION-SCREEN COMMENT /1(20) t_info.
+PARAMETERS p_max TYPE i DEFAULT 3.
+SELECTION-SCREEN END OF BLOCK b1.
+
+CLASS lcx_test_stop DEFINITION INHERITING FROM cx_no_check FINAL.
+ENDCLASS.
+
+INITIALIZATION.
+  t_info = 'Info'.
+
+START-OF-SELECTION.
+  PERFORM top-of-page.
+
+FORM top-of-page.
+  WRITE / |max { p_max }|.
+ENDFORM.
+
+FORM stop.
+  RAISE EXCEPTION TYPE lcx_test_stop.
+ENDFORM.
+
+CLASS ltcl_test DEFINITION FINAL FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS run FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD run.
+    PERFORM top-of-page.
+    TRY.
+        PERFORM stop.
+      CATCH lcx_test_stop.
+        WRITE / 'stopped'.
+    ENDTRY.
+    t_info = 'Set'.
+    WRITE / t_info.
+  ENDMETHOD.
+ENDCLASS.`;
+    const cxnocheck = `CLASS cx_no_check DEFINITION PUBLIC INHERITING FROM cx_root.
+ENDCLASS.
+CLASS cx_no_check IMPLEMENTATION.
+ENDCLASS.`;
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "cx_no_check.clas.abap", contents: cxnocheck},
+      {filename: "zscreen.prog.abap", contents: prog},
+      {filename: "zscreen.prog.xml", contents: progXml("zscreen", "1")},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons).to.include("ZSCREEN: running ltcl_test->run");
+    expect(cons).to.include("max 3");
+    expect(cons).to.include("stopped");
+    expect(cons).to.include("Set");
+  });
+
 });

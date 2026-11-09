@@ -155,6 +155,13 @@ export class Traversal {
     return name + "";
   }
 
+  /** the javascript function name of a FORM, from the FormName expression or the ABAP name. FORM names
+   * can contain dashes, eg. "top-of-page", and namespaces, all references must use this */
+  public static formName(name: abaplint.Nodes.ExpressionNode | string): string {
+    const abap = typeof name === "string" ? name : name.concatTokens();
+    return Traversal.prefixVariable(Traversal.escapeNamespace(abap.toLowerCase())!.replace(/-/g, "$"));
+  }
+
   public static isBracketComponent(name: string): boolean {
     return name.match(/^\d/) !== null || name.includes("/") || name.startsWith("%");
   }

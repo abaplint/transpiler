@@ -1093,6 +1093,39 @@ ENDCLASS.`;
     await f(abap);
   });
 
+  it("local subclass, no implementation", async () => {
+    const code = `
+CLASS lcl_base DEFINITION.
+  PUBLIC SECTION.
+    DATA name TYPE string.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS lcl_base IMPLEMENTATION.
+  METHOD constructor.
+    name = 'base'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_sub DEFINITION INHERITING FROM lcl_base FINAL.
+  PUBLIC SECTION.
+    DATA extra TYPE i VALUE 2.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo_base TYPE REF TO lcl_base.
+  DATA lo_sub TYPE REF TO lcl_sub.
+  CREATE OBJECT lo_sub.
+  WRITE lo_sub->name.
+  WRITE lo_sub->extra.
+  CREATE OBJECT lo_base TYPE ('LCL_SUB').
+  WRITE lo_base->name.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("base2base");
+  });
+
   it("escaped preferred parameter, check valid JS syntax", async () => {
     const code = `
 INTERFACE zif_abaplint_code_inspector.
