@@ -9,6 +9,7 @@ import {SQLFieldNameTranspiler} from "./sql_field_name";
 import {SourceTranspiler} from "./source";
 import {SQLFieldListTranspiler} from "./sql_field_list";
 import {SQLFromTranspiler} from "./sql_from";
+import {SQLFunctionTranspiler} from "./sql_function";
 
 export class SQLCondTranspiler implements IExpressionTranspiler {
 
@@ -125,6 +126,13 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
     if (fieldNameExpression && c.getChildren().length === 3 && c.concatTokens().toUpperCase().endsWith(" IS NULL")) {
       ret += fieldName + " IS NULL";
       return ret;
+    }
+
+    const sqlFunction = c.findDirectExpression(abaplint.Expressions.SQLFunction);
+    if (sqlFunction && c.getFirstChild() === sqlFunction && operator && source) {
+      return new SQLFunctionTranspiler().transpile(sqlFunction, traversal).getCode() + " "
+        + this.sqlOperator(operator.concatTokens()) + " "
+        + this.sqlSource(source, traversal, filename, table);
     }
 
     const aggregation = c.findDirectExpression(abaplint.Expressions.SQLAggregation);

@@ -101,6 +101,53 @@ const tabl_zdbw = `<?xml version="1.0" encoding="utf-8"?>
  </asx:abap>
 </abapGit>`;
 
+function tablXml(name: string, fields: {name: string, key?: boolean, type: "CHAR" | "DATS" | "NUMC", leng: number}[]) {
+  const inttype = {CHAR: "C", DATS: "D", NUMC: "N"};
+  const dd03p = fields.map(f => `
+    <DD03P>
+     <FIELDNAME>${f.name}</FIELDNAME>${f.key === true ? "\n     <KEYFLAG>X</KEYFLAG>" : ""}
+     <INTTYPE>${inttype[f.type]}</INTTYPE>
+     <INTLEN>${String(f.leng * 2).padStart(6, "0")}</INTLEN>${f.key === true ? "\n     <NOTNULL>X</NOTNULL>" : ""}
+     <DATATYPE>${f.type}</DATATYPE>
+     <LENG>${String(f.leng).padStart(6, "0")}</LENG>
+    </DD03P>`).join("");
+  return `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V>
+    <TABNAME>${name}</TABNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <TABCLASS>TRANSP</TABCLASS>
+    <CLIDEP>X</CLIDEP>
+    <CONTFLAG>A</CONTFLAG>
+   </DD02V>
+   <DD03P_TABLE>${dd03p}
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+}
+
+const tabl_zsel_main = tablXml("ZSEL_MAIN", [
+  {name: "MANDT", key: true, type: "CHAR", leng: 3},
+  {name: "LOC", key: true, type: "CHAR", leng: 10},
+  {name: "ITEM", key: true, type: "CHAR", leng: 18},
+  {name: "VALID_FROM", key: true, type: "DATS", leng: 8},
+  {name: "SEQ", key: true, type: "NUMC", leng: 2},
+  {name: "VALID_TO", type: "DATS", leng: 8},
+  {name: "BRANCH", type: "CHAR", leng: 4},
+  {name: "UNIT", type: "CHAR", leng: 3},
+  {name: "CHANGED_ON", type: "DATS", leng: 8},
+]);
+
+const tabl_zsel_excl = tablXml("ZSEL_EXCL", [
+  {name: "MANDT", key: true, type: "CHAR", leng: 3},
+  {name: "OBJCLASS", key: true, type: "CHAR", leng: 10},
+  {name: "CUST", key: true, type: "CHAR", leng: 10},
+  {name: "ITEM", key: true, type: "CHAR", leng: 18},
+]);
+
 async function runAllDatabases(abap: ABAP,
                                files: IFile[],
                                check: () => any,
@@ -3759,6 +3806,146 @@ WRITE lines( <tab> ).`;
       await runAllDatabases(abap, [{filename: "zfoobar.prog.abap", contents: code}, t100], () => {
         expect(output()).to.equal("1\n1\n1\n1");
       }, {snowflake: false});
+    });
+  });
+
+  describe("SELECT with alias, range, substring, column compare and correlated NOT EXISTS", () => {
+    const files = (select: string) => {
+      const code = `
+FORM run.
+DATA lt_main TYPE STANDARD TABLE OF zsel_main WITH DEFAULT KEY.
+DATA lt_excl TYPE STANDARD TABLE OF zsel_excl WITH DEFAULT KEY.
+DATA r_cust TYPE RANGE OF zsel_main-loc.
+DATA analysis_date TYPE d VALUE '20260101'.
+
+* included
+APPEND VALUE #( loc = '1000' item = 'ITEM0001' valid_from = '20260201' seq = '01'
+  valid_to = '20261231' branch = 'B1' unit = 'PC' changed_on = '20260101' ) TO lt_main.
+* included, sorts after the first by valid_from
+APPEND VALUE #( loc = '1000' item = 'ITEM0001' valid_from = '20260301' seq = '01'
+  valid_to = '20261231' branch = 'B1' unit = 'PC' changed_on = '20260101' ) TO lt_main.
+* excluded, 8th character of item is '-'
+APPEND VALUE #( loc = '1000' item = 'ABCDEFG-1' valid_from = '20260201' seq = '01'
+  valid_to = '20261231' branch = 'B1' unit = 'PC' changed_on = '20260101' ) TO lt_main.
+* excluded, valid_from not after changed_on
+APPEND VALUE #( loc = '1000' item = 'ITEM0002' valid_from = '20251201' seq = '01'
+  valid_to = '20261231' branch = 'B1' unit = 'PC' changed_on = '20260101' ) TO lt_main.
+* excluded, changed_on differs from analysis_date
+APPEND VALUE #( loc = '1000' item = 'ITEM0003' valid_from = '20260201' seq = '01'
+  valid_to = '20261231' branch = 'B1' unit = 'PC' changed_on = '20260102' ) TO lt_main.
+* excluded, loc not in range
+APPEND VALUE #( loc = '2000' item = 'ITEM0001' valid_from = '20260201' seq = '01'
+  valid_to = '20261231' branch = 'B1' unit = 'PC' changed_on = '20260101' ) TO lt_main.
+* excluded, matching row in zsel_excl
+APPEND VALUE #( loc = '1000' item = 'ITEM0004' valid_from = '20260201' seq = '01'
+  valid_to = '20261231' branch = 'B1' unit = 'PC' changed_on = '20260101' ) TO lt_main.
+* included, zsel_excl row has another objclass
+APPEND VALUE #( loc = '3000' item = 'ITEM0005' valid_from = '20260201' seq = '02'
+  valid_to = '20261231' branch = 'B2' unit = 'KG' changed_on = '20260101' ) TO lt_main.
+INSERT zsel_main FROM TABLE lt_main.
+
+APPEND VALUE #( objclass = 'OBJ1' cust = '1000' item = 'ITEM0004' ) TO lt_excl.
+APPEND VALUE #( objclass = 'OBJ2' cust = '3000' item = 'ITEM0005' ) TO lt_excl.
+* same item, but cust does not match the outer loc
+APPEND VALUE #( objclass = 'OBJ1' cust = '9999' item = 'ITEM0001' ) TO lt_excl.
+INSERT zsel_excl FROM TABLE lt_excl.
+
+APPEND VALUE #( sign = 'I' option = 'EQ' low = '1000' ) TO r_cust.
+APPEND VALUE #( sign = 'I' option = 'EQ' low = '3000' ) TO r_cust.
+
+${select}
+
+WRITE / lines( tab ).
+LOOP AT tab INTO DATA(row).
+  WRITE / |{ row-cust } { row-item } { row-valid_from } { row-valid_to } { row-branch } { row-unit } { row-seq }|.
+ENDLOOP.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+      return [
+        {filename: "zfoobar.prog.abap", contents: code},
+        {filename: "zsel_main.tabl.xml", contents: tabl_zsel_main},
+        {filename: "zsel_excl.tabl.xml", contents: tabl_zsel_excl},
+      ];
+    };
+
+    const expected = `3
+1000 ITEM0001 20260201 20261231 B1 PC 01
+1000 ITEM0001 20260301 20261231 B1 PC 01
+3000 ITEM0005 20260201 20261231 B2 KG 02`;
+
+    it("full statement", async () => {
+      const select = `
+SELECT loc AS cust, item, valid_from, valid_to, branch, unit, seq
+    FROM zsel_main AS a
+    WHERE loc        IN @r_cust
+      AND changed_on = @analysis_date
+      AND valid_from > a~changed_on
+      AND substring( item, 8, 1 ) <> '-'
+      AND NOT EXISTS ( SELECT 'X' FROM zsel_excl
+                              WHERE objclass = 'OBJ1'
+                                AND cust     = a~loc
+                                AND item     = a~item )
+    ORDER BY loc, item, valid_from, valid_to, branch, unit, seq
+    INTO TABLE @DATA(tab).`;
+      await runAllDatabases(abap, files(select), () => {
+        expect(abap.console.get().trimStart()).to.equal(expected);
+      });
+    });
+
+    it("column compared to column via alias", async () => {
+      const select = `
+SELECT loc AS cust, item, valid_from, valid_to, branch, unit, seq
+    FROM zsel_main AS a
+    WHERE valid_from > a~changed_on
+    ORDER BY loc, item, valid_from
+    INTO TABLE @DATA(tab).`;
+      await runAllDatabases(abap, files(select), () => {
+        expect(abap.console.get().trimStart().split("\n")[0]).to.equal("7");
+      });
+    });
+
+    it("substring in WHERE", async () => {
+      const select = `
+SELECT loc AS cust, item, valid_from, valid_to, branch, unit, seq
+    FROM zsel_main
+    WHERE substring( item, 8, 1 ) = '-'
+    INTO TABLE @DATA(tab).`;
+      await runAllDatabases(abap, files(select), () => {
+        expect(abap.console.get().trimStart()).to.equal(`1
+1000 ABCDEFG-1 20260201 20261231 B1 PC 01`);
+      });
+    });
+
+    it("correlated NOT EXISTS", async () => {
+      const select = `
+SELECT loc AS cust, item, valid_from, valid_to, branch, unit, seq
+    FROM zsel_main AS a
+    WHERE NOT EXISTS ( SELECT 'X' FROM zsel_excl
+                         WHERE objclass = 'OBJ1'
+                           AND cust     = a~loc
+                           AND item     = a~item )
+    INTO TABLE @DATA(tab).`;
+      await runAllDatabases(abap, files(select), () => {
+        expect(abap.console.get().trimStart().split("\n")[0]).to.equal("7");
+      });
+    });
+
+    it("correlated EXISTS", async () => {
+      const select = `
+SELECT loc AS cust, item, valid_from, valid_to, branch, unit, seq
+    FROM zsel_main AS a
+    WHERE EXISTS ( SELECT 'X' FROM zsel_excl
+                     WHERE cust = a~loc
+                       AND item = a~item )
+    ORDER BY loc
+    INTO TABLE @DATA(tab).`;
+      await runAllDatabases(abap, files(select), () => {
+        expect(abap.console.get().trimStart()).to.equal(`2
+1000 ITEM0004 20260201 20261231 B1 PC 01
+3000 ITEM0005 20260201 20261231 B2 KG 02`);
+      });
     });
   });
 
