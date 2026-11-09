@@ -107,6 +107,7 @@ export * from "./modify_screen";
 export * from "./move_corresponding";
 export * from "./move";
 export * from "./multiply";
+export * from "./native_sql";
 export * from "./new_page";
 export * from "./open_cursor";
 export * from "./open_dataset";
