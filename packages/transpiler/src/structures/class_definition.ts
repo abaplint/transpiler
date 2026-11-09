@@ -2,6 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
+import {filesWithProgramIncludes} from "../program_includes";
 
 export class ClassDefinitionTranspiler implements IStructureTranspiler {
 
@@ -10,7 +11,7 @@ export class ClassDefinitionTranspiler implements IStructureTranspiler {
 
     let found = false;
     if (className !== undefined) {
-      for (const a of traversal.getCurrentObject().getABAPFiles()) {
+      for (const a of filesWithProgramIncludes(traversal.getCurrentObject(), traversal.reg)) {
         if (a.getInfo().getClassImplementationByName(className) !== undefined) {
           found = true;
         }

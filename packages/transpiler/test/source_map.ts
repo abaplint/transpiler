@@ -14,6 +14,11 @@ const OPTIONS: ITranspilerOptions = {
   addCommonJS: true,
 };
 
+// as modules the executable code of programs is wrapped in a main function, these tests look at the statements
+const PROG_OPTIONS: ITranspilerOptions = {
+  ignoreSyntaxCheck: true,
+};
+
 async function countMappingsPerGeneratedLine(map: string | undefined) {
   if (map === undefined) {
     return {};
@@ -40,7 +45,7 @@ ENDIF.`;
 `if (abap.compare.cp(foo, bar)) {
 }`;
 
-    const result = await runSingleMapped(abap, OPTIONS);
+    const result = await runSingleMapped(abap, PROG_OPTIONS);
     expect(result?.js).to.equal(js);
 
     const perLine = await countMappingsPerGeneratedLine(result?.map);
@@ -51,7 +56,7 @@ ENDIF.`;
   it("APPEND", async () => {
     const abap = "APPEND <ls_branch> TO rt_branches.";
     const js = `abap.statements.append({source: fs_ls_branch_, target: rt_branches});`;
-    const result = await runSingleMapped(abap, OPTIONS);
+    const result = await runSingleMapped(abap, PROG_OPTIONS);
     expect(result?.js).to.equal(js);
 
     const perLine = await countMappingsPerGeneratedLine(result?.map);
@@ -65,7 +70,7 @@ LOOP AT tab INTO foo.
   WRITE foo.
 ENDLOOP.`;
 
-    const result = await runSingleMapped(abap, OPTIONS);
+    const result = await runSingleMapped(abap, PROG_OPTIONS);
     const consumer = await new sourceMap.SourceMapConsumer(JSON.parse(result!.map!));
     const jsLines = result!.js.split("\n");
 
@@ -85,7 +90,7 @@ ENDLOOP.`;
     const abap = `DATA foo TYPE i.
 CLEAR foo.`;
 
-    const result = await runSingleMapped(abap, OPTIONS);
+    const result = await runSingleMapped(abap, PROG_OPTIONS);
     // the CLEAR statement is generated as "foo.clear();"
     expect(result?.js).to.include("foo.clear();");
 
@@ -114,7 +119,7 @@ CLEAR foo.`;
     const abap = `WRITE 'x'.
 DATA foo TYPE i.`;
 
-    const result = await runSingleMapped(abap, OPTIONS);
+    const result = await runSingleMapped(abap, PROG_OPTIONS);
     const consumer = await new sourceMap.SourceMapConsumer(JSON.parse(result!.map!));
 
     // find the generated line declaring foo, confirm it maps back to abap line 2
