@@ -94,4 +94,52 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("bar");
   });
 
+  it("lower case keywords, inferred type, integer WHEN", async () => {
+    const code = `
+TYPES: BEGIN OF ty_struc,
+         flag TYPE i,
+       END OF ty_struc.
+DATA ls_struc TYPE ty_struc.
+DATA lv_result TYPE c LENGTH 1.
+
+ls_struc-flag = 1.
+lv_result = SWITCH #( ls_struc-flag WHEN 1 then 'S' ELSE 'N').
+WRITE / lv_result.
+ls_struc-flag = 2.
+lv_result = SWITCH #( ls_struc-flag WHEN 1 then 'S' ELSE 'N').
+WRITE / lv_result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("S\nN");
+  });
+
+  it("lower case keywords, named type, attribute", async () => {
+    const code = `
+TYPES ty_name TYPE c LENGTH 10.
+
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    DATA mv_value TYPE ty_name.
+    METHODS run RETURNING VALUE(rv_name) TYPE ty_name.
+ENDCLASS.
+
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD run.
+    rv_name = SWITCH ty_name( me->mv_value WHEN '' then 'DEFAULT' else me->mv_value ).
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo_bar TYPE REF TO lcl_bar.
+  CREATE OBJECT lo_bar.
+  WRITE / lo_bar->run( ).
+  lo_bar->mv_value = 'HELLO'.
+  WRITE / lo_bar->run( ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("DEFAULT   \nHELLO     ");
+  });
+
 });
