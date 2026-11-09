@@ -21,7 +21,7 @@ export class SQLFieldAndValueTranspiler implements IExpressionTranspiler {
         const source = traversal.traverse(n);
         // todo: value conversion? abap vs db, traversal.isSQLConversion
         // todo: integers?
-        chunk.appendString("'\" + " + source.getCode() + ".get() + \"'");
+        chunk.appendString("'\" + abap.sqlEscape(" + source.getCode() + ".get()) + \"'");
       } else if (n instanceof abaplint.Nodes.TokenNode) {
         // operators/keywords, eg. the "+" in "field = field + value"
         chunk.appendString(" " + concat + " ");
