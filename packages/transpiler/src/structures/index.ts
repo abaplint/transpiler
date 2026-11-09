@@ -9,6 +9,7 @@ export * from "./constants";
 export * from "./data";
 export * from "./define";
 export * from "./do";
+export * from "./exec_sql";
 export * from "./function_module";
 export * from "./interface";
 export * from "./loop";

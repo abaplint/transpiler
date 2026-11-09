@@ -31,6 +31,15 @@ describe("Multiple lines", () => {
     expect(await runSingle(abap)).to.include(`throw new Error("CATCH SYSTEM-EXCEPTIONS, not supported, transpiler");`);
   });
 
+  it("EXEC SQL, runtime error", async () => {
+    const abap = `
+    EXEC SQL.
+      SELECT * FROM foo
+    ENDEXEC.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("EXEC SQL, not supported, transpiler");`);
+  });
+
   it("SELECT SINGLE FOR UPDATE, runtime error", async () => {
     const abap = `SELECT SINGLE FOR UPDATE * FROM t100 INTO ls_result.`;
 
