@@ -14,7 +14,7 @@ export class PGDatabaseSchema implements DatabaseSchemaGenerator {
 
   public buildVIEW(view: abaplint.Objects.View): string {
     if (ExternalView.isExternal(view)) {
-      const {columns, keys} = ExternalView.columns(view);
+      const {columns, keys} = ExternalView.columns(view, this.reg);
       return this.createTable(view.getName(), columns, keys);
     }
     return new DatabaseSchemaReuse(QUOTE).buildVIEW(view);

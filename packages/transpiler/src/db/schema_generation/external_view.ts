@@ -10,66 +10,13 @@ export class ExternalView {
     return /<VIEWCLASS>X<\/VIEWCLASS>/.test(view.getXMLFile()?.getRaw() || "");
   }
 
-  public static columns(view: abaplint.Objects.View): {columns: TableColumn[], keys: string[]} {
-    const raw = view.getXMLFile()?.getRaw() || "";
-    const columns: TableColumn[] = [];
-    const keys: string[] = [];
-    for (const match of raw.matchAll(/<DD27P>([\s\S]*?)<\/DD27P>/g)) {
-      const value = (tag: string) => new RegExp(`<${tag}>([^<]*)</${tag}>`).exec(match[1])?.[1];
-      const name = value("VIEWFIELD");
-      if (name === undefined) {
-        continue;
-      }
-      const type = ExternalView.toType(value("EXVDATATYPE"), parseInt(value("EXVFLENGTH") || "0", 10),
-                                       parseInt(value("EXVDECIMALS") || "0", 10));
-      if (type === undefined) {
-        throw new Error(`External view ${view.getName()}-${name}: type ${value("EXVDATATYPE")} not supported`);
-      }
-      columns.push({name, type});
-      if (value("KEYFLAG") === "X") {
-        keys.push(name);
-      }
+  public static columns(view: abaplint.Objects.View, reg: abaplint.IRegistry): {columns: TableColumn[], keys: string[]} {
+    const type = view.parseType(reg);
+    if (!(type instanceof abaplint.BasicTypes.StructureType)) {
+      throw new Error(`External view ${view.getName()}: no fields`);
     }
-    return {columns, keys};
-  }
-
-  private static toType(datatype: string | undefined, length: number, decimals: number): abaplint.AbstractType | undefined {
-    switch (datatype) {
-      case "CHAR":
-      case "CLNT":
-      case "CUKY":
-      case "UNIT":
-      case "LANG":
-        return new abaplint.BasicTypes.CharacterType(length);
-      case "NUMC":
-        return new abaplint.BasicTypes.NumericType(length);
-      case "DATS":
-        return new abaplint.BasicTypes.DateType();
-      case "TIMS":
-        return new abaplint.BasicTypes.TimeType();
-      case "INT1":
-      case "INT2":
-      case "INT4":
-        return abaplint.BasicTypes.IntegerType.get();
-      case "INT8":
-        return new abaplint.BasicTypes.Integer8Type();
-      case "DEC":
-      case "CURR":
-      case "QUAN":
-        // EXVFLENGTH is the number of digits
-        return new abaplint.BasicTypes.PackedType(Math.floor(length / 2) + 1, decimals);
-      case "FLTP":
-        return new abaplint.BasicTypes.FloatType();
-      case "STRING":
-      case "SSTRING":
-        return abaplint.BasicTypes.StringType.get();
-      case "RAW":
-        return new abaplint.BasicTypes.HexType(length);
-      case "RAWSTRING":
-        return abaplint.BasicTypes.XStringType.get();
-      default:
-        return undefined;
-    }
+    // the field types come from EXVDATATYPE, abaplint types the fields void if it is missing
+    return {columns: [...type.getComponents()], keys: view.listKeys()};
   }
 
 }

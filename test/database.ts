@@ -3961,4 +3961,37 @@ SELECT loc AS cust, item, valid_from, valid_to, branch, unit, seq
     });
   });
 
+  it("external view, VIEWCLASS X, typed from EXVDATATYPE, INSERT and SELECT", async () => {
+    const code = `
+FORM run.
+  DATA row TYPE zvext_prio.
+  row-item = 'ITEM0001'.
+  row-ean = '4006381333931'.
+  row-flag_a = 'X'.
+  row-check = 'OK'.
+  row-test = 42.
+  row-unit = 'PC'.
+  INSERT zvext_prio FROM row.
+  row-item = 'ITEM0002'.
+  row-check = 'KO'.
+  row-test = 7.
+  INSERT zvext_prio FROM row.
+
+  SELECT * FROM zvext_prio WHERE check = 'OK' INTO TABLE @DATA(tab).
+  WRITE / lines( tab ).
+  LOOP AT tab INTO DATA(found).
+    WRITE / |{ found-item } { found-ean } { found-flag_a } { found-check } { found-test } { found-unit }|.
+  ENDLOOP.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "zvext_prio.view.xml", contents: zvExtPrio}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimStart()).to.equal("1\nITEM0001 4006381333931 X OK 42 PC");
+    });
+  });
+
 });
