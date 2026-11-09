@@ -92,7 +92,7 @@ export class PerformTranspiler implements IStatementTranspiler {
         index++;
       }
 
-      return new Chunk("await " + formName.concatTokens() + `({${params.join(",")}});`);
+      return new Chunk("await " + Traversal.formName(formName) + `({${params.join(",")}});`);
     }
   }
 

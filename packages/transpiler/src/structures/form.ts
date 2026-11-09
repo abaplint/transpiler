@@ -8,7 +8,7 @@ export class FormTranspiler implements IStructureTranspiler {
 
   public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): Chunk {
     const formName = node.findFirstStatement(abaplint.Statements.Form)
-      ?.findDirectExpression(abaplint.Expressions.FormName)?.concatTokens()?.toUpperCase();
+      ?.findDirectExpression(abaplint.Expressions.FormName)?.concatTokens().toUpperCase();
 
     const ret = new Chunk();
 
@@ -23,7 +23,7 @@ export class FormTranspiler implements IStructureTranspiler {
 
     if (formName && traversal.getCurrentObject().getType() === "PROG") {
       ret.appendString(`abap.Forms['PROG-${traversal.getCurrentObject().getName().toUpperCase()
-        }-${formName}'] = ${formName?.toLowerCase()};`);
+        }-${formName}'] = ${Traversal.formName(formName)};`);
     }
 
     return ret;

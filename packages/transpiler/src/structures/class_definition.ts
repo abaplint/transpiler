@@ -3,6 +3,7 @@ import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {filesWithProgramIncludes} from "../program_includes";
+import {ClassImplementationTranspiler} from "./class_implementation";
 
 export class ClassDefinitionTranspiler implements IStructureTranspiler {
 
@@ -21,20 +22,8 @@ export class ClassDefinitionTranspiler implements IStructureTranspiler {
     if (found) {
       return new Chunk("");
     } else {
-// its an abstract class with only abstract methods
-// not indented, Chunk.runIndentationLogic indents by brace depth
-      return new Chunk(`
-class ${className?.toLowerCase()} {
-static INTERNAL_TYPE = 'CLAS';
-static IMPLEMENTED_INTERFACES = [];
-static INTERNAL_NAME = 'ABSTRACT_CLASS_INTERNAL_NAME';
-static ATTRIBUTES = {};
-async constructor_() {
-this.me = new abap.types.ABAPObject();
-this.me.set(this);
-return this;
-}
-}`);
+      // no IMPLEMENTATION, eg. an exception class or an abstract class with only abstract methods
+      return new ClassImplementationTranspiler().transpileWithoutImplementation(node, traversal);
     }
   }
 

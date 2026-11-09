@@ -41,6 +41,57 @@ describe("Running statements - PERFORM", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
+  it("FORM name with dashes, parameters", async () => {
+    const code = `
+DATA lv_value TYPE i.
+PERFORM top-of-page CHANGING lv_value.
+WRITE lv_value.
+
+FORM top-of-page CHANGING cv_value TYPE i.
+  cv_value = 42.
+ENDFORM.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("42");
+  });
+
+  it("FORM name with dashes, IN PROGRAM", async () => {
+    await runProgram("ztarget_perform.prog.abap", `
+FORM top-of-page.
+  WRITE 'top'.
+ENDFORM.`);
+    await runProgram("zfoobar_perform.prog.abap", `
+PERFORM top-of-page IN PROGRAM ztarget_perform.`);
+    expect(abap.console.get()).to.equal("top");
+  });
+
+  it("FORM name, different case in PERFORM", async () => {
+    const code = `
+PERFORM Hello.
+
+FORM hELLO.
+  WRITE 'hello'.
+ENDFORM.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello");
+  });
+
+  it("FORM name is a javascript keyword", async () => {
+    const code = `
+PERFORM delete.
+
+FORM delete.
+  WRITE 'deleted'.
+ENDFORM.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("deleted");
+  });
+
   it("PERFORM IF FOUND", async () => {
     const code = `
 PERFORM sdfsdf IN PROGRAM sdfsdf IF FOUND.`;
