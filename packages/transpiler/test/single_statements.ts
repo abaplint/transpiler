@@ -209,7 +209,7 @@ describe("Single statements", () => {
     {abap: "SELECT * FROM (mv_table) INTO TABLE lt_tab.",
       js: `await abap.statements.select(lt_tab, {select: "SELECT * FROM " + abap.buildDbTableName(mv_table.get().trimEnd().toLowerCase()) + ""});`},
     {abap: "SELECT SINGLE * FROM t100 INTO ls_result WHERE arbgb = lv_arbgb.",
-      js: `await abap.statements.select(ls_result, {select: "SELECT * FROM " + abap.buildDbTableName("t100") + " WHERE \\"arbgb\\" = '" + lv_arbgb.get() + "' UP TO 1 ROWS"});`},
+      js: `await abap.statements.select(ls_result, {select: "SELECT * FROM " + abap.buildDbTableName("t100") + " WHERE \\"arbgb\\" = '" + abap.sqlEscape(lv_arbgb.get()) + "' UP TO 1 ROWS"});`},
     {abap: "select count( * ) from /foo/bar into bar.",
       js: `await abap.statements.select(bar, {select: "SELECT count( * )  from " + abap.buildDbTableName("/foo/bar") + ""});`},
     {abap: "SELECT * FROM sflight INTO CORRESPONDING FIELDS OF TABLE mt_sflight UP TO 10 ROWS ORDER BY carrid.",
@@ -489,7 +489,7 @@ await abap.Classes['KERNEL_RAP_EML'].rollback();`, skip: false},
       js: `await abap.statements.message({exceptionOrText: lx_exception, type: abap.CharacterFactory.get(1, 'S'), displayLike: abap.CharacterFactory.get(1, 'E')});`, skip: false},
 
     {abap: "select count( * ) from tab into res where enable_sqlite = abap_true.",
-      js: `await abap.statements.select(res, {select: "SELECT count( * )  from " + abap.buildDbTableName("tab") + " WHERE \\"enable_sqlite\\" = '" + abap.builtin.abap_true.get() + "'"});`, skip: false},
+      js: `await abap.statements.select(res, {select: "SELECT count( * )  from " + abap.buildDbTableName("tab") + " WHERE \\"enable_sqlite\\" = '" + abap.sqlEscape(abap.builtin.abap_true.get()) + "'"});`, skip: false},
     {abap: "select count( * ) from tab into res where ('enable_sqlite = abap_true').",
       js: `await abap.statements.select(res, {select: "SELECT count( * )  from " + abap.buildDbTableName("tab") + " WHERE \\"enable_sqlite\\" = 'X'"});`, skip: false},
   ];

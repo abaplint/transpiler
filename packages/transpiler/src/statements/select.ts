@@ -162,7 +162,8 @@ export class SelectTranspiler implements IStatementTranspiler {
       // ABAP semantics: with an empty driving table the whole WHERE condition is ignored
       const selectEmpty = select.replace(whereClause, "");
       const bindRow = (text: string) => text
-        .replace(new RegExp(" " + escapeRegExp(faeTranspiled!), "g"), " " + unique)
+        // the row reference follows a blank, or the parenthesis of abap.sqlEscape(
+        .replace(new RegExp("([ (])" + escapeRegExp(faeTranspiled!), "g"), "$1" + unique)
         .replace(unique + ".get().table_line.get()", unique + ".get()");  // there can be only one?
       select = bindRow(select);
       const where = bindRow(whereClause);

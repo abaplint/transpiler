@@ -52,7 +52,7 @@ export class UpdateDatabaseTranspiler implements IStatementTranspiler {
       const where: string[] = [];
       const set: string[] = [];
       for (const fieldName of allFields) {
-        const cond = `\\"${fieldName}\\" = '\" + ${sqlSource}.${fieldName}.get() + \"'`;
+        const cond = `\\"${fieldName}\\" = '\" + abap.sqlEscape(${sqlSource}.${fieldName}.get()) + \"'`;
         if (keys.includes(fieldName) === true) {
           where.push(cond);
         }  else {
