@@ -7,7 +7,6 @@ import {AtLastTranspiler} from "./at_last";
 import {UniqueIdentifier} from "../unique_identifier";
 import {LoopTranspiler as LoopStatementTranspiler} from "../statements";
 import {AtTranspiler} from "./at";
-import {InlineDeclarations} from "../inline";
 
 
 export class LoopTranspiler implements IStructureTranspiler {
@@ -34,11 +33,6 @@ export class LoopTranspiler implements IStructureTranspiler {
     const hasAtLast = (node.findDirectStructure(abaplint.Structures.Body)
       ?.findDirectStructures(abaplint.Structures.Normal) || [])
       .some(n => n.findDirectStructure(abaplint.Structures.AtLast) !== undefined);
-    const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
-    if (scope?.getIdentifier().stype === abaplint.ScopeType.Program
-        || scope?.getIdentifier().stype === abaplint.ScopeType.SelectionEvent) {
-      ret.appendString(InlineDeclarations.buildDeclarations(node, traversal));
-    }
     if (hasAtLast) {
       atLastFlag = UniqueIdentifier.get();
       ret.appendString(`let ${atLastFlag} = false;\n`);
