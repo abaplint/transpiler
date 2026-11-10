@@ -111,4 +111,65 @@ describe("Running statements - MESSAGE", () => {
     new AsyncFunction("abap", js);
   });
 
+  it("MESSAGE oref, IF_T100_MESSAGE gives the message and its placeholders", async () => {
+    const code = `
+INTERFACE if_message.
+  METHODS get_text RETURNING VALUE(result) TYPE string.
+ENDINTERFACE.
+
+INTERFACE if_t100_message.
+  INTERFACES if_message.
+  DATA: BEGIN OF t100key,
+          msgid TYPE c LENGTH 20,
+          msgno TYPE n LENGTH 3,
+          attr1 TYPE c LENGTH 255,
+          attr2 TYPE c LENGTH 255,
+          attr3 TYPE c LENGTH 255,
+          attr4 TYPE c LENGTH 255,
+        END OF t100key.
+ENDINTERFACE.
+
+CLASS lcl_msg DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES if_t100_message.
+    DATA mv_first TYPE c LENGTH 10.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS lcl_msg IMPLEMENTATION.
+  METHOD constructor.
+    mv_first = 'Alpha'.
+    if_t100_message~t100key-msgid = 'ZZ'.
+    if_t100_message~t100key-msgno = '001'.
+    if_t100_message~t100key-attr1 = 'MV_FIRST'.
+    if_t100_message~t100key-attr2 = 'NO_SUCH'.
+  ENDMETHOD.
+  METHOD if_message~get_text.
+    result = 'not used'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo_msg TYPE REF TO lcl_msg.
+  CREATE OBJECT lo_msg.
+  MESSAGE lo_msg TYPE 'S'.
+  WRITE / sy-msgid.
+  WRITE / sy-msgno.
+  WRITE / sy-msgty.
+  WRITE / sy-msgv1.
+  WRITE / sy-msgv2.`;
+
+    abap.context.databaseConnections["DEFAULT"] = new SQLiteDatabaseClient();
+    await abap.context.databaseConnections["DEFAULT"].connect();
+    await abap.context.databaseConnections["DEFAULT"].execute(`
+    CREATE TABLE t100 (sprsl NCHAR(1), arbgb NCHAR(20), msgnr NCHAR(3), text NCHAR(73), PRIMARY KEY(sprsl,arbgb,msgnr));
+    INSERT INTO t100 VALUES ('E', 'ZZ', '001', 'first &1 second &2');`);
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    const lines = abap.console.get().split("\n").map(l => l.trimEnd());
+    expect(lines).to.deep.equal(["ZZ", "001", "S", "Alpha", "&NO_SUCH&"]);
+  });
+
 });

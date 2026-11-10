@@ -68,6 +68,21 @@ async function findText(context: Context, arbgb: string | undefined, msgnr: stri
   return text;
 }
 
+/** a placeholder of IF_T100_MESSAGE: the content of the attribute ATTRn names, or the name itself framed by & when
+ * the object has no such attribute; an empty name gives an empty value */
+function t100Value(obj: any, attr: string): string {
+  const name = attr.trimEnd();
+  if (name === "") {
+    return "";
+  }
+  const value = obj[name.toLowerCase().replace("~", "$").replace(/\//g, "$")];
+  if (value === undefined || typeof value.get !== "function") {
+    return "&" + name + "&";
+  }
+  const content = value.get();
+  return typeof content === "object" ? "&" + name + "&" : (content + "").trimEnd();
+}
+
 export class MessageStatement {
   private readonly context: Context;
 
@@ -75,7 +90,23 @@ export class MessageStatement {
     this.context = context;
   }
 
-  public async message(options: IMessageOptions) {
+  /** returns the text of the message */
+  public async message(options: IMessageOptions): Promise<string> {
+    // MESSAGE oref, the object implements IF_T100_MESSAGE: its T100 key is the message
+    const t100 = options.exceptionOrText instanceof ABAPObject
+      ? options.exceptionOrText.get()?.if_t100_message$t100key?.get() : undefined;
+    if (t100 !== undefined) {
+      const obj = options.exceptionOrText!.get();
+      const dynamicType = obj.if_t100_dyn_msg$msgty?.get();
+      options = {...options,
+        id: t100.msgid.get().trimEnd(),
+        number: t100.msgno.get(),
+        type: options.type ?? (dynamicType ? dynamicType : undefined),
+        exceptionOrText: undefined,
+        with: [t100.attr1, t100.attr2, t100.attr3, t100.attr4].map((a: any) => t100Value(obj, a.get())),
+      };
+    }
+
     let arbgb = options.id;
     if (arbgb !== undefined && typeof arbgb !== "string") {
       arbgb = arbgb.get();
@@ -114,6 +145,7 @@ export class MessageStatement {
 // hmm, add option on how/if to write messages to console? or it should be the abap.console() ?
       console.log(replaced);
     }
+    return replaced;
   }
 
 }
