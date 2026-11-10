@@ -6,6 +6,7 @@ import {IStatementTranspiler} from "./statements/_statement_transpiler";
 import {IExpressionTranspiler} from "./expressions/_expression_transpiler";
 import {IStructureTranspiler} from "./structures/_structure_transpiler";
 import {Chunk} from "./chunk";
+import {InlineDeclarations} from "./inline";
 import {ConstantTranspiler} from "./expressions";
 import {ITranspilerOptions} from "./types";
 import {DEFAULT_KEYWORDS} from "./keywords";
@@ -70,6 +71,9 @@ export class Traversal {
   /** set when the executable program level code is collected into the program's main function,
    * shared with the traversals of its INCLUDEs, see traverseProgramLevel */
   public programMain: Chunk | undefined = undefined;
+  /** inline declarations (DATA( ), FIELD-SYMBOL( )) already written, each is declared once */
+  public readonly inlineDeclared: Set<abaplint.TypedIdentifier> = new Set();
+  private programInlineDone = false;
 
   public constructor(spaghetti: abaplint.ISpaghettiScope, file: abaplint.ABAPFile,
                      obj: abaplint.ABAPObject, reg: abaplint.IRegistry, options?: ITranspilerOptions,
@@ -1397,6 +1401,11 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
    * programMain. Declarations nested in executable blocks are global in ABAP, they stay on module level */
   private traverseProgramLevel(node: abaplint.Nodes.StructureNode, main: Chunk): Chunk {
     const ret = new Chunk();
+    if (this.programInlineDone === false) {
+      // inline declarations in event blocks and other code outside procedures are global data of the program
+      this.programInlineDone = true;
+      ret.appendString(InlineDeclarations.buildProgramDeclarations(node, this));
+    }
     for (const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.StatementNode) {
         // event statements like INITIALIZATION are executable, REPORT, PARAMETERS etc. are declarations
@@ -1437,6 +1446,11 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
 
     const list: any = StructureTranspilers;
     const ret = new Chunk();
+    if (node.get() instanceof abaplint.Structures.Any && this.programInlineDone === false) {
+      // inline declarations in event blocks and other code outside procedures are global data of the program
+      this.programInlineDone = true;
+      ret.appendString(InlineDeclarations.buildProgramDeclarations(node, this));
+    }
 
     const search = node.get().constructor.name + "Transpiler";
     if (list[search]) {

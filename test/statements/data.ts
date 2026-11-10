@@ -289,4 +289,34 @@ WRITE lv_value.`;
     expect(abap.console.get()).to.equal("3");
   });
 
+  it("inline DATA in a CASE branch and an IF of an event block is global data of the program", async () => {
+    const code = `
+REPORT zfoobar.
+DATA choice TYPE c LENGTH 1 VALUE 'B'.
+
+START-OF-SELECTION.
+  CASE choice.
+    WHEN 'A'.
+      DATA(lv_a) = 1.
+      WRITE / lv_a.
+    WHEN 'B'.
+      DATA(lv_b) = 2.
+      IF lv_b = 2.
+        DATA(lv_c) = 3.
+        ASSIGN lv_c TO FIELD-SYMBOL(<lv_c>).
+      ENDIF.
+      WRITE / lv_b.
+      WRITE / <lv_c>.
+  ENDCASE.
+  PERFORM show.
+
+FORM show.
+  WRITE / lv_b.
+ENDFORM.`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2\n3\n2");
+  });
+
 });
