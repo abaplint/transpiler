@@ -59,7 +59,8 @@ export class CallFunction {
       if (this.context.updateTask) {
         await this.context.updateTask.register(options.name, copied);
       } else {
-        await fm(copied);
+        // runs at COMMIT WORK, ROLLBACK WORK forgets it
+        this.context.luw.registerUpdate(options.name, copied);
       }
       return;
     } else if (options.destination) {
