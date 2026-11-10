@@ -218,6 +218,10 @@ describe("Single statements", () => {
       js: `await abap.statements.select(mt_sflight_join, {select: "SELECT * FROM " + abap.buildDbTableName("sflight") + " INNER JOIN " + abap.buildDbTableName("scarr") + " AS carrier ON \\"carrier\\".\\"carrid\\" = sflight~carrid WHERE \\"sflight\\".\\"carrid\\" = 'AA' ORDER BY \\"sflight\\".\\"fldate\\""});`},
     {abap: "SELECT * FROM t100 APPENDING CORRESPONDING FIELDS OF TABLE res WHERE arbgb = 'ZAG_UNIT_TEST'.",
       js: `await abap.statements.select(res, {select: "SELECT * FROM " + abap.buildDbTableName("t100") + " WHERE \\"arbgb\\" = 'ZAG_UNIT_TEST'"}, {appending: true});`},
+    {abap: "SELECT * FROM t100 INTO TABLE res WHERE substring( arbgb, 8, 1 ) <> '-'.",
+      js: `await abap.statements.select(res, {select: "SELECT * FROM " + abap.buildDbTableName("t100") + " WHERE substring(\\"arbgb\\", 8, 1) <> '-'"});`},
+    {abap: "SELECT * FROM t100 AS a INTO TABLE res WHERE upper( a~text ) = @lv_text.",
+      js: `await abap.statements.select(res, {select: "SELECT * FROM " + abap.buildDbTableName("t100") + " AS a WHERE upper(\\"a\\".\\"text\\") = '" + abap.sqlEscape(lv_text.get()) + "'"});`},
 
     {abap: "INSERT INTO zopentest VALUES ls_row.", js: `await abap.statements.insertDatabase("zopentest", {"values": ls_row});`},
     {abap: "INSERT t100 FROM ls_t100.", js: `await abap.statements.insertDatabase("t100", {"values": ls_t100});`},

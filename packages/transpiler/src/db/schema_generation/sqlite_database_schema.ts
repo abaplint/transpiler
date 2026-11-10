@@ -1,4 +1,5 @@
 import * as abaplint from "@abaplint/core";
+import {ExternalView, TableColumn} from "./external_view";
 import {DatabaseSchemaGenerator, packedTypeToDatabase} from "./database_schema_generator";
 import {DatabaseSchemaReuse} from "./_database_schema_reuse";
 
@@ -13,6 +14,10 @@ export class SQLiteDatabaseSchema implements DatabaseSchemaGenerator {
 
   // https://www.sqlite.org/lang_createview.html
   public buildVIEW(view: abaplint.Objects.View): string {
+    if (ExternalView.isExternal(view)) {
+      const {columns, keys} = ExternalView.columns(view, this.reg);
+      return this.createTable(view.getName(), columns, keys);
+    }
     return new DatabaseSchemaReuse(QUOTE).buildVIEW(view);
   }
 
@@ -22,24 +27,28 @@ export class SQLiteDatabaseSchema implements DatabaseSchemaGenerator {
       return "";
     }
 
-    const fields: string[] = [];
-    const fieldsRaw: string[] = [];
+    const columns: TableColumn[] = [];
     for (const field of type.getComponents()) {
       if (field.type instanceof abaplint.BasicTypes.StructureType) {
         // is a GROUP NAME
         continue;
       }
-      fieldsRaw.push(field.name.toLowerCase());
-      fields.push("'" + field.name.toLowerCase() + "' " + this.toType(field.type, field.name, tabl.getName()));
+      columns.push(field);
     }
 
     // assumption: all transparent tables have primary keys
-    // add single quotes to field names to allow for keywords as field names
-    const key = ", PRIMARY KEY(" + tabl.listKeys(this.reg)
+    return this.createTable(tabl.getName(), columns, tabl.listKeys(this.reg));
+  }
+
+  private createTable(name: string, columns: TableColumn[], keys: string[]): string {
+    const fieldsRaw = columns.map(c => c.name.toLowerCase());
+    // quote field names to allow for keywords as field names
+    const fields = columns.map(c => "'" + c.name.toLowerCase() + "' " + this.toType(c.type, c.name, name));
+    const key = ", PRIMARY KEY(" + keys
       .filter(e => fieldsRaw.includes(e.toLowerCase()))
       .map(e => "'" + e.toLowerCase() + "'").join(",") + ")";
 
-    return `CREATE TABLE '${tabl.getName().toLowerCase()}' (${fields.join(", ")}${key});\n`;
+    return `CREATE TABLE '${name.toLowerCase()}' (${fields.join(", ")}${key});\n`;
   }
 
   private toType(type: abaplint.AbstractType, fieldname: string, errorInfo: string): string {
