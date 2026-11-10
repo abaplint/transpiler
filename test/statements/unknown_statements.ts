@@ -50,4 +50,32 @@ describe("Statements that cannot be transpiled", () => {
     expect(message).to.include("ADD-CORRESPONDING, not supported, transpiler");
   });
 
+  it("with unknownStatements = runtimeError, a block that cannot be transpiled fails when it runs", async () => {
+    const provide = `
+TYPES: BEGIN OF ty,
+         lo  TYPE i,
+         hi  TYPE i,
+         txt TYPE c LENGTH 1,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row TYPE ty.
+DATA flag TYPE c LENGTH 1.
+WRITE / 'before'.
+PROVIDE FIELDS txt FROM tab INTO row VALID flag BOUNDS lo AND hi BETWEEN 1 AND 5.
+  WRITE / row-txt.
+ENDPROVIDE.
+WRITE / 'after'.`;
+    const js = await runFiles(abap, [{filename: "zfoobar_unknown.prog.abap", contents: provide}],
+                              {skipVersionCheck: true, unknownStatements: UnknownTypesEnum.runtimeError});
+    const f = new AsyncFunction("abap", js);
+    let message = "";
+    try {
+      await f(abap);
+    } catch (e) {
+      message = String(e);
+    }
+    expect(abap.console.get()).to.equal("before");
+    expect(message).to.include("PROVIDE FIELDS, not supported, transpiler");
+  });
+
 });

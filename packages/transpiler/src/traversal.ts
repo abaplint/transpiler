@@ -1445,6 +1445,16 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
       return ret;
     }
 
+    // a block whose opening statement cannot be transpiled (PROVIDE ... ENDPROVIDE): with unknownStatements =
+    // runtimeError the whole block fails when it runs
+    const opening = node.getFirstChild();
+    if (this.options?.unknownStatements === UnknownTypesEnum.runtimeError
+        && opening instanceof abaplint.Nodes.StatementNode
+        && Traversal.BLOCK_STATEMENTS.has(opening.get().constructor.name)
+        && (StatementTranspilers as any)[opening.get().constructor.name + "Transpiler"] === undefined) {
+      return this.runtimeError(opening, "").appendString("\n");
+    }
+
     for (const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.StructureNode) {
         ret.appendChunk(this.traverseStructure(c));
