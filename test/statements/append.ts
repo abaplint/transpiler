@@ -405,7 +405,7 @@ APPEND 2 TO tab.`;
     } catch (e) {
       message = String(e);
     }
-    expect(message).to.include("ITAB_DUPLICATE_KEY");
+    expect(message).to.include("ITAB_DUPLICATE_KEY_IDX_OP");
   });
 
 });

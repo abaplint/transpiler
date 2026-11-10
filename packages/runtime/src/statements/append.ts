@@ -31,7 +31,8 @@ function checkSorted(table: Table, row: any) {
   if (result < 0) {
     throw new Error("ITAB_ILLEGAL_SORT_ORDER");
   } else if (result === 0 && key.isUnique === true) {
-    throw new Error("ITAB_DUPLICATE_KEY");
+    // the name a 7.40 system gives this runtime error
+    throw new Error("ITAB_DUPLICATE_KEY_IDX_OP");
   }
 }
 
