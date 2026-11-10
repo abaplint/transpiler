@@ -7,6 +7,7 @@ import {SimpleSource3Transpiler} from "./simple_source3";
 import {FieldChainTranspiler} from "./field_chain";
 import {SQLFieldNameTranspiler} from "./sql_field_name";
 import {SourceTranspiler} from "./source";
+import {ConstantTranspiler} from "./constant";
 import {SQLFieldListTranspiler} from "./sql_field_list";
 import {SQLFromTranspiler} from "./sql_from";
 import {SQLFunctionTranspiler} from "./sql_function";
@@ -258,7 +259,9 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
       const conversionField = traversal.isSQLConversion(source.getFirstToken());
       if (conversionField) {
         const field = (table?.parseType(traversal.reg) as abaplint.BasicTypes.StructureType).getComponentByName(conversionField);
-        ret += "'\" + abap.sqlEscape(" + traversal.toType(field!) + ".set(" + concat + ").get()) + \"'";
+        // the literal is emitted as JavaScript, an integer like 007 must not become an octal literal
+        const value = ConstantTranspiler.normalizeInteger(concat);
+        ret += "'\" + abap.sqlEscape(" + traversal.toType(field!) + ".set(" + value + ").get()) + \"'";
       } else if (concat.startsWith("`")) {
         ret += "'" + concat.substring(1, concat.length - 1).replace(/'/g, "''") + "'";
       } else {

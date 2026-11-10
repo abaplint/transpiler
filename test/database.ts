@@ -163,14 +163,17 @@ async function runAllDatabases(abap: ABAP,
                                files: IFile[],
                                check: () => any,
                                settings?: {sqlite?: boolean, postgres?: boolean, snowflake?: boolean,
-                                 hana?: boolean, skipVersionCheck?: boolean}) {
+                                 hana?: boolean, skipVersionCheck?: boolean, strict?: boolean}) {
 
   // @ts-ignore
   global.abap = abap;
 
+  // the transpiled output is loaded as ES modules, which are always strict mode code
+  const prologue = settings?.strict === true ? "\"use strict\";\n" : "";
+
   if (settings === undefined || settings.sqlite === undefined || settings.sqlite === true) {
     const js = await runRilesSqlite(abap, files, {skipVersionCheck: settings?.skipVersionCheck});
-    const f = new AsyncFunction("abap", js);
+    const f = new AsyncFunction("abap", prologue + js);
     await f(abap);
     await abap.context.databaseConnections["DEFAULT"].disconnect();
     check();
@@ -182,7 +185,7 @@ async function runAllDatabases(abap: ABAP,
 
   if (settings === undefined || settings.postgres === undefined || settings.postgres === true) {
     const js = await runFilesPostgres(abap, files);
-    const f = new AsyncFunction("abap", js);
+    const f = new AsyncFunction("abap", prologue + js);
     await f(abap);
     await abap.context.databaseConnections["DEFAULT"].disconnect();
     check();
@@ -196,7 +199,7 @@ async function runAllDatabases(abap: ABAP,
   if ((settings === undefined || settings.hana === undefined || settings.hana === true)
       && process.env.HANA_HOST) {
     const js = await runFilesHana(abap, files);
-    const f = new AsyncFunction("abap", js);
+    const f = new AsyncFunction("abap", prologue + js);
     await f(abap);
     await abap.context.databaseConnections["DEFAULT"].disconnect();
     check();
@@ -205,7 +208,7 @@ async function runAllDatabases(abap: ABAP,
   if ((settings === undefined || settings.snowflake === undefined || settings.snowflake === true)
       && process.env.SNOWFLAKE_ACCOUNT) {
     const js = await runFilesSnowflake(abap, files);
-    const f = new AsyncFunction("abap", js);
+    const f = new AsyncFunction("abap", prologue + js);
     await f(abap);
     await abap.context.databaseConnections["DEFAULT"].disconnect();
     check();
@@ -4143,6 +4146,67 @@ START-OF-SELECTION.
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimStart()).to.equal("1\nITEM0001 4006381333931 X OK 42 PC");
     });
+  });
+
+  it("SELECT WHERE NUMC field = integer literal with leading zeros, strict mode", async () => {
+    const tabl_zstep = tablXml("ZSTEP_TAB", [
+      {name: "MANDT", key: true, type: "CHAR", leng: 3},
+      {name: "ID", key: true, type: "CHAR", leng: 10},
+      {name: "STEP", key: true, type: "NUMC", leng: 3},
+    ]);
+    const code = `
+CLASS lcl_run DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS run IMPORTING iv_id TYPE zstep_tab-id.
+ENDCLASS.
+
+CLASS lcl_run IMPLEMENTATION.
+  METHOD run.
+    DATA ls_row TYPE zstep_tab.
+    SELECT * FROM zstep_tab INTO TABLE @DATA(lt_rows)
+      WHERE id = @iv_id
+        AND step = 000.
+    WRITE / lines( lt_rows ).
+    LOOP AT lt_rows INTO ls_row.
+      WRITE / ls_row-step.
+    ENDLOOP.
+    SELECT * FROM zstep_tab INTO TABLE @lt_rows
+      WHERE id = @iv_id
+        AND step = 007.
+    LOOP AT lt_rows INTO ls_row.
+      WRITE / ls_row-step.
+    ENDLOOP.
+* octal 010 would be 8
+    SELECT * FROM zstep_tab INTO TABLE @lt_rows
+      WHERE id = @iv_id
+        AND step = 010.
+    LOOP AT lt_rows INTO ls_row.
+      WRITE / ls_row-step.
+    ENDLOOP.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ls_row TYPE zstep_tab.
+  ls_row-id = 'A'.
+  ls_row-step = '000'.
+  INSERT zstep_tab FROM ls_row.
+  ls_row-step = '007'.
+  INSERT zstep_tab FROM ls_row.
+  ls_row-step = '008'.
+  INSERT zstep_tab FROM ls_row.
+  ls_row-step = '010'.
+  INSERT zstep_tab FROM ls_row.
+  ls_row-id = 'B'.
+  ls_row-step = '000'.
+  INSERT zstep_tab FROM ls_row.
+  lcl_run=>run( 'A' ).`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "zstep_tab.tabl.xml", contents: tabl_zstep}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimStart()).to.equal("1\n000\n007\n010");
+    }, {strict: true});
   });
 
 });
