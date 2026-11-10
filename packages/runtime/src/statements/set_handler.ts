@@ -22,6 +22,5 @@ export function setHandler(eventReference: ABAPEventReference,
 
   const act = activation === undefined ? true : activation.get() === "X";
 
-  abap.eventing.setHandler(eventReference, methods, forObject, act);
-  abap.builtin.sy.get().subrc.set(0);
+  abap.builtin.sy.get().subrc.set(abap.eventing.setHandler(eventReference, methods, forObject, act));
 }

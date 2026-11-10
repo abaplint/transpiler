@@ -14,6 +14,137 @@ describe("Running statements - RAISE EVENT", () => {
     abap = new ABAP({console: new MemoryConsole()});
   });
 
+  it("SET HANDLER twice: registered once, sy-subrc 4, taking out one not registered sy-subrc 8", async () => {
+    const code = `
+CLASS lcl_raiser DEFINITION.
+  PUBLIC SECTION.
+    EVENTS ping.
+    METHODS raise.
+ENDCLASS.
+CLASS lcl_raiser IMPLEMENTATION.
+  METHOD raise.
+    RAISE EVENT ping.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_handler DEFINITION.
+  PUBLIC SECTION.
+    METHODS on_ping FOR EVENT ping OF lcl_raiser.
+ENDCLASS.
+CLASS lcl_handler IMPLEMENTATION.
+  METHOD on_ping.
+    WRITE / 'handled'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo_raiser TYPE REF TO lcl_raiser.
+  DATA lo_handler TYPE REF TO lcl_handler.
+  CREATE OBJECT lo_raiser.
+  CREATE OBJECT lo_handler.
+  SET HANDLER lo_handler->on_ping FOR lo_raiser.
+  WRITE / sy-subrc.
+  SET HANDLER lo_handler->on_ping FOR lo_raiser.
+  WRITE / sy-subrc.
+  lo_raiser->raise( ).
+  SET HANDLER lo_handler->on_ping FOR lo_raiser ACTIVATION space.
+  WRITE / sy-subrc.
+  SET HANDLER lo_handler->on_ping FOR lo_raiser ACTIVATION space.
+  WRITE / sy-subrc.`;
+    const js = await run(code);
+    await new AsyncFunction("abap", js)(abap);
+    expect(abap.console.get()).to.equal("0\n4\nhandled\n0\n8");
+  });
+
+  it("handler for a subclass: a static event raised in the superclass is not handled", async () => {
+    const code = `
+CLASS lcl_super DEFINITION.
+  PUBLIC SECTION.
+    CLASS-EVENTS ping.
+    CLASS-METHODS raise_super.
+ENDCLASS.
+CLASS lcl_super IMPLEMENTATION.
+  METHOD raise_super.
+    RAISE EVENT ping.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_sub DEFINITION INHERITING FROM lcl_super.
+  PUBLIC SECTION.
+    CLASS-METHODS raise_sub.
+ENDCLASS.
+CLASS lcl_sub IMPLEMENTATION.
+  METHOD raise_sub.
+    RAISE EVENT ping.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_handler DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS on_ping FOR EVENT ping OF lcl_sub.
+ENDCLASS.
+CLASS lcl_handler IMPLEMENTATION.
+  METHOD on_ping.
+    WRITE / 'handled'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  SET HANDLER lcl_handler=>on_ping.
+  lcl_sub=>raise_super( ).
+  WRITE / 'after super'.
+  lcl_sub=>raise_sub( ).
+  WRITE / 'after sub'.`;
+    const js = await run(code);
+    await new AsyncFunction("abap", js)(abap);
+    expect(abap.console.get()).to.equal("after super\nhandled\nafter sub");
+  });
+
+  it("handler for a subclass, FOR ALL INSTANCES: objects of the superclass are not handled", async () => {
+    const code = `
+CLASS lcl_super DEFINITION.
+  PUBLIC SECTION.
+    EVENTS ping.
+    METHODS raise.
+ENDCLASS.
+CLASS lcl_super IMPLEMENTATION.
+  METHOD raise.
+    RAISE EVENT ping.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_sub DEFINITION INHERITING FROM lcl_super.
+ENDCLASS.
+CLASS lcl_sub IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lcl_handler DEFINITION.
+  PUBLIC SECTION.
+    METHODS on_ping FOR EVENT ping OF lcl_sub.
+ENDCLASS.
+CLASS lcl_handler IMPLEMENTATION.
+  METHOD on_ping.
+    WRITE / 'handled'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo_super TYPE REF TO lcl_super.
+  DATA lo_sub TYPE REF TO lcl_sub.
+  DATA lo_handler TYPE REF TO lcl_handler.
+  CREATE OBJECT lo_super.
+  CREATE OBJECT lo_sub.
+  CREATE OBJECT lo_handler.
+  SET HANDLER lo_handler->on_ping FOR ALL INSTANCES.
+  lo_super->raise( ).
+  WRITE / 'after super'.
+  lo_sub->raise( ).
+  WRITE / 'after sub'.`;
+    const js = await run(code);
+    await new AsyncFunction("abap", js)(abap);
+    expect(abap.console.get()).to.equal("after super\nhandled\nafter sub");
+  });
+
   it("basic, no handlers", async () => {
     const code = `
 CLASS lcl DEFINITION.
