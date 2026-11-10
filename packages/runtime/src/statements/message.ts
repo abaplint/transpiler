@@ -118,6 +118,10 @@ export class MessageStatement {
       msgty = msgty.get();
     }
     msgty = msgty?.toUpperCase();
+    if (msgty !== undefined && ["A", "E", "I", "S", "W", "X"].includes(msgty.trimEnd()) === false) {
+      // a message type given at runtime that does not exist ends the program, it cannot be caught
+      throw new Error("MESSAGE_TYPE_UNKNOWN, message type \"" + msgty + "\"");
+    }
 
     abap.builtin.sy.get().msgid.set(arbgb || "");
     let msgnr = options.number;

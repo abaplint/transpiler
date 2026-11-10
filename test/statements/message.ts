@@ -111,6 +111,24 @@ describe("Running statements - MESSAGE", () => {
     new AsyncFunction("abap", js);
   });
 
+  it("MESSAGE with a type that does not exist ends the program", async () => {
+    const code = `
+DATA lv_type TYPE c LENGTH 1 VALUE 'Q'.
+WRITE / 'before'.
+MESSAGE ID '00' TYPE lv_type NUMBER '001'.
+WRITE / 'after'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    let error = "";
+    try {
+      await f(abap);
+    } catch (e) {
+      error = (e as Error).message;
+    }
+    expect(error).to.contain("MESSAGE_TYPE_UNKNOWN");
+    expect(abap.console.get()).to.equal("before");
+  });
+
   it("MESSAGE oref, IF_T100_MESSAGE gives the message and its placeholders", async () => {
     const code = `
 INTERFACE if_message.
