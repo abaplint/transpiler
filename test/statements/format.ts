@@ -41,4 +41,22 @@ WRITE / 'def'.`;
     expect(abap.console.get()).to.equal("abc  \ndef");
   });
 
+  it("obsolete list format statements and SET EXTENDED CHECK do not change the list", async () => {
+    const code = `
+SET EXTENDED CHECK OFF.
+DETAIL.
+WRITE / 'abc'.
+SUMMARY.
+WRITE / 'def'.
+SET EXTENDED CHECK ON.
+IF 1 = 2.
+  PRINT-CONTROL FUNCTION 'SF000'.
+ENDIF.
+WRITE / 'ghi'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("abc\ndef\nghi");
+  });
+
 });
