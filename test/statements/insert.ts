@@ -416,4 +416,29 @@ ENDLOOP.`;
     await f(abap);
     expect(abap.console.get().split("\n").map(l => l.trim())).to.deep.equal(["1", "3", "1", "2"]);
   });
+  it("INSERT wa INTO itab inside a LOOP goes in front of the current row, INSERT INDEX past the end inserts nothing", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA row TYPE i.
+DATA new TYPE i.
+APPEND 1 TO tab.
+APPEND 2 TO tab.
+APPEND 3 TO tab.
+LOOP AT tab INTO row.
+  new = row * 10.
+  INSERT new INTO tab.
+ENDLOOP.
+LOOP AT tab INTO row.
+  WRITE row.
+  WRITE ' '.
+ENDLOOP.
+INSERT 7 INTO tab INDEX 9.
+WRITE / sy-subrc.
+WRITE / lines( tab ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("10 1 20 2 30 3 \n4\n6");
+  });
+
 });
