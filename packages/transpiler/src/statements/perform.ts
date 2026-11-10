@@ -14,9 +14,10 @@ export class PerformTranspiler implements IStatementTranspiler {
     if (formName === undefined && dynamicName === undefined) {
       return new Chunk(`throw new Error("PerformTranspiler FormName not found");`);
     } else if (formName === undefined || node.concatTokens().toUpperCase().includes(" IN PROGRAM ")) {
+      // the end of the key in abap.Forms, after an open literal 'PROG-<program>-
       const formKey = formName === undefined
-        ? traversal.traverse(dynamicName!.getChildren()[1]).getCode() + ".get().toString().trimEnd()"
-        : `'${formName.concatTokens().toUpperCase()}'`;
+        ? "' + " + traversal.traverse(dynamicName!.getChildren()[1]).getCode() + ".get().toString().trimEnd()"
+        : formName.concatTokens().toUpperCase() + "'";
       const expression = node.findExpressionAfterToken("PROGRAM");
       let ref = "";
       let program = "";
@@ -25,13 +26,13 @@ export class PerformTranspiler implements IStatementTranspiler {
         const field = expression.getChildren()[1];
         const name = field.concatTokens().toUpperCase() === "SY-REPID"
           ? `'${traversal.getCurrentObject().getName().toUpperCase()}'`
-          : traversal.traverse(field).getCode() + ".get().toString().trimEnd()";
-        ref = `abap.Forms['PROG-' + ${name} + '-' + ${formKey}]`;
+          : traversal.traverse(field).getCode() + ".get().trimEnd()";
+        ref = `abap.Forms['PROG-' + ${name} + '-${formKey}]`;
         program = `'PROG-' + ${name} + '-'`;
       } else {
         // IN PROGRAM without a name, or no IN PROGRAM: the current program
         const progName = expression?.concatTokens().toUpperCase() ?? traversal.getCurrentObject().getName().toUpperCase();
-        ref = `abap.Forms['PROG-${progName}-' + ${formKey}]`;
+        ref = `abap.Forms['PROG-${progName}-${formKey}]`;
         program = `'PROG-${progName}-'`;
       }
       const params: string[] = [];
