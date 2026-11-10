@@ -28,16 +28,19 @@ describe("Running statements - COMMIT and ROLLBACK WORK", () => {
     expect(abap.console.get()).to.equal("after");
   });
 
-  it("COMMIT WORK, sy-subrc is not changed", async () => {
+  it("COMMIT WORK and ROLLBACK WORK set sy-subrc to 0", async () => {
     const code = `
       DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
       READ TABLE tab INDEX 1 TRANSPORTING NO FIELDS.
       COMMIT WORK.
+      WRITE sy-subrc.
+      READ TABLE tab INDEX 1 TRANSPORTING NO FIELDS.
+      ROLLBACK WORK.
       WRITE sy-subrc.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("4");
+    expect(abap.console.get()).to.equal("00");
   });
 
   it("COMMIT WORK AND WAIT, sets sy-subrc", async () => {
@@ -77,6 +80,68 @@ describe("Running statements - COMMIT and ROLLBACK WORK", () => {
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(rollbacks).to.equal(1);
+  });
+
+  it("PERFORM ON COMMIT runs at COMMIT WORK, by LEVEL, once", async () => {
+    const code = `
+FORM one.
+  WRITE / 'one'.
+ENDFORM.
+FORM two.
+  WRITE / 'two'.
+ENDFORM.
+FORM late.
+  WRITE / 'late'.
+ENDFORM.
+FORM back.
+  WRITE / 'back'.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM late ON COMMIT LEVEL 2.
+  PERFORM one ON COMMIT.
+  PERFORM two ON COMMIT.
+  PERFORM one ON COMMIT.
+  PERFORM back ON ROLLBACK.
+  WRITE / 'commit'.
+  COMMIT WORK.
+  WRITE / 'again'.
+  COMMIT WORK.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("commit\none\ntwo\nlate\nagain");
+  });
+
+  it("ROLLBACK WORK runs PERFORM ON ROLLBACK and forgets PERFORM ON COMMIT", async () => {
+    const code = `
+FORM one.
+  WRITE / 'one'.
+ENDFORM.
+FORM back.
+  WRITE / 'back'.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM one ON COMMIT.
+  PERFORM back ON ROLLBACK.
+  ROLLBACK WORK.
+  COMMIT WORK.
+  WRITE / 'done'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("back\ndone");
+  });
+
+  it("SET UPDATE TASK LOCAL", async () => {
+    const code = `
+SET UPDATE TASK LOCAL.
+WRITE sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0");
   });
 
 });

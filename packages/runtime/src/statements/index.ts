@@ -59,6 +59,9 @@ import {CallFunction, ICallFunctionOptions} from "./call_function";
 import {SelectDatabaseOptions, SelectRuntimeOptions} from "../db/db";
 import {Trace} from "../trace";
 import {ISkipOptions, SkipStatement} from "./skip";
+import {ABAP} from "..";
+
+declare const abap: ABAP;
 
 // this is a class, as statements like SELECT needs access to the database object instance
 // and WRITE will access the Console
@@ -133,6 +136,17 @@ export class Statements {
 
   public async rollback(options?: IRollbackOptions) {
     return rollback(this.context, options);
+  }
+
+  /** PERFORM ... ON COMMIT | ON ROLLBACK [LEVEL n]: registers the subroutine, COMMIT WORK or ROLLBACK WORK runs it */
+  public performOn(event: "COMMIT" | "ROLLBACK", key: string, call: () => Promise<void>, level?: INumeric | number) {
+    const n = level === undefined ? 0 : typeof level === "number" ? level : level.get();
+    this.context.luw.register(event, key, call, n);
+  }
+
+  /** SET UPDATE TASK LOCAL */
+  public setUpdateTaskLocal() {
+    abap.builtin.sy.get().subrc.set(this.context.luw.setLocal());
   }
 
   public async wait(options: IWaitOptions) {

@@ -9,7 +9,7 @@ describe("Statement CALL FUNCTION IN UPDATE TASK", () => {
     (globalThis as any).abap = abap;
   });
 
-  it("without a host, runs immediately with copied parameters", async () => {
+  it("without a host, runs at COMMIT WORK with the parameters copied at the call", async () => {
     const value = new abap.types.String().set("before");
     let calls = 0;
     abap.FunctionModules["BAR"] = async (param: any) => {
@@ -19,8 +19,22 @@ describe("Statement CALL FUNCTION IN UPDATE TASK", () => {
       param.exporting.foo.set("inside");
     };
     await abap.statements.callFunction({name: "BAR", updateTask: true, exporting: {foo: value}});
+    value.set("after");
+    expect(calls).to.equal(0);
+    await abap.statements.commit();
     expect(calls).to.equal(1);
-    expect(value.get()).to.equal("before");
+    expect(value.get()).to.equal("after");
+    await abap.statements.commit();
+    expect(calls).to.equal(1);
+  });
+
+  it("without a host, ROLLBACK WORK forgets it", async () => {
+    let calls = 0;
+    abap.FunctionModules["BAR"] = async () => { calls++; };
+    await abap.statements.callFunction({name: "BAR", updateTask: true, exporting: {}});
+    await abap.statements.rollback();
+    await abap.statements.commit();
+    expect(calls).to.equal(0);
   });
 
   it("registers the trimmed name with a host instead of running the module", async () => {

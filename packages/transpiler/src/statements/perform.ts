@@ -44,7 +44,7 @@ export class PerformTranspiler implements IStatementTranspiler {
         call = `if (${ref} === undefined) { if (${loaded}) { ${raise("CX_SY_DYN_CALL_ILLEGAL_FORM")} } else { ${raise("CX_SY_PROGRAM_NOT_FOUND")} } }\n` + call;
       }
 
-      return new Chunk(call);
+      return PerformTranspiler.onCommit(node, traversal, call);
     } else {
 // todo: most of this needs rewriting?
       let def: abaplint.Types.FormDefinition | undefined = undefined;
@@ -92,8 +92,21 @@ export class PerformTranspiler implements IStatementTranspiler {
         index++;
       }
 
-      return new Chunk("await " + Traversal.formName(formName) + `({${params.join(",")}});`);
+      return PerformTranspiler.onCommit(node, traversal, "await " + Traversal.formName(formName) + `({${params.join(",")}});`);
     }
+  }
+
+  /** PERFORM ... ON COMMIT [LEVEL n] | ON ROLLBACK only registers the subroutine, COMMIT WORK or ROLLBACK WORK runs it */
+  private static onCommit(node: abaplint.Nodes.StatementNode, traversal: Traversal, call: string): Chunk {
+    const event = /\sON\s+(COMMIT|ROLLBACK)/i.exec(node.concatTokens())?.[1]?.toUpperCase();
+    if (event === undefined) {
+      return new Chunk(call);
+    }
+    const formName = node.findDirectExpression(abaplint.Expressions.FormName)?.concatTokens().toUpperCase() ?? "";
+    const program = node.findExpressionAfterToken("PROGRAM")?.concatTokens().toUpperCase() ?? traversal.getCurrentObject().getName().toUpperCase();
+    const level = node.findExpressionAfterToken("LEVEL");
+    const levelCode = level ? ", " + traversal.traverse(level).getCode() : "";
+    return new Chunk(`abap.statements.performOn("${event}", ${JSON.stringify(program + "-" + formName)}, async () => {${call}}${levelCode});`);
   }
 
 }
