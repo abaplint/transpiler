@@ -148,18 +148,32 @@ const tabl_zsel_excl = tablXml("ZSEL_EXCL", [
   {name: "ITEM", key: true, type: "CHAR", leng: 18},
 ]);
 
+const tabl_zsel_cond = tablXml("ZSEL_COND", [
+  {name: "MANDT", key: true, type: "CHAR", leng: 3},
+  {name: "COUNTER", key: true, type: "NUMC", leng: 4},
+  {name: "DOCTYPE", type: "CHAR", leng: 2},
+  {name: "KEYVAL", type: "CHAR", leng: 30},
+  {name: "STATUS", type: "CHAR", leng: 1},
+  {name: "CREATED", type: "NUMC", leng: 14},
+  {name: "CONDTYPE", type: "CHAR", leng: 4},
+  {name: "TABNO", type: "CHAR", leng: 3},
+]);
+
 async function runAllDatabases(abap: ABAP,
                                files: IFile[],
                                check: () => any,
                                settings?: {sqlite?: boolean, postgres?: boolean, snowflake?: boolean,
-                                 hana?: boolean, skipVersionCheck?: boolean}) {
+                                 hana?: boolean, skipVersionCheck?: boolean, strict?: boolean}) {
 
   // @ts-ignore
   global.abap = abap;
 
+  // the transpiled output is loaded as ES modules, which are always strict mode code
+  const prologue = settings?.strict === true ? "\"use strict\";\n" : "";
+
   if (settings === undefined || settings.sqlite === undefined || settings.sqlite === true) {
     const js = await runRilesSqlite(abap, files, {skipVersionCheck: settings?.skipVersionCheck});
-    const f = new AsyncFunction("abap", js);
+    const f = new AsyncFunction("abap", prologue + js);
     await f(abap);
     await abap.context.databaseConnections["DEFAULT"].disconnect();
     check();
@@ -171,7 +185,7 @@ async function runAllDatabases(abap: ABAP,
 
   if (settings === undefined || settings.postgres === undefined || settings.postgres === true) {
     const js = await runFilesPostgres(abap, files);
-    const f = new AsyncFunction("abap", js);
+    const f = new AsyncFunction("abap", prologue + js);
     await f(abap);
     await abap.context.databaseConnections["DEFAULT"].disconnect();
     check();
@@ -185,7 +199,7 @@ async function runAllDatabases(abap: ABAP,
   if ((settings === undefined || settings.hana === undefined || settings.hana === true)
       && process.env.HANA_HOST) {
     const js = await runFilesHana(abap, files);
-    const f = new AsyncFunction("abap", js);
+    const f = new AsyncFunction("abap", prologue + js);
     await f(abap);
     await abap.context.databaseConnections["DEFAULT"].disconnect();
     check();
@@ -194,7 +208,7 @@ async function runAllDatabases(abap: ABAP,
   if ((settings === undefined || settings.snowflake === undefined || settings.snowflake === true)
       && process.env.SNOWFLAKE_ACCOUNT) {
     const js = await runFilesSnowflake(abap, files);
-    const f = new AsyncFunction("abap", js);
+    const f = new AsyncFunction("abap", prologue + js);
     await f(abap);
     await abap.context.databaseConnections["DEFAULT"].disconnect();
     check();
@@ -3949,6 +3963,146 @@ SELECT loc AS cust, item, valid_from, valid_to, branch, unit, seq
     });
   });
 
+  describe("SELECT DISTINCT substring field list, class constant, BETWEEN and substring IN range", () => {
+    const files = (select: string) => {
+      const code = `
+CLASS lcl_const DEFINITION.
+  PUBLIC SECTION.
+    CONSTANTS c_doctype TYPE c LENGTH 2 VALUE 'AL'.
+ENDCLASS.
+CLASS lcl_const IMPLEMENTATION.
+ENDCLASS.
+
+FORM run.
+* explicit target, abaplint does not yet infer @DATA( ) types for SQL function columns
+TYPES: BEGIN OF ty_result,
+         cust TYPE c LENGTH 10,
+         prod TYPE c LENGTH 7,
+       END OF ty_result.
+DATA lt_result TYPE STANDARD TABLE OF ty_result WITH DEFAULT KEY.
+DATA lt_cond TYPE STANDARD TABLE OF zsel_cond WITH DEFAULT KEY.
+DATA lr_cust TYPE RANGE OF ty_result-cust.
+DATA lv_created_from TYPE zsel_cond-created VALUE '20260101000000'.
+DATA lv_created_to TYPE zsel_cond-created VALUE '20261231235959'.
+
+* included
+APPEND VALUE #( counter = '0001' doctype = 'AL' keyval = '0000001000PROD001' status = ' '
+  created = '20260601120000' condtype = 'ZCT1' tabno = '670' ) TO lt_cond.
+* included, same substrings as the first row, removed by DISTINCT
+APPEND VALUE #( counter = '0002' doctype = 'AL' keyval = '0000001000PROD001X' status = ' '
+  created = '20260602120000' condtype = 'ZCT1' tabno = '670' ) TO lt_cond.
+* included
+APPEND VALUE #( counter = '0003' doctype = 'AL' keyval = '0000001000PROD002' status = ' '
+  created = '20260601120000' condtype = 'ZCT1' tabno = '670' ) TO lt_cond.
+* included
+APPEND VALUE #( counter = '0004' doctype = 'AL' keyval = '0000002000PROD001' status = ' '
+  created = '20260601120000' condtype = 'ZCT1' tabno = '670' ) TO lt_cond.
+* excluded, customer not in range
+APPEND VALUE #( counter = '0005' doctype = 'AL' keyval = '0000003000PROD001' status = ' '
+  created = '20260601120000' condtype = 'ZCT1' tabno = '670' ) TO lt_cond.
+* excluded, doctype
+APPEND VALUE #( counter = '0006' doctype = 'XX' keyval = '0000001000PROD003' status = ' '
+  created = '20260601120000' condtype = 'ZCT1' tabno = '670' ) TO lt_cond.
+* excluded, status not initial
+APPEND VALUE #( counter = '0007' doctype = 'AL' keyval = '0000001000PROD004' status = 'X'
+  created = '20260601120000' condtype = 'ZCT1' tabno = '670' ) TO lt_cond.
+* excluded, created before the interval
+APPEND VALUE #( counter = '0008' doctype = 'AL' keyval = '0000001000PROD005' status = ' '
+  created = '20251231235959' condtype = 'ZCT1' tabno = '670' ) TO lt_cond.
+* excluded, condtype
+APPEND VALUE #( counter = '0009' doctype = 'AL' keyval = '0000001000PROD006' status = ' '
+  created = '20260601120000' condtype = 'ZCT2' tabno = '670' ) TO lt_cond.
+* excluded, tabno
+APPEND VALUE #( counter = '0010' doctype = 'AL' keyval = '0000001000PROD007' status = ' '
+  created = '20260601120000' condtype = 'ZCT1' tabno = '671' ) TO lt_cond.
+INSERT zsel_cond FROM TABLE lt_cond.
+
+APPEND VALUE #( sign = 'I' option = 'EQ' low = '0000001000' ) TO lr_cust.
+APPEND VALUE #( sign = 'I' option = 'EQ' low = '0000002000' ) TO lr_cust.
+
+${select}
+
+SORT lt_result BY cust prod.
+WRITE / lines( lt_result ).
+LOOP AT lt_result INTO DATA(row).
+  WRITE / |{ row-cust } { row-prod }|.
+ENDLOOP.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+      return [
+        {filename: "zfoobar.prog.abap", contents: code},
+        {filename: "zsel_cond.tabl.xml", contents: tabl_zsel_cond},
+      ];
+    };
+
+    it("full statement", async () => {
+      const select = `
+SELECT DISTINCT substring( keyval, 1, 10 ) AS cust,
+                substring( keyval, 11, 7 ) AS prod FROM zsel_cond
+    WHERE doctype   = @lcl_const=>c_doctype
+      AND status    = @space
+      AND created BETWEEN @lv_created_from AND @lv_created_to
+      AND condtype  = 'ZCT1'
+      AND tabno     = '670'
+      AND substring( keyval, 1, 10 ) IN @lr_cust
+    INTO TABLE @lt_result.`;
+      await runAllDatabases(abap, files(select), () => {
+        expect(abap.console.get().trimStart()).to.equal(`3
+0000001000 PROD001
+0000001000 PROD002
+0000002000 PROD001`);
+      });
+    });
+
+    it("DISTINCT substring field list", async () => {
+      const select = `
+SELECT DISTINCT substring( keyval, 1, 10 ) AS cust,
+                substring( keyval, 11, 7 ) AS prod FROM zsel_cond
+    WHERE counter <= '0002'
+    INTO TABLE @lt_result.`;
+      await runAllDatabases(abap, files(select), () => {
+        expect(abap.console.get().trimStart()).to.equal(`1
+0000001000 PROD001`);
+      });
+    });
+
+    it("substring IN range", async () => {
+      const select = `
+SELECT substring( keyval, 1, 10 ) AS cust,
+       substring( keyval, 11, 7 ) AS prod FROM zsel_cond
+    WHERE substring( keyval, 1, 10 ) IN @lr_cust
+      AND counter >= '0003'
+      AND counter <= '0005'
+    INTO TABLE @lt_result.`;
+      await runAllDatabases(abap, files(select), () => {
+        expect(abap.console.get().trimStart()).to.equal(`2
+0000001000 PROD002
+0000002000 PROD001`);
+      });
+    });
+
+    it("BETWEEN host variables and class constant", async () => {
+      const select = `
+SELECT substring( keyval, 1, 10 ) AS cust,
+       substring( keyval, 11, 7 ) AS prod FROM zsel_cond
+    WHERE doctype = @lcl_const=>c_doctype
+      AND created BETWEEN @lv_created_from AND @lv_created_to
+      AND keyval LIKE '0000001000%'
+    INTO TABLE @lt_result.`;
+      await runAllDatabases(abap, files(select), () => {
+        expect(abap.console.get().trimStart()).to.equal(`6
+0000001000 PROD001
+0000001000 PROD001
+0000001000 PROD002
+0000001000 PROD004
+0000001000 PROD006
+0000001000 PROD007`);
+      });
+    });
+  });
+
   it("external view, VIEWCLASS X, is created as an empty table", async () => {
     const code = `
     SELECT COUNT(*) FROM zvext_prio.
@@ -3992,6 +4146,67 @@ START-OF-SELECTION.
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimStart()).to.equal("1\nITEM0001 4006381333931 X OK 42 PC");
     });
+  });
+
+  it("SELECT WHERE NUMC field = integer literal with leading zeros, strict mode", async () => {
+    const tabl_zstep = tablXml("ZSTEP_TAB", [
+      {name: "MANDT", key: true, type: "CHAR", leng: 3},
+      {name: "ID", key: true, type: "CHAR", leng: 10},
+      {name: "STEP", key: true, type: "NUMC", leng: 3},
+    ]);
+    const code = `
+CLASS lcl_run DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS run IMPORTING iv_id TYPE zstep_tab-id.
+ENDCLASS.
+
+CLASS lcl_run IMPLEMENTATION.
+  METHOD run.
+    DATA ls_row TYPE zstep_tab.
+    SELECT * FROM zstep_tab INTO TABLE @DATA(lt_rows)
+      WHERE id = @iv_id
+        AND step = 000.
+    WRITE / lines( lt_rows ).
+    LOOP AT lt_rows INTO ls_row.
+      WRITE / ls_row-step.
+    ENDLOOP.
+    SELECT * FROM zstep_tab INTO TABLE @lt_rows
+      WHERE id = @iv_id
+        AND step = 007.
+    LOOP AT lt_rows INTO ls_row.
+      WRITE / ls_row-step.
+    ENDLOOP.
+* octal 010 would be 8
+    SELECT * FROM zstep_tab INTO TABLE @lt_rows
+      WHERE id = @iv_id
+        AND step = 010.
+    LOOP AT lt_rows INTO ls_row.
+      WRITE / ls_row-step.
+    ENDLOOP.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA ls_row TYPE zstep_tab.
+  ls_row-id = 'A'.
+  ls_row-step = '000'.
+  INSERT zstep_tab FROM ls_row.
+  ls_row-step = '007'.
+  INSERT zstep_tab FROM ls_row.
+  ls_row-step = '008'.
+  INSERT zstep_tab FROM ls_row.
+  ls_row-step = '010'.
+  INSERT zstep_tab FROM ls_row.
+  ls_row-id = 'B'.
+  ls_row-step = '000'.
+  INSERT zstep_tab FROM ls_row.
+  lcl_run=>run( 'A' ).`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "zstep_tab.tabl.xml", contents: tabl_zstep}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimStart()).to.equal("1\n000\n007\n010");
+    }, {strict: true});
   });
 
 });

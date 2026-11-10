@@ -2,7 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {MethodCallBodyTranspiler, MethodCallChainTranspiler, MethodSourceTranspiler} from "../expressions";
+import {ConstantTranspiler, MethodCallBodyTranspiler, MethodCallChainTranspiler, MethodSourceTranspiler} from "../expressions";
 
 export class CallTranspiler implements IStatementTranspiler {
 
@@ -133,14 +133,11 @@ switch (e.classic.toUpperCase()) {\n`;
     for (const e of node.findAllExpressions(abaplint.Expressions.ParameterException)) {
       const name = e.getFirstToken().getStr().toUpperCase();
       // todo, also handle SimpleChain,
-      let value = e.findFirstExpression(abaplint.Expressions.Integer)?.getFirstToken().getStr().toUpperCase();
-      if (value === undefined) {
+      const integer = e.findFirstExpression(abaplint.Expressions.Integer);
+      if (integer === undefined) {
         continue;
       }
-      while (value.substring(0, 1) === "0" && value.length > 1) {
-        // remove leading zeros
-        value = value.substring(1);
-      }
+      const value = ConstantTranspiler.normalizeInteger(integer.concatTokens());
       if (name === "OTHERS") {
         post += `default: abap.builtin.sy.get().subrc.set(${value}); break;\n`;
       } else {

@@ -220,6 +220,8 @@ describe("Single statements", () => {
       js: `await abap.statements.select(res, {select: "SELECT * FROM " + abap.buildDbTableName("t100") + " WHERE \\"arbgb\\" = 'ZAG_UNIT_TEST'"}, {appending: true});`},
     {abap: "SELECT * FROM t100 INTO TABLE res WHERE substring( arbgb, 8, 1 ) <> '-'.",
       js: `await abap.statements.select(res, {select: "SELECT * FROM " + abap.buildDbTableName("t100") + " WHERE substring(\\"arbgb\\", 8, 1) <> '-'"});`},
+    {abap: "SELECT * FROM t100 INTO TABLE res WHERE substring( arbgb, 1, 3 ) IN @lr_range.",
+      js: `await abap.statements.select(res, {select: "SELECT * FROM " + abap.buildDbTableName("t100") + " WHERE " + abap.expandIN("substring(\\"arbgb\\", 1, 3)", lr_range, true) + ""});`},
     {abap: "SELECT * FROM t100 AS a INTO TABLE res WHERE upper( a~text ) = @lv_text.",
       js: `await abap.statements.select(res, {select: "SELECT * FROM " + abap.buildDbTableName("t100") + " AS a WHERE upper(\\"a\\".\\"text\\") = '" + abap.sqlEscape(lv_text.get()) + "'"});`},
 
