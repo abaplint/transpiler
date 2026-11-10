@@ -77,4 +77,39 @@ WRITE hex-11.`;
     expect(abap.console.get()).to.equal("0000000011223344");
   });
 
+  it("CLEAR of a table with header line clears the header line", async () => {
+    const code = `
+DATA: BEGIN OF itab OCCURS 0,
+        k TYPE i,
+      END OF itab.
+DO 3 TIMES.
+  CLEAR itab.
+  itab-k = sy-index.
+  APPEND itab.
+ENDDO.
+CLEAR itab.
+WRITE / lines( itab ).
+WRITE / itab-k.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3\n0");
+  });
+
+  it("CLEAR itab[] of a table with header line clears the body", async () => {
+    const code = `
+DATA: BEGIN OF itab OCCURS 0,
+        k TYPE i,
+      END OF itab.
+itab-k = 2.
+APPEND itab.
+CLEAR itab[].
+WRITE / lines( itab ).
+WRITE / itab-k.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n2");
+  });
+
 });
