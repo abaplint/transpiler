@@ -9,6 +9,7 @@ import {SQLFieldNameTranspiler} from "./sql_field_name";
 import {SourceTranspiler} from "./source";
 import {SQLFieldListTranspiler} from "./sql_field_list";
 import {SQLFromTranspiler} from "./sql_from";
+import {SQLFunctionTranspiler} from "./sql_function";
 
 export class SQLCondTranspiler implements IExpressionTranspiler {
 
@@ -127,6 +128,13 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
       return ret;
     }
 
+    const sqlFunction = c.findDirectExpression(abaplint.Expressions.SQLFunction);
+    if (sqlFunction && c.getFirstChild() === sqlFunction && operator && source) {
+      return new SQLFunctionTranspiler().transpile(sqlFunction, traversal).getCode() + " "
+        + this.sqlOperator(operator.concatTokens()) + " "
+        + this.sqlSource(source, traversal, filename, table);
+    }
+
     const aggregation = c.findDirectExpression(abaplint.Expressions.SQLAggregation);
     if (aggregation && operator && source) {
       return aggregation.concatTokens() + " " + this.sqlOperator(operator.concatTokens()) + " "
@@ -229,7 +237,7 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
       if (found) {
         let name = traversal.prefixAndName(alias.getFirstToken(), filename).replace("~", "$");
         name = Traversal.escapeNamespace(name)!;
-        ret += "'\" + " + name + ".get() + \"'";
+        ret += "'\" + abap.sqlEscape(" + name + ".get()) + \"'";
       } else {
         let concat = source.concatTokens();
         if (concat.includes("~") && concat.split("~")[0].includes("/")) {
@@ -242,9 +250,9 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
       const conversionField = traversal.isSQLConversion(source.getFirstToken());
       if (conversionField) {
         const field = (table?.parseType(traversal.reg) as abaplint.BasicTypes.StructureType).getComponentByName(conversionField);
-        ret += "'\" + " + traversal.toType(field!) + ".set(" + concat + ").get() + \"'";
+        ret += "'\" + abap.sqlEscape(" + traversal.toType(field!) + ".set(" + concat + ").get()) + \"'";
       } else if (concat.startsWith("`")) {
-        ret += "'" + concat.substring(1, concat.length - 1) + "'";
+        ret += "'" + concat.substring(1, concat.length - 1).replace(/'/g, "''") + "'";
       } else {
         ret += concat;
       }
@@ -254,9 +262,10 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
 
   private sqlHost(code: string, numericHost: boolean): string {
     if (numericHost) {
-      return `" + ((value) => typeof value === "number" || typeof value === "bigint" ? value : "'" + value + "'")(${code}) + "`;
+      return `" + ((value) => typeof value === "number" || typeof value === "bigint" ? value `
+        + `: "'" + abap.sqlEscape(value) + "'")(${code}) + "`;
     }
-    return "'\" + " + code + " + \"'";
+    return "'\" + abap.sqlEscape(" + code + ") + \"'";
   }
 
   private basicConditionNew(node: abaplint.Nodes.ExpressionNode, traversal: Traversal, filename: string,
@@ -280,7 +289,7 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
           && child instanceof abaplint.Nodes.ExpressionNode
           && child.get() instanceof abaplint.Expressions.SimpleSource3) {
         const code = new SimpleSource3Transpiler(true).transpile(child, traversal).getCode();
-        ret += `'" + ${code} + "'`;
+        ret += `'" + abap.sqlEscape(${code}) + "'`;
         hostExpression = false;
       } else if ((child.get() instanceof abaplint.Expressions.SQLFieldName
           || child.get() instanceof abaplint.Expressions.SQLAliasField)
@@ -288,7 +297,7 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
         if (hostExpression) {
           let name = traversal.prefixAndName(child.getFirstToken(), filename).replace("~", "$");
           name = Traversal.prefixVariable(Traversal.escapeNamespace(name)!);
-          ret += `'" + ${name}.get() + "'`;
+          ret += `'" + abap.sqlEscape(${name}.get()) + "'`;
           hostExpression = false;
         } else {
           ret += new SQLFieldNameTranspiler().transpile(child, traversal).getCode();
@@ -351,7 +360,7 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
     code += ".get()";
 
     const field = new SQLFieldNameTranspiler().transpile(fieldName, traversal).getCode();
-    return `${field} ${this.sqlOperator(operator.concatTokens())} '" + ${code} + "'`;
+    return `${field} ${this.sqlOperator(operator.concatTokens())} '" + abap.sqlEscape(${code}) + "'`;
   }
 
   private sqlOperator(op: string): string {

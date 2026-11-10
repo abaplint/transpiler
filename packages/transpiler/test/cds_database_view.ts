@@ -60,6 +60,34 @@ describe("DDLS database setup", () => {
       'CREATE VIEW "zddls" AS SELECT "client"."mandt" AS "id" FROM "t000" AS "client";');
   });
 
+  it("creates a view on top of other CDS views, after them", async () => {
+    const consumption = `define view entity zc_person_age
+    as select from zi_test_person as person
+        inner join zi_test_age as Age on person.PersonId = Age.PersonId
+{
+    key person.PersonId,
+    person.Name,
+    Age.Age
+}`;
+    const reg = new abaplint.Registry()
+      .addFile(new abaplint.MemoryFile("zc_person_age.ddls.asddls", consumption))
+      .addFile(new abaplint.MemoryFile("t000.tabl.xml", t000))
+      .addFile(new abaplint.MemoryFile("zi_test_person.ddls.asddls",
+        "define view entity zi_test_person as select from t000 { key mandt as PersonId, cccategory as Name }"))
+      .addFile(new abaplint.MemoryFile("zi_test_age.ddls.asddls",
+        "define view entity zi_test_age as select from t000 { key mandt as PersonId, cccategory as Age }"));
+
+    const res = await new Transpiler().run(reg);
+    const sqlite = res.databaseSetup.schemas.sqlite;
+    const expected = 'CREATE VIEW "zc_person_age" AS SELECT "person"."personid" AS "personid", ' +
+      '"person"."name" AS "name", "age"."age" AS "age" FROM "zi_test_person" AS "person" ' +
+      'INNER JOIN "zi_test_age" AS "age" ON "person"."personid" = "age"."personid";';
+    expect(sqlite).to.include(expected);
+    const index = sqlite.indexOf(expected);
+    expect(sqlite.findIndex(s => s.startsWith('CREATE VIEW "zi_test_person"'))).to.be.lessThan(index);
+    expect(sqlite.findIndex(s => s.startsWith('CREATE VIEW "zi_test_age"'))).to.be.lessThan(index);
+  });
+
   for (const [description, ddls, message] of [
     ["unresolved first source", joinedView.replace("t000 as item", "missing as item"), "source missing"],
     ["unresolved joined source", joinedView.replace("t003 as change", "missing as change"), "source missing"],

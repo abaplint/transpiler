@@ -6,9 +6,19 @@ import {Rearranger} from "../rearranger";
 import {Chunk} from "../chunk";
 import {OutputLayout, importPath} from "../output_layout";
 import {TypeFactoryRegistry} from "../type_factory_registry";
+import {findProgramIncludes} from "../program_includes";
 
 export class HandleABAP {
+  /** the function running the program, not a name a FORM or variable can be transpiled to */
+  public static readonly PROGRAM_MAIN = "$main";
   private readonly options: ITranspilerOptions | undefined;
+
+  /** executable programs as modules, their event blocks and other executable code are wrapped in a function */
+  public static wrapsMain(obj: abaplint.IObject, options: ITranspilerOptions | undefined): boolean {
+    return options?.addCommonJS === true
+      && obj instanceof abaplint.Objects.Program
+      && obj.isInclude() === false;
+  }
 
   public constructor(options?: ITranspilerOptions, private readonly layout = new OutputLayout()) {
     this.options = options;
@@ -57,14 +67,34 @@ export class HandleABAP {
 
       const rearranged = new Rearranger().run(obj.getType(), file.getStructure());
 
-      const contents = new Traversal(spaghetti, file, obj, reg, this.options, typeFactory).traverse(rearranged);
+      const traversal = new Traversal(spaghetti, file, obj, reg, this.options, typeFactory);
+      const wrapMain = HandleABAP.wrapsMain(obj, this.options);
+      if (wrapMain) {
+        traversal.programMain = new Chunk();
+      }
+      const contents = traversal.traverse(rearranged);
       chunk.appendChunk(contents);
+      if (wrapMain) {
+        // the program runs when main is called, importing the module eg. for unit testing does not run it
+        chunk.appendString(`async function ${HandleABAP.PROGRAM_MAIN}() {\n`);
+        chunk.appendChunk(traversal.programMain!);
+        chunk.appendString("}\n");
+      }
       chunk.stripLastNewline();
       if (this.options?.sharedTypeFactories !== true) {
         chunk.runIndentationLogic(this.options?.ignoreSourceMap);
       }
 
       const exports = this.findExports(file.getStructure());
+      if (obj instanceof abaplint.Objects.Program) {
+        // INCLUDEs are expanded into the program, so export their contents too
+        for (const include of findProgramIncludes(file, reg)) {
+          exports.push(...this.findExports(include.getStructure()).filter(e => exports.includes(e) === false));
+        }
+      }
+      if (wrapMain) {
+        exports.push(HandleABAP.PROGRAM_MAIN);
+      }
       const output: IOutputFile = {
         object: {
           name: obj.getName(),
@@ -192,9 +222,9 @@ export class HandleABAP {
       }
     }
     for (const c of node?.findAllStatements(abaplint.Statements.Form) || []) {
-      const e = c.findFirstExpression(abaplint.Expressions.FormName)?.getFirstToken().getStr();
+      const e = c.findFirstExpression(abaplint.Expressions.FormName);
       if (e) {
-        res.push(e.toLowerCase());
+        res.push(Traversal.formName(e));
       }
     }
     return res;

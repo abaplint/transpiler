@@ -3428,4 +3428,204 @@ ENDCLASS.`;
     expect(cons.split("\n").slice(1, 4)).to.deep.equal(["from locals_def", "from locals_def", "from locals_def"]);
   });
 
+  function progXml(name: string, subc: "1" | "I") {
+    return `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_PROG" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <PROGDIR>
+    <NAME>${name.toUpperCase()}</NAME>
+    <SUBC>${subc}</SUBC>
+   </PROGDIR>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+  }
+
+  it("test-71", async () => {
+// local test class in an include of a program, using global data from the TOP include
+    const prog = `REPORT zrepro.
+
+INCLUDE zrepro_top.
+
+START-OF-SELECTION.
+  PERFORM run.
+
+FORM run.
+  gv_value = gv_value + 1.
+ENDFORM.
+
+INCLUDE zrepro_t01.`;
+    const top = `DATA gv_value TYPE i.`;
+    const t01 = `CLASS ltcl_test DEFINITION FINAL FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS test_run FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD test_run.
+    CLEAR gv_value.
+    PERFORM run.
+    ASSERT gv_value = 1.
+    WRITE / |value { gv_value }|.
+  ENDMETHOD.
+ENDCLASS.`;
+    const files = [
+      {filename: "zrepro.prog.abap", contents: prog},
+      {filename: "zrepro.prog.xml", contents: progXml("zrepro", "1")},
+      {filename: "zrepro_top.prog.abap", contents: top},
+      {filename: "zrepro_top.prog.xml", contents: progXml("zrepro_top", "I")},
+      {filename: "zrepro_t01.prog.abap", contents: t01},
+      {filename: "zrepro_t01.prog.xml", contents: progXml("zrepro_t01", "I")},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons).to.include("ZREPRO: running ltcl_test->test_run");
+    expect(cons).to.include("value 1");
+
+    // KERNEL_UNIT_RUNNER finds the class as "PROG-ZREPRO-LTCL_TEST" after the program module is imported
+    const open = fs.readFileSync(path.join(outputFolder, "index_open.mjs"), "utf8");
+    expect(open).to.include(`await import("./zrepro.prog.mjs");`);
+    expect(open).to.include(`class_name.set("ZREPRO");`);
+    expect(open).to.include(`testclass_name.set("LTCL_TEST");`);
+    expect(open).to.include(`method_name.set("TEST_RUN");`);
+  });
+
+  it("test-72", async () => {
+// local test class directly in the main program
+    const prog = `REPORT zdirect.
+
+CLASS lcl_calc DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS double IMPORTING iv TYPE i RETURNING VALUE(rv) TYPE i.
+ENDCLASS.
+
+CLASS lcl_calc IMPLEMENTATION.
+  METHOD double.
+    rv = iv * 2.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS ltcl_test DEFINITION FINAL FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS test_double FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD test_double.
+    ASSERT lcl_calc=>double( 21 ) = 42.
+    WRITE / 'doubled'.
+  ENDMETHOD.
+ENDCLASS.`;
+    const files = [
+      {filename: "zdirect.prog.abap", contents: prog},
+      {filename: "zdirect.prog.xml", contents: progXml("zdirect", "1")},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons).to.include("ZDIRECT: running ltcl_test->test_double");
+    expect(cons).to.include("doubled");
+  });
+
+  it("test-73", async () => {
+// importing the program for unit testing must not run its event blocks, test class in a nested include
+    const prog = `REPORT zevents.
+
+DATA gv_state TYPE string.
+
+INITIALIZATION.
+  gv_state = 'initialization'.
+
+START-OF-SELECTION.
+  gv_state = 'start'.
+  WRITE / 'report ran'.
+
+END-OF-SELECTION.
+  gv_state = 'end'.
+
+INCLUDE zevents_a.`;
+    const includeA = `INCLUDE zevents_b.`;
+    const includeB = `CLASS ltcl_test DEFINITION FINAL FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS not_run FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD not_run.
+    ASSERT gv_state IS INITIAL.
+    WRITE / 'state initial'.
+  ENDMETHOD.
+ENDCLASS.`;
+    const files = [
+      {filename: "zevents.prog.abap", contents: prog},
+      {filename: "zevents.prog.xml", contents: progXml("zevents", "1")},
+      {filename: "zevents_a.prog.abap", contents: includeA},
+      {filename: "zevents_a.prog.xml", contents: progXml("zevents_a", "I")},
+      {filename: "zevents_b.prog.abap", contents: includeB},
+      {filename: "zevents_b.prog.xml", contents: progXml("zevents_b", "I")},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons).to.include("ZEVENTS: running ltcl_test->not_run");
+    expect(cons).to.include("state initial");
+    expect(cons).to.not.include("report ran");
+  });
+
+  it("test-74", async () => {
+// program with a selection screen, a FORM name with dashes and a local exception class without IMPLEMENTATION
+    const prog = `REPORT zscreen.
+
+SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE TEXT-001.
+SELECTION-SCREEN COMMENT /1(20) t_info.
+PARAMETERS p_max TYPE i DEFAULT 3.
+SELECTION-SCREEN END OF BLOCK b1.
+
+CLASS lcx_test_stop DEFINITION INHERITING FROM cx_no_check FINAL.
+ENDCLASS.
+
+INITIALIZATION.
+  t_info = 'Info'.
+
+START-OF-SELECTION.
+  PERFORM top-of-page.
+
+FORM top-of-page.
+  WRITE / |max { p_max }|.
+ENDFORM.
+
+FORM stop.
+  RAISE EXCEPTION TYPE lcx_test_stop.
+ENDFORM.
+
+CLASS ltcl_test DEFINITION FINAL FOR TESTING DURATION SHORT RISK LEVEL HARMLESS.
+  PRIVATE SECTION.
+    METHODS run FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD run.
+    PERFORM top-of-page.
+    TRY.
+        PERFORM stop.
+      CATCH lcx_test_stop.
+        WRITE / 'stopped'.
+    ENDTRY.
+    t_info = 'Set'.
+    WRITE / t_info.
+  ENDMETHOD.
+ENDCLASS.`;
+    const cxnocheck = `CLASS cx_no_check DEFINITION PUBLIC INHERITING FROM cx_root.
+ENDCLASS.
+CLASS cx_no_check IMPLEMENTATION.
+ENDCLASS.`;
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "cx_no_check.clas.abap", contents: cxnocheck},
+      {filename: "zscreen.prog.abap", contents: prog},
+      {filename: "zscreen.prog.xml", contents: progXml("zscreen", "1")},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons).to.include("ZSCREEN: running ltcl_test->run");
+    expect(cons).to.include("max 3");
+    expect(cons).to.include("stopped");
+    expect(cons).to.include("Set");
+  });
+
 });

@@ -209,7 +209,7 @@ describe("Single statements", () => {
     {abap: "SELECT * FROM (mv_table) INTO TABLE lt_tab.",
       js: `await abap.statements.select(lt_tab, {select: "SELECT * FROM " + abap.buildDbTableName(mv_table.get().trimEnd().toLowerCase()) + ""});`},
     {abap: "SELECT SINGLE * FROM t100 INTO ls_result WHERE arbgb = lv_arbgb.",
-      js: `await abap.statements.select(ls_result, {select: "SELECT * FROM " + abap.buildDbTableName("t100") + " WHERE \\"arbgb\\" = '" + lv_arbgb.get() + "' UP TO 1 ROWS"});`},
+      js: `await abap.statements.select(ls_result, {select: "SELECT * FROM " + abap.buildDbTableName("t100") + " WHERE \\"arbgb\\" = '" + abap.sqlEscape(lv_arbgb.get()) + "' UP TO 1 ROWS"});`},
     {abap: "select count( * ) from /foo/bar into bar.",
       js: `await abap.statements.select(bar, {select: "SELECT count( * )  from " + abap.buildDbTableName("/foo/bar") + ""});`},
     {abap: "SELECT * FROM sflight INTO CORRESPONDING FIELDS OF TABLE mt_sflight UP TO 10 ROWS ORDER BY carrid.",
@@ -218,6 +218,10 @@ describe("Single statements", () => {
       js: `await abap.statements.select(mt_sflight_join, {select: "SELECT * FROM " + abap.buildDbTableName("sflight") + " INNER JOIN " + abap.buildDbTableName("scarr") + " AS carrier ON \\"carrier\\".\\"carrid\\" = sflight~carrid WHERE \\"sflight\\".\\"carrid\\" = 'AA' ORDER BY \\"sflight\\".\\"fldate\\""});`},
     {abap: "SELECT * FROM t100 APPENDING CORRESPONDING FIELDS OF TABLE res WHERE arbgb = 'ZAG_UNIT_TEST'.",
       js: `await abap.statements.select(res, {select: "SELECT * FROM " + abap.buildDbTableName("t100") + " WHERE \\"arbgb\\" = 'ZAG_UNIT_TEST'"}, {appending: true});`},
+    {abap: "SELECT * FROM t100 INTO TABLE res WHERE substring( arbgb, 8, 1 ) <> '-'.",
+      js: `await abap.statements.select(res, {select: "SELECT * FROM " + abap.buildDbTableName("t100") + " WHERE substring(\\"arbgb\\", 8, 1) <> '-'"});`},
+    {abap: "SELECT * FROM t100 AS a INTO TABLE res WHERE upper( a~text ) = @lv_text.",
+      js: `await abap.statements.select(res, {select: "SELECT * FROM " + abap.buildDbTableName("t100") + " AS a WHERE upper(\\"a\\".\\"text\\") = '" + abap.sqlEscape(lv_text.get()) + "'"});`},
 
     {abap: "INSERT INTO zopentest VALUES ls_row.", js: `await abap.statements.insertDatabase("zopentest", {"values": ls_row});`},
     {abap: "INSERT t100 FROM ls_t100.", js: `await abap.statements.insertDatabase("t100", {"values": ls_t100});`},
@@ -414,16 +418,73 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({object: obj,user: usr,fields:
     {abap: "SET BLANK LINES ON.", js: `throw new Error("SET BLANK LINES, not supported, transpiler");`, skip: false},
     {abap: "TOP-OF-PAGE.", js: `throw new Error("TOP-OF-PAGE, not supported, transpiler");`, skip: false},
     {abap: "END-OF-PAGE.", js: `throw new Error("END-OF-PAGE, not supported, transpiler");`, skip: false},
+    {abap: "DELETE FROM DATABASE indx(zz) ID 'FOO'.", js: `throw new Error("DELETE CLUSTER, not supported, transpiler");`, skip: false},
 
     {abap: "delete foo where instance->field_type not in types.",
       js: `await abap.statements.deleteInternal(foo,{where: async (I) => {return !abap.compare.in(I.instance.get().field_type, types);}});`, skip: false},
 
     {abap: "READ REPORT name INTO text STATE 'A'.",
       js: `await abap.statements.readReport(name, {into: text,state: abap.CharacterFactory.get(1, 'A')});`, skip: false},
+    // EML is lowered onto a kernel class: begin with the statement's targets
+    // (the statement boundary), then one call per operation, with the names
+    // as strings and the tables and targets as they are
     {abap: "READ ENTITY zfoo ALL FIELDS WITH keys RESULT result.",
-      js: `throw new Error("ReadEntities, not supported, transpiler");`, skip: false},
+      js: `if (abap.Classes['KERNEL_RAP_EML'] === undefined) throw new Error("ReadEntities, kernel class missing");
+await abap.Classes['KERNEL_RAP_EML'].begin({bdef: new abap.types.String().set("ZFOO")});
+await abap.Classes['KERNEL_RAP_EML'].read({bdef: new abap.types.String().set("ZFOO"), entity: new abap.types.String().set("ZFOO"), keys: keys, fields: new abap.types.String().set("*"), result: result});`, skip: false},
     {abap: "MODIFY ENTITY zfoo CREATE FROM input.",
-      js: `throw new Error("ModifyEntities, not supported, transpiler");`, skip: false},
+      js: `if (abap.Classes['KERNEL_RAP_EML'] === undefined) throw new Error("ModifyEntities, kernel class missing");
+await abap.Classes['KERNEL_RAP_EML'].begin({bdef: new abap.types.String().set("ZFOO")});
+await abap.Classes['KERNEL_RAP_EML'].modify({bdef: new abap.types.String().set("ZFOO"), entity: new abap.types.String().set("ZFOO"), operation: new abap.types.String().set("CREATE"), rows: input});`, skip: false},
+    {abap: `MODIFY ENTITIES OF zi_note ENTITY Note
+      CREATE FROM lt_create
+      UPDATE FROM lt_update
+      DELETE FROM lt_delete
+      EXECUTE Approve FROM lt_approve
+      MAPPED ls_mapped FAILED ls_failed REPORTED ls_reported.`,
+      js: `if (abap.Classes['KERNEL_RAP_EML'] === undefined) throw new Error("ModifyEntities, kernel class missing");
+await abap.Classes['KERNEL_RAP_EML'].begin({bdef: new abap.types.String().set("ZI_NOTE"), mapped: ls_mapped, failed: ls_failed, reported: ls_reported});
+await abap.Classes['KERNEL_RAP_EML'].modify({bdef: new abap.types.String().set("ZI_NOTE"), entity: new abap.types.String().set("NOTE"), operation: new abap.types.String().set("CREATE"), rows: lt_create});
+await abap.Classes['KERNEL_RAP_EML'].modify({bdef: new abap.types.String().set("ZI_NOTE"), entity: new abap.types.String().set("NOTE"), operation: new abap.types.String().set("UPDATE"), rows: lt_update});
+await abap.Classes['KERNEL_RAP_EML'].modify({bdef: new abap.types.String().set("ZI_NOTE"), entity: new abap.types.String().set("NOTE"), operation: new abap.types.String().set("DELETE"), rows: lt_delete});
+await abap.Classes['KERNEL_RAP_EML'].execute({bdef: new abap.types.String().set("ZI_NOTE"), entity: new abap.types.String().set("NOTE"), action: new abap.types.String().set("APPROVE"), rows: lt_approve});`, skip: false},
+    {abap: "MODIFY ENTITIES OF zi_note ENTITY Note CREATE AUTO FILL CID FIELDS ( NoteText Status ) WITH lt_create MAPPED ls_mapped.",
+      js: `if (abap.Classes['KERNEL_RAP_EML'] === undefined) throw new Error("ModifyEntities, kernel class missing");
+await abap.Classes['KERNEL_RAP_EML'].begin({bdef: new abap.types.String().set("ZI_NOTE"), mapped: ls_mapped});
+await abap.Classes['KERNEL_RAP_EML'].modify({bdef: new abap.types.String().set("ZI_NOTE"), entity: new abap.types.String().set("NOTE"), operation: new abap.types.String().set("CREATE"), rows: lt_create, fields: new abap.types.String().set("NOTETEXT,STATUS"), auto_fill_cid: abap.CharacterFactory.get(1, 'X')});`, skip: false},
+    {abap: "MODIFY ENTITIES OF zi_note ENTITY Note UPDATE SET FIELDS WITH lt_update FAILED ls_failed.",
+      js: `if (abap.Classes['KERNEL_RAP_EML'] === undefined) throw new Error("ModifyEntities, kernel class missing");
+await abap.Classes['KERNEL_RAP_EML'].begin({bdef: new abap.types.String().set("ZI_NOTE"), failed: ls_failed});
+await abap.Classes['KERNEL_RAP_EML'].modify({bdef: new abap.types.String().set("ZI_NOTE"), entity: new abap.types.String().set("NOTE"), operation: new abap.types.String().set("UPDATE"), rows: lt_update, set_fields: abap.CharacterFactory.get(1, 'X')});`, skip: false},
+    {abap: "MODIFY ENTITIES OF zi_note ENTITY Note EXECUTE Approve FROM lt_keys RESULT lt_result FAILED ls_failed.",
+      js: `if (abap.Classes['KERNEL_RAP_EML'] === undefined) throw new Error("ModifyEntities, kernel class missing");
+await abap.Classes['KERNEL_RAP_EML'].begin({bdef: new abap.types.String().set("ZI_NOTE"), failed: ls_failed});
+await abap.Classes['KERNEL_RAP_EML'].execute({bdef: new abap.types.String().set("ZI_NOTE"), entity: new abap.types.String().set("NOTE"), action: new abap.types.String().set("APPROVE"), rows: lt_keys, result: lt_result});`, skip: false},
+    {abap: "MODIFY ENTITIES OF zi_note ENTITY Note CREATE BY \\_Item FROM lt_items MAPPED ls_mapped.",
+      js: `throw new Error("ModifyEntities BY, not supported, transpiler");`, skip: false},
+    {abap: "MODIFY ENTITIES OPERATIONS lt_operations FAILED ls_failed.",
+      js: `throw new Error("ModifyEntities OPERATIONS, not supported, transpiler");`, skip: false},
+    {abap: `READ ENTITIES OF zi_note ENTITY Note
+      FROM lt_keys RESULT lt_notes
+      FIELDS ( NoteText ) WITH lt_more RESULT lt_texts
+      FAILED ls_failed REPORTED ls_reported.`,
+      js: `if (abap.Classes['KERNEL_RAP_EML'] === undefined) throw new Error("ReadEntities, kernel class missing");
+await abap.Classes['KERNEL_RAP_EML'].begin({bdef: new abap.types.String().set("ZI_NOTE"), failed: ls_failed, reported: ls_reported});
+await abap.Classes['KERNEL_RAP_EML'].read({bdef: new abap.types.String().set("ZI_NOTE"), entity: new abap.types.String().set("NOTE"), keys: lt_keys, result: lt_notes});
+await abap.Classes['KERNEL_RAP_EML'].read({bdef: new abap.types.String().set("ZI_NOTE"), entity: new abap.types.String().set("NOTE"), keys: lt_more, fields: new abap.types.String().set("NOTETEXT"), result: lt_texts});`, skip: false},
+    {abap: "READ ENTITIES OF zi_note ENTITY Note EXECUTE GetText FROM lt_keys RESULT lt_result.",
+      js: `throw new Error("ReadEntities EXECUTE, not supported, transpiler");`, skip: false},
+    {abap: "COMMIT ENTITIES.",
+      js: `if (abap.Classes['KERNEL_RAP_EML'] === undefined) throw new Error("CommitEntities, kernel class missing");
+await abap.Classes['KERNEL_RAP_EML'].commit({});`, skip: false},
+    {abap: "COMMIT ENTITIES RESPONSE OF zi_note FAILED ls_failed REPORTED ls_reported.",
+      js: `if (abap.Classes['KERNEL_RAP_EML'] === undefined) throw new Error("CommitEntities, kernel class missing");
+await abap.Classes['KERNEL_RAP_EML'].commit({bdef: new abap.types.String().set("ZI_NOTE"), failed: ls_failed, reported: ls_reported});`, skip: false},
+    {abap: "COMMIT ENTITIES IN SIMULATION MODE.",
+      js: `throw new Error("CommitEntities SIMULATION, not supported, transpiler");`, skip: false},
+    {abap: "ROLLBACK ENTITIES.",
+      js: `if (abap.Classes['KERNEL_RAP_EML'] === undefined) throw new Error("RollbackEntities, kernel class missing");
+await abap.Classes['KERNEL_RAP_EML'].rollback();`, skip: false},
 
     {abap: "WAIT UNTIL gv_semaphore = 'X'.",
       js: `await abap.statements.wait({cond: () => {return abap.compare.eq(gv_semaphore, abap.CharacterFactory.get(1, 'X'));}});`, skip: false},
@@ -432,7 +493,7 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({object: obj,user: usr,fields:
       js: `await abap.statements.message({exceptionOrText: lx_exception, type: abap.CharacterFactory.get(1, 'S'), displayLike: abap.CharacterFactory.get(1, 'E')});`, skip: false},
 
     {abap: "select count( * ) from tab into res where enable_sqlite = abap_true.",
-      js: `await abap.statements.select(res, {select: "SELECT count( * )  from " + abap.buildDbTableName("tab") + " WHERE \\"enable_sqlite\\" = '" + abap.builtin.abap_true.get() + "'"});`, skip: false},
+      js: `await abap.statements.select(res, {select: "SELECT count( * )  from " + abap.buildDbTableName("tab") + " WHERE \\"enable_sqlite\\" = '" + abap.sqlEscape(abap.builtin.abap_true.get()) + "'"});`, skip: false},
     {abap: "select count( * ) from tab into res where ('enable_sqlite = abap_true').",
       js: `await abap.statements.select(res, {select: "SELECT count( * )  from " + abap.buildDbTableName("tab") + " WHERE \\"enable_sqlite\\" = 'X'"});`, skip: false},
   ];

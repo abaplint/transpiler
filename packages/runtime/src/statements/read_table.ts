@@ -1,7 +1,8 @@
 /* eslint-disable max-len */
 import {binarySearchFrom, binarySearchFromRow} from "../binary_search";
 import {eq, ge, gt, lt} from "../compare";
-import {DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Integer8, secondaryKeyName, Structure, Table, TableAccessType} from "../types";
+import {DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Integer8, secondaryKeyName, Structure, Table, TableAccessType, TableRowType} from "../types";
+import {primaryKeyValues} from "../primary_key";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {ABAP} from "..";
@@ -371,31 +372,19 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
       options.from = options.from.getPointer();
     }
 
-    if (table instanceof Table && options.from instanceof Structure) {
+    if (table instanceof Table) {
       // todo: optimize if the primary key is sorted
-      const arr = table.array();
-      const keys = table.getOptions()?.primaryKey?.keyFields;
-      const isStructured = arr[0] instanceof Structure;
-      if (keys !== undefined && isStructured === true) {
-//        console.dir(keys);
-//        console.dir(options.from.get()[keys[0].toLowerCase()]);
-        for (const a of arr) {
-          foundIndex++;
-          let matches = true;
-          for (const k of keys) {
-            if (eq(a.get()[k.toLowerCase()], options.from.get()[k.toLowerCase()]) === false) {
-              matches = false;
-              break;
-            }
-          }
-          if (matches === true) {
-            found = a;
-            break;
-          }
+      const fromKey = primaryKeyValues(table, options.from);
+      for (const a of table.array()) {
+        foundIndex++;
+        const rowKey = primaryKeyValues(table, a);
+        if (rowKey.every((value, n) => eq(value, fromKey[n]))) {
+          found = a;
+          break;
         }
       }
-    } else if (table instanceof HashedTable && options.from instanceof Structure) {
-      const key = table.buildHashFromData(options.from);
+    } else if (table instanceof HashedTable) {
+      const key = table.buildHashFromData(options.from as TableRowType);
       found = table.read(key);
     }
 

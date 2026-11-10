@@ -287,4 +287,22 @@ WRITE / result.`;
     expect(abap.console.get()).to.equal("3");
   });
 
+  it("GROUPS iteration, field symbol member, WITHOUT MEMBERS", async () => {
+    const code = `
+TYPES: BEGIN OF row_type,
+         id TYPE i,
+       END OF row_type.
+DATA input TYPE STANDARD TABLE OF row_type WITH EMPTY KEY.
+DATA result TYPE i.
+input = VALUE #( ( id = 5 ) ( id = 1 ) ( id = 5 ) ( id = 2 ) ).
+result = REDUCE i( INIT sum = 0
+                   FOR GROUPS group OF <row> IN input GROUP BY <row>-id WITHOUT MEMBERS
+                   NEXT sum = sum + group ).
+WRITE / result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("8");
+  });
+
 });

@@ -1,12 +1,11 @@
 import * as fs from "fs";
 import * as path from "path";
-import * as childProcess from "child_process";
 import * as os from "os";
 import * as abaplint from "@abaplint/core";
 import {IFile} from "@abaplint/transpiler";
 import {ITranspilerConfig} from "./types";
 import {FileOperations} from "./file_operations";
-import {buildGitCloneArguments} from "./git_clone";
+import {cloneRepository, resolveHead} from "./git_clone";
 import {resolveLibFolder} from "./lib_folder";
 
 type Library = NonNullable<ITranspilerConfig["libs"]>[number];
@@ -63,13 +62,14 @@ export async function loadLibraries(config: ITranspilerConfig): Promise<LoadedLi
           ? "Library must define a non-empty url or an existing folder"
           : "Library folder not found: " + folder);
       }
-      console.log("Clone: " + lib.url);
+      console.log("Clone: " + lib.url + (lib.ref ? " at " + lib.ref : ""));
       dir = fs.mkdtempSync(path.join(os.tmpdir(), "abap_transpile-"));
       cleanupFolder = true;
     }
     try {
-      if (cleanupFolder) {
-        childProcess.execFileSync("git", buildGitCloneArguments(lib.url!), {cwd: dir, stdio: "inherit"});
+      const commit = cleanupFolder ? cloneRepository(lib.url!, dir, lib.ref) : resolveHead(dir);
+      if (commit !== undefined) {
+        console.log("\tcommit: " + commit);
       }
       const patterns = typeof lib.files === "string" && lib.files !== "" ? [lib.files]
         : Array.isArray(lib.files) ? lib.files : ["/src/**"];

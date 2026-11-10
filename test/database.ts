@@ -3,7 +3,7 @@ import {AsyncFunction, runFiles as runRilesSqlite, runFilesHana, runFilesPostgre
 import {ABAP, MemoryConsole} from "../packages/runtime/src/";
 import {msag_escape, msag_zag_unit_test, tabl_t100xml, tabl_zrng, zquan, zt111, zt222} from "./_data";
 import {IFile} from "../packages/transpiler/src/types";
-import {zhead, zinfo, ztext, zvHeadText} from "../packages/transpiler/test/_view";
+import {zhead, zinfo, ztext, zvExtPrio, zvHeadText} from "../packages/transpiler/test/_view";
 
 try {
   process.loadEnvFile();
@@ -100,6 +100,53 @@ const tabl_zdbw = `<?xml version="1.0" encoding="utf-8"?>
   </asx:values>
  </asx:abap>
 </abapGit>`;
+
+function tablXml(name: string, fields: {name: string, key?: boolean, type: "CHAR" | "DATS" | "NUMC", leng: number}[]) {
+  const inttype = {CHAR: "C", DATS: "D", NUMC: "N"};
+  const dd03p = fields.map(f => `
+    <DD03P>
+     <FIELDNAME>${f.name}</FIELDNAME>${f.key === true ? "\n     <KEYFLAG>X</KEYFLAG>" : ""}
+     <INTTYPE>${inttype[f.type]}</INTTYPE>
+     <INTLEN>${String(f.leng * 2).padStart(6, "0")}</INTLEN>${f.key === true ? "\n     <NOTNULL>X</NOTNULL>" : ""}
+     <DATATYPE>${f.type}</DATATYPE>
+     <LENG>${String(f.leng).padStart(6, "0")}</LENG>
+    </DD03P>`).join("");
+  return `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V>
+    <TABNAME>${name}</TABNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <TABCLASS>TRANSP</TABCLASS>
+    <CLIDEP>X</CLIDEP>
+    <CONTFLAG>A</CONTFLAG>
+   </DD02V>
+   <DD03P_TABLE>${dd03p}
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+}
+
+const tabl_zsel_main = tablXml("ZSEL_MAIN", [
+  {name: "MANDT", key: true, type: "CHAR", leng: 3},
+  {name: "LOC", key: true, type: "CHAR", leng: 10},
+  {name: "ITEM", key: true, type: "CHAR", leng: 18},
+  {name: "VALID_FROM", key: true, type: "DATS", leng: 8},
+  {name: "SEQ", key: true, type: "NUMC", leng: 2},
+  {name: "VALID_TO", type: "DATS", leng: 8},
+  {name: "BRANCH", type: "CHAR", leng: 4},
+  {name: "UNIT", type: "CHAR", leng: 3},
+  {name: "CHANGED_ON", type: "DATS", leng: 8},
+]);
+
+const tabl_zsel_excl = tablXml("ZSEL_EXCL", [
+  {name: "MANDT", key: true, type: "CHAR", leng: 3},
+  {name: "OBJCLASS", key: true, type: "CHAR", leng: 10},
+  {name: "CUST", key: true, type: "CHAR", leng: 10},
+  {name: "ITEM", key: true, type: "CHAR", leng: 18},
+]);
 
 async function runAllDatabases(abap: ABAP,
                                files: IFile[],
@@ -3570,6 +3617,381 @@ WRITE lines( <tab> ).`;
     await runAllDatabases(abap, files, () => {
       // empty
     }, {snowflake: false});
+  });
+
+  // A host variable in a WHERE travels as text here, where a system binds it.
+  // Only the quote needs doubling: the value x' OR '1'='1 used to match every
+  // row, and a'b used to be a syntax error.
+  describe("host variables with quotes", () => {
+    const t100 = {filename: "t100.tabl.xml", contents: tabl_t100xml};
+    // WRITE pads a CHAR field to its length
+    const output = () => abap.console.get().split("\n").map(l => l.trimEnd()).join("\n");
+    const rows = `
+    DATA ls_row TYPE t100.
+    ls_row-sprsl = 'E'.
+    ls_row-arbgb = 'A''B'.
+    ls_row-msgnr = '001'.
+    ls_row-text = 'one'.
+    INSERT t100 FROM ls_row.
+    ls_row-arbgb = 'A''''B'.
+    ls_row-msgnr = '002'.
+    ls_row-text = 'two'.
+    INSERT t100 FROM ls_row.
+    ls_row-arbgb = 'A\\B'.
+    ls_row-msgnr = '003'.
+    ls_row-text = 'three'.
+    INSERT t100 FROM ls_row.
+    ls_row-arbgb = 'PLAIN'.
+    ls_row-msgnr = '004'.
+    ls_row-text = 'four'.
+    INSERT t100 FROM ls_row.`;
+
+    it("SELECT, a quote, two quotes and a backslash in the key", async () => {
+      const code = rows + `
+    DATA lv_key TYPE c LENGTH 20.
+    DATA ls_result TYPE t100.
+    lv_key = 'A''B'.
+    SELECT SINGLE * FROM t100 INTO ls_result WHERE arbgb = lv_key.
+    WRITE / ls_result-text.
+    lv_key = 'A''''B'.
+    SELECT SINGLE * FROM t100 INTO @ls_result WHERE arbgb = @lv_key.
+    WRITE / ls_result-text.
+    lv_key = 'A\\B'.
+    SELECT SINGLE * FROM t100 INTO ls_result WHERE arbgb = lv_key.
+    WRITE / ls_result-text.`;
+      await runAllDatabases(abap, [{filename: "zfoobar.prog.abap", contents: code}, t100], () => {
+        expect(output()).to.equal("one\ntwo\nthree");
+      }, {snowflake: false});
+    });
+
+    it("SELECT, a quote in the key does not become a condition", async () => {
+      const code = rows + `
+    DATA lv_key TYPE c LENGTH 20.
+    DATA lt_result TYPE STANDARD TABLE OF t100.
+    lv_key = 'x'' OR ''1''=''1'.
+    SELECT * FROM t100 INTO TABLE lt_result WHERE arbgb = lv_key.
+    WRITE / sy-subrc.
+    WRITE / lines( lt_result ).`;
+      await runAllDatabases(abap, [{filename: "zfoobar.prog.abap", contents: code}, t100], () => {
+        expect(output()).to.equal("4\n0");
+      });
+    });
+
+    it("SELECT, LIKE keeps its wildcard and escapes the quote", async () => {
+      const code = rows + `
+    DATA lv_pattern TYPE string.
+    DATA lt_result TYPE STANDARD TABLE OF t100.
+    lv_pattern = 'A''%'.
+    SELECT * FROM t100 INTO TABLE lt_result WHERE arbgb LIKE lv_pattern ORDER BY msgnr.
+    WRITE / lines( lt_result ).
+    lv_pattern = '%''''%'.
+    SELECT * FROM t100 INTO TABLE lt_result WHERE arbgb LIKE lv_pattern.
+    WRITE / lines( lt_result ).`;
+      await runAllDatabases(abap, [{filename: "zfoobar.prog.abap", contents: code}, t100], () => {
+        expect(output()).to.equal("2\n1");
+      }, {snowflake: false});
+    });
+
+    it("SELECT, IN with host values and FOR ALL ENTRIES", async () => {
+      const code = rows + `
+    DATA lv_one TYPE c LENGTH 20.
+    DATA lv_two TYPE c LENGTH 20.
+    DATA lt_result TYPE STANDARD TABLE OF t100.
+    DATA lt_fae TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+    DATA ls_fae LIKE LINE OF lt_fae.
+    lv_one = 'A''B'.
+    lv_two = 'A\\B'.
+    SELECT * FROM t100 INTO TABLE lt_result WHERE arbgb IN (lv_one, lv_two).
+    WRITE / lines( lt_result ).
+    ls_fae-arbgb = 'A''''B'.
+    APPEND ls_fae TO lt_fae.
+    SELECT * FROM t100 INTO TABLE lt_result FOR ALL ENTRIES IN lt_fae WHERE arbgb = lt_fae-arbgb.
+    WRITE / lines( lt_result ).`;
+      await runAllDatabases(abap, [{filename: "zfoobar.prog.abap", contents: code}, t100], () => {
+        expect(output()).to.equal("2\n1");
+      }, {snowflake: false});
+    });
+
+    it("UPDATE SET and UPDATE FROM touch only the quoted key", async () => {
+      const code = rows + `
+    DATA lv_key TYPE c LENGTH 20.
+    DATA lv_text TYPE c LENGTH 73.
+    DATA lt_result TYPE STANDARD TABLE OF t100.
+    lv_key = 'x'' OR ''1''=''1'.
+    lv_text = 'oracle'.
+    UPDATE t100 SET text = lv_text WHERE arbgb = lv_key.
+    WRITE / sy-dbcnt.
+    lv_key = 'A''B'.
+    lv_text = 'it''s'.
+    UPDATE t100 SET text = lv_text WHERE arbgb = lv_key.
+    WRITE / sy-dbcnt.
+    ls_row-sprsl = 'E'.
+    ls_row-arbgb = 'A''''B'.
+    ls_row-msgnr = '002'.
+    ls_row-text = 'from'.
+    UPDATE t100 FROM ls_row.
+    WRITE / sy-dbcnt.
+    SELECT * FROM t100 INTO TABLE lt_result ORDER BY msgnr.
+    LOOP AT lt_result INTO ls_row.
+      WRITE / ls_row-text.
+    ENDLOOP.`;
+      await runAllDatabases(abap, [{filename: "zfoobar.prog.abap", contents: code}, t100], () => {
+        expect(output()).to.equal("0\n1\n1\nit's\nfrom\nthree\nfour");
+      });
+    });
+
+    it("DELETE WHERE a quoted key removes that row only", async () => {
+      const code = rows + `
+    DATA lv_key TYPE c LENGTH 20.
+    DATA lt_result TYPE STANDARD TABLE OF t100.
+    lv_key = 'x'' OR ''1''=''1'.
+    DELETE FROM t100 WHERE arbgb = lv_key.
+    WRITE / sy-dbcnt.
+    lv_key = 'A''B'.
+    DELETE FROM t100 WHERE arbgb = lv_key.
+    WRITE / sy-dbcnt.
+    SELECT * FROM t100 INTO TABLE lt_result.
+    WRITE / lines( lt_result ).`;
+      await runAllDatabases(abap, [{filename: "zfoobar.prog.abap", contents: code}, t100], () => {
+        expect(output()).to.equal("0\n1\n3");
+      });
+    });
+
+    it("a backtick literal with a quote in the WHERE", async () => {
+      const code = rows + `
+    DATA ls_result TYPE t100.
+    SELECT SINGLE * FROM t100 INTO ls_result WHERE arbgb = \`A'B\`.
+    WRITE / ls_result-text.`;
+      await runAllDatabases(abap, [{filename: "zfoobar.prog.abap", contents: code}, t100], () => {
+        expect(output()).to.equal("one");
+      });
+    });
+
+    it("dynamic WHERE, field symbol values with $', $& and <x> in them", async () => {
+      const code = rows + `
+    DATA: BEGIN OF val,
+            a TYPE t100-arbgb,
+            b TYPE t100-arbgb,
+          END OF val.
+    FIELD-SYMBOLS <fs> LIKE val.
+    FIELD-SYMBOLS <one> TYPE t100-arbgb.
+    DATA lv_where TYPE string.
+    DATA lt_result TYPE STANDARD TABLE OF t100.
+    ls_row-arbgb = '$''X'.
+    ls_row-msgnr = '005'.
+    INSERT t100 FROM ls_row.
+    ls_row-arbgb = 'Y$&'.
+    ls_row-msgnr = '006'.
+    INSERT t100 FROM ls_row.
+    ls_row-arbgb = 'Z <one>'.
+    ls_row-msgnr = '007'.
+    INSERT t100 FROM ls_row.
+    ASSIGN val TO <fs>.
+    ASSIGN val-b TO <one>.
+    val-b = 'NOPE'.
+    lv_where = 'arbgb = <fs>-a OR arbgb = <fs>-b'.
+    val-a = '$''X'.
+    SELECT * FROM t100 INTO TABLE lt_result WHERE (lv_where).
+    WRITE / lines( lt_result ).
+    val-a = 'Y$&'.
+    SELECT * FROM t100 INTO TABLE lt_result WHERE (lv_where).
+    WRITE / lines( lt_result ).
+    val-a = 'Z <one>'.
+    SELECT * FROM t100 INTO TABLE lt_result WHERE (lv_where).
+    WRITE / lines( lt_result ).
+    val-b = '$''X'.
+    lv_where = 'arbgb = <one>'.
+    SELECT * FROM t100 INTO TABLE lt_result WHERE (lv_where).
+    WRITE / lines( lt_result ).`;
+      await runAllDatabases(abap, [{filename: "zfoobar.prog.abap", contents: code}, t100], () => {
+        expect(output()).to.equal("1\n1\n1\n1");
+      }, {snowflake: false});
+    });
+  });
+
+  describe("SELECT with alias, range, substring, column compare and correlated NOT EXISTS", () => {
+    const files = (select: string) => {
+      const code = `
+FORM run.
+DATA lt_main TYPE STANDARD TABLE OF zsel_main WITH DEFAULT KEY.
+DATA lt_excl TYPE STANDARD TABLE OF zsel_excl WITH DEFAULT KEY.
+DATA r_cust TYPE RANGE OF zsel_main-loc.
+DATA analysis_date TYPE d VALUE '20260101'.
+
+* included
+APPEND VALUE #( loc = '1000' item = 'ITEM0001' valid_from = '20260201' seq = '01'
+  valid_to = '20261231' branch = 'B1' unit = 'PC' changed_on = '20260101' ) TO lt_main.
+* included, sorts after the first by valid_from
+APPEND VALUE #( loc = '1000' item = 'ITEM0001' valid_from = '20260301' seq = '01'
+  valid_to = '20261231' branch = 'B1' unit = 'PC' changed_on = '20260101' ) TO lt_main.
+* excluded, 8th character of item is '-'
+APPEND VALUE #( loc = '1000' item = 'ABCDEFG-1' valid_from = '20260201' seq = '01'
+  valid_to = '20261231' branch = 'B1' unit = 'PC' changed_on = '20260101' ) TO lt_main.
+* excluded, valid_from not after changed_on
+APPEND VALUE #( loc = '1000' item = 'ITEM0002' valid_from = '20251201' seq = '01'
+  valid_to = '20261231' branch = 'B1' unit = 'PC' changed_on = '20260101' ) TO lt_main.
+* excluded, changed_on differs from analysis_date
+APPEND VALUE #( loc = '1000' item = 'ITEM0003' valid_from = '20260201' seq = '01'
+  valid_to = '20261231' branch = 'B1' unit = 'PC' changed_on = '20260102' ) TO lt_main.
+* excluded, loc not in range
+APPEND VALUE #( loc = '2000' item = 'ITEM0001' valid_from = '20260201' seq = '01'
+  valid_to = '20261231' branch = 'B1' unit = 'PC' changed_on = '20260101' ) TO lt_main.
+* excluded, matching row in zsel_excl
+APPEND VALUE #( loc = '1000' item = 'ITEM0004' valid_from = '20260201' seq = '01'
+  valid_to = '20261231' branch = 'B1' unit = 'PC' changed_on = '20260101' ) TO lt_main.
+* included, zsel_excl row has another objclass
+APPEND VALUE #( loc = '3000' item = 'ITEM0005' valid_from = '20260201' seq = '02'
+  valid_to = '20261231' branch = 'B2' unit = 'KG' changed_on = '20260101' ) TO lt_main.
+INSERT zsel_main FROM TABLE lt_main.
+
+APPEND VALUE #( objclass = 'OBJ1' cust = '1000' item = 'ITEM0004' ) TO lt_excl.
+APPEND VALUE #( objclass = 'OBJ2' cust = '3000' item = 'ITEM0005' ) TO lt_excl.
+* same item, but cust does not match the outer loc
+APPEND VALUE #( objclass = 'OBJ1' cust = '9999' item = 'ITEM0001' ) TO lt_excl.
+INSERT zsel_excl FROM TABLE lt_excl.
+
+APPEND VALUE #( sign = 'I' option = 'EQ' low = '1000' ) TO r_cust.
+APPEND VALUE #( sign = 'I' option = 'EQ' low = '3000' ) TO r_cust.
+
+${select}
+
+WRITE / lines( tab ).
+LOOP AT tab INTO DATA(row).
+  WRITE / |{ row-cust } { row-item } { row-valid_from } { row-valid_to } { row-branch } { row-unit } { row-seq }|.
+ENDLOOP.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+      return [
+        {filename: "zfoobar.prog.abap", contents: code},
+        {filename: "zsel_main.tabl.xml", contents: tabl_zsel_main},
+        {filename: "zsel_excl.tabl.xml", contents: tabl_zsel_excl},
+      ];
+    };
+
+    const expected = `3
+1000 ITEM0001 20260201 20261231 B1 PC 01
+1000 ITEM0001 20260301 20261231 B1 PC 01
+3000 ITEM0005 20260201 20261231 B2 KG 02`;
+
+    it("full statement", async () => {
+      const select = `
+SELECT loc AS cust, item, valid_from, valid_to, branch, unit, seq
+    FROM zsel_main AS a
+    WHERE loc        IN @r_cust
+      AND changed_on = @analysis_date
+      AND valid_from > a~changed_on
+      AND substring( item, 8, 1 ) <> '-'
+      AND NOT EXISTS ( SELECT 'X' FROM zsel_excl
+                              WHERE objclass = 'OBJ1'
+                                AND cust     = a~loc
+                                AND item     = a~item )
+    ORDER BY loc, item, valid_from, valid_to, branch, unit, seq
+    INTO TABLE @DATA(tab).`;
+      await runAllDatabases(abap, files(select), () => {
+        expect(abap.console.get().trimStart()).to.equal(expected);
+      });
+    });
+
+    it("column compared to column via alias", async () => {
+      const select = `
+SELECT loc AS cust, item, valid_from, valid_to, branch, unit, seq
+    FROM zsel_main AS a
+    WHERE valid_from > a~changed_on
+    ORDER BY loc, item, valid_from
+    INTO TABLE @DATA(tab).`;
+      await runAllDatabases(abap, files(select), () => {
+        expect(abap.console.get().trimStart().split("\n")[0]).to.equal("7");
+      });
+    });
+
+    it("substring in WHERE", async () => {
+      const select = `
+SELECT loc AS cust, item, valid_from, valid_to, branch, unit, seq
+    FROM zsel_main
+    WHERE substring( item, 8, 1 ) = '-'
+    INTO TABLE @DATA(tab).`;
+      await runAllDatabases(abap, files(select), () => {
+        expect(abap.console.get().trimStart()).to.equal(`1
+1000 ABCDEFG-1 20260201 20261231 B1 PC 01`);
+      });
+    });
+
+    it("correlated NOT EXISTS", async () => {
+      const select = `
+SELECT loc AS cust, item, valid_from, valid_to, branch, unit, seq
+    FROM zsel_main AS a
+    WHERE NOT EXISTS ( SELECT 'X' FROM zsel_excl
+                         WHERE objclass = 'OBJ1'
+                           AND cust     = a~loc
+                           AND item     = a~item )
+    INTO TABLE @DATA(tab).`;
+      await runAllDatabases(abap, files(select), () => {
+        expect(abap.console.get().trimStart().split("\n")[0]).to.equal("7");
+      });
+    });
+
+    it("correlated EXISTS", async () => {
+      const select = `
+SELECT loc AS cust, item, valid_from, valid_to, branch, unit, seq
+    FROM zsel_main AS a
+    WHERE EXISTS ( SELECT 'X' FROM zsel_excl
+                     WHERE cust = a~loc
+                       AND item = a~item )
+    ORDER BY loc
+    INTO TABLE @DATA(tab).`;
+      await runAllDatabases(abap, files(select), () => {
+        expect(abap.console.get().trimStart()).to.equal(`2
+1000 ITEM0004 20260201 20261231 B1 PC 01
+3000 ITEM0005 20260201 20261231 B2 KG 02`);
+      });
+    });
+  });
+
+  it("external view, VIEWCLASS X, is created as an empty table", async () => {
+    const code = `
+    SELECT COUNT(*) FROM zvext_prio.
+    WRITE sy-dbcnt.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "zvext_prio.view.xml", contents: zvExtPrio}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("0");
+    });
+  });
+
+  it("external view, VIEWCLASS X, typed from EXVDATATYPE, INSERT and SELECT", async () => {
+    const code = `
+FORM run.
+  DATA row TYPE zvext_prio.
+  row-item = 'ITEM0001'.
+  row-ean = '4006381333931'.
+  row-flag_a = 'X'.
+  row-check = 'OK'.
+  row-test = 42.
+  row-unit = 'PC'.
+  INSERT zvext_prio FROM row.
+  row-item = 'ITEM0002'.
+  row-check = 'KO'.
+  row-test = 7.
+  INSERT zvext_prio FROM row.
+
+  SELECT * FROM zvext_prio WHERE check = 'OK' INTO TABLE @DATA(tab).
+  WRITE / lines( tab ).
+  LOOP AT tab INTO DATA(found).
+    WRITE / |{ found-item } { found-ean } { found-flag_a } { found-check } { found-test } { found-unit }|.
+  ENDLOOP.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "zvext_prio.view.xml", contents: zvExtPrio}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimStart()).to.equal("1\nITEM0001 4006381333931 X OK 42 PC");
+    });
   });
 
 });

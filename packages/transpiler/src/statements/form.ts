@@ -9,12 +9,12 @@ export class FormTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     UniqueIdentifier.resetIndexBackup();
 
-    const name = node.findFirstExpression(abaplint.Expressions.FormName)!.getFirstToken().getStr();
+    const formName = node.findFirstExpression(abaplint.Expressions.FormName)!;
 
     const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
-    const def = scope?.findFormDefinition(name);
+    const def = scope?.findFormDefinition(formName.concatTokens());
 
-    const ret = new Chunk("async function " + name + "(INPUT) {");
+    const ret = new Chunk("async function " + Traversal.formName(formName) + "(INPUT) {");
     const params: string[] = [];
     for (const p of def?.getChangingParameters() || []) {
       params.push(`let ${Traversal.prefixVariable(p.getName())} = INPUT.${p.getName()};`);

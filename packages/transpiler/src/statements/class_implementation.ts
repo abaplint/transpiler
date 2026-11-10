@@ -8,7 +8,12 @@ export class ClassImplementationTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const token = node.findFirstExpression(abaplint.Expressions.ClassName)!.getFirstToken();
+    return new Chunk().append(this.buildHeader(token, traversal), node, traversal);
+  }
 
+  /** the class header with the static metadata, up to and including the opening brace,
+   * token is the class name in the CLASS ... IMPLEMENTATION or CLASS ... DEFINITION statement */
+  public buildHeader(token: abaplint.Token, traversal: Traversal): string {
     const def = traversal.getClassDefinition(token);
 
     let ret = "class " + Traversal.escapeNamespace(token.getStr().toLowerCase());
@@ -22,13 +27,13 @@ export class ClassImplementationTranspiler implements IStatementTranspiler {
 
     const scope = traversal.findCurrentScopeByToken(token);
 
-    return new Chunk().append(ret + ` {
+    return ret + ` {
 static STATIC_SUPER = ${Traversal.escapeNamespace(def?.getSuperClass()?.toLowerCase())};
 static INTERNAL_TYPE = 'CLAS';
 static INTERNAL_NAME = '${traversal.buildInternalName(token.getStr(), def)}';
 static IMPLEMENTED_INTERFACES = [${this.findImplementedByClass(traversal, def, scope).map(e => `"` + e.toUpperCase() + `"`).join(",")}];
 static ATTRIBUTES = {${Array.from(traversal.buildAttributes(def, scope)).join(",\n")}};
-static METHODS = {${traversal.buildMethods(def, scope).join(",\n")}};`, node, traversal);
+static METHODS = {${traversal.buildMethods(def, scope).join(",\n")}};`;
   }
 
   private findImplementedInterface(traversal: Traversal, def?: abaplint.IInterfaceDefinition, scope?: abaplint.ISpaghettiScopeNode): string[] {
