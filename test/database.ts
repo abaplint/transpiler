@@ -4209,4 +4209,23 @@ START-OF-SELECTION.
     }, {strict: true});
   });
 
+  it("UPDATE SET, the value is another column of the row", async () => {
+    const code = `
+    DATA ls_t100 TYPE t100.
+    ls_t100-sprsl = 'E'.
+    ls_t100-arbgb = 'HELLO'.
+    ls_t100-msgnr = '001'.
+    ls_t100-text = 'old'.
+    INSERT t100 FROM ls_t100.
+    UPDATE t100 SET text = arbgb WHERE msgnr = '001'.
+    SELECT SINGLE * FROM t100 INTO ls_t100 WHERE msgnr = '001'.
+    WRITE ls_t100-text.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("HELLO");
+    }, {postgres: false, snowflake: false, hana: false});
+  });
+
 });
