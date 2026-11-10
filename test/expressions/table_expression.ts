@@ -333,12 +333,14 @@ DATA itab TYPE STANDARD TABLE OF ty WITH EMPTY KEY WITH NON-UNIQUE SORTED KEY sk
 APPEND VALUE #( key = 1 val = 20 ) TO itab.
 APPEND VALUE #( key = 2 val = 10 ) TO itab.
 APPEND VALUE #( key = 3 val = 30 ) TO itab.
-WRITE / line_index( itab[ KEY sk val = 20 ] ).
-WRITE / line_index( itab[ KEY sk val = 99 ] ).`;
+DATA idx TYPE i.
+idx = line_index( itab[ KEY sk val = 20 ] ).
+ASSERT idx = 2.
+idx = line_index( itab[ KEY sk val = 99 ] ).
+ASSERT idx = 0.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("2\n0");
   });
 
   it("KEY secondary, not found", async () => {
