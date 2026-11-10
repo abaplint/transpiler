@@ -393,4 +393,41 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("1/1\n1/2\n2/3");
   });
 
+  it("INSERT, a block into a sorted table goes in front of equal keys; a duplicate of a unique secondary key is refused", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         name TYPE c LENGTH 1,
+         qty  TYPE i,
+       END OF ty.
+DATA srt TYPE SORTED TABLE OF ty WITH NON-UNIQUE KEY name.
+DATA blk TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA sec TYPE STANDARD TABLE OF ty WITH DEFAULT KEY WITH UNIQUE HASHED KEY by_qty COMPONENTS qty.
+DATA row TYPE ty.
+row-name = 'A'.
+DO 3 TIMES.
+  row-qty = sy-index.
+  INSERT row INTO TABLE srt.
+ENDDO.
+row-qty = 4. APPEND row TO blk.
+row-qty = 5. APPEND row TO blk.
+INSERT LINES OF blk INTO TABLE srt.
+LOOP AT srt INTO row.
+  WRITE row-qty.
+ENDLOOP.
+row-qty = 1. INSERT row INTO TABLE sec.
+row-name = 'B'.
+INSERT row INTO TABLE sec.
+WRITE / 'inserted'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    let message = "";
+    try {
+      await f(abap);
+    } catch (e) {
+      message = String(e);
+    }
+    expect(abap.console.get()).to.equal("45321");
+    expect(message).to.include("ITAB_DUPLICATE_KEY");
+  });
+
 });
