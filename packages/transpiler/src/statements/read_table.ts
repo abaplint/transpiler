@@ -128,17 +128,17 @@ export class ReadTableTranspiler implements IStatementTranspiler {
         }
 
         const simpleKey = keyExpression !== "" ? "[" + keyExpression + "]" : JSON.stringify(key);
-        if (s.includes("await")) {
-          const id = UniqueIdentifier.get();
+        // the operand is converted to the type of the component before the comparison, once per READ
+        const id = UniqueIdentifier.get();
+        if (key.includes("->")) {
           prefix += "const " + id + " = " + s + ";\n";
-          withKey.push("abap.compare.eq(" + field + ", " + id + ")");
-          withKeyValue.push(`{key: (i) => {return ${field}}, value: ${id}}`);
-          withKeySimple.push(`${simpleKey}: ${id}`);
         } else {
-          withKey.push("abap.compare.eq(" + field + ", " + s + ")");
-          withKeyValue.push(`{key: (i) => {return ${field}}, value: ${s}}`);
-          withKeySimple.push(`${simpleKey}: ${s}`);
+          const component = keyExpression !== "" ? keyExpression : JSON.stringify(key);
+          prefix += "const " + id + " = abap.statements.readTableKey(" + ret + ", " + component + ", " + s + ");\n";
         }
+        withKey.push("abap.compare.eq(" + field + ", " + id + ")");
+        withKeyValue.push(`{key: (i) => {return ${field}}, value: ${id}}`);
+        withKeySimple.push(`${simpleKey}: ${id}`);
       }
       extra.push("withKey: (i) => {return " + withKey.join(" && ") + ";}");
       extra.push(`withKeyValue: [${withKeyValue.join(",")}]`);
