@@ -57,12 +57,18 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
                 filename: string, table: abaplint.Objects.Table | undefined): string {
     const fieldName = c.findDirectExpression(abaplint.Expressions.SQLFieldName)
       || c.findDirectExpression(abaplint.Expressions.SQLAliasField);
+    const sqlFunction = c.getFirstChild()?.get() instanceof abaplint.Expressions.SQLFunction
+      ? c.getFirstChild() as abaplint.Nodes.ExpressionNode : undefined;
     const sqlin = c.findDirectExpression(abaplint.Expressions.SQLIn);
     const subselect = sqlin === undefined ? undefined : this.findSubselect(sqlin);
 
-    if (fieldName === undefined || sqlin === undefined) {
+    if ((fieldName === undefined && sqlFunction === undefined) || sqlin === undefined) {
       throw new Error("SQL Condition, transpiler todo, " + c.concatTokens());
     }
+
+    const fieldCode = () => sqlFunction
+      ? new SQLFunctionTranspiler().transpile(sqlFunction, traversal).getCode()
+      : new SQLFieldNameTranspiler().transpile(fieldName!, traversal).getCode();
 
     let pre = "";
     if (c.concatTokens().toUpperCase().includes(" NOT IN ")) {
@@ -70,8 +76,7 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
     }
 
     if (subselect) {
-      const field = new SQLFieldNameTranspiler().transpile(fieldName, traversal).getCode();
-      return `${field} ${pre}IN ${this.sqlSubselect(subselect, traversal, table)}`;
+      return `${fieldCode()} ${pre}IN ${this.sqlSubselect(subselect, traversal, table)}`;
     }
 
     const source = c.findFirstExpression(abaplint.Expressions.SimpleSource3);
@@ -82,12 +87,15 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
 
     if (sqlin.getChildren().length === 2) {
       const s = new SourceTranspiler().transpile(source, traversal).getCode();
-      return `${pre}" + abap.expandIN("${fieldName.concatTokens()}", ${s}) + "`;
+      if (sqlFunction) {
+        return `${pre}" + abap.expandIN("${fieldCode()}", ${s}, true) + "`;
+      }
+      return `${pre}" + abap.expandIN("${fieldName!.concatTokens()}", ${s}) + "`;
     } else {
       const cond: string[] = [];
       for (const s of sqlin.findDirectExpressions(abaplint.Expressions.SQLSource).concat(
           sqlin.findDirectExpressions(abaplint.Expressions.SQLSourceNoSpace))) {
-        const field = new SQLFieldNameTranspiler().transpile(fieldName, traversal).getCode();
+        const field = fieldCode();
         const sourc = this.sqlSource(s, traversal, filename, table);
         cond.push(field + " = " + sourc);
       }

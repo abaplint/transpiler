@@ -46,14 +46,15 @@ function rowCondition(field: string, sign: string, option: string, low: any, hig
 // https://www.sqlite.org/lang_select.html
 // The rows with SIGN I are ORed, AND NOT the OR of the rows with SIGN E; a
 // table with E rows only excludes them from everything.
-export function expandIN(fieldName: string, table: Table) {
+// sqlExpression: fieldName is already an SQL expression, eg. substring("field", 1, 10)
+export function expandIN(fieldName: string, table: Table, sqlExpression = false) {
   if (table.array().length === 0) {
     // " NOT IN ()" does not work on postgres
     // LIKE '%' does not work in snowflake with RTRIM collation
     return `true`;
   }
 
-  const field = `"${fieldName.replace("~", `"."`)}"`;
+  const field = sqlExpression ? fieldName : `"${fieldName.replace("~", `"."`)}"`;
   const include: string[] = [];
   const exclude: string[] = [];
   for (const row of table.array()) {
