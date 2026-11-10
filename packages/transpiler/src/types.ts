@@ -61,6 +61,9 @@ export interface ITranspilerOptions {
   addFilenames?: boolean;
   /** sets behavior for unknown types, either fail at compile- or run-time */
   unknownTypes?: UnknownTypesEnum;
+  /** sets behavior for statements that cannot be transpiled, either fail at compile-time (default) or only when the
+   * statement runs, so the rest of the object can still be used */
+  unknownStatements?: UnknownTypesEnum;
   /** list of unit tests to skip */
   skip?: TestMethodList;
   /** extra setup script to be executed during initialization */

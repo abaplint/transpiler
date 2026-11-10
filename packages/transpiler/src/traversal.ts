@@ -7,7 +7,7 @@ import {IExpressionTranspiler} from "./expressions/_expression_transpiler";
 import {IStructureTranspiler} from "./structures/_structure_transpiler";
 import {Chunk} from "./chunk";
 import {ConstantTranspiler} from "./expressions";
-import {ITranspilerOptions} from "./types";
+import {ITranspilerOptions, UnknownTypesEnum} from "./types";
 import {DEFAULT_KEYWORDS} from "./keywords";
 import {TypeFactoryRegistry} from "./type_factory_registry";
 import {TranspileTypes} from "./transpile_types";
@@ -1465,13 +1465,51 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
     const search = node.get().constructor.name + "Transpiler";
     if (list[search]) {
       const transpiler = new list[search]() as IStatementTranspiler;
-      const chunk = transpiler.transpile(node, this);
+      let chunk: Chunk;
+      try {
+        chunk = transpiler.transpile(node, this);
+      } catch (e) {
+        if (!this.failAtRuntime(node)) {
+          throw e;
+        }
+        chunk = this.runtimeError(node, String(e instanceof Error ? e.message : e));
+      }
       // baseline: statements that emitted no mappings still resolve to their source
       chunk.ensureStartMapping(node, this);
       chunk.appendString("\n");
       return chunk;
+    } else if (this.failAtRuntime(node)) {
+      return this.runtimeError(node, "").appendString("\n");
     }
     throw new Error(`Statement ${node.get().constructor.name} not supported, ${node.concatTokens()}`);
+  }
+
+  /** statements that open or close a block are never replaced, the braces of the block would not match */
+  private static readonly BLOCK_STATEMENTS = new Set(["If", "ElseIf", "Else", "EndIf", "While", "EndWhile", "Do", "EndDo",
+    "Loop", "EndLoop", "Case", "When", "WhenOthers", "WhenType", "CaseType", "EndCase", "Try", "Catch", "Cleanup", "EndTry",
+    "Select", "EndSelect", "Form", "EndForm", "Method", "EndMethod", "FunctionModule", "EndFunction", "ClassImplementation",
+    "EndClass", "ClassDefinition", "Interface", "EndInterface", "At", "EndAt", "AtFirst", "AtLast", "Module", "EndModule",
+    "LoopAtScreen", "EndLoopAtScreen", "Provide", "EndProvide", "CatchSystemExceptions", "EndCatch", "OnChange", "EndOn",
+    "WithLoop", "EndWith", "Define", "EndOfDefinition", "TestSeam", "EndTestSeam", "TestInjection", "EndTestInjection"]);
+
+  /** with the option unknownStatements = runtimeError, a statement that cannot be transpiled fails only when it runs */
+  private failAtRuntime(node: abaplint.Nodes.StatementNode): boolean {
+    return this.options?.unknownStatements === UnknownTypesEnum.runtimeError
+      && !Traversal.BLOCK_STATEMENTS.has(node.get().constructor.name);
+  }
+
+  private runtimeError(node: abaplint.Nodes.StatementNode, reason: string): Chunk {
+    // the statement's own words, eg. "SET UPDATE TASK LOCAL", then why it could not be transpiled
+    const words: string[] = [];
+    for (const c of node.getChildren()) {
+      if (!(c instanceof abaplint.Nodes.TokenNode) || c.getFirstToken().getStr() === ".") {
+        break;
+      }
+      words.push(c.getFirstToken().getStr().toUpperCase());
+    }
+    const name = words.join(" ").replace(/ - /g, "-") || node.get().constructor.name;
+    const text = `${name}, not supported, transpiler` + (reason === "" ? "" : ": " + reason.split("\n")[0]);
+    return new Chunk().append(`throw new Error(${JSON.stringify(text)});`, node, this);
   }
 
   protected traverseExpression(node: abaplint.Nodes.ExpressionNode): Chunk {
