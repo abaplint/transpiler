@@ -41,6 +41,29 @@ WRITE / 'def'.`;
     expect(abap.console.get()).to.equal("abc  \ndef");
   });
 
+  it("HIDE of a local field of a FORM is a runtime error", async () => {
+    const code = `
+START-OF-SELECTION.
+  PERFORM hide_local.
+  WRITE / 'after the form'.
+
+FORM hide_local.
+  DATA lv_key TYPE c LENGTH 4 VALUE 'K2'.
+  WRITE / 'in the form'.
+  HIDE lv_key.
+ENDFORM.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    let error = "";
+    try {
+      await f(abap);
+    } catch (e) {
+      error = (e as Error).message;
+    }
+    expect(error).to.contain("HIDE_NO_LOCAL");
+    expect(abap.console.get()).to.equal("in the form");
+  });
+
   it("obsolete list format statements and SET EXTENDED CHECK do not change the list", async () => {
     const code = `
 SET EXTENDED CHECK OFF.
