@@ -365,4 +365,31 @@ WRITE / lv_type.`;
     expect(abap.console.get()).to.equal("10");
   });
 
+  it("DESCRIBE FIELD LENGTH in byte and character mode, structures with alignment", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         c TYPE c LENGTH 1,
+         i TYPE i,
+       END OF ty.
+DATA text TYPE c LENGTH 5.
+DATA date TYPE d.
+DATA int TYPE i.
+DATA struc TYPE ty.
+DATA len TYPE i.
+DESCRIBE FIELD text LENGTH len IN BYTE MODE.
+WRITE / len.
+DESCRIBE FIELD text LENGTH len IN CHARACTER MODE.
+WRITE / len.
+DESCRIBE FIELD date LENGTH len IN CHARACTER MODE.
+WRITE / len.
+DESCRIBE FIELD int LENGTH len IN BYTE MODE.
+WRITE / len.
+DESCRIBE FIELD struc LENGTH len IN BYTE MODE.
+WRITE / len.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("10\n5\n8\n4\n8");
+  });
+
 });

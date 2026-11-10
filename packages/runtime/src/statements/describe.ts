@@ -32,6 +32,42 @@ function isDeep(structure: Structure): boolean {
   return false;
 }
 
+/** the length in bytes of a field and its alignment, as in a Unicode system: a character takes 2 bytes; strings,
+ *  tables and references are 8-byte references; a structure is its components with alignment gaps */
+function byteLength(field: any): {length: number, align: number} {
+  if (field instanceof Character || field instanceof Numc) {
+    return {length: field.getLength() * 2, align: 2};
+  } else if (field instanceof Date) {
+    return {length: 16, align: 2};
+  } else if (field instanceof Time) {
+    return {length: 12, align: 2};
+  } else if (field instanceof Integer) {
+    return {length: 4, align: 4};
+  } else if (field instanceof Integer8 || field instanceof Float || field instanceof UTCLong) {
+    return {length: 8, align: 8};
+  } else if (field instanceof DecFloat34) {
+    return {length: 16, align: 8};
+  } else if (field instanceof Packed || field instanceof Hex || field instanceof HexUInt8) {
+    return {length: field.getLength(), align: 1};
+  } else if (field instanceof Structure) {
+    let length = 0;
+    let align = 1;
+    const seen = new Set<any>();
+    for (const component of Object.values(field.get())) {
+      if (seen.has(component)) {
+        continue;
+      }
+      seen.add(component);
+      const c = byteLength(component);
+      length = Math.ceil(length / c.align) * c.align + c.length;
+      align = Math.max(align, c.align);
+    }
+    return {length: Math.ceil(length / align) * align, align};
+  }
+  // strings, tables and references: the field holds a reference
+  return {length: 8, align: 8};
+}
+
 export function describe(input: IDescribeOptions) {
 //  console.dir(input);
   if (input.type) {
@@ -83,12 +119,15 @@ export function describe(input: IDescribeOptions) {
   }
 
   if (input.length) {
-    if (input.field instanceof Character
-        || input.field instanceof Packed
-        || input.field instanceof Numc
-        || input.field instanceof HexUInt8
-        || input.field instanceof Hex) {
-      input.length.set(input.field.getLength());
+    const characters = input.field instanceof Character || input.field instanceof Numc
+      || input.field instanceof Date || input.field instanceof Time;
+    if (input.mode === "CHARACTER" && characters) {
+      input.length.set(input.field instanceof Date ? 8 : input.field instanceof Time ? 6 : input.field.getLength());
+    } else if (input.mode === "CHARACTER" && input.field instanceof Structure) {
+      // a flat structure of character-like components only
+      input.length.set(byteLength(input.field).length / 2);
+    } else if (input.mode === "BYTE" || input.mode === undefined) {
+      input.length.set(input.mode === undefined && characters ? byteLength(input.field).length / 2 : byteLength(input.field).length);
     } else {
       throw new Error("DESCRIBE length, unsupported or todo, " + input.field.constructor.name);
     }
