@@ -103,7 +103,7 @@ export class ForGroupsTranspiler {
    *  then the field symbol is declared untyped, it is only ever assigned to rows of the source */
   private declareFieldSymbol(node: Nodes.ExpressionNode, traversal: Traversal): string {
     const token = node.getFirstToken();
-    const found = traversal.findCurrentScopeByToken(token)?.findVariable(token.getStr());
+    const found = traversal.findCurrentScopeByToken(token)?.findVariable(token.getStr().replace(/^!/, ""));
     if (found !== undefined && !(found.getType() instanceof BasicTypes.VoidType)) {
       return new FieldSymbolTranspiler().transpile(node, traversal).getCode();
     }

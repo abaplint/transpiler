@@ -51,7 +51,7 @@ export class SortTranspiler implements IStatementTranspiler {
       return false;
     }
     const token = field.getFirstToken();
-    const type = traversal.findCurrentScopeByToken(token)?.findVariable(token.getStr())?.getType();
+    const type = traversal.findCurrentScopeByToken(token)?.findVariable(token.getStr().replace(/^!/, ""))?.getType();
     return !(type instanceof abaplint.BasicTypes.TableType);
   }
 

@@ -17,7 +17,7 @@ export class SelectionScreenTranspiler implements IStatementTranspiler {
       return new Chunk("");
     }
 
-    const found = traversal.findCurrentScopeByToken(token)?.findVariable(token.getStr());
+    const found = traversal.findCurrentScopeByToken(token)?.findVariable(token.getStr().replace(/^!/, ""));
     if (found === undefined) {
       return new Chunk("");
     }
