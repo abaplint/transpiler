@@ -9,6 +9,11 @@ export class MoveTranspiler implements IStatementTranspiler {
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const sourceExpression = node.findDirectExpression(abaplint.Expressions.Source);
 
+    // %_name_%_app_%-text is the label of a field on the selection screen: there is no screen here
+    if (/^%_.*_%_app_%/i.test(node.concatTokens())) {
+      return new Chunk().append("/* selection screen text */", node, traversal);
+    }
+
     const targets: Chunk[] = [];
     const targetExpressions = node.findDirectExpressions(abaplint.Expressions.Target);
     for (const t of targetExpressions) {

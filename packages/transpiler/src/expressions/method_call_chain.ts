@@ -92,11 +92,34 @@ export class MethodCallChainTranspiler implements IExpressionTranspiler {
     }
 
     const code = ret.getCode();
-    if (code.startsWith("(") && code.endsWith(")")) {
+    if (code.startsWith("(") && code.endsWith(")") && MethodCallChainTranspiler.wrapped(code)) {
       return new Chunk().append(code.substr(1, code.length - 2), node, traversal);
     } else {
       return ret;
     }
+  }
+
+  /** true when the first parenthesis closes at the very end, "(a)(b)" is two groups and not one wrapped in parentheses */
+  private static wrapped(code: string): boolean {
+    let depth = 0;
+    let quote = "";
+    for (let i = 0; i < code.length; i++) {
+      const c = code[i];
+      if (quote !== "") {
+        if (c === "\\") {
+          i++;
+        } else if (c === quote) {
+          quote = "";
+        }
+      } else if (c === "\"" || c === "'" || c === "`") {
+        quote = c;
+      } else if (c === "(") {
+        depth++;
+      } else if (c === ")" && --depth === 0 && i < code.length - 1) {
+        return false;
+      }
+    }
+    return true;
   }
 
 }
