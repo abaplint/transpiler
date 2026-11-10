@@ -28,7 +28,7 @@ describe("Single statements", () => {
     {abap: "IF foo CP 'bar*'. ENDIF.",             js: "if (abap.compare.cp(foo, abap.CharacterFactory.get(4, 'bar*'))) {\n}",    skip: false},
     {abap: "IF item IS INITIAL AND NOT ( foo = bar AND bar = moo ). ENDIF.",             js: "if (abap.compare.initial(item) && !(abap.compare.eq(foo, bar) && abap.compare.eq(bar, moo))) {\n}",    skip: false},
     {abap: "CONTINUE.",                            js: "continue;",                                 skip: false},
-    {abap: "IMPORT variscreens = lt_variscreens FROM MEMORY ID '%_SCRNR_%'.",                       js: `throw new Error("Import, transpiler todo");`,                                 skip: false},
+    {abap: "IMPORT variscreens = lt_variscreens FROM MEMORY ID '%_SCRNR_%'.",                       js: `await abap.statements.importCluster("MEMORY|" + abap.CharacterFactory.get(9, '%_SCRNR_%').get().toString().trimEnd(), {"VARISCREENS": lt_variscreens});`, skip: false},
     {abap: "CASE bar. ENDCASE.",                   js: "let unique1 = bar;",                        skip: false},
     {abap: "DATA foo TYPE c.",                     js: "let foo = new abap.types.Character(1, {});",     skip: false},
     {abap: "DATA foo TYPE string.",                js: `let foo = new abap.types.String({qualifiedName: "STRING"});`,      skip: false},
