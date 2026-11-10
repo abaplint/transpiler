@@ -246,25 +246,4 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("21\n22\n11\n12");
   });
 
-  it("SORT without BY, a table WITH EMPTY KEY keeps its order", async () => {
-    const code = `
-DATA tab TYPE STANDARD TABLE OF string WITH EMPTY KEY.
-DATA row TYPE string.
-APPEND 'c' TO tab.
-APPEND 'a' TO tab.
-APPEND 'b' TO tab.
-SORT tab.
-LOOP AT tab INTO row.
-  WRITE row.
-ENDLOOP.
-SORT tab BY table_line.
-LOOP AT tab INTO row.
-  WRITE row.
-ENDLOOP.`;
-    const js = await run(code);
-    const f = new AsyncFunction("abap", js);
-    await f(abap);
-    expect(abap.console.get()).to.equal("cababc");
-  });
-
 });

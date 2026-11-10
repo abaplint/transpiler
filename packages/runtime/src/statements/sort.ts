@@ -113,11 +113,6 @@ export function sort(input: Table | FieldSymbol | any[], options?: ISortOptions)
     throw new Error("Sort hashed table, ugh?");
   }
 
-  if (options?.by === undefined && input instanceof Table && input.getOptions()?.keyType === TableKeyType.empty) {
-    // without BY the rows are sorted by the primary key, an empty key leaves them as they are
-    return;
-  }
-
   if (options?.by) {
     if (options.by.length === 0) {
       throw new Error("SortByLengthZero");
