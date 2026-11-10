@@ -1647,4 +1647,24 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2\n0\n2\n0\n1");
   });
 
+  it("LOOP ... TO reads TO again in every pass", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA row TYPE i.
+DATA last TYPE i VALUE 2.
+DO 5 TIMES.
+  APPEND sy-index TO tab.
+ENDDO.
+LOOP AT tab INTO row TO last.
+  WRITE row.
+  IF row = 2.
+    last = 4.
+  ENDIF.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1234");
+  });
+
 });
