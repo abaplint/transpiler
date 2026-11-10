@@ -8,7 +8,12 @@ export class ModifyInternalTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
 
-    const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target)).getCode();
+    const targetNode = node.findDirectExpression(abaplint.Expressions.Target);
+    const target = traversal.traverse(targetNode).getCode();
+
+    if (node.getChildren().length === 3 && traversal.isDatabaseShortForm(targetNode)) {
+      return new Chunk(`await abap.statements.modifyDatabase("${targetNode!.concatTokens().toLowerCase()}", {values: ${target}});`);
+    }
 
     const extra: string[] = [];
 

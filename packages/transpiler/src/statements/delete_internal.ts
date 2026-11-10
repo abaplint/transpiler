@@ -6,8 +6,16 @@ import {Chunk} from "../chunk";
 export class DeleteInternalTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target)).getCode();
+    const targetNode = node.findDirectExpression(abaplint.Expressions.Target);
+    const target = traversal.traverse(targetNode).getCode();
     const concat = node.concatTokens().toUpperCase();
+
+    if (node.getChildren().length <= 5 && (node.getChildren().length === 3 || node.findDirectTokenByText("FROM"))
+        && concat.startsWith("DELETE TABLE ") === false && traversal.isDatabaseShortForm(targetNode)) {
+      const row = node.findExpressionAfterToken("FROM");
+      const source = row ? traversal.traverse(row).getCode() : target;
+      return new Chunk(`await abap.statements.deleteDatabase("${targetNode!.concatTokens().toLowerCase()}", {from: ${source}});`);
+    }
 
     const extra: string[] = [];
 

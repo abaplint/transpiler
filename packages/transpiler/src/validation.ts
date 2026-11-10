@@ -163,8 +163,8 @@ export class Validation {
     return issues.filter(i => i.getKey() !== "ambiguous_statement" || !Validation.deleteOfInternalTable(reg, i, scopes));
   }
 
-  /** DELETE itab. and DELETE itab FROM n. in a program read like DELETE dbtab, so abaplint calls them ambiguous;
-   * the parser takes them as DELETE of an internal table, and when itab is a variable of table type that is right */
+  /** DELETE name., DELETE name FROM x. and MODIFY name [FROM x]. read two ways, so abaplint calls them ambiguous. ABAP
+   * decides by the name: a variable of table type is the internal table, anything else the database table */
   private static deleteOfInternalTable(reg: IRegistry, issue: Issue, scopes: Map<ABAPObject, ISpaghettiScope>): boolean {
     const file = reg.getFileByName(issue.getFilename());
     const obj = file ? reg.findObjectForFile(file) : undefined;
@@ -173,11 +173,12 @@ export class Validation {
     }
     const statement = obj.getABAPFileByName(issue.getFilename())?.getStatements()
       .find(s => s.getStart().equals(issue.getStart()));
-    if (!(statement?.get() instanceof Statements.DeleteInternal)) {
+    const modify = statement !== undefined && /^MODIFY\s/i.test(statement.concatTokens());
+    if (statement === undefined || (!(statement.get() instanceof Statements.DeleteInternal) && !modify)) {
       return false;
     }
     const token = statement.getTokens()[1];
-    if (token === undefined) {
+    if (token === undefined || token.getStr().toUpperCase() === "TABLE") {
       return false;
     }
     let spaghetti = scopes.get(obj);
@@ -185,8 +186,11 @@ export class Validation {
       spaghetti = new SyntaxLogic(reg, obj).run().spaghetti;
       scopes.set(obj, spaghetti);
     }
-    const type = spaghetti.lookupPosition(token.getStart(), issue.getFilename())?.findVariable(token.getStr())?.getType();
-    return type instanceof BasicTypes.TableType;
+    const variable = spaghetti.lookupPosition(token.getStart(), issue.getFilename())?.findVariable(token.getStr());
+    if (variable?.getType() instanceof BasicTypes.TableType) {
+      return !modify;
+    }
+    return variable !== undefined || statement.findExpressionAfterToken("FROM") !== undefined;
   }
 
 
