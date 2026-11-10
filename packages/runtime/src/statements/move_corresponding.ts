@@ -1,6 +1,9 @@
-import {FieldSymbol, Structure} from "../types";
+import {FieldSymbol, HashedTable, Structure, Table} from "../types";
+import {insertInternal} from "./insert_internal";
 
-export function moveCorresponding(source: Structure | FieldSymbol, target: Structure | FieldSymbol) {
+type Corresponding = Structure | FieldSymbol | Table | HashedTable;
+
+export function moveCorresponding(source: Corresponding, target: Corresponding): Corresponding {
   if (source instanceof FieldSymbol) {
     if (source.isAssigned() === false) {
       throw new Error("GETWA_NOT_ASSIGNED");
@@ -14,11 +17,34 @@ export function moveCorresponding(source: Structure | FieldSymbol, target: Struc
     return moveCorresponding(source, target.getPointer());
   }
 
-  for (const n in source.get()) {
-    if (target.get()[n] instanceof Structure) {
-      moveCorresponding(source.get()[n], target.get()[n]);
+  const isTable = (t: Corresponding) => t instanceof Table || t instanceof HashedTable;
+  if (isTable(source) && isTable(target)) {
+    const src = source as Table | HashedTable;
+    const tgt = target as Table | HashedTable;
+    if (src.hasHeaderLine() === false && tgt.hasHeaderLine() === false) {
+      // internal tables without header lines: the target gets the source's lines, component by component
+      tgt.clear();
+      for (const row of src.array()) {
+        const line = tgt.getRowType().clone();
+        if (line instanceof Structure && row instanceof Structure) {
+          moveCorresponding(row, line);
+        } else {
+          line.set(row);
+        }
+        insertInternal({table: tgt, data: line});
+      }
+      return tgt;
+    }
+  }
+
+  // tables with header lines: their header lines
+  const s = isTable(source) ? (source as Table | HashedTable).getHeader() as Structure : source as Structure;
+  const d = isTable(target) ? (target as Table | HashedTable).getHeader() as Structure : target as Structure;
+  for (const n in s.get()) {
+    if (d.get()[n] instanceof Structure) {
+      moveCorresponding(s.get()[n], d.get()[n]);
     } else {
-      target.get()[n]?.set(source.get()[n]);
+      d.get()[n]?.set(s.get()[n]);
     }
   }
 
