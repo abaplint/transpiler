@@ -1667,4 +1667,113 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("1234");
   });
 
+  it("AT NEW, a change in a component left of the key is a new group", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         land TYPE c LENGTH 2,
+         town TYPE c LENGTH 3,
+         amount TYPE i,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row TYPE ty.
+row-land = 'DE'. row-town = 'AAA'. row-amount = 1. APPEND row TO tab.
+row-land = 'FR'. row-town = 'AAA'. row-amount = 2. APPEND row TO tab.
+FIELD-SYMBOLS <row> TYPE ty.
+LOOP AT tab ASSIGNING <row>.
+  AT NEW town.
+    WRITE / <row>-amount.
+  ENDAT.
+  AT END OF town.
+    WRITE / <row>-amount.
+  ENDAT.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n1\n2\n2");
+  });
+
+  it("AT with INTO, components right of the key show * or their initial value until ENDAT", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         land TYPE c LENGTH 2,
+         town TYPE c LENGTH 3,
+         amount TYPE i,
+         day TYPE d,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row TYPE ty.
+row-land = 'DE'. row-town = 'AAA'. row-amount = 5. row-day = '20240101'. APPEND row TO tab.
+LOOP AT tab INTO row.
+  AT FIRST.
+    WRITE / |{ row-land }{ row-town }{ row-amount }{ row-day }|.
+  ENDAT.
+  AT NEW land.
+    WRITE / |{ row-land }{ row-town }{ row-amount }{ row-day }|.
+  ENDAT.
+  WRITE / |{ row-land }{ row-town }{ row-amount }{ row-day }|.
+  AT END OF town.
+    WRITE / |{ row-land }{ row-town }{ row-amount }{ row-day }|.
+  ENDAT.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("*****0********\nDE***0********\nDEAAA520240101\nDEAAA0********");
+  });
+
+  it("SUM in AT END OF, AT LAST and outside AT", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         land TYPE c LENGTH 2,
+         amount TYPE i,
+         price TYPE p LENGTH 8 DECIMALS 2,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row TYPE ty.
+row-land = 'DE'. row-amount = 1. row-price = '1.50'. APPEND row TO tab.
+row-land = 'DE'. row-amount = 2. row-price = '2.25'. APPEND row TO tab.
+row-land = 'FR'. row-amount = 4. row-price = '1.00'. APPEND row TO tab.
+LOOP AT tab INTO row.
+  AT NEW land.
+    SUM.
+    WRITE / |new { row-land } { row-amount } { row-price }|.
+  ENDAT.
+  AT END OF land.
+    SUM.
+    WRITE / |end { row-land } { row-amount } { row-price }|.
+  ENDAT.
+  AT LAST.
+    SUM.
+    WRITE / |last { row-land } { row-amount } { row-price }|.
+  ENDAT.
+ENDLOOP.
+LOOP AT tab INTO row.
+  SUM.
+  WRITE / |all { row-land } { row-amount }|.
+  EXIT.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("new DE 3 3.75\nend DE 3 3.75\nnew FR 4 1.00\nend FR 4 1.00\nlast ** 7 4.75\nall DE 7");
+  });
+
+  it("AT END OF looks at the next row without changing sy-tabix", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA row TYPE i.
+APPEND 1 TO tab.
+APPEND 2 TO tab.
+LOOP AT tab INTO row.
+  AT END OF table_line.
+    WRITE / sy-tabix.
+  ENDAT.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2");
+  });
+
 });
