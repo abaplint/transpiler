@@ -7,6 +7,7 @@ export * from "./class_definition";
 export * from "./class_implementation";
 export * from "./constants";
 export * from "./data";
+export * from "./statics";
 export * from "./define";
 export * from "./do";
 export * from "./exec_sql";

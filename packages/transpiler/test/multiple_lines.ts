@@ -530,6 +530,17 @@ lcl_bar.foo = new abap.types.Integer({qualifiedName: "I"});`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
+  it("STATICS BEGIN OF, runtime error", async () => {
+    const abap = `
+    FORM foo.
+      STATICS: BEGIN OF ls_static,
+        field TYPE i,
+      END OF ls_static.
+    ENDFORM.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("STATICS, not supported, transpiler");`);
+  });
+
   it("Escape class constants", async () => {
     const abap = `
   CLASS lcl_bar DEFINITION.
