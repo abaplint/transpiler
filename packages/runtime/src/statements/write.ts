@@ -31,6 +31,14 @@ export class WriteStatement {
       throw new Error("WriteStatement: source is undefined");
     }
 
+    if (this.context.newLinePending === true) {
+      this.context.newLinePending = false;
+      if (options?.newLine !== true && options?.skipLine !== true && this.context.console.isEmpty() === false
+          && this.context.console.get().endsWith("\n") === false) {
+        this.context.console.add("\n");
+      }
+    }
+
     if (options?.skipLine === true) {
       this.context.console.add("\n");
     } else {
