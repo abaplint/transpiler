@@ -31,6 +31,25 @@ describe("Multiple lines", () => {
     expect(await runSingle(abap)).to.include(`throw new Error("CATCH SYSTEM-EXCEPTIONS, not supported, transpiler");`);
   });
 
+  it("PROVIDE, runtime error", async () => {
+    const abap = `
+    PROVIDE FIELDS * FROM lt_tab INTO ls_tab VALID lv_flag BOUNDS begda AND endda
+      BETWEEN lv_begda AND lv_endda.
+      WRITE ls_tab-begda.
+    ENDPROVIDE.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("PROVIDE, not supported, transpiler");`);
+  });
+
+  it("LOOP over an extract dataset, runtime error", async () => {
+    const abap = `
+    LOOP.
+      WRITE 'a'.
+    ENDLOOP.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("LOOP over extract, not supported, transpiler");`);
+  });
+
   it("EXEC SQL, runtime error", async () => {
     const abap = `
     EXEC SQL.
@@ -710,6 +729,13 @@ abap.Forms['PROG-ZFOOBAR-FOO'] = foo;`;
     expect(await runSingle(abap, {
       ignoreSyntaxCheck: true,
       unknownTypes: UnknownTypesEnum.runtimeError})).to.equals(expected);
+  });
+
+  it("VALUE # whose type cannot be inferred, runtime error with unknownTypes", async () => {
+    const abap = `
+    INSERT demo_expressions FROM @( VALUE #( id = 'F' ) ).`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true, skipVersionCheck: true, unknownTypes: UnknownTypesEnum.runtimeError})).to.include(`throw new Error("Unknown type: TypeNameOrInfer, type not found: #`);
   });
 
   it("Upper case method impl name, should transpile to lower", async () => {
