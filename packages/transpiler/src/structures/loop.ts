@@ -8,7 +8,6 @@ import {UniqueIdentifier} from "../unique_identifier";
 import {LoopTranspiler as LoopStatementTranspiler} from "../statements";
 import {AtTranspiler} from "./at";
 
-
 export class LoopTranspiler implements IStructureTranspiler {
 
   public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): Chunk {
