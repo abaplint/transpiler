@@ -15,6 +15,8 @@ export interface IInsertInternalOptions {
   assigning?: FieldSymbol,
   noClone?: boolean,
   lines?: boolean,
+  /** INSERT wa INTO itab, without INDEX and TABLE: in a LOOP over itab, in front of the current row */
+  currentRow?: boolean,
 }
 
 export function insertInternal(options: IInsertInternalOptions): void {
@@ -67,8 +69,13 @@ export function insertInternal(options: IInsertInternalOptions): void {
     }
   }
 
-  if (data && options.index) {
-    const index = options.index.get() - 1;
+  if (data && (options.index || (options.currentRow === true && options.table instanceof Table && options.table.getLoopCount?.() === 1))) {
+    const index = options.index ? options.index.get() - 1 : (options.table as Table).getCurrentLoopIndex();
+    if (index > options.table.getArrayLength()) {
+      // an index past the row after the last one inserts nothing
+      abap.builtin.sy.get().subrc.set(4);
+      return;
+    }
     const val = options.table.insertIndex(data as any, index);
     if (options.assigning) {
       options.assigning.assign(val);

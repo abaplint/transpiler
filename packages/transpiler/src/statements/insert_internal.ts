@@ -26,6 +26,10 @@ export class InsertInternalTranspiler implements IStatementTranspiler {
     const index = node.findExpressionAfterToken("INDEX");
     if (index) {
       options.push("index: " + traversal.traverse(index).getCode());
+    } else if (!concat.startsWith("INSERT LINES OF ") && !concat.includes(" INTO TABLE ") && concat.includes(" INTO ")
+        && node.findDirectExpression(abaplint.Expressions.Target) !== undefined) {
+      // INSERT wa INTO itab: in a LOOP over itab, in front of the current row
+      options.push("currentRow: true");
     }
 
     if (concat.includes(" REFERENCE INTO ")) {
