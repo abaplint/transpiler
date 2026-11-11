@@ -239,4 +239,22 @@ WRITE / foo[ index ].`;
     expect(abap.console.get()).to.equal("1");
   });
 
+
+  it("KEY name COMPONENTS and KEY name INDEX", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         id   TYPE i,
+         name TYPE c LENGTH 1,
+       END OF ty_row.
+DATA tab TYPE STANDARD TABLE OF ty_row WITH EMPTY KEY WITH UNIQUE SORTED KEY by_name COMPONENTS name.
+tab = VALUE #( ( id = 1 name = 'b' ) ( id = 2 name = 'a' ) ( id = 3 name = 'c' ) ).
+WRITE / tab[ KEY by_name COMPONENTS name = 'b' ]-id.
+WRITE / tab[ KEY by_name name = 'c' ]-id.
+WRITE / tab[ KEY by_name INDEX 1 ]-id.
+WRITE / tab[ KEY primary_key INDEX 1 ]-id.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n3\n2\n1");
+  });
 });
