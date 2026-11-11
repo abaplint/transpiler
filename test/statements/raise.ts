@@ -117,6 +117,57 @@ START-OF-SELECTION.
     }
   });
 
+  it("RAISE RESUMABLE EXCEPTION, caught", async () => {
+    const code = `
+${cx_root}
+
+${cx_static_check}
+
+CLASS lcx DEFINITION INHERITING FROM cx_static_check.
+ENDCLASS.
+CLASS lcx IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  TRY.
+      RAISE RESUMABLE EXCEPTION TYPE lcx.
+      WRITE 'not here'.
+    CATCH lcx.
+      WRITE 'caught'.
+  ENDTRY.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("caught");
+  });
+
+  it("RESUME, runtime error", async () => {
+    const code = `
+${cx_root}
+
+${cx_static_check}
+
+CLASS lcx DEFINITION INHERITING FROM cx_static_check.
+ENDCLASS.
+CLASS lcx IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  TRY.
+      RAISE RESUMABLE EXCEPTION TYPE lcx.
+    CATCH BEFORE UNWIND lcx.
+      RESUME.
+  ENDTRY.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch(e) {
+      expect(e.toString()).to.contain("RESUME, not supported, transpiler");
+    }
+  });
+
   it("RAISE EXCEPTION MESSAGE", async () => {
     const code = `
 ${cx_root}
