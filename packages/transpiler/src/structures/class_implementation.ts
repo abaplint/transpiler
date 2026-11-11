@@ -141,8 +141,13 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     const statement = obj.getABAPFileByName(m.getFilename())?.getStatements().find(s =>
       s.get() instanceof abaplint.Statements.MethodDef
       && s.getStart().isBefore(start) && s.getEnd().isAfter(start));
-    const match = statement?.concatTokens().toUpperCase().match(/ DEFAULT (IGNORE|FAIL)\b/);
-    return match ? match[1] as "IGNORE" | "FAIL" : undefined;
+    // DEFAULT IGNORE | FAIL are tokens of the statement itself, a parameter's DEFAULT value is inside an expression
+    if (statement?.findDirectTokenByText("IGNORE")) {
+      return "IGNORE";
+    } else if (statement?.findDirectTokenByText("FAIL")) {
+      return "FAIL";
+    }
+    return undefined;
   }
 
   /** an optional interface method, DEFAULT IGNORE, the class does not implement: it does
