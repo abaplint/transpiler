@@ -4,6 +4,7 @@ import {TranspileTypes} from "../transpile_types";
 import {IOutputFile, ITranspilerOptions} from "../types";
 import {TypeFactoryRegistry} from "../type_factory_registry";
 
+
 export class HandleDataElement {
   public constructor(private readonly options?: ITranspilerOptions) {}
 
