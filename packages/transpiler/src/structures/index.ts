@@ -13,6 +13,8 @@ export * from "./exec_sql";
 export * from "./function_module";
 export * from "./interface";
 export * from "./loop";
+export * from "./loop_extract";
+export * from "./provide";
 export * from "./module";
 export * from "./select";
 export * from "./method";
