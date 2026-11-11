@@ -2,6 +2,7 @@ import {expect} from "chai";
 import * as abaplint from "@abaplint/core";
 import {Transpiler} from "../src";
 
+
 async function transpileIgnoringSyntax(filename: string, contents: string) {
   const reg = new abaplint.Registry().addFile(new abaplint.MemoryFile(filename, contents));
   return new Transpiler({ignoreSyntaxCheck: true}).run(reg);
