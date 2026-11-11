@@ -399,6 +399,7 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({object: obj,user: usr,fields:
     {abap: "lo_foo ?= lo_bar.", js: 'await abap.statements.cast(lo_foo, lo_bar, {"INTERNAL_FILENAME": "zfoobar.prog.abap","INTERNAL_LINE": 1});', skip: false},
 
     {abap: "RETRY.", js: `throw new Error("RETRY, not supported, transpiler");`, skip: false},
+    {abap: "RESUME.", js: `throw new Error("RESUME, not supported, transpiler");`, skip: false},
 
     {abap: "STOP.", js: `throw new Error("STOP, not supported, transpiler");`, skip: false},
     {abap: "SET CURSOR FIELD foo.", js: `throw new Error("SET CURSOR, not supported, transpiler");`, skip: false},
