@@ -4,6 +4,7 @@ import {Traversal} from "../traversal";
 import {MethodCallParamTranspiler} from "./method_call_param";
 import {Chunk} from "../chunk";
 
+
 export class MethodCallTranspiler implements IExpressionTranspiler {
   private readonly discardResult: boolean;
 
