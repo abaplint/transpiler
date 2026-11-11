@@ -427,8 +427,10 @@ export class Traversal {
 
     const methodDefinitions = def.getMethodDefinitions();
     if (methodDefinitions === undefined) {
-      // this can occur if the dependencies is not 702?
-      throw new Error("buildMethods: unexpected undefined, " + def.getName());
+      // abaplint registers a definition before reading it, and stops reading at the first thing it cannot find
+      const superClass = def.getSuperClass();
+      const reason = superClass ? `its super class ${superClass} is not known` : "a super class, interface or type it names is not known";
+      throw new Error(`${this.getFilename()}: the definition of ${def.getName()} could not be read: ${reason}`);
     }
 
     for (const m of methodDefinitions.getAll()) {
