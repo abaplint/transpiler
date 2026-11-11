@@ -13,7 +13,8 @@ export class ExportTranspiler implements IStatementTranspiler {
     const params = clusterParameters(kids.slice(1, to < 0 ? 1 : to), ["FROM", "="], traversal);
     const medium = clusterMedium(kids.slice(to + 1), traversal);
     if (to < 0 || params.unsupported !== undefined || medium.unsupported !== undefined) {
-      throw new Error("ExportTranspiler, not supported: " + (params.unsupported ?? medium.unsupported ?? node.concatTokens()));
+      const what = params.unsupported ?? medium.unsupported ?? node.concatTokens();
+      return new Chunk().append(`throw new Error(${JSON.stringify("EXPORT, not supported, transpiler: " + what)});`, node, traversal);
     }
     const values = clusterValues(params.pairs);
     if (medium.buffer !== undefined) {

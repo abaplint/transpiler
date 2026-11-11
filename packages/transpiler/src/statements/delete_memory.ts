@@ -12,7 +12,7 @@ export class DeleteMemoryTranspiler implements IStatementTranspiler {
     const from = kids.findIndex(k => k instanceof abaplint.Nodes.TokenNode && k.concatTokens().toUpperCase() === "FROM");
     const medium = clusterMedium(kids.slice(from + 1), traversal);
     if (from < 0 || medium.key === undefined) {
-      throw new Error("DeleteMemoryTranspiler, not supported: " + node.concatTokens());
+      return new Chunk().append(`throw new Error(${JSON.stringify("DELETE FROM, not supported, transpiler: " + node.concatTokens())});`, node, traversal);
     }
     return new Chunk().append(`abap.statements.deleteCluster(${medium.key});`, node, traversal);
   }

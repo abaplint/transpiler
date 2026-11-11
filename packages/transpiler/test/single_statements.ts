@@ -421,6 +421,8 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({object: obj,user: usr,fields:
     {abap: "TOP-OF-PAGE.", js: `throw new Error("TOP-OF-PAGE, not supported, transpiler");`, skip: false},
     {abap: "END-OF-PAGE.", js: `throw new Error("END-OF-PAGE, not supported, transpiler");`, skip: false},
     {abap: "DELETE FROM DATABASE indx(zz) ID 'FOO'.", js: `throw new Error("DELETE CLUSTER, not supported, transpiler");`, skip: false},
+    {abap: "IMPORT foo = bar FROM INTERNAL TABLE itab.", js: `throw new Error("IMPORT, not supported, transpiler: INTERNAL TABLE itab .");`, skip: false},
+    {abap: "EXPORT foo = bar TO INTERNAL TABLE itab.", js: `throw new Error("EXPORT, not supported, transpiler: INTERNAL TABLE itab .");`, skip: false},
 
     {abap: "delete foo where instance->field_type not in types.",
       js: `await abap.statements.deleteInternal(foo,{where: async (I) => {return !abap.compare.in(I.instance.get().field_type, types);}});`, skip: false},
