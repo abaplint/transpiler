@@ -94,4 +94,34 @@ describe("Running statements - GET RUN TIME", () => {
     await f(abap);
   });
 
+
+  // measured on a 7.40 system: SET_RUN_TIME_CLOCK_ERROR when the resolution changes after GET RUN TIME
+  it("SET RUN TIME CLOCK RESOLUTION, the same again after GET RUN TIME", async () => {
+    const code = `
+    DATA lv_t TYPE i.
+    SET RUN TIME CLOCK RESOLUTION LOW.
+    SET RUN TIME CLOCK RESOLUTION HIGH.
+    GET RUN TIME FIELD lv_t.
+    SET RUN TIME CLOCK RESOLUTION HIGH.
+    WRITE 'running'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("running");
+  });
+
+  it("SET RUN TIME CLOCK RESOLUTION, a change after GET RUN TIME is a runtime error", async () => {
+    const code = `
+    DATA lv_t TYPE i.
+    GET RUN TIME FIELD lv_t.
+    SET RUN TIME CLOCK RESOLUTION LOW.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch (e) {
+      expect(e.message).to.equal("SET_RUN_TIME_CLOCK_ERROR");
+    }
+  });
 });

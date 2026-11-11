@@ -170,6 +170,7 @@ describe("Single statements", () => {
     {abap: "INTERFACE zif_foo LOAD.", js: ``, skip: false},
     {abap: "TYPE-POOL zfoo.", js: ``, skip: false},
     {abap: "SET RUN TIME ANALYZER ON.", js: ``, skip: false},
+    {abap: "SET RUN TIME CLOCK RESOLUTION LOW.", js: `abap.statements.setRunTimeClock("LOW");`, skip: false},
     {abap: "WAIT UP TO 1 SECONDS.", js: `await abap.statements.wait({seconds: abap.IntegerFactory.get(1)});`, skip: false},
     {abap: "if_bar~field = 2.",                      js: `if_bar$field.set(abap.IntegerFactory.get(2));`, skip: false},
     {abap: "IF if_bar~field IS NOT INITIAL. ENDIF.", js: `if (abap.compare.initial(if_bar$field) === false) {\n}`, skip: false},

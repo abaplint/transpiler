@@ -5,8 +5,12 @@ import {Chunk} from "../chunk";
 
 export class SetRunTimeTranspiler implements IStatementTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    // SET RUN TIME ANALYZER and SET RUN TIME CLOCK RESOLUTION only affect runtime measurements
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
+    if (node.findDirectTokenByText("CLOCK")) {
+      const resolution = node.findDirectTokenByText("LOW") ? "LOW" : "HIGH";
+      return new Chunk().append(`abap.statements.setRunTimeClock("${resolution}");`, node, traversal);
+    }
+    // SET RUN TIME ANALYZER ON | OFF only switches the runtime analysis
     return new Chunk(``);
   }
 
