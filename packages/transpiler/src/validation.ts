@@ -1,4 +1,4 @@
-import {Issue, IRegistry, Config, IConfig, Version} from "@abaplint/core";
+import {Issue, IRegistry, Config, IConfig, Version, ABAPObject, SyntaxLogic, BasicTypes, Statements, ISpaghettiScope} from "@abaplint/core";
 import {ITranspilerOptions, UnknownTypesEnum} from "./types";
 
 const defaultAllowedObjectTypes = [
@@ -159,7 +159,35 @@ export class Validation {
     const conf = new Config(JSON.stringify(config));
     reg.setConfig(conf);
     const issues = reg.findIssues();
-    return issues;
+    const scopes = new Map<ABAPObject, ISpaghettiScope>();
+    return issues.filter(i => i.getKey() !== "ambiguous_statement" || !Validation.deleteOfInternalTable(reg, i, scopes));
   }
+
+  /** DELETE itab. and DELETE itab FROM n. in a program read like DELETE dbtab, so abaplint calls them ambiguous;
+   * the parser takes them as DELETE of an internal table, and when itab is a variable of table type that is right */
+  private static deleteOfInternalTable(reg: IRegistry, issue: Issue, scopes: Map<ABAPObject, ISpaghettiScope>): boolean {
+    const file = reg.getFileByName(issue.getFilename());
+    const obj = file ? reg.findObjectForFile(file) : undefined;
+    if (!(obj instanceof ABAPObject)) {
+      return false;
+    }
+    const statement = obj.getABAPFileByName(issue.getFilename())?.getStatements()
+      .find(s => s.getStart().equals(issue.getStart()));
+    if (!(statement?.get() instanceof Statements.DeleteInternal)) {
+      return false;
+    }
+    const token = statement.getTokens()[1];
+    if (token === undefined) {
+      return false;
+    }
+    let spaghetti = scopes.get(obj);
+    if (spaghetti === undefined) {
+      spaghetti = new SyntaxLogic(reg, obj).run().spaghetti;
+      scopes.set(obj, spaghetti);
+    }
+    const type = spaghetti.lookupPosition(token.getStart(), issue.getFilename())?.findVariable(token.getStr())?.getType();
+    return type instanceof BasicTypes.TableType;
+  }
+
 
 }
