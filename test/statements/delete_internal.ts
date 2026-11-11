@@ -786,4 +786,29 @@ ENDCLASS.`;
     // just test its valid syntax
   });
 
+  it("DELETE ranges and ADJACENT DUPLICATES set sy-subrc", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DO 5 TIMES.
+  APPEND sy-index TO tab.
+ENDDO.
+DELETE tab FROM 4 TO 2.
+WRITE / sy-subrc.
+DELETE tab FROM 9 TO 10.
+WRITE / sy-subrc.
+DELETE tab FROM 4 TO 99.
+WRITE / sy-subrc.
+WRITE / lines( tab ).
+DELETE ADJACENT DUPLICATES FROM tab.
+WRITE / sy-subrc.
+APPEND 3 TO tab.
+DELETE ADJACENT DUPLICATES FROM tab.
+WRITE / sy-subrc.
+WRITE / lines( tab ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n4\n0\n3\n4\n0\n3");
+  });
+
 });
