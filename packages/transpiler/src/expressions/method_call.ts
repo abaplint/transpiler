@@ -1,20 +1,14 @@
-import {Nodes, Expressions, Visibility, ScopeType, Types} from "@abaplint/core";
+import {Nodes, Expressions, Visibility, ScopeType} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {MethodCallParamTranspiler} from "./method_call_param";
 import {Chunk} from "../chunk";
 
 export class MethodCallTranspiler implements IExpressionTranspiler {
-  private readonly postName: string;
-  private readonly method: {def: Types.MethodDefinition, name: string} | undefined;
   private readonly discardResult: boolean;
 
-  /** @param postName      inserted between the method name and the parameters, eg. ".bind(this)"
-   *  @param method        the already resolved method reference, saves looking it up again
-   *  @param discardResult the RETURNING value of this call is not consumed */
-  public constructor(postName = "", method?: {def: Types.MethodDefinition, name: string}, discardResult = false) {
-    this.postName = postName;
-    this.method = method;
+  /** @param discardResult the RETURNING value of this call is not consumed */
+  public constructor(discardResult = false) {
     this.discardResult = discardResult;
   }
 
@@ -28,7 +22,7 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
     }
 
     const scope = traversal.findCurrentScopeByToken(nameToken);
-    const m = this.method ?? traversal.findMethodReference(nameToken, scope);
+    const m = traversal.findMethodReference(nameToken, scope);
 
     let name = nameToken.getStr().toLowerCase();
     const isBuiltin = traversal.isBuiltinMethod(nameToken);
@@ -54,11 +48,11 @@ export class MethodCallTranspiler implements IExpressionTranspiler {
           name = `FRIENDS_ACCESS_INSTANCE["${name}"]`;
         }
       }
-      name = name + this.postName + "(";
+      name = name + "(";
     } else {
       // todo: this should never happen?
       name = Traversal.escapeNamespace(name.replace("~", "$"))!;
-      name = name + this.postName + "(";
+      name = name + "(";
     }
 
 

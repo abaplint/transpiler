@@ -188,10 +188,11 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
   public static readonly CONSTRUCTING_END = "} finally {\nthis.CONSTRUCTING = CONSTRUCTING_PREVIOUS;\n}\n";
 
   /** A redefinition runs the superclass implementation while the object is under construction
-   * and the class being constructed is neither this class nor one of its subclasses. If the
-   * superclass method is abstract, there is nothing to delegate to, and the redefinition runs */
+   * and the class being constructed is neither this class nor one of its subclasses. If the method
+   * is abstract in the class being constructed, ABAP ends in the runtime error
+   * CALL_METHOD_NOT_IMPLEMENTED, and here the call of the missing superclass method fails */
   private buildRedefinitionGuard(clas: string, methodName: string, input: string): string {
-    return `if (this.CONSTRUCTING !== undefined && this.CONSTRUCTING !== ${clas} && !(this.CONSTRUCTING.prototype instanceof ${clas}) && super.${methodName} !== undefined) {
+    return `if (this.CONSTRUCTING !== undefined && this.CONSTRUCTING !== ${clas} && !(this.CONSTRUCTING.prototype instanceof ${clas})) {
 return super.${methodName}(${input});
 }`;
   }

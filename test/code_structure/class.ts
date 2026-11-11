@@ -3509,8 +3509,106 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("AB");
   });
 
+  it("super redefinition, call from another object while the constructor runs", async () => {
+    const code = `
+CLASS lcl_a DEFINITION DEFERRED.
+
+CLASS lcl_helper DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS call IMPORTING io_a TYPE REF TO lcl_a RETURNING VALUE(rv_name) TYPE string.
+ENDCLASS.
+
+CLASS lcl_a DEFINITION.
+  PUBLIC SECTION.
+    DATA mv_log TYPE string.
+    METHODS constructor.
+    METHODS hook RETURNING VALUE(rv_name) TYPE string.
+ENDCLASS.
+
+CLASS lcl_b DEFINITION INHERITING FROM lcl_a.
+  PUBLIC SECTION.
+    METHODS hook REDEFINITION.
+ENDCLASS.
+
+CLASS lcl_helper IMPLEMENTATION.
+  METHOD call.
+    rv_name = io_a->hook( ).
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_a IMPLEMENTATION.
+  METHOD constructor.
+    mv_log = lcl_helper=>call( me ).
+  ENDMETHOD.
+  METHOD hook.
+    rv_name = 'A'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_b IMPLEMENTATION.
+  METHOD hook.
+    rv_name = 'B'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA instance TYPE REF TO lcl_b.
+  CREATE OBJECT instance.
+  instance->mv_log = instance->mv_log && lcl_helper=>call( instance ).
+  WRITE instance->mv_log.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("AB");
+  });
+
+  it("super redefinition, nested dynamic call from constructor", async () => {
+    const code = `
+CLASS lcl_a DEFINITION.
+  PUBLIC SECTION.
+    DATA mv_log TYPE string.
+    METHODS constructor.
+    METHODS log_hook.
+    METHODS hook.
+ENDCLASS.
+
+CLASS lcl_b DEFINITION INHERITING FROM lcl_a.
+  PUBLIC SECTION.
+    METHODS hook REDEFINITION.
+ENDCLASS.
+
+CLASS lcl_a IMPLEMENTATION.
+  METHOD constructor.
+    log_hook( ).
+  ENDMETHOD.
+  METHOD log_hook.
+    CALL METHOD me->('HOOK').
+  ENDMETHOD.
+  METHOD hook.
+    mv_log = mv_log && 'A'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_b IMPLEMENTATION.
+  METHOD hook.
+    mv_log = mv_log && 'B'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA instance TYPE REF TO lcl_b.
+  CREATE OBJECT instance.
+  instance->log_hook( ).
+  WRITE instance->mv_log.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("AB");
+  });
+
   it("constructor calling builtin methods", async () => {
-    // builtins are not dispatched via the instance, so they must not get the constructor prototype prefix
     const code = `
 CLASS lcl_foo DEFINITION.
   PUBLIC SECTION.
@@ -3535,7 +3633,6 @@ START-OF-SELECTION.
   foo = NEW lcl_foo( ).`;
 
     const js = await run(code);
-    expect(js).to.not.include("prototype.abap.builtin");
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("4\n1\nbar\nexists");
