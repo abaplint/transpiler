@@ -3709,6 +3709,69 @@ START-OF-SELECTION.
   });
 
   it("super redefinition, method abstract in the class under construction", async () => {
+    // on SAP: CX_SY_DYN_CALL_ILLEGAL_METHOD, "An attempt was made in class LCL_A to call
+    // non-implemented method HOOK", runtime error CALL_METHOD_NOT_IMPLEMENTED if not caught
+    const code = `
+CLASS cx_root DEFINITION ABSTRACT PUBLIC.
+ENDCLASS.
+CLASS cx_root IMPLEMENTATION.
+ENDCLASS.
+
+CLASS cx_sy_dyn_call_illegal_method DEFINITION PUBLIC INHERITING FROM cx_root.
+  PUBLIC SECTION.
+    DATA classname TYPE string.
+    DATA methodname TYPE string.
+    METHODS constructor IMPORTING classname TYPE string OPTIONAL methodname TYPE string OPTIONAL.
+ENDCLASS.
+CLASS cx_sy_dyn_call_illegal_method IMPLEMENTATION.
+  METHOD constructor.
+    super->constructor( ).
+    me->classname = classname.
+    me->methodname = methodname.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_a DEFINITION ABSTRACT.
+  PUBLIC SECTION.
+    METHODS constructor.
+    METHODS hook ABSTRACT.
+ENDCLASS.
+
+CLASS lcl_b DEFINITION INHERITING FROM lcl_a.
+  PUBLIC SECTION.
+    METHODS hook REDEFINITION.
+ENDCLASS.
+
+CLASS lcl_a IMPLEMENTATION.
+  METHOD constructor.
+    hook( ).
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_b IMPLEMENTATION.
+  METHOD hook.
+    WRITE 'B'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA instance TYPE REF TO lcl_b.
+  DATA lx TYPE REF TO cx_sy_dyn_call_illegal_method.
+  TRY.
+      CREATE OBJECT instance.
+      WRITE 'no exception'.
+    CATCH cx_sy_dyn_call_illegal_method INTO lx.
+      WRITE lx->classname.
+      WRITE lx->methodname.
+  ENDTRY.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("LCL_AHOOK");
+  });
+
+  it("super redefinition, method abstract in the class under construction, without the exception class", async () => {
     const code = `
 CLASS lcl_a DEFINITION ABSTRACT.
   PUBLIC SECTION.
@@ -3745,8 +3808,65 @@ START-OF-SELECTION.
     } catch (e: any) {
       message = e.message;
     }
-    expect(message).to.equal("CALL_METHOD_NOT_IMPLEMENTED");
+    expect(message).to.equal("CX_SY_DYN_CALL_ILLEGAL_METHOD not found, LCL_A->HOOK is not implemented");
     expect(abap.console.get()).to.equal("");
+  });
+
+  it("super redefinition, constructor ends with an exception", async () => {
+    // the object stays reachable via gr_last, it must no longer count as under construction
+    const code = `
+CLASS cx_root DEFINITION ABSTRACT PUBLIC.
+ENDCLASS.
+CLASS cx_root IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lcx_stop DEFINITION INHERITING FROM cx_root.
+ENDCLASS.
+CLASS lcx_stop IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lcl_a DEFINITION.
+  PUBLIC SECTION.
+    CLASS-DATA gr_last TYPE REF TO lcl_a.
+    METHODS constructor RAISING lcx_stop.
+    METHODS hook.
+ENDCLASS.
+
+CLASS lcl_b DEFINITION INHERITING FROM lcl_a.
+  PUBLIC SECTION.
+    METHODS hook REDEFINITION.
+ENDCLASS.
+
+CLASS lcl_a IMPLEMENTATION.
+  METHOD constructor.
+    gr_last = me.
+    hook( ).
+    RAISE EXCEPTION TYPE lcx_stop.
+  ENDMETHOD.
+  METHOD hook.
+    WRITE 'A'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_b IMPLEMENTATION.
+  METHOD hook.
+    WRITE 'B'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA instance TYPE REF TO lcl_b.
+  TRY.
+      CREATE OBJECT instance.
+    CATCH lcx_stop.
+      WRITE '-'.
+  ENDTRY.
+  lcl_a=>gr_last->hook( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("A-B");
   });
 
   it("super redefinition, variable named like the class in the redefinition", async () => {

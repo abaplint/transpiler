@@ -141,14 +141,9 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
   private buildNotImplementedMethod(emitted: string, m: abaplint.IMethodDefinition, className: string,
                                     interfaceName: string, token: abaplint.Token, traversal: Traversal): string {
     const unique = m.getParameters().getAll().length > 0 ? "INPUT" : "";
-    const exception = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_METHOD'", token, true);
     const classUpper = className.toUpperCase();
     const methodUpper = interfaceName.toUpperCase() + "~" + m.getName().toUpperCase();
-    const notFound = `CX_SY_DYN_CALL_ILLEGAL_METHOD not found, ${classUpper}->${methodUpper} is not implemented`;
-    const body = `if (${exception} === undefined) { throw new Error("${notFound}"); }\n` +
-      `throw await new ${exception}().constructor_({` +
-      `classname: new abap.types.String().set("${classUpper}"), ` +
-      `methodname: new abap.types.String().set("${methodUpper}")});\n`;
+    const body = traversal.buildRaiseIllegalMethod(`"${classUpper}"`, methodUpper, token);
 
     let ret = "";
     if (m.isStatic() === true) {

@@ -3628,4 +3628,72 @@ ENDCLASS.`;
     expect(cons).to.include("Set");
   });
 
+
+  it("test-75", async () => {
+// redefinition of a namespaced interface method that the superclass implements under its alias,
+// called from the superclass constructor: the superclass implementation runs
+    const intf = `INTERFACE /foo/if_hook PUBLIC.
+  METHODS hook.
+ENDINTERFACE.`;
+
+    const clas = `CLASS zcl_ns_hook DEFINITION PUBLIC.
+ENDCLASS.
+CLASS zcl_ns_hook IMPLEMENTATION.
+ENDCLASS.`;
+
+    const tests = `
+CLASS lcl_a DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES /foo/if_hook.
+    ALIASES hook FOR /foo/if_hook~hook.
+    DATA mv_log TYPE string.
+    METHODS constructor.
+    METHODS log_hook.
+ENDCLASS.
+
+CLASS lcl_b DEFINITION INHERITING FROM lcl_a.
+  PUBLIC SECTION.
+    METHODS /foo/if_hook~hook REDEFINITION.
+ENDCLASS.
+
+CLASS lcl_a IMPLEMENTATION.
+  METHOD constructor.
+    log_hook( ).
+  ENDMETHOD.
+  METHOD log_hook.
+    hook( ).
+  ENDMETHOD.
+  METHOD hook.
+    mv_log = mv_log && 'A'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_b IMPLEMENTATION.
+  METHOD /foo/if_hook~hook.
+    mv_log = mv_log && 'B'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+  PRIVATE SECTION.
+    METHODS test01 FOR TESTING.
+ENDCLASS.
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD test01.
+    DATA instance TYPE REF TO lcl_b.
+    CREATE OBJECT instance.
+    instance->log_hook( ).
+    WRITE / instance->mv_log.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const files = [
+      {filename: "#foo#if_hook.intf.abap", contents: intf},
+      {filename: "zcl_ns_hook.clas.abap", contents: clas},
+      {filename: "zcl_ns_hook.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons).to.include("AB");
+    expect(cons).to.not.include("CX_SY_DYN_CALL_ILLEGAL_METHOD");
+  });
 });

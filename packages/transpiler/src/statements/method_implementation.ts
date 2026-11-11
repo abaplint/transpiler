@@ -194,8 +194,8 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
   /** A redefinition runs the superclass implementation while the object is under construction
    * and the class being constructed is neither this class nor one of its subclasses. A superclass
    * can implement an interface method under an alias name, so those names are tried as well. If the
-   * method is abstract in the class being constructed, ABAP ends in the runtime error
-   * CALL_METHOD_NOT_IMPLEMENTED */
+   * method is abstract in the class being constructed, ABAP raises CX_SY_DYN_CALL_ILLEGAL_METHOD,
+   * which ends in the runtime error CALL_METHOD_NOT_IMPLEMENTED when it is not caught */
   private buildRedefinitionGuard(cdef: abaplint.IClassDefinition, methodName: string, input: string,
                                  traversal: Traversal, scope: abaplint.ISpaghettiScopeNode, token: abaplint.Token): string {
     const names = [methodName];
@@ -205,7 +205,8 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
         const superDef = traversal.findClassDefinition(superClassName, scope);
         for (const a of superDef?.getAliases() || []) {
           const name = Traversal.escapeNamespace(a.getName().toLowerCase())!;
-          if (a.getComponent().replace("~", "$").toLowerCase() === methodName && names.includes(name) === false) {
+          const component = Traversal.escapeNamespace(a.getComponent().replace("~", "$").toLowerCase());
+          if (component === methodName && names.includes(name) === false) {
             names.push(name);
           }
         }
@@ -217,8 +218,7 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
     return `if (this.CONSTRUCTING !== undefined && this.CONSTRUCTING !== ${clas} && !(this.CONSTRUCTING.prototype instanceof ${clas})) {
 const SUPER_METHOD = ${names.map(n => "super." + n).join(" ?? ")};
 if (SUPER_METHOD === undefined) {
-throw new Error("CALL_METHOD_NOT_IMPLEMENTED");
-}
+${traversal.buildRaiseIllegalMethod("this.CONSTRUCTING.INTERNAL_NAME.split(\"-\").pop()", token.getStr().toUpperCase(), token)}}
 return SUPER_METHOD.call(this${input === "" ? "" : ", " + input});
 }`;
   }

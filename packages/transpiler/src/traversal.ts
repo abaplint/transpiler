@@ -1197,6 +1197,17 @@ this.CONSTRUCTING = undefined;\n`;
     return name.toUpperCase();
   }
 
+  /** raises CX_SY_DYN_CALL_ILLEGAL_METHOD, as ABAP does when a method without implementation is called,
+   * the class and the method named. classNameJs is a JavaScript expression giving the class name */
+  public buildRaiseIllegalMethod(classNameJs: string, methodUpper: string, token: abaplint.Token): string {
+    const exception = this.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_METHOD'", token, true);
+    const notFound = `"CX_SY_DYN_CALL_ILLEGAL_METHOD not found, " + ${classNameJs} + "->${methodUpper} is not implemented"`;
+    return `if (${exception} === undefined) { throw new Error(${notFound}); }\n` +
+      `throw await new ${exception}().constructor_({` +
+      `classname: new abap.types.String().set(${classNameJs}), ` +
+      `methodname: new abap.types.String().set("${methodUpper}")});\n`;
+  }
+
   public lookupClassOrInterface(name: string | undefined, token: abaplint.Token | undefined, directGlobal = false): string {
     if (name === undefined || token === undefined) {
       return "abap.Classes['undefined']";
