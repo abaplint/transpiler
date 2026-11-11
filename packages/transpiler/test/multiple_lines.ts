@@ -40,6 +40,15 @@ describe("Multiple lines", () => {
     expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("EXEC SQL, not supported, transpiler");`);
   });
 
+  it("CHAIN, runtime error", async () => {
+    const abap = `
+    CHAIN.
+      FIELD foo MODULE check_foo.
+    ENDCHAIN.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("CHAIN, not supported, transpiler");`);
+  });
+
   it("AMDP method with native SQL, runtime error", async () => {
     const abap = `
 CLASS lcl DEFINITION.
