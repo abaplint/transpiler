@@ -392,4 +392,43 @@ WRITE / len.`;
     expect(abap.console.get()).to.equal("10\n5\n8\n4\n8");
   });
 
+  it("DESCRIBE FIELD LENGTH IN BYTE MODE, structures with deep components and decfloat34", async () => {
+    const code = `
+TYPES: BEGIN OF ty_str,
+         c TYPE c LENGTH 1,
+         s TYPE string,
+       END OF ty_str.
+TYPES: BEGIN OF ty_ref,
+         c TYPE c LENGTH 1,
+         r TYPE REF TO i,
+         d TYPE c LENGTH 1,
+       END OF ty_ref.
+TYPES: BEGIN OF ty_tab,
+         c TYPE c LENGTH 1,
+         t TYPE STANDARD TABLE OF i WITH DEFAULT KEY,
+         d TYPE c LENGTH 1,
+       END OF ty_tab.
+TYPES: BEGIN OF ty_dec,
+         x TYPE x LENGTH 1,
+         d TYPE decfloat34,
+       END OF ty_dec.
+DATA str TYPE ty_str.
+DATA ref TYPE ty_ref.
+DATA tab TYPE ty_tab.
+DATA dec TYPE ty_dec.
+DATA len TYPE i.
+DESCRIBE FIELD str LENGTH len IN BYTE MODE.
+WRITE / len.
+DESCRIBE FIELD ref LENGTH len IN BYTE MODE.
+WRITE / len.
+DESCRIBE FIELD tab LENGTH len IN BYTE MODE.
+WRITE / len.
+DESCRIBE FIELD dec LENGTH len IN BYTE MODE.
+WRITE / len.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("12\n16\n24\n32");
+  });
+
 });

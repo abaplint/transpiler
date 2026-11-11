@@ -33,7 +33,8 @@ function isDeep(structure: Structure): boolean {
 }
 
 /** the length in bytes of a field and its alignment, as in a Unicode system: a character takes 2 bytes; strings,
- *  tables and references are 8-byte references; a structure is its components with alignment gaps */
+ *  tables and references are 8 bytes (a table aligned to 8, strings and references to 4); a structure is its components
+ *  with alignment gaps */
 function byteLength(field: any): {length: number, align: number} {
   if (field instanceof Character || field instanceof Numc) {
     return {length: field.getLength() * 2, align: 2};
@@ -46,7 +47,7 @@ function byteLength(field: any): {length: number, align: number} {
   } else if (field instanceof Integer8 || field instanceof Float || field instanceof UTCLong) {
     return {length: 8, align: 8};
   } else if (field instanceof DecFloat34) {
-    return {length: 16, align: 8};
+    return {length: 16, align: 16};
   } else if (field instanceof Packed || field instanceof Hex || field instanceof HexUInt8) {
     return {length: field.getLength(), align: 1};
   } else if (field instanceof Structure) {
@@ -63,9 +64,11 @@ function byteLength(field: any): {length: number, align: number} {
       align = Math.max(align, c.align);
     }
     return {length: Math.ceil(length / align) * align, align};
+  } else if (field instanceof Table || field instanceof HashedTable) {
+    return {length: 8, align: 8};
   }
-  // strings, tables and references: the field holds a reference
-  return {length: 8, align: 8};
+  // strings and references: the field holds a reference, aligned like an integer
+  return {length: 8, align: 4};
 }
 
 export function describe(input: IDescribeOptions) {
