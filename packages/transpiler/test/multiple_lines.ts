@@ -720,6 +720,13 @@ abap.Forms['PROG-ZFOOBAR-FOO'] = foo;`;
       unknownTypes: UnknownTypesEnum.runtimeError})).to.equals(expected);
   });
 
+  it("VALUE # whose type cannot be inferred, runtime error with unknownTypes", async () => {
+    const abap = `
+    INSERT demo_expressions FROM @( VALUE #( id = 'F' ) ).`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true, skipVersionCheck: true, unknownTypes: UnknownTypesEnum.runtimeError})).to.include(`throw new Error("Unknown type: TypeNameOrInfer, type not found: #`);
+  });
+
   it("Upper case method impl name, should transpile to lower", async () => {
     const abap = `
 CLASS lcl_bar DEFINITION.
