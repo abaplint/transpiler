@@ -1,7 +1,7 @@
 import {searchWithKeyPromise} from "../statements/read_table";
 import {throwError} from "../throw_error";
 import {HashedTable, Integer, Table} from "../types";
-import {secondaryKeyName} from "../types/table";
+import {secondaryKeyName, TableAccessType} from "../types/table";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
@@ -34,6 +34,10 @@ export async function tableExpression(source: Table | HashedTable, options: ITab
 
   if (found === undefined) {
     throwError("CX_SY_ITAB_LINE_NOT_FOUND");
+  }
+  if (key !== undefined && source.getKeyByName(key)?.type === TableAccessType.hashed) {
+    // a hashed key has no row numbers: line_index gives -1 for a row found through it
+    foundIndex = -1;
   }
 
   return found;

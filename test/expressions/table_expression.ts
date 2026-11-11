@@ -257,4 +257,17 @@ WRITE / tab[ KEY primary_key INDEX 1 ]-id.`;
     await f(abap);
     expect(abap.console.get()).to.equal("1\n3\n2\n1");
   });
+
+  it("line_index through a hashed secondary key", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH EMPTY KEY WITH UNIQUE HASHED KEY h COMPONENTS table_line.
+DATA lv_line TYPE string.
+tab = VALUE #( ( 7 ) ( 8 ) ( 9 ) ).
+lv_line = |{ line_index( tab[ KEY h table_line = 8 ] ) } { line_index( tab[ KEY h table_line = 5 ] ) }|.
+WRITE lv_line.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("-1 0");
+  });
 });
