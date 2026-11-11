@@ -160,8 +160,50 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
 
     UniqueIdentifier.resetIndexBackup();
 
-    const str = staticMethod + "async " + isPrivate + Traversal.escapeNamespace(methodName) + "(" + unique + ") {" + after;
+    let guard = "";
+    if (methodName === "constructor_" && classDef !== undefined && MethodImplementationTranspiler.tracksConstruction(classDef)) {
+      guard = "\n" + MethodImplementationTranspiler.CONSTRUCTING_START
+        + traversal.lookupClassOrInterface(classDef.getName(), token) + ";\ntry {";
+    } else if (classDef !== undefined && this.isRedefinition(token.getStr(), classDef)) {
+      guard = "\n" + this.buildRedefinitionGuard(
+        traversal.lookupClassOrInterface(classDef.getName(), token),
+        Traversal.escapeNamespace(methodName)!,
+        unique);
+    }
+
+    const str = staticMethod + "async " + isPrivate + Traversal.escapeNamespace(methodName) + "(" + unique + ") {" + guard + after;
     return new Chunk().append(str, node, traversal);
+  }
+
+  /** While a superclass constructor runs, ABAP treats the object as an instance of that superclass:
+   * redefinitions in its subclasses are not called, also not from methods the constructor calls.
+   * Each constructor records the class it belongs to in the instance while it runs, and restores
+   * the previous value at the end, see EndMethodTranspiler. A FINAL class has no subclasses, so
+   * there are no redefinitions to skip while its constructor runs */
+  public static tracksConstruction(cdef: abaplint.IClassDefinition | undefined): boolean {
+    return cdef !== undefined && cdef.isFinal() === false;
+  }
+
+  private static readonly CONSTRUCTING_START = "const CONSTRUCTING_PREVIOUS = this.CONSTRUCTING;\nthis.CONSTRUCTING = ";
+  public static readonly CONSTRUCTING_END = "} finally {\nthis.CONSTRUCTING = CONSTRUCTING_PREVIOUS;\n}\n";
+
+  /** A redefinition runs the superclass implementation while the object is under construction
+   * and the class being constructed is neither this class nor one of its subclasses. If the
+   * superclass method is abstract, there is nothing to delegate to, and the redefinition runs */
+  private buildRedefinitionGuard(clas: string, methodName: string, input: string): string {
+    return `if (this.CONSTRUCTING !== undefined && this.CONSTRUCTING !== ${clas} && !(this.CONSTRUCTING.prototype instanceof ${clas}) && super.${methodName} !== undefined) {
+return super.${methodName}(${input});
+}`;
+  }
+
+  private isRedefinition(name: string, cdef: abaplint.IClassDefinition): boolean {
+    const upper = name.toUpperCase();
+    for (const m of cdef.getMethodDefinitions().getAll()) {
+      if (m.getName().toUpperCase() === upper && m.isRedefinition()) {
+        return true;
+      }
+    }
+    return false;
   }
 
 /////////////////////////////

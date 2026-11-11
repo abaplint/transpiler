@@ -327,9 +327,15 @@ abap.Classes['PROG-ZFOOBAR-ZCL_WORDS'] = zcl_words;`;
     this.bar = new abap.types.Integer({qualifiedName: "I"});
   }
   async constructor_(INPUT) {
-    this.bar.set(abap.IntegerFactory.get(2));
-    abap.statements.write(this.bar);
-    return this;
+    const CONSTRUCTING_PREVIOUS = this.CONSTRUCTING;
+    this.CONSTRUCTING = abap.Classes['PROG-ZFOOBAR-ZCL_WORDS'];
+    try {
+      this.bar.set(abap.IntegerFactory.get(2));
+      abap.statements.write(this.bar);
+      return this;
+    } finally {
+      this.CONSTRUCTING = CONSTRUCTING_PREVIOUS;
+    }
   }
 }
 abap.Classes['PROG-ZFOOBAR-ZCL_WORDS'] = zcl_words;`;

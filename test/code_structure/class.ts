@@ -3335,6 +3335,180 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("SUPER");
   });
 
+  it("super redefinition, nested call from constructor", async () => {
+    const code = `
+CLASS lcl_a DEFINITION.
+  PUBLIC SECTION.
+    DATA mv_log TYPE string.
+    METHODS constructor.
+    METHODS run.
+  PROTECTED SECTION.
+    METHODS m1.
+    METHODS m2 IMPORTING iv_text TYPE string RETURNING VALUE(rv_text) TYPE string.
+ENDCLASS.
+
+CLASS lcl_b DEFINITION INHERITING FROM lcl_a.
+  PROTECTED SECTION.
+    METHODS m1 REDEFINITION.
+    METHODS m2 REDEFINITION.
+ENDCLASS.
+
+CLASS lcl_a IMPLEMENTATION.
+  METHOD constructor.
+    m1( ).
+  ENDMETHOD.
+  METHOD run.
+    m1( ).
+  ENDMETHOD.
+  METHOD m1.
+    mv_log = mv_log && |A-m1 |.
+    mv_log = mv_log && m2( |x| ).
+  ENDMETHOD.
+  METHOD m2.
+    rv_text = |A-m2-{ iv_text }|.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_b IMPLEMENTATION.
+  METHOD m1.
+    mv_log = mv_log && |B-m1 |.
+    mv_log = mv_log && m2( |y| ).
+  ENDMETHOD.
+  METHOD m2.
+    rv_text = |B-m2-{ iv_text }|.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA instance TYPE REF TO lcl_b.
+  CREATE OBJECT instance.
+  WRITE / instance->mv_log.
+  CLEAR instance->mv_log.
+  instance->run( ).
+  WRITE / instance->mv_log.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("A-m1 A-m2-x\nB-m1 B-m2-y");
+  });
+
+  it("super redefinition, nested calls from constructors on three levels", async () => {
+    const code = `
+CLASS lcl_a DEFINITION.
+  PUBLIC SECTION.
+    DATA mv_log TYPE string.
+    METHODS constructor.
+    METHODS log_hook.
+  PROTECTED SECTION.
+    METHODS hook RETURNING VALUE(rv_name) TYPE string.
+ENDCLASS.
+
+CLASS lcl_b DEFINITION INHERITING FROM lcl_a.
+  PUBLIC SECTION.
+    METHODS constructor.
+  PROTECTED SECTION.
+    METHODS hook REDEFINITION.
+ENDCLASS.
+
+CLASS lcl_c DEFINITION INHERITING FROM lcl_b.
+  PROTECTED SECTION.
+    METHODS hook REDEFINITION.
+ENDCLASS.
+
+CLASS lcl_a IMPLEMENTATION.
+  METHOD constructor.
+    log_hook( ).
+    IF mv_log IS NOT INITIAL.
+      RETURN.
+    ENDIF.
+    mv_log = 'not reached'.
+  ENDMETHOD.
+  METHOD log_hook.
+    mv_log = mv_log && hook( ).
+  ENDMETHOD.
+  METHOD hook.
+    rv_name = 'A'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_b IMPLEMENTATION.
+  METHOD constructor.
+    super->constructor( ).
+    log_hook( ).
+  ENDMETHOD.
+  METHOD hook.
+    rv_name = 'B'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_c IMPLEMENTATION.
+  METHOD hook.
+    rv_name = 'C'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA instance TYPE REF TO lcl_c.
+  CREATE OBJECT instance.
+  instance->log_hook( ).
+  WRITE instance->mv_log.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ABC");
+  });
+
+  it("super redefinition, nested call of interface method from constructor", async () => {
+    const code = `
+INTERFACE lif_hook.
+  METHODS hook RETURNING VALUE(rv_name) TYPE string.
+ENDINTERFACE.
+
+CLASS lcl_a DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif_hook.
+    DATA mv_log TYPE string.
+    METHODS constructor.
+    METHODS log_hook.
+ENDCLASS.
+
+CLASS lcl_b DEFINITION INHERITING FROM lcl_a.
+  PUBLIC SECTION.
+    METHODS lif_hook~hook REDEFINITION.
+ENDCLASS.
+
+CLASS lcl_a IMPLEMENTATION.
+  METHOD constructor.
+    log_hook( ).
+  ENDMETHOD.
+  METHOD log_hook.
+    mv_log = mv_log && lif_hook~hook( ).
+  ENDMETHOD.
+  METHOD lif_hook~hook.
+    rv_name = 'A'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_b IMPLEMENTATION.
+  METHOD lif_hook~hook.
+    rv_name = 'B'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA instance TYPE REF TO lcl_b.
+  CREATE OBJECT instance.
+  instance->log_hook( ).
+  WRITE instance->mv_log.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("AB");
+  });
+
   it("constructor calling builtin methods", async () => {
     // builtins are not dispatched via the instance, so they must not get the constructor prototype prefix
     const code = `
