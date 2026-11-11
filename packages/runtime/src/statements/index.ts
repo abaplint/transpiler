@@ -171,6 +171,11 @@ export class Statements {
     return readReport(name, options, this.context);
   }
 
+  /** NEW-LINE, the next output starts a new line */
+  public newLine() {
+    this.context.newLinePending = true;
+  }
+
   public write(source: INumeric | ICharacter | FieldSymbol | string | number, options?: IWriteOptions) {
     return new WriteStatement(this.context).write(source, options);
   }
