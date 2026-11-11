@@ -685,6 +685,15 @@ try {
       unknownTypes: UnknownTypesEnum.runtimeError})).to.equals(expected);
   });
 
+  it("TEST-INJECTION, runtime error", async () => {
+    const abap = `
+    TEST-INJECTION read_value.
+      lv_value = 3.
+    END-TEST-INJECTION.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("TEST-INJECTION, not supported, transpiler");`);
+  });
+
   it("NEW unknown class, runtime error", async () => {
     const abap = `
 FORM foo.
