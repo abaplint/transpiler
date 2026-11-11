@@ -3,6 +3,7 @@ import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 
+
 export class TryTranspiler implements IStructureTranspiler {
 
   public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): Chunk {
