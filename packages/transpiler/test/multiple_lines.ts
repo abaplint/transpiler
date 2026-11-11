@@ -701,6 +701,13 @@ abap.Forms['PROG-ZFOOBAR-FOO'] = foo;`;
       unknownTypes: UnknownTypesEnum.runtimeError})).to.equals(expected);
   });
 
+  it("SET LOCKS, runtime error", async () => {
+    const abap = `
+    SET LOCKS OF zi_foo ENTITY ent FROM lt_keys FAILED ls_failed REPORTED ls_reported.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true, skipVersionCheck: true})).to.equal(`throw new Error("SET LOCKS, not supported, transpiler");`);
+  });
+
   it("Upper case method impl name, should transpile to lower", async () => {
     const abap = `
 CLASS lcl_bar DEFINITION.
