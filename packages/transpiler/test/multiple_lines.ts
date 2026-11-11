@@ -685,6 +685,21 @@ try {
       unknownTypes: UnknownTypesEnum.runtimeError})).to.equals(expected);
   });
 
+  it("SET HANDLER of a handler that is not known, runtime error", async () => {
+    const abap = `
+    SET HANDLER lcl_not_there=>on_event FOR ALL INSTANCES.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("SET HANDLER, on_event is not a known event handler, transpiler");`);
+  });
+
+  it("REF # for a parameter of a class that is not there, runtime error", async () => {
+    const abap = `
+    DATA lv_value TYPE i.
+    zcl_not_there=>run( ir_data = REF #( lv_value ) ).`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true, unknownTypes: UnknownTypesEnum.runtimeError})).to.include(`throw new Error("Void type: `);
+  });
+
   it("NEW unknown class, runtime error", async () => {
     const abap = `
 FORM foo.
