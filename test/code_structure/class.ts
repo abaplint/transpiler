@@ -3608,6 +3608,187 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("AB");
   });
 
+  it("super redefinition, interface method implemented under its alias in the superclass", async () => {
+    const code = `
+INTERFACE lif_hook.
+  METHODS hook.
+ENDINTERFACE.
+
+CLASS lcl_a DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif_hook.
+    ALIASES hook FOR lif_hook~hook.
+    DATA mv_log TYPE string.
+    METHODS constructor.
+    METHODS log_hook.
+ENDCLASS.
+
+CLASS lcl_b DEFINITION INHERITING FROM lcl_a.
+  PUBLIC SECTION.
+    METHODS lif_hook~hook REDEFINITION.
+ENDCLASS.
+
+CLASS lcl_a IMPLEMENTATION.
+  METHOD constructor.
+    log_hook( ).
+  ENDMETHOD.
+  METHOD log_hook.
+    hook( ).
+  ENDMETHOD.
+  METHOD hook.
+    mv_log = mv_log && 'A'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_b IMPLEMENTATION.
+  METHOD lif_hook~hook.
+    mv_log = mv_log && 'B'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA instance TYPE REF TO lcl_b.
+  CREATE OBJECT instance.
+  instance->log_hook( ).
+  WRITE instance->mv_log.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("AB");
+  });
+
+  it("super redefinition, interface method redefined under its alias", async () => {
+    const code = `
+INTERFACE lif_hook.
+  METHODS hook.
+ENDINTERFACE.
+
+CLASS lcl_a DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif_hook.
+    ALIASES hook FOR lif_hook~hook.
+    DATA mv_log TYPE string.
+    METHODS constructor.
+    METHODS log_hook.
+ENDCLASS.
+
+CLASS lcl_b DEFINITION INHERITING FROM lcl_a.
+  PUBLIC SECTION.
+    METHODS hook REDEFINITION.
+ENDCLASS.
+
+CLASS lcl_a IMPLEMENTATION.
+  METHOD constructor.
+    log_hook( ).
+  ENDMETHOD.
+  METHOD log_hook.
+    lif_hook~hook( ).
+  ENDMETHOD.
+  METHOD lif_hook~hook.
+    mv_log = mv_log && 'A'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_b IMPLEMENTATION.
+  METHOD hook.
+    mv_log = mv_log && 'B'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA instance TYPE REF TO lcl_b.
+  CREATE OBJECT instance.
+  instance->log_hook( ).
+  WRITE instance->mv_log.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("AB");
+  });
+
+  it("super redefinition, method abstract in the class under construction", async () => {
+    const code = `
+CLASS lcl_a DEFINITION ABSTRACT.
+  PUBLIC SECTION.
+    METHODS constructor.
+    METHODS hook ABSTRACT.
+ENDCLASS.
+
+CLASS lcl_b DEFINITION INHERITING FROM lcl_a.
+  PUBLIC SECTION.
+    METHODS hook REDEFINITION.
+ENDCLASS.
+
+CLASS lcl_a IMPLEMENTATION.
+  METHOD constructor.
+    hook( ).
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_b IMPLEMENTATION.
+  METHOD hook.
+    WRITE 'B'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA instance TYPE REF TO lcl_b.
+  CREATE OBJECT instance.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    let message = "";
+    try {
+      await f(abap);
+    } catch (e: any) {
+      message = e.message;
+    }
+    expect(message).to.equal("CALL_METHOD_NOT_IMPLEMENTED");
+    expect(abap.console.get()).to.equal("");
+  });
+
+  it("super redefinition, variable named like the class in the redefinition", async () => {
+    const code = `
+CLASS lcl_a DEFINITION.
+  PUBLIC SECTION.
+    METHODS constructor.
+    METHODS hook.
+ENDCLASS.
+
+CLASS lcl_b DEFINITION INHERITING FROM lcl_a.
+  PUBLIC SECTION.
+    METHODS hook REDEFINITION.
+ENDCLASS.
+
+CLASS lcl_a IMPLEMENTATION.
+  METHOD constructor.
+    hook( ).
+  ENDMETHOD.
+  METHOD hook.
+    WRITE 'A'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_b IMPLEMENTATION.
+  METHOD hook.
+    DATA lcl_b TYPE i.
+    WRITE 'B'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA instance TYPE REF TO lcl_b.
+  CREATE OBJECT instance.
+  instance->hook( ).`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("AB");
+  });
+
   it("constructor calling builtin methods", async () => {
     const code = `
 CLASS lcl_foo DEFINITION.

@@ -2,7 +2,6 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {MethodImplementationTranspiler} from "./method_implementation";
 
 export class EndMethodTranspiler implements IStatementTranspiler {
 
@@ -28,10 +27,6 @@ export class EndMethodTranspiler implements IStatementTranspiler {
     const data = scope.getIdentifier();
     if (data.stype === abaplint.ScopeType.Method && data.sname.toLowerCase() === "constructor") {
       returning += "return this;\n";
-      if (MethodImplementationTranspiler.tracksConstruction(traversal.getClassDefinition(token))) {
-        // closes the try block opened in MethodImplementationTranspiler
-        returning += MethodImplementationTranspiler.CONSTRUCTING_END;
-      }
     }
 
     return new Chunk().append(returning + "}", node, traversal);

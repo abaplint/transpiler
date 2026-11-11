@@ -161,14 +161,8 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
     UniqueIdentifier.resetIndexBackup();
 
     let guard = "";
-    if (methodName === "constructor_" && classDef !== undefined && MethodImplementationTranspiler.tracksConstruction(classDef)) {
-      guard = "\n" + MethodImplementationTranspiler.CONSTRUCTING_START
-        + traversal.lookupClassOrInterface(classDef.getName(), token) + ";\ntry {";
-    } else if (classDef !== undefined && this.isRedefinition(token.getStr(), classDef)) {
-      guard = "\n" + this.buildRedefinitionGuard(
-        traversal.lookupClassOrInterface(classDef.getName(), token),
-        Traversal.escapeNamespace(methodName)!,
-        unique);
+    if (classDef !== undefined && this.isRedefinition(token.getStr(), classDef)) {
+      guard = "\n" + this.buildRedefinitionGuard(classDef, Traversal.escapeNamespace(methodName)!, unique, traversal, scope, token);
     }
 
     const str = staticMethod + "async " + isPrivate + Traversal.escapeNamespace(methodName) + "(" + unique + ") {" + guard + after;
@@ -178,33 +172,59 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
   /** While a superclass constructor runs, ABAP treats the object as an instance of that superclass:
    * redefinitions in its subclasses are not called, also not from methods the constructor calls.
    * Each constructor records the class it belongs to in the instance while it runs, and restores
-   * the previous value at the end, see EndMethodTranspiler. A FINAL class has no subclasses, so
+   * the previous value at the end, see MethodTranspiler. A FINAL class has no subclasses, so
    * there are no redefinitions to skip while its constructor runs */
   public static tracksConstruction(cdef: abaplint.IClassDefinition | undefined): boolean {
     return cdef !== undefined && cdef.isFinal() === false;
   }
 
-  private static readonly CONSTRUCTING_START = "const CONSTRUCTING_PREVIOUS = this.CONSTRUCTING;\nthis.CONSTRUCTING = ";
+  public static buildConstructingStart(cdef: abaplint.IClassDefinition, traversal: Traversal, token: abaplint.Token): string {
+    return "const CONSTRUCTING_PREVIOUS = this.CONSTRUCTING;\nthis.CONSTRUCTING = "
+      + MethodImplementationTranspiler.ownClass(cdef, traversal, token) + ";\ntry {\n";
+  }
+
   public static readonly CONSTRUCTING_END = "} finally {\nthis.CONSTRUCTING = CONSTRUCTING_PREVIOUS;\n}\n";
 
+  /** the class via the registry, not via its JavaScript name: a parameter or variable of the
+   * same name would shadow that. The lookup only runs while an object is under construction */
+  private static ownClass(cdef: abaplint.IClassDefinition, traversal: Traversal, token: abaplint.Token): string {
+    return traversal.lookupClassOrInterface(cdef.getName(), token);
+  }
+
   /** A redefinition runs the superclass implementation while the object is under construction
-   * and the class being constructed is neither this class nor one of its subclasses. If the method
-   * is abstract in the class being constructed, ABAP ends in the runtime error
-   * CALL_METHOD_NOT_IMPLEMENTED, and here the call of the missing superclass method fails */
-  private buildRedefinitionGuard(clas: string, methodName: string, input: string): string {
+   * and the class being constructed is neither this class nor one of its subclasses. A superclass
+   * can implement an interface method under an alias name, so those names are tried as well. If the
+   * method is abstract in the class being constructed, ABAP ends in the runtime error
+   * CALL_METHOD_NOT_IMPLEMENTED */
+  private buildRedefinitionGuard(cdef: abaplint.IClassDefinition, methodName: string, input: string,
+                                 traversal: Traversal, scope: abaplint.ISpaghettiScopeNode, token: abaplint.Token): string {
+    const names = [methodName];
+    if (methodName.includes("$")) {
+      let superClassName = cdef.getSuperClass();
+      while (superClassName !== undefined) {
+        const superDef = traversal.findClassDefinition(superClassName, scope);
+        for (const a of superDef?.getAliases() || []) {
+          const name = Traversal.escapeNamespace(a.getName().toLowerCase())!;
+          if (a.getComponent().replace("~", "$").toLowerCase() === methodName && names.includes(name) === false) {
+            names.push(name);
+          }
+        }
+        superClassName = superDef?.getSuperClass();
+      }
+    }
+
+    const clas = MethodImplementationTranspiler.ownClass(cdef, traversal, token);
     return `if (this.CONSTRUCTING !== undefined && this.CONSTRUCTING !== ${clas} && !(this.CONSTRUCTING.prototype instanceof ${clas})) {
-return super.${methodName}(${input});
+const SUPER_METHOD = ${names.map(n => "super." + n).join(" ?? ")};
+if (SUPER_METHOD === undefined) {
+throw new Error("CALL_METHOD_NOT_IMPLEMENTED");
+}
+return SUPER_METHOD.call(this${input === "" ? "" : ", " + input});
 }`;
   }
 
   private isRedefinition(name: string, cdef: abaplint.IClassDefinition): boolean {
-    const upper = name.toUpperCase();
-    for (const m of cdef.getMethodDefinitions().getAll()) {
-      if (m.getName().toUpperCase() === upper && m.isRedefinition()) {
-        return true;
-      }
-    }
-    return false;
+    return cdef.getMethodDefinitions().getByName(name)?.isRedefinition() === true;
   }
 
 /////////////////////////////

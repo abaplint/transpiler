@@ -152,6 +152,7 @@ ENDCLASS.`;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.INTERNAL_ID = abap.internalIdCounter++;
+    this.CONSTRUCTING = undefined;
     this.FRIENDS_ACCESS_INSTANCE = {
       "bar": this.bar.bind(this),
     };
@@ -171,7 +172,7 @@ export {zcl_maptest};`;
     expect(result?.js).to.equal(js);
 
     const perLine = await countMappingsPerGeneratedLine(result?.map);
-    expect(perLine[21]).to.equal(3); // the WRITE statement
+    expect(perLine[22]).to.equal(3); // the WRITE statement
   });
 
   it("method body: each statement kind resolves back to its abap line", async () => {

@@ -112,6 +112,7 @@ abap.Classes['PROG-ZFOOBAR-LIF_FOOBAR'] = lif_foobar;`;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.INTERNAL_ID = abap.internalIdCounter++;
+    this.CONSTRUCTING = undefined;
     this.FRIENDS_ACCESS_INSTANCE = {
       "moo": this.moo.bind(this),
     };
@@ -153,6 +154,7 @@ abap.Classes['PROG-ZFOOBAR-LCL_FOOBAR'] = lcl_foobar;`;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.INTERNAL_ID = abap.internalIdCounter++;
+    this.CONSTRUCTING = undefined;
     this.FRIENDS_ACCESS_INSTANCE = {
       "moo": this.moo.bind(this),
     };
@@ -214,6 +216,7 @@ CREATE OBJECT foo.`;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.INTERNAL_ID = abap.internalIdCounter++;
+    this.CONSTRUCTING = undefined;
     this.FRIENDS_ACCESS_INSTANCE = {
     };
   }
@@ -278,6 +281,7 @@ DATA moo TYPE foo.`;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.INTERNAL_ID = abap.internalIdCounter++;
+    this.CONSTRUCTING = undefined;
     this.FRIENDS_ACCESS_INSTANCE = {
       "run": this.run.bind(this),
     };
@@ -322,6 +326,7 @@ abap.Classes['PROG-ZFOOBAR-ZCL_WORDS'] = zcl_words;`;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.INTERNAL_ID = abap.internalIdCounter++;
+    this.CONSTRUCTING = undefined;
     this.FRIENDS_ACCESS_INSTANCE = {
     };
     this.bar = new abap.types.Integer({qualifiedName: "I"});
@@ -332,10 +337,10 @@ abap.Classes['PROG-ZFOOBAR-ZCL_WORDS'] = zcl_words;`;
     try {
       this.bar.set(abap.IntegerFactory.get(2));
       abap.statements.write(this.bar);
-      return this;
     } finally {
       this.CONSTRUCTING = CONSTRUCTING_PREVIOUS;
     }
+    return this;
   }
 }
 abap.Classes['PROG-ZFOOBAR-ZCL_WORDS'] = zcl_words;`;
@@ -369,6 +374,7 @@ ENDCLASS.`;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.INTERNAL_ID = abap.internalIdCounter++;
+    this.CONSTRUCTING = undefined;
     this.FRIENDS_ACCESS_INSTANCE = {
     };
     this.bar = new abap.types.Integer({qualifiedName: "I"});
@@ -466,6 +472,7 @@ ENDCLASS.`;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.INTERNAL_ID = abap.internalIdCounter++;
+    this.CONSTRUCTING = undefined;
     this.FRIENDS_ACCESS_INSTANCE = {
     };
     this.c_maxdcodes = zcl_ret.c_maxdcodes;
@@ -502,6 +509,7 @@ ENDCLASS.`;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.INTERNAL_ID = abap.internalIdCounter++;
+    this.CONSTRUCTING = undefined;
     this.FRIENDS_ACCESS_INSTANCE = {
     };
     this.foo = lcl_bar.foo;
@@ -536,6 +544,7 @@ lcl_bar.foo = new abap.types.Integer({qualifiedName: "I"});`;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.INTERNAL_ID = abap.internalIdCounter++;
+    this.CONSTRUCTING = undefined;
     this.FRIENDS_ACCESS_INSTANCE = {
     };
     this.foo = lcl_bar.foo;
@@ -592,6 +601,7 @@ ENDINTERFACE.`;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.INTERNAL_ID = abap.internalIdCounter++;
+    this.CONSTRUCTING = undefined;
     this.FRIENDS_ACCESS_INSTANCE = {
     };
     this.first = lcl_bar.first;
@@ -738,6 +748,7 @@ ENDCLASS.`;
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.INTERNAL_ID = abap.internalIdCounter++;
+    this.CONSTRUCTING = undefined;
     this.FRIENDS_ACCESS_INSTANCE = {
     };
     this.area_name = lcl_constant_test.area_name;
@@ -788,6 +799,7 @@ class lcl {
     this.me = new abap.types.ABAPObject();
     this.me.set(this);
     this.INTERNAL_ID = abap.internalIdCounter++;
+    this.CONSTRUCTING = undefined;
     this.FRIENDS_ACCESS_INSTANCE = {
     };
   }

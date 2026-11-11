@@ -823,7 +823,8 @@ export class Traversal {
 
     ret += `this.me = new abap.types.ABAPObject();
 this.me.set(this);
-this.INTERNAL_ID = abap.internalIdCounter++;\n`;
+this.INTERNAL_ID = abap.internalIdCounter++;
+this.CONSTRUCTING = undefined;\n`;
     ret += this.buildFriendsAccess(def, def.getSuperClass() !== undefined);
     ret += this.buildThisAttributes(def, cName);
 
