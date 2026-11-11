@@ -1,7 +1,8 @@
-import {AbstractType, Nodes} from "@abaplint/core";
+import {AbstractType, BasicTypes, Nodes} from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
+import {UnknownTypesEnum} from "../types";
 
 export class TypeNameOrInfer implements IExpressionTranspiler {
 
@@ -16,7 +17,12 @@ export class TypeNameOrInfer implements IExpressionTranspiler {
         return sqlType;
       }
     }
-      throw new Error("TypeNameOrInfer, type not found: " + node.concatTokens() + ", " + traversal.getCurrentObject().getName() + ", " + traversal.getFilename() + " line " + node.getFirstToken().getStart().getRow());
+      const text = "TypeNameOrInfer, type not found: " + node.concatTokens() + ", " + traversal.getCurrentObject().getName() + ", " + traversal.getFilename() + " line " + node.getFirstToken().getStart().getRow();
+      if (traversal.options?.unknownTypes === UnknownTypesEnum.runtimeError) {
+        // eg. # for a parameter of a class that is not there: the code fails when it runs, as with other unknown types
+        return new BasicTypes.UnknownType(text);
+      }
+      throw new Error(text);
     }
 
     return type;
