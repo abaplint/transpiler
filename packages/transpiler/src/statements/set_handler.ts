@@ -10,6 +10,7 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
     const methods: string[] = [];
     let eventClass: string | undefined = undefined;
     let eventName: string | undefined = undefined;
+    let forClass = "";
 
     for (const m of node.findDirectExpressions(abaplint.Expressions.MethodSource)) {
       // the handler method is registered as a reference, it is dispatched dynamically when the event is raised,
@@ -29,6 +30,7 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
 
         eventName = method.def.getEventName();
         eventClass = this.findEventClass(method.def, traversal, scope);
+        forClass = this.findForClass(method.def, eventClass, traversal, scope);
       }
     }
 
@@ -46,10 +48,26 @@ export class SetHandlerTranspiler implements IStatementTranspiler {
       activation = ", " + new SourceTranspiler().transpile(activationExpression, traversal).getCode();
     }
 
-    return new Chunk().append(`abap.statements.setHandler({EVENT_NAME: "${eventName}", EVENT_CLASS: "${eventClass}"}, [${methods.join(",")}], ${f}${activation});`, node, traversal);
+    return new Chunk().append(`abap.statements.setHandler({EVENT_NAME: "${eventName}", EVENT_CLASS: "${eventClass}"${forClass}}, [${methods.join(",")}], ${f}${activation});`, node, traversal);
   }
 
 ///////////////////////////////////////////////////////////////////////
+
+  /** a handler FOR EVENT ... OF a subclass of the class declaring the event only reacts to that subclass */
+  private findForClass(mdef: abaplint.Types.MethodDefinition, eventClass: string,
+                       traversal: Traversal, scope: abaplint.ISpaghettiScopeNode | undefined): string {
+    const own = traversal.findClassDefinition(mdef.getEventClass(), scope);
+    if (own === undefined || traversal.buildInternalName(own.getName(), own) === eventClass) {
+      return "";
+    }
+    let def: abaplint.IClassDefinition | undefined = own;
+    let event = undefined;
+    while (def !== undefined && event === undefined) {
+      event = def.getEvents().find(e => e.getName().toUpperCase() === mdef.getEventName()?.toUpperCase());
+      def = def.getSuperClass() ? traversal.findClassDefinition(def.getSuperClass(), scope) : undefined;
+    }
+    return `, FOR_CLASS: "${traversal.buildInternalName(own.getName(), own)}", STATIC: ${event?.isStatic() === true}`;
+  }
 
   private findEventClass(mdef: abaplint.Types.MethodDefinition,
                          traversal: Traversal,

@@ -4,7 +4,7 @@ import {ABAPObject} from "../types";
 
 declare const abap: ABAP;
 
-export async function raiseEvent(eventReference: ABAPEventReference, me: ABAPObject, parameters?: object) {
+export async function raiseEvent(eventReference: ABAPEventReference, me: ABAPObject, parameters?: object, raisedIn?: any) {
   const input = parameters || {};
-  await abap.eventing.raiseEvent(eventReference, me, {...input, sender: me});
+  await abap.eventing.raiseEvent(eventReference, me, {...input, sender: me}, raisedIn);
 }

@@ -1,8 +1,14 @@
+import {ABAP} from ".";
 import {ABAPObject} from "./types";
+
+declare const abap: ABAP;
 
 export type ABAPEventReference = {
   EVENT_NAME: string;
   EVENT_CLASS: string;
+  /** set when the handler is declared FOR EVENT ... OF a subclass of the class that declares the event */
+  FOR_CLASS?: string;
+  STATIC?: boolean;
 };
 
 export type HandlerMethod = {
@@ -13,12 +19,15 @@ export type HandlerMethod = {
 type Handlers = {
   handlers: HandlerMethod[];
   forObject: WeakRef<object> | "ALL";
+  forClass?: string;
+  staticEvent?: boolean;
 }[];
 
 export class ABAPEventing {
   private readonly registrations: {[className: string]: {[eventName: string]: Handlers}} = {};
 
-  public setHandler(event: ABAPEventReference, methods: HandlerMethod[], forObject: ABAPObject | "ALL", activation: boolean): any {
+  /** returns sy-subrc: 4 a handler was registered already, 8 a handler to take out was not registered */
+  public setHandler(event: ABAPEventReference, methods: HandlerMethod[], forObject: ABAPObject | "ALL", activation: boolean): number {
     if (methods.length === 0) {
       throw new Error("ABAPEventing.setHandler: no methods provided");
     }
@@ -32,32 +41,54 @@ export class ABAPEventing {
 
     const target = forObject === "ALL" ? "ALL" : forObject.get();
     const handlers = this.registrations[event.EVENT_CLASS][event.EVENT_NAME];
-    if (activation === true) {
-      // todo: tackle duplicates
-      handlers.push({
-        handlers: methods,
-        forObject: target === "ALL" ? "ALL" : new WeakRef(target),
-      });
-    } else {
-      if (methods.length > 1) {
-        throw new Error("ABAPEventing.setHandler: deactivation of multiple methods not supported, todo");
-      }
+    let subrc = 0;
+    for (const method of methods) {
       const index = handlers.findIndex(handler => {
         const sameObject = handler.forObject === "ALL"
           ? target === "ALL"
           : target !== "ALL" && handler.forObject.deref() === target;
-        const sameMethod = handler.handlers[0].method === methods[0].method
-          && handler.handlers[0].receiver === methods[0].receiver;
+        const sameMethod = handler.handlers[0].method === method.method
+          && handler.handlers[0].receiver === method.receiver;
         return sameObject && sameMethod;
       });
-      if (index !== -1) {
+      if (activation === true) {
+        if (index !== -1) {
+          subrc = 4;
+          continue;
+        }
+        handlers.push({
+          handlers: [method],
+          forObject: target === "ALL" ? "ALL" : new WeakRef(target),
+          forClass: event.FOR_CLASS,
+          staticEvent: event.STATIC,
+        });
+      } else if (index === -1) {
+        subrc = 8;
+      } else {
         handlers.splice(index, 1);
       }
     }
+    return subrc;
+  }
+
+  /** a handler declared for a subclass reacts to a static event only when a method of that class or a subclass of it
+   * raises the event, and with FOR ALL INSTANCES to an instance event only of objects of that class */
+  private reacts(handler: Handlers[number], me: ABAPObject, raisedIn: any): boolean {
+    if (handler.forClass === undefined) {
+      return true;
+    }
+    const cls = abap.Classes[handler.forClass];
+    if (typeof cls !== "function") {
+      return true;
+    }
+    if (handler.staticEvent === true) {
+      return raisedIn === cls || raisedIn?.prototype instanceof cls;
+    }
+    return me.get() instanceof cls;
   }
 
   // todo: cleanup of dead WeakRefs
-  public async raiseEvent(event: ABAPEventReference, me: ABAPObject, parameters: object): Promise<void> {
+  public async raiseEvent(event: ABAPEventReference, me: ABAPObject, parameters: object, raisedIn?: any): Promise<void> {
     const handlers = this.registrations[event.EVENT_CLASS]?.[event.EVENT_NAME];
     if (handlers === undefined) {
       return;
@@ -65,6 +96,9 @@ export class ABAPEventing {
 
     for (const handler of handlers) {
       if (handler.forObject === "ALL") {
+        if (this.reacts(handler, me, raisedIn) === false) {
+          continue;
+        }
         for (const method of handler.handlers) {
           await method.method.call(method.receiver, parameters);
         }
