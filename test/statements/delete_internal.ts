@@ -809,6 +809,8 @@ WRITE / lines( tab ).`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("4\n4\n0\n3\n4\n0\n3");
+  });
+
   it("DELETE itab. inside a LOOP and DELETE itab FROM n. in a program", async () => {
     const code = `
 DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.

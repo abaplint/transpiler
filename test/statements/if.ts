@@ -207,4 +207,29 @@ ENDIF.`;
     await f(abap);
   });
 
+  it("comparing internal tables, more rows first, then the first different row", async () => {
+    const code = `
+DATA a TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA b TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+APPEND 9 TO a.
+APPEND 9 TO a.
+APPEND 1 TO b.
+APPEND 1 TO b.
+APPEND 1 TO b.
+IF a < b.
+  WRITE / 'fewer rows is smaller'.
+ENDIF.
+DELETE b INDEX 3.
+IF a > b.
+  WRITE / 'first different row decides'.
+ENDIF.
+IF a >= a.
+  WRITE / 'same'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("fewer rows is smaller\nfirst different row decides\nsame");
+  });
+
 });

@@ -1,4 +1,4 @@
-import {Issue, IRegistry, Config, IConfig, Version, ABAPObject, SyntaxLogic, BasicTypes, Statements, ISpaghettiScope} from "@abaplint/core";
+import {Issue, IRegistry, Config, IConfig, Version, SyntaxLogic, BasicTypes, ABAPObject, ISpaghettiScope, Statements} from "@abaplint/core";
 import {ITranspilerOptions, UnknownTypesEnum} from "./types";
 
 const defaultAllowedObjectTypes = [
@@ -126,6 +126,7 @@ export const config: IConfig = {
 export class Validation {
 
   private readonly options: ITranspilerOptions | undefined;
+  private readonly scopes = new Map<ABAPObject, ISpaghettiScope>();
 
   public constructor(options?: ITranspilerOptions) {
     this.options = options;
@@ -159,13 +160,12 @@ export class Validation {
     const conf = new Config(JSON.stringify(config));
     reg.setConfig(conf);
     const issues = reg.findIssues();
-    const scopes = new Map<ABAPObject, ISpaghettiScope>();
-    return issues.filter(i => i.getKey() !== "ambiguous_statement" || !Validation.deleteOfInternalTable(reg, i, scopes));
+    return issues.filter(i => i.getKey() !== "ambiguous_statement" || this.isUnambiguous(reg, i) === false);
   }
 
-  /** DELETE name., DELETE name FROM x. and MODIFY name [FROM x]. read two ways, so abaplint calls them ambiguous. ABAP
-   * decides by the name: a variable of table type is the internal table, anything else the database table */
-  private static deleteOfInternalTable(reg: IRegistry, issue: Issue, scopes: Map<ABAPObject, ISpaghettiScope>): boolean {
+  /** DELETE name., DELETE name FROM x., MODIFY name. and MODIFY name FROM x. read two ways, so abaplint calls them
+   * ambiguous. ABAP decides by the name: a variable of table type is the internal table, anything else the database table */
+  private isUnambiguous(reg: IRegistry, issue: Issue): boolean {
     const file = reg.getFileByName(issue.getFilename());
     const obj = file ? reg.findObjectForFile(file) : undefined;
     if (!(obj instanceof ABAPObject)) {
@@ -173,25 +173,24 @@ export class Validation {
     }
     const statement = obj.getABAPFileByName(issue.getFilename())?.getStatements()
       .find(s => s.getStart().equals(issue.getStart()));
-    const modify = statement !== undefined && /^MODIFY\s/i.test(statement.concatTokens());
-    if (statement === undefined || (!(statement.get() instanceof Statements.DeleteInternal) && !modify)) {
+    const token = statement?.getTokens()[1];
+    if (statement === undefined || token === undefined || token.getStr().toUpperCase() === "TABLE") {
       return false;
     }
-    const token = statement.getTokens()[1];
-    if (token === undefined || token.getStr().toUpperCase() === "TABLE") {
+    const modify = statement.getFirstToken().getStr().toUpperCase() === "MODIFY";
+    if (!(statement.get() instanceof Statements.DeleteInternal) && modify === false) {
       return false;
     }
-    let spaghetti = scopes.get(obj);
+    let spaghetti = this.scopes.get(obj);
     if (spaghetti === undefined) {
       spaghetti = new SyntaxLogic(reg, obj).run().spaghetti;
-      scopes.set(obj, spaghetti);
+      this.scopes.set(obj, spaghetti);
     }
     const variable = spaghetti.lookupPosition(token.getStart(), issue.getFilename())?.findVariable(token.getStr());
     if (variable?.getType() instanceof BasicTypes.TableType) {
-      return !modify;
+      return true;
     }
     return variable !== undefined || statement.findExpressionAfterToken("FROM") !== undefined;
   }
-
 
 }

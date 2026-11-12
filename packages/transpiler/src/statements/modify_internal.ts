@@ -3,6 +3,7 @@ import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {SourceTranspiler} from "../expressions";
 import {Chunk} from "../chunk";
+import {ModifyDatabaseTranspiler} from "./modify_database";
 
 export class ModifyInternalTranspiler implements IStatementTranspiler {
 
@@ -42,6 +43,14 @@ export class ModifyInternalTranspiler implements IStatementTranspiler {
         list.push("\"" + t.concatTokens().toLowerCase() + "\"");
       }
       extra.push("transporting: [" + list.join(",") + "]");
+    }
+
+    // without INDEX, WHERE or TABLE, in a LOOP: the current line, from the header line when FROM is left out
+    if (index === undefined && whereNode === undefined && node.findDirectTokenByText("TABLE") === undefined) {
+      if (from === undefined) {
+        extra.push(`from: ${target}.getHeader?.()`);
+      }
+      extra.push("..." + ModifyDatabaseTranspiler.currentLine(target));
     }
 
     let concat = "";
