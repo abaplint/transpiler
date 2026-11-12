@@ -53,6 +53,19 @@ export function referencesAt(scope: abaplint.ISpaghettiScopeNode, token: abaplin
   return found.map(n => references[n]);
 }
 
+export interface ControlLevel {
+  /** the work area of LOOP ... INTO or the header line, undefined for ASSIGNING and REFERENCE INTO */
+  workArea: string | undefined,
+  assigning: boolean,
+  /** the row of the current pass */
+  row: string,
+  /** code that makes "rows" hold every row the LOOP reads, in its order */
+  collect: string,
+  rows: string,
+  /** the control key of the AT block being transpiled, a JS expression; undefined outside AT and in AT FIRST/LAST */
+  key: string | undefined,
+}
+
 export class Traversal {
   private readonly spaghetti: abaplint.ISpaghettiScope;
   private readonly file: abaplint.ABAPFile;
@@ -71,6 +84,8 @@ export class Traversal {
   /** set when the executable program level code is collected into the program's main function,
    * shared with the traversals of its INCLUDEs, see traverseProgramLevel */
   public programMain: Chunk | undefined = undefined;
+  /** the LOOPs being transpiled, innermost last; SUM reads its work area, rows and control key here */
+  public readonly controlLevels: ControlLevel[] = [];
 
   public constructor(spaghetti: abaplint.ISpaghettiScope, file: abaplint.ABAPFile,
                      obj: abaplint.ABAPObject, reg: abaplint.IRegistry, options?: ITranspilerOptions,
