@@ -5,8 +5,11 @@ import {Chunk} from "../chunk";
 
 export class FreeMemoryTranspiler implements IStatementTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    return new Chunk(`throw new Error("FreeMemory, not supported, transpiler");`);
+  /** FREE MEMORY [ID id]: deletes the cluster of the ID, or every cluster of the ABAP memory */
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
+    const id = node.findDirectExpression(abaplint.Expressions.Source);
+    const key = id ? `"MEMORY|" + ` + traversal.traverse(id).getCode() + ".get().toString().trimEnd()" : "";
+    return new Chunk().append(`abap.statements.freeMemory(${key});`, node, traversal);
   }
 
 }

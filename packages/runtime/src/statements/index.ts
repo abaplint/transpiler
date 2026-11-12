@@ -31,6 +31,7 @@ import {insertInternal} from "./insert_internal";
 import {deleteDatabase, IDeleteDatabaseOptions} from "./delete_database";
 import {loop} from "./loop";
 import {IMessageOptions, MessageStatement} from "./message";
+import {ClusterStatements} from "./cluster";
 import {IModifyDatabaseOptions, modifyDatabase} from "./modify_database";
 import {modifyInternal} from "./modify_internal";
 import {moveCorresponding} from "./move_corresponding";
@@ -53,7 +54,7 @@ import {IUpdateDatabaseOptions, updateDatabase} from "./update_database";
 import {IWriteOptions, WriteStatement} from "./write";
 import {Context} from "../context";
 import {ICharacter} from "../types/_character";
-import {FieldSymbol, Structure, Table} from "../types";
+import {FieldSymbol, Structure, Table, XString} from "../types";
 import {INumeric} from "../types/_numeric";
 import {CallFunction, ICallFunctionOptions} from "./call_function";
 import {SelectDatabaseOptions, SelectRuntimeOptions} from "../db/db";
@@ -161,6 +162,30 @@ export class Statements {
 
   public async callFunction(options: ICallFunctionOptions) {
     return new CallFunction(this.context).callFunction(options);
+  }
+
+  public exportCluster(key: string, values: {[name: string]: any}) {
+    return new ClusterStatements(this.context).exportCluster(key, values);
+  }
+
+  public exportBuffer(target: XString | FieldSymbol, values: {[name: string]: any}) {
+    return new ClusterStatements(this.context).exportBuffer(target, values);
+  }
+
+  public async importCluster(key: string, targets: {[name: string]: any}) {
+    return new ClusterStatements(this.context).importCluster(key, targets);
+  }
+
+  public async importBuffer(source: XString | FieldSymbol, targets: {[name: string]: any}) {
+    return new ClusterStatements(this.context).importBuffer(source, targets);
+  }
+
+  public deleteCluster(key: string) {
+    return new ClusterStatements(this.context).deleteCluster(key);
+  }
+
+  public freeMemory(key?: string) {
+    return new ClusterStatements(this.context).freeMemory(key);
   }
 
   public async message(options: IMessageOptions) {
