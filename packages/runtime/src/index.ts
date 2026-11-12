@@ -13,6 +13,7 @@ import {expandDynamic} from "./expand_dynamic";
 import {dynamicOrderBy} from "./dynamic_order_by";
 import {sqlEscape} from "./sql_escape";
 import {ClassicError} from "./classic_error";
+import {ReportStop} from "./report_events";
 import {Console} from "./console/console";
 import {StandardOutConsole} from "./console/standard_out_console";
 import {MemoryConsole} from "./console/memory_console";
@@ -79,6 +80,7 @@ export class ABAP {
   public isLineNotFound = isLineNotFound;
   public buildDbTableName = buildDbTableName;
   public ClassicError = ClassicError;
+  public ReportStop = ReportStop;
   public dynamicCallLookup = dynamicCallLookup;
   public parametersCall = parametersCall;
   public eventing = new ABAPEventing();
