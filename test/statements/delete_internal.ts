@@ -811,4 +811,71 @@ WRITE / lines( tab ).`;
     expect(abap.console.get()).to.equal("4\n4\n0\n3\n4\n0\n3");
   });
 
+  it("DELETE TABLE FROM wa deletes only the first row with that key", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         name TYPE c LENGTH 3,
+         amount TYPE i,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row TYPE ty.
+row-name = 'A'. row-amount = 1. APPEND row TO tab.
+row-name = 'B'. row-amount = 2. APPEND row TO tab.
+row-name = 'B'. row-amount = 3. APPEND row TO tab.
+row-name = 'B'. row-amount = 9.
+DELETE TABLE tab FROM row.
+WRITE / sy-subrc.
+LOOP AT tab INTO row.
+  WRITE / row-amount.
+ENDLOOP.
+row-name = 'C'.
+DELETE TABLE tab FROM row.
+WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n1\n3\n4");
+  });
+
+  it("DELETE TABLE FROM wa, an empty key deletes the first row", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         amount TYPE i,
+         price TYPE p LENGTH 8 DECIMALS 2,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row TYPE ty.
+row-amount = 1. APPEND row TO tab.
+row-amount = 2. APPEND row TO tab.
+row-amount = 2.
+DELETE TABLE tab FROM row.
+LOOP AT tab INTO row.
+  WRITE / row-amount.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+  it("DELETE TABLE WITH TABLE KEY deletes only the first row found", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         name TYPE c LENGTH 3,
+         amount TYPE i,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH NON-UNIQUE KEY name.
+DATA row TYPE ty.
+row-name = 'B'. row-amount = 1. APPEND row TO tab.
+row-name = 'B'. row-amount = 2. APPEND row TO tab.
+DELETE TABLE tab WITH TABLE KEY name = 'B'.
+LOOP AT tab INTO row.
+  WRITE / row-amount.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });

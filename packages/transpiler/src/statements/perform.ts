@@ -8,19 +8,31 @@ export class PerformTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const formName = node.findDirectExpression(abaplint.Expressions.FormName);
-    if (formName === undefined) {
+    // PERFORM (name) IN PROGRAM ...: the name of the subroutine is the content of the field, as it is, so it must be
+    // in upper case to be found
+    const dynamicName = formName === undefined ? node.findDirectExpression(abaplint.Expressions.Dynamic) : undefined;
+    if (formName === undefined && dynamicName === undefined) {
       return new Chunk(`throw new Error("PerformTranspiler FormName not found");`);
-    } else if (node.concatTokens().toUpperCase().includes(" IN PROGRAM ")) {
+    } else if (formName === undefined || node.concatTokens().toUpperCase().includes(" IN PROGRAM ")) {
+      // the end of the key in abap.Forms, after an open literal 'PROG-<program>-
+      const formKey = formName === undefined
+        ? "' + " + traversal.traverse(dynamicName!.getChildren()[1]).getCode() + ".get().toString().trimEnd()"
+        : formName.concatTokens().toUpperCase() + "'";
       const expression = node.findExpressionAfterToken("PROGRAM");
       let ref = "";
       let program = "";
       if (expression?.get() instanceof abaplint.Expressions.Dynamic) {
-        const name = expression.getChildren()[1].concatTokens() + ".get().trimEnd()";
-        ref = `abap.Forms['PROG-' + ${name} + '-${formName.concatTokens().toUpperCase()}']`;
+        // any field, eg. a structure component; sy-repid is the name of the current program
+        const field = expression.getChildren()[1];
+        const name = field.concatTokens().toUpperCase() === "SY-REPID"
+          ? `'${traversal.getCurrentObject().getName().toUpperCase()}'`
+          : traversal.traverse(field).getCode() + ".get().trimEnd()";
+        ref = `abap.Forms['PROG-' + ${name} + '-${formKey}]`;
         program = `'PROG-' + ${name} + '-'`;
       } else {
-        const progName = expression?.concatTokens().toUpperCase();
-        ref = `abap.Forms['PROG-${progName}-${formName.concatTokens().toUpperCase()}']`;
+        // IN PROGRAM without a name, or no IN PROGRAM: the current program
+        const progName = expression?.concatTokens().toUpperCase() ?? traversal.getCurrentObject().getName().toUpperCase();
+        ref = `abap.Forms['PROG-${progName}-${formKey}]`;
         program = `'PROG-${progName}-'`;
       }
       const params: string[] = [];
