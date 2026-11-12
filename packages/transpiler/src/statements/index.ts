@@ -142,6 +142,7 @@ export * from "./insert_textpool";
 export * from "./leave";
 export * from "./log_point";
 export * from "./loop_at_screen";
+export * from "./local";
 export * from "./loop";
 export * from "./macro_call";
 export * from "./message";
