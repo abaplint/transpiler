@@ -1,4 +1,4 @@
-import {Issue, IRegistry, Config, IConfig, Version} from "@abaplint/core";
+import {Issue, IRegistry, Config, IConfig, Version, SyntaxLogic, BasicTypes, ABAPObject, ISpaghettiScope} from "@abaplint/core";
 import {ITranspilerOptions, UnknownTypesEnum} from "./types";
 
 const defaultAllowedObjectTypes = [
@@ -126,6 +126,7 @@ export const config: IConfig = {
 export class Validation {
 
   private readonly options: ITranspilerOptions | undefined;
+  private readonly scopes = new Map<ABAPObject, ISpaghettiScope>();
 
   public constructor(options?: ITranspilerOptions) {
     this.options = options;
@@ -159,7 +160,31 @@ export class Validation {
     const conf = new Config(JSON.stringify(config));
     reg.setConfig(conf);
     const issues = reg.findIssues();
-    return issues;
+    return issues.filter(i => i.getKey() !== "ambiguous_statement" || this.isInternalModify(reg, i) === false);
+  }
+
+  /** "MODIFY itab FROM wa" and "MODIFY itab" are not ambiguous when itab is an internal table */
+  private isInternalModify(reg: IRegistry, issue: Issue): boolean {
+    const file = reg.getFileByName(issue.getFilename());
+    const obj = file ? reg.findObjectForFile(file) : undefined;
+    if (!(obj instanceof ABAPObject)) {
+      return false;
+    }
+    const statement = obj.getABAPFileByName(issue.getFilename())?.getStatements()
+      .find(s => s.getStart().equals(issue.getStart()));
+    const token = statement?.getTokens()[1];
+    if (statement === undefined || token === undefined
+        || statement.getFirstToken().getStr().toUpperCase() !== "MODIFY"
+        || token.getStr().toUpperCase() === "TABLE") {
+      return false;
+    }
+    let spaghetti = this.scopes.get(obj);
+    if (spaghetti === undefined) {
+      spaghetti = new SyntaxLogic(reg, obj).run().spaghetti;
+      this.scopes.set(obj, spaghetti);
+    }
+    const variable = spaghetti.lookupPosition(token.getStart(), issue.getFilename())?.findVariable(token.getStr());
+    return variable?.getType() instanceof BasicTypes.TableType;
   }
 
 }
