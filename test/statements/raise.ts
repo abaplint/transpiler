@@ -123,7 +123,12 @@ ${cx_root}
 
 ${cx_static_check}
 
+INTERFACE if_t100_message.
+ENDINTERFACE.
+
 CLASS lcx DEFINITION INHERITING FROM cx_static_check.
+  PUBLIC SECTION.
+    INTERFACES if_t100_message.
 ENDCLASS.
 CLASS lcx IMPLEMENTATION.
 ENDCLASS.
