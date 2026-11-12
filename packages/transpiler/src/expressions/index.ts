@@ -67,4 +67,5 @@ export * from "./table_expression";
 export * from "./target_field_symbol";
 export * from "./target_field";
 export * from "./target";
+export * from "./throw";
 export * from "./type_name_or_infer";
