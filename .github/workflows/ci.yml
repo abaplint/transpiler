@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-    - uses: actions/checkout@v6
-    - uses: actions/setup-node@v6
+    - uses: actions/checkout@v7
+    - uses: actions/setup-node@v7
     - run: npm run docker:start
     - run: npm run install
     - run: npm run link-local
@@ -30,7 +30,7 @@ jobs:
         ls
         cp transpiler/transpiler/packages/cli/schema.json schema.abaplint.org/transpiler.json
     - name: deploy schema.abaplint.org
-      uses: peaceiris/actions-gh-pages@v3
+      uses: peaceiris/actions-gh-pages@v4
       if: github.ref == 'refs/heads/main' && github.repository == 'abaplint/transpiler'
       with:
         deploy_key: ${{ secrets.SCHEMA_DEPLOY_KEY }}
