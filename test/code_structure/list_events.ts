@@ -337,4 +337,28 @@ START-OF-SELECTION.
     expect(code.indexOf("async function $main() {")).to.be.lessThan(code.indexOf("abap.statements.reportEvents()"));
   });
 
+  it("F4 and F1 help, the exit command and TOP-OF-PAGE DURING LINE-SELECTION do not run", async () => {
+    const code = `
+REPORT zfoobar.
+PARAMETERS p_value TYPE i.
+
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_value.
+  WRITE / 'value request'.
+
+AT SELECTION-SCREEN ON HELP-REQUEST FOR p_value.
+  WRITE / 'help request'.
+
+AT SELECTION-SCREEN ON EXIT-COMMAND.
+  WRITE / 'exit command'.
+
+AT SELECTION-SCREEN ON p_value.
+  WRITE / 'screen on'.
+
+TOP-OF-PAGE DURING LINE-SELECTION.
+  WRITE / 'heading of a details list'.
+
+START-OF-SELECTION.
+  WRITE / 'start'.`;
+    expect(await output(code)).to.equal("screen on\nstart");
+  });
 });
