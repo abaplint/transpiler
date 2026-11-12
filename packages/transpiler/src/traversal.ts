@@ -160,7 +160,9 @@ export class Traversal {
    * can contain dashes, eg. "top-of-page", and namespaces, all references must use this */
   public static formName(name: abaplint.Nodes.ExpressionNode | string): string {
     const abap = typeof name === "string" ? name : name.concatTokens();
-    return Traversal.prefixVariable(Traversal.escapeNamespace(abap.toLowerCase())!.replace(/-/g, "$"));
+    // FORMs have a namespace of their own in ABAP: a FORM may have the name of a data object or a type of the
+    // program, so the function name gets a prefix no ABAP name can produce
+    return "form$" + Traversal.escapeNamespace(abap.toLowerCase())!.replace(/-/g, "$");
   }
 
   public static isBracketComponent(name: string): boolean {
@@ -1126,7 +1128,7 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
     let context: abaplint.AbstractType | undefined = undefined;
     for (const c of found.getChildren()) {
       if (context === undefined) {
-        context = scope.findVariable(c.getFirstToken().getStr())?.getType();
+        context = scope.findVariable(c.getFirstToken().getStr().replace(/^!/, ""))?.getType();
       } else if (c.get() instanceof abaplint.Expressions.ComponentName
           && context instanceof abaplint.BasicTypes.StructureType) {
         context = context.getComponentByName(c.getFirstToken().getStr());

@@ -98,8 +98,8 @@ ENDCLASS.`;
     ], {addCommonJS: true});
     const prog = res.objects.find(o => o.object.name === "ZREPRO");
     expect(prog).to.not.equal(undefined);
-    expect(prog!.exports).to.have.members(["ltcl_test", "run", "$main"]);
-    expect(prog!.chunk.getCode()).to.include("export {ltcl_test, run, $main};");
+    expect(prog!.exports).to.have.members(["ltcl_test", "form$run", "$main"]);
+    expect(prog!.chunk.getCode()).to.include("export {ltcl_test, form$run, $main};");
   });
 
 });

@@ -730,11 +730,11 @@ FORM foo.
   DATA(sdf) = NEW zcl_unknown( ).
 ENDFORM.`;
 
-    const expected = `async function foo(INPUT) {
+    const expected = `async function form$foo(INPUT) {
   let sdf = (() => { throw new Error("Void type: ZCL_UNKNOWN") })();
   sdf.set(function() { throw new Error("Void type: ZCL_UNKNOWN") })();
 }
-abap.Forms['PROG-ZFOOBAR-FOO'] = foo;`;
+abap.Forms['PROG-ZFOOBAR-FOO'] = form$foo;`;
     expect(await runSingle(abap, {
       ignoreSyntaxCheck: true,
       unknownTypes: UnknownTypesEnum.runtimeError})).to.equals(expected);
