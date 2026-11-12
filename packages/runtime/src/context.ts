@@ -14,6 +14,9 @@ export class Context {
 
   public RFCDestinations: {[name: string]: RFC.RFCClient} = {};
 
+  // NEW-LINE ran: the next list output starts a new line, unless a new line was just started
+  public newLinePending = false;
+
   // CALL FUNCTION IN UPDATE TASK hands the copied parameters to the host, if one is set
   public updateTask: {register(name: string, param: {exporting?: any, tables?: any}): Promise<void> | void} | undefined = undefined;
 
