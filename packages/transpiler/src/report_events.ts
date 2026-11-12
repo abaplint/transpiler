@@ -36,7 +36,10 @@ export class ReportEvents {
    * the program is started without a user, see RUN_ORDER */
   public static eventOf(node: abaplint.Nodes.StatementNode): ReportEvent | null | undefined {
     const s = node.get();
-    const has = (...words: string[]) => words.some(w => node.findDirectTokenByText(w) !== undefined);
+    // the words of the statement itself, not the names in it, eg. "AT SELECTION-SCREEN ON VALUE-REQUEST FOR"
+    const words = " " + node.getChildren().filter(c => c instanceof abaplint.Nodes.TokenNode)
+      .map(c => c.getFirstToken().getStr().toUpperCase()).join(" ").replace(/ - /g, "-") + " ";
+    const has = (...list: string[]) => list.some(w => words.includes(" " + w + " "));
     if (s instanceof abaplint.Statements.LoadOfProgram) {
       return "LOAD-OF-PROGRAM";
     } else if (s instanceof abaplint.Statements.Initialization) {
