@@ -809,6 +809,8 @@ WRITE / lines( tab ).`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("4\n4\n0\n3\n4\n0\n3");
+  });
+
   it("DELETE TABLE FROM wa deletes only the first row with that key", async () => {
     const code = `
 TYPES: BEGIN OF ty,
