@@ -11,6 +11,8 @@ export class InsertInternalTranspiler implements IStatementTranspiler {
     const source = node.findDirectExpression(abaplint.Expressions.SimpleSource4)
       || node.findDirectExpression(abaplint.Expressions.Source);
     const target = node.findDirectExpression(abaplint.Expressions.Target);
+    // INSERT TABLE itab. and INSERT itab INDEX n. name only the table, its header line goes into it
+    const shortForm = target === undefined && source !== undefined ? traversal.traverse(source).getCode() : undefined;
 
     const concat = node.concatTokens().toUpperCase();
     if (concat.startsWith("INSERT LINES OF ")) {
@@ -19,6 +21,8 @@ export class InsertInternalTranspiler implements IStatementTranspiler {
 
     if (concat.startsWith("INSERT INITIAL LINE ")) {
       options.push("initial: true");
+    } else if (shortForm !== undefined) {
+      options.push("data: " + shortForm + ".getHeader()");
     } else {
       options.push("data: " + traversal.traverse(source).getCode());
     }
@@ -38,7 +42,7 @@ export class InsertInternalTranspiler implements IStatementTranspiler {
       options.push("assigning: " + traversal.traverse((assigning.findFirstExpression(abaplint.Expressions.FieldSymbol))).getCode());
     }
 
-    options.push("table: " + traversal.traverse(target).getCode());
+    options.push("table: " + (shortForm ?? traversal.traverse(target).getCode()));
 
     return new Chunk()
       .append(`abap.statements.insertInternal({`, node, traversal)
