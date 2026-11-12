@@ -1,14 +1,6 @@
-import {Expressions, INode, Nodes, Statements, Structures} from "@abaplint/core";
+import {Expressions, INode, Nodes} from "@abaplint/core";
 
 // this rearranges the AST to take precedence into account
-
-enum EventKind {
-  None,
-  Start,
-  End,
-  AtLineSelection,
-  AtSelectionScreen,
-}
 
 export class Rearranger {
 
@@ -23,76 +15,8 @@ export class Rearranger {
     }
 
     const flattened = this.flatten(node);
-    const rebuilt = this.rebuild(flattened);
-    const rearranged = this.rearrangeListEvents(rebuilt as Nodes.StructureNode);
-    return rearranged;
-  }
-
-  /** Rearranges list event blocks so START-OF-SELECTION runs before END-OF-SELECTION,
-   *  matching ABAP runtime behavior regardless of source order */
-  private rearrangeListEvents(node: Nodes.StructureNode): Nodes.StructureNode {
-    if (!(node.get() instanceof Structures.Any)) {
-      return node;
-    }
-
-    const children = node.getChildren();
-
-    // Check if there are any list event statements
-    const hasStartOfSelection = children.some(c => c instanceof Nodes.StatementNode && c.get() instanceof Statements.StartOfSelection);
-    const hasEndOfSelection = children.some(c => c instanceof Nodes.StatementNode && c.get() instanceof Statements.EndOfSelection);
-    const hasAtLineSelection = children.some(c => c instanceof Nodes.StatementNode && c.get() instanceof Statements.AtLineSelection);
-    const hasAtSelectionScreen = children.some(c => c instanceof Nodes.StatementNode && c.get() instanceof Statements.AtSelectionScreen);
-
-    if (!hasStartOfSelection && !hasEndOfSelection && !hasAtLineSelection && !hasAtSelectionScreen) {
-      return node;
-    }
-
-    // Split children into: preamble (before first event), event blocks (keyed by event type)
-    const preamble: (Nodes.StatementNode | Nodes.StructureNode)[] = [];
-    const startBlocks: (Nodes.StatementNode | Nodes.StructureNode)[] = [];
-    const endBlocks: (Nodes.StatementNode | Nodes.StructureNode)[] = [];
-    // AT LINE-SELECTION and AT SELECTION-SCREEN are interactive events, their blocks are discarded
-
-    let currentEvent = EventKind.None;
-
-    for (const child of children) {
-      if (child instanceof Nodes.StatementNode && child.get() instanceof Statements.StartOfSelection) {
-        currentEvent = EventKind.Start;
-        startBlocks.push(child);
-      } else if (child instanceof Nodes.StatementNode && child.get() instanceof Statements.EndOfSelection) {
-        currentEvent = EventKind.End;
-        endBlocks.push(child);
-      } else if (child instanceof Nodes.StatementNode && child.get() instanceof Statements.AtLineSelection) {
-        currentEvent = EventKind.AtLineSelection;
-      } else if (child instanceof Nodes.StatementNode && child.get() instanceof Statements.AtSelectionScreen) {
-        currentEvent = EventKind.AtSelectionScreen;
-      } else {
-        switch (currentEvent) {
-          case EventKind.None:
-            preamble.push(child as Nodes.StatementNode | Nodes.StructureNode);
-            break;
-          case EventKind.Start:
-            startBlocks.push(child as Nodes.StatementNode | Nodes.StructureNode);
-            break;
-          case EventKind.End:
-            endBlocks.push(child as Nodes.StatementNode | Nodes.StructureNode);
-            break;
-          case EventKind.AtLineSelection:
-          case EventKind.AtSelectionScreen:
-            // discard: these are interactive events not executed in batch
-            break;
-          default:
-            break;
-        }
-      }
-    }
-
-    // Reassemble: preamble, then START-OF-SELECTION blocks, then END-OF-SELECTION blocks
-    // AT LINE-SELECTION and AT SELECTION-SCREEN blocks are omitted
-    const newChildren = [...preamble, ...startBlocks, ...endBlocks];
-    node.setChildren(newChildren);
-
-    return node;
+    // the event blocks of a report are put in the order of the runtime by the traversal, see ReportEvents
+    return this.rebuild(flattened) as Nodes.StructureNode;
   }
 
 /////////////////

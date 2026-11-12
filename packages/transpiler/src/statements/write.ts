@@ -53,7 +53,7 @@ export class WriteTranspiler implements IStatementTranspiler {
     }
 
     const chunk = new Chunk();
-    chunk.append("abap.statements.write(", node, traversal);
+    chunk.append((target === undefined ? traversal.beforeListOutput() : "") + "abap.statements.write(", node, traversal);
     chunk.appendChunk(source);
     if (extra.length === 0) {
       chunk.append(");", node.getLastToken(), traversal);

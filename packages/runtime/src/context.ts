@@ -25,6 +25,11 @@ export class Context {
   public dataset: DatasetHost | undefined = undefined;
   public datasets: {[name: string]: OpenDataset} = {};
 
+  // the event block of the report running now, eg. "INITIALIZATION", see report_events.ts
+  public reportEvent: string | undefined = undefined;
+  // TOP-OF-PAGE of the running report until it ran, before the first output to the list
+  public topOfPage: (() => Promise<unknown>) | undefined = undefined;
+
   // GET RUN TIME, the clock reading of the first call, and the last unwrapped microsecond count
   public runTime: {start: number, last: number} | undefined = undefined;
 

@@ -400,15 +400,19 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({object: obj,user: usr,fields:
 
     {abap: "RETRY.", js: `throw new Error("RETRY, not supported, transpiler");`, skip: false},
 
-    {abap: "STOP.", js: `throw new Error("STOP, not supported, transpiler");`, skip: false},
+    {abap: "STOP.", js: `const $events = abap.statements.reportEvents();
+await $events.selection("START-OF-SELECTION", async () => {
+  throw new abap.ReportStop();
+});
+$events.done();`, skip: false},
     {abap: "SET CURSOR FIELD foo.", js: `throw new Error("SET CURSOR, not supported, transpiler");`, skip: false},
     {abap: "SUM.", js: `throw new Error("SUM, not supported, transpiler");`, skip: false},
     {abap: "FORMAT RESET.", js: `throw new Error("FORMAT, not supported, transpiler");`, skip: false},
     {abap: "RESERVE 1 LINES.", js: `throw new Error("RESERVE, not supported, transpiler");`, skip: false},
     {abap: "NEW-PAGE NO-TITLE LINE-SIZE 80.", js: `throw new Error("NEW-PAGE, not supported, transpiler");`, skip: false},
     {abap: "HIDE gv_id.", js: `throw new Error("HIDE, not supported, transpiler");`, skip: false},
-    {abap: "AT USER-COMMAND.", js: `throw new Error("AT USER-COMMAND, not supported, transpiler");`, skip: false},
-    {abap: "AT PF5.", js: `throw new Error("AT PFnn, not supported, transpiler");`, skip: false},
+    {abap: "AT USER-COMMAND.", js: ``, skip: false}, // a block that only a user's action runs
+    {abap: "AT PF5.", js: ``, skip: false},
     {abap: "BACK.", js: `throw new Error("BACK, not supported, transpiler");`, skip: false},
     {abap: "POSITION 10.", js: `throw new Error("POSITION, not supported, transpiler");`, skip: false},
     {abap: "SCROLL LIST TO FIRST PAGE.", js: `throw new Error("SCROLL LIST, not supported, transpiler");`, skip: false},
@@ -448,13 +452,17 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({object: obj,user: usr,fields:
     {abap: "DEMAND foo = bar FROM CONTEXT ctx.", js: `throw new Error("DEMAND, not supported, transpiler");`, skip: false},
     {abap: "SUPPLY foo = bar TO CONTEXT ctx.", js: `throw new Error("SUPPLY, not supported, transpiler");`, skip: false},
     {abap: "COMMUNICATION INIT ID lv_id DESTINATION lv_dest.", js: `throw new Error("COMMUNICATION, not supported, transpiler");`, skip: false},
-    {abap: "TOP-OF-PAGE.", js: `throw new Error("TOP-OF-PAGE, not supported, transpiler");`, skip: false},
-    {abap: "END-OF-PAGE.", js: `throw new Error("END-OF-PAGE, not supported, transpiler");`, skip: false},
+    {abap: "TOP-OF-PAGE.", js: ``, skip: false}, // an empty event block
+    {abap: "END-OF-PAGE.", js: ``, skip: false},
     {abap: "FIELD-GROUPS header.", js: `throw new Error("FIELD-GROUPS, not supported, transpiler");`, skip: false},
     {abap: "INSERT foo bar INTO header.", js: `throw new Error("INSERT INTO field group, not supported, transpiler");`, skip: false},
     {abap: "EXTRACT header.", js: `throw new Error("EXTRACT, not supported, transpiler");`, skip: false},
     {abap: "NODES spfli.", js: `throw new Error("NODES, not supported, transpiler");`, skip: false},
-    {abap: "GET spfli LATE.", js: `throw new Error("GET, not supported, transpiler");`, skip: false},
+    {abap: "GET spfli LATE.", js: `const $events = abap.statements.reportEvents();
+await $events.selection("GET", async () => {
+  throw new Error("GET, not supported, transpiler");
+});
+$events.done();`, skip: false},
     {abap: "PUT spfli.", js: `throw new Error("PUT, not supported, transpiler");`, skip: false},
     {abap: "REJECT 'SPFLI'.", js: `throw new Error("REJECT, not supported, transpiler");`, skip: false},
     {abap: "CHECK SELECT-OPTIONS.", js: `throw new Error("CHECK SELECT-OPTIONS, not supported, transpiler");`, skip: false},
