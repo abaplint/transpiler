@@ -544,6 +544,7 @@ await abap.Classes['KERNEL_RAP_EML'].rollback();`, skip: false},
       js: `await abap.statements.select(res, {select: "SELECT count( * )  from " + abap.buildDbTableName("tab") + " WHERE \\"enable_sqlite\\" = '" + abap.sqlEscape(abap.builtin.abap_true.get()) + "'"});`, skip: false},
     {abap: "select count( * ) from tab into res where ('enable_sqlite = abap_true').",
       js: `await abap.statements.select(res, {select: "SELECT count( * )  from " + abap.buildDbTableName("tab") + " WHERE \\"enable_sqlite\\" = 'X'"});`, skip: false},
+    {abap: "CALL DATABASE PROCEDURE ('ZPROC') EXPORTING iv_foo = lv_foo IMPORTING ev_bar = lv_bar.", js: `throw new Error("CALL DATABASE PROCEDURE, not supported, transpiler");`, skip: false},
   ];
 
   for (const test of tests) {
