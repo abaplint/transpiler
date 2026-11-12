@@ -233,6 +233,16 @@ export class Traversal {
     node: abaplint.ISpaghettiScopeNode
   } | undefined = undefined;
 
+  /** MODIFY name. and DELETE name [FROM wa].: the name is a database table unless it is a variable of table type */
+  public isDatabaseShortForm(target: abaplint.Nodes.ExpressionNode | undefined): boolean {
+    if (target === undefined || target.getChildren().length !== 1) {
+      return false;
+    }
+    const token = target.getFirstToken();
+    const type = this.findCurrentScopeByToken(token)?.findVariable(token.getStr())?.getType();
+    return !(type instanceof abaplint.BasicTypes.TableType);
+  }
+
   public findCurrentScopeByToken(token: abaplint.Token) {
     const filename = this.file.getFilename();
 

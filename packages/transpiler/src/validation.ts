@@ -1,4 +1,4 @@
-import {Issue, IRegistry, Config, IConfig, Version, SyntaxLogic, BasicTypes, ABAPObject, ISpaghettiScope} from "@abaplint/core";
+import {Issue, IRegistry, Config, IConfig, Version, SyntaxLogic, BasicTypes, ABAPObject, ISpaghettiScope, Statements} from "@abaplint/core";
 import {ITranspilerOptions, UnknownTypesEnum} from "./types";
 
 const defaultAllowedObjectTypes = [
@@ -160,11 +160,12 @@ export class Validation {
     const conf = new Config(JSON.stringify(config));
     reg.setConfig(conf);
     const issues = reg.findIssues();
-    return issues.filter(i => i.getKey() !== "ambiguous_statement" || this.isInternalModify(reg, i) === false);
+    return issues.filter(i => i.getKey() !== "ambiguous_statement" || this.isUnambiguous(reg, i) === false);
   }
 
-  /** "MODIFY itab FROM wa" and "MODIFY itab" are not ambiguous when itab is an internal table */
-  private isInternalModify(reg: IRegistry, issue: Issue): boolean {
+  /** DELETE name., DELETE name FROM x., MODIFY name. and MODIFY name FROM x. read two ways, so abaplint calls them
+   * ambiguous. ABAP decides by the name: a variable of table type is the internal table, anything else the database table */
+  private isUnambiguous(reg: IRegistry, issue: Issue): boolean {
     const file = reg.getFileByName(issue.getFilename());
     const obj = file ? reg.findObjectForFile(file) : undefined;
     if (!(obj instanceof ABAPObject)) {
@@ -173,9 +174,11 @@ export class Validation {
     const statement = obj.getABAPFileByName(issue.getFilename())?.getStatements()
       .find(s => s.getStart().equals(issue.getStart()));
     const token = statement?.getTokens()[1];
-    if (statement === undefined || token === undefined
-        || statement.getFirstToken().getStr().toUpperCase() !== "MODIFY"
-        || token.getStr().toUpperCase() === "TABLE") {
+    if (statement === undefined || token === undefined || token.getStr().toUpperCase() === "TABLE") {
+      return false;
+    }
+    const modify = statement.getFirstToken().getStr().toUpperCase() === "MODIFY";
+    if (!(statement.get() instanceof Statements.DeleteInternal) && modify === false) {
       return false;
     }
     let spaghetti = this.scopes.get(obj);
@@ -184,7 +187,10 @@ export class Validation {
       this.scopes.set(obj, spaghetti);
     }
     const variable = spaghetti.lookupPosition(token.getStart(), issue.getFilename())?.findVariable(token.getStr());
-    return variable?.getType() instanceof BasicTypes.TableType;
+    if (variable?.getType() instanceof BasicTypes.TableType) {
+      return true;
+    }
+    return variable !== undefined || statement.findExpressionAfterToken("FROM") !== undefined;
   }
 
 }
