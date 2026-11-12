@@ -264,9 +264,12 @@ export class SourceTranspiler implements IExpressionTranspiler {
         if (inferType === undefined) {
           throw new Error("transpiler: REF # todo, lookupInferred, " + node.concatTokens());
         }
-        if (!(inferType instanceof BasicTypes.DataReference)) {
+        if (!(inferType instanceof BasicTypes.DataReference)
+            && !(inferType instanceof BasicTypes.VoidType)
+            && !(inferType instanceof BasicTypes.UnknownType)) {
           throw new Error("transpiler: REF # unexpected type");
         }
+        // a void or unknown type, eg. the parameter of a class that is not there, gives its runtime error as other uses do
         const typ = traversal.toType(inferType);
         ret.append(`abap.statements.getReference(${typ}, `, c, traversal);
         post.append(")", c, traversal);
