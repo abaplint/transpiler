@@ -7,6 +7,7 @@ import {Chunk} from "../chunk";
 import {OutputLayout, importPath} from "../output_layout";
 import {TypeFactoryRegistry} from "../type_factory_registry";
 import {findProgramIncludes} from "../program_includes";
+import {ReportEvents} from "../report_events";
 
 export class HandleABAP {
   /** the function running the program, not a name a FORM or variable can be transpiled to */
@@ -69,11 +70,20 @@ export class HandleABAP {
 
       const traversal = new Traversal(spaghetti, file, obj, reg, this.options, typeFactory);
       const wrapMain = HandleABAP.wrapsMain(obj, this.options);
-      if (wrapMain) {
+      // a report runs its event blocks in the order of the ABAP runtime, see ReportEvents
+      const events = ReportEvents.needed(obj, reg) ? new ReportEvents(ReportEvents.hasSelectionScreen(obj, reg)) : undefined;
+      if (wrapMain || events !== undefined) {
         traversal.programMain = new Chunk();
+        traversal.reportEvents = events;
       }
       const contents = traversal.traverse(rearranged);
       chunk.appendChunk(contents);
+      if (events !== undefined) {
+        traversal.programMain!.appendChunk(events.emit());
+        if (wrapMain === false) {
+          chunk.appendChunk(traversal.programMain!);
+        }
+      }
       if (wrapMain) {
         // the program runs when main is called, importing the module eg. for unit testing does not run it
         chunk.appendString(`async function ${HandleABAP.PROGRAM_MAIN}() {\n`);

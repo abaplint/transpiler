@@ -5,8 +5,9 @@ import {Chunk} from "../chunk";
 
 export class UlineTranspiler implements IStatementTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
+  public transpile(_node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const chunk = new Chunk();
+    chunk.appendString(traversal.beforeListOutput());
     chunk.appendString(`abap.statements.write("--------------------------------------------------", {"newLine": true});`);
     return chunk;
   }

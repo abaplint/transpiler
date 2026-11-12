@@ -12,6 +12,7 @@ import {DEFAULT_KEYWORDS} from "./keywords";
 import {TypeFactoryRegistry} from "./type_factory_registry";
 import {TranspileTypes} from "./transpile_types";
 import {InlineDeclarations} from "./inline";
+import {ReportEvents} from "./report_events";
 
 type IReference = ReturnType<abaplint.ISpaghettiScopeNode["getData"]>["references"][number];
 
@@ -71,6 +72,9 @@ export class Traversal {
   /** set when the executable program level code is collected into the program's main function,
    * shared with the traversals of its INCLUDEs, see traverseProgramLevel */
   public programMain: Chunk | undefined = undefined;
+  /** set when the program runs its code as report event blocks, shared with the traversals of its INCLUDEs */
+  public reportEvents: ReportEvents | undefined = undefined;
+  private topOfPage: boolean | undefined = undefined;
 
   public constructor(spaghetti: abaplint.ISpaghettiScope, file: abaplint.ABAPFile,
                      obj: abaplint.ABAPObject, reg: abaplint.IRegistry, options?: ITranspilerOptions,
@@ -1405,10 +1409,25 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
    * programMain. Declarations nested in executable blocks are global in ABAP, they stay on module level */
   private traverseProgramLevel(node: abaplint.Nodes.StructureNode, main: Chunk): Chunk {
     const ret = new Chunk();
+    const events = this.reportEvents;
+    // executable code goes to its event block, see ReportEvents, or else to main
+    const running = () => events === undefined || events.isRunning();
+    const add = (code: Chunk) => (events === undefined ? main.appendChunk(code) : events.add(code));
     for (const c of node.getChildren()) {
       if (c instanceof abaplint.Nodes.StatementNode) {
-        // event statements like INITIALIZATION are executable, REPORT, PARAMETERS etc. are declarations
-        (Traversal.isProgramLevelDeclaration(c) ? ret : main).appendChunk(this.traverse(c));
+        const event = events === undefined ? undefined : ReportEvents.eventOf(c);
+        if (event !== undefined) {
+          events!.switchTo(event);
+          if (c.get() instanceof abaplint.Statements.Get) {
+            // the block of a logical database node starts with what GET does off SAP
+            add(this.traverse(c));
+          }
+        } else if (Traversal.isProgramLevelDeclaration(c)) {
+          // REPORT, PARAMETERS etc. are declarations
+          ret.appendChunk(this.traverse(c));
+        } else if (running()) {
+          add(this.traverse(c));
+        }
         continue;
       } else if (!(c.get() instanceof abaplint.Structures.Normal)) {
         // classes, interfaces, FORMs
@@ -1422,18 +1441,29 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
           ret.appendChunk(this.traverse(n));
         } else if (n instanceof abaplint.Nodes.StructureNode) {
           ret.appendChunk(this.declareNestedEarly(n));
+          if (running() === false) {
+            continue;
+          }
           this.blockDepth++;
           try {
-            main.appendChunk(this.traverseStructure(n));
+            add(this.traverseStructure(n));
           } finally {
             this.blockDepth--;
           }
-        } else {
-          main.appendChunk(this.traverse(n));
+        } else if (running()) {
+          add(this.traverse(n));
         }
       }
     }
     return ret;
+  }
+
+  /** what runs before an output to the list: the program's TOP-OF-PAGE, the first time */
+  public beforeListOutput(): string {
+    if (this.topOfPage === undefined) {
+      this.topOfPage = this.reportEvents !== undefined && ReportEvents.hasTopOfPage(this.obj, this.reg);
+    }
+    return this.topOfPage ? "await abap.statements.topOfPage();\n" : "";
   }
 
   protected traverseStructure(node: abaplint.Nodes.StructureNode): Chunk {
