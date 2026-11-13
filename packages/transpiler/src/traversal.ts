@@ -11,6 +11,7 @@ import {ITranspilerOptions} from "./types";
 import {DEFAULT_KEYWORDS} from "./keywords";
 import {TypeFactoryRegistry} from "./type_factory_registry";
 import {TranspileTypes} from "./transpile_types";
+import {InlineDeclarations} from "./inline";
 
 type IReference = ReturnType<abaplint.ISpaghettiScopeNode["getData"]>["references"][number];
 
@@ -175,9 +176,14 @@ export class Traversal {
     if (this.getCurrentObject().getABAPFileByName(filename) !== undefined) {
       return true;
     }
-    const file = this.reg.getFileByName(filename);
-    const found = file ? this.reg.findObjectForFile(file) : undefined;
+    const found = this.findObjectForFilename(filename);
     return found instanceof abaplint.Objects.Program && found.isInclude();
+  }
+
+  /** the object containing the file, undefined if the file is not in the registry */
+  private findObjectForFilename(filename: string): abaplint.IObject | undefined {
+    const file = this.reg.getFileByName(filename);
+    return file === undefined ? undefined : this.reg.findObjectForFile(file);
   }
 
   public traverse(node: abaplint.INode | undefined): Chunk {
@@ -365,16 +371,11 @@ export class Traversal {
 
     if (filename && this.isCurrentObjectFile(filename) === false) {
       // the prefix is from a different object
-      const file = this.reg.getFileByName(filename);
-      if (file) {
-        const found = this.reg.findObjectForFile(file);
-        if (found) {
-          if (found instanceof abaplint.Objects.Interface) {
-            return Traversal.escapeNamespace(this.lookupClassOrInterface(found.getName(), t)) + "." + found.getName().toLowerCase() + "$" + name;
-          } else {
-            return Traversal.escapeNamespace(this.lookupClassOrInterface(found.getName(), t)) + "." + name;
-          }
-        }
+      const found = this.findObjectForFilename(filename);
+      if (found instanceof abaplint.Objects.Interface) {
+        return Traversal.escapeNamespace(this.lookupClassOrInterface(found.getName(), t)) + "." + found.getName().toLowerCase() + "$" + name;
+      } else if (found) {
+        return Traversal.escapeNamespace(this.lookupClassOrInterface(found.getName(), t)) + "." + name;
       }
     }
 
@@ -426,8 +427,10 @@ export class Traversal {
 
     const methodDefinitions = def.getMethodDefinitions();
     if (methodDefinitions === undefined) {
-      // this can occur if the dependencies is not 702?
-      throw new Error("buildMethods: unexpected undefined, " + def.getName());
+      // abaplint registers a definition before reading it, and stops reading at the first thing it cannot find
+      const superClass = def.getSuperClass();
+      const reason = superClass ? `its super class ${superClass} is not known` : "a super class, interface or type it names is not known";
+      throw new Error(`${this.getFilename()}: the definition of ${def.getName()} could not be read: ${reason}`);
     }
 
     for (const m of methodDefinitions.getAll()) {
@@ -683,12 +686,7 @@ export class Traversal {
   public isTypePool(token: abaplint.Token): string | undefined {
     const ref = this.findReadOrWriteReference(token);
     if (ref?.getFilename().endsWith(".type.abap")) {
-      const file = this.reg.getFileByName(ref.getFilename());
-      if (file === undefined) {
-        return undefined;
-      }
-      const obj = this.reg.findObjectForFile(file);
-      return obj?.getName();
+      return this.findObjectForFilename(ref.getFilename())?.getName();
     }
     return undefined;
   }
@@ -1190,8 +1188,7 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
   private findEnumValueIndex(identifier: abaplint.TypedIdentifier): number | undefined {
     // the enum can be declared in another object, eg. a global interface the class implements
     const filename = identifier.getFilename();
-    const raw = this.reg.getFileByName(filename);
-    const obj = raw === undefined ? undefined : this.reg.findObjectForFile(raw);
+    const obj = this.findObjectForFilename(filename);
     const file = obj instanceof abaplint.ABAPObject ? obj.getABAPFileByName(filename) : undefined;
     for (const enumeration of file?.getStructure()?.findAllStructures(abaplint.Structures.TypeEnum) || []) {
       const values = enumeration.getChildren().filter(c => c instanceof abaplint.Nodes.StatementNode
@@ -1296,7 +1293,12 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
    * and are initialized once, also when the block is a loop */
   private traverseProcedureLevel(node: abaplint.Nodes.StructureNode): Chunk {
     const ret = new Chunk();
+    // FORMs, methods and function modules declare their own inline declarations
+    const programLevel = InlineDeclarations.isProgramLevelScope(this.findCurrentScopeByToken(node.getFirstToken()));
     for (const c of node.getChildren()) {
+      if (programLevel === true) {
+        ret.appendString(InlineDeclarations.buildDeclarations(c, this, true));
+      }
       if (c instanceof abaplint.Nodes.StructureNode && Traversal.isDeclaration(c) === false) {
         ret.appendChunk(this.declareNestedEarly(c));
         this.blockDepth++;
@@ -1408,6 +1410,8 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
         continue;
       }
       for (const n of c.getChildren()) {
+        // inline declarations are program global like DATA, so they stay on module level too
+        ret.appendString(InlineDeclarations.buildDeclarations(n, this, true));
         if (Traversal.isProgramLevelDeclaration(n)) {
           ret.appendChunk(this.traverse(n));
         } else if (n instanceof abaplint.Nodes.StructureNode) {
