@@ -134,45 +134,95 @@ export class Chunk {
     if (search === "") {
       throw new Error("Chunk.replaceAll, search string must not be empty");
     }
-    const positions: number[] = [];
-    let cursor = 0;
-    while (true) {
-      const index = this.raw.indexOf(search, cursor);
-      if (index < 0) {
-        break;
-      }
-      positions.push(index);
-      cursor = index + search.length;
+    const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return this.replaceMatches(new RegExp(escaped, "g"), () => replacement);
+  }
+
+  /** Replace every match of a global pattern in one forward pass. The replacer
+   * returns the new text, or undefined to keep the match. Source-map positions
+   * are moved once at the end, so the cost is linear in the code size plus
+   * mappings * log(replacements), however many matches there are. */
+  public replaceMatches(pattern: RegExp, replacer: (match: RegExpMatchArray) => string | undefined): Chunk {
+    if (!pattern.global) {
+      throw new Error("Chunk.replaceMatches, pattern must be global");
     }
 
-    const replacementLines = replacement.split("\n");
-    const lineDelta = replacementLines.length - 1;
-    const replacementLastLineLength = replacementLines[replacementLines.length - 1].length;
-    for (const index of positions.reverse()) {
-      const before = this.raw.substring(0, index);
-      const startLine = before.split("\n").length;
-      const startColumn = before.length - before.lastIndexOf("\n") - 1;
-      const endColumn = startColumn + search.length;
+    type Position = {line: number, column: number};
+    type Edit = {oldStart: Position, oldEnd: Position, newStart: Position, newEnd: Position};
+    const advance = (position: Position, text: string): Position => {
+      const lastNewline = text.lastIndexOf("\n");
+      if (lastNewline < 0) {
+        return {line: position.line, column: position.column + text.length};
+      }
+      let lines = 0;
+      for (let index = text.indexOf("\n"); index >= 0; index = text.indexOf("\n", index + 1)) {
+        lines++;
+      }
+      return {line: position.line + lines, column: text.length - lastNewline - 1};
+    };
 
-      for (const mapping of this.mappings) {
-        if (mapping.generated.line > startLine) {
-          mapping.generated.line += lineDelta;
-        } else if (mapping.generated.line === startLine && mapping.generated.column >= endColumn) {
-          if (lineDelta === 0) {
-            mapping.generated.column += replacement.length - search.length;
-          } else {
-            mapping.generated.line += lineDelta;
-            mapping.generated.column = replacementLastLineLength + mapping.generated.column - endColumn;
-          }
+    const edits: Edit[] = [];
+    const output: string[] = [];
+    let oldPosition: Position = {line: 1, column: 0};
+    let newPosition: Position = {line: 1, column: 0};
+    let cursor = 0;
+    for (const match of this.raw.matchAll(pattern)) {
+      const replacement = replacer(match);
+      if (replacement === undefined || replacement === match[0]) {
+        continue;
+      }
+      const between = this.raw.substring(cursor, match.index);
+      output.push(between, replacement);
+      const oldStart = advance(oldPosition, between);
+      const newStart = advance(newPosition, between);
+      oldPosition = advance(oldStart, match[0]);
+      newPosition = advance(newStart, replacement);
+      edits.push({oldStart, oldEnd: oldPosition, newStart, newEnd: newPosition});
+      cursor = match.index! + match[0].length;
+    }
+    if (edits.length === 0) {
+      return this;
+    }
+    output.push(this.raw.substring(cursor));
+
+    const before = (a: Position, b: Position) => a.line < b.line || (a.line === b.line && a.column < b.column);
+    for (const mapping of this.mappings) {
+      const position = mapping.generated;
+      // last edit starting at or before this mapping
+      let low = 0;
+      let high = edits.length - 1;
+      let found = -1;
+      while (low <= high) {
+        const middle = Math.floor((low + high) / 2);
+        if (before(position, edits[middle].oldStart)) {
+          high = middle - 1;
+        } else {
+          found = middle;
+          low = middle + 1;
         }
       }
-
-      this.raw = this.raw.substring(0, index) + replacement + this.raw.substring(index + search.length);
+      if (found < 0) {
+        continue;
+      }
+      const edit = edits[found];
+      if (before(position, edit.oldEnd) && position.line === edit.oldStart.line) {
+        // inside the replaced text, keep the offset from its start
+        position.column = edit.newStart.column + position.column - edit.oldStart.column;
+        position.line = edit.newStart.line;
+      } else if (before(position, edit.oldEnd)) {
+        position.line += edit.newStart.line - edit.oldStart.line;
+      } else if (position.line === edit.oldEnd.line) {
+        position.column = edit.newEnd.column + position.column - edit.oldEnd.column;
+        position.line = edit.newEnd.line;
+      } else {
+        position.line += edit.newEnd.line - edit.oldEnd.line;
+      }
     }
 
-    const lastNewline = this.raw.lastIndexOf("\n");
-    this.lineCount = this.raw.split("\n").length;
-    this.lastLineLength = this.raw.length - lastNewline - 1;
+    this.raw = output.join("");
+    const end = advance(newPosition, output[output.length - 1]);
+    this.lineCount = end.line;
+    this.lastLineLength = end.column;
     return this;
   }
 

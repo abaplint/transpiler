@@ -147,6 +147,24 @@ WRITE first-value.`;
     }
   });
 
+  it("inlines nested factories consistently in the body and in kept factories", () => {
+    const fields = Array.from({length: 20}, (_, i) => `"field_${i}": new abap.types.Character(40)`).join(",");
+    const registry = new TypeFactoryRegistry("znested.prog.mjs");
+    const small = registry.register("new abap.types.Integer()");
+    const big = registry.register(`new abap.types.Structure({${fields}, "small": ${small}}, undefined, undefined, {}, {})`);
+    const unused = registry.register(`new abap.types.Structure({"unused": ${small}}, undefined, undefined, {}, {})`);
+    const body = new Chunk(`a = ${big};\nb = ${big};\nc = ${big};\nd = ${small};`);
+    const helpers = registry.finalize(body);
+    const code = helpers + body.getCode();
+
+    expect(registry.size).to.equal(1);
+    expect(code).not.to.include(small);
+    expect(code).not.to.include(unused.slice(0, -2));
+    expect(body.getCode().split(big).length - 1).to.equal(3);
+    expect(helpers).to.include(`"small": new abap.types.Integer()`);
+    expect(body.getCode()).to.include("d = new abap.types.Integer();");
+  });
+
   it("produces deterministic output across independent runs", async () => {
     const options = {sharedTypeFactories: true};
     const first = await transpile(source, options);
