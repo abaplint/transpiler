@@ -57,7 +57,9 @@ export class SwitchBodyTranspiler {
     for (const wto of whenThenOr) {
       let thenValue = "";
       if (wto.then?.get() instanceof Expressions.Source) {
-        thenValue = new SourceTranspiler().transpile(wto.then, traversal).getCode();
+        thenValue = "return " + new SourceTranspiler().transpile(wto.then, traversal).getCode() + ";";
+      } else if (wto.then?.get() instanceof Expressions.Throw) {
+        thenValue = "\n" + traversal.traverse(wto.then).getCode() + "\n";
       } else {
         throw new Error("SwitchBodyTranspiler, Expected Source1, todo, " + wto.then?.get().constructor.name);
       }
@@ -71,11 +73,13 @@ export class SwitchBodyTranspiler {
           throw new Error("SwitchBodyTranspiler, Expected Source2, todo, " + thenOr.get().constructor.name);
         }
 
-        ret.appendString(`if (abap.compare.eq(${source.getCode()}, ${condition})) { return ${thenValue}; }\n`);
+        ret.appendString(`if (abap.compare.eq(${source.getCode()}, ${condition})) { ${thenValue} }\n`);
       }
     }
 
-    if (elseExpression) {
+    if (elseExpression?.get() instanceof Expressions.Throw) {
+      ret.appendString(traversal.traverse(elseExpression).getCode() + "\n");
+    } else if (elseExpression) {
       if (!(elseExpression.get() instanceof Expressions.Source)) {
         throw new Error("SwitchBodyTranspiler, Expected Source3, todo, " + elseExpression.get().constructor.name);
       }

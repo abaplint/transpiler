@@ -11,6 +11,7 @@ import {ITranspilerOptions} from "./types";
 import {DEFAULT_KEYWORDS} from "./keywords";
 import {TypeFactoryRegistry} from "./type_factory_registry";
 import {TranspileTypes} from "./transpile_types";
+import {InlineDeclarations} from "./inline";
 
 type IReference = ReturnType<abaplint.ISpaghettiScopeNode["getData"]>["references"][number];
 
@@ -426,8 +427,10 @@ export class Traversal {
 
     const methodDefinitions = def.getMethodDefinitions();
     if (methodDefinitions === undefined) {
-      // this can occur if the dependencies is not 702?
-      throw new Error("buildMethods: unexpected undefined, " + def.getName());
+      // abaplint registers a definition before reading it, and stops reading at the first thing it cannot find
+      const superClass = def.getSuperClass();
+      const reason = superClass ? `its super class ${superClass} is not known` : "a super class, interface or type it names is not known";
+      throw new Error(`${this.getFilename()}: the definition of ${def.getName()} could not be read: ${reason}`);
     }
 
     for (const m of methodDefinitions.getAll()) {
@@ -1296,7 +1299,12 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
    * and are initialized once, also when the block is a loop */
   private traverseProcedureLevel(node: abaplint.Nodes.StructureNode): Chunk {
     const ret = new Chunk();
+    // FORMs, methods and function modules declare their own inline declarations
+    const programLevel = InlineDeclarations.isProgramLevelScope(this.findCurrentScopeByToken(node.getFirstToken()));
     for (const c of node.getChildren()) {
+      if (programLevel === true) {
+        ret.appendString(InlineDeclarations.buildDeclarations(c, this, true));
+      }
       if (c instanceof abaplint.Nodes.StructureNode && Traversal.isDeclaration(c) === false) {
         ret.appendChunk(this.declareNestedEarly(c));
         this.blockDepth++;
@@ -1408,6 +1416,8 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
         continue;
       }
       for (const n of c.getChildren()) {
+        // inline declarations are program global like DATA, so they stay on module level too
+        ret.appendString(InlineDeclarations.buildDeclarations(n, this, true));
         if (Traversal.isProgramLevelDeclaration(n)) {
           ret.appendChunk(this.traverse(n));
         } else if (n instanceof abaplint.Nodes.StructureNode) {

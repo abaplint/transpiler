@@ -501,4 +501,14 @@ ASSERT lv_upper_sscc IS INITIAL.`;
     await f(abap);
   });
 
+  it("ALPHA IN, WIDTH, string literal", async () => {
+    const code = `
+DATA(lv_text) = |{ \`12345\` ALPHA = IN WIDTH = 10 }|.
+WRITE lv_text.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0000012345");
+  });
+
 });
