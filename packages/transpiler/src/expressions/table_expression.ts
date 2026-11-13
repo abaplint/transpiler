@@ -31,7 +31,8 @@ export class TableExpressionTranspiler {
     } else {
       // conditions
       for (const c of node.getChildren()) {
-        if (c === keyName || ["KEY", "COMPONENTS"].includes(c.concatTokens().toUpperCase())) {
+        // only the keywords, a component can be named "key" or "components"
+        if (c === keyName || (c instanceof Nodes.TokenNode && ["KEY", "COMPONENTS"].includes(c.concatTokens().toUpperCase()))) {
           continue;
         }
         if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.ComponentChainSimple) {
