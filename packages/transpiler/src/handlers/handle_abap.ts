@@ -36,19 +36,17 @@ export class HandleABAP {
 
     const spaghetti = new abaplint.SyntaxLogic(reg, obj).run().spaghetti;
 
-    if (this.options?.sharedTypeFactories === true) {
-      // Reserve names across every source contributing to each final module
-      // before traversal assigns any helper names (notably merged class locals).
-      for (const file of sequencedFiles) {
-        const filename = file.getFilename().replace(".abap", ".mjs").toLowerCase();
-        const registryKey = filename.replace(/\.clas\.locals_(def|imp)\.mjs$/, ".clas.locals.mjs");
-        let typeFactory = typeFactories.get(registryKey);
-        if (typeFactory === undefined) {
-          typeFactory = new TypeFactoryRegistry(registryKey);
-          typeFactories.set(registryKey, typeFactory);
-        }
-        typeFactory.reserveSource(file.getRaw());
+    // Reserve names across every source contributing to each final module
+    // before traversal assigns any helper names (notably merged class locals).
+    for (const file of sequencedFiles) {
+      const filename = file.getFilename().replace(".abap", ".mjs").toLowerCase();
+      const registryKey = filename.replace(/\.clas\.locals_(def|imp)\.mjs$/, ".clas.locals.mjs");
+      let typeFactory = typeFactories.get(registryKey);
+      if (typeFactory === undefined) {
+        typeFactory = new TypeFactoryRegistry(registryKey);
+        typeFactories.set(registryKey, typeFactory);
       }
+      typeFactory.reserveSource(file.getRaw());
     }
 
     for (const file of sequencedFiles) {
@@ -81,9 +79,6 @@ export class HandleABAP {
         chunk.appendString("}\n");
       }
       chunk.stripLastNewline();
-      if (this.options?.sharedTypeFactories !== true) {
-        chunk.runIndentationLogic(this.options?.ignoreSourceMap);
-      }
 
       const exports = this.findExports(file.getStructure());
       if (obj instanceof abaplint.Objects.Program) {
@@ -111,15 +106,13 @@ export class HandleABAP {
 
     ret = this.rearrangeClassLocals(obj, ret);
 
-    if (this.options?.sharedTypeFactories === true) {
-      for (const output of ret) {
-        const registry = typeFactories.get(output.filename);
-        const code = registry?.finalize(output.chunk) ?? "";
-        if (code !== "") {
-          output.chunk = new Chunk(code).appendChunk(output.chunk);
-        }
-        output.chunk.runIndentationLogic(this.options?.ignoreSourceMap);
+    for (const output of ret) {
+      const registry = typeFactories.get(output.filename);
+      const code = registry?.finalize(output.chunk) ?? "";
+      if (code !== "") {
+        output.chunk = new Chunk(code).appendChunk(output.chunk);
       }
+      output.chunk.runIndentationLogic(this.options?.ignoreSourceMap);
     }
 
     if (this.options?.addCommonJS === true) {

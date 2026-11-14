@@ -134,19 +134,18 @@ export class TranspileTypes {
           asInclude[lower] = true;
         }
       }
-      extra = "{\n" + list.join(",\n") + "}";
-      if (type.getQualifiedName() !== undefined) {
-        extra += ", \"" + type.getQualifiedName() + "\"";
-      } else {
-        extra += ", undefined";
+      // an empty object costs memory in every constructed value, the runtime reads these optionally
+      const args = [
+        "{\n" + list.join(",\n") + "}",
+        type.getQualifiedName() !== undefined ? "\"" + type.getQualifiedName() + "\"" : "undefined",
+        type.getDDICName() !== undefined ? "\"" + type.getQualifiedName() + "\"" : "undefined",
+        Object.keys(suffix).length > 0 ? JSON.stringify(suffix) : "undefined",
+        Object.keys(asInclude).length > 0 ? JSON.stringify(asInclude) : "undefined",
+      ];
+      while (args[args.length - 1] === "undefined") {
+        args.pop();
       }
-      if (type.getDDICName() !== undefined) {
-        extra += ", \"" + type.getQualifiedName() + "\"";
-      } else {
-        extra += ", undefined";
-      }
-      extra += ", " + JSON.stringify(suffix);
-      extra += ", " + JSON.stringify(asInclude);
+      extra = args.join(", ");
     } else if (type instanceof abaplint.BasicTypes.CLikeType
         || type instanceof abaplint.BasicTypes.CGenericType
         || type instanceof abaplint.BasicTypes.CSequenceType) {
@@ -162,7 +161,11 @@ export class TranspileTypes {
       resolved = "Character";
     } else if (type instanceof abaplint.BasicTypes.CharacterType) {
       resolved = "Character";
-      extra = type.getLength() + ", " + JSON.stringify(type.getAbstractTypeData());
+      extra = type.getLength() + "";
+      const typeData = JSON.stringify(type.getAbstractTypeData());
+      if (typeData !== "{}") {
+        extra += ", " + typeData;
+      }
     } else if (type instanceof abaplint.BasicTypes.NumericType) {
       resolved = "Numc";
       if (type.getQualifiedName() && type.getLength() !== 1) {
