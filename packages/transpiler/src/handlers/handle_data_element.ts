@@ -4,6 +4,7 @@ import {TranspileTypes} from "../transpile_types";
 import {IOutputFile, ITranspilerOptions} from "../types";
 import {TypeFactoryRegistry} from "../type_factory_registry";
 
+
 export class HandleDataElement {
   public constructor(private readonly options?: ITranspilerOptions) {}
 
@@ -31,6 +32,7 @@ export class HandleDataElement {
   "domain": ${JSON.stringify(obj.getDomainName())},
   "fixedValues": ${JSON.stringify(fixedValues)},
   "description": ${JSON.stringify(obj.getDescription())},
+  "texts": ${JSON.stringify(obj.getTexts())},
 };`;
     const chunk = new Chunk(body);
     const helpers = typeFactory?.finalize(chunk) ?? "";
