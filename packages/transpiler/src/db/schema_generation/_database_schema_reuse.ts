@@ -40,7 +40,8 @@ export class DatabaseSchemaReuse {
     const root = first !== undefined && (pending.length === 0 || pending.some(j => j.LTAB === first || j.RTAB === first))
       ? first : (pending[0] || constants[0])?.LTAB;
     if (root === undefined) {
-      throw new Error(`View ${view.getName()}: no tables`);
+      // nothing to select from, eg. a maintenance or help view: no database view, a SELECT from it fails when it runs
+      return "";
     }
     add(root);
     while (pending.length > 0) {
