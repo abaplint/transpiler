@@ -2707,6 +2707,132 @@ ENDFUNCTION.`;
     await dumpNrun(files, false);
   });
 
+  it("test-56-tables-header-line", async () => {
+    // a TABLES parameter has a header line in the function module, also when the caller's table has none
+
+    const clas = `CLASS zcl_fugr_tb DEFINITION PUBLIC FINAL CREATE PUBLIC.
+  PUBLIC SECTION.
+ENDCLASS.
+
+CLASS zcl_fugr_tb IMPLEMENTATION.
+ENDCLASS.`;
+
+    const tests = `CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS FINAL.
+  PRIVATE SECTION.
+    METHODS test FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+
+  METHOD test.
+    DATA lt_t000 TYPE STANDARD TABLE OF t000 WITH DEFAULT KEY.
+    DATA ls_t000 TYPE t000.
+    DATA lv_text TYPE string.
+
+    ls_t000-mandt = '001'.
+    APPEND ls_t000 TO lt_t000.
+    ls_t000-mandt = '002'.
+    APPEND ls_t000 TO lt_t000.
+
+    CALL FUNCTION 'ZFUGRTB_JOIN'
+      IMPORTING
+        ev_text  = lv_text
+      TABLES
+        it_t000  = lt_t000.
+
+    ASSERT lv_text = '001002'.
+    ASSERT lines( lt_t000 ) = 3.
+    READ TABLE lt_t000 INDEX 3 INTO ls_t000.
+    ASSERT ls_t000-mandt = 'NEW'.
+  ENDMETHOD.
+
+ENDCLASS.`;
+
+    const top = `FUNCTION-POOL zfugrtb.`;
+
+    const topxml = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <PROGDIR>
+    <NAME>LZFUGRTBTOP</NAME>
+    <SUBC>I</SUBC>
+    <UCCHECK>X</UCCHECK>
+   </PROGDIR>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
+    const sapl = `
+  INCLUDE LZFUGRTBTOP.
+  INCLUDE LZFUGRTBUXX.`;
+
+    const saplxml = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <PROGDIR>
+    <NAME>SAPLZFUGRTB</NAME>
+    <SUBC>F</SUBC>
+    <UCCHECK>X</UCCHECK>
+   </PROGDIR>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
+    const fugrxml = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_FUGR" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <AREAT>test</AREAT>
+   <INCLUDES>
+    <SOBJ_NAME>LZFUGRTBTOP</SOBJ_NAME>
+    <SOBJ_NAME>SAPLZFUGRTB</SOBJ_NAME>
+   </INCLUDES>
+   <FUNCTIONS>
+    <item>
+     <FUNCNAME>ZFUGRTB_JOIN</FUNCNAME>
+     <SHORT_TEXT>tables header line</SHORT_TEXT>
+     <EXPORT>
+      <RSEXP>
+       <PARAMETER>EV_TEXT</PARAMETER>
+       <TYP>STRING</TYP>
+      </RSEXP>
+     </EXPORT>
+     <TABLES>
+      <RSTBL>
+       <PARAMETER>IT_T000</PARAMETER>
+       <DBSTRUCT>T000</DBSTRUCT>
+      </RSTBL>
+     </TABLES>
+    </item>
+   </FUNCTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
+    const join = `FUNCTION zfugrtb_join.
+  LOOP AT it_t000.
+    CONCATENATE ev_text it_t000-mandt INTO ev_text.
+  ENDLOOP.
+  it_t000-mandt = 'NEW'.
+  APPEND it_t000.
+ENDFUNCTION.`;
+
+    const files = [
+      {filename: "t000.tabl.xml", contents: t000},
+      {filename: "zcl_fugr_tb.clas.abap", contents: clas},
+      {filename: "zcl_fugr_tb.clas.testclasses.abap", contents: tests},
+      {filename: "zfugrtb.fugr.lzfugrtbtop.abap", contents: top},
+      {filename: "zfugrtb.fugr.lzfugrtbtop.xml", contents: topxml},
+      {filename: "zfugrtb.fugr.saplzfugrtb.abap", contents: sapl},
+      {filename: "zfugrtb.fugr.saplzfugrtb.xml", contents: saplxml},
+      {filename: "zfugrtb.fugr.xml", contents: fugrxml},
+      {filename: "zfugrtb.fugr.zfugrtb_join.abap", contents: join},
+    ];
+    await dumpNrun(files);
+  });
+
   it("test-57", async () => {
     // check private SETUP method is called
 

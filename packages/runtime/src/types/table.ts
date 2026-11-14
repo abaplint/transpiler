@@ -96,6 +96,9 @@ interface ITable {
   clear(): void;
   set(tab: Table | HashedTable | TableRowType): ITable;
   getHeader(): TableRowType;
+  hasHeaderLine(): boolean;
+  addHeaderLine(): boolean;
+  removeHeaderLine(): void;
 }
 
 export class TableFactory {
@@ -138,7 +141,7 @@ export function secondaryKeyName(name: string | undefined): string | undefined {
 
 export class HashedTable implements ITable {
   private value: {[hash: string]: TableRowType};
-  private readonly header: TableRowType | undefined;
+  private header: TableRowType | undefined;
   private readonly rowType: TableRowType;
   private readonly loops: Set<LoopController>;
   private readonly options: ITableOptions;
@@ -394,6 +397,26 @@ export class HashedTable implements ITable {
     return this.header;
   }
 
+  public hasHeaderLine(): boolean {
+    return this.header !== undefined;
+  }
+
+  /** a TABLES parameter of a function module has a header line, also when the caller passes a table
+   *  without one; returns true when the header line was added, the caller removes it again */
+  public addHeaderLine(): boolean {
+    if (this.header !== undefined) {
+      return false;
+    }
+    this.header = this.rowType.clone();
+    return true;
+  }
+
+  public removeHeaderLine(): void {
+    if (this.options?.withHeader !== true) {
+      this.header = undefined;
+    }
+  }
+
   ///////////////////////////
 
   private cloneRow(item: TableRowType) {
@@ -425,7 +448,7 @@ export class HashedTable implements ITable {
 
 export class Table implements ITable {
   private value: TableRowType[];
-  private readonly header: TableRowType | undefined;
+  private header: TableRowType | undefined;
   private readonly rowType: TableRowType;
   private readonly loops: Set<LoopController>;
   private readonly options: ITableOptions;
@@ -552,6 +575,26 @@ export class Table implements ITable {
       throw new Error("table, getHeader");
     }
     return this.header;
+  }
+
+  public hasHeaderLine(): boolean {
+    return this.header !== undefined;
+  }
+
+  /** a TABLES parameter of a function module has a header line, also when the caller passes a table
+   *  without one; returns true when the header line was added, the caller removes it again */
+  public addHeaderLine(): boolean {
+    if (this.header !== undefined) {
+      return false;
+    }
+    this.header = this.rowType.clone();
+    return true;
+  }
+
+  public removeHeaderLine(): void {
+    if (this.options?.withHeader !== true) {
+      this.header = undefined;
+    }
   }
 
   public get(): TableRowType {
