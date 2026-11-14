@@ -2,7 +2,7 @@ import {Hex} from "./hex";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {String} from "./string";
-import {Float} from ".";
+import {Character, Float} from ".";
 import {parse} from "../operators/_parse";
 
 export class Time implements ICharacter {
@@ -40,6 +40,9 @@ export class Time implements ICharacter {
       this.set(value.get().padEnd(6, "0"));
     } else if (value instanceof Float) {
       this.set(Math.round(value.getRaw()));
+    } else if (value instanceof Character && value.get().trim() !== "") {
+      // trailing blanks are passed, a shorter text is padded with "0" on the right
+      this.set(value.get().padEnd(6, "0"));
     } else {
       this.set(value.get());
     }
