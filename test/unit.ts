@@ -2707,6 +2707,160 @@ ENDFUNCTION.`;
     await dumpNrun(files, false);
   });
 
+  it("test-56-namespaced-parameters", async () => {
+    // function module parameters with a namespace, eg. /1BCDWB/FORMOUTPUT of form function modules,
+    // in all parameter lists of CALL FUNCTION
+
+    const clas = `CLASS zcl_fugr_ns DEFINITION PUBLIC FINAL CREATE PUBLIC.
+  PUBLIC SECTION.
+ENDCLASS.
+
+CLASS zcl_fugr_ns IMPLEMENTATION.
+ENDCLASS.`;
+
+    const tests = `CLASS ltcl_test DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS FINAL.
+  PRIVATE SECTION.
+    METHODS test FOR TESTING.
+    METHODS upper_case FOR TESTING.
+ENDCLASS.
+
+CLASS ltcl_test IMPLEMENTATION.
+
+  METHOD test.
+    DATA lv_out TYPE i.
+    DATA lv_chg TYPE i VALUE 5.
+    DATA lt_tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+
+    CALL FUNCTION '/FOO/NS_CALC'
+      EXPORTING
+        /foo/in  = 41
+      IMPORTING
+        /foo/out = lv_out
+      TABLES
+        /foo/tab = lt_tab
+      CHANGING
+        /foo/chg = lv_chg.
+
+    ASSERT lv_out = 42.
+    ASSERT lv_chg = 10.
+    ASSERT lines( lt_tab ) = 1.
+  ENDMETHOD.
+
+  METHOD upper_case.
+    DATA lv_out TYPE i.
+    DATA lv_chg TYPE i VALUE 1.
+    DATA lt_tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+
+    CALL FUNCTION '/FOO/NS_CALC'
+      EXPORTING
+        /FOO/IN  = 1
+      IMPORTING
+        /FOO/OUT = lv_out
+      TABLES
+        /FOO/TAB = lt_tab
+      CHANGING
+        /FOO/CHG = lv_chg.
+
+    ASSERT lv_out = 2.
+    ASSERT lv_chg = 2.
+    ASSERT lines( lt_tab ) = 1.
+  ENDMETHOD.
+
+ENDCLASS.`;
+
+    const top = `FUNCTION-POOL /foo/ns.`;
+
+    const topxml = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <PROGDIR>
+    <NAME>/FOO/LNSTOP</NAME>
+    <SUBC>I</SUBC>
+    <UCCHECK>X</UCCHECK>
+   </PROGDIR>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
+    const sapl = `
+  INCLUDE /foo/lnstop.
+  INCLUDE /foo/lnsuxx.`;
+
+    const saplxml = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <PROGDIR>
+    <NAME>/FOO/SAPLNS</NAME>
+    <SUBC>F</SUBC>
+    <UCCHECK>X</UCCHECK>
+   </PROGDIR>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
+    const fugrxml = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_FUGR" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <AREAT>test</AREAT>
+   <INCLUDES>
+    <SOBJ_NAME>/FOO/LNSTOP</SOBJ_NAME>
+    <SOBJ_NAME>/FOO/SAPLNS</SOBJ_NAME>
+   </INCLUDES>
+   <FUNCTIONS>
+    <item>
+     <FUNCNAME>/FOO/NS_CALC</FUNCNAME>
+     <SHORT_TEXT>namespaced parameters</SHORT_TEXT>
+     <IMPORT>
+      <RSIMP>
+       <PARAMETER>/FOO/IN</PARAMETER>
+       <TYP>I</TYP>
+      </RSIMP>
+     </IMPORT>
+     <CHANGING>
+      <RSCHA>
+       <PARAMETER>/FOO/CHG</PARAMETER>
+       <TYP>I</TYP>
+      </RSCHA>
+     </CHANGING>
+     <EXPORT>
+      <RSEXP>
+       <PARAMETER>/FOO/OUT</PARAMETER>
+       <TYP>I</TYP>
+      </RSEXP>
+     </EXPORT>
+     <TABLES>
+      <RSTBL>
+       <PARAMETER>/FOO/TAB</PARAMETER>
+      </RSTBL>
+     </TABLES>
+    </item>
+   </FUNCTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+
+    const calc = `FUNCTION /foo/ns_calc.
+  /foo/out = /foo/in + 1.
+  /foo/chg = /foo/chg * 2.
+  APPEND /foo/in TO /foo/tab.
+ENDFUNCTION.`;
+
+    const files = [
+      {filename: "zcl_fugr_ns.clas.abap", contents: clas},
+      {filename: "zcl_fugr_ns.clas.testclasses.abap", contents: tests},
+      {filename: "#foo#ns.fugr.#foo#lnstop.abap", contents: top},
+      {filename: "#foo#ns.fugr.#foo#lnstop.xml", contents: topxml},
+      {filename: "#foo#ns.fugr.#foo#saplns.abap", contents: sapl},
+      {filename: "#foo#ns.fugr.#foo#saplns.xml", contents: saplxml},
+      {filename: "#foo#ns.fugr.xml", contents: fugrxml},
+      {filename: "#foo#ns.fugr.#foo#ns_calc.abap", contents: calc},
+    ];
+    await dumpNrun(files, false);
+  });
+
   it("test-57", async () => {
     // check private SETUP method is called
 

@@ -26,6 +26,12 @@ describe("Transpile CALL FUNCTION", () => {
       js: "abap.statements.callFunction({name:'BAR',extra:" + extra + ",calling:this.return_info,exporting: {foo: boo}});"},
     {abap: "CALL FUNCTION 'BAR' STARTING NEW TASK 'foo' EXPORTING foo = boo.",
       js: guard + `await ${call}({exporting: {foo: boo}});`},
+    {abap: "CALL FUNCTION 'BAR' EXPORTING /foo/in = boo IMPORTING /foo/out = moo\n" +
+      "TABLES /foo/tab = itab CHANGING /foo/chg = chg.",
+      js: guard + `await ${call}({exporting: {$foo$in: boo}, importing: {$foo$out: moo}, ` +
+        "tables: {$foo$tab: itab}, changing: {$foo$chg: chg}});"},
+    {abap: "CALL FUNCTION 'BAR' IMPORTING /1BCDWB/FORMOUTPUT = moo FOO = bar.",
+      js: guard + `await ${call}({importing: {$1bcdwb$formoutput: moo, foo: bar}});`},
   ];
 
   for (const test of tests) {
