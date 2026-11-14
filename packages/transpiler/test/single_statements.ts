@@ -30,7 +30,7 @@ describe("Single statements", () => {
     {abap: "CONTINUE.",                            js: "continue;",                                 skip: false},
     {abap: "IMPORT variscreens = lt_variscreens FROM MEMORY ID '%_SCRNR_%'.",                       js: `throw new Error("Import, transpiler todo");`,                                 skip: false},
     {abap: "CASE bar. ENDCASE.",                   js: "let unique1 = bar;",                        skip: false},
-    {abap: "DATA foo TYPE c.",                     js: "let foo = new abap.types.Character(1, {});",     skip: false},
+    {abap: "DATA foo TYPE c.",                     js: "let foo = new abap.types.Character(1);",     skip: false},
     {abap: "DATA foo TYPE string.",                js: `let foo = new abap.types.String({qualifiedName: "STRING"});`,      skip: false},
     {abap: "DATA foo TYPE c LENGTH 2.",            js: "let foo = new abap.types.Character(2});",                 skip: true},
     {abap: "DATA foo TYPE c LENGTH 2 VALUE 'fo'.", js: "let foo = new abap.types.Character(2);\nfoo.set('fo');", skip: true},

@@ -105,6 +105,9 @@ DATA other_ref_2 TYPE REF TO ty_other.`;
   it("keeps statement source maps valid after adding helper declarations", async () => {
     const input = `TYPES: BEGIN OF ty,
   value TYPE i,
+  text1 TYPE c LENGTH 40,
+  text2 TYPE c LENGTH 40,
+  text3 TYPE c LENGTH 40,
 END OF ty.
 DATA first TYPE ty.
 DATA second TYPE ty.
@@ -117,6 +120,22 @@ WRITE first-value.`;
     expect(stats.codeLines).to.be.greaterThan(stats.mappedLines);
     const ignored = await runSingleMapped(input, {ignoreSourceMap: true});
     expect(JSON.parse(ignored!.map).mappings).to.equal("");
+  });
+
+  it("omits empty type data and include metadata from constructors", async () => {
+    const input = `TYPES: BEGIN OF ty_child,
+  value TYPE c LENGTH 1,
+END OF ty_child.
+TYPES BEGIN OF ty_parent.
+INCLUDE TYPE ty_child AS named RENAMING WITH SUFFIX _s.
+TYPES END OF ty_parent.
+DATA plain TYPE c LENGTH 5.
+DATA parent TYPE ty_parent.`;
+    const code = await transpile(input);
+    expect(code).to.include("let plain = new abap.types.Character(5);");
+    expect(code).not.to.include("{}");
+    expect(code).to.include(`}, "ty_child")`);
+    expect(code).to.include(`}, "ty_parent", undefined, {"named":"_s"}, {"named":true})`);
   });
 
   it("keeps unknown static types as runtime errors", () => {

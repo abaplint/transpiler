@@ -159,6 +159,9 @@ ENDFUNCTION.`;
     const repeated = (name: string) => `FUNCTION ${name}.
 TYPES: BEGIN OF ty_shared,
   value TYPE i,
+  text1 TYPE c LENGTH 40,
+  text2 TYPE c LENGTH 40,
+  text3 TYPE c LENGTH 40,
 END OF ty_shared.
 DATA item TYPE ty_shared.
 ENDFUNCTION.`;
