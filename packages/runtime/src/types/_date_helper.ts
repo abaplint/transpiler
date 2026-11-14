@@ -1,10 +1,12 @@
+// Day numbers are counted in UTC, so they are read back in UTC as well: reading them with the
+// local getters gave the day before on machines west of UTC (date + 45 was one day short)
 export function getDateFromNumber(value: number): string {
   const msInOneDay = 24 * 60 * 60 * 1000;
   const date = new Date(-62135596800000 + value * msInOneDay);
   let removeJulianLeaps = 2;
   if (value <= 577736) {
-    let beforeGregorian = date.getFullYear() <= 1582 ? date.getFullYear() : 1582;
-    if (date.getMonth() < 1 || ( date.getMonth() === 1 && date.getDay() < 29)) {
+    let beforeGregorian = date.getUTCFullYear() <= 1582 ? date.getUTCFullYear() : 1582;
+    if (date.getUTCMonth() < 1 || ( date.getUTCMonth() === 1 && date.getUTCDay() < 29)) {
       beforeGregorian -= 1;
     }
     removeJulianLeaps = Math.floor( beforeGregorian / 100 ) - Math.floor( beforeGregorian / 400 );
@@ -12,9 +14,9 @@ export function getDateFromNumber(value: number): string {
 
   date.setTime(date.getTime() - removeJulianLeaps * msInOneDay);
 
-  let ret = date.getFullYear().toString().padStart(4,"0");
-  ret += (date.getMonth() + 1).toString().padStart(2,"0");
-  ret += date.getDate().toString().padStart(2,"0");
+  let ret = date.getUTCFullYear().toString().padStart(4,"0");
+  ret += (date.getUTCMonth() + 1).toString().padStart(2,"0");
+  ret += date.getUTCDate().toString().padStart(2,"0");
 
   return ret;
 }
@@ -30,8 +32,8 @@ export function getNumberFromDate(value: string): number {
   let days = Math.floor((date.getTime() + 62135596800000 ) / msInOneDay);
   let addJulianLeaps = 2;
   if (days <= 577736) {
-    let beforeGregorian = date.getFullYear() <= 1582 ? date.getFullYear() : 1582;
-    if (date.getMonth() < 1 || ( date.getMonth() === 1 && date.getDay() < 29)) {
+    let beforeGregorian = date.getUTCFullYear() <= 1582 ? date.getUTCFullYear() : 1582;
+    if (date.getUTCMonth() < 1 || ( date.getUTCMonth() === 1 && date.getUTCDay() < 29)) {
       beforeGregorian -= 1;
     }
     addJulianLeaps = Math.floor( beforeGregorian / 100 ) - Math.floor( beforeGregorian / 400 );
