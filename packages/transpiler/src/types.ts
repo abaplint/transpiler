@@ -35,7 +35,8 @@ export interface IProgress {
   tick(text: string): Promise<void>;
 }
 
-/** one javascript output file for each object */
+/** one javascript output file for each object, except with folders the DDIC objects
+ * of each folder share one file, its object then has type "DDIC" and the folder as name */
 export interface IOutputFile {
   object: IObjectIdentifier;
   /** POSIX path relative to the output root; includes its folder when a layout is supplied. */
