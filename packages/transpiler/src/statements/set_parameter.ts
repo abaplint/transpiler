@@ -5,8 +5,16 @@ import {Chunk} from "../chunk";
 
 export class SetParameterTranspiler implements IStatementTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    return new Chunk(`throw new Error("SetParameter, transpiler todo");`);
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
+    const sources = node.findDirectExpressions(abaplint.Expressions.Source);
+    if (sources.length !== 2) {
+      throw new Error("SetParameterTranspiler, unexpected node");
+    }
+    return new Chunk(`abap.statements.setParameter(`)
+      .appendChunk(traversal.traverse(sources[0]))
+      .appendString(",")
+      .appendChunk(traversal.traverse(sources[1]))
+      .appendString(");");
   }
 
 }

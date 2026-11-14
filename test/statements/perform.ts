@@ -154,6 +154,64 @@ WRITE 'after'.`);
     expect(caught).to.be.instanceof(ProgramNotFound);
   });
 
+  it("PERFORM (name) IN PROGRAM, dynamic subroutine name", async () => {
+    await runProgram("ztarget_perform.prog.abap", `
+FORM say_hello.
+  WRITE 'hello'.
+ENDFORM.`);
+    await runProgram("zfoobar_perform.prog.abap", `
+DATA lv_form TYPE c LENGTH 30.
+DATA lv_prog TYPE c LENGTH 40.
+lv_form = 'SAY_HELLO'.
+lv_prog = 'ZTARGET_PERFORM'.
+PERFORM (lv_form) IN PROGRAM ztarget_perform.
+PERFORM (lv_form) IN PROGRAM (lv_prog).
+PERFORM ('SAY_HELLO') IN PROGRAM ztarget_perform.`);
+    expect(abap.console.get()).to.equal("hellohellohello");
+  });
+
+  it("PERFORM (name) IN PROGRAM (sy-repid), the current program", async () => {
+    const code = `
+FORM say_hello.
+  WRITE 'hello'.
+ENDFORM.
+
+START-OF-SELECTION.
+  DATA lv_form TYPE c LENGTH 30.
+  lv_form = 'SAY_HELLO'.
+  PERFORM (lv_form) IN PROGRAM (sy-repid).
+  PERFORM (lv_form) IN PROGRAM.`;
+    const js = await run(code);
+    await new AsyncFunction("abap", js)(abap);
+    expect(abap.console.get()).to.equal("hellohello");
+  });
+
+  it("PERFORM (name) IN PROGRAM, the name is taken as it is, lower case is not found", async () => {
+    abap.Classes["CX_SY_DYN_CALL_ILLEGAL_FORM"] = IllegalForm;
+    abap.Classes["CX_SY_PROGRAM_NOT_FOUND"] = ProgramNotFound;
+    await runProgram("ztarget_perform.prog.abap", `
+FORM say_hello.
+  WRITE 'hello'.
+ENDFORM.`);
+    const caught = await runCaught(`
+DATA lv_form TYPE c LENGTH 30.
+lv_form = 'say_hello'.
+PERFORM (lv_form) IN PROGRAM ztarget_perform.`);
+    expect(caught).to.be.instanceof(IllegalForm);
+    expect(abap.console.get()).to.equal("");
+  });
+
+  it("PERFORM (name) IN PROGRAM IF FOUND, missing subroutine", async () => {
+    const code = `
+DATA lv_form TYPE c LENGTH 30.
+lv_form = 'NO_SUCH_FORM'.
+PERFORM (lv_form) IN PROGRAM zfoobar_perform IF FOUND.
+WRITE 'after'.`;
+    const js = await run(code);
+    await new AsyncFunction("abap", js)(abap);
+    expect(abap.console.get()).to.equal("after");
+  });
+
   it("PERFORM IN PROGRAM, exception class not loaded", async () => {
     const caught = await runCaught(`PERFORM hello IN PROGRAM zunknown.`);
     expect(caught).to.equal("CX_SY_PROGRAM_NOT_FOUND not found");

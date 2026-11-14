@@ -2,7 +2,7 @@ import {DatabaseSetupResult} from "./db/database_setup_result";
 import * as abaplint from "@abaplint/core";
 import {ITranspilerOptions} from "./types";
 import {HandleFUGR} from "./handlers/handle_fugr";
-import {OutputLayout, importPath} from "./output_layout";
+import {DDIC_TYPES, OutputLayout, importPath} from "./output_layout";
 
 export function escapeNamespaceFilename(filename: string): string {
 // ES modules are resolved and cached as URLs. This means that special characters must be
@@ -99,8 +99,12 @@ globalThis.abap = new runtime.ABAP();\n`;
       };
     };
 
+    // grouped output merges the DDIC definitions of each folder, see DDIC_MODULE
+    const ddic = new Set<string>();
     for (const obj of reg.getObjects()) {
-      if (obj instanceof abaplint.Objects.Table
+      if (this.layout.isGrouped() && DDIC_TYPES.has(obj.getType())) {
+        ddic.add(this.layout.ddicModule({type: obj.getType(), name: obj.getName()}));
+      } else if (obj instanceof abaplint.Objects.Table
           || obj instanceof abaplint.Objects.DataElement
           || obj instanceof abaplint.Objects.LockObject
           || obj instanceof abaplint.Objects.MessageClass
@@ -135,7 +139,9 @@ globalThis.abap = new runtime.ABAP();\n`;
 
     // Folder names must not change the original module initialization order.
     list.sort((a, b) => a.filename < b.filename ? -1 : a.filename > b.filename ? 1 : 0);
-    return [...list, ...late].map(entry => entry.code).join("\n");
+    // DDIC definitions only register lazy types, loading them first is always safe
+    const early = [...ddic].sort().map(imp);
+    return [...early, ...list, ...late].map(entry => entry.code).join("\n");
   }
 
   // class constructors might make early use of eg. constants from interfaces

@@ -19,9 +19,9 @@ import {HandleMSAG} from "./handlers/handle_msag";
 import {HandleOA2P} from "./handlers/handle_oa2p";
 import {HandleFUGR} from "./handlers/handle_fugr";
 import {Initialization} from "./initialization";
-import {OutputLayout, OutputFolders} from "./output_layout";
+import {DDIC_TYPES, OutputLayout, OutputFolders} from "./output_layout";
 
-export {OutputLayout, OutputFolders, importPath} from "./output_layout";
+export {OutputLayout, OutputFolders, importPath, DDIC_MODULE} from "./output_layout";
 
 export {config, ITranspilerOptions, IFile, IProgress, IOutputFile, IOutput,
   UnknownTypesEnum, Chunk, DatabaseSetupResult};
@@ -110,7 +110,47 @@ export class Transpiler {
     for (const file of output.objects) {
       file.filename = layout.file(file.object, file.filename);
     }
+    if (layout.isGrouped()) {
+      output.objects = this.mergeDDIC(reg, layout, output.objects);
+    }
     return output;
+  }
+
+  /** One module per output folder with all its DDIC definitions, which the initialization
+   * scripts import. Each module is created for exactly the folders the initialization
+   * derives from the registry, so no import can point to a missing module. */
+  private mergeDDIC(reg: abaplint.IRegistry, layout: OutputLayout, objects: IOutputFile[]): IOutputFile[] {
+    const modules = new Map<string, IOutputFile[]>();
+    for (const obj of reg.getObjects()) {
+      if (DDIC_TYPES.has(obj.getType())) {
+        modules.set(layout.ddicModule({type: obj.getType(), name: obj.getName()}), []);
+      }
+    }
+
+    const result: IOutputFile[] = [];
+    for (const file of objects) {
+      if (DDIC_TYPES.has(file.object.type.toUpperCase())) {
+        modules.get(layout.ddicModule(file.object))!.push(file);
+      } else {
+        result.push(file);
+      }
+    }
+
+    for (const filename of [...modules.keys()].sort()) {
+      // type factory names carry their original module name, so the definitions can be
+      // concatenated without clashes; sorted, so the module does not depend on file order
+      const code = modules.get(filename)!
+        .sort((a, b) => a.filename < b.filename ? -1 : a.filename > b.filename ? 1 : 0)
+        .map(file => file.chunk.getCode()).join("\n");
+      result.push({
+        object: {type: "DDIC", name: filename.split("/")[0]},
+        filename,
+        chunk: new Chunk(code === "" ? "" : code + "\n"),
+        requires: [],
+        exports: [],
+      });
+    }
+    return result;
   }
 
 // ///////////////////////////////
