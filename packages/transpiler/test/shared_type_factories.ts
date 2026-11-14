@@ -33,7 +33,7 @@ async function transpile(contents: string, options?: ITranspilerOptions) {
 describe("shared type factories", () => {
 
   it("deduplicates nested structures and table row constructors per module", async () => {
-    const code = await transpile(source, {sharedTypeFactories: true});
+    const code = await transpile(source);
     expect(code).to.be.a("string");
     expect(code!.match(/function \$t_/g)?.length).to.equal(3);
     expect(code).to.include("let first = $t_");
@@ -42,20 +42,8 @@ describe("shared type factories", () => {
     expect(code).to.include("let second_rows = $t_");
   });
 
-  it("keeps the legacy inline output when disabled", async () => {
-    const code = await transpile(source, {sharedTypeFactories: false});
-    expect(code).to.include("new abap.types.Structure({");
-    expect(code).not.to.include("$t_");
-  });
-
-  it("enables shared factories by default", async () => {
-    const code = await transpile(source);
-    expect(code).to.include("function $t_");
-    expect(code).to.include("let first = $t_");
-  });
-
   it("emits factories inside the raw module chunk without helper imports", async () => {
-    const result = await transpileFiles([{filename: "zraw.prog.abap", contents: source}], {sharedTypeFactories: true});
+    const result = await transpileFiles([{filename: "zraw.prog.abap", contents: source}]);
     expect(result.objects).to.have.length(1);
     const code = result.objects[0].chunk.getCode();
     expect(code).to.include("function $t_");
@@ -74,7 +62,7 @@ END OF ty_second.
 DATA first TYPE ty_first.
 DATA first_copy TYPE ty_first.
 DATA second TYPE ty_second.`;
-    const code = await transpile(input + "\nDATA second_copy TYPE ty_second.", {sharedTypeFactories: true});
+    const code = await transpile(input + "\nDATA second_copy TYPE ty_second.");
     expect(code!.match(/function \$t_/g)?.length).to.equal(2);
   });
 
@@ -89,7 +77,7 @@ DATA std_1 TYPE ty_std.
 DATA std_2 TYPE ty_std.
 DATA sorted_1 TYPE ty_sorted.
 DATA sorted_2 TYPE ty_sorted.`;
-    const code = await transpile(input, {sharedTypeFactories: true});
+    const code = await transpile(input);
     expect(code!.match(/function \$t_/g)?.length).to.equal(3);
     expect(code).to.include('"type":"STANDARD"');
     expect(code).to.include('"type":"SORTED"');
@@ -108,17 +96,10 @@ DATA item_ref_1 TYPE REF TO ty_item.
 DATA item_ref_2 TYPE REF TO ty_item.
 DATA other_ref_1 TYPE REF TO ty_other.
 DATA other_ref_2 TYPE REF TO ty_other.`;
-    const code = await transpile(input, {sharedTypeFactories: true});
+    const code = await transpile(input);
     expect(code!.match(/function \$t_/g)?.length).to.equal(2);
     expect(code).to.include('"TY_ITEM-VALUE"');
     expect(code).to.include('"TY_OTHER-VALUE"');
-  });
-
-  it("keeps small repeated types inline when helper code would increase output", async () => {
-    const input = "TYPES: BEGIN OF ty,\n  value TYPE i,\nEND OF ty.\nDATA first TYPE ty.\nDATA second TYPE ty.";
-    const legacy = await transpile(input, {sharedTypeFactories: false});
-    const shared = await transpile(input, {sharedTypeFactories: true});
-    expect(Buffer.byteLength(shared!, "utf8")).to.be.at.most(Buffer.byteLength(legacy!, "utf8"));
   });
 
   it("keeps statement source maps valid after adding helper declarations", async () => {
@@ -128,13 +109,13 @@ END OF ty.
 DATA first TYPE ty.
 DATA second TYPE ty.
 WRITE first-value.`;
-    const result = await runSingleMapped(input, {sharedTypeFactories: true, addCommonJS: true});
+    const result = await runSingleMapped(input, {addCommonJS: true});
     expect(result).to.not.equal(undefined);
     expect(result!.js).to.include("function $t_");
     const stats = await validateSourceMap(input, result!.js, result!.map);
     expect(stats.mappedLines).to.be.greaterThan(0);
     expect(stats.codeLines).to.be.greaterThan(stats.mappedLines);
-    const ignored = await runSingleMapped(input, {sharedTypeFactories: true, ignoreSourceMap: true});
+    const ignored = await runSingleMapped(input, {ignoreSourceMap: true});
     expect(JSON.parse(ignored!.map).mappings).to.equal("");
   });
 
@@ -166,9 +147,8 @@ WRITE first-value.`;
   });
 
   it("produces deterministic output across independent runs", async () => {
-    const options = {sharedTypeFactories: true};
-    const first = await transpile(source, options);
-    const second = await transpile(source, options);
+    const first = await transpile(source);
+    const second = await transpile(source);
     expect(second).to.equal(first);
   });
 
@@ -269,7 +249,7 @@ CLASS lcl_factory IMPLEMENTATION.
 ENDCLASS.`,
       },
     ];
-    const result = await transpileFiles(files, {sharedTypeFactories: true});
+    const result = await transpileFiles(files);
     const locals = result.objects.find(output => output.filename.endsWith(".clas.locals.mjs"));
     const main = result.objects.find(output => output.filename.endsWith(".clas.mjs"));
     expect(locals).to.not.equal(undefined);

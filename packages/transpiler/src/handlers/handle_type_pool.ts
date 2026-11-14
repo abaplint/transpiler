@@ -24,9 +24,8 @@ export class HandleTypePool {
 
     const chunk = new Chunk();
     chunk.appendString(`const pool = {};\n`);
-    const typeFactory = this.options?.sharedTypeFactories === true
-      ? new TypeFactoryRegistry(obj.getName().toLowerCase() + ".typepool.mjs") : undefined;
-    typeFactory?.reserveSource(abapFile.getRaw());
+    const typeFactory = new TypeFactoryRegistry(obj.getName().toLowerCase() + ".typepool.mjs");
+    typeFactory.reserveSource(abapFile.getRaw());
 
     for (const v in spaghettiNode?.getData().vars) {
       const abs = spaghettiNode!.getData().vars[v];
@@ -60,11 +59,9 @@ export class HandleTypePool {
       exports: [],
     };
 
-    if (typeFactory !== undefined && typeFactory.size > 0) {
-      const helpers = typeFactory.finalize(output.chunk);
-      if (helpers !== "") {
-        output.chunk = new Chunk(helpers).appendChunk(output.chunk);
-      }
+    const helpers = typeFactory.finalize(output.chunk);
+    if (helpers !== "") {
+      output.chunk = new Chunk(helpers).appendChunk(output.chunk);
     }
 
     return [output];

@@ -167,7 +167,7 @@ ENDFUNCTION.`;
       : file.filename === "zfgroup.fugr.zfmodule2.abap"
         ? {...file, contents: repeated("zfmodule2")}
         : file);
-    const fugr = await runFugr(input, {sharedTypeFactories: true});
+    const fugr = await runFugr(input);
     const code = fugr.chunk.getCode();
     expect(code.match(/function \$t_/g)?.length).to.equal(1);
     expect(code.match(/\$t_[\w$]+\(\)/g)?.length).to.be.greaterThan(2);

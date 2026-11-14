@@ -21,16 +21,14 @@ export class HandleFUGR {
   public runObject(obj: abaplint.ABAPObject, reg: abaplint.IRegistry): IOutputFile[] {
     const spaghetti = new abaplint.SyntaxLogic(reg, obj).run().spaghetti;
     const chunk = new Chunk().appendString("{\n");
-    const typeFactory = this.options?.sharedTypeFactories === true
-      ? new TypeFactoryRegistry(obj.getName().toLowerCase().replace(/\//g, "#") + ".fugr.mjs") : undefined;
-
+    const typeFactory = new TypeFactoryRegistry(obj.getName().toLowerCase().replace(/\//g, "#") + ".fugr.mjs");
 
     if (HandleFUGR.shouldSkip(obj, reg)) {
       return [];
     }
 
     for (const file of obj.getSequencedFiles()) {
-      typeFactory?.reserveSource(file.getRaw());
+      typeFactory.reserveSource(file.getRaw());
     }
 
     for (const file of obj.getSequencedFiles()) {
@@ -44,7 +42,7 @@ export class HandleFUGR {
       chunk.appendChunk(contents);
       chunk.stripLastNewline();
     }
-    const helpers = typeFactory?.finalize(chunk) ?? "";
+    const helpers = typeFactory.finalize(chunk);
     const assembled = helpers === "" ? chunk : new Chunk(helpers).appendChunk(chunk);
     // indentation must run once over the accumulated chunk: running it per
     // appended file re-indents the earlier files, drifting the brace counter

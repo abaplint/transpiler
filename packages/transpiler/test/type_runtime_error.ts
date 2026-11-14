@@ -52,7 +52,7 @@ CLASS lcl DEFINITION.
 ENDCLASS.
 DATA first TYPE ty_bad.
 DATA second TYPE ty_bad.`;
-    const output = await runSingle(abap, {...options, sharedTypeFactories: true});
+    const output = await runSingle(abap, options);
     expect(output).not.to.include("function $t_");
     expect(output).to.include(`static ATTRIBUTES = {"BAD": {"type": () => {return new abap.types.Structure({`);
     expect(output).to.include('throw new Error("Void type: ZCL_MISSING")');
