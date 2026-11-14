@@ -167,6 +167,32 @@ describe("Chunk", () => {
     expect(found).to.not.include(1);
   });
 
+  it("replaceMatches moves mappings after each replacement, including added lines", async () => {
+    const chunk = new Chunk()
+      .append("a = X();", new Position(1, 1), new Dummy())
+      .append(" b = X();", new Position(1, 10), new Dummy())
+      .append(" c = Y();", new Position(1, 20), new Dummy());
+    chunk.appendString("\n");
+    chunk.append("d = X();", new Position(2, 1), new Dummy());
+
+    chunk.replaceMatches(/[XY]\(\)/g, match => match[0] === "X()" ? "new\nLong()" : undefined);
+
+    expect(chunk.getCode()).to.equal("a = new\nLong(); b = new\nLong(); c = Y();\nd = new\nLong();");
+    const generated = chunk.mappings.map(m => [m.generated.line, m.generated.column]);
+    expect(generated).to.deep.equal([[1, 0], [2, 7], [3, 7], [4, 0]]);
+    // appending after the replacement continues at the true end of the buffer
+    chunk.append("!", new Position(3, 1), new Dummy());
+    expect(chunk.mappings[4].generated).to.deep.equal({line: 5, column: 7});
+  });
+
+  it("replaceAll treats the search string literally", async () => {
+    const chunk = new Chunk().append("$t_a() + $t_a()", new Position(1, 1), new Dummy())
+      .append(" end", new Position(1, 20), new Dummy());
+    chunk.replaceAll("$t_a()", "value");
+    expect(chunk.getCode()).to.equal("value + value end");
+    expect(chunk.mappings[1].generated).to.deep.equal({line: 1, column: 13});
+  });
+
   it("getMap rewrites source paths", async () => {
     const chunk = new Chunk().append("code", new Position(1, 1), new Dummy());
     const map = JSON.parse(chunk.getMap("out.mjs", {sourcePaths: {dummy: "sub/dir/dummy.abap"}}));

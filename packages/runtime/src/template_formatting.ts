@@ -72,6 +72,10 @@ export function templateFormatting(source: ICharacter | INumeric | number | stri
     if (typeof source !== "number" && typeof source !== "string") {
       text = alphaIn(source, options.alphaInContext);
     }
+    if (options.width && text.match(/^[0-9 ]+$/) !== null && text.trim() !== "") {
+      // with WIDTH, the digits are padded with zeros to the width
+      text = text.trim().padStart(options.width, "0");
+    }
   }
 
   if (options) {

@@ -22,7 +22,7 @@ import {raiseEvent} from "./raise_event";
 import {receive} from "./receive";
 import {getLocale} from "./get_locale";
 import {unpack} from "./unpack";
-import {getParameter} from "./get_parameter";
+import {getParameter, setParameter} from "./get_parameter";
 import {setLocale} from "./set_locale";
 import {getRunTime} from "./get_run_time";
 import {getTime} from "./get_time";
@@ -80,6 +80,7 @@ export class Statements {
   public getBit = getBit;
   public getLocale = getLocale;
   public getParameter = getParameter;
+  public setParameter = setParameter;
   public getTime = getTime;
   public insertInternal = insertInternal;
   public loop = loop;
