@@ -641,6 +641,73 @@ START-OF-SELECTION.
   });
 
 
+  // METHODS ... DEFAULT IGNORE | DEFAULT FAIL: optional interface methods, a class implementing the
+  // interface may leave them out. IGNORE behaves like an empty method, FAIL raises CX_SY_DYN_CALL_ILLEGAL_METHOD
+  it("optional interface methods, DEFAULT IGNORE and DEFAULT FAIL", async () => {
+    const code = `
+CLASS cx_root DEFINITION ABSTRACT PUBLIC.
+ENDCLASS.
+CLASS cx_root IMPLEMENTATION.
+ENDCLASS.
+
+CLASS cx_sy_dyn_call_illegal_method DEFINITION PUBLIC INHERITING FROM cx_root.
+  PUBLIC SECTION.
+    DATA classname TYPE string.
+    DATA methodname TYPE string.
+    METHODS constructor IMPORTING classname TYPE string OPTIONAL methodname TYPE string OPTIONAL.
+ENDCLASS.
+CLASS cx_sy_dyn_call_illegal_method IMPLEMENTATION.
+  METHOD constructor.
+    super->constructor( ).
+    me->classname = classname.
+    me->methodname = methodname.
+  ENDMETHOD.
+ENDCLASS.
+
+INTERFACE lif.
+  METHODS count DEFAULT IGNORE RETURNING VALUE(r) TYPE i.
+  METHODS fill DEFAULT IGNORE EXPORTING VALUE(ev_value) TYPE i ev_ref TYPE i.
+  CLASS-METHODS must DEFAULT FAIL.
+  METHODS own.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD lif~own.
+    WRITE / 'own'.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lif.
+  DATA lx TYPE REF TO cx_sy_dyn_call_illegal_method.
+  DATA v TYPE i VALUE 5.
+  DATA a TYPE i VALUE 7.
+  DATA b TYPE i VALUE 7.
+  CREATE OBJECT lo TYPE lcl.
+  lo->own( ).
+  v = lo->count( ).
+  WRITE / v.
+  lo->fill( IMPORTING ev_value = a ev_ref = b ).
+  WRITE / a.
+  WRITE / b.
+  TRY.
+      lcl=>lif~must( ).
+      WRITE / 'no exception'.
+    CATCH cx_sy_dyn_call_illegal_method INTO lx.
+      WRITE / lx->methodname.
+  ENDTRY.`;
+
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("own\n0\n0\n7\nLIF~MUST");
+  });
+
   // INTERFACES ... PARTIALLY IMPLEMENTED: a system generates the methods the class
   // does not implement as empty methods, the transpiler emitted nothing for them
   it("PARTIALLY IMPLEMENTED, calling an unimplemented method raises CX_SY_DYN_CALL_ILLEGAL_METHOD", async () => {

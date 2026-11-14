@@ -62,7 +62,9 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
   /** INTERFACES ... PARTIALLY IMPLEMENTED: the interface methods the test class
    * does not implement exist on a system and raise CX_SY_DYN_CALL_ILLEGAL_METHOD
    * when called. Emits a method of that shape under the name the implementation
-   * would have had, so the call ends in that exception and not in a TypeError */
+   * would have had, so the call ends in that exception and not in a TypeError.
+   * Also the optional interface methods, METHODS ... DEFAULT IGNORE | DEFAULT FAIL, a class
+   * does not implement: IGNORE behaves like an empty method, FAIL raises CX_SY_DYN_CALL_ILLEGAL_METHOD */
   private buildPartiallyImplementedStubs(token: abaplint.Token, methods: readonly abaplint.Nodes.StatementNode[],
                                          traversal: Traversal): string {
     const cdef = traversal.getClassDefinition(token);
@@ -71,7 +73,8 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
       return "";
     }
     const partial = cdef.getImplementing().filter(i => i.partial === true);
-    if (partial.length === 0) {
+    const others = cdef.getImplementing().filter(i => i.partial !== true);
+    if (partial.length === 0 && others.length === 0) {
       return "";
     }
 
@@ -97,7 +100,10 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     }
 
     let ret = "";
-    for (const name of this.findIncludedInterfaces(partial.map(i => i.name), scope, traversal)) {
+    const partialNames = this.findIncludedInterfaces(partial.map(i => i.name), scope, traversal);
+    const otherNames = this.findIncludedInterfaces(others.map(i => i.name), scope, traversal)
+      .filter(n => partialNames.includes(n) === false);
+    for (const name of [...partialNames, ...otherNames]) {
       if (inherited.has(name)) {
         continue;
       }
@@ -111,10 +117,62 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
         if (implemented.has(emitted)) {
           continue;
         }
-        implemented.add(emitted);
-        ret += this.buildNotImplementedMethod(emitted, m, token.getStr().toLowerCase(), intf.getName(), token, traversal);
+        const optional = this.findOptionalDefault(m, traversal);
+        if (optional === "IGNORE") {
+          implemented.add(emitted);
+          ret += this.buildIgnoredMethod(emitted, m, token.getStr().toLowerCase(), traversal);
+        } else if (optional === "FAIL" || partialNames.includes(name)) {
+          implemented.add(emitted);
+          ret += this.buildNotImplementedMethod(emitted, m, token.getStr().toLowerCase(), intf.getName(), token, traversal);
+        }
       }
     }
+    return ret;
+  }
+
+  /** METHODS ... DEFAULT IGNORE | DEFAULT FAIL of an interface method, read from its declaration */
+  private findOptionalDefault(m: abaplint.IMethodDefinition, traversal: Traversal): "IGNORE" | "FAIL" | undefined {
+    const file = traversal.reg.getFileByName(m.getFilename());
+    const obj = file ? traversal.reg.findObjectForFile(file) : undefined;
+    if (!(obj instanceof abaplint.ABAPObject)) {
+      return undefined;
+    }
+    const start = m.getStart();
+    const statement = obj.getABAPFileByName(m.getFilename())?.getStatements().find(s =>
+      s.get() instanceof abaplint.Statements.MethodDef
+      && s.getStart().isBefore(start) && s.getEnd().isAfter(start));
+    // DEFAULT IGNORE | FAIL are tokens of the statement itself, a parameter's DEFAULT value is inside an expression
+    if (statement?.findDirectTokenByText("IGNORE")) {
+      return "IGNORE";
+    } else if (statement?.findDirectTokenByText("FAIL")) {
+      return "FAIL";
+    }
+    return undefined;
+  }
+
+  /** an optional interface method, DEFAULT IGNORE, the class does not implement: it does
+   * nothing, outputs passed by value and the returning parameter come back initial */
+  private buildIgnoredMethod(emitted: string, m: abaplint.IMethodDefinition, className: string, traversal: Traversal): string {
+    const parameters = m.getParameters();
+    const unique = parameters.getAll().length > 0 ? "INPUT" : "";
+    let body = "";
+    for (const p of parameters.getExporting()) {
+      if (p.getMeta().includes(abaplint.IdentifierMeta.PassByValue)) {
+        body += `INPUT?.${p.getName().toLowerCase()}?.clear();\n`;
+      }
+    }
+    const returning = parameters.getReturning();
+    if (returning !== undefined) {
+      body += `return ${traversal.toType(returning.getType())};\n`;
+    }
+
+    let ret = "";
+    if (m.isStatic() === true) {
+      ret += "async " + emitted + "(" + unique + ") {\n" +
+        "return " + Traversal.escapeNamespace(className) + "." + emitted + "(" + unique + ");\n" +
+        "}\n" + "static ";
+    }
+    ret += "async " + emitted + "(" + unique + ") {\n" + body + "}\n";
     return ret;
   }
 
