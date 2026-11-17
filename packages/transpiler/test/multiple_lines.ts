@@ -676,7 +676,7 @@ if (unique1 === undefined && abap.Classes['KERNEL_INTERNAL_NAME'] !== undefined)
     const unique2 = await abap.Classes['KERNEL_INTERNAL_NAME'].rtti_to_internal({iv_rtti: 'ZCL_BLAH'});
     unique1 = abap.Classes[unique2.get().trimEnd()];
 }
-if (unique1 === undefined) { throw new abap.Classes['CX_SY_CREATE_OBJECT_ERROR']; }
+if (unique1 === undefined) { throw await new abap.Classes['CX_SY_CREATE_OBJECT_ERROR']().constructor_({classname: new abap.types.String().set('ZCL_BLAH'.trimEnd())}); }
 blah.set(await (new unique1()).constructor_());`;
     expect(await runSingle(abap)).to.equal(expected);
   });
