@@ -44,7 +44,56 @@ describe("Running Examples - Integer8 type", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("9219994337134247936");
+    expect(abap.console.get()).to.equal("9219994337134247936 ");
+  });
+
+  it("int8 to string and c, sign last as for i", async () => {
+    const code = `
+DATA i8 TYPE int8.
+DATA s TYPE string.
+DATA c10 TYPE c LENGTH 10.
+DATA c20 TYPE c LENGTH 20.
+
+i8 = -3.
+s = i8.
+WRITE / |[{ s }]|.
+c10 = i8.
+WRITE / |[{ c10 }]|.
+i8 = 3.
+s = i8.
+WRITE / |[{ s }]|.
+c10 = i8.
+WRITE / |[{ c10 }]|.
+WRITE / |[{ strlen( c10 ) }]|.
+i8 = 0.
+s = i8.
+WRITE / |[{ s }]|.
+i8 = '-9223372036854775808'.
+s = i8.
+WRITE / |[{ s }]|.
+c20 = i8.
+WRITE / |[{ c20 }]|.
+i8 = '9223372036854775807'.
+s = i8.
+WRITE / |[{ s }]|.
+c20 = i8.
+WRITE / |[{ c20 }]|.
+i8 = -3.
+WRITE / |[{ i8 }]|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal(`[3-]
+[        3-]
+[3 ]
+[        3]
+[9]
+[0 ]
+[9223372036854775808-]
+[9223372036854775808-]
+[9223372036854775807 ]
+[9223372036854775807]
+[-3]`);
   });
 
   it("int8 from float", async () => {

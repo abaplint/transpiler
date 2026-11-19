@@ -4,6 +4,7 @@ import {Character} from "./character";
 import {FieldSymbol} from "./field_symbol";
 import {Hex} from "./hex";
 import {Integer} from "./integer";
+import {Integer8} from "./integer8";
 import {Packed} from "./packed";
 import {Structure} from "./structure";
 import {ICharacter} from "./_character";
@@ -61,6 +62,10 @@ export class String implements ICharacter {
       const lv_sign = (value as Integer).get() >= 0 ? " " : "-";
       this.value = Math.abs((value as Integer).get()) + "";
       this.value += lv_sign;
+    } else if (value instanceof Integer8) {
+      // as for i: sign last, a blank for zero and positive; bigint keeps the int8 minimum exact
+      const int8 = (value as Integer8).get();
+      this.value = (int8 < 0n ? -int8 : int8) + ( int8 < 0n ? "-" : " " );
     } else if (value instanceof Float) {
       this.value = value.get() + "";
       this.value = this.value.replace(",", ".");
