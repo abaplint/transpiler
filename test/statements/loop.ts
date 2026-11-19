@@ -1307,12 +1307,142 @@ LOOP AT t_customres INTO DATA(ls_cust_2)
   WRITE / route_group_2->route.
 ENDLOOP.`;
     const js = await run(code);
-    expect(js).to.contain("transpiler todo, GROUP BY");
-    /*
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.getTrimmed()).to.equal("2");
-    */
+    expect(abap.console.getTrimmed()).to.equal("R0001\nR0003");
+  });
+
+  it("LOOP GROUP BY, structured key with GROUP SIZE, LOOP AT GROUP, and a simple key", async () => {
+    const code = `
+TYPES: BEGIN OF ty, k1 TYPE c LENGTH 3, k2 TYPE i, v TYPE i, END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH EMPTY KEY.
+tab = VALUE #( ( k1 = 'A' k2 = 1 v = 10 ) ( k1 = 'A' k2 = 1 v = 11 ) ( k1 = 'B' k2 = 2 v = 20 ) ).
+
+LOOP AT tab INTO DATA(row) GROUP BY ( k1 = row-k1 k2 = row-k2 size = GROUP SIZE ) INTO DATA(grp).
+  WRITE / |{ grp-k1 } { grp-k2 } size { grp-size }|.
+  LOOP AT GROUP grp INTO DATA(member).
+    WRITE / |  { member-v }|.
+  ENDLOOP.
+ENDLOOP.
+LOOP AT tab INTO DATA(row2) GROUP BY row2-k2 INTO DATA(grp2).
+  WRITE / |simple { grp2 }|.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("A 1 size 2\n  10\n  11\nB 2 size 1\n  20\nsimple 1\nsimple 2");
+  });
+
+  it("LOOP GROUP BY, ASCENDING, GROUP SIZE and GROUP INDEX, ASSIGNING the group", async () => {
+    const code = `
+TYPES: BEGIN OF ty, k TYPE c LENGTH 1, v TYPE i, END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH EMPTY KEY.
+DATA keys TYPE string.
+DATA sizes TYPE string.
+DATA idx TYPE string.
+tab = VALUE #( ( k = 'B' v = 1 ) ( k = 'A' v = 2 ) ( k = 'B' v = 3 ) ( k = 'C' v = 4 ) ).
+LOOP AT tab ASSIGNING FIELD-SYMBOL(<r>) GROUP BY ( k = <r>-k s = GROUP SIZE i = GROUP INDEX ) ASCENDING ASSIGNING FIELD-SYMBOL(<g>).
+  keys = keys && <g>-k.
+  sizes = sizes && <g>-s.
+  idx = idx && <g>-i.
+ENDLOOP.
+ASSERT keys = 'ABC'.
+ASSERT sizes = '121'.
+ASSERT idx = '123'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("LOOP GROUP BY without group target, the representative and LOOP AT GROUP of it", async () => {
+    const code = `
+TYPES: BEGIN OF ty, k TYPE c LENGTH 1, v TYPE i, END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH EMPTY KEY.
+DATA out TYPE string.
+tab = VALUE #( ( k = 'B' v = 1 ) ( k = 'A' v = 2 ) ( k = 'B' v = 3 ) ).
+LOOP AT tab INTO DATA(rep) GROUP BY rep-k.
+  out = out && |{ rep-k }{ rep-v }:|.
+  LOOP AT GROUP rep INTO DATA(m).
+    out = out && m-v.
+  ENDLOOP.
+  out = out && \` \`.
+ENDLOOP.
+ASSERT out = \`B1:13 A2:2 \`.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("LOOP GROUP BY REFERENCE INTO, LOOP AT GROUP ASSIGNING WHERE changes the rows", async () => {
+    const code = `
+TYPES: BEGIN OF ty, k TYPE c LENGTH 1, v TYPE i, END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH EMPTY KEY.
+DATA out TYPE string.
+tab = VALUE #( ( k = 'B' v = 1 ) ( k = 'A' v = 2 ) ( k = 'B' v = 3 ) ).
+LOOP AT tab REFERENCE INTO DATA(rr) GROUP BY rr->k REFERENCE INTO DATA(gref).
+  LOOP AT GROUP gref ASSIGNING FIELD-SYMBOL(<m>) WHERE v > 1.
+    <m>-v = <m>-v * 10.
+  ENDLOOP.
+  out = out && gref->*.
+ENDLOOP.
+ASSERT out = \`BA\`.
+ASSERT tab[ 1 ]-v = 1.
+ASSERT tab[ 2 ]-v = 20.
+ASSERT tab[ 3 ]-v = 30.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("LOOP GROUP BY WITHOUT MEMBERS, and LOOP AT GROUP with its own GROUP BY", async () => {
+    const code = `
+TYPES: BEGIN OF ty, a TYPE c LENGTH 1, b TYPE i, END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH EMPTY KEY.
+DATA out TYPE string.
+DATA cnt TYPE i.
+tab = VALUE #( ( a = 'X' b = 1 ) ( a = 'X' b = 2 ) ( a = 'Y' b = 1 ) ( a = 'X' b = 1 ) ).
+LOOP AT tab INTO DATA(row) GROUP BY row-a WITHOUT MEMBERS INTO DATA(ga).
+  cnt = cnt + 1.
+ENDLOOP.
+ASSERT cnt = 2.
+LOOP AT tab INTO row GROUP BY row-a INTO ga.
+  LOOP AT GROUP ga INTO DATA(inner) GROUP BY inner-b ASCENDING INTO DATA(gb).
+    out = out && |{ ga }{ gb }|.
+  ENDLOOP.
+  out = out && \` \`.
+ENDLOOP.
+ASSERT out = \`X1X2 Y1 \`.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("LOOP GROUP BY in a method, inline group and member variables", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    TYPES: BEGIN OF ty, k TYPE i, v TYPE i, END OF ty.
+    TYPES tt TYPE STANDARD TABLE OF ty WITH EMPTY KEY.
+    CLASS-METHODS sums IMPORTING tab TYPE tt RETURNING VALUE(r) TYPE string.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD sums.
+    LOOP AT tab INTO DATA(row) GROUP BY ( k = row-k ) INTO DATA(grp).
+      DATA(sum) = 0.
+      LOOP AT GROUP grp INTO DATA(m).
+        sum = sum + m-v.
+      ENDLOOP.
+      r = r && |{ grp-k }={ sum };|.
+    ENDLOOP.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA(res) = lcl=>sums( VALUE #( ( k = 2 v = 1 ) ( k = 1 v = 5 ) ( k = 2 v = 3 ) ) ).
+  ASSERT res = \`2=4;1=5;\`.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
   });
 
 
