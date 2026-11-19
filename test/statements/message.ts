@@ -170,8 +170,7 @@ ENDCLASS.
 START-OF-SELECTION.
   DATA lo_msg TYPE REF TO lcl_msg.
   CREATE OBJECT lo_msg.
-  DATA lv_text TYPE string.
-  MESSAGE lo_msg TYPE 'S' INTO lv_text.
+  MESSAGE lo_msg TYPE 'S'.
   WRITE / sy-msgid.
   WRITE / sy-msgno.
   WRITE / sy-msgty.
