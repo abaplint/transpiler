@@ -15,6 +15,8 @@ export interface IGroup {
   members: any[],
   /** sy-tabix of each member in the grouped table */
   tabix: number[],
+  /** GROUP INDEX, the number of the group in order of the first occurrence of its key, also when sorted */
+  index: number,
 }
 
 function deref(value: any): any {
@@ -78,7 +80,7 @@ export class GroupBy {
 
     let group = this.lookup.get(serialized);
     if (group === undefined) {
-      group = {key: value, representative: row, members: [], tabix: []};
+      group = {key: value, representative: row, members: [], tabix: [], index: this.groups.length + 1};
       this.lookup.set(serialized, group);
       this.groups.push(group);
     }
@@ -94,15 +96,21 @@ export class GroupBy {
       // stable, groups with equal keys keep the order of their first occurrence
       ret.sort((a, b) => direction * this.compare(a.key, b.key));
     }
-    ret.forEach((group, i) => {
+    for (const group of ret) {
       if (this.size !== undefined) {
         group.key.get()[this.size].set(group.members.length);
       }
       if (this.index !== undefined) {
-        group.key.get()[this.index].set(i + 1);
+        group.key.get()[this.index].set(group.index);
       }
-    });
+    }
     return ret;
+  }
+
+  /** the group loop sets sy-tabix to the number of the pass with a group target,
+   *  else to the row number of the representative */
+  public setTabix(group: IGroup, pass: number, representative: boolean): void {
+    abap.builtin.sy.get().tabix.set(representative ? group.tabix[0] : pass);
   }
 
   private compare(a: any, b: any): number {

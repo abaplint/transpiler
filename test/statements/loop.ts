@@ -1340,15 +1340,18 @@ DATA tab TYPE STANDARD TABLE OF ty WITH EMPTY KEY.
 DATA keys TYPE string.
 DATA sizes TYPE string.
 DATA idx TYPE string.
+DATA tabix TYPE string.
 tab = VALUE #( ( k = 'B' v = 1 ) ( k = 'A' v = 2 ) ( k = 'B' v = 3 ) ( k = 'C' v = 4 ) ).
 LOOP AT tab ASSIGNING FIELD-SYMBOL(<r>) GROUP BY ( k = <r>-k s = GROUP SIZE i = GROUP INDEX ) ASCENDING ASSIGNING FIELD-SYMBOL(<g>).
   keys = keys && <g>-k.
   sizes = sizes && <g>-s.
   idx = idx && <g>-i.
+  tabix = tabix && sy-tabix.
 ENDLOOP.
 ASSERT keys = 'ABC'.
 ASSERT sizes = '121'.
-ASSERT idx = '123'.`;
+ASSERT idx = '213'.
+ASSERT tabix = '123'.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
@@ -1361,13 +1364,13 @@ DATA tab TYPE STANDARD TABLE OF ty WITH EMPTY KEY.
 DATA out TYPE string.
 tab = VALUE #( ( k = 'B' v = 1 ) ( k = 'A' v = 2 ) ( k = 'B' v = 3 ) ).
 LOOP AT tab INTO DATA(rep) GROUP BY rep-k.
-  out = out && |{ rep-k }{ rep-v }:|.
+  out = out && |{ rep-k }{ rep-v }@{ sy-tabix }:|.
   LOOP AT GROUP rep INTO DATA(m).
-    out = out && m-v.
+    out = out && |{ m-v }@{ sy-tabix }|.
   ENDLOOP.
   out = out && \` \`.
 ENDLOOP.
-ASSERT out = \`B1:13 A2:2 \`.`;
+ASSERT out = \`B1@1:1@13@3 A2@2:2@2 \`.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);

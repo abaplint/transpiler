@@ -88,10 +88,11 @@ export class LoopTranspiler implements IStructureTranspiler {
     } else if (groupBy.findDirectTokenByText("DESCENDING") !== undefined) {
       order = `"DESCENDING"`;
     }
-    ret.append(`for (const ${entry} of ${collector}.getGroups(${order})) {\n`, loopStatement, traversal);
-
     // the group loop binds the group key, or without a group target the first row of each group
     const groupTarget = groupBy.findDirectExpression(abaplint.Expressions.LoopGroupByTarget);
+    const pass = UniqueIdentifier.get();
+    ret.append(`for (const [${pass}, ${entry}] of ${collector}.getGroups(${order}).entries()) {\n`, loopStatement, traversal);
+    ret.appendString(`${collector}.setTabix(${entry}, ${pass} + 1, ${groupTarget === undefined});\n`);
     let name: string | undefined;
     if (groupTarget !== undefined) {
       const fs = groupTarget.findDirectExpression(abaplint.Expressions.FSTarget);
