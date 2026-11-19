@@ -7,18 +7,27 @@ import {Chunk} from "../chunk";
 
 export class LoopTranspiler implements IStatementTranspiler {
   private unique = "";
+  private targetCode = "";
   private readonly injectFrom: string | undefined = undefined;
   private readonly skipInto: boolean | undefined = undefined;
   private readonly atLast: string | undefined = undefined;
+  private readonly groupEntry: string | undefined = undefined;
 
-  public constructor(options?: {injectFrom?: string, skipInto?: boolean, atLast?: string}) {
+  /** groupEntry: LOOP AT GROUP, the JS name of the current group of the enclosing group loop */
+  public constructor(options?: {injectFrom?: string, skipInto?: boolean, atLast?: string, groupEntry?: string}) {
     this.injectFrom = options?.injectFrom;
     this.skipInto = options?.skipInto;
     this.atLast = options?.atLast;
+    this.groupEntry = options?.groupEntry;
   }
 
   public getTarget() {
     return this.unique;
+  }
+
+  /** the code assigning the row in getTarget() to the INTO, ASSIGNING or REFERENCE INTO target, can be empty */
+  public getTargetCode() {
+    return this.targetCode;
   }
 
   private determineInto(node: abaplint.Nodes.StatementNode): abaplint.Nodes.ExpressionNode | undefined {
@@ -43,9 +52,11 @@ export class LoopTranspiler implements IStatementTranspiler {
     // the abap expression the target-assignment line should map back to
     let targetNode: abaplint.Nodes.ExpressionNode | undefined = undefined;
     const into = this.determineInto(node);
+    // the row target only, a GROUP BY has its own INTO, ASSIGNING or REFERENCE INTO for the group
+    const loopTarget = node.findDirectExpression(abaplint.Expressions.LoopTarget);
     if (into && this.skipInto !== true) {
       targetNode = into;
-      const concat = node.concatTokens().toUpperCase();
+      const concat = " " + (loopTarget?.concatTokens().toUpperCase() ?? "") + " ";
       const t = traversal.traverse(into).getCode();
 
       const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
@@ -60,7 +71,8 @@ export class LoopTranspiler implements IStatementTranspiler {
         target = t + ".set(" + this.unique + ");";
       }
     } else if (this.skipInto !== true) {
-      const assigning = node.findFirstExpression(abaplint.Expressions.FSTarget)?.findFirstExpression(abaplint.Expressions.FieldSymbol);
+      const assigning = loopTarget?.findFirstExpression(abaplint.Expressions.FSTarget)
+        ?.findFirstExpression(abaplint.Expressions.FieldSymbol);
       if (assigning) {
         targetNode = assigning;
         target = traversal.traverse(assigning).getCode() + ".assign(" + this.unique + ");";
@@ -158,8 +170,15 @@ export class LoopTranspiler implements IStatementTranspiler {
     }
     // map the loop head to the statement start and the target-assignment line
     // (foo.set(unique)) back to the INTO/ASSIGNING target expression
+    this.targetCode = target;
     const ret = new Chunk();
-    ret.append(`for await (const ${this.unique} of abap.statements.loop(${source}${concat})) {`, node, traversal);
+    if (this.groupEntry !== undefined) {
+      // LOOP AT GROUP allows only WHERE
+      const where = whereNode ? `,{where: async ${traversal.traverse(whereNode).getCode()}}` : "";
+      ret.append(`for await (const ${this.unique} of abap.statements.loopGroup(${this.groupEntry}${where})) {`, node, traversal);
+    } else {
+      ret.append(`for await (const ${this.unique} of abap.statements.loop(${source}${concat})) {`, node, traversal);
+    }
     ret.appendString("\n");
     if (target !== "") {
       ret.append(target, targetNode ?? node, traversal);
