@@ -18,7 +18,8 @@ export class IncludeTranspiler implements IStatementTranspiler {
       if (includeName.toUpperCase().endsWith("XX") === false) {
         const include = obj.getInclude(includeName);
         if (include === undefined) {
-          throw new Error(`Include ${includeName} not found`);
+          // as an include of a program that is not there
+          return new Chunk("// transpiler TODO: INCLUDE " + includeName + "\n");
         }
 
         const sub = new Traversal(traversal.getSpaghetti(), include, traversal.getCurrentObject(), traversal.reg,
