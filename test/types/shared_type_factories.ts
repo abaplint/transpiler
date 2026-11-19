@@ -2,19 +2,11 @@ import {expect} from "chai";
 import {ABAP, MemoryConsole} from "../../packages/runtime/src/";
 import {AsyncFunction, runFiles} from "../_utils";
 
-async function run(source: string, filename: string, sharedTypeFactories: boolean) {
+async function expectOutput(source: string, filename: string, expected: string) {
   const abap = new ABAP({console: new MemoryConsole()});
-  const code = await runFiles(abap, [{filename, contents: source}],
-    {sharedTypeFactories, skipDatabaseSetup: true});
+  const code = await runFiles(abap, [{filename, contents: source}], {skipDatabaseSetup: true});
   await new AsyncFunction("abap", code)(abap);
-  return abap.console.get();
-}
-
-async function expectSameModes(source: string, filename: string, expected: string) {
-  const legacy = await run(source, filename, false);
-  const shared = await run(source, filename, true);
-  expect(shared).to.equal(expected);
-  expect(shared).to.equal(legacy);
+  expect(abap.console.get()).to.equal(expected);
 }
 
 describe("Running Examples - Shared type factories", () => {
@@ -41,7 +33,7 @@ WRITE / second-child-value.
 WRITE / second_rows-value.
 WRITE / <second_row>-value.
 WRITE / lines( second_rows ).`;
-    await expectSameModes(source, "zfactory.prog.abap", "0\n0\n0\n1");
+    await expectOutput(source, "zfactory.prog.abap", "0\n0\n0\n1");
   });
 
   it("creates independent reference wrappers for composite targets", async () => {
@@ -54,7 +46,7 @@ CREATE DATA first.
 CREATE DATA second.
 first->value = 5.
 WRITE second->value.`;
-    await expectSameModes(source, "zfactory_ref.prog.abap", "0");
+    await expectOutput(source, "zfactory_ref.prog.abap", "0");
   });
 
   it("preserves include aliases inside each fresh factory result", async () => {
@@ -72,7 +64,7 @@ WRITE / first-value_s.
 CLEAR first.
 WRITE / second-named-value.
 WRITE / second-value_s.`;
-    await expectSameModes(source, "zfactory_include.prog.abap", "9\n12\n12");
+    await expectOutput(source, "zfactory_include.prog.abap", "9\n12\n12");
   });
 
   it("preserves VALUE, NEW, CORRESPONDING, and field-symbol construction", async () => {
@@ -102,7 +94,7 @@ WRITE / inline_value-value.
 ENDFORM.
 START-OF-SELECTION.
 PERFORM foo.`;
-    await expectSameModes(source, "zfactory_expr.prog.abap", "0\n0\n8\n12\n4\n16");
+    await expectOutput(source, "zfactory_expr.prog.abap", "0\n0\n8\n12\n4\n16");
   });
 
   it("preserves class attributes and optional returning parameters", async () => {
@@ -138,7 +130,7 @@ missing = object->copy( ).
 WRITE / object->attribute-value.
 WRITE / result-value.
 WRITE / missing-value.`;
-    await expectSameModes(source, "zfactory_class.prog.abap", "4\n7\n0");
+    await expectOutput(source, "zfactory_class.prog.abap", "4\n7\n0");
   });
 
 });
