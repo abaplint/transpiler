@@ -385,4 +385,55 @@ ASSERT out = |b2a1a3|.`;
     await f(abap);
   });
 
+  it("SORT without BY, a table WITH EMPTY KEY keeps its order", async () => {
+    const code = `
+TYPES: BEGIN OF ty, k TYPE c LENGTH 1, v TYPE i, END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH EMPTY KEY.
+DATA def TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA strings TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+DATA out TYPE string.
+
+tab = VALUE #( ( k = 'b' v = 1 ) ( k = 'c' v = 2 ) ( k = 'a' v = 3 ) ).
+SORT tab.
+CLEAR out.
+LOOP AT tab INTO DATA(l1).
+  out = out && l1-k.
+ENDLOOP.
+WRITE / out.
+
+SORT tab DESCENDING.
+CLEAR out.
+LOOP AT tab INTO DATA(l2).
+  out = out && l2-k.
+ENDLOOP.
+WRITE / out.
+
+SORT tab BY k.
+CLEAR out.
+LOOP AT tab INTO DATA(l3).
+  out = out && l3-k.
+ENDLOOP.
+WRITE / out.
+
+strings = VALUE #( ( \`b\` ) ( \`c\` ) ( \`a\` ) ).
+SORT strings.
+CLEAR out.
+LOOP AT strings INTO DATA(l4).
+  out = out && l4.
+ENDLOOP.
+WRITE / out.
+
+def = VALUE #( ( k = 'b' v = 1 ) ( k = 'c' v = 2 ) ( k = 'a' v = 3 ) ).
+SORT def.
+CLEAR out.
+LOOP AT def INTO DATA(l5).
+  out = out && l5-k.
+ENDLOOP.
+WRITE / out.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("bca\nbca\nabc\nbca\nabc");
+  });
+
 });
