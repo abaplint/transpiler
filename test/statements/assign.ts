@@ -1317,7 +1317,7 @@ WRITE sy-subrc.`;
     }
   });
 
-  it("ASSIGN of a dereferenced string to a TYPE i field symbol is an illegal cast", async () => {
+  it("ASSIGN of a dereferenced string to a TYPE i field symbol is a type conflict", async () => {
     const code = `
 DATA r TYPE REF TO data.
 FIELD-SYMBOLS <i> TYPE i.
@@ -1326,12 +1326,13 @@ ASSIGN r->* TO <i>.
 WRITE sy-subrc.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
+    let thrown = "";
     try {
       await f(abap);
-      expect.fail("expected ASSIGN_CAST_ILLEGAL_CAST");
     } catch(e) {
-      expect(e.toString()).to.contain("ASSIGN_CAST_ILLEGAL_CAST");
+      thrown = e.toString();
     }
+    expect(thrown).to.contain("ASSIGN_TYPE_CONFLICT");
   });
 
   it("ASSIGN of a dereferenced string to a TYPE any field symbol, and with CASTING, and the same type", async () => {
@@ -1360,7 +1361,7 @@ WRITE / sy-subrc.`;
   });
 
 
-  it("ASSIGN COMPONENT of a c LENGTH 4 to a TYPE string field symbol is an illegal cast, #417", async () => {
+  it("ASSIGN COMPONENT of a c LENGTH 4 to a TYPE string field symbol is a type conflict, #417", async () => {
     const code = `
 TYPES:
   BEGIN OF ts_test,
@@ -1378,10 +1379,10 @@ WRITE <lv>.`;
     } catch(e) {
       thrown = e.toString();
     }
-    expect(thrown).to.contain("ASSIGN_CAST_ILLEGAL_CAST");
+    expect(thrown).to.contain("ASSIGN_TYPE_CONFLICT");
   });
 
-  it("ASSIGN COMPONENT, by name and by index, of another elementary type is an illegal cast", async () => {
+  it("ASSIGN COMPONENT, by name and by index, of another elementary type is a type conflict", async () => {
     const cases: [string, string, string][] = [
       ["string", "i", "'A'"],
       ["string", "i", "1"],
@@ -1406,7 +1407,7 @@ WRITE sy-subrc.`;
       } catch(e) {
         thrown = e.toString();
       }
-      expect(thrown, source + " to " + target + " by " + component).to.contain("ASSIGN_CAST_ILLEGAL_CAST");
+      expect(thrown, source + " to " + target + " by " + component).to.contain("ASSIGN_TYPE_CONFLICT");
     }
   });
 
@@ -1447,7 +1448,7 @@ WRITE / sy-subrc.`;
     expect(abap.console.getTrimmed()).to.equal("hello\n42\n0\n0\n0\n42\n4");
   });
 
-  it("ASSIGN COMPONENT through a field symbol to another elementary type is an illegal cast", async () => {
+  it("ASSIGN COMPONENT through a field symbol to another elementary type is a type conflict", async () => {
     const code = `
 TYPES: BEGIN OF ty, a TYPE c LENGTH 4, END OF ty.
 DATA ls TYPE ty.
@@ -1464,7 +1465,7 @@ WRITE sy-subrc.`;
     } catch(e) {
       thrown = e.toString();
     }
-    expect(thrown).to.contain("ASSIGN_CAST_ILLEGAL_CAST");
+    expect(thrown).to.contain("ASSIGN_TYPE_CONFLICT");
   });
 
 
