@@ -1360,6 +1360,114 @@ WRITE / sy-subrc.`;
   });
 
 
+  it("ASSIGN COMPONENT of a c LENGTH 4 to a TYPE string field symbol is an illegal cast, #417", async () => {
+    const code = `
+TYPES:
+  BEGIN OF ts_test,
+    a TYPE c LENGTH 4,
+  END OF ts_test.
+DATA ls_test TYPE ts_test.
+FIELD-SYMBOLS <lv> TYPE string.
+ASSIGN COMPONENT 'A' OF STRUCTURE ls_test TO <lv>.
+WRITE <lv>.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    let thrown = "";
+    try {
+      await f(abap);
+    } catch(e) {
+      thrown = e.toString();
+    }
+    expect(thrown).to.contain("ASSIGN_CAST_ILLEGAL_CAST");
+  });
+
+  it("ASSIGN COMPONENT, by name and by index, of another elementary type is an illegal cast", async () => {
+    const cases: [string, string, string][] = [
+      ["string", "i", "'A'"],
+      ["string", "i", "1"],
+      ["i", "string", "'A'"],
+      ["c LENGTH 4", "string", "1"],
+      ["d", "t", "'A'"],
+      ["f", "int8", "'A'"],
+    ];
+    for (const [source, target, component] of cases) {
+      const code = `
+TYPES: BEGIN OF ty, a TYPE ${source}, END OF ty.
+DATA ls TYPE ty.
+FIELD-SYMBOLS <fs> TYPE ${target}.
+ASSIGN COMPONENT ${component} OF STRUCTURE ls TO <fs>.
+WRITE sy-subrc.`;
+      const js = await run(code);
+      const f = new AsyncFunction("abap", js);
+      abap = new ABAP({console: new MemoryConsole()});
+      let thrown = "";
+      try {
+        await f(abap);
+      } catch(e) {
+        thrown = e.toString();
+      }
+      expect(thrown, source + " to " + target + " by " + component).to.contain("ASSIGN_CAST_ILLEGAL_CAST");
+    }
+  });
+
+  it("ASSIGN COMPONENT of the same type, to a generic field symbol, and through a field symbol", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         c TYPE c LENGTH 4,
+         s TYPE string,
+         i TYPE i,
+       END OF ty.
+DATA ls TYPE ty.
+FIELD-SYMBOLS <stru> TYPE any.
+FIELD-SYMBOLS <s> TYPE string.
+FIELD-SYMBOLS <i> TYPE i.
+FIELD-SYMBOLS <any> TYPE any.
+FIELD-SYMBOLS <simple> TYPE simple.
+FIELD-SYMBOLS <c> TYPE c.
+ASSIGN COMPONENT 'S' OF STRUCTURE ls TO <s>.
+<s> = 'hello'.
+WRITE / ls-s.
+ASSIGN COMPONENT 3 OF STRUCTURE ls TO <i>.
+<i> = 42.
+WRITE / ls-i.
+ASSIGN COMPONENT 'C' OF STRUCTURE ls TO <any>.
+WRITE / sy-subrc.
+ASSIGN COMPONENT 'C' OF STRUCTURE ls TO <simple>.
+WRITE / sy-subrc.
+ASSIGN COMPONENT 'C' OF STRUCTURE ls TO <c>.
+WRITE / sy-subrc.
+ASSIGN ls TO <stru>.
+ASSIGN COMPONENT 'I' OF STRUCTURE <stru> TO <i>.
+WRITE / <i>.
+ASSIGN COMPONENT 'NOPE' OF STRUCTURE ls TO <i>.
+WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("hello\n42\n0\n0\n0\n42\n4");
+  });
+
+  it("ASSIGN COMPONENT through a field symbol to another elementary type is an illegal cast", async () => {
+    const code = `
+TYPES: BEGIN OF ty, a TYPE c LENGTH 4, END OF ty.
+DATA ls TYPE ty.
+FIELD-SYMBOLS <stru> TYPE any.
+FIELD-SYMBOLS <i> TYPE i.
+ASSIGN ls TO <stru>.
+ASSIGN COMPONENT 'A' OF STRUCTURE <stru> TO <i>.
+WRITE sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    let thrown = "";
+    try {
+      await f(abap);
+    } catch(e) {
+      thrown = e.toString();
+    }
+    expect(thrown).to.contain("ASSIGN_CAST_ILLEGAL_CAST");
+  });
+
+
   it("ASSIGN INCREMENT, RANGE and sy-subrc, flat structure of integers", async () => {
     const code = `
 DATA: BEGIN OF s,

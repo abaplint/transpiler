@@ -347,6 +347,7 @@ export function assign(input: IAssignInput) {
       // not a field in the structure
       abap.builtin.sy.get().subrc.set(4);
     } else {
+      checkTypeConflict(input.target, result, input.casting);
       input.target.assign(result);
       abap.builtin.sy.get().subrc.set(0);
     }
