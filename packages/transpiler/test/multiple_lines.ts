@@ -90,6 +90,22 @@ ENDCLASS.`;
     expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("SELECT SINGLE FOR UPDATE, not supported, transpiler");`);
   });
 
+  it("WITH, runtime error", async () => {
+    const abap = `
+    WITH +cte AS ( SELECT field FROM ztab ) SELECT field FROM +cte INTO TABLE @lt_result.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true, skipVersionCheck: true})).to.equal(`throw new Error("WITH, not supported, transpiler");`);
+  });
+
+  it("WITH ... ENDWITH, runtime error", async () => {
+    const abap = `
+    WITH +cte AS ( SELECT field FROM ztab ) SELECT field FROM +cte INTO @DATA(lv_field).
+      WRITE lv_field.
+    ENDWITH.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true, skipVersionCheck: true})).to.include(`throw new Error("WITH, not supported, transpiler");`);
+  });
+
   it("Interfaces should not be skipped", async () => {
     const abap = `
   INTERFACE lif_foobar.

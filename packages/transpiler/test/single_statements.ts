@@ -66,7 +66,7 @@ describe("Single statements", () => {
     {abap: "PERFORM foo.",                            js: "await foo({});",                       skip: false},
     {abap: "PERFORM foo IN PROGRAM zsdfsd.",                        js: `if (abap.Forms['PROG-ZSDFSD-FOO'] === undefined) { if (Object.keys(abap.Forms).some(k => k.startsWith('PROG-ZSDFSD-'))) { if (abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FORM'.trimEnd()] === undefined) { throw \"CX_SY_DYN_CALL_ILLEGAL_FORM not found\"; } else { throw await new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FORM'.trimEnd()]().constructor_(); } } else { if (abap.Classes['CX_SY_PROGRAM_NOT_FOUND'.trimEnd()] === undefined) { throw \"CX_SY_PROGRAM_NOT_FOUND not found\"; } else { throw await new abap.Classes['CX_SY_PROGRAM_NOT_FOUND'.trimEnd()]().constructor_(); } } }\nawait abap.Forms['PROG-ZSDFSD-FOO']({});`,                       skip: false},
     {abap: "PERFORM foo in program zsdfsd.",                        js: `if (abap.Forms['PROG-ZSDFSD-FOO'] === undefined) { if (Object.keys(abap.Forms).some(k => k.startsWith('PROG-ZSDFSD-'))) { if (abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FORM'.trimEnd()] === undefined) { throw \"CX_SY_DYN_CALL_ILLEGAL_FORM not found\"; } else { throw await new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FORM'.trimEnd()]().constructor_(); } } else { if (abap.Classes['CX_SY_PROGRAM_NOT_FOUND'.trimEnd()] === undefined) { throw \"CX_SY_PROGRAM_NOT_FOUND not found\"; } else { throw await new abap.Classes['CX_SY_PROGRAM_NOT_FOUND'.trimEnd()]().constructor_(); } } }\nawait abap.Forms['PROG-ZSDFSD-FOO']({});`,                       skip: false},
-    {abap: "PERFORM foo in program (var) changing moo.",            js: `if (abap.Forms['PROG-' + var.get().trimEnd() + '-FOO'] === undefined) { if (Object.keys(abap.Forms).some(k => k.startsWith('PROG-' + var.get().trimEnd() + '-'))) { if (abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FORM'.trimEnd()] === undefined) { throw \"CX_SY_DYN_CALL_ILLEGAL_FORM not found\"; } else { throw await new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FORM'.trimEnd()]().constructor_(); } } else { if (abap.Classes['CX_SY_PROGRAM_NOT_FOUND'.trimEnd()] === undefined) { throw \"CX_SY_PROGRAM_NOT_FOUND not found\"; } else { throw await new abap.Classes['CX_SY_PROGRAM_NOT_FOUND'.trimEnd()]().constructor_(); } } }\nawait abap.Forms['PROG-' + var.get().trimEnd() + '-FOO']({"moo": moo});`,                       skip: false},
+    {abap: "PERFORM foo in program (var) changing moo.",            js: `if (abap.Forms['PROG-' + $var.get().trimEnd() + '-FOO'] === undefined) { if (Object.keys(abap.Forms).some(k => k.startsWith('PROG-' + $var.get().trimEnd() + '-'))) { if (abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FORM'.trimEnd()] === undefined) { throw \"CX_SY_DYN_CALL_ILLEGAL_FORM not found\"; } else { throw await new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FORM'.trimEnd()]().constructor_(); } } else { if (abap.Classes['CX_SY_PROGRAM_NOT_FOUND'.trimEnd()] === undefined) { throw \"CX_SY_PROGRAM_NOT_FOUND not found\"; } else { throw await new abap.Classes['CX_SY_PROGRAM_NOT_FOUND'.trimEnd()]().constructor_(); } } }\nawait abap.Forms['PROG-' + $var.get().trimEnd() + '-FOO']({"moo": moo});`,                       skip: false},
 //    {abap: "PERFORM ('ASDF') IN PROGRAM ('ASDF') TABLES bar.",      js: `throw new Error("PerformTranspiler FormName not found");`,                       skip: false},
     {abap: "DATA foo TYPE STANDARD TABLE OF string.",
       js: `let foo = abap.types.TableFactory.construct(new abap.types.String({qualifiedName: "STRING"}), {"withHeader":false,"keyType":"USER","primaryKey":{"name":"primary_key","type":"STANDARD","isUnique":false,"keyFields":[]},"secondary":[]}, "");`,         skip: false},
@@ -403,10 +403,10 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({object: obj,user: usr,fields:
     {abap: "STOP.", js: `throw new Error("STOP, not supported, transpiler");`, skip: false},
     {abap: "SET CURSOR FIELD foo.", js: `throw new Error("SET CURSOR, not supported, transpiler");`, skip: false},
     {abap: "SUM.", js: `throw new Error("SUM, not supported, transpiler");`, skip: false},
-    {abap: "FORMAT RESET.", js: `throw new Error("FORMAT, not supported, transpiler");`, skip: false},
+    {abap: "FORMAT RESET.", js: ``, skip: false},
     {abap: "RESERVE 1 LINES.", js: `throw new Error("RESERVE, not supported, transpiler");`, skip: false},
     {abap: "NEW-PAGE NO-TITLE LINE-SIZE 80.", js: `throw new Error("NEW-PAGE, not supported, transpiler");`, skip: false},
-    {abap: "HIDE gv_id.", js: `throw new Error("HIDE, not supported, transpiler");`, skip: false},
+    {abap: "HIDE gv_id.", js: ``, skip: false},
     {abap: "AT USER-COMMAND.", js: `throw new Error("AT USER-COMMAND, not supported, transpiler");`, skip: false},
     {abap: "AT PF5.", js: `throw new Error("AT PFnn, not supported, transpiler");`, skip: false},
     {abap: "BACK.", js: `throw new Error("BACK, not supported, transpiler");`, skip: false},
@@ -436,7 +436,7 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({object: obj,user: usr,fields:
     {abap: "SKIP 2.", js: `abap.statements.skip({lines: abap.IntegerFactory.get(2)});`, skip: false},
     {abap: "SKIP TO LINE 3.", js: `abap.statements.skip({toLine: abap.IntegerFactory.get(3)});`, skip: false},
 
-    {abap: "SET EXTENDED CHECK OFF.", js: `throw new Error("SET EXTENDED CHECK, not supported, transpiler");`, skip: false},
+    {abap: "SET EXTENDED CHECK OFF.", js: ``, skip: false},
     {abap: "SET BLANK LINES ON.", js: `throw new Error("SET BLANK LINES, not supported, transpiler");`, skip: false},
     {abap: "ADD-CORRESPONDING foo TO bar.", js: `throw new Error("ADD-CORRESPONDING, not supported, transpiler");`, skip: false},
     {abap: "SUBTRACT-CORRESPONDING foo FROM bar.", js: `throw new Error("SUBTRACT-CORRESPONDING, not supported, transpiler");`, skip: false},
@@ -544,6 +544,7 @@ await abap.Classes['KERNEL_RAP_EML'].rollback();`, skip: false},
       js: `await abap.statements.select(res, {select: "SELECT count( * )  from " + abap.buildDbTableName("tab") + " WHERE \\"enable_sqlite\\" = '" + abap.sqlEscape(abap.builtin.abap_true.get()) + "'"});`, skip: false},
     {abap: "select count( * ) from tab into res where ('enable_sqlite = abap_true').",
       js: `await abap.statements.select(res, {select: "SELECT count( * )  from " + abap.buildDbTableName("tab") + " WHERE \\"enable_sqlite\\" = 'X'"});`, skip: false},
+    {abap: "CALL DATABASE PROCEDURE ('ZPROC') EXPORTING iv_foo = lv_foo IMPORTING ev_bar = lv_bar.", js: `throw new Error("CALL DATABASE PROCEDURE, not supported, transpiler");`, skip: false},
   ];
 
   for (const test of tests) {

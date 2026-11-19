@@ -1,6 +1,14 @@
 import * as abaplint from "@abaplint/core";
 import {IObjectIdentifier} from "./types";
 
+/** Object types whose module only sets abap.DDIC[...] */
+export const DDIC_TYPES: ReadonlySet<string> = new Set(["DTEL", "TABL", "TTYP", "VIEW"]);
+
+/** Per folder module holding all its DDIC definitions. Object filenames never start
+ * with an underscore, so it cannot collide with an object module. Loading tens of
+ * thousands of tiny modules dominates startup, one module per folder avoids that. */
+export const DDIC_MODULE = "_ddic.mjs";
+
 /** Source filenames to output folders. Omit this map to retain flat output. */
 export type OutputFolders = ReadonlyMap<string, string>;
 
@@ -56,6 +64,19 @@ export class OutputLayout {
     }
     const module = filename.replace(/\.abap$/i, ".mjs").toLowerCase();
     return folder === undefined ? module : folder + "/" + module;
+  }
+
+  /** With folders, the DDIC definitions of each folder share one module, see DDIC_MODULE */
+  public isGrouped(): boolean {
+    return this.grouped;
+  }
+
+  /** The module defining this DDIC object's abap.DDIC entry */
+  public ddicModule(obj: IObjectIdentifier): string {
+    if (this.grouped === false) {
+      throw new Error("DDIC modules are only merged in grouped output");
+    }
+    return this.file(obj, DDIC_MODULE);
   }
 
   public objectModule(obj: abaplint.IObject, suffix = ""): string {
