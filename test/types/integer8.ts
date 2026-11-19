@@ -786,4 +786,32 @@ WRITE / lv_data.`;
     expect(abap.console.get()).to.equal("FF");
   });
 
+  it("int8 compared with x: the x field is converted to int8", async () => {
+    const code = `
+  DATA i8 TYPE int8.
+  DATA x8 TYPE x LENGTH 8 VALUE 'FFFFFFFFFFFFFFFE'.
+  DATA x2 TYPE x LENGTH 2 VALUE 'FFFE'.
+  i8 = 0.
+  IF i8 > x8. WRITE / 'gt'. ELSE. WRITE / 'not gt'. ENDIF.
+  IF i8 = x8. WRITE / 'eq'. ELSE. WRITE / 'not eq'. ENDIF.
+  IF i8 < x8. WRITE / 'lt'. ELSE. WRITE / 'not lt'. ENDIF.
+  IF x8 < i8. WRITE / 'x lt'. ELSE. WRITE / 'x not lt'. ENDIF.
+  i8 = -2.
+  IF i8 = x8. WRITE / 'eq -2'. ELSE. WRITE / 'not eq -2'. ENDIF.
+  i8 = 65534.
+  IF i8 = x2. WRITE / 'eq x2'. ELSE. WRITE / 'not eq x2'. ENDIF.
+  i8 = 1000000000000.
+  x8 = '00000000000000FF'.
+  IF i8 > x8. WRITE / 'gt ff'. ELSE. WRITE / 'not gt ff'. ENDIF.
+  x8 = '7FFFFFFFFFFFFFFF'.
+  i8 = 9223372036854775807.
+  IF i8 = x8. WRITE / 'eq max'. ELSE. WRITE / 'not eq max'. ENDIF.
+  i8 = 9223372036854775806.
+  IF x8 > i8. WRITE / 'x gt'. ELSE. WRITE / 'x not gt'. ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("gt\nnot eq\nnot lt\nx lt\neq -2\neq x2\ngt ff\neq max\nx gt");
+  });
+
 });
