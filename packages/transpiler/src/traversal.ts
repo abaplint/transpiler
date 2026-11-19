@@ -264,7 +264,7 @@ export class Traversal {
         && this.obj instanceof abaplint.Objects.FunctionGroup
         && this.obj.getInclude(filename.split(".")[2].replace(/#/g, "/"))) {
       // workaround for INCLUDEs in function groups
-      return this.fuctionGroupWorkaround(token);
+      return this.fuctionGroupWorkaround();
     }
 
     if (node === undefined
@@ -278,16 +278,10 @@ export class Traversal {
     return node;
   }
 
-  private fuctionGroupWorkaround(token: abaplint.Token): abaplint.ISpaghettiScopeNode | undefined {
-    // check the function group level, it might be an INCLUDE defining the DATA
-    const functionGroupLevel = this.spaghetti.getFirstChild()?.getFirstChild();
-
-    const variable = functionGroupLevel?.getData().vars[token.getStr().toUpperCase()];
-    if (variable?.getStart().equals(token.getStart())) {
-      return functionGroupLevel;
-    }
-
-    return undefined;
+  private fuctionGroupWorkaround(): abaplint.ISpaghettiScopeNode | undefined {
+    // code of an INCLUDE outside FORMs, methods and function modules is at the level of the function group, eg. the
+    // DATA of the TOP include and the constants their VALUE names
+    return this.spaghetti.getFirstChild()?.getFirstChild();
   }
 
   public getSQLInferredType(): abaplint.AbstractType | undefined {
