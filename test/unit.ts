@@ -1404,6 +1404,7 @@ ENDCLASS.
 
 CLASS zcx_parameter_test IMPLEMENTATION.
   METHOD constructor.
+    super->constructor( ).
     me->hello = hello.
   ENDMETHOD.
 ENDCLASS.`;
