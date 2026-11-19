@@ -31,6 +31,7 @@ import {IInsertDatabaseOptions, insertDatabase} from "./insert_database";
 import {insertInternal} from "./insert_internal";
 import {deleteDatabase, IDeleteDatabaseOptions} from "./delete_database";
 import {loop} from "./loop";
+import {groupBy, loopGroup} from "./loop_group_by";
 import {IMessageOptions, MessageStatement} from "./message";
 import {IModifyDatabaseOptions, modifyDatabase} from "./modify_database";
 import {modifyInternal} from "./modify_internal";
@@ -87,6 +88,8 @@ export class Statements {
   public getTime = getTime;
   public insertInternal = insertInternal;
   public loop = loop;
+  public groupBy = groupBy;
+  public loopGroup = loopGroup;
   public modifyInternal = modifyInternal;
   public moveCorresponding = moveCorresponding;
   public overlay = overlay;
