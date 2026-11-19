@@ -226,7 +226,11 @@ export class TranspileTypes {
       if (type.getQualifiedName() !== undefined) {
         extra = "{qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\"}";
       }
-    } else if (type instanceof abaplint.BasicTypes.DecFloat34Type) {
+    } else if (type instanceof abaplint.BasicTypes.DecFloat34Type
+        || type instanceof abaplint.BasicTypes.DecFloat16Type) {
+      // decfloat16 runs on the runtime's decfloat34, an exact decimal: the
+      // 16 digit rounding and range of decfloat16 are not modelled, and RTTI
+      // describes such a field as a decfloat34
       resolved = "DecFloat34";
     } else if (type instanceof abaplint.BasicTypes.EnumType) {
       resolved = "String";
@@ -318,6 +322,7 @@ export class TranspileTypes {
         || type instanceof abaplint.BasicTypes.FloatType
         || type instanceof abaplint.BasicTypes.FloatingPointType
         || type instanceof abaplint.BasicTypes.DecFloat34Type
+        || type instanceof abaplint.BasicTypes.DecFloat16Type
         || type instanceof abaplint.BasicTypes.EnumType) {
       return false;
     }
