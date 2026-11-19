@@ -1359,4 +1359,149 @@ WRITE / sy-subrc.`;
     expect(abap.console.get()).to.equal("0\n0\ncasting\n0");
   });
 
+
+  it("ASSIGN INCREMENT, RANGE and sy-subrc, flat structure of integers", async () => {
+    const code = `
+DATA: BEGIN OF s,
+        a TYPE i VALUE 1,
+        b TYPE i VALUE 2,
+        c TYPE i VALUE 3,
+        d TYPE i VALUE 4,
+      END OF s.
+DATA lv TYPE i VALUE 7.
+FIELD-SYMBOLS <i> TYPE i.
+ASSIGN s-a INCREMENT 1 TO <i>.
+ASSERT sy-subrc = 4.
+ASSERT <i> IS NOT ASSIGNED.
+ASSIGN s-a INCREMENT 0 TO <i>.
+ASSERT sy-subrc = 0.
+ASSERT <i> = 1.
+ASSIGN s-a INCREMENT 3 TO <i> RANGE s.
+ASSERT sy-subrc = 0.
+ASSERT <i> = 4.
+ASSIGN s-a INCREMENT 4 TO <i> RANGE s.
+ASSERT sy-subrc = 4.
+ASSERT <i> = 4.
+ASSIGN s-b INCREMENT -1 TO <i> RANGE s.
+ASSERT sy-subrc = 0.
+ASSERT <i> = 1.
+UNASSIGN <i>.
+ASSIGN s-a INCREMENT -1 TO <i> RANGE s.
+ASSERT sy-subrc = 4.
+ASSERT <i> IS NOT ASSIGNED.
+ASSIGN s-a INCREMENT 1 TO <i> RANGE s.
+<i> = 99.
+ASSERT s-b = 99.
+ASSIGN lv INCREMENT 0 TO <i>.
+ASSERT sy-subrc = 0.
+ASSERT <i> = 7.
+UNASSIGN <i>.
+ASSIGN lv INCREMENT 1 TO <i>.
+ASSERT sy-subrc = 4.
+ASSERT <i> IS NOT ASSIGNED.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("ASSIGN INCREMENT, character components, write through the field symbol", async () => {
+    const code = `
+DATA: BEGIN OF t,
+        x TYPE c LENGTH 2 VALUE 'ab',
+        y TYPE c LENGTH 2 VALUE 'cd',
+        z TYPE c LENGTH 2 VALUE 'ef',
+      END OF t.
+DATA inc TYPE i.
+FIELD-SYMBOLS <c> TYPE c.
+ASSIGN t-x INCREMENT 1 TO <c> RANGE t.
+ASSERT sy-subrc = 0.
+ASSERT <c> = 'cd'.
+ASSIGN t-x INCREMENT 2 TO <c> RANGE t.
+ASSERT sy-subrc = 0.
+ASSERT <c> = 'ef'.
+UNASSIGN <c>.
+ASSIGN t-x INCREMENT 3 TO <c> RANGE t.
+ASSERT sy-subrc = 4.
+ASSERT <c> IS NOT ASSIGNED.
+DO 3 TIMES.
+  inc = sy-index - 1.
+  ASSIGN t-x INCREMENT inc TO <c> RANGE t.
+  <c> = |{ sy-index }|.
+ENDDO.
+ASSERT t-x = '1'.
+ASSERT t-y = '2'.
+ASSERT t-z = '3'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("ASSIGN INCREMENT, include, nested structure, strings and a field symbol as data object", async () => {
+    const code = `
+TYPES: BEGIN OF ty_in,
+         p TYPE i,
+         q TYPE i,
+       END OF ty_in.
+DATA: BEGIN OF s,
+        a TYPE i VALUE 1,
+        b TYPE i VALUE 2.
+        INCLUDE TYPE ty_in.
+DATA:   n    TYPE ty_in,
+        str1 TYPE string VALUE \`s1\`,
+        str2 TYPE string VALUE \`s2\`,
+      END OF s.
+FIELD-SYMBOLS <i> TYPE i.
+FIELD-SYMBOLS <s> TYPE string.
+FIELD-SYMBOLS <a> TYPE any.
+s-p = 3.
+s-q = 4.
+s-n-p = 5.
+s-n-q = 6.
+ASSIGN s-a INCREMENT 2 TO <i> RANGE s.
+ASSERT sy-subrc = 0.
+ASSERT <i> = 3.
+ASSIGN s-a INCREMENT 5 TO <i> RANGE s.
+ASSERT sy-subrc = 0.
+ASSERT <i> = 6.
+ASSIGN s-str1 INCREMENT 1 TO <s> RANGE s.
+ASSERT sy-subrc = 0.
+ASSERT <s> = \`s2\`.
+ASSIGN s-b TO <a>.
+ASSIGN <a> INCREMENT 1 TO <i> RANGE s.
+ASSERT sy-subrc = 0.
+ASSERT <i> = 3.
+ASSIGN s-n-p INCREMENT 1 TO <i> RANGE s-n.
+ASSERT sy-subrc = 0.
+ASSERT <i> = 6.
+UNASSIGN <i>.
+ASSIGN s-n-p INCREMENT 2 TO <i> RANGE s-n.
+ASSERT sy-subrc = 4.
+ASSERT <i> IS NOT ASSIGNED.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("ASSIGN INCREMENT, an area of another type is ASSIGN_TYPE_CONFLICT, after the range check", async () => {
+    const code = `
+DATA: BEGIN OF struc,
+        word TYPE c LENGTH 4 VALUE 'abcd',
+        int1 TYPE i          VALUE 111,
+        int2 TYPE i          VALUE 222,
+        stri TYPE string     VALUE \`efgh\`,
+      END OF struc.
+FIELD-SYMBOLS <int> TYPE i.
+ASSIGN struc-word INCREMENT 100 TO <int> RANGE struc.
+ASSERT sy-subrc = 4.
+ASSIGN struc-word INCREMENT 1 TO <int> RANGE struc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail("expected ASSIGN_TYPE_CONFLICT");
+    } catch(e) {
+      expect(e.toString()).to.contain("ASSIGN_TYPE_CONFLICT");
+    }
+  });
+
 });
