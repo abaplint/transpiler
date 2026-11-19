@@ -31,6 +31,25 @@ describe("Multiple lines", () => {
     expect(await runSingle(abap)).to.include(`throw new Error("CATCH SYSTEM-EXCEPTIONS, not supported, transpiler");`);
   });
 
+  it("PROVIDE, runtime error", async () => {
+    const abap = `
+    PROVIDE FIELDS * FROM lt_tab INTO ls_tab VALID lv_flag BOUNDS begda AND endda
+      BETWEEN lv_begda AND lv_endda.
+      WRITE ls_tab-begda.
+    ENDPROVIDE.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("PROVIDE, not supported, transpiler");`);
+  });
+
+  it("LOOP over an extract dataset, runtime error", async () => {
+    const abap = `
+    LOOP.
+      WRITE 'a'.
+    ENDLOOP.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("LOOP over extract, not supported, transpiler");`);
+  });
+
   it("EXEC SQL, runtime error", async () => {
     const abap = `
     EXEC SQL.
@@ -38,6 +57,15 @@ describe("Multiple lines", () => {
     ENDEXEC.`;
 
     expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("EXEC SQL, not supported, transpiler");`);
+  });
+
+  it("CHAIN, runtime error", async () => {
+    const abap = `
+    CHAIN.
+      FIELD foo MODULE check_foo.
+    ENDCHAIN.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("CHAIN, not supported, transpiler");`);
   });
 
   it("AMDP method with native SQL, runtime error", async () => {
@@ -60,6 +88,22 @@ ENDCLASS.`;
     const abap = `SELECT SINGLE FOR UPDATE * FROM t100 INTO ls_result.`;
 
     expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("SELECT SINGLE FOR UPDATE, not supported, transpiler");`);
+  });
+
+  it("WITH, runtime error", async () => {
+    const abap = `
+    WITH +cte AS ( SELECT field FROM ztab ) SELECT field FROM +cte INTO TABLE @lt_result.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true, skipVersionCheck: true})).to.equal(`throw new Error("WITH, not supported, transpiler");`);
+  });
+
+  it("WITH ... ENDWITH, runtime error", async () => {
+    const abap = `
+    WITH +cte AS ( SELECT field FROM ztab ) SELECT field FROM +cte INTO @DATA(lv_field).
+      WRITE lv_field.
+    ENDWITH.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true, skipVersionCheck: true})).to.include(`throw new Error("WITH, not supported, transpiler");`);
   });
 
   it("Interfaces should not be skipped", async () => {
@@ -511,6 +555,17 @@ lcl_bar.foo = new abap.types.Integer({qualifiedName: "I"});`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
+  it("STATICS BEGIN OF, runtime error", async () => {
+    const abap = `
+    FORM foo.
+      STATICS: BEGIN OF ls_static,
+        field TYPE i,
+      END OF ls_static.
+    ENDFORM.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("STATICS, not supported, transpiler");`);
+  });
+
   it("Escape class constants", async () => {
     const abap = `
   CLASS lcl_bar DEFINITION.
@@ -699,6 +754,13 @@ abap.Forms['PROG-ZFOOBAR-FOO'] = foo;`;
     expect(await runSingle(abap, {
       ignoreSyntaxCheck: true,
       unknownTypes: UnknownTypesEnum.runtimeError})).to.equals(expected);
+  });
+
+  it("VALUE # whose type cannot be inferred, runtime error with unknownTypes", async () => {
+    const abap = `
+    INSERT demo_expressions FROM @( VALUE #( id = 'F' ) ).`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true, skipVersionCheck: true, unknownTypes: UnknownTypesEnum.runtimeError})).to.include(`throw new Error("Unknown type: TypeNameOrInfer, type not found: #`);
   });
 
   it("Upper case method impl name, should transpile to lower", async () => {

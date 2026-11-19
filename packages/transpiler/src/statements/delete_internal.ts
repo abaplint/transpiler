@@ -20,6 +20,9 @@ export class DeleteInternalTranspiler implements IStatementTranspiler {
     if (componentCompare) {
       // todo: this can be optimized, WITH TABLE KEY
       extra.push("where: async " + traversal.traverse(componentCompare).getCode());
+      if (concat.startsWith("DELETE TABLE ")) {
+        extra.push("withTableKey: true");
+      }
     }
 
 // todo, this is not completely correct, fields might have the name ADJACENT
