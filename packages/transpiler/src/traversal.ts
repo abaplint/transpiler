@@ -85,15 +85,15 @@ export class Traversal {
   }
 
   public toType(type: abaplint.AbstractType, options?: {packedDecimals?: number}): string {
-    return TranspileTypes.toType(type, options, this.typeFactories);
+    return TranspileTypes.toType(type, options, this.typeFactories, t => this.findEnumValueNames(t));
   }
 
   public declare(type: abaplint.TypedIdentifier): string {
-    return TranspileTypes.declare(type, this.typeFactories);
+    return TranspileTypes.declare(type, this.typeFactories, t => this.findEnumValueNames(t));
   }
 
   public declareStaticSkipVoid(pre: string, type: abaplint.TypedIdentifier): string {
-    return TranspileTypes.declareStaticSkipVoid(pre, type, this.typeFactories);
+    return TranspileTypes.declareStaticSkipVoid(pre, type, this.typeFactories, t => this.findEnumValueNames(t));
   }
 
   /** Build file-level control-flow context once instead of rescanning all
@@ -1182,6 +1182,51 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
       return index === undefined ? "" : Traversal.prefixVariable(name) + ".set(" + index + ");\n";
     }
     return Traversal.setValues(identifier, name);
+  }
+
+  /** the names of the constants of an enumerated type declared in a class or interface, in the
+   *  order they are declared, which is the order setValues numbers them in */
+  public findEnumValueNames(type: abaplint.BasicTypes.EnumType): string[] | undefined {
+    const [owner, name] = (type.getQualifiedName() ?? "").toUpperCase().split("=>");
+    if (name === undefined) {
+      // declared in a program or a procedure: there the values are the names already
+      return undefined;
+    }
+    // a local class or interface of this object hides a global one of the same name
+    for (const obj of [this.obj, this.reg.getObject("CLAS", owner), this.reg.getObject("INTF", owner)]) {
+      if (!(obj instanceof abaplint.ABAPObject)) {
+        continue;
+      }
+      for (const file of obj.getABAPFiles()) {
+        const structure = file.getStructure();
+        const definitions = [...structure?.findAllStructures(abaplint.Structures.ClassDefinition) ?? [],
+          ...structure?.findAllStructures(abaplint.Structures.Interface) ?? []];
+        for (const definition of definitions) {
+          const declared = definition.findDirectStatement(abaplint.Statements.ClassDefinition)
+            ?.findFirstExpression(abaplint.Expressions.ClassName)
+            ?? definition.findDirectStatement(abaplint.Statements.Interface)
+              ?.findFirstExpression(abaplint.Expressions.InterfaceName);
+          if (declared?.concatTokens().toUpperCase() !== owner) {
+            continue;
+          }
+          for (const enumeration of definition.findAllStructures(abaplint.Structures.TypeEnum)) {
+            const begin = enumeration.findDirectStatement(abaplint.Statements.TypeEnumBegin);
+            if (begin?.findFirstExpression(abaplint.Expressions.NamespaceSimpleName)?.concatTokens().toUpperCase() !== name) {
+              continue;
+            }
+            const names: string[] = [];
+            for (const child of enumeration.getChildren()) {
+              if (child instanceof abaplint.Nodes.StatementNode
+                  && (child.get() instanceof abaplint.Statements.Type || child.get() instanceof abaplint.Statements.TypeEnum)) {
+                names.push(child.findFirstExpression(abaplint.Expressions.NamespaceSimpleName)?.concatTokens().toUpperCase() ?? "");
+              }
+            }
+            return names;
+          }
+        }
+      }
+    }
+    return undefined;
   }
 
   /** position of an enumerated value in its TYPES BEGIN OF ENUM, counting from 0 */

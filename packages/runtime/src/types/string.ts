@@ -13,20 +13,29 @@ import {Float} from "./float";
 export class String implements ICharacter {
   private value: string;
   private readonly qualifiedName: string | undefined;
+  private readonly enumValues: readonly string[] | undefined;
 
-  public constructor(input?: {qualifiedName?: string}) {
+  public constructor(input?: {qualifiedName?: string, enumValues?: readonly string[]}) {
     this.value = "";
     this.qualifiedName = input?.qualifiedName;
+    this.enumValues = input?.enumValues;
   }
 
   public clone(): String {
-    const n = new String({qualifiedName: this.qualifiedName});
+    const n = new String({qualifiedName: this.qualifiedName, enumValues: this.enumValues});
     n.value = this.value;
     return n;
   }
 
   public getQualifiedName() {
     return this.qualifiedName;
+  }
+
+  /** the name of the constant this value stands for, when the type is an enumerated type
+   *  declared in a class or interface: such a value is held as the position of its constant,
+   *  and the initial value is the first constant */
+  public getEnumName(): string | undefined {
+    return this.enumValues?.[Number(this.value)];
   }
 
   public set(value: ICharacter | string | number | FieldSymbol): String {
