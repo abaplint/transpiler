@@ -1,6 +1,7 @@
 import {expect} from "chai";
 import {ABAP, MemoryConsole} from "../../packages/runtime/src";
 import {AsyncFunction, runFiles} from "../_utils";
+import {UnknownTypesEnum} from "../../packages/transpiler/src/types";
 
 let abap: ABAP;
 
@@ -337,6 +338,45 @@ START-OF-SELECTION.
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("-5");
+  });
+
+  it("the label of a selection screen field is assigned without a screen", async () => {
+    const code = `
+PARAMETERS p_prog TYPE i.
+%_p_prog_%_app_%-text = 'Program'.
+WRITE 'ran'.`;
+    const js = await run(code, true);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ran");
+  });
+
+  it("a NEW of an unknown class as a method parameter is valid JavaScript", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS run IMPORTING io TYPE REF TO object RETURNING VALUE(rv) TYPE i.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    rv = 1.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  WRITE 'before'.
+  DATA result TYPE i.
+  result = lcl=>run( io = NEW zcl_not_there( ) ).`;
+    const js = await runFiles(abap, [{filename: "zfoobar_move.prog.abap", contents: code}],
+                              {skipVersionCheck: true, unknownTypes: UnknownTypesEnum.runtimeError, ignoreSyntaxCheck: true});
+    const f = new AsyncFunction("abap", js);
+    let message = "";
+    try {
+      await f(abap);
+    } catch (e) {
+      message = String(e);
+    }
+    expect(message).to.include("Void type: ZCL_NOT_THERE");
   });
 
 });
