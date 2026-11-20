@@ -1,3 +1,4 @@
+import {ClassConstructors} from "../class_constructors";
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
@@ -62,6 +63,12 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
         ret += `await abap.statements.checkCreateObjectType(${id}, ${staticType}, "${staticName.toUpperCase()}", ${name}.trimEnd());\n`;
       }
       clas = id;
+      ret += `await abap.classConstructor(${id});\n`;
+    } else {
+      const classScope = traversal.findCurrentScopeByToken(node.getFirstToken());
+      if (ClassConstructors.inChain(traversal.findClassDefinition(name, classScope), traversal, classScope)) {
+        ret += ClassConstructors.check(clas);
+      }
     }
     ret += target + ".set(await (new " + clas + "()).constructor_(" + para + "));";
 

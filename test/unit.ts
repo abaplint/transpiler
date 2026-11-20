@@ -1857,16 +1857,30 @@ ENDINTERFACE.`;
   });
 
   it("test-41", async () => {
-// class_constructor using constant value from interface
+// class_constructor using constant value from interface, it runs at the first use of the class
 
     const clas = `CLASS zcl_cc DEFINITION PUBLIC.
   PUBLIC SECTION.
     CLASS-METHODS class_constructor.
+    CLASS-METHODS run.
 ENDCLASS.
 
 CLASS zcl_cc IMPLEMENTATION.
   METHOD class_constructor.
     WRITE zif_intf=>foo.
+  ENDMETHOD.
+  METHOD run.
+  ENDMETHOD.
+ENDCLASS.`;
+
+    const tests = `
+CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+  PRIVATE SECTION.
+    METHODS test01 FOR TESTING.
+ENDCLASS.
+CLASS ltcl_test IMPLEMENTATION.
+  METHOD test01.
+    zcl_cc=>run( ).
   ENDMETHOD.
 ENDCLASS.`;
 
@@ -1877,10 +1891,12 @@ ENDINTERFACE.`;
 
     const files = [
       {filename: "zcl_cc.clas.abap", contents: clas},
+      {filename: "zcl_cc.clas.testclasses.abap", contents: tests},
       {filename: "zif_intf.intf.abap", contents: intf},
     ];
     const cons = await dumpNrun(files);
-    expect(cons.split("\n")[0]).to.equal("123");
+    // the first line is the test runner's
+    expect(cons.split("\n")[1]).to.equal("123");
   });
 
   it("test-42", async () => {
