@@ -64,13 +64,10 @@ export class LoopTranspiler implements IStructureTranspiler {
     return "[" + list.join(", ") + "]";
   }
 
-  /** LOOP AT itab ... GROUP BY key [ASCENDING|DESCENDING] [WITHOUT MEMBERS] [INTO|ASSIGNING|REFERENCE INTO group],
+  /** LOOP AT itab ... GROUP BY key [ASCENDING|DESCENDING [AS TEXT]] [WITHOUT MEMBERS] [INTO|ASSIGNING|REFERENCE INTO group],
    *  first all rows are read and grouped, then the body runs once per group */
   private transpileGroupBy(node: abaplint.Nodes.StructureNode, loopStatement: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
     const groupBy = loopStatement.findDirectExpression(abaplint.Expressions.LoopGroupBy)!;
-    if (groupBy.findDirectTokenByText("TEXT") !== undefined) {
-      throw new Error("LOOP AT ... GROUP BY ... AS TEXT, todo, " + loopStatement.concatTokens());
-    }
 
     const collector = UniqueIdentifier.get();
     const entry = UniqueIdentifier.get();
@@ -87,6 +84,9 @@ export class LoopTranspiler implements IStructureTranspiler {
       order = `"ASCENDING"`;
     } else if (groupBy.findDirectTokenByText("DESCENDING") !== undefined) {
       order = `"DESCENDING"`;
+    }
+    if (order !== "" && groupBy.findDirectTokenByText("TEXT") !== undefined) {
+      order += ", true";
     }
     // the group loop binds the group key, or without a group target the first row of each group
     const groupTarget = groupBy.findDirectExpression(abaplint.Expressions.LoopGroupByTarget);
