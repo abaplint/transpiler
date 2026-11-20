@@ -19,4 +19,6 @@ export * from "./np";
 export * from "./ns";
 export * from "./o";
 export * from "./z";
+export * from "./text";
 export {compareIn as in} from "./in";
+

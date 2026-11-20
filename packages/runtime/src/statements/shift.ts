@@ -1,5 +1,5 @@
 import {co} from "../compare";
-import {Numc} from "../types";
+import {FieldSymbol, Hex, HexUInt8, Numc, XString} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 
@@ -92,6 +92,12 @@ function shift_character_mode(target: ICharacter, options?: IShiftOptions) {
 
 
 function shift_byte_mode(target: ICharacter, options?: IShiftOptions) {
+  // the syntax check refuses a static non byte-like target, a generic field symbol is checked here
+  const pointer = target instanceof FieldSymbol ? target.getPointer() : target;
+  if (pointer !== undefined && !(pointer instanceof Hex || pointer instanceof HexUInt8 || pointer instanceof XString)) {
+    throw new Error("OBJECTS_NOT_BYTELIKE");
+  }
+
   let value = target.get();
 
   if (options?.deletingLeading) {
