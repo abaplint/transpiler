@@ -147,7 +147,7 @@ const EXPLICIT_ELEMENTARY: readonly unknown[] = [Integer, Integer8, String, XStr
 
 /** a system refuses an ASSIGN whose target field symbol is declared with a type the source
  *  does not have: a table of another kind is ASSIGN_TYPE_CONFLICT, an elementary type of
- *  another kind is ASSIGN_CAST_ILLEGAL_CAST unless CASTING is given; both are uncatchable */
+ *  another kind is ASSIGN_TYPE_CONFLICT too unless CASTING is given, both uncatchable */
 function checkTypeConflict(target: FieldSymbol, source: any, casting: boolean | undefined): void {
   const targetType = target.getType();
   if (targetType === undefined || source === null || typeof source !== "object") {
@@ -183,7 +183,7 @@ function checkTypeConflict(target: FieldSymbol, source: any, casting: boolean | 
     // elementary source is compared
     return;
   }
-  throw new Error("ASSIGN_CAST_ILLEGAL_CAST");
+  throw new Error("ASSIGN_TYPE_CONFLICT");
 }
 
 export function assign(input: IAssignInput) {
@@ -347,6 +347,7 @@ export function assign(input: IAssignInput) {
       // not a field in the structure
       abap.builtin.sy.get().subrc.set(4);
     } else {
+      checkTypeConflict(input.target, result, input.casting);
       input.target.assign(result);
       abap.builtin.sy.get().subrc.set(0);
     }
