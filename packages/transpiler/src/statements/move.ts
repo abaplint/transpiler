@@ -29,8 +29,9 @@ export class MoveTranspiler implements IStatementTranspiler {
       return ret;
     }
 
-    let source = this.isInt8Calculation(node, sourceExpression, targetExpressions.length, traversal)
-      ? new SourceTranspiler(false, true).transpile(sourceExpression!, traversal)
+    const calculation = this.integerCalculation(node, sourceExpression, targetExpressions.length, traversal);
+    let source = calculation !== undefined
+      ? new SourceTranspiler(false, calculation).transpile(sourceExpression!, traversal)
       : traversal.traverse(sourceExpression);
 
     const second = node.getChildren()[1]?.concatTokens();
@@ -102,21 +103,34 @@ export class MoveTranspiler implements IStatementTranspiler {
   // when the target or an operand is int8: i * i into int8 is exact up to 2^62, and "/"
   // rounds. The runtime decides by the operands alone and does not know the target, so here
   // the operands are converted to int8 before the calculation. Only for an i or int8 target
-  // and operands whose type is known to be i or int8, and not for **, which counts as f
-  private isInt8Calculation(node: abaplint.Nodes.StatementNode, source: abaplint.Nodes.ExpressionNode | undefined,
-                            targets: number, traversal: Traversal): boolean {
+  // and operands whose type is known to be i or int8, and not for **, which counts as f.
+  // With a p, f or decfloat34 target the calculation type is that of the target, and an int8
+  // result outside the int8 range is no overflow: the operands are converted to decfloat34,
+  // exact for sums, differences and products of int8, so the runtime does not raise for them
+  private integerCalculation(node: abaplint.Nodes.StatementNode, source: abaplint.Nodes.ExpressionNode | undefined,
+                             targets: number, traversal: Traversal): "int8" | "decfloat34" | undefined {
     if (source === undefined
         || targets !== 1
         || source.findFirstExpression(abaplint.Expressions.ArithOperator) === undefined) {
-      return false;
+      return undefined;
     }
     const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
     const target = traversal.determineType(node, scope);
+    const wide = target instanceof abaplint.BasicTypes.PackedType
+      || target instanceof abaplint.BasicTypes.FloatType
+      || target instanceof abaplint.BasicTypes.DecFloat34Type;
     const found = {int8: target instanceof abaplint.BasicTypes.Integer8Type};
-    if (found.int8 === false && !(target instanceof abaplint.BasicTypes.IntegerType)) {
-      return false;
+    if (found.int8 === false && wide === false && !(target instanceof abaplint.BasicTypes.IntegerType)) {
+      return undefined;
+    } else if (this.integerOperands(source, scope, found) === false || found.int8 === false) {
+      return undefined;
+    } else if (wide === true) {
+      // DIV and MOD of a decfloat34 go through a double in the runtime, they stay int8
+      const divMod = source.findAllExpressions(abaplint.Expressions.ArithOperator)
+        .some(o => ["DIV", "MOD"].includes(o.concatTokens().toUpperCase()));
+      return divMod ? undefined : "decfloat34";
     }
-    return this.integerOperands(source, scope, found) && found.int8;
+    return "int8";
   }
 
   private integerOperands(node: abaplint.Nodes.ExpressionNode, scope: abaplint.ISpaghettiScopeNode | undefined,
