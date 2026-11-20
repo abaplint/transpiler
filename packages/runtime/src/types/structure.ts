@@ -7,6 +7,110 @@ import {Hex} from "./hex";
 import {Character} from "./character";
 import {throwError} from "../throw_error";
 import {ABAPObject} from "./abap_object";
+import {Numc} from "./numc";
+import {Date} from "./date";
+import {Time} from "./time";
+import {String} from "./string";
+import {XString} from "./xstring";
+import {DataReference} from "./data_reference";
+
+type CharLike = Character | Numc | Date | Time;
+type Fragment = {chars: CharLike[], length: number} | {other: any};
+
+/** length of a flat character-like field (c, n, d, t), undefined for every other type */
+function charLength(v: any): number | undefined {
+  if (v instanceof Character || v instanceof Numc) {
+    return v.getLength();
+  } else if (v instanceof Date) {
+    return 8;
+  } else if (v instanceof Time) {
+    return 6;
+  }
+  return undefined;
+}
+
+/** true when two elementary components at the same position may not move one to one: a
+ *  character-like one facing another type, or c / n of another length */
+function differentCharLayout(source: any, target: any): boolean {
+  if (source === undefined || source === null) {
+    return false;
+  } else if (source.constructor !== target.constructor) {
+    return charLength(source) !== undefined || charLength(target) !== undefined;
+  }
+  return (target instanceof Character || target instanceof Numc)
+    && target.getLength() !== source.getLength();
+}
+
+/** fragment view of a flat structure: consecutive character-like components, also across
+ *  nested structures, form one character fragment; returns false for a deep structure */
+function fragments(s: Structure, out: Fragment[]): boolean {
+  const v = s.get();
+  for (const key of Object.keys(v)) {
+    const val = v[key];
+    if (val instanceof Structure) {
+      if (fragments(val, out) === false) {
+        return false;
+      }
+      continue;
+    }
+    const length = charLength(val);
+    if (length !== undefined) {
+      const last = out[out.length - 1];
+      if (last !== undefined && "chars" in last) {
+        last.chars.push(val);
+        last.length += length;
+      } else {
+        out.push({chars: [val], length});
+      }
+    } else if (val instanceof Table || val instanceof HashedTable || val instanceof String
+        || val instanceof XString || val instanceof ABAPObject || val instanceof DataReference) {
+      return false;
+    } else {
+      out.push({other: val});
+    }
+  }
+  return true;
+}
+
+/** a move between flat structures that are not compatible goes fragment by fragment, a
+ *  character fragment is moved like one c field, filled with blanks; returns false, and
+ *  changes nothing, when the fragment views do not match */
+function moveByFragments(source: Structure, target: Structure): boolean {
+  const sf: Fragment[] = [];
+  const tf: Fragment[] = [];
+  if (fragments(source, sf) === false || fragments(target, tf) === false) {
+    return false;
+  }
+  const count = Math.min(sf.length, tf.length);
+  for (let i = 0; i < count; i++) {
+    const s = sf[i];
+    const t = tf[i];
+    if ("chars" in s !== "chars" in t) {
+      return false;
+    } else if ("chars" in s && "chars" in t && s.length !== t.length && i !== count - 1) {
+      // only the last fragment may differ in length
+      return false;
+    }
+  }
+
+  for (let i = 0; i < count; i++) {
+    const s = sf[i];
+    const t = tf[i];
+    if ("chars" in s && "chars" in t) {
+      let text = s.chars.map(c => c.get()).join("");
+      text = text.length > t.length ? text.substring(0, t.length) : text.padEnd(t.length, " ");
+      let pos = 0;
+      for (const c of t.chars) {
+        const length = charLength(c)!;
+        c.set(text.substring(pos, pos + length));
+        pos += length;
+      }
+    } else if ("other" in s && "other" in t) {
+      t.other.set(s.other);
+    }
+  }
+  return true;
+}
 
 // structures are typically instantiated repeatedly with the same literal names,
 // cache the uppercasing
@@ -128,20 +232,33 @@ export class Structure {
       const obj = input.get();
       const keys1 = Object.keys(obj);
       const keys2 = Object.keys(this.value);
+      // the components do not line up one to one, the character fragments may not either
+      let fragmentsTried = keys1.length !== keys2.length && moveByFragments(input, this);
+      if (fragmentsTried === true) {
+        return this;
+      }
       for (let i = 0; i < keys1.length; i++) {
         const key1 = keys1[i];
         const key2 = keys2[i];
-        if (this.value[key2] === undefined) {
+        const target = this.value[key2];
+        if (target === undefined) {
           break;
         }
         const val = obj[key1];
         if (val instanceof Structure || val instanceof Table || val instanceof HashedTable) {
           // deep types are cloned so the target never shares references with the source
-          this.value[key2].set(val.clone());
-        } else {
-          // elementary types copy by value in set(), no clone needed
-          this.value[key2].set(val);
+          target.set(val.clone());
+          continue;
+        } else if (fragmentsTried === false && differentCharLayout(val, target)) {
+          // a character-like component of another length or type, the move goes by fragments,
+          // which also redoes the components already moved, they line up
+          if (moveByFragments(input, this) === true) {
+            return this;
+          }
+          fragmentsTried = true;
         }
+        // elementary types copy by value in set(), no clone needed
+        target.set(val);
       }
     } else {
       this.setCharacter(input);
