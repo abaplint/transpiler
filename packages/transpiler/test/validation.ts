@@ -50,4 +50,45 @@ describe("Validation", () => {
       expect(e.message).to.contain("allowed");
     }
   });
+
+  it("leaves the registry's configuration as it found it", async () => {
+    const custom = new abaplint.Config(JSON.stringify({
+      global: {files: "/**/*.*"},
+      syntax: {version: abaplint.Version.v702, errorNamespace: "^(Z|Y)"},
+      rules: {line_length: {length: 10}},
+    }));
+    const original = JSON.parse(JSON.stringify(custom.get()));
+    const reg = new abaplint.Registry(custom).addFile(
+      new abaplint.MemoryFile("zfoobar.prog.abap", "DATA foo TYPE i.\nWRITE foo."));
+
+    const output = await new Transpiler().run(reg);
+
+    expect(output.objects.length).to.equal(1);
+    expect(reg.getConfig()).to.equal(custom);
+    expect(reg.getConfig().get()).to.deep.equal(original);
+    expect(reg.getConfig().getVersion()).to.equal(abaplint.Version.v702);
+    // the restored configuration is live again: line_length is not a transpiler rule
+    const keys = reg.findIssues().map(i => i.getKey());
+    expect(keys).to.include("line_length");
+    expect(keys).to.not.include("forbidden_identifier");
+  });
+
+  it("restores the configuration also when validation throws", async () => {
+    const custom = new abaplint.Config(JSON.stringify({
+      global: {files: "/**/*.*"},
+      syntax: {version: abaplint.Version.v702, errorNamespace: "^(Z|Y)"},
+      rules: {},
+    }));
+    const reg = new abaplint.Registry(custom).addFile(
+      new abaplint.MemoryFile("zfoobar.prog.abap", "WRITE foowrite."));
+
+    try {
+      await new Transpiler().run(reg);
+      expect.fail();
+    } catch (e) {
+      expect(e.message).to.contain("not found");
+    }
+    expect(reg.getConfig()).to.equal(custom);
+    expect(reg.getConfig().getVersion()).to.equal(abaplint.Version.v702);
+  });
 });
