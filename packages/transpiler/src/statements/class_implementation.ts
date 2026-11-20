@@ -26,8 +26,11 @@ export class ClassImplementationTranspiler implements IStatementTranspiler {
     }
 
     const scope = traversal.findCurrentScopeByToken(token);
+    // false until the class constructor runs, see ClassConstructors
+    const hasCctor = def?.getMethodDefinitions()?.getByName("CLASS_CONSTRUCTOR") !== undefined;
+    const cctor = hasCctor ? "\nstatic INTERNAL_CCTOR_DONE = false;" : "";
 
-    return ret + ` {
+    return ret + ` {${cctor}
 static STATIC_SUPER = ${Traversal.escapeNamespace(def?.getSuperClass()?.toLowerCase())};
 static INTERNAL_TYPE = 'CLAS';
 static INTERNAL_NAME = '${traversal.buildInternalName(token.getStr(), def)}';

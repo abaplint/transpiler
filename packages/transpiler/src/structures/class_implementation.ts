@@ -1,3 +1,4 @@
+import {ClassConstructors} from "../class_constructors";
 import * as abaplint from "@abaplint/core";
 import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
@@ -272,27 +273,12 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
       ret += Traversal.escapeNamespace(clasName) + "." + fname + " = {\"EVENT_NAME\": \"" + e.getName().toUpperCase() + "\", \"EVENT_CLASS\": \"" + name + "\"};\n";
     }
 
-    // this is not correct, ABAP does not invocate the class constructor at require time,
-    // but this will probably work
-    if (traversal.getCurrentObject().getType() === "CLAS") {
-// gather call of all class constructors together for a global class, also local classes
-// as they might use the global class, except for local testclass constructors
-      if (cdef.isGlobal() === true) {
-        for (const f of traversal.getCurrentObject().getABAPFiles()) {
-          for (const def of f.getInfo().listClassDefinitions()) {
-            if (def.isForTesting === true) {
-              continue;
-            } else if (def.methods.some(m => m.name.toLowerCase() === "class_constructor")) {
-              ret += "await " + traversal.lookupClassOrInterface(def.name, token) + ".class_constructor();\n";
-            }
-          }
-        }
-      }
-      if (cdef.isGlobal() === false && cdef.isForTesting() === true && cdef.getMethodDefinitions().getByName("class_constructor")) {
-        ret += "await " + Traversal.escapeNamespace(clasName) + ".class_constructor();\n";
-      }
-    } else if (cdef.getMethodDefinitions().getByName("class_constructor")) {
-      ret += "await " + Traversal.escapeNamespace(clasName) + ".class_constructor();\n";
+    // class constructors run at the first use of the class, see ClassConstructors, except the ones of
+    // local test classes and kernel ones, which run when the code is loaded
+    const hasCctor = cdef.getMethodDefinitions()?.getByName("class_constructor") !== undefined;
+    const testClass = traversal.getCurrentObject().getType() === "CLAS" && cdef.isGlobal() === false && cdef.isForTesting() === true;
+    if (hasCctor && (testClass || ClassConstructors.isKernel(cdef, traversal))) {
+      ret += "await abap.classConstructor(" + Traversal.escapeNamespace(clasName) + ");\n";
     }
 
     return ret;

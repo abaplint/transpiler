@@ -18,6 +18,7 @@ import {MemoryConsole} from "./console/memory_console";
 import {buildDbTableName} from "./prefix";
 import {IntegerFactory} from "./integer_factory";
 import {dynamicCallLookup} from "./dynamic_call_lookup";
+import {classConstructor} from "./class_constructor";
 import {CharacterFactory} from "./character_factory";
 import {ABAPEventing} from "./abap_eventing";
 import {isLineNotFound} from "./is_line_not_found";
@@ -78,6 +79,7 @@ export class ABAP {
   public buildDbTableName = buildDbTableName;
   public ClassicError = ClassicError;
   public dynamicCallLookup = dynamicCallLookup;
+  public classConstructor = classConstructor;
   public parametersCall = parametersCall;
   public eventing = new ABAPEventing();
   public alphaOut = alphaOut;
