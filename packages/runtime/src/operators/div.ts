@@ -37,6 +37,9 @@ export function div(left: INumeric | ICharacter | Integer8 | string | number, ri
   } else {
     // floor only for a positive divisor; for a negative one the quotient
     // rounds up, so that the remainder a - b * ( a DIV b ) is not negative
-    return new Integer().set(r > 0 ? Math.floor(l / r) : -Math.floor(l / -r));
+    // not checked against the range of i, p DIV 100 into a p target is not an i;
+    // -2147483648 DIV -1 into an i raises at the target
+    return Integer.arithmeticResult(r > 0 ? Math.floor(l / r) : -Math.floor(l / -r));
   }
 }
+

@@ -51,5 +51,6 @@ export function mod(left: INumeric | ICharacter | string | Integer8 | number, ri
   if (left instanceof Float || right instanceof Float) {
     return new Float().set(val);
   }
-  return new Integer().set(val);
+  // not checked against the range of i, the remainder of a large p divisor is not an i
+  return Integer.arithmeticResult(val);
 }
