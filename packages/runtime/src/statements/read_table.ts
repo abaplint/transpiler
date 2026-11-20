@@ -1,7 +1,9 @@
 /* eslint-disable max-len */
 import {binarySearchFrom, binarySearchFromRow} from "../binary_search";
 import {eq, ge, gt, lt} from "../compare";
-import {DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Integer8, secondaryKeyName, Structure, Table, TableAccessType, TableRowType} from "../types";
+import {Character, DataReference, Date, DecFloat34, FieldSymbol, Float, HashedTable, Hex, Integer, Integer8, Numc, Packed, secondaryKeyName, String, Structure, Table, TableAccessType, TableRowType, Time, XString} from "../types";
+
+const ELEMENTARY = [Character, Date, DecFloat34, Float, Hex, Integer, Integer8, Numc, Packed, String, Time, XString];
 import {primaryKeyValues} from "../primary_key";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
@@ -211,6 +213,35 @@ function sameComponents(found: any, workArea: any, names: string[]): boolean {
     return eq(found, workArea);
   }
   return names.every(n => eq(component(found, n), component(workArea, n)));
+}
+
+/** WITH KEY / WITH TABLE KEY comp = operand: the operand converted to the type of the component, as the comparison
+ *  uses it; an operand of the same type, or a component that is not elementary, is used as it is */
+export function readTableKey(table: Table | HashedTable | FieldSymbol, component: string, value: any): any {
+  if (table instanceof FieldSymbol) {
+    table = table.getPointer() as Table;
+  }
+  let operand = value;
+  if (operand instanceof FieldSymbol) {
+    operand = operand.getPointer();
+  }
+  let sample: any = (table as any)?.getRowType?.();
+  const name = component.trim().toLowerCase();
+  if (name !== "table_line") {
+    for (const part of name.split("-")) {
+      sample = sample instanceof Structure ? sample.get()[part] : undefined;
+    }
+  }
+  if (sample === undefined || operand === undefined || operand === null || typeof operand !== "object"
+      || !ELEMENTARY.some(t => sample instanceof t)) {
+    return value;
+  }
+  const sameLength = typeof sample.getLength !== "function" || sample.getLength() === operand.getLength?.();
+  const sameDecimals = typeof sample.getDecimals !== "function" || sample.getDecimals() === operand.getDecimals?.();
+  if (sample.constructor === operand.constructor && sameLength && sameDecimals) {
+    return value;
+  }
+  return sample.clone().set(operand);
 }
 
 export function readTable(table: Table | HashedTable | FieldSymbol, options?: IReadTableOptions): ReadTableReturn {

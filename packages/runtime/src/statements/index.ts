@@ -36,7 +36,7 @@ import {IMessageOptions, MessageStatement} from "./message";
 import {IModifyDatabaseOptions, modifyDatabase} from "./modify_database";
 import {modifyInternal} from "./modify_internal";
 import {moveCorresponding} from "./move_corresponding";
-import {readTable} from "./read_table";
+import {readTable, readTableKey} from "./read_table";
 import {replace} from "./replace";
 import {IRollbackOptions, rollback} from "./rollback";
 import {select as selectDB} from "./select";
@@ -95,6 +95,7 @@ export class Statements {
   public overlay = overlay;
   public raiseEvent = raiseEvent;
   public readTable = readTable;
+  public readTableKey = readTableKey;
   public replace = replace;
   public setBit = setBit;
   public setHandler = setHandler;

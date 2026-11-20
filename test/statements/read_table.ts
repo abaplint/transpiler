@@ -2044,4 +2044,42 @@ WRITE / |{ row-name }/{ row-qty } { sy-subrc }|.`;
     expect(abap.console.get()).to.equal("Z/3 0\nB/3 2\nB/3 0");
   });
 
+
+  it("READ TABLE WITH KEY converts the operand to the type of the component", async () => {
+    const code = `
+TYPES ty_code TYPE c LENGTH 2.
+DATA tab TYPE STANDARD TABLE OF ty_code WITH DEFAULT KEY.
+DATA row TYPE ty_code.
+DATA count TYPE i.
+APPEND 'AB' TO tab.
+READ TABLE tab INTO row WITH KEY table_line = 'ABX'.
+WRITE / sy-subrc.
+LOOP AT tab INTO row WHERE table_line = 'ABX'.
+  count = count + 1.
+ENDLOOP.
+WRITE / count.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n0");
+  });
+
+  it("READ TABLE WITH KEY, a number compared with a text component", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         code TYPE n LENGTH 4,
+         name TYPE c LENGTH 5,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row TYPE ty.
+row-code = '0042'. row-name = 'forty'. APPEND row TO tab.
+READ TABLE tab INTO row WITH KEY code = 42.
+WRITE / sy-subrc.
+WRITE / row-name.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\nforty");
+  });
+
 });
