@@ -13,7 +13,7 @@ export class SelectionDefault {
     if (token === undefined) {
       return undefined;
     }
-    const found = traversal.findCurrentScopeByToken(token)?.findVariable(token.getStr());
+    const found = traversal.findCurrentScopeByToken(token)?.findVariable(token.getStr().replace(/^!/, ""));
     if (found === undefined) {
       return undefined;
     }

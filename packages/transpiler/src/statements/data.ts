@@ -46,7 +46,7 @@ export class DataTranspiler implements IStatementTranspiler {
       throw new Error("DataTranspiler, scope not found: " + node.concatTokens());
     }
 
-    const found = scope.findVariable(token.getStr());
+    const found = scope.findVariable(token.getStr().replace(/^!/, ""));
     if (found === undefined) {
       throw new Error("DataTranspiler, var not found, \"" + token.getStr() + "\", " + traversal.getFilename() + ", line: " + token.getRow());
     }

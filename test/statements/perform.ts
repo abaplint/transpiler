@@ -217,4 +217,25 @@ WRITE 'after'.`;
     expect(caught).to.equal("CX_SY_PROGRAM_NOT_FOUND not found");
   });
 
+  it("a FORM, a data object and a type of the same name; a name marked with !", async () => {
+    const code = `
+TYPES amount TYPE p LENGTH 8 DECIMALS 2.
+DATA: amount TYPE amount,
+      !lines TYPE i.
+
+START-OF-SELECTION.
+  amount = '1.5'.
+  !lines = 2.
+  PERFORM amount.
+  WRITE / lines.
+
+FORM amount.
+  WRITE / |{ amount }|.
+ENDFORM.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1.50\n2");
+  });
+
 });

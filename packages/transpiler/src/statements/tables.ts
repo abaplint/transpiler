@@ -16,7 +16,7 @@ export class TablesTranspiler implements IStatementTranspiler {
       throw new Error("TablesTranspiler, scope not found");
     }
 
-    const found = scope.findVariable(token.getStr());
+    const found = scope.findVariable(token.getStr().replace(/^!/, ""));
     if (found === undefined) {
       throw new Error("TablesTranspiler, var not found, \"" + token.getStr() + "\"");
     }
