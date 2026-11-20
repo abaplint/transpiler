@@ -590,10 +590,10 @@ ENDINTERFACE.`;
     <SCRLEN2>20</SCRLEN2>
     <SCRLEN3>40</SCRLEN3>
     <DDTEXT>sdfsd</DDTEXT>
-    <REPTEXT>sdfsd</REPTEXT>
-    <SCRTEXT_S>sdfsd</SCRTEXT_S>
-    <SCRTEXT_M>sdfsd</SCRTEXT_M>
-    <SCRTEXT_L>sdfsd</SCRTEXT_L>
+    <REPTEXT>Heading</REPTEXT>
+    <SCRTEXT_S>Short</SCRTEXT_S>
+    <SCRTEXT_M>Medium</SCRTEXT_M>
+    <SCRTEXT_L>Long label</SCRTEXT_L>
     <DTELMASTER>E</DTELMASTER>
     <REFKIND>D</REFKIND>
    </DD04V>
@@ -612,6 +612,7 @@ ENDINTERFACE.`;
   "domain": "ZFIXEDVAL",
   "fixedValues": [{"description":"fixed","low":"F","language":"E"},{"description":"numbers","low":"1","high":"9","language":"E"}],
   "description": "sdfsd",
+  "texts": {"short":"Short","medium":"Medium","long":"Long label","heading":"Heading"},
 };`;
 
     expect(output.length).to.equal(1);
