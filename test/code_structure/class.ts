@@ -1557,6 +1557,30 @@ CONSTANTS END OF mode.`;
     expect(js).to.contain("mode");
   });
 
+  it("CONSTANTS in the local include of a class, outside its local classes", async () => {
+    const clas = `CLASS zcl_consts DEFINITION PUBLIC CREATE PUBLIC.
+  PUBLIC SECTION.
+    CLASS-METHODS run RETURNING VALUE(rv) TYPE string.
+ENDCLASS.
+CLASS zcl_consts IMPLEMENTATION.
+  METHOD run.
+    rv = gc_msg_class && gc_msg_form.
+  ENDMETHOD.
+ENDCLASS.`;
+    const locals = `
+CONSTANTS: gc_msg_class TYPE c LENGTH 4 VALUE 'ZMSG',
+           gc_msg_form  TYPE n LENGTH 3 VALUE '001'.`;
+
+    const result = await compileFiles([
+      {filename: "zcl_consts.clas.abap", contents: clas},
+      {filename: "zcl_consts.clas.locals_imp.abap", contents: locals},
+    ]);
+
+    const js = result.objects.map(o => o.chunk.getCode()).join("\n");
+    expect(js).to.contain("gc_msg_class");
+    expect(js).to.contain("'ZMSG'");
+  });
+
   it("aliased redefinition", async () => {
     const code = `
 INTERFACE ifile.
