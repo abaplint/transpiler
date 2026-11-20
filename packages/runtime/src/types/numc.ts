@@ -53,8 +53,13 @@ export class Numc implements ICharacter {
     } else if (value instanceof Float) {
       this.value = Math.trunc(value.getRaw()) + "";
     } else {
-      this.set(value.get());
-      return this;
+      const inner = value.get();
+      if (typeof inner !== "bigint") {
+        this.set(inner);
+        return this;
+      }
+      // int8: the absolute value, digit by digit, a number would lose precision above 2^53
+      this.value = (inner < 0n ? -inner : inner).toString();
     }
 
     if (this.value.length > this.length) {
