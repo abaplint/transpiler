@@ -137,9 +137,10 @@ export function sort(input: Table | FieldSymbol | any[], options?: ISortOptions)
       return 0;
     });
 
-  } else if (input instanceof Table
-      && input.getRowType() instanceof Structure
-      && input.getOptions()?.keyType !== TableKeyType.empty) {
+  } else if (input instanceof Table && input.getOptions()?.keyType === TableKeyType.empty) {
+    // without BY the rows are sorted by the primary key, an empty key keeps their order
+    return;
+  } else if (input instanceof Table && input.getRowType() instanceof Structure) {
     // without BY, rows of a structure are sorted by the primary key
     const descending = options?.descending === true;
     const text = options?.text === true;

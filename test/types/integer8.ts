@@ -887,4 +887,37 @@ WRITE / lv_data.`;
     expect(abap.console.get()).to.equal("09223372036854775807\n9223372036854775807\n9007199254740993\n42\n12345678901234567891");
   });
 
+  it("int8 to numc, the absolute value, exact", async () => {
+    const code = `
+  DATA i8 TYPE int8.
+  DATA n10 TYPE n LENGTH 10.
+  DATA n20 TYPE n LENGTH 20.
+  i8 = -3.
+  n10 = i8.
+  WRITE / n10.
+  i8 = 9223372036854775807.
+  n20 = i8.
+  WRITE / n20.
+  i8 = 9007199254740993.
+  n20 = i8.
+  WRITE / n20.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0000000003\n09223372036854775807\n00009007199254740993");
+  });
+
+  it("int8 to a short numc keeps the rightmost digits", async () => {
+    const code = `
+  DATA i8 TYPE int8.
+  DATA n3 TYPE n LENGTH 3.
+  i8 = 12345.
+  n3 = i8.
+  WRITE / n3.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("345");
+  });
+
 });
