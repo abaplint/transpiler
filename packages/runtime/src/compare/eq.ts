@@ -2,9 +2,9 @@
 import {ABAPObject, Character, Date, DecFloat34, FieldSymbol, Float, HashedTable, String, Hex, Integer, Numc, Structure, Table, DataReference, toInteger, XString, Integer8, Packed, HexUInt8, Time} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
-import {parse} from "../operators/_parse";
 import {compareDecFloat34} from "../operators/_decfloat";
 import {compareDecimal} from "../types/_decimal";
+import {int8Operand} from "./_int8";
 
 function compareTables(left: Table | HashedTable, right: Table | HashedTable): boolean {
   const leftArray = left.array();
@@ -144,9 +144,7 @@ export function eq(
       // exception?
       return false;
     }
-    const l = left instanceof Integer8 ? left.get() : BigInt(parse(left as any));
-    const r = right instanceof Integer8 ? right.get() : BigInt(parse(right as any));
-    return l === r;
+    return int8Operand(left) === int8Operand(right);
   }
 
 // for performance, do the typicaly/easy cases first
