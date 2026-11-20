@@ -1,4 +1,4 @@
-import {gt, lt} from "../compare";
+import {compareText, gt, lt} from "../compare";
 import {FieldSymbol, Integer, Structure} from "../types";
 import {ABAP} from "..";
 
@@ -88,13 +88,14 @@ export class GroupBy {
     group.tabix.push(abap.builtin.sy.get().tabix.get());
   }
 
-  /** the groups in the order of the group loop, with GROUP SIZE and GROUP INDEX set */
-  public getGroups(order?: "ASCENDING" | "DESCENDING"): IGroup[] {
+  /** the groups in the order of the group loop, with GROUP SIZE and GROUP INDEX set,
+   *  text: AS TEXT, character-like key components are compared by the text environment */
+  public getGroups(order?: "ASCENDING" | "DESCENDING", text = false): IGroup[] {
     const ret = [...this.groups];
     if (order !== undefined) {
       const direction = order === "ASCENDING" ? 1 : -1;
       // stable, groups with equal keys keep the order of their first occurrence
-      ret.sort((a, b) => direction * this.compare(a.key, b.key));
+      ret.sort((a, b) => direction * this.compare(a.key, b.key, text));
     }
     for (const group of ret) {
       if (this.size !== undefined) {
@@ -113,18 +114,21 @@ export class GroupBy {
     abap.builtin.sy.get().tabix.set(representative ? group.tabix[0] : pass);
   }
 
-  private compare(a: any, b: any): number {
+  private compare(a: any, b: any, text: boolean): number {
     if (a instanceof Structure) {
       for (const name of Object.keys(a.get())) {
         if (name === this.size || name === this.index) {
           continue;
         }
-        const c = this.compare(a.get()[name], b.get()[name]);
+        const c = this.compare(a.get()[name], b.get()[name], text);
         if (c !== 0) {
           return c;
         }
       }
       return 0;
+    }
+    if (text) {
+      return compareText(a, b);
     }
     return lt(a, b) ? -1 : gt(a, b) ? 1 : 0;
   }
