@@ -29,17 +29,18 @@ export class MethodTranspiler implements IStructureTranspiler {
                                  traversal: Traversal): string {
     const token = statement.findFirstExpression(abaplint.Expressions.MethodName)!.getFirstToken();
     const methodName = token.getStr();
+    const scope = traversal.findCurrentScopeByToken(token);
+    const classDef = traversal.getClassDefinition(token);
     let ret = "";
     if (methodName.toUpperCase() !== "CLASS_CONSTRUCTOR" && methodName.includes("~") === false) {
-      const scope = traversal.findCurrentScopeByToken(token);
-      const classDef = traversal.getClassDefinition(token);
       const method = classDef?.getMethodDefinitions()?.getByName(methodName);
       if (method?.isStatic() === true && ClassConstructors.inChain(classDef, traversal, scope)) {
         const className = scope?.getParent()?.getIdentifier().sname?.toLowerCase();
         ret += ClassConstructors.check(Traversal.escapeNamespace(className)!);
       }
     }
-    return ret + ClassConstructors.entryChecks(node, traversal);
+    // while a method of the class runs, the class constructors of the class and its super classes have run
+    return ret + ClassConstructors.entryChecks(node, traversal, ClassConstructors.chainNames(classDef, traversal, scope));
   }
 
 }

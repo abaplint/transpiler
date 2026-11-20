@@ -36,10 +36,11 @@ export class ClassConstructors {
     return `(${clas}.INTERNAL_CCTOR_DONE === false && await abap.classConstructor(${clas}), true)`;
   }
 
-  /** checks for the declaring classes of the static attributes accessed as class=>attr in node */
-  public static entryChecks(node: abaplint.INode, traversal: Traversal): string {
+  /** checks for the declaring classes of the static attributes accessed as class=>attr in node,
+   *  constructed: names of classes whose class constructors have run for sure, eg. in a method of the class */
+  public static entryChecks(node: abaplint.INode, traversal: Traversal, constructed?: Set<string>): string {
     const found = new Map<string, string>();
-    ClassConstructors.collect(node, traversal, found);
+    ClassConstructors.collect(node, traversal, found, constructed);
     let ret = "";
     for (const clas of found.values()) {
       ret += ClassConstructors.check(clas);
@@ -47,7 +48,22 @@ export class ClassConstructors {
     return ret;
   }
 
-  private static collect(node: abaplint.INode, traversal: Traversal, found: Map<string, string>): void {
+  /** the upper case names of the class and its super classes: while a method of the class runs,
+   *  their class constructors have run */
+  public static chainNames(def: abaplint.IClassDefinition | undefined, traversal: Traversal,
+                           scope: abaplint.ISpaghettiScopeNode | undefined): Set<string> {
+    const ret = new Set<string>();
+    let current = def;
+    for (let guard = 0; current !== undefined && guard < 100; guard++) {
+      ret.add(current.getName().toUpperCase());
+      const superName = current.getSuperClass();
+      current = superName === undefined ? undefined : traversal.findClassDefinition(superName, scope);
+    }
+    return ret;
+  }
+
+  private static collect(node: abaplint.INode, traversal: Traversal, found: Map<string, string>,
+                         constructed: Set<string> | undefined): void {
     const children = node.getChildren();
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
@@ -57,13 +73,13 @@ export class ClassConstructors {
           && child.get() instanceof abaplint.Expressions.ClassName
           && arrow instanceof abaplint.Nodes.TokenNode && arrow.getFirstToken().getStr() === "=>"
           && attribute instanceof abaplint.Nodes.ExpressionNode && attribute.get() instanceof abaplint.Expressions.AttributeName) {
-        ClassConstructors.add(child, attribute.concatTokens(), traversal, found);
+        ClassConstructors.add(child, attribute.concatTokens(), traversal, found, constructed);
       }
       if (child instanceof abaplint.Nodes.StructureNode && ClassConstructors.isOwnProcedure(child)) {
         // the code of other procedures and classes runs when they are entered, not here
         continue;
       } else if (!(child instanceof abaplint.Nodes.TokenNode)) {
-        ClassConstructors.collect(child, traversal, found);
+        ClassConstructors.collect(child, traversal, found, constructed);
       }
     }
   }
@@ -108,7 +124,8 @@ export class ClassConstructors {
       || get instanceof abaplint.Structures.Module;
   }
 
-  private static add(className: abaplint.Nodes.ExpressionNode, attribute: string, traversal: Traversal, found: Map<string, string>): void {
+  private static add(className: abaplint.Nodes.ExpressionNode, attribute: string, traversal: Traversal,
+                     found: Map<string, string>, constructed: Set<string> | undefined): void {
     const token = className.getFirstToken();
     const scope = traversal.findCurrentScopeByToken(token);
     const name = attribute.toUpperCase();
@@ -131,9 +148,19 @@ export class ClassConstructors {
       return;
     }
     const key = def.getName().toUpperCase();
-    if (found.has(key) === false) {
-      found.set(key, traversal.lookupClassOrInterface(def.getName(), token));
+    if (found.has(key) === false && constructed?.has(key) !== true) {
+      found.set(key, ClassConstructors.jsName(def, token, traversal));
     }
+  }
+
+  /** a local class of the object being transpiled is a class in the same module, used directly,
+   *  others via abap.Classes */
+  private static jsName(def: abaplint.IClassDefinition, token: abaplint.Token, traversal: Traversal): string {
+    const obj = traversal.getCurrentObject();
+    if (def.isGlobal() === false && obj.getABAPFiles().some(f => f.getFilename() === def.getFilename())) {
+      return Traversal.escapeNamespace(def.getName().toLowerCase())!;
+    }
+    return traversal.lookupClassOrInterface(def.getName(), token);
   }
 
 }

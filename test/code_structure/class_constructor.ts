@@ -283,4 +283,59 @@ START-OF-SELECTION.
     expect(out).to.equal("a P\nb P\nc P");
   });
 
+  it("in a method of a class: the own and super class constructors have run, a sub class is checked on entry", async () => {
+    const out = await execute(`
+CLASS lcl_s DEFINITION DEFERRED.
+CLASS lcl_p DEFINITION.
+  PUBLIC SECTION.
+    CLASS-DATA v TYPE string.
+    CLASS-METHODS class_constructor.
+    METHODS read_sub.
+    METHODS read_own.
+ENDCLASS.
+CLASS lcl_s DEFINITION INHERITING FROM lcl_p.
+  PUBLIC SECTION.
+    CLASS-DATA w TYPE string.
+    CLASS-METHODS class_constructor.
+    METHODS read_super.
+ENDCLASS.
+CLASS lcl_p IMPLEMENTATION.
+  METHOD class_constructor.
+    WRITE / 'p ctor'.
+  ENDMETHOD.
+  METHOD read_sub.
+    DATA x TYPE string.
+    WRITE / 'read_sub entry'.
+    x = lcl_s=>w.
+  ENDMETHOD.
+  METHOD read_own.
+    DATA x TYPE string.
+    WRITE / 'read_own entry'.
+    x = lcl_p=>v.
+  ENDMETHOD.
+ENDCLASS.
+CLASS lcl_s IMPLEMENTATION.
+  METHOD class_constructor.
+    WRITE / 's ctor'.
+  ENDMETHOD.
+  METHOD read_super.
+    DATA x TYPE string.
+    WRITE / 'read_super entry'.
+    x = lcl_p=>v.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA p TYPE REF TO lcl_p.
+  DATA s TYPE REF TO lcl_s.
+  WRITE / 'start'.
+  p = NEW #( ).
+  p->read_own( ).
+  p->read_sub( ).
+  s = NEW #( ).
+  s->read_super( ).
+  WRITE / 'end'.`);
+    expect(out).to.equal("start\np ctor\nread_own entry\ns ctor\nread_sub entry\nread_super entry\nend");
+  });
+
 });
