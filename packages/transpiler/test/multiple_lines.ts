@@ -132,6 +132,20 @@ abap.Classes['PROG-ZFOOBAR-LIF_FOOBAR'] = lif_foobar;`;
     expect(await runSingle(abap)).to.equal("");
   });
 
+  it("TYPES BEGIN OF MESH should be skipped", async () => {
+    const abap = `
+    TYPES: BEGIN OF ty_line,
+             key TYPE i,
+           END OF ty_line.
+    TYPES ty_tab TYPE SORTED TABLE OF ty_line WITH UNIQUE KEY key.
+    TYPES: BEGIN OF MESH ty_mesh,
+             node1 TYPE ty_tab ASSOCIATION to_node2 TO node2 ON key = key,
+             node2 TYPE ty_tab,
+           END OF MESH ty_mesh.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true, skipVersionCheck: true})).to.equal(``);
+  });
+
   it("Simple class, 1", async () => {
     const abap = `
     CLASS lcl_foobar DEFINITION.
