@@ -180,6 +180,7 @@ export * from "./replace";
 export * from "./report";
 export * from "./reserve";
 export * from "./retry";
+export * from "./resume";
 export * from "./return";
 export * from "./rollback";
 export * from "./rollback_entities";
