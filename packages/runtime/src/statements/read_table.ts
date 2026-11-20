@@ -25,7 +25,11 @@ export interface IReadTableOptions {
   withKeyValue?: {key: (i: any) => any, value: any}[],
   // key is raw concatenated, not eval'uable
   withKeySimple?: {[key: string]: any},
-// TODO: TRANSPORTING
+  /** COMPARING comp1 comp2 ...: the found row is compared with the work area in these components first, sy-subrc 2
+   *  when they differ; "*" for ALL FIELDS */
+  comparing?: string[],
+  /** TRANSPORTING comp1 comp2 ...: only these components are copied into the work area */
+  transporting?: string[],
 }
 
 export type ReadTableReturn = {
@@ -191,6 +195,22 @@ function readSortedWithKey(arr: readonly any[], keyFields: readonly string[], op
   }
 
   return {found: undefined, foundIndex: left + 1, subrc: left >= arr.length ? 8 : 4};
+}
+
+/** a component of a structure by its name, "a-b" for a component of a substructure */
+function component(row: Structure, name: string): any {
+  let value: any = row;
+  for (const part of name.toLowerCase().split("-")) {
+    value = value instanceof Structure ? value.get()[part] : undefined;
+  }
+  return value;
+}
+
+function sameComponents(found: any, workArea: any, names: string[]): boolean {
+  if (names.length === 1 && names[0] === "*") {
+    return eq(found, workArea);
+  }
+  return names.every(n => eq(component(found, n), component(workArea, n)));
 }
 
 export function readTable(table: Table | HashedTable | FieldSymbol, options?: IReadTableOptions): ReadTableReturn {
@@ -418,7 +438,17 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
           options.into.assign(found);
         }
       } else {
-        options.into.set(found);
+        if (options.comparing !== undefined && subrc === 0 && !sameComponents(found, options.into, options.comparing)) {
+          subrc = 2;
+          abap.builtin.sy.get().subrc.set(subrc);
+        }
+        if (options.transporting !== undefined && found instanceof Structure && options.into instanceof Structure) {
+          for (const name of options.transporting) {
+            component(options.into, name)?.set(component(found, name));
+          }
+        } else {
+          options.into.set(found);
+        }
       }
     } else if (options.referenceInto) {
       options.referenceInto.assign(found);

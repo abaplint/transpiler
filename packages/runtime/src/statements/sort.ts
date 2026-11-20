@@ -1,14 +1,16 @@
 import {FieldSymbol, HashedTable, Structure, Table, TableAccessType, TableKeyType, TableRowType} from "../types";
-import {eq, lt, gt} from "../compare";
+import {eq, lt, gt, compareText} from "../compare";
 import {primaryKeyValues} from "../primary_key";
 
 export interface ISortOptions {
   descending?: boolean,
+  /** AS TEXT, character-like values are sorted by the text environment */
+  text?: boolean,
   skipSortedCheck?: boolean,
-  by?: {component: string, descending?: boolean}[],
+  by?: {component: string, descending?: boolean, text?: boolean}[],
 }
 
-function compare(a: any, b: any, input: {component: string, descending?: boolean}) {
+function compare(a: any, b: any, input: {component: string, descending?: boolean, text?: boolean}) {
   const componentName = input.component;
   const descending = input.descending;
 
@@ -55,6 +57,11 @@ function compare(a: any, b: any, input: {component: string, descending?: boolean
     throw new Error("sort compare, wrong component name, " + componentName);
   }
 
+  if (input.text === true) {
+    const result = compareText(vala, valb);
+    return descending ? -result : result;
+  }
+
   if (descending && gt(vala, valb))  {
     return -1;
   } else if (!descending && lt(vala, valb)) {
@@ -66,8 +73,10 @@ function compare(a: any, b: any, input: {component: string, descending?: boolean
   }
 }
 
-function compareWholeRows(a: TableRowType, b: TableRowType): number {
-  if (eq(a, b)) {
+function compareWholeRows(a: TableRowType, b: TableRowType, text?: boolean): number {
+  if (text === true) {
+    return compareText(a, b);
+  } else if (eq(a, b)) {
     return 0;
   } else if (lt(a, b)) {
     return -1;
@@ -133,6 +142,7 @@ export function sort(input: Table | FieldSymbol | any[], options?: ISortOptions)
       && input.getOptions()?.keyType !== TableKeyType.empty) {
     // without BY, rows of a structure are sorted by the primary key
     const descending = options?.descending === true;
+    const text = options?.text === true;
     const keys = new Map<TableRowType, any[]>();
     for (const row of input.array()) {
       keys.set(row, primaryKeyValues(input, row));
@@ -141,12 +151,18 @@ export function sort(input: Table | FieldSymbol | any[], options?: ISortOptions)
       const keyA = keys.get(a)!;
       const keyB = keys.get(b)!;
       for (let i = 0; i < keyA.length; i++) {
-        const result = compareWholeRows(keyA[i], keyB[i]);
+        const result = compareWholeRows(keyA[i], keyB[i], text);
         if (result !== 0) {
           return descending ? -result : result;
         }
       }
       return 0;
+    });
+  } else if (options?.text === true) {
+    const descending = options?.descending === true;
+    input.sort((a: TableRowType, b: TableRowType) => {
+      const result = compareText(a, b);
+      return descending ? -result : result;
     });
   } else {
     const descending = options?.descending === true;

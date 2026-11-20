@@ -1,5 +1,5 @@
 import {alphaIn, alphaOut} from "./alpha";
-import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Integer, Packed, Structure, Table} from "./types";
+import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Integer, Packed, String, Structure, Table} from "./types";
 import {ICharacter} from "./types/_character";
 import {INumeric} from "./types/_numeric";
 import {decimalToFixed} from "./types/_decimal";
@@ -31,6 +31,9 @@ export function templateFormatting(source: ICharacter | INumeric | number | stri
       || source instanceof ABAPObject
       || source instanceof Structure) {
     throw new Error("STRG_ILLEGAL_DATA_TYPE");
+  } else if (source instanceof String && source.getEnumName() !== undefined) {
+    // an enumerated value is written as the name of its constant
+    text = source.getEnumName() + "";
   } else if (source instanceof Character) {
     text = source.getTrimEnd();
   } else if (source instanceof DecFloat34) {
@@ -71,6 +74,10 @@ export function templateFormatting(source: ICharacter | INumeric | number | stri
   } else if (options?.alpha === "in") {
     if (typeof source !== "number" && typeof source !== "string") {
       text = alphaIn(source, options.alphaInContext);
+    }
+    if (options.width && text.match(/^[0-9 ]+$/) !== null && text.trim() !== "") {
+      // with WIDTH, the digits are padded with zeros to the width
+      text = text.trim().padStart(options.width, "0");
     }
   }
 

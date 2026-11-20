@@ -14,6 +14,13 @@ export class Context {
 
   public RFCDestinations: {[name: string]: RFC.RFCClient} = {};
 
+  // NEW-LINE ran: the next list output starts a new line, unless a new line was just started
+  public newLinePending = false;
+  // the user memory (SET PARAMETER / GET PARAMETER) by parameter ID, upper and lower case kept apart
+  public userParameters: Map<string, string> = new Map();
+  // EXPORT/IMPORT ... SHARED MEMORY / SHARED BUFFER: per medium, the data clusters by key, each a map of parameter name to value
+  public dataClusters: Map<string, Map<string, Map<string, any>>> = new Map();
+
   // CALL FUNCTION IN UPDATE TASK hands the copied parameters to the host, if one is set
   public updateTask: {register(name: string, param: {exporting?: any, tables?: any}): Promise<void> | void} | undefined = undefined;
 

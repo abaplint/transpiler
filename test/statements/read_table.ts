@@ -2020,4 +2020,28 @@ IF r = r2. WRITE / 'same'. ENDIF.`;
     await f(abap);
     expect(abap.console.get()).to.equal("0\n0\n4\n2\n0\nsame");
   });
+
+  it("READ TABLE INTO wa COMPARING and TRANSPORTING", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         name TYPE c LENGTH 1,
+         qty  TYPE i,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row TYPE ty.
+row-name = 'B'. row-qty = 3. APPEND row TO tab.
+row-name = 'Z'. row-qty = 0.
+READ TABLE tab INDEX 1 INTO row TRANSPORTING qty.
+WRITE / |{ row-name }/{ row-qty } { sy-subrc }|.
+row-qty = 7.
+READ TABLE tab INDEX 1 INTO row COMPARING qty.
+WRITE / |{ row-name }/{ row-qty } { sy-subrc }|.
+READ TABLE tab INDEX 1 INTO row COMPARING qty TRANSPORTING name.
+WRITE / |{ row-name }/{ row-qty } { sy-subrc }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("Z/3 0\nB/3 2\nB/3 0");
+  });
+
 });

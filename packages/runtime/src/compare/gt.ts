@@ -5,6 +5,8 @@ import {INumeric} from "../types/_numeric";
 import {Integer} from "../types/integer";
 import {compareDecFloat34} from "../operators/_decfloat";
 import {referenceIdentity} from "../types/_reference_identity";
+import {eq} from "./eq";
+import {int8Operand} from "./_int8";
 
 export function gt(
   left: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | HashedTable | Integer8,
@@ -44,9 +46,10 @@ export function gt(
     if (left instanceof Table || left instanceof HashedTable) {
       throw new Error("runtime_todo, gt TABLE");
     }
-    const l = left instanceof Integer8 ? left.get() : BigInt(parse(left as any));
-    const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));
-    return l > r;
+    return int8Operand(left) > int8Operand(right);
+  } else if (left instanceof Integer8 && (right instanceof Hex || right instanceof HexUInt8)) {
+    // the x field is converted to int8, not compared as bytes
+    return left.get() > int8Operand(right);
   }
 
   if (left instanceof FieldSymbol) {
@@ -67,7 +70,20 @@ export function gt(
     return referenceIdentity(left.get()) > referenceIdentity(right.get());
   }
 
-  if (left instanceof Table || right instanceof Table || left instanceof HashedTable || right instanceof HashedTable) {
+  if ((left instanceof Table || left instanceof HashedTable) && (right instanceof Table || right instanceof HashedTable)) {
+    // the table with more rows is the larger one; with the same number, the first pair of rows that differs decides
+    const leftRows = left.array();
+    const rightRows = right.array();
+    if (leftRows.length !== rightRows.length) {
+      return leftRows.length > rightRows.length;
+    }
+    for (let i = 0; i < leftRows.length; i++) {
+      if (eq(leftRows[i], rightRows[i]) === false) {
+        return gt(leftRows[i] as any, rightRows[i] as any);
+      }
+    }
+    return false;
+  } else if (left instanceof Table || right instanceof Table || left instanceof HashedTable || right instanceof HashedTable) {
     throw new Error("runtime_todo, gt TABLE");
   } else if (left instanceof Hex || right instanceof Hex || left instanceof HexUInt8 || right instanceof HexUInt8) {
     return gt_with_hex(left, right);

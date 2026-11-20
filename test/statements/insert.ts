@@ -393,4 +393,27 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("1/1\n1/2\n2/3");
   });
 
+  it("INSERT TABLE itab. and INSERT itab INDEX n. insert the header line", async () => {
+    const code = `
+      DATA tab TYPE SORTED TABLE OF i WITH UNIQUE KEY table_line WITH HEADER LINE.
+      DATA std TYPE STANDARD TABLE OF i WITH HEADER LINE.
+      tab = 3.
+      INSERT TABLE tab.
+      tab = 1.
+      INSERT TABLE tab.
+      LOOP AT tab.
+        WRITE / tab.
+      ENDLOOP.
+      std = 2.
+      INSERT std INDEX 1.
+      std = 1.
+      INSERT std INDEX 1.
+      LOOP AT std.
+        WRITE / std.
+      ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get().split("\n").map(l => l.trim())).to.deep.equal(["1", "3", "1", "2"]);
+  });
 });
