@@ -7,6 +7,8 @@ import {Float} from "./float";
 
 const initialValues: {[length: number]: string} = {};
 const regexCharacters = /[a-zA-Z]/g;
+const leadingDigits = /^([+-]?)(\d+)/;
+const leadingZeros = /^0+(?=\d)/;
 
 export class Numc implements ICharacter {
   private value: string;
@@ -38,8 +40,13 @@ export class Numc implements ICharacter {
       this.value = Math.trunc(value) + "";
     } else if (typeof value === "string") {
       value = value.trim().replace(regexCharacters, "");
+      const leading = value.match(leadingDigits);
       if (value === "") {
         this.clear();
+      } else if (leading !== null) {
+        // the digits parseInt would read, as text: a number would lose digits above 2^53
+        const digits = leading[2].replace(leadingZeros, "");
+        this.value = (leading[1] === "-" && digits !== "0" ? "-" : "") + digits;
       } else {
         this.value = parseInt(value, 10) + "";
       }

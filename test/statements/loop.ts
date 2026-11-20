@@ -1800,4 +1800,56 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("1234");
   });
 
+  it("LOOP GROUP BY ASCENDING and DESCENDING AS TEXT", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+DATA out TYPE string.
+tab = VALUE #( ( |b| ) ( |B| ) ( |a| ) ( |ä| ) ( |Z| ) ( |a| ) ( |ä| ) ).
+LOOP AT tab INTO DATA(row) GROUP BY row ASCENDING AS TEXT INTO DATA(grp).
+  out = out && |[{ grp }]|.
+ENDLOOP.
+out = out && |/|.
+LOOP AT tab INTO row GROUP BY row DESCENDING AS TEXT INTO grp.
+  out = out && |[{ grp }]|.
+ENDLOOP.
+out = out && |/|.
+LOOP AT tab INTO row GROUP BY row ASCENDING INTO grp.
+  out = out && |[{ grp }]|.
+ENDLOOP.
+out = out && |/|.
+LOOP AT tab INTO row GROUP BY row DESCENDING AS TEXT.
+  out = out && |[{ row }{ sy-tabix }]|.
+ENDLOOP.
+ASSERT out = |[a][ä][b][B][Z]/[Z][B][b][ä][a]/[B][Z][a][b][ä]/[Z5][B2][b1][ä4][a3]|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("LOOP GROUP BY structured key AS TEXT, GROUP SIZE is not compared", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         k TYPE c LENGTH 3,
+         n TYPE i,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH EMPTY KEY.
+DATA out TYPE string.
+tab = VALUE #( ( k = 'b' n = 1 ) ( k = 'Ä' n = 1 ) ( k = 'b' n = 1 ) ( k = 'a' n = 2 ) ( k = 'a' n = 1 ) ).
+LOOP AT tab INTO DATA(row) GROUP BY ( k = row-k n = row-n size = GROUP SIZE ) DESCENDING AS TEXT INTO DATA(grp).
+  out = out && |{ grp-k }{ grp-n }{ grp-size },|.
+ENDLOOP.
+out = out && |/|.
+LOOP AT tab INTO row GROUP BY ( k = row-k n = row-n size = GROUP SIZE ) ASCENDING AS TEXT INTO grp.
+  out = out && |{ grp-k }{ grp-n }{ grp-size },|.
+ENDLOOP.
+out = out && |/|.
+LOOP AT tab INTO row GROUP BY ( k = row-k n = row-n size = GROUP SIZE ) DESCENDING INTO grp.
+  out = out && |{ grp-k }{ grp-n }{ grp-size },|.
+ENDLOOP.
+ASSERT out = |b12,Ä11,a21,a11,/a11,a21,Ä11,b12,/Ä11,b12,a21,a11,|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

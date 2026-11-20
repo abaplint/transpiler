@@ -814,4 +814,28 @@ WRITE / lv_data.`;
     expect(abap.console.get()).to.equal("gt\nnot eq\nnot lt\nx lt\neq -2\neq x2\ngt ff\neq max\nx gt");
   });
 
+  it("text to n to int8, exact above 2^53", async () => {
+    const code = `
+  DATA i8 TYPE int8.
+  DATA n10 TYPE n LENGTH 10.
+  DATA n20 TYPE n LENGTH 20.
+  DATA c20 TYPE c LENGTH 20 VALUE '12345678901234567891'.
+  n20 = '09223372036854775807'.
+  WRITE / n20.
+  i8 = n20.
+  WRITE / |{ i8 }|.
+  n20 = '00009007199254740993'.
+  i8 = n20.
+  WRITE / |{ i8 }|.
+  n10 = '0000000042'.
+  i8 = n10.
+  WRITE / |{ i8 }|.
+  n20 = c20.
+  WRITE / n20.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("09223372036854775807\n9223372036854775807\n9007199254740993\n42\n12345678901234567891");
+  });
+
 });

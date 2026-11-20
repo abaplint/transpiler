@@ -12,7 +12,7 @@ export interface ForGroupsDescriptor {
   close: string;
 }
 
-/** FOR GROUPS group OF member IN itab GROUP BY key [ASCENDING|DESCENDING] [WITHOUT MEMBERS] */
+/** FOR GROUPS group OF member IN itab GROUP BY key [ASCENDING|DESCENDING [AS TEXT]] [WITHOUT MEMBERS] */
 export class ForGroupsTranspiler {
 
   public transpile(forExpression: Nodes.ExpressionNode, traversal: Traversal): ForGroupsDescriptor {
@@ -28,9 +28,6 @@ export class ForGroupsTranspiler {
     const groupBy = forExpression.findDirectExpression(Expressions.FieldChain);
     if (groupBy === undefined) {
       throw new Error("FOR GROUPS, GROUP BY expected, " + forExpression.concatTokens());
-    }
-    if (forExpression.findDirectTokenByText("TEXT")) {
-      throw new Error("FOR GROUPS, AS TEXT, todo, " + forExpression.concatTokens());
     }
 
     const declarations: string[] = [];
@@ -66,10 +63,15 @@ export class ForGroupsTranspiler {
     const entry = UniqueIdentifier.get();
 
     let ordered = `${groups}.values()`;
+    const text = forExpression.findDirectTokenByText("TEXT") !== undefined;
     if (forExpression.findDirectTokenByText("ASCENDING")) {
-      ordered = `[...${groups}.values()].sort((a, b) => abap.compare.lt(a.key, b.key) ? -1 : abap.compare.gt(a.key, b.key) ? 1 : 0)`;
+      ordered = text
+        ? `[...${groups}.values()].sort((a, b) => abap.compare.compareText(a.key, b.key))`
+        : `[...${groups}.values()].sort((a, b) => abap.compare.lt(a.key, b.key) ? -1 : abap.compare.gt(a.key, b.key) ? 1 : 0)`;
     } else if (forExpression.findDirectTokenByText("DESCENDING")) {
-      ordered = `[...${groups}.values()].sort((a, b) => abap.compare.gt(a.key, b.key) ? -1 : abap.compare.lt(a.key, b.key) ? 1 : 0)`;
+      ordered = text
+        ? `[...${groups}.values()].sort((a, b) => abap.compare.compareText(b.key, a.key))`
+        : `[...${groups}.values()].sort((a, b) => abap.compare.gt(a.key, b.key) ? -1 : abap.compare.lt(a.key, b.key) ? 1 : 0)`;
     }
 
     // groups are kept in order of first occurrence
