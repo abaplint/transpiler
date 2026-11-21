@@ -6,6 +6,7 @@ import {primaryKeyValues} from "../primary_key";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {ABAP} from "..";
+import {keyAsComponentType} from "../compare/_numc";
 
 declare const abap: ABAP;
 
@@ -101,7 +102,7 @@ export function searchWithKey(arr: any, withKey: (i: any) => boolean, startIndex
   };
 }
 
-export async function searchWithKeyPromise(arr: any, withKey: (i: any) => Promise<boolean>, startIndex = 0, usesTableLine: boolean | undefined) {
+export async function searchWithKeyPromise(arr: any, withKey: (i: any) => Promise<boolean> | boolean, startIndex = 0, usesTableLine: boolean | undefined) {
   const isStructured = arr[0] instanceof Structure;
   for (let index = startIndex; index < arr.length; index++) {
     const a = arr[index];
@@ -131,6 +132,48 @@ function toRow(a: any, isStructured: boolean, usesTableLine: boolean | undefined
     return a.get();
   }
   return isStructured ? {table_line: a, ...a.get()} : {table_line: a};
+}
+
+/** the key values converted to the types of their components, as ABAP converts them before
+ *  the search; withKey, withKeyValue and withKeySimple then use the converted values.
+ *  Options without a value to convert are returned as they are */
+export function convertKeyValues<T extends {withKey?: (i: any) => any, withKeyValue?: {key: (i: any) => any, value: any}[],
+  withKeySimple?: {[key: string]: any}, usesTableLine?: boolean}>(table: Table | HashedTable, options: T): T {
+  if (options.withKeyValue === undefined || options.withKeyValue.length === 0) {
+    return options;
+  }
+  const rowType = table.getRowType();
+  const probe = toRow(rowType, rowType instanceof Structure, options.usesTableLine);
+  let changed = false;
+  const withKeyValue = options.withKeyValue.map(p => {
+    let component: unknown = undefined;
+    try {
+      component = p.key(probe);
+    } catch {
+      return p;
+    }
+    const value = keyAsComponentType(component, p.value);
+    if (value === p.value) {
+      return p;
+    }
+    changed = true;
+    return {key: p.key, value};
+  });
+  if (changed === false) {
+    return options;
+  }
+
+  const ret: T = {...options, withKeyValue};
+  ret.withKey = (row: any) => withKeyValue.every(p => eq(p.key(row), p.value));
+  if (options.withKeySimple !== undefined) {
+    // generated in the same order as withKeyValue
+    const withKeySimple: {[key: string]: any} = {};
+    Object.keys(options.withKeySimple).forEach((name, index) => {
+      withKeySimple[name] = withKeyValue[index] ? withKeyValue[index].value : options.withKeySimple![name];
+    });
+    ret.withKeySimple = withKeySimple;
+  }
+  return ret;
 }
 
 /** READ with a key on a SORTED table: binary search over the leading key components that are given,
@@ -232,6 +275,10 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
   // the key name; any other name, as ABAP reads it (secondaryKeyName)
   if (options?.keyName !== undefined && secondaryKeyName(options.keyName) !== options.keyName) {
     options = {...options, keyName: secondaryKeyName(options.keyName)};
+  }
+
+  if (options !== undefined) {
+    options = convertKeyValues(table, options);
   }
 
   // check if it is a primary index read specified with WITH KEY instead of WITH TABLE KEY
