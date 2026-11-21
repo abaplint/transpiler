@@ -236,6 +236,23 @@ lv_a = '1E20'.
 ASSERT |{ lv_a }| = \`100000000000000000000\`.`);
   });
 
+  it("string templates: 17 significant digits without trailing zeros, #2185", async () => {
+    await run(`
+DATA lv_f TYPE f.
+lv_f = '0.25'.
+ASSERT |{ lv_f }| = \`0.25\`.
+lv_f = '0.1'.
+ASSERT |{ lv_f }| = \`0.10000000000000001\`.
+lv_f = 1 / 3.
+ASSERT |{ lv_f }| = \`0.33333333333333331\`.
+lv_f = '-1234.5'.
+ASSERT |{ lv_f }| = \`-1234.5\`.
+ASSERT |{ lv_f NUMBER = RAW }| = \`-1234.5\`.
+ASSERT |{ lv_f STYLE = SIMPLE }| = \`-1234.5\`.
+lv_f = '1E-10'.
+ASSERT |{ lv_f }| = \`0.0000000001\`.`);
+  });
+
   it("COLLECT sums, SORT and READ TABLE WITH KEY on an f component", async () => {
     await run(`
 TYPES: BEGIN OF ty_row,

@@ -18,6 +18,28 @@ type options = {
   align?: "left" | "right",
 };
 
+// an f that is not a whole number is written with 17 significant digits, without trailing zeros
+// and without an exponent, as on a system: 0.25 is 0.25, 0.1 is 0.10000000000000001
+function floatToText(raw: number): string {
+  const [mantissa, exponentText] = raw.toPrecision(17).toLowerCase().split("e");
+  const exponent = exponentText === undefined ? 0 : parseInt(exponentText, 10);
+  const negative = mantissa.startsWith("-");
+  const [intPart, fracPart = ""] = (negative ? mantissa.slice(1) : mantissa).split(".");
+  let digits = intPart + fracPart;
+  let point = intPart.length + exponent;
+  if (point <= 0) {
+    digits = "0".repeat(1 - point) + digits;
+    point = 1;
+  } else if (point > digits.length) {
+    digits = digits.padEnd(point, "0");
+  }
+  const text = (digits.slice(0, point) + "." + digits.slice(point))
+    .replace(/0+$/, "")
+    .replace(/\.$/, "")
+    .replace(/^0+(?=\d)/, "");
+  return (negative ? "-" : "") + text;
+}
+
 export function templateFormatting(source: ICharacter | INumeric | number | string, options?: options): string {
   let text = "";
 
@@ -51,7 +73,7 @@ export function templateFormatting(source: ICharacter | INumeric | number | stri
     } else if (Number.isInteger(raw)) {
       text = raw.toFixed(0);
     } else {
-      text = raw.toFixed(16);
+      text = floatToText(raw);
     }
   } else if (source instanceof Packed) {
     if (options?.decimals !== undefined) {
