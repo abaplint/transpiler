@@ -36,6 +36,16 @@ export class Numc implements ICharacter {
     if (value instanceof Numc && value.getLength() === this.length) {
       this.value = value.get();
       return this;
+    } else if (raw === true && typeof value === "string") {
+      // the result of a character statement, ie. SHIFT or TRANSLATE: the text as it is,
+      // blanks and other characters kept, cut or padded with blanks on the right
+      this.value = value.substring(0, this.length).padEnd(this.length, " ");
+      return this;
+    } else if (value instanceof Numc) {
+      // n of another length: the text right-aligned, cut on the left or padded with zeros
+      const text = value.get();
+      this.value = text.length > this.length ? text.substring(text.length - this.length) : text.padStart(this.length, "0");
+      return this;
     } else if (typeof value === "number") {
       this.value = Math.trunc(value) + "";
     } else if (typeof value === "string") {
