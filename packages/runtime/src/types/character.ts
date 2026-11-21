@@ -8,6 +8,7 @@ import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {Integer} from "./integer";
 import {Integer8} from "./integer8";
+import {Float} from "./float";
 
 const TRIMREGEX = / *$/;
 
@@ -72,6 +73,9 @@ export class Character implements ICharacter {
       const int8 = value.get();
       this.value = (int8 < 0n ? -int8 : int8) + ( int8 < 0n ? "-" : " " );
       this.value = this.value.padStart(this.length, " ");
+    } else if (value instanceof Float) {
+      // right-aligned, with a decimal point; Float.get() writes a comma
+      this.value = value.get().replace(",", ".").padStart(this.length, " ");
     } else {
       this.value = value.get() + "";
     }
