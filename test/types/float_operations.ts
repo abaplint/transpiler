@@ -18,10 +18,14 @@ async function run(contents: string) {
     {filename: "zfoobar.prog.abap", contents},
     {filename: "cx_root.clas.abap", contents: exceptionClass("cx_root")},
     {filename: "cx_sy_zerodivide.clas.abap", contents: exceptionClass("cx_sy_zerodivide", "cx_root")},
-    {filename: "cx_sy_conversion_no_number.clas.abap", contents: exceptionClass("cx_sy_conversion_no_number", "cx_root")}]);
+    {filename: "cx_sy_conversion_no_number.clas.abap", contents: exceptionClass("cx_sy_conversion_no_number", "cx_root")},
+    {filename: "cx_sy_arg_out_of_domain.clas.abap", contents: exceptionClass("cx_sy_arg_out_of_domain", "cx_root")},
+    {filename: "cx_sy_arithmetic_overflow.clas.abap", contents: exceptionClass("cx_sy_arithmetic_overflow", "cx_root")}]);
   abap.Classes["CX_ROOT"] = class CxRoot {};
   abap.Classes["CX_SY_ZERODIVIDE"] = class CxSyZerodivide extends abap.Classes["CX_ROOT"] {};
   abap.Classes["CX_SY_CONVERSION_NO_NUMBER"] = class CxSyConversionNoNumber extends abap.Classes["CX_ROOT"] {};
+  abap.Classes["CX_SY_ARG_OUT_OF_DOMAIN"] = class CxSyArgOutOfDomain extends abap.Classes["CX_ROOT"] {};
+  abap.Classes["CX_SY_ARITHMETIC_OVERFLOW"] = class CxSyArithmeticOverflow extends abap.Classes["CX_ROOT"] {};
   const f = new AsyncFunction("abap", js);
   await f(abap);
 }
@@ -66,6 +70,54 @@ lv_r = cosh( lv_a ).
 ASSERT lv_r = '1.5430806348152437'.
 lv_r = tanh( lv_a ).
 ASSERT lv_r = '0.7615941559557649'.`);
+  });
+
+  it("sqrt, log, log10, acos outside their domain, log( 0 ), #2190", async () => {
+    await run(`
+DATA lv_r TYPE f.
+DATA lv_result TYPE string.
+TRY.
+    lv_r = sqrt( -1 ).
+    lv_result = lv_result && 'V'.
+  CATCH cx_sy_arg_out_of_domain.
+    lv_result = lv_result && 'D'.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+TRY.
+    lv_r = log( 0 ).
+    lv_result = lv_result && 'V'.
+  CATCH cx_sy_arg_out_of_domain.
+    lv_result = lv_result && 'D'.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+TRY.
+    lv_r = log( -1 ).
+    lv_result = lv_result && 'V'.
+  CATCH cx_sy_arg_out_of_domain.
+    lv_result = lv_result && 'D'.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+TRY.
+    lv_r = log10( -1 ).
+    lv_result = lv_result && 'V'.
+  CATCH cx_sy_arg_out_of_domain.
+    lv_result = lv_result && 'D'.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+TRY.
+    lv_r = acos( 2 ).
+    lv_result = lv_result && 'V'.
+  CATCH cx_sy_arg_out_of_domain.
+    lv_result = lv_result && 'D'.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+" D = CX_SY_ARG_OUT_OF_DOMAIN, O = CX_SY_ARITHMETIC_OVERFLOW, V = a value
+ASSERT lv_result = 'DODDD'.`);
   });
 
   it("** with a fractional, whole and negative exponent, and ipow( )", async () => {
