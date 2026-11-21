@@ -193,6 +193,21 @@ lv_a = '-0.01'.
 ASSERT lv_a < 0.`);
   });
 
+  it("to c, decimal point and right-aligned, #2186", async () => {
+    await run(`
+DATA lv_f TYPE f.
+DATA lv_c TYPE c LENGTH 24.
+DATA lv_s TYPE string.
+lv_f = '-1.5'.
+lv_c = lv_f.
+lv_s = |[{ lv_c }]|.
+ASSERT lv_s = \`[ -1.5000000000000000E+00]\`.
+lv_f = '1234.5'.
+lv_c = lv_f.
+lv_s = |[{ lv_c }]|.
+ASSERT lv_s = \`[  1.2345000000000000E+03]\`.`);
+  });
+
   it("ADD, SUBTRACT, MULTIPLY, DIVIDE and +=, -=, *=, /=", async () => {
     await run(`
 DATA lv_r TYPE f.
