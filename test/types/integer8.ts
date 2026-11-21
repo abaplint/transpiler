@@ -920,4 +920,39 @@ WRITE / lv_data.`;
     expect(abap.console.get()).to.equal("345");
   });
 
+  it("hex to int8, the last eight bytes, two's complement", async () => {
+    const code = `
+  DATA lv_xstr TYPE xstring.
+  DATA lv_x2 TYPE x LENGTH 2 VALUE 'FFFE'.
+  DATA lv_x9 TYPE x LENGTH 9 VALUE '0AAAAAAAAAAAAAAAAA'.
+  DATA lv_x10 TYPE x LENGTH 10 VALUE 'FFFF7FFFFFFFFFFFFFFF'.
+  DATA lv_int8 TYPE int8.
+
+  lv_xstr = '0AAAAAAAAAAAAAAAAA'.
+  lv_int8 = lv_xstr.
+  ASSERT lv_int8 = -6148914691236517206.
+  lv_xstr = 'FF0000000000000001'.
+  lv_int8 = lv_xstr.
+  ASSERT lv_int8 = 1.
+  lv_xstr = '0102030405060708090A'.
+  lv_int8 = lv_xstr.
+  ASSERT lv_int8 = 217304205466536202.
+  lv_xstr = 'FFFFFFFF'.
+  lv_int8 = lv_xstr.
+  ASSERT lv_int8 = 4294967295.
+  CLEAR lv_xstr.
+  lv_int8 = 5.
+  lv_int8 = lv_xstr.
+  ASSERT lv_int8 = 0.
+  lv_int8 = lv_x2.
+  ASSERT lv_int8 = 65534.
+  lv_int8 = lv_x9.
+  ASSERT lv_int8 = -6148914691236517206.
+  lv_int8 = lv_x10.
+  ASSERT lv_int8 = 9223372036854775807.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });
