@@ -511,4 +511,89 @@ WRITE lv_text.`;
     expect(abap.console.get()).to.equal("0000012345");
   });
 
+  it("SIGN, p and i", async () => {
+    const code = `
+DATA lv_p TYPE p LENGTH 8 DECIMALS 2 VALUE '1.5'.
+DATA lv_i TYPE i VALUE 15.
+WRITE / |{ lv_p SIGN = LEFTPLUS } { lv_i SIGN = LEFTPLUS }|.
+WRITE / |{ lv_p SIGN = RIGHTPLUS } { lv_i SIGN = RIGHTPLUS }|.
+WRITE / |{ lv_p SIGN = RIGHT } { lv_i SIGN = RIGHT }|.
+lv_p = '-1.5'.
+lv_i = -15.
+WRITE / |{ lv_p SIGN = LEFTPLUS } { lv_i SIGN = LEFTPLUS }|.
+WRITE / |{ lv_p SIGN = RIGHTPLUS } { lv_i SIGN = RIGHTPLUS }|.
+WRITE / |{ lv_p SIGN = RIGHT } { lv_i SIGN = RIGHT }|.
+WRITE / |{ lv_p SIGN = LEFT } { lv_i SIGN = LEFT }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("+1.50 +15\n1.50+ 15+\n1.50 15\n-1.50 -15\n1.50- 15-\n1.50- 15-\n-1.50 -15");
+  });
+
+  it("SIGN = RIGHT, int8", async () => {
+    const code = `
+DATA lv_a TYPE int8 VALUE -1234.
+WRITE / |{ lv_a SIGN = RIGHT }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1234-");
+  });
+
+  it("ALIGN with WIDTH, p, i, int8 and n", async () => {
+    const code = `
+DATA lv_p TYPE p LENGTH 8 DECIMALS 2 VALUE '-1.5'.
+DATA lv_i TYPE i VALUE -15.
+DATA lv_a TYPE int8 VALUE -1234.
+DATA lv_n TYPE n LENGTH 5 VALUE '00123'.
+DATA lv_n3 TYPE n LENGTH 3 VALUE '012'.
+WRITE / |[{ lv_p WIDTH = 8 ALIGN = RIGHT }] [{ lv_i WIDTH = 8 ALIGN = RIGHT }]|.
+WRITE / |[{ lv_p WIDTH = 8 ALIGN = CENTER }]|.
+WRITE / |[{ lv_a WIDTH = 8 ALIGN = RIGHT }]|.
+WRITE / |[{ lv_n ALIGN = RIGHT WIDTH = 8 }]|.
+WRITE / |[{ lv_n3 ALIGN = CENTER WIDTH = 7 }]|.
+WRITE / |[{ lv_i WIDTH = 8 ALIGN = LEFT }] [{ lv_i WIDTH = 8 }]|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("[   -1.50] [     -15]\n[ -1.50  ]\n[   -1234]\n[   00123]\n[  012  ]\n[-15     ] [-15     ]");
+  });
+
+  it("ALIGN = CENTER with PAD", async () => {
+    const code = `
+DATA lv_i TYPE i VALUE 7.
+WRITE / |{ lv_i WIDTH = 4 ALIGN = CENTER PAD = '*' }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("*7**");
+  });
+
+  it("SIGN and DECIMALS with WIDTH and ALIGN, i", async () => {
+    const code = `
+DATA lv_i TYPE i VALUE -15.
+WRITE / |[{ lv_i SIGN = RIGHT WIDTH = 6 ALIGN = RIGHT }]|.
+WRITE / |[{ lv_i DECIMALS = 2 WIDTH = 8 ALIGN = RIGHT }]|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("[   15-]\n[  -15.00]");
+  });
+
+  it("STYLE = SCIENTIFIC, p, i and int8", async () => {
+    const code = `
+DATA lv_p TYPE p LENGTH 8 DECIMALS 2 VALUE '1234567.89'.
+DATA lv_i TYPE i VALUE 1234567.
+DATA lv_a TYPE int8 VALUE -1234.
+DATA lv_small TYPE p LENGTH 8 DECIMALS 3 VALUE '0.05'.
+DATA lv_zero TYPE i.
+WRITE / |{ lv_p STYLE = SCIENTIFIC } { lv_i STYLE = SCIENTIFIC }|.
+WRITE / |{ lv_a STYLE = SCIENTIFIC }|.
+WRITE / |{ lv_small STYLE = SCIENTIFIC } { lv_zero STYLE = SCIENTIFIC }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1.23456789E+06 1.234567E+06\n-1.234E+03\n5E-02 0E+00");
+  });
+
 });
