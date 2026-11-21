@@ -33,9 +33,13 @@ export class CaseTypeTranspiler implements IStructureTranspiler {
           }
           const cname = c.findDirectExpression(abaplint.Expressions.ClassName);
           const lookup = traversal.lookupClassOrInterface(cname?.concatTokens(), cname?.getFirstToken());
-          ret.appendString(u + ".get() instanceof " + lookup);
+          // as IS INSTANCE OF: interfaces, and for an initial reference its static type
+          ret.appendString("abap.compare.instance_of(" + u + ", " + lookup + ")");
           ret.appendString(") {\n");
-          ret.appendString(traversal.traverse(c.findDirectExpression(abaplint.Expressions.Target)).getCode() + ".set(" + u + ")\n");
+          const target = c.findDirectExpression(abaplint.Expressions.Target);
+          if (target !== undefined) {
+            ret.appendString(traversal.traverse(target).getCode() + ".set(" + u + ")\n");
+          }
         } else if (c instanceof abaplint.Nodes.StatementNode && c.get() instanceof abaplint.Statements.WhenOthers) {
           if (first === true) {
             continue;
