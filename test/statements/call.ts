@@ -167,7 +167,65 @@ ENDCLASS.
 START-OF-SELECTION.
   CALL METHOD ('LCL')=>lif~method.`;
     const js = await run(code);
-    expect(js).to.include("].lif$method");
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hello");
+  });
+
+  it("dynamic static call of a local class, also an inherited method", async () => {
+    const code = `
+CLASS lcl_a DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS s RETURNING VALUE(r) TYPE string.
+ENDCLASS.
+CLASS lcl_a IMPLEMENTATION.
+  METHOD s.
+    r = 's'.
+  ENDMETHOD.
+ENDCLASS.
+CLASS lcl_b DEFINITION INHERITING FROM lcl_a.
+ENDCLASS.
+CLASS lcl_b IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA r1 TYPE string.
+  DATA r2 TYPE string.
+  DATA r3 TYPE string.
+  DATA name TYPE string.
+  DATA out TYPE string.
+  CALL METHOD ('LCL_A')=>('S') RECEIVING r = r1.
+  CALL METHOD ('LCL_B')=>('S') RECEIVING r = r2.
+  name = 'LCL_B'.
+  CALL METHOD (name)=>('S') RECEIVING r = r3.
+  out = r1 && r2 && r3.
+  ASSERT out = 'sss'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("dynamic static call of an unknown class, throw CX_SY_DYN_CALL_ILLEGAL_CLASS", async () => {
+    const code = `
+CLASS lcl_a DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS s.
+ENDCLASS.
+CLASS lcl_a IMPLEMENTATION.
+  METHOD s.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  CALL METHOD ('LCL_NOT_FOUND')=>('S').`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch (e) {
+      expect(e.toString()).to.contain("CX_SY_DYN_CALL_ILLEGAL_CLASS");
+    }
   });
 
   it("call method, simple parameter table", async () => {
