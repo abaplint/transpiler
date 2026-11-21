@@ -117,11 +117,17 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
       } else if (child.concatTokens() === "=>") {
         call += ".";
       } else if (child.concatTokens() === "->") {
-        if (ret.getCode() !== "super") {
+        if (nextChild.get() instanceof Expressions.Dynamic) {
+          // abap.dynamicCallLookup() raises CX_SY_REF_IS_INITIAL for an initial reference
           call += ".get()";
-        }
-        if (!(nextChild.get() instanceof Expressions.Dynamic)) {
-          call += ".";
+        } else if (this.staticConstructorCall === false
+            || call === "super"
+            || Traversal.isMe(children[i - 1])) {
+          // SET HANDLER only registers the method without calling it, and "me" or "super" cannot be initial
+          call += ".get().";
+        } else {
+          // a call through an initial reference raises CX_SY_REF_IS_INITIAL
+          call = "(" + call + ".get()" + Traversal.REF_IS_INITIAL + ").";
         }
       } else if (child.get() instanceof Expressions.FieldChain
           || child.get() instanceof Expressions.SourceField) {

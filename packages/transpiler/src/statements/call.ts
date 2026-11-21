@@ -99,10 +99,12 @@ export class CallTranspiler implements IStatementTranspiler {
             ms = ms.replace("await this.me.get().", "await this.");
             ms = ms.replace("await this.", "await this.#");
           } else {
-            if (ms.includes(".get().")) {
+            const checked = Traversal.REF_IS_INITIAL + ").";
+            if (ms.includes(".get().") || ms.includes(checked)) {
               let last: string[] | string = ms.split(".");
               last = last[last.length - 1];
               ms = ms.replace(".get()." + last, ".get().FRIENDS_ACCESS['" + last + "']");
+              ms = ms.replace(checked + last, checked + "FRIENDS_ACCESS['" + last + "']");
             } else {
               throw new Error("CallTranspiler, todo, refactor CALL");
             }

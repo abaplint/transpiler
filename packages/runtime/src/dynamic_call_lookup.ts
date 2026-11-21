@@ -33,6 +33,10 @@ function findFriendInterfaceMethod(obj: any, name: string): any {
 }
 
 export function dynamicCallLookup(obj: any, methodName: string | ICharacter): any {
+  if (obj === undefined) {
+    // "CALL METHOD ref->(name)" with an initial reference
+    throwError("CX_SY_REF_IS_INITIAL");
+  }
   let name = typeof methodName === "string" ? methodName.toLowerCase().trimEnd() : methodName.get().toLowerCase().trimEnd();
   name = name.replaceAll("~", "$").replaceAll("/", "$");
 

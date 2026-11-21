@@ -24,3 +24,8 @@ export function throwError(name: string, extra?: ExtraCX): never {
     throw new Error(`Global class ${name} not found`);
   }
 }
+
+/** a method is called through an initial object reference, used as "(ref.get() ?? abap.throwRefIsInitial())" */
+export function throwRefIsInitial(): never {
+  throwError("CX_SY_REF_IS_INITIAL");
+}
