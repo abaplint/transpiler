@@ -103,7 +103,7 @@ describe("Running Examples - Integer type", () => {
     await f(abap);
   });
 
-  it.skip("overflow", async () => {
+  it("overflow, ** is calculated in f", async () => {
     const code = `
     DATA lv_int TYPE i.
     lv_int = 2 ** 33.`;
@@ -113,7 +113,7 @@ describe("Running Examples - Integer type", () => {
       await f(abap);
       expect.fail();
     } catch(e) {
-      expect(e.toString()).to.contain("CX_SY_ARITHMETIC_OVERFLOW");
+      expect(e.toString()).to.contain("CX_SY_CONVERSION_OVERFLOW");
     }
   });
 

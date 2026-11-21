@@ -3,6 +3,7 @@ import {primaryKeyValues} from "../primary_key";
 import {DecFloat34, Float, HashedTable, Integer, Integer8, Packed, Structure, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {insertInternal} from "./insert_internal";
+import {integerResult} from "../operators/integer_result";
 import {ABAP} from "..";
 
 declare const abap: ABAP;
@@ -15,7 +16,8 @@ function sumNumeric(found: any, source: any, keyValues: Set<any>): void {
   } else if (keyValues.has(source)) {
     return;
   } else if (found instanceof Integer && source instanceof Integer) {
-    found.set(found.get() + source.get());
+    // the sum is calculated in i
+    found.set(integerResult(found.get() + source.get()));
   } else if (found instanceof Integer8 && source instanceof Integer8) {
     found.set(found.get() + source.get());
   } else if (found instanceof Packed && source instanceof Packed) {

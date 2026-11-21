@@ -15,6 +15,14 @@ import {roundToBigInt} from "./_decimal";
 
 const digits = new RegExp(/^\s*-?\+?\d+\.?\d* *$/i);
 
+/** a data object converted to int8: outside -2^63 .. 2^63-1 it is CX_SY_CONVERSION_OVERFLOW */
+function checkConversion(value: bigint): bigint {
+  if (value !== BigInt.asIntN(64, value)) {
+    throwError("CX_SY_CONVERSION_OVERFLOW");
+  }
+  return value;
+}
+
 export class Integer8 {
   private value: bigint;
   private readonly qualifiedName: string | undefined;
@@ -51,18 +59,18 @@ export class Integer8 {
         this.value = 0n;
         throwError("CX_SY_CONVERSION_NO_NUMBER");
       }
-      this.value = BigInt(value);
+      this.value = checkConversion(BigInt(value));
     } else if (value instanceof Date) {
 // d is converted to the number of days since 01.01.0001, not the YYYYMMDD digits
       this.value = BigInt(value.getNumeric());
     } else if (value instanceof DecFloat34) {
 // exact, getRaw() would go through a double
-      this.value = roundToBigInt(value.getDecimal());
+      this.value = checkConversion(roundToBigInt(value.getDecimal()));
     } else if (value instanceof Packed) {
 // exact and rounded half away from zero, get() would go through a double
-      this.value = BigInt(value.toFixed(0));
+      this.value = checkConversion(BigInt(value.toFixed(0)));
     } else if (value instanceof Float) {
-      this.set(roundHalfAwayFromZero(value.getRaw()));
+      this.value = checkConversion(BigInt(roundHalfAwayFromZero(value.getRaw())));
     } else if (value instanceof FieldSymbol) {
 // dispatch on the type the field symbol points to, get() would only give its plain value
       if (value.getPointer() === undefined) {

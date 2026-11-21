@@ -3,6 +3,7 @@ import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {SourceTranspiler} from "../expressions/source";
+import {compoundResult, isCalculated, isFloatCalculation, isIntegerTarget} from "./_integer_result";
 
 export class MoveTranspiler implements IStatementTranspiler {
 
@@ -29,9 +30,18 @@ export class MoveTranspiler implements IStatementTranspiler {
       return ret;
     }
 
-    let source = this.isInt8Calculation(node, sourceExpression, targetExpressions.length, traversal)
-      ? new SourceTranspiler(false, true).transpile(sourceExpression!, traversal)
+    const calculation = this.integerCalculation(node, sourceExpression, targetExpressions.length, traversal);
+    let source = calculation !== undefined
+      ? new SourceTranspiler(false, calculation).transpile(sourceExpression!, traversal)
       : traversal.traverse(sourceExpression);
+    // in calculation type i every operation is checked already
+    if (calculation !== "i"
+        && sourceExpression !== undefined
+        && isCalculated(sourceExpression)
+        && isIntegerTarget(node, traversal)
+        && isFloatCalculation(node, sourceExpression, traversal) === false) {
+      source = new Chunk().appendString("abap.operators.integerResult(").appendChunk(source).appendString(")");
+    }
 
     const second = node.getChildren()[1]?.concatTokens();
     switch (second) {
@@ -45,35 +55,27 @@ export class MoveTranspiler implements IStatementTranspiler {
         break;
       case "+":
         ret.appendChunk(targets[0])
-          .appendString(".set(abap.operators.add(")
-          .appendChunk(targets[0])
-          .appendString(", ")
-          .appendChunk(source)
-          .append("));", node.getLastToken(), traversal);
+          .appendString(".set(")
+          .appendChunk(this.compound("add", targets[0], source, node, sourceExpression, traversal))
+          .append(");", node.getLastToken(), traversal);
         break;
       case "-":
         ret.appendChunk(targets[0])
-          .appendString(".set(abap.operators.minus(")
-          .appendChunk(targets[0])
-          .appendString(", ")
-          .appendChunk(source)
-          .append("));", node.getLastToken(), traversal);
+          .appendString(".set(")
+          .appendChunk(this.compound("minus", targets[0], source, node, sourceExpression, traversal))
+          .append(");", node.getLastToken(), traversal);
         break;
       case "/=":
         ret.appendChunk(targets[0])
-          .appendString(".set(abap.operators.divide(")
-          .appendChunk(targets[0])
-          .appendString(", ")
-          .appendChunk(source)
-          .append("));", node.getLastToken(), traversal);
+          .appendString(".set(")
+          .appendChunk(this.compound("divide", targets[0], source, node, sourceExpression, traversal))
+          .append(");", node.getLastToken(), traversal);
         break;
       case "*=":
         ret.appendChunk(targets[0])
-          .appendString(".set(abap.operators.multiply(")
-          .appendChunk(targets[0])
-          .appendString(", ")
-          .appendChunk(source)
-          .append("));", node.getLastToken(), traversal);
+          .appendString(".set(")
+          .appendChunk(this.compound("multiply", targets[0], source, node, sourceExpression, traversal))
+          .append(");", node.getLastToken(), traversal);
         break;
       case "&&=":
         ret.appendChunk(targets[0])
@@ -97,26 +99,37 @@ export class MoveTranspiler implements IStatementTranspiler {
     return ret;
   }
 
+  private compound(operator: string, target: Chunk, source: Chunk, node: abaplint.Nodes.StatementNode,
+                   sourceExpression: abaplint.Nodes.ExpressionNode | undefined, traversal: Traversal): Chunk {
+    const operation = new Chunk().appendString(`abap.operators.${operator}(`)
+      .appendChunk(target).appendString(", ").appendChunk(source).appendString(")");
+    return compoundResult(node, sourceExpression, operation, traversal);
+  }
+
   // The calculation type of an arithmetic expression comes from its operands and the target
   // field, the type with the largest range wins. With operands of type i or int8 it is int8
   // when the target or an operand is int8: i * i into int8 is exact up to 2^62, and "/"
   // rounds. The runtime decides by the operands alone and does not know the target, so here
   // the operands are converted to int8 before the calculation. Only for an i or int8 target
-  // and operands whose type is known to be i or int8, and not for **, which counts as f
-  private isInt8Calculation(node: abaplint.Nodes.StatementNode, source: abaplint.Nodes.ExpressionNode | undefined,
-                            targets: number, traversal: Traversal): boolean {
+  // and operands whose type is known to be i or int8, and not for **, which counts as f.
+  // With an i target and operands of type i the calculation type is i, and each operation,
+  // not only the result, raises CX_SY_ARITHMETIC_OVERFLOW outside the range of i
+  private integerCalculation(node: abaplint.Nodes.StatementNode, source: abaplint.Nodes.ExpressionNode | undefined,
+                             targets: number, traversal: Traversal): "int8" | "i" | undefined {
     if (source === undefined
         || targets !== 1
         || source.findFirstExpression(abaplint.Expressions.ArithOperator) === undefined) {
-      return false;
+      return undefined;
     }
     const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
     const target = traversal.determineType(node, scope);
     const found = {int8: target instanceof abaplint.BasicTypes.Integer8Type};
     if (found.int8 === false && !(target instanceof abaplint.BasicTypes.IntegerType)) {
-      return false;
+      return undefined;
+    } else if (this.integerOperands(source, scope, found) === false) {
+      return undefined;
     }
-    return this.integerOperands(source, scope, found) && found.int8;
+    return found.int8 ? "int8" : "i";
   }
 
   private integerOperands(node: abaplint.Nodes.ExpressionNode, scope: abaplint.ISpaghettiScopeNode | undefined,
