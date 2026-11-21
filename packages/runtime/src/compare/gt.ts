@@ -7,6 +7,7 @@ import {compareDecFloat34} from "../operators/_decfloat";
 import {referenceIdentity} from "../types/_reference_identity";
 import {eq} from "./eq";
 import {int8Operand} from "./_int8";
+import {compareNumc} from "./_numc";
 
 export function gt(
   left: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | HashedTable | Integer8,
@@ -62,6 +63,11 @@ export function gt(
       throw new Error("GETWA_NOT_ASSIGNED");
     }
     return gt(left, right.getPointer());
+  }
+
+  const numc = compareNumc(left, right);
+  if (numc !== undefined) {
+    return numc > 0;
   }
 
   if (left instanceof DataReference && right instanceof DataReference) {
