@@ -5,6 +5,7 @@ import {INumeric} from "../types/_numeric";
 import {compareDecFloat34} from "../operators/_decfloat";
 import {compareDecimal} from "../types/_decimal";
 import {int8Operand} from "./_int8";
+import {compareNumc} from "./_numc";
 
 function compareTables(left: Table | HashedTable, right: Table | HashedTable): boolean {
   const leftArray = left.array();
@@ -93,7 +94,7 @@ export function eq(
       } else {
         return (left as Character).getTrimEnd() === (right as Character).getTrimEnd();
       }
-    } else if (leftConstructor === NumcC) {
+    } else if (leftConstructor === NumcC && (left as Numc).getLength() === (right as Numc).getLength()) {
       return (left as Numc).get() === (right as Numc).get();
     } else if (leftConstructor === DateC) {
       return (left as Date).get() === (right as Date).get();
@@ -137,6 +138,11 @@ export function eq(
     return eq(left, right.getPointer()!);
   } else if (left instanceof FieldSymbol) {
     return eq(left.getPointer()!, right);
+  }
+
+  const numc = compareNumc(left, right);
+  if (numc !== undefined) {
+    return numc === 0;
   }
 
   if (left instanceof Integer8 || right instanceof Integer8) {
