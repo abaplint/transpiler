@@ -1,4 +1,5 @@
 import {ABAP, MemoryConsole} from "../../packages/runtime/src/";
+import {expect} from "chai";
 import {AsyncFunction, runFiles} from "../_utils";
 
 let abap: ABAP;
@@ -236,6 +237,73 @@ ASSERT lv_n < lv_p.
 ASSERT lv_n > lv_f.
 ASSERT lv_n BETWEEN 5 AND 10.
 ASSERT lv_n CO '0123456789'.`);
+  });
+
+  it("compare with c, string and n of another length: as numbers", async () => {
+    await run(`
+DATA lv_n TYPE n LENGTH 5 VALUE '00010'.
+DATA lv_n3 TYPE n LENGTH 3 VALUE '010'.
+DATA lv_s TYPE string VALUE \`9\`.
+ASSERT lv_n = '10'.
+ASSERT lv_n = '010'.
+ASSERT lv_n > '9'.
+ASSERT lv_n > lv_s.
+ASSERT lv_n = ' 10'.
+ASSERT lv_n3 = lv_n.`);
+  });
+
+  it("compare with a text that is no number: CONVT_NO_NUMBER", async () => {
+    try {
+      await run(`
+DATA lv_n TYPE n LENGTH 5 VALUE '00010'.
+IF lv_n = 'x10'.
+ENDIF.`);
+      expect.fail();
+    } catch (e) {
+      expect((e as Error).toString()).to.contain("CONVT_NO_NUMBER");
+    }
+  });
+
+  it("READ TABLE and table expression: a text key is converted to the n component", async () => {
+    await run(`
+TYPES: BEGIN OF ty, k TYPE n LENGTH 5, END OF ty.
+DATA lt TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA lt_s TYPE SORTED TABLE OF ty WITH UNIQUE KEY k.
+DATA lt_h TYPE HASHED TABLE OF ty WITH UNIQUE KEY k.
+DATA ls TYPE ty.
+ls-k = '00010'.
+APPEND ls TO lt.
+INSERT ls INTO TABLE lt_s.
+INSERT ls INTO TABLE lt_h.
+CLEAR ls.
+READ TABLE lt INTO ls WITH KEY k = 'x10'.
+ASSERT sy-subrc = 0.
+ASSERT ls-k = '00010'.
+READ TABLE lt_s INTO ls WITH KEY k = 'x10'.
+ASSERT sy-subrc = 0.
+READ TABLE lt_s INTO ls WITH TABLE KEY k = 'x10'.
+ASSERT sy-subrc = 0.
+READ TABLE lt_h INTO ls WITH TABLE KEY k = 'x10'.
+ASSERT sy-subrc = 0.
+CLEAR ls.
+ls = VALUE #( lt[ k = 'x10' ] OPTIONAL ).
+ASSERT ls-k = '00010'.`);
+  });
+
+  it("LOOP WHERE with a text that is no number: CONVT_NO_NUMBER", async () => {
+    try {
+      await run(`
+TYPES: BEGIN OF ty, k TYPE n LENGTH 5, END OF ty.
+DATA lt TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA ls TYPE ty.
+ls-k = '00010'.
+APPEND ls TO lt.
+LOOP AT lt INTO ls WHERE k = 'x10'.
+ENDLOOP.`);
+      expect.fail();
+    } catch (e) {
+      expect((e as Error).toString()).to.contain("CONVT_NO_NUMBER");
+    }
   });
 
   it("string templates", async () => {
