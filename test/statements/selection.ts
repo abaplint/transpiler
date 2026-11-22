@@ -72,7 +72,7 @@ describe("Running statements - PARAMETERS and SELECT-OPTIONS", () => {
     const code = `
     DATA gi TYPE i.
     SELECT-OPTIONS s_d FOR gi.
-    WRITE |{ lines( s_d ) } <{ s_d-sign }{ s_d-option }{ s_d-low }>|.`;
+    WRITE |{ lines( s_d[] ) } <{ s_d-sign }{ s_d-option }{ s_d-low }>|.`;
     expect(await run(code)).to.equal("0 <0>");
   });
 
@@ -82,7 +82,7 @@ describe("Running statements - PARAMETERS and SELECT-OPTIONS", () => {
     SELECT-OPTIONS s_a FOR gv DEFAULT 'A1'.
     DATA ls LIKE LINE OF s_a.
     READ TABLE s_a INDEX 1 INTO ls.
-    WRITE |{ lines( s_a ) } { ls-sign }{ ls-option }{ ls-low } { s_a-sign }{ s_a-option }{ s_a-low }|.`;
+    WRITE |{ lines( s_a[] ) } { ls-sign }{ ls-option }{ ls-low } { s_a-sign }{ s_a-option }{ s_a-low }|.`;
     expect(await run(code)).to.equal("1 IEQA1 IEQA1");
   });
 
@@ -90,7 +90,7 @@ describe("Running statements - PARAMETERS and SELECT-OPTIONS", () => {
     const code = `
     DATA gv TYPE c LENGTH 10.
     SELECT-OPTIONS s_b FOR gv DEFAULT 'B1' TO 'B9'.
-    WRITE |{ lines( s_b ) } { s_b-sign }{ s_b-option }{ s_b-low }-{ s_b-high }|.`;
+    WRITE |{ lines( s_b[] ) } { s_b-sign }{ s_b-option }{ s_b-low }-{ s_b-high }|.`;
     expect(await run(code)).to.equal("1 IBTB1-B9");
   });
 

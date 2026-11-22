@@ -392,11 +392,67 @@ WRITE |{ lv_value STYLE = SCIENTIFIC }|.`;
     const code = `
 DATA lv_value TYPE n LENGTH 5.
 lv_value = 5.
-WRITE |{ lv_value ALPHA = OUT }|.`;
+WRITE |[{ lv_value ALPHA = OUT }]|.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("5");
+    expect(abap.console.get()).to.equal("[5    ]");
+  });
+
+  it("ALPHA OUT keeps the length of the source, all zeros give 0", async () => {
+    const code = `
+DATA lv_n TYPE n LENGTH 5.
+DATA lv_n1 TYPE n LENGTH 1.
+DATA lv_c TYPE c LENGTH 5.
+DATA lv_s TYPE string.
+FIELD-SYMBOLS <lv_any> TYPE any.
+lv_n = '00123'.
+WRITE / |[{ lv_n ALPHA = OUT }]|.
+WRITE / |[{ lv_n ALPHA = OUT WIDTH = 8 }]|.
+WRITE / |[{ lv_n ALPHA = OUT WIDTH = 2 }]|.
+ASSIGN lv_n TO <lv_any>.
+WRITE / |[{ <lv_any> ALPHA = OUT }]|.
+lv_n = '10020'.
+WRITE / |[{ lv_n ALPHA = OUT }]|.
+lv_n = '00000'.
+WRITE / |[{ lv_n ALPHA = OUT }]|.
+WRITE / |[{ lv_n ALPHA = OUT WIDTH = 2 }]|.
+lv_n1 = '0'.
+WRITE / |[{ lv_n1 ALPHA = OUT }]|.
+lv_c = '00000'.
+WRITE / |[{ lv_c ALPHA = OUT }]|.
+lv_c = ' 0012'.
+WRITE / |[{ lv_c ALPHA = OUT }]|.
+lv_c = '00A1'.
+WRITE / |[{ lv_c ALPHA = OUT }]|.
+lv_c = ''.
+WRITE / |[{ lv_c ALPHA = OUT }]|.
+lv_s = |00123|.
+WRITE / |[{ lv_s ALPHA = OUT }]|.
+WRITE / |[{ lv_s ALPHA = OUT WIDTH = 7 }]|.
+lv_s = ||.
+WRITE / |[{ lv_s ALPHA = OUT }]|.
+WRITE / |[{ '00012' ALPHA = OUT }]|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal([
+      "[123  ]",
+      "[123     ]",
+      "[123]",
+      "[123  ]",
+      "[10020]",
+      "[0    ]",
+      "[0 ]",
+      "[0]",
+      "[0    ]",
+      "[12   ]",
+      "[00A1 ]",
+      "[     ]",
+      "[123  ]",
+      "[123    ]",
+      "[]",
+      "[12   ]"].join("\n"));
   });
 
   it("ALPHA IN formatting", async () => {
