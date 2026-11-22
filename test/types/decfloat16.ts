@@ -185,4 +185,28 @@ START-OF-SELECTION.
     expect(await runAndGet(code)).to.equal("1234567890123457000\n1234567890123457000");
   });
 
+  for (const assign of [
+    {name: "a decfloat34 to a decfloat16 field symbol", code: `
+    DATA lv_34 TYPE decfloat34.
+    DATA lr TYPE REF TO data.
+    FIELD-SYMBOLS <fs> TYPE decfloat16.
+    GET REFERENCE OF lv_34 INTO lr.
+    ASSIGN lr->* TO <fs>.`},
+    {name: "a decfloat16 to a decfloat34 field symbol", code: `
+    DATA lv_16 TYPE decfloat16.
+    DATA lr TYPE REF TO data.
+    FIELD-SYMBOLS <fs> TYPE decfloat34.
+    GET REFERENCE OF lv_16 INTO lr.
+    ASSIGN lr->* TO <fs>.`},
+  ]) {
+    it("ASSIGN, " + assign.name + " is a type conflict", async () => {
+      try {
+        await runAndGet(assign.code);
+        expect.fail();
+      } catch (e) {
+        expect(e.toString()).to.contain("ASSIGN_TYPE_CONFLICT");
+      }
+    });
+  }
+
 });
