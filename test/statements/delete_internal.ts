@@ -878,4 +878,26 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("DELETE itab. inside a LOOP and DELETE itab FROM n. in a program", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA row TYPE i.
+DO 5 TIMES.
+  APPEND sy-index TO tab.
+ENDDO.
+LOOP AT tab INTO row.
+  IF row = 2.
+    DELETE tab.
+  ENDIF.
+ENDLOOP.
+DELETE tab FROM 4.
+LOOP AT tab INTO row.
+  WRITE / row.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n3\n4");
+  });
+
 });
