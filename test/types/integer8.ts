@@ -955,4 +955,19 @@ WRITE / lv_data.`;
     await f(abap);
   });
 
+  it("to c too short, the right end is kept with *", async () => {
+    const code = `
+    DATA lv_a TYPE int8.
+    DATA lv_c TYPE c LENGTH 4.
+    lv_a = -9007199254740993.
+    lv_c = lv_a.
+    WRITE / |[{ lv_c }]|.
+    lv_a = 123456.
+    lv_c = lv_a.
+    WRITE / |[{ lv_c }]|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("[*93-]\n[*456]");
+  });
 });

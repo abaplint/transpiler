@@ -66,13 +66,12 @@ export class Character implements ICharacter {
       this.set(value.getCharacter());
       return this;
     } else if (value instanceof Integer) {
-      this.value = Math.abs( value.get() ) + ( value.get() < 0 ? "-" : " " );
-      this.value = this.value.padStart(this.length, " ");
+      const int = value.get();
+      this.value = this.integerText(Math.abs(int) + "", int < 0);
     } else if (value instanceof Integer8) {
-      // as for i: right-aligned, sign last; bigint keeps the int8 minimum exact
+      // as for i; bigint keeps the int8 minimum exact
       const int8 = value.get();
-      this.value = (int8 < 0n ? -int8 : int8) + ( int8 < 0n ? "-" : " " );
-      this.value = this.value.padStart(this.length, " ");
+      this.value = this.integerText((int8 < 0n ? -int8 : int8) + "", int8 < 0n);
     } else if (value instanceof Float) {
       // right-aligned, with a decimal point; Float.get() writes a comma
       this.value = value.get().replace(",", ".").padStart(this.length, " ");
@@ -86,6 +85,17 @@ export class Character implements ICharacter {
       this.value = this.value.padEnd(this.length, " ");
     }
     return this;
+  }
+
+  /** an integer as text: right-aligned, the sign last, a blank in its place when positive.
+   * When the digits and the minus sign do not fit, the right end is kept and the first
+   * character is "*", ie. 12345 into c LENGTH 4 is "*345", -1234 is "*34-" */
+  private integerText(digits: string, negative: boolean): string {
+    const text = digits + (negative ? "-" : "");
+    if (text.length > this.length) {
+      return "*" + text.substring(text.length - this.length + 1);
+    }
+    return (negative ? text : text + " ").padStart(this.length, " ");
   }
 
   public getQualifiedName() {
