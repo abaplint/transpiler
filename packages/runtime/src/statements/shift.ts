@@ -1,7 +1,8 @@
 import {co} from "../compare";
-import {FieldSymbol, Hex, HexUInt8, Numc, XString} from "../types";
+import {FieldSymbol, Hex, HexUInt8, XString} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {setText} from "./_set_text";
 
 export interface IShiftOptions {
   deletingLeading?: string | ICharacter,
@@ -83,11 +84,7 @@ function shift_character_mode(target: ICharacter, options?: IShiftOptions) {
     value = value.substr(1);
   }
 
-  if (target instanceof Numc) {
-    target.set(value, true);
-  } else {
-    target.set(value);
-  }
+  setText(target, value);
 }
 
 

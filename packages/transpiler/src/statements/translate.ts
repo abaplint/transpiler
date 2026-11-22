@@ -18,7 +18,7 @@ export class TranslateTranspiler implements IStatementTranspiler {
     } else {
       const s = node.findDirectExpression(abaplint.Expressions.Source);
       if (s) {
-        type = new SourceTranspiler(true).transpile(s, traversal).getCode();
+        type = new SourceTranspiler(false).transpile(s, traversal).getCode();
       } else {
         throw new Error("TranslateTranspiler, Source expression not found");
       }
