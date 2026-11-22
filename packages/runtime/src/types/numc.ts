@@ -4,11 +4,10 @@ import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {throwError} from "../throw_error";
 import {Float} from "./float";
+import {DecFloat34} from "./decfloat34";
 
 const initialValues: {[length: number]: string} = {};
-const regexCharacters = /[a-zA-Z]/g;
-const leadingDigits = /^([+-]?)(\d+)/;
-const leadingZeros = /^0+(?=\d)/;
+const nonDigits = /\D/g;
 
 export class Numc implements ICharacter {
   private value: string;
@@ -49,17 +48,17 @@ export class Numc implements ICharacter {
     } else if (typeof value === "number") {
       this.value = Math.trunc(value) + "";
     } else if (typeof value === "string") {
-      value = value.trim().replace(regexCharacters, "");
-      const leading = value.match(leadingDigits);
-      if (value === "") {
+      // every digit is kept, everything else is dropped, as text: no precision limit
+      const digits = value.replace(nonDigits, "");
+      if (digits === "") {
         this.clear();
-      } else if (leading !== null) {
-        // the digits parseInt would read, as text: a number would lose digits above 2^53
-        const digits = leading[2].replace(leadingZeros, "");
-        this.value = (leading[1] === "-" && digits !== "0" ? "-" : "") + digits;
-      } else {
-        this.value = parseInt(value, 10) + "";
+        return this;
       }
+      this.value = digits;
+    } else if (value instanceof DecFloat34) {
+      // get() is text with a decimal comma, only the integer part counts
+      this.set(String(value.get()).split(",")[0]);
+      return this;
     } else if (value instanceof Float) {
       this.value = Math.trunc(value.getRaw()) + "";
     } else {

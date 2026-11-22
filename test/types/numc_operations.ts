@@ -70,6 +70,34 @@ lv_n20 = lv_t.
 ASSERT lv_n20 = '56789012345678901234'.`);
   });
 
+  it("from text: every digit kept, also after blanks, signs and punctuation", async () => {
+    await run(`
+DATA lv_t TYPE c LENGTH 30.
+DATA lv_n TYPE n LENGTH 5.
+DATA lv_s TYPE string.
+lv_t = '12.5'.
+lv_n = lv_t.
+ASSERT lv_n = '00125'.
+lv_t = '1 2'.
+lv_n = lv_t.
+ASSERT lv_n = '00012'.
+lv_t = '-5'.
+lv_n = lv_t.
+ASSERT lv_n = '00005'.
+lv_t = '1,234'.
+lv_n = lv_t.
+ASSERT lv_n = '01234'.
+lv_s = |12 34|.
+lv_n = lv_s.
+ASSERT lv_n = '01234'.
+lv_t = '%1&2'.
+lv_n = lv_t.
+ASSERT lv_n = '00012'.
+lv_t = '#'.
+lv_n = lv_t.
+ASSERT lv_n = '00000'.`);
+  });
+
   it("from i, int8, f and n: the absolute value, the right end kept", async () => {
     await run(`
 DATA lv_i TYPE i.
