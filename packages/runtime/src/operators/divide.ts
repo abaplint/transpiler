@@ -6,7 +6,6 @@ import {parse} from "./_parse";
 import {checkDivisor, decFloat34Result, isDecFloat34Operand, toDecimal} from "./_decfloat";
 import {divideDecimal} from "../types/_decimal";
 
-// todo, this will only work when the target value is an integer?
 export function divide(left: INumeric | ICharacter | Integer8 | string | number,
                        right: INumeric | ICharacter | Integer8 | string | number) {
   if (isDecFloat34Operand(left) || isDecFloat34Operand(right)) {
@@ -15,16 +14,10 @@ export function divide(left: INumeric | ICharacter | Integer8 | string | number,
     return decFloat34Result(checkDivisor(l, r) ? divideDecimal(l, r) : r);
   }
   if (left instanceof Integer8 || right instanceof Integer8) {
+    // calculation type int8, unless the target says otherwise, see divideFraction()
     const l = left instanceof Integer8 ? left.get() : BigInt(parse(left));
     const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));
-    if (r === 0n) {
-      if (l === 0n) {
-        return new Integer8().set(0n);
-      } else {
-        throwError("CX_SY_ZERODIVIDE");
-      }
-    }
-    return new Integer8().set(l / r);
+    return new Integer8().set(roundedQuotient(l, r));
   }
 
   const r = parse(right);
@@ -59,9 +52,27 @@ export function divideInt8(left: INumeric | ICharacter | Integer8 | string | num
                            right: INumeric | ICharacter | Integer8 | string | number) {
   const l = left instanceof Integer8 ? left.get() : new Integer8().set(left as INumeric).get();
   const r = right instanceof Integer8 ? right.get() : new Integer8().set(right as INumeric).get();
+  return new Integer8().set(roundedQuotient(l, r));
+}
+
+/** "/" with a p, f or decfloat target, which the transpiler knows: the target is part of the
+ * calculation type, so an int8 operand does not make it int8 and the fraction is kept,
+ * n8 / 2 with n8 = 7 is 3.5 */
+export function divideFraction(left: INumeric | ICharacter | Integer8 | string | number,
+                               right: INumeric | ICharacter | Integer8 | string | number) {
+  if (left instanceof Integer8 || right instanceof Integer8) {
+    const l = toDecimal(left);
+    const r = toDecimal(right);
+    return decFloat34Result(checkDivisor(l, r) ? divideDecimal(l, r) : r);
+  }
+  return divide(left, right);
+}
+
+/** the quotient rounded half away from zero, 0 / 0 is 0 */
+function roundedQuotient(l: bigint, r: bigint): bigint {
   if (r === 0n) {
     if (l === 0n) {
-      return new Integer8().set(0n);
+      return 0n;
     }
     throwError("CX_SY_ZERODIVIDE");
   }
@@ -70,5 +81,5 @@ export function divideInt8(left: INumeric | ICharacter | Integer8 | string | num
   if ((rem < 0n ? -rem : rem) * 2n >= (r < 0n ? -r : r)) {
     q = (l < 0n) === (r < 0n) ? q + 1n : q - 1n;
   }
-  return new Integer8().set(q);
+  return q;
 }

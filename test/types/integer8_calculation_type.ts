@@ -176,10 +176,8 @@ WRITE lv_i.`;
     expect(await runAndOutput(code)).to.equal("4");
   });
 
-  // Calculation type f: a system gives 3.5. The runtime gives 3 (its divide() truncates
-  // with int8 operands); that is a separate defect, this pins that the int8 rounding of
-  // this change does not reach an f target
-  it("UNMEASURED: int8 / int8 into f, today's value 3", async () => {
+  // The target is part of the calculation type: with an f target it is f, the fraction is kept
+  it("int8 / int8 into f", async () => {
     const code = `
 DATA lv_x TYPE int8.
 DATA lv_y TYPE int8.
@@ -187,13 +185,12 @@ DATA lv_f TYPE f.
 lv_x = 7.
 lv_y = 2.
 lv_f = lv_x / lv_y.
-ASSERT lv_f = 3.`;
+ASSERT lv_f = '3.5'.`;
     await runAndOutput(code);
   });
 
-  // Calculation type p: a system gives 3.5 into p DECIMALS 1. The runtime gives 3, the
-  // same separate defect; this pins that the int8 rounding does not reach a p target
-  it("UNMEASURED: int8 / int8 into p, today's value 3", async () => {
+  // with a p target the calculation type is p, the fraction is kept up to the decimals of the target
+  it("int8 / int8 into p", async () => {
     const code = `
 DATA lv_x TYPE int8.
 DATA lv_y TYPE int8.
@@ -201,8 +198,77 @@ DATA lv_p TYPE p LENGTH 8 DECIMALS 1.
 lv_x = 7.
 lv_y = 2.
 lv_p = lv_x / lv_y.
-ASSERT lv_p = 3.`;
+ASSERT lv_p = '3.5'.`;
     await runAndOutput(code);
+  });
+
+  it("int8 / constant into p DECIMALS 2", async () => {
+    const code = `
+DATA lv_p TYPE p LENGTH 8 DECIMALS 2.
+DATA lv_8 TYPE int8 VALUE 7.
+lv_p = lv_8 / 2.
+ASSERT lv_p = '3.50'.`;
+    await runAndOutput(code);
+  });
+
+  it("int8 MOD then / into p", async () => {
+    const code = `
+DATA lv_p TYPE p LENGTH 8 DECIMALS 2.
+DATA lv_8 TYPE int8 VALUE 7.
+lv_p = lv_8 MOD 100 / 2.
+ASSERT lv_p = '3.50'.`;
+    await runAndOutput(code);
+  });
+
+  it("int8 / into p, negative", async () => {
+    const code = `
+DATA lv_p TYPE p LENGTH 8 DECIMALS 2.
+DATA lv_8 TYPE int8 VALUE -7.
+lv_p = lv_8 / 4.
+ASSERT lv_p = '-1.75'.`;
+    await runAndOutput(code);
+  });
+
+  it("int8 method result MOD then / into p", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS next RETURNING VALUE(rv) TYPE int8.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD next.
+    rv = 1234567890123.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lv_p TYPE p LENGTH 8 DECIMALS 2.
+  lv_p = lcl=>next( ) MOD 100000000 / 100.
+  ASSERT lv_p = '678901.23'.`;
+    await runAndOutput(code);
+  });
+
+  // in a comparison there is no target, the calculation type is int8 and "/" rounds
+  it("int8 / in a comparison rounds", async () => {
+    const code = `
+DATA lv_8 TYPE int8 VALUE 7.
+IF lv_8 / 2 = 4.
+  WRITE 'yes'.
+ELSE.
+  WRITE 'no'.
+ENDIF.`;
+    expect(await runAndOutput(code)).to.equal("yes");
+  });
+
+  it("int8 / in a comparison rounds, negative", async () => {
+    const code = `
+DATA lv_8 TYPE int8 VALUE -7.
+IF lv_8 / 2 = -4.
+  WRITE 'yes'.
+ELSE.
+  WRITE 'no'.
+ENDIF.`;
+    expect(await runAndOutput(code)).to.equal("yes");
   });
 
   // int8 calculation type rounds every intermediate quotient: 7 / 2 is 4, times 2 is 8

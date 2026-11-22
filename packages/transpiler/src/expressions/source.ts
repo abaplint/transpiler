@@ -13,11 +13,14 @@ import {ValueBodyTranspiler} from "./value_body";
 export class SourceTranspiler implements IExpressionTranspiler {
   private readonly addGet: boolean;
   private readonly int8: boolean;
+  private readonly fraction: boolean;
 
-  /** int8: the calculation type is int8, each operation gets its left operand as an int8 */
-  public constructor(addGet = false, int8 = false) {
+  /** int8: the calculation type is int8, each operation gets its left operand as an int8.
+   * fraction: the target is p, f or decfloat, so "/" keeps the fraction also with int8 operands */
+  public constructor(addGet = false, int8 = false, fraction = false) {
     this.addGet = addGet;
     this.int8 = int8;
+    this.fraction = fraction;
   }
 
   // the operands of a chain of & / && (the rearranger leaves them as a binary
@@ -104,10 +107,14 @@ export class SourceTranspiler implements IExpressionTranspiler {
             ret = new Chunk().appendString("abap.operators.minus(0, ").appendChunk(ret).appendString(")");
             prefixNegated = false;
           }
-          // "/" rounds in calculation type int8, the runtime's divide() does not know the target
-          const operator = this.int8 === true && c.concatTokens().trim() === "/"
+          // "/" rounds in calculation type int8, and keeps the fraction with a p, f or decfloat
+          // target; the runtime's divide() does not know the target
+          const isDivide = c.concatTokens().trim() === "/";
+          const operator = this.int8 === true && isDivide
             ? new Chunk().append("abap.operators.divideInt8", c, traversal)
-            : traversal.traverse(c);
+            : this.fraction === true && isDivide
+              ? new Chunk().append("abap.operators.divideFraction", c, traversal)
+              : traversal.traverse(c);
           if (this.int8 === true && leftIsInt8 === false) {
             ret = new Chunk().appendChunk(operator).appendString("(new abap.types.Integer8().set(").appendChunk(ret).appendString("),");
           } else {
@@ -129,7 +136,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
             ret.append(".get()", c, traversal);
           }
         } else if (c.get() instanceof Expressions.Source) {
-          ret.appendChunk(new SourceTranspiler(this.addGet, this.int8).transpile(c, traversal));
+          ret.appendChunk(new SourceTranspiler(this.addGet, this.int8, this.fraction).transpile(c, traversal));
           leftIsInt8 = c.findDirectExpression(Expressions.ArithOperator) !== undefined;
         } else if (c.get() instanceof Expressions.Arrow) {
           ret = new Chunk().appendString("(").appendChunk(ret).appendString(").get().");

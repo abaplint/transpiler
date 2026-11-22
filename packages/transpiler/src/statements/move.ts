@@ -31,7 +31,9 @@ export class MoveTranspiler implements IStatementTranspiler {
 
     let source = this.isInt8Calculation(node, sourceExpression, targetExpressions.length, traversal)
       ? new SourceTranspiler(false, true).transpile(sourceExpression!, traversal)
-      : traversal.traverse(sourceExpression);
+      : this.isFractionTarget(node, sourceExpression, targetExpressions.length, traversal)
+        ? new SourceTranspiler(false, false, true).transpile(sourceExpression!, traversal)
+        : traversal.traverse(sourceExpression);
 
     const second = node.getChildren()[1]?.concatTokens();
     switch (second) {
@@ -117,6 +119,26 @@ export class MoveTranspiler implements IStatementTranspiler {
       return false;
     }
     return this.integerOperands(source, scope, found) && found.int8;
+  }
+
+  // With a p, f or decfloat target, the target raises the calculation type above int8, so "/"
+  // with an int8 operand keeps the fraction. The runtime's divide() calculates in int8 for an
+  // int8 operand, as it does not know the target
+  private isFractionTarget(node: abaplint.Nodes.StatementNode, source: abaplint.Nodes.ExpressionNode | undefined,
+                           targets: number, traversal: Traversal): boolean {
+    if (source === undefined
+        || targets !== 1
+        || source.findAllExpressions(abaplint.Expressions.ArithOperator).some(o => o.concatTokens() === "/") === false) {
+      return false;
+    }
+    const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
+    const target = traversal.determineType(node, scope);
+    return target instanceof abaplint.BasicTypes.PackedType
+      || target instanceof abaplint.BasicTypes.FloatType
+      || target instanceof abaplint.BasicTypes.FloatingPointType
+      || target instanceof abaplint.BasicTypes.DecFloatType
+      || target instanceof abaplint.BasicTypes.DecFloat16Type
+      || target instanceof abaplint.BasicTypes.DecFloat34Type;
   }
 
   private integerOperands(node: abaplint.Nodes.ExpressionNode, scope: abaplint.ISpaghettiScopeNode | undefined,
