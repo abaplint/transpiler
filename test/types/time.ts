@@ -256,4 +256,37 @@ describe("Running Examples - Time type", () => {
     expect(abap.console.get()).to.equal("86370\n86370");
   });
 
+  it("Time, assignment from int8, as from i", async () => {
+    const code = `
+      DATA time TYPE t.
+      DATA seconds TYPE int8.
+      seconds = 5.
+      time = seconds.
+      WRITE / time.
+      seconds = 90000.
+      time = seconds.
+      WRITE / time.
+      seconds = -1.
+      time = seconds.
+      WRITE / time.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("000005\n010000\n235959");
+  });
+
+  it("Time, sum of t and int8", async () => {
+    const code = `
+      CONSTANTS midnight TYPE t VALUE '000000'.
+      DATA time TYPE t.
+      DATA seconds TYPE int8.
+      seconds = 3600.
+      time = midnight + seconds.
+      WRITE time.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("010000");
+  });
+
 });

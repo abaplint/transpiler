@@ -4,6 +4,7 @@ import {INumeric} from "./_numeric";
 import {String} from "./string";
 import {getDateFromNumber, getNumberFromDate} from "./_date_helper";
 import {Float} from "./float";
+import {Integer8} from "./integer8";
 import {parse} from "../operators/_parse";
 
 export class Date implements ICharacter {
@@ -34,6 +35,9 @@ export class Date implements ICharacter {
       }
     } else if (value instanceof Float) {
       this.set(Math.round(value.getRaw()));
+    } else if (value instanceof Integer8) {
+      // int8 converts as i does
+      this.set(Number(value.get()));
     } else if (value instanceof String) {
       // an empty string is the initial date, a shorter one is filled with blanks
       const str = value.get();
