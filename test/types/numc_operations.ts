@@ -19,10 +19,12 @@ async function run(contents: string) {
     {filename: "zfoobar.prog.abap", contents},
     {filename: "cx_root.clas.abap", contents: exceptionClass("cx_root")},
     {filename: "cx_sy_zerodivide.clas.abap", contents: exceptionClass("cx_sy_zerodivide", "cx_root")},
-    {filename: "cx_sy_conversion_overflow.clas.abap", contents: exceptionClass("cx_sy_conversion_overflow", "cx_root")}]);
+    {filename: "cx_sy_conversion_overflow.clas.abap", contents: exceptionClass("cx_sy_conversion_overflow", "cx_root")},
+    {filename: "cx_sy_conversion_no_number.clas.abap", contents: exceptionClass("cx_sy_conversion_no_number", "cx_root")}]);
   abap.Classes["CX_ROOT"] = class CxRoot {};
   abap.Classes["CX_SY_ZERODIVIDE"] = class CxSyZerodivide extends abap.Classes["CX_ROOT"] {};
   abap.Classes["CX_SY_CONVERSION_OVERFLOW"] = class CxSyConversionOverflow extends abap.Classes["CX_ROOT"] {};
+  abap.Classes["CX_SY_CONVERSION_NO_NUMBER"] = class CxSyConversionNoNumber extends abap.Classes["CX_ROOT"] {};
   const f = new AsyncFunction("abap", js);
   await f(abap);
 }
@@ -346,6 +348,91 @@ APPEND '100' TO lt_n.
 SORT lt_n DESCENDING.
 lv_s = concat_lines_of( table = lt_n sep = \`,\` ).
 ASSERT lv_s = \`100,010,002\`.`);
+  });
+
+  it("character statements keep blanks and other characters in n", async () => {
+    await run(`
+DATA lv_n TYPE n LENGTH 5.
+DATA lv_n3 TYPE n LENGTH 3.
+DATA lv_n7 TYPE n LENGTH 7.
+DATA lv_c TYPE c LENGTH 5.
+DATA lv_s TYPE string.
+DATA lv_i TYPE i.
+FIELD-SYMBOLS <lv_fs> TYPE any.
+lv_n = '00123'.
+SHIFT lv_n LEFT DELETING LEADING '0'.
+CONCATENATE lv_n '|' INTO lv_s RESPECTING BLANKS.
+ASSERT lv_s = \`123  |\`.
+ASSERT NOT lv_n CO '0123456789'.
+ASSERT lv_n = 123.
+lv_i = lv_n.
+ASSERT lv_i = 123.
+lv_s = |{ lv_n }|.
+ASSERT lv_s = \`123\`.
+lv_n3 = lv_n.
+CONCATENATE lv_n3 '|' INTO lv_s RESPECTING BLANKS.
+ASSERT lv_s = \`3  |\`.
+CONDENSE lv_n.
+CONCATENATE lv_n '|' INTO lv_s RESPECTING BLANKS.
+ASSERT lv_s = \`123  |\`.
+lv_n = '00123'.
+TRANSLATE lv_n USING '0 '.
+CONCATENATE lv_n '|' INTO lv_s RESPECTING BLANKS.
+ASSERT lv_s = \`  123|\`.
+lv_i = lv_n + 1.
+ASSERT lv_i = 124.
+lv_s = lv_n.
+ASSERT lv_s = \`  123\`.
+lv_n7 = lv_n.
+CONCATENATE lv_n7 '|' INTO lv_s RESPECTING BLANKS.
+ASSERT lv_s = \`00  123|\`.
+lv_n = '00123'.
+SHIFT lv_n RIGHT DELETING TRAILING '3'.
+CONCATENATE lv_n '|' INTO lv_s RESPECTING BLANKS.
+ASSERT lv_s = \` 0012|\`.
+lv_n = '00123'.
+SHIFT lv_n BY 2 PLACES.
+CONCATENATE lv_n '|' INTO lv_s RESPECTING BLANKS.
+ASSERT lv_s = \`123  |\`.
+lv_n = '00123'.
+SHIFT lv_n RIGHT BY 2 PLACES.
+CONCATENATE lv_n '|' INTO lv_s RESPECTING BLANKS.
+ASSERT lv_s = \`  001|\`.
+lv_n = '00123'.
+SHIFT lv_n UP TO '2'.
+CONCATENATE lv_n '|' INTO lv_s RESPECTING BLANKS.
+ASSERT lv_s = \`23   |\`.
+lv_n = '00123'.
+TRANSLATE lv_n USING '1A'.
+CONCATENATE lv_n '|' INTO lv_s RESPECTING BLANKS.
+ASSERT lv_s = \`00A23|\`.
+TRY.
+    lv_i = lv_n.
+    ASSERT 1 = 2.
+  CATCH cx_sy_conversion_no_number.
+ENDTRY.
+lv_n = '00123'.
+REPLACE ALL OCCURRENCES OF '0' IN lv_n WITH 'x'.
+CONCATENATE lv_n '|' INTO lv_s RESPECTING BLANKS.
+ASSERT lv_s = \`xx123|\`.
+TRANSLATE lv_n TO UPPER CASE.
+CONCATENATE lv_n '|' INTO lv_s RESPECTING BLANKS.
+ASSERT lv_s = \`XX123|\`.
+CONCATENATE '1' 'a' INTO lv_n.
+CONCATENATE lv_n '|' INTO lv_s RESPECTING BLANKS.
+ASSERT lv_s = \`1a   |\`.
+CONCATENATE '12345' '678' INTO lv_n.
+CONCATENATE lv_n '|' INTO lv_s RESPECTING BLANKS.
+ASSERT lv_s = \`12345|\`.
+lv_n = '00123'.
+ASSIGN lv_n TO <lv_fs>.
+SHIFT <lv_fs> LEFT DELETING LEADING '0'.
+CONCATENATE lv_n '|' INTO lv_s RESPECTING BLANKS.
+ASSERT lv_s = \`123  |\`.
+lv_c = '00123'.
+TRANSLATE lv_c USING '0 '.
+CONCATENATE lv_c '|' INTO lv_s RESPECTING BLANKS.
+ASSERT lv_s = \`  123|\`.`);
   });
 
 });
