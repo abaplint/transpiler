@@ -3,11 +3,11 @@
 [![npm (scoped)](https://img.shields.io/npm/v/@abaplint/runtime?label=%40abaplint%2Fruntime)](https://www.npmjs.com/package/@abaplint/runtime)
 [![npm (scoped)](https://img.shields.io/npm/v/@abaplint/transpiler?label=%40abaplint%2Ftranspiler)](https://www.npmjs.com/package/@abaplint/transpiler)
 [![npm (scoped)](https://img.shields.io/npm/v/@abaplint/transpiler-cli?label=%40abaplint%2Ftranspiler-cli)](https://www.npmjs.com/package/@abaplint/transpiler-cli)
-[![CI](https://github.com/abaplint/transpiler/workflows/CI/badge.svg)](https://github.com/abaplint/transpiler/actions)
+[![CI](https://github.com/abaplint/transpiler/actions/workflows/ci.yml/badge.svg)](https://github.com/abaplint/transpiler/actions/workflows/ci.yml)
 
-Input must be ABAP 7.02 syntax, use abaplint [downport](https://rules.abaplint.org/downport/) rule to automatically change higher syntax before transpiling. Support has been added for many 750 statements and expressions, check https://syntax.abaplint.org for compatibility.
+Input is checked against the abaplint "Open ABAP" syntax version, which covers most modern ABAP statements and expressions, check https://syntax.abaplint.org for compatibility.
 
-Target is [ES6](http://es6-features.org)
+Output is JavaScript ES modules, ES2022 or later, it uses top-level `await`
 
 Playground: https://transpiler.abaplint.org
 
@@ -15,7 +15,6 @@ Connecting to a database is optional, currently the following databases have dri
 * [SQLite](https://www.sqlite.org) via [@abaplint/database-sqlite](https://www.npmjs.com/package/@abaplint/database-sqlite)
 * [PostgreSQL](https://www.postgresql.org) via [@abaplint/database-pg](https://www.npmjs.com/package/@abaplint/database-pg)
 * [Snowflake](https://www.snowflake.com/) via [@abaplint/database-snowflake](https://www.npmjs.com/package/@abaplint/database-snowflake)
-* [SAP HANA](https://www.sap.com/products/technology-platform/hana.html) via [@abaplint/database-hdb](https://www.npmjs.com/package/@abaplint/database-hdb)
 
 ## Reuse library
 
