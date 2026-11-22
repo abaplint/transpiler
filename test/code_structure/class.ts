@@ -993,11 +993,14 @@ START-OF-SELECTION.
   WRITE / lcl=>describe( '010203' ).
   WRITE / lcl=>describe( \`ABCD\` ).
   WRITE / lcl=>describe_value( '010203' ).
-  WRITE / lcl=>describe( bytes = 'A0B1' ).`;
+  WRITE / lcl=>describe( bytes = 'A0B1' ).
+  WRITE / lcl=>describe_value( '012' ).
+  WRITE / lcl=>describe_value( '1' ).`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.getTrimmed().split("\n")).to.deep.equal(["X 3 02", "X 3 02", "X 2 CD", "X 3 010203", "X 2 B1"]);
+    expect(abap.console.getTrimmed().split("\n")).to.deep.equal(
+      ["X 3 02", "X 3 02", "X 2 CD", "X 3 010203", "X 2 B1", "X 2 0120", "X 1 10"]);
   });
 
   it("static method with constant default", async () => {
