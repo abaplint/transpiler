@@ -14,14 +14,15 @@ describe("Running statements - CALL FUNCTION IN UPDATE TASK", () => {
     await new AsyncFunction("abap", js)(abap);
   }
 
-  it("without a host, runs the module at CALL time", async () => {
+  it("without a host, runs the module at COMMIT WORK", async () => {
     abap.FunctionModules["BAR"] = async (param: any) => {
       abap.statements.write(param.exporting.foo);
     };
     await run(`
 CALL FUNCTION 'BAR' IN UPDATE TASK EXPORTING foo = 42.
-WRITE 'after'.`);
-    expect(abap.console.get()).to.equal("42after");
+WRITE 'after'.
+COMMIT WORK.`);
+    expect(abap.console.get()).to.equal("after42");
   });
 
   it("with a host, registers the parameters without running the module", async () => {

@@ -20,13 +20,13 @@ export async function commit(context: Context, options?: ICommitOptions) {
     return;
   }
 
-  // COMMIT WORK ends the current LUW, ie. all open database connections are committed
+  // COMMIT WORK ends the SAP LUW: the PERFORM ... ON COMMIT subroutines and the update function modules run, then
+  // all open database connections are committed
+  await context.luw.commit();
   for (const name of Object.keys(context.databaseConnections)) {
     await context.databaseConnections[name].commit();
   }
 
-  // sy-subrc is only set when the WAIT addition is specified
-  if (options?.wait === true) {
-    abap.builtin.sy.get().subrc.set(0);
-  }
+  // always 0 without AND WAIT; with AND WAIT 0 when the update succeeded, which it did when it gets here
+  abap.builtin.sy.get().subrc.set(0);
 }
