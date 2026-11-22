@@ -25,7 +25,7 @@ import {unpack} from "./unpack";
 import {getParameter, setParameter} from "./get_parameter";
 import {exportCluster, importCluster} from "./data_cluster";
 import {setLocale} from "./set_locale";
-import {getRunTime} from "./get_run_time";
+import {getRunTime, setRunTimeClock} from "./get_run_time";
 import {getTime} from "./get_time";
 import {IInsertDatabaseOptions, insertDatabase} from "./insert_database";
 import {insertInternal} from "./insert_internal";
@@ -61,6 +61,7 @@ import {CallFunction, ICallFunctionOptions} from "./call_function";
 import {SelectDatabaseOptions, SelectRuntimeOptions} from "../db/db";
 import {Trace} from "../trace";
 import {ISkipOptions, SkipStatement} from "./skip";
+import {eq} from "../compare";
 
 // this is a class, as statements like SELECT needs access to the database object instance
 // and WRITE will access the Console
@@ -121,6 +122,10 @@ export class Statements {
     getRunTime(this.context, value);
   }
 
+  public setRunTimeClock(resolution: "HIGH" | "LOW") {
+    setRunTimeClock(this.context, resolution);
+  }
+
   public async openCursor(target: INumeric, select: string, options: IOpenCursorDatabaseOptions) {
     const num = await openCursor(this.context, select, options);
     target.set(num);
@@ -140,6 +145,24 @@ export class Statements {
 
   public async rollback(options?: IRollbackOptions) {
     return rollback(this.context, options);
+  }
+
+  /** ON CHANGE OF: true when a field differs from what this statement saw the last time it ran (the first time: from
+   *  its initial value), and then remembers the fields */
+  public onChange(key: string, fields: any[]): boolean {
+    const values = fields.map(f => (f instanceof FieldSymbol ? f.getPointer() : f));
+    const last = this.context.onChange.get(key) ?? values.map(v => {
+      const initial = v.clone();
+      initial.clear();
+      return initial;
+    });
+    const changed = values.some((v, i) => eq(v, last[i]) === false);
+    if (changed) {
+      this.context.onChange.set(key, values.map(v => v.clone()));
+    } else if (!this.context.onChange.has(key)) {
+      this.context.onChange.set(key, last);
+    }
+    return changed;
   }
 
   public async wait(options: IWaitOptions) {

@@ -32,7 +32,7 @@ APPEND INITIAL LINE TO second_rows ASSIGNING <second_row>.
 WRITE / second-child-value.
 WRITE / second_rows-value.
 WRITE / <second_row>-value.
-WRITE / lines( second_rows ).`;
+WRITE / lines( second_rows[] ).`;
     await expectOutput(source, "zfactory.prog.abap", "0\n0\n0\n1");
   });
 
