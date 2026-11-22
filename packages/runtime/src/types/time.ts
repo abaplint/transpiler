@@ -41,8 +41,12 @@ export class Time implements ICharacter {
     } else if (value instanceof Float) {
       this.set(Math.round(value.getRaw()));
     } else if (value instanceof Integer8) {
-      // int8 converts as i does
-      this.set(Number(value.get()));
+      // int8 converts as i does, seconds modulo 86400; reduce as bigint, the full range does not fit a number
+      let seconds = (value as Integer8).get() % 86400n;
+      if (seconds < 0n) {
+        seconds += 86400n;
+      }
+      this.set(Number(seconds));
     } else if (value instanceof Character && value.get().trim() !== "") {
       // trailing blanks are passed, a shorter text is padded with "0" on the right
       this.set(value.get().padEnd(6, "0"));

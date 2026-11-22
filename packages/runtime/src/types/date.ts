@@ -36,8 +36,8 @@ export class Date implements ICharacter {
     } else if (value instanceof Float) {
       this.set(Math.round(value.getRaw()));
     } else if (value instanceof Integer8) {
-      // int8 converts as i does
-      this.set(Number(value.get()));
+      // int8 converts as i does, from its lower 4 bytes as a signed integer
+      this.set(Number(BigInt.asIntN(32, (value as Integer8).get())));
     } else if (value instanceof String) {
       // an empty string is the initial date, a shorter one is filled with blanks
       const str = value.get();

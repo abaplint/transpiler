@@ -305,6 +305,31 @@ describe("Running Examples - Date type", () => {
     expect(abap.console.get()).to.equal("20210728\n00000000\n00000000");
   });
 
+  it("Date, assignment from int8 beyond the i range, lower 4 bytes", async () => {
+    const code = `
+      DATA date TYPE d.
+      DATA days TYPE int8.
+      days = 4295705296.
+      date = days.
+      WRITE / date.
+      days = 9007199254740993.
+      date = days.
+      WRITE / date.
+      days = -4294967291.
+      date = days.
+      WRITE / date.
+      days = 2147483653.
+      date = days.
+      WRITE / date.
+      days = 9223372036854775807.
+      date = days.
+      WRITE / date.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("20210728\n00010102\n00010106\n00000000\n00000000");
+  });
+
   it("Date, sum of d and int8", async () => {
     const code = `
       CONSTANTS epoch TYPE d VALUE '19700101'.
