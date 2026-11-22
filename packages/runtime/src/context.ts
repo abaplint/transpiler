@@ -18,7 +18,8 @@ export class Context {
   public newLinePending = false;
   // the user memory (SET PARAMETER / GET PARAMETER) by parameter ID, upper and lower case kept apart
   public userParameters: Map<string, string> = new Map();
-  // EXPORT/IMPORT ... SHARED MEMORY / SHARED BUFFER: per medium, the data clusters by key, each a map of parameter name to value
+  // EXPORT/IMPORT data clusters (MEMORY, DATABASE, SHARED MEMORY / SHARED BUFFER, DATA BUFFER):
+  // per medium, the clusters by key, each a map of parameter name to value
   public dataClusters: Map<string, Map<string, Map<string, any>>> = new Map();
 
   // CALL FUNCTION IN UPDATE TASK hands the copied parameters to the host, if one is set

@@ -23,7 +23,7 @@ import {receive} from "./receive";
 import {getLocale} from "./get_locale";
 import {unpack} from "./unpack";
 import {getParameter, setParameter} from "./get_parameter";
-import {exportCluster, importCluster} from "./data_cluster";
+import {deleteCluster, exportCluster, freeMemory, importCluster} from "./data_cluster";
 import {setLocale} from "./set_locale";
 import {getRunTime} from "./get_run_time";
 import {getTime} from "./get_time";
@@ -85,6 +85,8 @@ export class Statements {
   public setParameter = setParameter;
   public exportCluster = exportCluster;
   public importCluster = importCluster;
+  public deleteCluster = deleteCluster;
+  public freeMemory = freeMemory;
   public getTime = getTime;
   public insertInternal = insertInternal;
   public loop = loop;
