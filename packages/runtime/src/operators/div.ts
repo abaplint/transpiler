@@ -3,8 +3,12 @@ import {Integer, Integer8} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
+import {asFloat, isFloatWithInteger8} from "./_float_integer8";
 
 export function div(left: INumeric | ICharacter | Integer8 | string | number, right: INumeric | Integer8 | ICharacter | string | number) {
+  if (isFloatWithInteger8(left, right)) {
+    return div(asFloat(left), asFloat(right));
+  }
   if (left instanceof Integer8 || right instanceof Integer8) {
     const l = left instanceof Integer8 ? left.get() : BigInt(parse(left));
     const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));
