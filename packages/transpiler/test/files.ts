@@ -420,7 +420,7 @@ ENDINTERFACE.`;
   });
 
   it("keeps shared DDIC type construction lazy and memoized", async () => {
-    const result = await runResult([{filename: "t000.tabl.xml", contents: t000}], {sharedTypeFactories: true});
+    const result = await runResult([{filename: "t000.tabl.xml", contents: t000}]);
     const code = result.objects[0].chunk.getCode();
     const calls: string[] = [];
     const types = new Proxy({}, {

@@ -164,4 +164,118 @@ ENDCLASS.`;
     expect(js).to.contain("zcl_enum_impl.zif_enum_roles$second.set(1);");
   });
 
+  it("string template writes an enum value of a class as the name of its constant", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    TYPES:
+      BEGIN OF ENUM ty_size,
+        small,
+        large,
+      END OF ENUM ty_size.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA size TYPE lcl=>ty_size.
+  WRITE / |{ size }|.
+  size = lcl=>large.
+  WRITE / |{ size }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("SMALL\nLARGE");
+  });
+
+  it("string template, two enums in one interface, each with its own names", async () => {
+    const code = `
+INTERFACE lif_enums.
+  TYPES:
+    BEGIN OF ENUM ty_color,
+      red,
+      green,
+    END OF ENUM ty_color.
+  TYPES:
+    BEGIN OF ENUM ty_size,
+      small,
+      large,
+    END OF ENUM ty_size.
+ENDINTERFACE.
+
+START-OF-SELECTION.
+  DATA color TYPE lif_enums=>ty_color.
+  DATA size TYPE lif_enums=>ty_size.
+  color = lif_enums=>green.
+  size = lif_enums=>large.
+  WRITE / |{ color } { size }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("GREEN LARGE");
+  });
+
+  it("string template, enum with STRUCTURE as a component, read through a generic field symbol", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    TYPES:
+      BEGIN OF ENUM ty_light STRUCTURE light,
+        red,
+        green,
+      END OF ENUM ty_light STRUCTURE light.
+    TYPES:
+      BEGIN OF ty_signal,
+        light TYPE ty_light,
+      END OF ty_signal.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA signal TYPE lcl=>ty_signal.
+  DATA copy TYPE lcl=>ty_signal.
+  FIELD-SYMBOLS <light> TYPE simple.
+  ASSIGN COMPONENT 'LIGHT' OF STRUCTURE signal TO <light>.
+  WRITE / |{ <light> }|.
+  signal-light = lcl=>light-green.
+  copy = signal.
+  ASSIGN COMPONENT 'LIGHT' OF STRUCTURE copy TO <light>.
+  WRITE / |{ <light> }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("RED\nGREEN");
+  });
+
+  it("enum of a global interface, the type used in a class names the constants", async () => {
+    const intf = `
+INTERFACE zif_enum_roles PUBLIC.
+  TYPES:
+    BEGIN OF ENUM ty_role,
+      first,
+      second,
+    END OF ENUM ty_role.
+ENDINTERFACE.`;
+    const clas = `
+CLASS zcl_enum_user DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    CLASS-METHODS run.
+ENDCLASS.
+CLASS zcl_enum_user IMPLEMENTATION.
+  METHOD run.
+    DATA role TYPE zif_enum_roles=>ty_role.
+    WRITE / |{ role }|.
+  ENDMETHOD.
+ENDCLASS.`;
+    const result = await compileFiles([
+      {filename: "zif_enum_roles.intf.abap", contents: intf},
+      {filename: "zcl_enum_user.clas.abap", contents: clas},
+    ]);
+    const js = result.objects.find(o => o.object.name === "ZCL_ENUM_USER")?.chunk.getCode();
+    expect(js).to.contain(`new abap.types.String({qualifiedName: "ZIF_ENUM_ROLES=>TY_ROLE", enumValues: ["FIRST","SECOND"]})`);
+  });
+
 });

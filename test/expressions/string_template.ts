@@ -392,11 +392,67 @@ WRITE |{ lv_value STYLE = SCIENTIFIC }|.`;
     const code = `
 DATA lv_value TYPE n LENGTH 5.
 lv_value = 5.
-WRITE |{ lv_value ALPHA = OUT }|.`;
+WRITE |[{ lv_value ALPHA = OUT }]|.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("5");
+    expect(abap.console.get()).to.equal("[5    ]");
+  });
+
+  it("ALPHA OUT keeps the length of the source, all zeros give 0", async () => {
+    const code = `
+DATA lv_n TYPE n LENGTH 5.
+DATA lv_n1 TYPE n LENGTH 1.
+DATA lv_c TYPE c LENGTH 5.
+DATA lv_s TYPE string.
+FIELD-SYMBOLS <lv_any> TYPE any.
+lv_n = '00123'.
+WRITE / |[{ lv_n ALPHA = OUT }]|.
+WRITE / |[{ lv_n ALPHA = OUT WIDTH = 8 }]|.
+WRITE / |[{ lv_n ALPHA = OUT WIDTH = 2 }]|.
+ASSIGN lv_n TO <lv_any>.
+WRITE / |[{ <lv_any> ALPHA = OUT }]|.
+lv_n = '10020'.
+WRITE / |[{ lv_n ALPHA = OUT }]|.
+lv_n = '00000'.
+WRITE / |[{ lv_n ALPHA = OUT }]|.
+WRITE / |[{ lv_n ALPHA = OUT WIDTH = 2 }]|.
+lv_n1 = '0'.
+WRITE / |[{ lv_n1 ALPHA = OUT }]|.
+lv_c = '00000'.
+WRITE / |[{ lv_c ALPHA = OUT }]|.
+lv_c = ' 0012'.
+WRITE / |[{ lv_c ALPHA = OUT }]|.
+lv_c = '00A1'.
+WRITE / |[{ lv_c ALPHA = OUT }]|.
+lv_c = ''.
+WRITE / |[{ lv_c ALPHA = OUT }]|.
+lv_s = |00123|.
+WRITE / |[{ lv_s ALPHA = OUT }]|.
+WRITE / |[{ lv_s ALPHA = OUT WIDTH = 7 }]|.
+lv_s = ||.
+WRITE / |[{ lv_s ALPHA = OUT }]|.
+WRITE / |[{ '00012' ALPHA = OUT }]|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal([
+      "[123  ]",
+      "[123     ]",
+      "[123]",
+      "[123  ]",
+      "[10020]",
+      "[0    ]",
+      "[0 ]",
+      "[0]",
+      "[0    ]",
+      "[12   ]",
+      "[00A1 ]",
+      "[     ]",
+      "[123  ]",
+      "[123    ]",
+      "[]",
+      "[12   ]"].join("\n"));
   });
 
   it("ALPHA IN formatting", async () => {
@@ -499,6 +555,101 @@ ASSERT lv_upper_sscc IS INITIAL.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("ALPHA IN, WIDTH, string literal", async () => {
+    const code = `
+DATA(lv_text) = |{ \`12345\` ALPHA = IN WIDTH = 10 }|.
+WRITE lv_text.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0000012345");
+  });
+
+  it("SIGN, p and i", async () => {
+    const code = `
+DATA lv_p TYPE p LENGTH 8 DECIMALS 2 VALUE '1.5'.
+DATA lv_i TYPE i VALUE 15.
+WRITE / |{ lv_p SIGN = LEFTPLUS } { lv_i SIGN = LEFTPLUS }|.
+WRITE / |{ lv_p SIGN = RIGHTPLUS } { lv_i SIGN = RIGHTPLUS }|.
+WRITE / |{ lv_p SIGN = RIGHT } { lv_i SIGN = RIGHT }|.
+lv_p = '-1.5'.
+lv_i = -15.
+WRITE / |{ lv_p SIGN = LEFTPLUS } { lv_i SIGN = LEFTPLUS }|.
+WRITE / |{ lv_p SIGN = RIGHTPLUS } { lv_i SIGN = RIGHTPLUS }|.
+WRITE / |{ lv_p SIGN = RIGHT } { lv_i SIGN = RIGHT }|.
+WRITE / |{ lv_p SIGN = LEFT } { lv_i SIGN = LEFT }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("+1.50 +15\n1.50+ 15+\n1.50 15\n-1.50 -15\n1.50- 15-\n1.50- 15-\n-1.50 -15");
+  });
+
+  it("SIGN = RIGHT, int8", async () => {
+    const code = `
+DATA lv_a TYPE int8 VALUE -1234.
+WRITE / |{ lv_a SIGN = RIGHT }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1234-");
+  });
+
+  it("ALIGN with WIDTH, p, i, int8 and n", async () => {
+    const code = `
+DATA lv_p TYPE p LENGTH 8 DECIMALS 2 VALUE '-1.5'.
+DATA lv_i TYPE i VALUE -15.
+DATA lv_a TYPE int8 VALUE -1234.
+DATA lv_n TYPE n LENGTH 5 VALUE '00123'.
+DATA lv_n3 TYPE n LENGTH 3 VALUE '012'.
+WRITE / |[{ lv_p WIDTH = 8 ALIGN = RIGHT }] [{ lv_i WIDTH = 8 ALIGN = RIGHT }]|.
+WRITE / |[{ lv_p WIDTH = 8 ALIGN = CENTER }]|.
+WRITE / |[{ lv_a WIDTH = 8 ALIGN = RIGHT }]|.
+WRITE / |[{ lv_n ALIGN = RIGHT WIDTH = 8 }]|.
+WRITE / |[{ lv_n3 ALIGN = CENTER WIDTH = 7 }]|.
+WRITE / |[{ lv_i WIDTH = 8 ALIGN = LEFT }] [{ lv_i WIDTH = 8 }]|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("[   -1.50] [     -15]\n[ -1.50  ]\n[   -1234]\n[   00123]\n[  012  ]\n[-15     ] [-15     ]");
+  });
+
+  it("ALIGN = CENTER with PAD", async () => {
+    const code = `
+DATA lv_i TYPE i VALUE 7.
+WRITE / |{ lv_i WIDTH = 4 ALIGN = CENTER PAD = '*' }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("*7**");
+  });
+
+  it("SIGN and DECIMALS with WIDTH and ALIGN, i", async () => {
+    const code = `
+DATA lv_i TYPE i VALUE -15.
+WRITE / |[{ lv_i SIGN = RIGHT WIDTH = 6 ALIGN = RIGHT }]|.
+WRITE / |[{ lv_i DECIMALS = 2 WIDTH = 8 ALIGN = RIGHT }]|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("[   15-]\n[  -15.00]");
+  });
+
+  it("STYLE = SCIENTIFIC, p, i and int8", async () => {
+    const code = `
+DATA lv_p TYPE p LENGTH 8 DECIMALS 2 VALUE '1234567.89'.
+DATA lv_i TYPE i VALUE 1234567.
+DATA lv_a TYPE int8 VALUE -1234.
+DATA lv_small TYPE p LENGTH 8 DECIMALS 3 VALUE '0.05'.
+DATA lv_zero TYPE i.
+WRITE / |{ lv_p STYLE = SCIENTIFIC } { lv_i STYLE = SCIENTIFIC }|.
+WRITE / |{ lv_a STYLE = SCIENTIFIC }|.
+WRITE / |{ lv_small STYLE = SCIENTIFIC } { lv_zero STYLE = SCIENTIFIC }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1.23456789E+06 1.234567E+06\n-1.234E+03\n5E-02 0E+00");
   });
 
 });

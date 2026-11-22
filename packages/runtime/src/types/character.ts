@@ -7,6 +7,8 @@ import {AbstractTypeData} from "./_abstract_type_data";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {Integer} from "./integer";
+import {Integer8} from "./integer8";
+import {Float} from "./float";
 
 const TRIMREGEX = / *$/;
 
@@ -45,7 +47,7 @@ export class Character implements ICharacter {
     return this;
   }
 
-  public set(value: ICharacter | string | Structure | FieldSymbol | Integer) {
+  public set(value: ICharacter | string | Structure | FieldSymbol | Integer | Integer8) {
     if (this.constant === true) {
       throw new Error("Changing constant");
     }
@@ -66,6 +68,14 @@ export class Character implements ICharacter {
     } else if (value instanceof Integer) {
       this.value = Math.abs( value.get() ) + ( value.get() < 0 ? "-" : " " );
       this.value = this.value.padStart(this.length, " ");
+    } else if (value instanceof Integer8) {
+      // as for i: right-aligned, sign last; bigint keeps the int8 minimum exact
+      const int8 = value.get();
+      this.value = (int8 < 0n ? -int8 : int8) + ( int8 < 0n ? "-" : " " );
+      this.value = this.value.padStart(this.length, " ");
+    } else if (value instanceof Float) {
+      // right-aligned, with a decimal point; Float.get() writes a comma
+      this.value = value.get().replace(",", ".").padStart(this.length, " ");
     } else {
       this.value = value.get() + "";
     }

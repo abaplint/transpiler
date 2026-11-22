@@ -7,30 +7,62 @@ import {ComponentChainTranspiler, FieldChainTranspiler} from "../expressions";
 export class SortTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    const concat = node.concatTokens().toUpperCase();
-    const components = node.getChildren().filter(c => c instanceof abaplint.Nodes.ExpressionNode
-      && (c.get() instanceof abaplint.Expressions.ComponentChain || this.isDynamicName(c, traversal))) as abaplint.Nodes.ExpressionNode[];
     const options: string[] = [];
 
-    if (concat.includes(" BY ") === false) {
-      const descending = node.findDirectTokenByText("DESCENDING") !== undefined;
+    // additions before BY apply to the whole SORT, after BY each component can have its own order and AS TEXT,
+    // a component without its own order takes the order of the SORT
+    let descending = false;
+    let text = false;
+    let afterBy = false;
+    const by: {component: string, order?: string, text: boolean}[] = [];
+    for (const c of node.getChildren()) {
+      if (c instanceof abaplint.Nodes.ExpressionNode) {
+        if (afterBy && (c.get() instanceof abaplint.Expressions.ComponentChain || this.isDynamicName(c, traversal))) {
+          const component = c.get() instanceof abaplint.Expressions.Dynamic
+            ? this.dynamicName(c, traversal)
+            : `"${ComponentChainTranspiler.concat(c, traversal)}"`;
+          by.push({component, text: false});
+        }
+        continue;
+      }
+      const word = c.concatTokens().toUpperCase();
+      const current = by[by.length - 1];
+      if (word === "BY") {
+        afterBy = true;
+      } else if (word === "DESCENDING" || word === "ASCENDING") {
+        if (current !== undefined) {
+          current.order = word;
+        } else {
+          descending = word === "DESCENDING";
+        }
+      } else if (word === "TEXT") {
+        if (current !== undefined) {
+          current.text = true;
+        } else {
+          text = true;
+        }
+      }
+    }
+
+    if (by.length > 0) {
+      const list = by.map(b => {
+        const opts = [`component: ${b.component}`];
+        if (b.order === "DESCENDING" || (b.order === undefined && descending)) {
+          opts.push("descending: true");
+        }
+        if (b.text || text) {
+          opts.push("text: true");
+        }
+        return "{" + opts.join(", ") + "}";
+      });
+      options.push(`by: [${list.join(",")}]`);
+    } else if (afterBy === false) {
       if (descending === true) {
         options.push("descending: true");
       }
-    } else if (components.length > 0) {
-      const by: string[] = [];
-      for (const c of components) {
-        const next = this.findNextText(c, node);
-        const component = c.get() instanceof abaplint.Expressions.Dynamic
-          ? this.dynamicName(c, traversal)
-          : `"${ComponentChainTranspiler.concat(c, traversal)}"`;
-        if (next === "DESCENDING") {
-          by.push(`{component: ${component}, descending: true}`);
-        } else {
-          by.push(`{component: ${component}}`);
-        }
+      if (text === true) {
+        options.push("text: true");
       }
-      options.push(`by: [${by.join(",")}]`);
     }
 
     const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target)).getCode();
@@ -63,21 +95,6 @@ export class SortTranspiler implements IStatementTranspiler {
     }
     const field = c.findFirstExpression(abaplint.Expressions.FieldChain)!;
     return new FieldChainTranspiler(true).transpile(field, traversal).getCode() + ".toLowerCase().trimEnd()";
-  }
-
-  private findNextText(c: abaplint.Nodes.ExpressionNode, parent: abaplint.Nodes.StatementNode): string {
-    const children = parent.getChildren();
-    for (let i = 0; i < children.length; i++) {
-      const element = children[i];
-      if (element !== c) {
-        continue;
-      }
-      const next = children[i + 1];
-      if (next) {
-        return next.concatTokens().toUpperCase();
-      }
-    }
-    return "";
   }
 
 }
