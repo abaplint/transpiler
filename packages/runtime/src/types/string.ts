@@ -6,6 +6,7 @@ import {Hex} from "./hex";
 import {Integer} from "./integer";
 import {Integer8} from "./integer8";
 import {Packed} from "./packed";
+import {Numc} from "./numc";
 import {Structure} from "./structure";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
@@ -52,6 +53,9 @@ export class String implements ICharacter {
     } else if (value instanceof Character) {
       // replace trailing blanks if the source is a Character string
       this.value = value.getTrimEnd();
+    } else if (value instanceof Numc) {
+      // after a character statement n can end with blanks, they are dropped as for c
+      this.value = value.get().trimEnd();
     } else if (value instanceof Structure) {
       this.value = value.getCharacter().trimEnd();
     } else if (value instanceof Packed) {

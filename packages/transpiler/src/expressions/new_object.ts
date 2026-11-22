@@ -53,6 +53,10 @@ export class NewObjectTranspiler implements IExpressionTranspiler {
       const clas = traversal.lookupClassOrInterface(type.getIdentifierName(), node.getFirstToken());
       ret.appendString(traversal.toType(type) + ".set(await (new " + clas + "()).constructor_(" + para + "))");
     } else {
+      if (typeNameOrInfer.concatTokens() === "#" && type instanceof abaplint.BasicTypes.DataReference) {
+        // NEW #( ) infers the type of the target, a data reference: the new data object has the referenced type
+        type = type.getType();
+      }
       // a new data object with a copy of the value, never the source itself; async, as sources can await
       const typeCode = traversal.toType(type);
       const setCode = this.buildValue(node, type, traversal);

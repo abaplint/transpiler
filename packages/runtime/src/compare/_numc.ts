@@ -14,16 +14,6 @@ function isText(value: unknown): value is Character | String | string {
   return typeof value === "string" || value instanceof Character || value instanceof String;
 }
 
-/** a key value of READ TABLE or a table expression is converted to the type of its
- * component first: a text for an n component becomes an n, its letters dropped, no
- * CONVT_NO_NUMBER. Other values are returned as they are. */
-export function keyAsComponentType(component: unknown, value: unknown): unknown {
-  if (component instanceof Numc && isText(value)) {
-    return component.clone().set(value);
-  }
-  return value;
-}
-
 /** n compared with c, string or an n of another length: both operands are
  * numbers (calculation type p), a text that is no number is CONVT_NO_NUMBER.
  * Returns undefined when the rule does not apply. */
