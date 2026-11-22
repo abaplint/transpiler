@@ -5,11 +5,13 @@ import {Chunk} from "../chunk";
 import {UniqueIdentifier} from "../unique_identifier";
 import {InlineDeclarations} from "../inline";
 import {ClassConstructors} from "../class_constructors";
+import {LocalTranspiler} from "../statements/local";
 
 export class FunctionModuleTranspiler implements IStructureTranspiler {
 
   public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): Chunk {
     const chunk = new Chunk();
+    const local = LocalTranspiler.wrap(node);
     let name: string | undefined = "";
     for (const c of node.getChildren()) {
       if (c.get() instanceof abaplint.Statements.FunctionModule && c instanceof abaplint.Nodes.StatementNode) {
@@ -21,7 +23,13 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
         chunk.appendString(this.findSignature(traversal, name, c));
         chunk.appendString(InlineDeclarations.buildDeclarations(node, traversal));
         chunk.appendString(ClassConstructors.entryChecks(node, traversal));
+        if (local) {
+          chunk.appendString(local.open);
+        }
       } else if (c.get() instanceof abaplint.Statements.EndFunction) {
+        if (local) {
+          chunk.appendString(local.close);
+        }
         chunk.append("}\n", c, traversal);
         chunk.appendString(`abap.FunctionModules['${name.toUpperCase()}'] = ${Traversal.escapeNamespace(name)};\n`);
       } else {

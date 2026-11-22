@@ -1,5 +1,5 @@
-import {alphaIn, alphaOut} from "./alpha";
-import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Integer, Integer8, Packed, String, Structure, Table} from "./types";
+import {alphaIn, alphaOutTemplate} from "./alpha";
+import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Integer, Integer8, Numc, Packed, String, Structure, Table} from "./types";
 import {ICharacter} from "./types/_character";
 import {INumeric} from "./types/_numeric";
 import {decimalToFixed} from "./types/_decimal";
@@ -78,6 +78,9 @@ export function templateFormatting(source: ICharacter | INumeric | number | stri
     text = source.getEnumName() + "";
   } else if (source instanceof Character) {
     text = source.getTrimEnd();
+  } else if (source instanceof Numc) {
+    // after a character statement n can end with blanks, they are dropped as for c
+    text = source.get().trimEnd();
   } else if (source instanceof DecFloat34) {
     // exact, the value has up to 34 digits
     if (options?.decimals !== undefined) {
@@ -122,11 +125,12 @@ export function templateFormatting(source: ICharacter | INumeric | number | stri
   }
 
   if (options?.alpha === "out") {
-    if (typeof source === "number" || typeof source === "string") {
-      text = text.replace(/^0+/, "");
-    } else {
-      text = alphaOut(source);
+    // the length of the result is WIDTH, else the field length for c and n, else the length of the text
+    let length = source instanceof Character || source instanceof Numc ? source.getLength() : text.length;
+    if (options.width) {
+      length = options.width;
     }
+    text = alphaOutTemplate(text, length);
   } else if (options?.alpha === "in") {
     if (typeof source !== "number" && typeof source !== "string") {
       text = alphaIn(source, options.alphaInContext);
