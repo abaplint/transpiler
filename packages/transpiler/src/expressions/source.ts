@@ -97,6 +97,13 @@ export class SourceTranspiler implements IExpressionTranspiler {
         } else if (c.get() instanceof Expressions.Cond) {
           ret.appendChunk(traversal.traverse(c));
         } else if (c.get() instanceof Expressions.ArithOperator) {
+          // a leading sign belongs to the first operand: - a + b is ( - a ) + b, and the
+          // same for -, *, /, DIV and MOD. It binds weaker than **, - a ** 2 is - ( a ** 2 ),
+          // so there the whole expression stays negated, below
+          if (prefixNegated === true && c.concatTokens().trim() !== "**") {
+            ret = new Chunk().appendString("abap.operators.minus(0, ").appendChunk(ret).appendString(")");
+            prefixNegated = false;
+          }
           // "/" rounds in calculation type int8, the runtime's divide() does not know the target
           const operator = this.int8 === true && c.concatTokens().trim() === "/"
             ? new Chunk().append("abap.operators.divideInt8", c, traversal)
