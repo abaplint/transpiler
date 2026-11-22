@@ -131,8 +131,8 @@ describe("Running expressions - String templates", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-// hmm, something is a bit off?
-    expect(abap.console.get()).to.equal("f = 10.2390000000000008");
+    // 17 significant digits without trailing zeros, as on a system, #2185
+    expect(abap.console.get()).to.equal("f = 10.239000000000001");
   });
 
   it("basic float, integer", async () => {
