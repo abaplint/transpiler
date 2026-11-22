@@ -87,6 +87,12 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
   ${varPrefixed} = ${traversal.toType(identifier.getType())};
   ${varPrefixed}.set(${unique}?.${varName});
 }\n`;
+          } else if (type instanceof abaplint.BasicTypes.XSequenceType) {
+            // only a literal can be character-like here, its content is the bytes: '010203' is x LENGTH 3
+            after += `if (${varPrefixed}?.constructor.name === "Character" || ${varPrefixed}?.constructor.name === "String") {
+  const hex = ${varPrefixed}.get().trimEnd();
+  ${varPrefixed} = new abap.types.Hex({length: Math.max(1, hex.length / 2)}).set(hex);
+}\n`;
           }
 
         } else if (identifier.getMeta().includes(abaplint.IdentifierMeta.MethodImporting)

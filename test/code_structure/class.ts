@@ -960,6 +960,46 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("literal passed to an \"xsequence\" importing parameter is its bytes", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS describe
+      IMPORTING bytes         TYPE xsequence
+      RETURNING VALUE(result) TYPE string.
+    CLASS-METHODS describe_value
+      IMPORTING VALUE(bytes)  TYPE xsequence
+      RETURNING VALUE(result) TYPE string.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD describe.
+    DATA t TYPE c LENGTH 1.
+    DATA second TYPE xstring.
+    DESCRIBE FIELD bytes TYPE t.
+    second = bytes+1(1).
+    result = |{ t } { xstrlen( bytes ) } { second }|.
+  ENDMETHOD.
+  METHOD describe_value.
+    DATA t TYPE c LENGTH 1.
+    DESCRIBE FIELD bytes TYPE t.
+    result = |{ t } { xstrlen( bytes ) } { bytes }|.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA x3 TYPE x LENGTH 3 VALUE '010203'.
+  WRITE / lcl=>describe( x3 ).
+  WRITE / lcl=>describe( '010203' ).
+  WRITE / lcl=>describe( \`ABCD\` ).
+  WRITE / lcl=>describe_value( '010203' ).
+  WRITE / lcl=>describe( bytes = 'A0B1' ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed().split("\n")).to.deep.equal(["X 3 02", "X 3 02", "X 2 CD", "X 3 010203", "X 2 B1"]);
+  });
+
   it("static method with constant default", async () => {
     const code = `
 CLASS lcl_bar DEFINITION.
