@@ -2,6 +2,7 @@ import {INumeric} from "../types/_numeric";
 import {ICharacter} from "../types/_character";
 import {Character, FieldSymbol, String, Table} from "../types";
 import {ABAP} from "..";
+import {setText} from "./_set_text";
 
 declare const abap: ABAP;
 
@@ -21,7 +22,7 @@ function setTarget(target: ICharacter, result: string) {
   if (pointer instanceof Character && result.trimEnd().length > pointer.getLength()) {
     subrc = 4;
   }
-  target.set(result);
+  setText(target, result);
   abap.builtin.sy.get().subrc.set(subrc);
 }
 

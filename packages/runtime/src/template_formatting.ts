@@ -78,6 +78,9 @@ export function templateFormatting(source: ICharacter | INumeric | number | stri
     text = source.getEnumName() + "";
   } else if (source instanceof Character) {
     text = source.getTrimEnd();
+  } else if (source instanceof Numc) {
+    // after a character statement n can end with blanks, they are dropped as for c
+    text = source.get().trimEnd();
   } else if (source instanceof DecFloat34) {
     // exact, the value has up to 34 digits
     if (options?.decimals !== undefined) {
