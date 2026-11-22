@@ -151,9 +151,9 @@ export class Rearranger {
       }
     }
 
-    // fallback: all ** operators
+    // fallback: all ** operators, right-associative: 2 ** 3 ** 2 is 2 ** ( 3 ** 2 )
     if (splitAt === undefined) {
-      splitAt = arith[arith.length - 1];
+      splitAt = arith[0];
     }
 
     const index = children.indexOf(splitAt);
