@@ -227,7 +227,7 @@ export class TranspileTypes {
         extra = "{qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\"}";
       }
     } else if (type instanceof abaplint.BasicTypes.DecFloat16Type) {
-      // the range of decfloat16 is not modelled, and RTTI describes such a field as a decfloat34
+      // the range of decfloat16 is not modelled
       resolved = "DecFloat16";
     } else if (type instanceof abaplint.BasicTypes.DecFloat34Type) {
       resolved = "DecFloat34";
