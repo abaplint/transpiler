@@ -18,10 +18,14 @@ async function run(contents: string) {
     {filename: "zfoobar.prog.abap", contents},
     {filename: "cx_root.clas.abap", contents: exceptionClass("cx_root")},
     {filename: "cx_sy_zerodivide.clas.abap", contents: exceptionClass("cx_sy_zerodivide", "cx_root")},
-    {filename: "cx_sy_conversion_no_number.clas.abap", contents: exceptionClass("cx_sy_conversion_no_number", "cx_root")}]);
+    {filename: "cx_sy_conversion_no_number.clas.abap", contents: exceptionClass("cx_sy_conversion_no_number", "cx_root")},
+    {filename: "cx_sy_arg_out_of_domain.clas.abap", contents: exceptionClass("cx_sy_arg_out_of_domain", "cx_root")},
+    {filename: "cx_sy_arithmetic_overflow.clas.abap", contents: exceptionClass("cx_sy_arithmetic_overflow", "cx_root")}]);
   abap.Classes["CX_ROOT"] = class CxRoot {};
   abap.Classes["CX_SY_ZERODIVIDE"] = class CxSyZerodivide extends abap.Classes["CX_ROOT"] {};
   abap.Classes["CX_SY_CONVERSION_NO_NUMBER"] = class CxSyConversionNoNumber extends abap.Classes["CX_ROOT"] {};
+  abap.Classes["CX_SY_ARG_OUT_OF_DOMAIN"] = class CxSyArgOutOfDomain extends abap.Classes["CX_ROOT"] {};
+  abap.Classes["CX_SY_ARITHMETIC_OVERFLOW"] = class CxSyArithmeticOverflow extends abap.Classes["CX_ROOT"] {};
   const f = new AsyncFunction("abap", js);
   await f(abap);
 }
@@ -66,6 +70,54 @@ lv_r = cosh( lv_a ).
 ASSERT lv_r = '1.5430806348152437'.
 lv_r = tanh( lv_a ).
 ASSERT lv_r = '0.7615941559557649'.`);
+  });
+
+  it("sqrt, log, log10, acos outside their domain, log( 0 ), #2190", async () => {
+    await run(`
+DATA lv_r TYPE f.
+DATA lv_result TYPE string.
+TRY.
+    lv_r = sqrt( -1 ).
+    lv_result = lv_result && 'V'.
+  CATCH cx_sy_arg_out_of_domain.
+    lv_result = lv_result && 'D'.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+TRY.
+    lv_r = log( 0 ).
+    lv_result = lv_result && 'V'.
+  CATCH cx_sy_arg_out_of_domain.
+    lv_result = lv_result && 'D'.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+TRY.
+    lv_r = log( -1 ).
+    lv_result = lv_result && 'V'.
+  CATCH cx_sy_arg_out_of_domain.
+    lv_result = lv_result && 'D'.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+TRY.
+    lv_r = log10( -1 ).
+    lv_result = lv_result && 'V'.
+  CATCH cx_sy_arg_out_of_domain.
+    lv_result = lv_result && 'D'.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+TRY.
+    lv_r = acos( 2 ).
+    lv_result = lv_result && 'V'.
+  CATCH cx_sy_arg_out_of_domain.
+    lv_result = lv_result && 'D'.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+" D = CX_SY_ARG_OUT_OF_DOMAIN, O = CX_SY_ARITHMETIC_OVERFLOW, V = a value
+ASSERT lv_result = 'DODDD'.`);
   });
 
   it("** with a fractional, whole and negative exponent, and ipow( )", async () => {
@@ -249,6 +301,23 @@ lv_a = 2.
 ASSERT |{ lv_a }| = \`2\`.
 lv_a = '1E20'.
 ASSERT |{ lv_a }| = \`100000000000000000000\`.`);
+  });
+
+  it("string templates: 17 significant digits without trailing zeros, #2185", async () => {
+    await run(`
+DATA lv_f TYPE f.
+lv_f = '0.25'.
+ASSERT |{ lv_f }| = \`0.25\`.
+lv_f = '0.1'.
+ASSERT |{ lv_f }| = \`0.10000000000000001\`.
+lv_f = 1 / 3.
+ASSERT |{ lv_f }| = \`0.33333333333333331\`.
+lv_f = '-1234.5'.
+ASSERT |{ lv_f }| = \`-1234.5\`.
+ASSERT |{ lv_f NUMBER = RAW }| = \`-1234.5\`.
+ASSERT |{ lv_f STYLE = SIMPLE }| = \`-1234.5\`.
+lv_f = '1E-10'.
+ASSERT |{ lv_f }| = \`0.0000000001\`.`);
   });
 
   it("COLLECT sums, SORT and READ TABLE WITH KEY on an f component", async () => {

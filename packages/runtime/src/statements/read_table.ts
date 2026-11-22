@@ -1,12 +1,11 @@
 /* eslint-disable max-len */
 import {binarySearchFrom, binarySearchFromRow} from "../binary_search";
 import {eq, ge, gt, lt} from "../compare";
-import {DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Integer8, secondaryKeyName, Structure, Table, TableAccessType, TableRowType} from "../types";
+import {ABAPObject, DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Integer8, secondaryKeyName, Structure, Table, TableAccessType, TableRowType} from "../types";
 import {primaryKeyValues} from "../primary_key";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {ABAP} from "..";
-import {keyAsComponentType} from "../compare/_numc";
 
 declare const abap: ABAP;
 
@@ -132,6 +131,29 @@ function toRow(a: any, isStructured: boolean, usesTableLine: boolean | undefined
     return a.get();
   }
   return isStructured ? {table_line: a, ...a.get()} : {table_line: a};
+}
+
+function isElementary(value: any): boolean {
+  return typeof value?.clone === "function" && !(value instanceof Structure) && !(value instanceof Table)
+    && !(value instanceof HashedTable) && !(value instanceof DataReference) && !(value instanceof ABAPObject);
+}
+
+/** a key value is converted to the type of its component: 'ABX' for a c LENGTH 2 component is 'AB', 42 for an
+ *  n LENGTH 4 component is '0042', a text for an n component loses its letters. A value of the same type and
+ *  length, and a component or value that is not elementary, are used as they are */
+function keyAsComponentType(component: any, value: any): any {
+  const operand = value instanceof FieldSymbol ? value.getPointer() : value;
+  if (isElementary(component) === false) {
+    return value;
+  } else if (typeof operand === "string") {
+    return component.clone().set(operand);
+  } else if (isElementary(operand) === false
+      || (operand.constructor === component.constructor
+        && operand.getLength?.() === component.getLength?.()
+        && operand.getDecimals?.() === component.getDecimals?.())) {
+    return value;
+  }
+  return component.clone().set(operand);
 }
 
 /** the key values converted to the types of their components, as ABAP converts them before
