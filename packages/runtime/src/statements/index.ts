@@ -25,7 +25,7 @@ import {unpack} from "./unpack";
 import {getParameter, setParameter} from "./get_parameter";
 import {exportCluster, importCluster} from "./data_cluster";
 import {setLocale} from "./set_locale";
-import {getRunTime} from "./get_run_time";
+import {getRunTime, setRunTimeClock} from "./get_run_time";
 import {getTime} from "./get_time";
 import {IInsertDatabaseOptions, insertDatabase} from "./insert_database";
 import {insertInternal} from "./insert_internal";
@@ -119,6 +119,10 @@ export class Statements {
 
   public getRunTime(value: INumeric) {
     getRunTime(this.context, value);
+  }
+
+  public setRunTimeClock(resolution: "HIGH" | "LOW") {
+    setRunTimeClock(this.context, resolution);
   }
 
   public async openCursor(target: INumeric, select: string, options: IOpenCursorDatabaseOptions) {

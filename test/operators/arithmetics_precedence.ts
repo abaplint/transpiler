@@ -111,4 +111,29 @@ WRITE i.`;
     expect(abap.console.get()).to.equal("3000");
   });
 
+  it("power is right-associative", async () => {
+    const code = `
+DATA f TYPE f.
+DATA two TYPE i VALUE 2.
+DATA three TYPE i VALUE 3.
+f = 2 ** 3 ** 2.
+WRITE / |{ f }|.
+f = two ** three ** two.
+WRITE / |{ f }|.
+f = 2 ** 2 ** 3 * 2.
+WRITE / |{ f }|.
+f = 1 + 2 ** 3 ** 2.
+WRITE / |{ f }|.
+f = ( 2 ** 3 ) ** 2.
+WRITE / |{ f }|.
+f = 2 ** 1 ** 2 ** 3.
+WRITE / |{ f }|.
+f = - two ** three ** two.
+WRITE / |{ f }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed().split("\n")).to.deep.equal(["512", "512", "512", "513", "64", "2", "-512"]);
+  });
+
 });
