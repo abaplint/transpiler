@@ -349,7 +349,7 @@ ASSERT |{ lv_f STYLE = ENGINEERING }| = \`15E-201\`.`);
     const format = (value: number, options: object) => {
       const f = new abap.types.Float();
       f.set(value);
-      return abap.templateFormatting(f, options as any);
+      return abap.templateFormatting(f as any, options as any);
     };
     expect(format(-1234.5, {style: "engineering", decimals: 2})).to.equal("-1.23E+03");
     expect(format(0.25, {style: "engineering", decimals: 2})).to.equal("250.00E-03");
