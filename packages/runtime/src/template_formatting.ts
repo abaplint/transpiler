@@ -1,5 +1,5 @@
-import {alphaIn, alphaOut} from "./alpha";
-import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Integer, Packed, String, Structure, Table} from "./types";
+import {alphaIn, alphaOutTemplate} from "./alpha";
+import {ABAPObject, Character, DecFloat34, FieldSymbol, Float, HashedTable, Integer, Integer8, Numc, Packed, String, Structure, Table} from "./types";
 import {ICharacter} from "./types/_character";
 import {INumeric} from "./types/_numeric";
 import {decimalToFixed} from "./types/_decimal";
@@ -15,11 +15,12 @@ type options = {
   style?: any,
   alpha?: "out" | "in",
   alphaInContext?: any,
-  align?: "left" | "right",
+  align?: "left" | "right" | "center",
+  sign?: "left" | "leftplus" | "leftspace" | "right" | "rightplus" | "rightspace",
 };
 
 // an f that is not a whole number is written with 17 significant digits, without trailing zeros
-// and without an exponent, as on a system: 0.25 is 0.25, 0.1 is 0.10000000000000001
+// and without an exponent, as ABAP is expected to do: 0.25 is 0.25, 0.1 is 0.10000000000000001
 function floatToText(raw: number): string {
   const [mantissa, exponentText] = raw.toPrecision(17).toLowerCase().split("e");
   const exponent = exponentText === undefined ? 0 : parseInt(exponentText, 10);
@@ -38,6 +39,47 @@ function floatToText(raw: number): string {
     .replace(/\.$/, "")
     .replace(/^0+(?=\d)/, "");
   return (negative ? "-" : "") + text;
+}
+
+/** a number given as plain decimal text, ie. "-1234567.89", in scientific notation with the
+ * digits it needs and a two digit exponent: "-1.23456789E+06". Exact, the text is not parsed */
+function scientific(text: string): string {
+  const negative = text.startsWith("-");
+  const [integer, fraction = ""] = (negative ? text.substring(1) : text).split(".");
+  const significant = integer.replace(/^0+/, "");
+  const exponent = significant.length > 0
+    ? significant.length - 1
+    : -(fraction.length - fraction.replace(/^0+/, "").length + 1);
+  const digits = (integer + fraction).replace(/^0+/, "").replace(/0+$/, "");
+  if (digits === "") {
+    return "0E+00";
+  }
+  const mantissa = digits.length > 1 ? digits[0] + "." + digits.substring(1) : digits;
+  return (negative ? "-" : "") + mantissa + "E" + (exponent < 0 ? "-" : "+") + Math.abs(exponent).toString().padStart(2, "0");
+}
+
+/** SIGN: where the sign goes, and whether a positive number gets a plus sign */
+function applySign(text: string, sign: string): string {
+  const negative = text.startsWith("-");
+  const absolute = negative ? text.substring(1) : text;
+  switch (sign) {
+    case "leftplus":
+      return (negative ? "-" : "+") + absolute;
+    case "right":
+      return absolute + (negative ? "-" : "");
+    case "rightplus":
+      return absolute + (negative ? "-" : "+");
+    default:
+      return text;
+  }
+}
+
+function isNumeric(source: unknown): boolean {
+  return source instanceof Integer
+    || source instanceof Integer8
+    || source instanceof Packed
+    || source instanceof Float
+    || source instanceof DecFloat34;
 }
 
 export function templateFormatting(source: ICharacter | INumeric | number | string, options?: options): string {
@@ -67,7 +109,9 @@ export function templateFormatting(source: ICharacter | INumeric | number | stri
     }
   } else if (source instanceof Float) {
     const raw = source.getRaw();
-    if (options?.style === "scientific") {
+    if (options?.decimals !== undefined) {
+      text = raw.toFixed(options.decimals);
+    } else if (options?.style === "scientific") {
       text = raw.toExponential().toUpperCase();
       text = text.replace(/([+-])(\d)$/, "$10$2");
     } else if (Number.isInteger(raw)) {
@@ -78,9 +122,21 @@ export function templateFormatting(source: ICharacter | INumeric | number | stri
   } else if (source instanceof Packed) {
     if (options?.decimals !== undefined) {
       text = source.toFixed(options.decimals);
+    } else if (options?.style === "scientific") {
+      text = scientific(source.toFixed(source.getDecimals()));
     } else {
       text = source.toFixed(source.getDecimals());
     }
+  } else if (source instanceof Integer) {
+    if (options?.decimals !== undefined) {
+      text = source.get().toFixed(options.decimals);
+    } else if (options?.style === "scientific") {
+      text = scientific(source.get() + "");
+    } else {
+      text = source.get() + "";
+    }
+  } else if (source instanceof Integer8 && options?.style === "scientific") {
+    text = scientific(source.get() + "");
   } else if (typeof source === "number" || typeof source === "string") {
     text = source + "";
   } else {
@@ -88,11 +144,12 @@ export function templateFormatting(source: ICharacter | INumeric | number | stri
   }
 
   if (options?.alpha === "out") {
-    if (typeof source === "number" || typeof source === "string") {
-      text = text.replace(/^0+/, "");
-    } else {
-      text = alphaOut(source);
+    // the length of the result is WIDTH, else the field length for c and n, else the length of the text
+    let length = source instanceof Character || source instanceof Numc ? source.getLength() : text.length;
+    if (options.width) {
+      length = options.width;
     }
+    text = alphaOutTemplate(text, length);
   } else if (options?.alpha === "in") {
     if (typeof source !== "number" && typeof source !== "string") {
       text = alphaIn(source, options.alphaInContext);
@@ -147,18 +204,23 @@ export function templateFormatting(source: ICharacter | INumeric | number | stri
       if (text === "0--T::") {
         text = "0000-00-00T00:00:00";
       }
-    } else if (options.width && options.pad) {
-      if (options.align === "right") {
-        text = text.padStart(options.width, options.pad);
-      } else {
-        text = text.padEnd(options.width, options.pad);
+    } else {
+      if (options.sign !== undefined && isNumeric(source)) {
+        text = applySign(text, options.sign);
       }
-    } else if (options.width) {
-      text = text.padEnd(options.width, " ");
-    } else if (options.decimals !== undefined && source instanceof Integer) {
-      text = source.get().toFixed(options.decimals);
-    } else if (options.decimals !== undefined && source instanceof Float) {
-      text = source.getRaw().toFixed(options.decimals);
+      if (options.width) {
+        // ALIGN places the text in the WIDTH, PAD fills the rest, a blank by default
+        const pad = options.pad ?? " ";
+        const fill = options.width - text.length;
+        if (options.align === "right") {
+          text = text.padStart(options.width, pad);
+        } else if (options.align === "center" && fill > 0) {
+          const left = Math.floor(fill / 2);
+          text = pad.repeat(left) + text + pad.repeat(fill - left);
+        } else {
+          text = text.padEnd(options.width, pad);
+        }
+      }
     }
   }
 

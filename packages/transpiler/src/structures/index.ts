@@ -23,6 +23,7 @@ export * from "./method";
 export * from "./try";
 export * from "./type_enum";
 export * from "./types";
+export * from "./type_mesh";
 export * from "./when";
 export * from "./while";
 export * from "./with";
