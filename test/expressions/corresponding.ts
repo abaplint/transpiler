@@ -545,4 +545,83 @@ WRITE / lines( t2 ).`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("table, BASE keeps the base rows and appends the source rows", async () => {
+    const code = `
+TYPES: BEGIN OF ty1,
+         a TYPE i,
+       END OF ty1.
+TYPES: BEGIN OF ty2,
+         a TYPE i,
+         b TYPE i,
+       END OF ty2.
+DATA t1 TYPE STANDARD TABLE OF ty1 WITH EMPTY KEY.
+DATA t2 TYPE STANDARD TABLE OF ty2 WITH EMPTY KEY.
+DATA row TYPE ty2.
+t1 = VALUE #( ( a = 1 ) ).
+t2 = VALUE #( ( a = 5 b = 6 ) ).
+t2 = CORRESPONDING #( BASE ( t2 ) t1 ).
+LOOP AT t2 INTO row.
+  WRITE / row-a.
+  WRITE / row-b.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("5\n6\n1\n0");
+  });
+
+  it("table, BASE with MAPPING, and BASE into the shorter row type", async () => {
+    const code = `
+TYPES: BEGIN OF ty1,
+         a TYPE i,
+       END OF ty1.
+TYPES: BEGIN OF ty2,
+         a TYPE i,
+         b TYPE i,
+       END OF ty2.
+DATA t1 TYPE STANDARD TABLE OF ty1 WITH EMPTY KEY.
+DATA t2 TYPE STANDARD TABLE OF ty2 WITH EMPTY KEY.
+DATA row TYPE ty2.
+t1 = VALUE #( ( a = 1 ) ).
+t2 = VALUE #( ( a = 5 b = 6 ) ( a = 1 b = 0 ) ).
+t2 = CORRESPONDING #( BASE ( t2 ) t1 MAPPING b = a ).
+WRITE / lines( t2 ).
+LOOP AT t2 INTO row.
+  WRITE / row-a.
+  WRITE / row-b.
+ENDLOOP.
+t1 = CORRESPONDING #( BASE ( t1 ) t2 ).
+WRITE / lines( t1 ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3\n5\n6\n1\n0\n1\n1\n4");
+  });
+
+  it("table, BASE into a sorted target", async () => {
+    const code = `
+TYPES: BEGIN OF ty1,
+         a TYPE i,
+         b TYPE i,
+       END OF ty1.
+TYPES: BEGIN OF ty2,
+         a TYPE i,
+         c TYPE i,
+       END OF ty2.
+DATA t1 TYPE STANDARD TABLE OF ty1 WITH EMPTY KEY.
+DATA t2 TYPE SORTED TABLE OF ty2 WITH UNIQUE KEY a.
+DATA row TYPE ty2.
+t1 = VALUE #( ( a = 1 b = 2 ) ( a = 3 b = 4 ) ).
+t2 = VALUE #( ( a = 9 c = 9 ) ).
+t2 = CORRESPONDING #( BASE ( t2 ) t1 ).
+LOOP AT t2 INTO row.
+  WRITE / row-a.
+  WRITE / row-c.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n0\n3\n0\n9\n9");
+  });
+
 });
