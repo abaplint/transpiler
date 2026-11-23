@@ -1,6 +1,6 @@
 import {INumeric} from "../types/_numeric";
 import {ICharacter} from "../types/_character";
-import {Character, FieldSymbol, String, Table} from "../types";
+import {Character, FieldSymbol, Hex, String, Table, XString} from "../types";
 import {ABAP} from "..";
 import {setText} from "./_set_text";
 
@@ -102,9 +102,19 @@ function rawByteValue(source: number | string | INumeric | ICharacter): string {
   }
 }
 
+// the value of an xstring or x field is hexadecimal digits already, uppercase and even in number
+function isHex(source: unknown): boolean {
+  const value = source instanceof FieldSymbol ? source.getPointer() : source;
+  return value instanceof XString || value instanceof Hex;
+}
+
 function concatenateByteMode(input: IConcatenateInput) {
 
   let sep = "";
+  // when every part is an xstring or an x field, the result needs no check for an
+  // xstring target; XString.set( ) checks the whole string, so appending to an
+  // xstring in a loop took time in the square of its length
+  let hex = input.separatedBy === undefined || isHex(input.separatedBy);
   if (input.separatedBy !== undefined) {
     sep = rawByteValue(input.separatedBy);
   }
@@ -115,6 +125,7 @@ function concatenateByteMode(input: IConcatenateInput) {
     const tab = input.source[0];
     if (tab instanceof Table) {
       for (const l of tab.array()) {
+        hex = hex && isHex(l);
         result += l.get().toString() + sep;
       }
     }
@@ -123,6 +134,7 @@ function concatenateByteMode(input: IConcatenateInput) {
       if (source instanceof Table) {
         throw new Error("concatenate, error: input is table");
       }
+      hex = hex && isHex(source);
       result += rawByteValue(source) + sep;
     }
   }
@@ -131,5 +143,11 @@ function concatenateByteMode(input: IConcatenateInput) {
     result = result.slice(0, result.length - sep.length);
   }
 
+  const target = input.target instanceof FieldSymbol ? input.target.getPointer() : input.target;
+  if (hex === true && target instanceof XString) {
+    target.setHex(result);
+    abap.builtin.sy.get().subrc.set(0);
+    return;
+  }
   setTarget(input.target, result);
 }

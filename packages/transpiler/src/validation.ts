@@ -160,12 +160,12 @@ export class Validation {
     const conf = new Config(JSON.stringify(config));
     reg.setConfig(conf);
     const issues = reg.findIssues();
-    return issues.filter(i => i.getKey() !== "ambiguous_statement" || this.isInternalTableStatement(reg, i) === false);
+    return issues.filter(i => i.getKey() !== "ambiguous_statement" || this.isUnambiguous(reg, i) === false);
   }
 
-  /** "MODIFY itab FROM wa", "MODIFY itab", "DELETE itab." and "DELETE itab FROM n." read like the database statements,
-   * so abaplint calls them ambiguous; they are not when itab is an internal table */
-  private isInternalTableStatement(reg: IRegistry, issue: Issue): boolean {
+  /** DELETE name., DELETE name FROM x., MODIFY name. and MODIFY name FROM x. read two ways, so abaplint calls them
+   * ambiguous. ABAP decides by the name: a variable of table type is the internal table, anything else the database table */
+  private isUnambiguous(reg: IRegistry, issue: Issue): boolean {
     const file = reg.getFileByName(issue.getFilename());
     const obj = file ? reg.findObjectForFile(file) : undefined;
     if (!(obj instanceof ABAPObject)) {
@@ -187,7 +187,10 @@ export class Validation {
       this.scopes.set(obj, spaghetti);
     }
     const variable = spaghetti.lookupPosition(token.getStart(), issue.getFilename())?.findVariable(token.getStr());
-    return variable?.getType() instanceof BasicTypes.TableType;
+    if (variable?.getType() instanceof BasicTypes.TableType) {
+      return true;
+    }
+    return variable !== undefined || statement.findExpressionAfterToken("FROM") !== undefined;
   }
 
 }
