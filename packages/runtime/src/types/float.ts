@@ -71,6 +71,11 @@ export class Float {
 
   public set(value: INumeric | ICharacter | Hex | string | number) {
     if (typeof value === "number") {
+      // every f calculation builds its result here, a result beyond the double range is an
+      // overflow, and the target keeps its old value
+      if (value === Infinity || value === -Infinity) {
+        throwError("CX_SY_ARITHMETIC_OVERFLOW");
+      }
       this.value = value;
     } else if (typeof value === "string" && value.trim().length === 0) {
       this.value = 0;

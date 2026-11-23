@@ -121,6 +121,71 @@ ENDTRY.
 ASSERT lv_result = 'DODDD'.`);
   });
 
+  it("f result beyond the double range raises CX_SY_ARITHMETIC_OVERFLOW, target unchanged, #2188", async () => {
+    await run(`
+DATA lv_f TYPE f.
+DATA lv_r TYPE f.
+DATA lv_i TYPE i.
+DATA lv_result TYPE string.
+lv_f = '1E308'.
+lv_r = 5.
+TRY.
+    lv_r = lv_f * 10.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+TRY.
+    lv_r = exp( 1000 ).
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+TRY.
+    lv_r = lv_f + lv_f.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+TRY.
+    lv_r = - lv_f - lv_f.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+TRY.
+    lv_r = lv_f / '0.01'.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+TRY.
+    lv_r = lv_f ** 2.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+TRY.
+    lv_r = lv_f * 10 / 100.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+ASSERT lv_r = 5.
+lv_i = 5.
+TRY.
+    lv_i = lv_f * 10.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+ASSERT lv_i = 5.
+lv_r = lv_f.
+TRY.
+    MULTIPLY lv_r BY 10.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+ASSERT lv_r = lv_f.
+ASSERT lv_result = 'OOOOOOOOO'.
+" a result below the smallest double is 0, not an exception
+lv_f = '1E-300'.
+lv_r = lv_f * lv_f.
+ASSERT lv_r = 0.`);
+  });
+
   it("** with a fractional, whole and negative exponent, and ipow( )", async () => {
     await run(`
 DATA lv_a TYPE f.
