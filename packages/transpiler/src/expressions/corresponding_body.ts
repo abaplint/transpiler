@@ -24,31 +24,19 @@ export class CorrespondingBodyTranspiler {
     if (genericTarget !== undefined && type.isGeneric() === true) {
       return this.transpileGeneric(body, traversal, genericTarget);
     }
+    const {source, base, mapping} = this.parseBody(body, traversal);
     let target = traversal.toType(type);
-    let source: Chunk | undefined;
-    const isTableType = type instanceof BasicTypes.TableType;
-    const mapping: mappingType[] = [];
-
-    for (const child of body.getChildren()) {
-      const c = child.get();
-      if (c instanceof Expressions.Source && child instanceof Nodes.ExpressionNode) {
-        source = traversal.traverse(child);
-      } else if (c instanceof Expressions.CorrespondingBodyBase && child instanceof Nodes.ExpressionNode) {
-        source = traversal.traverse(child?.findDirectExpression(Expressions.Source));
-        target = `abap.statements.moveCorresponding(${source!.getCode()}, ${target})`;
-      } else if (c instanceof Expressions.CorrespondingBodyMapping && child instanceof Nodes.ExpressionNode) {
-        mapping.push(...this.parseMapping(child));
-      } else {
-        throw new Error("CorrespondingBodyTranspiler, todo, " + c.constructor.name + ", " + body.concatTokens());
-      }
+    if (base !== undefined) {
+      target = `abap.statements.moveCorresponding(${base.getCode()}, ${target})`;
     }
+    const isTableType = type instanceof BasicTypes.TableType;
 
     const ret = new Chunk();
     const id = UniqueIdentifier.get();
     const sourceId = UniqueIdentifier.get();
     ret.appendString("(await (async () => {\n");
     ret.appendString(`const ${id} = ${target};\n`);
-    ret.appendString(`const ${sourceId} = ${source!.getCode()};\n`);
+    ret.appendString(`const ${sourceId} = ${source.getCode()};\n`);
 
     if (isTableType) {
       const rowTargetType = traversal.toType(type.getRowType());
@@ -73,22 +61,7 @@ export class CorrespondingBodyTranspiler {
 
   /** the type is only known at runtime, it is taken from the target, a table or a structure */
   private transpileGeneric(body: Nodes.ExpressionNode, traversal: Traversal, genericTarget: string): Chunk {
-    let source: Chunk | undefined;
-    let base: Chunk | undefined;
-    const mapping: mappingType[] = [];
-
-    for (const child of body.getChildren()) {
-      const c = child.get();
-      if (c instanceof Expressions.Source && child instanceof Nodes.ExpressionNode) {
-        source = traversal.traverse(child);
-      } else if (c instanceof Expressions.CorrespondingBodyBase && child instanceof Nodes.ExpressionNode) {
-        base = traversal.traverse(child.findDirectExpression(Expressions.Source));
-      } else if (c instanceof Expressions.CorrespondingBodyMapping && child instanceof Nodes.ExpressionNode) {
-        mapping.push(...this.parseMapping(child));
-      } else {
-        throw new Error("CorrespondingBodyTranspiler, todo, " + c.constructor.name + ", " + body.concatTokens());
-      }
-    }
+    const {source, base, mapping} = this.parseBody(body, traversal);
 
     const ret = new Chunk();
     const id = UniqueIdentifier.get();
@@ -102,7 +75,7 @@ export class CorrespondingBodyTranspiler {
     if (base !== undefined) {
       ret.appendString(`${id}.set(${base.getCode()});\n`);
     }
-    ret.appendString(`const ${sourceId} = ${source!.getCode()};\n`);
+    ret.appendString(`const ${sourceId} = ${source.getCode()};\n`);
     ret.appendString(`if (${id} instanceof abap.types.Table || ${id} instanceof abap.types.HashedTable) {\n`);
     ret.appendString(`for (const ${sourceRowId} of ${sourceId}.array()) {\n`);
     ret.appendString(`const ${targetRowId} = ${id}.getRowType().clone();\n`);
@@ -121,19 +94,34 @@ export class CorrespondingBodyTranspiler {
     return ret;
   }
 
-  private parseMapping(node: Nodes.ExpressionNode): mappingType[] {
+  private parseBody(body: Nodes.ExpressionNode, traversal: Traversal) {
+    let source: Chunk | undefined;
+    let base: Chunk | undefined;
     const mapping: mappingType[] = [];
-    let mappingRow: mappingType = {componentName: undefined, componentChain: undefined};
-    for (const cc of node.getChildren()) {
-      if (cc.get() instanceof Expressions.ComponentName) {
-        mappingRow.componentName = cc as Nodes.ExpressionNode;
-      } else if (cc.get() instanceof Expressions.ComponentChain) {
-        mappingRow.componentChain = cc as Nodes.ExpressionNode;
-        mapping.push(mappingRow);
-        mappingRow = {componentName: undefined, componentChain: undefined};
+
+    for (const child of body.getChildren()) {
+      const c = child.get();
+      if (c instanceof Expressions.Source && child instanceof Nodes.ExpressionNode) {
+        source = traversal.traverse(child);
+      } else if (c instanceof Expressions.CorrespondingBodyBase && child instanceof Nodes.ExpressionNode) {
+        base = traversal.traverse(child.findDirectExpression(Expressions.Source));
+      } else if (c instanceof Expressions.CorrespondingBodyMapping && child instanceof Nodes.ExpressionNode) {
+        let mappingRow: mappingType = {componentName: undefined, componentChain: undefined};
+        for (const cc of child.getChildren()) {
+          if (cc.get() instanceof Expressions.ComponentName) {
+            mappingRow.componentName = cc as Nodes.ExpressionNode;
+          } else if (cc.get() instanceof Expressions.ComponentChain) {
+            mappingRow.componentChain = cc as Nodes.ExpressionNode;
+            mapping.push(mappingRow);
+            mappingRow = {componentName: undefined, componentChain: undefined};
+          }
+        }
+      } else {
+        throw new Error("CorrespondingBodyTranspiler, todo, " + c.constructor.name + ", " + body.concatTokens());
       }
     }
-    return mapping;
+
+    return {source: source!, base, mapping};
   }
 
   private mappingCode(mapping: mappingType[], targetId: string, sourceId: string, traversal: Traversal): string {
