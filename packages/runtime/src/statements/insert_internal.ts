@@ -6,6 +6,23 @@ import {ABAP} from "..";
 
 declare const abap: ABAP;
 
+/** true when the row has the key of a row already in the table, for one of its unique secondary keys */
+export function duplicateSecondaryKey(table: Table | HashedTable, row: any): boolean {
+  const unique = (table.getOptions()?.secondary ?? []).filter(k => k.isUnique === true);
+  if (unique.length === 0) {
+    return false;
+  }
+  const value = row instanceof FieldSymbol ? row.getPointer() : row;
+  return unique.some(k => table.array().some(existing => compareRows(existing, value, k.keyFields) === 0));
+}
+
+function duplicateKey(): never {
+  if (abap.Classes["CX_SY_ITAB_DUPLICATE_KEY"] !== undefined) {
+    throw new abap.Classes["CX_SY_ITAB_DUPLICATE_KEY"]();
+  }
+  throw new Error("ITAB_DUPLICATE_KEY");
+}
+
 export interface IInsertInternalOptions {
   index?: INumeric,
   initial?: boolean,
@@ -31,6 +48,12 @@ export function insertInternal(options: IInsertInternalOptions): void {
       throw new Error("GETWA_NOT_ASSIGNED");
     }
     options.data = options.data.getPointer();
+  }
+
+  // a duplicate of a unique secondary key is not inserted: CX_SY_ITAB_DUPLICATE_KEY
+  if (options.lines !== true && options.initial !== true && options.data !== undefined
+      && duplicateSecondaryKey(options.table, options.data)) {
+    duplicateKey();
   }
 
   let data = options.data;
@@ -88,6 +111,15 @@ export function insertInternal(options: IInsertInternalOptions): void {
         const result = options.table.insert(source);
         if (result.subrc !== 0) {
           throw new Error("ITAB_DUPLICATE_KEY");
+        }
+      }
+    } else if (options.table.getOptions()?.primaryKey?.type === TableAccessType.sorted) {
+      // into a sorted table: the block goes in front of the rows with the same key, in its own order
+      const key = options.table.getOptions().primaryKey!;
+      for (const source of [...options.data.array()].reverse()) {
+        const result = options.table.insertSorted(source, (a, b) => compareRows(a, b, key.keyFields), key.isUnique === true);
+        if (result.subrc !== 0) {
+          duplicateKey();
         }
       }
     } else {
