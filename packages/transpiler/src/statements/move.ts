@@ -3,6 +3,8 @@ import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {SourceTranspiler} from "../expressions/source";
+import {TypeNameOrInfer} from "../expressions/type_name_or_infer";
+import {CorrespondingBodyTranspiler} from "../expressions/corresponding_body";
 
 export class MoveTranspiler implements IStatementTranspiler {
 
@@ -29,11 +31,16 @@ export class MoveTranspiler implements IStatementTranspiler {
       return ret;
     }
 
-    let source = this.isInt8Calculation(node, sourceExpression, targetExpressions.length, traversal)
-      ? new SourceTranspiler(false, true).transpile(sourceExpression!, traversal)
-      : traversal.traverse(sourceExpression);
-
     const second = node.getChildren()[1]?.concatTokens();
+    let source = second === "=" && targetExpressions.length === 1
+      ? this.correspondingGeneric(sourceExpression, targets[0], traversal)
+      : undefined;
+    if (source === undefined) {
+      source = this.isInt8Calculation(node, sourceExpression, targetExpressions.length, traversal)
+        ? new SourceTranspiler(false, true).transpile(sourceExpression!, traversal)
+        : traversal.traverse(sourceExpression);
+    }
+
     switch (second) {
       case "?=":
         ret.appendString("await abap.statements.cast(")
@@ -95,6 +102,24 @@ export class MoveTranspiler implements IStatementTranspiler {
     }
 
     return ret;
+  }
+
+  // "target = CORRESPONDING #( ... )" with a generic target, eg. "CHANGING ct TYPE STANDARD TABLE",
+  // the type of the result is only known at runtime, so the target is passed on
+  private correspondingGeneric(source: abaplint.Nodes.ExpressionNode | undefined, target: Chunk,
+                               traversal: Traversal): Chunk | undefined {
+    const children = source?.getChildren() || [];
+    const typ = source?.findDirectExpression(abaplint.Expressions.TypeNameOrInfer);
+    const body = source?.findDirectExpression(abaplint.Expressions.CorrespondingBody);
+    if (children.length !== 5
+        || children[0].concatTokens().toUpperCase() !== "CORRESPONDING"
+        || typ === undefined
+        || typ.concatTokens() !== "#"
+        || body === undefined
+        || new TypeNameOrInfer().findTypeOrUndefined(typ, traversal)?.isGeneric() !== true) {
+      return undefined;
+    }
+    return new CorrespondingBodyTranspiler().transpile(typ, body, traversal, target.getCode());
   }
 
   // The calculation type of an arithmetic expression comes from its operands and the target
