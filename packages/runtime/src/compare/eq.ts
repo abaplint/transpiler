@@ -2,9 +2,10 @@
 import {ABAPObject, Character, Date, DecFloat34, FieldSymbol, Float, HashedTable, String, Hex, Integer, Numc, Structure, Table, DataReference, toInteger, XString, Integer8, Packed, HexUInt8, Time} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
-import {parse} from "../operators/_parse";
 import {compareDecFloat34} from "../operators/_decfloat";
 import {compareDecimal} from "../types/_decimal";
+import {int8Operand} from "./_int8";
+import {compareNumc} from "./_numc";
 
 function compareTables(left: Table | HashedTable, right: Table | HashedTable): boolean {
   const leftArray = left.array();
@@ -93,7 +94,7 @@ export function eq(
       } else {
         return (left as Character).getTrimEnd() === (right as Character).getTrimEnd();
       }
-    } else if (leftConstructor === NumcC) {
+    } else if (leftConstructor === NumcC && (left as Numc).getLength() === (right as Numc).getLength()) {
       return (left as Numc).get() === (right as Numc).get();
     } else if (leftConstructor === DateC) {
       return (left as Date).get() === (right as Date).get();
@@ -139,14 +140,17 @@ export function eq(
     return eq(left.getPointer()!, right);
   }
 
+  const numc = compareNumc(left, right);
+  if (numc !== undefined) {
+    return numc === 0;
+  }
+
   if (left instanceof Integer8 || right instanceof Integer8) {
     if (left instanceof Table || left instanceof HashedTable || right instanceof Table || right instanceof HashedTable) {
       // exception?
       return false;
     }
-    const l = left instanceof Integer8 ? left.get() : BigInt(parse(left as any));
-    const r = right instanceof Integer8 ? right.get() : BigInt(parse(right as any));
-    return l === r;
+    return int8Operand(left) === int8Operand(right);
   }
 
 // for performance, do the typicaly/easy cases first
