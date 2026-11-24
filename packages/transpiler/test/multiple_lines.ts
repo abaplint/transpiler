@@ -31,6 +31,25 @@ describe("Multiple lines", () => {
     expect(await runSingle(abap)).to.include(`throw new Error("CATCH SYSTEM-EXCEPTIONS, not supported, transpiler");`);
   });
 
+  it("PROVIDE, runtime error", async () => {
+    const abap = `
+    PROVIDE FIELDS * FROM lt_tab INTO ls_tab VALID lv_flag BOUNDS begda AND endda
+      BETWEEN lv_begda AND lv_endda.
+      WRITE ls_tab-begda.
+    ENDPROVIDE.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("PROVIDE, not supported, transpiler");`);
+  });
+
+  it("LOOP over an extract dataset, runtime error", async () => {
+    const abap = `
+    LOOP.
+      WRITE 'a'.
+    ENDLOOP.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("LOOP over extract, not supported, transpiler");`);
+  });
+
   it("EXEC SQL, runtime error", async () => {
     const abap = `
     EXEC SQL.
@@ -38,6 +57,15 @@ describe("Multiple lines", () => {
     ENDEXEC.`;
 
     expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("EXEC SQL, not supported, transpiler");`);
+  });
+
+  it("CHAIN, runtime error", async () => {
+    const abap = `
+    CHAIN.
+      FIELD foo MODULE check_foo.
+    ENDCHAIN.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("CHAIN, not supported, transpiler");`);
   });
 
   it("AMDP method with native SQL, runtime error", async () => {
@@ -60,6 +88,22 @@ ENDCLASS.`;
     const abap = `SELECT SINGLE FOR UPDATE * FROM t100 INTO ls_result.`;
 
     expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("SELECT SINGLE FOR UPDATE, not supported, transpiler");`);
+  });
+
+  it("WITH, runtime error", async () => {
+    const abap = `
+    WITH +cte AS ( SELECT field FROM ztab ) SELECT field FROM +cte INTO TABLE @lt_result.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true, skipVersionCheck: true})).to.equal(`throw new Error("WITH, not supported, transpiler");`);
+  });
+
+  it("WITH ... ENDWITH, runtime error", async () => {
+    const abap = `
+    WITH +cte AS ( SELECT field FROM ztab ) SELECT field FROM +cte INTO @DATA(lv_field).
+      WRITE lv_field.
+    ENDWITH.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true, skipVersionCheck: true})).to.include(`throw new Error("WITH, not supported, transpiler");`);
   });
 
   it("Interfaces should not be skipped", async () => {
@@ -86,6 +130,20 @@ abap.Classes['PROG-ZFOOBAR-LIF_FOOBAR'] = lif_foobar;`;
   END OF ty_header.`;
 
     expect(await runSingle(abap)).to.equal("");
+  });
+
+  it("TYPES BEGIN OF MESH should be skipped", async () => {
+    const abap = `
+    TYPES: BEGIN OF ty_line,
+             key TYPE i,
+           END OF ty_line.
+    TYPES ty_tab TYPE SORTED TABLE OF ty_line WITH UNIQUE KEY key.
+    TYPES: BEGIN OF MESH ty_mesh,
+             node1 TYPE ty_tab ASSOCIATION to_node2 TO node2 ON key = key,
+             node2 TYPE ty_tab,
+           END OF MESH ty_mesh.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true, skipVersionCheck: true})).to.equal(``);
   });
 
   it("Simple class, 1", async () => {
@@ -240,7 +298,7 @@ END OF foo.
 DATA moo TYPE foo.`;
 
     const expected = `let moo = new abap.types.Structure({
-"bar": new abap.types.Character(1, {"qualifiedName":"foo-bar"})}, "foo", undefined, {}, {});`;
+"bar": new abap.types.Character(1, {"qualifiedName":"foo-bar"})}, "foo");`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
@@ -253,7 +311,7 @@ DATA moo TYPE foo.`;
 
 // hmm, the qualified name is wrong?
     const expected = `let moo = new abap.types.Structure({
-"bar": new abap.types.Character(1, {"qualifiedName":"ABAP_BOOL","ddicName":"ABAP_BOOL"})}, "foo", undefined, {}, {});`;
+"bar": new abap.types.Character(1, {"qualifiedName":"ABAP_BOOL","ddicName":"ABAP_BOOL"})}, "foo");`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
@@ -525,6 +583,17 @@ lcl_bar.foo = new abap.types.Integer({qualifiedName: "I"});`;
     expect(await runSingle(abap)).to.equal(expected);
   });
 
+  it("STATICS BEGIN OF, runtime error", async () => {
+    const abap = `
+    FORM foo.
+      STATICS: BEGIN OF ls_static,
+        field TYPE i,
+      END OF ls_static.
+    ENDFORM.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("STATICS, not supported, transpiler");`);
+  });
+
   it("Escape class constants", async () => {
     const abap = `
   CLASS lcl_bar DEFINITION.
@@ -564,9 +633,9 @@ lcl_bar.foo.set('\\'');`;
     const abap = `
   CONSTANTS first TYPE c LENGTH 1 VALUE 'b'.
   CONSTANTS next TYPE c LENGTH 1 VALUE first.`;
-    const expected = `let first = new abap.types.Character(1, {});
+    const expected = `let first = new abap.types.Character(1);
 first.set('b');
-let next = new abap.types.Character(1, {});
+let next = new abap.types.Character(1);
 next.set(first);`;
     expect(await runSingle(abap)).to.equal(expected);
   });
@@ -595,7 +664,7 @@ ENDINTERFACE.`;
   static INTERNAL_TYPE = 'CLAS';
   static INTERNAL_NAME = 'PROG-ZFOOBAR-LCL_BAR';
   static IMPLEMENTED_INTERFACES = [];
-  static ATTRIBUTES = {"FIRST": {"type": () => {return new abap.types.Character(1, {});}, "visibility": "U", "is_constant": "X", "is_class": "X"}};
+  static ATTRIBUTES = {"FIRST": {"type": () => {return new abap.types.Character(1);}, "visibility": "U", "is_constant": "X", "is_class": "X"}};
   static METHODS = {};
   constructor() {
     this.me = new abap.types.ABAPObject();
@@ -612,16 +681,16 @@ ENDINTERFACE.`;
   }
 }
 abap.Classes['PROG-ZFOOBAR-LCL_BAR'] = lcl_bar;
-lcl_bar.first = new abap.types.Character(1, {});
+lcl_bar.first = new abap.types.Character(1);
 lcl_bar.first.set('b');
 class bar {
   static INTERNAL_TYPE = 'INTF';
   static INTERNAL_NAME = 'PROG-ZFOOBAR-BAR';
-  static ATTRIBUTES = {"NEXT": {"type": () => {return new abap.types.Character(1, {});}, "visibility": "U", "is_constant": "X", "is_class": "X"}};
+  static ATTRIBUTES = {"NEXT": {"type": () => {return new abap.types.Character(1);}, "visibility": "U", "is_constant": "X", "is_class": "X"}};
   static METHODS = {};
 }
 abap.Classes['PROG-ZFOOBAR-BAR'] = bar;
-bar.bar$next = new abap.types.Character(1, {});
+bar.bar$next = new abap.types.Character(1);
 bar.bar$next.set(abap.Classes['PROG-ZFOOBAR-LCL_BAR'].first);`;
     expect(await runSingle(abap)).to.equal(expected);
   });
@@ -637,7 +706,7 @@ if (unique1 === undefined && abap.Classes['KERNEL_INTERNAL_NAME'] !== undefined)
     const unique2 = await abap.Classes['KERNEL_INTERNAL_NAME'].rtti_to_internal({iv_rtti: 'ZCL_BLAH'});
     unique1 = abap.Classes[unique2.get().trimEnd()];
 }
-if (unique1 === undefined) { throw new abap.Classes['CX_SY_CREATE_OBJECT_ERROR']; }
+if (unique1 === undefined) { throw await new abap.Classes['CX_SY_CREATE_OBJECT_ERROR']().constructor_({classname: new abap.types.String().set('ZCL_BLAH'.trimEnd())}); }
 blah.set(await (new unique1()).constructor_());`;
     expect(await runSingle(abap)).to.equal(expected);
   });
@@ -715,6 +784,20 @@ abap.Forms['PROG-ZFOOBAR-FOO'] = foo;`;
     expect(await runSingle(abap, {
       ignoreSyntaxCheck: true,
       unknownTypes: UnknownTypesEnum.runtimeError})).to.equals(expected);
+  });
+
+  it("VALUE # whose type cannot be inferred, runtime error with unknownTypes", async () => {
+    const abap = `
+    INSERT demo_expressions FROM @( VALUE #( id = 'F' ) ).`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true, skipVersionCheck: true, unknownTypes: UnknownTypesEnum.runtimeError})).to.include(`throw new Error("Unknown type: TypeNameOrInfer, type not found: #`);
+  });
+
+  it("SET LOCKS, runtime error", async () => {
+    const abap = `
+    SET LOCKS OF zi_foo ENTITY ent FROM lt_keys FAILED ls_failed REPORTED ls_reported.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true, skipVersionCheck: true})).to.equal(`throw new Error("SET LOCKS, not supported, transpiler");`);
   });
 
   it("Upper case method impl name, should transpile to lower", async () => {
@@ -826,7 +909,7 @@ DATA hex16 TYPE c LENGTH 16.
 CALL 'RFCControl'
   ID 'CODE' FIELD 'U'
   ID 'UUID' FIELD hex16.`;
-    const expected = `let hex16 = new abap.types.Character(16, {});
+    const expected = `let hex16 = new abap.types.Character(16);
 if (abap.Classes['KERNEL_CALL'] === undefined) throw new Error("Call kernel class missing");
 await abap.Classes['KERNEL_CALL'].call({name: abap.CharacterFactory.get(10, 'RFCControl'),code: abap.CharacterFactory.get(1, 'U'),uuid: hex16});`;
     expect(await runSingle(abap)).to.equals(expected);

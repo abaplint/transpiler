@@ -6,7 +6,9 @@ import {Chunk} from "../chunk";
 export class FormatTranspiler implements IStatementTranspiler {
 
   public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    return new Chunk(`throw new Error("FORMAT, not supported, transpiler");`);
+    // FORMAT only sets how list output looks (colors, intensity, inverse, hotspot, input fields, frames),
+    // it does not change the text of the list
+    return new Chunk("");
   }
 
 }

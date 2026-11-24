@@ -853,6 +853,59 @@ ENDCLASS.`;
     expect(cons.split("\n")[1]).to.equal("not found");
   });
 
+  it("test-15b, CX_SY_CREATE_OBJECT_ERROR carries the class name", async () => {
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA li_bar TYPE REF TO object.
+        DATA lo_client TYPE REF TO ltcl_test.
+        DATA lv_name TYPE string.
+        DATA lx_error TYPE REF TO cx_sy_create_object_error.
+        lv_name = 'ZCL_SDFSD'.
+        TRY.
+            CREATE OBJECT li_bar TYPE (lv_name).
+          CATCH cx_sy_create_object_error INTO lx_error.
+            WRITE / lx_error->classname.
+        ENDTRY.
+        TRY.
+            CREATE OBJECT lo_client TYPE ('ZCL_CLIENT').
+          CATCH cx_sy_create_object_error INTO lx_error.
+            WRITE / lx_error->classname.
+        ENDTRY.
+      ENDMETHOD.
+    ENDCLASS.`;
+
+    const cxcreate = `
+    CLASS cx_sy_create_object_error DEFINITION PUBLIC INHERITING FROM cx_root.
+      PUBLIC SECTION.
+        METHODS constructor IMPORTING classname TYPE string OPTIONAL.
+        DATA classname TYPE string READ-ONLY.
+    ENDCLASS.
+    CLASS cx_sy_create_object_error IMPLEMENTATION.
+      METHOD constructor.
+        super->constructor( ).
+        me->classname = classname.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "cx_sy_create_object_error.clas.abap", contents: cxcreate},
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files);
+    expect(cons.split("\n").slice(1, 3)).to.deep.equal(["ZCL_SDFSD", "ZCL_CLIENT"]);
+  });
+
   it("test-16", async () => {
 // used for manual testing of source maps
     const clas = `CLASS zcl_sourcemaptest DEFINITION PUBLIC CREATE PRIVATE FOR TESTING.
@@ -1351,6 +1404,7 @@ ENDCLASS.
 
 CLASS zcx_parameter_test IMPLEMENTATION.
   METHOD constructor.
+    super->constructor( ).
     me->hello = hello.
   ENDMETHOD.
 ENDCLASS.`;
