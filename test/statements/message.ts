@@ -187,7 +187,7 @@ START-OF-SELECTION.
     const f = new AsyncFunction("abap", js);
     await f(abap);
     const lines = abap.console.get().split("\n").map(l => l.trimEnd());
-    expect(lines).to.deep.equal(["ZZ", "001", "S", "Alpha", "&NO_SUCH&"]);
+    expect(lines).to.deep.equal(["first Alpha second &NO_SUCH&", "ZZ", "001", "S", "Alpha", "&NO_SUCH&"]);
   });
 
 });
