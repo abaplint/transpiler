@@ -424,4 +424,56 @@ WRITE / ls_read-size.`;
     expect(abap.console.get()).to.equal("0\n2\n2");
   });
 
+  it("MODIFY itab FROM wa in a LOOP changes the current line", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         k TYPE i,
+         v TYPE c LENGTH 5,
+       END OF ty_row.
+DATA tab TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY.
+DATA row TYPE ty_row.
+DATA first TYPE ty_row.
+DO 3 TIMES.
+  row-k = sy-index.
+  row-v = 'a'.
+  APPEND row TO tab.
+ENDDO.
+LOOP AT tab INTO row.
+  READ TABLE tab INTO first INDEX 1.
+  row-v = 'chg'.
+  MODIFY tab FROM row.
+ENDLOOP.
+LOOP AT tab INTO row.
+  WRITE / row-v.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("chg  \nchg  \nchg  ");
+  });
+
+  it("MODIFY itab with a header line in a LOOP changes the current line", async () => {
+    const code = `
+DATA: BEGIN OF tab OCCURS 0,
+        k TYPE i,
+        v(5) TYPE c,
+      END OF tab.
+DO 2 TIMES.
+  tab-k = sy-index.
+  tab-v = 'a'.
+  APPEND tab.
+ENDDO.
+LOOP AT tab.
+  tab-v = 'hdr'.
+  MODIFY tab.
+ENDLOOP.
+LOOP AT tab.
+  WRITE / tab-v.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("hdr  \nhdr  ");
+  });
+
 });

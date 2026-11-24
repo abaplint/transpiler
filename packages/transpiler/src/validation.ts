@@ -1,4 +1,4 @@
-import {Issue, IRegistry, Config, IConfig, Version} from "@abaplint/core";
+import {Issue, IRegistry, Config, IConfig, Version, SyntaxLogic, BasicTypes, ABAPObject, ISpaghettiScope, Statements} from "@abaplint/core";
 import {ITranspilerOptions, UnknownTypesEnum} from "./types";
 
 const defaultAllowedObjectTypes = [
@@ -126,6 +126,7 @@ export const config: IConfig = {
 export class Validation {
 
   private readonly options: ITranspilerOptions | undefined;
+  private readonly scopes = new Map<ABAPObject, ISpaghettiScope>();
 
   public constructor(options?: ITranspilerOptions) {
     this.options = options;
@@ -159,7 +160,37 @@ export class Validation {
     const conf = new Config(JSON.stringify(config));
     reg.setConfig(conf);
     const issues = reg.findIssues();
-    return issues;
+    return issues.filter(i => i.getKey() !== "ambiguous_statement" || this.isUnambiguous(reg, i) === false);
+  }
+
+  /** DELETE name., DELETE name FROM x., MODIFY name. and MODIFY name FROM x. read two ways, so abaplint calls them
+   * ambiguous. ABAP decides by the name: a variable of table type is the internal table, anything else the database table */
+  private isUnambiguous(reg: IRegistry, issue: Issue): boolean {
+    const file = reg.getFileByName(issue.getFilename());
+    const obj = file ? reg.findObjectForFile(file) : undefined;
+    if (!(obj instanceof ABAPObject)) {
+      return false;
+    }
+    const statement = obj.getABAPFileByName(issue.getFilename())?.getStatements()
+      .find(s => s.getStart().equals(issue.getStart()));
+    const token = statement?.getTokens()[1];
+    if (statement === undefined || token === undefined || token.getStr().toUpperCase() === "TABLE") {
+      return false;
+    }
+    const modify = statement.getFirstToken().getStr().toUpperCase() === "MODIFY";
+    if (modify === false && !(statement.get() instanceof Statements.DeleteInternal)) {
+      return false;
+    }
+    let spaghetti = this.scopes.get(obj);
+    if (spaghetti === undefined) {
+      spaghetti = new SyntaxLogic(reg, obj).run().spaghetti;
+      this.scopes.set(obj, spaghetti);
+    }
+    const variable = spaghetti.lookupPosition(token.getStart(), issue.getFilename())?.findVariable(token.getStr());
+    if (variable?.getType() instanceof BasicTypes.TableType) {
+      return true;
+    }
+    return variable !== undefined || statement.findExpressionAfterToken("FROM") !== undefined;
   }
 
 }

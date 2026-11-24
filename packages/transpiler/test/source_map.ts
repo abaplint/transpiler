@@ -250,4 +250,73 @@ ENDCLASS.`;
     }
   });
 
+  it("CATCH and CLEANUP: the handler heads and the statements in the bodies map to their lines", async () => {
+    const abap = `DATA foo TYPE i.
+DATA lx TYPE REF TO cx_root.
+TRY.
+    foo = 1.
+  CATCH cx_root INTO lx.
+    foo = 2.
+    foo = 3.
+  CLEANUP.
+    foo = 4.
+ENDTRY.`;
+
+    const result = await runSingleMapped(abap, PROG_OPTIONS);
+    const consumer = await new sourceMap.SourceMapConsumer(JSON.parse(result!.map!));
+    const jsLines = result!.js.split("\n");
+    const codeCol = (l: string) => l.length - l.trimStart().length;
+    const abapLineOf = (needle: string) => {
+      const idx = jsLines.findIndex(l => l.includes(needle));
+      expect(idx, needle).to.be.greaterThan(-1);
+      return consumer.originalPositionFor({line: idx + 1, column: codeCol(jsLines[idx])}).line;
+    };
+
+    expect(abapLineOf("foo.set(abap.IntegerFactory.get(1))")).to.equal(4);
+    expect(abapLineOf("e instanceof abap.Classes['CX_ROOT'])) {")).to.equal(5);
+    expect(abapLineOf("lx.set(e)")).to.equal(5);
+    expect(abapLineOf("foo.set(abap.IntegerFactory.get(2))")).to.equal(6);
+    expect(abapLineOf("foo.set(abap.IntegerFactory.get(3))")).to.equal(7);
+    expect(abapLineOf("foo.set(abap.IntegerFactory.get(4))")).to.equal(9);
+  });
+
+  it("CATCH: several handlers, each body mapped, the javascript unchanged", async () => {
+    const abap = `DATA foo TYPE i.
+TRY.
+    foo = 1.
+  CATCH cx_sy_zerodivide.
+    foo = 2.
+  CATCH cx_sy_conversion_no_number cx_sy_arithmetic_overflow.
+    foo = 3.
+ENDTRY.`;
+
+    const secondHead = "  } else if ((abap.Classes['CX_SY_CONVERSION_NO_NUMBER'] && e instanceof abap.Classes['CX_SY_CONVERSION_NO_NUMBER'])" +
+      " || (abap.Classes['CX_SY_ARITHMETIC_OVERFLOW'] && e instanceof abap.Classes['CX_SY_ARITHMETIC_OVERFLOW'])) {";
+    const result = await runSingleMapped(abap, PROG_OPTIONS);
+    expect(result?.js).to.equal(`let foo = new abap.types.Integer({qualifiedName: "I"});
+try {
+  foo.set(abap.IntegerFactory.get(1));
+} catch (e) {
+  if ((abap.Classes['CX_SY_ZERODIVIDE'] && e instanceof abap.Classes['CX_SY_ZERODIVIDE'])) {
+    foo.set(abap.IntegerFactory.get(2));
+${secondHead}
+    foo.set(abap.IntegerFactory.get(3));
+  } else {
+    throw e;
+  }
+}`);
+    // every mapping inside the source; unmapped at their first column are only the javascript's own
+    // lines: "} catch (e) {", the "}" that opens "} else if" of a second handler, and the rethrow
+    const stats = await validateSourceMap(abap, result!.js, result!.map!);
+    expect(stats.unmappedLines).to.deep.equal([4, 7, 9, 10, 11]);
+
+    const consumer = await new sourceMap.SourceMapConsumer(JSON.parse(result!.map!));
+    const jsLines = result!.js.split("\n");
+    const codeCol = (l: string) => l.length - l.trimStart().length;
+    // the handler heads at their CATCH, the bodies at their own lines
+    expect(consumer.originalPositionFor({line: 5, column: codeCol(jsLines[4])}).line).to.equal(4);
+    expect(consumer.originalPositionFor({line: 6, column: codeCol(jsLines[5])}).line).to.equal(5);
+    expect(consumer.originalPositionFor({line: 8, column: codeCol(jsLines[7])}).line).to.equal(7);
+  });
+
 });

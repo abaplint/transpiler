@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import {binarySearchFrom, binarySearchFromRow} from "../binary_search";
 import {eq, ge, gt, lt} from "../compare";
-import {DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Integer8, secondaryKeyName, Structure, Table, TableAccessType, TableRowType} from "../types";
+import {ABAPObject, DataReference, DecFloat34, FieldSymbol, Float, HashedTable, Integer8, secondaryKeyName, Structure, Table, TableAccessType, TableRowType} from "../types";
 import {primaryKeyValues} from "../primary_key";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
@@ -25,7 +25,11 @@ export interface IReadTableOptions {
   withKeyValue?: {key: (i: any) => any, value: any}[],
   // key is raw concatenated, not eval'uable
   withKeySimple?: {[key: string]: any},
-// TODO: TRANSPORTING
+  /** COMPARING comp1 comp2 ...: the found row is compared with the work area in these components first, sy-subrc 2
+   *  when they differ; "*" for ALL FIELDS */
+  comparing?: string[],
+  /** TRANSPORTING comp1 comp2 ...: only these components are copied into the work area */
+  transporting?: string[],
 }
 
 export type ReadTableReturn = {
@@ -97,7 +101,7 @@ export function searchWithKey(arr: any, withKey: (i: any) => boolean, startIndex
   };
 }
 
-export async function searchWithKeyPromise(arr: any, withKey: (i: any) => Promise<boolean>, startIndex = 0, usesTableLine: boolean | undefined) {
+export async function searchWithKeyPromise(arr: any, withKey: (i: any) => Promise<boolean> | boolean, startIndex = 0, usesTableLine: boolean | undefined) {
   const isStructured = arr[0] instanceof Structure;
   for (let index = startIndex; index < arr.length; index++) {
     const a = arr[index];
@@ -127,6 +131,71 @@ function toRow(a: any, isStructured: boolean, usesTableLine: boolean | undefined
     return a.get();
   }
   return isStructured ? {table_line: a, ...a.get()} : {table_line: a};
+}
+
+function isElementary(value: any): boolean {
+  return typeof value?.clone === "function" && !(value instanceof Structure) && !(value instanceof Table)
+    && !(value instanceof HashedTable) && !(value instanceof DataReference) && !(value instanceof ABAPObject);
+}
+
+/** a key value is converted to the type of its component: 'ABX' for a c LENGTH 2 component is 'AB', 42 for an
+ *  n LENGTH 4 component is '0042', a text for an n component loses its letters. A value of the same type and
+ *  length, and a component or value that is not elementary, are used as they are */
+function keyAsComponentType(component: any, value: any): any {
+  const operand = value instanceof FieldSymbol ? value.getPointer() : value;
+  if (isElementary(component) === false) {
+    return value;
+  } else if (typeof operand === "string") {
+    return component.clone().set(operand);
+  } else if (isElementary(operand) === false
+      || (operand.constructor === component.constructor
+        && operand.getLength?.() === component.getLength?.()
+        && operand.getDecimals?.() === component.getDecimals?.())) {
+    return value;
+  }
+  return component.clone().set(operand);
+}
+
+/** the key values converted to the types of their components, as ABAP converts them before
+ *  the search; withKey, withKeyValue and withKeySimple then use the converted values.
+ *  Options without a value to convert are returned as they are */
+export function convertKeyValues<T extends {withKey?: (i: any) => any, withKeyValue?: {key: (i: any) => any, value: any}[],
+  withKeySimple?: {[key: string]: any}, usesTableLine?: boolean}>(table: Table | HashedTable, options: T): T {
+  if (options.withKeyValue === undefined || options.withKeyValue.length === 0) {
+    return options;
+  }
+  const rowType = table.getRowType();
+  const probe = toRow(rowType, rowType instanceof Structure, options.usesTableLine);
+  let changed = false;
+  const withKeyValue = options.withKeyValue.map(p => {
+    let component: unknown = undefined;
+    try {
+      component = p.key(probe);
+    } catch {
+      return p;
+    }
+    const value = keyAsComponentType(component, p.value);
+    if (value === p.value) {
+      return p;
+    }
+    changed = true;
+    return {key: p.key, value};
+  });
+  if (changed === false) {
+    return options;
+  }
+
+  const ret: T = {...options, withKeyValue};
+  ret.withKey = (row: any) => withKeyValue.every(p => eq(p.key(row), p.value));
+  if (options.withKeySimple !== undefined) {
+    // generated in the same order as withKeyValue
+    const withKeySimple: {[key: string]: any} = {};
+    Object.keys(options.withKeySimple).forEach((name, index) => {
+      withKeySimple[name] = withKeyValue[index] ? withKeyValue[index].value : options.withKeySimple![name];
+    });
+    ret.withKeySimple = withKeySimple;
+  }
+  return ret;
 }
 
 /** READ with a key on a SORTED table: binary search over the leading key components that are given,
@@ -193,6 +262,22 @@ function readSortedWithKey(arr: readonly any[], keyFields: readonly string[], op
   return {found: undefined, foundIndex: left + 1, subrc: left >= arr.length ? 8 : 4};
 }
 
+/** a component of a structure by its name, "a-b" for a component of a substructure */
+function component(row: Structure, name: string): any {
+  let value: any = row;
+  for (const part of name.toLowerCase().split("-")) {
+    value = value instanceof Structure ? value.get()[part] : undefined;
+  }
+  return value;
+}
+
+function sameComponents(found: any, workArea: any, names: string[]): boolean {
+  if (names.length === 1 && names[0] === "*") {
+    return eq(found, workArea);
+  }
+  return names.every(n => eq(component(found, n), component(workArea, n)));
+}
+
 export function readTable(table: Table | HashedTable | FieldSymbol, options?: IReadTableOptions): ReadTableReturn {
   let found: any = undefined;
   let foundIndex = 0;
@@ -212,6 +297,10 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
   // the key name; any other name, as ABAP reads it (secondaryKeyName)
   if (options?.keyName !== undefined && secondaryKeyName(options.keyName) !== options.keyName) {
     options = {...options, keyName: secondaryKeyName(options.keyName)};
+  }
+
+  if (options !== undefined) {
+    options = convertKeyValues(table, options);
   }
 
   // check if it is a primary index read specified with WITH KEY instead of WITH TABLE KEY
@@ -418,7 +507,17 @@ export function readTable(table: Table | HashedTable | FieldSymbol, options?: IR
           options.into.assign(found);
         }
       } else {
-        options.into.set(found);
+        if (options.comparing !== undefined && subrc === 0 && !sameComponents(found, options.into, options.comparing)) {
+          subrc = 2;
+          abap.builtin.sy.get().subrc.set(subrc);
+        }
+        if (options.transporting !== undefined && found instanceof Structure && options.into instanceof Structure) {
+          for (const name of options.transporting) {
+            component(options.into, name)?.set(component(found, name));
+          }
+        } else {
+          options.into.set(found);
+        }
       }
     } else if (options.referenceInto) {
       options.referenceInto.assign(found);

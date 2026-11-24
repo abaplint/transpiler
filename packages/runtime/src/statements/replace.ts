@@ -1,10 +1,11 @@
 import {ABAPRegExp} from "../abap_regex";
-import {Character, Table} from "../types";
+import {Character, Numc, Table} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {concatenate} from "./concatenate";
 import {IRegexOptions} from "./find";
 import {ABAP} from "..";
+import {setText} from "./_set_text";
 
 declare const abap: ABAP;
 
@@ -37,6 +38,9 @@ export function replace(input: replaceInput): void {
     let inp = input.of.get();
     if (input.of instanceof Character) {
       inp = input.of.getTrimEnd();
+    } else if (input.of instanceof Numc) {
+      // trailing blanks of n are ignored as for c
+      inp = inp.trimEnd();
     }
 
     if (inp.length === 0 && input.all === true) {
@@ -64,6 +68,9 @@ export function replace(input: replaceInput): void {
   } else {
     if (input.with instanceof Character) {
       rr = input.with.getTrimEnd();
+    } else if (input.with instanceof Numc) {
+      // trailing blanks of n are ignored as for c
+      rr = input.with.get().trimEnd();
     } else {
       rr = input.with.get();
     }
@@ -104,5 +111,5 @@ export function replace(input: replaceInput): void {
   const subrc = found ? 0 : 4;
   abap.builtin.sy.get().subrc.set(subrc);
 
-  input.target.set(temp);
+  setText(input.target, temp);
 }

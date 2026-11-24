@@ -4,21 +4,27 @@ import {TypeFactoryRegistry} from "./type_factory_registry";
 
 const featureHexUInt8 = false;
 
+/** finds the names of the constants of an enumerated type, in the order they are declared;
+ *  undefined when the type is not declared in a class or interface */
+export type EnumValueNames = (type: abaplint.BasicTypes.EnumType) => string[] | undefined;
+
 export class TranspileTypes {
 
-  public static declare(t: abaplint.TypedIdentifier, registry?: TypeFactoryRegistry): string {
+  public static declare(t: abaplint.TypedIdentifier, registry?: TypeFactoryRegistry, enumValueNames?: EnumValueNames): string {
     const type = t.getType();
-    return "let " + Traversal.prefixVariable(t.getName().toLowerCase()) + " = " + this.toType(type, undefined, registry) + ";";
+    return "let " + Traversal.prefixVariable(t.getName().toLowerCase()) + " = "
+      + this.toType(type, undefined, registry, enumValueNames) + ";";
   }
 
-  public static declareStaticSkipVoid(pre: string, t: abaplint.TypedIdentifier, registry?: TypeFactoryRegistry): string {
+  public static declareStaticSkipVoid(pre: string, t: abaplint.TypedIdentifier, registry?: TypeFactoryRegistry,
+                                      enumValueNames?: EnumValueNames): string {
     const type = t.getType();
     // todo, this should look at the configuration, for runtime vs compile time errors
     // unknown types are kept, they throw when the declaration is evaluated
     if (this.hasUnsupportedType(type, true)) {
       return "";
     }
-    const code = this.toType(type, undefined, registry);
+    const code = this.toType(type, undefined, registry, enumValueNames);
     return pre + t.getName().toLowerCase() + " = " + code + ";\n";
   }
 
@@ -33,26 +39,28 @@ export class TranspileTypes {
     return "(() => { let _t; return () => (_t ??= " + this.toType(type, undefined, registry) + "); })()";
   }
 
-  public static toType(type: abaplint.AbstractType, options?: {packedDecimals?: number}, registry?: TypeFactoryRegistry): string {
+  public static toType(type: abaplint.AbstractType, options?: {packedDecimals?: number}, registry?: TypeFactoryRegistry,
+                       enumValueNames?: EnumValueNames): string {
     if (registry === undefined) {
-      return this.toTypeInline(type, options);
+      return this.toTypeInline(type, options, undefined, enumValueNames);
     }
     // Elementary types cannot produce helpers or recursive constructor graphs.
     // Keep them off the registry's WeakMap and unsupported-graph walk; composite
     // parents still intern them as part of their exact rendered expression.
     if (!this.isComposite(type)) {
-      return this.toTypeInline(type, options, registry);
+      return this.toTypeInline(type, options, registry, enumValueNames);
     }
     const optionsKey = JSON.stringify(options ?? {});
     return registry.resolveType(type, optionsKey, () => {
       // Keep unsupported graphs on the legacy inline error path. Registering
       // their outer composite would hide the unsupported node behind a helper.
       const supportedRegistry = this.hasUnsupportedType(type) ? undefined : registry;
-      return this.toTypeInline(type, options, supportedRegistry);
+      return this.toTypeInline(type, options, supportedRegistry, enumValueNames);
     });
   }
 
-  private static toTypeInline(type: abaplint.AbstractType, options?: {packedDecimals?: number}, registry?: TypeFactoryRegistry): string {
+  private static toTypeInline(type: abaplint.AbstractType, options?: {packedDecimals?: number}, registry?: TypeFactoryRegistry,
+                              enumValueNames?: EnumValueNames): string {
     let resolved = "";
     let extra = "";
 
@@ -77,7 +85,7 @@ export class TranspileTypes {
         ", RTTIName: " + JSON.stringify(RTTIName?.toUpperCase()) + "}";
     } else if (type instanceof abaplint.BasicTypes.TableType) {
       resolved = "Table";
-      extra = this.toType(type.getRowType(), undefined, registry);
+      extra = this.toType(type.getRowType(), undefined, registry, enumValueNames);
       extra += ", " + JSON.stringify(type.getOptions());
       if (type.getQualifiedName() !== undefined) {
         extra += ", \"" + type.getQualifiedName() + "\"";
@@ -117,7 +125,7 @@ export class TranspileTypes {
       }
     } else if (type instanceof abaplint.BasicTypes.DataReference) {
       resolved = "DataReference";
-      extra = this.toType(type.getType(), undefined, registry);
+      extra = this.toType(type.getType(), undefined, registry, enumValueNames);
     } else if (type instanceof abaplint.BasicTypes.StructureType) {
       resolved = "Structure";
       const list: string[] = [];
@@ -126,7 +134,7 @@ export class TranspileTypes {
 
       for (const c of type.getComponents()) {
         const lower = c.name.toLowerCase();
-        list.push(`"` + lower + `": ` + this.toType(c.type, undefined, registry));
+        list.push(`"` + lower + `": ` + this.toType(c.type, undefined, registry, enumValueNames));
         if (c.suffix) {
           suffix[lower] = c.suffix;
         }
@@ -134,19 +142,18 @@ export class TranspileTypes {
           asInclude[lower] = true;
         }
       }
-      extra = "{\n" + list.join(",\n") + "}";
-      if (type.getQualifiedName() !== undefined) {
-        extra += ", \"" + type.getQualifiedName() + "\"";
-      } else {
-        extra += ", undefined";
+      // an empty object costs memory in every constructed value, the runtime reads these optionally
+      const args = [
+        "{\n" + list.join(",\n") + "}",
+        type.getQualifiedName() !== undefined ? "\"" + type.getQualifiedName() + "\"" : "undefined",
+        type.getDDICName() !== undefined ? "\"" + type.getQualifiedName() + "\"" : "undefined",
+        Object.keys(suffix).length > 0 ? JSON.stringify(suffix) : "undefined",
+        Object.keys(asInclude).length > 0 ? JSON.stringify(asInclude) : "undefined",
+      ];
+      while (args[args.length - 1] === "undefined") {
+        args.pop();
       }
-      if (type.getDDICName() !== undefined) {
-        extra += ", \"" + type.getQualifiedName() + "\"";
-      } else {
-        extra += ", undefined";
-      }
-      extra += ", " + JSON.stringify(suffix);
-      extra += ", " + JSON.stringify(asInclude);
+      extra = args.join(", ");
     } else if (type instanceof abaplint.BasicTypes.CLikeType
         || type instanceof abaplint.BasicTypes.CGenericType
         || type instanceof abaplint.BasicTypes.CSequenceType) {
@@ -162,7 +169,11 @@ export class TranspileTypes {
       resolved = "Character";
     } else if (type instanceof abaplint.BasicTypes.CharacterType) {
       resolved = "Character";
-      extra = type.getLength() + ", " + JSON.stringify(type.getAbstractTypeData());
+      extra = type.getLength() + "";
+      const typeData = JSON.stringify(type.getAbstractTypeData());
+      if (typeData !== "{}") {
+        extra += ", " + typeData;
+      }
     } else if (type instanceof abaplint.BasicTypes.NumericType) {
       resolved = "Numc";
       if (type.getQualifiedName() && type.getLength() !== 1) {
@@ -215,12 +226,20 @@ export class TranspileTypes {
       if (type.getQualifiedName() !== undefined) {
         extra = "{qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\"}";
       }
-    } else if (type instanceof abaplint.BasicTypes.DecFloat34Type) {
+    } else if (type instanceof abaplint.BasicTypes.DecFloat34Type
+        || type instanceof abaplint.BasicTypes.DecFloat16Type) {
+      // decfloat16 runs on the runtime's decfloat34, an exact decimal: the
+      // 16 digit rounding and range of decfloat16 are not modelled, and RTTI
+      // describes such a field as a decfloat34
       resolved = "DecFloat34";
     } else if (type instanceof abaplint.BasicTypes.EnumType) {
       resolved = "String";
       if (type.getQualifiedName() !== undefined) {
-        extra = "{qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\"}";
+        // the runtime holds a value of a class or interface enum as the position of its constant,
+        // the names let it write the value the way ABAP does, as the name of the constant
+        const names = enumValueNames?.(type);
+        extra = "{qualifiedName: \"" + type.getQualifiedName()?.toUpperCase() + "\""
+          + (names === undefined ? "" : ", enumValues: " + JSON.stringify(names)) + "}";
       }
     } else if (type instanceof abaplint.BasicTypes.UnknownType) {
       return `(() => { throw new Error("Unknown type: ${type.getError()}") })()`;
@@ -303,6 +322,7 @@ export class TranspileTypes {
         || type instanceof abaplint.BasicTypes.FloatType
         || type instanceof abaplint.BasicTypes.FloatingPointType
         || type instanceof abaplint.BasicTypes.DecFloat34Type
+        || type instanceof abaplint.BasicTypes.DecFloat16Type
         || type instanceof abaplint.BasicTypes.EnumType) {
       return false;
     }

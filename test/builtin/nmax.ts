@@ -83,4 +83,32 @@ describe("Builtin functions - nmin", () => {
     expect(abap.console.get()).to.equal("1.25");
   });
 
+  it("int8 arguments above 2^53, exact", async () => {
+    const code = `
+  DATA a TYPE int8.
+  DATA b TYPE int8.
+  DATA r TYPE int8.
+  DATA p TYPE p LENGTH 16 DECIMALS 1 VALUE '1.5'.
+  DATA rp TYPE p LENGTH 16 DECIMALS 1.
+  a = 9223372036854775806.
+  b = 9223372036854775807.
+  r = nmax( val1 = a val2 = b ).
+  WRITE / |{ r }|.
+  r = nmin( val1 = a val2 = b ).
+  WRITE / |{ r }|.
+  r = nmax( val1 = b val2 = 1 ).
+  WRITE / |{ r }|.
+  a = -9223372036854775807.
+  a = a - 1.
+  r = nmin( val1 = a val2 = 1 ).
+  WRITE / |{ r }|.
+  rp = nmax( val1 = b val2 = p ).
+  WRITE / |{ rp }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(
+      "9223372036854775807\n9223372036854775806\n9223372036854775807\n-9223372036854775808\n9223372036854775807.0");
+  });
+
 });

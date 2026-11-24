@@ -378,4 +378,34 @@ APPEND row TO tab.`;
     await f(abap);
   });
 
+  it("APPEND to a sorted table keeps the order of the key and a unique key unique", async () => {
+    const order = `
+DATA tab TYPE SORTED TABLE OF i WITH NON-UNIQUE KEY table_line.
+APPEND 2 TO tab.
+APPEND 2 TO tab.
+APPEND 1 TO tab.`;
+    let js = await run(order);
+    let f = new AsyncFunction("abap", js);
+    let message = "";
+    try {
+      await f(abap);
+    } catch (e) {
+      message = String(e);
+    }
+    expect(message).to.include("ITAB_ILLEGAL_SORT_ORDER");
+    const unique = `
+DATA tab TYPE SORTED TABLE OF i WITH UNIQUE KEY table_line.
+APPEND 2 TO tab.
+APPEND 2 TO tab.`;
+    js = await run(unique);
+    f = new AsyncFunction("abap", js);
+    message = "";
+    try {
+      await f(abap);
+    } catch (e) {
+      message = String(e);
+    }
+    expect(message).to.include("ITAB_DUPLICATE_KEY_IDX_OP");
+  });
+
 });
