@@ -451,4 +451,26 @@ SHIFT <lv> LEFT IN BYTE MODE.`;
     });
   }
 
+  it("SHIFT BY int8 PLACES, character and byte mode", async () => {
+    const code = `
+DATA places TYPE int8.
+DATA chr TYPE string.
+DATA hex TYPE xstring.
+DATA circ TYPE xstring.
+places = 2.
+chr = 'ABCDE'.
+SHIFT chr BY places PLACES.
+hex = 'AABBCC'.
+SHIFT hex BY places PLACES IN BYTE MODE.
+circ = 'AABBCC'.
+SHIFT circ BY places PLACES CIRCULAR IN BYTE MODE.
+WRITE / chr.
+WRITE / hex.
+WRITE / circ.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("CDE\nCC\nCCAABB");
+  });
+
 });

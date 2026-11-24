@@ -54,8 +54,8 @@ childProcess.execSync("npm run link-local", {stdio: "inherit"});
 
 for (let index = 0; index < repos.length; index++) {
   console.dir("New Version: " + repos[index].name + ", " + repos[index].folderName);
-  childProcess.execSync("npm link @abaplint/transpiler-cli", {stdio: "inherit", cwd: CWD + repos[index].folderName});
-  childProcess.execSync("npm link @abaplint/runtime", {stdio: "inherit", cwd: CWD + repos[index].folderName});
+  // link both in one call, a second "npm link" reinstalls from package.json and drops the first link
+  childProcess.execSync("npm link @abaplint/transpiler-cli @abaplint/runtime", {stdio: "inherit", cwd: CWD + repos[index].folderName});
   try {
     childProcess.execSync(repos[index].command, {stdio: "inherit", cwd: CWD + repos[index].folderName});
     repos[index].success = true;

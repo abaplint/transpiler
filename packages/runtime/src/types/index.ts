@@ -3,6 +3,7 @@ export * from "./character";
 export * from "./data_reference";
 export * from "./date";
 export * from "./decfloat34";
+export * from "./decfloat16";
 export * from "./field_symbol";
 export * from "./float";
 export * from "./hex";

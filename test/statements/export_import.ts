@@ -177,7 +177,8 @@ START-OF-SELECTION.
   it("other media still throw at runtime", async () => {
     const code = `
     DATA a TYPE i.
-    EXPORT a = a TO MEMORY ID 'X'.`;
+    DATA lt_tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+    EXPORT a = a TO INTERNAL TABLE lt_tab.`;
     let message = "";
     try {
       await runAndGet(code);
