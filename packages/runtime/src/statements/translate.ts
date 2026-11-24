@@ -1,4 +1,5 @@
 import {ICharacter} from "../types/_character";
+import {setText} from "./_set_text";
 
 export function translate(input: ICharacter, i: ICharacter | string): void {
   let c = i;
@@ -6,9 +7,9 @@ export function translate(input: ICharacter, i: ICharacter | string): void {
     c = c.get();
   }
   if (c === "LOWER") {
-    input.set(input.get().toLowerCase());
+    setText(input, input.get().toLowerCase());
   } else if (c === "UPPER") {
-    input.set(input.get().toUpperCase());
+    setText(input, input.get().toUpperCase());
   } else {
     const chunks = c.match(/.{1,2}/g);
     const characters = input.get().split("");
@@ -25,6 +26,6 @@ export function translate(input: ICharacter, i: ICharacter | string): void {
       }
       result += char;
     }
-    input.set(result);
+    setText(input, result);
   }
 }
