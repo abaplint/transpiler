@@ -2,12 +2,12 @@ import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
-import {mediumOptions, sharedMedium} from "./_data_cluster";
+import {dataClusterMedium, mediumOptions} from "./_data_cluster";
 
 export class ExportTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    const medium = sharedMedium(node, "TO", traversal);
+    const medium = dataClusterMedium(node, "TO", traversal);
     const parameters = medium === undefined ? undefined : this.parameters(node, traversal);
     if (medium === undefined || parameters === undefined) {
       return new Chunk(`throw new Error("Export, transpiler todo");`);

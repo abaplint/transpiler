@@ -1,5 +1,6 @@
 import {ABAP, MemoryConsole} from "../../packages/runtime/src/";
 import {AsyncFunction, runFiles} from "../_utils";
+import {expect} from "chai";
 
 let abap: ABAP;
 
@@ -336,6 +337,124 @@ ASSERT |{ lv_f NUMBER = RAW }| = \`-1234.5\`.
 ASSERT |{ lv_f STYLE = SIMPLE }| = \`-1234.5\`.
 lv_f = '1E-10'.
 ASSERT |{ lv_f }| = \`0.0000000001\`.`);
+  });
+
+  it("string templates: STYLE = ENGINEERING, #2185", async () => {
+    await run(`
+DATA lv_f TYPE f.
+lv_f = '-1234.5'.
+ASSERT |{ lv_f STYLE = ENGINEERING }| = \`-1.2345E+03\`.
+lv_f = '0.25'.
+ASSERT |{ lv_f STYLE = ENGINEERING }| = \`250E-03\`.
+lv_f = '0.1'.
+ASSERT |{ lv_f STYLE = ENGINEERING }| = \`100.00000000000001E-03\`.
+lv_f = '0.001234'.
+ASSERT |{ lv_f STYLE = ENGINEERING }| = \`1.2340000000000001E-03\`.
+lv_f = 0.
+ASSERT |{ lv_f STYLE = ENGINEERING }| = \`0E+00\`.
+lv_f = '12.5'.
+ASSERT |{ lv_f STYLE = ENGINEERING }| = \`12.5E+00\`.
+lv_f = '1E20'.
+ASSERT |{ lv_f STYLE = ENGINEERING }| = \`100E+18\`.
+lv_f = '1E100'.
+ASSERT |{ lv_f STYLE = ENGINEERING }| = \`10E+99\`.
+lv_f = '1.5E-200'.
+ASSERT |{ lv_f STYLE = ENGINEERING }| = \`15E-201\`.`);
+  });
+
+  it("string templates: STYLE together with DECIMALS, WIDTH and EXPONENT, #2185", async () => {
+    // abaplint does not parse STYLE together with other formatting options yet, so the runtime is called directly
+    const format = (value: number, options: object) => {
+      const f = new abap.types.Float();
+      f.set(value);
+      return abap.templateFormatting(f as any, options as any);
+    };
+    expect(format(-1234.5, {style: "engineering", decimals: 2})).to.equal("-1.23E+03");
+    expect(format(0.25, {style: "engineering", decimals: 2})).to.equal("250.00E-03");
+    expect(format(0, {style: "engineering", decimals: 2})).to.equal("0.00E+00");
+    expect(format(999.995, {style: "engineering", decimals: 2})).to.equal("1.00E+03");
+    expect(format(999.995, {style: "engineering", decimals: 0})).to.equal("1E+03");
+    expect(format(123456789012345678, {style: "engineering", decimals: 2})).to.equal("123.46E+15");
+    expect(format(-1234.5, {style: "engineering", width: 15, align: "right"})).to.equal("    -1.2345E+03");
+    expect(format(-1234.5, {style: "scientific", exponent: 2})).to.equal("-12.345E+02");
+    expect(format(1E15, {style: "scientific", exponent: 0})).to.equal("1000000000000000E+00");
+    expect(format(1E15, {style: "scientific", decimals: 2})).to.equal("1.00E+15");
+    expect(format(999.995, {style: "scientific", decimals: 2})).to.equal("1.000E+03");
+  });
+
+  it("string templates: EXPONENT, #2185", async () => {
+    await run(`
+DATA lv_f TYPE f.
+DATA lv_e TYPE i VALUE 3.
+lv_f = '-1234.5'.
+ASSERT |{ lv_f EXPONENT = 2 }| = \`-12.345E+02\`.
+ASSERT |{ lv_f EXPONENT = 0 }| = \`-1234.5\`.
+ASSERT |{ lv_f EXPONENT = -2 }| = \`-123450E-02\`.
+ASSERT |{ lv_f EXPONENT = 5 }| = \`-0.012345E+05\`.
+ASSERT |{ lv_f NUMBER = RAW EXPONENT = 2 }| = \`-12.345E+02\`.
+ASSERT |{ lv_f EXPONENT = 2 DECIMALS = 2 }| = \`-12.35E+02\`.
+ASSERT |{ lv_f EXPONENT = 2 SIGN = RIGHT }| = \`12.345E+02-\`.
+ASSERT |{ lv_f EXPONENT = lv_e }| = \`-1.2345E+03\`.
+lv_f = '0.1'.
+ASSERT |{ lv_f EXPONENT = 2 }| = \`0.0010000000000000001E+02\`.
+ASSERT |{ lv_f EXPONENT = 2 DECIMALS = 2 }| = \`0.00E+02\`.
+lv_f = 0.
+ASSERT |{ lv_f EXPONENT = 2 }| = \`0E+02\`.
+ASSERT |{ lv_f EXPONENT = 0 }| = \`0\`.
+lv_f = 2.
+ASSERT |{ lv_f EXPONENT = -2 }| = \`200E-02\`.
+lv_f = '12.5'.
+ASSERT |{ lv_f EXPONENT = 2 DECIMALS = 2 }| = \`0.13E+02\`.
+lv_f = '1E15'.
+ASSERT |{ lv_f EXPONENT = 2 DECIMALS = 2 }| = \`10000000000000.00E+02\`.
+lv_f = '1E17'.
+ASSERT |{ lv_f EXPONENT = 2 DECIMALS = 2 }| = \`1000000000000000.0E+02\`.
+lv_f = '1E20'.
+ASSERT |{ lv_f EXPONENT = 2 }| = \`1000000000000000000E+02\`.
+ASSERT |{ lv_f EXPONENT = 2 DECIMALS = 2 }| = \`1000000000000000000E+02\`.
+lv_f = '-0.001'.
+ASSERT |{ lv_f EXPONENT = 2 DECIMALS = 2 }| = \`-0.00E+02\`.`);
+  });
+
+  it("string templates: STYLE = SCIENTIFIC with 17 significant digits, #2185", async () => {
+    await run(`
+DATA lv_f TYPE f.
+lv_f = '0.1'.
+ASSERT |{ lv_f STYLE = SCIENTIFIC }| = \`1.0000000000000001E-01\`.
+lv_f = 1 / 3.
+ASSERT |{ lv_f STYLE = SCIENTIFIC }| = \`3.3333333333333331E-01\`.
+lv_f = '999.9'.
+ASSERT |{ lv_f STYLE = SCIENTIFIC }| = \`9.9989999999999998E+02\`.
+lv_f = '-1234.5'.
+ASSERT |{ lv_f STYLE = SCIENTIFIC }| = \`-1.2345E+03\`.
+lv_f = '1.5E-200'.
+ASSERT |{ lv_f STYLE = SCIENTIFIC }| = \`1.5E-200\`.`);
+  });
+
+  it("string templates: DECIMALS, an f has at most 17 digits", async () => {
+    await run(`
+DATA lv_f TYPE f.
+lv_f = '1E15'.
+ASSERT |{ lv_f DECIMALS = 2 }| = \`1000000000000000.0\`.
+lv_f = '1E16'.
+ASSERT |{ lv_f DECIMALS = 2 }| = \`10000000000000000\`.
+lv_f = '123456789012345678'.
+ASSERT |{ lv_f DECIMALS = 2 }| = \`123456789012345680\`.
+lv_f = '999.995'.
+ASSERT |{ lv_f DECIMALS = 2 }| = \`1000.00\`.
+ASSERT |{ lv_f EXPONENT = 0 DECIMALS = 2 }| = \`1000.00\`.
+lv_f = '-0.001'.
+ASSERT |{ lv_f DECIMALS = 2 }| = \`-0.00\`.
+lv_f = '1E100'.
+ASSERT |{ lv_f }| = \`1${"0".repeat(100)}\`.`);
+  });
+
+  it("string templates: STYLE = ENGINEERING for i and p", async () => {
+    await run(`
+DATA lv_i TYPE i VALUE -1234.
+DATA lv_p TYPE p LENGTH 8 DECIMALS 2 VALUE '-1234.5'.
+ASSERT |{ lv_i STYLE = ENGINEERING }| = \`-1.234E+03\`.
+ASSERT |{ lv_p STYLE = ENGINEERING }| = \`-1.2345E+03\`.`);
   });
 
   it("COLLECT sums, SORT and READ TABLE WITH KEY on an f component", async () => {
