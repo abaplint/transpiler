@@ -495,6 +495,11 @@ export class Table implements ITable {
     return l;
   }
 
+  /** how many LOOPs over this table are running */
+  public getLoopCount(): number {
+    return this.loops.size;
+  }
+
   public getCurrentLoopIndex() {
     if (this.loops.size !== 1) {
       throw new Error("More than one LOOP");
