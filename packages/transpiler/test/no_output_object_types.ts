@@ -11,7 +11,6 @@ const testFiles: {[filename: string]: string} = {
 annotate view ZDDLS with
 {
 }`,
-  "zddls.ddls.asddls": `define abstract entity ZDDLS { key mandt : abap.clnt; }`,
   "zbdef.bdef.asbdef": `managed implementation in class zbp_example unique;
 define behavior for ZDDLS
 {
