@@ -132,6 +132,20 @@ abap.Classes['PROG-ZFOOBAR-LIF_FOOBAR'] = lif_foobar;`;
     expect(await runSingle(abap)).to.equal("");
   });
 
+  it("TYPES BEGIN OF MESH should be skipped", async () => {
+    const abap = `
+    TYPES: BEGIN OF ty_line,
+             key TYPE i,
+           END OF ty_line.
+    TYPES ty_tab TYPE SORTED TABLE OF ty_line WITH UNIQUE KEY key.
+    TYPES: BEGIN OF MESH ty_mesh,
+             node1 TYPE ty_tab ASSOCIATION to_node2 TO node2 ON key = key,
+             node2 TYPE ty_tab,
+           END OF MESH ty_mesh.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true, skipVersionCheck: true})).to.equal(``);
+  });
+
   it("Simple class, 1", async () => {
     const abap = `
     CLASS lcl_foobar DEFINITION.
@@ -761,6 +775,13 @@ abap.Forms['PROG-ZFOOBAR-FOO'] = foo;`;
     INSERT demo_expressions FROM @( VALUE #( id = 'F' ) ).`;
 
     expect(await runSingle(abap, {ignoreSyntaxCheck: true, skipVersionCheck: true, unknownTypes: UnknownTypesEnum.runtimeError})).to.include(`throw new Error("Unknown type: TypeNameOrInfer, type not found: #`);
+  });
+
+  it("SET LOCKS, runtime error", async () => {
+    const abap = `
+    SET LOCKS OF zi_foo ENTITY ent FROM lt_keys FAILED ls_failed REPORTED ls_reported.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true, skipVersionCheck: true})).to.equal(`throw new Error("SET LOCKS, not supported, transpiler");`);
   });
 
   it("Upper case method impl name, should transpile to lower", async () => {
