@@ -39,6 +39,11 @@ export class CompareTranspiler implements IExpressionTranspiler {
         return new Chunk().appendString("abap.compare.assigned(").appendChunk(s0).appendString(")");
       }
 
+      // a table parameter is often named with its body suffix (it_x[] IS
+      // SUPPLIED): the parameter is it_x, "[]" is no part of a JS name
+      if (/ IS (NOT )?(SUPPLIED|REQUESTED)$/.test(concat)) {
+        concat = concat.replace(/\[\](?= IS )/, "");
+      }
       if (concat.endsWith(" IS SUPPLIED")) {
         if (concat.startsWith("NOT ")) {
           concat = concat.replace("NOT ", "");
