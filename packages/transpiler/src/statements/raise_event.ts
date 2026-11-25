@@ -15,6 +15,23 @@ export class RaiseEventTranspiler implements IStatementTranspiler {
       extra = "," + new ParameterListSTranspiler().transpile(parameters, traversal).getCode();
     }
 
+    // a static event: handlers may only react when the class of this statement is theirs, it is passed along
+    const def = traversal.getClassDefinition(node.getFirstToken());
+    const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
+    let search: abaplint.IClassDefinition | undefined = def;
+    let isStatic = false;
+    while (search !== undefined) {
+      const event = search.getEvents().find(e => e.getName().toLowerCase() === eventName);
+      if (event !== undefined) {
+        isStatic = event.isStatic();
+        break;
+      }
+      search = search.getSuperClass() ? traversal.findClassDefinition(search.getSuperClass(), scope) : undefined;
+    }
+    if (isStatic === true && def !== undefined) {
+      extra = (extra === "" ? ", undefined" : extra) + ", " + Traversal.escapeNamespace(def.getName().toLowerCase());
+    }
+
     return new Chunk().append(`await abap.statements.raiseEvent(this.${eventName}, this.me${extra});`, node, traversal);
   }
 
