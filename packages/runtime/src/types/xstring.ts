@@ -50,6 +50,9 @@ export class XString implements ICharacter {
           this.value = "0" + this.value;
         }
       }
+    } else if (value instanceof XString || value instanceof Hex) {
+      // already hexadecimal digits, uppercase and an even number of them
+      this.value = value.get();
     } else {
       let v = value.get();
       if (value instanceof Float) {
@@ -66,6 +69,13 @@ export class XString implements ICharacter {
         this.set(v);
       }
     }
+    return this;
+  }
+
+  /** sets hexadecimal digits the caller knows to be valid: uppercase 0-9 and A-F, an even
+   *  number of them. set( ) checks a string first, which takes time in its length */
+  public setHex(value: string): XString {
+    this.value = value;
     return this;
   }
 

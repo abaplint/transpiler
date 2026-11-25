@@ -4228,4 +4228,37 @@ START-OF-SELECTION.
     }, {postgres: false, snowflake: false, hana: false});
   });
 
+  it("MODIFY and DELETE of a database table in the short forms, from the TABLES work area and FROM", async () => {
+    const code = `
+    TABLES t100.
+    DATA ls_t100 TYPE t100.
+    DATA lv_count TYPE i.
+    t100-sprsl = 'E'.
+    t100-arbgb = 'HELLO'.
+    t100-msgnr = '001'.
+    t100-text = 'first'.
+    MODIFY t100.
+    WRITE / sy-subrc.
+    ls_t100 = t100.
+    ls_t100-msgnr = '002'.
+    MODIFY t100 FROM ls_t100.
+    WRITE / sy-subrc.
+    SELECT COUNT(*) FROM t100 INTO lv_count.
+    WRITE / lv_count.
+    DELETE t100.
+    WRITE / sy-subrc.
+    DELETE t100 FROM ls_t100.
+    WRITE / sy-subrc.
+    SELECT COUNT(*) FROM t100 INTO lv_count.
+    WRITE / lv_count.
+    DELETE t100.
+    WRITE / sy-subrc.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("0\n0\n2\n0\n0\n0\n4");
+    }, {postgres: false, snowflake: false, hana: false});
+  });
+
 });
