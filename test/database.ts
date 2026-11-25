@@ -240,6 +240,40 @@ describe("Top level tests, Database", () => {
     });
   });
 
+  it("SELECT from a CDS view with an association, and its metadata", async () => {
+    const ddls = `@EndUserText.label: 'Messages'
+define view entity ZI_MSG as select from t100
+  association [0..*] to t100 as _Same on $projection.MessageClass = _Same.arbgb
+{
+  key sprsl as Language,
+  key arbgb as MessageClass,
+  key msgnr as MessageNumber,
+  @EndUserText.label: 'Text'
+  text as MessageText,
+  _Same
+}`;
+    const code = `
+    DATA lv_meta TYPE string.
+    SELECT * FROM zi_msg INTO TABLE @DATA(lt_rows) WHERE messagenumber = '000'.
+    LOOP AT lt_rows INTO DATA(ls_row).
+      WRITE / ls_row-messagetext.
+    ENDLOOP.
+    WRITE '@KERNEL const ddic = abap.DDIC["ZI_MSG"];'.
+    WRITE '@KERNEL const meta = [ddic.keyFields.join(","), ddic.cds.associations[0].name];'.
+    WRITE '@KERNEL lv_meta.set(meta.join(" ") + " " + ddic.cds.fields[3].annotations[0].value);'.
+    WRITE / lv_meta.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zi_msg.ddls.asddls", contents: ddls},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test},
+    ];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().split("\n").map(l => l.trimEnd()).join("\n").trimEnd())
+        .to.equal("hello world\nLANGUAGE,MESSAGECLASS,MESSAGENUMBER _Same Text");
+    }, {sqlite: true, postgres: false, snowflake: false, hana: false});
+  });
+
   it("SQL scalar subselect in a condition", async () => {
     const code = `
     DATA lw_keys TYPE t001w.
@@ -4225,6 +4259,39 @@ START-OF-SELECTION.
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("HELLO");
+    }, {postgres: false, snowflake: false, hana: false});
+  });
+
+  it("MODIFY and DELETE of a database table in the short forms, from the TABLES work area and FROM", async () => {
+    const code = `
+    TABLES t100.
+    DATA ls_t100 TYPE t100.
+    DATA lv_count TYPE i.
+    t100-sprsl = 'E'.
+    t100-arbgb = 'HELLO'.
+    t100-msgnr = '001'.
+    t100-text = 'first'.
+    MODIFY t100.
+    WRITE / sy-subrc.
+    ls_t100 = t100.
+    ls_t100-msgnr = '002'.
+    MODIFY t100 FROM ls_t100.
+    WRITE / sy-subrc.
+    SELECT COUNT(*) FROM t100 INTO lv_count.
+    WRITE / lv_count.
+    DELETE t100.
+    WRITE / sy-subrc.
+    DELETE t100 FROM ls_t100.
+    WRITE / sy-subrc.
+    SELECT COUNT(*) FROM t100 INTO lv_count.
+    WRITE / lv_count.
+    DELETE t100.
+    WRITE / sy-subrc.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("0\n0\n2\n0\n0\n0\n4");
     }, {postgres: false, snowflake: false, hana: false});
   });
 

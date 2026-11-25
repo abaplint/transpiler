@@ -1,8 +1,10 @@
+import {int8Result} from "../types/integer8";
 import {Character, DecFloat34, FieldSymbol, Float, Hex, Integer, Integer8} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {String} from "../types/string";
 import {parse} from "./_parse";
+import {asFloat, isFloatWithInteger8} from "./_float_integer8";
 import {decFloat34Result, isDecFloat34Operand, toDecimal} from "./_decfloat";
 import {addDecimal} from "../types/_decimal";
 
@@ -43,14 +45,16 @@ export function add(left: INumeric | ICharacter | string | number | Float | Inte
       && isIntegerCharacter(left)
       && isIntegerCharacter(right)) {
     return new Integer().set(Number.parseInt(left.get(), 10) + Number.parseInt(right.get(), 10)).clearIntegerCalculationType();
+  } else if (isFloatWithInteger8(left, right)) {
+    return add(asFloat(left), asFloat(right));
   } else if (left instanceof Integer8) {
     if (right instanceof Integer8) {
-      return new Integer8().set(left.get() + right.get());
+      return int8Result(left.get() + right.get());
     } else {
-      return new Integer8().set(left.get() + BigInt(parse(right as any)));
+      return int8Result(left.get() + BigInt(parse(right as any)));
     }
   } else if (right instanceof Integer8) {
-    return new Integer8().set(BigInt(parse(left as any)) + right.get());
+    return int8Result(BigInt(parse(left as any)) + right.get());
   }
 
   if (left instanceof FieldSymbol) {

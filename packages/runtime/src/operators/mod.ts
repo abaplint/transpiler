@@ -3,9 +3,13 @@ import {Float, Integer, Integer8} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
+import {asFloat, isFloatWithInteger8} from "./_float_integer8";
 
 export function mod(left: INumeric | ICharacter | string | Integer8 | number, right: INumeric | Integer8 | ICharacter | string | number) {
   if (left instanceof Integer8 || right instanceof Integer8) {
+    if (isFloatWithInteger8(left, right)) {
+      return mod(asFloat(left), asFloat(right));
+    }
     const l = left instanceof Integer8 ? left.get() : BigInt(parse(left));
     const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));
     if (r === 0n) {

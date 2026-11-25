@@ -5,7 +5,7 @@ import {AsyncFunction, runFiles} from "../_utils";
 let abap: ABAP;
 
 async function run(contents: string) {
-  return runFiles(abap, [{filename: "zfoobar_on_change.prog.abap", contents}], {skipVersionCheck: true});
+  return runFiles(abap, [{filename: "zfoobar_on_change.prog.abap", contents}]);
 }
 
 describe("Running statements - ON CHANGE OF", () => {

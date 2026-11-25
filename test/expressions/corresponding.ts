@@ -545,4 +545,250 @@ WRITE / lines( t2 ).`;
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("table, BASE keeps the base rows and appends the source rows", async () => {
+    const code = `
+TYPES: BEGIN OF ty1,
+         a TYPE i,
+       END OF ty1.
+TYPES: BEGIN OF ty2,
+         a TYPE i,
+         b TYPE i,
+       END OF ty2.
+DATA t1 TYPE STANDARD TABLE OF ty1 WITH EMPTY KEY.
+DATA t2 TYPE STANDARD TABLE OF ty2 WITH EMPTY KEY.
+DATA row TYPE ty2.
+t1 = VALUE #( ( a = 1 ) ).
+t2 = VALUE #( ( a = 5 b = 6 ) ).
+t2 = CORRESPONDING #( BASE ( t2 ) t1 ).
+LOOP AT t2 INTO row.
+  WRITE / row-a.
+  WRITE / row-b.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("5\n6\n1\n0");
+  });
+
+  it("table, BASE with MAPPING, and BASE into the shorter row type", async () => {
+    const code = `
+TYPES: BEGIN OF ty1,
+         a TYPE i,
+       END OF ty1.
+TYPES: BEGIN OF ty2,
+         a TYPE i,
+         b TYPE i,
+       END OF ty2.
+DATA t1 TYPE STANDARD TABLE OF ty1 WITH EMPTY KEY.
+DATA t2 TYPE STANDARD TABLE OF ty2 WITH EMPTY KEY.
+DATA row TYPE ty2.
+t1 = VALUE #( ( a = 1 ) ).
+t2 = VALUE #( ( a = 5 b = 6 ) ( a = 1 b = 0 ) ).
+t2 = CORRESPONDING #( BASE ( t2 ) t1 MAPPING b = a ).
+WRITE / lines( t2 ).
+LOOP AT t2 INTO row.
+  WRITE / row-a.
+  WRITE / row-b.
+ENDLOOP.
+t1 = CORRESPONDING #( BASE ( t1 ) t2 ).
+WRITE / lines( t1 ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3\n5\n6\n1\n0\n1\n1\n4");
+  });
+
+  it("table, BASE into a sorted target", async () => {
+    const code = `
+TYPES: BEGIN OF ty1,
+         a TYPE i,
+         b TYPE i,
+       END OF ty1.
+TYPES: BEGIN OF ty2,
+         a TYPE i,
+         c TYPE i,
+       END OF ty2.
+DATA t1 TYPE STANDARD TABLE OF ty1 WITH EMPTY KEY.
+DATA t2 TYPE SORTED TABLE OF ty2 WITH UNIQUE KEY a.
+DATA row TYPE ty2.
+t1 = VALUE #( ( a = 1 b = 2 ) ( a = 3 b = 4 ) ).
+t2 = VALUE #( ( a = 9 c = 9 ) ).
+t2 = CORRESPONDING #( BASE ( t2 ) t1 ).
+LOOP AT t2 INTO row.
+  WRITE / row-a.
+  WRITE / row-c.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n0\n3\n0\n9\n9");
+  });
+
+  it("table into generic CHANGING parameter", async () => {
+    const code = `
+TYPES: BEGIN OF ty1,
+         foo TYPE i,
+         bar TYPE i,
+       END OF ty1.
+TYPES: BEGIN OF ty2,
+         bar TYPE i,
+         moo TYPE i,
+       END OF ty2.
+TYPES ty_tab1 TYPE STANDARD TABLE OF ty1 WITH EMPTY KEY.
+TYPES ty_tab2 TYPE STANDARD TABLE OF ty2 WITH EMPTY KEY.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS run IMPORTING src TYPE ty_tab1 CHANGING ct TYPE STANDARD TABLE.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    ct = CORRESPONDING #( src ).
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA t1 TYPE ty_tab1.
+  DATA t2 TYPE ty_tab2.
+  DATA row TYPE ty2.
+  t1 = VALUE #( ( foo = 1 bar = 2 ) ( foo = 3 bar = 4 ) ).
+  t2 = VALUE #( ( bar = 9 moo = 9 ) ).
+  lcl=>run( EXPORTING src = t1 CHANGING ct = t2 ).
+  WRITE / lines( t2 ).
+  LOOP AT t2 INTO row.
+    WRITE / |{ row-bar } { row-moo }|.
+  ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2\n2 0\n4 0");
+  });
+
+  it("table into generic CHANGING parameter, MAPPING", async () => {
+    const code = `
+TYPES: BEGIN OF ty1,
+         k TYPE i,
+       END OF ty1.
+TYPES: BEGIN OF ty2,
+         key TYPE i,
+       END OF ty2.
+TYPES ty_tab1 TYPE STANDARD TABLE OF ty1 WITH EMPTY KEY.
+TYPES ty_tab2 TYPE STANDARD TABLE OF ty2 WITH EMPTY KEY.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS run IMPORTING src TYPE ty_tab1 CHANGING ct TYPE STANDARD TABLE.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    ct = CORRESPONDING #( src MAPPING key = k ).
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA t1 TYPE ty_tab1.
+  DATA t2 TYPE ty_tab2.
+  DATA row TYPE ty2.
+  t1 = VALUE #( ( k = 5 ) ).
+  lcl=>run( EXPORTING src = t1 CHANGING ct = t2 ).
+  LOOP AT t2 INTO row.
+    WRITE / row-key.
+  ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("5");
+  });
+
+  it("table into generic CHANGING parameter, BASE", async () => {
+    const code = `
+TYPES: BEGIN OF ty1,
+         foo TYPE i,
+       END OF ty1.
+TYPES ty_tab1 TYPE STANDARD TABLE OF ty1 WITH EMPTY KEY.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS run IMPORTING src TYPE ty_tab1 CHANGING ct TYPE STANDARD TABLE.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    ct = CORRESPONDING #( BASE ( ct ) src ).
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA t1 TYPE ty_tab1.
+  DATA t2 TYPE ty_tab1.
+  DATA row TYPE ty1.
+  t1 = VALUE #( ( foo = 2 ) ).
+  t2 = VALUE #( ( foo = 1 ) ).
+  lcl=>run( EXPORTING src = t1 CHANGING ct = t2 ).
+  LOOP AT t2 INTO row.
+    WRITE / row-foo.
+  ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2");
+  });
+
+  it("structure into generic CHANGING parameter", async () => {
+    const code = `
+TYPES: BEGIN OF ty1,
+         foo TYPE i,
+         bar TYPE i,
+       END OF ty1.
+TYPES: BEGIN OF ty2,
+         bar TYPE i,
+         moo TYPE i,
+       END OF ty2.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS run IMPORTING src TYPE ty1 CHANGING cs TYPE any.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD run.
+    cs = CORRESPONDING #( src ).
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA s1 TYPE ty1.
+  DATA s2 TYPE ty2.
+  s1-foo = 1.
+  s1-bar = 2.
+  s2-moo = 9.
+  lcl=>run( EXPORTING src = s1 CHANGING cs = s2 ).
+  WRITE / |{ s2-bar } { s2-moo }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2 0");
+  });
+
+  it("table into generic field symbol", async () => {
+    const code = `
+TYPES: BEGIN OF ty1,
+         foo TYPE i,
+       END OF ty1.
+TYPES ty_tab1 TYPE STANDARD TABLE OF ty1 WITH EMPTY KEY.
+DATA t1 TYPE ty_tab1.
+DATA t2 TYPE ty_tab1.
+FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.
+t1 = VALUE #( ( foo = 3 ) ).
+ASSIGN t2 TO <tab>.
+<tab> = CORRESPONDING #( t1 ).
+WRITE / lines( t2 ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1");
+  });
+
 });
