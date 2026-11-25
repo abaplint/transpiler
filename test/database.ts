@@ -240,6 +240,40 @@ describe("Top level tests, Database", () => {
     });
   });
 
+  it("SELECT from a CDS view with an association, and its metadata", async () => {
+    const ddls = `@EndUserText.label: 'Messages'
+define view entity ZI_MSG as select from t100
+  association [0..*] to t100 as _Same on $projection.MessageClass = _Same.arbgb
+{
+  key sprsl as Language,
+  key arbgb as MessageClass,
+  key msgnr as MessageNumber,
+  @EndUserText.label: 'Text'
+  text as MessageText,
+  _Same
+}`;
+    const code = `
+    DATA lv_meta TYPE string.
+    SELECT * FROM zi_msg INTO TABLE @DATA(lt_rows) WHERE messagenumber = '000'.
+    LOOP AT lt_rows INTO DATA(ls_row).
+      WRITE / ls_row-messagetext.
+    ENDLOOP.
+    WRITE '@KERNEL const ddic = abap.DDIC["ZI_MSG"];'.
+    WRITE '@KERNEL const meta = [ddic.keyFields.join(","), ddic.cds.associations[0].name];'.
+    WRITE '@KERNEL lv_meta.set(meta.join(" ") + " " + ddic.cds.fields[3].annotations[0].value);'.
+    WRITE / lv_meta.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zi_msg.ddls.asddls", contents: ddls},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test},
+    ];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().split("\n").map(l => l.trimEnd()).join("\n").trimEnd())
+        .to.equal("hello world\nLANGUAGE,MESSAGECLASS,MESSAGENUMBER _Same Text");
+    }, {sqlite: true, postgres: false, snowflake: false, hana: false});
+  });
+
   it("SQL scalar subselect in a condition", async () => {
     const code = `
     DATA lw_keys TYPE t001w.
