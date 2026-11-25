@@ -6,6 +6,7 @@ import {Integer8} from "./integer8";
 import {DecFloat34} from "./decfloat34";
 import {Time} from "./time";
 import {FieldSymbol} from "./field_symbol";
+import {roundHalfAwayFromZero} from "./integer";
 
 const digits = new RegExp(/^\s*-?\+?\d*\.?\d*(?:E[+-]?\d+)? *$/i);
 
@@ -77,7 +78,8 @@ export class Packed implements INumeric {
 
   private numberToScaled(value: number): bigint {
     const factor = Math.pow(10, this.decimals);
-    return BigInt(Math.round(value * factor));
+    // a half is rounded away from zero, also for negative values: -1.125 is -1.13
+    return BigInt(roundHalfAwayFromZero(value * factor));
   }
 
   private stringToScaled(input: string): bigint {

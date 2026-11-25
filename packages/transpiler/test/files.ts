@@ -610,6 +610,9 @@ ENDINTERFACE.`;
   "objectType": "DTEL",
   "type": ${dtelType},
   "domain": "ZFIXEDVAL",
+  "datatype": "CHAR",
+  "length": 1,
+  "decimals": undefined,
   "fixedValues": [{"description":"fixed","low":"F","language":"E"},{"description":"numbers","low":"1","high":"9","language":"E"}],
   "description": "sdfsd",
 };`;
