@@ -30,6 +30,23 @@ export class IncludeTranspiler implements IStatementTranspiler {
       }
     }
 
+    if (obj instanceof abaplint.Objects.Program) {
+      const prog = traversal.reg.getObject("PROG", includeName) as abaplint.Objects.Program | undefined;
+      const file = prog?.getMainABAPFile();
+      if (file !== undefined) {
+        // traversed with the spaghetti of the main program, the include can use its types and data
+        const sub = new Traversal(traversal.getSpaghetti(), file, obj, traversal.reg,
+          traversal.options, traversal.typeFactories);
+        sub.programMain = traversal.programMain;
+        const rearranged = new Rearranger().run(obj.getType(), file.getStructure());
+        const chunk = new Chunk();
+        if (traversal.options?.addFilenames === true) {
+          chunk.appendString("// " + file.getFilename() + "\n");
+        }
+        return chunk.appendChunk(sub.traverse(rearranged));
+      }
+    }
+
     // todo, this will not work
     return new Chunk("// transpiler TODO: INCLUDE " + includeName + "\n");
   }

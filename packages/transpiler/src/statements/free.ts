@@ -7,7 +7,8 @@ import {Chunk} from "../chunk";
 export class FreeTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    return new ClearTranspiler().transpile(node, traversal);
+    // FREE of a table with a header line frees the table body, not the header line
+    return new ClearTranspiler(true).transpile(node, traversal);
   }
 
 }

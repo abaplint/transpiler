@@ -50,6 +50,8 @@ export class Hex implements ICharacter {
       }
       this.value = this.value.padStart(doubleLength, "0");
     } else if (value instanceof Integer8) {
+      // the eight bytes in two's complement, right aligned: a shorter target keeps
+      // the last bytes, a longer one is zero padded on the left
       const hex = BigInt.asUintN(64, value.get()).toString(16).toUpperCase();
       return this.set(hex.slice(-doubleLength).padStart(doubleLength, "0"));
     } else if (value instanceof Hex || value instanceof XString) {

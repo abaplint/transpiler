@@ -73,8 +73,9 @@ export class Integer8 {
 // t is converted to the number of seconds since midnight, not the HHMMSS digits
       this.value = BigInt(value.getNumeric());
     } else if (value instanceof Hex || value instanceof XString || value instanceof HexUInt8) {
-      const hex = value.get().slice(-16);
-      this.value = BigInt.asIntN(64, hex === "" ? 0n : BigInt("0x" + hex));
+// the last eight bytes, two's complement; a shorter source is zero padded on the left, so it is never negative
+      const hex = value.get();
+      this.value = hex === "" ? 0n : BigInt.asIntN(64, BigInt("0x" + hex));
     } else {
       this.set(value.get());
     }

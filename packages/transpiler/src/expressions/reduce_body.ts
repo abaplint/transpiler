@@ -6,6 +6,7 @@ import {LetTranspiler} from "./let";
 import {FieldSymbolTranspiler} from "../statements";
 import {SourceFieldSymbolTranspiler} from "./source_field_symbol";
 import {UniqueIdentifier} from "../unique_identifier";
+import {ForGroupsTranspiler} from "./for_groups";
 
 interface LoopDescriptor {
   beforeLoop: string[];
@@ -67,7 +68,7 @@ export class ReduceBodyTranspiler {
   private describeFor(forExpression: Nodes.ExpressionNode, body: Nodes.ExpressionNode,
                       traversal: Traversal, declarations: string[]): LoopDescriptor {
     if (forExpression.findDirectTokenByText("GROUPS")) {
-      return this.describeGroupsFor(forExpression, body, traversal);
+      return this.describeGroupsFor(forExpression, traversal, declarations);
     }
     const loopExpression = forExpression.findDirectExpression(Expressions.InlineLoopDefinition);
     if (loopExpression === undefined) {
@@ -140,51 +141,21 @@ export class ReduceBodyTranspiler {
     };
   }
 
-  private describeGroupsFor(forExpression: Nodes.ExpressionNode, body: Nodes.ExpressionNode,
-                            traversal: Traversal): LoopDescriptor {
-    const targets = forExpression.findDirectExpressions(Expressions.TargetField);
-    const source = forExpression.findDirectExpression(Expressions.Source);
-    const groupBy = forExpression.findDirectExpression(Expressions.FieldChain);
-    if (targets.length !== 2 || source === undefined || groupBy === undefined) {
-      throw new Error("ReduceBodyTranspiler invalid GROUPS FOR, " + body.concatTokens());
+  private describeGroupsFor(forExpression: Nodes.ExpressionNode, traversal: Traversal,
+                            declarations: string[]): LoopDescriptor {
+    const groups = new ForGroupsTranspiler().transpile(forExpression, traversal);
+    declarations.push(...groups.declarations);
+    const preBody = [...groups.preBody];
+    const letNode = forExpression.findDirectExpression(Expressions.Let);
+    if (letNode) {
+      preBody.push(new LetTranspiler().transpile(letNode, traversal).getCode());
     }
-
-    const groupTarget = traversal.traverse(targets[0]).getCode();
-    const memberTarget = traversal.traverse(targets[1]).getCode();
-    const sourceCode = traversal.traverse(source).getCode();
-    const groupByCode = traversal.traverse(groupBy).getCode();
-    const groups = UniqueIdentifier.get();
-    const row = UniqueIdentifier.get();
-    const key = UniqueIdentifier.get();
-    const rawKey = UniqueIdentifier.get();
-    const entry = UniqueIdentifier.get();
-
-    const generator = `(async function*() {\n`
-      + `const ${groups} = new Map();\n`
-      + `for await (const ${row} of abap.statements.loop(${sourceCode})) {\n`
-      + `const ${memberTarget} = ${row}.clone();\n`
-      + `const ${key} = ${groupByCode};\n`
-      + `const ${rawKey} = ${key}.get();\n`
-      + `let ${entry} = ${groups}.get(${rawKey});\n`
-      + `if (${entry} === undefined) {\n`
-      + `${entry} = {key: ${key}.clone(), members: []};\n`
-      + `${groups}.set(${rawKey}, ${entry});\n`
-      + `}\n`
-      + `${entry}.members.push(${row});\n`
-      + `}\n`
-      + `for (const value of ${groups}.values()) { yield value; }\n`
-      + `})()`;
-
-    const loopEntry = UniqueIdentifier.get();
     return {
       beforeLoop: [],
-      open: `for await (const ${loopEntry} of ${generator}) {`,
-      preBody: [
-        `const ${groupTarget} = ${loopEntry}.key.clone();`,
-        `const ${memberTarget} = ${loopEntry}.members[0].clone();`,
-      ],
+      open: groups.open,
+      preBody,
       postBody: [],
-      close: "}",
+      close: groups.close,
     };
   }
 

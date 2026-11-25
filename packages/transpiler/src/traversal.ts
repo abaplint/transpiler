@@ -11,6 +11,7 @@ import {ITranspilerOptions} from "./types";
 import {DEFAULT_KEYWORDS} from "./keywords";
 import {TypeFactoryRegistry} from "./type_factory_registry";
 import {TranspileTypes} from "./transpile_types";
+import {InlineDeclarations} from "./inline";
 
 type IReference = ReturnType<abaplint.ISpaghettiScopeNode["getData"]>["references"][number];
 
@@ -67,6 +68,9 @@ export class Traversal {
   public readonly reg: abaplint.IRegistry;
   public readonly options: ITranspilerOptions | undefined;
   public readonly typeFactories: TypeFactoryRegistry | undefined;
+  /** set when the executable program level code is collected into the program's main function,
+   * shared with the traversals of its INCLUDEs, see traverseProgramLevel */
+  public programMain: Chunk | undefined = undefined;
 
   public constructor(spaghetti: abaplint.ISpaghettiScope, file: abaplint.ABAPFile,
                      obj: abaplint.ABAPObject, reg: abaplint.IRegistry, options?: ITranspilerOptions,
@@ -81,15 +85,15 @@ export class Traversal {
   }
 
   public toType(type: abaplint.AbstractType, options?: {packedDecimals?: number}): string {
-    return TranspileTypes.toType(type, options, this.typeFactories);
+    return TranspileTypes.toType(type, options, this.typeFactories, t => this.findEnumValueNames(t));
   }
 
   public declare(type: abaplint.TypedIdentifier): string {
-    return TranspileTypes.declare(type, this.typeFactories);
+    return TranspileTypes.declare(type, this.typeFactories, t => this.findEnumValueNames(t));
   }
 
   public declareStaticSkipVoid(pre: string, type: abaplint.TypedIdentifier): string {
-    return TranspileTypes.declareStaticSkipVoid(pre, type, this.typeFactories);
+    return TranspileTypes.declareStaticSkipVoid(pre, type, this.typeFactories, t => this.findEnumValueNames(t));
   }
 
   /** Build file-level control-flow context once instead of rescanning all
@@ -152,12 +156,34 @@ export class Traversal {
     return name + "";
   }
 
+  /** the javascript function name of a FORM, from the FormName expression or the ABAP name. FORM names
+   * can contain dashes, eg. "top-of-page", and namespaces, all references must use this */
+  public static formName(name: abaplint.Nodes.ExpressionNode | string): string {
+    const abap = typeof name === "string" ? name : name.concatTokens();
+    return Traversal.prefixVariable(Traversal.escapeNamespace(abap.toLowerCase())!.replace(/-/g, "$"));
+  }
+
   public static isBracketComponent(name: string): boolean {
     return name.match(/^\d/) !== null || name.includes("/") || name.startsWith("%");
   }
 
   public getCurrentObject(): abaplint.ABAPObject {
     return this.obj;
+  }
+
+  /** true if the file is part of the current object, include programs are inlined into the object using them */
+  public isCurrentObjectFile(filename: string): boolean {
+    if (this.getCurrentObject().getABAPFileByName(filename) !== undefined) {
+      return true;
+    }
+    const found = this.findObjectForFilename(filename);
+    return found instanceof abaplint.Objects.Program && found.isInclude();
+  }
+
+  /** the object containing the file, undefined if the file is not in the registry */
+  private findObjectForFilename(filename: string): abaplint.IObject | undefined {
+    const file = this.reg.getFileByName(filename);
+    return file === undefined ? undefined : this.reg.findObjectForFile(file);
   }
 
   public traverse(node: abaplint.INode | undefined): Chunk {
@@ -212,6 +238,16 @@ export class Traversal {
     node: abaplint.ISpaghettiScopeNode
   } | undefined = undefined;
 
+  /** MODIFY name. and DELETE name [FROM wa].: the name is a database table unless it is a variable of table type */
+  public isDatabaseShortForm(target: abaplint.Nodes.ExpressionNode | undefined): boolean {
+    if (target === undefined || target.getChildren().length !== 1) {
+      return false;
+    }
+    const token = target.getFirstToken();
+    const type = this.findCurrentScopeByToken(token)?.findVariable(token.getStr())?.getType();
+    return !(type instanceof abaplint.BasicTypes.TableType);
+  }
+
   public findCurrentScopeByToken(token: abaplint.Token) {
     const filename = this.file.getFilename();
 
@@ -238,22 +274,24 @@ export class Traversal {
         && this.obj instanceof abaplint.Objects.FunctionGroup
         && this.obj.getInclude(filename.split(".")[2].replace(/#/g, "/"))) {
       // workaround for INCLUDEs in function groups
-      return this.fuctionGroupWorkaround(token);
+      return this.fuctionGroupWorkaround();
+    }
+
+    if (node === undefined
+        && this.obj instanceof abaplint.Objects.Program
+        && this.obj.getABAPFileByName(filename) === undefined
+        && this.isCurrentObjectFile(filename)) {
+      // INCLUDE in program, the program level scope only covers the main file
+      return this.spaghetti.getFirstChild()?.getFirstChild();
     }
 
     return node;
   }
 
-  private fuctionGroupWorkaround(token: abaplint.Token): abaplint.ISpaghettiScopeNode | undefined {
-    // check the function group level, it might be an INCLUDE defining the DATA
-    const functionGroupLevel = this.spaghetti.getFirstChild()?.getFirstChild();
-
-    const variable = functionGroupLevel?.getData().vars[token.getStr().toUpperCase()];
-    if (variable?.getStart().equals(token.getStart())) {
-      return functionGroupLevel;
-    }
-
-    return undefined;
+  private fuctionGroupWorkaround(): abaplint.ISpaghettiScopeNode | undefined {
+    // code of an INCLUDE outside FORMs, methods and function modules is at the level of the function group, eg. the
+    // DATA of the TOP include and the constants their VALUE names
+    return this.spaghetti.getFirstChild()?.getFirstChild();
   }
 
   public getSQLInferredType(): abaplint.AbstractType | undefined {
@@ -335,18 +373,13 @@ export class Traversal {
   public prefixAndName(t: abaplint.Token, filename?: string): string {
     let name = t.getStr().toLowerCase().replace(/^!/, "");
 
-    if (filename && this.getCurrentObject().getABAPFileByName(filename) === undefined) {
+    if (filename && this.isCurrentObjectFile(filename) === false) {
       // the prefix is from a different object
-      const file = this.reg.getFileByName(filename);
-      if (file) {
-        const found = this.reg.findObjectForFile(file);
-        if (found) {
-          if (found instanceof abaplint.Objects.Interface) {
-            return Traversal.escapeNamespace(this.lookupClassOrInterface(found.getName(), t)) + "." + found.getName().toLowerCase() + "$" + name;
-          } else {
-            return Traversal.escapeNamespace(this.lookupClassOrInterface(found.getName(), t)) + "." + name;
-          }
-        }
+      const found = this.findObjectForFilename(filename);
+      if (found instanceof abaplint.Objects.Interface) {
+        return Traversal.escapeNamespace(this.lookupClassOrInterface(found.getName(), t)) + "." + found.getName().toLowerCase() + "$" + name;
+      } else if (found) {
+        return Traversal.escapeNamespace(this.lookupClassOrInterface(found.getName(), t)) + "." + name;
       }
     }
 
@@ -398,8 +431,10 @@ export class Traversal {
 
     const methodDefinitions = def.getMethodDefinitions();
     if (methodDefinitions === undefined) {
-      // this can occur if the dependencies is not 702?
-      throw new Error("buildMethods: unexpected undefined, " + def.getName());
+      // abaplint registers a definition before reading it, and stops reading at the first thing it cannot find
+      const superClass = def.getSuperClass();
+      const reason = superClass ? `its super class ${superClass} is not known` : "a super class, interface or type it names is not known";
+      throw new Error(`${this.getFilename()}: the definition of ${def.getName()} could not be read: ${reason}`);
     }
 
     for (const m of methodDefinitions.getAll()) {
@@ -655,12 +690,7 @@ export class Traversal {
   public isTypePool(token: abaplint.Token): string | undefined {
     const ref = this.findReadOrWriteReference(token);
     if (ref?.getFilename().endsWith(".type.abap")) {
-      const file = this.reg.getFileByName(ref.getFilename());
-      if (file === undefined) {
-        return undefined;
-      }
-      const obj = this.reg.findObjectForFile(file);
-      return obj?.getName();
+      return this.findObjectForFilename(ref.getFilename())?.getName();
     }
     return undefined;
   }
@@ -723,7 +753,7 @@ export class Traversal {
       if (scope?.getIdentifier().stype === abaplint.ScopeType.Interface) {
         return scope?.getIdentifier().sname;
       }
-    } else if (this.getCurrentObject().getABAPFileByName(ref.getFilename()) !== undefined) {
+    } else if (this.isCurrentObjectFile(ref.getFilename())) {
       const scope = this.spaghetti.lookupPosition(ref.getStart(), ref.getFilename());
       if (scope?.getIdentifier().stype === abaplint.ScopeType.Interface) {
         return scope?.getIdentifier().sname;
@@ -1158,12 +1188,56 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
     return Traversal.setValues(identifier, name);
   }
 
+  /** the names of the constants of an enumerated type declared in a class or interface, in the
+   *  order they are declared, which is the order setValues numbers them in */
+  public findEnumValueNames(type: abaplint.BasicTypes.EnumType): string[] | undefined {
+    const [owner, name] = (type.getQualifiedName() ?? "").toUpperCase().split("=>");
+    if (name === undefined) {
+      // declared in a program or a procedure: there the values are the names already
+      return undefined;
+    }
+    // a local class or interface of this object hides a global one of the same name
+    for (const obj of [this.obj, this.reg.getObject("CLAS", owner), this.reg.getObject("INTF", owner)]) {
+      if (!(obj instanceof abaplint.ABAPObject)) {
+        continue;
+      }
+      for (const file of obj.getABAPFiles()) {
+        const structure = file.getStructure();
+        const definitions = [...structure?.findAllStructures(abaplint.Structures.ClassDefinition) ?? [],
+          ...structure?.findAllStructures(abaplint.Structures.Interface) ?? []];
+        for (const definition of definitions) {
+          const declared = definition.findDirectStatement(abaplint.Statements.ClassDefinition)
+            ?.findFirstExpression(abaplint.Expressions.ClassName)
+            ?? definition.findDirectStatement(abaplint.Statements.Interface)
+              ?.findFirstExpression(abaplint.Expressions.InterfaceName);
+          if (declared?.concatTokens().toUpperCase() !== owner) {
+            continue;
+          }
+          for (const enumeration of definition.findAllStructures(abaplint.Structures.TypeEnum)) {
+            const begin = enumeration.findDirectStatement(abaplint.Statements.TypeEnumBegin);
+            if (begin?.findFirstExpression(abaplint.Expressions.NamespaceSimpleName)?.concatTokens().toUpperCase() !== name) {
+              continue;
+            }
+            const names: string[] = [];
+            for (const child of enumeration.getChildren()) {
+              if (child instanceof abaplint.Nodes.StatementNode
+                  && (child.get() instanceof abaplint.Statements.Type || child.get() instanceof abaplint.Statements.TypeEnum)) {
+                names.push(child.findFirstExpression(abaplint.Expressions.NamespaceSimpleName)?.concatTokens().toUpperCase() ?? "");
+              }
+            }
+            return names;
+          }
+        }
+      }
+    }
+    return undefined;
+  }
+
   /** position of an enumerated value in its TYPES BEGIN OF ENUM, counting from 0 */
   private findEnumValueIndex(identifier: abaplint.TypedIdentifier): number | undefined {
     // the enum can be declared in another object, eg. a global interface the class implements
     const filename = identifier.getFilename();
-    const raw = this.reg.getFileByName(filename);
-    const obj = raw === undefined ? undefined : this.reg.findObjectForFile(raw);
+    const obj = this.findObjectForFilename(filename);
     const file = obj instanceof abaplint.ABAPObject ? obj.getABAPFileByName(filename) : undefined;
     for (const enumeration of file?.getStructure()?.findAllStructures(abaplint.Structures.TypeEnum) || []) {
       const values = enumeration.getChildren().filter(c => c instanceof abaplint.Nodes.StatementNode
@@ -1268,7 +1342,12 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
    * and are initialized once, also when the block is a loop */
   private traverseProcedureLevel(node: abaplint.Nodes.StructureNode): Chunk {
     const ret = new Chunk();
+    // FORMs, methods and function modules declare their own inline declarations
+    const programLevel = InlineDeclarations.isProgramLevelScope(this.findCurrentScopeByToken(node.getFirstToken()));
     for (const c of node.getChildren()) {
+      if (programLevel === true) {
+        ret.appendString(InlineDeclarations.buildDeclarations(c, this, true));
+      }
       if (c instanceof abaplint.Nodes.StructureNode && Traversal.isDeclaration(c) === false) {
         ret.appendChunk(this.declareNestedEarly(c));
         this.blockDepth++;
@@ -1337,9 +1416,74 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
     }
   }
 
+  private static readonly PROGRAM_LEVEL_DECLARATIONS = [
+    abaplint.Statements.Data, abaplint.Statements.DataBegin, abaplint.Statements.DataEnd,
+    abaplint.Statements.Constant, abaplint.Statements.ConstantBegin,
+    abaplint.Statements.Type, abaplint.Statements.TypeBegin, abaplint.Statements.TypeEnum,
+    abaplint.Statements.FieldSymbol, abaplint.Statements.Static, abaplint.Statements.StaticBegin,
+    abaplint.Statements.Tables, abaplint.Statements.TypePools, abaplint.Statements.Ranges, abaplint.Statements.Nodes,
+    abaplint.Statements.Parameter, abaplint.Statements.SelectOption, abaplint.Statements.SelectionScreen,
+    abaplint.Statements.ClassDeferred, abaplint.Statements.InterfaceDeferred,
+    abaplint.Statements.ClassDefinitionLoad, abaplint.Statements.InterfaceLoad,
+    abaplint.Statements.Define, abaplint.Statements.Include, abaplint.Statements.Report, abaplint.Statements.Program,
+  ];
+
+  private static isProgramLevelDeclaration(node: abaplint.INode): boolean {
+    const get = node.get();
+    if (node instanceof abaplint.Nodes.StatementNode) {
+      return Traversal.PROGRAM_LEVEL_DECLARATIONS.some(d => get instanceof d);
+    } else if (node instanceof abaplint.Nodes.StructureNode) {
+      return get instanceof abaplint.Structures.Data
+        || get instanceof abaplint.Structures.Constants
+        || get instanceof abaplint.Structures.Types
+        || get instanceof abaplint.Structures.TypeEnum
+        || get instanceof abaplint.Structures.Statics
+        || get instanceof abaplint.Structures.Define;
+    }
+    return false;
+  }
+
+  /** Splits the top level of a program, or of an INCLUDE expanded into it: declarations, classes and FORMs
+   * stay on module level and are returned, the executable statements and event blocks are appended to
+   * programMain. Declarations nested in executable blocks are global in ABAP, they stay on module level */
+  private traverseProgramLevel(node: abaplint.Nodes.StructureNode, main: Chunk): Chunk {
+    const ret = new Chunk();
+    for (const c of node.getChildren()) {
+      if (c instanceof abaplint.Nodes.StatementNode) {
+        // event statements like INITIALIZATION are executable, REPORT, PARAMETERS etc. are declarations
+        (Traversal.isProgramLevelDeclaration(c) ? ret : main).appendChunk(this.traverse(c));
+        continue;
+      } else if (!(c.get() instanceof abaplint.Structures.Normal)) {
+        // classes, interfaces, FORMs
+        ret.appendChunk(this.traverse(c));
+        continue;
+      }
+      for (const n of c.getChildren()) {
+        // inline declarations are program global like DATA, so they stay on module level too
+        ret.appendString(InlineDeclarations.buildDeclarations(n, this, true));
+        if (Traversal.isProgramLevelDeclaration(n)) {
+          ret.appendChunk(this.traverse(n));
+        } else if (n instanceof abaplint.Nodes.StructureNode) {
+          ret.appendChunk(this.declareNestedEarly(n));
+          this.blockDepth++;
+          try {
+            main.appendChunk(this.traverseStructure(n));
+          } finally {
+            this.blockDepth--;
+          }
+        } else {
+          main.appendChunk(this.traverse(n));
+        }
+      }
+    }
+    return ret;
+  }
+
   protected traverseStructure(node: abaplint.Nodes.StructureNode): Chunk {
     if (this.declaredEarly.has(node) && this.emittingEarly === false) {
       return new Chunk();
+    } else if (this.programMain !== undefined && node.get() instanceof abaplint.Structures.Any) {
+      return this.traverseProgramLevel(node, this.programMain);
     } else if (this.blockDepth === 0 && node.get() instanceof abaplint.Structures.Normal) {
       return this.traverseProcedureLevel(node);
     }

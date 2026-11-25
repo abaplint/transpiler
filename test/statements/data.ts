@@ -289,4 +289,57 @@ WRITE lv_value.`;
     expect(abap.console.get()).to.equal("3");
   });
 
+  it("inline DATA and FIELD-SYMBOL on program level, nested in IF, used after", async () => {
+    const code = `
+DATA itab TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+APPEND 7 TO itab.
+APPEND 8 TO itab.
+DATA(first) = 1.
+IF lines( itab ) > 0.
+  DATA(cnt) = lines( itab ).
+ENDIF.
+READ TABLE itab INDEX first INTO DATA(row).
+READ TABLE itab INDEX cnt ASSIGNING FIELD-SYMBOL(<fs>).
+ASSERT cnt = 2.
+ASSERT row = 7.
+ASSERT <fs> = 8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("inline DATA on program level, LOOP nested in IF, used after", async () => {
+    const code = `
+DATA itab TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+APPEND 7 TO itab.
+APPEND 8 TO itab.
+IF lines( itab ) > 0.
+  LOOP AT itab INTO DATA(last).
+    DATA(dbl) = last * 2.
+  ENDLOOP.
+ENDIF.
+ASSERT last = 8.
+ASSERT dbl = 16.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("inline DATA in START-OF-SELECTION is program global, FORM keeps its own", async () => {
+    const code = `
+START-OF-SELECTION.
+  DO 3 TIMES.
+    DATA(counter) = sy-index.
+  ENDDO.
+  PERFORM check.
+
+FORM check.
+  DATA(local) = counter * 2.
+  ASSERT local = 6.
+ENDFORM.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

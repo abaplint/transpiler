@@ -159,10 +159,10 @@ describe("Running Examples - Float type", () => {
   });
 
   it("Float, a value written out can be read back", async () => {
-    // moving a float into a character field writes the decimal separator as
-    // a comma, and moving it back has to accept one. Before this the pair was
-    // lossy in the worst way: no error on the way out, CX_SY_CONVERSION_NO_NUMBER
-    // on the way back, three layers from wherever the value came from
+    // moving a float into a character field and back gives the same value.
+    // Before #1847 the pair was lossy in the worst way: no error on the way out,
+    // CX_SY_CONVERSION_NO_NUMBER on the way back, three layers from wherever the
+    // value came from
     const code = `
     DATA float TYPE f.
     DATA ch TYPE c LENGTH 30.
@@ -175,7 +175,8 @@ describe("Running Examples - Float type", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.getTrimmed()).to.equal("9,7944078900000004E+00");
+    // as on a system: a decimal point, right-aligned in the c field, #2186
+    expect(abap.console.getTrimmed()).to.equal("        9.7944078900000004E+00");
   });
 
   it("Float, a point is still a point", async () => {

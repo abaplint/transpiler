@@ -1,5 +1,6 @@
 import * as abaplint from "@abaplint/core";
 import {IRequire} from "./types";
+import {filesWithProgramIncludes} from "./program_includes";
 
 export class Requires {
   private readonly reg: abaplint.IRegistry;
@@ -94,7 +95,7 @@ export class Requires {
       }
 
       // include global super classes for local class definitions
-      for (const f of obj.getSequencedFiles()) {
+      for (const f of filesWithProgramIncludes(obj, this.reg)) {
         for (const c of f.getInfo().listClassDefinitions()) {
           if (c.superClassName === undefined) {
             continue;

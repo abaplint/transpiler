@@ -5,6 +5,9 @@ import {ITranspilerConfig} from "./types";
 import {ISourceFile} from "./libraries";
 import {IOutputArtifact} from "./output_writer";
 
+/** the exported function of a program module running the program, see HandleABAP in the transpiler */
+const PROGRAM_MAIN = "$main";
+
 export function collectObjectFiles(outputFiles: IOutputFile[], config: ITranspilerConfig, files: ISourceFile[]) {
   const root = path.resolve(config.output_folder);
   const filesToWrite: IOutputArtifact[] = [];
@@ -20,6 +23,11 @@ export function collectObjectFiles(outputFiles: IOutputFile[], config: ITranspil
     if (type === "PROG") {
       contents = 'if (!globalThis.abap) await import("' + importPath(output.filename, "_init.mjs") + '");\n' + contents;
       generatedLineOffset = 1;
+      if (output.exports.includes(PROGRAM_MAIN)) {
+        // run the program when executed directly, "node zapp.prog.mjs", not when imported eg. for unit testing
+        contents += "\nif (process.argv[1] !== undefined"
+          + ` && import.meta.url === (await import("url")).pathToFileURL(process.argv[1]).href) await ${PROGRAM_MAIN}();`;
+      }
     }
     if (config.write_source_map === true && (type === "PROG" || type === "FUGR" || type === "CLAS")) {
       const name = output.filename + ".map";

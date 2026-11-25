@@ -3,6 +3,7 @@ import * as abaplint from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
+import {ConstantTranspiler} from "./constant";
 
 export class CallTransformationParametersTranspiler implements IExpressionTranspiler {
 
@@ -18,7 +19,7 @@ export class CallTransformationParametersTranspiler implements IExpressionTransp
           if (res.getCode() !== "{") {
             res.appendString(",");
           }
-          res.appendString(c.concatTokens());
+          res.appendString(ConstantTranspiler.normalizeInteger(c.concatTokens()));
         } else if (c.get() instanceof abaplint.Expressions.SimpleSource3) {
           res.appendChunk(traversal.traverse(c));
         } else if (c.concatTokens() === "=") {

@@ -960,6 +960,82 @@ START-OF-SELECTION.
     await f(abap);
   });
 
+  it("literal passed to an \"xsequence\" importing parameter is its bytes", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS describe
+      IMPORTING bytes         TYPE xsequence
+      RETURNING VALUE(result) TYPE string.
+    CLASS-METHODS describe_value
+      IMPORTING VALUE(bytes)  TYPE xsequence
+      RETURNING VALUE(result) TYPE string.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD describe.
+    DATA t TYPE c LENGTH 1.
+    DATA second TYPE xstring.
+    DESCRIBE FIELD bytes TYPE t.
+    second = bytes+1(1).
+    result = |{ t } { xstrlen( bytes ) } { second }|.
+  ENDMETHOD.
+  METHOD describe_value.
+    DATA t TYPE c LENGTH 1.
+    DESCRIBE FIELD bytes TYPE t.
+    result = |{ t } { xstrlen( bytes ) } { bytes }|.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA x3 TYPE x LENGTH 3 VALUE '010203'.
+  WRITE / lcl=>describe( x3 ).
+  WRITE / lcl=>describe( '010203' ).
+  WRITE / lcl=>describe( \`ABCD\` ).
+  WRITE / lcl=>describe_value( '010203' ).
+  WRITE / lcl=>describe( bytes = 'A0B1' ).
+  WRITE / lcl=>describe_value( '012' ).
+  WRITE / lcl=>describe_value( '1' ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed().split("\n")).to.deep.equal(
+      ["X 3 02", "X 3 02", "X 2 CD", "X 3 010203", "X 2 B1", "X 2 0120", "X 1 10"]);
+  });
+
+  it("empty string literal passed to an \"xsequence\" importing parameter has no bytes", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS len
+      IMPORTING bytes         TYPE xsequence
+      RETURNING VALUE(result) TYPE i.
+    CLASS-METHODS len_value
+      IMPORTING VALUE(bytes)  TYPE xsequence
+      RETURNING VALUE(result) TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD len.
+    result = xstrlen( bytes ).
+  ENDMETHOD.
+  METHOD len_value.
+    result = xstrlen( bytes ).
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA empty TYPE xstring.
+  WRITE / lcl=>len( empty ).
+  WRITE / lcl=>len( \`\` ).
+  WRITE / lcl=>len_value( \`\` ).
+  WRITE / lcl=>len( \`0102\` ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed().split("\n")).to.deep.equal(["0", "0", "0", "2"]);
+  });
+
   it("static method with constant default", async () => {
     const code = `
 CLASS lcl_bar DEFINITION.
@@ -1091,6 +1167,39 @@ ENDCLASS.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
+  });
+
+  it("local subclass, no implementation", async () => {
+    const code = `
+CLASS lcl_base DEFINITION.
+  PUBLIC SECTION.
+    DATA name TYPE string.
+    METHODS constructor.
+ENDCLASS.
+
+CLASS lcl_base IMPLEMENTATION.
+  METHOD constructor.
+    name = 'base'.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_sub DEFINITION INHERITING FROM lcl_base FINAL.
+  PUBLIC SECTION.
+    DATA extra TYPE i VALUE 2.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo_base TYPE REF TO lcl_base.
+  DATA lo_sub TYPE REF TO lcl_sub.
+  CREATE OBJECT lo_sub.
+  WRITE lo_sub->name.
+  WRITE lo_sub->extra.
+  CREATE OBJECT lo_base TYPE ('LCL_SUB').
+  WRITE lo_base->name.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("base2base");
   });
 
   it("escaped preferred parameter, check valid JS syntax", async () => {

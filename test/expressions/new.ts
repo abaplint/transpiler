@@ -336,4 +336,59 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("2");
   });
 
+  it("NEW # for a data reference: the value has the referenced type", async () => {
+    const code = `
+DATA ref TYPE REF TO i.
+ref = NEW #( 5 ).
+ref->* = ref->* + 1.
+WRITE ref->*.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("6");
+  });
+
+  it("NEW # for a structure component that is a data reference", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         count TYPE REF TO i,
+         name  TYPE REF TO string,
+       END OF ty_row.
+DATA row TYPE ty_row.
+row-count = NEW #( 2 * 3 ).
+row-name = NEW #( |n{ row-count->* }| ).
+WRITE / row-count->*.
+WRITE / row-name->*.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("6\nn6");
+  });
+
+  it("NEW # for a data reference to a structure, with components", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         bar TYPE i,
+       END OF ty.
+DATA ref TYPE REF TO ty.
+ref = NEW #( bar = 2 ).
+WRITE ref->bar.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+  it("NEW # for a data reference to a table, with lines", async () => {
+    const code = `
+TYPES ty_strings TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+DATA ref TYPE REF TO ty_strings.
+ref = NEW #( ( |a| ) ( |b| ) ).
+WRITE lines( ref->* ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
 });
