@@ -49,6 +49,78 @@ describe("DTEL + DOMA + CLAS", () => {
       'new abap.types.Packed({length: 8, decimals: 0, qualifiedName: "TIMESTAMP"})');
   });
 
+  it("DTEL, DDIC data type and length of a predefined type, not derivable from the packed runtime type", async () => {
+    const output = await runFiles([{filename: "timestamp.dtel.xml", contents: timestampDtel}]);
+    const code = output[0].chunk.getCode();
+
+    expect(code).to.include(`"datatype": "DEC",\n  "length": 15,\n  "decimals": undefined,`);
+  });
+
+  it("DTEL, CLNT is distinguishable from CHAR", async () => {
+    const clnt = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_DTEL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD04V>
+    <ROLLNAME>ZCLIENT</ROLLNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <DDTEXT>client</DDTEXT>
+    <DTELMASTER>E</DTELMASTER>
+    <DATATYPE>CLNT</DATATYPE>
+    <LENG>000003</LENG>
+    <DECIMALS>000000</DECIMALS>
+   </DD04V>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+    const output = await runFiles([{filename: "zclient.dtel.xml", contents: clnt}]);
+    const code = output[0].chunk.getCode();
+
+    expect(code).to.include("new abap.types.Character(3");
+    expect(code).to.include(`"datatype": "CLNT",\n  "length": 3,\n  "decimals": 0,`);
+  });
+
+  it("DTEL, data type, length and decimals from the domain", async () => {
+    const doma = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_DOMA" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD01V>
+    <DOMNAME>ZAMOUNT</DOMNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <DATATYPE>DEC</DATATYPE>
+    <LENG>000004</LENG>
+    <OUTPUTLEN>000006</OUTPUTLEN>
+    <DECIMALS>000002</DECIMALS>
+    <DDTEXT>amount</DDTEXT>
+   </DD01V>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+    const dtel = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_DTEL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD04V>
+    <ROLLNAME>ZAMOUNT_DTEL</ROLLNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <DOMNAME>ZAMOUNT</DOMNAME>
+    <DDTEXT>amount</DDTEXT>
+    <DTELMASTER>E</DTELMASTER>
+    <REFKIND>D</REFKIND>
+   </DD04V>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+    const output = await runFiles([
+      {filename: "zamount.doma.xml", contents: doma},
+      {filename: "zamount_dtel.dtel.xml", contents: dtel},
+    ]);
+    const code = output.find(file => file.filename === "zamount_dtel.dtel.mjs")!.chunk.getCode();
+
+    expect(code).to.include(`"domain": "ZAMOUNT",\n  "datatype": "DEC",\n  "length": 4,\n  "decimals": 2,`);
+  });
+
   it("Testing qualified names", async () => {
     const amoo_dtel = `<?xml version="1.0" encoding="utf-8"?>
 <abapGit version="v1.0.0" serializer="LCL_OBJECT_DTEL" serializer_version="v1.0.0">

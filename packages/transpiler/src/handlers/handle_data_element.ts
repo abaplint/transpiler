@@ -27,6 +27,9 @@ export class HandleDataElement {
   "objectType": "DTEL",
   "type": ${TranspileTypes.toTypeFunction(type, typeFactory)},
   "domain": ${JSON.stringify(obj.getDomainName())},
+  "datatype": ${JSON.stringify(obj.getDataType(reg))},
+  "length": ${JSON.stringify(obj.getLength(reg))},
+  "decimals": ${JSON.stringify(obj.getDecimals(reg))},
   "fixedValues": ${JSON.stringify(fixedValues)},
   "description": ${JSON.stringify(obj.getDescription())},
 };`;
