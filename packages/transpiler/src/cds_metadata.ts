@@ -140,7 +140,7 @@ export class CDSMetadata {
       // the first name is the projection's own, the second the projected entity
       const name = root.findDirectExpressions(cds.CDSName)[1];
       if (name) {
-        ret.push(name.concatTokens().toUpperCase());
+        ret.push(name.concatTokens().replace(/ /g, "").toUpperCase());
       }
     }
     for (const s of root.findAllExpressions(cds.CDSSource)) {
@@ -236,7 +236,7 @@ export class CDSMetadata {
       return undefined;
     }
     const rest = children.slice(to + 1).map(c => c.concatTokens().toUpperCase());
-    const target = children.slice(to + 1).find(c => c.get() instanceof cds.CDSName)?.concatTokens();
+    const target = children.slice(to + 1).find(c => c.get() instanceof cds.CDSName)?.concatTokens().replace(/ /g, "");
     if (target === undefined) {
       return undefined;
     }

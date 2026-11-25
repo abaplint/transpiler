@@ -170,6 +170,34 @@ describe("CDS metadata", () => {
     ]);
   });
 
+  it("projection in a namespace, redirected target and inherited cardinality", () => {
+    const reg = new abaplint.Registry();
+    reg.addFile(new abaplint.MemoryFile("#abc#i_travel.ddls.asddls",
+      `define root view entity /ABC/I_TRAVEL as select from t000
+  composition [0..*] of /ABC/I_BOOKING as _Booking
+{
+  key mandt as TravelId,
+  _Booking
+}`));
+    reg.addFile(new abaplint.MemoryFile("#abc#i_booking.ddls.asddls",
+      `define view entity /ABC/I_BOOKING as select from t001
+{
+  key mandt as TravelId
+}`));
+    reg.addFile(new abaplint.MemoryFile("#abc#c_travel.ddls.asddls",
+      `define root view entity /ABC/C_TRAVEL as projection on /ABC/I_TRAVEL {
+  key TravelId,
+  _Booking : redirected to composition child /ABC/C_BOOKING
+}`));
+    reg.parse();
+    const m = new CDSMetadata(reg).build(reg.getObject("DDLS", "/ABC/C_TRAVEL") as abaplint.Objects.DataDefinition)!;
+    expect(m.associations.map(a => [a.name, a.target, a.type])).to.deep.equal([
+      ["_Booking", "/ABC/C_BOOKING", "COMPOSITION"],
+    ]);
+    // the cardinality comes from the projected entity, found by its name without blanks
+    expect(m.associations[0].cardinality).to.deep.equal({min: 0, max: "*"});
+  });
+
   it("abstract entity", () => {
     const m = metadata("ZA_PARAM");
     expect(m.definitionType).to.equal("ABSTRACT_ENTITY");
