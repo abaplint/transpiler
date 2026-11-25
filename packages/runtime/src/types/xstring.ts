@@ -7,6 +7,7 @@ import {Character} from "./character";
 import {throwError} from "../throw_error";
 import {Integer} from "./integer";
 import {Integer8} from "./integer8";
+import {Packed} from "./packed";
 
 export class XString implements ICharacter {
   private value: string;
@@ -62,6 +63,9 @@ export class XString implements ICharacter {
       if (value instanceof Float) {
         v = value.getRaw();
         this.set(v);
+      } else if (value instanceof Packed) {
+        // rounded as f is, the number is not written with its decimals
+        this.set(value.get());
       } else if (value instanceof Character) {
         this.set(value.getTrimEnd());
       } else if (typeof v === "number") {

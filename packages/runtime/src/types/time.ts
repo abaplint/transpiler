@@ -2,7 +2,7 @@ import {Hex} from "./hex";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {String} from "./string";
-import {Character, Float, Integer8} from ".";
+import {Character, Float, Integer8, Packed} from ".";
 import {parse} from "../operators/_parse";
 
 export class Time implements ICharacter {
@@ -47,6 +47,9 @@ export class Time implements ICharacter {
         seconds += 86400n;
       }
       this.set(Number(seconds));
+    } else if (value instanceof Packed) {
+      // rounded as f is, set(number) would cut the decimals off
+      this.set(Math.round(value.get()));
     } else if (value instanceof Character && value.get().trim() !== "") {
       // trailing blanks are passed, a shorter text is padded with "0" on the right
       this.set(value.get().padEnd(6, "0"));

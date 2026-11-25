@@ -68,7 +68,11 @@ export class Integer8 {
       this.value = roundToBigInt(value.getDecimal());
     } else if (value instanceof Packed) {
 // exact and rounded half away from zero, get() would go through a double
-      this.value = BigInt(value.toFixed(0));
+      const rounded = BigInt(value.toFixed(0));
+      if (rounded !== BigInt.asIntN(64, rounded)) {
+        throwError("CX_SY_ARITHMETIC_OVERFLOW");
+      }
+      this.value = rounded;
     } else if (value instanceof Float) {
       this.set(roundHalfAwayFromZero(value.getRaw()));
     } else if (value instanceof FieldSymbol) {

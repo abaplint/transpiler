@@ -1,5 +1,5 @@
 import {int8Result} from "../types/integer8";
-import {Character, DecFloat34, FieldSymbol, Float, Integer, Integer8} from "../types";
+import {Character, DecFloat34, FieldSymbol, Float, Integer, Integer8, Packed} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
@@ -7,10 +7,11 @@ import {asFloat, isFloatWithInteger8} from "./_float_integer8";
 import {String} from "../types/string";
 import {decFloat34Result, isDecFloat34Operand, toDecimal} from "./_decfloat";
 import {subtractDecimal} from "../types/_decimal";
+import {packedCalculation} from "./_packed";
 
 export function minus(left: INumeric | ICharacter | string | Integer8 | number | Integer | Float | FieldSymbol,
                       right: INumeric | ICharacter | string | Integer8 | number | Integer | Float | FieldSymbol):
-  Integer | Integer8 | Float | DecFloat34 {
+  Integer | Integer8 | Float | DecFloat34 | Packed {
 
   if (left instanceof FieldSymbol) {
     if (left.getPointer() === undefined) {
@@ -39,7 +40,14 @@ export function minus(left: INumeric | ICharacter | string | Integer8 | number |
     // Float is getRaw(). It sits after the integer branch on purpose, so that
     // integer arithmetic pays nothing for it.
     return new Float().set(left.getRaw() - right.getRaw());
-  } else if (left instanceof Integer8 || right instanceof Integer8) {
+  }
+  if (left instanceof Packed || right instanceof Packed) {
+    const packed = packedCalculation("-", left, right);
+    if (packed !== undefined) {
+      return packed;
+    }
+  }
+  if (left instanceof Integer8 || right instanceof Integer8) {
     if (isFloatWithInteger8(left, right)) {
       return minus(asFloat(left), asFloat(right));
     }
