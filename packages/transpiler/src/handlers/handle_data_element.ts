@@ -16,17 +16,24 @@ export class HandleDataElement {
     const typeFactory = new TypeFactoryRegistry(filename);
 
     let fixedValues: any | undefined = undefined;
+    let doma: abaplint.Objects.Domain | undefined = undefined;
     if (obj.getDomainName()) {
-      const doma = reg.getObject("DOMA", obj.getDomainName()) as abaplint.Objects.Domain | undefined;
+      doma = reg.getObject("DOMA", obj.getDomainName()) as abaplint.Objects.Domain | undefined;
       if (doma) {
         fixedValues = doma.getFixedValues();
       }
     }
 
+    const length = this.ddicNumber(obj, doma, "LENG");
+    const decimals = this.ddicNumber(obj, doma, "DECIMALS");
+
     const body = `abap.DDIC["${obj.getName().toUpperCase()}"] = {
   "objectType": "DTEL",
   "type": ${TranspileTypes.toTypeFunction(type, typeFactory)},
   "domain": ${JSON.stringify(obj.getDomainName())},
+  "datatype": ${JSON.stringify(obj.getDataType(reg))},
+  "length": ${JSON.stringify(length)},
+  "decimals": ${JSON.stringify(decimals)},
   "fixedValues": ${JSON.stringify(fixedValues)},
   "description": ${JSON.stringify(obj.getDescription())},
 };`;
@@ -46,5 +53,19 @@ export class HandleDataElement {
     };
 
     return [output];
+  }
+
+  /** The DDIC length or decimals, the runtime type cannot give them, eg. DEC 4 and DEC 5 are both 3 bytes packed.
+   * Taken from the data element, or from its domain if the data element does not state it */
+  private ddicNumber(obj: abaplint.Objects.DataElement, doma: abaplint.Objects.Domain | undefined,
+                     tag: "LENG" | "DECIMALS"): number | undefined {
+    const regex = new RegExp(`<${tag}>(\\d+)</${tag}>`);
+    for (const raw of [obj.getXMLFile()?.getRaw(), doma?.getXMLFile()?.getRaw()]) {
+      const match = raw?.match(regex);
+      if (match) {
+        return parseInt(match[1], 10);
+      }
+    }
+    return undefined;
   }
 }
