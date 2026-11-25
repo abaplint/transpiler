@@ -10,6 +10,7 @@ const defaultAllowedObjectTypes = [
   "CHKO",
   "CHKV",
   "CLAS",
+  "DCLS",
   "DDLS",
   "DDLX",
   "DEVC",

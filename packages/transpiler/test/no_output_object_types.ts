@@ -18,6 +18,10 @@ define behavior for ZDDLS
   "zsrvd.srvd.srvdsrv": `define service ZSRVD {
   expose ZDDLS;
 }`,
+  "zdcls.dcls.asdcls": `@MappingRole: true
+define role ZDCLS {
+  grant select on ZDDLS;
+}`,
   "zaplo.aplo.xml": abapgitXML,
   "zsajc.sajc.xml": abapgitXML,
   "zsajt.sajt.xml": abapgitXML,
