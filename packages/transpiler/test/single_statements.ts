@@ -272,6 +272,10 @@ await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",resultXML: rv_
       RESULT (lt_rtab).`, js: `if (abap.Classes['KERNEL_CALL_TRANSFORMATION'] === undefined) throw new Error("CallTransformation, kernel class missing");
 await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",sourceXML: mi_xml_doc,options: {value_handling:abap.CharacterFactory.get(16, 'accept_data_loss')},result: (lt_rtab)});`},
     {abap: `CALL TRANSFORMATION id
+      SOURCE XML mi_xml_doc
+      RESULT (lt_rtab[]).`, js: `if (abap.Classes['KERNEL_CALL_TRANSFORMATION'] === undefined) throw new Error("CallTransformation, kernel class missing");
+await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",sourceXML: mi_xml_doc,result: (lt_rtab)});`},
+    {abap: `CALL TRANSFORMATION id
       OPTIONS initial_components = 'suppress'
       SOURCE (lt_stab)
       RESULT XML li_doc.`, js: `if (abap.Classes['KERNEL_CALL_TRANSFORMATION'] === undefined) throw new Error("CallTransformation, kernel class missing");
