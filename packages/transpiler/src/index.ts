@@ -11,6 +11,8 @@ import {HandleABAP} from "./handlers/handle_abap";
 import {HandleDataElement} from "./handlers/handle_data_element";
 import {HandleTableType} from "./handlers/handle_table_type";
 import {HandleView} from "./handlers/handle_view";
+import {HandleDataDefinition} from "./handlers/handle_data_definition";
+import {CDSMetadata} from "./cds_metadata";
 import {HandleEnqu} from "./handlers/handle_enqu";
 import {HandleTypePool} from "./handlers/handle_type_pool";
 import {HandleW3MI} from "./handlers/handle_w3mi";
@@ -65,6 +67,7 @@ export class Transpiler {
       reg: reg,
     };
 
+    const cdsMetadata = new CDSMetadata(reg);
     progress?.set(reg.getObjectCount().total, "Building");
     for (const obj of reg.getObjects()) {
       await progress?.tick("Building, " + obj.getName());
@@ -86,6 +89,8 @@ export class Transpiler {
         output.objects.push(...new HandleTable().runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.View) {
         output.objects.push(...new HandleView().runObject(obj, reg));
+      } else if (obj instanceof abaplint.Objects.DataDefinition) {
+        output.objects.push(...new HandleDataDefinition(cdsMetadata).runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.LockObject) {
         output.objects.push(...new HandleEnqu().runObject(obj, reg));
       } else if (obj instanceof abaplint.Objects.DataElement) {
