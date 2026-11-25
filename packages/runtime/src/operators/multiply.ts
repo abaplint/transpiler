@@ -3,6 +3,7 @@ import {Character, Float, Integer, Integer8} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
+import {asFloat, isFloatWithInteger8} from "./_float_integer8";
 import {String} from "../types/string";
 import {decFloat34Result, isDecFloat34Operand, toDecimal} from "./_decfloat";
 import {multiplyDecimal} from "../types/_decimal";
@@ -13,6 +14,9 @@ export function multiply(left: INumeric | ICharacter | string | Integer8 | numbe
     return decFloat34Result(multiplyDecimal(toDecimal(left), toDecimal(right)));
   }
   if (left instanceof Integer8 || right instanceof Integer8) {
+    if (isFloatWithInteger8(left, right)) {
+      return multiply(asFloat(left), asFloat(right));
+    }
     const l = left instanceof Integer8 ? left.get() : BigInt(parse(left));
     const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));
     return int8Result(l * r);

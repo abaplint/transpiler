@@ -4,6 +4,7 @@ import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {String} from "../types/string";
 import {parse} from "./_parse";
+import {asFloat, isFloatWithInteger8} from "./_float_integer8";
 import {decFloat34Result, isDecFloat34Operand, toDecimal} from "./_decfloat";
 import {addDecimal} from "../types/_decimal";
 
@@ -44,6 +45,8 @@ export function add(left: INumeric | ICharacter | string | number | Float | Inte
       && isIntegerCharacter(left)
       && isIntegerCharacter(right)) {
     return new Integer().set(Number.parseInt(left.get(), 10) + Number.parseInt(right.get(), 10)).clearIntegerCalculationType();
+  } else if (isFloatWithInteger8(left, right)) {
+    return add(asFloat(left), asFloat(right));
   } else if (left instanceof Integer8) {
     if (right instanceof Integer8) {
       return int8Result(left.get() + right.get());
