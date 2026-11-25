@@ -9,7 +9,8 @@ export class CallTransformationParametersTranspiler implements IExpressionTransp
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     if (node.getFirstChild()?.get() instanceof abaplint.Expressions.Dynamic) {
-      return new Chunk().append(node.concatTokens(), node, traversal);
+      // a dynamic parameter table named with its body suffix: (lt_x[])
+      return new Chunk().append(node.concatTokens().replace(/\[\]\s*\)$/, ")"), node, traversal);
     } else {
 
       const res = new Chunk().appendString("{");
