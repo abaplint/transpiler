@@ -6,6 +6,7 @@ export * from "./bit-xor";
 export * from "./concat";
 export * from "./div";
 export * from "./divide";
+export * from "./integer_calculation";
 export * from "./minus";
 export * from "./mod";
 export * from "./multiply";

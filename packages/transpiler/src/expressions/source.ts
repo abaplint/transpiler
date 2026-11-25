@@ -12,13 +12,25 @@ import {ValueBodyTranspiler} from "./value_body";
 
 export class SourceTranspiler implements IExpressionTranspiler {
   private readonly addGet: boolean;
-  private readonly calculation: "int8" | "decfloat34" | undefined;
+  private readonly calculation: "int8" | "decfloat34" | "i" | undefined;
 
   /** calculation: the calculation type the target gives integer operands, each operation
-   *  gets its left operand as an int8, or as a decfloat34 when the target is p, f or decfloat34 */
-  public constructor(addGet = false, calculation?: "int8" | "decfloat34") {
+   *  gets its left operand as an int8, or as a decfloat34 when the target is p, f or decfloat34;
+   *  with "i" the operands stay as they are and "+", "-" and "*" are the operators that check
+   *  the range of i */
+  public constructor(addGet = false, calculation?: "int8" | "decfloat34" | "i") {
     this.addGet = addGet;
     this.calculation = calculation;
+  }
+
+  private static readonly INTEGER_OPERATORS: {[operator: string]: string} = {
+    "+": "abap.operators.addInt",
+    "-": "abap.operators.minusInt",
+    "*": "abap.operators.multiplyInt",
+  };
+
+  private negation(): string {
+    return this.calculation === "i" ? "abap.operators.minusInt(0, " : "abap.operators.minus(0, ";
   }
 
   // the operands of a chain of & / && (the rearranger leaves them as a binary
@@ -102,14 +114,19 @@ export class SourceTranspiler implements IExpressionTranspiler {
           // same for -, *, /, DIV and MOD. It binds weaker than **, - a ** 2 is - ( a ** 2 ),
           // so there the whole expression stays negated, below
           if (prefixNegated === true && c.concatTokens().trim() !== "**") {
-            ret = new Chunk().appendString("abap.operators.minus(0, ").appendChunk(ret).appendString(")");
+            ret = new Chunk().appendString(this.negation()).appendChunk(ret).appendString(")");
             prefixNegated = false;
           }
           // "/" rounds in calculation type int8, the runtime's divide() does not know the target
-          const operator = this.calculation === "int8" && c.concatTokens().trim() === "/"
+          let operator = this.calculation === "int8" && c.concatTokens().trim() === "/"
             ? new Chunk().append("abap.operators.divideInt8", c, traversal)
             : traversal.traverse(c);
-          if (this.calculation !== undefined && leftIsCalculation === false) {
+          // calculation type i: the operator checks the range of i
+          const checked = this.calculation === "i" ? SourceTranspiler.INTEGER_OPERATORS[c.concatTokens().trim()] : undefined;
+          if (checked !== undefined) {
+            operator = new Chunk().append(checked, c, traversal);
+          }
+          if (this.calculation !== undefined && this.calculation !== "i" && leftIsCalculation === false) {
             const type = this.calculation === "int8" ? "Integer8" : "DecFloat34";
             ret = new Chunk().appendChunk(operator).appendString(`(new abap.types.${type}().set(`).appendChunk(ret).appendString("),");
           } else {
@@ -288,7 +305,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
     ret.appendChunk(post);
 
     if (prefixNegated) {
-      ret = new Chunk().appendString("abap.operators.minus(0, ").appendChunk(ret).appendString(")");
+      ret = new Chunk().appendString(this.negation()).appendChunk(ret).appendString(")");
     }
 
 //    console.dir("return: " + ret.getCode());
