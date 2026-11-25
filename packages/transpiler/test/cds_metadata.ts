@@ -1,7 +1,6 @@
 import {expect} from "chai";
 import * as abaplint from "@abaplint/core";
-import {Transpiler} from "../src";
-import {CDSMetadata, ICDSMetadata} from "../src/cds_metadata";
+import {Transpiler, CDSMetadata, ICDSMetadata} from "../src";
 import {t000} from "./_cds";
 
 const travel = `@AbapCatalog.sqlViewName: 'ZVTRAVEL'

@@ -24,6 +24,7 @@ import {Initialization} from "./initialization";
 import {DDIC_TYPES, OutputLayout, OutputFolders} from "./output_layout";
 
 export {OutputLayout, OutputFolders, importPath, DDIC_MODULE} from "./output_layout";
+export {CDSMetadata, ICDSMetadata, ICDSField, ICDSAssociation, ICDSCardinality, ICDSAnnotation, CDSAnnotationValue} from "./cds_metadata";
 
 export {config, ITranspilerOptions, IFile, IProgress, IOutputFile, IOutput,
   UnknownTypesEnum, Chunk, DatabaseSetupResult};
