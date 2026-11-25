@@ -1,5 +1,5 @@
 import {throwError} from "../throw_error";
-import {ABAPObject, Character, DataReference, Date, String, FieldSymbol, Float, HashedTable, Integer, Structure, Table, Time, XString, Hex, Packed, Numc, Integer8, UTCLong, DecFloat34, ITableOptions, TableKeyType} from "../types";
+import {ABAPObject, Character, DataReference, Date, String, FieldSymbol, Float, HashedTable, Integer, Structure, Table, Time, XString, Hex, Packed, Numc, Integer8, UTCLong, DecFloat34, DecFloat16, ITableOptions, TableKeyType} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {ABAP} from "..";
@@ -114,6 +114,8 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
       target.assign(new Float());
     } else if (name === "INT8") {
       target.assign(new Integer8());
+    } else if (name === "DECFLOAT16") {
+      target.assign(new DecFloat16());
     } else if (options.refTo === true) {
       createDataRefTo(target, options.name);
     } else {
@@ -191,6 +193,9 @@ export function createData(target: DataReference | FieldSymbol, options?: ICreat
         break;
       case "DECFLOAT34":
         target.assign(new DecFloat34());
+        break;
+      case "DECFLOAT16":
+        target.assign(new DecFloat16());
         break;
       default:
         if (abap.DDIC[options.typeName.trimEnd()] && options.table) {
