@@ -3,6 +3,7 @@ import {Float, Integer, Integer8} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
+import {asFloat, isFloatWithInteger8} from "./_float_integer8";
 import {checkDivisor, decFloat34Result, isDecFloat34Operand, toDecimal} from "./_decfloat";
 import {divideDecimal} from "../types/_decimal";
 
@@ -15,6 +16,9 @@ export function divide(left: INumeric | ICharacter | Integer8 | string | number,
     return decFloat34Result(checkDivisor(l, r) ? divideDecimal(l, r) : r);
   }
   if (left instanceof Integer8 || right instanceof Integer8) {
+    if (isFloatWithInteger8(left, right)) {
+      return divide(asFloat(left), asFloat(right));
+    }
     const l = left instanceof Integer8 ? left.get() : BigInt(parse(left));
     const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));
     if (r === 0n) {
