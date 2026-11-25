@@ -271,9 +271,12 @@ abap.builtin.sy.get().dbcnt.set(${target}.getArrayLength());
   }
 
   private dynamicSQLClause(keyword: string, code: string): string {
+    // a dynamic ORDER BY may separate its columns with blanks, as Open SQL
+    // allows; abap.dynamicOrderBy puts the commas SQL needs between them
+    const list = (text: string) => keyword === "ORDER BY" ? `abap.dynamicOrderBy(${text})` : text;
     return `(${code} instanceof abap.types.Table || ${code} instanceof abap.types.HashedTable`
-      + ` ? (${code}.array().length === 0 ? "" : "${keyword} " + ${code}.array().map(row => row.get()).join(", "))`
-      + ` : (("" + ${code}.get()).trim() === "" ? "" : "${keyword} " + ${code}.get()))`;
+      + ` ? (${code}.array().length === 0 ? "" : "${keyword} " + ${list(`${code}.array().map(row => row.get()).join(", ")`)})`
+      + ` : (("" + ${code}.get()).trim() === "" ? "" : "${keyword} " + ${list(`${code}.get()`)}))`;
   }
 
   private dynamicHavingClause(code: string): string {
