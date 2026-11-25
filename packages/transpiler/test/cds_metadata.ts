@@ -50,6 +50,42 @@ define abstract entity ZA_PARAM {
   _Travel : association to ZI_TRAVEL on _Travel.TravelId = $projection.days;
 }`;
 
+const node = `define view entity ZI_NODE
+  as select from t000
+  association [0..1] to ZI_NODE as _Parent on $projection.ParentId = _Parent.NodeId
+{
+  key mandt      as NodeId,
+      cccategory as ParentId,
+      _Parent
+}`;
+
+const hierarchy = `define hierarchy ZI_NODE_HIERARCHY
+  as parent child hierarchy(
+    source ZI_NODE
+    child to parent association _Parent
+    start where ParentId is initial
+    siblings order by NodeId
+  )
+{
+  NodeId,
+  ParentId
+}`;
+
+const hierarchyAlias = `@EndUserText.label: 'Nodes'
+define hierarchy ZI_NODE_HIERARCHY_ALIAS
+  as parent child hierarchy(
+    source ZI_NODE
+    child to parent association _Parent
+    start where ParentId is initial
+    siblings order by NodeId
+  )
+{
+  key NodeId as Id,
+  @EndUserText.label: 'Parent'
+  ParentId,
+  _Parent
+}`;
+
 function registry(): abaplint.IRegistry {
   const files = [
     ...["t000", "t001", "t002"].map(n => ({filename: n + ".tabl.xml", contents: t000.replace(/T000/g, n.toUpperCase())})),
@@ -57,6 +93,9 @@ function registry(): abaplint.IRegistry {
     {filename: "zi_booking.ddls.asddls", contents: booking},
     {filename: "zc_travel.ddls.asddls", contents: projection},
     {filename: "za_param.ddls.asddls", contents: abstract},
+    {filename: "zi_node.ddls.asddls", contents: node},
+    {filename: "zi_node_hierarchy.ddls.asddls", contents: hierarchy},
+    {filename: "zi_node_hierarchy_alias.ddls.asddls", contents: hierarchyAlias},
   ];
   return new abaplint.Registry().addFiles(files.map(f => new abaplint.MemoryFile(f.filename, f.contents))).parse();
 }
@@ -167,6 +206,30 @@ describe("CDS metadata", () => {
       {name: "note", key: false, virtual: false, annotations: []},
     ]);
     expect(m.associations.map(a => [a.name, a.target, a.exposed])).to.deep.equal([["_Travel", "ZI_TRAVEL", true]]);
+  });
+
+  it("hierarchy elements", () => {
+    const m = metadata("ZI_NODE_HIERARCHY");
+    expect(m.definitionType).to.equal("HIERARCHY");
+    expect(m.fields).to.deep.equal([
+      {name: "NodeId", key: false, virtual: false, annotations: []},
+      {name: "ParentId", key: false, virtual: false, annotations: []},
+    ]);
+    expect(m.associations).to.deep.equal([]);
+  });
+
+  it("hierarchy with key, alias, annotations and an exposed source association", () => {
+    const m = metadata("ZI_NODE_HIERARCHY_ALIAS");
+    expect(m.definitionType).to.equal("HIERARCHY");
+    expect(m.annotations).to.deep.equal([{name: "EndUserText.label", value: "Nodes"}]);
+    expect(m.fields).to.deep.equal([
+      {name: "Id", key: true, virtual: false, annotations: []},
+      {name: "ParentId", key: false, virtual: false, annotations: [{name: "EndUserText.label", value: "Parent"}]},
+    ]);
+    expect(m.associations).to.deep.equal([
+      {name: "_Parent", target: "ZI_NODE", type: "ASSOCIATION", cardinality: {min: 0, max: 1},
+        condition: "$projection.ParentId = _Parent.NodeId", defaultFilter: undefined, exposed: true, annotations: []},
+    ]);
   });
 
   it("enum expressions, numbers and null", () => {
