@@ -2,7 +2,7 @@ import * as abaplint from "@abaplint/core";
 import {IObjectIdentifier} from "./types";
 
 /** Object types whose module only sets abap.DDIC[...] */
-export const DDIC_TYPES: ReadonlySet<string> = new Set(["DTEL", "TABL", "TTYP", "VIEW"]);
+export const DDIC_TYPES: ReadonlySet<string> = new Set(["DDLS", "DTEL", "TABL", "TTYP", "VIEW"]);
 
 /** Per folder module holding all its DDIC definitions. Object filenames never start
  * with an underscore, so it cannot collide with an object module. Loading tens of
