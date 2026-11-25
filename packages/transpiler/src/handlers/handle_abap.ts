@@ -8,6 +8,17 @@ import {OutputLayout, importPath} from "../output_layout";
 import {TypeFactoryRegistry} from "../type_factory_registry";
 import {findProgramIncludes} from "../program_includes";
 
+interface IDeferredLocals {
+  /** the module of the global class */
+  main: string;
+  /** the module of its locals, which requires the global class */
+  locals: string;
+  /** the statement registering the global class, the locals are imported after it */
+  registration: string;
+  /** where the locals take the global class from */
+  lookup: string;
+}
+
 export class HandleABAP {
   /** the function running the program, not a name a FORM or variable can be transpiled to */
   public static readonly PROGRAM_MAIN = "$main";
@@ -116,7 +127,8 @@ export class HandleABAP {
     }
 
     if (this.options?.addCommonJS === true) {
-      ret.map(output => output.chunk = this.addImportsAndExports(output));
+      const owner = this.findOwnerRequiredByLocals(obj, ret);
+      ret.map(output => output.chunk = this.addImportsAndExports(output, owner));
     }
 
     return ret;
@@ -176,8 +188,34 @@ export class HandleABAP {
     return ret;
   }
 
-  protected addImportsAndExports(output: IOutputFile): Chunk {
+  /** A local class inheriting from its own global class: the locals module needs the owner
+   * defined, and the owner module awaits the locals before it is defined. Under top-level await
+   * that import cycle never settles. When the locals require the owner, the locals take it from
+   * abap.Classes and the owner imports its locals right after registering itself, still before its
+   * static values and class constructors, which may use the locals */
+  private findOwnerRequiredByLocals(obj: abaplint.ABAPObject, output: IOutputFile[]): IDeferredLocals | undefined {
+    if (!(obj instanceof abaplint.Objects.Class)) {
+      return undefined;
+    }
+    const main = obj.getMainABAPFile()?.getFilename().replace(".abap", ".mjs").toLowerCase();
+    const locals = output.find(o => o.filename.endsWith(".clas.locals.mjs"));
+    if (main === undefined || locals === undefined
+        || locals.requires.some(r => r.filename.replace(".abap", ".mjs").toLowerCase() === main) === false) {
+      return undefined;
+    }
+    const name = obj.getName();
+    return {
+      main: main,
+      locals: locals.filename,
+      registration: "abap.Classes['" + name.toUpperCase() + "'] = " + Traversal.escapeNamespace(name.toLowerCase()) + ";",
+      lookup: "abap.Classes['" + name.toUpperCase() + "']",
+    };
+  }
+
+  protected addImportsAndExports(output: IOutputFile, deferred?: IDeferredLocals): Chunk {
     const contents = new Chunk();
+    const isMain = deferred !== undefined && output.filename === deferred.main;
+    const isLocals = deferred !== undefined && output.filename === deferred.locals;
 
     for (const r of output.requires) {
       const name = r.name?.toLowerCase();
@@ -186,6 +224,17 @@ export class HandleABAP {
         continue;
       }
       const specifier = importPath(this.layout.file(output.object, output.filename), this.layout.sourceModule(r.filename));
+      if (isMain && filename.toLowerCase() === deferred.locals) {
+        const occurrences = output.chunk.getCode().split(deferred.registration).length - 1;
+        if (occurrences !== 1) {
+          throw new Error("HandleABAP, class registration not found once in " + output.filename + ", cannot defer its locals");
+        }
+        output.chunk.replaceAll(deferred.registration, deferred.registration + "\nawait import(\"" + specifier + "\");");
+        continue;
+      } else if (isLocals && filename.toLowerCase() === deferred.main && name) {
+        contents.appendString("const " + Traversal.escapeNamespace(name) + " = " + deferred.lookup + ";\n");
+        continue;
+      }
       if (name) {
         contents.appendString("const {" + Traversal.escapeNamespace(name) + "} = await import(\"" + specifier + "\");\n");
       } else {

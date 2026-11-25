@@ -103,6 +103,8 @@ export class CDSMetadata {
           this.element(e, result, this.sources(root));
         }
       }
+    } else if (def instanceof cds.CDSDefineHierarchy) {
+      this.hierarchy(root, result);
     } else {
       this.signature(root, result);
     }
@@ -245,6 +247,50 @@ export class CDSMetadata {
       type = "COMPOSITION";
     }
     return {target, type};
+  }
+
+  /** hierarchies list their elements directly under the root, after the "{" and separated by ",":
+   * [annotations] [KEY] path [AS alias]. Associations of the SOURCE entity can be exposed. */
+  private hierarchy(root: abaplint.Nodes.ExpressionNode, result: ICDSMetadata): void {
+    const children = root.getChildren();
+    const token = (c: abaplint.Nodes.ExpressionNode | abaplint.Nodes.TokenNode) =>
+      c instanceof abaplint.Nodes.TokenNode ? c.getFirstToken().getStr().toUpperCase() : "";
+    const source = children[children.findIndex(c => token(c) === "SOURCE") + 1];
+    const sources = source?.get() instanceof cds.CDSName ? [source.concatTokens().toUpperCase()] : [];
+
+    let annotations: ICDSAnnotation[] = [];
+    let key = false;
+    let path: string[] = [];
+    let as: string | undefined;
+    for (const child of children.slice(children.findIndex(c => token(c) === "{") + 1)) {
+      const text = token(child);
+      if (child.get() instanceof cds.CDSAnnotation) {
+        annotations.push(CDSMetadata.annotation(child as abaplint.Nodes.ExpressionNode));
+      } else if (text === "KEY") {
+        key = true;
+      } else if (child.get() instanceof cds.CDSPrefixedName) {
+        path = (child as abaplint.Nodes.ExpressionNode).findAllExpressions(cds.CDSName).map(n => n.concatTokens());
+      } else if (child.get() instanceof cds.CDSAs) {
+        as = this.alias(child as abaplint.Nodes.ExpressionNode);
+      } else if (text === "," || text === "}") {
+        if (path.length > 0) {
+          const name = as ?? path[path.length - 1];
+          const inherited = this.sourceAssociation(sources, path[path.length - 1]);
+          if (inherited) {
+            result.associations.push({...inherited, name, exposed: true, annotations});
+          } else {
+            result.fields.push({name, key, virtual: false, annotations});
+          }
+        }
+        annotations = [];
+        key = false;
+        path = [];
+        as = undefined;
+        if (text === "}") {
+          return;
+        }
+      }
+    }
   }
 
   /** abstract and custom entities and table functions list their elements inline: name : type ; */

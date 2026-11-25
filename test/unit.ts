@@ -3682,4 +3682,176 @@ ENDCLASS.`;
     expect(cons).to.include("Set");
   });
 
+  it("test-75", async () => {
+// a local class inheriting from its own global class: the class pool's modules must load
+    const clas = `
+    CLASS zcl_owner DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        CLASS-DATA gv_count TYPE i.
+        CLASS-METHODS class_constructor.
+        CLASS-METHODS make RETURNING VALUE(result) TYPE REF TO zcl_owner.
+        METHODS name RETURNING VALUE(result) TYPE string.
+    ENDCLASS.
+    CLASS zcl_owner IMPLEMENTATION.
+      METHOD class_constructor.
+        gv_count = 10.
+      ENDMETHOD.
+      METHOD make.
+        CREATE OBJECT result TYPE lcl_sub.
+      ENDMETHOD.
+      METHOD name.
+        result = 'owner'.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const imp = `
+    CLASS lcl_sub DEFINITION INHERITING FROM zcl_owner.
+      PUBLIC SECTION.
+        METHODS name REDEFINITION.
+    ENDCLASS.
+    CLASS lcl_sub IMPLEMENTATION.
+      METHOD name.
+        DATA lv_count TYPE i.
+        gv_count = gv_count + 1.
+        lv_count = zcl_owner=>gv_count.
+        result = |sub { super->name( ) } { lv_count }|.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA lo_sub TYPE REF TO lcl_sub.
+        WRITE / zcl_owner=>make( )->name( ).
+        CREATE OBJECT lo_sub.
+        WRITE / lo_sub->name( ).
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zcl_owner.clas.abap", contents: clas},
+      {filename: "zcl_owner.clas.locals_imp.abap", contents: imp},
+      {filename: "zcl_owner.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons.split("\n").slice(1, 3)).to.deep.equal(["sub owner 11", "sub owner 12"]);
+  });
+
+  it("test-76", async () => {
+// a local exception class inheriting from its own global exception class
+    const cx = `
+    CLASS zcx_owner DEFINITION PUBLIC INHERITING FROM cx_root.
+      PUBLIC SECTION.
+        CLASS-METHODS raise_local RAISING zcx_owner.
+        METHODS text RETURNING VALUE(result) TYPE string.
+    ENDCLASS.
+    CLASS zcx_owner IMPLEMENTATION.
+      METHOD raise_local.
+        RAISE EXCEPTION TYPE lcx_local.
+      ENDMETHOD.
+      METHOD text.
+        result = 'global'.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const def = `
+    CLASS lcx_local DEFINITION INHERITING FROM zcx_owner.
+      PUBLIC SECTION.
+        METHODS text REDEFINITION.
+    ENDCLASS.`;
+    const imp = `
+    CLASS lcx_local IMPLEMENTATION.
+      METHOD text.
+        result = 'local'.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA lx_owner TYPE REF TO zcx_owner.
+        TRY.
+            zcx_owner=>raise_local( ).
+          CATCH zcx_owner INTO lx_owner.
+            WRITE / lx_owner->text( ).
+        ENDTRY.
+        TRY.
+            RAISE EXCEPTION TYPE lcx_local.
+          CATCH cx_root.
+            WRITE / 'caught'.
+        ENDTRY.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "zcx_owner.clas.abap", contents: cx},
+      {filename: "zcx_owner.clas.locals_def.abap", contents: def},
+      {filename: "zcx_owner.clas.locals_imp.abap", contents: imp},
+      {filename: "zcx_owner.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons.split("\n").slice(1, 3)).to.deep.equal(["local", "caught"]);
+  });
+
+  it("test-77", async () => {
+// a local class inheriting from another global class, which uses the first class: still loads
+    const base = `
+    CLASS zcl_base DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        METHODS name RETURNING VALUE(result) TYPE string.
+        CLASS-METHODS other RETURNING VALUE(result) TYPE string.
+    ENDCLASS.
+    CLASS zcl_base IMPLEMENTATION.
+      METHOD name.
+        result = 'base'.
+      ENDMETHOD.
+      METHOD other.
+        result = zcl_user=>run( ).
+      ENDMETHOD.
+    ENDCLASS.`;
+    const user = `
+    CLASS zcl_user DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        CLASS-METHODS run RETURNING VALUE(result) TYPE string.
+    ENDCLASS.
+    CLASS zcl_user IMPLEMENTATION.
+      METHOD run.
+        DATA lo_helper TYPE REF TO lcl_helper.
+        CREATE OBJECT lo_helper.
+        result = lo_helper->name( ).
+      ENDMETHOD.
+    ENDCLASS.`;
+    const imp = `
+    CLASS lcl_helper DEFINITION INHERITING FROM zcl_base.
+      PUBLIC SECTION.
+        METHODS name REDEFINITION.
+    ENDCLASS.
+    CLASS lcl_helper IMPLEMENTATION.
+      METHOD name.
+        result = |helper of { super->name( ) }|.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        WRITE / zcl_base=>other( ).
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zcl_base.clas.abap", contents: base},
+      {filename: "zcl_user.clas.abap", contents: user},
+      {filename: "zcl_user.clas.locals_imp.abap", contents: imp},
+      {filename: "zcl_user.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons.split("\n")[1]).to.equal("helper of base");
+  });
+
 });
