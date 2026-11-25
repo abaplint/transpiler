@@ -60,6 +60,86 @@ function secondaryDuplicatesFirst(rows: any[], key: ITableKey): any[] {
   return rows;
 }
 
+/** first position in rows, sorted by keyFields, whose key is not less than the key of row */
+function lowerBound(rows: TableRowType[], row: any, keyFields: readonly string[]): number {
+  let low = 0;
+  let high = rows.length;
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2);
+    if (compareRows(rows[middle], row, keyFields) < 0) {
+      low = middle + 1;
+    } else {
+      high = middle;
+    }
+  }
+  return low;
+}
+
+/* the rows sorted by each unique secondary key, so INSERT finds a duplicate key by
+ * binary search instead of comparing every row of the table. Built on the first
+ * lookup, then kept up to date as rows are inserted and deleted, and dropped on
+ * anything else. A key field changed in place, by MODIFY or via a field symbol or
+ * data reference, leaves the order stale: MODIFY drops it, a field symbol is not seen */
+class UniqueKeyIndexes {
+  private readonly keys: ITableKey[];
+  private indexes: TableRowType[][] | undefined;
+
+  public static create(options: ITableOptions | undefined): UniqueKeyIndexes | undefined {
+    const keys = (options?.secondary ?? []).filter(k => k.isUnique === true);
+    return keys.length > 0 ? new UniqueKeyIndexes(keys) : undefined;
+  }
+
+  private constructor(keys: ITableKey[]) {
+    this.keys = keys;
+  }
+
+  public hasDuplicate(rows: () => TableRowType[], row: any): boolean {
+    if (this.indexes === undefined) {
+      this.indexes = this.keys.map(key => [...rows()].sort((a, b) => compareRows(a, b, key.keyFields)));
+    }
+    const indexes = this.indexes;
+    return this.keys.some((key, i) => {
+      const index = indexes[i];
+      const position = lowerBound(index, row, key.keyFields);
+      return position < index.length && compareRows(index[position], row, key.keyFields) === 0;
+    });
+  }
+
+  public add(row: TableRowType) {
+    if (this.indexes === undefined) {
+      return;
+    }
+    for (let i = 0; i < this.keys.length; i++) {
+      const index = this.indexes[i];
+      index.splice(lowerBound(index, row, this.keys[i].keyFields), 0, row);
+    }
+  }
+
+  public remove(row: TableRowType) {
+    if (this.indexes === undefined) {
+      return;
+    }
+    for (let i = 0; i < this.keys.length; i++) {
+      const index = this.indexes[i];
+      const keyFields = this.keys[i].keyFields;
+      let position = lowerBound(index, row, keyFields);
+      while (position < index.length && index[position] !== row && compareRows(index[position], row, keyFields) === 0) {
+        position++;
+      }
+      if (index[position] !== row) {
+        // not where its key says, the index is stale
+        this.invalidate();
+        return;
+      }
+      index.splice(position, 1);
+    }
+  }
+
+  public invalidate() {
+    this.indexes = undefined;
+  }
+}
+
 export class LoopController {
   public index: number;
   public loopTo: number;
@@ -145,10 +225,12 @@ export class HashedTable implements ITable {
   private readonly qualifiedName: string | undefined;
   private readonly isStructured: boolean;
   private secondaryIndexes: {[name: string]: TableRowType[]};
+  private readonly uniqueKeyIndexes: UniqueKeyIndexes | undefined;
 
   public constructor(rowType: TableRowType, options: ITableOptions, qualifiedName?: string) {
     this.value = {};
     this.secondaryIndexes = {};
+    this.uniqueKeyIndexes = UniqueKeyIndexes.create(options);
     this.loops = new Set();
     this.rowType = rowType;
     this.options = options;
@@ -175,6 +257,16 @@ export class HashedTable implements ITable {
 
   public getKeyByName(name: string) {
     return this.getOptions()?.secondary?.find(s => s.name.toUpperCase() === name.trimEnd().toUpperCase());
+  }
+
+  /** true when a row has the key of row, for one of the unique secondary keys */
+  public hasDuplicateSecondaryKey(row: any): boolean {
+    return this.uniqueKeyIndexes?.hasDuplicate(() => this.array(), row) === true;
+  }
+
+  /** the rows were changed in place, their unique secondary key order is not known */
+  public rowsModified() {
+    this.uniqueKeyIndexes?.invalidate();
   }
 
   public getSecondaryIndex(name: string) {
@@ -233,6 +325,10 @@ export class HashedTable implements ITable {
 
   public deleteFrom(row: TableRowType) {
     const hash = this.buildHashFromData(row);
+    const existing = this.value[hash];
+    if (existing !== undefined) {
+      this.uniqueKeyIndexes?.remove(existing);
+    }
     delete this.value[hash];
   }
 
@@ -306,6 +402,7 @@ export class HashedTable implements ITable {
       }
 
       this.secondaryIndexes = {};
+      this.uniqueKeyIndexes?.add(val);
       this.value[hash] = val;
       return {value: val, subrc: 0};
     }
@@ -362,6 +459,7 @@ export class HashedTable implements ITable {
   public clear(): void {
     this.value = {};
     this.secondaryIndexes = {};
+    this.uniqueKeyIndexes?.invalidate();
   }
 
   public set(tab: HashedTable | TableRowType): ITable {
@@ -432,10 +530,12 @@ export class Table implements ITable {
   private readonly qualifiedName: string | undefined;
   private readonly isStructured: boolean;
   private secondaryIndexes: {[name: string]: TableRowType[]};
+  private readonly uniqueKeyIndexes: UniqueKeyIndexes | undefined;
 
   public constructor(rowType: TableRowType, options: ITableOptions, qualifiedName?: string) {
     this.value = [];
     this.secondaryIndexes = {};
+    this.uniqueKeyIndexes = UniqueKeyIndexes.create(options);
     this.loops = new Set();
     this.rowType = rowType;
     this.options = options;
@@ -463,6 +563,16 @@ export class Table implements ITable {
 
   public getKeyByName(name: string) {
     return this.getOptions()?.secondary?.find(s => s.name.toUpperCase() === name.trimEnd().toUpperCase());
+  }
+
+  /** true when a row has the key of row, for one of the unique secondary keys */
+  public hasDuplicateSecondaryKey(row: any): boolean {
+    return this.uniqueKeyIndexes?.hasDuplicate(() => this.value, row) === true;
+  }
+
+  /** the rows were changed in place, their unique secondary key order is not known */
+  public rowsModified() {
+    this.uniqueKeyIndexes?.invalidate();
   }
 
   public getSecondaryIndex(name: string) {
@@ -524,6 +634,7 @@ export class Table implements ITable {
   public clear(): void {
     this.value = [];
     this.secondaryIndexes = {};
+    this.uniqueKeyIndexes?.invalidate();
   }
 
   public set(tab: Table | HashedTable | TableRowType) {
@@ -592,6 +703,7 @@ export class Table implements ITable {
     } else {
       this.value.splice(index, 0, val);
     }
+    this.uniqueKeyIndexes?.add(val);
 
     for (const loopController of this.loops.values()) {
       if (index <= loopController.index) {
@@ -653,6 +765,9 @@ export class Table implements ITable {
     if (index > this.value.length) {
       return;
     }
+    if (this.value[index] !== undefined) {
+      this.uniqueKeyIndexes?.remove(this.value[index]);
+    }
     if (index === this.value.length - 1) {
       this.value.pop(); // pop'ing is faster than splice
     } else if (index === 0) {
@@ -684,10 +799,12 @@ export class Table implements ITable {
       const ref = new DataReference(item.getType());
       ref.assign(item.getPointer());
       this.value.push(ref);
+      this.uniqueKeyIndexes?.add(ref);
       return ref;
     } else {
       const val = this.cloneRow(item);
       this.value.push(val);
+      this.uniqueKeyIndexes?.add(val);
       return val;
     }
   }

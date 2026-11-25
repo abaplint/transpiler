@@ -478,4 +478,50 @@ WRITE / 'inserted'.`;
     expect(message).to.include("ITAB_DUPLICATE_KEY");
   });
 
+  it("INSERT, unique secondary key, duplicate check follows DELETE and MODIFY", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         name TYPE c LENGTH 1,
+         qty  TYPE i,
+       END OF ty.
+DATA std TYPE STANDARD TABLE OF ty WITH DEFAULT KEY WITH UNIQUE SORTED KEY by_qty COMPONENTS qty.
+DATA hsh TYPE HASHED TABLE OF ty WITH UNIQUE KEY name WITH UNIQUE SORTED KEY by_qty COMPONENTS qty.
+DATA row TYPE ty.
+DO 3 TIMES.
+  row-name = sy-index.
+  row-qty = sy-index.
+  INSERT row INTO TABLE std.
+  INSERT row INTO TABLE hsh.
+ENDDO.
+DELETE std INDEX 2.
+row-name = 'X'.
+row-qty = 2.
+INSERT row INTO TABLE std.
+WRITE / lines( std ).
+row-name = '2'.
+DELETE TABLE hsh FROM row.
+row-name = 'Y'.
+INSERT row INTO TABLE hsh.
+WRITE / lines( hsh ).
+row-name = 'Z'.
+row-qty = 9.
+MODIFY std FROM row INDEX 1.
+row-qty = 1.
+INSERT row INTO TABLE std.
+WRITE / lines( std ).
+row-qty = 9.
+INSERT row INTO TABLE std.
+WRITE / 'inserted'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    let message = "";
+    try {
+      await f(abap);
+    } catch (e) {
+      message = String(e);
+    }
+    expect(abap.console.get()).to.equal("3\n3\n4");
+    expect(message).to.include("ITAB_DUPLICATE_KEY");
+  });
+
 });

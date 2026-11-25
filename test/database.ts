@@ -1778,6 +1778,75 @@ WRITE sy-dbcnt.`;
     }, {snowflake: false});
   });
 
+  it("order by dynamic, columns separated by blanks", async () => {
+    const code = `
+DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+DATA ls_t100 LIKE LINE OF lt_t100.
+DATA lv_order TYPE string.
+
+lv_order = 'arbgb msgnr DESCENDING'.
+SELECT * FROM t100 INTO TABLE lt_t100 ORDER BY (lv_order).
+LOOP AT lt_t100 INTO ls_t100.
+  WRITE / ls_t100-msgnr.
+ENDLOOP.
+
+lv_order = 'arbgb, msgnr'.
+SELECT * FROM t100 INTO TABLE lt_t100 ORDER BY (lv_order).
+LOOP AT lt_t100 INTO ls_t100.
+  WRITE / ls_t100-msgnr.
+ENDLOOP.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test},
+    ];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("123\n000\n000\n123");
+    }, {snowflake: false});
+  });
+
+  it("order by dynamic tab, one row with two columns separated by blanks", async () => {
+    const code = `
+DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+DATA ls_t100 LIKE LINE OF lt_t100.
+DATA lt_order TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+
+APPEND 'arbgb msgnr DESCENDING' TO lt_order.
+SELECT * FROM t100 INTO TABLE lt_t100 ORDER BY (lt_order).
+LOOP AT lt_t100 INTO ls_t100.
+  WRITE / ls_t100-msgnr.
+ENDLOOP.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test},
+    ];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("123\n000");
+    }, {snowflake: false});
+  });
+
+  it("order by dynamic, PRIMARY KEY", async () => {
+    const code = `
+DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+DATA ls_t100 LIKE LINE OF lt_t100.
+DATA lv_order TYPE string.
+
+lv_order = 'PRIMARY KEY'.
+SELECT * FROM t100 INTO TABLE lt_t100 ORDER BY (lv_order).
+LOOP AT lt_t100 INTO ls_t100.
+  WRITE / ls_t100-msgnr.
+ENDLOOP.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test},
+    ];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("000\n123");
+    }, {snowflake: false});
+  });
+
   it("WHERE, empty dynamic condition", async () => {
     const code = `
 DATA tab TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.

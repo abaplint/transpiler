@@ -9,7 +9,7 @@ on:
 jobs:
   transpiler:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
     - uses: actions/checkout@v7
     - uses: actions/setup-node@v7
