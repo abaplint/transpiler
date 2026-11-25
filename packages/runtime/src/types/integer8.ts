@@ -15,6 +15,14 @@ import {roundToBigInt} from "./_decimal";
 
 const digits = new RegExp(/^\s*-?\+?\d+\.?\d* *$/i);
 
+/** the result of an operation in calculation type int8: outside -2^63 .. 2^63-1 it is CX_SY_ARITHMETIC_OVERFLOW */
+export function int8Result(value: bigint): Integer8 {
+  if (value !== BigInt.asIntN(64, value)) {
+    throwError("CX_SY_ARITHMETIC_OVERFLOW");
+  }
+  return new Integer8().set(value);
+}
+
 export class Integer8 {
   private value: bigint;
   private readonly qualifiedName: string | undefined;

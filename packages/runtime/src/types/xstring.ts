@@ -5,6 +5,7 @@ import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {Character} from "./character";
 import {throwError} from "../throw_error";
+import {Integer} from "./integer";
 import {Integer8} from "./integer8";
 
 export class XString implements ICharacter {
@@ -26,7 +27,7 @@ export class XString implements ICharacter {
     return this.qualifiedName;
   }
 
-  public set(value: ICharacter | INumeric | string | number) {
+  public set(value: ICharacter | INumeric | string | number | Integer8) {
     if (typeof value === "string") {
       // the input is interpreted as hexadecimal digits, the conversion stops at
       // the first character which is not an uppercase hex digit
@@ -50,6 +51,9 @@ export class XString implements ICharacter {
           this.value = "0" + this.value;
         }
       }
+    } else if (value instanceof Integer && value.get() < 0) {
+      // two's complement, as i -> x LENGTH 4
+      this.value = (value.get() + 0x100000000).toString(16).toUpperCase();
     } else if (value instanceof XString || value instanceof Hex) {
       // already hexadecimal digits, uppercase and an even number of them
       this.value = value.get();
