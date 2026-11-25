@@ -1,3 +1,4 @@
+import {int8Result} from "../types/integer8";
 import {throwError} from "../throw_error";
 import {Integer, Integer8} from "../types";
 import {ICharacter} from "../types/_character";
@@ -27,7 +28,7 @@ export function div(left: INumeric | ICharacter | Integer8 | string | number, ri
     if (remainder < 0n) {
       div = r > 0n ? div - 1n : div + 1n;
     }
-    return new Integer8().set(div);
+    return int8Result(div);
   }
 
   const l = parse(left);

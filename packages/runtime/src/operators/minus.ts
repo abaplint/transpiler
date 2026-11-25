@@ -1,3 +1,4 @@
+import {int8Result} from "../types/integer8";
 import {Character, DecFloat34, FieldSymbol, Float, Integer, Integer8} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
@@ -44,7 +45,7 @@ export function minus(left: INumeric | ICharacter | string | Integer8 | number |
     }
     const l = left instanceof Integer8 ? left.get() : BigInt(parse(left));
     const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));
-    return new Integer8().set(l - r);
+    return int8Result(l - r);
   } else if (typeof left === "number" && typeof right === "number"
       && Number.isInteger(left) && Number.isInteger(right)) {
     return new Integer().set(left - right);

@@ -1,3 +1,4 @@
+import {int8Result} from "../types/integer8";
 import {Character, Float, Integer, Integer8} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
@@ -18,7 +19,7 @@ export function multiply(left: INumeric | ICharacter | string | Integer8 | numbe
     }
     const l = left instanceof Integer8 ? left.get() : BigInt(parse(left));
     const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));
-    return new Integer8().set(l * r);
+    return int8Result(l * r);
   } else if (left instanceof Integer && right instanceof Integer) {
     const val = left.get() * right.get();
     return new Integer().set(val);

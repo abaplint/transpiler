@@ -1,3 +1,4 @@
+import {int8Result} from "../types/integer8";
 import {throwError} from "../throw_error";
 import {Float, Integer, Integer8} from "../types";
 import {ICharacter} from "../types/_character";
@@ -28,7 +29,7 @@ export function divide(left: INumeric | ICharacter | Integer8 | string | number,
         throwError("CX_SY_ZERODIVIDE");
       }
     }
-    return new Integer8().set(l / r);
+    return int8Result(l / r);
   }
 
   const r = parse(right);
@@ -74,5 +75,5 @@ export function divideInt8(left: INumeric | ICharacter | Integer8 | string | num
   if ((rem < 0n ? -rem : rem) * 2n >= (r < 0n ? -r : r)) {
     q = (l < 0n) === (r < 0n) ? q + 1n : q - 1n;
   }
-  return new Integer8().set(q);
+  return int8Result(q);
 }

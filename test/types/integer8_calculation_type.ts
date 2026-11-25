@@ -176,10 +176,8 @@ WRITE lv_i.`;
     expect(await runAndOutput(code)).to.equal("4");
   });
 
-  // Calculation type f: a system gives 3.5. The runtime gives 3 (its divide() truncates
-  // with int8 operands); that is a separate defect, this pins that the int8 rounding of
-  // this change does not reach an f target
-  it("UNMEASURED: int8 / int8 into f, today's value 3", async () => {
+  // Calculation type f: checked on a system, 3.5; the int8 rounding does not reach an f target
+  it("int8 / int8 into f", async () => {
     const code = `
 DATA lv_x TYPE int8.
 DATA lv_y TYPE int8.
@@ -187,13 +185,13 @@ DATA lv_f TYPE f.
 lv_x = 7.
 lv_y = 2.
 lv_f = lv_x / lv_y.
-ASSERT lv_f = 3.`;
+ASSERT lv_f = '3.5'.`;
     await runAndOutput(code);
   });
 
-  // Calculation type p: a system gives 3.5 into p DECIMALS 1. The runtime gives 3, the
-  // same separate defect; this pins that the int8 rounding does not reach a p target
-  it("UNMEASURED: int8 / int8 into p, today's value 3", async () => {
+  // Calculation type p: checked on a system, 3.5 into p DECIMALS 1; the int8 rounding
+  // does not reach a p target
+  it("int8 / int8 into p", async () => {
     const code = `
 DATA lv_x TYPE int8.
 DATA lv_y TYPE int8.
@@ -201,7 +199,7 @@ DATA lv_p TYPE p LENGTH 8 DECIMALS 1.
 lv_x = 7.
 lv_y = 2.
 lv_p = lv_x / lv_y.
-ASSERT lv_p = 3.`;
+ASSERT lv_p = '3.5'.`;
     await runAndOutput(code);
   });
 
