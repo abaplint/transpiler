@@ -75,7 +75,9 @@ export class SelectTranspiler implements IStructureTranspiler {
         assign = `${intoName}.set(${loopName});\n`;
       }
     }
-    const selectHead = new SelectStatementTranspiler().transpile(selectStatement, traversal, targetName, loopOptions);
+    // INTO (a, b, c) is filled by position: two columns of one name get an alias
+    const selectHead = new SelectStatementTranspiler().transpile(selectStatement, traversal, targetName, loopOptions,
+                                                                 intoList !== undefined);
     ret.appendChunk(selectHead.ensureStartMapping(selectStatement, traversal));
 
     // todo: optimize, it should do real streaming?
