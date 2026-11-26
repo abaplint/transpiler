@@ -4116,4 +4116,42 @@ ENDCLASS.`;
     expect(cons.split("\n").slice(1, 4)).to.deep.equal(["v", "d", "k"]);
   });
 
+  it("test-84", async () => {
+// two interfaces naming each other's constants, the chains end in VALUE IS INITIAL: the initial
+// value is written, the modules do not import each other
+    const zifm1 = `
+    INTERFACE zif_m1 PUBLIC.
+      CONSTANTS c7 TYPE i VALUE IS INITIAL.
+      CONSTANTS c3 TYPE string VALUE zif_m2=>c2.
+    ENDINTERFACE.`;
+    const zifm2 = `
+    INTERFACE zif_m2 PUBLIC.
+      CONSTANTS c2 TYPE i VALUE IS INITIAL.
+      CONSTANTS c6 TYPE i VALUE zif_m1=>c7.
+    ENDINTERFACE.`;
+    const clas = `
+    CLASS zcl_consts DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_consts IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        WRITE / |{ zif_m1=>c3 }{ zif_m2=>c6 }|.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zif_m1.intf.abap", contents: zifm1},
+      {filename: "zif_m2.intf.abap", contents: zifm2},
+      {filename: "zcl_consts.clas.abap", contents: clas},
+      {filename: "zcl_consts.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons.split("\n")[1]).to.equal("0 0");
+  });
+
 });

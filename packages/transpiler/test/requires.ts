@@ -223,4 +223,66 @@ ENDINTERFACE.`}];
     expect(y.chunk.getCode()).to.contain("zif_y.zif_y$d.set('lit');");
   });
 
+  it("INTF constants naming each other, the chains end in VALUE IS INITIAL: initial values, no require", async () => {
+    const files = [
+      {filename: "zif_m1.intf.abap", contents: `INTERFACE zif_m1 PUBLIC.
+  CONSTANTS c7 TYPE i VALUE IS INITIAL.
+  CONSTANTS c3 TYPE string VALUE zif_m2=>c2.
+ENDINTERFACE.`},
+      {filename: "zif_m2.intf.abap", contents: `INTERFACE zif_m2 PUBLIC.
+  CONSTANTS c2 TYPE i VALUE IS INITIAL.
+  CONSTANTS c6 TYPE i VALUE zif_m1=>c7.
+ENDINTERFACE.`}];
+    const output = await runFiles(files);
+    const m1 = output.find(o => o.filename === "zif_m1.intf.mjs")!;
+    const m2 = output.find(o => o.filename === "zif_m2.intf.mjs")!;
+    expect(m1.requires).to.deep.equal([]);
+    expect(m2.requires).to.deep.equal([]);
+    expect(m1.chunk.getCode()).to.contain("zif_m1.zif_m1$c3.set(new abap.types.Integer(");
+    expect(m2.chunk.getCode()).to.contain("zif_m2.zif_m2$c6.set(new abap.types.Integer(");
+    expect(m1.chunk.getCode()).to.not.contain("abap.Classes['ZIF_M2']");
+    expect(m2.chunk.getCode()).to.not.contain("abap.Classes['ZIF_M1']");
+  });
+
+  it("INTF whole structured constant, first component VALUE IS INITIAL: the structure read, interface required", async () => {
+    const files = [
+      {filename: "zif_a.intf.abap", contents: `INTERFACE zif_a PUBLIC.
+  CONSTANTS: BEGIN OF gs,
+               comp  TYPE i VALUE IS INITIAL,
+               other TYPE i VALUE 5,
+             END OF gs.
+ENDINTERFACE.`},
+      {filename: "zif_u.intf.abap", contents: `INTERFACE zif_u PUBLIC.
+  CONSTANTS s LIKE zif_a=>gs VALUE zif_a=>gs.
+ENDINTERFACE.`}];
+    const output = await runFiles(files);
+    const u = output.find(o => o.filename === "zif_u.intf.mjs")!;
+    expect(u.requires).to.deep.equal([{filename: "zif_a.intf.abap", name: undefined}]);
+    expect(u.chunk.getCode()).to.contain("zif_u.zif_u$s.set(abap.Classes['ZIF_A'].zif_a$gs);");
+  });
+
+  it("INTF whole structured constant, first component from another interface's constant: the structure read", async () => {
+    const files = [
+      {filename: "zif_x.intf.abap", contents: `INTERFACE zif_x PUBLIC.
+  CONSTANTS k TYPE i VALUE 7.
+ENDINTERFACE.`},
+      {filename: "zif_a.intf.abap", contents: `INTERFACE zif_a PUBLIC.
+  CONSTANTS: BEGIN OF gs,
+               comp  TYPE i VALUE zif_x=>k,
+               other TYPE i VALUE 5,
+             END OF gs.
+ENDINTERFACE.`},
+      {filename: "zif_u.intf.abap", contents: `INTERFACE zif_u PUBLIC.
+  CONSTANTS s LIKE zif_a=>gs VALUE zif_a=>gs.
+ENDINTERFACE.`}];
+    const output = await runFiles(files);
+    const a = output.find(o => o.filename === "zif_a.intf.mjs")!;
+    const u = output.find(o => o.filename === "zif_u.intf.mjs")!;
+    expect(a.chunk.getCode()).to.contain("zif_a.zif_a$gs.get().comp.set(7);");
+    expect(a.chunk.getCode()).to.contain("zif_a.zif_a$gs.get().other.set(5);");
+    expect(a.chunk.getCode()).to.not.contain("zif_a.zif_a$gs.set(");
+    expect(u.requires).to.deep.equal([{filename: "zif_a.intf.abap", name: undefined}]);
+    expect(u.chunk.getCode()).to.contain("zif_u.zif_u$s.set(abap.Classes['ZIF_A'].zif_a$gs);");
+  });
+
 });
