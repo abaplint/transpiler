@@ -109,4 +109,21 @@ lv_f = lv_max + lv_one.
 ASSERT lv_f = 9223372036854775808.`);
   });
 
+  it("an int8 target with a p operand: calculated in p, the result does not fit", async () => {
+    await run(`
+DATA lv_max TYPE int8.
+DATA lv_one TYPE p LENGTH 8 DECIMALS 0 VALUE 1.
+DATA lv_result TYPE int8.
+DATA lv_raised TYPE abap_bool.
+lv_max = 9223372036854775807.
+TRY.
+    lv_result = lv_max + lv_one.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_raised = abap_true.
+ENDTRY.
+ASSERT lv_raised = abap_true.
+lv_result = lv_max - lv_one.
+ASSERT lv_result = 9223372036854775806.`);
+  });
+
 });

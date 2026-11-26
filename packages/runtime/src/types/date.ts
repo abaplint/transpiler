@@ -5,6 +5,7 @@ import {String} from "./string";
 import {getDateFromNumber, getNumberFromDate} from "./_date_helper";
 import {Float} from "./float";
 import {Integer8} from "./integer8";
+import {Packed} from "./packed";
 import {parse} from "../operators/_parse";
 
 export class Date implements ICharacter {
@@ -38,6 +39,9 @@ export class Date implements ICharacter {
     } else if (value instanceof Integer8) {
       // int8 converts as i does, from its lower 4 bytes as a signed integer
       this.set(Number(BigInt.asIntN(32, (value as Integer8).get())));
+    } else if (value instanceof Packed) {
+      // rounded as f is, set(number) would cut the decimals off
+      this.set(Math.round(value.get()));
     } else if (value instanceof String) {
       // an empty string is the initial date, a shorter one is filled with blanks
       const str = value.get();

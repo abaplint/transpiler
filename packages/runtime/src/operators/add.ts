@@ -1,5 +1,5 @@
 import {int8Result} from "../types/integer8";
-import {Character, DecFloat34, FieldSymbol, Float, Hex, Integer, Integer8} from "../types";
+import {Character, DecFloat34, FieldSymbol, Float, Hex, Integer, Integer8, Packed} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {String} from "../types/string";
@@ -7,6 +7,7 @@ import {parse} from "./_parse";
 import {asFloat, isFloatWithInteger8} from "./_float_integer8";
 import {decFloat34Result, isDecFloat34Operand, toDecimal} from "./_decfloat";
 import {addDecimal} from "../types/_decimal";
+import {packedCalculation} from "./_packed";
 
 function isIntegerCharacter(value: String | Character): boolean {
   return value.get().trim().length > 0 && Number.isInteger(Number(value.get()));
@@ -14,7 +15,7 @@ function isIntegerCharacter(value: String | Character): boolean {
 
 export function add(left: INumeric | ICharacter | string | number | Float | Integer | Hex | FieldSymbol,
                     right: INumeric | ICharacter | string | number  | Float | Integer | Hex | FieldSymbol):
-  Integer | Integer8 | Float | DecFloat34 {
+  Integer | Integer8 | Float | DecFloat34 | Packed {
 
   if (left instanceof Integer && right instanceof Integer) {
     return new Integer().set(left.get() + right.get());
@@ -27,7 +28,17 @@ export function add(left: INumeric | ICharacter | string | number | Float | Inte
     return new Float().set(left.getRaw() + right.getRaw());
   } else if (isDecFloat34Operand(left) || isDecFloat34Operand(right)) {
     return decFloat34Result(addDecimal(toDecimal(left), toDecimal(right)));
-  } else if (typeof left === "number" && typeof right === "number"
+  }
+  // a field symbol on a p is looked through here, before the int8 branch takes its operand as an integer
+  if (left instanceof Packed || right instanceof Packed
+      || (left instanceof FieldSymbol && left.getPointer() instanceof Packed)
+      || (right instanceof FieldSymbol && right.getPointer() instanceof Packed)) {
+    const packed = packedCalculation("+", left, right);
+    if (packed !== undefined) {
+      return packed;
+    }
+  }
+  if (typeof left === "number" && typeof right === "number"
       && Number.isInteger(left) && Number.isInteger(right)) {
     return new Integer().set(left + right);
 
