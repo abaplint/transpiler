@@ -8,12 +8,8 @@ declare const abap: ABAP;
 
 /** true when the row has the key of a row already in the table, for one of its unique secondary keys */
 export function duplicateSecondaryKey(table: Table | HashedTable, row: any): boolean {
-  const unique = (table.getOptions()?.secondary ?? []).filter(k => k.isUnique === true);
-  if (unique.length === 0) {
-    return false;
-  }
   const value = row instanceof FieldSymbol ? row.getPointer() : row;
-  return unique.some(k => table.array().some(existing => compareRows(existing, value, k.keyFields) === 0));
+  return table.hasDuplicateSecondaryKey(value);
 }
 
 function duplicateKey(): never {
