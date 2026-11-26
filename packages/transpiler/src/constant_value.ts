@@ -10,6 +10,8 @@ import * as abaplint from "@abaplint/core";
  *   analysis knows. The value is read at load from that member, and the module requires its
  *   object first. A class module never imports an interface, so an interface's edge to a class
  *   cannot close a cycle;
+ * - initial: it ends in an interface constant declared VALUE IS INITIAL. A new initial value of
+ *   that constant's type is set, which is what reading it at load gives, and nothing is read;
  * - void: the referenced object is not in the registry; the caller keeps its field chain.
  * A component chain (`zif_a=>gs-comp`) folds to, or reads, the component, never the structure.
  * A chain that comes back to a constant it already passed never reaches a value (illegal ABAP,
@@ -19,6 +21,7 @@ import * as abaplint from "@abaplint/core";
 export type ConstantSource =
   {kind: "literal", value: string} |
   {kind: "member", object: abaplint.ABAPObject, attribute: string, components: string[]} |
+  {kind: "initial", type: abaplint.AbstractType} |
   {kind: "void"};
 
 export function constantSource(reg: abaplint.IRegistry, chain: abaplint.Nodes.ExpressionNode,
@@ -61,10 +64,15 @@ export function constantSource(reg: abaplint.IRegistry, chain: abaplint.Nodes.Ex
     }
     return typeof value === "string" ? {kind: "literal", value: value} : member;
   }
-  const next = findStatement(obj, identifier)?.findDirectExpression(abaplint.Expressions.Value)?.getChildren()[1];
+  const declared = findStatement(obj, identifier)?.findDirectExpression(abaplint.Expressions.Value);
+  const next = declared?.getChildren()[1];
   if (next instanceof abaplint.Nodes.ExpressionNode && next.get() instanceof abaplint.Expressions.SimpleFieldChain) {
     const further = constantSource(reg, next, [...path, key]);
     return further.kind === "void" ? member : further;
+  }
+  if (next instanceof abaplint.Nodes.TokenNode && next.concatTokens().toUpperCase() === "IS") {
+    // VALUE IS INITIAL has no expression of its own: it is the one alternative of Value made of words
+    return {kind: "initial", type: identifier.getType()};
   }
   const value = identifier.getValue();
   return typeof value === "string" ? {kind: "literal", value: value} : member;
@@ -90,7 +98,7 @@ function findStatement(obj: abaplint.ABAPObject, identifier: abaplint.TypedIdent
   const file = obj.getABAPFiles().find(f => f.getFilename() === identifier.getFilename());
   const start = identifier.getStart();
   return file?.getStatements().find(s => s.get() instanceof abaplint.Statements.Constant
-    && s.getStart().getRow() <= start.getRow() && s.getEnd().isAfter(start));
+    && s.findDirectExpression(abaplint.Expressions.DefinitionName)?.getFirstToken().getStart().equals(start) === true);
 }
 
 /** the JS expression reading a member source at load */
