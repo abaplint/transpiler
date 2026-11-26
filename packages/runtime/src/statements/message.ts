@@ -146,8 +146,13 @@ export class MessageStatement {
     if (options.into) {
       options.into.set(replaced);
     } else {
-// hmm, add option on how/if to write messages to console? or it should be the abap.console() ?
-      console.log(replaced);
+      // the message is written on its own line in the list output
+      const output = this.context.console;
+      if (output.isEmpty() === false && output.get().endsWith("\n") === false) {
+        output.add("\n");
+      }
+      output.add(replaced);
+      this.context.newLinePending = true;
     }
     return replaced;
   }

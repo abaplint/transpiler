@@ -89,10 +89,11 @@ export class MethodImplementationTranspiler implements IStatementTranspiler {
 }\n`;
           } else if (type instanceof abaplint.BasicTypes.XSequenceType) {
             // only a literal can be character-like here, its content is the bytes: '010203' is
-            // x LENGTH 3, and an odd number of digits is filled with 0 on the right, '012' is 0120
+            // x LENGTH 3, and an odd number of digits is filled with 0 on the right, '012' is 0120.
+            // The empty string literal `` has no bytes; a Hex cannot have length 0
             after += `if (${varPrefixed}?.constructor.name === "Character" || ${varPrefixed}?.constructor.name === "String") {
   const hex = ${varPrefixed}.get().trimEnd();
-  ${varPrefixed} = new abap.types.Hex({length: Math.ceil(hex.length / 2)}).set(hex.padEnd(Math.ceil(hex.length / 2) * 2, "0"));
+  ${varPrefixed} = hex.length === 0 ? new abap.types.XString() : new abap.types.Hex({length: Math.ceil(hex.length / 2)}).set(hex.padEnd(Math.ceil(hex.length / 2) * 2, "0"));
 }\n`;
           }
 

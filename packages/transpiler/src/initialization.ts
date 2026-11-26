@@ -113,7 +113,8 @@ globalThis.abap = new runtime.ABAP();\n`;
           || obj instanceof abaplint.Objects.WebMIME
           || obj instanceof abaplint.Objects.TypePool
           || obj instanceof abaplint.Objects.TableType
-          || obj instanceof abaplint.Objects.View) {
+          || obj instanceof abaplint.Objects.View
+          || (obj instanceof abaplint.Objects.DataDefinition && obj.findSourceFile() !== undefined)) {
         list.push(imp(this.layout.objectModule(obj)));
       }
     }

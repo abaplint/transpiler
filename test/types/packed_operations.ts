@@ -201,4 +201,238 @@ READ TABLE lt_rows TRANSPORTING NO FIELDS WITH KEY amount = '-0.7'.
 ASSERT sy-subrc = 4.`);
   });
 
+  it("a timestamp with seven decimals is copied exactly", async () => {
+    await run(`
+DATA lv_first TYPE p LENGTH 11 DECIMALS 7.
+DATA lv_second TYPE p LENGTH 11 DECIMALS 7.
+lv_first = '20240229235959'.
+lv_second = lv_first.
+ASSERT lv_second = '20240229235959.0000000'.
+ASSERT |{ lv_second }| = '20240229235959.0000000'.
+lv_first = '20240229235959.1234567'.
+lv_second = lv_first.
+ASSERT |{ lv_second }| = '20240229235959.1234567'.`);
+  });
+
+  it("a short timestamp assigned to a long one keeps the whole minute", async () => {
+    await run(`
+DATA lv_short TYPE p LENGTH 8 DECIMALS 0.
+DATA lv_long TYPE p LENGTH 11 DECIMALS 7.
+lv_short = 20261014103400.
+lv_long = lv_short.
+ASSERT |{ lv_long }| = '20261014103400.0000000'.`);
+  });
+
+  it("p plus and minus p, exact beyond the digits of a double", async () => {
+    await run(`
+DATA lv_long TYPE p LENGTH 11 DECIMALS 7.
+DATA lv_step TYPE p LENGTH 11 DECIMALS 7.
+DATA lv_result TYPE p LENGTH 11 DECIMALS 7.
+lv_long = '20240229235959.1234567'.
+lv_step = '0.0000001'.
+lv_result = lv_long + lv_step.
+ASSERT |{ lv_result }| = '20240229235959.1234568'.
+lv_result = lv_long - lv_step.
+ASSERT |{ lv_result }| = '20240229235959.1234566'.
+lv_result = lv_long - lv_long.
+ASSERT lv_result = 0.`);
+  });
+
+  it("p with i and int8 operands, exact above 2 ** 53", async () => {
+    await run(`
+DATA lv_big TYPE p LENGTH 16 DECIMALS 0.
+DATA lv_result TYPE p LENGTH 16 DECIMALS 0.
+DATA lv_int TYPE i VALUE 1.
+DATA lv_int8 TYPE int8 VALUE 2.
+lv_big = '9007199254740993'.
+lv_result = lv_big + lv_int.
+ASSERT |{ lv_result }| = '9007199254740994'.
+lv_result = lv_int + lv_big.
+ASSERT |{ lv_result }| = '9007199254740994'.
+lv_result = lv_big - lv_int8.
+ASSERT |{ lv_result }| = '9007199254740991'.
+lv_result = lv_big * lv_int.
+ASSERT |{ lv_result }| = '9007199254740993'.
+lv_result = lv_big + 1.
+ASSERT |{ lv_result }| = '9007199254740994'.`);
+  });
+
+  it("p times p, exact, rounded half away from zero into the target", async () => {
+    await run(`
+DATA lv_left TYPE p LENGTH 16 DECIMALS 2.
+DATA lv_right TYPE p LENGTH 8 DECIMALS 2.
+DATA lv_result TYPE p LENGTH 16 DECIMALS 2.
+lv_left = '12345678901234567.89'.
+lv_right = '3.00'.
+lv_result = lv_left * lv_right.
+ASSERT |{ lv_result }| = '37037036703703703.67'.
+lv_left = '0.05'.
+lv_right = '0.50'.
+lv_result = lv_left * lv_right.
+ASSERT |{ lv_result }| = '0.03'.
+lv_left = '-0.05'.
+lv_result = lv_left * lv_right.
+ASSERT |{ lv_result }| = '-0.03'.`);
+  });
+
+  it("p operands with different decimals", async () => {
+    await run(`
+DATA lv_two TYPE p LENGTH 8 DECIMALS 2.
+DATA lv_five TYPE p LENGTH 8 DECIMALS 5.
+DATA lv_result TYPE p LENGTH 8 DECIMALS 5.
+DATA lv_int TYPE i.
+lv_two = '1.25'.
+lv_five = '0.00001'.
+lv_result = lv_two + lv_five.
+ASSERT |{ lv_result }| = '1.25001'.
+lv_result = lv_two - lv_five.
+ASSERT |{ lv_result }| = '1.24999'.
+lv_int = lv_two + lv_two.
+ASSERT lv_int = 3.`);
+  });
+
+  it("p through field symbols, exact for all three operators", async () => {
+    await run(`
+DATA lv_big TYPE p LENGTH 16 DECIMALS 0.
+DATA lv_one TYPE p LENGTH 16 DECIMALS 0.
+DATA lv_result TYPE p LENGTH 16 DECIMALS 0.
+FIELD-SYMBOLS <lv_big> TYPE any.
+FIELD-SYMBOLS <lv_one> TYPE any.
+lv_big = '9007199254740993'.
+lv_one = 1.
+ASSIGN lv_big TO <lv_big>.
+ASSIGN lv_one TO <lv_one>.
+lv_result = <lv_big> * lv_one.
+ASSERT |{ lv_result }| = '9007199254740993'.
+lv_result = <lv_big> * <lv_one>.
+ASSERT |{ lv_result }| = '9007199254740993'.
+lv_result = <lv_big> + <lv_one>.
+ASSERT |{ lv_result }| = '9007199254740994'.
+lv_result = <lv_big> - <lv_one>.
+ASSERT |{ lv_result }| = '9007199254740992'.`);
+  });
+
+  it("MOD with a p operand keeps the decimals, also of a calculated p", async () => {
+    await run(`
+DATA lv_p TYPE p LENGTH 8 DECIMALS 2.
+DATA lv_result TYPE p LENGTH 8 DECIMALS 2.
+lv_p = '2.50'.
+lv_result = lv_p MOD 2.
+ASSERT lv_result = '0.50'.
+lv_p = '1.25'.
+lv_result = ( lv_p + lv_p ) MOD 2.
+ASSERT lv_result = '0.50'.
+lv_result = ( lv_p * 3 ) MOD 1.
+ASSERT lv_result = '0.75'.
+lv_result = ( lv_p - 3 ) MOD 2.
+ASSERT lv_result = '0.25'.
+lv_result = ( lv_p + lv_p ) DIV 2.
+ASSERT lv_result = 1.`);
+  });
+
+  it("p into t and d is rounded, also a calculated p", async () => {
+    await run(`
+DATA lv_p TYPE p LENGTH 8 DECIMALS 2.
+DATA lv_time TYPE t.
+DATA lv_date TYPE d.
+lv_p = '3.50'.
+lv_time = lv_p.
+ASSERT lv_time = '000004'.
+lv_date = lv_p.
+ASSERT lv_date = '00010105'.
+lv_p = '1.75'.
+lv_time = lv_p + lv_p.
+ASSERT lv_time = '000004'.
+lv_date = lv_p * 2.
+ASSERT lv_date = '00010105'.
+lv_time = lv_p * 2 + 1.
+ASSERT lv_time = '000005'.`);
+  });
+
+  it("a calculated p into i, string and a string template", async () => {
+    await run(`
+DATA lv_p TYPE p LENGTH 8 DECIMALS 2.
+DATA lv_int TYPE i.
+DATA lv_string TYPE string.
+DATA lv_q TYPE p LENGTH 8 DECIMALS 2.
+lv_p = '1.25'.
+lv_q = '1.26'.
+lv_int = lv_p + lv_p.
+ASSERT lv_int = 3.
+lv_string = lv_p + lv_q.
+ASSERT lv_string = \`2.51 \`.
+ASSERT |{ lv_p + lv_q }| = '2.51'.
+ASSERT |{ lv_p * lv_p }| = '1.5625'.
+lv_p = '-1.25'.
+lv_int = lv_p + lv_p.
+ASSERT lv_int = -3.
+lv_string = lv_p - 1.
+ASSERT lv_string = \`2.25-\`.`);
+  });
+
+  it("MOD with p operands is exact and stays a p", async () => {
+    await run(`
+DATA lv_long TYPE p LENGTH 11 DECIMALS 7.
+DATA lv_result TYPE p LENGTH 11 DECIMALS 7.
+DATA lv_whole TYPE p LENGTH 8 DECIMALS 0.
+DATA lv_small TYPE p LENGTH 8 DECIMALS 2.
+DATA lv_string TYPE string.
+lv_long = '20261003101500.3500000'.
+lv_result = lv_long MOD 100.
+ASSERT |{ lv_result }| = '0.3500000'.
+lv_whole = 7.
+lv_string = lv_whole MOD 2.
+ASSERT lv_string = \`1 \`.
+lv_small = '-7.50'.
+lv_small = lv_small MOD 2.
+ASSERT lv_small = '0.50'.
+lv_small = '7.50'.
+lv_small = lv_small MOD -2.
+ASSERT lv_small = '1.50'.
+lv_small = 0.
+lv_small = lv_small MOD 0.
+ASSERT lv_small = 0.`);
+  });
+
+  it("a field symbol on a p next to an int8", async () => {
+    await run(`
+DATA lv_p TYPE p LENGTH 8 DECIMALS 2 VALUE '1.25'.
+DATA lv_int8 TYPE int8 VALUE 3.
+DATA lv_result TYPE p LENGTH 8 DECIMALS 2.
+FIELD-SYMBOLS <lv_p> TYPE any.
+ASSIGN lv_p TO <lv_p>.
+lv_result = <lv_p> + lv_int8.
+ASSERT lv_result = '4.25'.
+lv_result = lv_int8 - <lv_p>.
+ASSERT lv_result = '1.75'.
+lv_result = <lv_p> * lv_int8.
+ASSERT lv_result = '3.75'.
+lv_result = <lv_p> MOD lv_int8.
+ASSERT lv_result = '1.25'.`);
+  });
+
+  it("p into xstring is rounded, also a calculated p", async () => {
+    await run(`
+DATA lv_p TYPE p LENGTH 8 DECIMALS 2 VALUE '1.25'.
+DATA lv_xstring TYPE xstring.
+lv_xstring = lv_p + lv_p.
+ASSERT lv_xstring = '03'.
+lv_p = '2.50'.
+lv_xstring = lv_p.
+ASSERT lv_xstring = '03'.`);
+  });
+
+  it("an int8 calculated with a whole p compares exactly", async () => {
+    await run(`
+DATA lv_a TYPE int8.
+DATA lv_b TYPE int8.
+DATA lv_one TYPE p LENGTH 8 DECIMALS 0 VALUE 1.
+lv_a = 9223372036854775807.
+lv_b = 9223372036854775806.
+ASSERT lv_a - lv_one = lv_b.
+ASSERT lv_b + lv_one = lv_a.
+ASSERT lv_b + lv_one > lv_b.
+ASSERT lv_one = 1.`);
+  });
+
 });

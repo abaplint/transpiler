@@ -267,6 +267,24 @@ lv_a = lv_p.
 ASSERT lv_a = '-3.25'.`);
   });
 
+  it("to p rounds a half away from zero, also negative, #2187", async () => {
+    await run(`
+DATA lv_f TYPE f.
+DATA lv_p TYPE p LENGTH 8 DECIMALS 2.
+lv_f = '1.125'.
+lv_p = lv_f.
+ASSERT lv_p = '1.13'.
+lv_f = '-1.125'.
+lv_p = lv_f.
+ASSERT lv_p = '-1.13'.
+lv_f = '-0.375'.
+lv_p = lv_f.
+ASSERT lv_p = '-0.38'.
+lv_f = '-2.5'.
+lv_p = lv_f.
+ASSERT lv_p = '-2.50'.`);
+  });
+
   it("comparisons with f, i, p, decfloat34, c and string", async () => {
     await run(`
 DATA lv_a TYPE f.

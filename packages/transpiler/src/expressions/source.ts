@@ -12,12 +12,25 @@ import {ValueBodyTranspiler} from "./value_body";
 
 export class SourceTranspiler implements IExpressionTranspiler {
   private readonly addGet: boolean;
-  private readonly int8: boolean;
+  private readonly calculation: "int8" | "decfloat34" | "i" | undefined;
 
-  /** int8: the calculation type is int8, each operation gets its left operand as an int8 */
-  public constructor(addGet = false, int8 = false) {
+  /** calculation: the calculation type the target gives integer operands, each operation
+   *  gets its left operand as an int8, or as a decfloat34 when the target is p, f or decfloat34;
+   *  with "i" the operands stay as they are and "+", "-" and "*" are the operators that check
+   *  the range of i */
+  public constructor(addGet = false, calculation?: "int8" | "decfloat34" | "i") {
     this.addGet = addGet;
-    this.int8 = int8;
+    this.calculation = calculation;
+  }
+
+  private static readonly INTEGER_OPERATORS: {[operator: string]: string} = {
+    "+": "abap.operators.addInt",
+    "-": "abap.operators.minusInt",
+    "*": "abap.operators.multiplyInt",
+  };
+
+  private negation(): string {
+    return this.calculation === "i" ? "abap.operators.minusInt(0, " : "abap.operators.minus(0, ";
   }
 
   // the operands of a chain of & / && (the rearranger leaves them as a binary
@@ -81,8 +94,8 @@ export class SourceTranspiler implements IExpressionTranspiler {
       } else { break; }
     }
 
-    // int8: whether the operand left of the next operator is already an int8
-    let leftIsInt8 = false;
+    // whether the operand left of the next operator already has the calculation type
+    let leftIsCalculation = false;
     for (let i = startIdx; i < children.length; i++) {
       const c = children[i];
       const isLast = i === children.length - 1;
@@ -101,20 +114,26 @@ export class SourceTranspiler implements IExpressionTranspiler {
           // same for -, *, /, DIV and MOD. It binds weaker than **, - a ** 2 is - ( a ** 2 ),
           // so there the whole expression stays negated, below
           if (prefixNegated === true && c.concatTokens().trim() !== "**") {
-            ret = new Chunk().appendString("abap.operators.minus(0, ").appendChunk(ret).appendString(")");
+            ret = new Chunk().appendString(this.negation()).appendChunk(ret).appendString(")");
             prefixNegated = false;
           }
           // "/" rounds in calculation type int8, the runtime's divide() does not know the target
-          const operator = this.int8 === true && c.concatTokens().trim() === "/"
+          let operator = this.calculation === "int8" && c.concatTokens().trim() === "/"
             ? new Chunk().append("abap.operators.divideInt8", c, traversal)
             : traversal.traverse(c);
-          if (this.int8 === true && leftIsInt8 === false) {
-            ret = new Chunk().appendChunk(operator).appendString("(new abap.types.Integer8().set(").appendChunk(ret).appendString("),");
+          // calculation type i: the operator checks the range of i
+          const checked = this.calculation === "i" ? SourceTranspiler.INTEGER_OPERATORS[c.concatTokens().trim()] : undefined;
+          if (checked !== undefined) {
+            operator = new Chunk().append(checked, c, traversal);
+          }
+          if (this.calculation !== undefined && this.calculation !== "i" && leftIsCalculation === false) {
+            const type = this.calculation === "int8" ? "Integer8" : "DecFloat34";
+            ret = new Chunk().appendChunk(operator).appendString(`(new abap.types.${type}().set(`).appendChunk(ret).appendString("),");
           } else {
             ret = new Chunk().appendChunk(operator).appendString("(").appendChunk(ret).appendString(",");
           }
-          // the result of an operation with an int8 operand is an int8
-          leftIsInt8 = true;
+          // the result of an operation with an int8 or decfloat34 operand has that type
+          leftIsCalculation = true;
           post.appendString(")");
           if (this.addGet) {
             post.append(".get()", c, traversal);
@@ -129,8 +148,8 @@ export class SourceTranspiler implements IExpressionTranspiler {
             ret.append(".get()", c, traversal);
           }
         } else if (c.get() instanceof Expressions.Source) {
-          ret.appendChunk(new SourceTranspiler(this.addGet, this.int8).transpile(c, traversal));
-          leftIsInt8 = c.findDirectExpression(Expressions.ArithOperator) !== undefined;
+          ret.appendChunk(new SourceTranspiler(this.addGet, this.calculation).transpile(c, traversal));
+          leftIsCalculation = c.findDirectExpression(Expressions.ArithOperator) !== undefined;
         } else if (c.get() instanceof Expressions.Arrow) {
           ret = new Chunk().appendString("(").appendChunk(ret).appendString(").get().");
         } else if (c.get() instanceof Expressions.AttributeChain) {
@@ -286,7 +305,7 @@ export class SourceTranspiler implements IExpressionTranspiler {
     ret.appendChunk(post);
 
     if (prefixNegated) {
-      ret = new Chunk().appendString("abap.operators.minus(0, ").appendChunk(ret).appendString(")");
+      ret = new Chunk().appendString(this.negation()).appendChunk(ret).appendString(")");
     }
 
 //    console.dir("return: " + ret.getCode());

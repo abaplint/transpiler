@@ -159,6 +159,40 @@ const tabl_zsel_cond = tablXml("ZSEL_COND", [
   {name: "TABNO", type: "CHAR", leng: 3},
 ]);
 
+// two transparent tables for the SELECT loops over a join: a head with an
+// address number, and the address it points at
+const tabl_zjhead = tablXml("ZJHEAD", [
+  {name: "ID", key: true, type: "CHAR", leng: 4},
+  {name: "NAME", type: "CHAR", leng: 10},
+  {name: "ADRNR", type: "CHAR", leng: 4},
+]);
+const tabl_zjadr = tablXml("ZJADR", [
+  {name: "ADRNR", key: true, type: "CHAR", leng: 4},
+  {name: "CITY", type: "CHAR", leng: 10},
+]);
+
+// four heads, three with an address; head 0004 points at no address and
+// is not in the inner join
+const joinSeed = `
+DATA ls_seed_h TYPE zjhead.
+DATA ls_seed_a TYPE zjadr.
+ls_seed_h-id = '0001'. ls_seed_h-name = 'ALPHA'. ls_seed_h-adrnr = 'A1'. INSERT zjhead FROM ls_seed_h.
+ls_seed_h-id = '0002'. ls_seed_h-name = 'BETA'.  ls_seed_h-adrnr = 'A2'. INSERT zjhead FROM ls_seed_h.
+ls_seed_h-id = '0003'. ls_seed_h-name = 'GAMMA'. ls_seed_h-adrnr = 'A3'. INSERT zjhead FROM ls_seed_h.
+ls_seed_h-id = '0004'. ls_seed_h-name = 'DELTA'. ls_seed_h-adrnr = 'A9'. INSERT zjhead FROM ls_seed_h.
+ls_seed_a-adrnr = 'A1'. ls_seed_a-city = 'OSLO'.   INSERT zjadr FROM ls_seed_a.
+ls_seed_a-adrnr = 'A2'. ls_seed_a-city = 'BERGEN'. INSERT zjadr FROM ls_seed_a.
+ls_seed_a-adrnr = 'A3'. ls_seed_a-city = 'ROME'.   INSERT zjadr FROM ls_seed_a.
+DATA lv_id TYPE zjhead-id.
+DATA lv_name TYPE zjhead-name.
+DATA lv_city TYPE zjadr-city.
+`;
+
+const joinFiles = (code: string) => [
+  {filename: "zfoobar.prog.abap", contents: joinSeed + code},
+  {filename: "zjhead.tabl.xml", contents: tabl_zjhead},
+  {filename: "zjadr.tabl.xml", contents: tabl_zjadr}];
+
 async function runAllDatabases(abap: ABAP,
                                files: IFile[],
                                check: () => any,
@@ -238,6 +272,40 @@ describe("Top level tests, Database", () => {
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("hello world");
     });
+  });
+
+  it("SELECT from a CDS view with an association, and its metadata", async () => {
+    const ddls = `@EndUserText.label: 'Messages'
+define view entity ZI_MSG as select from t100
+  association [0..*] to t100 as _Same on $projection.MessageClass = _Same.arbgb
+{
+  key sprsl as Language,
+  key arbgb as MessageClass,
+  key msgnr as MessageNumber,
+  @EndUserText.label: 'Text'
+  text as MessageText,
+  _Same
+}`;
+    const code = `
+    DATA lv_meta TYPE string.
+    SELECT * FROM zi_msg INTO TABLE @DATA(lt_rows) WHERE messagenumber = '000'.
+    LOOP AT lt_rows INTO DATA(ls_row).
+      WRITE / ls_row-messagetext.
+    ENDLOOP.
+    WRITE '@KERNEL const ddic = abap.DDIC["ZI_MSG"];'.
+    WRITE '@KERNEL const meta = [ddic.keyFields.join(","), ddic.cds.associations[0].name];'.
+    WRITE '@KERNEL lv_meta.set(meta.join(" ") + " " + ddic.cds.fields[3].annotations[0].value);'.
+    WRITE / lv_meta.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zi_msg.ddls.asddls", contents: ddls},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test},
+    ];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().split("\n").map(l => l.trimEnd()).join("\n").trimEnd())
+        .to.equal("hello world\nLANGUAGE,MESSAGECLASS,MESSAGENUMBER _Same Text");
+    }, {sqlite: true, postgres: false, snowflake: false, hana: false});
   });
 
   it("SQL scalar subselect in a condition", async () => {
@@ -656,8 +724,7 @@ describe("Top level tests, Database", () => {
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
-// TODO, for now it only checks that it compiles to valid JS
-    // expect(abap.console.get()).to.equal("hello world\nblah");
+      expect(abap.console.getTrimmed()).to.equal("hello world\nblah");
     });
   });
 
@@ -675,9 +742,175 @@ ENDSELECT.`;
       {filename: "t100.tabl.xml", contents: tabl_t100xml},
       {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
     await runAllDatabases(abap, files, () => {
-// TODO, for now it only checks that it compiles to valid JS
-    // expect(abap.console.get()).to.equal("hello world\nblah");
+      expect(abap.console.getTrimmed()).to.equal("hello world\nblah");
     });
+  });
+
+  it("SELECT loop, join with aliases, INTO list", async () => {
+    const code = `
+SELECT h~id h~name a~city INTO (lv_id, lv_name, lv_city)
+  FROM ( zjhead AS h INNER JOIN zjadr AS a ON h~adrnr = a~adrnr )
+  ORDER BY h~id.
+  WRITE / |{ lv_id } { lv_name } { lv_city }|.
+ENDSELECT.`;
+    await runAllDatabases(abap, joinFiles(code), () => {
+      expect(abap.console.getTrimmed()).to.equal("0001 ALPHA OSLO\n0002 BETA BERGEN\n0003 GAMMA ROME");
+    }, {snowflake: false});
+  });
+
+  it("SELECT loop, join with aliases, INTO a work area behind a field symbol, left to right", async () => {
+    const code = `
+DATA: BEGIN OF ls_row,
+        key  TYPE zjhead-id,
+        town TYPE zjadr-city,
+      END OF ls_row.
+FIELD-SYMBOLS <ls_row> LIKE ls_row.
+ASSIGN ls_row TO <ls_row>.
+SELECT h~id a~city INTO <ls_row>
+  FROM ( zjhead AS h INNER JOIN zjadr AS a ON h~adrnr = a~adrnr )
+  ORDER BY h~id.
+  WRITE / |{ ls_row-key } { ls_row-town }|.
+ENDSELECT.`;
+    await runAllDatabases(abap, joinFiles(code), () => {
+      expect(abap.console.getTrimmed()).to.equal("0001 OSLO\n0002 BERGEN\n0003 ROME");
+    }, {snowflake: false});
+  });
+
+  it("SELECT loop, join with aliases, INTO CORRESPONDING FIELDS OF", async () => {
+    const code = `
+DATA: BEGIN OF ls_row,
+        city TYPE zjadr-city,
+        id   TYPE zjhead-id,
+      END OF ls_row.
+SELECT h~id a~city INTO CORRESPONDING FIELDS OF ls_row
+  FROM ( zjhead AS h INNER JOIN zjadr AS a ON h~adrnr = a~adrnr )
+  ORDER BY h~id.
+  WRITE / |{ ls_row-id } { ls_row-city }|.
+ENDSELECT.`;
+    await runAllDatabases(abap, joinFiles(code), () => {
+      expect(abap.console.getTrimmed()).to.equal("0001 OSLO\n0002 BERGEN\n0003 ROME");
+    }, {snowflake: false});
+  });
+
+  it("SELECT loop, left outer join, INTO list: a null column clears its target", async () => {
+    const code = `
+lv_city = 'BEFORE'.
+SELECT h~id a~city INTO (lv_id, lv_city)
+  FROM ( zjhead AS h LEFT OUTER JOIN zjadr AS a ON h~adrnr = a~adrnr )
+  WHERE h~id = '0004'.
+  WRITE / |{ lv_id }:{ lv_city }:|.
+ENDSELECT.`;
+    await runAllDatabases(abap, joinFiles(code), () => {
+      expect(abap.console.getTrimmed()).to.equal("0004::");
+    }, {snowflake: false});
+  });
+
+  it("SELECT loop, INTO list, two columns of one name: refused, not shifted", async () => {
+    const code = `
+DATA lv_adrnr1 TYPE zjhead-adrnr.
+DATA lv_adrnr2 TYPE zjadr-adrnr.
+SELECT h~adrnr a~adrnr a~city INTO (lv_adrnr1, lv_adrnr2, lv_city)
+  FROM ( zjhead AS h INNER JOIN zjadr AS a ON h~adrnr = a~adrnr ).
+ENDSELECT.`;
+    // on sqlite and on postgres
+    const messages: string[] = [];
+    for (const database of [{postgres: false}, {sqlite: false}]) {
+      try {
+        await runAllDatabases(abap, joinFiles(code), () => { return; }, {...database, snowflake: false, hana: false});
+        messages.push("no error");
+      } catch (error) {
+        messages.push((error as Error).message);
+        await abap.context.databaseConnections["DEFAULT"].disconnect();
+      }
+    }
+    const expected = "SELECT INTO, by position: 2 columns for 3 components";
+    expect(messages).to.deep.equal([expected, expected]);
+  });
+
+  // the next three ran before the alias handling and must keep their result
+
+  it("SELECT loop, join without aliases, INTO a work area with other component names", async () => {
+    const code = `
+DATA: BEGIN OF ls_o,
+        key  TYPE zjhead-id,
+        text TYPE zjhead-name,
+      END OF ls_o.
+SELECT zjhead~id zjhead~name INTO ls_o
+  FROM zjhead INNER JOIN zjadr ON zjhead~adrnr = zjadr~adrnr
+  ORDER BY zjhead~id.
+  WRITE / |{ ls_o-key } { ls_o-text }|.
+ENDSELECT.`;
+    await runAllDatabases(abap, joinFiles(code), () => {
+      expect(abap.console.getTrimmed()).to.equal("0001 ALPHA\n0002 BETA\n0003 GAMMA");
+    }, {snowflake: false});
+  });
+
+  it("SELECT loop, one table, subquery in WHERE", async () => {
+    const code = `
+DATA: BEGIN OF ls_o,
+        key  TYPE zjhead-id,
+        text TYPE zjhead-name,
+      END OF ls_o.
+SELECT id name FROM zjhead INTO ls_o
+  WHERE adrnr IN ( SELECT adrnr FROM zjadr )
+  ORDER BY PRIMARY KEY.
+  WRITE / |{ ls_o-key } { ls_o-text }|.
+ENDSELECT.`;
+    await runAllDatabases(abap, joinFiles(code), () => {
+      expect(abap.console.getTrimmed()).to.equal("0001 ALPHA\n0002 BETA\n0003 GAMMA");
+    }, {snowflake: false});
+  });
+
+  it("SELECT loop, join without aliases, FOR ALL ENTRIES", async () => {
+    const code = `
+DATA ls_head TYPE zjhead.
+DATA lt_keys TYPE STANDARD TABLE OF zjhead-id WITH DEFAULT KEY.
+APPEND '0002' TO lt_keys.
+SELECT zjhead~id zjhead~name INTO CORRESPONDING FIELDS OF ls_head
+  FROM zjhead INNER JOIN zjadr ON zjhead~adrnr = zjadr~adrnr
+  FOR ALL ENTRIES IN lt_keys WHERE id = lt_keys-table_line.
+  WRITE / |{ ls_head-id } { ls_head-name }|.
+ENDSELECT.`;
+    await runAllDatabases(abap, joinFiles(code), () => {
+      expect(abap.console.getTrimmed()).to.equal("0002 BETA");
+    }, {snowflake: false});
+  });
+
+  it("SELECT loop, single table with alias, INTO work area", async () => {
+    const code = `
+DATA ls_head TYPE zjhead.
+SELECT * FROM zjhead AS h INTO ls_head WHERE h~adrnr <> 'A9' ORDER BY PRIMARY KEY.
+  WRITE / |{ ls_head-id } { ls_head-name }|.
+ENDSELECT.`;
+    await runAllDatabases(abap, joinFiles(code), () => {
+      expect(abap.console.getTrimmed()).to.equal("0001 ALPHA\n0002 BETA\n0003 GAMMA");
+    }, {snowflake: false});
+  });
+
+  it("SELECT loop, INTO list, FOR ALL ENTRIES with rows and with an empty driving table", async () => {
+    const code = `
+DATA lt_keys TYPE STANDARD TABLE OF zjhead-id WITH DEFAULT KEY.
+DATA lt_out TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+DATA lv_out TYPE string.
+APPEND '0003' TO lt_keys.
+APPEND '0001' TO lt_keys.
+SELECT id name INTO (lv_id, lv_name) FROM zjhead
+    FOR ALL ENTRIES IN lt_keys WHERE id = lt_keys-table_line.
+  APPEND |{ lv_id } { lv_name }| TO lt_out.
+ENDSELECT.
+SORT lt_out.
+LOOP AT lt_out INTO lv_out.
+  WRITE / lv_out.
+ENDLOOP.
+WRITE / sy-dbcnt.
+CLEAR lt_keys.
+SELECT id name INTO (lv_id, lv_name) FROM zjhead
+    FOR ALL ENTRIES IN lt_keys WHERE id = lt_keys-table_line.
+ENDSELECT.
+WRITE / sy-dbcnt.`;
+    await runAllDatabases(abap, joinFiles(code), () => {
+      expect(abap.console.getTrimmed()).to.equal("0001 ALPHA\n0003 GAMMA\n2\n4");
+    }, {snowflake: false});
   });
 
   it("SELECT COUNT(*)", async () => {
@@ -1741,6 +1974,75 @@ WRITE sy-dbcnt.`;
     ];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get()).to.equal("2");
+    }, {snowflake: false});
+  });
+
+  it("order by dynamic, columns separated by blanks", async () => {
+    const code = `
+DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+DATA ls_t100 LIKE LINE OF lt_t100.
+DATA lv_order TYPE string.
+
+lv_order = 'arbgb msgnr DESCENDING'.
+SELECT * FROM t100 INTO TABLE lt_t100 ORDER BY (lv_order).
+LOOP AT lt_t100 INTO ls_t100.
+  WRITE / ls_t100-msgnr.
+ENDLOOP.
+
+lv_order = 'arbgb, msgnr'.
+SELECT * FROM t100 INTO TABLE lt_t100 ORDER BY (lv_order).
+LOOP AT lt_t100 INTO ls_t100.
+  WRITE / ls_t100-msgnr.
+ENDLOOP.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test},
+    ];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("123\n000\n000\n123");
+    }, {snowflake: false});
+  });
+
+  it("order by dynamic tab, one row with two columns separated by blanks", async () => {
+    const code = `
+DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+DATA ls_t100 LIKE LINE OF lt_t100.
+DATA lt_order TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+
+APPEND 'arbgb msgnr DESCENDING' TO lt_order.
+SELECT * FROM t100 INTO TABLE lt_t100 ORDER BY (lt_order).
+LOOP AT lt_t100 INTO ls_t100.
+  WRITE / ls_t100-msgnr.
+ENDLOOP.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test},
+    ];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("123\n000");
+    }, {snowflake: false});
+  });
+
+  it("order by dynamic, PRIMARY KEY", async () => {
+    const code = `
+DATA lt_t100 TYPE STANDARD TABLE OF t100 WITH DEFAULT KEY.
+DATA ls_t100 LIKE LINE OF lt_t100.
+DATA lv_order TYPE string.
+
+lv_order = 'PRIMARY KEY'.
+SELECT * FROM t100 INTO TABLE lt_t100 ORDER BY (lv_order).
+LOOP AT lt_t100 INTO ls_t100.
+  WRITE / ls_t100-msgnr.
+ENDLOOP.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test},
+    ];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get()).to.equal("000\n123");
     }, {snowflake: false});
   });
 
@@ -4225,6 +4527,39 @@ START-OF-SELECTION.
       {filename: "t100.tabl.xml", contents: tabl_t100xml}];
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("HELLO");
+    }, {postgres: false, snowflake: false, hana: false});
+  });
+
+  it("MODIFY and DELETE of a database table in the short forms, from the TABLES work area and FROM", async () => {
+    const code = `
+    TABLES t100.
+    DATA ls_t100 TYPE t100.
+    DATA lv_count TYPE i.
+    t100-sprsl = 'E'.
+    t100-arbgb = 'HELLO'.
+    t100-msgnr = '001'.
+    t100-text = 'first'.
+    MODIFY t100.
+    WRITE / sy-subrc.
+    ls_t100 = t100.
+    ls_t100-msgnr = '002'.
+    MODIFY t100 FROM ls_t100.
+    WRITE / sy-subrc.
+    SELECT COUNT(*) FROM t100 INTO lv_count.
+    WRITE / lv_count.
+    DELETE t100.
+    WRITE / sy-subrc.
+    DELETE t100 FROM ls_t100.
+    WRITE / sy-subrc.
+    SELECT COUNT(*) FROM t100 INTO lv_count.
+    WRITE / lv_count.
+    DELETE t100.
+    WRITE / sy-subrc.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.get().trimEnd()).to.equal("0\n0\n2\n0\n0\n0\n4");
     }, {postgres: false, snowflake: false, hana: false});
   });
 
