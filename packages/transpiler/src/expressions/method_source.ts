@@ -4,6 +4,7 @@ import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {FieldChainTranspiler} from ".";
+import {UniqueIdentifier} from "../unique_identifier";
 
 export class MethodSourceTranspiler implements IExpressionTranspiler {
   private prepend: string;
@@ -16,6 +17,14 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
     this.prepend = (prepend || "") + "await ";
     this.privatePrefix = privatePrefix;
     this.staticConstructorCall = staticConstructorCall;
+  }
+
+  /** (name)=>: the class of a dynamic static call, a local class of the program first, as CREATE OBJECT ... TYPE (name),
+   *  then a global class. name is the JS code of the name. Returns the JS name of a variable holding the class */
+  private dynamicClass(name: string, ret: Chunk, traversal: Traversal): string {
+    const id = UniqueIdentifier.get();
+    ret.appendString(`const ${id} = abap.Classes["${traversal.buildPrefix()}" + ${name}.trimEnd()] ?? abap.Classes[${name}.trimEnd()];\n`);
+    return id;
   }
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
@@ -37,10 +46,10 @@ export class MethodSourceTranspiler implements IExpressionTranspiler {
         if (second.get() instanceof Expressions.FieldChain && second instanceof Nodes.ExpressionNode) {
           const t = new FieldChainTranspiler(true).transpile(second, traversal).getCode();
 
-          call = traversal.lookupClassOrInterface(t, child.getFirstToken(), true);
+          call = this.dynamicClass(t, ret, traversal);
           ret.appendString(`if (${call} === undefined) { if (${illegalClass} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; } else {throw new ${illegalClass}(); } }\n`);
         } else if (second.get() instanceof Expressions.Constant) {
-          call = traversal.lookupClassOrInterface(second.getFirstToken().getStr(), child.getFirstToken(), true);
+          call = this.dynamicClass(second.getFirstToken().getStr(), ret, traversal);
           ret.appendString(`if (${call} === undefined) { if (${illegalClass} === undefined) { throw "CX_SY_DYN_CALL_ILLEGAL_CLASS not found"; } else {throw new ${illegalClass}(); } }\n`);
 
           const name = children[i + 2];

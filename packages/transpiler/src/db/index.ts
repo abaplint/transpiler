@@ -87,7 +87,10 @@ export class DatabaseSetup {
     for (const obj of this.reg.getObjects()) {
       if (obj instanceof abaplint.Objects.Table
           && obj.getTableCategory() === abaplint.Objects.TableCategory.Transparent) {
-        statements.push(schemaGenerator.buildTABL(obj).trim());
+        const statement = schemaGenerator.buildTABL(obj).trim();
+        if (statement.length > 0) {
+          statements.push(statement);
+        }
       }
     }
 
@@ -95,7 +98,10 @@ export class DatabaseSetup {
     // todo: what if the view is based on another view?
     for (const obj of this.reg.getObjects()) {
       if (obj instanceof abaplint.Objects.View) {
-        statements.push(schemaGenerator.buildVIEW(obj).trim());
+        const statement = schemaGenerator.buildVIEW(obj).trim();
+        if (statement.length > 0) {
+          statements.push(statement);
+        }
       }
     }
 

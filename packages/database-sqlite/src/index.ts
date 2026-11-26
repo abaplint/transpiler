@@ -8,13 +8,13 @@ export interface SQLiteDatabaseClientOptions {
   trace?: boolean;
   /** passed to initSqlJs() as is, eg. locateFile or wasmBinary to tell sql.js
    * where its .wasm is when the page is not served from the site root */
-  sqlJs?: SqlJsConfig;
+  sqlJs?: Partial<SqlJsConfig>;
 }
 
 export class SQLiteDatabaseClient implements DB.DatabaseClient {
   public readonly name = "sqlite";
   private readonly trace: boolean;
-  private readonly sqlJs: SqlJsConfig | undefined;
+  private readonly sqlJs: Partial<SqlJsConfig> | undefined;
   private sqlite: Database | undefined = undefined;
   private inTransaction = false;
 
@@ -24,7 +24,8 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
   }
 
   public async connect(data?: ArrayLike<number> | Buffer | null) {
-    const SQL = await initSqlJs(this.sqlJs);
+    // @types/sql.js marks useOldExtensionFunctions as required, sql.js itself defaults it
+    const SQL = await initSqlJs(this.sqlJs as SqlJsConfig | undefined);
     this.sqlite = new SQL.Database(data);
 
     if (abap?.context?.databaseConnections

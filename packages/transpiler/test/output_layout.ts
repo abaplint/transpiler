@@ -52,6 +52,71 @@ describe("Output layout", () => {
     expect(output.initializationScript.indexOf("zfolder/acl")).to.be.lessThan(output.initializationScript.indexOf("afolder/zcl"));
   });
 
+  it("merges the DDIC definitions of each folder into one module", async () => {
+    const dtel = (name: string) => `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_DTEL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD04V><ROLLNAME>${name}</ROLLNAME><DDTEXT>text</DDTEXT><DATATYPE>CHAR</DATATYPE><LENG>000010</LENG></DD04V>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+    const tabl = `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V><TABNAME>ZTAB</TABNAME><TABCLASS>INTTAB</TABCLASS></DD02V>
+   <DD03P_TABLE>
+    <DD03P><FIELDNAME>FIELD</FIELDNAME><ROLLNAME>ZPROJECT</ROLLNAME><COMPTYPE>E</COMPTYPE></DD03P>
+    <DD03P><FIELDNAME>OTHER</FIELDNAME><ROLLNAME>ZLIB</ROLLNAME><COMPTYPE>E</COMPTYPE></DD03P>
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>`;
+    const files = [
+      {filename: "zproject.dtel.xml", contents: dtel("ZPROJECT")},
+      {filename: "ztab.tabl.xml", contents: tabl},
+      {filename: "zlib.dtel.xml", contents: dtel("ZLIB")},
+      {filename: "acl.clas.abap", contents: "CLASS acl DEFINITION PUBLIC. ENDCLASS. CLASS acl IMPLEMENTATION. ENDCLASS."},
+    ];
+    const reg = new abaplint.Registry().addFiles(files.map(file => new abaplint.MemoryFile(file.filename, file.contents)));
+    const output = await new Transpiler().run(reg, undefined, new Map([
+      ["zproject.dtel.xml", "project"], ["ztab.tabl.xml", "project"], ["zlib.dtel.xml", "lib"], ["acl.clas.abap", "project"]]));
+
+    expect(output.objects.map(file => file.filename).sort())
+      .to.deep.equal(["lib/_ddic.mjs", "project/_ddic.mjs", "project/acl.clas.mjs"]);
+
+    const DDIC: {[name: string]: {objectType: string}} = {};
+    for (const file of output.objects.filter(file => file.object.type === "DDIC")) {
+      new Function("abap", file.chunk.getCode())({DDIC});
+    }
+    expect(Object.keys(DDIC).sort()).to.deep.equal(["ZLIB", "ZPROJECT", "ZTAB"]);
+    expect(DDIC["ZTAB"].objectType).to.equal("TABL");
+
+    for (const script of [output.initializationScript, output.initializationScript2]) {
+      expect(script).to.not.contain(".dtel.mjs");
+      expect(script).to.not.contain(".tabl.mjs");
+      const lib = script.indexOf("./lib/_ddic.mjs");
+      const project = script.indexOf("./project/_ddic.mjs");
+      expect(lib).to.be.greaterThan(-1);
+      expect(project).to.be.greaterThan(lib);
+      expect(script.indexOf("./project/acl.clas.mjs")).to.be.greaterThan(project);
+    }
+  });
+
+  it("keeps one module per DDIC object in flat output", async () => {
+    const result = await new Transpiler().runRaw([{filename: "zint8.dtel.xml", contents: `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_DTEL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD04V><ROLLNAME>ZINT8</ROLLNAME><DATATYPE>CHAR</DATATYPE><LENG>000010</LENG></DD04V>
+  </asx:values>
+ </asx:abap>
+</abapGit>`}]);
+    expect(result.objects.map(file => file.filename)).to.deep.equal(["zint8.dtel.mjs"]);
+    expect(result.initializationScript).to.contain("./zint8.dtel.mjs");
+  });
+
   it("rejects output paths escaping the owning folder", () => {
     const reg = new abaplint.Registry().addFile(new abaplint.MemoryFile("zapp.prog.abap", ""));
     const layout = new OutputLayout(reg, new Map([["zapp.prog.abap", "project"]]));
