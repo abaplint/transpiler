@@ -1,6 +1,7 @@
 import * as abaplint from "@abaplint/core";
 import {IRequire} from "./types";
 import {filesWithProgramIncludes} from "./program_includes";
+import {constantSource} from "./constant_value";
 
 export class Requires {
   private readonly reg: abaplint.IRegistry;
@@ -14,7 +15,7 @@ export class Requires {
     const ret: IRequire[] = [];
 
     if (obj.getType() === "INTF") {
-      return [];
+      return this.constantSources(obj, filename);
     }
 
     const add = function (req: IRequire | undefined) {
@@ -114,6 +115,32 @@ export class Requires {
       }
     }
 
+    return ret;
+  }
+
+  /** the global objects whose constants an interface reads at load: a constant whose VALUE
+   * leads to a class constant, or to an object no analysis knows (constant_value.ts) */
+  private constantSources(obj: abaplint.ABAPObject, filename: string): IRequire[] {
+    const ret: IRequire[] = [];
+    for (const file of obj.getABAPFiles()) {
+      for (const statement of file.getStatements()) {
+        if (!(statement.get() instanceof abaplint.Statements.Constant)) {
+          continue;
+        }
+        const chain = statement.findDirectExpression(abaplint.Expressions.Value)?.getChildren()[1];
+        if (!(chain instanceof abaplint.Nodes.ExpressionNode) || !(chain.get() instanceof abaplint.Expressions.SimpleFieldChain)) {
+          continue;
+        }
+        const source = constantSource(this.reg, chain);
+        if (source.kind !== "member" || source.object.getName().toUpperCase() === obj.getName().toUpperCase()) {
+          continue;
+        }
+        const main = source.object.getMainABAPFile()?.getFilename();
+        if (main && main !== filename && ret.some(r => r.filename === main) === false) {
+          ret.push({filename: main, name: undefined});
+        }
+      }
+    }
     return ret;
   }
 
