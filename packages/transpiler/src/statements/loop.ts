@@ -8,6 +8,8 @@ import {Chunk} from "../chunk";
 export class LoopTranspiler implements IStatementTranspiler {
   private unique = "";
   private targetCode = "";
+  private workArea: string | undefined = undefined;
+  private assigning = false;
   private readonly injectFrom: string | undefined = undefined;
   private readonly skipInto: boolean | undefined = undefined;
   private readonly atLast: string | undefined = undefined;
@@ -28,6 +30,15 @@ export class LoopTranspiler implements IStatementTranspiler {
   /** the code assigning the row in getTarget() to the INTO, ASSIGNING or REFERENCE INTO target, can be empty */
   public getTargetCode() {
     return this.targetCode;
+  }
+
+  /** the work area the row is copied into (INTO wa, or the header line), undefined for ASSIGNING and REFERENCE INTO */
+  public getWorkArea() {
+    return this.workArea;
+  }
+
+  public isAssigning() {
+    return this.assigning;
   }
 
   private determineInto(node: abaplint.Nodes.StatementNode): abaplint.Nodes.ExpressionNode | undefined {
@@ -69,6 +80,7 @@ export class LoopTranspiler implements IStatementTranspiler {
         target = t + ".assign(" + this.unique + ".getPointer());";
       } else {
         target = t + ".set(" + this.unique + ");";
+        this.workArea = t;
       }
     } else if (this.skipInto !== true) {
       const assigning = loopTarget?.findFirstExpression(abaplint.Expressions.FSTarget)
@@ -76,9 +88,11 @@ export class LoopTranspiler implements IStatementTranspiler {
       if (assigning) {
         targetNode = assigning;
         target = traversal.traverse(assigning).getCode() + ".assign(" + this.unique + ");";
+        this.assigning = true;
       } else if (!node.concatTokens().toUpperCase().includes(" TRANSPORTING NO FIELDS") && this.hasHeaderLine(loopSource, traversal)) {
         // LOOP AT itab. without a target: the row goes into the header line of the table
         target = source + ".getHeader().set(" + this.unique + ");";
+        this.workArea = source + ".getHeader()";
       }
     }
 

@@ -6,6 +6,7 @@ import {assign} from "./assign";
 import {commit, ICommitOptions} from "./commit";
 import {concatenate} from "./concatenate";
 import {condense} from "./condense";
+import {atMask, atSameKey, sum} from "./control_level";
 import {convert} from "./convert";
 import {createData} from "./create_data";
 import {deleteInternal} from "./delete_internal";
@@ -68,6 +69,8 @@ import {eq} from "../compare";
 export class Statements {
   public append = append;
   public assert = assert;
+  public atMask = atMask;
+  public atSameKey = atSameKey;
   public assign = assign;
   public cast = cast;
   public checkCreateObjectType = checkCreateObjectType;
@@ -106,6 +109,7 @@ export class Statements {
   public shift = shift;
   public sort = sort;
   public split = split;
+  public sum = sum;
   public translate = translate;
   public receive = receive;
   public callTransaction = callTransaction;
