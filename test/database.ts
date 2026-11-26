@@ -2634,6 +2634,76 @@ ENDSELECT.`;
     });
   });
 
+  it("SELECT loop, PACKAGE SIZE INTO TABLE, join with aliases: rows of the target table, left to right", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         town TYPE zjadr-city,
+         key  TYPE zjhead-id,
+       END OF ty_row.
+DATA lt_rows TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY.
+DATA ls_row TYPE ty_row.
+SELECT a~city h~id INTO TABLE lt_rows PACKAGE SIZE 10
+  FROM ( zjhead AS h INNER JOIN zjadr AS a ON h~adrnr = a~adrnr )
+  ORDER BY h~id.
+  WRITE / |{ lines( lt_rows ) } { sy-dbcnt }|.
+  LOOP AT lt_rows INTO ls_row.
+    WRITE / |{ ls_row-key } { ls_row-town }|.
+  ENDLOOP.
+ENDSELECT.`;
+    await runAllDatabases(abap, joinFiles(code), () => {
+      expect(abap.console.getTrimmed()).to.equal("3 3\n0001 OSLO\n0002 BERGEN\n0003 ROME");
+    }, {snowflake: false});
+  });
+
+  it("SELECT loop, PACKAGE SIZE INTO and APPENDING CORRESPONDING FIELDS OF TABLE, join with aliases: by name", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         city  TYPE zjadr-city,
+         other TYPE c LENGTH 2,
+         id    TYPE zjhead-id,
+       END OF ty_row.
+DATA lt_rows TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY.
+DATA ls_row TYPE ty_row.
+SELECT h~id a~city INTO CORRESPONDING FIELDS OF TABLE lt_rows PACKAGE SIZE 10
+  FROM ( zjhead AS h INNER JOIN zjadr AS a ON h~adrnr = a~adrnr )
+  ORDER BY h~id.
+  LOOP AT lt_rows INTO ls_row.
+    WRITE / |{ ls_row-id } { ls_row-city }|.
+  ENDLOOP.
+ENDSELECT.
+SELECT h~id a~city APPENDING CORRESPONDING FIELDS OF TABLE lt_rows PACKAGE SIZE 10
+  FROM ( zjhead AS h INNER JOIN zjadr AS a ON h~adrnr = a~adrnr )
+  WHERE h~id = '0001'.
+ENDSELECT.
+READ TABLE lt_rows INDEX 4 INTO ls_row.
+WRITE / |{ lines( lt_rows ) } { ls_row-id } { ls_row-city }|.`;
+    await runAllDatabases(abap, joinFiles(code), () => {
+      expect(abap.console.getTrimmed()).to.equal("0001 OSLO\n0002 BERGEN\n0003 ROME\n4 0001 OSLO");
+    }, {snowflake: false});
+  });
+
+  // ran before the buffer of an aliased join took the target table's row type and must keep its result
+
+  it("SELECT loop, PACKAGE SIZE INTO TABLE, one table with an alias, and a join without aliases", async () => {
+    const code = `
+DATA lt_head TYPE STANDARD TABLE OF zjhead WITH DEFAULT KEY.
+DATA ls_head TYPE zjhead.
+SELECT * FROM zjhead AS h INTO TABLE lt_head PACKAGE SIZE 10 WHERE h~id <> '0001'.
+  WRITE / lines( lt_head ).
+ENDSELECT.
+CLEAR lt_head.
+SELECT zjhead~id zjhead~name INTO CORRESPONDING FIELDS OF TABLE lt_head PACKAGE SIZE 10
+  FROM zjhead INNER JOIN zjadr ON zjhead~adrnr = zjadr~adrnr
+  ORDER BY zjhead~id.
+  LOOP AT lt_head INTO ls_head.
+    WRITE / |{ ls_head-id } { ls_head-name }|.
+  ENDLOOP.
+ENDSELECT.`;
+    await runAllDatabases(abap, joinFiles(code), () => {
+      expect(abap.console.getTrimmed()).to.equal("3\n0001 ALPHA\n0002 BETA\n0003 GAMMA");
+    }, {snowflake: false});
+  });
+
   it("SINGLE star into CORRESPONDING FIELDS OF", async () => {
     const code = `
 DATA: BEGIN OF res,
