@@ -912,11 +912,27 @@ ENDSELECT.`;
     }, {snowflake: false});
   });
 
-  it("SELECT loop, INTO list, two columns of one name: refused, not shifted", async () => {
+  it("SELECT loop, INTO list, two columns of one name", async () => {
     const code = `
 DATA lv_adrnr1 TYPE zjhead-adrnr.
 DATA lv_adrnr2 TYPE zjadr-adrnr.
 SELECT h~adrnr a~adrnr a~city INTO (lv_adrnr1, lv_adrnr2, lv_city)
+  FROM ( zjhead AS h INNER JOIN zjadr AS a ON h~adrnr = a~adrnr )
+  ORDER BY h~id.
+  WRITE / |{ lv_adrnr1 } { lv_adrnr2 } { lv_city }|.
+ENDSELECT.`;
+    await runAllDatabases(abap, joinFiles(code), () => {
+      expect(abap.console.getTrimmed()).to.equal("A1 A1 OSLO\nA2 A2 BERGEN\nA3 A3 ROME");
+    }, {snowflake: false});
+  });
+
+  it("SELECT loop, INTO list, dynamic list with two columns of one name: refused, not shifted", async () => {
+    const code = `
+DATA lv_adrnr1 TYPE zjhead-adrnr.
+DATA lv_adrnr2 TYPE zjadr-adrnr.
+DATA lv_list TYPE string.
+lv_list = 'h~adrnr, a~adrnr, a~city'.
+SELECT (lv_list) INTO (lv_adrnr1, lv_adrnr2, lv_city)
   FROM ( zjhead AS h INNER JOIN zjadr AS a ON h~adrnr = a~adrnr ).
 ENDSELECT.`;
     // on sqlite and on postgres
@@ -932,6 +948,24 @@ ENDSELECT.`;
     }
     const expected = "SELECT INTO, by position: 2 columns for 3 components";
     expect(messages).to.deep.equal([expected, expected]);
+  });
+
+  // ran before two columns of one name got an alias and must keep its result
+
+  it("SELECT loop, INTO list without two columns of one name: the select list is sent as written", async () => {
+    const code = `
+DATA lv_adrnr TYPE zjhead-adrnr.
+SELECT h~adrnr a~city INTO (lv_adrnr, lv_city)
+  FROM ( zjhead AS h INNER JOIN zjadr AS a ON h~adrnr = a~adrnr )
+  ORDER BY h~adrnr DESCENDING.
+  WRITE / |{ lv_adrnr } { lv_city }|.
+ENDSELECT.`;
+    const js = await runRilesSqlite(abap, joinFiles(code));
+    await abap.context.databaseConnections["DEFAULT"].disconnect();
+    expect(js).to.include(`SELECT \\"h\\".\\"adrnr\\", \\"a\\".\\"city\\" FROM`);
+    await runAllDatabases(abap, joinFiles(code), () => {
+      expect(abap.console.getTrimmed()).to.equal("A3 ROME\nA2 BERGEN\nA1 OSLO");
+    }, {snowflake: false});
   });
 
   // the next three ran before the alias handling and must keep their result
@@ -2632,6 +2666,76 @@ ENDSELECT.`;
     await runAllDatabases(abap, files, () => {
       expect(abap.console.get().trimEnd()).to.equal("2");
     });
+  });
+
+  it("SELECT loop, PACKAGE SIZE INTO TABLE, join with aliases: rows of the target table, left to right", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         town TYPE zjadr-city,
+         key  TYPE zjhead-id,
+       END OF ty_row.
+DATA lt_rows TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY.
+DATA ls_row TYPE ty_row.
+SELECT a~city h~id INTO TABLE lt_rows PACKAGE SIZE 10
+  FROM ( zjhead AS h INNER JOIN zjadr AS a ON h~adrnr = a~adrnr )
+  ORDER BY h~id.
+  WRITE / |{ lines( lt_rows ) } { sy-dbcnt }|.
+  LOOP AT lt_rows INTO ls_row.
+    WRITE / |{ ls_row-key } { ls_row-town }|.
+  ENDLOOP.
+ENDSELECT.`;
+    await runAllDatabases(abap, joinFiles(code), () => {
+      expect(abap.console.getTrimmed()).to.equal("3 3\n0001 OSLO\n0002 BERGEN\n0003 ROME");
+    }, {snowflake: false});
+  });
+
+  it("SELECT loop, PACKAGE SIZE INTO and APPENDING CORRESPONDING FIELDS OF TABLE, join with aliases: by name", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         city  TYPE zjadr-city,
+         other TYPE c LENGTH 2,
+         id    TYPE zjhead-id,
+       END OF ty_row.
+DATA lt_rows TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY.
+DATA ls_row TYPE ty_row.
+SELECT h~id a~city INTO CORRESPONDING FIELDS OF TABLE lt_rows PACKAGE SIZE 10
+  FROM ( zjhead AS h INNER JOIN zjadr AS a ON h~adrnr = a~adrnr )
+  ORDER BY h~id.
+  LOOP AT lt_rows INTO ls_row.
+    WRITE / |{ ls_row-id } { ls_row-city }|.
+  ENDLOOP.
+ENDSELECT.
+SELECT h~id a~city APPENDING CORRESPONDING FIELDS OF TABLE lt_rows PACKAGE SIZE 10
+  FROM ( zjhead AS h INNER JOIN zjadr AS a ON h~adrnr = a~adrnr )
+  WHERE h~id = '0001'.
+ENDSELECT.
+READ TABLE lt_rows INDEX 4 INTO ls_row.
+WRITE / |{ lines( lt_rows ) } { ls_row-id } { ls_row-city }|.`;
+    await runAllDatabases(abap, joinFiles(code), () => {
+      expect(abap.console.getTrimmed()).to.equal("0001 OSLO\n0002 BERGEN\n0003 ROME\n4 0001 OSLO");
+    }, {snowflake: false});
+  });
+
+  // ran before the buffer of an aliased join took the target table's row type and must keep its result
+
+  it("SELECT loop, PACKAGE SIZE INTO TABLE, one table with an alias, and a join without aliases", async () => {
+    const code = `
+DATA lt_head TYPE STANDARD TABLE OF zjhead WITH DEFAULT KEY.
+DATA ls_head TYPE zjhead.
+SELECT * FROM zjhead AS h INTO TABLE lt_head PACKAGE SIZE 10 WHERE h~id <> '0001'.
+  WRITE / lines( lt_head ).
+ENDSELECT.
+CLEAR lt_head.
+SELECT zjhead~id zjhead~name INTO CORRESPONDING FIELDS OF TABLE lt_head PACKAGE SIZE 10
+  FROM zjhead INNER JOIN zjadr ON zjhead~adrnr = zjadr~adrnr
+  ORDER BY zjhead~id.
+  LOOP AT lt_head INTO ls_head.
+    WRITE / |{ ls_head-id } { ls_head-name }|.
+  ENDLOOP.
+ENDSELECT.`;
+    await runAllDatabases(abap, joinFiles(code), () => {
+      expect(abap.console.getTrimmed()).to.equal("3\n0001 ALPHA\n0002 BETA\n0003 GAMMA");
+    }, {snowflake: false});
   });
 
   it("SINGLE star into CORRESPONDING FIELDS OF", async () => {

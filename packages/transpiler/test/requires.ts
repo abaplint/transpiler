@@ -170,7 +170,7 @@ ENDINTERFACE.`}];
     expect(n.chunk.getCode()).to.contain("zif_n.zif_n$y.set(abap.Classes['ZIF_P'].zif_p$x);");
   });
 
-  it("INTF constant from a component of a structured constant: not followed, the field chain as before", async () => {
+  it("INTF constant from a component of a class's structured constant: the component, class required", async () => {
     const files = [
       {filename: "zif_b.intf.abap", contents: `INTERFACE zif_b PUBLIC.
   CONSTANTS y TYPE string VALUE zcl_k=>gs-a.
@@ -185,8 +185,42 @@ CLASS zcl_k IMPLEMENTATION.
 ENDCLASS.`}];
     const output = await runFiles(files);
     const b = output.find(o => o.filename === "zif_b.intf.mjs")!;
-    expect(b.requires).to.deep.equal([]);
+    expect(b.requires).to.deep.equal([{filename: "zcl_k.clas.abap", name: undefined}]);
     expect(b.chunk.getCode()).to.contain("zif_b.zif_b$y.set(abap.Classes['ZCL_K'].gs.get().a);");
+  });
+
+  it("INTF constants naming each other in a cycle: refused, the chain named", async () => {
+    const files = [
+      {filename: "zif_x.intf.abap", contents: `INTERFACE zif_x PUBLIC.
+  CONSTANTS c TYPE string VALUE zif_y=>d.
+ENDINTERFACE.`},
+      {filename: "zif_y.intf.abap", contents: `INTERFACE zif_y PUBLIC.
+  CONSTANTS d TYPE string VALUE zif_x=>c.
+ENDINTERFACE.`}];
+    let message = "";
+    try {
+      await runFiles(files);
+    } catch (e) {
+      message = (e as Error).message;
+    }
+    expect(message).to.equal("zif_y.intf.abap: constant chain ZIF_Y=>D -> ZIF_X=>C -> ZIF_Y=>D never reaches a value");
+  });
+
+  it("INTF component named like a constant on the chain: no cycle", async () => {
+    const files = [
+      {filename: "zif_x.intf.abap", contents: `INTERFACE zif_x PUBLIC.
+  CONSTANTS c TYPE string VALUE 'lit'.
+  CONSTANTS: BEGIN OF gs,
+               c TYPE string VALUE zif_y=>d,
+             END OF gs.
+ENDINTERFACE.`},
+      {filename: "zif_y.intf.abap", contents: `INTERFACE zif_y PUBLIC.
+  CONSTANTS d TYPE string VALUE zif_x=>c.
+ENDINTERFACE.`}];
+    const output = await runFiles(files);
+    const y = output.find(o => o.filename === "zif_y.intf.mjs")!;
+    expect(y.requires).to.deep.equal([]);
+    expect(y.chunk.getCode()).to.contain("zif_y.zif_y$d.set('lit');");
   });
 
 });
