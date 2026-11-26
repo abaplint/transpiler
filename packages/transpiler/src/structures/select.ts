@@ -79,7 +79,20 @@ export class SelectTranspiler implements IStructureTranspiler {
 abap.statements.append({source: ${targetName}, target: ${intoName}, lines: true});
 {\n`);
     } else {
-      ret.appendString(`\nfor (const ${loopName} of ${targetName}.array()) {\n`);
+      // every pass sets sy-dbcnt to the number of rows passed so far and sy-subrc
+      // to 0; ENDSELECT sets both once more when the rows run out, which an EXIT
+      // does not reach
+      const countName = UniqueIdentifier.get();
+      ret.appendString(`\nlet ${countName} = 0;
+for (;;) {
+const ${loopName} = ${targetName}.array()[${countName}];
+if (${loopName} === undefined) {
+abap.builtin.sy.get().dbcnt.set(${countName});
+abap.builtin.sy.get().subrc.set(${countName} > 0 ? 0 : 4);
+break;
+}
+abap.builtin.sy.get().dbcnt.set(++${countName});
+abap.builtin.sy.get().subrc.set(0);\n`);
       ret.appendString(assign);
     }
 

@@ -746,6 +746,113 @@ ENDSELECT.`;
     });
   });
 
+  it("SELECT loop, sy-dbcnt and sy-subrc per row and after ENDSELECT", async () => {
+    const code = `
+    DATA bar TYPE t100.
+    SELECT * FROM t100 INTO bar ORDER BY PRIMARY KEY.
+      WRITE / |{ sy-dbcnt } { sy-subrc } { bar-msgnr }|.
+      sy-subrc = 8.
+      sy-dbcnt = 77.
+    ENDSELECT.
+    WRITE / |{ sy-dbcnt } { sy-subrc }|.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.getTrimmed()).to.equal("1 0 000\n2 0 123\n2 0");
+    });
+  });
+
+  it("SELECT loop, no row: body skipped, sy-subrc 4, sy-dbcnt 0", async () => {
+    const code = `
+    DATA bar TYPE t100.
+    sy-dbcnt = 7.
+    SELECT * FROM t100 INTO bar WHERE msgnr = '999'.
+      WRITE / 'row'.
+    ENDSELECT.
+    WRITE / |{ sy-dbcnt } { sy-subrc }|.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.getTrimmed()).to.equal("0 4");
+    });
+  });
+
+  it("SELECT loop, SELECT SINGLE in the body, ENDSELECT sets the loop's own values", async () => {
+    const code = `
+    DATA: bar TYPE t100, foo TYPE t100.
+    SELECT * FROM t100 INTO bar ORDER BY PRIMARY KEY.
+      SELECT SINGLE * FROM t100 INTO foo WHERE msgnr = '000' AND msgnr = bar-msgnr.
+      WRITE / |{ sy-dbcnt } { sy-subrc }|.
+    ENDSELECT.
+    WRITE / |{ sy-dbcnt } { sy-subrc }|.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.getTrimmed()).to.equal("1 0\n0 4\n2 0");
+    });
+  });
+
+  it("SELECT loop, CONTINUE in the last pass", async () => {
+    const code = `
+    DATA bar TYPE t100.
+    SELECT * FROM t100 INTO bar ORDER BY PRIMARY KEY.
+      IF bar-msgnr = '123'.
+        sy-subrc = 8.
+        CONTINUE.
+      ENDIF.
+      WRITE / |{ sy-dbcnt } { sy-subrc } { bar-msgnr }|.
+    ENDSELECT.
+    WRITE / |{ sy-dbcnt } { sy-subrc }|.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.getTrimmed()).to.equal("1 0 000\n2 0");
+    });
+  });
+
+  it("SELECT loop, EXIT keeps the count of rows read", async () => {
+    const code = `
+    DATA bar TYPE t100.
+    SELECT * FROM t100 INTO bar ORDER BY PRIMARY KEY.
+      EXIT.
+    ENDSELECT.
+    WRITE / |{ sy-dbcnt } { sy-subrc } { bar-msgnr }|.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.getTrimmed()).to.equal("1 0 000");
+    });
+  });
+
+  it("SELECT loop, EXIT: nothing is set after the loop, as before", async () => {
+    const code = `
+    DATA: bar TYPE t100, foo TYPE t100.
+    SELECT * FROM t100 INTO bar ORDER BY PRIMARY KEY.
+      SELECT SINGLE * FROM t100 INTO foo WHERE msgnr = '999'.
+      IF sy-subrc <> 0.
+        EXIT.
+      ENDIF.
+    ENDSELECT.
+    WRITE / |{ sy-dbcnt } { sy-subrc } { bar-msgnr }|.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    await runAllDatabases(abap, files, () => {
+      expect(abap.console.getTrimmed()).to.equal("0 4 000");
+    });
+  });
+
   it("SELECT loop, join with aliases, INTO list", async () => {
     const code = `
 SELECT h~id h~name a~city INTO (lv_id, lv_name, lv_city)
