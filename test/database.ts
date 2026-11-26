@@ -912,11 +912,27 @@ ENDSELECT.`;
     }, {snowflake: false});
   });
 
-  it("SELECT loop, INTO list, two columns of one name: refused, not shifted", async () => {
+  it("SELECT loop, INTO list, two columns of one name", async () => {
     const code = `
 DATA lv_adrnr1 TYPE zjhead-adrnr.
 DATA lv_adrnr2 TYPE zjadr-adrnr.
 SELECT h~adrnr a~adrnr a~city INTO (lv_adrnr1, lv_adrnr2, lv_city)
+  FROM ( zjhead AS h INNER JOIN zjadr AS a ON h~adrnr = a~adrnr )
+  ORDER BY h~id.
+  WRITE / |{ lv_adrnr1 } { lv_adrnr2 } { lv_city }|.
+ENDSELECT.`;
+    await runAllDatabases(abap, joinFiles(code), () => {
+      expect(abap.console.getTrimmed()).to.equal("A1 A1 OSLO\nA2 A2 BERGEN\nA3 A3 ROME");
+    }, {snowflake: false});
+  });
+
+  it("SELECT loop, INTO list, dynamic list with two columns of one name: refused, not shifted", async () => {
+    const code = `
+DATA lv_adrnr1 TYPE zjhead-adrnr.
+DATA lv_adrnr2 TYPE zjadr-adrnr.
+DATA lv_list TYPE string.
+lv_list = 'h~adrnr, a~adrnr, a~city'.
+SELECT (lv_list) INTO (lv_adrnr1, lv_adrnr2, lv_city)
   FROM ( zjhead AS h INNER JOIN zjadr AS a ON h~adrnr = a~adrnr ).
 ENDSELECT.`;
     // on sqlite and on postgres
@@ -932,6 +948,24 @@ ENDSELECT.`;
     }
     const expected = "SELECT INTO, by position: 2 columns for 3 components";
     expect(messages).to.deep.equal([expected, expected]);
+  });
+
+  // ran before two columns of one name got an alias and must keep its result
+
+  it("SELECT loop, INTO list without two columns of one name: the select list is sent as written", async () => {
+    const code = `
+DATA lv_adrnr TYPE zjhead-adrnr.
+SELECT h~adrnr a~city INTO (lv_adrnr, lv_city)
+  FROM ( zjhead AS h INNER JOIN zjadr AS a ON h~adrnr = a~adrnr )
+  ORDER BY h~adrnr DESCENDING.
+  WRITE / |{ lv_adrnr } { lv_city }|.
+ENDSELECT.`;
+    const js = await runRilesSqlite(abap, joinFiles(code));
+    await abap.context.databaseConnections["DEFAULT"].disconnect();
+    expect(js).to.include(`SELECT \\"h\\".\\"adrnr\\", \\"a\\".\\"city\\" FROM`);
+    await runAllDatabases(abap, joinFiles(code), () => {
+      expect(abap.console.getTrimmed()).to.equal("A3 ROME\nA2 BERGEN\nA1 OSLO");
+    }, {snowflake: false});
   });
 
   // the next three ran before the alias handling and must keep their result
