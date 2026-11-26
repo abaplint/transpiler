@@ -93,6 +93,8 @@ export class InterfaceTranspiler implements IStructureTranspiler {
           ret += name + ".set(" + ConstantTranspiler.escape(ConstantTranspiler.trimTextFieldLiteral(source.value)) + ");\n";
         } else if (source.kind === "member") {
           ret += name + ".set(" + memberRead(source) + ");\n";
+        } else if (source.kind === "initial") {
+          ret += name + ".set(" + traversal.toType(source.type) + ");\n";
         } else {
           const s = new FieldChainTranspiler().transpile(chain, traversal, false).getCode();
           ret += name + ".set(" + ConstantTranspiler.escape(s) + ");\n";
