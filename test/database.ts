@@ -2719,6 +2719,50 @@ WRITE / sy-dbcnt.`;
     });
   });
 
+  // t100 has two rows, msgnr 000 and 123; 999 finds nothing
+  const faeFound = "SELECT * FROM t100 INTO TABLE lt FOR ALL ENTRIES IN lt_k WHERE msgnr = lt_k-table_line";
+  const faeSixty = "DO 60 TIMES. INSERT '999' INTO TABLE lt_k. ENDDO.";
+  for (const fae of [
+    {name: "rows found, sy-subrc is 0", expected: "1 0 1",
+      code: `INSERT '123' INTO TABLE lt_k. INSERT '999' INTO TABLE lt_k.\n${faeFound}.`},
+    {name: "rows found in the first block only, sy-subrc is 0", expected: "1 0 1",
+      code: `INSERT '123' INTO TABLE lt_k. ${faeSixty}\n${faeFound}.`},
+    {name: "rows found in two blocks, sy-subrc is 0", expected: "2 0 2",
+      code: `INSERT '123' INTO TABLE lt_k. ${faeSixty} INSERT '000' INTO TABLE lt_k.\n${faeFound}.`},
+    {name: "rows found into HASHED in the first block only, sy-subrc is 0", expected: "1 0 1",
+      kind: "HASHED TABLE OF t100 WITH UNIQUE KEY sprsl arbgb msgnr",
+      code: `INSERT '123' INTO TABLE lt_k. ${faeSixty}\n${faeFound}.`},
+    {name: "UP TO with ORDER BY, rows found, sy-subrc is 0", expected: "1 0 1",
+      code: `INSERT '123' INTO TABLE lt_k. INSERT '999' INTO TABLE lt_k.
+SELECT * FROM t100 INTO TABLE lt UP TO 5 ROWS FOR ALL ENTRIES IN lt_k
+  WHERE msgnr = lt_k-table_line ORDER BY PRIMARY KEY.`},
+    {name: "nothing found, sy-subrc is 4 and the target is initial", expected: "0 4 0",
+      code: `${faeSixty} APPEND INITIAL LINE TO lt.\n${faeFound}.`},
+    {name: "UP TO with ORDER BY, nothing found, sy-subrc is 4", expected: "0 4 0",
+      code: `INSERT '999' INTO TABLE lt_k. APPEND INITIAL LINE TO lt.
+SELECT * FROM t100 INTO TABLE lt UP TO 5 ROWS FOR ALL ENTRIES IN lt_k
+  WHERE msgnr = lt_k-table_line ORDER BY PRIMARY KEY.`},
+    {name: "empty driving table, all rows and sy-subrc is 0", expected: "2 0 2",
+      code: `${faeFound}.`},
+  ]) {
+    it("FOR ALL ENTRIES, " + fae.name, async () => {
+      const code = `
+DATA lt TYPE ${fae.kind ?? "STANDARD TABLE OF t100 WITH DEFAULT KEY"}.
+DATA lt_k TYPE STANDARD TABLE OF t100-msgnr WITH DEFAULT KEY.
+sy-dbcnt = 77.
+sy-subrc = 8.
+${fae.code}
+WRITE |{ sy-dbcnt } { sy-subrc } { lines( lt ) }|.`;
+      const files = [
+        {filename: "zfoobar.prog.abap", contents: code},
+        {filename: "t100.tabl.xml", contents: tabl_t100xml},
+        {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+      await runAllDatabases(abap, files, () => {
+        expect(abap.console.get()).to.equal(fae.expected);
+      });
+    });
+  }
+
   it("FOR ALL ENTRIES, into HASHED", async () => {
     const code = `
     DATA lt_t100 TYPE HASHED TABLE OF t100 WITH UNIQUE KEY sprsl arbgb msgnr.
