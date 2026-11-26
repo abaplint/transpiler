@@ -3870,4 +3870,209 @@ ENDCLASS.`;
     expect(cons.split("\n")[1]).to.equal("helper of base");
   });
 
+
+  it("test-78", async () => {
+// an interface constant whose VALUE is another interface's constant; the referencing interface is loaded first
+    const zifb = `
+    INTERFACE zif_b PUBLIC.
+      CONSTANTS y TYPE string VALUE zif_c=>x.
+    ENDINTERFACE.`;
+    const zifc = `
+    INTERFACE zif_c PUBLIC.
+      CONSTANTS x TYPE string VALUE 'c'.
+    ENDINTERFACE.`;
+    const clas = `
+    CLASS zcl_consts DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_consts IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        WRITE / zif_b=>y.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zif_b.intf.abap", contents: zifb},
+      {filename: "zif_c.intf.abap", contents: zifc},
+      {filename: "zcl_consts.clas.abap", contents: clas},
+      {filename: "zcl_consts.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons.split("\n").slice(1, 2)).to.deep.equal(["c"]);
+  });
+
+  it("test-79", async () => {
+// a chain of three interface constants
+    const zifa = `
+    INTERFACE zif_a PUBLIC.
+      CONSTANTS z TYPE i VALUE zif_b=>y.
+    ENDINTERFACE.`;
+    const zifb = `
+    INTERFACE zif_b PUBLIC.
+      CONSTANTS y TYPE i VALUE zif_c=>x.
+    ENDINTERFACE.`;
+    const zifc = `
+    INTERFACE zif_c PUBLIC.
+      CONSTANTS x TYPE i VALUE 42.
+    ENDINTERFACE.`;
+    const clas = `
+    CLASS zcl_consts DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_consts IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        WRITE / zif_a=>z.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zif_a.intf.abap", contents: zifa},
+      {filename: "zif_b.intf.abap", contents: zifb},
+      {filename: "zif_c.intf.abap", contents: zifc},
+      {filename: "zcl_consts.clas.abap", contents: clas},
+      {filename: "zcl_consts.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons.split("\n").slice(1, 2)).to.deep.equal(["42"]);
+  });
+
+  it("test-80", async () => {
+// an interface constant from another interface's constant whose value is the %_newline builtin
+    const zifn = `
+    INTERFACE zif_n PUBLIC.
+      CONSTANTS nl TYPE c LENGTH 1 VALUE zif_p=>nl.
+    ENDINTERFACE.`;
+    const zifp = `
+    INTERFACE zif_p PUBLIC.
+      CONSTANTS nl TYPE c LENGTH 1 VALUE %_newline.
+    ENDINTERFACE.`;
+    const clas = `
+    CLASS zcl_consts DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_consts IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        IF zif_n=>nl = zif_p=>nl AND zif_p=>nl IS NOT INITIAL.
+          WRITE / 'same'.
+        ENDIF.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zif_n.intf.abap", contents: zifn},
+      {filename: "zif_p.intf.abap", contents: zifp},
+      {filename: "zcl_consts.clas.abap", contents: clas},
+      {filename: "zcl_consts.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons.split("\n").slice(1, 2)).to.deep.equal(["same"]);
+  });
+
+  it("test-81", async () => {
+// each interface has a constant whose chain runs through the other one and back into itself: no load-time cycle
+    const zifm1 = `
+    INTERFACE zif_m1 PUBLIC.
+      INTERFACES zif_m2.
+      CONSTANTS c1 TYPE string VALUE 'one'.
+      CONSTANTS c3 TYPE string VALUE zif_m2=>c2.
+      CONSTANTS c7 TYPE string VALUE zif_m2=>c5.
+    ENDINTERFACE.`;
+    const zifm2 = `
+    INTERFACE zif_m2 PUBLIC.
+      CONSTANTS c2 TYPE string VALUE zif_m1=>c1.
+      CONSTANTS c5 TYPE string VALUE 'five'.
+      CONSTANTS c6 TYPE string VALUE zif_m1=>c7.
+    ENDINTERFACE.`;
+    const clas = `
+    CLASS zcl_consts DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_consts IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        WRITE / zif_m1=>c3.
+        WRITE / zif_m2=>c6.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zif_m1.intf.abap", contents: zifm1},
+      {filename: "zif_m2.intf.abap", contents: zifm2},
+      {filename: "zcl_consts.clas.abap", contents: clas},
+      {filename: "zcl_consts.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons.split("\n").slice(1, 3)).to.deep.equal(["one", "five"]);
+  });
+
+
+  it("test-82", async () => {
+// an interface constant from a class constant the class sets in its class constructor, directly
+// and through another interface; the interfaces are loaded before the class
+    const zifa = `
+    INTERFACE zif_a PUBLIC.
+      CONSTANTS direct TYPE c LENGTH 1 VALUE zcl_z=>nl.
+      CONSTANTS chained TYPE c LENGTH 1 VALUE zif_b=>nl.
+    ENDINTERFACE.`;
+    const zifb = `
+    INTERFACE zif_b PUBLIC.
+      CONSTANTS nl TYPE c LENGTH 1 VALUE zcl_z=>nl.
+    ENDINTERFACE.`;
+    const zclz = `
+    CLASS zcl_z DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        CONSTANTS nl TYPE c LENGTH 1 VALUE '_'.
+        CLASS-METHODS class_constructor.
+    ENDCLASS.
+    CLASS zcl_z IMPLEMENTATION.
+      METHOD class_constructor.
+        WRITE '@KERNEL zcl_z.nl.set("N");'.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const clas = `
+    CLASS zcl_consts DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_consts IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        WRITE / zif_a=>direct.
+        WRITE / zif_a=>chained.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zif_a.intf.abap", contents: zifa},
+      {filename: "zif_b.intf.abap", contents: zifb},
+      {filename: "zcl_z.clas.abap", contents: zclz},
+      {filename: "zcl_consts.clas.abap", contents: clas},
+      {filename: "zcl_consts.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons.split("\n").slice(1, 3)).to.deep.equal(["N", "N"]);
+  });
+
 });
