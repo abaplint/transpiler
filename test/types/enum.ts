@@ -278,4 +278,54 @@ ENDCLASS.`;
     expect(js).to.contain(`new abap.types.String({qualifiedName: "ZIF_ENUM_ROLES=>TY_ROLE", enumValues: ["FIRST","SECOND"]})`);
   });
 
+  it("enum with STRUCTURE of an interface, initial value of a component equals the first constant", async () => {
+    const code = `
+INTERFACE lif_states.
+  TYPES:
+    BEGIN OF ENUM ty_state STRUCTURE states,
+      pending,
+      done,
+    END OF ENUM ty_state STRUCTURE states.
+  TYPES:
+    BEGIN OF ty_row,
+      name  TYPE string,
+      state TYPE ty_state,
+    END OF ty_row.
+  TYPES ty_rows TYPE STANDARD TABLE OF ty_row WITH EMPTY KEY.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS count
+      IMPORTING rows          TYPE lif_states=>ty_rows
+                wanted        TYPE lif_states=>ty_state
+      RETURNING VALUE(result) TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD count.
+    result = REDUCE #( INIT n = 0
+                       FOR r IN rows WHERE ( state = wanted )
+                       NEXT n = n + 1 ).
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA rows TYPE lif_states=>ty_rows.
+  DATA row TYPE lif_states=>ty_row.
+  INSERT VALUE #( name = \`a\` ) INTO TABLE rows.
+  row-name = \`b\`.
+  INSERT row INTO TABLE rows.
+  INSERT VALUE #( name = \`c\` state = lif_states=>states-done ) INTO TABLE rows.
+  IF rows[ 1 ]-state = lif_states=>states-pending.
+    WRITE / 'initial is pending'.
+  ENDIF.
+  WRITE / lcl=>count( rows = rows wanted = lif_states=>states-pending ).
+  WRITE / lcl=>count( rows = rows wanted = lif_states=>states-done ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("initial is pending\n2\n1");
+  });
+
 });
