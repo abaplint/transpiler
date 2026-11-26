@@ -332,7 +332,9 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
     const operator = children[1];
     const source = children[2];
     if (!(fieldName instanceof abaplint.Nodes.ExpressionNode)
-        || !(fieldName.get() instanceof abaplint.Expressions.SQLFieldName)
+        // field = structure-component, and tab~field = structure-component
+        || !(fieldName.get() instanceof abaplint.Expressions.SQLFieldName
+          || fieldName.get() instanceof abaplint.Expressions.SQLAliasField)
         || !(operator instanceof abaplint.Nodes.ExpressionNode)
         || !(operator.get() instanceof abaplint.Expressions.SQLCompareOperator)
         || !(source instanceof abaplint.Nodes.ExpressionNode)
@@ -346,8 +348,10 @@ export class SQLCondTranspiler implements IExpressionTranspiler {
     for (let i = 3; i < children.length; i += 2) {
       const dash = children[i];
       const component = children[i + 1];
+      // the component selector is the token Dash; a minus sign is arithmetic
       if (!(dash instanceof abaplint.Nodes.TokenNode)
           || dash.getFirstToken().getStr() !== "-"
+          || !(dash.getFirstToken() instanceof abaplint.Tokens.Dash)
           || !(component instanceof abaplint.Nodes.ExpressionNode)
           || !(component.get() instanceof abaplint.Expressions.SQLFieldName)) {
         return undefined;
