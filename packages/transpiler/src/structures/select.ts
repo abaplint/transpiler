@@ -28,8 +28,44 @@ export class SelectTranspiler implements IStructureTranspiler {
     // note: this implementation SELECTs everything into memory, which might be bad, and sometimes not correct
     const targetName = UniqueIdentifier.get();
     const loopName = UniqueIdentifier.get();
-    ret.appendString(`let ${targetName} = new abap.types.Table(abap.DDIC["${from}"].type());\n`);
-    const selectHead = new SelectStatementTranspiler().transpile(selectStatement, traversal, targetName);
+    // the sources of the loop's own FROM, not those of a subquery in its WHERE
+    const sources = selectStatement.findFirstExpression(abaplint.Expressions.SQLFrom)
+      ?.findAllExpressions(abaplint.Expressions.SQLFromSource) ?? [];
+    const aliased = sources[0]?.findDirectExpression(abaplint.Expressions.SQLAsName) !== undefined;
+    const table = sources[0]?.findDirectExpression(abaplint.Expressions.DatabaseTable)?.concatTokens().toUpperCase();
+    const intoList = selectStatement.findFirstExpression(abaplint.Expressions.SQLIntoList);
+    const loopOptions: string[] = [];
+    let assign: string;
+    if (intoList) {
+      // INTO (a, b, c): the buffer row has one component per target, filled
+      // from the columns left to right, and every target is assigned per row
+      const targets = intoList.findDirectExpressions(abaplint.Expressions.SQLTarget)
+        .map(t => new SQLTargetTranspiler().transpile(t, traversal).getCode());
+      const components = targets.map((t, i) => `"c${i}": ${this.cloneOf(t)}`);
+      ret.appendString(`let ${targetName} = new abap.types.Table(new abap.types.Structure({${components.join(", ")}}));\n`);
+      loopOptions.push("positional: true");
+      assign = targets.map((t, i) => `${t}.set(${loopName}.get().c${i});\n`).join("");
+    } else {
+      if (aliased && sources.length === 1 && table !== undefined) {
+        // "tab AS a" is no DDIC name, the row type is that of the table
+        ret.appendString(`let ${targetName} = new abap.types.Table(abap.DDIC["${table}"].type());\n`);
+      } else if (aliased && sTarget !== undefined) {
+        // a join that starts with "tab AS a" has no row type to look up, the buffer
+        // takes the work area's; without CORRESPONDING it is filled left to right
+        ret.appendString(`let ${targetName} = new abap.types.Table(${this.cloneOf(intoName)});\n`);
+        if (concat.includes(" INTO CORRESPONDING FIELDS OF ") === false) {
+          loopOptions.push("positional: true");
+        }
+      } else {
+        ret.appendString(`let ${targetName} = new abap.types.Table(abap.DDIC["${from}"].type());\n`);
+      }
+      if (concat.includes(" INTO CORRESPONDING FIELDS OF ")) {
+        assign = `abap.statements.moveCorresponding(${loopName}, ${intoName});\n`;
+      } else {
+        assign = `${intoName}.set(${loopName});\n`;
+      }
+    }
+    const selectHead = new SelectStatementTranspiler().transpile(selectStatement, traversal, targetName, loopOptions);
     ret.appendChunk(selectHead.ensureStartMapping(selectStatement, traversal));
 
     // todo: optimize, it should do real streaming?
@@ -42,12 +78,9 @@ export class SelectTranspiler implements IStructureTranspiler {
 };
 abap.statements.append({source: ${targetName}, target: ${intoName}, lines: true});
 {\n`);
-    } else if (concat.includes(" INTO CORRESPONDING FIELDS OF ")) {
-      ret.appendString(`\nfor (const ${loopName} of ${targetName}.array()) {\n`);
-      ret.appendString(`abap.statements.moveCorresponding(${loopName}, ${intoName});\n`);
     } else {
       ret.appendString(`\nfor (const ${loopName} of ${targetName}.array()) {\n`);
-      ret.appendString(`${intoName}.set(${loopName});\n`);
+      ret.appendString(assign);
     }
 
     const body = node.findDirectStructure(abaplint.Structures.Body);
@@ -58,6 +91,11 @@ abap.statements.append({source: ${targetName}, target: ${intoName}, lines: true}
     ret.appendString("}\n");
 
     return ret;
+  }
+
+  // a fresh value of the target's type, also when the target is a field symbol
+  private cloneOf(code: string): string {
+    return `(${code} instanceof abap.types.FieldSymbol ? ${code}.getPointer() : ${code}).clone()`;
   }
 
 }
