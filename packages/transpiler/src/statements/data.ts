@@ -51,18 +51,20 @@ export class DataTranspiler implements IStatementTranspiler {
       throw new Error("DataTranspiler, var not found, \"" + token.getStr() + "\", " + traversal.getFilename() + ", line: " + token.getRow());
     }
 
+    this.variableName = Traversal.prefixVariable(Traversal.escapeNamespace(found.getName().toLowerCase()));
+
     let value = "";
     if (found.getValue() !== undefined && node.concatTokens().includes(" & ")) {
-      value = "\n" + traversal.setValues(found, found.getName());
+      value = "\n" + traversal.setValues(found, Traversal.escapeNamespace(found.getName())!);
     } else {
-      value = DataTranspiler.buildValue(node, Traversal.prefixVariable(found.getName().toLowerCase()), traversal);
+      value = DataTranspiler.buildValue(node, this.variableName, traversal);
     }
 
     // for enum types, initialize with the first enum value
     if (found.getType() instanceof abaplint.BasicTypes.EnumType && value === "") {
       const enumDefault = DataTranspiler.findEnumDefault(scope, found.getType());
       if (enumDefault) {
-        value = "\n" + Traversal.prefixVariable(found.getName().toLowerCase()) + ".set(\"" + enumDefault + "\");";
+        value = "\n" + this.variableName + ".set(\"" + enumDefault + "\");";
       }
     }
 
@@ -74,7 +76,6 @@ export class DataTranspiler implements IStatementTranspiler {
       }
     }
 
-    this.variableName = Traversal.prefixVariable(Traversal.escapeNamespace(found.getName().toLowerCase()));
     this.loopScoped = traversal.isInsideLoop(node);
 
     const ret = new Chunk()
