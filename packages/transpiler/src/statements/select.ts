@@ -14,7 +14,8 @@ function escapeRegExp(string: string) {
 // TODO: currently SELECT into are always handled as CORRESPONDING
 export class SelectTranspiler implements IStatementTranspiler {
 
-  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal, targetOverride?: string): Chunk {
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal, targetOverride?: string,
+                   overrideOptions: string[] = []): Chunk {
     if (node.findDirectTokenByText("UNION") !== undefined) {
       return new Chunk(`throw new Error("SELECT UNION, not supported, transpiler, todo");`);
     } else if (node.findDirectTokenByText("ALL") !== undefined) {
@@ -138,7 +139,10 @@ export class SelectTranspiler implements IStatementTranspiler {
     }
 
     let runtimeOptions = "";
-    const runtimeOptionsList: string[] = [];
+    // the SelectLoop structure passes its options for its buffer table
+    const runtimeOptionsList: string[] = [...overrideOptions];
+    const appendingOptions = ["appending: true", ...overrideOptions].join(", ");
+    const loopOptions = overrideOptions.length > 0 ? `, {${overrideOptions.join(", ")}}` : "";
     if (concat.includes(" APPENDING TABLE ") || concat.includes(" APPENDING CORRESPONDING FIELDS OF TABLE ")) {
       runtimeOptionsList.push(`appending: true`);
     }
@@ -184,12 +188,12 @@ await abap.statements.deleteInternal(${target}, {adjacent: true, allFields: true
       // trim after the de-duplicating sort, so that pair stays row by row
       if (concat.startsWith("SELECT SINGLE ") || at < 0 || (upTo && orderBy)) {
         const code = `if (${faeTranspiled}.array().length === 0) {
-await abap.statements.select(${target}, {select: "${selectEmpty.trim()}"${extra}});
+await abap.statements.select(${target}, {select: "${selectEmpty.trim()}"${extra}}${loopOptions});
 } else {
 const ${unique2} = ${faeTranspiled}.array();
 ${target}.clear();
 for await (const ${unique} of ${unique2}) {
-await abap.statements.select(${target}, {select: "${select.trim()}"${extra}}, {appending: true});
+await abap.statements.select(${target}, {select: "${select.trim()}"${extra}}, {${appendingOptions}});
 }
 ${dedup}
 abap.builtin.sy.get().dbcnt.set(${target}.getArrayLength());
@@ -220,14 +224,14 @@ abap.builtin.sy.get().dbcnt.set(${target}.getArrayLength());
       const unique3 = UniqueIdentifier.get();
       const unique4 = UniqueIdentifier.get();
       const code = `if (${faeTranspiled}.array().length === 0) {
-await abap.statements.select(${target}, {select: "${selectEmpty.trim()}"${extra}});
+await abap.statements.select(${target}, {select: "${selectEmpty.trim()}"${extra}}${loopOptions});
 } else {
 const ${unique2} = ${faeTranspiled}.array();
 ${target}.clear();
 const ${unique3} = (${unique}) => "(${condition})";
 for (let ${unique4} = 0; ${unique4} < ${unique2}.length; ${unique4} += 50) {
 const ${unique4}where = ${unique2}.slice(${unique4}, ${unique4} + 50).map(${unique3}).join(" OR ");
-await abap.statements.select(${target}, {select: "${head}WHERE " + ${unique4}where + " ${tail.trim()}"${extra}}, {appending: true});
+await abap.statements.select(${target}, {select: "${head}WHERE " + ${unique4}where + " ${tail.trim()}"${extra}}, {${appendingOptions}});
 }
 ${dedup}
 const ${unique4}max = ${upToCode};
