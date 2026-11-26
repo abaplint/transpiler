@@ -50,11 +50,21 @@ export class SelectTranspiler implements IStructureTranspiler {
         // "tab AS a" is no DDIC name, the row type is that of the table
         ret.appendString(`let ${targetName} = new abap.types.Table(abap.DDIC["${table}"].type());\n`);
       } else if (aliased && sTarget !== undefined) {
-        // a join that starts with "tab AS a" has no row type to look up, the buffer
-        // takes the work area's; without CORRESPONDING it is filled left to right
-        ret.appendString(`let ${targetName} = new abap.types.Table(${this.cloneOf(intoName)});\n`);
-        if (concat.includes(" INTO CORRESPONDING FIELDS OF ") === false) {
-          loopOptions.push("positional: true");
+        const intoTable = selectStatement.findFirstExpression(abaplint.Expressions.SQLIntoTable);
+        if (intoTable) {
+          // PACKAGE SIZE ... INTO TABLE over a join that starts with "tab AS a": the
+          // buffer holds rows of the target table's row type, filled as below
+          ret.appendString(`let ${targetName} = new abap.types.Table(${this.pointerOf(intoName)}.getRowType());\n`);
+          if (intoTable.findDirectTokenByText("CORRESPONDING") === undefined) {
+            loopOptions.push("positional: true");
+          }
+        } else {
+          // a join that starts with "tab AS a" has no row type to look up, the buffer
+          // takes the work area's; without CORRESPONDING it is filled left to right
+          ret.appendString(`let ${targetName} = new abap.types.Table(${this.cloneOf(intoName)});\n`);
+          if (concat.includes(" INTO CORRESPONDING FIELDS OF ") === false) {
+            loopOptions.push("positional: true");
+          }
         }
       } else {
         ret.appendString(`let ${targetName} = new abap.types.Table(abap.DDIC["${from}"].type());\n`);
@@ -65,7 +75,9 @@ export class SelectTranspiler implements IStructureTranspiler {
         assign = `${intoName}.set(${loopName});\n`;
       }
     }
-    const selectHead = new SelectStatementTranspiler().transpile(selectStatement, traversal, targetName, loopOptions);
+    // INTO (a, b, c) is filled by position: two columns of one name get an alias
+    const selectHead = new SelectStatementTranspiler().transpile(selectStatement, traversal, targetName, loopOptions,
+                                                                 intoList !== undefined);
     ret.appendChunk(selectHead.ensureStartMapping(selectStatement, traversal));
 
     // todo: optimize, it should do real streaming?
@@ -79,7 +91,20 @@ export class SelectTranspiler implements IStructureTranspiler {
 abap.statements.append({source: ${targetName}, target: ${intoName}, lines: true});
 {\n`);
     } else {
-      ret.appendString(`\nfor (const ${loopName} of ${targetName}.array()) {\n`);
+      // every pass sets sy-dbcnt to the number of rows passed so far and sy-subrc
+      // to 0; ENDSELECT sets both once more when the rows run out, which an EXIT
+      // does not reach
+      const countName = UniqueIdentifier.get();
+      ret.appendString(`\nlet ${countName} = 0;
+for (;;) {
+const ${loopName} = ${targetName}.array()[${countName}];
+if (${loopName} === undefined) {
+abap.builtin.sy.get().dbcnt.set(${countName});
+abap.builtin.sy.get().subrc.set(${countName} > 0 ? 0 : 4);
+break;
+}
+abap.builtin.sy.get().dbcnt.set(++${countName});
+abap.builtin.sy.get().subrc.set(0);\n`);
       ret.appendString(assign);
     }
 
@@ -95,7 +120,11 @@ abap.statements.append({source: ${targetName}, target: ${intoName}, lines: true}
 
   // a fresh value of the target's type, also when the target is a field symbol
   private cloneOf(code: string): string {
-    return `(${code} instanceof abap.types.FieldSymbol ? ${code}.getPointer() : ${code}).clone()`;
+    return `${this.pointerOf(code)}.clone()`;
+  }
+
+  private pointerOf(code: string): string {
+    return `(${code} instanceof abap.types.FieldSymbol ? ${code}.getPointer() : ${code})`;
   }
 
 }

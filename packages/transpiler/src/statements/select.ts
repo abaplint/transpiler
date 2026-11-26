@@ -15,7 +15,7 @@ function escapeRegExp(string: string) {
 export class SelectTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal, targetOverride?: string,
-                   overrideOptions: string[] = []): Chunk {
+                   overrideOptions: string[] = [], columnsByPosition = false): Chunk {
     if (node.findDirectTokenByText("UNION") !== undefined) {
       return new Chunk(`throw new Error("SELECT UNION, not supported, transpiler, todo");`);
     } else if (node.findDirectTokenByText("ALL") !== undefined) {
@@ -50,7 +50,7 @@ export class SelectTranspiler implements IStatementTranspiler {
     if (fieldList === undefined) {
       throw new Error("SelectTranspiler, field list not found");
     }
-    select += new SQLFieldListTranspiler().transpile(fieldList, traversal).getCode() + " ";
+    select += new SQLFieldListTranspiler().transpile(fieldList, traversal, columnsByPosition).getCode() + " ";
 
     const from = node.findFirstExpression(abaplint.Expressions.SQLFrom);
     if (from) {

@@ -49,7 +49,8 @@ export class String implements ICharacter {
     } else if (typeof value === "string") {
       this.value = value;
     } else if (typeof value === "number") {
-      this.value = value.toString();
+      // an enum value is the position of its constant, the first one is the initial value
+      this.value = this.enumValues !== undefined && value === 0 ? "" : value.toString();
     } else if (value instanceof Character) {
       // replace trailing blanks if the source is a Character string
       this.value = value.getTrimEnd();
@@ -63,6 +64,9 @@ export class String implements ICharacter {
       const lv_sign = fixed.startsWith("-") ? "-" : " ";
       this.value = (fixed.startsWith("-") ? fixed.slice(1) : fixed) + lv_sign;
     } else if (value instanceof Integer) {
+      if (this.enumValues !== undefined) {
+        return this.set(value.get());
+      }
       const lv_sign = (value as Integer).get() >= 0 ? " " : "-";
       this.value = Math.abs((value as Integer).get()) + "";
       this.value += lv_sign;
