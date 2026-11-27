@@ -84,7 +84,7 @@ ENDCLASS.`;
     expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("Native SQL, not supported, transpiler");`);
   });
 
-  it("SELECT SINGLE FOR UPDATE, transpiled as SELECT SINGLE, one warning with file and line", async () => {
+  it("SELECT SINGLE FOR UPDATE, the SELECT SINGLE with the forUpdate flag, no warning", async () => {
     const plain = `
     WRITE 'hello'.
     SELECT SINGLE * FROM t100 INTO ls_result WHERE arbgb = 'ZAG_UNIT_TEST'.`;
@@ -96,18 +96,19 @@ ENDCLASS.`;
     let js: string | undefined;
     let expected: string | undefined;
     try {
-      js = await runSingle(abap, {ignoreSyntaxCheck: true});
       const count = warnings.length;
-      expected = await runSingle(plain, {ignoreSyntaxCheck: true});
+      js = await runSingle(abap, {ignoreSyntaxCheck: true});
       expect(warnings.length).to.equal(count);
+      expected = await runSingle(plain, {ignoreSyntaxCheck: true});
     } finally {
       console.warn = original;
     }
 
-    expect(js).to.include(`await abap.statements.select(`);
+    // the SQL is the one of the statement without the addition, the flag is the only difference
+    expect(expected).to.include(`UP TO 1 ROWS"});`);
+    expect(expected).to.not.include("forUpdate");
     expect(js).to.not.include("FOR UPDATE");
-    expect(js).to.equal(expected);
-    expect(warnings).to.deep.equal(["zfoobar.prog.abap:3: warning, SELECT SINGLE FOR UPDATE, the row lock is not taken, transpiled as SELECT SINGLE"]);
+    expect(js).to.equal(expected?.replace(`UP TO 1 ROWS"});`, `UP TO 1 ROWS", forUpdate: true});`));
   });
 
   it("WITH, runtime error", async () => {

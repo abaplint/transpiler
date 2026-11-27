@@ -20,6 +20,9 @@ export interface SelectDatabaseOptions {
   select: string,
   /** list of primary key fields, in lower case, if known */
   primaryKey?: string[],
+  /** SELECT SINGLE FOR UPDATE: lock the selected row exclusively until the end of the transaction,
+   *  a client that cannot take the lock must throw instead of reading without it */
+  forUpdate?: boolean,
 }
 
 export interface SelectRuntimeOptions {

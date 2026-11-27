@@ -257,7 +257,8 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     return {subrc, dbcnt};
   }
 
-  public async select(options: DB.SelectDatabaseOptions): Promise<DB.SelectDatabaseResult> {
+  // forUpdate is spelled out, the package compiles against a released runtime that does not declare it yet
+  public async select(options: DB.SelectDatabaseOptions & {forUpdate?: boolean}): Promise<DB.SelectDatabaseResult> {
     this.checkFatal();
     if (this.lazy === true && this.pool === undefined) {
       await this.connect();
@@ -275,13 +276,17 @@ export class PostgresDatabaseClient implements DB.DatabaseClient {
     options.select = options.select.replace(/ DESCENDING/ig, " DESC");
     options.select = options.select.replace(/~/g, ".");
     options.select = options.select.replace(/ LIMIT 0/g, "");
+    if (options.forUpdate === true) {
+      options.select += " FOR UPDATE";
+    }
 
     if (this.trace === true) {
       console.log(options.select);
     }
 
     try {
-      res = await this.query(options.select);
+      // a row lock lives as long as its transaction, so FOR UPDATE opens the LUW like a modifying statement does
+      res = options.forUpdate === true ? await this.modifying(options.select) : await this.query(options.select);
     } catch (error) {
       // @ts-ignore
       if (abap.Classes["CX_SY_DYNAMIC_OSQL_SEMANTICS"] !== undefined) {
