@@ -5,7 +5,7 @@ import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
 import {asFloat, isFloatWithInteger8} from "./_float_integer8";
-import {checkDivisor, decFloat34Result, isDecFloat34Operand, toDecimal} from "./_decfloat";
+import {checkDivisor, decFloat34Result, isDecFloat34Operand, isPackedCalculation, packedResult, toDecimal} from "./_decfloat";
 import {divideDecimal} from "../types/_decimal";
 
 // todo, this will only work when the target value is an integer?
@@ -30,6 +30,15 @@ export function divide(left: INumeric | ICharacter | Integer8 | string | number,
       }
     }
     return int8Result(l / r);
+  }
+
+  if (isPackedCalculation(left, right)) {
+    // a system computes the quotient in the precision of the target; the 34 significant
+    // digits of the intermediate are enough for the target's set( ) to round exactly
+    const l = toDecimal(left);
+    const r = toDecimal(right);
+    const quotient = checkDivisor(l, r) ? divideDecimal(l, r) : r;
+    return packedResult(quotient, 0);
   }
 
   const r = parse(right);

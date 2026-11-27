@@ -5,7 +5,7 @@ import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
 import {asFloat, isFloatWithInteger8} from "./_float_integer8";
 import {String} from "../types/string";
-import {decFloat34Result, isDecFloat34Operand, toDecimal} from "./_decfloat";
+import {decFloat34Result, isDecFloat34Operand, isPackedCalculation, packedDecimals, packedResult, toDecimal} from "./_decfloat";
 import {multiplyDecimal} from "../types/_decimal";
 import {packedCalculation} from "./_packed";
 
@@ -57,6 +57,11 @@ export function multiply(left: INumeric | ICharacter | string | Integer8 | numbe
   } else if ((right instanceof String || right instanceof Character) && Number.isInteger(Number(right)) && left instanceof Integer) {
     const val = left.get() * Number.parseInt(right.get(), 10);
     return new Integer().set(val).clearIntegerCalculationType();
+  }
+
+  if (isPackedCalculation(left, right)) {
+    // the product keeps the decimals of both factors, 1.5 * 0.25 = 0.375
+    return packedResult(multiplyDecimal(toDecimal(left), toDecimal(right)), packedDecimals(left, right));
   }
 
   return new Float().set(parse(left) * parse(right));

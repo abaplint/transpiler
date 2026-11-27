@@ -5,7 +5,7 @@ import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
 import {asFloat, isFloatWithInteger8} from "./_float_integer8";
 import {String} from "../types/string";
-import {decFloat34Result, isDecFloat34Operand, toDecimal} from "./_decfloat";
+import {decFloat34Result, isDecFloat34Operand, isPackedCalculation, packedDecimals, packedResult, toDecimal} from "./_decfloat";
 import {subtractDecimal} from "../types/_decimal";
 import {packedCalculation} from "./_packed";
 
@@ -67,6 +67,10 @@ export function minus(left: INumeric | ICharacter | string | Integer8 | number |
     return new Integer().set(Number.parseInt(left.get(), 10) - right.get()).clearIntegerCalculationType();
   } else if ((right instanceof String || right instanceof Character) && Number.isInteger(Number(right)) && left instanceof Integer) {
     return new Integer().set(left.get() - Number.parseInt(right.get(), 10)).clearIntegerCalculationType();
+  }
+
+  if (isPackedCalculation(left, right)) {
+    return packedResult(subtractDecimal(toDecimal(left), toDecimal(right)), packedDecimals(left, right));
   }
 
   return new Float().set(parse(left) - parse(right));

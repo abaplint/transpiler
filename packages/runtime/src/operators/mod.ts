@@ -5,6 +5,8 @@ import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
 import {asFloat, isFloatWithInteger8} from "./_float_integer8";
 import {packedCalculation} from "./_packed";
+import {checkDivisor, isPackedCalculation, packedDecimals, packedResult, toDecimal} from "./_decfloat";
+import {modDecimal} from "../types/_decimal";
 
 export function mod(left: INumeric | ICharacter | string | Integer8 | number, right: INumeric | Integer8 | ICharacter | string | number) {
   // a p operand: the remainder keeps its decimals, 2.50 MOD 2 is 0.50
@@ -38,6 +40,12 @@ export function mod(left: INumeric | ICharacter | string | Integer8 | number, ri
       val = val + a;
     }
     return new Integer8().set(val);
+  }
+
+  if (isPackedCalculation(left, right)) {
+    const l = toDecimal(left);
+    const r = toDecimal(right);
+    return packedResult(checkDivisor(l, r) ? modDecimal(l, r) : r, packedDecimals(left, right));
   }
 
   const l = parse(left);

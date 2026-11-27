@@ -5,7 +5,7 @@ import {INumeric} from "../types/_numeric";
 import {String} from "../types/string";
 import {parse} from "./_parse";
 import {asFloat, isFloatWithInteger8} from "./_float_integer8";
-import {decFloat34Result, isDecFloat34Operand, toDecimal} from "./_decfloat";
+import {decFloat34Result, isDecFloat34Operand, isPackedCalculation, packedDecimals, packedResult, toDecimal} from "./_decfloat";
 import {addDecimal} from "../types/_decimal";
 import {packedCalculation} from "./_packed";
 
@@ -80,6 +80,10 @@ export function add(left: INumeric | ICharacter | string | number | Float | Inte
       throw new Error("GETWA_NOT_ASSIGNED");
     }
     return add(left, right.getPointer());
+  }
+
+  if (isPackedCalculation(left, right)) {
+    return packedResult(addDecimal(toDecimal(left), toDecimal(right)), packedDecimals(left, right));
   }
 
   const ret = new Float().set(parse(left) + parse(right));
