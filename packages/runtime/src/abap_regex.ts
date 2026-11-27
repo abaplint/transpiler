@@ -1,18 +1,83 @@
 import {IRegexOptions} from "./statements/find";
+import {throwError} from "./throw_error";
 
 // https://github.com/TooTallNate/pcre-to-regexp/blob/master/src/index.ts
 export class ABAPRegExp {
+  // the POSIX character classes ABAP takes inside a bracket expression, and what the same
+  // characters are in a JavaScript class; print keeps the ASCII range the [^[:print:]] rule
+  // below has always answered
+  private static readonly POSIX_CLASSES: {[name: string]: string} = {
+    "alpha": "a-zA-Z",
+    "alnum": "a-zA-Z0-9",
+    "upper": "A-Z",
+    "lower": "a-z",
+    "digit": "0-9",
+    "xdigit": "0-9A-Fa-f",
+    "space": "\\s",
+    "blank": " \\t",
+    "cntrl": "\\x00-\\x1F\\x7F",
+    "print": "\\x20-\\x7E",
+    "graph": "\\x21-\\x7E",
+    "punct": "@%\\.\\,\\-\\{\\}\\[\\]\\:\\!\\?\\(\\)\\;\\'",
+    "word": "\\w",
+  };
+
+  /** every [:name:] inside a bracket expression becomes the JavaScript characters of that
+   * class, so [[:alpha:]], [^[:alpha:][:digit:]] and [[:alpha:]_] all work; an unknown name
+   * raises CX_SY_REGEX like a system does */
+  private static convertPosixClasses(input: string): string {
+    let ret = "";
+    let inClass = false;
+    for (let i = 0; i < input.length; i++) {
+      const c = input[i];
+      if (c === "\\" && i + 1 < input.length) {
+        ret += c + input[i + 1];
+        i++;
+      } else if (inClass && c === "[" && input[i + 1] === ":") {
+        const end = input.indexOf(":]", i + 2);
+        const name = end === -1 ? undefined : input.substring(i + 2, end);
+        if (name === undefined || /^[a-z]+$/.test(name) === false) {
+          ret += c;
+          continue;
+        }
+        const chars = ABAPRegExp.POSIX_CLASSES[name];
+        if (chars === undefined) {
+          throwError("CX_SY_REGEX");
+        }
+        ret += chars;
+        i = end + 1;
+      } else if (inClass) {
+        ret += c;
+        if (c === "]") {
+          inClass = false;
+        }
+      } else if (c === "[") {
+        inClass = true;
+        ret += c;
+        // a ] right after [ or [^ is a character, not the end of the class
+        if (input[i + 1] === "^") {
+          ret += "^";
+          i++;
+        }
+        if (input[i + 1] === "]") {
+          ret += "]";
+          i++;
+        }
+      } else {
+        ret += c;
+      }
+    }
+    return ret;
+  }
+
   // converts from ABAP specific regex to javascript regex
   public static convert(input: string): string {
     let ret = input;
 
-    ret = ret.replace(/\[\[:punct:\]\]/g, "[@%\\.\\,\\-\\{\\}\\[\\]\\:\\!\\?\\(\\)\\;\\']");
-
     // https://github.com/micromatch/posix-character-classes#posix-character-classes
     ret = ret.replace(/\[\^\[:print:\]\]/g, "[\\x00-\\x1F\\x7F]");
 
-    // https://github.com/micromatch/posix-character-classes#posix-character-classes
-    ret = ret.replace(/\[\[:digit:\]\]/g, "[0-9]");
+    ret = ABAPRegExp.convertPosixClasses(ret);
 
     // https://help.sap.com/doc/abapdocu_750_index_htm/7.50/en-US/abenregex_syntax_specials.htm
     ret = ret.replace(/\\C/g, "[a-zA-Z]");

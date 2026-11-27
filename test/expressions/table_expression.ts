@@ -239,4 +239,192 @@ WRITE / foo[ index ].`;
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("KEY primary_key COMPONENTS", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         key TYPE i,
+         val TYPE i,
+       END OF ty.
+DATA itab TYPE SORTED TABLE OF ty WITH UNIQUE KEY key.
+INSERT VALUE #( key = 2 val = 20 ) INTO TABLE itab.
+INSERT VALUE #( key = 1 val = 10 ) INTO TABLE itab.
+WRITE / itab[ KEY primary_key COMPONENTS key = 2 ]-val.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("20");
+  });
+
+  it("KEY primary_key INDEX", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         key TYPE i,
+         val TYPE i,
+       END OF ty.
+DATA itab TYPE SORTED TABLE OF ty WITH UNIQUE KEY key.
+INSERT VALUE #( key = 2 val = 20 ) INTO TABLE itab.
+INSERT VALUE #( key = 1 val = 10 ) INTO TABLE itab.
+WRITE / itab[ KEY primary_key INDEX 2 ]-val.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("20");
+  });
+
+  it("KEY primary_key COMPONENTS, hashed", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         key TYPE i,
+         val TYPE i,
+       END OF ty.
+DATA itab TYPE HASHED TABLE OF ty WITH UNIQUE KEY key.
+INSERT VALUE #( key = 1 val = 20 ) INTO TABLE itab.
+INSERT VALUE #( key = 2 val = 10 ) INTO TABLE itab.
+WRITE / itab[ KEY primary_key COMPONENTS key = 2 ]-val.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("10");
+  });
+
+  it("KEY secondary, INDEX and COMPONENTS", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         key TYPE i,
+         val TYPE i,
+       END OF ty.
+DATA itab TYPE STANDARD TABLE OF ty WITH EMPTY KEY WITH NON-UNIQUE SORTED KEY sk COMPONENTS val.
+APPEND VALUE #( key = 1 val = 20 ) TO itab.
+APPEND VALUE #( key = 2 val = 10 ) TO itab.
+APPEND VALUE #( key = 3 val = 30 ) TO itab.
+WRITE / itab[ KEY sk INDEX 1 ]-key.
+WRITE / itab[ KEY sk COMPONENTS val = 20 ]-key.
+WRITE / itab[ KEY sk val = 10 ]-key.
+WRITE / itab[ 1 ]-key.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2\n1\n2\n1");
+  });
+
+  it("KEY secondary INDEX, hashed", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         key TYPE i,
+         val TYPE i,
+       END OF ty.
+DATA itab TYPE HASHED TABLE OF ty WITH UNIQUE KEY key WITH NON-UNIQUE SORTED KEY sk COMPONENTS val.
+INSERT VALUE #( key = 1 val = 20 ) INTO TABLE itab.
+INSERT VALUE #( key = 2 val = 10 ) INTO TABLE itab.
+WRITE / itab[ KEY sk INDEX 1 ]-key.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+  it("KEY secondary, line_index is the line in the secondary key", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         key TYPE i,
+         val TYPE i,
+       END OF ty.
+DATA itab TYPE STANDARD TABLE OF ty WITH EMPTY KEY WITH NON-UNIQUE SORTED KEY sk COMPONENTS val.
+APPEND VALUE #( key = 1 val = 20 ) TO itab.
+APPEND VALUE #( key = 2 val = 10 ) TO itab.
+APPEND VALUE #( key = 3 val = 30 ) TO itab.
+DATA idx TYPE i.
+idx = line_index( itab[ KEY sk val = 20 ] ).
+ASSERT idx = 2.
+idx = line_index( itab[ KEY sk val = 99 ] ).
+ASSERT idx = 0.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("KEY secondary, not found", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         key TYPE i,
+         val TYPE i,
+       END OF ty.
+DATA itab TYPE STANDARD TABLE OF ty WITH EMPTY KEY WITH NON-UNIQUE SORTED KEY sk COMPONENTS val.
+APPEND VALUE #( key = 1 val = 20 ) TO itab.
+WRITE / itab[ KEY sk val = 99 ]-key.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+
+    try {
+      await f(abap);
+      expect.fail();
+    } catch (e) {
+      expect(e.toString()).to.contain("CX_SY_ITAB_LINE_NOT_FOUND");
+    }
+  });
+
+  it("KEY name COMPONENTS and KEY name INDEX", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         id   TYPE i,
+         name TYPE c LENGTH 1,
+       END OF ty_row.
+DATA tab TYPE STANDARD TABLE OF ty_row WITH EMPTY KEY WITH UNIQUE SORTED KEY by_name COMPONENTS name.
+tab = VALUE #( ( id = 1 name = 'b' ) ( id = 2 name = 'a' ) ( id = 3 name = 'c' ) ).
+WRITE / tab[ KEY by_name COMPONENTS name = 'b' ]-id.
+WRITE / tab[ KEY by_name name = 'c' ]-id.
+WRITE / tab[ KEY by_name INDEX 1 ]-id.
+WRITE / tab[ KEY primary_key INDEX 1 ]-id.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n3\n2\n1");
+  });
+
+  it("line_index through a hashed secondary key", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH EMPTY KEY WITH UNIQUE HASHED KEY h COMPONENTS table_line.
+DATA lv_line TYPE string.
+tab = VALUE #( ( 7 ) ( 8 ) ( 9 ) ).
+lv_line = |{ line_index( tab[ KEY h table_line = 8 ] ) } { line_index( tab[ KEY h table_line = 5 ] ) }|.
+WRITE lv_line.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("-1 0");
+  });
+
+  it("components with a namespace", async () => {
+    const code = `
+TYPES: BEGIN OF ty_sub,
+         /foo/comp TYPE i,
+       END OF ty_sub.
+TYPES: BEGIN OF ty_row,
+         /foo/comp TYPE i,
+         /foo/two  TYPE i,
+         plain     TYPE i,
+         sub       TYPE ty_sub,
+       END OF ty_row.
+DATA lt TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY.
+DATA ls TYPE ty_row.
+DATA lv TYPE i VALUE 2.
+ls-/foo/comp = 1. ls-/foo/two = 10. ls-plain = 100. ls-sub-/foo/comp = 7. APPEND ls TO lt.
+ls-/foo/comp = 2. ls-/foo/two = 20. ls-plain = 200. ls-sub-/foo/comp = 8. APPEND ls TO lt.
+ls-/foo/comp = 3. ls-/foo/two = 30. ls-plain = 300. ls-sub-/foo/comp = 9. APPEND ls TO lt.
+CLEAR ls.
+ls = lt[ /foo/comp = lv ].
+WRITE / ls-plain.
+ls = lt[ /foo/comp = 3 /foo/two = 30 ].
+WRITE / ls-plain.
+IF line_exists( lt[ sub-/foo/comp = 7 ] ).
+  WRITE / 'yes'.
+ENDIF.
+IF line_exists( lt[ /foo/comp = 4 ] ).
+  WRITE / 'no'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("200\n300\nyes");
+  });
 });

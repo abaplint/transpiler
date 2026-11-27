@@ -274,6 +274,9 @@ export async function* loop(table: Table | HashedTable | FieldSymbol | undefined
       if (options?.to === undefined && usingKey === undefined) {
         // extra rows might have been inserted inside the loop
         loopController.loopTo = array.length;
+      } else if (options?.to !== undefined && usingKey === undefined) {
+        // TO is read again in every pass: a change of it inside the loop counts
+        loopController.loopTo = Math.min(options.to.get(), array.length);
       }
     }
   } finally {

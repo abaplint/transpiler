@@ -42,7 +42,7 @@ export async function select(target: Structure | Table | HashedTable | FieldSymb
     }
   }
 
-  rowsToTarget(target, rows);
+  rowsToTarget(target, rows, runtimeOptions?.positional === true);
 
   if (target === undefined && rows.length === 1) {
     abap.builtin.sy.get().dbcnt.set(Object.values(rows[0])[0]);
@@ -52,7 +52,7 @@ export async function select(target: Structure | Table | HashedTable | FieldSymb
   abap.builtin.sy.get().subrc.set(0);
 }
 
-export function rowsToTarget(target: Structure | Table | HashedTable | FieldSymbol, rows: DatabaseRows) {
+export function rowsToTarget(target: Structure | Table | HashedTable | FieldSymbol, rows: DatabaseRows, positional = false) {
   if (target instanceof Structure) {
     const result: any = {};
     for (const column in rows[0]) {
@@ -65,7 +65,24 @@ export function rowsToTarget(target: Structure | Table | HashedTable | FieldSymb
   } else if (target instanceof Table || target instanceof HashedTable) {
     for (const row of rows) {
       const targetRow = target.getRowType().clone();
-      if (targetRow instanceof Structure) {
+      if (positional === true && targetRow instanceof Structure) {
+        // the n-th column goes into the n-th component, as INTO (list) assigns
+        const components = Object.values(targetRow.get());
+        const columns = Object.keys(row);
+        if (columns.length !== components.length) {
+          // the rows are keyed by column name, so two columns of one name
+          // come back as one; filling by position would shift every later target
+          throw new Error(`SELECT INTO, by position: ${columns.length} columns for ${components.length} components`);
+        }
+        for (let index = 0; index < components.length; index++) {
+          const value = row[columns[index]];
+          if (value === null) {
+            components[index].clear();
+          } else {
+            components[index].set(value);
+          }
+        }
+      } else if (targetRow instanceof Structure) {
         for (let columnName in row) {
           columnName = columnName.toLowerCase();
           if (row[columnName] === null) {

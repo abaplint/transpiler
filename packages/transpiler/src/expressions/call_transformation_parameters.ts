@@ -3,12 +3,14 @@ import * as abaplint from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
+import {ConstantTranspiler} from "./constant";
 
 export class CallTransformationParametersTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
     if (node.getFirstChild()?.get() instanceof abaplint.Expressions.Dynamic) {
-      return new Chunk().append(node.concatTokens(), node, traversal);
+      // a dynamic parameter table named with its body suffix: (lt_x[])
+      return new Chunk().append(node.concatTokens().replace(/\[\]\s*\)$/, ")"), node, traversal);
     } else {
 
       const res = new Chunk().appendString("{");
@@ -18,7 +20,7 @@ export class CallTransformationParametersTranspiler implements IExpressionTransp
           if (res.getCode() !== "{") {
             res.appendString(",");
           }
-          res.appendString(c.concatTokens());
+          res.appendString(ConstantTranspiler.normalizeInteger(c.concatTokens()));
         } else if (c.get() instanceof abaplint.Expressions.SimpleSource3) {
           res.appendChunk(traversal.traverse(c));
         } else if (c.concatTokens() === "=") {

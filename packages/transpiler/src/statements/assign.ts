@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import * as abaplint from "@abaplint/core";
 import {IStatementTranspiler} from "./_statement_transpiler";
-import {FieldChainTranspiler, FieldLengthTranspiler, FieldSymbolTranspiler, SourceTranspiler} from "../expressions";
+import {FieldChainTranspiler, FieldLengthTranspiler, FieldSymbolTranspiler, SourceTranspiler, TargetTranspiler} from "../expressions";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 
@@ -42,7 +42,41 @@ throw error;
     return first !== undefined && !(first.get() instanceof abaplint.Expressions.SourceFieldSymbol);
   }
 
+  /** ASSIGN dobj INCREMENT inc TO <fs> [CASTING] [RANGE range]., dobj is parsed as the Target,
+   *  inc as the AssignSource */
+  private transpileIncrement(node: abaplint.Nodes.StatementNode, traversal: Traversal, fs: string): Chunk {
+    const options: string[] = ["target: " + fs];
+
+    const dobj = node.findDirectExpression(abaplint.Expressions.Target);
+    options.push("source: " + new TargetTranspiler().transpile(dobj!, traversal).getCode());
+
+    const inc = node.findDirectExpression(abaplint.Expressions.AssignSource)?.findDirectExpression(abaplint.Expressions.Source);
+    options.push("increment: " + new SourceTranspiler(false).transpile(inc!, traversal).getCode());
+
+    const range = node.findDirectExpression(abaplint.Expressions.Source);
+    if (range !== undefined) {
+      options.push("range: " + new SourceTranspiler(false).transpile(range, traversal).getCode());
+    }
+
+    const concat = node.concatTokens().toUpperCase();
+    if (concat.includes(" CASTING")) {
+      options.push("casting: true");
+    }
+
+    return new Chunk().append("abap.statements.assign({", node, traversal)
+      .appendString(options.join(", "))
+      .append("});", node.getLastToken(), traversal);
+  }
+
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
+    if (node.findDirectTokenByText("INCREMENT") !== undefined) {
+      let fsTarget = node.findDirectExpression(abaplint.Expressions.FSTarget);
+      if (fsTarget?.getFirstChild()?.get() instanceof abaplint.Expressions.InlineFS) {
+        fsTarget = fsTarget.findFirstExpression(abaplint.Expressions.TargetFieldSymbol);
+      }
+      return this.transpileIncrement(node, traversal, new FieldSymbolTranspiler().transpile(fsTarget!, traversal).getCode());
+    }
+
     const assignSource = node.findDirectExpression(abaplint.Expressions.AssignSource);
 
     const sourceExpressions = assignSource?.findDirectExpressionsMulti([abaplint.Expressions.Source,abaplint.Expressions.SimpleSource3]) || [];

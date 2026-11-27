@@ -3,6 +3,7 @@ import {IExpressionTranspiler} from "./_expression_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {FieldChainTranspiler} from "./field_chain";
+import {ConstantTranspiler} from "./constant";
 
 export class FieldOffsetTranspiler implements IExpressionTranspiler {
 
@@ -15,11 +16,7 @@ export class FieldOffsetTranspiler implements IExpressionTranspiler {
         }
       } else if(c instanceof Nodes.TokenNode) {
         if (c.get() instanceof Tokens.Identifier) {
-          let value = c.getFirstToken().getStr().toLowerCase();
-          if (/^0+\d+$/.test(value)) {
-            value = value.replace(/^0+/, "") || "0";
-          }
-          ret += value;
+          ret += ConstantTranspiler.normalizeInteger(c.getFirstToken().getStr().toLowerCase());
         }
       }
     }

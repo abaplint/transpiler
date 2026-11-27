@@ -34,14 +34,14 @@ export function getTime(options?: options): void {
     options.field.set(time);
   }
   if (options?.stamp) {
-    options.stamp.set(date + time);
-
     if (options.stamp instanceof Packed && options.stamp.getDecimals() === 7) {
-      const str = (d.getUTCMilliseconds() + "").padStart(3, "0") + "0000";
-      // note: parsing to float will make it imprecise,
-      // ie. filling the nanoseconds part with garbage, which is what we want
-      const decimals = Number.parseFloat("0." + str);
-      options.stamp.set(options.stamp.get() + decimals);
+      // set once, from the digits: a timestampl scaled to its 7 decimals has 21 digits,
+      // adding the milliseconds via get() would go through a double and the last digits
+      // would be noise - at a whole second even below it (20261014103400 -> 20261014103399.999…)
+      const ms = (d.getUTCMilliseconds() + "").padStart(3, "0");
+      options.stamp.set(date + time + "." + ms + "0000");
+    } else {
+      options.stamp.set(date + time);
     }
   }
 }

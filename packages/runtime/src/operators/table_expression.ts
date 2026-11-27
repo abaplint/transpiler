@@ -1,14 +1,19 @@
-import {searchWithKeyPromise} from "../statements/read_table";
+import {convertKeyValues, searchWithKeyPromise} from "../statements/read_table";
 import {throwError} from "../throw_error";
 import {HashedTable, Integer, Table} from "../types";
+import {secondaryKeyName, TableAccessType} from "../types/table";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
 
 export interface ITableExpressionOptions {
   index?: INumeric | ICharacter | string | Integer | number
+  /** KEY name: INDEX and the search go by this key, primary_key is the primary key */
+  keyName?: string,
   // single function, evaluates full condition
-  withKey?: (i: any) => Promise<boolean>,
+  withKey?: (i: any) => Promise<boolean> | boolean,
+  /** one function per component and its value, the values are converted to the component types */
+  withKeyValue?: {key: (i: any) => any, value: any}[],
   usesTableLine?: boolean
 }
 
@@ -16,11 +21,14 @@ export let foundIndex: number = 0;
 
 export async function tableExpression(source: Table | HashedTable, options: ITableExpressionOptions) {
   let found;
+  options = convertKeyValues(source, options);
+  const key = secondaryKeyName(options.keyName);
+  const rows = key === undefined ? source.array() : source.getSecondaryIndex(key);
   if (options.index) {
     foundIndex = parse(options.index) - 1;
-    found = source.array()[ foundIndex ];
+    found = rows[ foundIndex ];
   } else if (options.withKey) {
-    const search = await searchWithKeyPromise(source.array(), options.withKey, 0, options?.usesTableLine);
+    const search = await searchWithKeyPromise(rows, options.withKey, 0, options?.usesTableLine);
     found = search.found;
     foundIndex = search.foundIndex;
   } else {
@@ -29,6 +37,10 @@ export async function tableExpression(source: Table | HashedTable, options: ITab
 
   if (found === undefined) {
     throwError("CX_SY_ITAB_LINE_NOT_FOUND");
+  }
+  if (key !== undefined && source.getKeyByName(key)?.type === TableAccessType.hashed) {
+    // a hashed key has no row numbers: line_index gives -1 for a row found through it
+    foundIndex = -1;
   }
 
   return found;
