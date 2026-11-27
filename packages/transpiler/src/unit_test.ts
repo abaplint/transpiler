@@ -250,13 +250,33 @@ ret += `  return ret;
 }
 
 async function run() {
-  const skipCritical = process.argv[2] === "--skip-critical";
-  const onlyCritical = process.argv[2] === "--only-critical";
+  const args = process.argv.slice(2);
+  const skipCritical = args.includes("--skip-critical");
+  const onlyCritical = args.includes("--only-critical");
+  // --keep-going: a failing test does not end the run, the rest still runs and the failures are counted
+  const keepGoing = args.includes("--keep-going");
+  // --filter <text>: only the test methods whose "OBJECT: localclass->method" contains the text, case insensitive
+  const filter = args.includes("--filter") ? (args[args.indexOf("--filter") + 1] || "").toUpperCase() : undefined;
+  let failed = 0;
+  let ran = 0;
+  const fail = (what, err) => {
+    if (keepGoing === false) throw err;
+    failed++;
+    console.log(what + ", FAILED");
+    console.log(err);
+  };
   for (const st of getData()) {
+    const methods = filter === undefined ? st.methods : st.methods.filter(m => (st.objectName + ": " + st.localClass + "->" + m.name).toUpperCase().includes(filter));
+    if (filter !== undefined && methods.length === 0) continue;
     const imported = await import(st.filename);
     const localClass = imported[st.localClass];
-    if (localClass.class_setup) await localClass.class_setup();
-    for (const m of st.methods) {
+    try {
+      if (localClass.class_setup) await localClass.class_setup();
+    } catch (err) {
+      fail(st.objectName + ": " + st.localClass + ", class_setup", err);
+      continue;
+    }
+    for (const m of methods) {
       const prefix = st.objectName + ": running " + st.localClass + "->" + m.name;
       if (m.skip) {
         console.log(prefix + ", skipped due to configuration");
@@ -265,19 +285,49 @@ async function run() {
       } else if (onlyCritical && st.riskLevel !== "CRITICAL") {
         console.log(prefix + ", skipped due to risk level " + st.riskLevel);
       } else {
-        const test = await (new localClass()).constructor_();
-        ${callSpecial("setup")}
-        console.log(prefix);
-        await test.FRIENDS_ACCESS_INSTANCE[m.name]();
-        ${callSpecial("teardown")}
+        ran++;
+        let test = undefined;
+        try {
+          test = await (new localClass()).constructor_();
+          ${callSpecial("setup")}
+          console.log(prefix);
+          await test.FRIENDS_ACCESS_INSTANCE[m.name]();
+        } catch (err) {
+          fail(prefix, err);
+          // the fixture is still torn down, the next test starts from a clean state
+          try {
+            if (test) {
+              ${callSpecial("teardown")}
+            }
+          } catch (err2) {
+            console.log(err2);
+          }
+          continue;
+        }
+        try {
+          ${callSpecial("teardown")}
+        } catch (err) {
+          fail(prefix + ", teardown", err);
+        }
       }
     }
-    if (localClass.class_teardown) await localClass.class_teardown();
+    try {
+      if (localClass.class_teardown) await localClass.class_teardown();
+    } catch (err) {
+      fail(st.objectName + ": " + st.localClass + ", class_teardown", err);
+    }
   }
+  if (filter !== undefined && ran === 0) {
+    throw new Error("no test method matches --filter " + filter);
+  }
+  if (failed > 0) {
+    console.log(failed + " failed, " + ran + " run");
+  }
+  return failed;
 }
 
-run().then(() => {
-  process.exit(0);
+run().then((failed) => {
+  process.exit(failed > 0 ? 1 : 0);
 }).catch((err) => {
   console.log(err);
   process.exit(1);

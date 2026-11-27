@@ -264,7 +264,7 @@ describe("Testing Unit Testing", () => {
     }
   });
 
-  async function dumpNrun(files: IFile[], database = true, importProg = false): Promise<string> {
+  async function dumpNrun(files: IFile[], database = true, importProg = false, args?: string[]): Promise<string> {
     const SETUP_NAME = "mysetup.mjs";
     const config: ITranspilerOptions = {
       addCommonJS: true,
@@ -325,6 +325,12 @@ export async function setup(abap, schemas, insert) {
       `import runtime from "@abaplint/runtime";`,
       `import runtime from "../../packages/runtime/build/src/index.js";`);
     fs.writeFileSync(outputFolder + path.sep + "init.mjs", output.initializationScript);
+
+    if (args !== undefined) {
+      // runner arguments, a failing run is part of what is tested: its exit code is the first line
+      const res = childProcess.spawnSync(process.execPath, [path.join(outputFolder, "index.mjs"), ...args]);
+      return "exit " + res.status + "\n" + res.stdout.toString();
+    }
 
     const buf = childProcess.execFileSync(process.execPath, [path.join(outputFolder, "index.mjs")]);
     return buf.toString();
@@ -4152,6 +4158,84 @@ ENDCLASS.`;
     ];
     const cons = await dumpNrun(files, false);
     expect(cons.split("\n")[1]).to.equal("0 0");
+  });
+
+  describe("runner arguments", () => {
+    const clas = `
+    CLASS zcl_client DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_client IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS teardown.
+        METHODS test01 FOR TESTING.
+        METHODS test02 FOR TESTING.
+        METHODS test03 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD teardown.
+        WRITE / 'teardown'.
+      ENDMETHOD.
+      METHOD test01.
+        WRITE / 'one'.
+      ENDMETHOD.
+      METHOD test02.
+        ASSERT 1 = 2.
+      ENDMETHOD.
+      METHOD test03.
+        WRITE / 'three'.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zcl_client.clas.abap", contents: clas},
+      {filename: "zcl_client.clas.testclasses.abap", contents: tests},
+    ];
+
+    it("runner-args-1, no arguments, the first failing test ends the run", async () => {
+      const cons = await dumpNrun(files, false, false, []);
+      expect(cons).to.include("exit 1");
+      expect(cons).to.include("running ltcl_test->test02");
+      expect(cons).to.not.include("running ltcl_test->test03");
+      expect(cons).to.not.include(", FAILED");
+    });
+
+    it("runner-args-2, keep-going runs the tests after a failing one", async () => {
+      const cons = await dumpNrun(files, false, false, ["--keep-going"]);
+      expect(cons.split("\n")[0]).to.equal("exit 1");
+      expect(cons).to.include("ZCL_CLIENT: running ltcl_test->test02, FAILED");
+      expect(cons).to.include("running ltcl_test->test03");
+      expect(cons).to.include("three");
+      expect(cons).to.include("1 failed, 3 run");
+      // the fixture of the failing test is torn down as well
+      expect(cons.split("teardown").length - 1).to.equal(3);
+    });
+
+    it("runner-args-3, keep-going with nothing failing exits zero", async () => {
+      const cons = await dumpNrun(files, false, false, ["--keep-going", "--filter", "test01"]);
+      expect(cons.split("\n")[0]).to.equal("exit 0");
+      expect(cons).to.not.include("failed");
+    });
+
+    it("runner-args-4, filter runs only the matching test methods", async () => {
+      const cons = await dumpNrun(files, false, false, ["--filter", "ltcl_test->test03"]);
+      expect(cons.split("\n")[0]).to.equal("exit 0");
+      expect(cons).to.include("running ltcl_test->test03");
+      expect(cons).to.not.include("test01");
+      expect(cons).to.not.include("test02");
+    });
+
+    it("runner-args-5, filter matches the object name, case insensitive", async () => {
+      const cons = await dumpNrun(files, false, false, ["--keep-going", "--filter", "zcl_client: LTCL_TEST"]);
+      expect(cons).to.include("1 failed, 3 run");
+    });
+
+    it("runner-args-6, filter matching nothing is an error", async () => {
+      const cons = await dumpNrun(files, false, false, ["--filter", "nothing_like_this"]);
+      expect(cons.split("\n")[0]).to.equal("exit 1");
+      expect(cons).to.include("no test method matches --filter");
+    });
   });
 
 });
