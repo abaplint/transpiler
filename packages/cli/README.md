@@ -82,7 +82,11 @@ Imports and registered MIME filenames reference the new paths.
 Shared initialization scripts and test runners remain at the output root.
 Run programs with `node output/project/zapp.prog.mjs`; run project unit tests
 with `node output/index.mjs`. Importing a program module, eg. for its unit tests,
-does not run the program; call its exported `$main()` to run it. When migrating from flat output, rebuild a clean
+does not run the program; call its exported `$main()` to run it. The unit test
+runner takes `--skip-critical` or `--only-critical`, `--keep-going` to run the
+remaining tests after a failing one and exit with 1 at the end, and
+`--filter <text>` to run only the test methods whose `OBJECT: localclass->method`
+contains the text. When migrating from flat output, rebuild a clean
 generated output directory and update scripts that reference individual
 modules or assets.
 
