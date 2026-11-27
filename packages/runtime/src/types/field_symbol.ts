@@ -9,6 +9,7 @@ import {Float} from "./float";
 import {DataReference} from "./data_reference";
 import {HexUInt8} from "./hex_uint8";
 import {Date} from "./date";
+import {Character} from "./character";
 
 type PointerType = INumeric | Table | ICharacter | ABAPObject | undefined | Structure | Float;
 
@@ -57,6 +58,10 @@ export class FieldSymbol  {
   }
 
   public getPointer() {
+    const casted = this.castToStructure();
+    if (casted !== undefined) {
+      return casted;
+    }
     if (this.needsReinterpretation()) {
       // todo, this wont work for everything, eg changing CASTING'ed values
       return this.get();
@@ -79,6 +84,10 @@ export class FieldSymbol  {
   }
 
   public get() {
+    const casted = this.castToStructure();
+    if (casted !== undefined) {
+      return casted.get();
+    }
     if (this.needsReinterpretation()) {
       if (this.type instanceof Hex || this.type instanceof HexUInt8) {
         const pt = this.pointer;
@@ -118,6 +127,12 @@ export class FieldSymbol  {
   }
 
   public set(value: any) {
+    const casted = this.castToStructure();
+    if (casted !== undefined) {
+      casted.set(value);
+      (this.pointer as Character | Structure).set(casted.getCharacter());
+      return this;
+    }
     if (this.needsReinterpretation()) {
       if (this.type instanceof Hex || this.type instanceof HexUInt8) {
         const pt = this.pointer;
@@ -135,6 +150,25 @@ export class FieldSymbol  {
 
   public getOffset(input: {offset?: number | INumeric | Hex, length?: number | INumeric | Hex}) {
     return this.getPointer().getOffset(input);
+  }
+
+  /** a character-like field CASTING to a flat character-like structure: the structure laid over the
+   *  field's characters, component by component. It is a copy, changes to single components are not
+   *  written back to the field */
+  private castToStructure(): Structure | undefined {
+    if (this.casting === false || !(this.type instanceof Structure)) {
+      return undefined;
+    }
+    const pt = this.pointer;
+    let chars: string;
+    if (pt instanceof Character) {
+      chars = pt.get();
+    } else if (pt instanceof Structure) {
+      chars = pt.getCharacter();
+    } else {
+      return undefined;
+    }
+    return this.type.clone().set(chars);
   }
 
   private needsReinterpretation(): boolean {

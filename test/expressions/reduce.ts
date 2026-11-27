@@ -287,4 +287,45 @@ WRITE / result.`;
     expect(abap.console.get()).to.equal("3");
   });
 
+  it("GROUPS iteration, field symbol member, WITHOUT MEMBERS", async () => {
+    const code = `
+TYPES: BEGIN OF row_type,
+         id TYPE i,
+       END OF row_type.
+DATA input TYPE STANDARD TABLE OF row_type WITH EMPTY KEY.
+DATA result TYPE i.
+input = VALUE #( ( id = 5 ) ( id = 1 ) ( id = 5 ) ( id = 2 ) ).
+result = REDUCE i( INIT sum = 0
+                   FOR GROUPS group OF <row> IN input GROUP BY <row>-id WITHOUT MEMBERS
+                   NEXT sum = sum + group ).
+WRITE / result.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("8");
+  });
+
+  it("GROUPS iteration, ASCENDING AS TEXT and DESCENDING AS TEXT", async () => {
+    const code = `
+TYPES: BEGIN OF row_type,
+         k TYPE c LENGTH 3,
+         s TYPE string,
+       END OF row_type.
+DATA input TYPE STANDARD TABLE OF row_type WITH EMPTY KEY.
+DATA result TYPE string.
+input = VALUE #( ( k = 'b' s = |x| ) ( k = 'B' s = |y| ) ( k = 'a' s = |Y| )
+  ( k = 'ä' s = |x| ) ( k = 'A' s = |x| ) ( k = 'a' s = |y| ) ).
+result = REDUCE string( INIT x = ||
+                        FOR GROUPS g OF w IN input GROUP BY w-k ASCENDING AS TEXT
+                        NEXT x = x && g && |,| ).
+ASSERT result = |a,A,ä,b,B,|.
+result = REDUCE string( INIT x = ||
+                        FOR GROUPS h OF v IN input GROUP BY v-s DESCENDING AS TEXT
+                        NEXT x = x && h && |,| ).
+ASSERT result = |Y,y,x,|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
 });

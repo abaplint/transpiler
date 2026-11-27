@@ -5,7 +5,9 @@ import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {Character} from "./character";
 import {throwError} from "../throw_error";
+import {Integer} from "./integer";
 import {Integer8} from "./integer8";
+import {Packed} from "./packed";
 
 export class XString implements ICharacter {
   private value: string;
@@ -26,7 +28,7 @@ export class XString implements ICharacter {
     return this.qualifiedName;
   }
 
-  public set(value: ICharacter | INumeric | string | number) {
+  public set(value: ICharacter | INumeric | string | number | Integer8) {
     if (typeof value === "string") {
       // the input is interpreted as hexadecimal digits, the conversion stops at
       // the first character which is not an uppercase hex digit
@@ -39,11 +41,31 @@ export class XString implements ICharacter {
       if (this.value.length % 2 === 1) {
         this.value = "0" + this.value;
       }
+    } else if (value instanceof Integer8) {
+      const v: bigint = (value as Integer8).get();
+      if (v < 0n) {
+        // two's complement, as int8 -> x LENGTH 8
+        this.value = new Hex({length: 8}).set(value).get();
+      } else {
+        this.value = v.toString(16).toUpperCase();
+        if (this.value.length % 2 === 1) {
+          this.value = "0" + this.value;
+        }
+      }
+    } else if (value instanceof Integer && value.get() < 0) {
+      // two's complement, as i -> x LENGTH 4
+      this.value = (value.get() + 0x100000000).toString(16).toUpperCase();
+    } else if (value instanceof XString || value instanceof Hex) {
+      // already hexadecimal digits, uppercase and an even number of them
+      this.value = value.get();
     } else {
       let v = value.get();
       if (value instanceof Float) {
         v = value.getRaw();
         this.set(v);
+      } else if (value instanceof Packed) {
+        // rounded as f is, the number is not written with its decimals
+        this.set(value.get());
       } else if (value instanceof Character) {
         this.set(value.getTrimEnd());
       } else if (typeof v === "number") {
@@ -55,6 +77,13 @@ export class XString implements ICharacter {
         this.set(v);
       }
     }
+    return this;
+  }
+
+  /** sets hexadecimal digits the caller knows to be valid: uppercase 0-9 and A-F, an even
+   *  number of them. set( ) checks a string first, which takes time in its length */
+  public setHex(value: string): XString {
+    this.value = value;
     return this;
   }
 

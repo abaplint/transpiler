@@ -2,35 +2,167 @@ import * as abaplint from "@abaplint/core";
 import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
+import {ClassImplementationTranspiler as ClassImplementationStatementTranspiler} from "../statements/class_implementation";
+
+const DEFAULT_CONSTRUCTOR = "async constructor_(INPUT) {\nif (super.constructor_) { await super.constructor_(INPUT); }\nreturn this;\n}\n";
 
 export class ClassImplementationTranspiler implements IStructureTranspiler {
 
   public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): Chunk {
+    const token = node.findFirstExpression(abaplint.Expressions.ClassName)?.getFirstToken();
+    if (token === undefined) {
+      throw new Error("ClassImplementationTranspiler, class name not found");
+    }
+    const methods = node.findAllStatements(abaplint.Statements.MethodImplementation);
 
     const ret = new Chunk();
 
     for (const c of node.getChildren()) {
+      if (c.get() instanceof abaplint.Statements.EndClass) {
+        ret.appendString(this.buildPartiallyImplementedStubs(token, methods, traversal));
+      }
       ret.appendChunk(traversal.traverse(c));
       if (c.get() instanceof abaplint.Statements.ClassImplementation) {
-        ret.appendString(this.buildConstructor(node.getFirstStatement(), traversal));
-      }
-      if (c instanceof abaplint.Nodes.StatementNode
-          && c.get() instanceof abaplint.Statements.ClassImplementation
-          && this.hasConstructor(node) === false) {
-        ret.appendString("async constructor_(INPUT) {\nif (super.constructor_) { await super.constructor_(INPUT); }\nreturn this;\n}\n");
+        ret.appendString(this.buildConstructor(token, traversal));
+        if (this.hasConstructor(methods) === false) {
+          ret.appendString(DEFAULT_CONSTRUCTOR);
+        }
       }
     }
 
-    ret.appendString(this.buildStatic(node.findFirstExpression(abaplint.Expressions.ClassName), traversal));
-    ret.appendString(this.buildTypes(node.findFirstExpression(abaplint.Expressions.ClassName), traversal));
+    ret.appendString(this.buildStatic(token, traversal));
+    ret.appendString(this.buildTypes(token, traversal));
 
+    return ret;
+  }
+
+  /** a class with a DEFINITION and no IMPLEMENTATION, valid ABAP when the class has no
+   * methods to implement, eg. an exception class or an abstract class with only abstract
+   * methods: the same output as for an empty CLASS ... IMPLEMENTATION. ENDCLASS. */
+  public transpileWithoutImplementation(node: abaplint.Nodes.StructureNode, traversal: Traversal): Chunk {
+    const token = node.findFirstExpression(abaplint.Expressions.ClassName)?.getFirstToken();
+    if (token === undefined) {
+      throw new Error("ClassImplementationTranspiler, class name not found");
+    }
+
+    const ret = new Chunk();
+    ret.append(new ClassImplementationStatementTranspiler().buildHeader(token, traversal) + "\n", node, traversal);
+    ret.appendString(this.buildConstructor(token, traversal));
+    ret.appendString(DEFAULT_CONSTRUCTOR);
+    ret.appendString(this.buildPartiallyImplementedStubs(token, [], traversal));
+    ret.append("}\n" + traversal.registerClassOrInterface(traversal.getClassDefinition(token)) + "\n",
+               node.getLastToken(), traversal);
+    ret.appendString(this.buildStatic(token, traversal));
+    ret.appendString(this.buildTypes(token, traversal));
     return ret;
   }
 
 ///////////////////////////////
 
-  private hasConstructor(node: abaplint.Nodes.StructureNode): boolean {
-    for (const m of node.findAllStatements(abaplint.Statements.MethodImplementation)) {
+  /** INTERFACES ... PARTIALLY IMPLEMENTED: the interface methods the test class
+   * does not implement exist on a system and raise CX_SY_DYN_CALL_ILLEGAL_METHOD
+   * when called. Emits a method of that shape under the name the implementation
+   * would have had, so the call ends in that exception and not in a TypeError */
+  private buildPartiallyImplementedStubs(token: abaplint.Token, methods: readonly abaplint.Nodes.StatementNode[],
+                                         traversal: Traversal): string {
+    const cdef = traversal.getClassDefinition(token);
+    const scope = traversal.findCurrentScopeByToken(token);
+    if (cdef === undefined || scope === undefined) {
+      return "";
+    }
+    const partial = cdef.getImplementing().filter(i => i.partial === true);
+    if (partial.length === 0) {
+      return "";
+    }
+
+    // the methods the class implements itself, by the emitted name
+    const implemented = new Set<string>();
+    for (const m of methods) {
+      const name = m.findFirstExpression(abaplint.Expressions.MethodName)?.getFirstToken().getStr();
+      if (name !== undefined) {
+        implemented.add(Traversal.escapeNamespace(name.replace("~", "$").toLowerCase())!);
+      }
+    }
+
+    // an interface a superclass implements is inherited, with the real implementations,
+    // a stub for one of its methods would override those
+    const inherited = new Set<string>();
+    let sup = cdef.getSuperClass();
+    while (sup !== undefined) {
+      const sdef = traversal.findClassDefinition(sup, scope);
+      for (const name of this.findIncludedInterfaces(sdef?.getImplementing().map(i => i.name) || [], scope, traversal)) {
+        inherited.add(name);
+      }
+      sup = sdef?.getSuperClass();
+    }
+
+    let ret = "";
+    for (const name of this.findIncludedInterfaces(partial.map(i => i.name), scope, traversal)) {
+      if (inherited.has(name)) {
+        continue;
+      }
+      const intf = traversal.findInterfaceDefinition(name, scope);
+      if (intf === undefined) {
+        continue;
+      }
+      const prefix = Traversal.escapeNamespace(intf.getName().toLowerCase()) + "$";
+      for (const m of intf.getMethodDefinitions().getAll()) {
+        const emitted = prefix + Traversal.escapeNamespace(m.getName().toLowerCase());
+        if (implemented.has(emitted)) {
+          continue;
+        }
+        implemented.add(emitted);
+        ret += this.buildNotImplementedMethod(emitted, m, token.getStr().toLowerCase(), intf.getName(), token, traversal);
+      }
+    }
+    return ret;
+  }
+
+  /** the interfaces, upper cased, with the interfaces they include, recursively */
+  private findIncludedInterfaces(names: string[], scope: abaplint.ISpaghettiScopeNode, traversal: Traversal): string[] {
+    const ret: string[] = [];
+    const queue = [...names];
+    while (queue.length > 0) {
+      const name = queue.shift()!.toUpperCase();
+      if (ret.includes(name)) {
+        continue;
+      }
+      ret.push(name);
+      const intf = traversal.findInterfaceDefinition(name, scope);
+      queue.push(...(intf?.getImplementing().map(i => i.name) || []));
+    }
+    return ret;
+  }
+
+  /** the method a system generates for an interface method the test class leaves
+   * out under PARTIALLY IMPLEMENTED: calling it raises CX_SY_DYN_CALL_ILLEGAL_METHOD
+   * (ABAP keyword documentation, INTERFACES - PARTIALLY IMPLEMENTED), the class and
+   * method named, instead of a JavaScript TypeError no CATCH sees */
+  private buildNotImplementedMethod(emitted: string, m: abaplint.IMethodDefinition, className: string,
+                                    interfaceName: string, token: abaplint.Token, traversal: Traversal): string {
+    const unique = m.getParameters().getAll().length > 0 ? "INPUT" : "";
+    const exception = traversal.lookupClassOrInterface("'CX_SY_DYN_CALL_ILLEGAL_METHOD'", token, true);
+    const classUpper = className.toUpperCase();
+    const methodUpper = interfaceName.toUpperCase() + "~" + m.getName().toUpperCase();
+    const notFound = `CX_SY_DYN_CALL_ILLEGAL_METHOD not found, ${classUpper}->${methodUpper} is not implemented`;
+    const body = `if (${exception} === undefined) { throw new Error("${notFound}"); }\n` +
+      `throw await new ${exception}().constructor_({` +
+      `classname: new abap.types.String().set("${classUpper}"), ` +
+      `methodname: new abap.types.String().set("${methodUpper}")});\n`;
+
+    let ret = "";
+    if (m.isStatic() === true) {
+      // in ABAP static methods can be called with instance arrows, "->"
+      ret += "async " + emitted + "(" + unique + ") {\n" +
+        "return " + Traversal.escapeNamespace(className) + "." + emitted + "(" + unique + ");\n" +
+        "}\n" + "static ";
+    }
+    ret += "async " + emitted + "(" + unique + ") {\n" + body + "}\n";
+    return ret;
+  }
+
+  private hasConstructor(methods: readonly abaplint.Nodes.StatementNode[]): boolean {
+    for (const m of methods) {
       const name = m.findFirstExpression(abaplint.Expressions.MethodName)?.getFirstToken().getStr();
       if (name?.toUpperCase() === "CONSTRUCTOR") {
         return true;
@@ -70,11 +202,8 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     return ret;
   }
 
-  private buildTypes(node: abaplint.Nodes.ExpressionNode | undefined, traversal: Traversal): string {
-    if (node === undefined) {
-      return "";
-    }
-    const cdef = traversal.getClassDefinition(node.getFirstToken());
+  private buildTypes(token: abaplint.Token, traversal: Traversal): string {
+    const cdef = traversal.getClassDefinition(token);
     if (cdef === undefined) {
       return "ERROR_CDEF_NOT_FOUND";
     }
@@ -87,12 +216,8 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
     return ret;
   }
 
-  private buildPrivate(node: abaplint.Nodes.ExpressionNode | undefined, traversal: Traversal): string {
-    if (node === undefined) {
-      return "";
-    }
-
-    const cdef = traversal.getClassDefinition(node.getFirstToken());
+  private buildPrivate(token: abaplint.Token, traversal: Traversal): string {
+    const cdef = traversal.getClassDefinition(token);
     if (cdef === undefined) {
       return "ERROR_CDEF_NOT_FOUND";
     }
@@ -107,21 +232,18 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
   }
 
   /** this builds the part after the class, containing the static variables/constants */
-  private buildStatic(node: abaplint.Nodes.ExpressionNode | undefined, traversal: Traversal): string {
-    if (node === undefined) {
-      return "";
-    }
-    const cdef = traversal.getClassDefinition(node.getFirstToken());
+  private buildStatic(token: abaplint.Token, traversal: Traversal): string {
+    const cdef = traversal.getClassDefinition(token);
     if (cdef === undefined) {
       return "ERROR_CDEF_NOT_FOUND";
     }
-    const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
+    const scope = traversal.findCurrentScopeByToken(token);
     if (scope === undefined) {
       return "ERROR_SCOPE_NOT_FOUND";
     }
 
     let ret = "";
-    const clasName = node.getFirstToken().getStr().toLowerCase();
+    const clasName = token.getStr().toLowerCase();
     const staticAttributes = this.findStaticAttributes(cdef, scope, traversal);
     for (const attr of staticAttributes) {
       const name = Traversal.escapeNamespace(clasName) + "." + Traversal.escapeNamespace(attr.prefix) + Traversal.escapeNamespace(attr.identifier.getName().toLowerCase());
@@ -161,32 +283,24 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
             if (def.isForTesting === true) {
               continue;
             } else if (def.methods.some(m => m.name.toLowerCase() === "class_constructor")) {
-              ret += "await " + traversal.lookupClassOrInterface(def.name, node.getFirstToken()) + ".class_constructor();\n";
+              ret += "await " + traversal.lookupClassOrInterface(def.name, token) + ".class_constructor();\n";
             }
           }
         }
       }
       if (cdef.isGlobal() === false && cdef.isForTesting() === true && cdef.getMethodDefinitions().getByName("class_constructor")) {
-        ret += "await " + Traversal.escapeNamespace(node.getFirstToken().getStr().toLowerCase()) + ".class_constructor();\n";
+        ret += "await " + Traversal.escapeNamespace(clasName) + ".class_constructor();\n";
       }
     } else if (cdef.getMethodDefinitions().getByName("class_constructor")) {
-      ret += "await " + Traversal.escapeNamespace(node.getFirstToken().getStr().toLowerCase()) + ".class_constructor();\n";
+      ret += "await " + Traversal.escapeNamespace(clasName) + ".class_constructor();\n";
     }
 
     return ret;
   }
 
-  private buildConstructor(node: abaplint.Nodes.StatementNode | undefined, traversal: Traversal): string {
-    if (node === undefined) {
-      throw new Error("buildConstructor node undefined");
-    }
+  private buildConstructor(token: abaplint.Token, traversal: Traversal): string {
+    const scope = traversal.findCurrentScopeByToken(token);
 
-    const scope = traversal.findCurrentScopeByToken(node.getFirstToken());
-
-    const token = node.findFirstExpression(abaplint.Expressions.ClassName)?.getFirstToken();
-    if (token === undefined) {
-      throw "buildConstructorTokenNotFound";
-    }
     const cdef = traversal.getClassDefinition(token);
     if (cdef === undefined) {
       throw "buildConstructorCDEFNotFound, " + token.getStr();
@@ -197,7 +311,7 @@ export class ClassImplementationTranspiler implements IStructureTranspiler {
       return ret;
     }
 
-    const privates = this.buildPrivate(node.findFirstExpression(abaplint.Expressions.ClassName), traversal);
+    const privates = this.buildPrivate(token, traversal);
 
 // note: for CALL TRANSFORMATION, its nice that the values are initialized by the JS constructor,
     return privates + "constructor() {\n" + ret + "}\n";

@@ -159,6 +159,9 @@ ENDFUNCTION.`;
     const repeated = (name: string) => `FUNCTION ${name}.
 TYPES: BEGIN OF ty_shared,
   value TYPE i,
+  text1 TYPE c LENGTH 40,
+  text2 TYPE c LENGTH 40,
+  text3 TYPE c LENGTH 40,
 END OF ty_shared.
 DATA item TYPE ty_shared.
 ENDFUNCTION.`;
@@ -167,7 +170,7 @@ ENDFUNCTION.`;
       : file.filename === "zfgroup.fugr.zfmodule2.abap"
         ? {...file, contents: repeated("zfmodule2")}
         : file);
-    const fugr = await runFugr(input, {sharedTypeFactories: true});
+    const fugr = await runFugr(input);
     const code = fugr.chunk.getCode();
     expect(code.match(/function \$t_/g)?.length).to.equal(1);
     expect(code.match(/\$t_[\w$]+\(\)/g)?.length).to.be.greaterThan(2);
@@ -189,6 +192,66 @@ ENDFUNCTION.`,
 
     expect(declaration, js).to.be.greaterThan(-1);
     expect(assignment, js).to.be.greaterThan(declaration);
+  });
+
+  it("a VALUE of the TOP include names a constant", async () => {
+    const input = files.map(file => file.filename === "zfgroup.fugr.lzfgrouptop.abap"
+      ? {...file, contents: "FUNCTION-POOL zfgroup.\nCONSTANTS c_max TYPE i VALUE 3.\nDATA gv_flag TYPE abap_bool VALUE abap_true.\nDATA gv_max TYPE i VALUE c_max."}
+      : file);
+    const js = (await runFugr(input)).chunk.getCode();
+    expect(js).to.include("gv_flag.set(abap.builtin.abap_true);");
+    expect(js).to.include("gv_max.set(c_max);");
+  });
+
+  describe("local class split over TOP and F01 includes", () => {
+    const includeXml = (name: string) => topxml.replace("LZFGROUPTOP", name);
+    const splitXml = xml.replace("<SOBJ_NAME>SAPLZFGROUP</SOBJ_NAME>",
+                                 "<SOBJ_NAME>LZFGROUPF01</SOBJ_NAME>\n    <SOBJ_NAME>SAPLZFGROUP</SOBJ_NAME>");
+
+    function buildFiles(top: string, f01: string): IFile[] {
+      return [
+        ...files.filter(f => f.filename !== "zfgroup.fugr.saplzfgroup.abap" && f.filename !== "zfgroup.fugr.xml"
+          && f.filename !== "zfgroup.fugr.lzfgrouptop.abap"),
+        {filename: "zfgroup.fugr.xml", contents: splitXml},
+        {filename: "zfgroup.fugr.saplzfgroup.abap", contents: "INCLUDE lzfgrouptop.\nINCLUDE lzfgroupuxx.\nINCLUDE lzfgroupf01."},
+        {filename: "zfgroup.fugr.lzfgrouptop.abap", contents: top},
+        {filename: "zfgroup.fugr.lzfgroupf01.abap", contents: f01},
+        {filename: "zfgroup.fugr.lzfgroupf01.xml", contents: includeXml("LZFGROUPF01")},
+      ];
+    }
+
+    function expectParses(js: string) {
+      // the module body is plain statements, a function body gives the same duplicate declaration checks
+      expect(() => new Function(`return async () => {\n${js}\n};`), js).to.not.throw();
+    }
+
+    it("DEFINITION in TOP, IMPLEMENTATION in F01: one class declaration", async () => {
+      const top = `FUNCTION-POOL zfgroup.
+CLASS lcl_example DEFINITION.
+  PUBLIC SECTION.
+    METHODS run RETURNING VALUE(rv) TYPE i.
+ENDCLASS.`;
+      const f01 = `CLASS lcl_example IMPLEMENTATION.
+  METHOD run.
+    rv = 2.
+  ENDMETHOD.
+ENDCLASS.`;
+      const js = (await runFugr(buildFiles(top, f01))).chunk.getCode();
+      expect(js.match(/^\s*class lcl_example\b/gm)?.length, js).to.equal(1);
+      expect(js, js).to.include("async run(");
+      expectParses(js);
+    });
+
+    it("declaration-only class in TOP still gets a class", async () => {
+      const top = `FUNCTION-POOL zfgroup.
+CLASS lcl_abstract DEFINITION ABSTRACT.
+  PUBLIC SECTION.
+    METHODS run ABSTRACT.
+ENDCLASS.`;
+      const js = (await runFugr(buildFiles(top, "* nothing"))).chunk.getCode();
+      expect(js.match(/^\s*class lcl_abstract\b/gm)?.length, js).to.equal(1);
+      expectParses(js);
+    });
   });
 
 });

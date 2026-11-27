@@ -26,3 +26,13 @@ export function getRunTime(context: Context, value: INumeric) {
   // like the kernel: the count wraps modulo 2^31 and stays non-negative
   value.set(micro % 2147483648);
 }
+
+const resolutions = new WeakMap<Context, "HIGH" | "LOW">();
+
+// SET RUN TIME CLOCK RESOLUTION: the resolution (HIGH by default) can only change before the first GET RUN TIME
+export function setRunTimeClock(context: Context, resolution: "HIGH" | "LOW") {
+  if (context.runTime !== undefined && resolution !== (resolutions.get(context) ?? "HIGH")) {
+    throw new Error("SET_RUN_TIME_CLOCK_ERROR");
+  }
+  resolutions.set(context, resolution);
+}

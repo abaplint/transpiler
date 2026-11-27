@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 import * as abaplint from "@abaplint/core";
 import {OutputLayout, importPath} from "./output_layout";
+import {filesWithProgramIncludes} from "./program_includes";
 
 /** @uniqueItems true */
 export type TestMethodList = {
@@ -35,22 +36,36 @@ async function run() {
 `;
 
     for (const obj of reg.getObjects()) {
-      if (reg.isDependency(obj) || !(obj instanceof abaplint.Objects.Class)) {
+      if (reg.isDependency(obj)) {
         continue;
       }
-      const hasTestFile = obj.getFiles().some(f => { return f.getFilename().includes(".testclasses."); });
-      if (hasTestFile === true) {
-        ret += `  await import("${importPath("index.mjs", this.layout.objectModule(obj, ".testclasses"))}");\n`;
+
+      let files: readonly abaplint.ABAPFile[] = [];
+      if (obj instanceof abaplint.Objects.Class) {
+        const hasTestFile = obj.getFiles().some(f => { return f.getFilename().includes(".testclasses."); });
+        if (hasTestFile === true) {
+          ret += `  await import("${importPath("index.mjs", this.layout.objectModule(obj, ".testclasses"))}");\n`;
+        }
+        files = obj.getABAPFiles();
+      } else if (obj instanceof abaplint.Objects.Program && obj.isInclude() === false) {
+        // KERNEL_UNIT_RUNNER finds local classes of programs as "PROG-<program>-<class>",
+        // importing the program module registers them, its main function is not run
+        files = filesWithProgramIncludes(obj, reg);
+        if (files.some(f => f.getInfo().listClassDefinitions().some(d => d.isForTesting === true && d.isGlobal === false))) {
+          ret += `  await import("${importPath("index.mjs", this.layout.objectModule(obj))}");\n`;
+        }
+      } else {
+        continue;
       }
 
-      for (const file of obj.getABAPFiles()) {
+      for (const file of files) {
         for (const def of file.getInfo().listClassDefinitions()) {
           if (def.isForTesting === false || def.isGlobal === true || def.isAbstract === true) {
           // todo, fix, there might be global test methods
             continue;
           }
 
-          for (const m of this.findTestMethods(def, obj, reg)) {
+          for (const m of this.findTestMethods(def, files, reg)) {
             ret += `  ls_input.get().class_name.set("${obj.getName()}");
   ls_input.get().testclass_name.set("${def.name.toUpperCase()}");
   ls_input.get().method_name.set("${m.toUpperCase()}");
@@ -80,14 +95,14 @@ run().then(() => {
    * a concrete test class may get all its tests from a local ABSTRACT base, the way a
    * suite runs the same tests against several implementations. A redefinition, or a
    * method of the same name, replaces the ancestor's entry */
-  private findTestMethods(def: abaplint.Info.InfoClassDefinition, obj: abaplint.Objects.Class, reg: abaplint.IRegistry): string[] {
+  private findTestMethods(def: abaplint.Info.InfoClassDefinition, files: readonly abaplint.ABAPFile[], reg: abaplint.IRegistry): string[] {
     const chain: abaplint.Info.InfoClassDefinition[] = [];
     const seen = new Set<string>();
     let current: abaplint.Info.InfoClassDefinition | undefined = def;
     while (current !== undefined && seen.has(current.name.toUpperCase()) === false) {
       seen.add(current.name.toUpperCase());
       chain.push(current);
-      current = this.findClassDefinition(current.superClassName, obj, reg);
+      current = this.findClassDefinition(current.superClassName, files, reg);
     }
 
     // the root ancestor's methods first, so a redefinition keeps its place in the order
@@ -103,13 +118,13 @@ run().then(() => {
     return [...methods.values()];
   }
 
-  /** a local class of the same object, in any of its files, or else a global class */
-  private findClassDefinition(name: string | undefined, obj: abaplint.Objects.Class, reg: abaplint.IRegistry): abaplint.Info.InfoClassDefinition | undefined {
+  /** a local class of the same object, in any of its files (for a program also its includes), or else a global class */
+  private findClassDefinition(name: string | undefined, files: readonly abaplint.ABAPFile[], reg: abaplint.IRegistry): abaplint.Info.InfoClassDefinition | undefined {
     if (name === undefined) {
       return undefined;
     }
     const upper = name.toUpperCase();
-    for (const file of obj.getABAPFiles()) {
+    for (const file of files) {
       for (const def of file.getInfo().listClassDefinitions()) {
         if (def.name.toUpperCase() === upper) {
           return def;
@@ -140,16 +155,28 @@ run().then(() => {
     }[] = [];
 
     for (const obj of reg.getObjects()) {
-      if (reg.isDependency(obj) || !(obj instanceof abaplint.Objects.Class)) {
+      if (reg.isDependency(obj)) {
         continue;
       }
 
-      const hasTestFile = obj.getFiles().some(f => { return f.getFilename().includes(".testclasses."); });
-      if (hasTestFile === false) {
+      let files: readonly abaplint.ABAPFile[] = [];
+      let filename = "";
+      if (obj instanceof abaplint.Objects.Class) {
+        const hasTestFile = obj.getFiles().some(f => { return f.getFilename().includes(".testclasses."); });
+        if (hasTestFile === false) {
+          continue;
+        }
+        files = obj.getABAPFiles();
+        filename = importPath("index.mjs", this.layout.objectModule(obj, ".testclasses"));
+      } else if (obj instanceof abaplint.Objects.Program && obj.isInclude() === false) {
+        // local test classes are in the program or its includes, the includes are expanded into the program module
+        files = filesWithProgramIncludes(obj, reg);
+        filename = importPath("index.mjs", this.layout.objectModule(obj));
+      } else {
         continue;
       }
 
-      for (const file of obj.getABAPFiles()) {
+      for (const file of files) {
         for (const def of file.getInfo().listClassDefinitions()) {
           if (def.isForTesting === false
               || def.isGlobal === true
@@ -158,7 +185,7 @@ run().then(() => {
             continue;
           }
 
-          const methods = this.findTestMethods(def, obj, reg);
+          const methods = this.findTestMethods(def, files, reg);
           if (methods.length === 0) {
             // FOR TESTING helper class without test methods, nothing to run; it might also
             // live in locals_imp, which is not exported from the .testclasses module
@@ -167,7 +194,7 @@ run().then(() => {
 
           tests.push({
             obj,
-            filename: `${importPath("index.mjs", this.layout.objectModule(obj, ".testclasses"))}`,
+            filename: filename,
             localClass: def.name.toLowerCase(),
             riskLevel: def.riskLevel,
             duration: def.duration,

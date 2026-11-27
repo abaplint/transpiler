@@ -6,8 +6,16 @@ import {Chunk} from "../chunk";
 export class DeleteInternalTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    const target = traversal.traverse(node.findDirectExpression(abaplint.Expressions.Target)).getCode();
+    const targetNode = node.findDirectExpression(abaplint.Expressions.Target);
+    const target = traversal.traverse(targetNode).getCode();
     const concat = node.concatTokens().toUpperCase();
+
+    if (node.getChildren().length <= 5 && (node.getChildren().length === 3 || node.findDirectTokenByText("FROM"))
+        && concat.startsWith("DELETE TABLE ") === false && traversal.isDatabaseShortForm(targetNode)) {
+      const row = node.findExpressionAfterToken("FROM");
+      const source = row ? traversal.traverse(row).getCode() : target;
+      return new Chunk(`await abap.statements.deleteDatabase("${targetNode!.concatTokens().toLowerCase()}", {from: ${source}});`);
+    }
 
     const extra: string[] = [];
 
@@ -16,10 +24,20 @@ export class DeleteInternalTranspiler implements IStatementTranspiler {
       extra.push("where: async " + traversal.traverse(componentCond).getCode());
     }
 
-    const componentCompare = node.findDirectExpression(abaplint.Expressions.ComponentCompare);
-    if (componentCompare) {
+    // WITH TABLE KEY comp1 = a comp2 = b: one ComponentCompare per component, all of them must match
+    const componentCompares = node.findDirectExpressions(abaplint.Expressions.ComponentCompare);
+    if (componentCompares.length > 0) {
       // todo: this can be optimized, WITH TABLE KEY
-      extra.push("where: async " + traversal.traverse(componentCompare).getCode());
+      let where = traversal.traverse(componentCompares[0]).getCode();
+      if (componentCompares.length > 1) {
+        const conds = componentCompares.map(c => traversal.traverse(c).getCode()
+          .replace(/^\(I\) => \{return /, "").replace(/;\}$/, ""));
+        where = `(I) => {return ${conds.join(" && ")};}`;
+      }
+      extra.push("where: async " + where);
+      if (concat.startsWith("DELETE TABLE ")) {
+        extra.push("withTableKey: true");
+      }
     }
 
 // todo, this is not completely correct, fields might have the name ADJACENT
