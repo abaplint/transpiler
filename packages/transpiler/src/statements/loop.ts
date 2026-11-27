@@ -152,9 +152,8 @@ export class LoopTranspiler implements IStatementTranspiler {
       if (simple?.getChildren().length !== 1) {
         continue;
       }
-      const tchain = traversal.traverse(simple);
       const tsource = traversal.traverse(compare.findDirectExpression(abaplint.Expressions.Source));
-      topEquals[tchain.getCode()] = tsource.getCode();
+      topEquals[simple.concatTokens().toLowerCase()] = tsource.getCode();
     }
     if (Object.keys(topEquals).length > 0) {
       const fields: string[] = [];

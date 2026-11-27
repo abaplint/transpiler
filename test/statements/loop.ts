@@ -1852,4 +1852,62 @@ ASSERT out = |b12,Ä11,a21,a11,/a11,a21,Ä11,b12,/Ä11,b12,a21,a11,|.`;
     await f(abap);
   });
 
+  it("LOOP WHERE, components with a namespace", async () => {
+    const code = `
+TYPES: BEGIN OF ty_sub,
+         /foo/comp TYPE i,
+       END OF ty_sub.
+TYPES: BEGIN OF ty_row,
+         /foo/comp TYPE i,
+         /foo/two  TYPE i,
+         plain     TYPE i,
+         sub       TYPE ty_sub,
+       END OF ty_row.
+DATA lt TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY.
+DATA ls TYPE ty_row.
+DATA lv TYPE i VALUE 2.
+ls-/foo/comp = 1. ls-/foo/two = 10. ls-plain = 100. ls-sub-/foo/comp = 7. APPEND ls TO lt.
+ls-/foo/comp = 2. ls-/foo/two = 20. ls-plain = 200. ls-sub-/foo/comp = 8. APPEND ls TO lt.
+ls-/foo/comp = 3. ls-/foo/two = 30. ls-plain = 300. ls-sub-/foo/comp = 9. APPEND ls TO lt.
+CLEAR ls.
+LOOP AT lt INTO ls WHERE /foo/comp = lv.
+  WRITE / ls-plain.
+ENDLOOP.
+WRITE / sy-subrc.
+LOOP AT lt INTO ls WHERE /foo/comp >= lv AND /foo/two < 30 OR sub-/foo/comp = 9.
+  WRITE / ls-plain.
+ENDLOOP.
+LOOP AT lt INTO ls WHERE /foo/comp IS INITIAL.
+  WRITE / ls-plain.
+ENDLOOP.
+WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("200\n0\n200\n300\n4");
+  });
+
+  it("LOOP WHERE, sorted table with a namespaced key component", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         /foo/comp TYPE i,
+         plain     TYPE i,
+       END OF ty_row.
+DATA lt TYPE SORTED TABLE OF ty_row WITH UNIQUE KEY /foo/comp.
+DATA ls TYPE ty_row.
+DATA lv TYPE i VALUE 2.
+ls-/foo/comp = 3. ls-plain = 300. INSERT ls INTO TABLE lt.
+ls-/foo/comp = 1. ls-plain = 100. INSERT ls INTO TABLE lt.
+ls-/foo/comp = 2. ls-plain = 200. INSERT ls INTO TABLE lt.
+CLEAR ls.
+LOOP AT lt INTO ls WHERE /foo/comp = lv.
+  WRITE / ls-plain.
+ENDLOOP.
+WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("200\n0");
+  });
+
 });
