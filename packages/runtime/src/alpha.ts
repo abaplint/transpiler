@@ -7,6 +7,19 @@ export function alphaOut(source: ICharacter | INumeric): string {
   return txt.replace(/^0+/, "");
 }
 
+/** ALPHA = OUT in a string template: a text of digits loses its leading blanks and zeros,
+ * all zeros give "0", any other text is kept; the result keeps the length of the source,
+ * padded with blanks on the right */
+export function alphaOutTemplate(text: string, length: number): string {
+  if (text.match(/^ *\d+$/) !== null) {
+    text = text.replace(/^[ 0]+/, "");
+    if (text === "") {
+      text = "0";
+    }
+  }
+  return text.padEnd(length, " ");
+}
+
 export function alphaIn(source: ICharacter | INumeric | String, context: Character | String | undefined): string {
   let txt: string = source.get() + "";
 

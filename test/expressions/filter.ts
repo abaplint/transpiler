@@ -202,4 +202,28 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("1");
   });
 
+  it("FILTER and FOR ... WHERE, components with a namespace", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         /foo/comp TYPE i,
+         plain     TYPE i,
+       END OF ty_row.
+DATA lt TYPE SORTED TABLE OF ty_row WITH UNIQUE KEY /foo/comp.
+DATA ls TYPE ty_row.
+DATA lv TYPE i VALUE 2.
+ls-/foo/comp = 3. ls-plain = 300. INSERT ls INTO TABLE lt.
+ls-/foo/comp = 1. ls-plain = 100. INSERT ls INTO TABLE lt.
+ls-/foo/comp = 2. ls-plain = 200. INSERT ls INTO TABLE lt.
+CLEAR ls.
+DATA lt2 LIKE lt.
+lt2 = FILTER #( lt WHERE /foo/comp = 2 ).
+WRITE / lines( lt2 ).
+lt2 = VALUE #( FOR w IN lt WHERE ( /foo/comp >= lv ) ( w ) ).
+WRITE / lines( lt2 ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n2");
+  });
+
 });

@@ -75,4 +75,32 @@ ENDCLASS.`;
     await f(abap);
   });
 
+  it("namespaced name", async () => {
+    const code = `
+CONSTANTS /foo/lit TYPE string VALUE 'x'.
+CONSTANTS /foo/num TYPE i VALUE 5.
+CONSTANTS /foo/cat TYPE string VALUE 'a' & 'b'.
+WRITE / /foo/lit.
+WRITE / /foo/num.
+WRITE / /foo/cat.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("x\n5\nab");
+  });
+
+  it("structure, namespaced name and component", async () => {
+    const code = `
+CONSTANTS: BEGIN OF /foo/lc,
+             /foo/comp TYPE string VALUE 'ns',
+             plain     TYPE string VALUE 'pl',
+           END OF /foo/lc.
+WRITE / /foo/lc-/foo/comp.
+WRITE / /foo/lc-plain.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ns\npl");
+  });
+
 });

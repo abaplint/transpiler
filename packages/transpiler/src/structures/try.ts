@@ -3,6 +3,7 @@ import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 
+
 export class TryTranspiler implements IStructureTranspiler {
 
   public transpile(node: abaplint.Nodes.StructureNode, traversal: Traversal): Chunk {
@@ -35,17 +36,18 @@ export class TryTranspiler implements IStructureTranspiler {
 
 /////////////////////
 
+  // Built as chunks, not as strings: the bodies keep their source mappings, so a stack frame, a
+  // source map or a debugger can name an ABAP line inside a CATCH or CLEANUP block
   private buildHandlerCode(nodes: abaplint.Nodes.StructureNode[], cleanup: abaplint.Nodes.StructureNode | undefined,
                            traversal: Traversal): Chunk | undefined {
-    let ret = "";
-    let first = true;
-
     if (nodes.length === 0 && cleanup === undefined) {
       return undefined;
     }
 
-    ret += `} catch (e) {\n`;
+    const ret = new Chunk();
+    ret.appendString(`} catch (e) {\n`);
 
+    let first = true;
     for (const n of nodes) {
       const catchStatement = n.findDirectStatement(abaplint.Statements.Catch);
       if (catchStatement === undefined) {
@@ -53,50 +55,65 @@ export class TryTranspiler implements IStructureTranspiler {
       }
       const catchNames = catchStatement.findDirectExpressions(abaplint.Expressions.ClassName).map(
         e => traversal.lookupClassOrInterface(e.concatTokens(), e.getFirstToken()));
-      ret += first ? "" : " else ";
+      if (first === false) {
+        ret.appendString(" else ");
+      }
       first = false;
-      ret += "if (" + catchNames?.map(n => "(" + n + " && e instanceof " + n + ")").join(" || ") + ") {\n";
+      ret.append("if (" + catchNames?.map(n => "(" + n + " && e instanceof " + n + ")").join(" || ") + ") {\n",
+                 catchStatement, traversal);
 
       const intoNode = catchStatement.findExpressionAfterToken("INTO");
       if (intoNode) {
-        ret += traversal.traverse(intoNode).getCode() + ".set(e);\n";
+        ret.appendChunk(traversal.traverse(intoNode)).appendString(".set(e);\n");
       }
 
       const body = n.findDirectStructure(abaplint.Structures.Body);
       if (body) {
-        ret += traversal.traverse(body).getCode();
+        ret.appendChunk(traversal.traverse(body));
       }
 
-      ret += "}";
+      ret.appendString("}");
     }
 
     // unhandled in this TRY-CATCH, or a javascript runtime error
-    const unhandled = this.buildCleanupCode(cleanup, traversal) + `throw e;\n`;
-    ret += nodes.length > 0 ? ` else {\n` + unhandled + `}\n` : unhandled;
+    if (nodes.length > 0) {
+      ret.appendString(` else {\n`);
+    }
+    this.appendCleanupCode(ret, cleanup, traversal);
+    ret.appendString(`throw e;\n`);
+    if (nodes.length > 0) {
+      ret.appendString(`}\n`);
+    }
 
-    return new Chunk(ret);
+    return ret;
   }
 
   /** CLEANUP runs when a class based exception leaves the TRY block, not for an exception raised
    * in a CATCH block of the same TRY, and not for javascript runtime errors */
-  private buildCleanupCode(cleanup: abaplint.Nodes.StructureNode | undefined, traversal: Traversal): string {
+  private appendCleanupCode(ret: Chunk, cleanup: abaplint.Nodes.StructureNode | undefined, traversal: Traversal): void {
     if (cleanup === undefined) {
-      return "";
+      return;
     }
     const cxRoot = traversal.lookupClassOrInterface("CX_ROOT", cleanup.getFirstToken());
-    let ret = `if (${cxRoot} && e instanceof ${cxRoot}) {\n`;
+    const cleanupStatement = cleanup.findDirectStatement(abaplint.Statements.Cleanup);
+    const head = `if (${cxRoot} && e instanceof ${cxRoot}) {\n`;
+    if (cleanupStatement) {
+      ret.append(head, cleanupStatement, traversal);
+    } else {
+      ret.appendString(head);
+    }
 
-    const intoNode = cleanup.findDirectStatement(abaplint.Statements.Cleanup)?.findExpressionAfterToken("INTO");
+    const intoNode = cleanupStatement?.findExpressionAfterToken("INTO");
     if (intoNode) {
-      ret += traversal.traverse(intoNode).getCode() + ".set(e);\n";
+      ret.appendChunk(traversal.traverse(intoNode)).appendString(".set(e);\n");
     }
 
     const body = cleanup.findDirectStructure(abaplint.Structures.Body);
     if (body) {
-      ret += traversal.traverse(body).getCode();
+      ret.appendChunk(traversal.traverse(body));
     }
 
-    return ret + `}\n`;
+    ret.appendString(`}\n`);
   }
 
 }

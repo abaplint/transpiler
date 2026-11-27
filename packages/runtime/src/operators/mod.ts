@@ -1,11 +1,25 @@
 import {throwError} from "../throw_error";
-import {Float, Integer, Integer8} from "../types";
+import {FieldSymbol, Float, Integer, Integer8, Packed} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
+import {asFloat, isFloatWithInteger8} from "./_float_integer8";
+import {packedCalculation} from "./_packed";
 
 export function mod(left: INumeric | ICharacter | string | Integer8 | number, right: INumeric | Integer8 | ICharacter | string | number) {
+  // a p operand: the remainder keeps its decimals, 2.50 MOD 2 is 0.50
+  if (left instanceof Packed || right instanceof Packed
+      || (left instanceof FieldSymbol && left.getPointer() instanceof Packed)
+      || (right instanceof FieldSymbol && right.getPointer() instanceof Packed)) {
+    const packed = packedCalculation("MOD", left, right);
+    if (packed !== undefined) {
+      return packed;
+    }
+  }
   if (left instanceof Integer8 || right instanceof Integer8) {
+    if (isFloatWithInteger8(left, right)) {
+      return mod(asFloat(left), asFloat(right));
+    }
     const l = left instanceof Integer8 ? left.get() : BigInt(parse(left));
     const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));
     if (r === 0n) {

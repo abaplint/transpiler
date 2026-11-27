@@ -47,7 +47,8 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
       ret += `  const ${internalName} = await abap.Classes['KERNEL_INTERNAL_NAME'].rtti_to_internal({iv_rtti: ${name}});\n`;
       ret += `  ${id} = abap.Classes[${internalName}.get().trimEnd()];\n`;
       ret += `}\n`;
-      ret += `if (${id} === undefined) { throw new ${cx}; }\n`;
+      const cxParameters = `{classname: new abap.types.String().set(${name}.trimEnd())}`;
+      ret += `if (${id} === undefined) { throw await new ${cx}().constructor_(${cxParameters}); }\n`;
       // ...and it has to be compatible with the STATIC type of the target.
       // A system raises CX_SY_CREATE_OBJECT_ERROR for a class that is not,
       // before the constructor runs; without this the class was assigned to
@@ -58,7 +59,7 @@ export class CreateObjectTranspiler implements IStatementTranspiler {
       const staticName = this.findTargetTypeName(node, traversal);
       if (staticName !== undefined) {
         const staticType = traversal.lookupClassOrInterface(staticName, node.getFirstToken());
-        ret += `abap.statements.checkCreateObjectType(${id}, ${staticType}, "${staticName.toUpperCase()}");\n`;
+        ret += `await abap.statements.checkCreateObjectType(${id}, ${staticType}, "${staticName.toUpperCase()}", ${name}.trimEnd());\n`;
       }
       clas = id;
     }
