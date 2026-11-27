@@ -115,7 +115,7 @@ export class ReadTableTranspiler implements IStatementTranspiler {
           } else {
             // WITH TABLE KEY ('LITERAL') = value
             key = key.substring(2, key.length - 2);
-            field = "i." + key;
+            field = Traversal.isBracketComponent(key) ? "i[" + JSON.stringify(key) + "]" : "i." + key;
           }
         } else if (left.get() instanceof abaplint.Expressions.ComponentChainSimple
             && left instanceof abaplint.Nodes.ExpressionNode) {
