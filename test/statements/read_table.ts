@@ -2081,4 +2081,125 @@ WRITE / row-name.`;
     expect(abap.console.get()).to.equal("0\nforty");
   });
 
+  it("READ TABLE WITH KEY, components with a namespace", async () => {
+    const code = `
+TYPES: BEGIN OF ty_sub,
+         /foo/comp TYPE i,
+       END OF ty_sub.
+TYPES: BEGIN OF ty_row,
+         /foo/comp TYPE i,
+         /foo/two  TYPE i,
+         plain     TYPE i,
+         sub       TYPE ty_sub,
+       END OF ty_row.
+DATA lt TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY.
+DATA ls TYPE ty_row.
+DATA lv TYPE i VALUE 2.
+ls-/foo/comp = 1. ls-/foo/two = 10. ls-plain = 100. ls-sub-/foo/comp = 7. APPEND ls TO lt.
+ls-/foo/comp = 2. ls-/foo/two = 20. ls-plain = 200. ls-sub-/foo/comp = 8. APPEND ls TO lt.
+ls-/foo/comp = 3. ls-/foo/two = 30. ls-plain = 300. ls-sub-/foo/comp = 9. APPEND ls TO lt.
+CLEAR ls.
+READ TABLE lt INTO ls WITH KEY /foo/comp = lv.
+WRITE / sy-subrc.
+WRITE / ls-plain.
+READ TABLE lt INTO ls WITH KEY /foo/comp = 3 /foo/two = 30.
+WRITE / ls-plain.
+READ TABLE lt INTO ls WITH KEY sub-/foo/comp = 7.
+WRITE / ls-plain.
+READ TABLE lt TRANSPORTING NO FIELDS WITH KEY /foo/comp = lv BINARY SEARCH.
+WRITE / sy-tabix.
+READ TABLE lt INTO ls WITH KEY /foo/comp = 4.
+WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n200\n300\n100\n2\n4");
+  });
+
+  it("READ TABLE, sorted table with a namespaced key component", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         /foo/comp TYPE i,
+         plain     TYPE i,
+       END OF ty_row.
+DATA lt TYPE SORTED TABLE OF ty_row WITH UNIQUE KEY /foo/comp.
+DATA ls TYPE ty_row.
+DATA lv TYPE i VALUE 2.
+ls-/foo/comp = 3. ls-plain = 300. INSERT ls INTO TABLE lt.
+ls-/foo/comp = 1. ls-plain = 100. INSERT ls INTO TABLE lt.
+ls-/foo/comp = 2. ls-plain = 200. INSERT ls INTO TABLE lt.
+CLEAR ls.
+READ TABLE lt INTO ls WITH TABLE KEY /foo/comp = lv.
+WRITE / sy-subrc.
+WRITE / ls-plain.
+READ TABLE lt INTO ls WITH KEY /foo/comp = 3.
+WRITE / ls-plain.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n200\n300");
+  });
+
+  it("READ TABLE WITH KEY, the component name as a literal, with a namespace or a leading digit", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         /foo/comp TYPE i,
+         1st       TYPE i,
+         plain     TYPE i,
+       END OF ty_row.
+DATA lt TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY.
+DATA ls TYPE ty_row.
+DATA lv TYPE i VALUE 2.
+ls-/foo/comp = 1. ls-1st = 10. ls-plain = 100. APPEND ls TO lt.
+ls-/foo/comp = 2. ls-1st = 20. ls-plain = 200. APPEND ls TO lt.
+ls-/foo/comp = 3. ls-1st = 30. ls-plain = 300. APPEND ls TO lt.
+CLEAR ls.
+READ TABLE lt INTO ls WITH KEY ('/FOO/COMP') = lv.
+WRITE / sy-subrc.
+WRITE / ls-plain.
+READ TABLE lt INTO ls WITH KEY ('/foo/comp') = 3 plain = 300.
+WRITE / ls-plain.
+READ TABLE lt INTO ls WITH KEY ('1ST') = 10 ('/FOO/COMP') = 1.
+WRITE / ls-plain.
+READ TABLE lt TRANSPORTING NO FIELDS WITH KEY ('/FOO/COMP') = lv BINARY SEARCH.
+WRITE / sy-tabix.
+READ TABLE lt INTO ls WITH KEY ('/FOO/COMP') = 2 plain = 300.
+WRITE / sy-subrc.
+READ TABLE lt INTO ls WITH KEY ('PLAIN') = 200.
+WRITE / ls-1st.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n200\n300\n100\n2\n4\n20");
+  });
+
+  it("READ TABLE WITH TABLE KEY, a namespaced key component named by a literal, sorted and hashed", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         /foo/comp TYPE i,
+         plain     TYPE i,
+       END OF ty_row.
+DATA lt_sorted TYPE SORTED TABLE OF ty_row WITH UNIQUE KEY /foo/comp.
+DATA lt_hashed TYPE HASHED TABLE OF ty_row WITH UNIQUE KEY /foo/comp plain.
+DATA ls TYPE ty_row.
+ls-/foo/comp = 3. ls-plain = 300. INSERT ls INTO TABLE lt_sorted. INSERT ls INTO TABLE lt_hashed.
+ls-/foo/comp = 1. ls-plain = 100. INSERT ls INTO TABLE lt_sorted. INSERT ls INTO TABLE lt_hashed.
+ls-/foo/comp = 2. ls-plain = 200. INSERT ls INTO TABLE lt_sorted. INSERT ls INTO TABLE lt_hashed.
+CLEAR ls.
+READ TABLE lt_sorted INTO ls WITH TABLE KEY ('/FOO/COMP') = 2.
+WRITE / sy-subrc.
+WRITE / ls-plain.
+READ TABLE lt_sorted INTO ls WITH KEY ('/FOO/COMP') = 3.
+WRITE / ls-plain.
+READ TABLE lt_hashed INTO ls WITH TABLE KEY ('/FOO/COMP') = 1 ('PLAIN') = 100.
+WRITE / sy-subrc.
+WRITE / ls-plain.
+READ TABLE lt_hashed INTO ls WITH TABLE KEY ('/FOO/COMP') = 1 ('PLAIN') = 200.
+WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n200\n300\n0\n100\n4");
+  });
+
 });

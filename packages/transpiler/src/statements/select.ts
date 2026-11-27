@@ -23,7 +23,9 @@ export class SelectTranspiler implements IStatementTranspiler {
     } else if (node.findDirectTokenByText("DISTINCT") !== undefined) {
       throw new Error("SelectTranspiler, UNION DISTINCT todo");
     } else if (node.findDirectExpression(abaplint.Expressions.Select)?.findDirectTokenByText("UPDATE") !== undefined) {
-      return new Chunk(`throw new Error("SELECT SINGLE FOR UPDATE, not supported, transpiler");`);
+      // no row lock is requested from the database, the statement runs as the SELECT SINGLE without the addition
+      console.warn(traversal.getFilename() + ":" + node.getFirstToken().getStart().getRow() +
+        ": warning, SELECT SINGLE FOR UPDATE, the row lock is not taken, transpiled as SELECT SINGLE");
     }
 
     let target = "undefined";
@@ -183,6 +185,11 @@ abap.statements.sort(${target}, {by: ${by}.map(k => { return {component: k}; })}
 await abap.statements.deleteInternal(${target}, {adjacent: true, allFields: true});
 }`;
 
+      // the last SELECT of the loop and the de-duplicating DELETE both set
+      // sy-subrc; the statement as a whole found rows or it did not
+      const found = `abap.builtin.sy.get().dbcnt.set(${target}.getArrayLength());
+abap.builtin.sy.get().subrc.set(${target}.getArrayLength() === 0 ? 4 : 0);`;
+
       const at = where.startsWith("WHERE ") ? select.indexOf(where) : -1;
       // UP TO with ORDER BY keeps the first n rows in that order; the blocks
       // trim after the de-duplicating sort, so that pair stays row by row
@@ -196,7 +203,7 @@ for await (const ${unique} of ${unique2}) {
 await abap.statements.select(${target}, {select: "${select.trim()}"${extra}}, {${appendingOptions}});
 }
 ${dedup}
-abap.builtin.sy.get().dbcnt.set(${target}.getArrayLength());
+${found}
 }`;
         return new Chunk().append(code, node, traversal);
       }
@@ -246,7 +253,7 @@ ${target}.deleteIndex(${target}.getArrayLength() - 1);
 }
 }
 }
-abap.builtin.sy.get().dbcnt.set(${target}.getArrayLength());
+${found}
 }`;
       return new Chunk().append(code, node, traversal);
     } else {
