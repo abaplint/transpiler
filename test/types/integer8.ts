@@ -44,7 +44,56 @@ describe("Running Examples - Integer8 type", () => {
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
     await f(abap);
-    expect(abap.console.get()).to.equal("9219994337134247936");
+    expect(abap.console.get()).to.equal("9219994337134247936 ");
+  });
+
+  it("int8 to string and c, sign last as for i", async () => {
+    const code = `
+DATA i8 TYPE int8.
+DATA s TYPE string.
+DATA c10 TYPE c LENGTH 10.
+DATA c20 TYPE c LENGTH 20.
+
+i8 = -3.
+s = i8.
+WRITE / |[{ s }]|.
+c10 = i8.
+WRITE / |[{ c10 }]|.
+i8 = 3.
+s = i8.
+WRITE / |[{ s }]|.
+c10 = i8.
+WRITE / |[{ c10 }]|.
+WRITE / |[{ strlen( c10 ) }]|.
+i8 = 0.
+s = i8.
+WRITE / |[{ s }]|.
+i8 = '-9223372036854775808'.
+s = i8.
+WRITE / |[{ s }]|.
+c20 = i8.
+WRITE / |[{ c20 }]|.
+i8 = '9223372036854775807'.
+s = i8.
+WRITE / |[{ s }]|.
+c20 = i8.
+WRITE / |[{ c20 }]|.
+i8 = -3.
+WRITE / |[{ i8 }]|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal(`[3-]
+[        3-]
+[3 ]
+[        3]
+[9]
+[0 ]
+[9223372036854775808-]
+[9223372036854775808-]
+[9223372036854775807 ]
+[9223372036854775807]
+[-3]`);
   });
 
   it("int8 from float", async () => {
@@ -700,4 +749,271 @@ describe("Running Examples - Integer8 type", () => {
     expect(abap.console.get()).to.equal("430656791676715017");
   });
 
+  it("int8 from packed with decimals, rounded half away from zero", async () => {
+    const code = `
+    DATA p TYPE p LENGTH 10 DECIMALS 2.
+    DATA int8 TYPE int8.
+    p = '2.5'.
+    int8 = p.
+    WRITE / int8.
+    p = '-2.5'.
+    int8 = p.
+    WRITE / int8.
+    p = '2.49'.
+    int8 = p.
+    WRITE / int8.
+    p = '3.5'.
+    int8 = p.
+    WRITE / int8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3\n-3\n2\n4");
+  });
+
+  it("int8 from packed, exact beyond the precision of a double", async () => {
+    const code = `
+    DATA p TYPE p LENGTH 16 DECIMALS 1.
+    DATA int8 TYPE int8.
+    p = '1234567890123456789.5'.
+    int8 = p.
+    WRITE / int8.
+    p = '-1234567890123456789.4'.
+    int8 = p.
+    WRITE / int8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1234567890123456790\n-1234567890123456789");
+  });
+
+  it("int8 from float with decimals, rounded half away from zero", async () => {
+    const code = `
+    DATA float TYPE f.
+    DATA int8 TYPE int8.
+    float = '2.5'.
+    int8 = float.
+    WRITE / int8.
+    float = '-2.5'.
+    int8 = float.
+    WRITE / int8.
+    float = '0.5'.
+    int8 = float.
+    WRITE / int8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3\n-3\n1");
+  });
+
+  it("int8 from decfloat34 with decimals, rounded half away from zero", async () => {
+    const code = `
+    DATA dec TYPE decfloat34.
+    DATA int8 TYPE int8.
+    dec = '2.5'.
+    int8 = dec.
+    WRITE / int8.
+    dec = '-2.5'.
+    int8 = dec.
+    WRITE / int8.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3\n-3");
+  });
+
+  it("int8 to xstring", async () => {
+    const code = `
+DATA lv_value TYPE int8.
+DATA lv_data TYPE xstring.
+lv_value = 255.
+lv_data = lv_value.
+WRITE / lv_data.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("FF");
+  });
+
+  it("int8 compared with x: the x field is converted to int8", async () => {
+    const code = `
+  DATA i8 TYPE int8.
+  DATA x8 TYPE x LENGTH 8 VALUE 'FFFFFFFFFFFFFFFE'.
+  DATA x2 TYPE x LENGTH 2 VALUE 'FFFE'.
+  i8 = 0.
+  IF i8 > x8. WRITE / 'gt'. ELSE. WRITE / 'not gt'. ENDIF.
+  IF i8 = x8. WRITE / 'eq'. ELSE. WRITE / 'not eq'. ENDIF.
+  IF i8 < x8. WRITE / 'lt'. ELSE. WRITE / 'not lt'. ENDIF.
+  IF x8 < i8. WRITE / 'x lt'. ELSE. WRITE / 'x not lt'. ENDIF.
+  i8 = -2.
+  IF i8 = x8. WRITE / 'eq -2'. ELSE. WRITE / 'not eq -2'. ENDIF.
+  i8 = 65534.
+  IF i8 = x2. WRITE / 'eq x2'. ELSE. WRITE / 'not eq x2'. ENDIF.
+  i8 = 1000000000000.
+  x8 = '00000000000000FF'.
+  IF i8 > x8. WRITE / 'gt ff'. ELSE. WRITE / 'not gt ff'. ENDIF.
+  x8 = '7FFFFFFFFFFFFFFF'.
+  i8 = 9223372036854775807.
+  IF i8 = x8. WRITE / 'eq max'. ELSE. WRITE / 'not eq max'. ENDIF.
+  i8 = 9223372036854775806.
+  IF x8 > i8. WRITE / 'x gt'. ELSE. WRITE / 'x not gt'. ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("gt\nnot eq\nnot lt\nx lt\neq -2\neq x2\ngt ff\neq max\nx gt");
+  });
+
+  it("text to n to int8, exact above 2^53", async () => {
+    const code = `
+  DATA i8 TYPE int8.
+  DATA n10 TYPE n LENGTH 10.
+  DATA n20 TYPE n LENGTH 20.
+  DATA c20 TYPE c LENGTH 20 VALUE '12345678901234567891'.
+  n20 = '09223372036854775807'.
+  WRITE / n20.
+  i8 = n20.
+  WRITE / |{ i8 }|.
+  n20 = '00009007199254740993'.
+  i8 = n20.
+  WRITE / |{ i8 }|.
+  n10 = '0000000042'.
+  i8 = n10.
+  WRITE / |{ i8 }|.
+  n20 = c20.
+  WRITE / n20.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("09223372036854775807\n9223372036854775807\n9007199254740993\n42\n12345678901234567891");
+  });
+
+  it("int8 to numc, the absolute value, exact", async () => {
+    const code = `
+  DATA i8 TYPE int8.
+  DATA n10 TYPE n LENGTH 10.
+  DATA n20 TYPE n LENGTH 20.
+  i8 = -3.
+  n10 = i8.
+  WRITE / n10.
+  i8 = 9223372036854775807.
+  n20 = i8.
+  WRITE / n20.
+  i8 = 9007199254740993.
+  n20 = i8.
+  WRITE / n20.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0000000003\n09223372036854775807\n00009007199254740993");
+  });
+
+  it("int8 to a short numc keeps the rightmost digits", async () => {
+    const code = `
+  DATA i8 TYPE int8.
+  DATA n3 TYPE n LENGTH 3.
+  i8 = 12345.
+  n3 = i8.
+  WRITE / n3.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("345");
+  });
+
+  it("hex to int8, the last eight bytes, two's complement", async () => {
+    const code = `
+  DATA lv_xstr TYPE xstring.
+  DATA lv_x2 TYPE x LENGTH 2 VALUE 'FFFE'.
+  DATA lv_x9 TYPE x LENGTH 9 VALUE '0AAAAAAAAAAAAAAAAA'.
+  DATA lv_x10 TYPE x LENGTH 10 VALUE 'FFFF7FFFFFFFFFFFFFFF'.
+  DATA lv_int8 TYPE int8.
+
+  lv_xstr = '0AAAAAAAAAAAAAAAAA'.
+  lv_int8 = lv_xstr.
+  ASSERT lv_int8 = -6148914691236517206.
+  lv_xstr = 'FF0000000000000001'.
+  lv_int8 = lv_xstr.
+  ASSERT lv_int8 = 1.
+  lv_xstr = '0102030405060708090A'.
+  lv_int8 = lv_xstr.
+  ASSERT lv_int8 = 217304205466536202.
+  lv_xstr = 'FFFFFFFF'.
+  lv_int8 = lv_xstr.
+  ASSERT lv_int8 = 4294967295.
+  CLEAR lv_xstr.
+  lv_int8 = 5.
+  lv_int8 = lv_xstr.
+  ASSERT lv_int8 = 0.
+  lv_int8 = lv_x2.
+  ASSERT lv_int8 = 65534.
+  lv_int8 = lv_x9.
+  ASSERT lv_int8 = -6148914691236517206.
+  lv_int8 = lv_x10.
+  ASSERT lv_int8 = 9223372036854775807.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("int8 to x, right aligned: a short target keeps the last bytes, a long one is zero padded on the left", async () => {
+    const code = `
+  DATA lv_int8 TYPE int8.
+  DATA lv_x2 TYPE x LENGTH 2.
+  DATA lv_x4 TYPE x LENGTH 4.
+  DATA lv_x8 TYPE x LENGTH 8.
+  DATA lv_x16 TYPE x LENGTH 16.
+
+  lv_int8 = 72623859790382856.
+  lv_x2 = lv_int8.
+  lv_x4 = lv_int8.
+  lv_x8 = lv_int8.
+  lv_x16 = lv_int8.
+  ASSERT lv_x2 = '0708'.
+  ASSERT lv_x4 = '05060708'.
+  ASSERT lv_x8 = '0102030405060708'.
+  ASSERT lv_x16 = '00000000000000000102030405060708'.
+
+  lv_int8 = 9223372036854775807.
+  lv_x2 = lv_int8.
+  lv_x4 = lv_int8.
+  lv_x16 = lv_int8.
+  ASSERT lv_x2 = 'FFFF'.
+  ASSERT lv_x4 = 'FFFFFFFF'.
+  ASSERT lv_x16 = '00000000000000007FFFFFFFFFFFFFFF'.
+
+  lv_int8 = -2.
+  lv_x2 = lv_int8.
+  lv_x4 = lv_int8.
+  lv_x8 = lv_int8.
+  lv_x16 = lv_int8.
+  ASSERT lv_x2 = 'FFFE'.
+  ASSERT lv_x4 = 'FFFFFFFE'.
+  ASSERT lv_x8 = 'FFFFFFFFFFFFFFFE'.
+  ASSERT lv_x16 = '0000000000000000FFFFFFFFFFFFFFFE'.
+
+  lv_int8 = -9223372036854775808.
+  lv_x2 = lv_int8.
+  lv_x16 = lv_int8.
+  ASSERT lv_x2 = '0000'.
+  ASSERT lv_x16 = '00000000000000008000000000000000'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("to c too short, the right end is kept with *", async () => {
+    const code = `
+    DATA lv_a TYPE int8.
+    DATA lv_c TYPE c LENGTH 4.
+    lv_a = -9007199254740993.
+    lv_c = lv_a.
+    WRITE / |[{ lv_c }]|.
+    lv_a = 123456.
+    lv_c = lv_a.
+    WRITE / |[{ lv_c }]|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("[*93-]\n[*456]");
+  });
 });

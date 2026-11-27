@@ -7,6 +7,7 @@ import {FieldAssignmentTranspiler} from "./field_assignment";
 import {FieldSymbolTranspiler} from "../statements";
 import {SourceFieldSymbolTranspiler} from "./source_field_symbol";
 import {LetTranspiler} from "./let";
+import {ForGroupsTranspiler} from "./for_groups";
 
 export class ValueBodyTranspiler {
 
@@ -126,7 +127,22 @@ export class ValueBodyTranspiler {
 
     for (const child of forNodes) {
       const loop = child.findDirectExpression(Expressions.InlineLoopDefinition);
-      if (loop) {
+      if (child.findDirectTokenByText("GROUPS")) {
+        const groups = new ForGroupsTranspiler().transpile(child, traversal);
+        preLoopDecls.push(...groups.declarations);
+        const preBody = [...groups.preBody];
+        const llet = child.findDirectExpression(Expressions.Let);
+        if (llet) {
+          preBody.push(new LetTranspiler().transpile(llet, traversal).getCode());
+        }
+        descriptors.push({
+          beforeLoop: [],
+          open: groups.open,
+          preBody,
+          postBody: [],
+          close: groups.close,
+        });
+      } else if (loop) {
         if (["THEN", "UNTIL", "WHILE", "FROM", "TO", "GROUPS"].some(token => child.findDirectTokenByText(token))) {
           throw new Error("ValueBody FOR todo, " + body.concatTokens());
         }

@@ -52,10 +52,26 @@ CLASS lcl DEFINITION.
 ENDCLASS.
 DATA first TYPE ty_bad.
 DATA second TYPE ty_bad.`;
-    const output = await runSingle(abap, {...options, sharedTypeFactories: true});
+    const output = await runSingle(abap, options);
     expect(output).not.to.include("function $t_");
-    expect(output).to.include("static ATTRIBUTES = {}");
+    expect(output).to.include(`static ATTRIBUTES = {"BAD": {"type": () => {return new abap.types.Structure({`);
     expect(output).to.include('throw new Error("Void type: ZCL_MISSING")');
+  });
+
+  it("missing method implementation is not a compile error", async () => {
+    const abap = `INTERFACE lif.
+  METHODS foo.
+ENDINTERFACE.
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+    METHODS bar.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.`;
+    const output = await runSingle(abap, options);
+    expect(output).to.include("class lcl");
+    expect(output).not.to.include("lif$foo");
   });
 
 });

@@ -216,4 +216,35 @@ describe("Running Examples - Integer type", () => {
     await f(abap);
     expect(abap.console.get()).to.equal("1");
   });
+
+  it("to c too short, the right end is kept with *", async () => {
+    const code = `
+    DATA lv_a TYPE i VALUE 12345.
+    DATA lv_c1 TYPE c LENGTH 1.
+    DATA lv_c2 TYPE c LENGTH 2.
+    DATA lv_c4 TYPE c LENGTH 4.
+    DATA lv_c5 TYPE c LENGTH 5.
+    DATA lv_c6 TYPE c LENGTH 6.
+    lv_c2 = lv_a.
+    WRITE / |[{ lv_c2 }]|.
+    lv_c4 = lv_a.
+    WRITE / |[{ lv_c4 }]|.
+    lv_c5 = lv_a.
+    WRITE / |[{ lv_c5 }]|.
+    lv_a = -1234.
+    lv_c4 = lv_a.
+    WRITE / |[{ lv_c4 }]|.
+    lv_c5 = lv_a.
+    WRITE / |[{ lv_c5 }]|.
+    lv_a = -15.
+    lv_c6 = lv_a.
+    WRITE / |[{ lv_c6 }]|.
+    lv_a = 5.
+    lv_c1 = lv_a.
+    WRITE / |[{ lv_c1 }]|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("[*5]\n[*345]\n[12345]\n[*34-]\n[1234-]\n[   15-]\n[5]");
+  });
 });

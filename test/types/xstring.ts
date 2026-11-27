@@ -157,4 +157,29 @@ WRITE xstr+2(3).`;
     }
   });
 
+  it("negative i to xstring, the four bytes in two's complement", async () => {
+    const code = `
+DATA lv_int TYPE i.
+DATA lv_xstr TYPE xstring.
+lv_int = -1.
+lv_xstr = lv_int.
+WRITE / lv_xstr.
+lv_int = -129.
+lv_xstr = lv_int.
+WRITE / lv_xstr.
+lv_int = -2147483648.
+lv_xstr = lv_int.
+WRITE / lv_xstr.
+lv_int = 255.
+lv_xstr = lv_int.
+WRITE / lv_xstr.
+lv_int = 2147483647.
+lv_xstr = lv_int.
+WRITE / lv_xstr.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("FFFFFFFF\nFFFFFF7F\n80000000\nFF\n7FFFFFFF");
+  });
+
 });

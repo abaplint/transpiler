@@ -16,9 +16,10 @@ const DECFLOAT = 4;
  * p before int8 before i. So nmin( val1 = i1 val2 = i2 ) is an i, which DO
  * nmin( ... ) TIMES and every other integer position rely on, and a p result
  * keeps the most decimals of its arguments. */
-export function extremum(args: ExtremumArgument[], isBetter: (candidate: number, best: number) => boolean) {
+export function extremum(args: ExtremumArgument[], isBetter: (candidate: number | bigint, best: number | bigint) => boolean) {
   let best: number | INumeric | undefined = undefined;
-  let bestValue = 0;
+  // an int8 is compared as a bigint, a number would lose precision above 2^53
+  let bestValue: number | bigint = 0;
   let type = INT;
   let decimals = 0;
 
@@ -46,7 +47,7 @@ export function extremum(args: ExtremumArgument[], isBetter: (candidate: number,
       type = Math.max(type, FLOAT);
     }
 
-    const value = parse(arg as any);
+    const value = arg instanceof Integer8 ? arg.get() : parse(arg as any);
     if (best === undefined || isBetter(value, bestValue)) {
       best = arg;
       bestValue = value;
@@ -57,19 +58,19 @@ export function extremum(args: ExtremumArgument[], isBetter: (candidate: number,
     case DECFLOAT:
       return new DecFloat34().set(bestValue);
     case FLOAT:
-      return new Float().set(bestValue);
+      return new Float().set(Number(bestValue));
     case PACKED:
       if (best instanceof Packed) {
         // through the digits, not through a binary float
         return new Packed({length: 16, decimals}).set(best.toFixed(best.getDecimals()));
       }
-      return new Packed({length: 16, decimals}).set(bestValue);
+      return new Packed({length: 16, decimals}).set(typeof bestValue === "bigint" ? bestValue.toString() : bestValue);
     case INT8:
       if (best instanceof Integer8) {
         return new Integer8().set(best.get());
       }
       return new Integer8().set(bestValue);
     default:
-      return new Integer().set(bestValue);
+      return new Integer().set(Number(bestValue));
   }
 }
