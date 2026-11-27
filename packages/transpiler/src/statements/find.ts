@@ -34,31 +34,36 @@ export class FindTranspiler implements IStatementTranspiler {
       options.push("byteMode: true");
     }
 
-    if (concat.includes(" IN SECTION OFFSET")) {
-      options.push("sectionOffset: " + traversal.traverse(sources[1]).getCode());
-      index++;
-    }
-
-    const source1 = traversal.traverse(sources[index]).getCode();
-
+    // IN SECTION [OFFSET off] [LENGTH len] OF dobj: the section sources come before the data object,
+    // and LENGTH followed by a Source is the section length, MATCH LENGTH is followed by a Target
+    const inSection = concat.includes(" IN SECTION ");
     let prev = undefined;
     let off: abaplint.Nodes.ExpressionNode | abaplint.Nodes.TokenNode | undefined;
+    let len: abaplint.Nodes.ExpressionNode | abaplint.Nodes.TokenNode | undefined;
     for (const c of node.getChildren()) {
-      if (prev?.getFirstToken().getStr().toUpperCase() === "OFFSET"
-          && c.get() instanceof abaplint.Expressions.Target) {
+      const prevToken = prev?.getFirstToken().getStr().toUpperCase();
+      if (inSection && prevToken === "OFFSET" && c.get() instanceof abaplint.Expressions.Source) {
+        options.push("sectionOffset: " + traversal.traverse(c).getCode());
+        index++;
+      } else if (inSection && prevToken === "LENGTH" && c.get() instanceof abaplint.Expressions.Source) {
+        options.push("sectionLength: " + traversal.traverse(c).getCode());
+        index++;
+      } else if (prevToken === "OFFSET" && c.get() instanceof abaplint.Expressions.Target && off === undefined) {
         options.push("offset: " + traversal.traverse(c).getCode());
         off = c;
-        break;
+      } else if (prevToken === "LENGTH" && c.get() instanceof abaplint.Expressions.Target && len === undefined) {
+        len = c;
       }
       prev = c;
     }
+
+    const source1 = traversal.traverse(sources[index]).getCode();
 
     const cnt = node.findExpressionAfterToken("COUNT");
     if (cnt) {
       options.push("count: " + traversal.traverse(cnt).getCode());
     }
 
-    const len = node.findExpressionAfterToken("LENGTH");
     if (len) {
       options.push("length: " + traversal.traverse(len).getCode());
     }
