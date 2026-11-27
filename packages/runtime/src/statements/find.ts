@@ -19,6 +19,7 @@ export type IFindOptions = IRegexOptions & {
   first?: boolean,
   offset?: INumeric,
   sectionOffset?: INumeric,
+  sectionLength?: INumeric,
   byteMode?: boolean,
   length?: INumeric,
   count?: INumeric,
@@ -31,6 +32,10 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
   let sectionOffset = options.sectionOffset?.get();
   if (sectionOffset && options.byteMode) {
     sectionOffset = sectionOffset * 2;
+  }
+  let sectionLength = options.sectionLength?.get();
+  if (sectionLength !== undefined && options.byteMode) {
+    sectionLength = sectionLength * 2;
   }
 
   let s: ICharacter | string | RegExp = "";
@@ -84,6 +89,13 @@ export function find(input: ICharacter | Table, options: IFindOptions) {
       if (sectionOffset > blah.length) {
         throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
       }
+    }
+    if (sectionLength !== undefined) {
+      if (sectionLength < 0 || (sectionOffset || 0) + sectionLength > blah.length) {
+        throwError("CX_SY_RANGE_OUT_OF_BOUNDS");
+      }
+      blah = blah.substr(sectionOffset || 0, sectionLength);
+    } else if (sectionOffset) {
       blah = blah.substr(sectionOffset);
     }
 

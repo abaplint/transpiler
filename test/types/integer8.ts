@@ -955,6 +955,36 @@ WRITE / lv_data.`;
     await f(abap);
   });
 
+  it("VALUE literals above 2^53, exact", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CONSTANTS c_max TYPE int8 VALUE 9223372036854775807.
+    CLASS-DATA s_neg TYPE int8 VALUE -9007199254740993.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+FORM value_literal.
+  DATA lv_neg TYPE int8 VALUE -9223372036854775807.
+  CONSTANTS lc TYPE int8 VALUE 9007199254740993.
+  DATA lv_p TYPE p LENGTH 16 VALUE 12345678901234567891.
+  WRITE / |{ lcl=>c_max }|.
+  WRITE / |{ lcl=>s_neg }|.
+  WRITE / |{ lv_neg }|.
+  WRITE / |{ lc }|.
+  WRITE / |{ lv_p }|.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM value_literal.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(
+      "9223372036854775807\n-9007199254740993\n-9223372036854775807\n9007199254740993\n12345678901234567891");
+  });
+
   it("int8 to x, right aligned: a short target keeps the last bytes, a long one is zero padded on the left", async () => {
     const code = `
   DATA lv_int8 TYPE int8.

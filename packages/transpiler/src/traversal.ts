@@ -1282,7 +1282,9 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
 
     const handle = (val: any, name: string) => {
       if (typeof val === "string") {
-        const e = ConstantTranspiler.escape(ConstantTranspiler.trimTextFieldLiteral(val));
+        const e = /^\s*[+-]?\s*\d+\s*$/.test(val)
+          ? ConstantTranspiler.integerValue(val)
+          : ConstantTranspiler.escape(ConstantTranspiler.trimTextFieldLiteral(val));
         ret += name + ".set(" + e + ");\n";
       } else if (typeof val === "object") {
         const a: any = val;
