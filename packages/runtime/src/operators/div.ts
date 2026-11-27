@@ -1,12 +1,17 @@
+import {int8Result} from "../types/integer8";
 import {throwError} from "../throw_error";
 import {Integer, Integer8} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {parse} from "./_parse";
+import {asFloat, isFloatWithInteger8} from "./_float_integer8";
 import {checkDivisor, isPackedCalculation, packedResult, toDecimal} from "./_decfloat";
 import {divDecimal} from "../types/_decimal";
 
 export function div(left: INumeric | ICharacter | Integer8 | string | number, right: INumeric | Integer8 | ICharacter | string | number) {
+  if (isFloatWithInteger8(left, right)) {
+    return div(asFloat(left), asFloat(right));
+  }
   if (left instanceof Integer8 || right instanceof Integer8) {
     const l = left instanceof Integer8 ? left.get() : BigInt(parse(left));
     const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));
@@ -25,7 +30,7 @@ export function div(left: INumeric | ICharacter | Integer8 | string | number, ri
     if (remainder < 0n) {
       div = r > 0n ? div - 1n : div + 1n;
     }
-    return new Integer8().set(div);
+    return int8Result(div);
   }
 
   if (isPackedCalculation(left, right)) {

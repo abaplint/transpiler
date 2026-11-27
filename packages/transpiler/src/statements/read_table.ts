@@ -58,6 +58,35 @@ export class ReadTableTranspiler implements IStatementTranspiler {
       }
     }
 
+    // COMPARING comp1 comp2 ... | ALL FIELDS, TRANSPORTING comp1 comp2 ...
+    const children = node.getChildren();
+    const comparingAt = children.findIndex(c => c instanceof abaplint.Nodes.TokenNode && c.concatTokens().toUpperCase() === "COMPARING");
+    let transported: string[] | undefined = undefined;
+    if (comparingAt >= 0) {
+      const names: string[] = [];
+      for (let i = comparingAt + 1; i < children.length; i++) {
+        const c = children[i];
+        if (!(c instanceof abaplint.Nodes.ExpressionNode) || !(c.get() instanceof abaplint.Expressions.FieldSub)) {
+          break;
+        }
+        names.push(c.concatTokens().toLowerCase());
+      }
+      // the parser can read "COMPARING a TRANSPORTING b" as four compared names
+      const cut = names.indexOf("transporting");
+      if (cut >= 0) {
+        transported = names.slice(cut + 1);
+        names.splice(cut);
+      }
+      extra.push("comparing: " + JSON.stringify(names.join(" ") === "all fields" ? ["*"] : names));
+    }
+    const transportingFields = node.findDirectExpression(abaplint.Expressions.TransportingFields);
+    if (transportingFields) {
+      transported = transportingFields.findAllExpressions(abaplint.Expressions.FieldSub).map(f => f.concatTokens().toLowerCase());
+    }
+    if (transported !== undefined && transported.join(" ") !== "all fields") {
+      extra.push("transporting: " + JSON.stringify(transported));
+    }
+
     const compare = node.findDirectExpression(abaplint.Expressions.ComponentCompareSimple);
     if (compare) {
       const withKey: string[] = [];

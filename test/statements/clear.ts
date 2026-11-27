@@ -77,4 +77,33 @@ WRITE hex-11.`;
     expect(abap.console.get()).to.equal("0000000011223344");
   });
 
+  it("CLEAR of a table with a header line clears the header line, FREE the rows", async () => {
+    const code = `
+TYPES ty_c3 TYPE c LENGTH 3.
+DATA tab TYPE STANDARD TABLE OF ty_c3 WITH HEADER LINE.
+DATA count TYPE i.
+DATA row TYPE ty_c3.
+tab = 'A'.
+APPEND tab.
+tab = 'B'.
+APPEND tab.
+CLEAR tab.
+count = lines( tab[] ).
+WRITE / count.
+APPEND tab.
+READ TABLE tab INDEX 3 INTO row.
+WRITE / |{ row }.|.
+tab = 'C'.
+FREE tab.
+count = lines( tab[] ).
+WRITE / count.
+APPEND tab.
+READ TABLE tab INDEX 1 INTO row.
+WRITE / |{ row }.|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2\n.\n0\nC.");
+  });
+
 });

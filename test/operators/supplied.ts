@@ -46,6 +46,42 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("no\nyes\nyes");
   });
 
+  it("IS SUPPLIED, a table parameter named with its body suffix", async () => {
+    const code = `
+TYPES ty_tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+CLASS lcl_bar DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS moo
+      IMPORTING it_opt TYPE ty_tab OPTIONAL.
+ENDCLASS.
+
+CLASS lcl_bar IMPLEMENTATION.
+  METHOD moo.
+    IF it_opt[] IS SUPPLIED.
+      WRITE / 'yes'.
+    ELSE.
+      WRITE / 'no'.
+    ENDIF.
+    IF boolc( it_opt[] IS NOT SUPPLIED ) = abap_true.
+      WRITE / 'not'.
+    ENDIF.
+  ENDMETHOD.
+ENDCLASS.
+
+FORM run.
+  DATA lt_tab TYPE ty_tab.
+  lcl_bar=>moo( ).
+  lcl_bar=>moo( lt_tab ).
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM run.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("no\nnot\nyes");
+  });
+
   it("IS SUPPLIED with boolc()", async () => {
     const code = `
 CLASS lcl_bar DEFINITION.

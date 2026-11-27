@@ -269,6 +269,39 @@ WRITE / |{ lv_xs }/{ sy-subrc }|.`;
     expect(abap.console.get()).to.equal("FFAB00CD00/0");
   });
 
+  it("CONCATENATE IN BYTE MODE appends to an xstring in a loop", async () => {
+    const code = `
+DATA lv_xs TYPE xstring.
+DATA lv_x TYPE x LENGTH 1.
+DO 100000 TIMES.
+  lv_x = sy-index MOD 256.
+  CONCATENATE lv_xs lv_x INTO lv_xs IN BYTE MODE.
+ENDDO.
+WRITE / |{ xstrlen( lv_xs ) } { lv_xs+254(4) } { sy-subrc }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("100000 FF000102 0");
+  });
+
+  it("CONCATENATE IN BYTE MODE with field symbols and a separator", async () => {
+    const code = `
+DATA lv_xs TYPE xstring VALUE '01'.
+DATA lv_x TYPE x LENGTH 2 VALUE 'A0B0'.
+DATA lv_sep TYPE x LENGTH 1 VALUE 'FF'.
+DATA lv_res TYPE xstring.
+FIELD-SYMBOLS <lv_any> TYPE any.
+FIELD-SYMBOLS <lv_res> TYPE xstring.
+ASSIGN lv_x TO <lv_any>.
+ASSIGN lv_res TO <lv_res>.
+CONCATENATE lv_xs <lv_any> lv_xs INTO <lv_res> SEPARATED BY lv_sep IN BYTE MODE.
+WRITE / lv_res.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("01FFA0B0FF01");
+  });
+
   it("CONCATENATE into a c field too short for the result sets sy-subrc 4", async () => {
     const code = `
 DATA lv_c3 TYPE c LENGTH 3.
