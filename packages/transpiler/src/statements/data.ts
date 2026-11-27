@@ -120,7 +120,7 @@ export class DataTranspiler implements IStatementTranspiler {
       const int = val.findFirstExpression(abaplint.Expressions.Integer);
       const str = val.findFirstExpression(abaplint.Expressions.ConstantString);
       if (int) {
-        value = "\n" + name + ".set(" + ConstantTranspiler.normalizeInteger(int.concatTokens()) + ");";
+        value = "\n" + name + ".set(" + ConstantTranspiler.integerValue(int.concatTokens()) + ");";
       } else if (str) {
         const escaped = ConstantTranspiler.escape(ConstantTranspiler.trimTextFieldLiteral(str.concatTokens()));
         value = "\n" + name + ".set(" + escaped + ");";
