@@ -24,10 +24,17 @@ export class DeleteInternalTranspiler implements IStatementTranspiler {
       extra.push("where: async " + traversal.traverse(componentCond).getCode());
     }
 
-    const componentCompare = node.findDirectExpression(abaplint.Expressions.ComponentCompare);
-    if (componentCompare) {
+    // WITH TABLE KEY comp1 = a comp2 = b: one ComponentCompare per component, all of them must match
+    const componentCompares = node.findDirectExpressions(abaplint.Expressions.ComponentCompare);
+    if (componentCompares.length > 0) {
       // todo: this can be optimized, WITH TABLE KEY
-      extra.push("where: async " + traversal.traverse(componentCompare).getCode());
+      let where = traversal.traverse(componentCompares[0]).getCode();
+      if (componentCompares.length > 1) {
+        const conds = componentCompares.map(c => traversal.traverse(c).getCode()
+          .replace(/^\(I\) => \{return /, "").replace(/;\}$/, ""));
+        where = `(I) => {return ${conds.join(" && ")};}`;
+      }
+      extra.push("where: async " + where);
       if (concat.startsWith("DELETE TABLE ")) {
         extra.push("withTableKey: true");
       }
