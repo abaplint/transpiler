@@ -51,18 +51,20 @@ export class DataTranspiler implements IStatementTranspiler {
       throw new Error("DataTranspiler, var not found, \"" + token.getStr() + "\", " + traversal.getFilename() + ", line: " + token.getRow());
     }
 
+    this.variableName = Traversal.prefixVariable(Traversal.escapeNamespace(found.getName().toLowerCase()));
+
     let value = "";
     if (found.getValue() !== undefined && node.concatTokens().includes(" & ")) {
-      value = "\n" + traversal.setValues(found, found.getName());
+      value = "\n" + traversal.setValues(found, Traversal.escapeNamespace(found.getName())!);
     } else {
-      value = DataTranspiler.buildValue(node, Traversal.prefixVariable(found.getName().toLowerCase()), traversal);
+      value = DataTranspiler.buildValue(node, this.variableName, traversal);
     }
 
     // for enum types, initialize with the first enum value
     if (found.getType() instanceof abaplint.BasicTypes.EnumType && value === "") {
       const enumDefault = DataTranspiler.findEnumDefault(scope, found.getType());
       if (enumDefault) {
-        value = "\n" + Traversal.prefixVariable(found.getName().toLowerCase()) + ".set(\"" + enumDefault + "\");";
+        value = "\n" + this.variableName + ".set(\"" + enumDefault + "\");";
       }
     }
 
@@ -74,7 +76,6 @@ export class DataTranspiler implements IStatementTranspiler {
       }
     }
 
-    this.variableName = Traversal.prefixVariable(Traversal.escapeNamespace(found.getName().toLowerCase()));
     this.loopScoped = traversal.isInsideLoop(node);
 
     const ret = new Chunk()
@@ -116,12 +117,12 @@ export class DataTranspiler implements IStatementTranspiler {
     let value = "";
     const val = node.findFirstExpression(abaplint.Expressions.Value);
     if (val) {
-      let int = val.findFirstExpression(abaplint.Expressions.Integer);
-      if (int === undefined) {
-        int = val.findFirstExpression(abaplint.Expressions.ConstantString);
-      }
+      const int = val.findFirstExpression(abaplint.Expressions.Integer);
+      const str = val.findFirstExpression(abaplint.Expressions.ConstantString);
       if (int) {
-        const escaped = ConstantTranspiler.escape(ConstantTranspiler.trimTextFieldLiteral(int.concatTokens()));
+        value = "\n" + name + ".set(" + ConstantTranspiler.normalizeInteger(int.concatTokens()) + ");";
+      } else if (str) {
+        const escaped = ConstantTranspiler.escape(ConstantTranspiler.trimTextFieldLiteral(str.concatTokens()));
         value = "\n" + name + ".set(" + escaped + ");";
       } else if (val.getChildren()[1].get() instanceof abaplint.Expressions.SimpleFieldChain) {
         const s = new FieldChainTranspiler().transpile(val.getChildren()[1] as abaplint.Nodes.ExpressionNode, traversal).getCode();

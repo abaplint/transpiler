@@ -6,8 +6,6 @@ import {XString} from "./xstring";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {Integer, roundHalfAwayFromZero} from "./integer";
-import {getBit} from "../statements/get_bit";
-import {Character} from "./character";
 import {HexUInt8} from "./hex_uint8";
 import {DecFloat34} from "./decfloat34";
 import {Time} from "./time";
@@ -16,6 +14,14 @@ import {Packed} from "./packed";
 import {roundToBigInt} from "./_decimal";
 
 const digits = new RegExp(/^\s*-?\+?\d+\.?\d* *$/i);
+
+/** the result of an operation in calculation type int8: outside -2^63 .. 2^63-1 it is CX_SY_ARITHMETIC_OVERFLOW */
+export function int8Result(value: bigint): Integer8 {
+  if (value !== BigInt.asIntN(64, value)) {
+    throwError("CX_SY_ARITHMETIC_OVERFLOW");
+  }
+  return new Integer8().set(value);
+}
 
 export class Integer8 {
   private value: bigint;
@@ -62,7 +68,11 @@ export class Integer8 {
       this.value = roundToBigInt(value.getDecimal());
     } else if (value instanceof Packed) {
 // exact and rounded half away from zero, get() would go through a double
-      this.value = BigInt(value.toFixed(0));
+      const rounded = BigInt(value.toFixed(0));
+      if (rounded !== BigInt.asIntN(64, rounded)) {
+        throwError("CX_SY_ARITHMETIC_OVERFLOW");
+      }
+      this.value = rounded;
     } else if (value instanceof Float) {
       this.set(roundHalfAwayFromZero(value.getRaw()));
     } else if (value instanceof FieldSymbol) {
@@ -75,19 +85,9 @@ export class Integer8 {
 // t is converted to the number of seconds since midnight, not the HHMMSS digits
       this.value = BigInt(value.getNumeric());
     } else if (value instanceof Hex || value instanceof XString || value instanceof HexUInt8) {
-      if (value.get().length === 16) {
-        const lv_bit = new Character();
-        getBit(new Integer().set(1), value, lv_bit);
-        if (lv_bit.get() === "1") {
-          const val = BigInt("0x" + value.get());
-          this.value = val - BigInt("0x10000000000000000");
-        } else {
-          this.value = BigInt("0x" + value.get());
-        }
-      } else {
-// todo, what if the input is longer than 16 bytes?
-        this.value = BigInt("0x" + value.get());
-      }
+// the last eight bytes, two's complement; a shorter source is zero padded on the left, so it is never negative
+      const hex = value.get();
+      this.value = hex === "" ? 0n : BigInt.asIntN(64, BigInt("0x" + hex));
     } else {
       this.set(value.get());
     }

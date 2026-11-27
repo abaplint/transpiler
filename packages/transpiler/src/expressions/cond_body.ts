@@ -51,18 +51,20 @@ export class CondBodyTranspiler {
         throw new Error("CondBodyTranspiler, Expected Cond, todo, " + when.get().constructor.name);
       }
 
-      let value = "";
       if (then.get() instanceof Expressions.Source) {
-        value = new SourceTranspiler().transpile(then, traversal).getCode();
+        const value = new SourceTranspiler().transpile(then, traversal).getCode();
+        ret.appendString(`if (${condition}) { return ${value}; }\n`);
+      } else if (then.get() instanceof Expressions.Throw) {
+        ret.appendString(`if (${condition}) {\n${traversal.traverse(then).getCode()}\n}\n`);
       } else {
         throw new Error("CondBodyTranspiler, Expected Source, todo, " + then.get().constructor.name);
       }
-
-      ret.appendString(`if (${condition}) { return ${value}; }\n`);
     }
 
     const els = body.findExpressionAfterToken("ELSE");
-    if (els) {
+    if (els?.get() instanceof Expressions.Throw) {
+      ret.appendString(traversal.traverse(els).getCode() + "\n");
+    } else if (els) {
       if (!(els.get() instanceof Expressions.Source)) {
         throw new Error("CondBodyTranspiler, Expected Source, todo, " + els.get().constructor.name);
       }

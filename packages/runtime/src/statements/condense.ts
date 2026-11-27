@@ -1,4 +1,5 @@
 import {ICharacter} from "../types/_character";
+import {setText} from "./_set_text";
 
 const ENDS_WITH_SPACE = / +$/;
 const BEGINS_WITH_SPACE = /^ +/;
@@ -13,5 +14,5 @@ export function condense(input: ICharacter, options: {nogaps: boolean}): void {
   } else {
     trimmed = trimmed.replace(MULTIPLE_SPACES_REGEX, " ");
   }
-  input.set(trimmed);
+  setText(input, trimmed);
 }

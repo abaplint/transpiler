@@ -1927,6 +1927,50 @@ WRITE / |{ sy-subrc } { r-a }/{ r-b }|.`;
     expect(abap.console.get()).to.equal("0 2/2\n0 2/2");
   });
 
+  it("READ TABLE WITH TABLE KEY, sorted table keyed on a structure", async () => {
+    const code = `
+TYPES: BEGIN OF ty_item,
+         obj_type TYPE c LENGTH 4,
+         obj_name TYPE c LENGTH 10,
+       END OF ty_item.
+TYPES: BEGIN OF ty_row,
+         item     TYPE ty_item,
+         filename TYPE string,
+         name     TYPE string,
+       END OF ty_row.
+DATA tab TYPE SORTED TABLE OF ty_row WITH UNIQUE KEY item filename.
+DATA row TYPE ty_row.
+DATA key TYPE ty_item.
+
+row-item-obj_type = 'CLAS'.
+row-item-obj_name = 'ZCL_C'.
+row-filename = 'zcl_c.clas.abap'.
+row-name = 'third'.
+INSERT row INTO TABLE tab.
+row-item-obj_name = 'ZCL_A'.
+row-filename = 'zcl_a.clas.abap'.
+row-name = 'first'.
+INSERT row INTO TABLE tab.
+row-item-obj_name = 'ZCL_B'.
+row-filename = 'zcl_b.clas.abap'.
+row-name = 'second'.
+INSERT row INTO TABLE tab.
+
+LOOP AT tab INTO row.
+  WRITE / row-name.
+ENDLOOP.
+
+key-obj_type = 'CLAS'.
+key-obj_name = 'ZCL_A'.
+CLEAR row.
+READ TABLE tab INTO row WITH TABLE KEY item = key filename = 'zcl_a.clas.abap'.
+WRITE / sy-subrc.
+WRITE / row-name.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("first\nsecond\nthird\n0\nfirst");
+  });
 
   it("HASHED TABLE keyed by a REF TO data component, read and duplicate", async () => {
     // the hash of a data reference is its target, not the value the target holds:
@@ -1976,4 +2020,124 @@ IF r = r2. WRITE / 'same'. ENDIF.`;
     await f(abap);
     expect(abap.console.get()).to.equal("0\n0\n4\n2\n0\nsame");
   });
+
+  it("READ TABLE INTO wa COMPARING and TRANSPORTING", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         name TYPE c LENGTH 1,
+         qty  TYPE i,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row TYPE ty.
+row-name = 'B'. row-qty = 3. APPEND row TO tab.
+row-name = 'Z'. row-qty = 0.
+READ TABLE tab INDEX 1 INTO row TRANSPORTING qty.
+WRITE / |{ row-name }/{ row-qty } { sy-subrc }|.
+row-qty = 7.
+READ TABLE tab INDEX 1 INTO row COMPARING qty.
+WRITE / |{ row-name }/{ row-qty } { sy-subrc }|.
+READ TABLE tab INDEX 1 INTO row COMPARING qty TRANSPORTING name.
+WRITE / |{ row-name }/{ row-qty } { sy-subrc }|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("Z/3 0\nB/3 2\nB/3 0");
+  });
+
+  it("READ TABLE WITH KEY converts the operand to the type of the component", async () => {
+    const code = `
+TYPES ty_code TYPE c LENGTH 2.
+DATA tab TYPE STANDARD TABLE OF ty_code WITH DEFAULT KEY.
+DATA row TYPE ty_code.
+DATA count TYPE i.
+APPEND 'AB' TO tab.
+READ TABLE tab INTO row WITH KEY table_line = 'ABX'.
+WRITE / sy-subrc.
+LOOP AT tab INTO row WHERE table_line = 'ABX'.
+  count = count + 1.
+ENDLOOP.
+WRITE / count.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n0");
+  });
+
+  it("READ TABLE WITH KEY, a number compared with a text component", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         code TYPE n LENGTH 4,
+         name TYPE c LENGTH 5,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row TYPE ty.
+row-code = '0042'. row-name = 'forty'. APPEND row TO tab.
+READ TABLE tab INTO row WITH KEY code = 42.
+WRITE / sy-subrc.
+WRITE / row-name.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\nforty");
+  });
+
+  it("READ TABLE WITH KEY, components with a namespace", async () => {
+    const code = `
+TYPES: BEGIN OF ty_sub,
+         /foo/comp TYPE i,
+       END OF ty_sub.
+TYPES: BEGIN OF ty_row,
+         /foo/comp TYPE i,
+         /foo/two  TYPE i,
+         plain     TYPE i,
+         sub       TYPE ty_sub,
+       END OF ty_row.
+DATA lt TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY.
+DATA ls TYPE ty_row.
+DATA lv TYPE i VALUE 2.
+ls-/foo/comp = 1. ls-/foo/two = 10. ls-plain = 100. ls-sub-/foo/comp = 7. APPEND ls TO lt.
+ls-/foo/comp = 2. ls-/foo/two = 20. ls-plain = 200. ls-sub-/foo/comp = 8. APPEND ls TO lt.
+ls-/foo/comp = 3. ls-/foo/two = 30. ls-plain = 300. ls-sub-/foo/comp = 9. APPEND ls TO lt.
+CLEAR ls.
+READ TABLE lt INTO ls WITH KEY /foo/comp = lv.
+WRITE / sy-subrc.
+WRITE / ls-plain.
+READ TABLE lt INTO ls WITH KEY /foo/comp = 3 /foo/two = 30.
+WRITE / ls-plain.
+READ TABLE lt INTO ls WITH KEY sub-/foo/comp = 7.
+WRITE / ls-plain.
+READ TABLE lt TRANSPORTING NO FIELDS WITH KEY /foo/comp = lv BINARY SEARCH.
+WRITE / sy-tabix.
+READ TABLE lt INTO ls WITH KEY /foo/comp = 4.
+WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n200\n300\n100\n2\n4");
+  });
+
+  it("READ TABLE, sorted table with a namespaced key component", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         /foo/comp TYPE i,
+         plain     TYPE i,
+       END OF ty_row.
+DATA lt TYPE SORTED TABLE OF ty_row WITH UNIQUE KEY /foo/comp.
+DATA ls TYPE ty_row.
+DATA lv TYPE i VALUE 2.
+ls-/foo/comp = 3. ls-plain = 300. INSERT ls INTO TABLE lt.
+ls-/foo/comp = 1. ls-plain = 100. INSERT ls INTO TABLE lt.
+ls-/foo/comp = 2. ls-plain = 200. INSERT ls INTO TABLE lt.
+CLEAR ls.
+READ TABLE lt INTO ls WITH TABLE KEY /foo/comp = lv.
+WRITE / sy-subrc.
+WRITE / ls-plain.
+READ TABLE lt INTO ls WITH KEY /foo/comp = 3.
+WRITE / ls-plain.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n200\n300");
+  });
+
 });

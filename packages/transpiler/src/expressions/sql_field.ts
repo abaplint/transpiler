@@ -22,7 +22,7 @@ export class SQLFieldTranspiler implements IExpressionTranspiler {
       } else if (c.get() instanceof abaplint.Expressions.SQLFieldName) {
         chunk.appendChunk(new SQLFieldNameTranspiler().transpile(c, traversal));
       } else if (c.get() instanceof abaplint.Expressions.SimpleFieldChain2) {
-        chunk.appendString(`'" + ` + new FieldChainTranspiler().transpile(c, traversal).getCode() + `.get() + "' `);
+        chunk.appendString(`'" + abap.sqlEscape(` + new FieldChainTranspiler().transpile(c, traversal).getCode() + `.get()) + "' `);
       } else {
         chunk.appendString(c.concatTokens() + " ");
       }
