@@ -1,7 +1,7 @@
 import {expect} from "chai";
 import * as abaplint from "@abaplint/core";
 import {DatabaseSetup} from "../src/db";
-import {zhead, zinfo, ztext, zvHeadText} from "./_view";
+import {zhead, zinfo, ztext, zvExtPrio, zvHeadText} from "./_view";
 
 function setup(view: string) {
   const reg = new abaplint.Registry().addFiles([
@@ -26,6 +26,21 @@ describe("VIEW database setup", () => {
   it("escapes a constant for the javascript template string", async () => {
     const res = setup(zvHeadText("&apos;`${x}\\&apos;"));
     expect(res.schemas.sqlite[res.schemas.sqlite.length - 1]).to.include("'ztext'.langu = '\\`\\${x}\\\\'");
+  });
+
+  it("external view, VIEWCLASS X, becomes a table with the EXVDATATYPE columns", async () => {
+    const reg = new abaplint.Registry().addFiles([
+      new abaplint.MemoryFile("zvext_prio.view.xml", zvExtPrio),
+    ]).parse();
+    const res = new DatabaseSetup(reg).run();
+    expect(res.schemas.sqlite).to.deep.equal(["CREATE TABLE 'zvext_prio' (" +
+      "'item' NCHAR(18) COLLATE RTRIM, 'ean' NCHAR(14) COLLATE RTRIM, 'flag_a' NCHAR(1) COLLATE RTRIM, " +
+      "'flag_b' NCHAR(1) COLLATE RTRIM, 'check' NCHAR(2) COLLATE RTRIM, 'test' INT, 'unit' NCHAR(3) COLLATE RTRIM, " +
+      "'request' NCHAR(12) COLLATE RTRIM, 'status' NCHAR(2) COLLATE RTRIM, " +
+      "PRIMARY KEY('item','ean','flag_a','flag_b','check','test','unit','request','status'));"]);
+    expect(res.schemas.pg).to.have.length(1);
+    expect(res.schemas.pg[0]).to.match(/^CREATE TABLE "zvext_prio" \("item" /);
+    expect(res.schemas.snowflake[0]).to.match(/^CREATE TABLE "zvext_prio" \("item" /);
   });
 
 });

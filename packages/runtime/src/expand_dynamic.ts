@@ -1,4 +1,5 @@
 import {expandIN} from "./expand_in";
+import {sqlEscape} from "./sql_escape";
 import {FieldSymbol, HashedTable, Table} from "./types";
 
 type DynamicCondition = string | Table | HashedTable | {get(): string};
@@ -20,61 +21,30 @@ export function expandDynamic(input: DynamicCondition, evaluate: (name: string) 
     // yea, this is also wrong,
     code = code.replace(/ EQ /g, " = ");
 
-// todo more here, this is just one simple case,
-    let regex = /(\w+) IN @?<(\w+)>-(\w+)/;
-    while(true) {
-      const match = code.match(regex);
-      if (match && match[1] && match[2] && match[3]) {
-        let name = "fs_" + match[2] + "_";
-        name = name.toLowerCase();
-        let found = evaluate(name);
-        if (found instanceof FieldSymbol) {
-          found = found.get()[match[3].toLowerCase()];
-          if (found === undefined) {
-            throw new Error(`expandDynamic: Field symbol ${name} does not have field ${match[2]}`);
-          }
-          code = code.replace(regex, expandIN(match[1].toLowerCase(), found as any));
-        }
-      } else {
-        break;
+// todo more here, these are just the simple cases.
+// One pass over the text: a value put in is never scanned again, so a value
+// holding " <x>" is data, and the replacement is a function so that "$'",
+// "$&" and the like in a value are not read as replacement patterns.
+    const regex = /(?:(\w+) IN)? @?<(\w+)>(?:-(\w+))?/g;
+    code = code.replace(regex, (whole: string, field: string | undefined, fs: string, component: string | undefined) => {
+      const name = ("fs_" + fs + "_").toLowerCase();
+      const found = evaluate(name);
+      if (!(found instanceof FieldSymbol)) {
+        return whole;
       }
-    }
-
-// todo more here, this is just one simple case,
-    regex = / @?<(\w+)>-(\w+)/;
-    while(true) {
-      const match = code.match(regex);
-      if (match && match[1] && match[2]) {
-        let name = "fs_" + match[1] + "_";
-        name = name.toLowerCase();
-        let found = evaluate(name);
-        if (found instanceof FieldSymbol) {
-          found = found.get()[match[2].toLowerCase()];
-          if (found === undefined) {
-            throw new Error(`expandDynamic: Field symbol ${name} does not have field ${match[2]}`);
-          }
-          code = code.replace(regex, " '" + found.get() + "'");
+      let value: any = found;
+      if (component !== undefined) {
+        value = found.get()[component.toLowerCase()];
+        if (value === undefined) {
+          throw new Error(`expandDynamic: Field symbol ${name} does not have field ${component}`);
         }
-      } else {
-        break;
-      }
-    }
-
-// todo more here, this is just one simple case,
-    regex = / @?<(\w+)>/;
-    while(true) {
-      const match = code.match(regex);
-      if (match && match[1]) {
-        let name = "fs_" + match[1] + "_";
-        name = name.toLowerCase();
-        const found = evaluate(name);
-        if (found instanceof FieldSymbol) {
-          code = code.replace(regex, " '" + found.get() + "'");
+        if (field !== undefined) {
+          return expandIN(field.toLowerCase(), value);
         }
-      } else {
-        break;
       }
-    }
+      const prefix = field !== undefined ? field + " IN" : "";
+      return prefix + " '" + sqlEscape(value.get()) + "'";
+    });
 
 //    console.dir(code);
     return code;

@@ -10,11 +10,21 @@ export class ConstantTranspiler implements IExpressionTranspiler {
     this.addGet = addGet;
   }
 
-  private handleInteger(int: Nodes.ExpressionNode, traversal: Traversal): Chunk {
-    let concat = int.concatTokens().trim().replace(/^0+/, "");
-    if (concat === "") {
-      concat = "0";
+  /** Normalizes an ABAP integer literal to a JavaScript decimal integer literal, which is also
+   *  valid in strict mode, where leading zeros give an octal literal and a SyntaxError.
+   *  "007" -> "7", "000" -> "0", "-007" -> "-7", "- 010" -> "-10", "+5" -> "5", "-000" -> "0".
+   *  Input that is not an integer literal is returned unchanged */
+  public static normalizeInteger(str: string): string {
+    const match = str.replace(/\s/g, "").match(/^([+-]?)(\d+)$/);
+    if (match === null) {
+      return str;
     }
+    const digits = match[2].replace(/^0+(?=\d)/, "");
+    return match[1] === "-" && digits !== "0" ? "-" + digits : digits;
+  }
+
+  private handleInteger(int: Nodes.ExpressionNode, traversal: Traversal): Chunk {
+    const concat = ConstantTranspiler.normalizeInteger(int.concatTokens());
     const parsed = Number.parseInt(concat, 10);
     let code = "";
     if (concat.length > 18) {

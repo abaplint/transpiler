@@ -482,4 +482,23 @@ WRITE char+2(*).`;
     expect(abap.console.get().trim()).to.equal("1A 4");
   });
 
+  it("int8 offset and length, writing", async () => {
+    const code = `
+    DATA hex TYPE x LENGTH 4.
+    DATA chr TYPE c LENGTH 4.
+    DATA off TYPE int8.
+    DATA len TYPE int8.
+    off = 1.
+    len = 2.
+    hex+off(len) = 'AABB'.
+    chr = '1234'.
+    chr+off(len) = 'AB'.
+    WRITE / hex.
+    WRITE / chr.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("00AABB00\n1AB4");
+  });
+
 });

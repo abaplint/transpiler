@@ -1,7 +1,8 @@
 import {co} from "../compare";
-import {Numc} from "../types";
+import {FieldSymbol, Hex, HexUInt8, XString} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
+import {setText} from "./_set_text";
 
 export interface IShiftOptions {
   deletingLeading?: string | ICharacter,
@@ -44,7 +45,7 @@ function shift_character_mode(target: ICharacter, options?: IShiftOptions) {
       }
     }
   } else if (options?.places) {
-    const p = options.places.get();
+    const p = Number(options.places.get());
     if (options.circular) {
       if (options.direction === "RIGHT") {
         value = value.substr(value.length - p) + value.substr(0, value.length - p);
@@ -83,15 +84,17 @@ function shift_character_mode(target: ICharacter, options?: IShiftOptions) {
     value = value.substr(1);
   }
 
-  if (target instanceof Numc) {
-    target.set(value, true);
-  } else {
-    target.set(value);
-  }
+  setText(target, value);
 }
 
 
 function shift_byte_mode(target: ICharacter, options?: IShiftOptions) {
+  // the syntax check refuses a static non byte-like target, a generic field symbol is checked here
+  const pointer = target instanceof FieldSymbol ? target.getPointer() : target;
+  if (pointer !== undefined && !(pointer instanceof Hex || pointer instanceof HexUInt8 || pointer instanceof XString)) {
+    throw new Error("OBJECTS_NOT_BYTELIKE");
+  }
+
   let value = target.get();
 
   if (options?.deletingLeading) {
@@ -106,16 +109,16 @@ function shift_byte_mode(target: ICharacter, options?: IShiftOptions) {
   } else if (options?.places) {
     if (options.circular) {
       if (options.direction === "RIGHT") {
-        for (let i = 0; i < options.places.get(); i++) {
+        for (let i = 0; i < Number(options.places.get()); i++) {
           value = value.substr(value.length - 2) + value.substr(0, value.length - 2);
         }
       } else {
-        for (let i = 0; i < options.places.get(); i++) {
+        for (let i = 0; i < Number(options.places.get()); i++) {
           value = value.substr(2) + value.substr(0, 2);
         }
       }
     } else {
-      const p = options.places.get() * 2;
+      const p = Number(options.places.get()) * 2;
       if (options.direction === "RIGHT") {
         // set() cuts a fixed length target, an xstring gets longer
         value = "0".repeat(p) + value;

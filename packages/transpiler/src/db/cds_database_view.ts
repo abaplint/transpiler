@@ -7,8 +7,14 @@ type Node = abaplint.Nodes.ExpressionNode | abaplint.Nodes.TokenNode;
 export class CDSDatabaseView {
   private viewName = "";
   private readonly sources: string[] = [];
+  private readonly dependencies = new Set<string>();
 
   public constructor(private readonly reg: abaplint.IRegistry) {}
+
+  /** Names of the CDS views selected from, valid after build() */
+  public getDependencies(): string[] {
+    return Array.from(this.dependencies);
+  }
 
   public build(obj: abaplint.Objects.DataDefinition): string | undefined {
     this.viewName = obj.getName();
@@ -40,14 +46,21 @@ export class CDSDatabaseView {
     for (const join of select.findDirectExpressions(cds.CDSJoin)) {
       from.push(this.join(join));
     }
-    const elements = select.findDirectExpressions(cds.CDSElement);
+    // associations are not columns, neither are virtual elements
+    const associations = this.associationNames(select);
+    const elements = select.findDirectExpressions(cds.CDSElement).filter(e => {
+      const path = e.findDirectExpression(cds.CDSPrefixedName)?.findAllExpressions(cds.CDSName) || [];
+      const last = path[path.length - 1]?.concatTokens().toUpperCase();
+      return e.findDirectTokenByText("VIRTUAL") === undefined && (last === undefined || !associations.has(last));
+    });
     if (elements.length === 0) {
       return this.unsupported("expected explicit projected fields");
     }
     const columns = elements.map(e => this.element(e)).join(", ");
     let where = "";
     for (const child of select.getChildren()) {
-      if (child === source || child.get() instanceof cds.CDSJoin || child.get() instanceof cds.CDSElement) {
+      if (child === source || child.get() instanceof cds.CDSJoin || child.get() instanceof cds.CDSElement
+          || child.get() instanceof cds.CDSAssociation || child.get() instanceof cds.CDSComposition) {
         continue;
       } else if (child.get() instanceof cds.CDSWhere) {
         where = " " + this.expression(child);
@@ -59,14 +72,37 @@ export class CDSDatabaseView {
     return `CREATE VIEW ${this.quote(this.viewName)} AS SELECT ${distinct}${columns} FROM ${from.join(" ")}${where};`;
   }
 
+  /** Aliases of the associations declared here or in the CDS sources, they can be exposed as elements */
+  private associationNames(select: abaplint.Nodes.ExpressionNode): Set<string> {
+    const ret = new Set<string>();
+    for (const a of [...select.findDirectExpressions(cds.CDSAssociation), ...select.findDirectExpressions(cds.CDSComposition)]) {
+      const relation = a.findDirectExpression(cds.CDSRelation);
+      const name = relation?.findDirectExpression(cds.CDSAs)?.findDirectExpression(cds.CDSName) || relation?.getFirstChild();
+      if (name) {
+        ret.add(name.concatTokens().toUpperCase());
+      }
+    }
+    for (const s of select.findAllExpressions(cds.CDSSource)) {
+      const name = s.findDirectExpression(cds.CDSPrefixedName)?.concatTokens().replace(/ /g, "");
+      const ddls = name ? this.reg.getObject("DDLS", name) as abaplint.Objects.DataDefinition | undefined : undefined;
+      ddls?.parse();
+      for (const a of ddls?.getParsedData()?.associations || []) {
+        ret.add((a.as || a.name).toUpperCase());
+      }
+    }
+    return ret;
+  }
+
   private source(node: abaplint.Nodes.ExpressionNode): string {
     const nameNode = node.findDirectExpression(cds.CDSPrefixedName);
     if (nameNode === undefined) {
       return this.unsupported("expected a table source");
     }
     const name = this.name(nameNode);
-    if (this.reg.getObject("TABL", name)?.getType() !== "TABL") {
-      return this.unsupported(`source ${name} does not resolve to a TABL`);
+    if (this.reg.getObject("DDLS", name) instanceof abaplint.Objects.DataDefinition) {
+      this.dependencies.add(name);
+    } else if (this.reg.getObject("TABL", name) === undefined && this.reg.getObject("VIEW", name) === undefined) {
+      return this.unsupported(`source ${name} does not resolve to a TABL, VIEW or DDLS`);
     }
     const as = node.findDirectExpression(cds.CDSAs);
     const alias = as?.findDirectExpression(cds.CDSName) || node.findDirectExpression(cds.CDSName);

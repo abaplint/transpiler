@@ -8,21 +8,6 @@ Call `abap_transpile` on the command line, see example in
 
 https://github.com/larshp/abap-advent-2020/blob/main/package.json#L8
 
-Shared factory functions for repeated composite type constructors are enabled by
-default. Each factory call creates a fresh ABAP value. To preserve inline
-constructor output, set `options.sharedTypeFactories` to `false` in
-`abap_transpile.json`:
-
-```json
-{
-  "options": {
-    "sharedTypeFactories": false
-  }
-}
-```
-
-Omit the option or set it to `true` to use shared factories.
-
 `WRITE '@KERNEL <js>'.` emits the literal as raw JavaScript, which runs with
 the privileges of the host. To restrict it, set `options.kernel.allow` to the
 list of regular expressions (matched case insensitively against the object
@@ -96,7 +81,8 @@ Imports and registered MIME filenames reference the new paths.
 
 Shared initialization scripts and test runners remain at the output root.
 Run programs with `node output/project/zapp.prog.mjs`; run project unit tests
-with `node output/index.mjs`. When migrating from flat output, rebuild a clean
+with `node output/index.mjs`. Importing a program module, eg. for its unit tests,
+does not run the program; call its exported `$main()` to run it. When migrating from flat output, rebuild a clean
 generated output directory and update scripts that reference individual
 modules or assets.
 
