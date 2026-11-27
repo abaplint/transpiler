@@ -16,7 +16,7 @@ export function multiply(left: INumeric | ICharacter | string | Integer8 | numbe
   }
   if (left instanceof Integer && right instanceof Integer) {
     // first, so that integer arithmetic does not pay for the p check below
-    return new Integer().set(left.get() * right.get());
+    return Integer.arithmeticResult(left.get() * right.get());
   }
   // a field symbol on a p is looked through here, the other paths below take a field symbol as they did
   if (left instanceof Packed || right instanceof Packed
@@ -43,20 +43,17 @@ export function multiply(left: INumeric | ICharacter | string | Integer8 | numbe
     return new Float().set(left.getRaw() * right.getRaw());
   } else if (typeof left === "number" && typeof right === "number"
       && Number.isInteger(left) && Number.isInteger(right)) {
-    const val = left * right;
-    return new Integer().set(val);
+    return Integer.arithmeticResult(left * right);
   } else if (typeof left === "number" && Number.isInteger(left) && right instanceof Integer) {
-    const val = left * right.get();
-    return new Integer().set(val);
+    return Integer.arithmeticResult(left * right.get());
   } else if (typeof right === "number" && Number.isInteger(right) && left instanceof Integer) {
-    const val = left.get() * right;
-    return new Integer().set(val);
+    return Integer.arithmeticResult(left.get() * right);
   } else if ((left instanceof String || left instanceof Character) && Number.isInteger(Number(left.get())) && right instanceof Integer) {
     const val = Number.parseInt(left.get(), 10) * right.get();
-    return new Integer().set(val).clearIntegerCalculationType();
+    return Integer.arithmeticResult(val).clearIntegerCalculationType();
   } else if ((right instanceof String || right instanceof Character) && Number.isInteger(Number(right)) && left instanceof Integer) {
     const val = left.get() * Number.parseInt(right.get(), 10);
-    return new Integer().set(val).clearIntegerCalculationType();
+    return Integer.arithmeticResult(val).clearIntegerCalculationType();
   }
 
   return new Float().set(parse(left) * parse(right));
