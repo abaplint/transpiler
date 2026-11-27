@@ -157,6 +157,11 @@ export class Traversal {
     return name.match(/^\d/) !== null || name.includes("/") || name.startsWith("%");
   }
 
+  /** the access to a component of a structure, in brackets if the name is not a javascript identifier */
+  public static componentAccess(name: string): string {
+    return Traversal.isBracketComponent(name) ? `.get()["${name.toLowerCase()}"]` : ".get()." + name;
+  }
+
   public getCurrentObject(): abaplint.ABAPObject {
     return this.obj;
   }
@@ -922,7 +927,7 @@ this.CONSTRUCTING = undefined;\n`;
     }
 
     for (const a of intf?.getAttributes().getAll() || []) {
-      const n = Traversal.escapeNamespace(name.toLowerCase()) + "$" + a.getName().toLowerCase();
+      const n = Traversal.escapeNamespace(name.toLowerCase() + "$" + a.getName().toLowerCase());
       // note: interface inheritenace and super inheritance might be strange,
       if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
         ret += "if (this." + n + " === undefined) this." + n + " = " + cname + "." + n + ";\n";
@@ -1218,7 +1223,7 @@ this.CONSTRUCTING = undefined;\n`;
           if (s === undefined) {
             continue;
           }
-          handle(s, name + ".get()." + v.toLowerCase());
+          handle(s, name + Traversal.componentAccess(v.toLowerCase()));
         }
       }
     };

@@ -3682,8 +3682,479 @@ ENDCLASS.`;
     expect(cons).to.include("Set");
   });
 
-
   it("test-75", async () => {
+// a local class inheriting from its own global class: the class pool's modules must load
+    const clas = `
+    CLASS zcl_owner DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        CLASS-DATA gv_count TYPE i.
+        CLASS-METHODS class_constructor.
+        CLASS-METHODS make RETURNING VALUE(result) TYPE REF TO zcl_owner.
+        METHODS name RETURNING VALUE(result) TYPE string.
+    ENDCLASS.
+    CLASS zcl_owner IMPLEMENTATION.
+      METHOD class_constructor.
+        gv_count = 10.
+      ENDMETHOD.
+      METHOD make.
+        CREATE OBJECT result TYPE lcl_sub.
+      ENDMETHOD.
+      METHOD name.
+        result = 'owner'.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const imp = `
+    CLASS lcl_sub DEFINITION INHERITING FROM zcl_owner.
+      PUBLIC SECTION.
+        METHODS name REDEFINITION.
+    ENDCLASS.
+    CLASS lcl_sub IMPLEMENTATION.
+      METHOD name.
+        DATA lv_count TYPE i.
+        gv_count = gv_count + 1.
+        lv_count = zcl_owner=>gv_count.
+        result = |sub { super->name( ) } { lv_count }|.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA lo_sub TYPE REF TO lcl_sub.
+        WRITE / zcl_owner=>make( )->name( ).
+        CREATE OBJECT lo_sub.
+        WRITE / lo_sub->name( ).
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zcl_owner.clas.abap", contents: clas},
+      {filename: "zcl_owner.clas.locals_imp.abap", contents: imp},
+      {filename: "zcl_owner.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons.split("\n").slice(1, 3)).to.deep.equal(["sub owner 11", "sub owner 12"]);
+  });
+
+  it("test-76", async () => {
+// a local exception class inheriting from its own global exception class
+    const cx = `
+    CLASS zcx_owner DEFINITION PUBLIC INHERITING FROM cx_root.
+      PUBLIC SECTION.
+        CLASS-METHODS raise_local RAISING zcx_owner.
+        METHODS text RETURNING VALUE(result) TYPE string.
+    ENDCLASS.
+    CLASS zcx_owner IMPLEMENTATION.
+      METHOD raise_local.
+        RAISE EXCEPTION TYPE lcx_local.
+      ENDMETHOD.
+      METHOD text.
+        result = 'global'.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const def = `
+    CLASS lcx_local DEFINITION INHERITING FROM zcx_owner.
+      PUBLIC SECTION.
+        METHODS text REDEFINITION.
+    ENDCLASS.`;
+    const imp = `
+    CLASS lcx_local IMPLEMENTATION.
+      METHOD text.
+        result = 'local'.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        DATA lx_owner TYPE REF TO zcx_owner.
+        TRY.
+            zcx_owner=>raise_local( ).
+          CATCH zcx_owner INTO lx_owner.
+            WRITE / lx_owner->text( ).
+        ENDTRY.
+        TRY.
+            RAISE EXCEPTION TYPE lcx_local.
+          CATCH cx_root.
+            WRITE / 'caught'.
+        ENDTRY.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "cx_root.clas.abap", contents: cxroot},
+      {filename: "zcx_owner.clas.abap", contents: cx},
+      {filename: "zcx_owner.clas.locals_def.abap", contents: def},
+      {filename: "zcx_owner.clas.locals_imp.abap", contents: imp},
+      {filename: "zcx_owner.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons.split("\n").slice(1, 3)).to.deep.equal(["local", "caught"]);
+  });
+
+  it("test-77", async () => {
+// a local class inheriting from another global class, which uses the first class: still loads
+    const base = `
+    CLASS zcl_base DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        METHODS name RETURNING VALUE(result) TYPE string.
+        CLASS-METHODS other RETURNING VALUE(result) TYPE string.
+    ENDCLASS.
+    CLASS zcl_base IMPLEMENTATION.
+      METHOD name.
+        result = 'base'.
+      ENDMETHOD.
+      METHOD other.
+        result = zcl_user=>run( ).
+      ENDMETHOD.
+    ENDCLASS.`;
+    const user = `
+    CLASS zcl_user DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        CLASS-METHODS run RETURNING VALUE(result) TYPE string.
+    ENDCLASS.
+    CLASS zcl_user IMPLEMENTATION.
+      METHOD run.
+        DATA lo_helper TYPE REF TO lcl_helper.
+        CREATE OBJECT lo_helper.
+        result = lo_helper->name( ).
+      ENDMETHOD.
+    ENDCLASS.`;
+    const imp = `
+    CLASS lcl_helper DEFINITION INHERITING FROM zcl_base.
+      PUBLIC SECTION.
+        METHODS name REDEFINITION.
+    ENDCLASS.
+    CLASS lcl_helper IMPLEMENTATION.
+      METHOD name.
+        result = |helper of { super->name( ) }|.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        WRITE / zcl_base=>other( ).
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zcl_base.clas.abap", contents: base},
+      {filename: "zcl_user.clas.abap", contents: user},
+      {filename: "zcl_user.clas.locals_imp.abap", contents: imp},
+      {filename: "zcl_user.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons.split("\n")[1]).to.equal("helper of base");
+  });
+
+
+  it("test-78", async () => {
+// an interface constant whose VALUE is another interface's constant; the referencing interface is loaded first
+    const zifb = `
+    INTERFACE zif_b PUBLIC.
+      CONSTANTS y TYPE string VALUE zif_c=>x.
+    ENDINTERFACE.`;
+    const zifc = `
+    INTERFACE zif_c PUBLIC.
+      CONSTANTS x TYPE string VALUE 'c'.
+    ENDINTERFACE.`;
+    const clas = `
+    CLASS zcl_consts DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_consts IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        WRITE / zif_b=>y.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zif_b.intf.abap", contents: zifb},
+      {filename: "zif_c.intf.abap", contents: zifc},
+      {filename: "zcl_consts.clas.abap", contents: clas},
+      {filename: "zcl_consts.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons.split("\n").slice(1, 2)).to.deep.equal(["c"]);
+  });
+
+  it("test-79", async () => {
+// a chain of three interface constants
+    const zifa = `
+    INTERFACE zif_a PUBLIC.
+      CONSTANTS z TYPE i VALUE zif_b=>y.
+    ENDINTERFACE.`;
+    const zifb = `
+    INTERFACE zif_b PUBLIC.
+      CONSTANTS y TYPE i VALUE zif_c=>x.
+    ENDINTERFACE.`;
+    const zifc = `
+    INTERFACE zif_c PUBLIC.
+      CONSTANTS x TYPE i VALUE 42.
+    ENDINTERFACE.`;
+    const clas = `
+    CLASS zcl_consts DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_consts IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        WRITE / zif_a=>z.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zif_a.intf.abap", contents: zifa},
+      {filename: "zif_b.intf.abap", contents: zifb},
+      {filename: "zif_c.intf.abap", contents: zifc},
+      {filename: "zcl_consts.clas.abap", contents: clas},
+      {filename: "zcl_consts.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons.split("\n").slice(1, 2)).to.deep.equal(["42"]);
+  });
+
+  it("test-80", async () => {
+// an interface constant from another interface's constant whose value is the %_newline builtin
+    const zifn = `
+    INTERFACE zif_n PUBLIC.
+      CONSTANTS nl TYPE c LENGTH 1 VALUE zif_p=>nl.
+    ENDINTERFACE.`;
+    const zifp = `
+    INTERFACE zif_p PUBLIC.
+      CONSTANTS nl TYPE c LENGTH 1 VALUE %_newline.
+    ENDINTERFACE.`;
+    const clas = `
+    CLASS zcl_consts DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_consts IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        IF zif_n=>nl = zif_p=>nl AND zif_p=>nl IS NOT INITIAL.
+          WRITE / 'same'.
+        ENDIF.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zif_n.intf.abap", contents: zifn},
+      {filename: "zif_p.intf.abap", contents: zifp},
+      {filename: "zcl_consts.clas.abap", contents: clas},
+      {filename: "zcl_consts.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons.split("\n").slice(1, 2)).to.deep.equal(["same"]);
+  });
+
+  it("test-81", async () => {
+// each interface has a constant whose chain runs through the other one and back into itself: no load-time cycle
+    const zifm1 = `
+    INTERFACE zif_m1 PUBLIC.
+      INTERFACES zif_m2.
+      CONSTANTS c1 TYPE string VALUE 'one'.
+      CONSTANTS c3 TYPE string VALUE zif_m2=>c2.
+      CONSTANTS c7 TYPE string VALUE zif_m2=>c5.
+    ENDINTERFACE.`;
+    const zifm2 = `
+    INTERFACE zif_m2 PUBLIC.
+      CONSTANTS c2 TYPE string VALUE zif_m1=>c1.
+      CONSTANTS c5 TYPE string VALUE 'five'.
+      CONSTANTS c6 TYPE string VALUE zif_m1=>c7.
+    ENDINTERFACE.`;
+    const clas = `
+    CLASS zcl_consts DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_consts IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        WRITE / zif_m1=>c3.
+        WRITE / zif_m2=>c6.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zif_m1.intf.abap", contents: zifm1},
+      {filename: "zif_m2.intf.abap", contents: zifm2},
+      {filename: "zcl_consts.clas.abap", contents: clas},
+      {filename: "zcl_consts.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons.split("\n").slice(1, 3)).to.deep.equal(["one", "five"]);
+  });
+
+
+  it("test-82", async () => {
+// an interface constant from a class constant the class sets in its class constructor, directly
+// and through another interface; the interfaces are loaded before the class
+    const zifa = `
+    INTERFACE zif_a PUBLIC.
+      CONSTANTS direct TYPE c LENGTH 1 VALUE zcl_z=>nl.
+      CONSTANTS chained TYPE c LENGTH 1 VALUE zif_b=>nl.
+    ENDINTERFACE.`;
+    const zifb = `
+    INTERFACE zif_b PUBLIC.
+      CONSTANTS nl TYPE c LENGTH 1 VALUE zcl_z=>nl.
+    ENDINTERFACE.`;
+    const zclz = `
+    CLASS zcl_z DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        CONSTANTS nl TYPE c LENGTH 1 VALUE '_'.
+        CLASS-METHODS class_constructor.
+    ENDCLASS.
+    CLASS zcl_z IMPLEMENTATION.
+      METHOD class_constructor.
+        WRITE '@KERNEL zcl_z.nl.set("N");'.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const clas = `
+    CLASS zcl_consts DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_consts IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        WRITE / zif_a=>direct.
+        WRITE / zif_a=>chained.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zif_a.intf.abap", contents: zifa},
+      {filename: "zif_b.intf.abap", contents: zifb},
+      {filename: "zcl_z.clas.abap", contents: zclz},
+      {filename: "zcl_consts.clas.abap", contents: clas},
+      {filename: "zcl_consts.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons.split("\n").slice(1, 3)).to.deep.equal(["N", "N"]);
+  });
+
+  it("test-83", async () => {
+// an interface constant from a component of a structured constant, of an interface and of a class;
+// the nested component is declared in upper case and named in lower case
+    const zifu = `
+    INTERFACE zif_u PUBLIC.
+      CONSTANTS c TYPE string VALUE zif_a=>gs-comp.
+      CONSTANTS d TYPE string VALUE zif_a=>gs-sub-deep.
+      CONSTANTS k TYPE string VALUE zcl_s=>gs-comp.
+    ENDINTERFACE.`;
+    const zifa = `
+    INTERFACE zif_a PUBLIC.
+      CONSTANTS: BEGIN OF gs,
+                   comp  TYPE string VALUE 'v',
+                   other TYPE string VALUE 'w',
+                   BEGIN OF SUB,
+                     DEEP TYPE string VALUE 'd',
+                   END OF SUB,
+                 END OF gs.
+    ENDINTERFACE.`;
+    const zcls = `
+    CLASS zcl_s DEFINITION PUBLIC.
+      PUBLIC SECTION.
+        CONSTANTS: BEGIN OF gs,
+                     comp  TYPE string VALUE 'k',
+                     other TYPE string VALUE 'x',
+                   END OF gs.
+    ENDCLASS.
+    CLASS zcl_s IMPLEMENTATION.
+    ENDCLASS.`;
+    const clas = `
+    CLASS zcl_consts DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_consts IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        WRITE / zif_u=>c.
+        WRITE / zif_u=>d.
+        WRITE / zif_u=>k.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zif_u.intf.abap", contents: zifu},
+      {filename: "zif_a.intf.abap", contents: zifa},
+      {filename: "zcl_s.clas.abap", contents: zcls},
+      {filename: "zcl_consts.clas.abap", contents: clas},
+      {filename: "zcl_consts.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons.split("\n").slice(1, 4)).to.deep.equal(["v", "d", "k"]);
+  });
+
+  it("test-84", async () => {
+// two interfaces naming each other's constants, the chains end in VALUE IS INITIAL: the initial
+// value is written, the modules do not import each other
+    const zifm1 = `
+    INTERFACE zif_m1 PUBLIC.
+      CONSTANTS c7 TYPE i VALUE IS INITIAL.
+      CONSTANTS c3 TYPE string VALUE zif_m2=>c2.
+    ENDINTERFACE.`;
+    const zifm2 = `
+    INTERFACE zif_m2 PUBLIC.
+      CONSTANTS c2 TYPE i VALUE IS INITIAL.
+      CONSTANTS c6 TYPE i VALUE zif_m1=>c7.
+    ENDINTERFACE.`;
+    const clas = `
+    CLASS zcl_consts DEFINITION PUBLIC.
+    ENDCLASS.
+    CLASS zcl_consts IMPLEMENTATION.
+    ENDCLASS.`;
+    const tests = `
+    CLASS ltcl_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FINAL.
+      PRIVATE SECTION.
+        METHODS test01 FOR TESTING.
+    ENDCLASS.
+    CLASS ltcl_test IMPLEMENTATION.
+      METHOD test01.
+        WRITE / |{ zif_m1=>c3 }{ zif_m2=>c6 }|.
+      ENDMETHOD.
+    ENDCLASS.`;
+    const files = [
+      {filename: "zif_m1.intf.abap", contents: zifm1},
+      {filename: "zif_m2.intf.abap", contents: zifm2},
+      {filename: "zcl_consts.clas.abap", contents: clas},
+      {filename: "zcl_consts.clas.testclasses.abap", contents: tests},
+    ];
+    const cons = await dumpNrun(files, false);
+    expect(cons.split("\n")[1]).to.equal("0 0");
+  });
+
+  it("test-85", async () => {
 // redefinition of a namespaced interface method that the superclass implements under its alias,
 // called from the superclass constructor: the superclass implementation runs
     const intf = `INTERFACE /foo/if_hook PUBLIC.

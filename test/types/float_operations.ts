@@ -121,6 +121,71 @@ ENDTRY.
 ASSERT lv_result = 'DODDD'.`);
   });
 
+  it("f result beyond the double range raises CX_SY_ARITHMETIC_OVERFLOW, target unchanged, #2188", async () => {
+    await run(`
+DATA lv_f TYPE f.
+DATA lv_r TYPE f.
+DATA lv_i TYPE i.
+DATA lv_result TYPE string.
+lv_f = '1E308'.
+lv_r = 5.
+TRY.
+    lv_r = lv_f * 10.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+TRY.
+    lv_r = exp( 1000 ).
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+TRY.
+    lv_r = lv_f + lv_f.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+TRY.
+    lv_r = - lv_f - lv_f.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+TRY.
+    lv_r = lv_f / '0.01'.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+TRY.
+    lv_r = lv_f ** 2.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+TRY.
+    lv_r = lv_f * 10 / 100.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+ASSERT lv_r = 5.
+lv_i = 5.
+TRY.
+    lv_i = lv_f * 10.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+ASSERT lv_i = 5.
+lv_r = lv_f.
+TRY.
+    MULTIPLY lv_r BY 10.
+  CATCH cx_sy_arithmetic_overflow.
+    lv_result = lv_result && 'O'.
+ENDTRY.
+ASSERT lv_r = lv_f.
+ASSERT lv_result = 'OOOOOOOOO'.
+" a result below the smallest double is 0, not an exception
+lv_f = '1E-300'.
+lv_r = lv_f * lv_f.
+ASSERT lv_r = 0.`);
+  });
+
   it("** with a fractional, whole and negative exponent, and ipow( )", async () => {
     await run(`
 DATA lv_a TYPE f.
@@ -200,6 +265,24 @@ ASSERT lv_a = '0.0015'.
 lv_p = '-3.25'.
 lv_a = lv_p.
 ASSERT lv_a = '-3.25'.`);
+  });
+
+  it("to p rounds a half away from zero, also negative, #2187", async () => {
+    await run(`
+DATA lv_f TYPE f.
+DATA lv_p TYPE p LENGTH 8 DECIMALS 2.
+lv_f = '1.125'.
+lv_p = lv_f.
+ASSERT lv_p = '1.13'.
+lv_f = '-1.125'.
+lv_p = lv_f.
+ASSERT lv_p = '-1.13'.
+lv_f = '-0.375'.
+lv_p = lv_f.
+ASSERT lv_p = '-0.38'.
+lv_f = '-2.5'.
+lv_p = lv_f.
+ASSERT lv_p = '-2.50'.`);
   });
 
   it("comparisons with f, i, p, decfloat34, c and string", async () => {

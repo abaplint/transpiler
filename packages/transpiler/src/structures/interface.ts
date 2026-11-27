@@ -3,6 +3,7 @@ import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
 import {ConstantTranspiler, FieldChainTranspiler} from "../expressions";
 import {Chunk} from "../chunk";
+import {constantSource, memberRead} from "../constant_value";
 
 export class InterfaceTranspiler implements IStructureTranspiler {
 
@@ -70,7 +71,7 @@ export class InterfaceTranspiler implements IStructureTranspiler {
         continue;
       }
       const interfaceName = Traversal.escapeNamespace(node.getFirstToken().getStr().toLowerCase());
-      const name = interfaceName + "." + interfaceName + "$" + n.toLowerCase();
+      const name = interfaceName + "." + interfaceName + "$" + Traversal.escapeNamespace(n.toLowerCase());
       ret += name + " = " + traversal.toType(identifier.getType()) + ";\n";
 
       const alias = idef?.getAliases().find(a => a.getName().toUpperCase() === n.toUpperCase());
@@ -81,11 +82,23 @@ export class InterfaceTranspiler implements IStructureTranspiler {
 
       const constantStatement = traversal.findStatementInFile(identifier.getStart());
       const valExpression = constantStatement?.findFirstExpression(abaplint.Expressions.Value);
-      if (valExpression?.getChildren()[1].get() instanceof abaplint.Expressions.SimpleFieldChain) {
-        const s = new FieldChainTranspiler().transpile(
-          valExpression.getChildren()[1] as abaplint.Nodes.ExpressionNode, traversal, false).getCode();
-        const e = ConstantTranspiler.escape(s);
-        ret += name + ".set(" + e + ");\n";
+      // VALUE other=>constant: followed to the constant that declares the value
+      // (constant_value.ts). An interface literal is written as the literal, so interfaces
+      // naming each other's constants have no load-time edge; a class constant, which the class
+      // may set at run time, is read at load from that class, which requires.ts loads first
+      const chain = valExpression?.getChildren()[1];
+      if (chain instanceof abaplint.Nodes.ExpressionNode && chain.get() instanceof abaplint.Expressions.SimpleFieldChain) {
+        const source = constantSource(traversal.reg, chain);
+        if (source.kind === "literal") {
+          ret += name + ".set(" + ConstantTranspiler.escape(ConstantTranspiler.trimTextFieldLiteral(source.value)) + ");\n";
+        } else if (source.kind === "member") {
+          ret += name + ".set(" + memberRead(source) + ");\n";
+        } else if (source.kind === "initial") {
+          ret += name + ".set(" + traversal.toType(source.type) + ");\n";
+        } else {
+          const s = new FieldChainTranspiler().transpile(chain, traversal, false).getCode();
+          ret += name + ".set(" + ConstantTranspiler.escape(s) + ");\n";
+        }
         continue;
       }
 

@@ -1,4 +1,4 @@
-import {ABAPObject, Character, DataReference, Date, DecFloat34, FieldSymbol, Float, HashedTable, Hex, HexUInt8, Integer, Integer8, Numc, Packed, String, Structure, Table, TableAccessType, Time, XString} from "../types";
+import {ABAPObject, Character, DataReference, Date, DecFloat16, DecFloat34, FieldSymbol, Float, HashedTable, Hex, HexUInt8, Integer, Integer8, Numc, Packed, String, Structure, Table, TableAccessType, Time, XString} from "../types";
 import {ICharacter} from "../types/_character";
 import {INumeric} from "../types/_numeric";
 import {ABAP} from "..";
@@ -143,7 +143,7 @@ function tableKind(t: any): TableAccessType | undefined {
 
 // elementary types no generic type (any, data, clike, csequence, simple, numeric, c, n, x, p)
 // is transpiled to, so a field symbol of one of them is declared with that type
-const EXPLICIT_ELEMENTARY: readonly unknown[] = [Integer, Integer8, String, XString, Float, DecFloat34, Date, Time];
+const EXPLICIT_ELEMENTARY: readonly unknown[] = [Integer, Integer8, String, XString, Float, DecFloat16, DecFloat34, Date, Time];
 
 /** a system refuses an ASSIGN whose target field symbol is declared with a type the source
  *  does not have: a table of another kind is ASSIGN_TYPE_CONFLICT, an elementary type of
