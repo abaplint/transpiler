@@ -1013,4 +1013,69 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("0\n4\n0\n4\n0\n4\n0");
   });
 
+  it("FIND IN SECTION OFFSET ... LENGTH ... OF, byte mode", async () => {
+    const code = `
+      CONSTANTS lc_hmm TYPE x LENGTH 2 VALUE '7801'.
+      DATA lv_data TYPE xstring.
+      DATA lv_span TYPE i.
+      DATA lv_off TYPE i.
+      lv_data = '00AA7801BB789C7801'.
+      lv_span = 4.
+      FIND FIRST OCCURRENCE OF lc_hmm IN SECTION OFFSET 1 LENGTH lv_span OF lv_data
+        IN BYTE MODE MATCH OFFSET lv_off.
+      WRITE / sy-subrc.
+      WRITE / lv_off.
+      FIND FIRST OCCURRENCE OF lc_hmm IN SECTION OFFSET 1 LENGTH 2 OF lv_data
+        IN BYTE MODE MATCH OFFSET lv_off.
+      WRITE / sy-subrc.
+      FIND FIRST OCCURRENCE OF lc_hmm IN SECTION OFFSET 4 LENGTH 4 OF lv_data
+        IN BYTE MODE MATCH OFFSET lv_off.
+      WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n2\n4\n4");
+  });
+
+  it("FIND IN SECTION LENGTH ... OF, character mode", async () => {
+    const code = `
+      DATA lv_off TYPE i.
+      FIND 'c' IN SECTION LENGTH 2 OF 'abcabc'.
+      WRITE / sy-subrc.
+      FIND 'c' IN SECTION LENGTH 3 OF 'abcabc' MATCH OFFSET lv_off.
+      WRITE / sy-subrc.
+      WRITE / lv_off.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n0\n2");
+  });
+
+  it("FIND IN SECTION OFFSET ... LENGTH ... OF with MATCH LENGTH", async () => {
+    const code = `
+      DATA lv_off TYPE i.
+      DATA lv_len TYPE i.
+      FIND REGEX 'b+' IN SECTION OFFSET 2 LENGTH 4 OF 'abcabbb' MATCH OFFSET lv_off MATCH LENGTH lv_len.
+      WRITE / sy-subrc.
+      WRITE / lv_off.
+      WRITE / lv_len.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n4\n2");
+  });
+
+  it("FIND IN SECTION ... LENGTH beyond the data, CX_SY_RANGE_OUT_OF_BOUNDS", async () => {
+    const code = `
+      FIND 'c' IN SECTION OFFSET 1 LENGTH 5 OF 'abc'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail();
+    } catch (e) {
+      expect(e.toString()).to.contain("CX_SY_RANGE_OUT_OF_BOUNDS");
+    }
+  });
+
 });
