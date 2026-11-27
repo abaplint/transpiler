@@ -932,5 +932,164 @@ WRITE / lines( lt_sorted ).`;
     await f(abap);
     expect(abap.console.get()).to.equal("0\n1\n0\n0");
   });
+  it("DELETE TABLE WITH TABLE KEY, two components, both are compared", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         other TYPE i,
+         plain TYPE i,
+         third TYPE i,
+       END OF ty_row.
+DATA lt TYPE STANDARD TABLE OF ty_row WITH NON-UNIQUE KEY other plain.
+DATA ls TYPE ty_row.
+ls-other = 0. ls-plain = 100. ls-third = 1. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 200. ls-third = 2. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 300. ls-third = 3. INSERT ls INTO TABLE lt.
+ls-other = 1. ls-plain = 300. ls-third = 4. INSERT ls INTO TABLE lt.
+DELETE TABLE lt WITH TABLE KEY other = 0 plain = 300.
+WRITE / sy-subrc.
+LOOP AT lt INTO ls.
+  WRITE / ls-third.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n1\n2\n4");
+  });
+
+  it("DELETE TABLE WITH TABLE KEY, two components, no row has both", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         other TYPE i,
+         plain TYPE i,
+         third TYPE i,
+       END OF ty_row.
+DATA lt TYPE STANDARD TABLE OF ty_row WITH NON-UNIQUE KEY other plain.
+DATA ls TYPE ty_row.
+ls-other = 0. ls-plain = 100. ls-third = 1. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 200. ls-third = 2. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 300. ls-third = 3. INSERT ls INTO TABLE lt.
+ls-other = 1. ls-plain = 300. ls-third = 4. INSERT ls INTO TABLE lt.
+DELETE TABLE lt WITH TABLE KEY other = 0 plain = 999.
+WRITE / sy-subrc.
+LOOP AT lt INTO ls.
+  WRITE / ls-third.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n1\n2\n3\n4");
+  });
+
+  it("DELETE TABLE WITH TABLE KEY, three components, sorted table", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         other TYPE i,
+         plain TYPE i,
+         third TYPE i,
+       END OF ty_row.
+DATA lt TYPE SORTED TABLE OF ty_row WITH UNIQUE KEY other plain third.
+DATA ls TYPE ty_row.
+ls-other = 0. ls-plain = 100. ls-third = 1. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 200. ls-third = 2. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 300. ls-third = 3. INSERT ls INTO TABLE lt.
+ls-other = 1. ls-plain = 300. ls-third = 4. INSERT ls INTO TABLE lt.
+DELETE TABLE lt WITH TABLE KEY other = 0 plain = 300 third = 9.
+WRITE / sy-subrc.
+DELETE TABLE lt WITH TABLE KEY other = 0 plain = 300 third = 3.
+WRITE / sy-subrc.
+LOOP AT lt INTO ls.
+  WRITE / ls-third.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n0\n1\n2\n4");
+  });
+
+  it("DELETE TABLE WITH TABLE KEY, two components, hashed table", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         other TYPE i,
+         plain TYPE i,
+         third TYPE i,
+       END OF ty_row.
+DATA lt TYPE HASHED TABLE OF ty_row WITH UNIQUE KEY other plain.
+DATA ls TYPE ty_row.
+ls-other = 0. ls-plain = 100. ls-third = 1. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 200. ls-third = 2. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 300. ls-third = 3. INSERT ls INTO TABLE lt.
+ls-other = 1. ls-plain = 300. ls-third = 4. INSERT ls INTO TABLE lt.
+DELETE TABLE lt WITH TABLE KEY other = 0 plain = 999.
+WRITE / sy-subrc.
+DELETE TABLE lt WITH TABLE KEY plain = 300 other = 0.
+WRITE / sy-subrc.
+LOOP AT lt INTO ls.
+  WRITE / ls-third.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n0\n1\n2\n4");
+  });
+
+  it("DELETE TABLE WITH TABLE KEY name COMPONENTS, two components", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         other TYPE i,
+         plain TYPE i,
+         third TYPE i,
+       END OF ty_row.
+DATA lt TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY WITH NON-UNIQUE SORTED KEY k COMPONENTS other plain.
+DATA ls TYPE ty_row.
+ls-other = 0. ls-plain = 100. ls-third = 1. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 200. ls-third = 2. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 300. ls-third = 3. INSERT ls INTO TABLE lt.
+ls-other = 1. ls-plain = 300. ls-third = 4. INSERT ls INTO TABLE lt.
+DELETE TABLE lt WITH TABLE KEY k COMPONENTS other = 0 plain = 300.
+WRITE / sy-subrc.
+LOOP AT lt INTO ls.
+  WRITE / ls-third.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n1\n2\n4");
+  });
+
+  it("DELETE TABLE WITH TABLE KEY, two components, values from a calculation and a method call", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS three_hundred RETURNING VALUE(rv_value) TYPE i.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD three_hundred.
+    rv_value = 300.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+TYPES: BEGIN OF ty_row,
+         other TYPE i,
+         plain TYPE i,
+         third TYPE i,
+       END OF ty_row.
+DATA lt TYPE STANDARD TABLE OF ty_row WITH NON-UNIQUE KEY other plain.
+DATA ls TYPE ty_row.
+ls-other = 0. ls-plain = 100. ls-third = 1. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 200. ls-third = 2. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 300. ls-third = 3. INSERT ls INTO TABLE lt.
+ls-other = 1. ls-plain = 300. ls-third = 4. INSERT ls INTO TABLE lt.
+DATA lv TYPE i VALUE 1.
+DELETE TABLE lt WITH TABLE KEY other = lv - 1 plain = lcl=>three_hundred( ).
+WRITE / sy-subrc.
+LOOP AT lt INTO ls.
+  WRITE / ls-third.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n1\n2\n4");
+  });
 
 });
