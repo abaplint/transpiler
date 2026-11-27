@@ -6,6 +6,7 @@ import {Hex} from "./hex";
 import {Integer} from "./integer";
 import {Integer8} from "./integer8";
 import {Packed} from "./packed";
+import {Numc} from "./numc";
 import {Structure} from "./structure";
 import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
@@ -48,10 +49,14 @@ export class String implements ICharacter {
     } else if (typeof value === "string") {
       this.value = value;
     } else if (typeof value === "number") {
-      this.value = value.toString();
+      // an enum value is the position of its constant, the first one is the initial value
+      this.value = this.enumValues !== undefined && value === 0 ? "" : value.toString();
     } else if (value instanceof Character) {
       // replace trailing blanks if the source is a Character string
       this.value = value.getTrimEnd();
+    } else if (value instanceof Numc) {
+      // after a character statement n can end with blanks, they are dropped as for c
+      this.value = value.get().trimEnd();
     } else if (value instanceof Structure) {
       this.value = value.getCharacter().trimEnd();
     } else if (value instanceof Packed) {
@@ -59,6 +64,9 @@ export class String implements ICharacter {
       const lv_sign = fixed.startsWith("-") ? "-" : " ";
       this.value = (fixed.startsWith("-") ? fixed.slice(1) : fixed) + lv_sign;
     } else if (value instanceof Integer) {
+      if (this.enumValues !== undefined) {
+        return this.set(value.get());
+      }
       const lv_sign = (value as Integer).get() >= 0 ? " " : "-";
       this.value = Math.abs((value as Integer).get()) + "";
       this.value += lv_sign;

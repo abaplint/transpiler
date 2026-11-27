@@ -176,10 +176,8 @@ WRITE lv_i.`;
     expect(await runAndOutput(code)).to.equal("4");
   });
 
-  // Calculation type f: a system gives 3.5. The runtime gives 3 (its divide() truncates
-  // with int8 operands); that is a separate defect, this pins that the int8 rounding of
-  // this change does not reach an f target
-  it("UNMEASURED: int8 / int8 into f, today's value 3", async () => {
+  // Calculation type f: checked on a system, 3.5; the int8 rounding does not reach an f target
+  it("int8 / int8 into f", async () => {
     const code = `
 DATA lv_x TYPE int8.
 DATA lv_y TYPE int8.
@@ -187,13 +185,13 @@ DATA lv_f TYPE f.
 lv_x = 7.
 lv_y = 2.
 lv_f = lv_x / lv_y.
-ASSERT lv_f = 3.`;
+ASSERT lv_f = '3.5'.`;
     await runAndOutput(code);
   });
 
-  // Calculation type p: a system gives 3.5 into p DECIMALS 1. The runtime gives 3, the
-  // same separate defect; this pins that the int8 rounding does not reach a p target
-  it("UNMEASURED: int8 / int8 into p, today's value 3", async () => {
+  // Calculation type p: checked on a system, 3.5 into p DECIMALS 1; the int8 rounding
+  // does not reach a p target
+  it("int8 / int8 into p", async () => {
     const code = `
 DATA lv_x TYPE int8.
 DATA lv_y TYPE int8.
@@ -201,7 +199,7 @@ DATA lv_p TYPE p LENGTH 8 DECIMALS 1.
 lv_x = 7.
 lv_y = 2.
 lv_p = lv_x / lv_y.
-ASSERT lv_p = 3.`;
+ASSERT lv_p = '3.5'.`;
     await runAndOutput(code);
   });
 
@@ -238,6 +236,104 @@ lv_a = 46340.
 lv_i = lv_a * lv_a.
 WRITE lv_i.`;
     expect(await runAndOutput(code)).to.equal("2147395600");
+  });
+
+});
+
+// f takes precedence over int8 in the calculation type: an operation with an f operand and an
+// int8 operand is calculated in f, also when the int8 comes first. The results are compared
+// with f values, as the output of an f is a separate matter.
+describe("Running Examples - int8 with f operands, calculation type f", () => {
+
+  beforeEach(async () => {
+    abap = new ABAP({console: new MemoryConsole()});
+  });
+
+  it("+, -, *, / with a fraction", async () => {
+    const code = `
+DATA n TYPE int8 VALUE 3.
+DATA half TYPE f VALUE '0.5'.
+DATA quarter TYPE f VALUE '0.25'.
+DATA result TYPE f.
+DATA expected TYPE f.
+result = n * half.
+expected = '1.5'.
+WRITE / boolc( result = expected ).
+result = n + half.
+expected = '3.5'.
+WRITE / boolc( result = expected ).
+result = n - half.
+expected = '2.5'.
+WRITE / boolc( result = expected ).
+result = n / half.
+expected = 6.
+WRITE / boolc( result = expected ).
+result = ( n + n ) * quarter.
+expected = '1.5'.
+WRITE / boolc( result = expected ).
+result = half * n.
+expected = '1.5'.
+WRITE / boolc( result = expected ).
+result = half - n.
+expected = '-2.5'.
+WRITE / boolc( result = expected ).`;
+    expect((await runAndOutput(code)).trim().split("\n")).to.deep.equal(["X", "X", "X", "X", "X", "X", "X"]);
+  });
+
+  it("int8 target, the f result is rounded", async () => {
+    const code = `
+DATA n TYPE int8 VALUE 3.
+DATA half TYPE f VALUE '0.5'.
+DATA r8 TYPE int8.
+r8 = n * half.
+WRITE r8.`;
+    expect(await runAndOutput(code)).to.equal("2");
+  });
+
+  it("DIV, MOD, **", async () => {
+    const code = `
+DATA n TYPE int8 VALUE 7.
+DATA two TYPE f VALUE 2.
+DATA half TYPE f VALUE '0.5'.
+DATA result TYPE f.
+DATA expected TYPE f.
+result = n DIV two.
+expected = 3.
+WRITE / boolc( result = expected ).
+result = n MOD two.
+expected = 1.
+WRITE / boolc( result = expected ).
+result = n ** half.
+expected = sqrt( 7 ).
+WRITE / boolc( result = expected ).`;
+    expect((await runAndOutput(code)).trim().split("\n")).to.deep.equal(["X", "X", "X"]);
+  });
+
+  it("integral f, no int8 division", async () => {
+    const code = `
+DATA n TYPE int8 VALUE 7.
+DATA f52 TYPE f.
+DATA result TYPE f.
+DATA expected TYPE f.
+f52 = 2 ** 52.
+result = n / f52 * f52.
+expected = 7.
+WRITE / boolc( result = expected ).
+result = ( f52 + n ) / f52.
+expected = 1 + 7 / f52.
+WRITE / boolc( result = expected ).`;
+    expect((await runAndOutput(code)).trim().split("\n")).to.deep.equal(["X", "X"]);
+  });
+
+  it("int8 beyond 2^53 is rounded to f", async () => {
+    const code = `
+DATA big TYPE int8.
+DATA half TYPE f VALUE '0.5'.
+DATA r8 TYPE int8.
+big = 1152921504606846977.
+r8 = big * half.
+WRITE r8.`;
+    expect(await runAndOutput(code)).to.equal("576460752303423488");
   });
 
 });

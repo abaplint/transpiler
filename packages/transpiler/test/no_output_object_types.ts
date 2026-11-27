@@ -11,13 +11,16 @@ const testFiles: {[filename: string]: string} = {
 annotate view ZDDLS with
 {
 }`,
-  "zddls.ddls.asddls": `define abstract entity ZDDLS { key mandt : abap.clnt; }`,
   "zbdef.bdef.asbdef": `managed implementation in class zbp_example unique;
 define behavior for ZDDLS
 {
 }`,
   "zsrvd.srvd.srvdsrv": `define service ZSRVD {
   expose ZDDLS;
+}`,
+  "zdcls.dcls.asdcls": `@MappingRole: true
+define role ZDCLS {
+  grant select on ZDDLS;
 }`,
   "zaplo.aplo.xml": abapgitXML,
   "zsajc.sajc.xml": abapgitXML,

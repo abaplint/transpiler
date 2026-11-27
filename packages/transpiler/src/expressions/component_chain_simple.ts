@@ -16,6 +16,8 @@ export class ComponentChainSimpleTranspiler implements IExpressionTranspiler {
     const offset: string[] = [];
     let ret = new Chunk();
     let prefix = this.prefix;
+    // a structure component keeps its name as the key, an attribute after "->" is an escaped identifier
+    let attribute = false;
 
     for (const c of node.getChildren()) {
       const type = c.get();
@@ -26,7 +28,10 @@ export class ComponentChainSimpleTranspiler implements IExpressionTranspiler {
         if (interfaceName && field.startsWith(interfaceName) === false) {
           field = interfaceName + "$" + field;
         }
-        field = Traversal.escapeNamespace(field)!.replace("~", "$");
+        if (attribute || interfaceName) {
+          field = Traversal.escapeNamespace(field)!;
+        }
+        field = field.replace("~", "$");
         if (Traversal.isBracketComponent(field)) {
           ret.append(prefix.replace(/\.$/, "") + `["${field}"]`, c, traversal);
         } else {
@@ -36,6 +41,7 @@ export class ComponentChainSimpleTranspiler implements IExpressionTranspiler {
       } else if (type instanceof Expressions.ArrowOrDash) {
         ret.append(".get()", c, traversal);
         prefix = ".";
+        attribute = c.concatTokens() !== "-";
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.FieldOffset) {
         offset.push("offset: " + new FieldOffsetTranspiler().transpile(c, traversal).getCode());
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.FieldLength) {

@@ -28,7 +28,7 @@ describe("Single statements", () => {
     {abap: "IF foo CP 'bar*'. ENDIF.",             js: "if (abap.compare.cp(foo, abap.CharacterFactory.get(4, 'bar*'))) {\n}",    skip: false},
     {abap: "IF item IS INITIAL AND NOT ( foo = bar AND bar = moo ). ENDIF.",             js: "if (abap.compare.initial(item) && !(abap.compare.eq(foo, bar) && abap.compare.eq(bar, moo))) {\n}",    skip: false},
     {abap: "CONTINUE.",                            js: "continue;",                                 skip: false},
-    {abap: "IMPORT variscreens = lt_variscreens FROM MEMORY ID '%_SCRNR_%'.",                       js: `throw new Error("Import, transpiler todo");`,                                 skip: false},
+    {abap: "IMPORT variscreens = lt_variscreens FROM MEMORY ID '%_SCRNR_%'.",                       js: `abap.statements.importCluster({medium: "MEMORY", id: abap.CharacterFactory.get(9, '%_SCRNR_%'), parameters: {"VARISCREENS": lt_variscreens}});`, skip: false},
     {abap: "CASE bar. ENDCASE.",                   js: "let unique1 = bar;",                        skip: false},
     {abap: "DATA foo TYPE c.",                     js: "let foo = new abap.types.Character(1);",     skip: false},
     {abap: "DATA foo TYPE string.",                js: `let foo = new abap.types.String({qualifiedName: "STRING"});`,      skip: false},
@@ -164,6 +164,13 @@ describe("Single statements", () => {
     {abap: "RAISE EXCEPTION instance.", js: `throw instance.get();`, skip: false},
     {abap: "CLASS ltcl_test DEFINITION DEFERRED.", js: ``, skip: false},
     {abap: "CLASS sdfsdf DEFINITION LOCAL FRIENDS ltcl_test ltcl_split_text.", js: ``, skip: false},
+    {abap: "FIELDS foo.", js: ``, skip: false},
+    {abap: "FORM foo DEFINITION.", js: ``, skip: false},
+    {abap: "INTERFACE zif_foo DEFERRED PUBLIC.", js: ``, skip: false},
+    {abap: "INTERFACE zif_foo LOAD.", js: ``, skip: false},
+    {abap: "TYPE-POOL zfoo.", js: ``, skip: false},
+    {abap: "SET RUN TIME ANALYZER ON.", js: ``, skip: false},
+    {abap: "SET RUN TIME CLOCK RESOLUTION LOW.", js: `abap.statements.setRunTimeClock("LOW");`, skip: false},
     {abap: "WAIT UP TO 1 SECONDS.", js: `await abap.statements.wait({seconds: abap.IntegerFactory.get(1)});`, skip: false},
     {abap: "if_bar~field = 2.",                      js: `if_bar$field.set(abap.IntegerFactory.get(2));`, skip: false},
     {abap: "IF if_bar~field IS NOT INITIAL. ENDIF.", js: `if (abap.compare.initial(if_bar$field) === false) {\n}`, skip: false},
@@ -264,6 +271,10 @@ await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",resultXML: rv_
       SOURCE XML mi_xml_doc
       RESULT (lt_rtab).`, js: `if (abap.Classes['KERNEL_CALL_TRANSFORMATION'] === undefined) throw new Error("CallTransformation, kernel class missing");
 await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",sourceXML: mi_xml_doc,options: {value_handling:abap.CharacterFactory.get(16, 'accept_data_loss')},result: (lt_rtab)});`},
+    {abap: `CALL TRANSFORMATION id
+      SOURCE XML mi_xml_doc
+      RESULT (lt_rtab[]).`, js: `if (abap.Classes['KERNEL_CALL_TRANSFORMATION'] === undefined) throw new Error("CallTransformation, kernel class missing");
+await abap.Classes['KERNEL_CALL_TRANSFORMATION'].call({name: "id",sourceXML: mi_xml_doc,result: (lt_rtab)});`},
     {abap: `CALL TRANSFORMATION id
       OPTIONS initial_components = 'suppress'
       SOURCE (lt_stab)
@@ -399,6 +410,7 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({object: obj,user: usr,fields:
     {abap: "lo_foo ?= lo_bar.", js: 'await abap.statements.cast(lo_foo, lo_bar, {"INTERNAL_FILENAME": "zfoobar.prog.abap","INTERNAL_LINE": 1});', skip: false},
 
     {abap: "RETRY.", js: `throw new Error("RETRY, not supported, transpiler");`, skip: false},
+    {abap: "RESUME.", js: `throw new Error("RESUME, not supported, transpiler");`, skip: false},
 
     {abap: "STOP.", js: `throw new Error("STOP, not supported, transpiler");`, skip: false},
     {abap: "SET CURSOR FIELD foo.", js: `throw new Error("SET CURSOR, not supported, transpiler");`, skip: false},
@@ -459,7 +471,9 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({object: obj,user: usr,fields:
     {abap: "REJECT 'SPFLI'.", js: `throw new Error("REJECT, not supported, transpiler");`, skip: false},
     {abap: "CHECK SELECT-OPTIONS.", js: `throw new Error("CHECK SELECT-OPTIONS, not supported, transpiler");`, skip: false},
     {abap: "INFOTYPES 0001.", js: `throw new Error("INFOTYPES, not supported, transpiler");`, skip: false},
-    {abap: "DELETE FROM DATABASE indx(zz) ID 'FOO'.", js: `throw new Error("DELETE CLUSTER, not supported, transpiler");`, skip: false},
+    {abap: "DELETE FROM DATABASE indx(zz) ID 'FOO'.", js: `abap.statements.deleteCluster({medium: "DATABASE", table: "INDX", area: "ZZ", id: abap.CharacterFactory.get(3, 'FOO')});`, skip: false},
+    {abap: "IMPORT foo = bar FROM INTERNAL TABLE itab.", js: `throw new Error("Import, transpiler todo");`, skip: false},
+    {abap: "EXPORT foo = bar TO INTERNAL TABLE itab.", js: `throw new Error("Export, transpiler todo");`, skip: false},
     {abap: "GENERATE REPORT lv_name.", js: `throw new Error("GENERATE REPORT, not supported, transpiler");`, skip: false},
     {abap: "LOAD REPORT lv_name PART 'HEAD' INTO lt_head.", js: `throw new Error("LOAD REPORT, not supported, transpiler");`, skip: false},
     {abap: "GENERATE DYNPRO ls_h lt_f lt_e lt_m ID lv_id MESSAGE lv_mess LINE lv_line WORD lv_word.", js: `throw new Error("GENERATE DYNPRO, not supported, transpiler");`, skip: false},
@@ -530,6 +544,10 @@ await abap.Classes['KERNEL_RAP_EML'].commit({});`, skip: false},
 await abap.Classes['KERNEL_RAP_EML'].commit({bdef: new abap.types.String().set("ZI_NOTE"), failed: ls_failed, reported: ls_reported});`, skip: false},
     {abap: "COMMIT ENTITIES IN SIMULATION MODE.",
       js: `throw new Error("CommitEntities SIMULATION, not supported, transpiler");`, skip: false},
+    {abap: "GET BADI lo_badi.", js: `throw new Error("GET BADI, not supported, transpiler");`, skip: false},
+    {abap: "CALL BADI lo_badi->run EXPORTING iv_foo = lv_foo.", js: `throw new Error("CALL BADI, not supported, transpiler");`, skip: false},
+    {abap: "RAISE ENTITY EVENT zi_foo~created FROM lt_events.", js: `throw new Error("RAISE ENTITY EVENT, not supported, transpiler");`, skip: false},
+    {abap: "GET PERMISSIONS ONLY GLOBAL ENTITY zi_foo REQUEST ls_request RESULT ls_result FAILED ls_failed REPORTED ls_reported.", js: `throw new Error("GET PERMISSIONS, not supported, transpiler");`, skip: false},
     {abap: "ROLLBACK ENTITIES.",
       js: `if (abap.Classes['KERNEL_RAP_EML'] === undefined) throw new Error("RollbackEntities, kernel class missing");
 await abap.Classes['KERNEL_RAP_EML'].rollback();`, skip: false},

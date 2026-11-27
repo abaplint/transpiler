@@ -84,10 +84,30 @@ ENDCLASS.`;
     expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("Native SQL, not supported, transpiler");`);
   });
 
-  it("SELECT SINGLE FOR UPDATE, runtime error", async () => {
-    const abap = `SELECT SINGLE FOR UPDATE * FROM t100 INTO ls_result.`;
+  it("SELECT SINGLE FOR UPDATE, transpiled as SELECT SINGLE, one warning with file and line", async () => {
+    const plain = `
+    WRITE 'hello'.
+    SELECT SINGLE * FROM t100 INTO ls_result WHERE arbgb = 'ZAG_UNIT_TEST'.`;
+    const abap = plain.replace("SELECT SINGLE *", "SELECT SINGLE FOR UPDATE *");
 
-    expect(await runSingle(abap, {ignoreSyntaxCheck: true})).to.include(`throw new Error("SELECT SINGLE FOR UPDATE, not supported, transpiler");`);
+    const warnings: string[] = [];
+    const original = console.warn;
+    console.warn = (...args: any[]) => { warnings.push(args.join(" ")); };
+    let js: string | undefined;
+    let expected: string | undefined;
+    try {
+      js = await runSingle(abap, {ignoreSyntaxCheck: true});
+      const count = warnings.length;
+      expected = await runSingle(plain, {ignoreSyntaxCheck: true});
+      expect(warnings.length).to.equal(count);
+    } finally {
+      console.warn = original;
+    }
+
+    expect(js).to.include(`await abap.statements.select(`);
+    expect(js).to.not.include("FOR UPDATE");
+    expect(js).to.equal(expected);
+    expect(warnings).to.deep.equal(["zfoobar.prog.abap:3: warning, SELECT SINGLE FOR UPDATE, the row lock is not taken, transpiled as SELECT SINGLE"]);
   });
 
   it("WITH, runtime error", async () => {
@@ -130,6 +150,20 @@ abap.Classes['PROG-ZFOOBAR-LIF_FOOBAR'] = lif_foobar;`;
   END OF ty_header.`;
 
     expect(await runSingle(abap)).to.equal("");
+  });
+
+  it("TYPES BEGIN OF MESH should be skipped", async () => {
+    const abap = `
+    TYPES: BEGIN OF ty_line,
+             key TYPE i,
+           END OF ty_line.
+    TYPES ty_tab TYPE SORTED TABLE OF ty_line WITH UNIQUE KEY key.
+    TYPES: BEGIN OF MESH ty_mesh,
+             node1 TYPE ty_tab ASSOCIATION to_node2 TO node2 ON key = key,
+             node2 TYPE ty_tab,
+           END OF MESH ty_mesh.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true, skipVersionCheck: true})).to.equal(``);
   });
 
   it("Simple class, 1", async () => {
@@ -761,6 +795,13 @@ abap.Forms['PROG-ZFOOBAR-FOO'] = foo;`;
     INSERT demo_expressions FROM @( VALUE #( id = 'F' ) ).`;
 
     expect(await runSingle(abap, {ignoreSyntaxCheck: true, skipVersionCheck: true, unknownTypes: UnknownTypesEnum.runtimeError})).to.include(`throw new Error("Unknown type: TypeNameOrInfer, type not found: #`);
+  });
+
+  it("SET LOCKS, runtime error", async () => {
+    const abap = `
+    SET LOCKS OF zi_foo ENTITY ent FROM lt_keys FAILED ls_failed REPORTED ls_reported.`;
+
+    expect(await runSingle(abap, {ignoreSyntaxCheck: true, skipVersionCheck: true})).to.equal(`throw new Error("SET LOCKS, not supported, transpiler");`);
   });
 
   it("Upper case method impl name, should transpile to lower", async () => {
