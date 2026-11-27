@@ -3476,4 +3476,34 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("one");
   });
 
+  it("structured constant, namespaced components", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CONSTANTS: BEGIN OF gc,
+                 /foo/comp TYPE string VALUE 'ns',
+                 BEGIN OF /foo/sub,
+                   /foo/deep TYPE string VALUE 'd' & 'p',
+                 END OF /foo/sub,
+                 plain TYPE string VALUE 'pl',
+               END OF gc.
+    CLASS-METHODS m RETURNING VALUE(r) TYPE string.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD m.
+    r = gc-/foo/comp.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  WRITE / lcl=>m( ).
+  WRITE / lcl=>gc-/foo/sub-/foo/deep.
+  WRITE / lcl=>gc-plain.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ns\ndp\npl");
+  });
+
 });

@@ -531,6 +531,37 @@ define view entity ZI_MSG as select from t100
     });
   });
 
+  it("SELECT SINGLE FOR UPDATE, reads the row", async () => {
+    const code = `
+    DATA ls_result TYPE t100.
+    SELECT SINGLE FOR UPDATE * FROM t100 INTO ls_result
+      WHERE sprsl = 'E' AND arbgb = 'ZAG_UNIT_TEST' AND msgnr = '000'.
+    WRITE / sy-subrc.
+    WRITE / ls_result-text.
+    SELECT SINGLE FOR UPDATE * FROM t100 INTO ls_result
+      WHERE sprsl = 'E' AND arbgb = 'ZAG_UNIT_TEST' AND msgnr = '999'.
+    WRITE / sy-subrc.`;
+    const files = [
+      {filename: "zfoobar.prog.abap", contents: code},
+      {filename: "t100.tabl.xml", contents: tabl_t100xml},
+      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+    // the transpiler warns that the row lock is not taken, once per statement and per database
+    const warnings: string[] = [];
+    const original = console.warn;
+    console.warn = (...args: any[]) => { warnings.push(args.join(" ")); };
+    try {
+      await runAllDatabases(abap, files, () => {
+        expect(abap.console.get().split("\n").map(l => l.trim())).to.deep.equal(["0", "hello world", "4"]);
+      });
+    } finally {
+      console.warn = original;
+    }
+    expect(warnings.length).to.be.greaterThan(0);
+    for (const w of warnings) {
+      expect(w).to.match(/^zfoobar\.prog\.abap:(3|7): warning, SELECT SINGLE FOR UPDATE, the row lock is not taken/);
+    }
+  });
+
   it("SELECT SINGLE, WHERE char constant", async () => {
     const code = `
     DATA ls_result TYPE t100.

@@ -71,7 +71,7 @@ export class InterfaceTranspiler implements IStructureTranspiler {
         continue;
       }
       const interfaceName = Traversal.escapeNamespace(node.getFirstToken().getStr().toLowerCase());
-      const name = interfaceName + "." + interfaceName + "$" + n.toLowerCase();
+      const name = interfaceName + "." + interfaceName + "$" + Traversal.escapeNamespace(n.toLowerCase());
       ret += name + " = " + traversal.toType(identifier.getType()) + ";\n";
 
       const alias = idef?.getAliases().find(a => a.getName().toUpperCase() === n.toUpperCase());

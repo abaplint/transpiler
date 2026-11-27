@@ -393,4 +393,38 @@ WRITE lv_line.`;
     await f(abap);
     expect(abap.console.get()).to.equal("-1 0");
   });
+
+  it("components with a namespace", async () => {
+    const code = `
+TYPES: BEGIN OF ty_sub,
+         /foo/comp TYPE i,
+       END OF ty_sub.
+TYPES: BEGIN OF ty_row,
+         /foo/comp TYPE i,
+         /foo/two  TYPE i,
+         plain     TYPE i,
+         sub       TYPE ty_sub,
+       END OF ty_row.
+DATA lt TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY.
+DATA ls TYPE ty_row.
+DATA lv TYPE i VALUE 2.
+ls-/foo/comp = 1. ls-/foo/two = 10. ls-plain = 100. ls-sub-/foo/comp = 7. APPEND ls TO lt.
+ls-/foo/comp = 2. ls-/foo/two = 20. ls-plain = 200. ls-sub-/foo/comp = 8. APPEND ls TO lt.
+ls-/foo/comp = 3. ls-/foo/two = 30. ls-plain = 300. ls-sub-/foo/comp = 9. APPEND ls TO lt.
+CLEAR ls.
+ls = lt[ /foo/comp = lv ].
+WRITE / ls-plain.
+ls = lt[ /foo/comp = 3 /foo/two = 30 ].
+WRITE / ls-plain.
+IF line_exists( lt[ sub-/foo/comp = 7 ] ).
+  WRITE / 'yes'.
+ENDIF.
+IF line_exists( lt[ /foo/comp = 4 ] ).
+  WRITE / 'no'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("200\n300\nyes");
+  });
 });

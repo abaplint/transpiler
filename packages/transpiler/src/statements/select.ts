@@ -23,7 +23,9 @@ export class SelectTranspiler implements IStatementTranspiler {
     } else if (node.findDirectTokenByText("DISTINCT") !== undefined) {
       throw new Error("SelectTranspiler, UNION DISTINCT todo");
     } else if (node.findDirectExpression(abaplint.Expressions.Select)?.findDirectTokenByText("UPDATE") !== undefined) {
-      return new Chunk(`throw new Error("SELECT SINGLE FOR UPDATE, not supported, transpiler");`);
+      // no row lock is requested from the database, the statement runs as the SELECT SINGLE without the addition
+      console.warn(traversal.getFilename() + ":" + node.getFirstToken().getStart().getRow() +
+        ": warning, SELECT SINGLE FOR UPDATE, the row lock is not taken, transpiled as SELECT SINGLE");
     }
 
     let target = "undefined";
