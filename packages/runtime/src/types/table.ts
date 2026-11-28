@@ -323,6 +323,15 @@ export class HashedTable implements ITable {
     throw new Error("HashedTable, deleteIndex");
   }
 
+  /** the row the one LOOP over this table stands on, for the short form DELETE itab */
+  public getCurrentLoopRow(): TableRowType {
+    if (this.loops.size !== 1) {
+      throw new Error("More than one LOOP");
+    }
+    const loop = Array.from(this.loops)[0];
+    return loop.array[loop.index];
+  }
+
   /** returns true if a row with the key of the given row was found and deleted */
   public deleteFrom(row: TableRowType): boolean {
     const hash = this.buildHashFromData(row);

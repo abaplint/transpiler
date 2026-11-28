@@ -1194,6 +1194,53 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("0\n4\n10\n30");
   });
 
+  it("DELETE, short form in LOOP, hashed table", async () => {
+    const code = `
+DATA lt TYPE HASHED TABLE OF i WITH UNIQUE KEY table_line.
+DATA lv TYPE i.
+INSERT 10 INTO TABLE lt.
+INSERT 20 INTO TABLE lt.
+INSERT 30 INTO TABLE lt.
+LOOP AT lt INTO lv.
+  IF lv = 20.
+    DELETE lt.
+  ENDIF.
+ENDLOOP.
+WRITE / lines( lt ).
+LOOP AT lt INTO lv.
+  WRITE / lv.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2\n10\n30");
+  });
+
+  it("DELETE, short form in LOOP, hashed table, structured key, every row", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         other TYPE i,
+         plain TYPE c LENGTH 1,
+         value TYPE i,
+       END OF ty_row.
+DATA lt TYPE HASHED TABLE OF ty_row WITH UNIQUE KEY other plain.
+DATA ls LIKE LINE OF lt.
+DATA lv_seen TYPE i.
+ls-other = 1. ls-plain = 'a'. ls-value = 5. INSERT ls INTO TABLE lt.
+ls-other = 1. ls-plain = 'b'. ls-value = 6. INSERT ls INTO TABLE lt.
+ls-other = 2. ls-plain = 'a'. ls-value = 7. INSERT ls INTO TABLE lt.
+LOOP AT lt INTO ls.
+  lv_seen = lv_seen + 1.
+  DELETE lt.
+ENDLOOP.
+WRITE / lv_seen.
+WRITE / lines( lt ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("3\n0");
+  });
+
   it("DELETE TABLE FROM field symbol, hashed table, sy-subrc", async () => {
     const code = `
 TYPES: BEGIN OF ty_row,
