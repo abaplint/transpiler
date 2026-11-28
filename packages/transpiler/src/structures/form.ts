@@ -3,6 +3,7 @@ import {IStructureTranspiler} from "./_structure_transpiler";
 import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {InlineDeclarations} from "../inline";
+import {ClassConstructors} from "../class_constructors";
 import {LocalTranspiler} from "../statements/local";
 
 export class FormTranspiler implements IStructureTranspiler {
@@ -23,6 +24,7 @@ export class FormTranspiler implements IStructureTranspiler {
       if (c.get() instanceof abaplint.Statements.Form) {
         const declare = InlineDeclarations.buildDeclarations(node, traversal);
         ret.appendString(declare);
+        ret.appendString(ClassConstructors.entryChecks(node, traversal));
         if (local) {
           ret.appendString(local.open);
         }

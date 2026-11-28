@@ -1,3 +1,4 @@
+import {ClassConstructors} from "../class_constructors";
 import {Nodes, Expressions} from "@abaplint/core";
 import * as abaplint from "@abaplint/core";
 import {IExpressionTranspiler} from "./_expression_transpiler";
@@ -51,7 +52,10 @@ export class NewObjectTranspiler implements IExpressionTranspiler {
       }
 
       const clas = traversal.lookupClassOrInterface(type.getIdentifierName(), node.getFirstToken());
-      ret.appendString(traversal.toType(type) + ".set(await (new " + clas + "()).constructor_(" + para + "))");
+      const classScope = traversal.findCurrentScopeByToken(node.getFirstToken());
+      const classDef = traversal.findClassDefinition(type.getIdentifierName(), classScope);
+      const cctor = ClassConstructors.inChain(classDef, traversal, classScope) ? ClassConstructors.checkExpression(clas) + " && " : "";
+      ret.appendString(traversal.toType(type) + ".set(await (" + cctor + "new " + clas + "()).constructor_(" + para + "))");
     } else {
       if (typeNameOrInfer.concatTokens() === "#" && type instanceof abaplint.BasicTypes.DataReference) {
         // NEW #( ) infers the type of the target, a data reference: the new data object has the referenced type

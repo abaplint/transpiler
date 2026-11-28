@@ -711,6 +711,7 @@ if (unique1 === undefined && abap.Classes['KERNEL_INTERNAL_NAME'] !== undefined)
     unique1 = abap.Classes[unique2.get().trimEnd()];
 }
 if (unique1 === undefined) { throw await new abap.Classes['CX_SY_CREATE_OBJECT_ERROR']().constructor_({classname: new abap.types.String().set('ZCL_BLAH'.trimEnd())}); }
+await abap.classConstructor(unique1);
 blah.set(await (new unique1()).constructor_());`;
     expect(await runSingle(abap)).to.equal(expected);
   });

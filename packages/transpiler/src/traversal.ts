@@ -1,3 +1,4 @@
+import {ClassConstructors} from "./class_constructors";
 import * as abaplint from "@abaplint/core";
 import * as StatementTranspilers from "./statements";
 import * as ExpressionTranspilers from "./expressions";
@@ -1355,6 +1356,10 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
       if (programLevel === true) {
         ret.appendString(InlineDeclarations.buildDeclarations(c, this, true));
       }
+      if (programLevel === true && !(c instanceof abaplint.Nodes.StructureNode && Traversal.isDeclaration(c))) {
+        // program level code has no procedure entry, the checks go before each statement
+        ret.appendString(ClassConstructors.entryChecks(c, this));
+      }
       if (c instanceof abaplint.Nodes.StructureNode && Traversal.isDeclaration(c) === false) {
         ret.appendChunk(this.declareNestedEarly(c));
         this.blockDepth++;
@@ -1472,6 +1477,7 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
           ret.appendChunk(this.traverse(n));
         } else if (n instanceof abaplint.Nodes.StructureNode) {
           ret.appendChunk(this.declareNestedEarly(n));
+          main.appendString(ClassConstructors.entryChecks(n, this));
           this.blockDepth++;
           try {
             main.appendChunk(this.traverseStructure(n));
@@ -1479,6 +1485,7 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
             this.blockDepth--;
           }
         } else {
+          main.appendString(ClassConstructors.entryChecks(n, this));
           main.appendChunk(this.traverse(n));
         }
       }

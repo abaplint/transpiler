@@ -4,6 +4,7 @@ import {Traversal} from "../traversal";
 import {Chunk} from "../chunk";
 import {UniqueIdentifier} from "../unique_identifier";
 import {InlineDeclarations} from "../inline";
+import {ClassConstructors} from "../class_constructors";
 import {LocalTranspiler} from "../statements/local";
 
 export class FunctionModuleTranspiler implements IStructureTranspiler {
@@ -21,6 +22,7 @@ export class FunctionModuleTranspiler implements IStructureTranspiler {
         chunk.append(`async function ${Traversal.escapeNamespace(name)}(INPUT) {\n`, c, traversal);
         chunk.appendString(this.findSignature(traversal, name, c));
         chunk.appendString(InlineDeclarations.buildDeclarations(node, traversal));
+        chunk.appendString(ClassConstructors.entryChecks(node, traversal));
         if (local) {
           chunk.appendString(local.open);
         }
