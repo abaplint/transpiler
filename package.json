@@ -12,6 +12,7 @@
         "performance": "npm run compile && node --expose-gc build/performance/index.js",
         "performance:output": "npm run compile && node --expose-gc build/performance/output_writer.js",
         "test": "npm run compile && mocha --timeout 60000 && npm run lint",
+        "test:ci": "npm run compile && mocha --timeout 60000 --reporter spec && npm run lint",
         "regression": "node .github/regression/regression.js",
         "link-local": "npm run link:transpiler && npm run link:cli && npm run link:runtime && npm run link:rfc-client-soap-xml && npm run link:database-sqlite && npm run link:database-pg && npm run link:database-snowflake && npm run link:database-hdb",
         "link:transpiler": "cd packages/transpiler && npm link",
@@ -46,7 +47,7 @@
     },
     "homepage": "https://github.com/abaplint/transpiler_poc#readme",
     "devDependencies": {
-        "@abaplint/core": "^2.120.121",
+        "@abaplint/core": "^2.120.125",
         "@eslint/compat": "^2.1.1",
         "@eslint/eslintrc": "^3.3.7",
         "@eslint/js": "^9.39.5",
