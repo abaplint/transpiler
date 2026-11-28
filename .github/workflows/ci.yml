@@ -19,7 +19,7 @@ jobs:
     - run: npm run docker:start
     - run: npm run install
     - run: npm run link-local
-    - run: npm test
+    - run: npm run test:ci
     - run: npm run schema
       working-directory: packages/cli
     - name: prepare schema.abaplint.org
