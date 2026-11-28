@@ -31,9 +31,36 @@ define role ZDCLS {
   "zsmbc.smbc.json": `{
   "formatVersion": "1",
   "header": {
-    "description": "Maintenance Object",
-    "originalLanguage": "en",
-    "abapLanguageVersion": "cloudDevelopment"
+    "description": "AFF Example Object for SMBC",
+    "originalLanguage": "en"
+  },
+  "serviceConfiguration": {
+    "serviceBinding": "/DMO/SB_CUSTOMER_MSSK_O4",
+    "serviceName": "/DMO/SD_CUSTOMER_MSSK",
+    "serviceVersion": "0001",
+    "rootEntitySet": "Customer",
+    "name": "Maintain customer",
+    "configurationGroup": "/DMO/ADMIN_GROUP",
+    "skipRootEntity": false
+  },
+  "appConfiguration": {
+    "listReport": {
+      "variantManagement": "none"
+    },
+    "objectPages": [
+      {
+        "entitySet": "Customer",
+        "sectionLayout": "tabs"
+      }
+    ],
+    "tableSettings": [
+      {
+        "entitySet": "Customer",
+        "tableType": "gridTable",
+        "selectionMode": "auto",
+        "enableFullScreen": true
+      }
+    ]
   }
 }`,
 };
