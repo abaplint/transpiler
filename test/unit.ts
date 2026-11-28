@@ -326,7 +326,8 @@ export async function setup(abap, schemas, insert) {
       `import runtime from "../../packages/runtime/build/src/index.js";`);
     fs.writeFileSync(outputFolder + path.sep + "init.mjs", output.initializationScript);
 
-    const buf = childProcess.execFileSync(process.execPath, [path.join(outputFolder, "index.mjs")]);
+    // execFileSync blocks the event loop so the mocha timeout cannot fire, a hanging child must be killed here
+    const buf = childProcess.execFileSync(process.execPath, [path.join(outputFolder, "index.mjs")], {timeout: 30000, killSignal: "SIGKILL"});
     return buf.toString();
   }
 

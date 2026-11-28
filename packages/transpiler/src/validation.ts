@@ -42,6 +42,7 @@ const defaultAllowedObjectTypes = [
   "SHMA",
   "SIA6",
   "SICF",
+  "SMBC",
   "SMIM",
   "SPLO",
   "SRFC",
