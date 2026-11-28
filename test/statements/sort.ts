@@ -246,4 +246,194 @@ ENDLOOP.`;
     expect(abap.console.get()).to.equal("21\n22\n11\n12");
   });
 
+  it("SORT BY table_line AS TEXT, umlauts, accents, case, digits and punctuation", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+DATA s TYPE string.
+DATA out TYPE string.
+tab = VALUE #( ( |b| ) ( |B| ) ( |a| ) ( |A| ) ( |Z| ) ( |ä| ) ( |Ä| ) ( |ae| ) ( |af| ) ( |ad| )
+  ( |ß| ) ( |ss| ) ( |st| ) ( |é| ) ( |e| ) ( |E| ) ( |è| ) ( |ê| ) ( |f| ) ( |1| ) ( |10| ) ( |2| )
+  ( | a| ) ( |a b| ) ( |ab| ) ( |a-b| ) ( |a_b| ) ( |a.b| ) ( |a,b| ) ( |-| ) ( |_| ) ( |.| ) ( || )
+  ( |ö| ) ( |o| ) ( |p| ) ( |ü| ) ( |u| ) ( |v| ) ( |ø| ) ( |å| ) ( |z| ) ( |ñ| ) ( |n| )
+  ( |@| ) ( |#| ) ( |'| ) ( |a'b| ) ( |aB| ) ( |Ab| ) ( |AB| ) ).
+SORT tab BY table_line AS TEXT.
+LOOP AT tab INTO s.
+  out = out && |[{ s }]|.
+ENDLOOP.
+ASSERT out = |[][ a][_][-][.]['][@][#][1][10][2][a][A][å][ä][Ä][a b][a_b][a-b][a,b][a.b][a'b][ab][aB][Ab][AB]|
+  && |[ad][ae][af][b][B][e][E][é][è][ê][f][n][ñ][o][ö][ø][p][ss][ß][st][u][ü][v][z][Z]|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("SORT DESCENDING AS TEXT, table of strings", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+DATA s TYPE string.
+DATA out TYPE string.
+tab = VALUE #( ( |b| ) ( |B| ) ( |a| ) ( |A| ) ( |Z| ) ( |ä| ) ).
+SORT tab DESCENDING AS TEXT.
+LOOP AT tab INTO s.
+  out = out && s.
+ENDLOOP.
+ASSERT out = |ZBbäAa|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("SORT AS TEXT without BY, character-like components of the default key", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         k TYPE c LENGTH 3,
+         s TYPE string,
+         n TYPE i,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row TYPE ty.
+DATA out TYPE string.
+tab = VALUE #( ( k = 'b' s = |x| n = 2 ) ( k = 'B' s = |y| n = 1 ) ( k = 'a' s = |Y| n = 3 )
+  ( k = 'ä' s = |x| n = 1 ) ( k = 'A' s = |x| n = 2 ) ( k = 'a' s = |y| n = 1 ) ).
+SORT tab AS TEXT.
+LOOP AT tab INTO row.
+  out = out && row-k && row-s && row-n && |,|.
+ENDLOOP.
+ASSERT out = |ay1,aY3,Ax2,äx1,bx2,By1,|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("SORT AS TEXT, per component and for the whole SORT", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         k TYPE c LENGTH 3,
+         s TYPE string,
+         n TYPE i,
+       END OF ty.
+TYPES tt TYPE STANDARD TABLE OF ty WITH EMPTY KEY.
+DATA tab TYPE tt.
+DATA sorted TYPE tt.
+DATA row TYPE ty.
+DATA out TYPE string.
+tab = VALUE #( ( k = 'b' s = |x| n = 2 ) ( k = 'B' s = |y| n = 1 ) ( k = 'a' s = |Y| n = 3 )
+  ( k = 'ä' s = |x| n = 1 ) ( k = 'A' s = |x| n = 2 ) ( k = 'a' s = |y| n = 1 ) ).
+
+sorted = tab.
+SORT sorted BY k DESCENDING AS TEXT s AS TEXT.
+CLEAR out.
+LOOP AT sorted INTO row.
+  out = out && row-k && row-s && row-n && |,|.
+ENDLOOP.
+ASSERT out = |By1,bx2,äx1,Ax2,ay1,aY3,|.
+
+sorted = tab.
+SORT sorted DESCENDING AS TEXT BY k s.
+CLEAR out.
+LOOP AT sorted INTO row.
+  out = out && row-k && row-s && row-n && |,|.
+ENDLOOP.
+ASSERT out = |By1,bx2,äx1,Ax2,aY3,ay1,|.
+
+sorted = tab.
+SORT sorted AS TEXT BY k s DESCENDING.
+CLEAR out.
+LOOP AT sorted INTO row.
+  out = out && row-k && row-s && row-n && |,|.
+ENDLOOP.
+ASSERT out = |aY3,ay1,Ax2,äx1,bx2,By1,|.
+
+sorted = tab.
+SORT sorted BY k s.
+CLEAR out.
+LOOP AT sorted INTO row.
+  out = out && row-k && row-s && row-n && |,|.
+ENDLOOP.
+ASSERT out = |Ax2,By1,aY3,ay1,bx2,äx1,|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("SORT DESCENDING BY, the order of the SORT applies to components without their own", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         k TYPE c LENGTH 3,
+         n TYPE i,
+       END OF ty.
+TYPES tt TYPE STANDARD TABLE OF ty WITH EMPTY KEY.
+DATA tab TYPE tt.
+DATA row TYPE ty.
+DATA out TYPE string.
+tab = VALUE #( ( k = 'a' n = 1 ) ( k = 'b' n = 2 ) ( k = 'a' n = 3 ) ).
+SORT tab DESCENDING BY k n.
+LOOP AT tab INTO row.
+  out = out && row-k && row-n.
+ENDLOOP.
+ASSERT out = |b2a3a1|.
+
+tab = VALUE #( ( k = 'a' n = 1 ) ( k = 'b' n = 2 ) ( k = 'a' n = 3 ) ).
+SORT tab DESCENDING BY k n ASCENDING.
+CLEAR out.
+LOOP AT tab INTO row.
+  out = out && row-k && row-n.
+ENDLOOP.
+ASSERT out = |b2a1a3|.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("SORT without BY, a table WITH EMPTY KEY keeps its order", async () => {
+    const code = `
+TYPES: BEGIN OF ty, k TYPE c LENGTH 1, v TYPE i, END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH EMPTY KEY.
+DATA def TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA strings TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+DATA out TYPE string.
+
+tab = VALUE #( ( k = 'b' v = 1 ) ( k = 'c' v = 2 ) ( k = 'a' v = 3 ) ).
+SORT tab.
+CLEAR out.
+LOOP AT tab INTO DATA(l1).
+  out = out && l1-k.
+ENDLOOP.
+WRITE / out.
+
+SORT tab DESCENDING.
+CLEAR out.
+LOOP AT tab INTO DATA(l2).
+  out = out && l2-k.
+ENDLOOP.
+WRITE / out.
+
+SORT tab BY k.
+CLEAR out.
+LOOP AT tab INTO DATA(l3).
+  out = out && l3-k.
+ENDLOOP.
+WRITE / out.
+
+strings = VALUE #( ( \`b\` ) ( \`c\` ) ( \`a\` ) ).
+SORT strings.
+CLEAR out.
+LOOP AT strings INTO DATA(l4).
+  out = out && l4.
+ENDLOOP.
+WRITE / out.
+
+def = VALUE #( ( k = 'b' v = 1 ) ( k = 'c' v = 2 ) ( k = 'a' v = 3 ) ).
+SORT def.
+CLEAR out.
+LOOP AT def INTO DATA(l5).
+  out = out && l5-k.
+ENDLOOP.
+WRITE / out.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("bca\nbca\nabc\nbca\nabc");
+  });
+
 });

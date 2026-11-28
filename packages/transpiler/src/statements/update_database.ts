@@ -24,8 +24,13 @@ export class UpdateDatabaseTranspiler implements IStatementTranspiler {
     const sets = node.findAllExpressions(abaplint.Expressions.SQLFieldAndValue);
     if (sets.length > 0) {
       const s = [];
+      let columns: Set<string> | undefined = undefined;
+      const type = traversal.findTable(dbtab.concatTokens().toUpperCase())?.parseType(traversal.reg);
+      if (type instanceof abaplint.BasicTypes.StructureType) {
+        columns = new Set(type.getComponents().map(c => c.name.toLowerCase()));
+      }
       for (const set of sets) {
-        s.push(new SQLFieldAndValueTranspiler().transpile(set, traversal).getCode());
+        s.push(new SQLFieldAndValueTranspiler(columns, node.getFirstToken().getStart()).transpile(set, traversal).getCode());
       }
       options.push(`"set": [${s.join(",")}]`);
     }

@@ -20,7 +20,8 @@ export class DataTranspiler implements IStructureTranspiler {
     for (const d of node.findDirectStatements(abaplint.Statements.Data)) {
       const subName = d.findFirstExpression(abaplint.Expressions.DefinitionName)?.concatTokens().toLowerCase();
       if (subName && topName) {
-        chunk.appendString(DataStatementTranspiler.buildValue(d, topName + ".get()." + subName, traversal));
+        const component = Traversal.escapeNamespace(topName) + Traversal.componentAccess(subName);
+        chunk.appendString(DataStatementTranspiler.buildValue(d, component, traversal));
       }
     }
 

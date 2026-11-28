@@ -414,4 +414,63 @@ WRITE / lv_hex.`;
     expect(abap.console.get()).to.equal("DDAABBCC");
   });
 
+  it("SHIFT IN BYTE MODE, generic field symbol to xstring and x", async () => {
+    const code = `
+FIELD-SYMBOLS <lv> TYPE any.
+DATA lv_xstring TYPE xstring.
+DATA lv_hex TYPE x LENGTH 3.
+lv_xstring = '112233'.
+ASSIGN lv_xstring TO <lv>.
+SHIFT <lv> BY 1 PLACES LEFT IN BYTE MODE.
+WRITE / lv_xstring.
+lv_hex = '112233'.
+ASSIGN lv_hex TO <lv>.
+SHIFT <lv> RIGHT CIRCULAR IN BYTE MODE.
+WRITE / lv_hex.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("2233\n331122");
+  });
+
+  for (const type of ["string", "c LENGTH 3", "i"]) {
+    it("SHIFT IN BYTE MODE, generic field symbol to " + type + " is OBJECTS_NOT_BYTELIKE", async () => {
+      const code = `
+FIELD-SYMBOLS <lv> TYPE any.
+DATA lv_temp TYPE ${type}.
+ASSIGN lv_temp TO <lv>.
+SHIFT <lv> LEFT IN BYTE MODE.`;
+      const js = await run(code);
+      const f = new AsyncFunction("abap", js);
+      try {
+        await f(abap);
+        expect.fail();
+      } catch (e) {
+        expect(e.toString()).to.contain("OBJECTS_NOT_BYTELIKE");
+      }
+    });
+  }
+
+  it("SHIFT BY int8 PLACES, character and byte mode", async () => {
+    const code = `
+DATA places TYPE int8.
+DATA chr TYPE string.
+DATA hex TYPE xstring.
+DATA circ TYPE xstring.
+places = 2.
+chr = 'ABCDE'.
+SHIFT chr BY places PLACES.
+hex = 'AABBCC'.
+SHIFT hex BY places PLACES IN BYTE MODE.
+circ = 'AABBCC'.
+SHIFT circ BY places PLACES CIRCULAR IN BYTE MODE.
+WRITE / chr.
+WRITE / hex.
+WRITE / circ.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("CDE\nCC\nCCAABB");
+  });
+
 });

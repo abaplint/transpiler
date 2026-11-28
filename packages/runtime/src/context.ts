@@ -16,6 +16,13 @@ export class Context {
 
   // NEW-LINE ran: the next list output starts a new line, unless a new line was just started
   public newLinePending = false;
+  // the user memory (SET PARAMETER / GET PARAMETER) by parameter ID, upper and lower case kept apart
+  public userParameters: Map<string, string> = new Map();
+  // EXPORT/IMPORT data clusters (MEMORY, DATABASE, SHARED MEMORY / SHARED BUFFER, DATA BUFFER):
+  // per medium, the clusters by key, each a map of parameter name to value
+  public dataClusters: Map<string, Map<string, Map<string, any>>> = new Map();
+  // ON CHANGE OF: the values each statement saw the last time it ran, by statement
+  public onChange: Map<string, any[]> = new Map();
 
   // CALL FUNCTION IN UPDATE TASK hands the copied parameters to the host, if one is set
   public updateTask: {register(name: string, param: {exporting?: any, tables?: any}): Promise<void> | void} | undefined = undefined;

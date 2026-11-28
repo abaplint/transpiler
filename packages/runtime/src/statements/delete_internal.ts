@@ -14,6 +14,8 @@ export interface IDeleteInternalOptions {
   comparing?: string[],
   allFields?: boolean,
   fromValue?: any,
+  /** DELETE TABLE ... WITH TABLE KEY: only the first row found is deleted */
+  withTableKey?: boolean,
   from?: any,
   to?: any,
 }
@@ -105,7 +107,28 @@ export async function deleteInternal(target: Table | HashedTable | FieldSymbol, 
   }
 
   if (target instanceof HashedTable && options?.fromValue) {
-    target.deleteFrom(options.fromValue);
+    const found = target.deleteFrom(options.fromValue);
+    abap.builtin.sy.get().subrc.set(found ? 0 : 4);
+    return;
+  }
+
+  // DELETE TABLE itab FROM wa: the first row with the primary key of wa, the first row of all when the key is empty
+  if (options?.fromValue !== undefined && options.where === undefined) {
+    let value = options.fromValue;
+    if (value instanceof FieldSymbol) {
+      value = value.getPointer();
+    }
+    const key = primaryKeyValues(target, value);
+    const array = target.array();
+    for (let i = 0; i < array.length; i++) {
+      const rowKey = primaryKeyValues(target, array[i]);
+      if (key.every((k, n) => eq(rowKey[n], k))) {
+        target.deleteIndex(i);
+        abap.builtin.sy.get().subrc.set(0);
+        return;
+      }
+    }
+    abap.builtin.sy.get().subrc.set(4);
     return;
   }
 
@@ -128,6 +151,9 @@ export async function deleteInternal(target: Table | HashedTable | FieldSymbol, 
           target.deleteIndex(index);
         }
         deleted++;
+        if (options.withTableKey === true) {
+          break;
+        }
       }
     } else if (options?.index && options.index.get() === index) {
       target.deleteIndex(options.index.get() - 1);

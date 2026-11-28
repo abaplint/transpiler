@@ -342,4 +342,36 @@ ENDFORM.`;
     await f(abap);
   });
 
+  it("DATA, namespaced, VALUE and enum default", async () => {
+    const code = `
+TYPES: BEGIN OF ENUM te STRUCTURE es,
+         e1,
+         e2,
+       END OF ENUM te STRUCTURE es.
+DATA /foo/var TYPE string VALUE 'dv'.
+DATA /foo/en TYPE te.
+WRITE / /foo/var.
+IF /foo/en = es-e1.
+  WRITE / 'e1'.
+ENDIF.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("dv\ne1");
+  });
+
+  it("DATA BEGIN OF, namespaced name and component, VALUE", async () => {
+    const code = `
+DATA: BEGIN OF /foo/ls,
+        /foo/comp TYPE string VALUE 'dv',
+        plain     TYPE string VALUE 'pl',
+      END OF /foo/ls.
+WRITE / /foo/ls-/foo/comp.
+WRITE / /foo/ls-plain.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("dv\npl");
+  });
+
 });

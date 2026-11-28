@@ -26,6 +26,8 @@ export interface SelectRuntimeOptions {
   appending?: boolean,
   /** INTO CORRESPONDING FIELDS OF work area, components not in the field list are left untouched */
   corresponding?: boolean,
+  /** INTO TABLE whose row components take the columns left to right, not by name: the buffer of a SELECT loop INTO (list) */
+  positional?: boolean,
 }
 
 export type DatabaseValue = number | string | Uint8Array | null;

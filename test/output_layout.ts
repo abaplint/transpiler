@@ -117,7 +117,7 @@ describe("CLI grouped output", () => {
     libs,
     write_source_map: maps,
     write_unit_tests: true,
-    options: {addCommonJS: true, sharedTypeFactories: false,
+    options: {addCommonJS: true,
       setup: undefined as {filename: string, postFunction: string} | undefined},
   });
   const build = (settings: object) => {
@@ -139,13 +139,13 @@ describe("CLI grouped output", () => {
     ].join("\n");
     const file = {filename: "zmap.prog.abap", contents: programSource, relative: "src"};
     const registry = new abaplint.Registry().addFiles([new abaplint.MemoryFile(file.filename, file.contents)]);
-    const transpiled = await new Transpiler({sharedTypeFactories: true, addCommonJS: true})
+    const transpiled = await new Transpiler({addCommonJS: true})
       .run(registry, undefined, new Map([[file.filename, "project"]]));
     const config: ITranspilerConfig = {
       input_folder: "src",
       output_folder: "nested/output",
       write_source_map: true,
-      options: {sharedTypeFactories: true, addCommonJS: true},
+      options: {addCommonJS: true},
     };
     const artifacts = collectObjectFiles(
       transpiled.objects as unknown as Parameters<typeof collectObjectFiles>[0], config, [file]);
@@ -159,12 +159,12 @@ describe("CLI grouped output", () => {
     expect(original.line).to.equal(programSource.split("\n").findIndex(line => line.startsWith("DATA first")) + 1);
 
     const flatRegistry = new abaplint.Registry().addFiles([new abaplint.MemoryFile(file.filename, file.contents)]);
-    const flatOutput = await new Transpiler({sharedTypeFactories: true, addCommonJS: true}).run(flatRegistry);
+    const flatOutput = await new Transpiler({addCommonJS: true}).run(flatRegistry);
     const flatConfig: ITranspilerConfig = {
       input_folder: ["src"],
       output_folder: "nested/output",
       write_source_map: true,
-      options: {sharedTypeFactories: true, addCommonJS: true},
+      options: {addCommonJS: true},
     };
     const flatArtifacts = collectObjectFiles(
       flatOutput.objects as unknown as Parameters<typeof collectObjectFiles>[0], flatConfig, [file]);
@@ -305,7 +305,7 @@ describe("CLI grouped output", () => {
       "  }};",
       "}",
     ].join("\n"));
-    settings.options = {...settings.options, sharedTypeFactories: true,
+    settings.options = {...settings.options,
       setup: {filename: "./test-setup.mjs", postFunction: "setup"}};
     build(settings);
     expect(existsSync(path.join(folder, "nested/output/zapp.prog.mjs"))).to.equal(false);
@@ -353,26 +353,7 @@ describe("CLI grouped output", () => {
     run("nested/output/index.mjs");
   });
 
-  it("enables shared factories by default when the CLI option is omitted", () => {
-    const fields = Array.from({length: 20}, (_, i) => "field_" + i + " TYPE c LENGTH 40");
-    const source = [
-      "TYPES: BEGIN OF ty_shared,",
-      ...fields.map(field => "  " + field + ","),
-      "END OF ty_shared.",
-      "DATA first TYPE ty_shared.",
-      "DATA second TYPE ty_shared.",
-      "ASSERT first-field_0 = second-field_0.",
-    ].join("\n");
-    write("src/zdefault.prog.abap", source);
-    const settings = {...config([], false), input_folder: "src", options: {addCommonJS: true}};
-    build(settings);
-    const generated = read("project/zdefault.prog.mjs");
-    expect(generated).to.contain("function $t_");
-    expect(generated).to.contain("let first = $t_");
-    run("nested/output/project/zdefault.prog.mjs");
-  });
-
-  it("executes flat CLI output with shared factories enabled", () => {
+  it("executes CLI output with shared factories", () => {
     const fields = Array.from({length: 20}, (_, i) => "field_" + i + " TYPE c LENGTH 40");
     const source = [
       "TYPES: BEGIN OF ty_shared,",
@@ -384,10 +365,10 @@ describe("CLI grouped output", () => {
     ].join("\n");
     write("src/zflat.prog.abap", source);
     const settings = {...config([], false), input_folder: "src"};
-    settings.options = {...settings.options, sharedTypeFactories: true};
     build(settings);
     const generated = read("project/zflat.prog.mjs");
     expect(generated).to.contain("function $t_");
+    expect(generated).to.contain("let first = $t_");
     run("nested/output/project/zflat.prog.mjs");
   });
 

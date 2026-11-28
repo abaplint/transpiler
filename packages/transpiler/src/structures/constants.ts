@@ -19,7 +19,7 @@ export class ConstantsTranspiler implements IStructureTranspiler {
     const ret = new Chunk();
     ret.appendChunk(new DataTranspiler().transpile(begin, traversal).ensureStartMapping(begin, traversal));
     ret.appendString("\n");
-    ret.appendString(ConstantsTranspiler.handleValues(name, node, traversal));
+    ret.appendString(ConstantsTranspiler.handleValues(Traversal.escapeNamespace(name)!, node, traversal));
 
     return ret;
   }
@@ -35,7 +35,7 @@ export class ConstantsTranspiler implements IStructureTranspiler {
       }
       const value = c.findFirstExpression(abaplint.Expressions.Constant);
       if (value) {
-        ret += `${prefix}.get().${field}.set(${traversal.traverse(value).getCode()});\n`;
+        ret += `${prefix}${Traversal.componentAccess(field)}.set(${traversal.traverse(value).getCode()});\n`;
       }
     }
 

@@ -11,7 +11,6 @@
         "compile": "cd packages/runtime && npm run compile && cd ../../ && cd packages/transpiler && npm run compile && cd ../../ && cd packages/cli && npm run compile && cd ../../ && cd packages/database-pg && npm run compile && cd ../../ && cd packages/database-sqlite && npm run compile && cd ../../ && cd packages/database-snowflake && npm run compile && cd ../../ && cd packages/database-hdb && npm run compile && cd ../../ && tsc",
         "performance": "npm run compile && node --expose-gc build/performance/index.js",
         "performance:output": "npm run compile && node --expose-gc build/performance/output_writer.js",
-        "performance:type-factories": "npm run compile && node --expose-gc build/performance/type_factories.js",
         "test": "npm run compile && mocha --timeout 60000 && npm run lint",
         "regression": "node .github/regression/regression.js",
         "link-local": "npm run link:transpiler && npm run link:cli && npm run link:runtime && npm run link:rfc-client-soap-xml && npm run link:database-sqlite && npm run link:database-pg && npm run link:database-snowflake && npm run link:database-hdb",
@@ -47,7 +46,7 @@
     },
     "homepage": "https://github.com/abaplint/transpiler_poc#readme",
     "devDependencies": {
-        "@abaplint/core": "^2.120.100",
+        "@abaplint/core": "^2.120.121",
         "@eslint/compat": "^2.1.1",
         "@eslint/eslintrc": "^3.3.7",
         "@eslint/js": "^9.39.5",
@@ -60,7 +59,7 @@
         "chai": "^6.2.2",
         "eslint": "^9.39.5",
         "eslint-plugin-import": "^2.32.0",
-        "fast-xml-parser": "^5.12.0",
+        "fast-xml-parser": "^5.12.1",
         "globals": "^17.14.0",
         "hdb": "^2.30.1",
         "mocha": "^12.0.3",
@@ -69,8 +68,8 @@
         "rimraf": "^6.1.4",
         "snowflake-sdk": "^3.3.0",
         "source-map-support": "^0.5.21",
-        "sql.js": "^1.15.2",
-        "temporal-polyfill": "^1.0.6",
+        "sql.js": "^1.17.0",
+        "temporal-polyfill": "^1.0.8",
         "typescript": "^6.0.3"
     }
 }

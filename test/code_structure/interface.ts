@@ -963,4 +963,54 @@ ENDCLASS.`;
     expect(message).to.contain("implement_methods");
   });
 
+  it("constants, namespaced names and namespaced component", async () => {
+    const code = `
+INTERFACE lif.
+  CONSTANTS /foo/lit TYPE string VALUE 'x'.
+  CONSTANTS: BEGIN OF /foo/gc,
+               /foo/comp TYPE string VALUE 'ns',
+               plain     TYPE string VALUE 'pl',
+             END OF /foo/gc.
+ENDINTERFACE.
+
+START-OF-SELECTION.
+  WRITE / lif=>/foo/lit.
+  WRITE / lif=>/foo/gc-/foo/comp.
+  WRITE / lif=>/foo/gc-plain.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("x\nns\npl");
+  });
+
+  it("attributes, namespaced names, through the implementing class", async () => {
+    const code = `
+INTERFACE lif.
+  DATA /foo/attr TYPE string.
+  CLASS-DATA /foo/sattr TYPE string.
+ENDINTERFACE.
+
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    INTERFACES lif.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA lo TYPE REF TO lcl.
+  DATA li TYPE REF TO lif.
+  CREATE OBJECT lo.
+  li = lo.
+  li->/foo/attr = 'a'.
+  li->/foo/sattr = 's'.
+  WRITE / li->/foo/attr.
+  WRITE / li->/foo/sattr.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("a\ns");
+  });
+
 });
