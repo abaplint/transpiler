@@ -38,6 +38,13 @@ export class ReturnTranspiler implements IStatementTranspiler {
         + ";", node, traversal);
     }
 
+    if (extra === "" && traversal.reportEvents !== undefined
+        && scope?.getIdentifier().stype === abaplint.ScopeType.Program
+        && !(node.get() instanceof abaplint.Statements.Check)) {
+      // RETURN and EXIT in an event block of a report: in START-OF-SELECTION they end the program, see ReportEvents
+      return new Chunk().append(pre + "return $events.LEAVE;", node, traversal);
+    }
+
     return new Chunk().append(pre + "return" + extra + ";", node, traversal);
   }
 

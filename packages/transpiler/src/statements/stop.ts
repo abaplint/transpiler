@@ -5,8 +5,9 @@ import {Chunk} from "../chunk";
 
 export class StopTranspiler implements IStatementTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    return new Chunk(`throw new Error("STOP, not supported, transpiler");`);
+  /** leaves the selection events of the report, END-OF-SELECTION still runs, see ReportEvents */
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
+    return new Chunk().append("throw new abap.ReportStop();", node, traversal);
   }
 
 }
