@@ -43,4 +43,22 @@ describe("VIEW database setup", () => {
     expect(res.schemas.snowflake[0]).to.match(/^CREATE TABLE "zvext_prio" \("item" /);
   });
 
+  it("a view without tables gives no database view and does not stop the setup", async () => {
+    const reg = new abaplint.Registry().addFiles([
+      new abaplint.MemoryFile("zv_empty.view.xml", `<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_VIEW" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD25V>
+    <VIEWNAME>ZV_EMPTY</VIEWNAME>
+    <VIEWCLASS>C</VIEWCLASS>
+   </DD25V>
+  </asx:values>
+ </asx:abap>
+</abapGit>`),
+    ]).parse();
+    const res = new DatabaseSetup(reg).run();
+    expect(res.schemas.sqlite.join("")).to.not.include("zv_empty");
+  });
+
 });
