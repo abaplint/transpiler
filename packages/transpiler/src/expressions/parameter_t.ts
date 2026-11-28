@@ -6,11 +6,16 @@ import {Chunk} from "../chunk";
 export class ParameterTTranspiler implements IExpressionTranspiler {
 
   public transpile(node: Nodes.ExpressionNode, traversal: Traversal): Chunk {
-    const nameToken = node.findDirectExpression(Expressions.ParameterName)?.getFirstToken();
-    const name = nameToken?.getStr().replace(/^!/, "");
+    const nameNode = node.findDirectExpression(Expressions.ParameterName);
     const source = traversal.traverse(node.findDirectExpression(Expressions.Target));
 
-    return new Chunk().append(name + ": ", nameToken || node, traversal).appendChunk(source);
+    if (nameNode === undefined) {
+      throw new Error("ParameterTTranspilerNameNotFound");
+    }
+
+    // same key as the EXPORTING side, ParameterNameTranspiler: lower case and namespace
+    // escaped, eg. /1BCDWB/FORMOUTPUT becomes $1bcdwb$formoutput
+    return new Chunk().appendChunk(traversal.traverse(nameNode)).appendString(": ").appendChunk(source);
   }
 
 }
