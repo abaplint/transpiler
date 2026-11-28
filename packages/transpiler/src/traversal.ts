@@ -85,15 +85,15 @@ export class Traversal {
   }
 
   public toType(type: abaplint.AbstractType, options?: {packedDecimals?: number}): string {
-    return TranspileTypes.toType(type, options, this.typeFactories);
+    return TranspileTypes.toType(type, options, this.typeFactories, t => this.findEnumValueNames(t));
   }
 
   public declare(type: abaplint.TypedIdentifier): string {
-    return TranspileTypes.declare(type, this.typeFactories);
+    return TranspileTypes.declare(type, this.typeFactories, t => this.findEnumValueNames(t));
   }
 
   public declareStaticSkipVoid(pre: string, type: abaplint.TypedIdentifier): string {
-    return TranspileTypes.declareStaticSkipVoid(pre, type, this.typeFactories);
+    return TranspileTypes.declareStaticSkipVoid(pre, type, this.typeFactories, t => this.findEnumValueNames(t));
   }
 
   /** Build file-level control-flow context once instead of rescanning all
@@ -167,6 +167,11 @@ export class Traversal {
     return name.match(/^\d/) !== null || name.includes("/") || name.startsWith("%");
   }
 
+  /** the access to a component of a structure, in brackets if the name is not a javascript identifier */
+  public static componentAccess(name: string): string {
+    return Traversal.isBracketComponent(name) ? `.get()["${name.toLowerCase()}"]` : ".get()." + name;
+  }
+
   public getCurrentObject(): abaplint.ABAPObject {
     return this.obj;
   }
@@ -176,9 +181,14 @@ export class Traversal {
     if (this.getCurrentObject().getABAPFileByName(filename) !== undefined) {
       return true;
     }
-    const file = this.reg.getFileByName(filename);
-    const found = file ? this.reg.findObjectForFile(file) : undefined;
+    const found = this.findObjectForFilename(filename);
     return found instanceof abaplint.Objects.Program && found.isInclude();
+  }
+
+  /** the object containing the file, undefined if the file is not in the registry */
+  private findObjectForFilename(filename: string): abaplint.IObject | undefined {
+    const file = this.reg.getFileByName(filename);
+    return file === undefined ? undefined : this.reg.findObjectForFile(file);
   }
 
   public traverse(node: abaplint.INode | undefined): Chunk {
@@ -233,6 +243,16 @@ export class Traversal {
     node: abaplint.ISpaghettiScopeNode
   } | undefined = undefined;
 
+  /** MODIFY name. and DELETE name [FROM wa].: the name is a database table unless it is a variable of table type */
+  public isDatabaseShortForm(target: abaplint.Nodes.ExpressionNode | undefined): boolean {
+    if (target === undefined || target.getChildren().length !== 1) {
+      return false;
+    }
+    const token = target.getFirstToken();
+    const type = this.findCurrentScopeByToken(token)?.findVariable(token.getStr())?.getType();
+    return !(type instanceof abaplint.BasicTypes.TableType);
+  }
+
   public findCurrentScopeByToken(token: abaplint.Token) {
     const filename = this.file.getFilename();
 
@@ -259,7 +279,7 @@ export class Traversal {
         && this.obj instanceof abaplint.Objects.FunctionGroup
         && this.obj.getInclude(filename.split(".")[2].replace(/#/g, "/"))) {
       // workaround for INCLUDEs in function groups
-      return this.fuctionGroupWorkaround(token);
+      return this.fuctionGroupWorkaround();
     }
 
     if (node === undefined
@@ -273,16 +293,10 @@ export class Traversal {
     return node;
   }
 
-  private fuctionGroupWorkaround(token: abaplint.Token): abaplint.ISpaghettiScopeNode | undefined {
-    // check the function group level, it might be an INCLUDE defining the DATA
-    const functionGroupLevel = this.spaghetti.getFirstChild()?.getFirstChild();
-
-    const variable = functionGroupLevel?.getData().vars[token.getStr().toUpperCase()];
-    if (variable?.getStart().equals(token.getStart())) {
-      return functionGroupLevel;
-    }
-
-    return undefined;
+  private fuctionGroupWorkaround(): abaplint.ISpaghettiScopeNode | undefined {
+    // code of an INCLUDE outside FORMs, methods and function modules is at the level of the function group, eg. the
+    // DATA of the TOP include and the constants their VALUE names
+    return this.spaghetti.getFirstChild()?.getFirstChild();
   }
 
   public getSQLInferredType(): abaplint.AbstractType | undefined {
@@ -366,16 +380,11 @@ export class Traversal {
 
     if (filename && this.isCurrentObjectFile(filename) === false) {
       // the prefix is from a different object
-      const file = this.reg.getFileByName(filename);
-      if (file) {
-        const found = this.reg.findObjectForFile(file);
-        if (found) {
-          if (found instanceof abaplint.Objects.Interface) {
-            return Traversal.escapeNamespace(this.lookupClassOrInterface(found.getName(), t)) + "." + found.getName().toLowerCase() + "$" + name;
-          } else {
-            return Traversal.escapeNamespace(this.lookupClassOrInterface(found.getName(), t)) + "." + name;
-          }
-        }
+      const found = this.findObjectForFilename(filename);
+      if (found instanceof abaplint.Objects.Interface) {
+        return Traversal.escapeNamespace(this.lookupClassOrInterface(found.getName(), t)) + "." + found.getName().toLowerCase() + "$" + name;
+      } else if (found) {
+        return Traversal.escapeNamespace(this.lookupClassOrInterface(found.getName(), t)) + "." + name;
       }
     }
 
@@ -686,12 +695,7 @@ export class Traversal {
   public isTypePool(token: abaplint.Token): string | undefined {
     const ref = this.findReadOrWriteReference(token);
     if (ref?.getFilename().endsWith(".type.abap")) {
-      const file = this.reg.getFileByName(ref.getFilename());
-      if (file === undefined) {
-        return undefined;
-      }
-      const obj = this.reg.findObjectForFile(file);
-      return obj?.getName();
+      return this.findObjectForFilename(ref.getFilename())?.getName();
     }
     return undefined;
   }
@@ -991,7 +995,7 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
     }
 
     for (const a of intf?.getAttributes().getAll() || []) {
-      const n = Traversal.escapeNamespace(name.toLowerCase()) + "$" + a.getName().toLowerCase();
+      const n = Traversal.escapeNamespace(name.toLowerCase() + "$" + a.getName().toLowerCase());
       // note: interface inheritenace and super inheritance might be strange,
       if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
         ret += "if (this." + n + " === undefined) this." + n + " = " + cname + "." + n + ";\n";
@@ -1189,12 +1193,56 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
     return Traversal.setValues(identifier, name);
   }
 
+  /** the names of the constants of an enumerated type declared in a class or interface, in the
+   *  order they are declared, which is the order setValues numbers them in */
+  public findEnumValueNames(type: abaplint.BasicTypes.EnumType): string[] | undefined {
+    const [owner, name] = (type.getQualifiedName() ?? "").toUpperCase().split("=>");
+    if (name === undefined) {
+      // declared in a program or a procedure: there the values are the names already
+      return undefined;
+    }
+    // a local class or interface of this object hides a global one of the same name
+    for (const obj of [this.obj, this.reg.getObject("CLAS", owner), this.reg.getObject("INTF", owner)]) {
+      if (!(obj instanceof abaplint.ABAPObject)) {
+        continue;
+      }
+      for (const file of obj.getABAPFiles()) {
+        const structure = file.getStructure();
+        const definitions = [...structure?.findAllStructures(abaplint.Structures.ClassDefinition) ?? [],
+          ...structure?.findAllStructures(abaplint.Structures.Interface) ?? []];
+        for (const definition of definitions) {
+          const declared = definition.findDirectStatement(abaplint.Statements.ClassDefinition)
+            ?.findFirstExpression(abaplint.Expressions.ClassName)
+            ?? definition.findDirectStatement(abaplint.Statements.Interface)
+              ?.findFirstExpression(abaplint.Expressions.InterfaceName);
+          if (declared?.concatTokens().toUpperCase() !== owner) {
+            continue;
+          }
+          for (const enumeration of definition.findAllStructures(abaplint.Structures.TypeEnum)) {
+            const begin = enumeration.findDirectStatement(abaplint.Statements.TypeEnumBegin);
+            if (begin?.findFirstExpression(abaplint.Expressions.NamespaceSimpleName)?.concatTokens().toUpperCase() !== name) {
+              continue;
+            }
+            const names: string[] = [];
+            for (const child of enumeration.getChildren()) {
+              if (child instanceof abaplint.Nodes.StatementNode
+                  && (child.get() instanceof abaplint.Statements.Type || child.get() instanceof abaplint.Statements.TypeEnum)) {
+                names.push(child.findFirstExpression(abaplint.Expressions.NamespaceSimpleName)?.concatTokens().toUpperCase() ?? "");
+              }
+            }
+            return names;
+          }
+        }
+      }
+    }
+    return undefined;
+  }
+
   /** position of an enumerated value in its TYPES BEGIN OF ENUM, counting from 0 */
   private findEnumValueIndex(identifier: abaplint.TypedIdentifier): number | undefined {
     // the enum can be declared in another object, eg. a global interface the class implements
     const filename = identifier.getFilename();
-    const raw = this.reg.getFileByName(filename);
-    const obj = raw === undefined ? undefined : this.reg.findObjectForFile(raw);
+    const obj = this.findObjectForFilename(filename);
     const file = obj instanceof abaplint.ABAPObject ? obj.getABAPFileByName(filename) : undefined;
     for (const enumeration of file?.getStructure()?.findAllStructures(abaplint.Structures.TypeEnum) || []) {
       const values = enumeration.getChildren().filter(c => c instanceof abaplint.Nodes.StatementNode
@@ -1234,7 +1282,9 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
 
     const handle = (val: any, name: string) => {
       if (typeof val === "string") {
-        const e = ConstantTranspiler.escape(ConstantTranspiler.trimTextFieldLiteral(val));
+        const e = /^\s*[+-]?\s*\d+\s*$/.test(val)
+          ? ConstantTranspiler.integerValue(val)
+          : ConstantTranspiler.escape(ConstantTranspiler.trimTextFieldLiteral(val));
         ret += name + ".set(" + e + ");\n";
       } else if (typeof val === "object") {
         const a: any = val;
@@ -1243,7 +1293,7 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
           if (s === undefined) {
             continue;
           }
-          handle(s, name + ".get()." + v.toLowerCase());
+          handle(s, name + Traversal.componentAccess(v.toLowerCase()));
         }
       }
     };

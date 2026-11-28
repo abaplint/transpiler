@@ -6,6 +6,8 @@ import {Integer} from "../types/integer";
 import {compareDecFloat34} from "../operators/_decfloat";
 import {referenceIdentity} from "../types/_reference_identity";
 import {eq} from "./eq";
+import {int8Operand} from "./_int8";
+import {compareNumc} from "./_numc";
 
 export function gt(
   left: number | string | ICharacter | INumeric | ABAPObject | Structure | Table | HashedTable | Integer8,
@@ -45,9 +47,10 @@ export function gt(
     if (left instanceof Table || left instanceof HashedTable) {
       throw new Error("runtime_todo, gt TABLE");
     }
-    const l = left instanceof Integer8 ? left.get() : BigInt(parse(left as any));
-    const r = right instanceof Integer8 ? right.get() : BigInt(parse(right));
-    return l > r;
+    return int8Operand(left) > int8Operand(right);
+  } else if (left instanceof Integer8 && (right instanceof Hex || right instanceof HexUInt8)) {
+    // the x field is converted to int8, not compared as bytes
+    return left.get() > int8Operand(right);
   }
 
   if (left instanceof FieldSymbol) {
@@ -60,6 +63,11 @@ export function gt(
       throw new Error("GETWA_NOT_ASSIGNED");
     }
     return gt(left, right.getPointer());
+  }
+
+  const numc = compareNumc(left, right);
+  if (numc !== undefined) {
+    return numc > 0;
   }
 
   if (left instanceof DataReference && right instanceof DataReference) {

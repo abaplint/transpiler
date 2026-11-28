@@ -1,4 +1,5 @@
-import {throwError} from "../throw_error";
+import {throwErrorWithParameters} from "../throw_error";
+import {String} from "../types";
 
 /**
  * CREATE OBJECT with a DYNAMIC class name, into a reference that has a static
@@ -15,8 +16,10 @@ import {throwError} from "../throw_error";
  * `targetType` is the class or interface object of the reference's static
  * type and `targetName` its upper-case name; a generic `REF TO object` target
  * passes both as undefined, and then there is nothing to check.
+ * `className` is the dynamic name as given, put into the CLASSNAME attribute
+ * of the exception.
  */
-export function checkCreateObjectType(clas: any, targetType: any, targetName?: string) {
+export async function checkCreateObjectType(clas: any, targetType: any, targetName?: string, className?: string) {
   if (clas === undefined || targetType === undefined) {
     return;
   }
@@ -38,5 +41,5 @@ export function checkCreateObjectType(clas: any, targetType: any, targetName?: s
     return;
   }
 
-  throwError("CX_SY_CREATE_OBJECT_ERROR");
+  await throwErrorWithParameters("CX_SY_CREATE_OBJECT_ERROR", {classname: new String().set(className ?? "")});
 }

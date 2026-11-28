@@ -4,9 +4,10 @@ import {ICharacter} from "./_character";
 import {INumeric} from "./_numeric";
 import {throwError} from "../throw_error";
 import {Float} from "./float";
+import {DecFloat34} from "./decfloat34";
 
 const initialValues: {[length: number]: string} = {};
-const regexCharacters = /[a-zA-Z]/g;
+const nonDigits = /\D/g;
 
 export class Numc implements ICharacter {
   private value: string;
@@ -34,20 +35,40 @@ export class Numc implements ICharacter {
     if (value instanceof Numc && value.getLength() === this.length) {
       this.value = value.get();
       return this;
+    } else if (raw === true && typeof value === "string") {
+      // the result of a character statement, ie. SHIFT or TRANSLATE: the text as it is,
+      // blanks and other characters kept, cut or padded with blanks on the right
+      this.value = value.substring(0, this.length).padEnd(this.length, " ");
+      return this;
+    } else if (value instanceof Numc) {
+      // n of another length: the text right-aligned, cut on the left or padded with zeros
+      const text = value.get();
+      this.value = text.length > this.length ? text.substring(text.length - this.length) : text.padStart(this.length, "0");
+      return this;
     } else if (typeof value === "number") {
       this.value = Math.trunc(value) + "";
     } else if (typeof value === "string") {
-      value = value.trim().replace(regexCharacters, "");
-      if (value === "") {
+      // every digit is kept, everything else is dropped, as text: no precision limit
+      const digits = value.replace(nonDigits, "");
+      if (digits === "") {
         this.clear();
-      } else {
-        this.value = parseInt(value, 10) + "";
+        return this;
       }
+      this.value = digits;
+    } else if (value instanceof DecFloat34) {
+      // get() is text with a decimal comma, only the integer part counts
+      this.set(String(value.get()).split(",")[0]);
+      return this;
     } else if (value instanceof Float) {
       this.value = Math.trunc(value.getRaw()) + "";
     } else {
-      this.set(value.get());
-      return this;
+      const inner = value.get();
+      if (typeof inner !== "bigint") {
+        this.set(inner);
+        return this;
+      }
+      // int8: the absolute value, digit by digit, a number would lose precision above 2^53
+      this.value = (inner < 0n ? -inner : inner).toString();
     }
 
     if (this.value.length > this.length) {

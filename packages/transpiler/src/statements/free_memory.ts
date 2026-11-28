@@ -5,8 +5,9 @@ import {Chunk} from "../chunk";
 
 export class FreeMemoryTranspiler implements IStatementTranspiler {
 
-  public transpile(_node: abaplint.Nodes.StatementNode, _traversal: Traversal): Chunk {
-    return new Chunk(`throw new Error("FreeMemory, not supported, transpiler");`);
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
+    const id = node.findDirectExpression(abaplint.Expressions.Source);
+    return new Chunk(`abap.statements.freeMemory({${id === undefined ? "" : "id: " + traversal.traverse(id).getCode()}});`);
   }
 
 }

@@ -14,7 +14,8 @@ function escapeRegExp(string: string) {
 // TODO: currently SELECT into are always handled as CORRESPONDING
 export class SelectTranspiler implements IStatementTranspiler {
 
-  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal, targetOverride?: string): Chunk {
+  public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal, targetOverride?: string,
+                   overrideOptions: string[] = [], columnsByPosition = false): Chunk {
     if (node.findDirectTokenByText("UNION") !== undefined) {
       return new Chunk(`throw new Error("SELECT UNION, not supported, transpiler, todo");`);
     } else if (node.findDirectTokenByText("ALL") !== undefined) {
@@ -22,7 +23,9 @@ export class SelectTranspiler implements IStatementTranspiler {
     } else if (node.findDirectTokenByText("DISTINCT") !== undefined) {
       throw new Error("SelectTranspiler, UNION DISTINCT todo");
     } else if (node.findDirectExpression(abaplint.Expressions.Select)?.findDirectTokenByText("UPDATE") !== undefined) {
-      return new Chunk(`throw new Error("SELECT SINGLE FOR UPDATE, not supported, transpiler");`);
+      // no row lock is requested from the database, the statement runs as the SELECT SINGLE without the addition
+      console.warn(traversal.getFilename() + ":" + node.getFirstToken().getStart().getRow() +
+        ": warning, SELECT SINGLE FOR UPDATE, the row lock is not taken, transpiled as SELECT SINGLE");
     }
 
     let target = "undefined";
@@ -49,7 +52,7 @@ export class SelectTranspiler implements IStatementTranspiler {
     if (fieldList === undefined) {
       throw new Error("SelectTranspiler, field list not found");
     }
-    select += new SQLFieldListTranspiler().transpile(fieldList, traversal).getCode() + " ";
+    select += new SQLFieldListTranspiler().transpile(fieldList, traversal, columnsByPosition).getCode() + " ";
 
     const from = node.findFirstExpression(abaplint.Expressions.SQLFrom);
     if (from) {
@@ -138,7 +141,10 @@ export class SelectTranspiler implements IStatementTranspiler {
     }
 
     let runtimeOptions = "";
-    const runtimeOptionsList: string[] = [];
+    // the SelectLoop structure passes its options for its buffer table
+    const runtimeOptionsList: string[] = [...overrideOptions];
+    const appendingOptions = ["appending: true", ...overrideOptions].join(", ");
+    const loopOptions = overrideOptions.length > 0 ? `, {${overrideOptions.join(", ")}}` : "";
     if (concat.includes(" APPENDING TABLE ") || concat.includes(" APPENDING CORRESPONDING FIELDS OF TABLE ")) {
       runtimeOptionsList.push(`appending: true`);
     }
@@ -179,20 +185,25 @@ abap.statements.sort(${target}, {by: ${by}.map(k => { return {component: k}; })}
 await abap.statements.deleteInternal(${target}, {adjacent: true, allFields: true});
 }`;
 
+      // the last SELECT of the loop and the de-duplicating DELETE both set
+      // sy-subrc; the statement as a whole found rows or it did not
+      const found = `abap.builtin.sy.get().dbcnt.set(${target}.getArrayLength());
+abap.builtin.sy.get().subrc.set(${target}.getArrayLength() === 0 ? 4 : 0);`;
+
       const at = where.startsWith("WHERE ") ? select.indexOf(where) : -1;
       // UP TO with ORDER BY keeps the first n rows in that order; the blocks
       // trim after the de-duplicating sort, so that pair stays row by row
       if (concat.startsWith("SELECT SINGLE ") || at < 0 || (upTo && orderBy)) {
         const code = `if (${faeTranspiled}.array().length === 0) {
-await abap.statements.select(${target}, {select: "${selectEmpty.trim()}"${extra}});
+await abap.statements.select(${target}, {select: "${selectEmpty.trim()}"${extra}}${loopOptions});
 } else {
 const ${unique2} = ${faeTranspiled}.array();
 ${target}.clear();
 for await (const ${unique} of ${unique2}) {
-await abap.statements.select(${target}, {select: "${select.trim()}"${extra}}, {appending: true});
+await abap.statements.select(${target}, {select: "${select.trim()}"${extra}}, {${appendingOptions}});
 }
 ${dedup}
-abap.builtin.sy.get().dbcnt.set(${target}.getArrayLength());
+${found}
 }`;
         return new Chunk().append(code, node, traversal);
       }
@@ -220,14 +231,14 @@ abap.builtin.sy.get().dbcnt.set(${target}.getArrayLength());
       const unique3 = UniqueIdentifier.get();
       const unique4 = UniqueIdentifier.get();
       const code = `if (${faeTranspiled}.array().length === 0) {
-await abap.statements.select(${target}, {select: "${selectEmpty.trim()}"${extra}});
+await abap.statements.select(${target}, {select: "${selectEmpty.trim()}"${extra}}${loopOptions});
 } else {
 const ${unique2} = ${faeTranspiled}.array();
 ${target}.clear();
 const ${unique3} = (${unique}) => "(${condition})";
 for (let ${unique4} = 0; ${unique4} < ${unique2}.length; ${unique4} += 50) {
 const ${unique4}where = ${unique2}.slice(${unique4}, ${unique4} + 50).map(${unique3}).join(" OR ");
-await abap.statements.select(${target}, {select: "${head}WHERE " + ${unique4}where + " ${tail.trim()}"${extra}}, {appending: true});
+await abap.statements.select(${target}, {select: "${head}WHERE " + ${unique4}where + " ${tail.trim()}"${extra}}, {${appendingOptions}});
 }
 ${dedup}
 const ${unique4}max = ${upToCode};
@@ -242,7 +253,7 @@ ${target}.deleteIndex(${target}.getArrayLength() - 1);
 }
 }
 }
-abap.builtin.sy.get().dbcnt.set(${target}.getArrayLength());
+${found}
 }`;
       return new Chunk().append(code, node, traversal);
     } else {
@@ -271,9 +282,12 @@ abap.builtin.sy.get().dbcnt.set(${target}.getArrayLength());
   }
 
   private dynamicSQLClause(keyword: string, code: string): string {
+    // a dynamic ORDER BY may separate its columns with blanks, as Open SQL
+    // allows; abap.dynamicOrderBy puts the commas SQL needs between them
+    const list = (text: string) => keyword === "ORDER BY" ? `abap.dynamicOrderBy(${text})` : text;
     return `(${code} instanceof abap.types.Table || ${code} instanceof abap.types.HashedTable`
-      + ` ? (${code}.array().length === 0 ? "" : "${keyword} " + ${code}.array().map(row => row.get()).join(", "))`
-      + ` : (("" + ${code}.get()).trim() === "" ? "" : "${keyword} " + ${code}.get()))`;
+      + ` ? (${code}.array().length === 0 ? "" : "${keyword} " + ${list(`${code}.array().map(row => row.get()).join(", ")`)})`
+      + ` : (("" + ${code}.get()).trim() === "" ? "" : "${keyword} " + ${list(`${code}.get()`)}))`;
   }
 
   private dynamicHavingClause(code: string): string {
