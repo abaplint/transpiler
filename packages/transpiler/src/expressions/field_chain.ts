@@ -27,7 +27,7 @@ export class FieldChainTranspiler implements IExpressionTranspiler {
         const name = traversal.prefixAndName(c.getFirstToken(), filename).replace("~", "$");
         ret.append(Traversal.prefixVariable(Traversal.escapeNamespace(name)!), c, traversal);
 
-        context = scope?.findVariable(c.getFirstToken().getStr())?.getType();
+        context = scope?.findVariable(c.getFirstToken().getStr().replace(/^!/, ""))?.getType();
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.SourceFieldSymbol) {
         ret.appendChunk(new FieldSymbolTranspiler().transpile(c, traversal));
       } else if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.ClassName) {

@@ -16,7 +16,7 @@ export class RangesTranspiler implements IStatementTranspiler {
       throw new Error("RangesTranspiler, scope not found: " + node.concatTokens());
     }
 
-    const found = scope.findVariable(token.getStr());
+    const found = scope.findVariable(token.getStr().replace(/^!/, ""));
     if (found === undefined) {
       throw new Error("RangesTranspiler, var not found, \"" + token.getStr() + "\", " + traversal.getFilename() + ", line: " + token.getRow());
     }

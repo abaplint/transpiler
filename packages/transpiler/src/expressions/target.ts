@@ -22,7 +22,7 @@ export class TargetTranspiler implements IExpressionTranspiler {
         const prefix = traversal.prefixAndName(c.getFirstToken()).replace("~", "$");
         ret.append(Traversal.prefixVariable(Traversal.escapeNamespace(prefix)!), c, traversal);
 
-        context = scope?.findVariable(c.getFirstToken().getStr())?.getType();
+        context = scope?.findVariable(c.getFirstToken().getStr().replace(/^!/, ""))?.getType();
       } else if (c.get() instanceof Expressions.TableExpression && c instanceof Nodes.ExpressionNode) {
         if (context instanceof abaplint.BasicTypes.TableType) {
           context = context.getRowType();
