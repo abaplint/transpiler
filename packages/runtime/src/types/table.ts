@@ -323,13 +323,16 @@ export class HashedTable implements ITable {
     throw new Error("HashedTable, deleteIndex");
   }
 
-  public deleteFrom(row: TableRowType) {
+  /** returns true if a row with the key of the given row was found and deleted */
+  public deleteFrom(row: TableRowType): boolean {
     const hash = this.buildHashFromData(row);
     const existing = this.value[hash];
-    if (existing !== undefined) {
-      this.uniqueKeyIndexes?.remove(existing);
+    if (existing === undefined) {
+      return false;
     }
+    this.uniqueKeyIndexes?.remove(existing);
     delete this.value[hash];
+    return true;
   }
 
   public buildHashFromSimple(data: {[key: string]: any}): string {
