@@ -12,14 +12,14 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
     - uses: actions/checkout@v7
     - uses: actions/setup-node@v7
     - run: npm run docker:start
     - run: npm run install
     - run: npm run link-local
-    - run: npm test
+    - run: npm run test:ci
     - run: npm run schema
       working-directory: packages/cli
     - name: prepare schema.abaplint.org

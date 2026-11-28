@@ -65,6 +65,10 @@ export function modifyInternal(table: Table | HashedTable, options: IModifyInter
     }
   }
 
+  if (found) {
+    table.rowsModified();
+  }
+
   const subrc = found ? 0 : 4;
   abap.builtin.sy.get().subrc.set(subrc);
 }

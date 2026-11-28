@@ -8,10 +8,7 @@ import {UniqueIdentifier} from "../unique_identifier";
 export class RaiseTranspiler implements IStatementTranspiler {
 
   public transpile(node: abaplint.Nodes.StatementNode, traversal: Traversal): Chunk {
-    if (node.findDirectTokenByText("RESUMABLE")) {
-      throw new Error("RaiseTranspiler, RESUMABLE not implemented");
-    }
-
+    // RESUMABLE: the exception is raised as any other, a handler that does not RESUME sees no difference
     const classNameToken = node.findFirstExpression(abaplint.Expressions.ClassName)?.getFirstToken();
     const className = classNameToken?.getStr();
     if (className === undefined) {

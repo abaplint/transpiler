@@ -45,7 +45,7 @@ function shift_character_mode(target: ICharacter, options?: IShiftOptions) {
       }
     }
   } else if (options?.places) {
-    const p = options.places.get();
+    const p = Number(options.places.get());
     if (options.circular) {
       if (options.direction === "RIGHT") {
         value = value.substr(value.length - p) + value.substr(0, value.length - p);
@@ -109,16 +109,16 @@ function shift_byte_mode(target: ICharacter, options?: IShiftOptions) {
   } else if (options?.places) {
     if (options.circular) {
       if (options.direction === "RIGHT") {
-        for (let i = 0; i < options.places.get(); i++) {
+        for (let i = 0; i < Number(options.places.get()); i++) {
           value = value.substr(value.length - 2) + value.substr(0, value.length - 2);
         }
       } else {
-        for (let i = 0; i < options.places.get(); i++) {
+        for (let i = 0; i < Number(options.places.get()); i++) {
           value = value.substr(2) + value.substr(0, 2);
         }
       }
     } else {
-      const p = options.places.get() * 2;
+      const p = Number(options.places.get()) * 2;
       if (options.direction === "RIGHT") {
         // set() cuts a fixed length target, an xstring gets longer
         value = "0".repeat(p) + value;

@@ -1003,6 +1003,39 @@ START-OF-SELECTION.
       ["X 3 02", "X 3 02", "X 2 CD", "X 3 010203", "X 2 B1", "X 2 0120", "X 1 10"]);
   });
 
+  it("empty string literal passed to an \"xsequence\" importing parameter has no bytes", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS len
+      IMPORTING bytes         TYPE xsequence
+      RETURNING VALUE(result) TYPE i.
+    CLASS-METHODS len_value
+      IMPORTING VALUE(bytes)  TYPE xsequence
+      RETURNING VALUE(result) TYPE i.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD len.
+    result = xstrlen( bytes ).
+  ENDMETHOD.
+  METHOD len_value.
+    result = xstrlen( bytes ).
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA empty TYPE xstring.
+  WRITE / lcl=>len( empty ).
+  WRITE / lcl=>len( \`\` ).
+  WRITE / lcl=>len_value( \`\` ).
+  WRITE / lcl=>len( \`0102\` ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed().split("\n")).to.deep.equal(["0", "0", "0", "2"]);
+  });
+
   it("static method with constant default", async () => {
     const code = `
 CLASS lcl_bar DEFINITION.
@@ -3465,6 +3498,36 @@ START-OF-SELECTION.
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("one");
+  });
+
+  it("structured constant, namespaced components", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CONSTANTS: BEGIN OF gc,
+                 /foo/comp TYPE string VALUE 'ns',
+                 BEGIN OF /foo/sub,
+                   /foo/deep TYPE string VALUE 'd' & 'p',
+                 END OF /foo/sub,
+                 plain TYPE string VALUE 'pl',
+               END OF gc.
+    CLASS-METHODS m RETURNING VALUE(r) TYPE string.
+ENDCLASS.
+
+CLASS lcl IMPLEMENTATION.
+  METHOD m.
+    r = gc-/foo/comp.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  WRITE / lcl=>m( ).
+  WRITE / lcl=>gc-/foo/sub-/foo/deep.
+  WRITE / lcl=>gc-plain.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("ns\ndp\npl");
   });
 
 });

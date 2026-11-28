@@ -955,6 +955,82 @@ WRITE / lv_data.`;
     await f(abap);
   });
 
+  it("VALUE literals above 2^53, exact", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CONSTANTS c_max TYPE int8 VALUE 9223372036854775807.
+    CLASS-DATA s_neg TYPE int8 VALUE -9007199254740993.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+ENDCLASS.
+
+FORM value_literal.
+  DATA lv_neg TYPE int8 VALUE -9223372036854775807.
+  CONSTANTS lc TYPE int8 VALUE 9007199254740993.
+  DATA lv_p TYPE p LENGTH 16 VALUE 12345678901234567891.
+  WRITE / |{ lcl=>c_max }|.
+  WRITE / |{ lcl=>s_neg }|.
+  WRITE / |{ lv_neg }|.
+  WRITE / |{ lc }|.
+  WRITE / |{ lv_p }|.
+ENDFORM.
+
+START-OF-SELECTION.
+  PERFORM value_literal.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal(
+      "9223372036854775807\n-9007199254740993\n-9223372036854775807\n9007199254740993\n12345678901234567891");
+  });
+
+  it("int8 to x, right aligned: a short target keeps the last bytes, a long one is zero padded on the left", async () => {
+    const code = `
+  DATA lv_int8 TYPE int8.
+  DATA lv_x2 TYPE x LENGTH 2.
+  DATA lv_x4 TYPE x LENGTH 4.
+  DATA lv_x8 TYPE x LENGTH 8.
+  DATA lv_x16 TYPE x LENGTH 16.
+
+  lv_int8 = 72623859790382856.
+  lv_x2 = lv_int8.
+  lv_x4 = lv_int8.
+  lv_x8 = lv_int8.
+  lv_x16 = lv_int8.
+  ASSERT lv_x2 = '0708'.
+  ASSERT lv_x4 = '05060708'.
+  ASSERT lv_x8 = '0102030405060708'.
+  ASSERT lv_x16 = '00000000000000000102030405060708'.
+
+  lv_int8 = 9223372036854775807.
+  lv_x2 = lv_int8.
+  lv_x4 = lv_int8.
+  lv_x16 = lv_int8.
+  ASSERT lv_x2 = 'FFFF'.
+  ASSERT lv_x4 = 'FFFFFFFF'.
+  ASSERT lv_x16 = '00000000000000007FFFFFFFFFFFFFFF'.
+
+  lv_int8 = -2.
+  lv_x2 = lv_int8.
+  lv_x4 = lv_int8.
+  lv_x8 = lv_int8.
+  lv_x16 = lv_int8.
+  ASSERT lv_x2 = 'FFFE'.
+  ASSERT lv_x4 = 'FFFFFFFE'.
+  ASSERT lv_x8 = 'FFFFFFFFFFFFFFFE'.
+  ASSERT lv_x16 = '0000000000000000FFFFFFFFFFFFFFFE'.
+
+  lv_int8 = -9223372036854775808.
+  lv_x2 = lv_int8.
+  lv_x16 = lv_int8.
+  ASSERT lv_x2 = '0000'.
+  ASSERT lv_x16 = '00000000000000008000000000000000'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
   it("to c too short, the right end is kept with *", async () => {
     const code = `
     DATA lv_a TYPE int8.

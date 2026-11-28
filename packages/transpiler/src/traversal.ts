@@ -167,6 +167,11 @@ export class Traversal {
     return name.match(/^\d/) !== null || name.includes("/") || name.startsWith("%");
   }
 
+  /** the access to a component of a structure, in brackets if the name is not a javascript identifier */
+  public static componentAccess(name: string): string {
+    return Traversal.isBracketComponent(name) ? `.get()["${name.toLowerCase()}"]` : ".get()." + name;
+  }
+
   public getCurrentObject(): abaplint.ABAPObject {
     return this.obj;
   }
@@ -237,6 +242,16 @@ export class Traversal {
     filename: string,
     node: abaplint.ISpaghettiScopeNode
   } | undefined = undefined;
+
+  /** MODIFY name. and DELETE name [FROM wa].: the name is a database table unless it is a variable of table type */
+  public isDatabaseShortForm(target: abaplint.Nodes.ExpressionNode | undefined): boolean {
+    if (target === undefined || target.getChildren().length !== 1) {
+      return false;
+    }
+    const token = target.getFirstToken();
+    const type = this.findCurrentScopeByToken(token)?.findVariable(token.getStr())?.getType();
+    return !(type instanceof abaplint.BasicTypes.TableType);
+  }
 
   public findCurrentScopeByToken(token: abaplint.Token) {
     const filename = this.file.getFilename();
@@ -987,7 +1002,7 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
     }
 
     for (const a of intf?.getAttributes().getAll() || []) {
-      const n = Traversal.escapeNamespace(name.toLowerCase()) + "$" + a.getName().toLowerCase();
+      const n = Traversal.escapeNamespace(name.toLowerCase() + "$" + a.getName().toLowerCase());
       // note: interface inheritenace and super inheritance might be strange,
       if (a.getMeta().includes(abaplint.IdentifierMeta.Static) === true) {
         ret += "if (this." + n + " === undefined) this." + n + " = " + cname + "." + n + ";\n";
@@ -1274,7 +1289,9 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
 
     const handle = (val: any, name: string) => {
       if (typeof val === "string") {
-        const e = ConstantTranspiler.escape(ConstantTranspiler.trimTextFieldLiteral(val));
+        const e = /^\s*[+-]?\s*\d+\s*$/.test(val)
+          ? ConstantTranspiler.integerValue(val)
+          : ConstantTranspiler.escape(ConstantTranspiler.trimTextFieldLiteral(val));
         ret += name + ".set(" + e + ");\n";
       } else if (typeof val === "object") {
         const a: any = val;
@@ -1283,7 +1300,7 @@ this.INTERNAL_ID = abap.internalIdCounter++;\n`;
           if (s === undefined) {
             continue;
           }
-          handle(s, name + ".get()." + v.toLowerCase());
+          handle(s, name + Traversal.componentAccess(v.toLowerCase()));
         }
       }
     };

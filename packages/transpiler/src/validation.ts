@@ -10,6 +10,7 @@ const defaultAllowedObjectTypes = [
   "CHKO",
   "CHKV",
   "CLAS",
+  "DCLS",
   "DDLS",
   "DDLX",
   "DEVC",
@@ -41,6 +42,7 @@ const defaultAllowedObjectTypes = [
   "SHMA",
   "SIA6",
   "SICF",
+  "SMBC",
   "SMIM",
   "SPLO",
   "SRFC",
@@ -116,6 +118,7 @@ export const config: IConfig = {
     "forbidden_identifier": {
       "check": [],
     },
+    "forbidden_kernel_write": false,
   },
 };
 
@@ -141,6 +144,15 @@ export class Validation {
 
     config.rules["forbidden_identifier"]["check"] = ["^unique\\d+$"];
 
+    // WRITE '@KERNEL ...' is emitted as raw JavaScript, see statements/write.ts. In the rule an
+    // empty allow list allows everything, here it allows nothing, "^$" matches no object name
+    const allow = this.options?.kernel?.allow;
+    if (allow === undefined) {
+      config.rules["forbidden_kernel_write"] = false;
+    } else {
+      config.rules["forbidden_kernel_write"] = {allow: allow.length === 0 ? ["^$"] : allow};
+    }
+
     if (this.options?.unknownTypes === UnknownTypesEnum.runtimeError) {
       // this is not a constant, just a regex that happens to not match anything
       config.syntax.errorNamespace = "VOID_EVERYTHING";
@@ -160,12 +172,12 @@ export class Validation {
     const conf = new Config(JSON.stringify(config));
     reg.setConfig(conf);
     const issues = reg.findIssues();
-    return issues.filter(i => i.getKey() !== "ambiguous_statement" || this.isInternalTableStatement(reg, i) === false);
+    return issues.filter(i => i.getKey() !== "ambiguous_statement" || this.isUnambiguous(reg, i) === false);
   }
 
-  /** "MODIFY itab FROM wa", "MODIFY itab", "DELETE itab." and "DELETE itab FROM n." read like the database statements,
-   * so abaplint calls them ambiguous; they are not when itab is an internal table */
-  private isInternalTableStatement(reg: IRegistry, issue: Issue): boolean {
+  /** DELETE name., DELETE name FROM x., MODIFY name. and MODIFY name FROM x. read two ways, so abaplint calls them
+   * ambiguous. ABAP decides by the name: a variable of table type is the internal table, anything else the database table */
+  private isUnambiguous(reg: IRegistry, issue: Issue): boolean {
     const file = reg.getFileByName(issue.getFilename());
     const obj = file ? reg.findObjectForFile(file) : undefined;
     if (!(obj instanceof ABAPObject)) {
@@ -187,7 +199,10 @@ export class Validation {
       this.scopes.set(obj, spaghetti);
     }
     const variable = spaghetti.lookupPosition(token.getStart(), issue.getFilename())?.findVariable(token.getStr());
-    return variable?.getType() instanceof BasicTypes.TableType;
+    if (variable?.getType() instanceof BasicTypes.TableType) {
+      return true;
+    }
+    return variable !== undefined || statement.findExpressionAfterToken("FROM") !== undefined;
   }
 
 }

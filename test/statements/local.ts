@@ -5,7 +5,7 @@ import {AsyncFunction, runFiles} from "../_utils";
 let abap: ABAP;
 
 async function run(contents: string) {
-  return runFiles(abap, [{filename: "zfoobar_local.prog.abap", contents}], {skipVersionCheck: true});
+  return runFiles(abap, [{filename: "zfoobar_local.prog.abap", contents}]);
 }
 
 describe("Running statements - LOCAL", () => {

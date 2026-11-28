@@ -107,7 +107,8 @@ export async function deleteInternal(target: Table | HashedTable | FieldSymbol, 
   }
 
   if (target instanceof HashedTable && options?.fromValue) {
-    target.deleteFrom(options.fromValue);
+    const found = target.deleteFrom(options.fromValue);
+    abap.builtin.sy.get().subrc.set(found ? 0 : 4);
     return;
   }
 
