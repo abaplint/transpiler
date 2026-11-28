@@ -28,6 +28,41 @@ define role ZDCLS {
   "zsco2.sco2.xml": abapgitXML,
   "zsia6.sia6.xml": abapgitXML,
   "zsrvb.srvb.xml": abapgitXML,
+  "zsmbc.smbc.json": `{
+  "formatVersion": "1",
+  "header": {
+    "description": "AFF Example Object for SMBC",
+    "originalLanguage": "en"
+  },
+  "serviceConfiguration": {
+    "serviceBinding": "/DMO/SB_CUSTOMER_MSSK_O4",
+    "serviceName": "/DMO/SD_CUSTOMER_MSSK",
+    "serviceVersion": "0001",
+    "rootEntitySet": "Customer",
+    "name": "Maintain customer",
+    "configurationGroup": "/DMO/ADMIN_GROUP",
+    "skipRootEntity": false
+  },
+  "appConfiguration": {
+    "listReport": {
+      "variantManagement": "none"
+    },
+    "objectPages": [
+      {
+        "entitySet": "Customer",
+        "sectionLayout": "tabs"
+      }
+    ],
+    "tableSettings": [
+      {
+        "entitySet": "Customer",
+        "tableType": "gridTable",
+        "selectionMode": "auto",
+        "enableFullScreen": true
+      }
+    ]
+  }
+}`,
 };
 
 describe("object types without output", () => {
