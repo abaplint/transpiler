@@ -25,6 +25,7 @@ import {isLineNotFound} from "./is_line_not_found";
 import {parametersCall} from "./parameters_call";
 import {alphaIn, alphaOut} from "./alpha";
 import {DatasetHost} from "./dataset/dataset";
+import {throwRefIsInitial} from "./throw_error";
 
 export {RFC, types, DB, MemoryConsole};
 export type {DatasetHost, DatasetHandle, DatasetMode} from "./dataset/dataset";
@@ -84,6 +85,7 @@ export class ABAP {
   public eventing = new ABAPEventing();
   public alphaOut = alphaOut;
   public alphaIn = alphaIn;
+  public throwRefIsInitial = throwRefIsInitial;
 
   public IntegerFactory = IntegerFactory;
   public CharacterFactory = CharacterFactory;

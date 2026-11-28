@@ -139,6 +139,10 @@ export class Traversal {
     return name?.replace(/\//g, "$");
   }
 
+  /** appended to "ref.get()" where a method is called through a reference which can be initial,
+   *  "(ref.get() ?? abap.throwRefIsInitial())" raises CX_SY_REF_IS_INITIAL instead of a TypeError */
+  public static readonly REF_IS_INITIAL = " ?? abap.throwRefIsInitial()";
+
   /** the self reference "me", it is a FieldChain in eg. MethodCallChain and a SourceField in eg. MethodSource */
   public static isMe(node: abaplint.Nodes.ExpressionNode
     | abaplint.Nodes.TokenNode

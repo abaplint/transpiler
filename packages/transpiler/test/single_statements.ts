@@ -58,10 +58,10 @@ describe("Single statements", () => {
     {abap: "INSERT 5 INTO tab INDEX sy-tabix.", js: "abap.statements.insertInternal({data: abap.IntegerFactory.get(5), index: abap.builtin.sy.get().tabix, table: tab});", skip: false},
     {abap: "RETURN.",                                 js: "return;",                                   skip: false}, // todo, hmm? some more to be added here
     {abap: "method( ).",                              js: "await this.method();",                            skip: false},
-    {abap: "foo->method( ).",                         js: "await foo.get().method();",                       skip: false},
+    {abap: "foo->method( ).",                         js: "await (foo.get() ?? abap.throwRefIsInitial()).method();",                       skip: false},
     {abap: "foo->method( 1 ).",                       js: "await foo.get().method(abap.IntegerFactory.get(1));",             skip: true}, // todo, hmm, need to know the default parameter name?
-    {abap: "foo->method( bar = 2 moo = 1 ).",         js: "await foo.get().method({bar: abap.IntegerFactory.get(2), moo: abap.IntegerFactory.get(1)});",       skip: false},
-    {abap: "moo = foo->method( ).",                   js: "moo.set((await foo.get().method()));",              skip: false},
+    {abap: "foo->method( bar = 2 moo = 1 ).",         js: "await (foo.get() ?? abap.throwRefIsInitial()).method({bar: abap.IntegerFactory.get(2), moo: abap.IntegerFactory.get(1)});",       skip: false},
+    {abap: "moo = foo->method( ).",                   js: "moo.set((await (foo.get() ?? abap.throwRefIsInitial()).method()));",              skip: false},
     {abap: "FORM foo. ENDFORM.",                      js: "async function foo(INPUT) {\n}\nabap.Forms['PROG-ZFOOBAR-FOO'] = foo;",                       skip: false},
     {abap: "PERFORM foo.",                            js: "await foo({});",                       skip: false},
     {abap: "PERFORM foo IN PROGRAM zsdfsd.",                        js: `if (abap.Forms['PROG-ZSDFSD-FOO'] === undefined) { if (Object.keys(abap.Forms).some(k => k.startsWith('PROG-ZSDFSD-'))) { if (abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FORM'.trimEnd()] === undefined) { throw \"CX_SY_DYN_CALL_ILLEGAL_FORM not found\"; } else { throw await new abap.Classes['CX_SY_DYN_CALL_ILLEGAL_FORM'.trimEnd()]().constructor_(); } } else { if (abap.Classes['CX_SY_PROGRAM_NOT_FOUND'.trimEnd()] === undefined) { throw \"CX_SY_PROGRAM_NOT_FOUND not found\"; } else { throw await new abap.Classes['CX_SY_PROGRAM_NOT_FOUND'.trimEnd()]().constructor_(); } } }\nawait abap.Forms['PROG-ZSDFSD-FOO']({});`,                       skip: false},
@@ -340,11 +340,11 @@ await abap.Classes['KERNEL_PUSH_CHANNELS'].wait({seconds: abap.IntegerFactory.ge
   fs_n_.assign(unique1);
 }`},
     {abap: `lo_result->if_ci_test~navigate( ).`,
-      js: `await lo_result.get().if_ci_test$navigate();`},
+      js: `await (lo_result.get() ?? abap.throwRefIsInitial()).if_ci_test$navigate();`},
     {abap: `WRITE bar+30(*).`,
       js: `abap.statements.write(bar.getOffset({offset: 30}));`},
     {abap: `mi_merge->get_result( )-stage->count( ).`,
-      js: `await (await mi_merge.get().get_result()).get().stage.get().count();`},
+      js: `await ((await (mi_merge.get() ?? abap.throwRefIsInitial()).get_result()).get().stage.get() ?? abap.throwRefIsInitial()).count();`},
 
     {abap: `CREATE DATA dref TYPE STANDARD TABLE OF ('T000') WITH DEFAULT KEY.`,
       js: `abap.statements.createData(dref,{"name": 'T000',"table": true});`},
@@ -369,9 +369,9 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({object: obj,user: usr,fields:
     {abap: `CALL METHOD bar RECEIVING field = field.`,
       js: `field.set(await bar());`},
     {abap: `CALL METHOD bar->name( ).`,
-      js: `await bar.get().name();`},
+      js: `await (bar.get() ?? abap.throwRefIsInitial()).name();`},
     {abap: `CALL METHOD bar->name.`,
-      js: `await bar.get().name();`},
+      js: `await (bar.get() ?? abap.throwRefIsInitial()).name();`},
 
     {abap: `lo_sdescr->get_component_type(
   EXPORTING
@@ -381,7 +381,7 @@ await abap.Classes['KERNEL_AUTHORITY_CHECK'].call({object: obj,user: usr,fields:
   EXCEPTIONS
     component_not_found = 4 ).`,
     js: `try {
-  rs_node_type.get().dd.set(await lo_sdescr.get().get_component_type({p_name: rs_node_type.get().target_field_name}));
+  rs_node_type.get().dd.set(await (lo_sdescr.get() ?? abap.throwRefIsInitial()).get_component_type({p_name: rs_node_type.get().target_field_name}));
   abap.builtin.sy.get().subrc.set(0);
 } catch (e) {
   if (e.classic) {

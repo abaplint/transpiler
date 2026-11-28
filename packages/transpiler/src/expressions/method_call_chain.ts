@@ -19,7 +19,8 @@ export class MethodCallChainTranspiler implements IExpressionTranspiler {
     const calls = node.findDirectExpressions(Expressions.MethodCall);
     const lastCall = calls[calls.length - 1];
 
-    for (const c of children) {
+    for (let i = 0; i < children.length; i++) {
+      const c = children[i];
       if (c instanceof Nodes.ExpressionNode && c.get() instanceof Expressions.MethodCall) {
         const isFirst = c === node.getFirstChild();
         // "me->name( )" has the same semantics as the unqualified "name( )",
@@ -70,10 +71,15 @@ export class MethodCallChainTranspiler implements IExpressionTranspiler {
         const name = Traversal.escapeNamespace(c.getFirstToken().getStr().toLowerCase().replace("~", "$"));
         ret.append(name!, c, traversal);
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr() === "->") {
+        const previous = children[i - 1];
         if (ret.getCode() === "super") {
           ret.append(".", c, traversal);
-        } else {
+        } else if (Traversal.isMe(previous) || previous.get() instanceof Expressions.NewObject) {
+          // the reference cannot be initial
           ret.append(".get().", c, traversal);
+        } else {
+          // a call through an initial reference raises CX_SY_REF_IS_INITIAL
+          ret = new Chunk().appendString("(").appendChunk(ret).append(".get()" + Traversal.REF_IS_INITIAL + ").", c, traversal);
         }
       } else if (c instanceof Nodes.TokenNode && c.getFirstToken().getStr() === "=>") {
         ret.append(".", c, traversal);
