@@ -28,6 +28,14 @@ define role ZDCLS {
   "zsco2.sco2.xml": abapgitXML,
   "zsia6.sia6.xml": abapgitXML,
   "zsrvb.srvb.xml": abapgitXML,
+  "zsmbc.smbc.json": `{
+  "formatVersion": "1",
+  "header": {
+    "description": "Maintenance Object",
+    "originalLanguage": "en",
+    "abapLanguageVersion": "cloudDevelopment"
+  }
+}`,
 };
 
 describe("object types without output", () => {
