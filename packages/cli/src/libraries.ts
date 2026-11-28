@@ -50,6 +50,7 @@ export async function loadLibraries(config: ITranspilerConfig): Promise<LoadedLi
   const result: LoadedLibrary[] = [];
   for (const [index, lib] of libs.entries()) {
     const libraryName = names[index];
+    const start = Date.now();
     let dir: string;
     let cleanupFolder = false;
     const folder = resolveLibFolder(lib.folder, process.cwd());
@@ -92,7 +93,7 @@ export async function loadLibraries(config: ITranspilerConfig): Promise<LoadedLi
         }
       }
       result.push({name: libraryName, files});
-      console.log("\t" + files.length + " files added from lib");
+      console.log("\t" + files.length + " files added from lib, " + ((Date.now() - start) / 1000).toFixed(1) + " seconds");
     } finally {
       if (cleanupFolder) {
         FileOperations.deleteFolderRecursive(dir);

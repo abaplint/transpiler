@@ -786,4 +786,443 @@ ENDCLASS.`;
     // just test its valid syntax
   });
 
+  it("DELETE ranges and ADJACENT DUPLICATES set sy-subrc", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DO 5 TIMES.
+  APPEND sy-index TO tab.
+ENDDO.
+DELETE tab FROM 4 TO 2.
+WRITE / sy-subrc.
+DELETE tab FROM 9 TO 10.
+WRITE / sy-subrc.
+DELETE tab FROM 4 TO 99.
+WRITE / sy-subrc.
+WRITE / lines( tab ).
+DELETE ADJACENT DUPLICATES FROM tab.
+WRITE / sy-subrc.
+APPEND 3 TO tab.
+DELETE ADJACENT DUPLICATES FROM tab.
+WRITE / sy-subrc.
+WRITE / lines( tab ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n4\n0\n3\n4\n0\n3");
+  });
+
+  it("DELETE TABLE FROM wa deletes only the first row with that key", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         name TYPE c LENGTH 3,
+         amount TYPE i,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row TYPE ty.
+row-name = 'A'. row-amount = 1. APPEND row TO tab.
+row-name = 'B'. row-amount = 2. APPEND row TO tab.
+row-name = 'B'. row-amount = 3. APPEND row TO tab.
+row-name = 'B'. row-amount = 9.
+DELETE TABLE tab FROM row.
+WRITE / sy-subrc.
+LOOP AT tab INTO row.
+  WRITE / row-amount.
+ENDLOOP.
+row-name = 'C'.
+DELETE TABLE tab FROM row.
+WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n1\n3\n4");
+  });
+
+  it("DELETE TABLE FROM wa, an empty key deletes the first row", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         amount TYPE i,
+         price TYPE p LENGTH 8 DECIMALS 2,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH DEFAULT KEY.
+DATA row TYPE ty.
+row-amount = 1. APPEND row TO tab.
+row-amount = 2. APPEND row TO tab.
+row-amount = 2.
+DELETE TABLE tab FROM row.
+LOOP AT tab INTO row.
+  WRITE / row-amount.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+  it("DELETE TABLE WITH TABLE KEY deletes only the first row found", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         name TYPE c LENGTH 3,
+         amount TYPE i,
+       END OF ty.
+DATA tab TYPE STANDARD TABLE OF ty WITH NON-UNIQUE KEY name.
+DATA row TYPE ty.
+row-name = 'B'. row-amount = 1. APPEND row TO tab.
+row-name = 'B'. row-amount = 2. APPEND row TO tab.
+DELETE TABLE tab WITH TABLE KEY name = 'B'.
+LOOP AT tab INTO row.
+  WRITE / row-amount.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("2");
+  });
+
+  it("DELETE itab. inside a LOOP and DELETE itab FROM n. in a program", async () => {
+    const code = `
+DATA tab TYPE STANDARD TABLE OF i WITH DEFAULT KEY.
+DATA row TYPE i.
+DO 5 TIMES.
+  APPEND sy-index TO tab.
+ENDDO.
+LOOP AT tab INTO row.
+  IF row = 2.
+    DELETE tab.
+  ENDIF.
+ENDLOOP.
+DELETE tab FROM 4.
+LOOP AT tab INTO row.
+  WRITE / row.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("1\n3\n4");
+  });
+
+  it("DELETE WHERE and DELETE TABLE WITH TABLE KEY, components with a namespace", async () => {
+    const code = `
+TYPES: BEGIN OF ty_sub,
+         /foo/comp TYPE i,
+       END OF ty_sub.
+TYPES: BEGIN OF ty_row,
+         /foo/comp TYPE i,
+         /foo/two  TYPE i,
+         plain     TYPE i,
+         sub       TYPE ty_sub,
+       END OF ty_row.
+DATA lt TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY.
+DATA ls TYPE ty_row.
+DATA lv TYPE i VALUE 2.
+ls-/foo/comp = 1. ls-/foo/two = 10. ls-plain = 100. ls-sub-/foo/comp = 7. APPEND ls TO lt.
+ls-/foo/comp = 2. ls-/foo/two = 20. ls-plain = 200. ls-sub-/foo/comp = 8. APPEND ls TO lt.
+ls-/foo/comp = 3. ls-/foo/two = 30. ls-plain = 300. ls-sub-/foo/comp = 9. APPEND ls TO lt.
+CLEAR ls.
+DELETE lt WHERE /foo/comp = lv.
+WRITE / sy-subrc.
+DELETE lt WHERE sub-/foo/comp = 9.
+WRITE / lines( lt ).
+DATA lt_sorted TYPE SORTED TABLE OF ty_row WITH UNIQUE KEY /foo/comp.
+INSERT LINES OF lt INTO TABLE lt_sorted.
+DELETE TABLE lt_sorted WITH TABLE KEY /foo/comp = 1.
+WRITE / sy-subrc.
+WRITE / lines( lt_sorted ).`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n1\n0\n0");
+  });
+  it("DELETE TABLE WITH TABLE KEY, two components, both are compared", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         other TYPE i,
+         plain TYPE i,
+         third TYPE i,
+       END OF ty_row.
+DATA lt TYPE STANDARD TABLE OF ty_row WITH NON-UNIQUE KEY other plain.
+DATA ls TYPE ty_row.
+ls-other = 0. ls-plain = 100. ls-third = 1. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 200. ls-third = 2. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 300. ls-third = 3. INSERT ls INTO TABLE lt.
+ls-other = 1. ls-plain = 300. ls-third = 4. INSERT ls INTO TABLE lt.
+DELETE TABLE lt WITH TABLE KEY other = 0 plain = 300.
+WRITE / sy-subrc.
+LOOP AT lt INTO ls.
+  WRITE / ls-third.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n1\n2\n4");
+  });
+
+  it("DELETE TABLE WITH TABLE KEY, two components, no row has both", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         other TYPE i,
+         plain TYPE i,
+         third TYPE i,
+       END OF ty_row.
+DATA lt TYPE STANDARD TABLE OF ty_row WITH NON-UNIQUE KEY other plain.
+DATA ls TYPE ty_row.
+ls-other = 0. ls-plain = 100. ls-third = 1. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 200. ls-third = 2. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 300. ls-third = 3. INSERT ls INTO TABLE lt.
+ls-other = 1. ls-plain = 300. ls-third = 4. INSERT ls INTO TABLE lt.
+DELETE TABLE lt WITH TABLE KEY other = 0 plain = 999.
+WRITE / sy-subrc.
+LOOP AT lt INTO ls.
+  WRITE / ls-third.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n1\n2\n3\n4");
+  });
+
+  it("DELETE TABLE WITH TABLE KEY, three components, sorted table", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         other TYPE i,
+         plain TYPE i,
+         third TYPE i,
+       END OF ty_row.
+DATA lt TYPE SORTED TABLE OF ty_row WITH UNIQUE KEY other plain third.
+DATA ls TYPE ty_row.
+ls-other = 0. ls-plain = 100. ls-third = 1. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 200. ls-third = 2. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 300. ls-third = 3. INSERT ls INTO TABLE lt.
+ls-other = 1. ls-plain = 300. ls-third = 4. INSERT ls INTO TABLE lt.
+DELETE TABLE lt WITH TABLE KEY other = 0 plain = 300 third = 9.
+WRITE / sy-subrc.
+DELETE TABLE lt WITH TABLE KEY other = 0 plain = 300 third = 3.
+WRITE / sy-subrc.
+LOOP AT lt INTO ls.
+  WRITE / ls-third.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n0\n1\n2\n4");
+  });
+
+  it("DELETE TABLE WITH TABLE KEY, two components, hashed table", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         other TYPE i,
+         plain TYPE i,
+         third TYPE i,
+       END OF ty_row.
+DATA lt TYPE HASHED TABLE OF ty_row WITH UNIQUE KEY other plain.
+DATA ls TYPE ty_row.
+ls-other = 0. ls-plain = 100. ls-third = 1. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 200. ls-third = 2. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 300. ls-third = 3. INSERT ls INTO TABLE lt.
+ls-other = 1. ls-plain = 300. ls-third = 4. INSERT ls INTO TABLE lt.
+DELETE TABLE lt WITH TABLE KEY other = 0 plain = 999.
+WRITE / sy-subrc.
+DELETE TABLE lt WITH TABLE KEY plain = 300 other = 0.
+WRITE / sy-subrc.
+LOOP AT lt INTO ls.
+  WRITE / ls-third.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n0\n1\n2\n4");
+  });
+
+  it("DELETE TABLE WITH TABLE KEY name COMPONENTS, two components", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         other TYPE i,
+         plain TYPE i,
+         third TYPE i,
+       END OF ty_row.
+DATA lt TYPE STANDARD TABLE OF ty_row WITH DEFAULT KEY WITH NON-UNIQUE SORTED KEY k COMPONENTS other plain.
+DATA ls TYPE ty_row.
+ls-other = 0. ls-plain = 100. ls-third = 1. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 200. ls-third = 2. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 300. ls-third = 3. INSERT ls INTO TABLE lt.
+ls-other = 1. ls-plain = 300. ls-third = 4. INSERT ls INTO TABLE lt.
+DELETE TABLE lt WITH TABLE KEY k COMPONENTS other = 0 plain = 300.
+WRITE / sy-subrc.
+LOOP AT lt INTO ls.
+  WRITE / ls-third.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n1\n2\n4");
+  });
+
+  it("DELETE TABLE WITH TABLE KEY, two components, values from a calculation and a method call", async () => {
+    const code = `
+CLASS lcl DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS three_hundred RETURNING VALUE(rv_value) TYPE i.
+ENDCLASS.
+CLASS lcl IMPLEMENTATION.
+  METHOD three_hundred.
+    rv_value = 300.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+TYPES: BEGIN OF ty_row,
+         other TYPE i,
+         plain TYPE i,
+         third TYPE i,
+       END OF ty_row.
+DATA lt TYPE STANDARD TABLE OF ty_row WITH NON-UNIQUE KEY other plain.
+DATA ls TYPE ty_row.
+ls-other = 0. ls-plain = 100. ls-third = 1. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 200. ls-third = 2. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 300. ls-third = 3. INSERT ls INTO TABLE lt.
+ls-other = 1. ls-plain = 300. ls-third = 4. INSERT ls INTO TABLE lt.
+DATA lv TYPE i VALUE 1.
+DELETE TABLE lt WITH TABLE KEY other = lv - 1 plain = lcl=>three_hundred( ).
+WRITE / sy-subrc.
+LOOP AT lt INTO ls.
+  WRITE / ls-third.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n1\n2\n4");
+  });
+
+  it("DELETE TABLE FROM wa, hashed table, row found, sy-subrc 0", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         other TYPE i,
+         plain TYPE i,
+         third TYPE i,
+       END OF ty_row.
+DATA lt TYPE HASHED TABLE OF ty_row WITH UNIQUE KEY other plain.
+DATA ls TYPE ty_row.
+ls-other = 0. ls-plain = 100. ls-third = 1. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 200. ls-third = 2. INSERT ls INTO TABLE lt.
+ls-other = 1. ls-plain = 200. ls-third = 3. INSERT ls INTO TABLE lt.
+CLEAR ls.
+ls-other = 0. ls-plain = 200.
+sy-subrc = 4.
+DELETE TABLE lt FROM ls.
+WRITE / sy-subrc.
+LOOP AT lt INTO ls.
+  WRITE / ls-third.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n1\n3");
+  });
+
+  it("DELETE TABLE FROM wa, hashed table, no row found, sy-subrc 4", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         other TYPE i,
+         plain TYPE i,
+         third TYPE i,
+       END OF ty_row.
+DATA lt TYPE HASHED TABLE OF ty_row WITH UNIQUE KEY other plain.
+DATA ls TYPE ty_row.
+ls-other = 0. ls-plain = 100. ls-third = 1. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 200. ls-third = 2. INSERT ls INTO TABLE lt.
+ls-other = 1. ls-plain = 200. ls-third = 3. INSERT ls INTO TABLE lt.
+CLEAR ls.
+ls-other = 0. ls-plain = 999.
+sy-subrc = 0.
+DELETE TABLE lt FROM ls.
+WRITE / sy-subrc.
+LOOP AT lt INTO ls.
+  WRITE / ls-third.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("4\n1\n2\n3");
+  });
+
+  it("DELETE TABLE FROM wa, hashed table, same row twice", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         other TYPE i,
+         plain TYPE i,
+         third TYPE i,
+       END OF ty_row.
+DATA lt TYPE HASHED TABLE OF ty_row WITH UNIQUE KEY other plain.
+DATA ls TYPE ty_row.
+ls-other = 0. ls-plain = 100. ls-third = 1. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 200. ls-third = 2. INSERT ls INTO TABLE lt.
+ls-other = 1. ls-plain = 200. ls-third = 3. INSERT ls INTO TABLE lt.
+CLEAR ls.
+ls-other = 0. ls-plain = 200.
+DELETE TABLE lt FROM ls.
+WRITE / sy-subrc.
+DELETE TABLE lt FROM ls.
+WRITE / sy-subrc.
+LOOP AT lt INTO ls.
+  WRITE / ls-third.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n4\n1\n3");
+  });
+
+  it("DELETE TABLE FROM wa, hashed table, key table_line, sy-subrc", async () => {
+    const code = `
+DATA lt TYPE HASHED TABLE OF i WITH UNIQUE KEY table_line.
+DATA lv TYPE i.
+INSERT 10 INTO TABLE lt.
+INSERT 20 INTO TABLE lt.
+INSERT 30 INTO TABLE lt.
+lv = 20.
+sy-subrc = 4.
+DELETE TABLE lt FROM lv.
+WRITE / sy-subrc.
+lv = 99.
+DELETE TABLE lt FROM lv.
+WRITE / sy-subrc.
+LOOP AT lt INTO lv.
+  WRITE / lv.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n4\n10\n30");
+  });
+
+  it("DELETE TABLE FROM field symbol, hashed table, sy-subrc", async () => {
+    const code = `
+TYPES: BEGIN OF ty_row,
+         other TYPE i,
+         plain TYPE i,
+         third TYPE i,
+       END OF ty_row.
+DATA lt TYPE HASHED TABLE OF ty_row WITH UNIQUE KEY other plain.
+DATA ls TYPE ty_row.
+ls-other = 0. ls-plain = 100. ls-third = 1. INSERT ls INTO TABLE lt.
+ls-other = 0. ls-plain = 200. ls-third = 2. INSERT ls INTO TABLE lt.
+ls-other = 1. ls-plain = 200. ls-third = 3. INSERT ls INTO TABLE lt.
+CLEAR ls.
+FIELD-SYMBOLS <ls> TYPE ty_row.
+ASSIGN ls TO <ls>.
+ls-other = 0. ls-plain = 200.
+sy-subrc = 4.
+DELETE TABLE lt FROM <ls>.
+WRITE / sy-subrc.
+ls-plain = 999.
+DELETE TABLE lt FROM <ls>.
+WRITE / sy-subrc.
+LOOP AT lt INTO ls.
+  WRITE / ls-third.
+ENDLOOP.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("0\n4\n1\n3");
+  });
+
 });

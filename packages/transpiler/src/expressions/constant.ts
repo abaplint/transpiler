@@ -10,6 +10,17 @@ export class ConstantTranspiler implements IExpressionTranspiler {
     this.addGet = addGet;
   }
 
+  /** An ABAP integer literal as the argument of a set( ): a JavaScript number, or the digits as a
+   *  string when a number would lose precision, above 2^53, for an int8 or p VALUE.
+   *  Input that is not an integer literal is returned unchanged */
+  public static integerValue(str: string): string {
+    const normalized = ConstantTranspiler.normalizeInteger(str);
+    if (/^-?\d+$/.test(normalized) && Number.isSafeInteger(Number(normalized)) === false) {
+      return JSON.stringify(normalized);
+    }
+    return normalized;
+  }
+
   /** Normalizes an ABAP integer literal to a JavaScript decimal integer literal, which is also
    *  valid in strict mode, where leading zeros give an octal literal and a SyntaxError.
    *  "007" -> "7", "000" -> "0", "-007" -> "-7", "- 010" -> "-10", "+5" -> "5", "-000" -> "0".

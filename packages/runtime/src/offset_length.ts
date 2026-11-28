@@ -29,7 +29,7 @@ export class OffsetLength {
       if (typeof options.offset === "number") {
         this.offset = options.offset;
       } else {
-        this.offset = options.offset.get();
+        this.offset = Number(options.offset.get());
       }
       if (this.isHex) {
         this.offset *= 2;
@@ -40,7 +40,7 @@ export class OffsetLength {
       if (typeof options.length === "number") {
         this.length = options.length;
       } else {
-        this.length = options.length.get();
+        this.length = Number(options.length.get());
       }
       if (this.isHex) {
         this.length *= 2;

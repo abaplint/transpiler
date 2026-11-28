@@ -1317,7 +1317,7 @@ WRITE sy-subrc.`;
     }
   });
 
-  it("ASSIGN of a dereferenced string to a TYPE i field symbol is an illegal cast", async () => {
+  it("ASSIGN of a dereferenced string to a TYPE i field symbol is a type conflict", async () => {
     const code = `
 DATA r TYPE REF TO data.
 FIELD-SYMBOLS <i> TYPE i.
@@ -1326,12 +1326,13 @@ ASSIGN r->* TO <i>.
 WRITE sy-subrc.`;
     const js = await run(code);
     const f = new AsyncFunction("abap", js);
+    let thrown = "";
     try {
       await f(abap);
-      expect.fail("expected ASSIGN_CAST_ILLEGAL_CAST");
     } catch(e) {
-      expect(e.toString()).to.contain("ASSIGN_CAST_ILLEGAL_CAST");
+      thrown = e.toString();
     }
+    expect(thrown).to.contain("ASSIGN_TYPE_CONFLICT");
   });
 
   it("ASSIGN of a dereferenced string to a TYPE any field symbol, and with CASTING, and the same type", async () => {
@@ -1357,6 +1358,259 @@ WRITE / sy-subrc.`;
     const f = new AsyncFunction("abap", js);
     await f(abap);
     expect(abap.console.get()).to.equal("0\n0\ncasting\n0");
+  });
+
+
+  it("ASSIGN COMPONENT of a c LENGTH 4 to a TYPE string field symbol is a type conflict, #417", async () => {
+    const code = `
+TYPES:
+  BEGIN OF ts_test,
+    a TYPE c LENGTH 4,
+  END OF ts_test.
+DATA ls_test TYPE ts_test.
+FIELD-SYMBOLS <lv> TYPE string.
+ASSIGN COMPONENT 'A' OF STRUCTURE ls_test TO <lv>.
+WRITE <lv>.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    let thrown = "";
+    try {
+      await f(abap);
+    } catch(e) {
+      thrown = e.toString();
+    }
+    expect(thrown).to.contain("ASSIGN_TYPE_CONFLICT");
+  });
+
+  it("ASSIGN COMPONENT, by name and by index, of another elementary type is a type conflict", async () => {
+    const cases: [string, string, string][] = [
+      ["string", "i", "'A'"],
+      ["string", "i", "1"],
+      ["i", "string", "'A'"],
+      ["c LENGTH 4", "string", "1"],
+      ["d", "t", "'A'"],
+      ["f", "int8", "'A'"],
+    ];
+    for (const [source, target, component] of cases) {
+      const code = `
+TYPES: BEGIN OF ty, a TYPE ${source}, END OF ty.
+DATA ls TYPE ty.
+FIELD-SYMBOLS <fs> TYPE ${target}.
+ASSIGN COMPONENT ${component} OF STRUCTURE ls TO <fs>.
+WRITE sy-subrc.`;
+      const js = await run(code);
+      const f = new AsyncFunction("abap", js);
+      abap = new ABAP({console: new MemoryConsole()});
+      let thrown = "";
+      try {
+        await f(abap);
+      } catch(e) {
+        thrown = e.toString();
+      }
+      expect(thrown, source + " to " + target + " by " + component).to.contain("ASSIGN_TYPE_CONFLICT");
+    }
+  });
+
+  it("ASSIGN COMPONENT of the same type, to a generic field symbol, and through a field symbol", async () => {
+    const code = `
+TYPES: BEGIN OF ty,
+         c TYPE c LENGTH 4,
+         s TYPE string,
+         i TYPE i,
+       END OF ty.
+DATA ls TYPE ty.
+FIELD-SYMBOLS <stru> TYPE any.
+FIELD-SYMBOLS <s> TYPE string.
+FIELD-SYMBOLS <i> TYPE i.
+FIELD-SYMBOLS <any> TYPE any.
+FIELD-SYMBOLS <simple> TYPE simple.
+FIELD-SYMBOLS <c> TYPE c.
+ASSIGN COMPONENT 'S' OF STRUCTURE ls TO <s>.
+<s> = 'hello'.
+WRITE / ls-s.
+ASSIGN COMPONENT 3 OF STRUCTURE ls TO <i>.
+<i> = 42.
+WRITE / ls-i.
+ASSIGN COMPONENT 'C' OF STRUCTURE ls TO <any>.
+WRITE / sy-subrc.
+ASSIGN COMPONENT 'C' OF STRUCTURE ls TO <simple>.
+WRITE / sy-subrc.
+ASSIGN COMPONENT 'C' OF STRUCTURE ls TO <c>.
+WRITE / sy-subrc.
+ASSIGN ls TO <stru>.
+ASSIGN COMPONENT 'I' OF STRUCTURE <stru> TO <i>.
+WRITE / <i>.
+ASSIGN COMPONENT 'NOPE' OF STRUCTURE ls TO <i>.
+WRITE / sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.getTrimmed()).to.equal("hello\n42\n0\n0\n0\n42\n4");
+  });
+
+  it("ASSIGN COMPONENT through a field symbol to another elementary type is a type conflict", async () => {
+    const code = `
+TYPES: BEGIN OF ty, a TYPE c LENGTH 4, END OF ty.
+DATA ls TYPE ty.
+FIELD-SYMBOLS <stru> TYPE any.
+FIELD-SYMBOLS <i> TYPE i.
+ASSIGN ls TO <stru>.
+ASSIGN COMPONENT 'A' OF STRUCTURE <stru> TO <i>.
+WRITE sy-subrc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    let thrown = "";
+    try {
+      await f(abap);
+    } catch(e) {
+      thrown = e.toString();
+    }
+    expect(thrown).to.contain("ASSIGN_TYPE_CONFLICT");
+  });
+
+
+  it("ASSIGN INCREMENT, RANGE and sy-subrc, flat structure of integers", async () => {
+    const code = `
+DATA: BEGIN OF s,
+        a TYPE i VALUE 1,
+        b TYPE i VALUE 2,
+        c TYPE i VALUE 3,
+        d TYPE i VALUE 4,
+      END OF s.
+DATA lv TYPE i VALUE 7.
+FIELD-SYMBOLS <i> TYPE i.
+ASSIGN s-a INCREMENT 1 TO <i>.
+ASSERT sy-subrc = 4.
+ASSERT <i> IS NOT ASSIGNED.
+ASSIGN s-a INCREMENT 0 TO <i>.
+ASSERT sy-subrc = 0.
+ASSERT <i> = 1.
+ASSIGN s-a INCREMENT 3 TO <i> RANGE s.
+ASSERT sy-subrc = 0.
+ASSERT <i> = 4.
+ASSIGN s-a INCREMENT 4 TO <i> RANGE s.
+ASSERT sy-subrc = 4.
+ASSERT <i> = 4.
+ASSIGN s-b INCREMENT -1 TO <i> RANGE s.
+ASSERT sy-subrc = 0.
+ASSERT <i> = 1.
+UNASSIGN <i>.
+ASSIGN s-a INCREMENT -1 TO <i> RANGE s.
+ASSERT sy-subrc = 4.
+ASSERT <i> IS NOT ASSIGNED.
+ASSIGN s-a INCREMENT 1 TO <i> RANGE s.
+<i> = 99.
+ASSERT s-b = 99.
+ASSIGN lv INCREMENT 0 TO <i>.
+ASSERT sy-subrc = 0.
+ASSERT <i> = 7.
+UNASSIGN <i>.
+ASSIGN lv INCREMENT 1 TO <i>.
+ASSERT sy-subrc = 4.
+ASSERT <i> IS NOT ASSIGNED.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("ASSIGN INCREMENT, character components, write through the field symbol", async () => {
+    const code = `
+DATA: BEGIN OF t,
+        x TYPE c LENGTH 2 VALUE 'ab',
+        y TYPE c LENGTH 2 VALUE 'cd',
+        z TYPE c LENGTH 2 VALUE 'ef',
+      END OF t.
+DATA inc TYPE i.
+FIELD-SYMBOLS <c> TYPE c.
+ASSIGN t-x INCREMENT 1 TO <c> RANGE t.
+ASSERT sy-subrc = 0.
+ASSERT <c> = 'cd'.
+ASSIGN t-x INCREMENT 2 TO <c> RANGE t.
+ASSERT sy-subrc = 0.
+ASSERT <c> = 'ef'.
+UNASSIGN <c>.
+ASSIGN t-x INCREMENT 3 TO <c> RANGE t.
+ASSERT sy-subrc = 4.
+ASSERT <c> IS NOT ASSIGNED.
+DO 3 TIMES.
+  inc = sy-index - 1.
+  ASSIGN t-x INCREMENT inc TO <c> RANGE t.
+  <c> = |{ sy-index }|.
+ENDDO.
+ASSERT t-x = '1'.
+ASSERT t-y = '2'.
+ASSERT t-z = '3'.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("ASSIGN INCREMENT, include, nested structure, strings and a field symbol as data object", async () => {
+    const code = `
+TYPES: BEGIN OF ty_in,
+         p TYPE i,
+         q TYPE i,
+       END OF ty_in.
+DATA: BEGIN OF s,
+        a TYPE i VALUE 1,
+        b TYPE i VALUE 2.
+        INCLUDE TYPE ty_in.
+DATA:   n    TYPE ty_in,
+        str1 TYPE string VALUE \`s1\`,
+        str2 TYPE string VALUE \`s2\`,
+      END OF s.
+FIELD-SYMBOLS <i> TYPE i.
+FIELD-SYMBOLS <s> TYPE string.
+FIELD-SYMBOLS <a> TYPE any.
+s-p = 3.
+s-q = 4.
+s-n-p = 5.
+s-n-q = 6.
+ASSIGN s-a INCREMENT 2 TO <i> RANGE s.
+ASSERT sy-subrc = 0.
+ASSERT <i> = 3.
+ASSIGN s-a INCREMENT 5 TO <i> RANGE s.
+ASSERT sy-subrc = 0.
+ASSERT <i> = 6.
+ASSIGN s-str1 INCREMENT 1 TO <s> RANGE s.
+ASSERT sy-subrc = 0.
+ASSERT <s> = \`s2\`.
+ASSIGN s-b TO <a>.
+ASSIGN <a> INCREMENT 1 TO <i> RANGE s.
+ASSERT sy-subrc = 0.
+ASSERT <i> = 3.
+ASSIGN s-n-p INCREMENT 1 TO <i> RANGE s-n.
+ASSERT sy-subrc = 0.
+ASSERT <i> = 6.
+UNASSIGN <i>.
+ASSIGN s-n-p INCREMENT 2 TO <i> RANGE s-n.
+ASSERT sy-subrc = 4.
+ASSERT <i> IS NOT ASSIGNED.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+  });
+
+  it("ASSIGN INCREMENT, an area of another type is ASSIGN_TYPE_CONFLICT, after the range check", async () => {
+    const code = `
+DATA: BEGIN OF struc,
+        word TYPE c LENGTH 4 VALUE 'abcd',
+        int1 TYPE i          VALUE 111,
+        int2 TYPE i          VALUE 222,
+        stri TYPE string     VALUE \`efgh\`,
+      END OF struc.
+FIELD-SYMBOLS <int> TYPE i.
+ASSIGN struc-word INCREMENT 100 TO <int> RANGE struc.
+ASSERT sy-subrc = 4.
+ASSIGN struc-word INCREMENT 1 TO <int> RANGE struc.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    try {
+      await f(abap);
+      expect.fail("expected ASSIGN_TYPE_CONFLICT");
+    } catch(e) {
+      expect(e.toString()).to.contain("ASSIGN_TYPE_CONFLICT");
+    }
   });
 
 });

@@ -339,4 +339,19 @@ START-OF-SELECTION.
     expect(abap.console.get()).to.equal("-5");
   });
 
+  it("text into a time field, trailing blanks are kept and the rest is filled with 0", async () => {
+    const code = `
+DATA text TYPE c LENGTH 3.
+DATA time TYPE t.
+text = '12'.
+time = text.
+WRITE / time.
+time = '1234'.
+WRITE / time.`;
+    const js = await run(code);
+    const f = new AsyncFunction("abap", js);
+    await f(abap);
+    expect(abap.console.get()).to.equal("12 000\n123400");
+  });
+
 });

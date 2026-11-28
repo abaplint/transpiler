@@ -8,20 +8,24 @@ Call `abap_transpile` on the command line, see example in
 
 https://github.com/larshp/abap-advent-2020/blob/main/package.json#L8
 
-Shared factory functions for repeated composite type constructors are enabled by
-default. Each factory call creates a fresh ABAP value. To preserve inline
-constructor output, set `options.sharedTypeFactories` to `false` in
-`abap_transpile.json`:
+`WRITE '@KERNEL <js>'.` emits the literal as raw JavaScript, which runs with
+the privileges of the host. To restrict it, set `options.kernel.allow` to the
+list of regular expressions (matched case insensitively against the object
+name) that may use it, an empty list allows none. A `@KERNEL` literal in any
+other object fails the transpile with the issue of the abaplint rule
+`forbidden_kernel_write`, naming file and line. Libraries
+are allowed the same way, by listing the object name patterns they use, for
+example `"^CL_"` and `"^KERNEL_"` for open-abap-core:
 
 ```json
 {
   "options": {
-    "sharedTypeFactories": false
+    "kernel": {"allow": ["^CL_", "^KERNEL_", "^ZCL_MY_FFI$"]}
   }
 }
 ```
 
-Omit the option or set it to `true` to use shared factories.
+Omit `kernel` to allow `@KERNEL` everywhere (the default).
 
 ## Output layout
 

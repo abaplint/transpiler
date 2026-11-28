@@ -35,7 +35,8 @@ export interface IProgress {
   tick(text: string): Promise<void>;
 }
 
-/** one javascript output file for each object */
+/** one javascript output file for each object, except with folders the DDIC objects
+ * of each folder share one file, its object then has type "DDIC" and the folder as name */
 export interface IOutputFile {
   object: IObjectIdentifier;
   /** POSIX path relative to the output root; includes its folder when a layout is supplied. */
@@ -51,8 +52,6 @@ export enum UnknownTypesEnum {
 }
 
 export interface ITranspilerOptions {
-  /** deduplicate generated composite type constructors within each output module (default: true) */
-  sharedTypeFactories?: boolean;
   /** ignore syntax check, used for internal testing */
   ignoreSyntaxCheck?: boolean;
   /** adds common js modules */
@@ -92,4 +91,10 @@ export interface ITranspilerOptions {
   importProg?: boolean;
   /** skips version check, not recommended */
   skipVersionCheck?: boolean;
+  /** restricts WRITE '@KERNEL ...' (raw JavaScript) to the objects whose name matches one of the
+   * regular expressions in allow, case insensitive, an empty list allows none; a literal anywhere else is
+   * reported by the abaplint rule forbidden_kernel_write. Undefined allows @KERNEL everywhere */
+  kernel?: {
+    allow: string[];
+  };
 }

@@ -45,7 +45,7 @@ export class NewObjectTranspiler implements IExpressionTranspiler {
         // single default parameter
         const scope = traversal.findCurrentScopeByToken(typeNameOrInfer.getFirstToken());
         const cdef = traversal.findClassDefinition(type.getIdentifierName(), scope);
-        const constr = this.findConstructor(cdef, scope);
+        const constr = NewObjectTranspiler.findConstructor(cdef, scope);
         const pname = constr?.getParameters().getDefaultImporting()?.toLowerCase();
         para = `{${pname}: ${traversal.traverse(node.getChildren()[3]).getCode()}}`;
       }
@@ -53,6 +53,10 @@ export class NewObjectTranspiler implements IExpressionTranspiler {
       const clas = traversal.lookupClassOrInterface(type.getIdentifierName(), node.getFirstToken());
       ret.appendString(traversal.toType(type) + ".set(await (new " + clas + "()).constructor_(" + para + "))");
     } else {
+      if (typeNameOrInfer.concatTokens() === "#" && type instanceof abaplint.BasicTypes.DataReference) {
+        // NEW #( ) infers the type of the target, a data reference: the new data object has the referenced type
+        type = type.getType();
+      }
       // a new data object with a copy of the value, never the source itself; async, as sources can await
       const typeCode = traversal.toType(type);
       const setCode = this.buildValue(node, type, traversal);
@@ -100,7 +104,7 @@ export class NewObjectTranspiler implements IExpressionTranspiler {
     return ret;
   }
 
-  private findConstructor(cdef: abaplint.IClassDefinition | undefined, spag: abaplint.ISpaghettiScopeNode | undefined): any {
+  public static findConstructor(cdef: abaplint.IClassDefinition | undefined, spag: abaplint.ISpaghettiScopeNode | undefined): any {
     let def = cdef;
     while (def !== undefined) {
       const method = def?.getMethodDefinitions().getByName("CONSTRUCTOR");
