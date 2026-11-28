@@ -531,8 +531,7 @@ define view entity ZI_MSG as select from t100
     });
   });
 
-  it("SELECT SINGLE FOR UPDATE, reads the row", async () => {
-    const code = `
+  const forUpdate = `
     DATA ls_result TYPE t100.
     SELECT SINGLE FOR UPDATE * FROM t100 INTO ls_result
       WHERE sprsl = 'E' AND arbgb = 'ZAG_UNIT_TEST' AND msgnr = '000'.
@@ -541,24 +540,54 @@ define view entity ZI_MSG as select from t100
     SELECT SINGLE FOR UPDATE * FROM t100 INTO ls_result
       WHERE sprsl = 'E' AND arbgb = 'ZAG_UNIT_TEST' AND msgnr = '999'.
     WRITE / sy-subrc.`;
-    const files = [
-      {filename: "zfoobar.prog.abap", contents: code},
-      {filename: "t100.tabl.xml", contents: tabl_t100xml},
-      {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
-    // the transpiler warns that the row lock is not taken, once per statement and per database
-    const warnings: string[] = [];
-    const original = console.warn;
-    console.warn = (...args: any[]) => { warnings.push(args.join(" ")); };
+  const forUpdateFiles = [
+    {filename: "zfoobar.prog.abap", contents: forUpdate},
+    {filename: "t100.tabl.xml", contents: tabl_t100xml},
+    {filename: "zag_unit_test.msag.xml", contents: msag_zag_unit_test}];
+
+  it("SELECT SINGLE FOR UPDATE, reads the row", async () => {
+    await runAllDatabases(abap, forUpdateFiles, () => {
+      expect(abap.console.get().split("\n").map(l => l.trim())).to.deep.equal(["0", "hello world", "4"]);
+    }, {sqlite: false});
+  });
+
+  it("SELECT SINGLE FOR UPDATE, sqlite has no row locks and refuses", async () => {
+    let message = "";
     try {
-      await runAllDatabases(abap, files, () => {
-        expect(abap.console.get().split("\n").map(l => l.trim())).to.deep.equal(["0", "hello world", "4"]);
-      });
-    } finally {
-      console.warn = original;
+      await runAllDatabases(abap, forUpdateFiles, () => undefined,
+                            {sqlite: true, postgres: false, hana: false, snowflake: false});
+    } catch (error) {
+      message = (error as Error).message;
     }
-    expect(warnings.length).to.be.greaterThan(0);
-    for (const w of warnings) {
-      expect(w).to.match(/^zfoobar\.prog\.abap:(3|7): warning, SELECT SINGLE FOR UPDATE, the row lock is not taken/);
+    expect(message).to.equal("SELECT SINGLE FOR UPDATE, not supported by sqlite, there are no row locks");
+    // nothing was read without the lock
+    expect(abap.console.get()).to.equal("");
+  });
+
+  it("SELECT SINGLE FOR UPDATE, postgres holds the row lock until the end of the LUW", async () => {
+    // @ts-ignore
+    global.abap = abap;
+    const js = await runFilesPostgres(abap, forUpdateFiles);
+    await new AsyncFunction("abap", js)(abap);
+    const db = abap.context.databaseConnections["DEFAULT"];
+    // the pool hands out another connection than the one the LUW runs on, so this is a second session
+    const other = (msgnr: string) => (db as any).pool.query(
+      `SELECT text FROM t100 WHERE sprsl = 'E' AND arbgb = 'ZAG_UNIT_TEST' AND msgnr = '${msgnr}' FOR UPDATE NOWAIT`);
+    try {
+      let message = "";
+      try {
+        await other("000");
+      } catch (error) {
+        message = (error as Error).message;
+      }
+      expect(message).to.include("could not obtain lock");
+      // a row lock, the other row of the table is free
+      expect((await other("123")).rows.length).to.equal(1);
+
+      await db.commit();
+      expect((await other("000")).rows.length).to.equal(1);
+    } finally {
+      await db.disconnect();
     }
   });
 

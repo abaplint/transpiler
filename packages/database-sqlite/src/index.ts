@@ -167,7 +167,11 @@ export class SQLiteDatabaseClient implements DB.DatabaseClient {
   }
 
   // // https://www.sqlite.org/lang_select.html
-  public async select(options: DB.SelectDatabaseOptions) {
+  // forUpdate is spelled out, the package compiles against a released runtime that does not declare it yet
+  public async select(options: DB.SelectDatabaseOptions & {forUpdate?: boolean}) {
+    if (options.forUpdate === true) {
+      throw new Error("SELECT SINGLE FOR UPDATE, not supported by sqlite, there are no row locks");
+    }
     let res: undefined | QueryExecResult[] = undefined;
 
     options.select = options.select.replace(/ UP TO (\d+) ROWS(.*)/i, "$2 LIMIT $1");

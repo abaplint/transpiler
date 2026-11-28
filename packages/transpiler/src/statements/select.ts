@@ -22,10 +22,6 @@ export class SelectTranspiler implements IStatementTranspiler {
       throw new Error("SelectTranspiler, UNION ALL todo");
     } else if (node.findDirectTokenByText("DISTINCT") !== undefined) {
       throw new Error("SelectTranspiler, UNION DISTINCT todo");
-    } else if (node.findDirectExpression(abaplint.Expressions.Select)?.findDirectTokenByText("UPDATE") !== undefined) {
-      // no row lock is requested from the database, the statement runs as the SELECT SINGLE without the addition
-      console.warn(traversal.getFilename() + ":" + node.getFirstToken().getStart().getRow() +
-        ": warning, SELECT SINGLE FOR UPDATE, the row lock is not taken, transpiled as SELECT SINGLE");
     }
 
     let target = "undefined";
@@ -158,6 +154,10 @@ export class SelectTranspiler implements IStatementTranspiler {
     let extra = "";
     if (keys.length > 0) {
       extra = `, primaryKey: ${JSON.stringify(keys)}`;
+    }
+    if (node.findDirectExpression(abaplint.Expressions.Select)?.findDirectTokenByText("UPDATE") !== undefined) {
+      // SELECT SINGLE FOR UPDATE: the SQL is that of the SELECT SINGLE, the database client takes the row lock or refuses
+      extra += `, forUpdate: true`;
     }
 
     if (node.findFirstExpression(abaplint.Expressions.SQLForAllEntries)) {
