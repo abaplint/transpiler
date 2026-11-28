@@ -132,8 +132,11 @@ export async function deleteInternal(target: Table | HashedTable | FieldSymbol, 
     return;
   }
 
-  // short form, "DELETE tab"
-  if (options === undefined) {
+  // short form, "DELETE tab"; a hashed table has no index, its current row goes by its key
+  if (options === undefined && target instanceof HashedTable) {
+    target.deleteFrom(target.getCurrentLoopRow());
+    return;
+  } else if (options === undefined) {
     target.deleteIndex((target as Table).getCurrentLoopIndex());
     return;
   }
